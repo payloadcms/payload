@@ -1,12 +1,13 @@
 import type { SQL } from 'drizzle-orm'
-import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
 import type { SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core'
 import type { Field, FieldAffectingData, NumberField, TabAsField, TextField } from 'payload'
 
 import { and, eq, like, sql } from 'drizzle-orm'
+import { type PgTableWithColumns } from 'drizzle-orm/pg-core'
 import { APIError, flattenTopLevelFields } from 'payload'
 import { fieldAffectsData, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
+import { validate as uuidValidate } from 'uuid'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
@@ -21,6 +22,10 @@ type Constraint = {
 
 type TableColumn = {
   columnName?: string
+  columns?: {
+    idType: 'number' | 'text'
+    rawColumn: SQL<unknown>
+  }[]
   constraints: Constraint[]
   field: FieldAffectingData
   getNotNullColumnByValue?: (val: unknown) => string
@@ -53,7 +58,7 @@ type Args = {
   value: unknown
 }
 /**
- * Transforms path to table and column name
+ * Transforms path to table and column name or to a list of OR columns
  * Adds tables to `join`
  * @returns TableColumn
  */
@@ -510,41 +515,55 @@ export const getTableColumnFromPath = ({
               }
             }
           } else if (newCollectionPath === 'value') {
-            const hasCollectionWithCustomID = field.relationTo.some(
-              (each) => !!adapter.payload.collections[each].customIDType,
+            const hasCustomCollectionWithCustomID = field.relationTo.some(
+              (relationTo) => !!adapter.payload.collections[relationTo].customIDType,
             )
 
-            const tableColumnsNames = field.relationTo.map((relationTo) => {
-              const relationTableName = adapter.tableNameMap.get(
-                toSnakeCase(adapter.payload.collections[relationTo].config.slug),
-              )
+            const columns: TableColumn['columns'] = field.relationTo
+              .map((relationTo) => {
+                let idType: 'number' | 'text' = adapter.idType === 'uuid' ? 'text' : 'number'
 
-              const columnName = `"${aliasRelationshipTableName}"."${relationTableName}_id"`
+                const { customIDType } = adapter.payload.collections[relationTo]
 
-              if (!hasCollectionWithCustomID) {
-                return columnName
-              }
-              if (adapter.name.includes('postgres')) {
-                return `${columnName}::text`
-              }
-              if (adapter.name.includes('sqlite')) {
-                return `cast(${columnName} as text)`
-              }
+                if (customIDType) {
+                  idType = customIDType
+                }
 
-              throw new APIError(`Cast is not implemented for database adapter: ${adapter.name}`)
-            })
+                // Do not add the column to OR if we know that it can't match by the type
+                // We can't do the same with idType: 'number' because `value` can be from the REST search query params
+                if (typeof value === 'number' && idType === 'text') {
+                  return null
+                }
 
-            let column: string
-            if (tableColumnsNames.length === 1) {
-              column = tableColumnsNames[0]
-            } else {
-              column = `COALESCE(${tableColumnsNames.join(', ')})`
-            }
+                // Do not add the UUID type column if incoming query value doesn't match UUID. If there aren't any collections with
+                // a custom ID type, we skip this check
+                // We need this because Postgres throws an error if querying by UUID column with a value that isn't a valid UUID.
+                if (
+                  value &&
+                  !customIDType &&
+                  adapter.idType === 'uuid' &&
+                  hasCustomCollectionWithCustomID
+                ) {
+                  if (!uuidValidate(value)) {
+                    return null
+                  }
+                }
+
+                const relationTableName = adapter.tableNameMap.get(
+                  toSnakeCase(adapter.payload.collections[relationTo].config.slug),
+                )
+
+                return {
+                  idType,
+                  rawColumn: sql.raw(`"${aliasRelationshipTableName}"."${relationTableName}_id"`),
+                }
+              })
+              .filter(Boolean)
 
             return {
+              columns,
               constraints,
               field,
-              rawColumn: sql.raw(`${column}`),
               table: aliasRelationshipTable,
             }
           } else if (newCollectionPath === 'relationTo') {

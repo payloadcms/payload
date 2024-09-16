@@ -4,8 +4,6 @@ import type { RadioFieldClientComponent } from 'payload'
 import { RadioGroupField } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomRadioFieldClient: RadioFieldClientComponent = (props) => {
-  const { field } = props
-
+export const CustomRadioFieldClient: RadioFieldClientComponent = ({ field }) => {
   return <RadioGroupField field={field} />
 }

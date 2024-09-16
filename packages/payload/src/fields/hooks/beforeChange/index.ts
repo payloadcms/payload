@@ -12,7 +12,6 @@ type Args<T extends JsonObject> = {
   data: T
   doc: T
   docWithLocales: JsonObject
-  duplicate?: boolean
   global: null | SanitizedGlobalConfig
   id?: number | string
   operation: Operation
@@ -26,7 +25,6 @@ type Args<T extends JsonObject> = {
  * - Execute field hooks
  * - Validate data
  * - Transform data for storage
- * - beforeDuplicate hooks (if duplicate)
  * - Unflatten locales. The input `data` is the normal document for one locale. The output result will become the document with locales.
  */
 export const beforeChange = async <T extends JsonObject>({
@@ -36,7 +34,6 @@ export const beforeChange = async <T extends JsonObject>({
   data: incomingData,
   doc,
   docWithLocales,
-  duplicate = false,
   global,
   operation,
   req,
@@ -53,7 +50,6 @@ export const beforeChange = async <T extends JsonObject>({
     data,
     doc,
     docWithLocales,
-    duplicate,
     errors,
     fields: collection?.fields || global?.fields,
     global,

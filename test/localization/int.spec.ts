@@ -1120,6 +1120,13 @@ describe('Localization', () => {
     })
 
     it('should duplicate with localized blocks', async () => {
+      // This test covers a few things:
+      // 1. make sure we can duplicate localized blocks
+      //    - in relational DBs, we need to create new block / array IDs
+      //    - and this needs to be done recursively for all block / array fields
+      // 2. make sure localized arrays / blocks work inside of localized groups / tabs
+      //    - this is covered with myTab.group.nestedArray2
+
       const englishText = 'english'
       const spanishText = 'spanish'
       const doc = await payload.create({
@@ -1129,8 +1136,30 @@ describe('Localization', () => {
             {
               blockType: 'text',
               text: englishText,
+              nestedArray: [
+                {
+                  text: 'hello',
+                },
+                {
+                  text: 'goodbye',
+                },
+              ],
             },
           ],
+          myTab: {
+            text: 'hello',
+            group: {
+              nestedText: 'hello',
+              nestedArray2: [
+                {
+                  nestedText: 'hello',
+                },
+                {
+                  nestedText: 'goodbye',
+                },
+              ],
+            },
+          },
           title: 'hello',
         },
         locale: defaultLocale,
@@ -1144,9 +1173,31 @@ describe('Localization', () => {
             {
               blockType: 'text',
               text: spanishText,
+              nestedArray: [
+                {
+                  text: 'hola',
+                },
+                {
+                  text: 'adios',
+                },
+              ],
             },
           ],
           title: 'hello',
+          myTab: {
+            text: 'hola',
+            group: {
+              nestedText: 'hola',
+              nestedArray2: [
+                {
+                  nestedText: 'hola',
+                },
+                {
+                  nestedText: 'adios',
+                },
+              ],
+            },
+          },
         },
         locale: spanishLocale,
       })
@@ -1168,6 +1219,14 @@ describe('Localization', () => {
 
       expect(allLocales.layout.en[0].text).toStrictEqual(englishText)
       expect(allLocales.layout.es[0].text).toStrictEqual(spanishText)
+
+      expect(allLocales.myTab.group.en.nestedText).toStrictEqual('hello')
+      expect(allLocales.myTab.group.en.nestedArray2[0].nestedText).toStrictEqual('hello')
+      expect(allLocales.myTab.group.en.nestedArray2[1].nestedText).toStrictEqual('goodbye')
+
+      expect(allLocales.myTab.group.es.nestedText).toStrictEqual('hola')
+      expect(allLocales.myTab.group.es.nestedArray2[0].nestedText).toStrictEqual('hola')
+      expect(allLocales.myTab.group.es.nestedArray2[1].nestedText).toStrictEqual('adios')
     })
   })
 

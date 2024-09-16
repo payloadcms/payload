@@ -478,6 +478,116 @@ describe('Relationships', () => {
           expect(response.status).toEqual(200)
           expect(doc.relationField).toBeFalsy()
         })
+
+        it('should query a polymorphic relationship field with mixed custom ids and default', async () => {
+          const customIDNumber = await payload.create({
+            collection: 'custom-id-number',
+            data: { id: 999 },
+          })
+
+          const customIDText = await payload.create({
+            collection: 'custom-id',
+            data: { id: 'custom-id' },
+          })
+
+          const page = await payload.create({
+            collection: 'pages',
+            data: {},
+          })
+
+          const relToCustomIdText = await payload.create({
+            collection: 'rels-to-pages-and-custom-text-ids',
+            data: {
+              rel: {
+                relationTo: 'custom-id',
+                value: customIDText.id,
+              },
+            },
+          })
+
+          const relToCustomIdNumber = await payload.create({
+            collection: 'rels-to-pages-and-custom-text-ids',
+            data: {
+              rel: {
+                relationTo: 'custom-id-number',
+                value: customIDNumber.id,
+              },
+            },
+          })
+
+          const relToPage = await payload.create({
+            collection: 'rels-to-pages-and-custom-text-ids',
+            data: {
+              rel: {
+                relationTo: 'pages',
+                value: page.id,
+              },
+            },
+          })
+
+          const pageResult = await payload.find({
+            collection: 'rels-to-pages-and-custom-text-ids',
+            where: {
+              and: [
+                {
+                  'rel.value': {
+                    equals: page.id,
+                  },
+                },
+                {
+                  'rel.relationTo': {
+                    equals: 'pages',
+                  },
+                },
+              ],
+            },
+          })
+
+          expect(pageResult.totalDocs).toBe(1)
+          expect(pageResult.docs[0].id).toBe(relToPage.id)
+
+          const customIDResult = await payload.find({
+            collection: 'rels-to-pages-and-custom-text-ids',
+            where: {
+              and: [
+                {
+                  'rel.value': {
+                    equals: customIDText.id,
+                  },
+                },
+                {
+                  'rel.relationTo': {
+                    equals: 'custom-id',
+                  },
+                },
+              ],
+            },
+          })
+
+          expect(customIDResult.totalDocs).toBe(1)
+          expect(customIDResult.docs[0].id).toBe(relToCustomIdText.id)
+
+          const customIDNumberResult = await payload.find({
+            collection: 'rels-to-pages-and-custom-text-ids',
+            where: {
+              and: [
+                {
+                  'rel.value': {
+                    equals: customIDNumber.id,
+                  },
+                },
+                {
+                  'rel.relationTo': {
+                    equals: 'custom-id-number',
+                  },
+                },
+              ],
+            },
+          })
+
+          expect(customIDNumberResult.totalDocs).toBe(1)
+          expect(customIDNumberResult.docs[0].id).toBe(relToCustomIdNumber.id)
+        })
       })
 
       describe('depth', () => {
