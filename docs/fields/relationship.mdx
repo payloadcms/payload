@@ -196,6 +196,12 @@ You can learn more about writing queries [here](/docs/queries/overview).
   <strong>payload/shared</strong> in your validate function.
 </Banner>
 
+## Bi-directional relationships
+
+The `relationship` field on its own is used to define relationships for the document that contains the relationship field, and this can be considered as a "one-way" relationship. For example, if you have a Post that has a `category` relationship field on it, the related `category` itself will not surface any information about the posts that have the category set.
+
+However, the `relationship` field can be used in conjunction with the `Join` field to produce powerful bi-directional relationship authoring capabilities. If you're interested in bi-directional relationships, check out the [documentation for the Join field](./join).
+
 ## How the data is saved
 
 Given the variety of options possible within the `relationship` field type, the shape of the data needed for creating
