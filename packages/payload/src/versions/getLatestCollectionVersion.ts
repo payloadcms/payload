@@ -3,12 +3,11 @@ import type { FindOneArgs } from '../database/types.js'
 import type { Payload, PayloadRequest } from '../types/index.js'
 import type { TypeWithVersion } from './types.js'
 
-import { docHasTimestamps } from '../types/index.js'
-
 type Args = {
   config: SanitizedCollectionConfig
   id: number | string
   payload: Payload
+  published?: boolean
   query: FindOneArgs
   req?: PayloadRequest
 }
@@ -17,10 +16,15 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
   id,
   config,
   payload,
+  published,
   query,
   req,
 }: Args): Promise<T> => {
   let latestVersion: TypeWithVersion<T>
+
+  const whereQuery = published
+    ? { and: [{ parent: { equals: id } }, { 'version._status': { equals: 'published' } }] }
+    : { and: [{ parent: { equals: id } }, { latest: { equals: true } }] }
 
   if (config.versions?.drafts) {
     const { docs } = await payload.db.findVersions<T>({
@@ -29,15 +33,19 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
       pagination: false,
       req,
       sort: '-updatedAt',
-      where: { parent: { equals: id } },
+      where: whereQuery,
     })
     ;[latestVersion] = docs
   }
 
-  const doc = await payload.db.findOne<T>({ ...query, req })
+  if (!latestVersion) {
+    if (!published) {
+      const doc = await payload.db.findOne<T>({ ...query, req })
 
-  if (!latestVersion || (docHasTimestamps(doc) && latestVersion.updatedAt < doc.updatedAt)) {
-    return doc
+      return doc
+    }
+
+    return undefined
   }
 
   return {

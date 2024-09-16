@@ -1,7 +1,7 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { GlobalSlug, JsonObject } from '../../index.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
+import type { Operation, PayloadRequest, Where } from '../../types/index.js'
 import type { DataFromGlobalSlug, SanitizedGlobalConfig } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
@@ -25,6 +25,7 @@ type Args<TSlug extends GlobalSlug> = {
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
   overrideAccess?: boolean
+  publishSpecificLocale?: string
   req: PayloadRequest
   showHiddenFields?: boolean
   slug: string
@@ -33,6 +34,10 @@ type Args<TSlug extends GlobalSlug> = {
 export const updateOperation = async <TSlug extends GlobalSlug>(
   args: Args<TSlug>,
 ): Promise<DataFromGlobalSlug<TSlug>> => {
+  if (args.publishSpecificLocale) {
+    args.req.locale = args.publishSpecificLocale
+  }
+
   const {
     slug,
     autosave,
@@ -40,6 +45,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
     draft: draftArg,
     globalConfig,
     overrideAccess,
+    publishSpecificLocale,
     req: { fallbackLocale, locale, payload },
     req,
     showHiddenFields,
@@ -75,7 +81,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
     // /////////////////////////////////////
     // 2. Retrieve document
     // /////////////////////////////////////
-    const { global, globalExists } = await getLatestGlobalVersion({
+    const globalVersion = await getLatestGlobalVersion({
       slug,
       config: globalConfig,
       locale,
@@ -83,10 +89,11 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
       req,
       where: query,
     })
+    const { global, globalExists } = globalVersion || {}
 
     let globalJSON: JsonObject = {}
 
-    if (global) {
+    if (globalVersion && globalVersion.global) {
       globalJSON = deepCopyObjectSimple(global)
 
       if (globalJSON._id) {
@@ -170,18 +177,43 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
     // /////////////////////////////////////
     // beforeChange - Fields
     // /////////////////////////////////////
+    let publishedDocWithLocales = globalJSON
+    let versionSnapshotResult
 
-    let result = await beforeChange({
+    const beforeChangeArgs = {
       collection: null,
       context: req.context,
       data,
       doc: originalDoc,
-      docWithLocales: globalJSON,
+      docWithLocales: undefined,
       global: globalConfig,
-      operation: 'update',
+      operation: 'update' as Operation,
       req,
       skipValidation:
         shouldSaveDraft && globalConfig.versions.drafts && !globalConfig.versions.drafts.validate,
+    }
+
+    if (publishSpecificLocale) {
+      const latestVersion = await getLatestGlobalVersion({
+        slug,
+        config: globalConfig,
+        payload,
+        published: true,
+        req,
+        where: query,
+      })
+
+      publishedDocWithLocales = latestVersion?.global || {}
+
+      versionSnapshotResult = await beforeChange({
+        ...beforeChangeArgs,
+        docWithLocales: globalJSON,
+      })
+    }
+
+    let result = await beforeChange({
+      ...beforeChangeArgs,
+      docWithLocales: publishedDocWithLocales,
     })
 
     // /////////////////////////////////////
@@ -207,7 +239,6 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
     // /////////////////////////////////////
     // Create version
     // /////////////////////////////////////
-
     if (globalConfig.versions) {
       const { globalType } = result
       result = await saveVersion({
@@ -220,9 +251,15 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
         draft: shouldSaveDraft,
         global: globalConfig,
         payload,
+        publishSpecificLocale,
         req,
+        snapshot: versionSnapshotResult,
       })
-      result.globalType = globalType
+
+      result = {
+        ...result,
+        globalType,
+      }
     }
 
     // /////////////////////////////////////

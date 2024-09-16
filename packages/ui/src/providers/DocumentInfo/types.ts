@@ -76,7 +76,6 @@ export type DocumentInfoContext = {
   ) => void
   setDocumentIsLocked?: React.Dispatch<React.SetStateAction<boolean>>
   setDocumentTitle: (title: string) => void
-  slug?: string
   title: string
   unlockDocument: (docId: number | string, slug: string) => Promise<void>
   unpublishedVersions?: PaginatedDocs<TypeWithVersion<any>>

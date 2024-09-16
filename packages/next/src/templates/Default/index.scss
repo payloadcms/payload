@@ -20,8 +20,13 @@
     justify-content: center;
   }
 
-  &__nav-toggler {
+  &__nav-toggler-container {
     height: var(--app-header-height);
+    display: flex;
+    align-items: center;
+  }
+
+  &__nav-toggler {
     display: flex;
     align-items: center;
   }

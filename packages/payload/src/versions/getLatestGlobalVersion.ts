@@ -7,6 +7,7 @@ type Args = {
   config: SanitizedGlobalConfig
   locale?: string
   payload: Payload
+  published?: boolean
   req?: PayloadRequest
   slug: string
   where: Where
@@ -17,10 +18,15 @@ export const getLatestGlobalVersion = async ({
   config,
   locale,
   payload,
+  published,
   req,
   where,
 }: Args): Promise<{ global: Document; globalExists: boolean }> => {
   let latestVersion
+
+  const whereQuery = published
+    ? { 'version._status': { equals: 'published' } }
+    : { latest: { equals: true } }
 
   if (config.versions?.drafts) {
     latestVersion = (
@@ -30,7 +36,7 @@ export const getLatestGlobalVersion = async ({
         locale,
         pagination: false,
         req,
-        sort: '-updatedAt',
+        where: whereQuery,
       })
     ).docs[0]
   }
@@ -43,7 +49,7 @@ export const getLatestGlobalVersion = async ({
   })
   const globalExists = Boolean(global)
 
-  if (!latestVersion || (docHasTimestamps(global) && latestVersion.updatedAt < global.updatedAt)) {
+  if (!latestVersion) {
     return {
       global,
       globalExists,
