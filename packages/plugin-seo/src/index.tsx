@@ -17,21 +17,6 @@ import { OverviewField } from './fields/Overview/index.js'
 import { PreviewField } from './fields/Preview/index.js'
 import { translations } from './translations/index.js'
 
-const getEntityConfig = ({
-  collectionSlug,
-  config,
-  globalSlug,
-}: {
-  collectionSlug?: string
-  config: Config
-  globalSlug?: string
-}) =>
-  collectionSlug
-    ? config.collections?.find((c) => c.slug === collectionSlug)
-    : globalSlug
-      ? config.globals?.find((g) => g.slug === globalSlug)
-      : null
-
 export const seoPlugin =
   (pluginConfig: SEOPluginConfig) =>
   (config: Config): Config => {
@@ -147,22 +132,24 @@ export const seoPlugin =
         ...(config.endpoints ?? []),
         {
           handler: async (req) => {
-            const data: Omit<Parameters<GenerateTitle>[0], 'docConfig' | 'req'> = await req.json()
+            const data: Omit<
+              Parameters<GenerateTitle>[0],
+              'collectionConfig' | 'globalConfig' | 'req'
+            > = await req.json()
 
             if (data) {
               req.data = data
             }
 
-            const docConfig = getEntityConfig({
-              collectionSlug: req.data.collectionSlug,
-              config,
-              globalSlug: req.data.globalSlug,
-            })
-
             const result = pluginConfig.generateTitle
               ? await pluginConfig.generateTitle({
                   ...data,
-                  docConfig,
+                  collectionConfig: req.data.collectionSlug
+                    ? config.collections?.find((c) => c.slug === req.data.collectionSlug)
+                    : null,
+                  globalConfig: req.data.globalSlug
+                    ? config.globals?.find((g) => g.slug === req.data.globalSlug)
+                    : null,
                   req,
                 } satisfies Parameters<GenerateTitle>[0])
               : ''
@@ -173,22 +160,24 @@ export const seoPlugin =
         },
         {
           handler: async (req) => {
-            const data: Omit<Parameters<GenerateTitle>[0], 'docConfig' | 'req'> = await req.json()
+            const data: Omit<
+              Parameters<GenerateTitle>[0],
+              'collectionConfig' | 'globalConfig' | 'req'
+            > = await req.json()
 
             if (data) {
               req.data = data
             }
 
-            const docConfig = getEntityConfig({
-              collectionSlug: req.data.collectionSlug,
-              config,
-              globalSlug: req.data.globalSlug,
-            })
-
             const result = pluginConfig.generateDescription
               ? await pluginConfig.generateDescription({
                   ...data,
-                  docConfig,
+                  collectionConfig: req.data.collectionSlug
+                    ? config.collections?.find((c) => c.slug === req.data.collectionSlug)
+                    : null,
+                  globalConfig: req.data.globalSlug
+                    ? config.globals?.find((g) => g.slug === req.data.globalSlug)
+                    : null,
                   req,
                 } satisfies Parameters<GenerateDescription>[0])
               : ''
@@ -199,22 +188,24 @@ export const seoPlugin =
         },
         {
           handler: async (req) => {
-            const data: Omit<Parameters<GenerateTitle>[0], 'docConfig' | 'req'> = await req.json()
+            const data: Omit<
+              Parameters<GenerateTitle>[0],
+              'collectionConfig' | 'globalConfig' | 'req'
+            > = await req.json()
 
             if (data) {
               req.data = data
             }
 
-            const docConfig = getEntityConfig({
-              collectionSlug: req.data.collectionSlug,
-              config,
-              globalSlug: req.data.globalSlug,
-            })
-
             const result = pluginConfig.generateURL
               ? await pluginConfig.generateURL({
                   ...data,
-                  docConfig,
+                  collectionConfig: req.data.collectionSlug
+                    ? config.collections?.find((c) => c.slug === req.data.collectionSlug)
+                    : null,
+                  globalConfig: req.data.globalSlug
+                    ? config.globals?.find((g) => g.slug === req.data.globalSlug)
+                    : null,
                   req,
                 } satisfies Parameters<GenerateURL>[0])
               : ''
@@ -225,22 +216,24 @@ export const seoPlugin =
         },
         {
           handler: async (req) => {
-            const data: Omit<Parameters<GenerateTitle>[0], 'docConfig' | 'req'> = await req.json()
+            const data: Omit<
+              Parameters<GenerateTitle>[0],
+              'collectionConfig' | 'globalConfig' | 'req'
+            > = await req.json()
 
             if (data) {
               req.data = data
             }
 
-            const docConfig = getEntityConfig({
-              collectionSlug: req.data.collectionSlug,
-              config,
-              globalSlug: req.data.globalSlug,
-            })
-
             const result = pluginConfig.generateImage
               ? await pluginConfig.generateImage({
                   ...data,
-                  docConfig,
+                  collectionConfig: req.data.collectionSlug
+                    ? config.collections?.find((c) => c.slug === req.data.collectionSlug)
+                    : null,
+                  globalConfig: req.data.globalSlug
+                    ? config.globals?.find((g) => g.slug === req.data.globalSlug)
+                    : null,
                   req,
                 } as Parameters<GenerateImage>[0])
               : ''

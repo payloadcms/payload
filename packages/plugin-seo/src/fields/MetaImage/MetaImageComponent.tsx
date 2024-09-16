@@ -68,7 +68,10 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         initialState: docInfo.initialState,
         locale: typeof locale === 'object' ? locale?.code : locale,
         title: docInfo.title,
-      } satisfies Omit<Parameters<GenerateImage>[0], 'docConfig' | 'req'>),
+      } satisfies Omit<
+        Parameters<GenerateDescription>[0],
+        'collectionConfig' | 'globalConfig' | 'req'
+      >),
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',

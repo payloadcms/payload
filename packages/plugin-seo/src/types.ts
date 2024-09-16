@@ -27,8 +27,9 @@ export type PartialDocumentInfoContext = Pick<
 
 export type GenerateTitle<T = any> = (
   args: {
+    collectionConfig?: CollectionConfig
     doc: T
-    docConfig: CollectionConfig | GlobalConfig
+    globalConfig?: GlobalConfig
     locale?: string
     req: PayloadRequest
   } & PartialDocumentInfoContext,
@@ -36,8 +37,9 @@ export type GenerateTitle<T = any> = (
 
 export type GenerateDescription<T = any> = (
   args: {
+    collectionConfig?: CollectionConfig
     doc: T
-    docConfig: CollectionConfig | GlobalConfig
+    globalConfig?: GlobalConfig
     locale?: string
     req: PayloadRequest
   } & PartialDocumentInfoContext,
@@ -45,8 +47,9 @@ export type GenerateDescription<T = any> = (
 
 export type GenerateImage<T = any> = (
   args: {
+    collectionConfig?: CollectionConfig
     doc: T
-    docConfig: CollectionConfig | GlobalConfig
+    globalConfig?: GlobalConfig
     locale?: string
     req: PayloadRequest
   } & PartialDocumentInfoContext,
@@ -54,8 +57,9 @@ export type GenerateImage<T = any> = (
 
 export type GenerateURL<T = any> = (
   args: {
+    collectionConfig?: CollectionConfig
     doc: T
-    docConfig: CollectionConfig | GlobalConfig
+    globalConfig?: GlobalConfig
     locale?: string
     req: PayloadRequest
   } & PartialDocumentInfoContext,
