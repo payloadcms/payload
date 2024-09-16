@@ -59,10 +59,7 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
           initialState: docInfo.initialState,
           locale: typeof locale === 'object' ? locale?.code : locale,
           title: docInfo.title,
-        } satisfies Omit<
-          Parameters<GenerateDescription>[0],
-          'collectionConfig' | 'globalConfig' | 'req'
-        >),
+        } satisfies Omit<Parameters<GenerateURL>[0], 'collectionConfig' | 'globalConfig' | 'req'>),
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
