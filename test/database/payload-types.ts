@@ -23,7 +23,7 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   globals: {
     global: Global;
@@ -56,7 +56,7 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: number;
+  id: string;
   title: string;
   throwAfterChange?: boolean | null;
   updatedAt: string;
@@ -67,7 +67,7 @@ export interface Post {
  * via the `definition` "default-values".
  */
 export interface DefaultValue {
-  id: number;
+  id: string;
   title?: string | null;
   defaultValue?: string | null;
   array?:
@@ -88,7 +88,7 @@ export interface DefaultValue {
  * via the `definition` "relation-a".
  */
 export interface RelationA {
-  id: number;
+  id: string;
   title?: string | null;
   richText?: {
     root: {
@@ -113,9 +113,9 @@ export interface RelationA {
  * via the `definition` "relation-b".
  */
 export interface RelationB {
-  id: number;
+  id: string;
   title?: string | null;
-  relationship?: (number | null) | RelationA;
+  relationship?: (string | null) | RelationA;
   richText?: {
     root: {
       type: string;
@@ -139,14 +139,14 @@ export interface RelationB {
  * via the `definition` "pg-migrations".
  */
 export interface PgMigration {
-  id: number;
-  relation1?: (number | null) | RelationA;
+  id: string;
+  relation1?: (string | null) | RelationA;
   myArray?:
     | {
-        relation2?: (number | null) | RelationB;
+        relation2?: (string | null) | RelationB;
         mySubArray?:
           | {
-              relation3?: (number | null) | RelationB;
+              relation3?: (string | null) | RelationB;
               id?: string | null;
             }[]
           | null;
@@ -154,12 +154,12 @@ export interface PgMigration {
       }[]
     | null;
   myGroup?: {
-    relation4?: (number | null) | RelationB;
+    relation4?: (string | null) | RelationB;
   };
   myBlocks?:
     | {
-        relation5?: (number | null) | RelationA;
-        relation6?: (number | null) | RelationB;
+        relation5?: (string | null) | RelationA;
+        relation6?: (string | null) | RelationB;
         id?: string | null;
         blockName?: string | null;
         blockType: 'myBlock';
@@ -173,10 +173,10 @@ export interface PgMigration {
  * via the `definition` "custom-schema".
  */
 export interface CustomSchema {
-  id: number;
+  id: string;
   text?: string | null;
   localizedText?: string | null;
-  relationship?: (number | RelationA)[] | null;
+  relationship?: (string | RelationA)[] | null;
   select?: ('a' | 'b' | 'c')[] | null;
   radio?: ('a' | 'b' | 'c') | null;
   array?:
@@ -204,7 +204,7 @@ export interface CustomSchema {
  * via the `definition` "places".
  */
 export interface Place {
-  id: number;
+  id: string;
   country?: string | null;
   city?: string | null;
   updatedAt: string;
@@ -215,7 +215,7 @@ export interface Place {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -232,10 +232,10 @@ export interface User {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -255,7 +255,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -266,7 +266,7 @@ export interface PayloadMigration {
  * via the `definition` "global".
  */
 export interface Global {
-  id: number;
+  id: string;
   text?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
