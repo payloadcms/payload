@@ -587,6 +587,46 @@ describe('Relationships', () => {
 
           expect(customIDNumberResult.totalDocs).toBe(1)
           expect(customIDNumberResult.docs[0].id).toBe(relToCustomIdNumber.id)
+
+          const inResult_1 = await payload.find({
+            collection: 'rels-to-pages-and-custom-text-ids',
+            where: {
+              'rel.value': {
+                in: [page.id, customIDNumber.id],
+              },
+            },
+          })
+
+          expect(inResult_1.totalDocs).toBe(2)
+          expect(inResult_1.docs.some((each) => each.id === relToPage.id)).toBeTruthy()
+          expect(inResult_1.docs.some((each) => each.id === relToCustomIdNumber.id)).toBeTruthy()
+
+          const inResult_2 = await payload.find({
+            collection: 'rels-to-pages-and-custom-text-ids',
+            where: {
+              'rel.value': {
+                in: [customIDNumber.id, customIDText.id],
+              },
+            },
+          })
+
+          expect(inResult_2.totalDocs).toBe(2)
+          expect(inResult_2.docs.some((each) => each.id === relToCustomIdText.id)).toBeTruthy()
+          expect(inResult_2.docs.some((each) => each.id === relToCustomIdNumber.id)).toBeTruthy()
+
+          const inResult_3 = await payload.find({
+            collection: 'rels-to-pages-and-custom-text-ids',
+            where: {
+              'rel.value': {
+                in: [customIDNumber.id, customIDText.id, page.id],
+              },
+            },
+          })
+
+          expect(inResult_3.totalDocs).toBe(3)
+          expect(inResult_3.docs.some((each) => each.id === relToCustomIdText.id)).toBeTruthy()
+          expect(inResult_3.docs.some((each) => each.id === relToCustomIdNumber.id)).toBeTruthy()
+          expect(inResult_3.docs.some((each) => each.id === relToPage.id)).toBeTruthy()
         })
       })
 

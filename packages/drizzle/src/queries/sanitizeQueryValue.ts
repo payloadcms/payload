@@ -2,13 +2,14 @@ import type { SQL } from 'drizzle-orm'
 
 import { APIError, createArrayFromCommaDelineated, type Field, type TabAsField } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
+import { validate as uuidValidate } from 'uuid'
 
 import type { DrizzleAdapter } from '../types.js'
 
 type SanitizeQueryValueArgs = {
   adapter: DrizzleAdapter
   columns?: {
-    idType: 'number' | 'text'
+    idType: 'number' | 'text' | 'uuid'
     rawColumn: SQL<unknown>
   }[]
   field: Field | TabAsField
@@ -119,15 +120,37 @@ export const sanitizeQueryValue = ({
       } else {
         formattedColumns = columns
           .map(({ idType, rawColumn }) => {
-            let formattedValue: number | string
-            if (idType === 'number') {
+            let formattedValue: number | number[] | string | string[]
+
+            if (Array.isArray(val)) {
+              formattedValue = val
+                .map((eachVal) => {
+                  let formattedValue: number | string
+
+                  if (idType === 'number') {
+                    formattedValue = Number(eachVal)
+
+                    if (Number.isNaN(formattedValue)) {
+                      return null
+                    }
+                  } else {
+                    if (idType === 'uuid' && !uuidValidate(eachVal)) {
+                      return null
+                    }
+
+                    formattedValue = String(eachVal)
+                  }
+
+                  return formattedValue
+                })
+                .filter(Boolean) as number[] | string[]
+            } else if (idType === 'number') {
               formattedValue = Number(val)
 
               if (Number.isNaN(formattedValue)) {
                 return null
               }
-            }
-            if (idType === 'text') {
+            } else {
               formattedValue = String(val)
             }
 
