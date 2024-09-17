@@ -28,6 +28,15 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
+      type: 'text',
+      name: 'title',
+      hasMany: true,
+      validate: (value): true => {
+        console.log('value', value)
+        return true
+      },
+    },
+    {
       name: 'richText',
       type: 'richText',
     },
