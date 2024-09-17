@@ -250,15 +250,16 @@ describe('Locked documents', () => {
     await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        user: {
-          relationTo: 'users',
-          value: user2.id,
-        },
         document: {
           relationTo: 'posts',
           value: newPost.id,
         },
+        editedAt: new Date().toISOString(),
         globalSlug: undefined,
+        user: {
+          relationTo: 'users',
+          value: user2.id,
+        },
       },
     })
 
@@ -284,12 +285,13 @@ describe('Locked documents', () => {
     await payload.create({
       collection: lockedDocumentCollection,
       data: {
+        document: undefined,
+        editedAt: new Date().toISOString(),
+        globalSlug: menuSlug,
         user: {
           relationTo: 'users',
           value: user2.id,
         },
-        document: undefined,
-        globalSlug: menuSlug,
       },
     })
 
@@ -322,15 +324,16 @@ describe('Locked documents', () => {
     await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        user: {
-          relationTo: 'users',
-          value: user2.id,
-        },
         document: {
           relationTo: 'posts',
           value: newPost3.id,
         },
+        editedAt: new Date().toISOString(),
         globalSlug: undefined,
+        user: {
+          relationTo: 'users',
+          value: user2.id,
+        },
       },
     })
 
