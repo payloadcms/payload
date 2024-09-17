@@ -9,7 +9,7 @@ import type { Form } from './payload-types.js'
 import { serializeLexical } from '../../packages/plugin-form-builder/src/utilities/lexical/serializeLexical.js'
 import { serializeSlate } from '../../packages/plugin-form-builder/src/utilities/slate/serializeSlate.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { formSubmissionsSlug, formsSlug } from './shared.js'
+import { formsSlug, formSubmissionsSlug } from './shared.js'
 
 let payload: Payload
 let form: Form
@@ -22,12 +22,38 @@ describe('@payloadcms/plugin-form-builder', () => {
     ;({ payload } = await initPayloadInt(dirname))
 
     const formConfig: Omit<Form, 'createdAt' | 'id' | 'updatedAt'> = {
-      confirmationMessage: [
-        {
-          type: 'text',
-          text: 'Confirmed.',
+      confirmationType: 'message',
+      confirmationMessage: {
+        root: {
+          children: [
+            {
+              children: [
+                {
+                  detail: 0,
+                  format: 0,
+                  mode: 'normal',
+                  style: '',
+                  text: 'Confirmed.',
+                  type: 'text',
+                  version: 1,
+                },
+              ],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              type: 'paragraph',
+              version: 1,
+              textFormat: 0,
+              textStyle: '',
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          type: 'root',
+          version: 1,
         },
-      ],
+      },
       fields: [
         {
           name: 'name',
@@ -64,12 +90,38 @@ describe('@payloadcms/plugin-form-builder', () => {
   describe('form building', () => {
     it('can create a simple form', async () => {
       const formConfig: Omit<Form, 'createdAt' | 'id' | 'updatedAt'> = {
-        confirmationMessage: [
-          {
-            type: 'text',
-            text: 'Confirmed.',
+        confirmationType: 'message',
+        confirmationMessage: {
+          root: {
+            children: [
+              {
+                children: [
+                  {
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                    text: 'Confirmed.',
+                    type: 'text',
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                type: 'paragraph',
+                version: 1,
+                textFormat: 0,
+                textStyle: '',
+              },
+            ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            type: 'root',
+            version: 1,
           },
-        ],
+        },
         fields: [
           {
             name: 'name',
@@ -91,12 +143,38 @@ describe('@payloadcms/plugin-form-builder', () => {
 
     it('can use form overrides', async () => {
       const formConfig: Omit<Form, 'createdAt' | 'id' | 'updatedAt'> = {
-        confirmationMessage: [
-          {
-            type: 'text',
-            text: 'Confirmed.',
+        confirmationType: 'message',
+        confirmationMessage: {
+          root: {
+            children: [
+              {
+                children: [
+                  {
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                    text: 'Confirmed.',
+                    type: 'text',
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                type: 'paragraph',
+                version: 1,
+                textFormat: 0,
+                textStyle: '',
+              },
+            ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            type: 'root',
+            version: 1,
           },
-        ],
+        },
         custom: 'custom',
         title: 'Test Form',
       }
