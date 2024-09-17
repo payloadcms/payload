@@ -13,6 +13,9 @@ const collectionWithDb = (collectionSlug: string): CollectionConfig => {
   return {
     slug: collectionSlug,
     db: {
+      init: () => {
+        return Promise.resolve()
+      },
       // @ts-expect-error
       create: () => {
         return doc
@@ -21,9 +24,9 @@ const collectionWithDb = (collectionSlug: string): CollectionConfig => {
       deleteOne: () => {
         return docs
       },
-      // Only used in deleteUserPreferences on user collections
       // @ts-expect-error
       deleteMany: () => {
+        // Only used in deleteUserPreferences on user collections
         return docs
       },
       // @ts-expect-error
