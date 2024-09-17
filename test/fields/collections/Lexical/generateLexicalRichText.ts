@@ -303,6 +303,17 @@ export function generateLexicalRichText(): TypedEditorState<
             blockType: 'tabBlock',
           },
         },
+        {
+          format: '',
+          type: 'block',
+          version: 2,
+          fields: {
+            id: '666c9e0b189d72626ea301fa',
+            blockName: '',
+            blockType: 'code',
+            code: 'Some code\nhello\nworld',
+          },
+        },
       ],
       direction: 'ltr',
     },
