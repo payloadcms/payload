@@ -3,6 +3,7 @@ import type { GenericTranslationsObject } from '@payloadcms/translations'
 export const nb: GenericTranslationsObject = {
   $schema: './translation-schema.json',
   'plugin-seo': {
+    missing: 'Mangler',
     almostThere: 'Nesten der',
     autoGenerate: 'Auto-generer',
     bestPractices: 'beste praksis',
@@ -17,7 +18,6 @@ export const nb: GenericTranslationsObject = {
       'Dette bør være mellom {{minLength}} og {{maxLength}} tegn. For hjelp til å skrive beskrivelser av god kvalitet, se ',
     lengthTipTitle:
       'Dette bør være mellom {{minLength}} og {{maxLength}} tegn. For hjelp til å skrive metatitler av god kvalitet, se ',
-    missing: 'Mangler',
     noImage: 'Bilde mangler',
     preview: 'Forhåndsvisning',
     previewDescription:

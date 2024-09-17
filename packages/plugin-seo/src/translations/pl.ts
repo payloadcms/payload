@@ -3,6 +3,7 @@ import type { GenericTranslationsObject } from '@payloadcms/translations'
 export const pl: GenericTranslationsObject = {
   $schema: './translation-schema.json',
   'plugin-seo': {
+    missing: 'Brakuje',
     almostThere: 'Prawie gotowe',
     autoGenerate: 'Wygeneruj automatycznie',
     bestPractices: 'najlepsze praktyki',
@@ -17,7 +18,6 @@ export const pl: GenericTranslationsObject = {
       'Długość powinna wynosić od {{minLength}} do {{maxLength}} znaków. Po porady dotyczące pisania wysokiej jakości meta opisów zobacz ',
     lengthTipTitle:
       'Długość powinna wynosić od {{minLength}} do {{maxLength}} znaków. Po porady dotyczące pisania wysokiej jakości meta tytułów zobacz ',
-    missing: 'Brakuje',
     noImage: 'Brak obrazu',
     preview: 'Podgląd',
     previewDescription:

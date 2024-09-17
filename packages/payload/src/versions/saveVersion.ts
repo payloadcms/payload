@@ -131,7 +131,7 @@ export const saveVersion = async ({
 
       if (publishSpecificLocale && snapshot) {
         const snapshotData = deepCopyObjectSimple(snapshot)
-        if (snapshotData._id) {delete snapshotData._id}
+        if (snapshotData._id) delete snapshotData._id
 
         snapshotData._status = 'draft'
 
