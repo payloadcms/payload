@@ -1,12 +1,14 @@
-import type {
-  SerializedBlockNode,
-  SerializedLinkNode,
-  SerializedRelationshipNode,
-  SerializedUploadNode,
-} from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState, SerializedParagraphNode } from 'lexical'
 import type { PaginatedDocs, Payload } from 'payload'
 
+import {
+  consolidateHTMLConverters,
+  convertLexicalToHTML,
+  type SerializedBlockNode,
+  type SerializedLinkNode,
+  type SerializedRelationshipNode,
+  type SerializedUploadNode,
+} from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -352,11 +354,19 @@ describe('Lexical', () => {
         })
       ).docs[0] as never
 
-      const lexicalField = lexicalDoc?.lexicalWithLexicalPluginData_html
+      const field = payload.config.collections
+        .find((collection) => collection.slug === lexicalMigrateFieldsSlug)
+        // @ts-ignore
+        .fields.find((field) => field.name === 'lexicalWithLexicalPluginData')
+      // @ts-ignore
+      const editorConfig = field.editor.editorConfig
 
-      console.log('lexicalField:', lexicalField)
+      const html = await convertLexicalToHTML({
+        converters: consolidateHTMLConverters({ editorConfig }),
+        data: lexicalDoc.lexicalWithLexicalPluginData,
+      })
 
-      expect(lexicalField).toStrictEqual('<p>lexical plugin</p>')
+      expect(html).toStrictEqual('<p>lexical plugin</p>')
     })
   })
   describe('advanced - blocks', () => {
