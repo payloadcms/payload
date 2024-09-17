@@ -56,7 +56,6 @@ export interface Post {
   id: string;
   text?: string | null;
   serverTextField?: string | null;
-  title?: string[] | null;
   richText?: {
     root: {
       type: string;
