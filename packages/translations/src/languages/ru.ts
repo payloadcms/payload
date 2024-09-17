@@ -187,7 +187,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     cancel: 'Отмена',
     changesNotSaved:
       'Ваши изменения не были сохранены. Если вы сейчас уйдете, то потеряете свои изменения.',
-    clearAll: undefined,
+    clearAll: 'Очистить все',
     close: 'Закрыть',
     collapse: 'Свернуть',
     collections: 'Коллекции',
@@ -294,7 +294,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} {{title}} успешно удалено.',
     true: 'Правда',
     unauthorized: 'Нет доступа',
-    unsavedChanges: undefined,
+    unsavedChanges:
+      'У вас есть несохраненные изменения. Сохраните или отмените их перед продолжением.',
     unsavedChangesDuplicate:
       'У вас есть несохраненные изменения. Вы хотите продолжить дублирование?',
     untitled: 'Без названия',
@@ -406,7 +407,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Последний раз сохранено {{distance}} назад',
     noFurtherVersionsFound: 'Другие версии не найдены',
     noRowsFound: 'Не найдено {{label}}',
-    noRowsSelected: undefined,
+    noRowsSelected: 'Не выбрано {{label}}',
     preview: 'Предпросмотр',
     previouslyPublished: 'Ранее опубликовано',
     problemRestoringVersion: 'Возникла проблема с восстановлением этой версии',

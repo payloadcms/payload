@@ -186,7 +186,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     cancel: 'Cancelar',
     changesNotSaved:
       'Suas alterações não foram salvas. Se você sair agora, essas alterações serão perdidas.',
-    clearAll: undefined,
+    clearAll: 'Limpar Tudo',
     close: 'Fechar',
     collapse: 'Recolher',
     collections: 'Coleções',
@@ -293,7 +293,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} {{title}} excluído com sucesso.',
     true: 'Verdadeiro',
     unauthorized: 'Não autorizado',
-    unsavedChanges: undefined,
+    unsavedChanges: 'Você tem alterações não salvas. Salve ou descarte antes de continuar.',
     unsavedChangesDuplicate: 'Você tem mudanças não salvas. Você gostaria de continuar a duplicar?',
     untitled: 'Sem título',
     updatedAt: 'Atualizado Em',

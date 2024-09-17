@@ -294,7 +294,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" succesvol verwijderd.',
     true: 'Waar',
     unauthorized: 'Onbevoegd',
-    unsavedChanges: undefined,
+    unsavedChanges: 'U heeft niet-opgeslagen wijzigingen. Sla op of verwijder voordat u doorgaat.',
     unsavedChangesDuplicate: 'U heeft onbewaarde wijzigingen. Wilt u doorgaan met dupliceren?',
     untitled: 'Zonder titel',
     updatedAt: 'Aangepast op',

@@ -188,7 +188,7 @@ export const trTranslations: DefaultTranslationsObject = {
     cancel: 'İptal',
     changesNotSaved:
       'Değişiklikleriniz henüz kaydedilmedi. Eğer bu sayfayı terk ederseniz değişiklikleri kaybedeceksiniz.',
-    clearAll: undefined,
+    clearAll: 'Hepsini Temizle',
     close: 'Kapat',
     collapse: 'Daralt',
     collections: 'Koleksiyonlar',
@@ -295,7 +295,7 @@ export const trTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} {{title}} başarıyla silindi.',
     true: 'Doğru',
     unauthorized: 'Yetkisiz',
-    unsavedChanges: undefined,
+    unsavedChanges: 'Kaydedilmemiş değişiklikleriniz var. Devam etmeden önce kaydedin veya atın.',
     unsavedChangesDuplicate:
       'Kaydedilmemiş değişiklikler var. Çoğaltma işlemine devam etmek istiyor musunuz?',
     untitled: 'Başlıksız',
@@ -405,7 +405,7 @@ export const trTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Son kaydedildi {{distance}} önce',
     noFurtherVersionsFound: 'Başka sürüm bulunamadı.',
     noRowsFound: '{{label}} bulunamadı',
-    noRowsSelected: undefined,
+    noRowsSelected: 'Seçili {{label}} yok',
     preview: 'Önizleme',
     previouslyPublished: 'Daha Önce Yayınlanmış',
     problemRestoringVersion: 'Bu sürüme geri döndürürken bir hatayla karşılaşıldı.',

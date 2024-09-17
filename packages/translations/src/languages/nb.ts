@@ -292,7 +292,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" ble slettet.',
     true: 'Sann',
     unauthorized: 'Ikke autorisert',
-    unsavedChanges: undefined,
+    unsavedChanges: 'Du har ulagrede endringer. Lagre eller forkast før du fortsetter.',
     unsavedChangesDuplicate: 'Du har ulagrede endringer. Vil du fortsette å duplisere?',
     untitled: 'Uten tittel',
     updatedAt: 'Oppdatert',

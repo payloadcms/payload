@@ -187,7 +187,7 @@ export const itTranslations: DefaultTranslationsObject = {
     backToDashboard: 'Torna alla Dashboard',
     cancel: 'Cancella',
     changesNotSaved: 'Le tue modifiche non sono state salvate. Se esci ora, verranno perse.',
-    clearAll: undefined,
+    clearAll: 'Cancella tutto',
     close: 'Chiudere',
     collapse: 'Comprimi',
     collections: 'Collezioni',

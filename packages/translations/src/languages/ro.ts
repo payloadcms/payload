@@ -189,7 +189,7 @@ export const roTranslations: DefaultTranslationsObject = {
     cancel: 'Anulați',
     changesNotSaved:
       'Modificările dvs. nu au fost salvate. Dacă plecați acum, vă veți pierde modificările.',
-    clearAll: undefined,
+    clearAll: 'Șterge tot',
     close: 'Închide',
     collapse: 'Colaps',
     collections: 'Colecții',

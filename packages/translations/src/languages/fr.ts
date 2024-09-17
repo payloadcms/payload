@@ -299,7 +299,8 @@ export const frTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" supprimé(e) avec succès.',
     true: 'Vrai',
     unauthorized: 'Non autorisé',
-    unsavedChanges: undefined,
+    unsavedChanges:
+      'Vous avez des modifications non enregistrées. Enregistrez ou supprimez avant de continuer.',
     unsavedChangesDuplicate:
       'Vous avez des changements non enregistrés. Souhaitez-vous continuer la duplication ?',
     untitled: 'Sans titre',
@@ -415,7 +416,7 @@ export const frTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Dernière sauvegarde il y a {{distance}}',
     noFurtherVersionsFound: 'Aucune autre version trouvée',
     noRowsFound: 'Aucun(e) {{label}} trouvé(e)',
-    noRowsSelected: undefined,
+    noRowsSelected: 'Aucun {{label}} sélectionné',
     preview: 'Aperçu',
     previouslyPublished: 'Précédemment publié',
     problemRestoringVersion: 'Un problème est survenu lors de la restauration de cette version',
