@@ -18,6 +18,7 @@ export type Options<TSlug extends CollectionSlug> = {
   draft?: boolean
   fallbackLocale?: TypedLocale
   id: number | string
+  includeLockStatus?: boolean
   joins?: JoinQuery
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
@@ -37,6 +38,7 @@ export default async function findByIDLocal<TSlug extends CollectionSlug>(
     depth,
     disableErrors = false,
     draft = false,
+    includeLockStatus,
     joins,
     overrideAccess = true,
     showHiddenFields,
@@ -57,6 +59,7 @@ export default async function findByIDLocal<TSlug extends CollectionSlug>(
     depth,
     disableErrors,
     draft,
+    includeLockStatus,
     joins,
     overrideAccess,
     req: await createLocalReq(options, payload),

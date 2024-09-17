@@ -23,7 +23,7 @@ type Constraint = {
 type TableColumn = {
   columnName?: string
   columns?: {
-    idType: 'number' | 'text'
+    idType: 'number' | 'text' | 'uuid'
     rawColumn: SQL<unknown>
   }[]
   constraints: Constraint[]
@@ -521,7 +521,8 @@ export const getTableColumnFromPath = ({
 
             const columns: TableColumn['columns'] = field.relationTo
               .map((relationTo) => {
-                let idType: 'number' | 'text' = adapter.idType === 'uuid' ? 'text' : 'number'
+                let idType: 'number' | 'text' | 'uuid' =
+                  adapter.idType === 'uuid' ? 'uuid' : 'number'
 
                 const { customIDType } = adapter.payload.collections[relationTo]
 
@@ -529,9 +530,19 @@ export const getTableColumnFromPath = ({
                   idType = customIDType
                 }
 
+                const idTypeTextOrUuid = idType === 'text' || idType === 'uuid'
+
                 // Do not add the column to OR if we know that it can't match by the type
                 // We can't do the same with idType: 'number' because `value` can be from the REST search query params
-                if (typeof value === 'number' && idType === 'text') {
+                if (typeof value === 'number' && idTypeTextOrUuid) {
+                  return null
+                }
+
+                if (
+                  Array.isArray(value) &&
+                  value.every((val) => typeof val === 'number') &&
+                  idTypeTextOrUuid
+                ) {
                   return null
                 }
 
@@ -540,13 +551,22 @@ export const getTableColumnFromPath = ({
                 // We need this because Postgres throws an error if querying by UUID column with a value that isn't a valid UUID.
                 if (
                   value &&
-                  !customIDType &&
-                  adapter.idType === 'uuid' &&
+                  !Array.isArray(value) &&
+                  idType === 'uuid' &&
                   hasCustomCollectionWithCustomID
                 ) {
                   if (!uuidValidate(value)) {
                     return null
                   }
+                }
+
+                if (
+                  Array.isArray(value) &&
+                  idType === 'uuid' &&
+                  hasCustomCollectionWithCustomID &&
+                  !value.some((val) => uuidValidate(val))
+                ) {
+                  return null
                 }
 
                 const relationTableName = adapter.tableNameMap.get(

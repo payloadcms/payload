@@ -324,21 +324,34 @@ export function buildObjectType({
       let type
       let relationToType = null
 
+      const graphQLCollections = config.collections.filter(
+        (collectionConfig) => collectionConfig.graphQL !== false,
+      )
+
       if (Array.isArray(relationTo)) {
         relationToType = new GraphQLEnumType({
           name: `${relationshipName}_RelationTo`,
-          values: relationTo.reduce(
-            (relations, relation) => ({
-              ...relations,
-              [formatName(relation)]: {
-                value: relation,
-              },
-            }),
-            {},
-          ),
+          values: relationTo
+            .filter((relation) =>
+              graphQLCollections.some((collection) => collection.slug === relation),
+            )
+            .reduce(
+              (relations, relation) => ({
+                ...relations,
+                [formatName(relation)]: {
+                  value: relation,
+                },
+              }),
+              {},
+            ),
         })
 
-        const types = relationTo.map((relation) => graphqlResult.collections[relation].graphQL.type)
+        // Only pass collections that are GraphQL enabled
+        const types = relationTo
+          .filter((relation) =>
+            graphQLCollections.some((collection) => collection.slug === relation),
+          )
+          .map((relation) => graphqlResult.collections[relation]?.graphQL.type)
 
         type = new GraphQLObjectType({
           name: `${relationshipName}_Relationship`,
@@ -377,9 +390,9 @@ export function buildObjectType({
         where?: unknown
       } = {}
 
-      const relationsUseDrafts = (Array.isArray(relationTo) ? relationTo : [relationTo]).some(
-        (relation) => graphqlResult.collections[relation].config.versions?.drafts,
-      )
+      const relationsUseDrafts = (Array.isArray(relationTo) ? relationTo : [relationTo])
+        .filter((relation) => graphQLCollections.some((collection) => collection.slug === relation))
+        .some((relation) => graphqlResult.collections[relation].config.versions?.drafts)
 
       if (relationsUseDrafts) {
         relationshipArgs.draft = {
@@ -420,37 +433,39 @@ export function buildObjectType({
               let id = relatedDoc
               let collectionSlug = field.relationTo
 
-              if (isRelatedToManyCollections) {
-                collectionSlug = relatedDoc.relationTo
-                id = relatedDoc.value
-              }
-
-              const result = await context.req.payloadDataLoader.load(
-                createDataloaderCacheKey({
-                  collectionSlug: collectionSlug as string,
-                  currentDepth: 0,
-                  depth: 0,
-                  docID: id,
-                  draft,
-                  fallbackLocale,
-                  locale,
-                  overrideAccess: false,
-                  showHiddenFields: false,
-                  transactionID: context.req.transactionID,
-                }),
-              )
-
-              if (result) {
+              if (graphQLCollections.some((collection) => collection.slug === collectionSlug)) {
                 if (isRelatedToManyCollections) {
-                  results[i] = {
-                    relationTo: collectionSlug,
-                    value: {
-                      ...result,
-                      collection: collectionSlug,
-                    },
+                  collectionSlug = relatedDoc.relationTo
+                  id = relatedDoc.value
+                }
+
+                const result = await context.req.payloadDataLoader.load(
+                  createDataloaderCacheKey({
+                    collectionSlug: collectionSlug as string,
+                    currentDepth: 0,
+                    depth: 0,
+                    docID: id,
+                    draft,
+                    fallbackLocale,
+                    locale,
+                    overrideAccess: false,
+                    showHiddenFields: false,
+                    transactionID: context.req.transactionID,
+                  }),
+                )
+
+                if (result) {
+                  if (isRelatedToManyCollections) {
+                    results[i] = {
+                      relationTo: collectionSlug,
+                      value: {
+                        ...result,
+                        collection: collectionSlug,
+                      },
+                    }
+                  } else {
+                    results[i] = result
                   }
-                } else {
-                  results[i] = result
                 }
               }
             }
@@ -472,33 +487,37 @@ export function buildObjectType({
           }
 
           if (id) {
-            const relatedDocument = await context.req.payloadDataLoader.load(
-              createDataloaderCacheKey({
-                collectionSlug: relatedCollectionSlug as string,
-                currentDepth: 0,
-                depth: 0,
-                docID: id,
-                draft,
-                fallbackLocale,
-                locale,
-                overrideAccess: false,
-                showHiddenFields: false,
-                transactionID: context.req.transactionID,
-              }),
-            )
+            if (
+              graphQLCollections.some((collection) => collection.slug === relatedCollectionSlug)
+            ) {
+              const relatedDocument = await context.req.payloadDataLoader.load(
+                createDataloaderCacheKey({
+                  collectionSlug: relatedCollectionSlug as string,
+                  currentDepth: 0,
+                  depth: 0,
+                  docID: id,
+                  draft,
+                  fallbackLocale,
+                  locale,
+                  overrideAccess: false,
+                  showHiddenFields: false,
+                  transactionID: context.req.transactionID,
+                }),
+              )
 
-            if (relatedDocument) {
-              if (isRelatedToManyCollections) {
-                return {
-                  relationTo: relatedCollectionSlug,
-                  value: {
-                    ...relatedDocument,
-                    collection: relatedCollectionSlug,
-                  },
+              if (relatedDocument) {
+                if (isRelatedToManyCollections) {
+                  return {
+                    relationTo: relatedCollectionSlug,
+                    value: {
+                      ...relatedDocument,
+                      collection: relatedCollectionSlug,
+                    },
+                  }
                 }
-              }
 
-              return relatedDocument
+                return relatedDocument
+              }
             }
 
             return null

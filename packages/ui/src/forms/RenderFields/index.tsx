@@ -13,8 +13,17 @@ const baseClass = 'render-fields'
 export { Props }
 
 export const RenderFields: React.FC<Props> = (props) => {
-  const { className, fields, forceRender, indexPath, margins, path, permissions, schemaPath } =
-    props
+  const {
+    className,
+    fields,
+    forceRender,
+    indexPath,
+    margins,
+    path,
+    permissions,
+    readOnly,
+    schemaPath,
+  } = props
 
   const { i18n } = useTranslation()
   const [hasRendered, setHasRendered] = React.useState(Boolean(forceRender))
@@ -65,7 +74,7 @@ export const RenderFields: React.FC<Props> = (props) => {
 
             return (
               <RenderField
-                fieldComponentProps={{ field, forceRender: forceRenderChildren }}
+                fieldComponentProps={{ field, forceRender: forceRenderChildren, readOnly }}
                 indexPath={indexPath !== undefined ? `${indexPath}.${fieldIndex}` : `${fieldIndex}`}
                 key={fieldIndex}
                 name={name}

@@ -1,7 +1,7 @@
 import type { DBQueryConfig } from 'drizzle-orm'
 import type { Field, JoinQuery } from 'payload'
 
-import { fieldAffectsData, tabHasName } from 'payload/shared'
+import { fieldAffectsData, fieldIsVirtual, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
@@ -42,6 +42,10 @@ export const traverseFields = ({
   topLevelTableName,
 }: TraverseFieldArgs) => {
   fields.forEach((field) => {
+    if (fieldIsVirtual(field)) {
+      return
+    }
+
     // handle simple relationship
     if (
       depth > 0 &&

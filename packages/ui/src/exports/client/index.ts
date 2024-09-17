@@ -52,6 +52,7 @@ export { GenerateConfirmation } from '../../elements/GenerateConfirmation/index.
 export { Gutter } from '../../elements/Gutter/index.js'
 export { Hamburger } from '../../elements/Hamburger/index.js'
 export { HydrateAuthProvider } from '../../elements/HydrateAuthProvider/index.js'
+export { Locked } from '../../elements/Locked/index.js'
 export { ListControls } from '../../elements/ListControls/index.js'
 export { useListDrawer } from '../../elements/ListDrawer/index.js'
 export { ListSelection } from '../../elements/ListSelection/index.js'

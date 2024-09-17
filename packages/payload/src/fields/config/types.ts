@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { EditorProps } from '@monaco-editor/react'
-import type { I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 import type { CSSProperties } from 'react'
 import type { DeepUndefinable } from 'ts-essentials'
@@ -38,7 +37,6 @@ import type {
   CollapsibleFieldLabelClientComponent,
   CollapsibleFieldLabelServerComponent,
   ConditionalDateProps,
-  CreateMappedComponent,
   DateFieldClientProps,
   DateFieldErrorClientComponent,
   DateFieldErrorServerComponent,
@@ -112,15 +110,9 @@ import type {
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { CollectionSlug, ImportMap } from '../../index.js'
+import type { CollectionSlug } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type {
-  Operation,
-  Payload,
-  PayloadRequest,
-  RequestContext,
-  Where,
-} from '../../types/index.js'
+import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
 
 export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = {
   /** The collection which the field belongs to. If the field belongs to a global, this will be null. */
@@ -405,6 +397,11 @@ export interface FieldBase {
   typescriptSchema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
   unique?: boolean
   validate?: Validate
+  /**
+   * Pass `true` to disable field in the DB
+   * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges):
+   */
+  virtual?: boolean
 }
 
 export interface FieldBaseClient {
@@ -453,7 +450,6 @@ export type NumberField = {
   /** Minimum value accepted. Used in the default `validate` function. */
   min?: number
   type: 'number'
-  validate?: Validate<number | number[], unknown, unknown, NumberField>
 } & (
   | {
       /** Makes this field an ordered array of numbers instead of just a single number. */
@@ -462,6 +458,7 @@ export type NumberField = {
       maxRows?: number
       /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
       minRows?: number
+      validate?: Validate<number[], unknown, unknown, NumberField>
     }
   | {
       /** Makes this field an ordered array of numbers instead of just a single number. */
@@ -470,9 +467,10 @@ export type NumberField = {
       maxRows?: undefined
       /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
       minRows?: undefined
+      validate?: Validate<number, unknown, unknown, NumberField>
     }
 ) &
-  FieldBase
+  Omit<FieldBase, 'validate'>
 
 export type NumberFieldClient = {
   admin?: {
@@ -502,7 +500,6 @@ export type TextField = {
   maxLength?: number
   minLength?: number
   type: 'text'
-  validate?: Validate<string | string[], unknown, unknown, TextField>
 } & (
   | {
       /** Makes this field an ordered array of strings instead of just a single string. */
@@ -511,6 +508,7 @@ export type TextField = {
       maxRows?: number
       /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
       minRows?: number
+      validate?: Validate<string[], unknown, unknown, TextField>
     }
   | {
       /** Makes this field an ordered array of strings instead of just a single string. */
@@ -519,9 +517,10 @@ export type TextField = {
       maxRows?: undefined
       /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
       minRows?: undefined
+      validate?: Validate<string, unknown, unknown, TextField>
     }
 ) &
-  FieldBase
+  Omit<FieldBase, 'validate'>
 
 export type TextFieldClient = {
   admin?: {
@@ -549,7 +548,7 @@ export type EmailField = {
   } & Admin
   type: 'email'
   validate?: Validate<string, unknown, unknown, EmailField>
-} & FieldBase
+} & Omit<FieldBase, 'validate'>
 
 export type EmailFieldClient = {
   admin?: {
@@ -580,7 +579,7 @@ export type TextareaField = {
   minLength?: number
   type: 'textarea'
   validate?: Validate<string, unknown, unknown, TextareaField>
-} & FieldBase
+} & Omit<FieldBase, 'validate'>
 
 export type TextareaFieldClient = {
   admin?: {
@@ -605,8 +604,8 @@ export type CheckboxField = {
     } & Admin['components']
   } & Admin
   type: 'checkbox'
-  validate?: Validate<unknown, unknown, unknown, CheckboxField>
-} & FieldBase
+  validate?: Validate<boolean, unknown, unknown, CheckboxField>
+} & Omit<FieldBase, 'validate'>
 
 export type CheckboxFieldClient = {
   admin?: {
@@ -633,7 +632,7 @@ export type DateField = {
   } & Admin
   type: 'date'
   validate?: Validate<unknown, unknown, unknown, DateField>
-} & FieldBase
+} & Omit<FieldBase, 'validate'>
 
 export type DateFieldClient = {
   admin?: {
@@ -665,7 +664,7 @@ export type GroupField = {
   interfaceName?: string
   type: 'group'
   validate?: Validate<unknown, unknown, unknown, GroupField>
-} & Omit<FieldBase, 'required'>
+} & Omit<FieldBase, 'required' | 'validate'>
 
 export type GroupFieldClient = {
   admin?: {
@@ -682,12 +681,12 @@ export type RowField = {
   admin?: Omit<Admin, 'description'>
   fields: Field[]
   type: 'row'
-} & Omit<FieldBase, 'admin' | 'label' | 'name' | 'validate'>
+} & Omit<FieldBase, 'admin' | 'label' | 'name' | 'validate' | 'virtual'>
 
 export type RowFieldClient = {
   admin?: Omit<AdminClient, 'description'>
   fields: ClientField[]
-} & Omit<FieldBaseClient, 'admin' | 'label' | 'name' | 'validate'> &
+} & Omit<FieldBaseClient, 'admin' | 'label' | 'name'> &
   Pick<RowField, 'type'>
 
 export type CollapsibleField = {
@@ -718,7 +717,7 @@ export type CollapsibleField = {
       label: Required<FieldBase['label']>
     }
 ) &
-  Omit<FieldBase, 'label' | 'name' | 'validate'>
+  Omit<FieldBase, 'label' | 'name' | 'validate' | 'virtual'>
 
 export type CollapsibleFieldClient = {
   fields: ClientField[]
@@ -773,7 +772,7 @@ export type UnnamedTab = {
     | LabelFunction
     | string
   localized?: never
-} & Omit<TabBase, 'name'>
+} & Omit<TabBase, 'name' | 'virtual'>
 
 export type Tab = NamedTab | UnnamedTab
 
@@ -781,7 +780,7 @@ export type TabsField = {
   admin?: Omit<Admin, 'description'>
   tabs: Tab[]
   type: 'tabs'
-} & Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT'>
+} & Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT' | 'virtual'>
 
 export type TabsFieldClient = {
   admin?: Omit<AdminClient, 'description'>
@@ -848,7 +847,6 @@ type SharedUploadProperties = {
    */
   displayPreview?: boolean
   filterOptions?: FilterOptions
-  hasMany?: boolean
   /**
    * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
    *
@@ -856,7 +854,6 @@ type SharedUploadProperties = {
    */
   maxDepth?: number
   type: 'upload'
-  validate?: Validate<unknown, unknown, unknown, SharedUploadProperties>
 } & (
   | {
       hasMany: true
@@ -870,6 +867,7 @@ type SharedUploadProperties = {
        */
       min?: number
       minRows?: number
+      validate?: Validate<unknown[], unknown, unknown, SharedUploadProperties>
     }
   | {
       hasMany?: false | undefined
@@ -883,9 +881,10 @@ type SharedUploadProperties = {
        */
       min?: undefined
       minRows?: undefined
+      validate?: Validate<unknown, unknown, unknown, SharedUploadProperties>
     }
 ) &
-  FieldBase
+  Omit<FieldBase, 'validate'>
 
 type SharedUploadPropertiesClient = FieldBaseClient &
   Pick<
@@ -958,7 +957,7 @@ export type CodeField = {
   minLength?: number
   type: 'code'
   validate?: Validate<string, unknown, unknown, CodeField>
-} & Omit<FieldBase, 'admin'>
+} & Omit<FieldBase, 'admin' | 'validate'>
 
 export type CodeFieldClient = {
   admin?: {
@@ -991,7 +990,7 @@ export type JSONField = {
   }
   type: 'json'
   validate?: Validate<Record<string, unknown>, unknown, unknown, JSONField>
-} & Omit<FieldBase, 'admin'>
+} & Omit<FieldBase, 'admin' | 'validate'>
 
 export type JSONFieldClient = {
   admin?: {
@@ -1028,8 +1027,17 @@ export type SelectField = {
   hasMany?: boolean
   options: Option[]
   type: 'select'
-  validate?: Validate<string, unknown, unknown, SelectField>
-} & FieldBase
+} & (
+  | {
+      hasMany: true
+      validate?: Validate<string[], unknown, unknown, SelectField>
+    }
+  | {
+      hasMany?: false | undefined
+      validate?: Validate<string, unknown, unknown, SelectField>
+    }
+) &
+  Omit<FieldBase, 'validate'>
 
 export type SelectFieldClient = {
   admin?: {
@@ -1046,7 +1054,6 @@ export type SelectFieldClient = {
 
 type SharedRelationshipProperties = {
   filterOptions?: FilterOptions
-  hasMany?: boolean
   /**
    * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
    *
@@ -1054,7 +1061,6 @@ type SharedRelationshipProperties = {
    */
   maxDepth?: number
   type: 'relationship'
-  validate?: Validate<unknown, unknown, unknown, SharedRelationshipProperties>
 } & (
   | {
       hasMany: true
@@ -1068,6 +1074,7 @@ type SharedRelationshipProperties = {
        */
       min?: number
       minRows?: number
+      validate?: Validate<any[], unknown, unknown, SharedRelationshipProperties>
     }
   | {
       hasMany?: false | undefined
@@ -1081,9 +1088,10 @@ type SharedRelationshipProperties = {
        */
       min?: undefined
       minRows?: undefined
+      validate?: Validate<any, unknown, unknown, SharedRelationshipProperties>
     }
 ) &
-  FieldBase
+  Omit<FieldBase, 'validate'>
 
 type SharedRelationshipPropertiesClient = FieldBaseClient &
   Pick<
@@ -1230,7 +1238,7 @@ export type ArrayField = {
   minRows?: number
   type: 'array'
   validate?: Validate<unknown[], unknown, unknown, ArrayField>
-} & FieldBase
+} & Omit<FieldBase, 'validate'>
 
 export type ArrayFieldClient = {
   admin?: {
@@ -1265,7 +1273,7 @@ export type RadioField = {
   options: Option[]
   type: 'radio'
   validate?: Validate<string, unknown, unknown, RadioField>
-} & FieldBase
+} & Omit<FieldBase, 'validate'>
 
 export type RadioFieldClient = {
   admin?: {
@@ -1351,7 +1359,7 @@ export type BlocksField = {
   minRows?: number
   type: 'blocks'
   validate?: Validate<string, unknown, unknown, BlocksField>
-} & FieldBase
+} & Omit<FieldBase, 'validate'>
 
 export type BlocksFieldClient = {
   admin?: {
@@ -1377,8 +1385,8 @@ export type PointField = {
     step?: number
   } & Admin
   type: 'point'
-  validate?: Validate<unknown, unknown, unknown, PointField>
-} & FieldBase
+  validate?: Validate<[number, number], unknown, unknown, PointField>
+} & Omit<FieldBase, 'validate'>
 
 export type PointFieldClient = {
   admin?: {
@@ -1706,6 +1714,10 @@ export function tabHasName<TField extends ClientTab | Tab>(tab: TField): tab is 
 
 export function fieldIsLocalized(field: Field | Tab): boolean {
   return 'localized' in field && field.localized
+}
+
+export function fieldIsVirtual(field: Field | Tab): boolean {
+  return 'virtual' in field && field.virtual
 }
 
 export type HookName =

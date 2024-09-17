@@ -18,6 +18,7 @@ export type Arguments = {
   disableErrors?: boolean
   draft?: boolean
   id: number | string
+  includeLockStatus?: boolean
   joins?: JoinQuery
   overrideAccess?: boolean
   req: PayloadRequest
@@ -54,6 +55,7 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
       depth,
       disableErrors,
       draft: draftEnabled = false,
+      includeLockStatus,
       joins,
       overrideAccess = false,
       req: { fallbackLocale, locale, t },
@@ -100,6 +102,47 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
       }
 
       return null
+    }
+
+    // /////////////////////////////////////
+    // Include Lock Status if required
+    // /////////////////////////////////////
+
+    if (includeLockStatus && id) {
+      let lockStatus = null
+
+      try {
+        const lockedDocument = await req.payload.find({
+          collection: 'payload-locked-documents',
+          depth: 1,
+          limit: 1,
+          pagination: false,
+          req,
+          where: {
+            and: [
+              {
+                'document.relationTo': {
+                  equals: collectionConfig.slug,
+                },
+              },
+              {
+                'document.value': {
+                  equals: id,
+                },
+              },
+            ],
+          },
+        })
+
+        if (lockedDocument && lockedDocument.docs.length > 0) {
+          lockStatus = lockedDocument.docs[0]
+        }
+      } catch {
+        // swallow error
+      }
+
+      result.isLocked = !!lockStatus
+      result.userEditing = lockStatus?._lastEdited?.user?.value ?? null
     }
 
     // /////////////////////////////////////

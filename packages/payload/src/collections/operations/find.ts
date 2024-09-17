@@ -20,6 +20,7 @@ export type Arguments = {
   depth?: number
   disableErrors?: boolean
   draft?: boolean
+  includeLockStatus?: boolean
   joins?: JoinQuery
   limit?: number
   overrideAccess?: boolean
@@ -61,6 +62,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
       depth,
       disableErrors,
       draft: draftsEnabled,
+      includeLockStatus,
       joins,
       limit,
       overrideAccess,
@@ -151,6 +153,49 @@ export const findOperation = async <TSlug extends CollectionSlug>(
         sort,
         where: fullWhere,
       })
+    }
+
+    if (includeLockStatus) {
+      try {
+        const lockedDocuments = await payload.find({
+          collection: 'payload-locked-documents',
+          depth: 1,
+          limit: sanitizedLimit,
+          pagination: false,
+          req,
+          where: {
+            and: [
+              {
+                'document.relationTo': {
+                  equals: collectionConfig.slug,
+                },
+              },
+              {
+                'document.value': {
+                  in: result.docs.map((doc) => doc.id),
+                },
+              },
+            ],
+          },
+        })
+
+        const lockedDocs = Array.isArray(lockedDocuments?.docs) ? lockedDocuments.docs : []
+
+        result.docs = result.docs.map((doc) => {
+          const lockedDoc = lockedDocs.find((lock) => lock?.document?.value === doc.id)
+          return {
+            ...doc,
+            isLocked: !!lockedDoc,
+            userEditing: lockedDoc ? lockedDoc._lastEdited?.user?.value : null,
+          }
+        })
+      } catch (error) {
+        result.docs = result.docs.map((doc) => ({
+          ...doc,
+          isLocked: false,
+          userEditing: null,
+        }))
+      }
     }
 
     // /////////////////////////////////////

@@ -18,7 +18,7 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core'
 import { InvalidConfiguration } from 'payload'
-import { fieldAffectsData, optionIsObject } from 'payload/shared'
+import { fieldAffectsData, fieldIsVirtual, optionIsObject } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type {
@@ -119,6 +119,10 @@ export const traverseFields = ({
     if ('name' in field && field.name === 'id') {
       return
     }
+    if (fieldIsVirtual(field)) {
+      return
+    }
+
     let columnName: string
     let fieldName: string
 
