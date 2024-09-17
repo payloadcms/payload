@@ -159,7 +159,7 @@ export const sanitizeFields = async ({
         if (defaultValidate) {
           field.validate = (val, options) => defaultValidate(val, { ...field, ...options })
         } else {
-          field.validate = () => true
+          field.validate = (): true => true
         }
       }
 
