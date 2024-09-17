@@ -400,7 +400,6 @@ describe('locked documents', () => {
             value: postDoc.id,
           },
           globalSlug: undefined,
-          isLocked: true,
         },
       })
     })
@@ -490,7 +489,6 @@ describe('locked documents', () => {
             value: postDoc.id,
           },
           globalSlug: undefined,
-          isLocked: true,
         },
       })
     })
@@ -604,11 +602,9 @@ describe('locked documents', () => {
         id: lockedDoc.docs[0].id,
         collection: lockedDocumentCollection,
         data: {
-          _lastEdited: {
-            user: {
-              relationTo: 'users',
-              value: user2.id,
-            },
+          user: {
+            relationTo: 'users',
+            value: user2.id,
           },
         },
       })
@@ -657,11 +653,9 @@ describe('locked documents', () => {
         id: lockedDoc.docs[0].id,
         collection: lockedDocumentCollection,
         data: {
-          _lastEdited: {
-            user: {
-              relationTo: 'users',
-              value: user2.id,
-            },
+          user: {
+            relationTo: 'users',
+            value: user2.id,
           },
         },
       })
@@ -715,11 +709,9 @@ describe('locked documents', () => {
         id: lockedDoc.docs[0].id,
         collection: lockedDocumentCollection,
         data: {
-          _lastEdited: {
-            user: {
-              relationTo: 'users',
-              value: user2.id,
-            },
+          user: {
+            relationTo: 'users',
+            value: user2.id,
           },
         },
       })

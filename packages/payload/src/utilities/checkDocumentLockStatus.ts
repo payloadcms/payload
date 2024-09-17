@@ -32,7 +32,7 @@ export const checkDocumentLockStatus = async ({
 
   // If lockDocuments is explicitly set to false, skip the lock logic and return early
   if (isLockingEnabled === false) {
-    return { lockedDocument: undefined, shouldUnlockDocument: false }
+    return
   }
 
   let lockedDocumentQuery = {}
@@ -72,7 +72,7 @@ export const checkDocumentLockStatus = async ({
     return
   }
 
-  const lastEditedAt = new Date(lockedDoc?.updatedAt)
+  const lastEditedAt = new Date(lockedDoc?.editedAt)
   const now = new Date()
 
   const lockDuration =

@@ -138,7 +138,7 @@ describe('Locked documents', () => {
     const lockedDocInstance = await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        updatedAt: pastEditedAt.toISOString(),
+        editedAt: pastEditedAt.toISOString(),
         user: {
           relationTo: 'users',
           value: user2.id,
@@ -195,7 +195,7 @@ describe('Locked documents', () => {
     const lockedGlobalInstance = await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        updatedAt: pastEditedAt.toISOString(), // stale date
+        editedAt: pastEditedAt.toISOString(), // stale date
         user: {
           relationTo: 'users',
           value: user2.id,
@@ -362,7 +362,7 @@ describe('Locked documents', () => {
     const lockedDocInstance = await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        updatedAt: pastEditedAt.toISOString(), // stale date
+        editedAt: pastEditedAt.toISOString(), // stale date
         user: {
           relationTo: 'users',
           value: user2.id,

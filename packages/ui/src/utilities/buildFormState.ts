@@ -265,7 +265,9 @@ export const buildFormState = async ({
           await req.payload.db.updateOne({
             id: lockedDocument.docs[0].id,
             collection: 'payload-locked-documents',
-            data: {},
+            data: {
+              editedAt: new Date().toISOString(),
+            },
             req,
           })
         }
@@ -282,6 +284,7 @@ export const buildFormState = async ({
                   value: id,
                 }
               : undefined,
+            editedAt: new Date().toISOString(),
             globalSlug: globalSlug ? globalSlug : undefined,
             user: {
               relationTo: [req.user.collection],
