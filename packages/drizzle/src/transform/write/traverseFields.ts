@@ -268,7 +268,7 @@ export const traverseFields = ({
     if (field.type === 'tabs') {
       field.tabs.forEach((tab) => {
         if ('name' in tab) {
-          if (tab.virtual === false) {
+          if (fieldIsVirtual(tab)) {
             return
           }
 
