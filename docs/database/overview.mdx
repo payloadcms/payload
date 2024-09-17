@@ -172,3 +172,45 @@ export const Collection: CollectionConfig => {
 }
 
 ```
+
+## Global Operations
+
+You can also configure database operations on globals.
+
+Like collection operations, the override methods receive arguments useful for augmenting operations such as the global slug, and the req.
+
+Here is an example:
+```ts
+import type { CollectionConfig } from 'payload/types'
+
+export const Collection: CollectionConfig => {
+  return {
+    globals: [
+      {
+        slug: 'global-db-operations',
+        db: {
+          createGlobal: () => {
+            // ...
+          },
+          updateGlobal: () => {
+            // ...
+          },
+          findGlobal: () => {
+            // ...
+          },
+          findGlobalVersions: () => {
+            // ...
+          },
+        },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+      },
+    ],
+  }
+}
+
+```
