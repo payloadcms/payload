@@ -16,7 +16,7 @@ import './index.scss'
 const baseClass = 'dashboard'
 
 export type DashboardProps = {
-  globalData: Array<{ data: { isLocked: boolean; userEditing: ClientUser | null }; slug: string }>
+  globalData: Array<{ data: { _isLocked: boolean; _userEditing: ClientUser | null }; slug: string }>
   Link: React.ComponentType<any>
   navGroups?: ReturnType<typeof groupNavItems>
   permissions: Permissions
@@ -131,8 +131,8 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                           (global) => global.slug === entity.slug,
                         )
                         if (globalLockData) {
-                          lockStatus = globalLockData.data.isLocked
-                          userEditing = globalLockData.data.userEditing
+                          lockStatus = globalLockData.data._isLocked
+                          userEditing = globalLockData.data._userEditing
                         }
                       }
 

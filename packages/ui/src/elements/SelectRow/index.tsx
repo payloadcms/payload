@@ -12,12 +12,12 @@ const baseClass = 'select-row'
 export const SelectRow: React.FC = () => {
   const { selected, setSelection } = useSelection()
   const { rowData } = useTableCell()
-  const { isLocked, userEditing } = rowData || {}
+  const { _isLocked, _userEditing } = rowData || {}
 
-  const documentIsLocked = isLocked && userEditing
+  const documentIsLocked = _isLocked && _userEditing
 
   if (documentIsLocked) {
-    return <Locked user={userEditing} />
+    return <Locked user={_userEditing} />
   }
 
   return (

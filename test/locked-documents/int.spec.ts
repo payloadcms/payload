@@ -138,19 +138,16 @@ describe('Locked documents', () => {
     const lockedDocInstance = await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        _lastEdited: {
-          editedAt: pastEditedAt.toISOString(), // stale date
-          user: {
-            relationTo: 'users',
-            value: user2.id,
-          },
+        editedAt: pastEditedAt.toISOString(),
+        user: {
+          relationTo: 'users',
+          value: user2.id,
         },
         document: {
           relationTo: 'posts',
           value: newPost2.id,
         },
         globalSlug: undefined,
-        isLocked: true,
       },
     })
 
@@ -198,16 +195,13 @@ describe('Locked documents', () => {
     const lockedGlobalInstance = await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        _lastEdited: {
-          editedAt: pastEditedAt.toISOString(), // stale date
-          user: {
-            relationTo: 'users',
-            value: user2.id,
-          },
+        editedAt: pastEditedAt.toISOString(), // stale date
+        user: {
+          relationTo: 'users',
+          value: user2.id,
         },
         document: undefined,
         globalSlug: menuSlug,
-        isLocked: true,
       },
     })
 
@@ -256,19 +250,16 @@ describe('Locked documents', () => {
     await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        _lastEdited: {
-          editedAt: new Date().toISOString(),
-          user: {
-            relationTo: 'users',
-            value: user2.id,
-          },
-        },
         document: {
           relationTo: 'posts',
           value: newPost.id,
         },
+        editedAt: new Date().toISOString(),
         globalSlug: undefined,
-        isLocked: true,
+        user: {
+          relationTo: 'users',
+          value: user2.id,
+        },
       },
     })
 
@@ -294,16 +285,13 @@ describe('Locked documents', () => {
     await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        _lastEdited: {
-          editedAt: new Date().toISOString(),
-          user: {
-            relationTo: 'users',
-            value: user2.id,
-          },
-        },
         document: undefined,
+        editedAt: new Date().toISOString(),
         globalSlug: menuSlug,
-        isLocked: true,
+        user: {
+          relationTo: 'users',
+          value: user2.id,
+        },
       },
     })
 
@@ -336,19 +324,16 @@ describe('Locked documents', () => {
     await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        _lastEdited: {
-          editedAt: new Date().toISOString(),
-          user: {
-            relationTo: 'users',
-            value: user2.id,
-          },
-        },
         document: {
           relationTo: 'posts',
           value: newPost3.id,
         },
+        editedAt: new Date().toISOString(),
         globalSlug: undefined,
-        isLocked: true,
+        user: {
+          relationTo: 'users',
+          value: user2.id,
+        },
       },
     })
 
@@ -380,19 +365,16 @@ describe('Locked documents', () => {
     const lockedDocInstance = await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        _lastEdited: {
-          editedAt: pastEditedAt.toISOString(), // stale date
-          user: {
-            relationTo: 'users',
-            value: user2.id,
-          },
+        editedAt: pastEditedAt.toISOString(), // stale date
+        user: {
+          relationTo: 'users',
+          value: user2.id,
         },
         document: {
           relationTo: 'posts',
           value: newPost4.id,
         },
         globalSlug: undefined,
-        isLocked: true,
       },
     })
 
