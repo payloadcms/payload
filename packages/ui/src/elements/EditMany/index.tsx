@@ -126,7 +126,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   React.useEffect(() => {
     if (!hasInitializedState.current) {
       const getInitialState = async () => {
-        const result = await getFormState({
+        const { state: result } = await getFormState({
           apiRoute,
           body: {
             collectionSlug: slug,
@@ -146,8 +146,8 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   }, [apiRoute, hasInitializedState, serverURL, slug])
 
   const onChange: FormProps['onChange'][0] = useCallback(
-    ({ formState: prevFormState }) =>
-      getFormState({
+    async ({ formState: prevFormState }) => {
+      const { state } = await getFormState({
         apiRoute,
         body: {
           collectionSlug: slug,
@@ -156,7 +156,10 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
           schemaPath: slug,
         },
         serverURL,
-      }),
+      })
+
+      return state
+    },
     [serverURL, apiRoute, slug],
   )
 
