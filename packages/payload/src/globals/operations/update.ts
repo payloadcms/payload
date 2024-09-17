@@ -44,7 +44,11 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   } = args
 
   try {
-    const shouldCommit = await initTransaction(req)
+    const isCustomGlobalDb = Boolean(
+      globalConfig?.db?.updateGlobal || globalConfig?.db?.createGlobal,
+    )
+
+    const shouldCommit = !isCustomGlobalDb && (await initTransaction(req))
 
     let { data } = args
 
