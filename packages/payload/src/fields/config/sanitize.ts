@@ -155,7 +155,7 @@ export const sanitizeFields = async ({
         }
       }
 
-      if (typeof field.validate === 'undefined') {
+      if ('validate' in field && typeof field.validate === 'undefined') {
         const defaultValidate = validations[field.type]
         if (defaultValidate) {
           field.validate = (val, options) => defaultValidate(val, { ...field, ...options })

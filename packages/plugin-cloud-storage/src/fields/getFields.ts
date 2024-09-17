@@ -67,7 +67,7 @@ export const getFields = ({
         ...(existingURLField?.hooks?.afterRead || []),
       ],
     },
-  } satisfies TextField)
+  } as TextField)
 
   if (typeof collection.upload === 'object' && collection.upload.imageSizes) {
     let existingSizesFieldIndex = -1
@@ -151,7 +151,7 @@ export const getFields = ({
       ...basePrefixField,
       ...(existingPrefixField || {}),
       defaultValue: path.posix.join(prefix),
-    } satisfies TextField)
+    } as TextField)
   }
 
   return fields
