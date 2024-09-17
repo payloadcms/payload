@@ -1016,18 +1016,18 @@ export type SelectField = {
   enumName?: DBIdentifierName
   hasMany?: boolean
   options: Option[]
-  type: 'select' &
-    (
-      | {
-          hasMany: true
-          validate?: Validate<string[], unknown, unknown, SelectField>
-        }
-      | {
-          hasMany?: false | undefined
-          validate?: Validate<string, unknown, unknown, SelectField>
-        }
-    )
-} & Omit<FieldBase, 'validate'>
+  type: 'select'
+} & (
+  | {
+      hasMany: true
+      validate?: Validate<string[], unknown, unknown, SelectField>
+    }
+  | {
+      hasMany?: false | undefined
+      validate?: Validate<string, unknown, unknown, SelectField>
+    }
+) &
+  Omit<FieldBase, 'validate'>
 
 export type SelectFieldClient = {
   admin?: {
