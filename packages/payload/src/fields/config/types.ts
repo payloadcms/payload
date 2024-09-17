@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { EditorProps } from '@monaco-editor/react'
-import type { I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 import type { CSSProperties } from 'react'
 import type { DeepUndefinable } from 'ts-essentials'
@@ -32,7 +31,6 @@ import type {
   CollapsibleFieldLabelClientComponent,
   CollapsibleFieldLabelServerComponent,
   ConditionalDateProps,
-  CreateMappedComponent,
   DateFieldClientProps,
   DateFieldErrorClientComponent,
   DateFieldErrorServerComponent,
@@ -106,15 +104,9 @@ import type {
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { CollectionSlug, ImportMap } from '../../index.js'
+import type { CollectionSlug } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type {
-  Operation,
-  Payload,
-  PayloadRequest,
-  RequestContext,
-  Where,
-} from '../../types/index.js'
+import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
 
 export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = {
   /** The collection which the field belongs to. If the field belongs to a global, this will be null. */
@@ -715,12 +707,6 @@ export type RowFieldClient = {
 } & Omit<FieldBaseClient, 'admin' | 'label' | 'name' | 'validate'> &
   Pick<RowField, 'type'>
 
-export type RowFieldClient = {
-  admin?: Omit<AdminClient, 'description'>
-  fields: ClientField[]
-} & Omit<FieldBaseClient, 'admin' | 'label' | 'name' | 'validate'> &
-  Pick<RowField, 'type'>
-
 export type CollapsibleField = {
   fields: Field[]
   type: 'collapsible'
@@ -813,12 +799,6 @@ export type TabsField = {
   tabs: Tab[]
   type: 'tabs'
 } & Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT' | 'virtual'>
-
-export type TabsFieldClient = {
-  admin?: Omit<AdminClient, 'description'>
-  tabs: ClientTab[]
-} & Omit<FieldBaseClient, 'admin' | 'localized' | 'name' | 'saveToJWT'> &
-  Pick<TabsField, 'type'>
 
 export type TabsFieldClient = {
   admin?: Omit<AdminClient, 'description'>

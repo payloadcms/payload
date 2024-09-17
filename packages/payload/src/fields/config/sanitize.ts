@@ -44,7 +44,6 @@ type Args = {
 }
 
 export const sanitizeFields = async ({
-  collectionConfig,
   config,
   existingFieldNames = new Set(),
   fields,
