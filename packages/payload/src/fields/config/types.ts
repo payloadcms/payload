@@ -105,15 +105,9 @@ import type {
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { CollectionSlug, ImportMap } from '../../index.js'
+import type { CollectionSlug } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type {
-  Operation,
-  Payload,
-  PayloadRequest,
-  RequestContext,
-  Where,
-} from '../../types/index.js'
+import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
 
 export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = {
   /** The collection which the field belongs to. If the field belongs to a global, this will be null. */
@@ -446,7 +440,6 @@ export type NumberField = {
   /** Minimum value accepted. Used in the default `validate` function. */
   min?: number
   type: 'number'
-  validate?: Validate<number | number[], unknown, unknown, NumberField>
 } & (
   | {
       /** Makes this field an ordered array of numbers instead of just a single number. */
@@ -455,6 +448,7 @@ export type NumberField = {
       maxRows?: number
       /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
       minRows?: number
+      validate?: Validate<number[], unknown, unknown, NumberField>
     }
   | {
       /** Makes this field an ordered array of numbers instead of just a single number. */
@@ -463,6 +457,7 @@ export type NumberField = {
       maxRows?: undefined
       /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
       minRows?: undefined
+      validate?: Validate<number, unknown, unknown, NumberField>
     }
 ) &
   Omit<FieldBase, 'validate'>
@@ -495,7 +490,6 @@ export type TextField = {
   maxLength?: number
   minLength?: number
   type: 'text'
-  validate?: Validate<string | string[], unknown, unknown, TextField>
 } & (
   | {
       /** Makes this field an ordered array of strings instead of just a single string. */
@@ -504,6 +498,7 @@ export type TextField = {
       maxRows?: number
       /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
       minRows?: number
+      validate?: Validate<string[], unknown, unknown, TextField>
     }
   | {
       /** Makes this field an ordered array of strings instead of just a single string. */
@@ -512,6 +507,7 @@ export type TextField = {
       maxRows?: undefined
       /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
       minRows?: undefined
+      validate?: Validate<string, unknown, unknown, TextField>
     }
 ) &
   Omit<FieldBase, 'validate'>
@@ -841,7 +837,6 @@ type SharedUploadProperties = {
    */
   displayPreview?: boolean
   filterOptions?: FilterOptions
-  hasMany?: boolean
   /**
    * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
    *
@@ -849,7 +844,6 @@ type SharedUploadProperties = {
    */
   maxDepth?: number
   type: 'upload'
-  validate?: Validate<unknown, unknown, unknown, SharedUploadProperties>
 } & (
   | {
       hasMany: true
@@ -863,6 +857,7 @@ type SharedUploadProperties = {
        */
       min?: number
       minRows?: number
+      validate?: Validate<unknown[], unknown, unknown, SharedUploadProperties>
     }
   | {
       hasMany?: false | undefined
@@ -876,6 +871,7 @@ type SharedUploadProperties = {
        */
       min?: undefined
       minRows?: undefined
+      validate?: Validate<unknown, unknown, unknown, SharedUploadProperties>
     }
 ) &
   Omit<FieldBase, 'validate'>
@@ -1020,8 +1016,17 @@ export type SelectField = {
   enumName?: DBIdentifierName
   hasMany?: boolean
   options: Option[]
-  type: 'select'
-  validate?: Validate<string, unknown, unknown, SelectField>
+  type: 'select' &
+    (
+      | {
+          hasMany: true
+          validate?: Validate<string[], unknown, unknown, SelectField>
+        }
+      | {
+          hasMany?: false | undefined
+          validate?: Validate<string, unknown, unknown, SelectField>
+        }
+    )
 } & Omit<FieldBase, 'validate'>
 
 export type SelectFieldClient = {
@@ -1039,7 +1044,6 @@ export type SelectFieldClient = {
 
 type SharedRelationshipProperties = {
   filterOptions?: FilterOptions
-  hasMany?: boolean
   /**
    * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
    *
@@ -1047,7 +1051,6 @@ type SharedRelationshipProperties = {
    */
   maxDepth?: number
   type: 'relationship'
-  validate?: Validate<any, unknown, unknown, SharedRelationshipProperties>
 } & (
   | {
       hasMany: true
@@ -1061,6 +1064,7 @@ type SharedRelationshipProperties = {
        */
       min?: number
       minRows?: number
+      validate?: Validate<any[], unknown, unknown, SharedRelationshipProperties>
     }
   | {
       hasMany?: false | undefined
@@ -1074,6 +1078,7 @@ type SharedRelationshipProperties = {
        */
       min?: undefined
       minRows?: undefined
+      validate?: Validate<any, unknown, unknown, SharedRelationshipProperties>
     }
 ) &
   Omit<FieldBase, 'validate'>
