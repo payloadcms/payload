@@ -17,7 +17,9 @@ export const createVersion: CreateVersion = async function createVersion(
     collectionSlug,
     createdAt,
     parent,
+    publishedLocale,
     req = {} as PayloadRequest,
+    snapshot,
     updatedAt,
     versionData,
   },
@@ -32,10 +34,15 @@ export const createVersion: CreateVersion = async function createVersion(
       createdAt,
       latest: true,
       parent,
+      publishedLocale,
+      snapshot,
       updatedAt,
       version: versionData,
     },
-    fields: buildVersionCollectionFields(this.payload.collections[collectionSlug].config),
+    fields: buildVersionCollectionFields(
+      this.payload.config,
+      this.payload.collections[collectionSlug].config,
+    ),
   })
 
   const [doc] = await VersionModel.create([data], options, req)

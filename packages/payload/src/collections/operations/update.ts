@@ -127,7 +127,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
         collectionConfig: collection.config,
         overrideAccess,
         req,
-        versionFields: buildVersionCollectionFields(collection.config),
+        versionFields: buildVersionCollectionFields(payload.config, collection.config),
         where: versionsWhere,
       })
 

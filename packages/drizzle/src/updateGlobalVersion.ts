@@ -35,7 +35,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     `_${toSnakeCase(globalConfig.slug)}${this.versionsSuffix}`,
   )
 
-  const fields = buildVersionGlobalFields(globalConfig)
+  const fields = buildVersionGlobalFields(this.payload.config, globalConfig)
 
   const { where } = buildQuery({
     adapter: this,

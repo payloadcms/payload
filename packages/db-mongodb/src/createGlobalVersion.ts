@@ -1,8 +1,8 @@
 import {
+  buildVersionGlobalFields,
   type CreateGlobalVersion,
   type Document,
   type PayloadRequest,
-  buildVersionGlobalFields,
 } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -12,7 +12,17 @@ import { withSession } from './withSession.js'
 
 export const createGlobalVersion: CreateGlobalVersion = async function createGlobalVersion(
   this: MongooseAdapter,
-  { autosave, createdAt, globalSlug, parent, req = {} as PayloadRequest, updatedAt, versionData },
+  {
+    autosave,
+    createdAt,
+    globalSlug,
+    parent,
+    publishedLocale,
+    req = {} as PayloadRequest,
+    snapshot,
+    updatedAt,
+    versionData,
+  },
 ) {
   const VersionModel = this.versions[globalSlug]
   const options = await withSession(this, req)
@@ -24,10 +34,13 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
       createdAt,
       latest: true,
       parent,
+      publishedLocale,
+      snapshot,
       updatedAt,
       version: versionData,
     },
     fields: buildVersionGlobalFields(
+      this.payload.config,
       this.payload.config.globals.find((global) => global.slug === globalSlug),
     ),
   })
