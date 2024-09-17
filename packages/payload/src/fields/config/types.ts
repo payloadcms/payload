@@ -621,7 +621,7 @@ export type DateField = {
     placeholder?: Record<string, string> | string
   } & Admin
   type: 'date'
-  validate?: Validate<Date, unknown, unknown, DateField>
+  validate?: Validate<unknown, unknown, unknown, DateField>
 } & Omit<FieldBase, 'validate'>
 
 export type DateFieldClient = {
