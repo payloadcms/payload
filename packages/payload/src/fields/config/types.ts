@@ -104,9 +104,33 @@ import type {
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type {
+  ArrayFieldValidation,
+  BlocksFieldValidation,
+  CheckboxFieldValidation,
+  CodeFieldValidation,
+  CollectionSlug,
+  DateFieldValidation,
+  EmailFieldValidation,
+  JSONFieldValidation,
+  PointFieldValidation,
+  RadioFieldValidation,
+  TextareaFieldValidation,
+} from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
+import type {
+  NumberFieldManyValidation,
+  NumberFieldSingleValidation,
+  RelationshipFieldManyValidation,
+  RelationshipFieldSingleValidation,
+  SelectFieldManyValidation,
+  SelectFieldSingleValidation,
+  TextFieldManyValidation,
+  TextFieldSingleValidation,
+  UploadFieldManyValidation,
+  UploadFieldSingleValidation,
+} from '../validations.js'
 
 export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = {
   /** The collection which the field belongs to. If the field belongs to a global, this will be null. */
@@ -335,7 +359,7 @@ export type Validate<
   TSiblingData = any,
   TFieldConfig extends object = object,
 > = (
-  value: TValue,
+  value: null | TValue | undefined,
   options: ValidateOptions<TData, TSiblingData, TFieldConfig, TValue>,
 ) => Promise<string | true> | string | true
 
@@ -452,7 +476,7 @@ export type NumberField = {
       maxRows?: number
       /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
       minRows?: number
-      validate?: Validate<number[], unknown, unknown, NumberField>
+      validate?: NumberFieldManyValidation
     }
   | {
       /** Makes this field an ordered array of numbers instead of just a single number. */
@@ -461,7 +485,7 @@ export type NumberField = {
       maxRows?: undefined
       /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
       minRows?: undefined
-      validate?: Validate<number, unknown, unknown, NumberField>
+      validate?: NumberFieldSingleValidation
     }
 ) &
   Omit<FieldBase, 'validate'>
@@ -502,7 +526,7 @@ export type TextField = {
       maxRows?: number
       /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
       minRows?: number
-      validate?: Validate<string[], unknown, unknown, TextField>
+      validate?: TextFieldManyValidation
     }
   | {
       /** Makes this field an ordered array of strings instead of just a single string. */
@@ -511,7 +535,7 @@ export type TextField = {
       maxRows?: undefined
       /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
       minRows?: undefined
-      validate?: Validate<string, unknown, unknown, TextField>
+      validate?: TextFieldSingleValidation
     }
 ) &
   Omit<FieldBase, 'validate'>
@@ -541,7 +565,7 @@ export type EmailField = {
     placeholder?: Record<string, string> | string
   } & Admin
   type: 'email'
-  validate?: Validate<string, unknown, unknown, EmailField>
+  validate?: EmailFieldValidation
 } & Omit<FieldBase, 'validate'>
 
 export type EmailFieldClient = {
@@ -572,7 +596,7 @@ export type TextareaField = {
   maxLength?: number
   minLength?: number
   type: 'textarea'
-  validate?: Validate<string, unknown, unknown, TextareaField>
+  validate?: TextareaFieldValidation
 } & Omit<FieldBase, 'validate'>
 
 export type TextareaFieldClient = {
@@ -598,7 +622,7 @@ export type CheckboxField = {
     } & Admin['components']
   } & Admin
   type: 'checkbox'
-  validate?: Validate<boolean, unknown, unknown, CheckboxField>
+  validate?: CheckboxFieldValidation
 } & Omit<FieldBase, 'validate'>
 
 export type CheckboxFieldClient = {
@@ -625,7 +649,7 @@ export type DateField = {
     placeholder?: Record<string, string> | string
   } & Admin
   type: 'date'
-  validate?: Validate<unknown, unknown, unknown, DateField>
+  validate?: DateFieldValidation
 } & Omit<FieldBase, 'validate'>
 
 export type DateFieldClient = {
@@ -861,7 +885,7 @@ type SharedUploadProperties = {
        */
       min?: number
       minRows?: number
-      validate?: Validate<unknown[], unknown, unknown, SharedUploadProperties>
+      validate?: UploadFieldManyValidation
     }
   | {
       hasMany?: false | undefined
@@ -875,7 +899,7 @@ type SharedUploadProperties = {
        */
       min?: undefined
       minRows?: undefined
-      validate?: Validate<unknown, unknown, unknown, SharedUploadProperties>
+      validate?: UploadFieldSingleValidation
     }
 ) &
   Omit<FieldBase, 'validate'>
@@ -950,7 +974,7 @@ export type CodeField = {
   maxLength?: number
   minLength?: number
   type: 'code'
-  validate?: Validate<string, unknown, unknown, CodeField>
+  validate?: CodeFieldValidation
 } & Omit<FieldBase, 'admin' | 'validate'>
 
 export type CodeFieldClient = {
@@ -983,7 +1007,7 @@ export type JSONField = {
     uri: string
   }
   type: 'json'
-  validate?: Validate<Record<string, unknown>, unknown, unknown, JSONField>
+  validate?: JSONFieldValidation
 } & Omit<FieldBase, 'admin' | 'validate'>
 
 export type JSONFieldClient = {
@@ -1024,11 +1048,11 @@ export type SelectField = {
 } & (
   | {
       hasMany: true
-      validate?: Validate<string[], unknown, unknown, SelectField>
+      validate?: SelectFieldManyValidation
     }
   | {
       hasMany?: false | undefined
-      validate?: Validate<string, unknown, unknown, SelectField>
+      validate?: SelectFieldSingleValidation
     }
 ) &
   Omit<FieldBase, 'validate'>
@@ -1068,7 +1092,7 @@ type SharedRelationshipProperties = {
        */
       min?: number
       minRows?: number
-      validate?: Validate<any[], unknown, unknown, SharedRelationshipProperties>
+      validate?: RelationshipFieldManyValidation
     }
   | {
       hasMany?: false | undefined
@@ -1082,7 +1106,7 @@ type SharedRelationshipProperties = {
        */
       min?: undefined
       minRows?: undefined
-      validate?: Validate<any, unknown, unknown, SharedRelationshipProperties>
+      validate?: RelationshipFieldSingleValidation
     }
 ) &
   Omit<FieldBase, 'validate'>
@@ -1155,11 +1179,11 @@ export function valueIsValueWithRelation(value: unknown): value is ValueWithRela
   return value !== null && typeof value === 'object' && 'relationTo' in value && 'value' in value
 }
 
-export type RelationshipValue =
-  | (number | string)[]
-  | (number | string)
-  | ValueWithRelation
-  | ValueWithRelation[]
+export type RelationshipValue = RelationshipValueMany | RelationshipValueSingle
+
+export type RelationshipValueMany = (number | string)[] | ValueWithRelation[]
+
+export type RelationshipValueSingle = number | string | ValueWithRelation
 
 export type RichTextField<
   TValue extends object = any,
@@ -1231,7 +1255,7 @@ export type ArrayField = {
   maxRows?: number
   minRows?: number
   type: 'array'
-  validate?: Validate<unknown[], unknown, unknown, ArrayField>
+  validate?: ArrayFieldValidation
 } & Omit<FieldBase, 'validate'>
 
 export type ArrayFieldClient = {
@@ -1266,7 +1290,7 @@ export type RadioField = {
   enumName?: DBIdentifierName
   options: Option[]
   type: 'radio'
-  validate?: Validate<string, unknown, unknown, RadioField>
+  validate?: RadioFieldValidation
 } & Omit<FieldBase, 'validate'>
 
 export type RadioFieldClient = {
@@ -1352,7 +1376,7 @@ export type BlocksField = {
   maxRows?: number
   minRows?: number
   type: 'blocks'
-  validate?: Validate<string, unknown, unknown, BlocksField>
+  validate?: BlocksFieldValidation
 } & Omit<FieldBase, 'validate'>
 
 export type BlocksFieldClient = {
@@ -1379,7 +1403,7 @@ export type PointField = {
     step?: number
   } & Admin
   type: 'point'
-  validate?: Validate<[number, number], unknown, unknown, PointField>
+  validate?: PointFieldValidation
 } & Omit<FieldBase, 'validate'>
 
 export type PointFieldClient = {
