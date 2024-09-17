@@ -143,7 +143,7 @@ formBuilder({
 Override anything on the `form-submissions` collection by sending a [Payload Collection Config](https://payloadcms.com/docs/configuration/collections) to the `formSubmissionOverrides` property.
 
 <Banner type="warning">
-  By default, this plugin relies on [Payload access control](https://payloadcms.com/docs/access-control/collections) to restrict the `update` and `read` operations on the `form-submissions` collection. This is because _anyone_ should be able to create a form submission, even from a public-facing website, but _no one_ should be able to update a submission one it has been created, or read a submission unless they have permission. You can override this behavior or any other property as needed.
+  By default, this plugin relies on [Payload access control](https://payloadcms.com/docs/access-control/collections) to restrict the `update` and `read` operations on the `form-submissions` collection. This is because _anyone_ should be able to create a form submission, even from a public-facing website, but _no one_ should be able to update a submission once it has been created, or read a submission unless they have permission. You can override this behavior or any other property as needed.
 </Banner>
 
 ```ts
