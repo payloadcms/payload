@@ -25,7 +25,6 @@ type Args = {
 
 /**
  * Extends the passed table with additional columns / extra config
- * @example
  */
 export const extendDrizzleTable = ({ columns, extraConfig, table }: Args): void => {
   const InlineForeignKeys = Object.getOwnPropertySymbols(table).find((symbol) => {
