@@ -38,7 +38,7 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
   })
 
   const fieldToUseValue = useFormFields(([fields, dispatch]) => {
-    return fields[fieldToUse].value as string
+    return fields[fieldToUse]?.value as string
   })
 
   useEffect(() => {
