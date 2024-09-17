@@ -432,6 +432,32 @@ export interface FieldBaseClient {
   unique?: boolean
 }
 
+export interface FieldBaseClient {
+  _isPresentational?: undefined
+  _path?: string
+  _schemaPath?: string
+  admin?: AdminClient
+  hidden?: boolean
+  index?: boolean
+  label?: StaticLabel
+  localized?: boolean
+  /**
+   * The name of the field. Must be alphanumeric and cannot contain ' . '
+   *
+   * Must not be one of reserved field names: ['__v', 'salt', 'hash', 'file']
+   * @link https://payloadcms.com/docs/fields/overview#field-names
+   */
+  name?: string
+  required?: boolean
+  saveToJWT?: boolean | string
+  /**
+   * Allows you to modify the base JSON schema that is generated during generate:types for this field.
+   * This JSON schema will be used to generate the TypeScript interface of this field.
+   */
+  typescriptSchema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
+  unique?: boolean
+}
+
 export type NumberField = {
   admin?: {
     /** Set this property to a string that will be used for browser autocomplete. */
@@ -689,6 +715,12 @@ export type RowFieldClient = {
 } & Omit<FieldBaseClient, 'admin' | 'label' | 'name' | 'validate'> &
   Pick<RowField, 'type'>
 
+export type RowFieldClient = {
+  admin?: Omit<AdminClient, 'description'>
+  fields: ClientField[]
+} & Omit<FieldBaseClient, 'admin' | 'label' | 'name' | 'validate'> &
+  Pick<RowField, 'type'>
+
 export type CollapsibleField = {
   fields: Field[]
   type: 'collapsible'
@@ -781,6 +813,12 @@ export type TabsField = {
   tabs: Tab[]
   type: 'tabs'
 } & Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT' | 'virtual'>
+
+export type TabsFieldClient = {
+  admin?: Omit<AdminClient, 'description'>
+  tabs: ClientTab[]
+} & Omit<FieldBaseClient, 'admin' | 'localized' | 'name' | 'saveToJWT'> &
+  Pick<TabsField, 'type'>
 
 export type TabsFieldClient = {
   admin?: Omit<AdminClient, 'description'>
