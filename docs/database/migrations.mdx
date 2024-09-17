@@ -211,3 +211,32 @@ In the example above, we've specified a `ci` script which we can use as our "bui
 This will require that your build pipeline can connect to your database, and it will simply run the `payload migrate` command prior to starting the build process. By calling `payload migrate`, Payload will automatically execute any migrations in your `/migrations` folder that have not yet been executed against your production database, in the order that they were created.
 
 If it fails, the deployment will be rejected. But now, with your build script set up to run your migrations, you will be all set! Next time you deploy, your CI will execute the required migrations for you, and your database will be caught up with the shape that your Payload Config requires.
+
+## Running migrations in production
+
+In certain cases, you might want to run migrations at runtime when the server starts. Running them during build time may be impossible due to not having access to your database connection while building or similar reasoning.
+
+If you're using a long-running server or container where your Node server starts up one time and then stays initialized, you might prefer to run migrations on server startup instead of within your CI.
+
+In order to run migrations at runtime, on initialization, you can pass your migrations to your database adapter under the `prodMigrations` key as follows:
+
+```ts
+// Import your migrations from the `index.ts` file
+// that Payload generates for you
+import { migrations } from './migrations'
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // your config here
+  db: postgresAdapter({
+    //  your adapter config here
+    prodMigrations: migrations
+  })
+})
+```
+
+Passing your migrations as shown above will tell Payload, in production only, to execute any migrations that need to be run prior to completing the initialization of Payload. This is ideal for long-running services where Payload will only be initialized at startup.
+
+<Banner type="warning">
+  Warning - if Payload is instructed to run migrations in production, this may slow down serverless cold starts on platforms such as Vercel. Generally, this option should only be used for long-running servers / containers.
+</Banner>

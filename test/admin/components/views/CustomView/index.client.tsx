@@ -42,9 +42,11 @@ const CustomPassword: React.FC = () => {
   return (
     <PasswordField
       autoComplete="off"
-      label="Password"
-      name="password"
-      required
+      field={{
+        name: 'password',
+        label: 'Password',
+        required: true,
+      }}
       validate={(value) => {
         if (value && confirmValue) {
           return confirmValue === value ? true : 'Passwords must match!!!!'

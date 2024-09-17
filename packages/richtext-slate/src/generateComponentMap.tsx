@@ -1,7 +1,7 @@
-import type { Field, RichTextAdapter } from 'payload'
+import type { ClientField, Field, MappedComponent, RichTextGenerateComponentMap } from 'payload'
 
-import { mapFields } from '@payloadcms/ui/utilities/buildComponentMap'
-import React from 'react'
+import { createClientFields } from '@payloadcms/ui/utilities/createClientConfig'
+import { deepCopyObjectSimple } from 'payload'
 
 import type { AdapterArguments, RichTextCustomElement, RichTextCustomLeaf } from './types.js'
 
@@ -11,9 +11,9 @@ import { uploadFieldsSchemaPath } from './field/elements/upload/shared.js'
 import { defaultLeaves as leafTypes } from './field/leaves/index.js'
 
 export const getGenerateComponentMap =
-  (args: AdapterArguments): RichTextAdapter['generateComponentMap'] =>
-  ({ WithServerSideProps, config, i18n, payload }) => {
-    const componentMap = new Map()
+  (args: AdapterArguments): RichTextGenerateComponentMap =>
+  ({ createMappedComponent, i18n, importMap, payload }) => {
+    const componentMap: Map<string, ClientField[] | MappedComponent> = new Map()
 
     ;(args?.admin?.leaves || Object.values(leafTypes)).forEach((leaf) => {
       let leafObject: RichTextCustomLeaf
@@ -28,12 +28,22 @@ export const getGenerateComponentMap =
         const LeafButton = leafObject.Button
         const LeafComponent = leafObject.Leaf
 
-        componentMap.set(`leaf.button.${leafObject.name}`, <LeafButton />)
-        componentMap.set(`leaf.component.${leafObject.name}`, <LeafComponent />)
+        componentMap.set(
+          `leaf.button.${leafObject.name}`,
+          createMappedComponent(LeafButton, undefined, undefined, 'slate-LeafButton'),
+        )
+
+        componentMap.set(
+          `leaf.component.${leafObject.name}`,
+          createMappedComponent(LeafComponent, undefined, undefined, 'slate-LeafComponent'),
+        )
 
         if (Array.isArray(leafObject.plugins)) {
           leafObject.plugins.forEach((Plugin, i) => {
-            componentMap.set(`leaf.plugin.${leafObject.name}.${i}`, <Plugin />)
+            componentMap.set(
+              `leaf.plugin.${leafObject.name}.${i}`,
+              createMappedComponent(Plugin, undefined, undefined, 'slate-LeafPlugin'),
+            )
           })
         }
       }
@@ -51,33 +61,47 @@ export const getGenerateComponentMap =
         const ElementButton = element.Button
         const ElementComponent = element.Element
 
-        if (ElementButton) componentMap.set(`element.button.${element.name}`, <ElementButton />)
-        componentMap.set(`element.component.${element.name}`, <ElementComponent />)
+        if (ElementButton) {
+          componentMap.set(
+            `element.button.${element.name}`,
+            createMappedComponent(ElementButton, undefined, undefined, 'slate-ElementButton'),
+          )
+        }
+        componentMap.set(
+          `element.component.${element.name}`,
+          createMappedComponent(ElementComponent, undefined, undefined, 'slate-ElementComponent'),
+        )
 
         if (Array.isArray(element.plugins)) {
           element.plugins.forEach((Plugin, i) => {
-            componentMap.set(`element.plugin.${element.name}.${i}`, <Plugin />)
+            componentMap.set(
+              `element.plugin.${element.name}.${i}`,
+              createMappedComponent(Plugin, undefined, undefined, 'slate-ElementPlugin'),
+            )
           })
         }
 
         switch (element.name) {
           case 'link': {
-            const mappedFields = mapFields({
-              WithServerSideProps,
-              config,
-              fieldSchema: args.admin?.link?.fields as Field[],
+            let clientFields = deepCopyObjectSimple(
+              args.admin?.link?.fields,
+            ) as unknown as ClientField[]
+            clientFields = createClientFields({
+              clientFields,
+              createMappedComponent,
+              fields: args.admin?.link?.fields as Field[],
               i18n,
+              importMap,
               payload,
-              readOnly: false,
             })
 
-            componentMap.set(linkFieldsSchemaPath, mappedFields)
+            componentMap.set(linkFieldsSchemaPath, clientFields)
 
             break
           }
 
           case 'upload': {
-            const uploadEnabledCollections = config.collections.filter(
+            const uploadEnabledCollections = payload.config.collections.filter(
               ({ admin: { enableRichTextRelationship, hidden }, upload }) => {
                 if (hidden === true) {
                   return false
@@ -89,16 +113,19 @@ export const getGenerateComponentMap =
 
             uploadEnabledCollections.forEach((collection) => {
               if (args?.admin?.upload?.collections[collection.slug]?.fields) {
-                const mappedFields = mapFields({
-                  WithServerSideProps,
-                  config,
-                  fieldSchema: args?.admin?.upload?.collections[collection.slug]?.fields,
+                let clientFields = deepCopyObjectSimple(
+                  args?.admin?.upload?.collections[collection.slug]?.fields,
+                ) as unknown as ClientField[]
+                clientFields = createClientFields({
+                  clientFields,
+                  createMappedComponent,
+                  fields: args?.admin?.upload?.collections[collection.slug]?.fields,
                   i18n,
+                  importMap,
                   payload,
-                  readOnly: false,
                 })
 
-                componentMap.set(`${uploadFieldsSchemaPath}.${collection.slug}`, mappedFields)
+                componentMap.set(`${uploadFieldsSchemaPath}.${collection.slug}`, clientFields)
               }
             })
 

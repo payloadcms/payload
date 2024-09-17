@@ -9,22 +9,24 @@ import type {
   SerializedLexicalNode,
 } from 'lexical'
 import type {
+  Config,
   Field,
   JsonObject,
   Payload,
+  PayloadComponent,
   PayloadRequest,
   ReplaceAny,
   RequestContext,
   RichTextField,
+  RichTextHooks,
   SanitizedConfig,
   ValidateOptions,
 } from 'payload'
-import type React from 'react'
 
 import type { ServerEditorConfig } from '../lexical/config/types.js'
 import type { AdapterProps } from '../types.js'
 import type { HTMLConverter } from './converters/html/converter/types.js'
-import type { ClientComponentProps } from './typesClient.js'
+import type { BaseClientFeatureProps } from './typesClient.js'
 
 export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
   context,
@@ -108,6 +110,7 @@ export type FeatureProviderServer<
         /** unSanitizedEditorConfig.features, but mapped */
         featureProviderMap: ServerFeatureProviderMap
         isRoot?: boolean
+        parentIsLocalized: boolean
         // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
         resolvedFeatures: ResolvedServerFeatureMap
         // unSanitized EditorConfig,
@@ -177,7 +180,6 @@ export type BeforeValidateNodeHookArgs<T extends SerializedLexicalNode> = {
 }
 
 export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
-  duplicate: boolean
   /**
    * Only available in `beforeChange` hooks.
    */
@@ -231,11 +233,14 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
   }
   /**
    * If a node includes sub-fields (e.g. block and link nodes), passing those subFields here will make payload
-   * automatically populate & run hooks for them
+   * automatically populate, run hooks, and generate component import maps for them
    */
   getSubFields?: (args: {
-    node: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
-    req: PayloadRequest
+    /**
+     * Optional. If not provided, all possible sub-fields should be returned.
+     */
+    node?: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
+    req?: PayloadRequest
   }) => Field[] | null
   /**
    * If a node includes sub-fields, the sub-fields data needs to be returned here, alongside `getSubFields` which returns their schema.
@@ -276,27 +281,19 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
 }
 
 export type ServerFeature<ServerProps, ClientFeatureProps> = {
-  ClientFeature?: React.FC<ClientComponentProps<ClientFeatureProps>>
+  ClientFeature?: PayloadComponent<never, BaseClientFeatureProps<ClientFeatureProps>>
   /**
    * This determines what props will be available on the Client.
    */
   clientFeatureProps?: ClientFeatureProps
-  generateComponentMap?: (args: {
-    config: SanitizedConfig
-    i18n: I18nClient
-    payload: Payload
-    props: ServerProps
-    schemaPath: string
-  }) => {
-    [key: string]: React.FC<{ componentKey: string; featureKey: string }>
-  }
-  generateSchemaMap?: (args: {
-    config: SanitizedConfig
-    i18n: I18nClient
-    props: ServerProps
-    schemaMap: Map<string, Field[]>
-    schemaPath: string
-  }) => Map<string, Field[]> | null
+  componentImports?: Config['admin']['importMap']['generators'][0] | PayloadComponent[]
+  componentMap?:
+    | ((args: { i18n: I18nClient; payload: Payload; props: ServerProps; schemaPath: string }) => {
+        [key: string]: PayloadComponent
+      })
+    | {
+        [key: string]: PayloadComponent
+      }
   generatedTypes?: {
     modifyOutputSchema: ({
       collectionIDFieldTypes,
@@ -320,6 +317,15 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
       isRequired: boolean
     }) => JSONSchema4
   }
+  generateSchemaMap?: (args: {
+    config: SanitizedConfig
+    field: RichTextField
+    i18n: I18nClient
+    props: ServerProps
+    schemaMap: Map<string, Field[]>
+    schemaPath: string
+  }) => Map<string, Field[]> | null
+  hooks?: RichTextHooks
   /**
    * Here you can provide i18n translations for your feature. These will only be available on the server and client.
    *
@@ -403,7 +409,8 @@ export type SanitizedServerFeatures = {
     (args: { node: SerializedLexicalNode; req: PayloadRequest }) => JsonObject
   >
   graphQLPopulationPromises: Map<string, Array<PopulationPromise>>
-  hooks?: {
+  hooks: RichTextHooks
+  nodeHooks?: {
     afterChange?: Map<string, Array<AfterChangeNodeHook<SerializedLexicalNode>>>
     afterRead?: Map<string, Array<AfterReadNodeHook<SerializedLexicalNode>>>
     beforeChange?: Map<string, Array<BeforeChangeNodeHook<SerializedLexicalNode>>>

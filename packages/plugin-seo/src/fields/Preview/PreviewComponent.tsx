@@ -9,23 +9,24 @@ import {
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
-import { get } from 'http'
 import React, { useEffect, useState } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
 import type { GenerateURL } from '../../types.js'
 
 type PreviewProps = {
-  descriptionPath?: string
-  hasGenerateURLFn: boolean
-  titlePath?: string
+  readonly descriptionPath?: string
+  readonly hasGenerateURLFn: boolean
+  readonly titlePath?: string
 } & UIField
 
-export const PreviewComponent: React.FC<PreviewProps> = ({
-  descriptionPath: descriptionPathFromContext,
-  hasGenerateURLFn,
-  titlePath: titlePathFromContext,
-}) => {
+export const PreviewComponent: React.FC<PreviewProps> = (props) => {
+  const {
+    descriptionPath: descriptionPathFromContext,
+    hasGenerateURLFn,
+    titlePath: titlePathFromContext,
+  } = props
+
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
   const locale = useLocale()
@@ -47,10 +48,18 @@ export const PreviewComponent: React.FC<PreviewProps> = ({
     const getHref = async () => {
       const genURLResponse = await fetch('/api/plugin-seo/generate-url', {
         body: JSON.stringify({
-          ...docInfo,
-          doc: { ...getData() },
+          id: docInfo.id,
+          collectionSlug: docInfo.collectionSlug,
+          doc: getData(),
+          docPermissions: docInfo.docPermissions,
+          globalSlug: docInfo.globalSlug,
+          hasPublishPermission: docInfo.hasPublishPermission,
+          hasSavePermission: docInfo.hasSavePermission,
+          initialData: docInfo.initialData,
+          initialState: docInfo.initialState,
           locale: typeof locale === 'object' ? locale?.code : locale,
-        } satisfies Parameters<GenerateURL>[0]),
+          title: docInfo.title,
+        } satisfies Omit<Parameters<GenerateURL>[0], 'collectionConfig' | 'globalConfig' | 'req'>),
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',

@@ -1,5 +1,5 @@
 'use client'
-import type { CodeFieldProps } from 'payload'
+import type { CodeFieldClientComponent } from 'payload'
 
 import React, { useCallback } from 'react'
 
@@ -7,6 +7,7 @@ import { CodeEditor } from '../../elements/CodeEditor/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
@@ -20,28 +21,33 @@ const prismToMonacoLanguageMap = {
 
 const baseClass = 'code-field'
 
-const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
+const CodeFieldComponent: CodeFieldClientComponent = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
     descriptionProps,
-    editorOptions = {},
     errorProps,
-    label,
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        description,
+        editorOptions = {},
+        language = 'javascript',
+        readOnly: readOnlyFromAdmin,
+        style,
+        width,
+      } = {},
+      label,
+      required,
+    },
     labelProps,
-    language = 'javascript',
-    path: pathFromProps,
-    readOnly: readOnlyFromProps,
-    required,
-    style,
+    readOnly: readOnlyFromTopLevelProps,
+
     validate,
-    width,
   } = props
+
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -77,15 +83,15 @@ const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel field={field} Label={field?.admin?.components?.Label} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        {BeforeInput}
+        <FieldError
+          CustomError={field?.admin?.components?.Error}
+          field={field}
+          path={path}
+          {...(errorProps || {})}
+        />
+        <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
         <CodeEditor
           defaultLanguage={prismToMonacoLanguageMap[language] || language}
           onChange={disabled ? () => null : (val) => setValue(val)}
@@ -93,9 +99,14 @@ const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
           readOnly={disabled}
           value={(value as string) || ''}
         />
-        {AfterInput}
+        <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
       </div>
-      {CustomDescription ? CustomDescription : <FieldDescription {...(descriptionProps || {})} />}
+      <FieldDescription
+        Description={field?.admin?.components?.Description}
+        description={description}
+        field={field}
+        {...(descriptionProps || {})}
+      />
     </div>
   )
 }

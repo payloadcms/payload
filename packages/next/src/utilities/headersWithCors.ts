@@ -1,4 +1,4 @@
-import type { CORSConfig, PayloadRequest } from 'payload'
+import type { PayloadRequest } from 'payload'
 
 type CorsArgs = {
   headers: Headers

@@ -12,13 +12,18 @@ export interface Config {
   };
   collections: {
     posts: Post;
+    'default-values': DefaultValue;
     'relation-a': RelationA;
     'relation-b': RelationB;
     'pg-migrations': PgMigration;
     'custom-schema': CustomSchema;
+    'fields-persistance': FieldsPersistance;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+  };
+  db: {
+    defaultIDType: string;
   };
   globals: {
     global: Global;
@@ -31,12 +36,17 @@ export interface Config {
 export interface UserAuthOperations {
   forgotPassword: {
     email: string;
+    password: string;
   };
   login: {
-    password: string;
     email: string;
+    password: string;
   };
   registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
     email: string;
     password: string;
   };
@@ -54,12 +64,32 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "default-values".
+ */
+export interface DefaultValue {
+  id: string;
+  title?: string | null;
+  defaultValue?: string | null;
+  array?:
+    | {
+        defaultValue?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  group?: {
+    defaultValue?: string | null;
+  };
+  select?: ('option0' | 'option1' | 'default') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relation-a".
  */
 export interface RelationA {
   id: string;
   title?: string | null;
-  relationship?: (string | null) | RelationB;
   richText?: {
     root: {
       type: string;
@@ -168,6 +198,22 @@ export interface CustomSchema {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fields-persistance".
+ */
+export interface FieldsPersistance {
+  id: string;
+  text?: string | null;
+  textHooked?: string | null;
+  array?:
+    | {
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

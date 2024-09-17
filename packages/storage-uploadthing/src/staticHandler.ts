@@ -39,7 +39,9 @@ export const getHandler = ({ utApi }: Args): StaticHandler => {
           where: { or },
         })
 
-        if (result) retrievedDoc = result
+        if (result) {
+          retrievedDoc = result
+        }
       }
 
       if (!retrievedDoc) {

@@ -111,7 +111,14 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     },
     index: true,
     label: ({ t }) => t('upload:fileName'),
-    unique: true,
+  }
+
+  // Only set unique: true if the collection does not have a compound index
+  if (
+    collection.upload === true ||
+    (typeof collection.upload === 'object' && !collection.upload.filenameCompoundIndex)
+  ) {
+    filename.unique = true
   }
 
   const url: Field = {
@@ -130,7 +137,9 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
       hooks: {
         afterRead: [
           ({ data, value }) => {
-            if (value && !data.filename) return value
+            if (value && !data.filename) {
+              return value
+            }
 
             return generateURL({
               collectionSlug: collection.slug,
@@ -192,7 +201,9 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               hooks: {
                 afterRead: [
                   ({ data, value }) => {
-                    if (value && size.height && size.width && !data.filename) return value
+                    if (value && size.height && size.width && !data.filename) {
+                      return value
+                    }
 
                     const sizeFilename = data?.sizes?.[size.name]?.filename
 

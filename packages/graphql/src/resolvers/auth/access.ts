@@ -4,7 +4,7 @@ import { accessOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 
-import formatName from '../../utilities/formatName.js'
+import { formatName } from '../../utilities/formatName.js'
 const formatConfigNames = (results, configs) => {
   const formattedResults = { ...results }
 
@@ -17,7 +17,7 @@ const formatConfigNames = (results, configs) => {
   return formattedResults
 }
 
-function accessResolver(config: SanitizedConfig) {
+export function accessResolver(config: SanitizedConfig) {
   async function resolver(_, args, context: Context) {
     const options = {
       req: isolateObjectProperty<any>(context.req, 'transactionID'),
@@ -34,5 +34,3 @@ function accessResolver(config: SanitizedConfig) {
 
   return resolver
 }
-
-export default accessResolver

@@ -1,13 +1,19 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import configPromise, { pagesSlug } from './config.js'
+import { pagesSlug } from './config.js'
 
 let payload: Payload
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 describe('Collections - Plugins', () => {
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(configPromise))
+    ;({ payload } = await initPayloadInt(dirname))
   })
 
   afterAll(async () => {

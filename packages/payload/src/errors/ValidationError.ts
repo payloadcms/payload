@@ -21,7 +21,12 @@ export class ValidationError extends APIError<{
   global?: string
 }> {
   constructor(
-    results: { collection?: string; errors: ValidationFieldError[]; global?: string },
+    results: {
+      collection?: string
+      errors: ValidationFieldError[]
+      global?: string
+      id?: number | string
+    },
     t?: TFunction,
   ) {
     const message = t

@@ -10,12 +10,12 @@ export const RenderParams: React.FC<{
   className?: string
 }> = ({ params = ['error', 'message', 'success'], message, className }) => {
   const searchParams = useSearchParams()
-  const paramValues = params.map(param => searchParams.get(param)).filter(Boolean)
+  const paramValues = params.map((param) => searchParams.get(param)).filter(Boolean)
 
   if (paramValues.length) {
     return (
       <div className={className}>
-        {paramValues.map(paramValue => (
+        {paramValues.map((paramValue) => (
           <Message
             key={paramValue}
             message={(message || 'PARAM')?.replace('PARAM', paramValue || '')}

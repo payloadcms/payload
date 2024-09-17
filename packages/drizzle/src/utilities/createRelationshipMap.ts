@@ -11,7 +11,9 @@ export const createPathMap = (rows: unknown): Record<string, Record<string, unkn
 
       delete formattedRow.path
 
-      if (!res[row.path]) res[row.path] = []
+      if (!res[row.path]) {
+        res[row.path] = []
+      }
       res[row.path].push(row)
 
       return res

@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, FieldMap, FormState } from 'payload'
+import type { ClientCollectionConfig, ClientField, FormState } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -29,11 +29,14 @@ import './index.scss'
 const baseClass = 'edit-many'
 
 export type EditManyProps = {
-  collection: ClientCollectionConfig
-  fieldMap: FieldMap
+  readonly collection: ClientCollectionConfig
+  readonly fields: ClientField[]
 }
 
-const Submit: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
+const Submit: React.FC<{
+  readonly action: string
+  readonly disabled: boolean
+}> = ({ action, disabled }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
 
@@ -96,13 +99,15 @@ const SaveDraftButton: React.FC<{ action: string; disabled: boolean }> = ({ acti
   )
 }
 export const EditMany: React.FC<EditManyProps> = (props) => {
-  const { collection: { slug, labels: { plural } } = {}, collection, fieldMap } = props
+  const { collection: { slug, labels: { plural } } = {}, collection, fields } = props
 
   const { permissions } = useAuth()
   const { closeModal } = useModal()
   const {
-    routes: { api: apiRoute },
-    serverURL,
+    config: {
+      routes: { api: apiRoute },
+      serverURL,
+    },
   } = useConfig()
   const { count, getQueryParams, selectAll } = useSelection()
   const { i18n, t } = useTranslation()
@@ -205,9 +210,9 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                 onChange={[onChange]}
                 onSuccess={onSuccess}
               >
-                <FieldSelect fieldMap={fieldMap} setSelected={setSelected} />
+                <FieldSelect fields={fields} setSelected={setSelected} />
                 {selected.length === 0 ? null : (
-                  <RenderFields fieldMap={selected} path="" readOnly={false} schemaPath={slug} />
+                  <RenderFields fields={selected} path="" readOnly={false} schemaPath={slug} />
                 )}
                 <div className={`${baseClass}__sidebar-wrap`}>
                   <div className={`${baseClass}__sidebar`}>

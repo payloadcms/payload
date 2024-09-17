@@ -11,7 +11,8 @@ import { Gutter } from '../Gutter/index.js'
 import './index.scss'
 
 const baseClass = 'drawer'
-const zBase = 100
+
+export const drawerZBase = 100
 
 export const formatDrawerSlug = ({ slug, depth }: { depth: number; slug: string }): string =>
   `drawer_${depth}_${slug}`
@@ -31,7 +32,9 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
   const handleClick = useCallback(
     (e) => {
       openModal(slug)
-      if (typeof onClick === 'function') onClick(e)
+      if (typeof onClick === 'function') {
+        onClick(e)
+      }
     },
     [openModal, slug, onClick],
   )
@@ -45,10 +48,10 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
 
 export const Drawer: React.FC<Props> = ({
   slug,
-  Header,
   children,
   className,
   gutter = true,
+  Header,
   hoverTitle,
   title,
 }) => {
@@ -81,7 +84,7 @@ export const Drawer: React.FC<Props> = ({
           .join(' ')}
         slug={slug}
         style={{
-          zIndex: zBase + drawerDepth,
+          zIndex: drawerZBase + drawerDepth,
         }}
       >
         {(!drawerDepth || drawerDepth === 1) && <div className={`${baseClass}__blur-bg`} />}

@@ -1,13 +1,18 @@
 import type { ArrayField, Payload, RelationshipField } from 'payload'
 
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import configPromise from './config.js'
 
 let payload: Payload
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 describe('@payloadcms/plugin-nested-docs', () => {
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(configPromise))
+    ;({ payload } = await initPayloadInt(dirname))
   })
 
   afterAll(async () => {

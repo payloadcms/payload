@@ -18,6 +18,11 @@ import TransformHooks from './collections/Transform/index.js'
 import Users, { seedHooksUsers } from './collections/Users/index.js'
 import { DataHooksGlobal } from './globals/Data/index.js'
 export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     AfterOperationCollection,
     ContextHooks,

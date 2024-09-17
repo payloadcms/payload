@@ -1,27 +1,46 @@
-import { APIError, type Field, type TabAsField, createArrayFromCommaDelineated } from 'payload'
+import type { SQL } from 'drizzle-orm'
+
+import { APIError, createArrayFromCommaDelineated, type Field, type TabAsField } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
 
 import type { DrizzleAdapter } from '../types.js'
 
 type SanitizeQueryValueArgs = {
   adapter: DrizzleAdapter
+  columns?: {
+    idType: 'number' | 'text'
+    rawColumn: SQL<unknown>
+  }[]
   field: Field | TabAsField
   operator: string
   relationOrPath: string
   val: any
 }
 
+type SanitizedColumn = {
+  rawColumn: SQL<unknown>
+  value: unknown
+}
+
 export const sanitizeQueryValue = ({
   adapter,
+  columns,
   field,
   operator: operatorArg,
   relationOrPath,
   val,
-}: SanitizeQueryValueArgs): { operator: string; value: unknown } => {
+}: SanitizeQueryValueArgs): {
+  columns?: SanitizedColumn[]
+  operator: string
+  value: unknown
+} => {
   let operator = operatorArg
   let formattedValue = val
+  let formattedColumns: SanitizedColumn[]
 
-  if (!fieldAffectsData(field)) return { operator, value: formattedValue }
+  if (!fieldAffectsData(field)) {
+    return { operator, value: formattedValue }
+  }
 
   if (
     (field.type === 'relationship' || field.type === 'upload') &&
@@ -43,8 +62,12 @@ export const sanitizeQueryValue = ({
 
   // Cast incoming values as proper searchable types
   if (field.type === 'checkbox' && typeof val === 'string') {
-    if (val.toLowerCase() === 'true') formattedValue = true
-    if (val.toLowerCase() === 'false') formattedValue = false
+    if (val.toLowerCase() === 'true') {
+      formattedValue = true
+    }
+    if (val.toLowerCase() === 'false') {
+      formattedValue = false
+    }
   }
 
   if (['all', 'in', 'not_in'].includes(operator)) {
@@ -71,7 +94,9 @@ export const sanitizeQueryValue = ({
       if (Number.isNaN(Date.parse(formattedValue))) {
         return { operator, value: undefined }
       }
-    } else if (typeof val === 'number') formattedValue = new Date(val).toISOString()
+    } else if (typeof val === 'number') {
+      formattedValue = new Date(val).toISOString()
+    }
   }
 
   if (field.type === 'relationship' || field.type === 'upload') {
@@ -92,10 +117,26 @@ export const sanitizeQueryValue = ({
         }
         idType = typeMap[mixedType]
       } else {
-        // LIMITATION: Only cast to the first relationTo id type,
-        // otherwise we need to make the db cast which is inefficient
-        const collection = adapter.payload.collections[field.relationTo[0]]
-        idType = collection.customIDType || adapter.idType === 'uuid' ? 'text' : 'number'
+        formattedColumns = columns
+          .map(({ idType, rawColumn }) => {
+            let formattedValue: number | string
+            if (idType === 'number') {
+              formattedValue = Number(val)
+
+              if (Number.isNaN(formattedValue)) {
+                return null
+              }
+            }
+            if (idType === 'text') {
+              formattedValue = String(val)
+            }
+
+            return {
+              rawColumn,
+              value: formattedValue,
+            }
+          })
+          .filter(Boolean)
       }
       if (Array.isArray(formattedValue)) {
         formattedValue = formattedValue.map((value) => {
@@ -139,5 +180,9 @@ export const sanitizeQueryValue = ({
     }
   }
 
-  return { operator, value: formattedValue }
+  return {
+    columns: formattedColumns,
+    operator,
+    value: formattedValue,
+  }
 }

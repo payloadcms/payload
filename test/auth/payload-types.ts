@@ -39,6 +39,7 @@ export interface Config {
 export interface UserAuthOperations {
   forgotPassword: {
     email: string;
+    password: string;
   };
   login: {
     email: string;
@@ -50,11 +51,13 @@ export interface UserAuthOperations {
   };
   unlock: {
     email: string;
+    password: string;
   };
 }
 export interface ApiKeyAuthOperations {
   forgotPassword: {
     email: string;
+    password: string;
   };
   login: {
     email: string;
@@ -66,11 +69,13 @@ export interface ApiKeyAuthOperations {
   };
   unlock: {
     email: string;
+    password: string;
   };
 }
 export interface PublicUserAuthOperations {
   forgotPassword: {
     email: string;
+    password: string;
   };
   login: {
     email: string;
@@ -82,6 +87,7 @@ export interface PublicUserAuthOperations {
   };
   unlock: {
     email: string;
+    password: string;
   };
 }
 /**

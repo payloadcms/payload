@@ -18,7 +18,6 @@ import { toast } from 'sonner'
 
 import type { Props } from './types.js'
 
-import { MinimalTemplate } from '../../../templates/Minimal/index.js'
 import './index.scss'
 
 const baseClass = 'restore-version'
@@ -35,9 +34,14 @@ const Restore: React.FC<Props> = ({
   versionID,
 }) => {
   const {
-    routes: { admin: adminRoute, api: apiRoute },
-    serverURL,
+    config: {
+      collections,
+      routes: { admin: adminRoute, api: apiRoute },
+      serverURL,
+    },
   } = useConfig()
+
+  const collectionConfig = collections.find((collection) => collection.slug === collectionSlug)
 
   const { toggleModal } = useModal()
   const [processing, setProcessing] = useState(false)
@@ -52,7 +56,8 @@ const Restore: React.FC<Props> = ({
 
   let fetchURL = `${serverURL}${apiRoute}`
   let redirectURL: string
-  const canRestoreAsDraft = status !== 'draft'
+
+  const canRestoreAsDraft = status !== 'draft' && collectionConfig?.versions?.drafts
 
   if (collectionSlug) {
     fetchURL = `${fetchURL}/${collectionSlug}/versions/${versionID}?draft=${draft}`
@@ -117,20 +122,25 @@ const Restore: React.FC<Props> = ({
         )}
       </div>
       <Modal className={`${baseClass}__modal`} slug={modalSlug}>
-        <MinimalTemplate className={`${baseClass}__modal-template`}>
-          <h1>{t('version:confirmVersionRestoration')}</h1>
-          <p>{restoreMessage}</p>
-          <Button
-            buttonStyle="secondary"
-            onClick={processing ? undefined : () => toggleModal(modalSlug)}
-            type="button"
-          >
-            {t('general:cancel')}
-          </Button>
-          <Button onClick={processing ? undefined : () => void handleRestore()}>
-            {processing ? t('version:restoring') : t('general:confirm')}
-          </Button>
-        </MinimalTemplate>
+        <div className={`${baseClass}__wrapper`}>
+          <div className={`${baseClass}__content`}>
+            <h1>{t('version:confirmVersionRestoration')}</h1>
+            <p>{restoreMessage}</p>
+          </div>
+          <div className={`${baseClass}__controls`}>
+            <Button
+              buttonStyle="secondary"
+              onClick={processing ? undefined : () => toggleModal(modalSlug)}
+              size="large"
+              type="button"
+            >
+              {t('general:cancel')}
+            </Button>
+            <Button onClick={processing ? undefined : () => void handleRestore()}>
+              {processing ? t('version:restoring') : t('general:confirm')}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </Fragment>
   )

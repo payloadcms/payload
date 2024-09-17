@@ -17,5 +17,7 @@ export async function withSession(
     transactionID = await req.transactionID
   }
 
-  if (req) return db.sessions[transactionID] ? { session: db.sessions[transactionID] } : {}
+  if (req) {
+    return db.sessions[transactionID] ? { session: db.sessions[transactionID] } : {}
+  }
 }

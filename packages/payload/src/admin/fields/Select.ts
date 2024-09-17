@@ -1,23 +1,64 @@
-import type { Option } from '../../fields/config/types.js'
+import type { MarkOptional } from 'ts-essentials'
+
+import type { SelectField, SelectFieldClient } from '../../fields/config/types.js'
 import type { SelectFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+} from '../types.js'
 
-export type SelectFieldProps = {
-  hasMany?: boolean
-  isClearable?: boolean
-  isSortable?: boolean
-  name?: string
-  onChange?: (e: string | string[]) => void
-  options?: Option[]
-  path?: string
-  validate?: SelectFieldValidation
-  value?: string
-  width?: string
-} & Omit<FormFieldBase, 'validate'>
+type SelectFieldClientWithoutType = MarkOptional<SelectFieldClient, 'type'>
 
-export type SelectFieldLabelComponent = LabelComponent<'select'>
+type SelectFieldBaseClientProps = {
+  readonly onChange?: (e: string | string[]) => void
+  readonly validate?: SelectFieldValidation
+  readonly value?: string
+}
 
-export type SelectFieldDescriptionComponent = DescriptionComponent<'select'>
+export type SelectFieldClientProps = ClientFieldBase<SelectFieldClientWithoutType> &
+  SelectFieldBaseClientProps
 
-export type SelectFieldErrorComponent = ErrorComponent<'select'>
+export type SelectFieldServerProps = ServerFieldBase<SelectField, SelectFieldClientWithoutType>
+
+export type SelectFieldServerComponent = FieldServerComponent<
+  SelectField,
+  SelectFieldClientWithoutType
+>
+
+export type SelectFieldClientComponent = FieldClientComponent<
+  SelectFieldClientWithoutType,
+  SelectFieldBaseClientProps
+>
+
+export type SelectFieldLabelServerComponent = FieldLabelServerComponent<
+  SelectField,
+  SelectFieldClientWithoutType
+>
+
+export type SelectFieldLabelClientComponent =
+  FieldLabelClientComponent<SelectFieldClientWithoutType>
+
+export type SelectFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  SelectField,
+  SelectFieldClientWithoutType
+>
+
+export type SelectFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<SelectFieldClientWithoutType>
+
+export type SelectFieldErrorServerComponent = FieldErrorServerComponent<
+  SelectField,
+  SelectFieldClientWithoutType
+>
+
+export type SelectFieldErrorClientComponent =
+  FieldErrorClientComponent<SelectFieldClientWithoutType>

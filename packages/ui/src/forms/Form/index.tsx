@@ -54,9 +54,9 @@ export const Form: React.FC<FormProps> = (props) => {
     beforeSubmit,
     children,
     className,
+    disabled: disabledFromProps,
     disableSuccessStatus,
     disableValidationOnSubmit,
-    disabled: disabledFromProps,
     // fields: fieldsFromProps = collection?.fields || global?.fields,
     handleResponse,
     initialState, // fully formed initial field state
@@ -79,7 +79,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const { refreshCookie, user } = useAuth()
   const operation = useOperation()
 
-  const config = useConfig()
+  const { config } = useConfig()
   const {
     routes: { api: apiRoute },
     serverURL,
@@ -138,7 +138,7 @@ export const Form: React.FC<FormProps> = (props) => {
                 },
                 t,
                 user,
-              } as PayloadRequest,
+              } as unknown as PayloadRequest,
               siblingData: contextRef.current.getSiblingData(path),
             })
 
@@ -186,7 +186,7 @@ export const Form: React.FC<FormProps> = (props) => {
       }
 
       // create new toast promise which will resolve manually later
-      let successToast, errorToast
+      let errorToast, successToast
       const promise = new Promise((resolve, reject) => {
         successToast = resolve
         errorToast = reject
@@ -220,7 +220,9 @@ export const Form: React.FC<FormProps> = (props) => {
       setProcessing(true)
       setDisabled(true)
 
-      if (waitForAutocomplete) await wait(100)
+      if (waitForAutocomplete) {
+        await wait(100)
+      }
 
       // Execute server side validations
       if (Array.isArray(beforeSubmit)) {
@@ -307,9 +309,13 @@ export const Form: React.FC<FormProps> = (props) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let json: Record<string, any> = {}
 
-        if (isJSON) json = await res.json()
+        if (isJSON) {
+          json = await res.json()
+        }
         if (res.status < 400) {
-          if (typeof onSuccess === 'function') await onSuccess(json)
+          if (typeof onSuccess === 'function') {
+            await onSuccess(json)
+          }
           setSubmitted(false)
           setProcessing(false)
 
@@ -562,11 +568,15 @@ export const Form: React.FC<FormProps> = (props) => {
   }, [])
 
   useEffect(() => {
-    if (typeof disabledFromProps === 'boolean') setDisabled(disabledFromProps)
+    if (typeof disabledFromProps === 'boolean') {
+      setDisabled(disabledFromProps)
+    }
   }, [disabledFromProps])
 
   useEffect(() => {
-    if (typeof submittedFromProps === 'boolean') setSubmitted(submittedFromProps)
+    if (typeof submittedFromProps === 'boolean') {
+      setSubmitted(submittedFromProps)
+    }
   }, [submittedFromProps])
 
   useEffect(() => {
@@ -618,7 +628,9 @@ export const Form: React.FC<FormProps> = (props) => {
         }
       }
 
-      if (modified) void executeOnChange()
+      if (modified) {
+        void executeOnChange()
+      }
     },
     150,
     // Make sure we trigger this whenever modified changes (not just when `fields` changes), otherwise we will miss merging server form state for the first form update/onChange. Here's why:

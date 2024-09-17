@@ -4,6 +4,7 @@ import React from 'react'
 
 import type { TextAreaInputProps } from './types.js'
 
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
@@ -13,14 +14,16 @@ import './index.scss'
 
 export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
   const {
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
+    afterInput,
+    beforeInput,
     className,
+    Description,
+    description,
     descriptionProps,
+    Error,
     errorProps,
+    field,
+    Label,
     label,
     labelProps,
     onChange,
@@ -55,14 +58,15 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
       }}
     >
       <FieldLabel
-        CustomLabel={CustomLabel}
+        field={field}
+        Label={Label}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        {BeforeInput}
+        <FieldError CustomError={Error} field={field} path={path} {...(errorProps || {})} />
+        <RenderComponent mappedComponent={beforeInput} />
         <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
           <div className="textarea-inner">
             <div className="textarea-clone" data-value={value || placeholder || ''} />
@@ -79,12 +83,13 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
             />
           </div>
         </label>
-        {AfterInput}
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <RenderComponent mappedComponent={afterInput} />
+        <FieldDescription
+          Description={Description}
+          description={description}
+          field={field}
+          {...(descriptionProps || {})}
+        />
       </div>
     </div>
   )

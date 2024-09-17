@@ -1,4 +1,4 @@
-import type { EditViewComponent, PaginatedDocs } from 'payload'
+import type { EditViewComponent, PaginatedDocs, PayloadServerReactComponent } from 'payload'
 
 import { Gutter, ListQueryProvider } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
@@ -13,7 +13,7 @@ import './index.scss'
 
 export const baseClass = 'versions'
 
-export const VersionsView: EditViewComponent = async (props) => {
+export const VersionsView: PayloadServerReactComponent<EditViewComponent> = async (props) => {
   const { initPageResult, searchParams } = props
 
   const {
@@ -25,6 +25,7 @@ export const VersionsView: EditViewComponent = async (props) => {
       i18n,
       payload,
       payload: { config },
+      t,
       user,
     },
   } = initPageResult
@@ -56,9 +57,18 @@ export const VersionsView: EditViewComponent = async (props) => {
         sort: sort as string,
         user,
         where: {
-          parent: {
-            equals: id,
-          },
+          and: [
+            {
+              parent: {
+                equals: id,
+              },
+            },
+            {
+              snapshot: {
+                not_equals: true,
+              },
+            },
+          ],
         },
       })
       if (collectionConfig?.versions?.drafts) {
@@ -92,6 +102,11 @@ export const VersionsView: EditViewComponent = async (props) => {
         req,
         sort: sort as string,
         user,
+        where: {
+          snapshot: {
+            not_equals: true,
+          },
+        },
       })
 
       if (globalConfig?.versions?.drafts) {
@@ -141,13 +156,19 @@ export const VersionsView: EditViewComponent = async (props) => {
     latestPublishedVersion: latestPublishedVersion?.id,
   })
 
+  const pluralLabel = collectionConfig?.labels?.plural
+    ? typeof collectionConfig.labels.plural === 'function'
+      ? collectionConfig.labels.plural({ t })
+      : collectionConfig.labels.plural
+    : globalConfig?.label
+
   return (
     <React.Fragment>
       <SetDocumentStepNav
         collectionSlug={collectionConfig?.slug}
         globalSlug={globalConfig?.slug}
         id={id}
-        pluralLabel={collectionConfig?.labels?.plural || globalConfig?.label}
+        pluralLabel={pluralLabel}
         useAsTitle={collectionConfig?.admin?.useAsTitle || globalConfig?.slug}
         view={i18n.t('version:versions')}
       />

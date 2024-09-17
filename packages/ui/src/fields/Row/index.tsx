@@ -1,5 +1,5 @@
 'use client'
-import type { RowFieldProps } from 'payload'
+import type { RowFieldClientComponent } from 'payload'
 
 import React from 'react'
 
@@ -14,8 +14,11 @@ export { RowProvider, useRow }
 
 const baseClass = 'row'
 
-const RowFieldComponent: React.FC<RowFieldProps> = (props) => {
-  const { className, fieldMap, forceRender = false } = props
+const RowFieldComponent: RowFieldClientComponent = (props) => {
+  const {
+    field: { admin: { className } = {}, fields },
+    forceRender = false,
+  } = props
 
   const { indexPath, path, readOnly, schemaPath, siblingPermissions } = useFieldProps()
 
@@ -23,13 +26,15 @@ const RowFieldComponent: React.FC<RowFieldProps> = (props) => {
     <RowProvider>
       <div className={[fieldBaseClass, baseClass, className].filter(Boolean).join(' ')}>
         <RenderFields
-          {...{ fieldMap, forceRender, path, readOnly, schemaPath }}
           className={`${baseClass}__fields`}
-          fieldMap={fieldMap}
+          fields={fields}
           forceRender={forceRender}
           indexPath={indexPath}
           margins={false}
+          path={path}
           permissions={siblingPermissions}
+          readOnly={readOnly}
+          schemaPath={schemaPath}
         />
       </div>
     </RowProvider>

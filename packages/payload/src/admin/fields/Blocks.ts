@@ -1,34 +1,62 @@
-import type { Block, BlockField } from '../../fields/config/types.js'
-import type { BlockFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { FieldMap } from '../forms/FieldMap.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { MarkOptional } from 'ts-essentials'
 
-export type BlocksFieldProps = {
-  blocks?: ReducedBlock[]
-  forceRender?: boolean
-  isSortable?: boolean
-  labels?: BlockField['labels']
-  maxRows?: number
-  minRows?: number
-  name?: string
-  slug?: string
-  validate?: BlockFieldValidation
-  width?: string
-} & Omit<FormFieldBase, 'validate'>
+import type { BlocksField, BlocksFieldClient } from '../../fields/config/types.js'
+import type { BlocksFieldValidation } from '../../fields/validations.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+} from '../types.js'
 
-export type ReducedBlock = {
-  LabelComponent: Block['admin']['components']['Label']
-  custom?: Record<any, string>
-  fieldMap: FieldMap
-  imageAltText?: string
-  imageURL?: string
-  labels: BlockField['labels']
-  slug: string
+type BlocksFieldClientWithoutType = MarkOptional<BlocksFieldClient, 'type'>
+
+type BlocksFieldBaseClientProps = {
+  readonly validate?: BlocksFieldValidation
 }
 
-export type BlocksFieldLabelComponent = LabelComponent<'blocks'>
+export type BlocksFieldClientProps = BlocksFieldBaseClientProps &
+  ClientFieldBase<BlocksFieldClientWithoutType>
 
-export type BlocksFieldDescriptionComponent = DescriptionComponent<'blocks'>
+export type BlocksFieldServerProps = ServerFieldBase<BlocksField, BlocksFieldClientWithoutType>
 
-export type BlocksFieldErrorComponent = ErrorComponent<'blocks'>
+export type BlocksFieldServerComponent = FieldServerComponent<
+  BlocksField,
+  BlocksFieldClientWithoutType
+>
+
+export type BlocksFieldClientComponent = FieldClientComponent<
+  BlocksFieldClientWithoutType,
+  BlocksFieldBaseClientProps
+>
+
+export type BlocksFieldLabelServerComponent = FieldLabelServerComponent<
+  BlocksField,
+  BlocksFieldClientWithoutType
+>
+
+export type BlocksFieldLabelClientComponent =
+  FieldLabelClientComponent<BlocksFieldClientWithoutType>
+
+export type BlocksFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  BlocksField,
+  BlocksFieldClientWithoutType
+>
+
+export type BlocksFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<BlocksFieldClientWithoutType>
+
+export type BlocksFieldErrorServerComponent = FieldErrorServerComponent<
+  BlocksField,
+  BlocksFieldClientWithoutType
+>
+
+export type BlocksFieldErrorClientComponent =
+  FieldErrorClientComponent<BlocksFieldClientWithoutType>

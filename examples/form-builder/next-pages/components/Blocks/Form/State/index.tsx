@@ -33,8 +33,8 @@ export const State: React.FC<
             <ReactSelect
               instanceId={name}
               options={stateOptions}
-              value={stateOptions.find(t => t.value === value)}
-              onChange={val => onChange(val.value)}
+              value={stateOptions.find((t) => t.value === value)}
+              onChange={(val) => onChange(val.value)}
               className={classes.reactSelect}
               classNamePrefix="rs"
               id={name}

@@ -31,9 +31,12 @@ export const verifyEmailOperation = async (args: Args): Promise<boolean> => {
       },
     })
 
-    if (!user) throw new APIError('Verification token is invalid.', httpStatus.FORBIDDEN)
-    if (user && user._verified === true)
+    if (!user) {
+      throw new APIError('Verification token is invalid.', httpStatus.FORBIDDEN)
+    }
+    if (user && user._verified === true) {
       throw new APIError('This account has already been activated.', httpStatus.ACCEPTED)
+    }
 
     await req.payload.db.updateOne({
       id: user.id,
@@ -46,7 +49,9 @@ export const verifyEmailOperation = async (args: Args): Promise<boolean> => {
       req,
     })
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return true
   } catch (error: unknown) {

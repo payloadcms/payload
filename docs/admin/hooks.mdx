@@ -52,7 +52,7 @@ The `useField` hook accepts the following arguments:
 The `useField` hook returns the following object:
 
 ```ts
-type FieldResult<T> = {
+type FieldType<T> = {
   errorMessage?: string
   errorPaths?: string[]
   filterOptions?: FilterOptionsResult
@@ -65,7 +65,7 @@ type FieldResult<T> = {
   readOnly?: boolean
   rows?: Row[]
   schemaPath: string
-  setValue: (val: unknown, disableModifyingForm?: boolean) => voi
+  setValue: (val: unknown, disableModifyingForm?: boolean) => void
   showError: boolean
   valid?: boolean
   value: T
@@ -74,9 +74,9 @@ type FieldResult<T> = {
 
 ## useFieldProps
 
-All [Custom Field Components](./fields#the-field-component) are rendered on the server, and as such, only have access to static props at render time. But, some fields can be dynamic, such as when nested in an [`array`](../fields/array) or [`blocks`](../fields/block) field. For example, items can be added, re-ordered, or deleted on-the-fly.
+[Custom Field Components](./fields#the-field-component) can be rendered on the server. When using a server component as a custom field component, you can access dynamic props from within any client component rendered by your custom server component. This is done using the `useFieldProps` hook. This is important because some fields can be dynamic, such as when nested in an [`array`](../fields/array) or [`blocks`](../fields/block) field. For example, items can be added, re-ordered, or deleted on-the-fly.
 
-For this reason, dynamic props like `path` are managed in their own React context, which can be accessed using the `useFieldProps` hook:
+You can use the `useFieldProps` hooks to access dynamic props like `path`:
 
 ```tsx
 'use client'
@@ -113,7 +113,7 @@ You can pass a Redux-like selector into the hook, which will ensure that you ret
 
 ```tsx
 'use client'
-import type { useFormFields } from '@payloadcms/ui'
+import { useFormFields } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // Get only the `amount` field state, and only cause a rerender when that field changes
@@ -463,7 +463,7 @@ export const CustomArrayManager = () => {
       name: "customArrayManager",
       admin: {
         components: {
-          Field: CustomArrayManager,
+          Field: '/path/to/CustomArrayManagerField',
         },
       },
     },
@@ -560,7 +560,7 @@ export const CustomArrayManager = () => {
       name: "customArrayManager",
       admin: {
         components: {
-          Field: CustomArrayManager,
+          Field: '/path/to/CustomArrayManagerField',
         },
       },
     },
@@ -670,7 +670,7 @@ export const CustomArrayManager = () => {
       name: "customArrayManager",
       admin: {
         components: {
-          Field: CustomArrayManager,
+          Field: '/path/to/CustomArrayManagerField',
         },
       },
     },
@@ -818,7 +818,7 @@ import { useConfig } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // highlight-start
-  const config = useConfig()
+  const { config } = useConfig()
   // highlight-end
 
   return <span>{config.serverURL}</span>

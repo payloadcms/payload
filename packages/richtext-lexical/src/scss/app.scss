@@ -21,8 +21,8 @@
   --theme-baseline-body-size: #{$baseline-body-size};
   --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
     sans-serif;
-  --font-serif: Georgia, 'Bitstream Charter', 'Charis SIL', Utopia, 'URW Bookman L', serif;
-  --font-mono: monospace;
+  --font-serif: 'Georgia', 'Bitstream Charter', 'Charis SIL', Utopia, 'URW Bookman L', serif;
+  --font-mono: 'SF Mono', Menlo, Consolas, Monaco, monospace;
 
   --style-radius-s: #{$style-radius-s};
   --style-radius-m: #{$style-radius-m};
@@ -146,13 +146,13 @@ h6 {
 }
 
 p {
-  margin: 0 0 $baseline;
+  margin: 0;
 }
 
 ul,
 ol {
   padding-left: $baseline;
-  margin: 0 0 $baseline;
+  margin: 0;
 }
 
 :focus-visible {

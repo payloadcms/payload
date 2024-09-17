@@ -1,10 +1,10 @@
-import type { SerializedHeadingNode } from '../../../../../heading/feature.server.js'
+import type { SerializedHeadingNode } from '../../../../../heading/server/index.js'
 import type { LexicalPluginNodeConverter } from '../../types.js'
 
 import { convertLexicalPluginNodesToLexical } from '../../index.js'
 
-export const _HeadingConverter: LexicalPluginNodeConverter = {
-  converter({ converters, lexicalPluginNode }) {
+export const HeadingConverter: LexicalPluginNodeConverter = {
+  converter({ converters, lexicalPluginNode, quiet }) {
     return {
       ...lexicalPluginNode,
       type: 'heading',
@@ -12,6 +12,7 @@ export const _HeadingConverter: LexicalPluginNodeConverter = {
         converters,
         lexicalPluginNodes: lexicalPluginNode.children,
         parentNodeType: 'heading',
+        quiet,
       }),
       version: 1,
     } as const as SerializedHeadingNode

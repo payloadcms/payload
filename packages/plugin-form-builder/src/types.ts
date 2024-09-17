@@ -1,4 +1,10 @@
-import type { Block, CollectionConfig, Field } from 'payload'
+import type {
+  Block,
+  CollectionBeforeChangeHook,
+  CollectionConfig,
+  Field,
+  TypeWithID,
+} from 'payload'
 
 export interface BlockConfig {
   block: Block
@@ -24,20 +30,24 @@ export type PaymentFieldConfig = {
 export type FieldConfig = Partial<Field> | PaymentFieldConfig
 
 export interface FieldsConfig {
-  [key: string]: FieldConfig | boolean | undefined
-  checkbox?: FieldConfig | boolean
-  country?: FieldConfig | boolean
-  email?: FieldConfig | boolean
-  message?: FieldConfig | boolean
-  number?: FieldConfig | boolean
-  payment?: FieldConfig | boolean
-  select?: FieldConfig | boolean
-  state?: FieldConfig | boolean
-  text?: FieldConfig | boolean
-  textarea?: FieldConfig | boolean
+  [key: string]: boolean | FieldConfig | undefined
+  checkbox?: boolean | FieldConfig
+  country?: boolean | FieldConfig
+  email?: boolean | FieldConfig
+  message?: boolean | FieldConfig
+  number?: boolean | FieldConfig
+  payment?: boolean | FieldConfig
+  select?: boolean | FieldConfig
+  state?: boolean | FieldConfig
+  text?: boolean | FieldConfig
+  textarea?: boolean | FieldConfig
 }
 
-export type BeforeEmail = (emails: FormattedEmail[]) => FormattedEmail[] | Promise<FormattedEmail[]>
+type BeforeChangeParams<T extends TypeWithID = any> = Parameters<CollectionBeforeChangeHook<T>>[0]
+export type BeforeEmail<T extends TypeWithID = any> = (
+  emails: FormattedEmail[],
+  beforeChangeParams: BeforeChangeParams<T>,
+) => FormattedEmail[] | Promise<FormattedEmail[]>
 export type HandlePayment = (data: any) => void
 export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
 

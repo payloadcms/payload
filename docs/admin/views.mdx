@@ -31,31 +31,70 @@ const config = buildConfig({
   admin: {
     components: {
       views: {
-        Dashboard: MyCustomDashboardView, // highlight-line
+        customView: {
+          Component: '/path/to/MyCustomView#MyCustomView', // highlight-line
+          path: '/my-custom-view',
+        }
       },
     },
   },
 })
 ```
 
-_For details on how to build Custom Views, see [Building Custom Views](#building-custom-views)._
+Your Custom Root Views can optionally use one of the templates that Payload provides. The most common of these is the Default Template which provides the basic layout and navigation. Here is an example of what that might look like:
+
+```tsx
+import type { AdminViewProps } from 'payload'
+
+import { DefaultTemplate } from '@payloadcms/next/templates'
+import { Gutter } from '@payloadcms/ui'
+import React from 'react'
+
+export const MyCustomView: React.FC<AdminViewProps> = ({
+  initPageResult,
+  params,
+  searchParams,
+}) => {
+  return (
+    <DefaultTemplate
+      i18n={initPageResult.req.i18n}
+      locale={initPageResult.locale}
+      params={params}
+      payload={initPageResult.req.payload}
+      permissions={initPageResult.permissions}
+      searchParams={searchParams}
+      user={initPageResult.req.user || undefined}
+      visibleEntities={initPageResult.visibleEntities}
+    >
+      <Gutter>
+        <h1>Custom Default Root View</h1>
+        <br />
+        <p>This view uses the Default Template.</p>
+      </Gutter>
+    </DefaultTemplate>
+  )
+}
+```
+
+_For details on how to build Custom Views, including all available props, see [Building Custom Views](#building-custom-views)._
 
 The following options are available:
 
 | Property        | Description                                                                   |
 | --------------- | ----------------------------------------------------------------------------- |
-| **`Account`**   | The Account view is used to show the currently logged in user's Account page. |
-| **`Dashboard`** | The main landing page of the [Admin Panel](./overview).                                     |
+| **`account`**   | The Account view is used to show the currently logged in user's Account page. |
+| **`dashboard`** | The main landing page of the [Admin Panel](./overview).                                     |
 
 For more granular control, pass a configuration object instead. Payload exposes the following properties for each view:
 
 | Property           | Description                                                                                                                                                                                |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`Component`** \* | Pass in the component that should be rendered when a user navigates to this route.                                                                                                         |
+| **`Component`** \* | Pass in the component path that should be rendered when a user navigates to this route.                                                                                                         |
 | **`path`** \*      | Any valid URL path or array of paths that [`path-to-regexp`](https://www.npmjs.com/package/path-to-regex) understands.                                                                     |
 | **`exact`**        | Boolean. When true, will only match if the path matches the `usePathname()` exactly.                                                                                                     |
 | **`strict`**       | When true, a path that has a trailing slash will only match a `location.pathname` with a trailing slash. This has no effect when there are additional URL segments in the pathname. |
-| **`sensitive`**    | When true, will match if the path is case sensitive.                                                                                                                                       |
+| **`sensitive`**    | When true, will match if the path is case sensitive.
+| **`meta`**         | Page metadata overrides to apply to this view within the Admin Panel. [More details](./metadata).                                                                           |
 
 _\* An asterisk denotes that a property is required._
 
@@ -72,9 +111,9 @@ const config = buildConfig({
     components: {
       views: {
         // highlight-start
-        MyCustomView: {
+        myCustomView: {
         // highlight-end
-          Component: MyCustomView,
+          Component: '/path/to/MyCustomView#MyCustomViewComponent',
           path: '/my-custom-view',
         },
       },
@@ -108,26 +147,41 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
   admin: {
     components: {
       views: {
-        Edit: MyCustomEditView, // highlight-line
+        edit: {
+          root: {
+            Component: '/path/to/MyCustomEditView', // highlight-line
+          }
+          // other options include:
+          // default
+          // versions
+          // version
+          // api
+          // livePreview
+          // [key: string]
+          // See "Document Views" for more details
+        },
+        list: {
+          Component: '/path/to/MyCustomListView',
+        }
       },
     },
   },
 }
 ```
 
-_For details on how to build Custom Views, see [Building Custom Views](#building-custom-views)._
+_For details on how to build Custom Views, including all available props, see [Building Custom Views](#building-custom-views)._
 
 <Banner type="warning">
   <strong>Note:</strong>
-  The `Edit` property will replace the _entire_ Edit View, including the title, tabs, etc., _as well as all nested [Document Views](#document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `Edit.Default` key instead.
+  The `root` property will replace the _entire_ Edit View, including the title, tabs, etc., _as well as all nested [Document Views](#document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `edit.default` key instead.
 </Banner>
 
 The following options are available:
 
 | Property   | Description                                                                                                       |
 | ---------- | ----------------------------------------------------------------------------------------------------------------- |
-| **`Edit`** | The Edit View is used to edit a single document for any given Collection. [More details](#document-views).     |
-| **`List`** | The List View is used to show a list of documents for any given Collection.                                         |
+| **`edit`** | The Edit View is used to edit a single document for any given Collection. [More details](#document-views).     |
+| **`list`** | The List View is used to show a list of documents for any given Collection.                                         |
 
 <Banner type="success">
   <strong>Note:</strong>
@@ -148,25 +202,36 @@ export const MyGlobalConfig: SanitizedGlobalConfig = {
   admin: {
     components: {
       views: {
-        Edit: MyCustomEditView, // highlight-line
+        edit: {
+          root: {
+            Component: '/path/to/MyCustomEditView', // highlight-line
+          }
+          // other options include:
+          // default
+          // versions
+          // version
+          // api
+          // livePreview
+          // [key: string]
+        },
       },
     },
   },
-})
+}
 ```
 
-_For details on how to build Custom Views, see [Building Custom Views](#building-custom-views)._
+_For details on how to build Custom Views, including all available props, see [Building Custom Views](#building-custom-views)._
 
 <Banner type="warning">
   <strong>Note:</strong>
-  The `Edit` property will replace the _entire_ Edit View, including the title, tabs, etc., _as well as all nested [Document Views](#document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `Edit.Default` key instead.
+  The `root` property will replace the _entire_ Edit View, including the title, tabs, etc., _as well as all nested [Document Views](#document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `edit.default` key instead.
 </Banner>
 
 The following options are available:
 
 | Property   | Description                                                         |
 | ---------- | ------------------------------------------------------------------- |
-| **`Edit`** | The Edit View is used to edit a single document for any given Global. [More details](#document-views). |
+| **`edit`** | The Edit View is used to edit a single document for any given Global. [More details](#document-views). |
 
 <Banner type="success">
   <strong>Note:</strong>
@@ -187,37 +252,38 @@ export const MyCollectionOrGlobalConfig: SanitizedCollectionConfig = {
   admin: {
     components: {
       views: {
-        Edit: {
-          API: {
-            Component: MyCustomAPIView, // highlight-line
+        edit: {
+          api: {
+            Component: '/path/to/MyCustomAPIViewComponent', // highlight-line
           },
         },
       },
     },
   },
-})
+}
 ```
 
-_For details on how to build Custom Views, see [Building Custom Views](#building-custom-views)._
+_For details on how to build Custom Views, including all available props, see [Building Custom Views](#building-custom-views)._
 
 <Banner type="warning">
  <strong>Note:</strong>
- If you need to replace the _entire_ Edit View, including _all_ nested Document Views, use the `Edit` key itself. See [Custom Collection Views](#collection-views) or [Custom Global Views](#global-views) for more information.
+ If you need to replace the _entire_ Edit View, including _all_ nested Document Views, use the `root` key. See [Custom Collection Views](#collection-views) or [Custom Global Views](#global-views) for more information.
 </Banner>
 
 The following options are available:
 
 | Property          | Description                                                                                                                 |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| **`Default`**     | The Default view is the primary view in which your document is edited.                                                      |
-| **`Versions`**    | The Versions view is used to view the version history of a single document. [More details](../versions).                    |
-| **`Version`**     | The Version view is used to view a single version of a single document for a given collection. [More details](../versions). |
-| **`API`**         | The API view is used to display the REST API JSON response for a given document.                                            |
-| **`LivePreview`** | The LivePreview view is used to display the Live Preview interface. [More details](../live-preview).                        |
+| **`root`**        | The Root View overrides all other nested views and routes. No document controls or tabs are rendered when this key is set.  |
+| **`default`**     | The Default View is the primary view in which your document is edited. It is rendered within the "Edit" tab.     |
+| **`versions`**    | The Versions View is used to navigate the version history of a single document. It is rendered within the "Versions" tab. [More details](../versions).                    |
+| **`version`**     | The Version View is used to edit a single version of a document. It is rendered within the "Version" tab. [More details](../versions). |
+| **`api`**         | The API View is used to display the REST API JSON response for a given document. It is rendered within the "API" tab.                                            |
+| **`livePreview`** | The LivePreview view is used to display the Live Preview interface. It is rendered within the "Live Preview" tab. [More details](../live-preview).                        |
 
 ### Document Tabs
 
-Each Document View can be given a new tab in the Edit View, if desired. Tabs are highly configurable, from as simple as changing the label to swapping out the entire component, they can be modified in any way. To add or customize tabs in the Edit View, use the `Component.Tab` key:
+Each Document View can be given a new tab in the Edit View, if desired. Tabs are highly configurable, from as simple as changing the label to swapping out the entire component, they can be modified in any way. To add or customize tabs in the Edit View, use the `tab` key:
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
@@ -227,17 +293,19 @@ export const MyCollection: SanitizedCollectionConfig = {
   admin: {
     components: {
       views: {
-        Edit: {
-          MyCustomTab: {
-            Component: MyCustomTab,
+        edit: {
+          myCustomTab: {
+            Component: '/path/to/MyCustomTab',
             path: '/my-custom-tab',
-            Tab: MyCustomTab // highlight-line
+            tab: {
+              Component: '/path/to/MyCustomTabComponent' // highlight-line
+            }
           },
-          AnotherCustomView: {
-            Component: AnotherCustomView,
+          anotherCustomTab: {
+            Component: '/path/to/AnotherCustomView',
             path: '/another-custom-view',
             // highlight-start
-            Tab: {
+            tab: {
               label: 'Another Custom View',
               href: '/another-custom-view',
             }
@@ -261,14 +329,15 @@ Custom Views are just [Custom Components](./components) rendered at the page-lev
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
-import { MyCustomView } from './MyCustomView'
 
 export const MyCollectionConfig: SanitizedCollectionConfig = {
   // ...
   admin: {
     components: {
       views: {
-        Edit: MyCustomView, // highlight-line
+        edit: {
+          Component: '/path/to/MyCustomView' // highlight-line
+        }
       },
     },
   },
@@ -279,13 +348,11 @@ Your Custom Views will be provided with the following props:
 
 | Prop                      | Description                                                                                                                            |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| **`user`**                    | The currently logged in user.                                                                                                          |
-| **`locale`**                  | The current [Locale](../configuration/localization) of the [Admin Panel](./overview).                                                  |
-| **`navGroups`**               | The grouped navigation items according to `admin.group` in your [Collection Config](../collections/overview) or [Global Config](../globals/overview). |
-| **`params`**                  | An object containing the [Dynamic Route Parameters](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes).     |
-| **`permissions`**             | The permissions of the currently logged in user.                                                                                       |
-| **`searchParams`**            | An object containing the [Search Parameters](https://developer.mozilla.org/docs/Learn/Common_questions/What_is_a_URL#parameters).      |
-| **`visibleEntities`**         | The current user's visible entities according to your [Access Control](../access-control/overview).                                    |
+| **`initPageResult`**      | An object containing `req`, `payload`, `permissions`, etc.                                                                  |
+| **`clientConfig`**        | The Client Config object. [More details](../components#accessing-the-payload-config).                                                             |
+| **`importMap`**           | The import map object.                                                        |
+| **`params`**              | An object containing the [Dynamic Route Parameters](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes).     |
+| **`searchParams`**        | An object containing the [Search Parameters](https://developer.mozilla.org/docs/Learn/Common_questions/What_is_a_URL#parameters).      |
 
 <Banner type="success">
   <strong>Reminder:</strong>

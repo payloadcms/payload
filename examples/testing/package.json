@@ -29,6 +29,6 @@
     "build:server": "tsc",
     "build": "yarn build:server && yarn build:payload",
     "serve": "PAYLOAD_CONFIG_PATH=dist/payload.config.js NODE_ENV=production node dist/server.js",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest --forceExit --detectOpenHandles"
+    "test": "jest --forceExit --detectOpenHandles"
   }
 }

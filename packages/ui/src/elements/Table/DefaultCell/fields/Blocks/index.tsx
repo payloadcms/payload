@@ -1,17 +1,14 @@
 'use client'
-import type { CellComponentProps, DefaultCellComponentProps } from 'payload'
+import type { BlocksFieldClient, DefaultCellComponentProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 
-export interface BlocksCellProps extends DefaultCellComponentProps<any> {
-  blocks: CellComponentProps['blocks']
-  labels: CellComponentProps['labels']
-}
+export interface BlocksCellProps extends DefaultCellComponentProps<any, BlocksFieldClient> {}
 
-export const BlocksCell: React.FC<BlocksCellProps> = ({ blocks, cellData, labels }) => {
+export const BlocksCell: React.FC<BlocksCellProps> = ({ cellData, field: { blocks, labels } }) => {
   const { i18n } = useTranslation()
 
   const selectedBlocks = Array.isArray(cellData) ? cellData.map(({ blockType }) => blockType) : []

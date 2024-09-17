@@ -15,6 +15,8 @@ import { migrateDocumentFieldsRecursively } from './migrateDocumentFieldsRecursi
 export async function migrateSlateToLexical({ payload }: { payload: Payload }) {
   const collections = payload.config.collections
 
+  const errors = []
+
   const allLocales = payload.config.localization ? payload.config.localization.localeCodes : [null]
 
   const totalCollections = collections.length
@@ -25,6 +27,7 @@ export async function migrateSlateToLexical({ payload }: { payload: Payload }) {
       await migrateCollection({
         collection,
         cur: curCollection,
+        errors,
         locale,
         max: totalCollections,
         payload,
@@ -32,19 +35,28 @@ export async function migrateSlateToLexical({ payload }: { payload: Payload }) {
     }
     for (const global of payload.config.globals) {
       await migrateGlobal({
+        errors,
         global,
         locale,
         payload,
       })
     }
   }
+
+  if (errors.length) {
+    console.error(`Found ${errors.length} errors::`, JSON.stringify(errors, null, 2))
+  } else {
+    console.log('Migration successful - no errors')
+  }
 }
 
 async function migrateGlobal({
+  errors,
   global,
   locale,
   payload,
 }: {
+  errors: any[]
   global: GlobalConfig
   locale: null | string
   payload: Payload
@@ -54,6 +66,7 @@ async function migrateGlobal({
   const document = await payload.findGlobal({
     slug: global.slug,
     depth: 0,
+    draft: true,
     locale: locale || undefined,
     overrideAccess: true,
   })
@@ -64,24 +77,35 @@ async function migrateGlobal({
   })
 
   if (found) {
-    await payload.updateGlobal({
-      slug: global.slug,
-      data: document,
-      depth: 0,
-      locale: locale || undefined,
-    })
+    try {
+      await payload.updateGlobal({
+        slug: global.slug,
+        data: document,
+        depth: 0,
+        draft: document?._status === 'draft',
+        locale: locale || undefined,
+      })
+      // Catch it, because some errors were caused by the user previously (e.g. invalid relationships) and will throw an error now, even though they are not related to the migration
+    } catch (e) {
+      console.log('Error updating global', e, {
+        slug: global.slug,
+      })
+      errors.push(e)
+    }
   }
 }
 
 async function migrateCollection({
   collection,
   cur,
+  errors,
   locale,
   max,
   payload,
 }: {
   collection: CollectionConfig
   cur: number
+  errors: any[]
   locale: null | string
   max: number
   payload: Payload
@@ -107,6 +131,7 @@ async function migrateCollection({
     const documents = await payload.find({
       collection: collection.slug,
       depth: 0,
+      draft: true,
       locale: locale || undefined,
       overrideAccess: true,
       page,
@@ -136,13 +161,24 @@ async function migrateCollection({
       })
 
       if (found) {
-        await payload.update({
-          id: document.id,
-          collection: collection.slug,
-          data: document,
-          depth: 0,
-          locale: locale || undefined,
-        })
+        try {
+          await payload.update({
+            id: document.id,
+            collection: collection.slug,
+            data: document,
+            depth: 0,
+            draft: document?._status === 'draft',
+            locale: locale || undefined,
+          })
+          // Catch it, because some errors were caused by the user previously (e.g. invalid relationships) and will throw an error now, even though they are not related to the migration
+        } catch (e) {
+          errors.push(e)
+
+          console.log('Error updating collection', e, {
+            id: document.id,
+            slug: collection.slug,
+          })
+        }
       }
     }
     page++

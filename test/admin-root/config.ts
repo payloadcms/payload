@@ -18,6 +18,9 @@ export default buildConfigWithDefaults({
       password: devUser.password,
       prefillOnly: true,
     },
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
   },
   cors: ['http://localhost:3000', 'http://localhost:3001'],
   globals: [MenuGlobal],

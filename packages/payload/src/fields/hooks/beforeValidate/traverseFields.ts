@@ -6,7 +6,7 @@ import type { Field, TabAsField } from '../../config/types.js'
 import { promise } from './promise.js'
 
 type Args<T> = {
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: T
   /**
@@ -14,7 +14,7 @@ type Args<T> = {
    */
   doc: T
   fields: (Field | TabAsField)[]
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
   id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean

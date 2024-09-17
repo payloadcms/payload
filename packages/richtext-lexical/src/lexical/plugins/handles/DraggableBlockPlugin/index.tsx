@@ -219,7 +219,7 @@ function useDraggableBlockMenu(
           editorConfig?.admin?.hideGutter ? '0px' : '3rem',
           blockHandleHorizontalOffset +
             (editorConfig?.admin?.hideGutter
-              ? menuRef?.current?.getBoundingClientRect()?.width ?? 0
+              ? (menuRef?.current?.getBoundingClientRect()?.width ?? 0)
               : -(menuRef?.current?.getBoundingClientRect()?.width ?? 0)),
           targetLineElem,
           targetBlockElem,
@@ -348,14 +348,8 @@ function useDraggableBlockMenu(
           const highlightElem = document.createElement('div')
           highlightElem.className = 'lexical-block-highlighter'
 
-          // if html data-theme is dark, set the highlighter color to white
-          if (document.documentElement.getAttribute('data-theme') === 'dark') {
-            highlightElem.style.backgroundColor = 'white'
-          } else {
-            highlightElem.style.backgroundColor = 'black'
-          }
-
-          highlightElem.style.transition = 'opacity 0.1s ease-in-out'
+          highlightElem.style.backgroundColor = 'var(--theme-elevation-1000'
+          highlightElem.style.transition = 'opacity 0.5s ease-in-out'
           highlightElem.style.zIndex = '1'
           highlightElem.style.pointerEvents = 'none'
           highlightElem.style.boxSizing = 'border-box'
@@ -374,8 +368,8 @@ function useDraggableBlockMenu(
             highlightElem.style.opacity = '0'
             setTimeout(() => {
               highlightElem.remove()
-            }, 1000)
-          }, 3000)
+            }, 500)
+          }, 1000)
         }, 120)
       })
 

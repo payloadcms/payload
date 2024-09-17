@@ -4,7 +4,6 @@ import type { EntityToGroup } from '@payloadcms/ui/shared'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
-  ChevronIcon,
   NavGroup,
   useAuth,
   useConfig,
@@ -25,9 +24,11 @@ export const DefaultNavClient: React.FC = () => {
   const pathname = usePathname()
 
   const {
-    collections,
-    globals,
-    routes: { admin: adminRoute },
+    config: {
+      collections,
+      globals,
+      routes: { admin: adminRoute },
+    },
   } = useConfig()
 
   const { i18n } = useTranslation()
@@ -86,7 +87,8 @@ export const DefaultNavClient: React.FC = () => {
                 LinkWithDefault) as typeof LinkWithDefault.default
 
               const LinkElement = Link || 'a'
-              const activeCollection = pathname.endsWith(href)
+              const activeCollection =
+                pathname.startsWith(href) && ['/', undefined].includes(pathname[href.length])
 
               return (
                 <LinkElement

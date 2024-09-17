@@ -1,21 +1,19 @@
 'use client'
-import type { ClientCollectionConfig, FieldMap, Where } from 'payload'
+import type { ClientCollectionConfig, ClientField, Where } from 'payload'
 
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { Fragment, useEffect, useRef, useState } from 'react'
 import AnimateHeightImport from 'react-animate-height'
 
 const AnimateHeight = (AnimateHeightImport.default ||
   AnimateHeightImport) as typeof AnimateHeightImport.default
 
-import { useListInfo } from '@payloadcms/ui'
-
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { SearchIcon } from '../../icons/Search/index.js'
+import { useListInfo } from '../../providers/ListInfo/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
-import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { DeleteMany } from '../DeleteMany/index.js'
@@ -32,13 +30,13 @@ import './index.scss'
 const baseClass = 'list-controls'
 
 export type ListControlsProps = {
-  collectionConfig: ClientCollectionConfig
-  enableColumns?: boolean
-  enableSort?: boolean
-  fieldMap: FieldMap
-  handleSearchChange?: (search: string) => void
-  handleSortChange?: (sort: string) => void
-  handleWhereChange?: (where: Where) => void
+  readonly collectionConfig: ClientCollectionConfig
+  readonly enableColumns?: boolean
+  readonly enableSort?: boolean
+  readonly fields: ClientField[]
+  readonly handleSearchChange?: (search: string) => void
+  readonly handleSortChange?: (sort: string) => void
+  readonly handleWhereChange?: (where: Where) => void
 }
 
 /**
@@ -47,66 +45,59 @@ export type ListControlsProps = {
  * the collection's documents.
  */
 export const ListControls: React.FC<ListControlsProps> = (props) => {
-  const { collectionConfig, enableColumns = true, enableSort = false, fieldMap } = props
+  const { collectionConfig, enableColumns = true, enableSort = false, fields } = props
 
-  const { handleSearchChange } = useListQuery()
-  const { collectionSlug } = useListInfo()
-  const { searchParams } = useSearchParams()
-  const titleField = useUseTitleField(collectionConfig, fieldMap)
+  const { handleSearchChange, params } = useListQuery()
+  const { beforeActions, collectionSlug, disableBulkDelete, disableBulkEdit } = useListInfo()
+  const titleField = useUseTitleField(collectionConfig, fields)
   const { i18n, t } = useTranslation()
   const {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
-  const [search, setSearch] = useState(
-    typeof searchParams?.search === 'string' ? searchParams?.search : '',
-  )
 
   const searchLabel =
     (titleField &&
       getTranslation(
-        'label' in titleField.fieldComponentProps &&
-          typeof titleField.fieldComponentProps.label === 'string'
-          ? titleField.fieldComponentProps.label
-          : titleField.name,
+        'label' in titleField && typeof titleField.label === 'string'
+          ? titleField.label
+          : 'name' in titleField
+            ? titleField.name
+            : null,
         i18n,
       )) ??
     'ID'
 
   const listSearchableFields = getTextFieldsToBeSearched(
     collectionConfig.admin.listSearchableFields,
-    fieldMap,
+    fields,
   )
 
   const searchLabelTranslated = useRef(
     t('general:searchBy', { label: getTranslation(searchLabel, i18n) }),
   )
 
-  const hasWhereParam = useRef(Boolean(searchParams?.where))
+  const hasWhereParam = useRef(Boolean(params?.where))
 
-  const shouldInitializeWhereOpened = validateWhereQuery(searchParams?.where)
+  const shouldInitializeWhereOpened = validateWhereQuery(params?.where)
   const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(
     shouldInitializeWhereOpened ? 'where' : undefined,
   )
 
   useEffect(() => {
-    if (hasWhereParam.current && !searchParams?.where) {
+    if (hasWhereParam.current && !params?.where) {
       setVisibleDrawer(undefined)
       hasWhereParam.current = false
-    } else if (searchParams?.where) {
+    } else if (params?.where) {
       hasWhereParam.current = true
     }
-  }, [setVisibleDrawer, searchParams?.where])
+  }, [setVisibleDrawer, params?.where])
 
   useEffect(() => {
     if (listSearchableFields?.length > 0) {
       searchLabelTranslated.current = listSearchableFields.reduce(
         (placeholderText: string, field, i: number) => {
           const label =
-            'fieldComponentProps' in field &&
-            'label' in field.fieldComponentProps &&
-            field.fieldComponentProps.label
-              ? field.fieldComponentProps.label
-              : field.name
+            'label' in field && field.label ? field.label : 'name' in field ? field.name : null
 
           if (i === 0) {
             return `${t('general:searchBy', {
@@ -134,24 +125,28 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
       <div className={`${baseClass}__wrap`}>
         <SearchIcon />
         <SearchFilter
-          fieldName={titleField?.name}
+          fieldName={'name' in titleField ? titleField?.name : null}
           handleChange={(search) => {
             return void handleSearchChange(search)
           }}
-          initialParams={searchParams}
+          // @ts-expect-error @todo: fix types
+          initialParams={params}
           key={collectionSlug}
           label={searchLabelTranslated.current}
-          setValue={setSearch}
-          value={search}
         />
         <div className={`${baseClass}__buttons`}>
           <div className={`${baseClass}__buttons-wrap`}>
             {!smallBreak && (
               <React.Fragment>
-                <EditMany collection={collectionConfig} fieldMap={fieldMap} />
-                <PublishMany collection={collectionConfig} />
-                <UnpublishMany collection={collectionConfig} />
-                <DeleteMany collection={collectionConfig} />
+                {beforeActions && beforeActions}
+                {!disableBulkEdit && (
+                  <Fragment>
+                    <EditMany collection={collectionConfig} fields={fields} />
+                    <PublishMany collection={collectionConfig} />
+                    <UnpublishMany collection={collectionConfig} />
+                  </Fragment>
+                )}
+                {!disableBulkDelete && <DeleteMany collection={collectionConfig} />}
               </React.Fragment>
             )}
             {enableColumns && (
@@ -214,8 +209,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
         <WhereBuilder
           collectionPluralLabel={collectionConfig?.labels?.plural}
           collectionSlug={collectionConfig.slug}
-          fieldMap={fieldMap}
-          key={String(hasWhereParam.current && !searchParams?.where)}
+          fields={fields}
+          key={String(hasWhereParam.current && !params?.where)}
         />
       </AnimateHeight>
       {enableSort && (

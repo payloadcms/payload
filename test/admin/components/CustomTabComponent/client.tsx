@@ -8,14 +8,17 @@ import React from 'react'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const CustomTabComponentClient: React.FC<{
-  path: string
+  readonly path: string
 }> = ({ path }) => {
   const {
-    routes: { admin: adminRoute },
+    config: {
+      routes: { admin: adminRoute },
+    },
   } = useConfig()
+
   const params = useParams()
 
-  const baseRoute = (params.segments.slice(0, 2) as string[]).join('/')
+  const baseRoute = (params.segments.slice(0, 3) as string[]).join('/')
 
   return <Link href={`${adminRoute}/${baseRoute}${path}`}>Custom Tab Component</Link>
 }

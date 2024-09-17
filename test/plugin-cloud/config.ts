@@ -16,6 +16,11 @@ dotenv.config({
 })
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [Media, Users],
   onInit: async (payload) => {
     await payload.create({

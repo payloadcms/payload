@@ -6,7 +6,7 @@ import { buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
-import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
@@ -25,6 +25,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
 ) {
   const Model = this.versions[global]
   const versionFields = buildVersionGlobalFields(
+    this.payload.config,
     this.payload.globals.config.find(({ slug }) => slug === global),
   )
   const options = {

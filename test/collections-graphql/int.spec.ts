@@ -10,7 +10,7 @@ import type { Post } from './payload-types.js'
 
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import config, { errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js'
+import { errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js'
 
 const title = 'title'
 
@@ -22,7 +22,7 @@ const dirname = path.dirname(filename)
 
 describe('collections-graphql', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(config))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
 
     // Wait for indexes to be created,
     // as we need them to query by point

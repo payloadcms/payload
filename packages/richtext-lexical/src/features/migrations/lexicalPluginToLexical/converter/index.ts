@@ -10,9 +10,11 @@ import type { LexicalPluginNodeConverter, PayloadPluginLexicalData } from './typ
 export function convertLexicalPluginToLexical({
   converters,
   lexicalPluginData,
+  quiet,
 }: {
   converters: LexicalPluginNodeConverter[]
   lexicalPluginData: PayloadPluginLexicalData
+  quiet?: boolean
 }): SerializedEditorState {
   return {
     root: {
@@ -21,6 +23,7 @@ export function convertLexicalPluginToLexical({
         converters,
         lexicalPluginNodes: lexicalPluginData?.jsonContent?.root?.children || [],
         parentNodeType: 'root',
+        quiet,
       }),
       direction: lexicalPluginData?.jsonContent?.root?.direction || 'ltr',
       format: lexicalPluginData?.jsonContent?.root?.format || '',
@@ -34,6 +37,7 @@ export function convertLexicalPluginNodesToLexical({
   converters,
   lexicalPluginNodes,
   parentNodeType,
+  quiet,
 }: {
   converters: LexicalPluginNodeConverter[]
   lexicalPluginNodes: SerializedLexicalNode[] | undefined
@@ -41,15 +45,16 @@ export function convertLexicalPluginNodesToLexical({
    * Type of the parent lexical node (not the type of the original, parent payload-plugin-lexical type)
    */
   parentNodeType: string
+  quiet?: boolean
 }): SerializedLexicalNode[] {
-  if (!lexicalPluginNodes?.length) {
+  if (!lexicalPluginNodes?.length || !converters?.length) {
     return []
   }
   const unknownConverter = converters.find((converter) => converter.nodeTypes.includes('unknown'))
   return (
     lexicalPluginNodes.map((lexicalPluginNode, i) => {
       if (lexicalPluginNode.type === 'paragraph') {
-        return convertParagraphNode(converters, lexicalPluginNode)
+        return convertParagraphNode(converters, lexicalPluginNode, quiet)
       }
       if (lexicalPluginNode.type === 'text' || !lexicalPluginNode.type) {
         return convertTextNode(lexicalPluginNode)
@@ -60,17 +65,27 @@ export function convertLexicalPluginNodesToLexical({
       )
 
       if (converter) {
-        return converter.converter({ childIndex: i, converters, lexicalPluginNode, parentNodeType })
+        return converter.converter({
+          childIndex: i,
+          converters,
+          lexicalPluginNode,
+          parentNodeType,
+          quiet,
+        })
       }
 
-      console.warn(
-        'lexicalPluginToLexical > No converter found for node type: ' + lexicalPluginNode.type,
-      )
+      if (!quiet) {
+        console.warn(
+          'lexicalPluginToLexical > No converter found for node type: ' + lexicalPluginNode.type,
+        )
+      }
+
       return unknownConverter?.converter({
         childIndex: i,
         converters,
         lexicalPluginNode,
         parentNodeType,
+        quiet,
       })
     }) || []
   )
@@ -79,6 +94,7 @@ export function convertLexicalPluginNodesToLexical({
 export function convertParagraphNode(
   converters: LexicalPluginNodeConverter[],
   node: SerializedLexicalNode,
+  quiet?: boolean,
 ): SerializedParagraphNode {
   return {
     ...node,
@@ -88,6 +104,7 @@ export function convertParagraphNode(
       converters,
       lexicalPluginNodes: (node as any).children || [],
       parentNodeType: 'paragraph',
+      quiet,
     }),
     version: 1,
   } as SerializedParagraphNode

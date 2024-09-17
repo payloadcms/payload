@@ -117,7 +117,7 @@ export const CollectionConfig: CollectionConfig = {
       // ...
       admin: {
         components: {
-          Field: MyFieldComponent, // highlight-line
+          Field: '/path/to/MyFieldComponent', // highlight-line
         },
       },
     }
@@ -135,32 +135,13 @@ All Field Components receive the following props:
 
 | Property         | Description                                                                                                                                                                                                                      |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`AfterInput`** | The rendered result of the `admin.components.afterInput` property. [More details](#afterinput-and-beforeinput).                                                                                                      |
-| **`BeforeInput`** | The rendered result of the `admin.components.beforeInput` property. [More details](#afterinput-and-beforeinput).                                                                                                      |
-| **`CustomDescription`** | The rendered result of the `admin.components.Description` property. [More details](#the-description-component).                                                                                                      |
-| **`CustomError`** | The rendered result of the `admin.components.Error` property. [More details](#the-error-component).                                                                                                      |
-| **`CustomLabel`** | The rendered result of the `admin.components.Label` property. [More details](#the-label-component).
-| **`path`**       | The static path of the field at render time. [More details](./hooks#usefieldprops). |
-| **`disabled`**   | The `admin.disabled` property defined in the [Field Config](../fields/overview). |
-| **`required`**   | The `admin.required` property defined in the [Field Config](../fields/overview). |
-| **`className`**  | The `admin.className` property defined in the [Field Config](../fields/overview). |
-| **`style`**      | The `admin.style` property defined in the [Field Config](../fields/overview).                                                                                                                                                      |
-| **`custom`**     | The `admin.custom` property defined in the [Field Config](../fields/overview).
-| **`placeholder`** | The `admin.placeholder` property defined in the [Field Config](../fields/overview). |
-| **`descriptionProps`** | An object that contains the props for the `FieldDescription` component.                                                                                                                                                                   |
-| **`labelProps`** | An object that contains the props needed for the `FieldLabel` component.                                                                                                                                                                         |
-| **`errorProps`** | An object that contains the props for the `FieldError` component.                                                                                                                                                                         |
-| **`docPreferences`** | An object that contains the preferences for the document.                                                                                                                                                                         |
-| **`label`**      | The label value provided in the field, it can be used with i18n.                                                                                                                                                                   |
+| **`docPreferences`** | An object that contains the [Preferences](./preferences) for the document.
+| **`field`** | In Server Components, this is the original Field Config. In Client Components, this is the sanitized Client Field Config. [More details](#the-field-prop). |
+| **`clientField`** | Server components receive the Client Field Config through this prop. [More details](#the-field-prop). |
 | **`locale`**     | The locale of the field. [More details](../configuration/localization).                                                                                                                                                                   |
-| **`localized`**  | A boolean value that represents if the field is localized or not. [More details](../fields/localized).                                                                                                                                                                   |
 | **`readOnly`**   | A boolean value that represents if the field is read-only or not.                                                                                                                                                                  |
-| **`rtl`**        | A boolean value that represents if the field should be rendered right-to-left or not. [More details](../configuration/i18n).                                                                                           |
 | **`user`**       | The currently authenticated user. [More details](../authentication/overview). |
 | **`validate`**   | A function that can be used to validate the field.                                                                                                                                                                                 |
-| **`hasMany`**    | If a [`relationship`](../fields/relationship) field, the `hasMany` property defined in the [Field Config](../fields/overview). |
-| **`maxLength`**  | If a [`text`](../fields/text) field, the `maxLength` property defined in the [Field Config](../fields/overview). |
-| **`minLength`**  | If a [`text`](../fields/text) field, the `minLength` property defined in the [Field Config](../fields/overview). |
 
 <Banner type="success">
   <strong>Reminder:</strong>
@@ -193,6 +174,82 @@ export const CustomTextField: React.FC = () => {
   For a complete list of all available React hooks, see the [Payload React Hooks](./hooks) documentation. For additional help, see [Building Custom Components](./components#building-custom-components).
 </Banner>
 
+#### TypeScript
+
+When building Custom Field Components, you can import the component type to ensure type safety. There is an explicit type for the Field Component, one for every [Field Type](../fields/overview) and for every client/server environment. The convention is to prepend the field type onto the target type, i.e. `TextFieldClientComponent`:
+
+```tsx
+import type {
+  TextFieldClientComponent,
+  TextFieldServerComponent,
+  TextFieldClientProps,
+  TextFieldServerProps,
+  // ...and so on for each Field Type
+} from 'payload'
+```
+
+### The `field` Prop
+
+All Field Components are passed their own Field Config through a common `field` prop. Within Server Components, this is the original Field Config as written within your Payload Config. Within Client Components, however, this is a "Client Config", which is a sanitized, client-friendly version of the Field Config. This is because the original Field Config is [non-serializable](https://react.dev/reference/rsc/use-client#serializable-types), meaning it cannot be passed into Client Components without first being transformed.
+
+The Client Field Config is an exact copy of the original Field Config, minus all non-serializable properties, plus all evaluated functions such as field labels, [Custom Components](../components), etc.
+
+Server Component:
+
+```tsx
+import React from 'react'
+import type { TextFieldServerComponent } from 'payload'
+import { TextField } from '@payloadcms/ui'
+
+export const MyServerField: TextFieldServerComponent = ({ clientField }) => {
+  return <TextField field={clientField} />
+}
+```
+
+<Banner type="info">
+  <strong>Tip:</strong>
+  Server Components can still access the original Field Config through the `field` prop.
+</Banner>
+
+Client Component:
+
+```tsx
+'use client'
+import React from 'react'
+import type { TextFieldClientComponent } from 'payload'
+
+export const MyTextField: TextFieldClientComponent = ({ field }) => {
+  return <TextField field={field} />
+}
+```
+
+The following additional properties are also provided to the `field` prop:
+
+| Property         | Description                                                                                                                                                                                                                      |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`_isPresentational`** | A boolean indicating that the field is purely visual and does not directly affect data or change data shape, i.e. the [UI Field](../fields/ui). |
+| **`_path`** | A string representing the direct, dynamic path to the field at runtime, i.e. `myGroup.myArray[0].myField`. |
+| **`_schemaPath`** | A string representing the direct, static path to the [Field Config](../fields/overview), i.e. `myGroup.myArray.myField` |
+
+<Banner type="info">
+  <strong>Note:</strong>
+  These properties are underscored to denote that they are not part of the original Field Config, and instead are attached during client sanitization to make fields easier to work with on the front-end.
+</Banner>
+
+#### TypeScript
+
+When building Custom Field Components, you can import the client field props to ensure type safety in your component. There is an explicit type for the Field Component, one for every [Field Type](../fields/overview) and server/client environment. The convention is to prepend the field type onto the target type, i.e. `TextFieldClientComponent`:
+
+```tsx
+import type {
+  TextFieldClientComponent,
+  TextFieldServerComponent,
+  TextFieldClientProps,
+  TextFieldServerProps,
+  // ...and so on for each Field Type
+} from 'payload'
+```
+
 ### The Cell Component
 
 The Cell Component is rendered in the table of the List View. It represents the value of the field when displayed in a table cell.
@@ -207,7 +264,7 @@ export const myField: Field = {
   type: 'text',
   admin: {
     components: {
-      Cell: MyCustomCell, // highlight-line
+      Cell: '/path/to/MyCustomCellComponent', // highlight-line
     },
   },
 }
@@ -219,20 +276,10 @@ All Cell Components receive the following props:
 
 | Property         | Description                                                       |
 | ---------------- | ----------------------------------------------------------------- |
-| **`name`** | The name of the field. |
-| **`className`**  | The `admin.className` property defined in the [Field Config](../fields/overview). |
-| **`fieldType`** | The `type` property defined in the [Field Config](../fields/overview). |
-| **`schemaPath`** | The path to the field in the schema. Similar to `path`, but without dynamic indices. |
-| **`isFieldAffectingData`** | A boolean value that represents if the field is affecting the data or not. |
-| **`label`** | The label value provided in the field, it can be used with i18n. |
-| **`labels`** | An object that contains the labels for the field. |
+| **`field`** | In Server Components, this is the original Field Config. In Client Components, this is the sanitized Client Field Config. [More details](#the-field-prop). |
+| **`clientField`** | Server components receive the Client Field Config through this prop. [More details](#the-field-prop). |
 | **`link`** | A boolean representing whether this cell should be wrapped in a link. |
 | **`onClick`** | A function that is called when the cell is clicked. |
-| **`dateDisplayFormat`** | If a [`date`](../fields/date) field, the `admin.dateDisplayFormat` property defined in the [Field Config](../fields/overview). |
-| **`options`** | If a [`select`](../fields/select) field, this is an array of options defined in the [Field Config](../fields/overview). [More details](../fields/select). |
-| **`relationTo`** | If a [`relationship`](../fields/relationship). or [`upload`](../fields/upload) field, this is the collection(s) the field is related to. |
-| **`richTextComponentMap`** | If a [`richText`](../fields/rich-text) field, this is an object that maps the rich text components. [More details](../fields/rich-text). |
-| **`blocks`** | If a [`blocks`](../fields/blocks) field, this is an array of labels and slugs representing the blocks defined in the [Field Config](../fields/overview). [More details](../fields/blocks). |
 
 <Banner type="info">
   <strong>Tip:</strong>
@@ -258,7 +305,7 @@ export const myField: Field = {
   type: 'text',
   admin: {
     components: {
-      Label: MyCustomLabel, // highlight-line
+      Label: '/path/to/MyCustomLabelComponent', // highlight-line
     },
   },
 }
@@ -270,7 +317,8 @@ Custom Label Components receive all [Field Component](#the-field-component) prop
 
 | Property       | Description                                                      |
 | -------------- | ---------------------------------------------------------------- |
-| **`schemaPath`** | The path to the field in the schema. Similar to `path`, but without dynamic indices. |
+| **`field`** | In Server Components, this is the original Field Config. In Client Components, this is the sanitized Client Field Config. [More details](#the-field-prop). |
+| **`clientField`** | Server components receive the Client Field Config through this prop. [More details](#the-field-prop). |
 
 <Banner type="success">
   <strong>Reminder:</strong>
@@ -279,31 +327,13 @@ Custom Label Components receive all [Field Component](#the-field-component) prop
 
 #### TypeScript
 
-When building Custom Error Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Error Component, one for every [Field Type](../fields/overview). The convention is to append `ErrorComponent` to the type of field, i.e. `TextFieldErrorComponent`.
+When building Custom Label Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Label Component, one for every [Field Type](../fields/overview) and server/client environment. The convention is to append `LabelServerComponent` or `LabelClientComponent` to the type of field, i.e. `TextFieldLabelClientComponent`.
 
 ```tsx
 import type {
-  ArrayFieldLabelComponent,
-  BlocksFieldLabelComponent,
-  CheckboxFieldLabelComponent,
-  CodeFieldLabelComponent,
-  CollapsibleFieldLabelComponent,
-  DateFieldLabelComponent,
-  EmailFieldLabelComponent,
-  GroupFieldLabelComponent,
-  HiddenFieldLabelComponent,
-  JSONFieldLabelComponent,
-  NumberFieldLabelComponent,
-  PointFieldLabelComponent,
-  RadioFieldLabelComponent,
-  RelationshipFieldLabelComponent,
-  RichTextFieldLabelComponent,
-  RowFieldLabelComponent,
-  SelectFieldLabelComponent,
-  TabsFieldLabelComponent,
-  TextFieldLabelComponent,
-  TextareaFieldLabelComponent,
-  UploadFieldLabelComponent
+  TextFieldLabelServerComponent,
+  TextFieldLabelClientComponent,
+  // ...and so on for each Field Type
 } from 'payload'
 ```
 
@@ -321,7 +351,7 @@ export const myField: Field = {
   type: 'text',
   admin: {
     components: {
-      Error: MyCustomError, // highlight-line
+      Error: '/path/to/MyCustomErrorComponent', // highlight-line
     },
   },
 }
@@ -333,7 +363,8 @@ Custom Error Components receive all [Field Component](#the-field-component) prop
 
 | Property        | Description                                                   |
 | --------------- | ------------------------------------------------------------- |
-| **`path`***       | The static path of the field at render time. [More details](./hooks#usefieldprops). |
+| **`field`** | In Server Components, this is the original Field Config. In Client Components, this is the sanitized Client Field Config. [More details](#the-field-prop). |
+| **`clientField`** | Server components receive the Client Field Config through this prop. [More details](#the-field-prop). |
 
 <Banner type="success">
   <strong>Reminder:</strong>
@@ -342,31 +373,13 @@ Custom Error Components receive all [Field Component](#the-field-component) prop
 
 #### TypeScript
 
-When building Custom Error Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Error Component, one for every [Field Type](../fields/overview). The convention is to append `ErrorComponent` to the type of field, i.e. `TextFieldErrorComponent`.
+When building Custom Error Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Error Component, one for every [Field Type](../fields/overview) and server/client environment. The convention is to append `ErrorServerComponent` or `ErrorClientComponent` to the type of field, i.e. `TextFieldErrorClientComponent`.
 
 ```tsx
 import type {
-  ArrayFieldErrorComponent,
-  BlocksFieldErrorComponent,
-  CheckboxFieldErrorComponent,
-  CodeFieldErrorComponent,
-  CollapsibleFieldErrorComponent,
-  DateFieldErrorComponent,
-  EmailFieldErrorComponent,
-  GroupFieldErrorComponent,
-  HiddenFieldErrorComponent,
-  JSONFieldErrorComponent,
-  NumberFieldErrorComponent,
-  PointFieldErrorComponent,
-  RadioFieldErrorComponent,
-  RelationshipFieldErrorComponent,
-  RichTextFieldErrorComponent,
-  RowFieldErrorComponent,
-  SelectFieldErrorComponent,
-  TabsFieldErrorComponent,
-  TextFieldErrorComponent,
-  TextareaFieldErrorComponent,
-  UploadFieldErrorComponent
+  TextFieldErrorServerComponent,
+  TextFieldErrorClientComponent,
+  // And so on for each Field Type
 } from 'payload'
 ```
 
@@ -443,7 +456,6 @@ To easily add a Description Component to a field, use the `admin.components.Desc
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
-import { MyCustomDescription } from './MyCustomDescription'
 
 export const MyCollectionConfig: SanitizedCollectionConfig = {
   // ...
@@ -454,7 +466,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
       type: 'text',
       admin: {
         components: {
-          Description: MyCustomDescription, // highlight-line
+          Description: '/path/to/MyCustomDescriptionComponent', // highlight-line
         }
       }
     }
@@ -468,7 +480,8 @@ Custom Description Components receive all [Field Component](#the-field-component
 
 | Property       | Description                                                      |
 | -------------- | ---------------------------------------------------------------- |
-| **`description`**    | The `description` property defined in the [Field Config](../fields/overview).         |
+| **`field`** | In Server Components, this is the original Field Config. In Client Components, this is the sanitized Client Field Config. [More details](#the-field-prop). |
+| **`clientField`** | Server components receive the Client Field Config through this prop. [More details](#the-field-prop). |
 
 <Banner type="success">
   <strong>Reminder:</strong>
@@ -477,31 +490,13 @@ Custom Description Components receive all [Field Component](#the-field-component
 
 #### TypeScript
 
-When building Custom Description Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Description Component, one for every [Field Type](../fields/overview). The convention is to append `DescriptionComponent` to the type of field, i.e. `TextFieldDescriptionComponent`.
+When building Custom Description Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Description Component, one for every [Field Type](../fields/overview) and server/client environment. The convention is to append `DescriptionServerComponent` or `DescriptionClientComponent` to the type of field, i.e. `TextFieldDescriptionClientComponent`.
 
 ```tsx
 import type {
-  ArrayFieldDescriptionComponent,
-  BlocksFieldDescriptionComponent,
-  CheckboxFieldDescriptionComponent,
-  CodeFieldDescriptionComponent,
-  CollapsibleFieldDescriptionComponent,
-  DateFieldDescriptionComponent,
-  EmailFieldDescriptionComponent,
-  GroupFieldDescriptionComponent,
-  HiddenFieldDescriptionComponent,
-  JSONFieldDescriptionComponent,
-  NumberFieldDescriptionComponent,
-  PointFieldDescriptionComponent,
-  RadioFieldDescriptionComponent,
-  RelationshipFieldDescriptionComponent,
-  RichTextFieldDescriptionComponent,
-  RowFieldDescriptionComponent,
-  SelectFieldDescriptionComponent,
-  TabsFieldDescriptionComponent,
-  TextFieldDescriptionComponent,
-  TextareaFieldDescriptionComponent,
-  UploadFieldDescriptionComponent
+  TextFieldDescriptionServerComponent,
+  TextFieldDescriptionClientComponent,
+  // And so on for each Field Type
 } from 'payload'
 ```
 
@@ -524,8 +519,8 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
       admin: {
         components: {
           // highlight-start
-          beforeInput: [MyCustomComponent],
-          afterInput: [MyOtherCustomComponent],
+          beforeInput: ['/path/to/MyCustomComponent'],
+          afterInput: ['/path/to/MyOtherCustomComponent'],
           // highlight-end
         }
       }

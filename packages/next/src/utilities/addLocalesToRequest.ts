@@ -31,8 +31,12 @@ export function addLocalesToRequestFromData(req: PayloadRequest): void {
       localization: config.localization,
     })
 
-    if (locale) req.locale = locale
-    if (fallbackLocale) req.fallbackLocale = fallbackLocale
+    if (locale) {
+      req.locale = locale
+    }
+    if (fallbackLocale) {
+      req.fallbackLocale = fallbackLocale
+    }
   }
 }
 

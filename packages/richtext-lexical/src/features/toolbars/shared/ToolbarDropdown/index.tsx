@@ -29,6 +29,9 @@ const ToolbarItem = ({
   item: ToolbarGroupItem
 }) => {
   const { i18n } = useTranslation()
+  const {
+    field: { richTextComponentMap },
+  } = useEditorConfigContext()
 
   if (item.Component) {
     return (
@@ -47,7 +50,8 @@ const ToolbarItem = ({
 
   let title = item.key
   if (item.label) {
-    title = typeof item.label === 'function' ? item.label({ i18n }) : item.label
+    title =
+      typeof item.label === 'function' ? item.label({ i18n, richTextComponentMap }) : item.label
   }
   // Crop title to max. 25 characters
   if (title.length > 25) {
@@ -63,22 +67,22 @@ const ToolbarItem = ({
 }
 
 export const ToolbarDropdown = ({
-  Icon,
   anchorElem,
   classNames,
   editor,
   groupKey,
+  Icon,
   items,
   itemsContainerClassNames,
   label,
   maxActiveItems,
   onActiveChange,
 }: {
-  Icon?: React.FC
   anchorElem: HTMLElement
   classNames?: string[]
   editor: LexicalEditor
   groupKey: string
+  Icon?: React.FC
   items: ToolbarGroupItem[]
   itemsContainerClassNames?: string[]
   label?: string
@@ -132,13 +136,6 @@ export const ToolbarDropdown = ({
   }, [updateStates])
 
   useEffect(() => {
-    document.addEventListener('mouseup', updateStates)
-    return () => {
-      document.removeEventListener('mouseup', updateStates)
-    }
-  }, [updateStates])
-
-  useEffect(() => {
     return mergeRegister(
       editor.registerUpdateListener(() => {
         updateStates()
@@ -148,11 +145,11 @@ export const ToolbarDropdown = ({
 
   return (
     <DropDown
-      Icon={Icon}
       buttonAriaLabel={`${groupKey} dropdown`}
       buttonClassName={[baseClass, `${baseClass}-${groupKey}`, ...(classNames || [])]
         .filter(Boolean)
         .join(' ')}
+      Icon={Icon}
       itemsContainerClassNames={[`${baseClass}-items`, ...(itemsContainerClassNames || [])]}
       key={groupKey}
       label={label}

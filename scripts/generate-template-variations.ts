@@ -11,6 +11,7 @@
 
 import type { DbType, StorageAdapterType } from 'packages/create-payload-app/src/types.js'
 
+import chalk from 'chalk'
 import { execSync } from 'child_process'
 import { configurePayloadConfig } from 'create-payload-app/lib/configure-payload-config.js'
 import { copyRecursiveSync } from 'create-payload-app/utils/copy-recursive-sync.js'
@@ -33,6 +34,7 @@ type TemplateVariations = {
   envNames?: {
     dbUri: string
   }
+  configureConfig?: boolean
 }
 
 main().catch((error) => {
@@ -50,7 +52,7 @@ async function main() {
     {
       name: 'payload-vercel-postgres-template',
       dirname: 'with-vercel-postgres',
-      db: 'postgres',
+      db: 'vercelPostgres',
       storage: 'vercelBlobStorage',
       sharp: false,
       vercelDeployButtonLink:
@@ -66,6 +68,13 @@ async function main() {
         // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
         dbUri: 'POSTGRES_URL',
       },
+    },
+    {
+      name: 'payload-postgres-template',
+      dirname: 'with-postgres',
+      db: 'postgres',
+      storage: 'localDisk',
+      sharp: true,
     },
     {
       name: 'payload-vercel-mongodb-template',
@@ -93,6 +102,9 @@ async function main() {
       db: 'mongodb',
       storage: 'localDisk',
       sharp: true,
+      // The blank template is used as a base for create-payload-app functionality,
+      // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
+      configureConfig: false,
     },
     {
       name: 'payload-cloud-mongodb-template',
@@ -111,21 +123,31 @@ async function main() {
     vercelDeployButtonLink,
     envNames,
     sharp,
+    configureConfig,
   } of variations) {
-    console.log(`Generating ${name}...`)
+    header(`Generating ${name}...`)
     const destDir = path.join(templatesDir, dirname)
     copyRecursiveSync(path.join(templatesDir, '_template'), destDir)
-    console.log(`Generated ${name} in ${destDir}`)
+    log(`Copied to ${destDir}`)
 
-    // Configure payload config
-    await configurePayloadConfig({
-      dbType: db,
-      packageJsonName: name,
-      projectDirOrConfigPath: { projectDir: destDir },
-      storageAdapter: storage,
-      sharp,
-      envNames,
-    })
+    if (configureConfig !== false) {
+      log('Configuring payload.config.ts')
+      await configurePayloadConfig({
+        dbType: db,
+        packageJsonName: name,
+        projectDirOrConfigPath: { projectDir: destDir },
+        storageAdapter: storage,
+        sharp,
+        envNames,
+      })
+
+      log('Configuring .env.example')
+      // Replace DATABASE_URI with the correct env name if set
+      await writeEnvExample({
+        destDir,
+        envNames,
+      })
+    }
 
     await generateReadme({
       destDir,
@@ -146,7 +168,7 @@ async function main() {
       if ((await fs.stat(migrationDestDir).catch(() => null)) === null) {
         await fs.mkdir(migrationDestDir, { recursive: true })
       }
-      console.log(`Copying migrations from ${migrationSrcDir} to ${migrationDestDir}`)
+      log(`Copying migrations from ${migrationSrcDir} to ${migrationDestDir}`)
       copyRecursiveSync(migrationSrcDir, migrationDestDir)
     }
 
@@ -154,13 +176,13 @@ async function main() {
 
     // TODO: Sharp?
 
-    console.log(`Done configuring payload config for ${destDir}/src/payload.config.ts`)
+    log(`Done configuring payload config for ${destDir}/src/payload.config.ts`)
   }
   // TODO: Run prettier manually on the generated files, husky blows up
-  console.log('Running prettier on generated files...')
+  log('Running prettier on generated files...')
   execSync(`pnpm prettier --write templates "*.{js,jsx,ts,tsx}"`)
 
-  console.log('Template generation complete!')
+  log('Template generation complete!')
 }
 
 async function generateReadme({
@@ -192,5 +214,35 @@ ${description}
 
   const readmePath = path.join(destDir, 'README.md')
   await fs.writeFile(readmePath, readmeContent)
-  console.log(`Generated README.md in ${readmePath}`)
+  log('Generated README.md')
+}
+
+async function writeEnvExample({
+  destDir,
+  envNames,
+}: {
+  destDir: string
+  envNames?: TemplateVariations['envNames']
+}) {
+  const envExamplePath = path.join(destDir, '.env.example')
+  const envFileContents = await fs.readFile(envExamplePath, 'utf8')
+  const fileContents = envFileContents
+    .split('\n')
+    .filter((e) => e)
+    .map((l) =>
+      envNames?.dbUri && l.startsWith('DATABASE_URI')
+        ? l.replace('DATABASE_URI', envNames.dbUri)
+        : l,
+    )
+    .join('\n')
+
+  await fs.writeFile(envExamplePath, fileContents)
+}
+
+function header(message: string) {
+  console.log(chalk.bold.green(`\n${message}\n`))
+}
+
+function log(message: string) {
+  console.log(chalk.dim(message))
 }

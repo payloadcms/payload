@@ -12,11 +12,11 @@ type BuildFindQueryArgs = {
   tableName: string
 }
 
-export type Result = DBQueryConfig<'many', true, any, any> & {
-  with?: DBQueryConfig<'many', true, any, any> & {
+export type Result = {
+  with?: {
     _locales?: DBQueryConfig<'many', true, any, any>
-  }
-}
+  } & DBQueryConfig<'many', true, any, any>
+} & DBQueryConfig<'many', true, any, any>
 
 // Generate the Drizzle query for findMany based on
 // a collection field structure
@@ -80,6 +80,7 @@ export const buildFindManyArgs = ({
     depth,
     fields,
     path: '',
+    tablePath: '',
     topLevelArgs: result,
     topLevelTableName: tableName,
   })

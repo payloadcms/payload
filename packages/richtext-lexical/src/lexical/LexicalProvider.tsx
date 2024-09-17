@@ -1,28 +1,24 @@
 'use client'
 import type { InitialConfigType } from '@lexical/react/LexicalComposer.js'
 import type { EditorState, LexicalEditor, SerializedEditorState } from 'lexical'
-import type { FormFieldBase } from 'payload'
 
 import { LexicalComposer } from '@lexical/react/LexicalComposer.js'
 import * as React from 'react'
 import { useMemo } from 'react'
 
+import type { LexicalRichTextFieldProps } from '../types.js'
 import type { SanitizedClientEditorConfig } from './config/types.js'
 
-import { LexicalEditor as LexicalEditorComponent } from './LexicalEditor.js'
 import {
   EditorConfigProvider,
   useEditorConfigContext,
 } from './config/client/EditorConfigProvider.js'
+import { LexicalEditor as LexicalEditorComponent } from './LexicalEditor.js'
 import { getEnabledNodes } from './nodes/index.js'
 
 export type LexicalProviderProps = {
   editorConfig: SanitizedClientEditorConfig
-  fieldProps: {
-    editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
-    name: string
-    richTextComponentMap: Map<string, React.ReactNode>
-  } & FormFieldBase
+  field: LexicalRichTextFieldProps['field']
   onChange: (editorState: EditorState, editor: LexicalEditor, tags: Set<string>) => void
   path: string
   readOnly: boolean
@@ -45,7 +41,7 @@ const NestProviders = ({ children, providers }) => {
 }
 
 export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
-  const { editorConfig, fieldProps, onChange, path, readOnly, value } = props
+  const { editorConfig, field, onChange, path, readOnly, value } = props
 
   const parentContext = useEditorConfigContext()
 
@@ -103,7 +99,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
       <EditorConfigProvider
         editorConfig={editorConfig}
         editorContainerRef={editorContainerRef}
-        fieldProps={fieldProps}
+        field={field}
         parentContext={parentContext}
       >
         <NestProviders providers={editorConfig.features.providers}>

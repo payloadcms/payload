@@ -1,15 +1,57 @@
-import type { ErrorComponent } from '../forms/Error.js'
-import type { FieldMap } from '../forms/FieldMap.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { MarkOptional } from 'ts-essentials'
 
-export type CollapsibleFieldProps = {
-  fieldMap: FieldMap
-  initCollapsed?: boolean
-  width?: string
-} & FormFieldBase
+import type { CollapsibleField, CollapsibleFieldClient } from '../../fields/config/types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+} from '../types.js'
 
-export type CollapsibleFieldLabelComponent = LabelComponent<'collapsible'>
+type CollapsibleFieldClientWithoutType = MarkOptional<CollapsibleFieldClient, 'type'>
 
-export type CollapsibleFieldDescriptionComponent = DescriptionComponent<'collapsible'>
+export type CollapsibleFieldClientProps = ClientFieldBase<CollapsibleFieldClientWithoutType>
 
-export type CollapsibleFieldErrorComponent = ErrorComponent<'collapsible'>
+export type CollapsibleFieldServerProps = ServerFieldBase<
+  CollapsibleField,
+  CollapsibleFieldClientWithoutType
+>
+
+export type CollapsibleFieldServerComponent = FieldServerComponent<
+  CollapsibleField,
+  CollapsibleFieldClientWithoutType
+>
+
+export type CollapsibleFieldClientComponent =
+  FieldClientComponent<CollapsibleFieldClientWithoutType>
+
+export type CollapsibleFieldLabelServerComponent = FieldLabelServerComponent<
+  CollapsibleField,
+  CollapsibleFieldClientWithoutType
+>
+
+export type CollapsibleFieldLabelClientComponent =
+  FieldLabelClientComponent<CollapsibleFieldClientWithoutType>
+
+export type CollapsibleFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  CollapsibleField,
+  CollapsibleFieldClientWithoutType
+>
+
+export type CollapsibleFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<CollapsibleFieldClientWithoutType>
+
+export type CollapsibleFieldErrorServerComponent = FieldErrorServerComponent<
+  CollapsibleField,
+  CollapsibleFieldClientWithoutType
+>
+
+export type CollapsibleFieldErrorClientComponent =
+  FieldErrorClientComponent<CollapsibleFieldClientWithoutType>

@@ -50,7 +50,9 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
       : true
 
     // If errors are disabled, and access returns false, return null
-    if (accessResults === false) return null
+    if (accessResults === false) {
+      return null
+    }
 
     const hasWhereAccess = typeof accessResults === 'object'
 
@@ -73,8 +75,12 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
 
     if (!result) {
       if (!disableErrors) {
-        if (!hasWhereAccess) throw new NotFound(req.t)
-        if (hasWhereAccess) throw new Forbidden(req.t)
+        if (!hasWhereAccess) {
+          throw new NotFound(req.t)
+        }
+        if (hasWhereAccess) {
+          throw new Forbidden(req.t)
+        }
       }
 
       return null

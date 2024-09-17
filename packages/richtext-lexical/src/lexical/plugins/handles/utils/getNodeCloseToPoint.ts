@@ -1,3 +1,4 @@
+'use client'
 import type { LexicalEditor, LexicalNode } from 'lexical'
 
 import { $getNodeByKey } from 'lexical'
@@ -42,8 +43,8 @@ type Output = {
 }
 
 const cache = {
-  props: null as Props | null,
-  result: null as Output | null,
+  props: null as null | Props,
+  result: null as null | Output,
 }
 
 function isPointClose(previous: Point, current: Point, threshold: number = 20): boolean {

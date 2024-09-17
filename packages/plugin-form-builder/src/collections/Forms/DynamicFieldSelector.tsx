@@ -1,6 +1,6 @@
 'use client'
 
-import type { SelectFieldValidation, TextFieldProps } from 'payload'
+import type { SelectFieldClientProps, SelectFieldValidation } from 'payload'
 
 import { SelectField, useForm } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react'
 import type { SelectFieldOption } from '../../types.js'
 
 export const DynamicFieldSelector: React.FC<
-  { validate: SelectFieldValidation } & TextFieldProps
+  { validate: SelectFieldValidation } & SelectFieldClientProps
 > = (props) => {
   const { fields, getDataByPath } = useForm()
 
@@ -19,7 +19,7 @@ export const DynamicFieldSelector: React.FC<
 
     if (fields) {
       const allNonPaymentFields = fields
-        .map((block): SelectFieldOption | null => {
+        .map((block): null | SelectFieldOption => {
           const { name, blockType, label } = block
 
           if (blockType !== 'payment') {
@@ -36,5 +36,13 @@ export const DynamicFieldSelector: React.FC<
     }
   }, [fields, getDataByPath])
 
-  return <SelectField {...props} options={options} />
+  return (
+    <SelectField
+      {...props}
+      field={{
+        options,
+        ...(props.field || {}),
+      }}
+    />
+  )
 }

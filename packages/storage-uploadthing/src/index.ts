@@ -56,7 +56,7 @@ export const uploadthingStorage: UploadthingPlugin =
       uploadthingStorageOptions.options.acl = 'public-read'
     }
 
-    const adapter = uploadthingInternal(uploadthingStorageOptions, incomingConfig)
+    const adapter = uploadthingInternal(uploadthingStorageOptions)
 
     // Add adapter to each collection option object
     const collectionsWithAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
@@ -101,7 +101,7 @@ export const uploadthingStorage: UploadthingPlugin =
     })(config)
   }
 
-function uploadthingInternal(options: UploadthingStorageOptions, incomingConfig: Config): Adapter {
+function uploadthingInternal(options: UploadthingStorageOptions): Adapter {
   const fields: Field[] = [
     {
       name: '_key',

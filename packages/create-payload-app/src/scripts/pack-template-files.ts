@@ -9,7 +9,7 @@ const dirname = path.dirname(filename)
 main()
 
 /**
- * Copy the necessary template files from `templates/blank-3.0` to `dist/template`
+ * Copy the necessary template files from `templates/blank` to `dist/template`
  *
  * Eventually, this should be replaced with using tar.x to stream from the git repo
  */
@@ -17,7 +17,7 @@ main()
 async function main() {
   const root = path.resolve(dirname, '../../../../')
   const outputPath = path.resolve(dirname, '../../dist/template')
-  const sourceTemplatePath = path.resolve(root, 'templates/blank-3.0')
+  const sourceTemplatePath = path.resolve(root, 'templates/blank')
 
   if (!fs.existsSync(sourceTemplatePath)) {
     throw new Error(`Source path does not exist: ${sourceTemplatePath}`)
@@ -27,7 +27,7 @@ async function main() {
     fs.mkdirSync(outputPath, { recursive: true })
   }
 
-  // Copy the src directory from `templates/blank-3.0` to `dist`
+  // Copy the src directory from `templates/blank` to `dist`
   const srcPath = path.resolve(sourceTemplatePath, 'src')
   const distSrcPath = path.resolve(outputPath, 'src')
   // Copy entire file structure from src to dist

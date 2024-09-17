@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax, no-await-in-loop */
 import type { PayloadRequest } from 'payload'
 
 import {
@@ -58,7 +57,9 @@ export async function migrateReset(this: DrizzleAdapter): Promise<void> {
     } catch (err: unknown) {
       let msg = `Error running migration ${migrationFile.name}.`
 
-      if (err instanceof Error) msg += ` ${err.message}`
+      if (err instanceof Error) {
+        msg += ` ${err.message}`
+      }
 
       await killTransaction(req)
       payload.logger.error({

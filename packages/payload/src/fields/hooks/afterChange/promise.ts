@@ -10,12 +10,12 @@ import { getFieldPaths } from '../../getFieldPaths.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: JsonObject
   doc: JsonObject
   field: Field | TabAsField
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
   /**
    * The parent's path
@@ -132,7 +132,7 @@ export const promise = async ({
               req,
               schemaPath: fieldSchemaPath,
               siblingData: siblingData?.[field.name]?.[i] || {},
-              siblingDoc: ({ ...(row as JsonObject) } as JsonObject) || {},
+              siblingDoc: row ? { ...row } : {},
             }),
           )
         })
@@ -167,7 +167,7 @@ export const promise = async ({
                 req,
                 schemaPath: fieldSchemaPath,
                 siblingData: siblingData?.[field.name]?.[i] || {},
-                siblingDoc: ({ ...(row as JsonObject) } as JsonObject) || {},
+                siblingDoc: row ? { ...row } : {},
               }),
             )
           }

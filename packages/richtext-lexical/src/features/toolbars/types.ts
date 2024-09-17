@@ -80,7 +80,12 @@ export type ToolbarGroupItem = {
   /** Each toolbar item needs to have a unique key. */
   key: string
   /** The label will be displayed in your toolbar item, if it's within a dropdown group. In order to make use of i18n, this can be a function. */
-  label?: (({ i18n }: { i18n: I18nClient<{}, string> }) => string) | string
+  label?:
+    | ((args: {
+        i18n: I18nClient<{}, string>
+        richTextComponentMap: Map<string, React.ReactNode>
+      }) => string)
+    | string
   /** Each toolbar item needs to have a unique key. */
   onSelect?: ({ editor, isActive }: { editor: LexicalEditor; isActive: boolean }) => void
   order?: number

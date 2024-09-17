@@ -24,6 +24,7 @@ import {
   adminThumbnailSizeSlug,
   animatedTypeMedia,
   audioSlug,
+  customFileNameMediaSlug,
   focalOnlySlug,
   mediaSlug,
   relationPreviewSlug,
@@ -51,6 +52,7 @@ let withMetadataURL: AdminUrlUtil
 let withoutMetadataURL: AdminUrlUtil
 let withOnlyJPEGMetadataURL: AdminUrlUtil
 let relationPreviewURL: AdminUrlUtil
+let customFileNameURL: AdminUrlUtil
 
 describe('uploads', () => {
   let page: Page
@@ -74,6 +76,7 @@ describe('uploads', () => {
     withoutMetadataURL = new AdminUrlUtil(serverURL, withoutMetadataSlug)
     withOnlyJPEGMetadataURL = new AdminUrlUtil(serverURL, withOnlyJPEGMetadataSlug)
     relationPreviewURL = new AdminUrlUtil(serverURL, relationPreviewSlug)
+    customFileNameURL = new AdminUrlUtil(serverURL, customFileNameMediaSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -243,6 +246,25 @@ describe('uploads', () => {
     await expect(page.locator('.file-details img')).toBeVisible()
   })
 
+  test('should have custom file name for image size', async () => {
+    await page.goto(customFileNameURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+
+    await expect(page.locator('.file-field__upload .thumbnail img')).toBeVisible()
+
+    await saveDocAndAssert(page)
+
+    await expect(page.locator('.file-details img')).toBeVisible()
+
+    await page.locator('.file-field__previewSizes').click()
+
+    const renamedImageSizeFile = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(1)
+
+    await expect(renamedImageSizeFile).toContainText('custom-500x500.png')
+  })
+
   test('should show draft uploads in the relation list', async () => {
     await page.goto(relationURL.list)
     // from the list edit the first document
@@ -264,7 +286,7 @@ describe('uploads', () => {
     await page.locator('.field-type:nth-of-type(2) .icon--x').click()
 
     // choose from existing
-    await openDocDrawer(page, '.list-drawer__toggler')
+    await openDocDrawer(page, '.upload__listToggler')
 
     await expect(page.locator('.row-3 .cell-title')).toContainText('draft')
   })
@@ -275,9 +297,9 @@ describe('uploads', () => {
 
     // remove the selection and open the list drawer
     await wait(500) // flake workaround
-    await page.locator('.file-details__remove').click()
+    await page.locator('#field-audio .upload-relationship-details__remove').click()
 
-    await openDocDrawer(page, '.upload__toggler.list-drawer__toggler')
+    await openDocDrawer(page, '#field-audio  .upload__listToggler')
 
     const listDrawer = page.locator('[id^=list-drawer_1_]')
     await expect(listDrawer).toBeVisible()
@@ -310,9 +332,9 @@ describe('uploads', () => {
 
     // remove the selection and open the list drawer
     await wait(500) // flake workaround
-    await page.locator('.file-details__remove').click()
+    await page.locator('#field-audio .upload-relationship-details__remove').click()
 
-    await openDocDrawer(page, '.upload__toggler.list-drawer__toggler')
+    await openDocDrawer(page, '.upload__listToggler')
 
     const listDrawer = page.locator('[id^=list-drawer_1_]')
     await expect(listDrawer).toBeVisible()

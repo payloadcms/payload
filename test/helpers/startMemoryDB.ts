@@ -7,7 +7,7 @@ export default async () => {
   process.env.PAYLOAD_DROP_DATABASE = 'true'
   process.env.NODE_OPTIONS = '--no-deprecation'
   process.env.DISABLE_PAYLOAD_HMR = 'true'
-  process.env.NODE_OPTIONS = '--experimental-vm-modules --no-deprecation'
+  process.env.NODE_OPTIONS = '--no-deprecation'
 
   if (
     (!process.env.PAYLOAD_DATABASE || process.env.PAYLOAD_DATABASE === 'mongodb') &&

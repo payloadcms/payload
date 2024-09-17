@@ -1,8 +1,8 @@
 'use client'
-import type { DocumentPreferences, TabsFieldProps } from 'payload'
+import type { DocumentPreferences, TabsFieldClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { toKebabCase } from 'payload/shared'
+import { tabHasName, toKebabCase } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
@@ -14,24 +14,24 @@ import { usePreferences } from '../../providers/Preferences/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { fieldBaseClass } from '../shared/index.js'
-import { TabComponent } from './Tab/index.js'
 import './index.scss'
 import { TabsProvider } from './provider.js'
+import { TabComponent } from './Tab/index.js'
 
 const baseClass = 'tabs-field'
 
 export { TabsProvider }
 
-const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
+const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const {
-    name,
-    CustomDescription,
-    className,
-    descriptionProps,
+    field,
+    field: {
+      _path: pathFromProps,
+      admin: { className, readOnly: readOnlyFromAdmin } = {},
+      tabs = [],
+    },
     forceRender = false,
-    path: pathFromProps,
-    readOnly: readOnlyFromProps,
-    tabs = [],
+    readOnly: readOnlyFromTopLevelProps,
   } = props
 
   const {
@@ -41,9 +41,10 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
     schemaPath,
     siblingPermissions,
   } = useFieldProps()
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const readOnly = readOnlyFromProps || readOnlyFromContext
-  const path = pathFromContext ?? pathFromProps ?? name
+  const path = pathFromContext ?? pathFromProps
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
   const { i18n } = useTranslation()
@@ -102,9 +103,9 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
 
   function generateTabPath() {
     let tabPath = path
-    if (path && activeTabConfig.name) {
+    if (path && tabHasName(activeTabConfig) && activeTabConfig.name) {
       tabPath = `${path}.${activeTabConfig.name}`
-    } else if (!path && activeTabConfig.name) {
+    } else if (!path && tabHasName(activeTabConfig) && activeTabConfig.name) {
       tabPath = activeTabConfig.name
     }
 
@@ -153,13 +154,9 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
                 .filter(Boolean)
                 .join(' ')}
             >
-              {CustomDescription ? (
-                CustomDescription
-              ) : (
-                <FieldDescription {...(descriptionProps || {})} />
-              )}
+              <FieldDescription Description={field?.admin?.components?.Description} field={field} />
               <RenderFields
-                fieldMap={activeTabConfig.fieldMap}
+                fields={activeTabConfig.fields}
                 forceRender={forceRender}
                 key={
                   activeTabConfig.label
@@ -174,7 +171,7 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
                     : siblingPermissions
                 }
                 readOnly={readOnly}
-                schemaPath={`${schemaPath ? `${schemaPath}` : ''}${activeTabConfig.name ? `.${activeTabConfig.name}` : ''}`}
+                schemaPath={`${schemaPath ? `${schemaPath}` : ''}${tabHasName(activeTabConfig) && activeTabConfig.name ? `.${activeTabConfig.name}` : ''}`}
               />
             </div>
           )}

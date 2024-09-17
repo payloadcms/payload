@@ -159,7 +159,6 @@ import {
   useAllFormFields,
   useAuth,
   useClientFunctions,
-  useComponentMap,
   useConfig,
   useDebounce,
   useDebouncedCallback,
@@ -212,7 +211,6 @@ import {
   ActionsProvider,
   AuthProvider,
   ClientFunctionProvider,
-  ComponentMapProvider,
   ConfigProvider,
   DocumentEventsProvider,
   DocumentInfoProvider,
@@ -299,14 +297,10 @@ import {
   fieldBaseClass,
 
   // TS Types
-  ActionMap,
-  CollectionComponentMap,
   ColumnPreferences,
-  ConfigComponentMapBase,
   DocumentInfoContext,
   DocumentInfoProps,
   FieldType,
-  FieldComponentProps,
   FormProps,
   RowLabelProps,
   SelectFieldProps,
@@ -323,7 +317,6 @@ import {
   AppHeader,
   BlocksDrawer,
   Column,
-  ComponentMap,
   DefaultBlockImage,
   DeleteMany,
   DocumentControls,
@@ -338,7 +331,6 @@ import {
   FormLoadingOverlayToggle,
   FormSubmit,
   GenerateConfirmation,
-  GlobalComponentMap,
   HydrateClientUser,
   ListControls,
   ListSelection,
@@ -349,7 +341,8 @@ import {
   PublishMany,
   ReactSelect,
   ReactSelectOption,
-  ReducedBlock,
+  ClientField,
+  ClientBlock,
   RenderFields,
   SectionTitle,
   Select,
@@ -474,10 +467,10 @@ export const ServerRenderedDescription = () => <ClientRenderedDescription />
 // file: components/ClientRenderedDescription.tsx
 'use client'
 import React from 'react'
-import type { DescriptionComponent } from 'payload'
+import type { TextFieldDescriptionClientComponent } from 'payload'
 import { useFieldProps, useFormFields } from '@payloadcms/ui'
 
-export const ClientRenderedDescription: DescriptionComponent = () ={
+export const ClientRenderedDescription: TextFieldDescriptionClientComponent = () ={
   const { path } = useFieldProps()
   const { value } = useFormFields(([fields]) => fields[path])
   const customDescription = `Component description: ${path} - ${value}`
@@ -666,8 +659,8 @@ export const ClientArrayRowLabel = () => {
   admin: {
     components: {
       views: {
-        Edit: {
-          Tab: {
+        edit: {
+          tab: {
             pillLabel: '',
           },
         },
@@ -682,9 +675,11 @@ export const ClientArrayRowLabel = () => {
   admin: {
     components: {
       views: {
-        Edit: {
-          Tab: {
-            Pill: MyPill,
+        edit: {
+          tab: {
+            pill: {
+              Component: './path/to/CustomPill.js',
+            },
           },
         },
       },
@@ -716,7 +711,7 @@ import type { FormState } from 'payload'
 
 This is because the configs themselves are not serializable and so they cannot be thread through to the client, i.e. the `DocumentInfoContext`. Instead, various properties of the config are passed instead, like `collectionSlug` and `globalSlug`.  You can use these to access a client-side config, if needed, through the `useConfig` hook (see next bullet).
 
-17. The `useConfig` hook now returns a `ClientConfig` and not a `SanizitedConfig`.
+17. The `useConfig` hook now returns a `ClientConfig` and not a `SanitizedConfig`.
 
 This is because the config itself is not serializable and so it is not able to be thread through to the client, i.e. the `ConfigContext`.
 

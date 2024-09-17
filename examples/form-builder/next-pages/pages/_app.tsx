@@ -14,7 +14,7 @@ export interface IGlobals {
 
 export const getAllGlobals = async (): Promise<IGlobals> => {
   const [mainMenu] = await Promise.all([
-    fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/globals/main-menu?depth=1`).then(res =>
+    fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/globals/main-menu?depth=1`).then((res) =>
       res.json(),
     ),
   ])

@@ -4,11 +4,9 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { CollectionConfig, FilterOptionsProps } from 'payload'
 
-import { withMergedProps } from '@payloadcms/ui/shared'
-
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { PrePopulateFieldUI } from './PrePopulateFieldUI/index.js'
+import { VersionedRelationshipFieldCollection } from './collections/VersionedRelationshipField/index.js'
 import {
   collection1Slug,
   collection2Slug,
@@ -24,7 +22,6 @@ import {
   slug,
   videoCollectionSlug,
 } from './collectionSlugs.js'
-import { VersionedRelationshipFieldCollection } from './collections/VersionedRelationshipField/index.js'
 
 export interface FieldsRelationship {
   createdAt: Date
@@ -55,6 +52,11 @@ const baseRelationshipFields: CollectionConfig['fields'] = [
 ]
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       admin: {
@@ -218,9 +220,6 @@ export default buildConfigWithDefaults({
       slug: relationWithTitleSlug,
     },
     {
-      admin: {
-        useAsTitle: 'name',
-      },
       fields: [
         {
           fields: [
@@ -236,13 +235,13 @@ export default buildConfigWithDefaults({
               name: 'prePopulate',
               admin: {
                 components: {
-                  Field: withMergedProps({
-                    Component: PrePopulateFieldUI,
-                    toMergeIntoProps: {
+                  Field: {
+                    path: '/PrePopulateFieldUI/index.js#PrePopulateFieldUI',
+                    clientProps: {
                       hasMultipleRelations: false,
                       path: 'relationPrePopulate',
                     },
-                  }),
+                  },
                 },
                 width: '25%',
               },
@@ -266,13 +265,13 @@ export default buildConfigWithDefaults({
               name: 'prePopulateRelationHasMany',
               admin: {
                 components: {
-                  Field: withMergedProps({
-                    Component: PrePopulateFieldUI,
-                    toMergeIntoProps: {
+                  Field: {
+                    path: '/PrePopulateFieldUI/index.js#PrePopulateFieldUI',
+                    clientProps: {
                       hasMultipleRelations: false,
                       path: 'relationHasMany',
                     },
-                  }),
+                  },
                 },
                 width: '25%',
               },
@@ -296,13 +295,13 @@ export default buildConfigWithDefaults({
               name: 'prePopulateToMany',
               admin: {
                 components: {
-                  Field: withMergedProps({
-                    Component: PrePopulateFieldUI,
-                    toMergeIntoProps: {
+                  Field: {
+                    path: '/PrePopulateFieldUI/index.js#PrePopulateFieldUI',
+                    clientProps: {
                       hasMultipleRelations: true,
                       path: 'relationToManyHasMany',
                     },
-                  }),
+                  },
                 },
                 width: '25%',
               },

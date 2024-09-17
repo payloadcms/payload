@@ -1,10 +1,10 @@
-import type { CustomComponent } from 'payload'
+import type { CustomComponent, PayloadServerReactComponent } from 'payload'
 
 import React from 'react'
 
 const baseClass = 'collection-edit-button'
 
-export const CollectionEditButton: CustomComponent = () => {
+export const CollectionEditButton: PayloadServerReactComponent<CustomComponent> = () => {
   return (
     <div
       className={baseClass}

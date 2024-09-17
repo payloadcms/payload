@@ -47,7 +47,7 @@ export function convertSlateNodesToLexical({
   parentNodeType: string
   slateNodes: SlateNode[]
 }): SerializedLexicalNode[] {
-  if (!converters?.length) {
+  if (!converters?.length || !slateNodes?.length) {
     return []
   }
   const unknownConverter = converters.find((converter) => converter.nodeTypes.includes('unknown'))

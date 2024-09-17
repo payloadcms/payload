@@ -1,5 +1,5 @@
 'use client'
-import type { DateFieldProps, DateFieldValidation } from 'payload'
+import type { DateFieldClientComponent, DateFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -15,31 +15,35 @@ const baseClass = 'date-time-field'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 
-const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
+const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
-    date: datePickerProps,
     descriptionProps,
     errorProps,
-    label,
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        date: datePickerProps,
+        description,
+        placeholder,
+        readOnly: readOnlyFromAdmin,
+        style,
+        width,
+      } = {},
+      label,
+      required,
+    },
     labelProps,
-    path: pathFromProps,
-    placeholder,
-    readOnly: readOnlyFromProps,
-    required,
-    style,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
-    width,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n } = useTranslation()
 
@@ -77,31 +81,34 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel field={field} Label={field?.admin?.components?.Label} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        {BeforeInput}
+        <FieldError
+          CustomError={field?.admin?.components?.Error}
+          field={field}
+          path={path}
+          {...(errorProps || {})}
+        />
+        <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
         <DatePickerField
           {...datePickerProps}
           onChange={(incomingDate) => {
-            if (!disabled) setValue(incomingDate?.toISOString() || null)
+            if (!disabled) {
+              setValue(incomingDate?.toISOString() || null)
+            }
           }}
           placeholder={getTranslation(placeholder, i18n)}
           readOnly={disabled}
           value={value}
         />
-        {AfterInput}
+        <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
       </div>
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <FieldDescription
+        Description={field?.admin?.components?.Description}
+        description={description}
+        field={field}
+        {...(descriptionProps || {})}
+      />
     </div>
   )
 }

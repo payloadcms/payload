@@ -140,6 +140,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       migrateReset,
       migrateStatus,
       migrationDir,
+      packageName: '@payloadcms/db-sqlite',
       payload,
       queryDrafts,
       rejectInitializing,

@@ -1,6 +1,6 @@
 import type { Access } from 'payload'
 
-import type { User } from '../../../../payload-types'
+import type { User } from '../../../payload-types'
 
 import { isSuperAdmin } from '../../../access/isSuperAdmin'
 import { getTenantAdminTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'

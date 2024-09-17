@@ -1,11 +1,8 @@
-import type React from 'react'
+import type { LexicalPluginNodeConverter, PayloadPluginLexicalData } from './converter/types.js'
 
-import type { LexicalPluginNodeConverterProvider } from './converter/types.js'
-
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { LexicalPluginToLexicalFeatureClient } from '../../../exports/client/index.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { defaultConverters } from './converter/defaultConverters.js'
+import { convertLexicalPluginToLexical } from './converter/index.js'
 import { UnknownConvertedNode } from './nodes/unknownConvertedNode/index.js'
 
 export type LexicalPluginToLexicalFeatureProps = {
@@ -13,9 +10,11 @@ export type LexicalPluginToLexicalFeatureProps = {
     | (({
         defaultConverters,
       }: {
-        defaultConverters: LexicalPluginNodeConverterProvider[]
-      }) => LexicalPluginNodeConverterProvider[])
-    | LexicalPluginNodeConverterProvider[]
+        defaultConverters: LexicalPluginNodeConverter[]
+      }) => LexicalPluginNodeConverter[])
+    | LexicalPluginNodeConverter[]
+  disableHooks?: boolean
+  quiet?: boolean
 }
 
 export const LexicalPluginToLexicalFeature =
@@ -25,7 +24,7 @@ export const LexicalPluginToLexicalFeature =
         props = {}
       }
 
-      let converters: LexicalPluginNodeConverterProvider[] = []
+      let converters: LexicalPluginNodeConverter[] = []
 
       if (props?.converters && typeof props?.converters === 'function') {
         converters = props.converters({ defaultConverters })
@@ -38,21 +37,26 @@ export const LexicalPluginToLexicalFeature =
       props.converters = converters
 
       return {
-        ClientFeature: LexicalPluginToLexicalFeatureClient,
-        generateComponentMap: () => {
-          const map: {
-            [key: string]: React.FC
-          } = {}
+        ClientFeature: '@payloadcms/richtext-lexical/client#LexicalPluginToLexicalFeatureClient',
+        hooks: props.disableHooks
+          ? undefined
+          : {
+              afterRead: [
+                ({ value }) => {
+                  if (!value || !('jsonContent' in value)) {
+                    // incomingEditorState null or not from Lexical Plugin
+                    return value
+                  }
 
-          for (const converter of converters) {
-            if (converter.ClientConverter) {
-              const key = converter.converter.nodeTypes.join('-')
-              map[key] = converter.ClientConverter
-            }
-          }
-
-          return map
-        },
+                  // Lexical Plugin => convert to lexical
+                  return convertLexicalPluginToLexical({
+                    converters: props.converters as LexicalPluginNodeConverter[],
+                    lexicalPluginData: value as PayloadPluginLexicalData,
+                    quiet: props?.quiet,
+                  })
+                },
+              ],
+            },
         nodes: [
           {
             node: UnknownConvertedNode,

@@ -45,7 +45,7 @@ export const ListDrawer: React.FC<ListDrawerProps> = (props) => {
   const { drawerSlug } = props
 
   return (
-    <Drawer Header={null} className={baseClass} gutter={false} slug={drawerSlug}>
+    <Drawer className={baseClass} gutter={false} Header={null} slug={drawerSlug}>
       <ListDrawerContent {...props} />
     </Drawer>
   )
@@ -57,7 +57,9 @@ export const useListDrawer: UseListDrawer = ({
   selectedCollection,
   uploads,
 }) => {
-  const { collections } = useConfig()
+  const {
+    config: { collections },
+  } = useConfig()
   const drawerDepth = useEditDepth()
   const uuid = useId()
   const { closeModal, modalState, openModal, toggleModal } = useModal()
@@ -85,6 +87,7 @@ export const useListDrawer: UseListDrawer = ({
       setCollectionSlugs(filteredCollectionSlugs.map(({ slug }) => slug))
     }
   }, [collectionSlugs, uploads, collections])
+
   const toggleDrawer = useCallback(() => {
     toggleModal(drawerSlug)
   }, [toggleModal, drawerSlug])

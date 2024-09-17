@@ -14,6 +14,11 @@ import { ValidateDraftsOnAndAutosave } from './collections/ValidateDraftsOnAutos
 import { GlobalValidateDraftsOn } from './globals/ValidateDraftsOn/index.js'
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     ErrorFieldsCollection,
     Uploads,

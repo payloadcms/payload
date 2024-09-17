@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-slate",
-  "version": "3.0.0-beta.77",
+  "version": "3.0.0-beta.107",
   "description": "The officially supported Slate richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -16,6 +16,12 @@
       "import": "./src/index.tsx",
       "types": "./src/index.tsx",
       "default": "./src/index.tsx"
+    },
+    "./generateComponentMap": "./src/generateComponentMap.tsx",
+    "./client": {
+      "import": "./src/exports/client/index.ts",
+      "types": "./src/exports/client/index.ts",
+      "default": "./src/exports/client/index.ts"
     }
   },
   "main": "./src/index.tsx",
@@ -29,9 +35,13 @@
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
     "is-hotkey": "0.2.0",
     "slate": "0.91.4",
     "slate-history": "0.86.0",
@@ -40,16 +50,13 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@payloadcms/ui": "workspace:*",
     "@types/is-hotkey": "^0.1.10",
-    "@types/node": "20.12.5",
+    "@types/node": "22.5.4",
     "@types/react": "npm:types-react@19.0.0-rc.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*",
     "payload": "workspace:*",
     "react": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801"
   },
@@ -62,6 +69,16 @@
         "import": "./dist/index.js",
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
+      },
+      "./generateComponentMap": {
+        "import": "./dist/generateComponentMap.js",
+        "types": "./dist/generateComponentMap.d.ts",
+        "default": "./dist/generateComponentMap.js"
+      },
+      "./client": {
+        "import": "./dist/exports/client/index.js",
+        "types": "./dist/exports/client/index.d.ts",
+        "default": "./dist/exports/client/index.js"
       }
     },
     "main": "./dist/index.js",

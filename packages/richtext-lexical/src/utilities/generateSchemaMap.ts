@@ -6,7 +6,7 @@ import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
 
 export const getGenerateSchemaMap =
   (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): RichTextAdapter['generateSchemaMap'] =>
-  ({ config, i18n, schemaMap, schemaPath }) => {
+  ({ config, field, i18n, schemaMap, schemaPath }) => {
     for (const [featureKey, resolvedFeature] of args.resolvedFeatureMap.entries()) {
       if (
         !('generateSchemaMap' in resolvedFeature) ||
@@ -16,6 +16,7 @@ export const getGenerateSchemaMap =
       }
       const schemas = resolvedFeature.generateSchemaMap({
         config,
+        field,
         i18n,
         props: resolvedFeature.sanitizedServerFeatureProps,
         schemaMap,

@@ -1,14 +1,15 @@
 'use client'
 
+import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
+
 import {
   CheckboxField,
   CopyToClipboard,
   Form,
   Gutter,
   MinimizeMaximizeIcon,
-  NumberField as NumberInput,
+  NumberField,
   SetViewActions,
-  useComponentMap,
   useConfig,
   useDocumentInfo,
   useLocale,
@@ -19,9 +20,9 @@ import * as React from 'react'
 import { toast } from 'sonner'
 
 import { SetDocumentStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'
+import './index.scss'
 import { LocaleSelector } from './LocaleSelector/index.js'
 import { RenderJSON } from './RenderJSON/index.js'
-import './index.scss'
 
 const baseClass = 'query-inspector'
 
@@ -32,22 +33,17 @@ export const APIViewClient: React.FC = () => {
   const { i18n, t } = useTranslation()
   const { code } = useLocale()
 
-  const { getComponentMap } = useComponentMap()
-
-  const componentMap = getComponentMap({ collectionSlug, globalSlug })
-
   const {
-    collections,
-    globals,
-    localization,
-    routes: { api: apiRoute },
-    serverURL,
+    config: {
+      localization,
+      routes: { api: apiRoute },
+      serverURL,
+    },
+    getEntityConfig,
   } = useConfig()
 
-  const collectionConfig =
-    collectionSlug && collections.find((collection) => collection.slug === collectionSlug)
-
-  const globalConfig = globalSlug && globals.find((global) => global.slug === globalSlug)
+  const collectionClientConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  const globalClientConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
 
   const localeOptions =
     localization &&
@@ -56,13 +52,13 @@ export const APIViewClient: React.FC = () => {
   let draftsEnabled: boolean = false
   let docEndpoint: string = ''
 
-  if (collectionConfig) {
-    draftsEnabled = Boolean(collectionConfig.versions?.drafts)
+  if (collectionClientConfig) {
+    draftsEnabled = Boolean(collectionClientConfig.versions?.drafts)
     docEndpoint = `/${collectionSlug}/${id}`
   }
 
-  if (globalConfig) {
-    draftsEnabled = Boolean(globalConfig.versions?.drafts)
+  if (globalClientConfig) {
+    draftsEnabled = Boolean(globalClientConfig.versions?.drafts)
     docEndpoint = `/globals/${globalSlug}`
   }
 
@@ -97,11 +93,11 @@ export const APIViewClient: React.FC = () => {
           setData(json)
         } catch (error) {
           toast.error('Error parsing response')
-          console.error(error)
+          console.error(error) // eslint-disable-line no-console
         }
       } catch (error) {
         toast.error('Error making request')
-        console.error(error)
+        console.error(error) // eslint-disable-line no-console
       }
     }
 
@@ -115,14 +111,19 @@ export const APIViewClient: React.FC = () => {
     >
       <SetDocumentStepNav
         collectionSlug={collectionSlug}
-        globalLabel={globalConfig?.label}
+        globalLabel={globalClientConfig?.label}
         globalSlug={globalSlug}
         id={id}
-        pluralLabel={collectionConfig ? collectionConfig?.labels?.plural : undefined}
-        useAsTitle={collectionConfig ? collectionConfig?.admin?.useAsTitle : undefined}
+        pluralLabel={collectionClientConfig ? collectionClientConfig?.labels?.plural : undefined}
+        useAsTitle={collectionClientConfig ? collectionClientConfig?.admin?.useAsTitle : undefined}
         view="API"
       />
-      <SetViewActions actions={componentMap?.actionsMap?.Edit?.API} />
+      <SetViewActions
+        actions={
+          (collectionClientConfig || globalClientConfig)?.admin?.components?.views?.edit?.api
+            ?.actions
+        }
+      />
       <div className={`${baseClass}__configuration`}>
         <div className={`${baseClass}__api-url`}>
           <span className={`${baseClass}__label`}>
@@ -160,28 +161,33 @@ export const APIViewClient: React.FC = () => {
             <div className={`${baseClass}__filter-query-checkboxes`}>
               {draftsEnabled && (
                 <CheckboxField
-                  label={t('version:draft')}
-                  name="draft"
+                  field={{
+                    name: 'draft',
+                    label: t('version:draft'),
+                  }}
                   onChange={() => setDraft(!draft)}
-                  path="draft"
                 />
               )}
               <CheckboxField
-                label={t('authentication:authenticated')}
-                name="authenticated"
+                field={{
+                  name: 'authenticated',
+                  label: t('authentication:authenticated'),
+                }}
                 onChange={() => setAuthenticated(!authenticated)}
-                path="authenticated"
               />
             </div>
             {localeOptions && <LocaleSelector localeOptions={localeOptions} onChange={setLocale} />}
-            <NumberInput
-              label={t('general:depth')}
-              max={10}
-              min={0}
-              name="depth"
+            <NumberField
+              field={{
+                name: 'depth',
+                admin: {
+                  step: 1,
+                },
+                label: t('general:depth'),
+                max: 10,
+                min: 0,
+              }}
               onChange={(value) => setDepth(value?.toString())}
-              path="depth"
-              step={1}
             />
           </div>
         </Form>

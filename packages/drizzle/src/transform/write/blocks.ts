@@ -1,5 +1,4 @@
-/* eslint-disable no-param-reassign */
-import type { BlockField } from 'payload'
+import type { BlocksField } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 
@@ -16,7 +15,7 @@ type Args = {
   }
   blocksToDelete: Set<string>
   data: Record<string, unknown>[]
-  field: BlockField
+  field: BlocksField
   locale?: string
   numbers: Record<string, unknown>[]
   path: string
@@ -26,6 +25,11 @@ type Args = {
     [tableName: string]: Record<string, unknown>[]
   }
   texts: Record<string, unknown>[]
+  /**
+   * Set to a locale code if this set of fields is traversed within a
+   * localized array or block field
+   */
+  withinArrayOrBlockLocale?: string
 }
 export const transformBlocks = ({
   adapter,
@@ -41,14 +45,21 @@ export const transformBlocks = ({
   relationshipsToDelete,
   selects,
   texts,
+  withinArrayOrBlockLocale,
 }: Args) => {
   data.forEach((blockRow, i) => {
-    if (typeof blockRow.blockType !== 'string') return
+    if (typeof blockRow.blockType !== 'string') {
+      return
+    }
     const matchedBlock = field.blocks.find(({ slug }) => slug === blockRow.blockType)
-    if (!matchedBlock) return
+    if (!matchedBlock) {
+      return
+    }
     const blockType = toSnakeCase(blockRow.blockType)
 
-    if (!blocks[blockType]) blocks[blockType] = []
+    if (!blocks[blockType]) {
+      blocks[blockType] = []
+    }
 
     const newRow: BlockRowToInsert = {
       arrays: {},
@@ -59,7 +70,12 @@ export const transformBlocks = ({
       },
     }
 
-    if (field.localized && locale) newRow.row._locale = locale
+    if (field.localized && locale) {
+      newRow.row._locale = locale
+    }
+    if (withinArrayOrBlockLocale) {
+      newRow.row._locale = withinArrayOrBlockLocale
+    }
 
     const blockTableName = adapter.tableNameMap.get(`${baseTableName}_blocks_${blockType}`)
 
@@ -94,6 +110,7 @@ export const transformBlocks = ({
       row: newRow.row,
       selects,
       texts,
+      withinArrayOrBlockLocale,
     })
 
     blocks[blockType].push(newRow)

@@ -1,4 +1,4 @@
-import type { ResizeOptions, Sharp, Metadata as SharpMetadata } from 'sharp'
+import type { ResizeOptions, Sharp } from 'sharp'
 
 import type { TypeWithID } from '../collections/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
@@ -49,12 +49,24 @@ export type ImageUploadFormatOptions = {
  */
 export type ImageUploadTrimOptions = Parameters<Sharp['trim']>[0]
 
+export type GenerateImageName = (args: {
+  extension: string
+  height: number
+  originalName: string
+  sizeName: string
+  width: number
+}) => string
+
 export type ImageSize = {
   /**
    * @deprecated prefer position
    */
   crop?: string // comes from sharp package
   formatOptions?: ImageUploadFormatOptions
+  /**
+   * Generate a custom name for the file of this image size.
+   */
+  generateImageName?: GenerateImageName
   name: string
   trimOptions?: ImageUploadTrimOptions
   /**
@@ -84,6 +96,11 @@ export type UploadConfig = {
    **/
   adminThumbnail?: GetAdminThumbnail | string
   /**
+   * Enables bulk upload of files from the list view.
+   * @default true
+   */
+  bulkUpload?: boolean
+  /**
    * Enables cropping of images.
    * @default true
    */
@@ -106,6 +123,10 @@ export type UploadConfig = {
    * @default undefined
    */
   externalFileHeaderFilter?: (headers: Record<string, string>) => Record<string, string>
+  /**
+   * Field slugs to use for a compount index instead of the default filename index.
+   */
+  filenameCompoundIndex?: string[]
   /**
    * Require files to be uploaded when creating a document.
    * @default true

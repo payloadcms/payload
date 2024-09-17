@@ -1,17 +1,73 @@
+import type { MarkOptional } from 'ts-essentials'
+
+import type { RichTextField, RichTextFieldClient } from '../../fields/config/types.js'
 import type { RichTextFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { MappedField } from '../forms/FieldMap.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+} from '../types.js'
 
-export type RichTextComponentProps = {
-  name: string
-  richTextComponentMap?: Map<string, MappedField[] | React.ReactNode>
-  validate?: RichTextFieldValidation
-  width?: string
-} & Omit<FormFieldBase, 'validate'>
+type RichTextFieldClientWithoutType = MarkOptional<RichTextFieldClient, 'type'>
 
-export type RichTextFieldLabelComponent = LabelComponent<'richText'>
+type RichTextFieldBaseClientProps<
+  TValue extends object = any,
+  TAdapterProps = any,
+  TExtraProperties = object,
+> = {
+  readonly validate?: RichTextFieldValidation
+}
 
-export type RichTextFieldDescriptionComponent = DescriptionComponent<'richText'>
+export type RichTextFieldClientProps<
+  TValue extends object = any,
+  TAdapterProps = any,
+  TExtraProperties = object,
+> = ClientFieldBase<RichTextFieldClientWithoutType> &
+  RichTextFieldBaseClientProps<TValue, TAdapterProps, TExtraProperties>
 
-export type RichTextFieldErrorComponent = ErrorComponent<'richText'>
+export type RichTextFieldServerProps = ServerFieldBase<
+  RichTextField,
+  RichTextFieldClientWithoutType
+>
+
+export type RichTextFieldServerComponent = FieldServerComponent<
+  RichTextField,
+  RichTextFieldClientWithoutType
+>
+
+export type RichTextFieldClientComponent = FieldClientComponent<
+  RichTextFieldClientWithoutType,
+  RichTextFieldBaseClientProps
+>
+
+export type RichTextFieldLabelServerComponent = FieldLabelServerComponent<
+  RichTextField,
+  RichTextFieldClientWithoutType
+>
+
+export type RichTextFieldLabelClientComponent =
+  FieldLabelClientComponent<RichTextFieldClientWithoutType>
+
+export type RichTextFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  RichTextField,
+  RichTextFieldClientWithoutType
+>
+
+export type RichTextFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<RichTextFieldClientWithoutType>
+
+export type RichTextFieldErrorServerComponent = FieldErrorServerComponent<
+  RichTextField,
+  RichTextFieldClientWithoutType
+>
+
+export type RichTextFieldErrorClientComponent =
+  FieldErrorClientComponent<RichTextFieldClientWithoutType>

@@ -5,8 +5,6 @@ import { reduceFieldsToValues } from 'payload/shared'
 import type { BuildFormStateArgs } from '../forms/buildStateFromSchema/index.js'
 import type { FieldSchemaMap } from './buildFieldSchemaMap/types.js'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import {} from '../exports/client/index.js'
 import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
 
@@ -82,7 +80,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
   }
 
   if (!fieldSchema) {
-    throw new Error('Could not find field schema for given path')
+    throw new Error(`Could not find field schema for given path "${schemaPath}"`)
   }
 
   let docPreferences = reqData.docPreferences
@@ -96,7 +94,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
   // If the request does not include doc preferences,
   // we should fetch them. This is useful for DocumentInfoProvider
   // as it reduces the amount of client-side fetches necessary
-  // when we fetch data for the Edit view
+  // when we fetch data for the Edit View
   if (!docPreferences) {
     let preferencesKey
 
@@ -135,7 +133,9 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
           },
         })) as unknown as { docs: { value: DocumentPreferences }[] }
 
-        if (preferencesResult?.docs?.[0]?.value) docPreferences = preferencesResult.docs[0].value
+        if (preferencesResult?.docs?.[0]?.value) {
+          docPreferences = preferencesResult.docs[0].value
+        }
       }
 
       promises.preferences = fetchPreferences()
@@ -144,7 +144,9 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
 
   // If there is a form state,
   // then we can deduce data from that form state
-  if (formState) data = reduceFieldsToValues(formState, true)
+  if (formState) {
+    data = reduceFieldsToValues(formState, true)
+  }
 
   // If we do not have data at this point,
   // we can fetch it. This is useful for DocumentInfoProvider

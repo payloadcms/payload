@@ -1,4 +1,4 @@
-import type { Field, RichTextFieldProps, SanitizedConfig } from 'payload'
+import type { Field, PayloadComponent, RichTextFieldClientProps, SanitizedConfig } from 'payload'
 import type { Editor } from 'slate'
 
 export type TextNode = { [x: string]: unknown; text: string }
@@ -9,19 +9,19 @@ export function nodeIsTextNode(node: ElementNode | TextNode): node is TextNode {
   return 'text' in node
 }
 
-export type RichTextPluginComponent = React.ComponentType
+export type RichTextPluginComponent = PayloadComponent
 export type RichTextPlugin = (editor: Editor) => Editor
 
 export type RichTextCustomElement = {
-  Button?: React.ComponentType<any>
-  Element: React.ComponentType<any>
+  Button?: PayloadComponent
+  Element: PayloadComponent
   name: string
   plugins?: RichTextPluginComponent[]
 }
 
 export type RichTextCustomLeaf = {
-  Button: React.ComponentType<any>
-  Leaf: React.ComponentType<any>
+  Button: PayloadComponent
+  Leaf: PayloadComponent
   name: string
   plugins?: RichTextPluginComponent[]
 }
@@ -70,4 +70,4 @@ export type AdapterArguments = {
   }
 }
 
-export type FieldProps = RichTextFieldProps<any[], AdapterArguments, AdapterArguments>
+export type SlateFieldProps = RichTextFieldClientProps<any[], AdapterArguments, AdapterArguments>

@@ -26,8 +26,10 @@ export const Status: React.FC = () => {
   } = useDocumentInfo()
   const { toggleModal } = useModal()
   const {
-    routes: { api },
-    serverURL,
+    config: {
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
   const [processing, setProcessing] = useState(false)
   const { reset: resetForm } = useForm()
@@ -150,19 +152,27 @@ export const Status: React.FC = () => {
                 {t('version:unpublish')}
               </Button>
               <Modal className={`${baseClass}__modal`} slug={unPublishModalSlug}>
-                <div className={`${baseClass}__modal-template`}>
-                  <h1>{t('version:confirmUnpublish')}</h1>
-                  <p>{t('version:aboutToUnpublish')}</p>
-                  <Button
-                    buttonStyle="secondary"
-                    onClick={processing ? undefined : () => toggleModal(unPublishModalSlug)}
-                    type="button"
-                  >
-                    {t('general:cancel')}
-                  </Button>
-                  <Button onClick={processing ? undefined : () => performAction('unpublish')}>
-                    {t(processing ? 'version:unpublishing' : 'general:confirm')}
-                  </Button>
+                <div className={`${baseClass}__wrapper`}>
+                  <div className={`${baseClass}__content`}>
+                    <h1>{t('version:confirmUnpublish')}</h1>
+                    <p>{t('version:aboutToUnpublish')}</p>
+                  </div>
+                  <div className={`${baseClass}__controls`}>
+                    <Button
+                      buttonStyle="secondary"
+                      onClick={processing ? undefined : () => toggleModal(unPublishModalSlug)}
+                      size="large"
+                      type="button"
+                    >
+                      {t('general:cancel')}
+                    </Button>
+                    <Button
+                      onClick={processing ? undefined : () => performAction('unpublish')}
+                      size="large"
+                    >
+                      {t(processing ? 'version:unpublishing' : 'general:confirm')}
+                    </Button>
+                  </div>
                 </div>
               </Modal>
             </React.Fragment>
@@ -179,22 +189,28 @@ export const Status: React.FC = () => {
                 {t('version:revertToPublished')}
               </Button>
               <Modal className={`${baseClass}__modal`} slug={revertModalSlug}>
-                <div className={`${baseClass}__modal-template`}>
-                  <h1>{t('version:confirmRevertToSaved')}</h1>
-                  <p>{t('version:aboutToRevertToPublished')}</p>
-                  <Button
-                    buttonStyle="secondary"
-                    onClick={processing ? undefined : () => toggleModal(revertModalSlug)}
-                    type="button"
-                  >
-                    {t('general:cancel')}
-                  </Button>
-                  <Button
-                    id="action-revert-to-published-confirm"
-                    onClick={processing ? undefined : () => performAction('revert')}
-                  >
-                    {t(processing ? 'version:reverting' : 'general:confirm')}
-                  </Button>
+                <div className={`${baseClass}__wrapper`}>
+                  <div className={`${baseClass}__content`}>
+                    <h1>{t('version:confirmRevertToSaved')}</h1>
+                    <p>{t('version:aboutToRevertToPublished')}</p>
+                  </div>
+                  <div className={`${baseClass}__controls`}>
+                    <Button
+                      buttonStyle="secondary"
+                      onClick={processing ? undefined : () => toggleModal(revertModalSlug)}
+                      size="large"
+                      type="button"
+                    >
+                      {t('general:cancel')}
+                    </Button>
+                    <Button
+                      id="action-revert-to-published-confirm"
+                      onClick={processing ? undefined : () => performAction('revert')}
+                      size="large"
+                    >
+                      {t(processing ? 'version:reverting' : 'general:confirm')}
+                    </Button>
+                  </div>
                 </div>
               </Modal>
             </React.Fragment>

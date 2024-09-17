@@ -14,6 +14,11 @@ const defaultValueField: TextField = {
 }
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       slug: 'posts',
@@ -269,6 +274,28 @@ export default buildConfigWithDefaults({
       versions: {
         drafts: true,
       },
+    },
+    {
+      slug: 'fields-persistance',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+          virtual: true,
+        },
+        {
+          name: 'textHooked',
+          type: 'text',
+          virtual: true,
+          hooks: { afterRead: [() => 'hooked'] },
+        },
+        {
+          name: 'array',
+          type: 'array',
+          virtual: true,
+          fields: [],
+        },
+      ],
     },
   ],
   globals: [

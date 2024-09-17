@@ -1,5 +1,5 @@
 'use client'
-import type { DefaultCellComponentProps } from 'payload'
+import type { DefaultCellComponentProps, UploadFieldClient } from 'payload'
 
 import React from 'react'
 
@@ -8,7 +8,7 @@ import './index.scss'
 
 const baseClass = 'file'
 
-export interface FileCellProps extends DefaultCellComponentProps<any> {}
+export interface FileCellProps extends DefaultCellComponentProps<any, UploadFieldClient> {}
 
 export const FileCell: React.FC<FileCellProps> = ({
   cellData: filename,

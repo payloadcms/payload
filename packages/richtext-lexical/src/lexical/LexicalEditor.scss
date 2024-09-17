@@ -25,19 +25,31 @@
   }
 
   &--show-gutter {
-    > .rich-text-lexical__wrap > .editor-container  > .editor-scroller > .editor > div > .editor-placeholder {
+    > .rich-text-lexical__wrap
+      > .editor-container
+      > .editor-scroller
+      > .editor
+      > div
+      > .editor-placeholder {
       left: 3rem;
     }
   }
 
-  &:not(&--show-gutter) > .rich-text-lexical__wrap > .editor-container > .editor-scroller > .editor > div > .editor-placeholder {
+  &:not(&--show-gutter)
+    > .rich-text-lexical__wrap
+    > .editor-container
+    > .editor-scroller
+    > .editor
+    > div
+    > .editor-placeholder {
     left: 0;
   }
 
   .editor-placeholder {
     position: absolute;
     top: 8px;
-    font-size: 15px;
+    font-size: base(0.8);
+    line-height: 1.5;
     color: var(--theme-elevation-500);
     /* Prevent text selection */
     user-select: none;

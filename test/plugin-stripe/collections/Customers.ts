@@ -1,7 +1,5 @@
 import type { CollectionConfig } from 'payload'
 
-import { LinkToDoc } from '@payloadcms/plugin-stripe'
-
 import { customersSlug } from '../shared.js'
 
 export const Customers: CollectionConfig = {
@@ -32,7 +30,7 @@ export const Customers: CollectionConfig = {
           type: 'ui',
           admin: {
             components: {
-              Field: LinkToDoc,
+              Field: '@payloadcms/plugin-stripe/client#LinkToDoc',
             },
             custom: {
               isTestKey: process.env.PAYLOAD_PUBLIC_IS_STRIPE_TEST_KEY === 'true',

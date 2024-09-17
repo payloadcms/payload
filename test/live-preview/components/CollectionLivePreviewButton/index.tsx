@@ -1,8 +1,12 @@
+import type { PayloadServerReactComponent, SanitizedCollectionConfig } from 'payload'
+
 import React from 'react'
 
 const baseClass = 'collection-live-preview-button'
 
-const CollectionLivePreviewButton: React.FC = () => {
+export const CollectionLivePreviewButton: PayloadServerReactComponent<
+  SanitizedCollectionConfig['admin']['components']['views']['edit']['livePreview']
+> = () => {
   return (
     <div
       className={baseClass}
@@ -18,5 +22,3 @@ const CollectionLivePreviewButton: React.FC = () => {
     </div>
   )
 }
-
-export default CollectionLivePreviewButton

@@ -1,7 +1,9 @@
+import type { MappedComponent } from 'payload'
+
 import type { EnabledFeatures } from './types.js'
 
 export const createFeatureMap = (
-  richTextComponentMap: Map<string, React.ReactNode>,
+  richTextComponentMap: Map<string, MappedComponent>,
 ): EnabledFeatures => {
   const features: EnabledFeatures = {
     elements: {},
@@ -21,8 +23,12 @@ export const createFeatureMap = (
         }
       }
 
-      if (key.startsWith('leaf.button.')) features.leaves[leafName].Button = value
-      if (key.startsWith('leaf.component.')) features.leaves[leafName].Leaf = value
+      if (key.startsWith('leaf.button.')) {
+        features.leaves[leafName].Button = value
+      }
+      if (key.startsWith('leaf.component.')) {
+        features.leaves[leafName].Leaf = value
+      }
     }
 
     if (key.startsWith('element.button.') || key.startsWith('element.component.')) {
@@ -36,8 +42,12 @@ export const createFeatureMap = (
         }
       }
 
-      if (key.startsWith('element.button.')) features.elements[elementName].Button = value
-      if (key.startsWith('element.component.')) features.elements[elementName].Element = value
+      if (key.startsWith('element.button.')) {
+        features.elements[elementName].Button = value
+      }
+      if (key.startsWith('element.component.')) {
+        features.elements[elementName].Element = value
+      }
     }
 
     if (key.startsWith('leaf.plugin.') || key.startsWith('element.plugin.')) {

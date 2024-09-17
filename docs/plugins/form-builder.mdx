@@ -109,7 +109,7 @@ The `beforeEmail` property is a [beforeChange](<[beforeChange](https://payloadcm
 // payload.config.ts
 formBuilder({
   // ...
-  beforeEmail: (emailsToSend) => {
+  beforeEmail: (emailsToSend, beforeChangeParams) => {
     // modify the emails in any way before they are sent
     return emails.map((email) => ({
       ...email,
@@ -117,6 +117,23 @@ formBuilder({
     }))
   },
 })
+```
+
+For full types with `beforeChangeParams`, you can import the types from the plugin:
+
+```ts
+import type { BeforeEmail } from '@payloadcms/plugin-form-builder'
+// Your generated FormSubmission type
+import type {FormSubmission} from '@payload-types'
+
+// Pass it through and 'data' or 'originalDoc' will now be typed
+const beforeEmail: BeforeEmail<FormSubmission> = (emailsToSend, beforeChangeParams) => {
+  // modify the emails in any way before they are sent
+  return emails.map((email) => ({
+    ...email,
+    html: email.html, // transform the html in any way you'd like (maybe wrap it in an html template?)
+  }))
+}
 ```
 
 ### `formOverrides`

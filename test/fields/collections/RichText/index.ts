@@ -3,11 +3,11 @@ import type { CollectionConfig } from 'payload'
 import {
   BlocksFeature,
   HTMLConverterFeature,
+  lexicalEditor,
+  lexicalHTML,
   LinkFeature,
   TreeViewFeature,
   UploadFeature,
-  lexicalEditor,
-  lexicalHTML,
 } from '@payloadcms/richtext-lexical'
 import { slateEditor } from '@payloadcms/richtext-slate'
 

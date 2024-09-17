@@ -1,13 +1,11 @@
 'use client'
-import type { FieldMap, PayloadRequest } from 'payload'
+import type { PayloadRequest, TextFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
   CopyToClipboard,
-  FieldDescription,
   FieldLabel,
   GenerateConfirmation,
-  useComponentMap,
   useConfig,
   useDocumentInfo,
   useField,
@@ -29,17 +27,16 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
   const [initialAPIKey] = useState(uuidv4())
   const [highlightedField, setHighlightedField] = useState(false)
   const { i18n, t } = useTranslation()
-  const config = useConfig()
-  const apiKey = useFormFields(([fields]) => (fields && fields[path]) || null)
+  const { config } = useConfig()
   const { collectionSlug, docPermissions } = useDocumentInfo()
 
-  const { getFieldMap } = useComponentMap()
+  const apiKey = useFormFields(([fields]) => (fields && fields[path]) || null)
 
-  const fieldMap: FieldMap = getFieldMap({
-    collectionSlug,
-  })
-
-  const apiKeyField = fieldMap.find((field) => 'name' in field && field.name === 'apiKey')
+  const apiKeyField: TextFieldClient = config.collections
+    .find((collection) => {
+      return collection.slug === collectionSlug
+    })
+    ?.fields?.find((field) => 'name' in field && field.name === 'apiKey') as TextFieldClient
 
   const validate = (val) =>
     text(val, {
@@ -54,7 +51,7 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
           config,
         },
         t,
-      } as PayloadRequest,
+      } as unknown as PayloadRequest,
       siblingData: {},
     })
 
@@ -63,21 +60,22 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
   const apiKeyLabel = useMemo(() => {
     let label: Record<string, string> | string = 'API Key'
 
-    if (apiKeyField && apiKeyField.fieldComponentProps.label) {
-      label = apiKeyField.fieldComponentProps.label
+    if (apiKeyField?.label) {
+      label = apiKeyField.label
     }
 
     return getTranslation(label, i18n)
   }, [apiKeyField, i18n])
 
-  const APIKeyLabelComponent = useMemo(() => {
-    return (
+  const APIKeyLabel = useMemo(
+    () => (
       <div className={`${baseClass}__label`}>
         <span>{apiKeyLabel}</span>
         <CopyToClipboard value={apiKeyValue as string} />
       </div>
-    )
-  }, [apiKeyLabel, apiKeyValue])
+    ),
+    [apiKeyLabel, apiKeyValue],
+  )
 
   const canUpdateAPIKey = useMemo(() => {
     if (docPermissions && docPermissions?.fields?.apiKey) {
@@ -125,7 +123,15 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
   return (
     <React.Fragment>
       <div className={[fieldBaseClass, 'api-key', 'read-only'].filter(Boolean).join(' ')}>
-        <FieldLabel CustomLabel={APIKeyLabelComponent} htmlFor={path} />
+        <FieldLabel
+          field={null}
+          htmlFor={path}
+          Label={{
+            type: 'client',
+            Component: null,
+            RenderedComponent: APIKeyLabel,
+          }}
+        />
         <input
           aria-label={apiKeyLabel}
           className={highlightedField ? 'highlight' : undefined}

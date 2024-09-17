@@ -1,16 +1,16 @@
+import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type { Payload, PayloadRequest, TypeWithID } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
-import { commitTransaction, initTransaction } from 'payload'
+import { commitTransaction, initTransaction, QueryError } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import removeFiles from '../helpers/removeFiles.js'
-import configPromise from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -25,7 +25,7 @@ process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
 describe('database', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
     payload.db.migrationDir = path.join(dirname, './migrations')
 
     const loginResult = await payload.login({
@@ -122,24 +122,21 @@ describe('database', () => {
   })
 
   describe('migrations', () => {
-    beforeAll(async () => {
+    beforeEach(async () => {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true' && 'drizzle' in payload.db) {
         const db = payload.db as unknown as PostgresAdapter
         await db.dropDatabase({ adapter: db })
       }
-    })
-
-    afterAll(() => {
       removeFiles(path.join(dirname, './migrations'))
-    })
 
-    it('should run migrate:create', async () => {
       await payload.db.createMigration({
         forceAcceptWarning: true,
         migrationName: 'test',
         payload,
       })
+    })
 
+    it('should run migrate:create', () => {
       // read files names in migrationsDir
       const migrationFile = path.normalize(fs.readdirSync(payload.db.migrationDir)[0])
       expect(migrationFile).toContain('_test')
@@ -479,5 +476,40 @@ describe('database', () => {
       expect(result.group.defaultValue).toStrictEqual('default value from database')
       expect(result.select).toStrictEqual('default')
     })
+  })
+
+  describe('virtual fields', () => {
+    it('should not save a field with `virtual: true` to the db', async () => {
+      const createRes = await payload.create({
+        collection: 'fields-persistance',
+        data: { text: 'asd', array: [], textHooked: 'asd' },
+      })
+
+      const resLocal = await payload.findByID({
+        collection: 'fields-persistance',
+        id: createRes.id,
+      })
+
+      const resDb = (await payload.db.findOne({
+        collection: 'fields-persistance',
+        where: { id: { equals: createRes.id } },
+        req: {} as PayloadRequest,
+      })) as Record<string, unknown>
+
+      expect(resDb.text).toBeUndefined()
+      expect(resDb.array).toBeUndefined()
+      expect(resDb.textHooked).toBeUndefined()
+
+      expect(resLocal.textHooked).toBe('hooked')
+    })
+  })
+
+  it('should not allow to query by a field with `virtual: true`', async () => {
+    await expect(
+      payload.find({
+        collection: 'fields-persistance',
+        where: { text: { equals: 'asd' } },
+      }),
+    ).rejects.toThrow(QueryError)
   })
 })

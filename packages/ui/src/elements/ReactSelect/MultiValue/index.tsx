@@ -40,7 +40,6 @@ export const MultiValue: React.FC<MultiValueProps<Option>> = (props) => {
 
   return (
     <React.Fragment>
-      {/* @ts-expect-error // TODO Fix this - Broke with React 19 types */}
       <SelectComponents.MultiValue
         {...props}
         className={classes}

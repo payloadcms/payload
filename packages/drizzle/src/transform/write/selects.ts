@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import { isArrayOfRows } from '../../utilities/isArrayOfRows.js'
 
 type Args = {

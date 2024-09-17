@@ -1,3 +1,4 @@
+'use client'
 import type { LexicalEditor } from 'lexical'
 
 import { $getRoot } from 'lexical'

@@ -99,7 +99,7 @@ export const buildAfterOperation = async <
   O extends keyof AfterOperationMap<TOperationGeneric> = keyof AfterOperationMap<TOperationGeneric>,
 >(
   operationArgs: { operation: O } & Omit<AfterOperationArg<TOperationGeneric>, 'req'>,
-): Promise<OperationResult<TOperationGeneric, O> | any> => {
+): Promise<any | OperationResult<TOperationGeneric, O>> => {
   const { args, collection, operation, result } = operationArgs
 
   let newResult = result as OperationResult<TOperationGeneric, O>

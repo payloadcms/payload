@@ -1,67 +1,48 @@
 'use client'
-import type { Description, PasswordFieldValidation, PayloadRequest, Validate } from 'payload'
+import type { PasswordFieldValidation, PayloadRequest } from 'payload'
 
-import { useConfig, useLocale, useTranslation } from '@payloadcms/ui'
 import { password } from 'payload/shared'
 import React, { useCallback } from 'react'
 
+import type { PasswordFieldProps } from './types.js'
+
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { isFieldRTL } from '../shared/index.js'
 import './index.scss'
 import { PasswordInput } from './input.js'
 
-export type PasswordFieldProps = {
-  AfterInput?: React.ReactElement
-  BeforeInput?: React.ReactElement
-  CustomDescription?: React.ReactElement
-  CustomError?: React.ReactElement
-  CustomLabel?: React.ReactElement
-  autoComplete?: string
-  className?: string
-  description?: Description
-  disabled?: boolean
-  errorProps?: any // unknown type
-  inputRef?: React.RefObject<HTMLInputElement>
-  label?: string
-  labelProps?: any // unknown type
-  name: string
-  path?: string
-  placeholder?: string
-  required?: boolean
-  rtl?: boolean
-  style?: React.CSSProperties
-  validate?: PasswordFieldValidation
-  width?: string
-}
-
 const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
     autoComplete,
-    className,
-    disabled: disabledFromProps,
     errorProps,
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        description,
+        disabled: disabledFromProps,
+        placeholder,
+        rtl,
+        style,
+        width,
+      } = {} as PasswordFieldProps['field']['admin'],
+      label,
+      required,
+    } = {} as PasswordFieldProps['field'],
     inputRef,
-    label,
     labelProps,
-    path: pathFromProps,
-    placeholder,
-    required,
-    rtl,
-    style,
     validate,
-    width,
   } = props
 
   const { t } = useTranslation()
   const locale = useLocale()
-  const config = useConfig()
+  const { config } = useConfig()
 
   const memoizedValidate: PasswordFieldValidation = useCallback(
     (value, options) => {
@@ -79,7 +60,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
             config,
           },
           t,
-        } as PayloadRequest,
+        } as unknown as PayloadRequest,
         required: true,
         siblingData: {},
       })
@@ -103,15 +84,16 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
 
   return (
     <PasswordInput
-      AfterInput={AfterInput}
-      BeforeInput={BeforeInput}
-      CustomDescription={CustomDescription}
-      CustomError={CustomError}
-      CustomLabel={CustomLabel}
+      afterInput={field?.admin?.components?.afterInput}
       autoComplete={autoComplete}
+      beforeInput={field?.admin?.components?.beforeInput}
       className={className}
+      Description={field?.admin?.components?.Description}
+      description={description}
+      Error={field?.admin?.components?.Error}
       errorProps={errorProps}
       inputRef={inputRef}
+      Label={field?.admin?.components?.Label}
       label={label}
       labelProps={labelProps}
       onChange={(e) => {

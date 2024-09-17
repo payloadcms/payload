@@ -17,7 +17,9 @@ export const authenticateLocalStrategy = async ({ doc, password }: Args): Promis
     if (typeof salt === 'string' && typeof hash === 'string') {
       const res = await new Promise<Doc | null>((resolve, reject) => {
         crypto.pbkdf2(password, salt, 25000, 512, 'sha256', (e, hashBuffer) => {
-          if (e) reject(null)
+          if (e) {
+            reject(null)
+          }
 
           if (scmp(hashBuffer, Buffer.from(hash, 'hex'))) {
             resolve(doc)

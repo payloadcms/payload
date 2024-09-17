@@ -23,6 +23,11 @@ const access = {
 }
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   globals: [
     {
       access,

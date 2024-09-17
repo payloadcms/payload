@@ -8,7 +8,7 @@
     position: absolute;
     order: 3;
     left: unset;
-    inset-inline-end: base(0.5);
+    inset-inline-end: base(0.8);
     top: 50%;
     transform: translateY(-50%);
     color: var(--theme-elevation-600);
@@ -16,8 +16,8 @@
     border: none;
 
     svg {
-      width: base(0.75);
-      height: base(0.75);
+      width: base(0.8);
+      height: base(0.8);
     }
 
     &:hover {
@@ -33,10 +33,11 @@
 
   .toast-title {
     line-height: base(1);
+    margin-right: base(1);
   }
 
   .payload-toast-item {
-    padding: base(0.5);
+    padding: base(0.8);
     color: var(--theme-elevation-800);
     font-style: normal;
     font-weight: 600;
@@ -69,8 +70,8 @@
     }
 
     .toast-icon {
-      width: base(1);
-      height: base(1);
+      width: base(0.8);
+      height: base(0.8);
       margin: 0;
       display: flex;
       align-items: center;
@@ -84,8 +85,8 @@
 
     &.toast-warning {
       color: var(--theme-warning-800);
-      border-color: var(--theme-warning-150);
-      background-color: var(--theme-warning-50);
+      border-color: var(--theme-warning-250);
+      background-color: var(--theme-warning-100);
 
       .payload-toast-close-button {
         color: var(--theme-warning-600);
@@ -98,8 +99,8 @@
 
     &.toast-error {
       color: var(--theme-error-800);
-      border-color: var(--theme-error-150);
-      background-color: var(--theme-error-50);
+      border-color: var(--theme-error-250);
+      background-color: var(--theme-error-100);
 
       .payload-toast-close-button {
         color: var(--theme-error-600);
@@ -112,8 +113,8 @@
 
     &.toast-success {
       color: var(--theme-success-800);
-      border-color: var(--theme-success-150);
-      background-color: var(--theme-success-50);
+      border-color: var(--theme-success-250);
+      background-color: var(--theme-success-100);
 
       .payload-toast-close-button {
         color: var(--theme-success-600);
@@ -126,8 +127,8 @@
 
     &.toast-info {
       color: var(--theme-elevation-800);
-      border-color: var(--theme-elevation-150);
-      background-color: var(--theme-elevation-50);
+      border-color: var(--theme-elevation-250);
+      background-color: var(--theme-elevation-100);
 
       .payload-toast-close-button {
         color: var(--theme-elevation-600);

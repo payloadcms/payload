@@ -1,28 +1,27 @@
-import type { FieldMap, MappedField } from 'payload'
+'use client'
+import type { ClientField } from 'payload'
+
+import { fieldAffectsData } from 'payload/shared'
 
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
 
-export function fieldAffectsData(field: MappedField): boolean {
-  return 'name' in field && field.type !== 'ui'
-}
-
-const getRemainingColumns = (fieldMap: FieldMap, useAsTitle: string): ColumnPreferences =>
-  fieldMap.reduce((remaining, field) => {
+const getRemainingColumns = (fields: ClientField[], useAsTitle: string): ColumnPreferences =>
+  fields.reduce((remaining, field) => {
     if (fieldAffectsData(field) && field.name === useAsTitle) {
       return remaining
     }
 
-    if (!fieldAffectsData(field) && 'fieldMap' in field.fieldComponentProps) {
-      return [...remaining, ...getRemainingColumns(field.fieldComponentProps.fieldMap, useAsTitle)]
+    if (!fieldAffectsData(field) && 'fields' in field) {
+      return [...remaining, ...getRemainingColumns(field.fields, useAsTitle)]
     }
 
-    if (field.type === 'tabs' && 'tabs' in field.fieldComponentProps) {
+    if (field.type === 'tabs' && 'tabs' in field) {
       return [
         ...remaining,
-        ...field.fieldComponentProps.tabs.reduce(
+        ...field.tabs.reduce(
           (tabFieldColumns, tab) => [
             ...tabFieldColumns,
-            ...('name' in tab ? [tab.name] : getRemainingColumns(tab.fieldMap, useAsTitle)),
+            ...('name' in tab ? [tab.name] : getRemainingColumns(tab.fields, useAsTitle)),
           ],
           [],
         ),
@@ -33,7 +32,7 @@ const getRemainingColumns = (fieldMap: FieldMap, useAsTitle: string): ColumnPref
   }, [])
 
 export const getInitialColumns = (
-  fieldMap: FieldMap,
+  fields: ClientField[],
   useAsTitle: string,
   defaultColumns: string[],
 ): ColumnPreferences => {
@@ -46,7 +45,7 @@ export const getInitialColumns = (
       initialColumns.push(useAsTitle)
     }
 
-    const remainingColumns = getRemainingColumns(fieldMap, useAsTitle)
+    const remainingColumns = getRemainingColumns(fields, useAsTitle)
 
     initialColumns = initialColumns.concat(remainingColumns)
     initialColumns = initialColumns.slice(0, 4)

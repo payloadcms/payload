@@ -5,15 +5,15 @@ export const recordLastLoggedInTenant: AfterLoginHook = async ({ req, user }) =>
     const relatedOrg = await req.payload
       .find({
         collection: 'tenants',
+        depth: 0,
+        limit: 1,
         where: {
           'domains.domain': {
             in: [req.headers.host],
           },
         },
-        depth: 0,
-        limit: 1,
       })
-      ?.then(res => res.docs?.[0])
+      ?.then((res) => res.docs?.[0])
 
     await req.payload.update({
       id: user.id,
@@ -24,7 +24,10 @@ export const recordLastLoggedInTenant: AfterLoginHook = async ({ req, user }) =>
       req,
     })
   } catch (err: unknown) {
-    req.payload.logger.error(`Error recording last logged in tenant for user ${user.id}: ${err}`)
+    req.payload.logger.error({
+      err,
+      msg: `Error recording last logged in tenant for user ${user.id}`,
+    })
   }
 
   return user

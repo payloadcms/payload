@@ -1,24 +1,62 @@
-import type { ArrayField } from '../../fields/config/types.js'
+import type { MarkOptional } from 'ts-essentials'
+
+import type { ArrayField, ArrayFieldClient } from '../../fields/config/types.js'
 import type { ArrayFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { FieldMap } from '../forms/FieldMap.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+  MappedComponent,
+} from '../types.js'
 
-export type ArrayFieldProps = {
-  CustomRowLabel?: React.ReactNode
-  fieldMap: FieldMap
-  forceRender?: boolean
-  isSortable?: boolean
-  labels?: ArrayField['labels']
-  maxRows?: ArrayField['maxRows']
-  minRows?: ArrayField['minRows']
-  name?: string
-  validate?: ArrayFieldValidation
-  width?: string
-} & Omit<FormFieldBase, 'validate'>
+type ArrayFieldClientWithoutType = MarkOptional<ArrayFieldClient, 'type'>
 
-export type ArrayFieldLabelComponent = LabelComponent<'array'>
+type ArrayFieldBaseClientProps = {
+  readonly CustomRowLabel?: MappedComponent
+  readonly validate?: ArrayFieldValidation
+}
 
-export type ArrayFieldDescriptionComponent = DescriptionComponent<'array'>
+export type ArrayFieldClientProps = ArrayFieldBaseClientProps &
+  ClientFieldBase<ArrayFieldClientWithoutType>
 
-export type ArrayFieldErrorComponent = ErrorComponent<'array'>
+export type ArrayFieldServerProps = ServerFieldBase<ArrayField, ArrayFieldClientWithoutType>
+
+export type ArrayFieldServerComponent = FieldServerComponent<
+  ArrayField,
+  ArrayFieldClientWithoutType
+>
+
+export type ArrayFieldClientComponent = FieldClientComponent<
+  ArrayFieldClientWithoutType,
+  ArrayFieldBaseClientProps
+>
+
+export type ArrayFieldLabelServerComponent = FieldLabelServerComponent<
+  ArrayField,
+  ArrayFieldClientWithoutType
+>
+
+export type ArrayFieldLabelClientComponent = FieldLabelClientComponent<ArrayFieldClientWithoutType>
+
+export type ArrayFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  ArrayField,
+  ArrayFieldClientWithoutType
+>
+
+export type ArrayFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<ArrayFieldClientWithoutType>
+
+export type ArrayFieldErrorServerComponent = FieldErrorServerComponent<
+  ArrayField,
+  ArrayFieldClientWithoutType
+>
+
+export type ArrayFieldErrorClientComponent = FieldErrorClientComponent<ArrayFieldClientWithoutType>

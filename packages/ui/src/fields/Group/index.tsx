@@ -1,9 +1,9 @@
 'use client'
 
-import type { GroupFieldProps } from 'payload'
+import type { GroupFieldClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { Fragment } from 'react'
+import React from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
@@ -16,29 +16,29 @@ import {
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { useRow } from '../Row/provider.js'
-import { useTabs } from '../Tabs/provider.js'
 import { fieldBaseClass } from '../shared/index.js'
+import { useTabs } from '../Tabs/provider.js'
 import './index.scss'
 import { GroupProvider, useGroup } from './provider.js'
 
 const baseClass = 'group-field'
 
-export const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
+export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const {
-    CustomDescription,
-    CustomLabel,
-    className,
     descriptionProps,
-    fieldMap,
-    hideGutter,
-    label,
-    readOnly: readOnlyFromProps,
-    style,
-    width,
+    field,
+    field: {
+      admin: { className, description, hideGutter, readOnly: readOnlyFromAdmin, style, width } = {},
+      fields,
+      label,
+    },
+    readOnly: readOnlyFromTopLevelProps,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { path, permissions, readOnly: readOnlyFromContext, schemaPath } = useFieldProps()
   const { i18n } = useTranslation()
@@ -57,59 +57,63 @@ export const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
   const isTopLevel = !(isWithinCollapsible || isWithinGroup || isWithinRow)
 
   return (
-    <Fragment>
-      <div
-        className={[
-          fieldBaseClass,
-          baseClass,
-          isTopLevel && `${baseClass}--top-level`,
-          isWithinCollapsible && `${baseClass}--within-collapsible`,
-          isWithinGroup && `${baseClass}--within-group`,
-          isWithinRow && `${baseClass}--within-row`,
-          isWithinTab && `${baseClass}--within-tab`,
-          !hideGutter && isWithinGroup && `${baseClass}--gutter`,
-          fieldHasErrors && `${baseClass}--has-error`,
-          className,
-        ]
-          .filter(Boolean)
-          .join(' ')}
-        id={`field-${path?.replace(/\./g, '__')}`}
-        style={{
-          ...style,
-          width,
-        }}
-      >
-        <GroupProvider>
-          <div className={`${baseClass}__wrap`}>
-            <div className={`${baseClass}__header`}>
-              {(CustomLabel || CustomDescription || label) && (
-                <header>
-                  {CustomLabel !== undefined ? (
-                    CustomLabel
-                  ) : label ? (
-                    <h3 className={`${baseClass}__title`}>{getTranslation(label, i18n)}</h3>
-                  ) : null}
-                  {CustomDescription !== undefined ? (
-                    CustomDescription
-                  ) : (
-                    <FieldDescription {...(descriptionProps || {})} />
-                  )}
-                </header>
-              )}
-              {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
-            </div>
-            <RenderFields
-              fieldMap={fieldMap}
-              margins="small"
-              path={path}
-              permissions={permissions?.fields}
-              readOnly={disabled}
-              schemaPath={schemaPath}
-            />
+    <div
+      className={[
+        fieldBaseClass,
+        baseClass,
+        isTopLevel && `${baseClass}--top-level`,
+        isWithinCollapsible && `${baseClass}--within-collapsible`,
+        isWithinGroup && `${baseClass}--within-group`,
+        isWithinRow && `${baseClass}--within-row`,
+        isWithinTab && `${baseClass}--within-tab`,
+        !hideGutter && isWithinGroup && `${baseClass}--gutter`,
+        fieldHasErrors && `${baseClass}--has-error`,
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      id={`field-${path?.replace(/\./g, '__')}`}
+      style={{
+        ...style,
+        width,
+      }}
+    >
+      <GroupProvider>
+        <div className={`${baseClass}__wrap`}>
+          <div className={`${baseClass}__header`}>
+            {(field?.admin?.components?.Label ||
+              field?.admin?.components?.Description ||
+              label) && (
+              <header>
+                {field?.admin?.components?.Label !== undefined ? (
+                  <RenderComponent
+                    clientProps={{ label }}
+                    mappedComponent={field?.admin?.components?.Label}
+                  />
+                ) : label ? (
+                  <h3 className={`${baseClass}__title`}>{getTranslation(label, i18n)}</h3>
+                ) : null}
+                <FieldDescription
+                  Description={field?.admin?.components?.Description}
+                  description={description}
+                  field={field}
+                  {...(descriptionProps || {})}
+                />
+              </header>
+            )}
+            {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
-        </GroupProvider>
-      </div>
-    </Fragment>
+          <RenderFields
+            fields={fields}
+            margins="small"
+            path={path}
+            permissions={permissions?.fields}
+            readOnly={disabled}
+            schemaPath={schemaPath}
+          />
+        </div>
+      </GroupProvider>
+    </div>
   )
 }
 

@@ -6,12 +6,12 @@ import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T extends JsonObject> = {
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: T
   doc?: T
   duplicate?: boolean
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
   id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean

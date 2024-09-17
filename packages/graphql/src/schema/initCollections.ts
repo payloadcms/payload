@@ -18,38 +18,38 @@ import { fieldAffectsData } from 'payload/shared'
 
 import type { ObjectTypeConfig } from './buildObjectType.js'
 
-import forgotPassword from '../resolvers/auth/forgotPassword.js'
-import init from '../resolvers/auth/init.js'
-import login from '../resolvers/auth/login.js'
-import logout from '../resolvers/auth/logout.js'
-import me from '../resolvers/auth/me.js'
-import refresh from '../resolvers/auth/refresh.js'
-import resetPassword from '../resolvers/auth/resetPassword.js'
-import unlock from '../resolvers/auth/unlock.js'
-import verifyEmail from '../resolvers/auth/verifyEmail.js'
+import { forgotPassword } from '../resolvers/auth/forgotPassword.js'
+import { init } from '../resolvers/auth/init.js'
+import { login } from '../resolvers/auth/login.js'
+import { logout } from '../resolvers/auth/logout.js'
+import { me } from '../resolvers/auth/me.js'
+import { refresh } from '../resolvers/auth/refresh.js'
+import { resetPassword } from '../resolvers/auth/resetPassword.js'
+import { unlock } from '../resolvers/auth/unlock.js'
+import { verifyEmail } from '../resolvers/auth/verifyEmail.js'
 import { countResolver } from '../resolvers/collections/count.js'
-import createResolver from '../resolvers/collections/create.js'
+import { createResolver } from '../resolvers/collections/create.js'
 import { getDeleteResolver } from '../resolvers/collections/delete.js'
 import { docAccessResolver } from '../resolvers/collections/docAccess.js'
-import duplicateResolver from '../resolvers/collections/duplicate.js'
+import { duplicateResolver } from '../resolvers/collections/duplicate.js'
 import { findResolver } from '../resolvers/collections/find.js'
 import { findByIDResolver } from '../resolvers/collections/findByID.js'
 import { findVersionByIDResolver } from '../resolvers/collections/findVersionByID.js'
 import { findVersionsResolver } from '../resolvers/collections/findVersions.js'
-import restoreVersionResolver from '../resolvers/collections/restoreVersion.js'
+import { restoreVersionResolver } from '../resolvers/collections/restoreVersion.js'
 import { updateResolver } from '../resolvers/collections/update.js'
-import formatName from '../utilities/formatName.js'
+import { formatName } from '../utilities/formatName.js'
 import { buildMutationInputType, getCollectionIDType } from './buildMutationInputType.js'
 import { buildObjectType } from './buildObjectType.js'
 import { buildPaginatedListType } from './buildPaginatedListType.js'
 import { buildPolicyType } from './buildPoliciesType.js'
-import buildWhereInputType from './buildWhereInputType.js'
+import { buildWhereInputType } from './buildWhereInputType.js'
 
 type InitCollectionsGraphQLArgs = {
   config: SanitizedConfig
   graphqlResult: GraphQLInfo
 }
-function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQLArgs): void {
+export function initCollections({ config, graphqlResult }: InitCollectionsGraphQLArgs): void {
   Object.keys(graphqlResult.collections).forEach((slug) => {
     const collection: Collection = graphqlResult.collections[slug]
     const {
@@ -57,7 +57,9 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
       config: { fields, graphQL = {} as SanitizedCollectionConfig['graphQL'], versions },
     } = collection
 
-    if (!graphQL) return
+    if (!graphQL) {
+      return
+    }
 
     let singularName
     let pluralName
@@ -95,7 +97,7 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
     const whereInputFields = [...fields]
 
     if (!hasIDField) {
-      baseFields.id = { type: idType }
+      baseFields.id = { type: new GraphQLNonNull(idType) }
       whereInputFields.push({
         name: 'id',
         type: config.db.defaultIDType as 'text',
@@ -274,7 +276,7 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
     if (collectionConfig.versions) {
       const versionIDType = config.db.defaultIDType === 'text' ? GraphQLString : GraphQLInt
       const versionCollectionFields: Field[] = [
-        ...buildVersionCollectionFields(collectionConfig),
+        ...buildVersionCollectionFields(config, collectionConfig),
         {
           name: 'id',
           type: config.db.defaultIDType as 'text',
@@ -514,5 +516,3 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
     }
   })
 }
-
-export default initCollectionsGraphQL

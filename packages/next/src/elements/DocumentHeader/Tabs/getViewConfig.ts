@@ -9,9 +9,9 @@ export const getViewConfig = (args: {
 
   if (collectionConfig) {
     const collectionConfigViewsConfig =
-      typeof collectionConfig?.admin?.components?.views?.Edit === 'object' &&
-      typeof collectionConfig?.admin?.components?.views?.Edit !== 'function'
-        ? collectionConfig?.admin?.components?.views?.Edit
+      typeof collectionConfig?.admin?.components?.views?.edit === 'object' &&
+      typeof collectionConfig?.admin?.components?.views?.edit !== 'function'
+        ? collectionConfig?.admin?.components?.views?.edit
         : undefined
 
     return collectionConfigViewsConfig?.[name]
@@ -19,9 +19,9 @@ export const getViewConfig = (args: {
 
   if (globalConfig) {
     const globalConfigViewsConfig =
-      typeof globalConfig?.admin?.components?.views?.Edit === 'object' &&
-      typeof globalConfig?.admin?.components?.views?.Edit !== 'function'
-        ? globalConfig?.admin?.components?.views?.Edit
+      typeof globalConfig?.admin?.components?.views?.edit === 'object' &&
+      typeof globalConfig?.admin?.components?.views?.edit !== 'function'
+        ? globalConfig?.admin?.components?.views?.edit
         : undefined
 
     return globalConfigViewsConfig?.[name]

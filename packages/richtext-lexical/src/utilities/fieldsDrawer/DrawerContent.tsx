@@ -1,6 +1,6 @@
 'use client'
 import type { FormProps } from '@payloadcms/ui'
-import type { FormState } from 'payload'
+import type { ClientField, FormState } from 'payload'
 
 import {
   Form,
@@ -22,22 +22,27 @@ import { useEditorConfigContext } from '../../lexical/config/client/EditorConfig
 export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'drawerTitle'>> = ({
   data,
   featureKey,
+  fieldMapOverride,
   handleDrawerSubmit,
+  schemaFieldsPathOverride,
   schemaPathSuffix,
 }) => {
   const { t } = useTranslation()
   const { id } = useDocumentInfo()
   const { schemaPath } = useFieldProps()
-  const config = useConfig()
-  const [initialState, setInitialState] = useState<FormState | false>(false)
+  const { config } = useConfig()
+  const [initialState, setInitialState] = useState<false | FormState>(false)
   const {
     field: { richTextComponentMap },
   } = useEditorConfigContext()
 
   const componentMapRenderedFieldsPath = `lexical_internal_feature.${featureKey}.fields${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
-  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.${featureKey}${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
+  const schemaFieldsPath =
+    schemaFieldsPathOverride ??
+    `${schemaPath}.lexical_internal_feature.${featureKey}${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
 
-  const fieldMap = richTextComponentMap.get(componentMapRenderedFieldsPath) // Field Schema
+  const fields: any =
+    fieldMapOverride ?? (richTextComponentMap.get(componentMapRenderedFieldsPath) as ClientField[]) // Field Schema
 
   useEffect(() => {
     const awaitInitialState = async () => {
@@ -83,14 +88,14 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     <Form
       beforeSubmit={[onChange]}
       disableValidationOnSubmit
-      fields={Array.isArray(fieldMap) ? fieldMap : []}
+      fields={Array.isArray(fields) ? fields : []}
       initialState={initialState}
       onChange={[onChange]}
       onSubmit={handleDrawerSubmit}
       uuid={uuid()}
     >
       <RenderFields
-        fieldMap={Array.isArray(fieldMap) ? fieldMap : []}
+        fields={Array.isArray(fields) ? fields : []}
         forceRender
         path="" // See Blocks feature path for details as for why this is empty
         readOnly={false}

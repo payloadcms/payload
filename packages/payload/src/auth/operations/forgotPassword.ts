@@ -128,7 +128,9 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
     // We don't want to indicate specifically that an email was not found,
     // as doing so could lead to the exposure of registered emails.
     // Therefore, we prefer to fail silently.
-    if (!user) return null
+    if (!user) {
+      return null
+    }
 
     user.resetPasswordToken = token
     user.resetPasswordExpiration = new Date(expiration || Date.now() + 3600000).toISOString() // 1 hour
@@ -197,7 +199,9 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
       result: token,
     })
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return token
   } catch (error: unknown) {

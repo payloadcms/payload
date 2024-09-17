@@ -2,11 +2,14 @@ import type { EntityToGroup } from '@payloadcms/ui/shared'
 import type { AdminViewProps } from 'payload'
 
 import { HydrateAuthProvider } from '@payloadcms/ui'
-import { EntityType, RenderCustomComponent, groupNavItems } from '@payloadcms/ui/shared'
+import {
+  EntityType,
+  getCreateMappedComponent,
+  groupNavItems,
+  RenderComponent,
+} from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'
-
-import type { DashboardProps } from './Default/index.js'
 
 import { DefaultDashboard } from './Default/index.js'
 
@@ -64,37 +67,38 @@ export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult, params, se
     i18n,
   )
 
-  const viewComponentProps: DashboardProps = {
-    Link,
-    i18n,
-    locale,
-    navGroups,
-    params,
-    payload,
-    permissions,
-    searchParams,
-    user,
-    visibleEntities,
-  }
+  const createMappedComponent = getCreateMappedComponent({
+    importMap: payload.importMap,
+    serverProps: {
+      i18n,
+      Link,
+      locale,
+      navGroups,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+      visibleEntities,
+    },
+  })
+
+  const mappedDashboardComponent = createMappedComponent(
+    CustomDashboardComponent?.Component,
+    undefined,
+    DefaultDashboard,
+    'CustomDashboardComponent.Component',
+  )
 
   return (
     <Fragment>
       <HydrateAuthProvider permissions={permissions} />
-      <RenderCustomComponent
-        CustomComponent={
-          typeof CustomDashboardComponent === 'function' ? CustomDashboardComponent : undefined
-        }
-        DefaultComponent={DefaultDashboard}
-        componentProps={viewComponentProps}
-        serverOnlyProps={{
-          i18n,
+      <RenderComponent
+        clientProps={{
+          Link,
           locale,
-          params,
-          payload,
-          permissions,
-          searchParams,
-          user,
         }}
+        mappedComponent={mappedDashboardComponent}
       />
     </Fragment>
   )

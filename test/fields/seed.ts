@@ -41,14 +41,20 @@ import {
   lexicalFieldsSlug,
   lexicalLocalizedFieldsSlug,
   lexicalMigrateFieldsSlug,
+  lexicalRelationshipFieldsSlug,
   numberFieldsSlug,
   pointFieldsSlug,
   radioFieldsSlug,
+  relationshipFieldsSlug,
   richTextFieldsSlug,
   selectFieldsSlug,
   tabsFieldsSlug,
   textFieldsSlug,
   uiSlug,
+  uploads2Slug,
+  uploadsMulti,
+  uploadsMultiPoly,
+  uploadsPoly,
   uploadsSlug,
   usersSlug,
 } from './slugs.js'
@@ -62,7 +68,9 @@ export const seed = async (_payload: Payload) => {
       _payload.config.collections.map(async (coll) => {
         await new Promise((resolve, reject) => {
           _payload.db?.collections[coll.slug]?.ensureIndexes(function (err) {
-            if (err) reject(err)
+            if (err) {
+              reject(err)
+            }
             resolve(true)
           })
         })
@@ -122,6 +130,50 @@ export const seed = async (_payload: Payload) => {
     depth: 0,
     overrideAccess: true,
   })
+
+  // const createdJPGDocSlug2 = await _payload.create({
+  //   collection: uploads2Slug,
+  //   data: {
+  //     ...uploadsDoc,
+  //   },
+  //   file: jpgFile,
+  //   depth: 0,
+  //   overrideAccess: true,
+  // })
+
+  // Create hasMany upload
+  await _payload.create({
+    collection: uploadsMulti,
+    data: {
+      media: [createdPNGDoc.id, createdJPGDoc.id],
+    },
+  })
+
+  // Create hasMany poly upload
+  // await _payload.create({
+  //   collection: uploadsMultiPoly,
+  //   data: {
+  //     media: [
+  //       { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
+  //       { value: createdJPGDoc.id, relationTo: uploadsSlug },
+  //     ],
+  //   },
+  // })
+
+  // Create poly upload
+  await _payload.create({
+    collection: uploadsPoly,
+    data: {
+      media: { value: createdJPGDoc.id, relationTo: uploadsSlug },
+    },
+  })
+  // Create poly upload
+  // await _payload.create({
+  //   collection: uploadsPoly,
+  //   data: {
+  //     media: { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
+  //   },
+  // })
 
   const formattedID =
     _payload.db.defaultIDType === 'number' ? createdArrayDoc.id : `"${createdArrayDoc.id}"`
@@ -288,6 +340,37 @@ export const seed = async (_payload: Payload) => {
     overrideAccess: true,
   })
 
+  const relationshipField1 = await _payload.create({
+    collection: relationshipFieldsSlug,
+    data: {
+      text: 'Relationship 1',
+      relationship: {
+        relationTo: textFieldsSlug,
+        value: createdTextDoc.id,
+      },
+    },
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  try {
+    await _payload.create({
+      collection: relationshipFieldsSlug,
+      data: {
+        text: 'Relationship 2',
+        relationToSelf: relationshipField1.id,
+        relationship: {
+          relationTo: textFieldsSlug,
+          value: createdAnotherTextDoc.id,
+        },
+      },
+      depth: 0,
+      overrideAccess: true,
+    })
+  } catch (e) {
+    console.error(e)
+  }
+
   await _payload.create({
     collection: lexicalFieldsSlug,
     data: lexicalDocWithRelId,
@@ -306,6 +389,15 @@ export const seed = async (_payload: Payload) => {
       ) as any,
     },
     locale: 'en',
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.create({
+    collection: lexicalRelationshipFieldsSlug,
+    data: {
+      richText: textToLexicalJSON({ text: 'English text' }) as any,
+    },
     depth: 0,
     overrideAccess: true,
   })

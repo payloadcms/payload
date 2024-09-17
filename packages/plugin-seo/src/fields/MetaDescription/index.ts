@@ -1,9 +1,5 @@
 import type { TextareaField } from 'payload'
 
-import { withMergedProps } from '@payloadcms/ui/shared'
-
-import { MetaDescriptionComponent } from './MetaDescriptionComponent.js'
-
 interface FieldFunctionProps {
   /**
    * Tell the component if the generate function is available as configured in the plugin config
@@ -20,13 +16,12 @@ export const MetaDescriptionField: FieldFunction = ({ hasGenerateFn = false, ove
     type: 'textarea',
     admin: {
       components: {
-        Field: withMergedProps({
-          Component: MetaDescriptionComponent,
-          sanitizeServerOnlyProps: true,
-          toMergeIntoProps: {
+        Field: {
+          clientProps: {
             hasGenerateDescriptionFn: hasGenerateFn,
           },
-        }),
+          path: '@payloadcms/plugin-seo/client#MetaDescriptionComponent',
+        },
       },
     },
     localized: true,

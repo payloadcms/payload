@@ -17,7 +17,7 @@ import React from 'react'
 import { toast } from 'sonner'
 
 type Args = {
-  token: string
+  readonly token: string
 }
 
 const initialState: FormState = {
@@ -36,12 +36,14 @@ const initialState: FormState = {
 export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
   const i18n = useTranslation()
   const {
-    admin: {
-      routes: { login: loginRoute },
-      user: userSlug,
+    config: {
+      admin: {
+        routes: { login: loginRoute },
+        user: userSlug,
+      },
+      routes: { admin: adminRoute, api: apiRoute },
+      serverURL,
     },
-    routes: { admin: adminRoute, api: apiRoute },
-    serverURL,
   } = useConfig()
 
   const history = useRouter()
@@ -73,14 +75,23 @@ export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
       method="POST"
       onSuccess={onSuccess}
     >
-      <PasswordField
-        label={i18n.t('authentication:newPassword')}
-        name="password"
-        path="password"
-        required
-      />
-      <ConfirmPasswordField />
-      <HiddenField forceUsePathFromProps name="token" value={token} />
+      <div className={'inputWrap'}>
+        <PasswordField
+          field={{
+            name: 'password',
+            label: i18n.t('authentication:newPassword'),
+            required: true,
+          }}
+        />
+        <ConfirmPasswordField />
+        <HiddenField
+          field={{
+            name: 'token',
+          }}
+          forceUsePathFromProps
+          value={token}
+        />
+      </div>
       <FormSubmit size="large">{i18n.t('authentication:resetPassword')}</FormSubmit>
     </Form>
   )

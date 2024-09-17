@@ -7,7 +7,7 @@ export const emailFieldConfig: EmailField = {
   type: 'email',
   admin: {
     components: {
-      Field: () => null,
+      Field: false,
     },
   },
   hooks: {

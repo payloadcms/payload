@@ -6,7 +6,7 @@ import type { Field, TabAsField } from '../../config/types.js'
 import { promise } from './promise.js'
 
 type Args = {
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: JsonObject
   /**
@@ -17,10 +17,9 @@ type Args = {
    * The original data with locales (not modified by any hooks)
    */
   docWithLocales: JsonObject
-  duplicate: boolean
   errors: { field: string; message: string }[]
   fields: (Field | TabAsField)[]
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
   id?: number | string
   mergeLocaleActions: (() => Promise<void>)[]
   operation: Operation
@@ -54,7 +53,6 @@ export const traverseFields = async ({
   data,
   doc,
   docWithLocales,
-  duplicate,
   errors,
   fields,
   global,
@@ -79,7 +77,6 @@ export const traverseFields = async ({
         data,
         doc,
         docWithLocales,
-        duplicate,
         errors,
         field,
         global,

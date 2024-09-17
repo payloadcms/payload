@@ -1,10 +1,19 @@
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+
 import { buildConfigWithDefaults } from '../../buildConfigWithDefaults.js'
 
 export const collectionSlug = 'users'
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 export default buildConfigWithDefaults({
   admin: {
     user: 'users',
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
   },
   collections: [
     {

@@ -16,6 +16,7 @@ export const updateByID: CollectionRouteHandlerWithID = async ({
   const depth = searchParams.get('depth')
   const autosave = searchParams.get('autosave') === 'true'
   const draft = searchParams.get('draft') === 'true'
+  const publishSpecificLocale = req.query.publishSpecificLocale as string | undefined
 
   const id = sanitizeCollectionID({
     id: incomingID,
@@ -30,13 +31,18 @@ export const updateByID: CollectionRouteHandlerWithID = async ({
     data: req.data,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft,
+    publishSpecificLocale,
     req,
   })
 
   let message = req.t('general:updatedSuccessfully')
 
-  if (draft) message = req.t('version:draftSavedSuccessfully')
-  if (autosave) message = req.t('version:autosavedSuccessfully')
+  if (draft) {
+    message = req.t('version:draftSavedSuccessfully')
+  }
+  if (autosave) {
+    message = req.t('version:autosavedSuccessfully')
+  }
 
   return Response.json(
     {

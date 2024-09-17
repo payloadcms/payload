@@ -1,9 +1,9 @@
-import type { SerializedQuoteNode } from '../../../../../blockquote/feature.server.js'
+import type { SerializedQuoteNode } from '../../../../../blockquote/server/index.js'
 import type { SlateNodeConverter } from '../../types.js'
 
 import { convertSlateNodesToLexical } from '../../index.js'
 
-export const _SlateBlockquoteConverter: SlateNodeConverter = {
+export const SlateBlockquoteConverter: SlateNodeConverter = {
   converter({ converters, slateNode }) {
     return {
       type: 'quote',

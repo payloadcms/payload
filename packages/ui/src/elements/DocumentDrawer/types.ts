@@ -5,19 +5,25 @@ import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
 import type { Props as DrawerProps } from '../Drawer/types.js'
 
 export type DocumentDrawerProps = {
-  collectionSlug: string
-  drawerSlug?: string
-  id?: null | number | string
-  onSave?: DocumentInfoContext['onSave']
+  readonly AfterFields?: React.ReactNode
+  readonly collectionSlug: string
+  readonly disableActions?: boolean
+  readonly drawerSlug?: string
+  readonly id?: null | number | string
+  readonly onDelete?: DocumentInfoContext['onDelete']
+  readonly onDuplicate?: DocumentInfoContext['onDuplicate']
+  readonly onSave?: DocumentInfoContext['onSave']
+  readonly redirectAfterDelete?: boolean
+  readonly redirectAfterDuplicate?: boolean
 } & Pick<DrawerProps, 'Header'>
 
 export type DocumentTogglerProps = {
-  children?: React.ReactNode
-  className?: string
-  collectionSlug: string
-  disabled?: boolean
-  drawerSlug?: string
-  id?: string
+  readonly children?: React.ReactNode
+  readonly className?: string
+  readonly collectionSlug: string
+  readonly disabled?: boolean
+  readonly drawerSlug?: string
+  readonly id?: string
 } & HTMLAttributes<HTMLButtonElement>
 
 export type UseDocumentDrawer = (args: { collectionSlug: string; id?: number | string }) => [

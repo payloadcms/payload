@@ -2,7 +2,7 @@
 import type { TextNode } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { useTranslation } from '@payloadcms/ui'
+import { useFieldProps, useTranslation } from '@payloadcms/ui'
 import { useCallback, useMemo, useState } from 'react'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
@@ -15,8 +15,8 @@ import type {
 } from './LexicalTypeaheadMenuPlugin/types.js'
 
 import { useEditorConfigContext } from '../../config/client/EditorConfigProvider.js'
-import { LexicalTypeaheadMenuPlugin } from './LexicalTypeaheadMenuPlugin/index.js'
 import './index.scss'
+import { LexicalTypeaheadMenuPlugin } from './LexicalTypeaheadMenuPlugin/index.js'
 import { useMenuTriggerMatch } from './useMenuTriggerMatch.js'
 
 const baseClass = 'slash-menu-popup'
@@ -33,6 +33,11 @@ function SlashMenuItem({
   onClick: () => void
   onMouseEnter: () => void
 }) {
+  const {
+    field: { richTextComponentMap },
+  } = useEditorConfigContext()
+  const { schemaPath } = useFieldProps()
+
   const { i18n } = useTranslation()
 
   let className = `${baseClass}__item ${baseClass}__item-${item.key}`
@@ -42,7 +47,10 @@ function SlashMenuItem({
 
   let title = item.key
   if (item.label) {
-    title = typeof item.label === 'function' ? item.label({ i18n }) : item.label
+    title =
+      typeof item.label === 'function'
+        ? item.label({ i18n, richTextComponentMap, schemaPath })
+        : item.label
   }
   // Crop title to max. 25 characters
   if (title.length > 25) {
@@ -80,6 +88,10 @@ export function SlashMenuPlugin({
   const [queryString, setQueryString] = useState<null | string>(null)
   const { editorConfig } = useEditorConfigContext()
   const { i18n } = useTranslation()
+  const {
+    field: { richTextComponentMap },
+  } = useEditorConfigContext()
+  const { schemaPath } = useFieldProps()
 
   const checkForTriggerMatch = useMenuTriggerMatch('/', {
     minLength: 0,
@@ -111,7 +123,10 @@ export function SlashMenuPlugin({
         const filteredItems = group.items.filter((item) => {
           let itemTitle = item.key
           if (item.label) {
-            itemTitle = typeof item.label === 'function' ? item.label({ i18n }) : item.label
+            itemTitle =
+              typeof item.label === 'function'
+                ? item.label({ i18n, richTextComponentMap, schemaPath })
+                : item.label
           }
 
           if (new RegExp(queryString, 'gi').exec(itemTitle)) {
@@ -163,7 +178,7 @@ export function SlashMenuPlugin({
   const onSelectItem = useCallback(
     (
       selectedItem: SlashMenuItemType,
-      nodeToRemove: TextNode | null,
+      nodeToRemove: null | TextNode,
       closeMenu: () => void,
       matchingString: string,
     ) => {
@@ -185,7 +200,7 @@ export function SlashMenuPlugin({
       groups={groups as SlashMenuGroupInternal[]}
       menuRenderFn={(
         anchorElementRef,
-        { selectItemAndCleanUp, selectedItemKey, setSelectedItemKey },
+        { selectedItemKey, selectItemAndCleanUp, setSelectedItemKey },
       ) =>
         anchorElementRef.current && groups.length
           ? ReactDOM.createPortal(
@@ -194,7 +209,9 @@ export function SlashMenuPlugin({
                   let groupTitle = group.key
                   if (group.label) {
                     groupTitle =
-                      typeof group.label === 'function' ? group.label({ i18n }) : group.label
+                      typeof group.label === 'function'
+                        ? group.label({ i18n, richTextComponentMap, schemaPath })
+                        : group.label
                   }
 
                   return (

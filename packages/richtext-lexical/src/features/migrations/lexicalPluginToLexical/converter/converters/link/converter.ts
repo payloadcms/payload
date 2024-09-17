@@ -5,14 +5,15 @@ import type { LexicalPluginNodeConverter } from '../../types.js'
 
 import { convertLexicalPluginNodesToLexical } from '../../index.js'
 
-export const _LinkConverter: LexicalPluginNodeConverter = {
-  converter({ converters, lexicalPluginNode }) {
+export const LinkConverter: LexicalPluginNodeConverter = {
+  converter({ converters, lexicalPluginNode, quiet }) {
     return {
       type: 'link',
       children: convertLexicalPluginNodesToLexical({
         converters,
         lexicalPluginNodes: lexicalPluginNode.children,
         parentNodeType: 'link',
+        quiet,
       }),
       direction: (lexicalPluginNode as any).direction || 'ltr',
       fields: {

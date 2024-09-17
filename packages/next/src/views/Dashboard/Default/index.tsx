@@ -3,7 +3,12 @@ import type { Permissions, ServerProps, VisibleEntities } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { Button, Card, Gutter, SetStepNav, SetViewActions } from '@payloadcms/ui'
-import { EntityType, WithServerSideProps, formatAdminURL } from '@payloadcms/ui/shared'
+import {
+  EntityType,
+  formatAdminURL,
+  getCreateMappedComponent,
+  RenderComponent,
+} from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
 import './index.scss'
@@ -19,9 +24,9 @@ export type DashboardProps = {
 
 export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
   const {
-    Link,
     i18n,
     i18n: { t },
+    Link,
     locale,
     navGroups,
     params,
@@ -39,48 +44,39 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
     user,
   } = props
 
-  const BeforeDashboards = Array.isArray(beforeDashboard)
-    ? beforeDashboard.map((Component, i) => (
-        <WithServerSideProps
-          Component={Component}
-          key={i}
-          serverOnlyProps={{
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          }}
-        />
-      ))
-    : null
+  const createMappedComponent = getCreateMappedComponent({
+    importMap: payload.importMap,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
+  })
 
-  const AfterDashboards = Array.isArray(afterDashboard)
-    ? afterDashboard.map((Component, i) => (
-        <WithServerSideProps
-          Component={Component}
-          key={i}
-          serverOnlyProps={{
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          }}
-        />
-      ))
-    : null
+  const mappedBeforeDashboards = createMappedComponent(
+    beforeDashboard,
+    undefined,
+    undefined,
+    'beforeDashboard',
+  )
+
+  const mappedAfterDashboards = createMappedComponent(
+    afterDashboard,
+    undefined,
+    undefined,
+    'afterDashboard',
+  )
 
   return (
     <div className={baseClass}>
       <SetStepNav nav={[]} />
       <SetViewActions actions={[]} />
       <Gutter className={`${baseClass}__wrap`}>
-        {Array.isArray(BeforeDashboards) && BeforeDashboards.map((Component) => Component)}
+        <RenderComponent mappedComponent={mappedBeforeDashboards} />
         <Fragment>
           <SetViewActions actions={[]} />
           {!navGroups || navGroups?.length === 0 ? (
@@ -130,11 +126,9 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                       return (
                         <li key={entityIndex}>
                           <Card
-                            Link={Link}
                             actions={
                               hasCreatePermission && type === EntityType.collection ? (
                                 <Button
-                                  Link={Link}
                                   aria-label={t('general:createNewLabel', {
                                     label: getTranslation(entity.labels.singular, i18n),
                                   })}
@@ -142,6 +136,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                                   el="link"
                                   icon="plus"
                                   iconStyle="with-border"
+                                  Link={Link}
                                   round
                                   to={createHREF}
                                 />
@@ -150,6 +145,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                             buttonAriaLabel={buttonAriaLabel}
                             href={href}
                             id={`card-${entity.slug}`}
+                            Link={Link}
                             title={title}
                             titleAs="h3"
                           />
@@ -162,7 +158,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
             })
           )}
         </Fragment>
-        {Array.isArray(AfterDashboards) && AfterDashboards.map((Component) => Component)}
+        <RenderComponent mappedComponent={mappedAfterDashboards} />
       </Gutter>
     </div>
   )

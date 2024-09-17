@@ -1,3 +1,4 @@
+'use client'
 import { CAN_USE_DOM } from './canUseDOM.js'
 
 declare global {

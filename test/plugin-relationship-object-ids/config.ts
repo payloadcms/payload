@@ -7,6 +7,11 @@ import { fileURLToPath } from 'node:url'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       slug: 'uploads',

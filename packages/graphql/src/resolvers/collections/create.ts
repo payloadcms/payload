@@ -22,7 +22,7 @@ export type Resolver<TSlug extends CollectionSlug> = (
   },
 ) => Promise<DataFromCollectionSlug<TSlug>>
 
-export default function createResolver<TSlug extends CollectionSlug>(
+export function createResolver<TSlug extends CollectionSlug>(
   collection: Collection,
 ): Resolver<TSlug> {
   return async function resolver(_, args, context: Context) {

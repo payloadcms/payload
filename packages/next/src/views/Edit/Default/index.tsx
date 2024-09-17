@@ -1,14 +1,16 @@
 'use client'
 
+import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
+
 import {
   DocumentControls,
   DocumentFields,
   Form,
   type FormProps,
   OperationProvider,
+  RenderComponent,
   Upload,
   useAuth,
-  useComponentMap,
   useConfig,
   useDocumentEvents,
   useDocumentInfo,
@@ -21,9 +23,9 @@ import React, { Fragment, useCallback, useState } from 'react'
 
 import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving/index.js'
 import { Auth } from './Auth/index.js'
+import './index.scss'
 import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
 import { SetDocumentTitle } from './SetDocumentTitle/index.js'
-import './index.scss'
 
 const baseClass = 'collection-edit'
 
@@ -33,14 +35,15 @@ const baseClass = 'collection-edit'
 export const DefaultEditView: React.FC = () => {
   const {
     id,
+    action,
     AfterDocument,
     AfterFields,
+    apiURL,
     BeforeDocument,
     BeforeFields,
-    action,
-    apiURL,
     collectionSlug,
     disableActions,
+    disableCreate,
     disableLeaveWithoutSaving,
     docPermissions,
     getDocPreferences,
@@ -52,13 +55,27 @@ export const DefaultEditView: React.FC = () => {
     initialState,
     isEditing,
     isInitializing,
+    onDelete,
+    onDrawerCreate,
+    onDuplicate,
     onSave: onSaveFromContext,
+    redirectAfterDelete,
+    redirectAfterDuplicate,
   } = useDocumentInfo()
 
   const { refreshCookieAsync, user } = useAuth()
-  const config = useConfig()
+
+  const {
+    config,
+    config: {
+      admin: { user: userSlug },
+      routes: { admin: adminRoute, api: apiRoute },
+      serverURL,
+    },
+    getEntityConfig,
+  } = useConfig()
+
   const router = useRouter()
-  const { getComponentMap, getFieldMap } = useComponentMap()
   const depth = useEditDepth()
   const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
@@ -66,29 +83,11 @@ export const DefaultEditView: React.FC = () => {
 
   const locale = params.get('locale')
 
-  const {
-    admin: { user: userSlug },
-    collections,
-    globals,
-    routes: { admin: adminRoute, api: apiRoute },
-    serverURL,
-  } = config
+  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
-  const collectionConfig =
-    collectionSlug && collections.find((collection) => collection.slug === collectionSlug)
-
-  const globalConfig = globalSlug && globals.find((global) => global.slug === globalSlug)
+  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
 
   const entitySlug = collectionConfig?.slug || globalConfig?.slug
-
-  const componentMap = getComponentMap({
-    collectionSlug: collectionConfig?.slug,
-    globalSlug: globalConfig?.slug,
-  })
-  const fieldMap = getFieldMap({
-    collectionSlug: collectionConfig?.slug,
-    globalSlug: globalConfig?.slug,
-  })
 
   const operation = collectionSlug && !id ? 'create' : 'update'
 
@@ -102,17 +101,25 @@ export const DefaultEditView: React.FC = () => {
 
   const classes = [baseClass, id && `${baseClass}--is-editing`]
 
-  if (globalSlug) classes.push(`global-edit--${globalSlug}`)
-  if (collectionSlug) classes.push(`collection-edit--${collectionSlug}`)
+  if (globalSlug) {
+    classes.push(`global-edit--${globalSlug}`)
+  }
+  if (collectionSlug) {
+    classes.push(`collection-edit--${collectionSlug}`)
+  }
 
-  const [schemaPath, setSchemaPath] = React.useState(entitySlug)
+  const [schemaPath, setSchemaPath] = React.useState(() => {
+    if (operation === 'create' && auth && !auth.disableLocalStrategy) {
+      return `_${entitySlug}.auth`
+    }
+
+    return entitySlug
+  })
   const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(() => {
-    if (
-      operation === 'create' &&
-      collectionConfig.auth &&
-      !collectionConfig.auth.disableLocalStrategy
-    )
+    if (operation === 'create' && auth && !auth.disableLocalStrategy) {
       return true
+    }
+
     return false
   })
 
@@ -195,8 +202,8 @@ export const DefaultEditView: React.FC = () => {
         <Form
           action={action}
           className={`${baseClass}__form`}
-          disableValidationOnSubmit={!validateBeforeSubmit}
           disabled={isInitializing || !hasSavePermission}
+          disableValidationOnSubmit={!validateBeforeSubmit}
           initialState={!isInitializing && initialState}
           isInitializing={isInitializing}
           method={id ? 'PATCH' : 'POST'}
@@ -222,11 +229,18 @@ export const DefaultEditView: React.FC = () => {
             apiURL={apiURL}
             data={data}
             disableActions={disableActions}
+            disableCreate={disableCreate}
             hasPublishPermission={hasPublishPermission}
             hasSavePermission={hasSavePermission}
             id={id}
             isEditing={isEditing}
+            onDelete={onDelete}
+            onDrawerCreate={onDrawerCreate}
+            onDuplicate={onDuplicate}
+            onSave={onSave}
             permissions={docPermissions}
+            redirectAfterDelete={redirectAfterDelete}
+            redirectAfterDuplicate={redirectAfterDuplicate}
             slug={collectionConfig?.slug || globalConfig?.slug}
           />
           <DocumentFields
@@ -253,8 +267,10 @@ export const DefaultEditView: React.FC = () => {
                   )}
                   {upload && (
                     <React.Fragment>
-                      {componentMap.Upload !== undefined ? (
-                        componentMap.Upload
+                      {collectionConfig?.admin?.components?.edit?.Upload ? (
+                        <RenderComponent
+                          mappedComponent={collectionConfig.admin.components.edit.Upload}
+                        />
                       ) : (
                         <Upload
                           collectionSlug={collectionConfig.slug}
@@ -268,7 +284,7 @@ export const DefaultEditView: React.FC = () => {
               )
             }
             docPermissions={docPermissions}
-            fieldMap={fieldMap}
+            fields={(collectionConfig || globalConfig)?.fields}
             readOnly={!hasSavePermission}
             schemaPath={schemaPath}
           />

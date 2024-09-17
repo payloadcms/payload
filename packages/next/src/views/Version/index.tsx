@@ -1,18 +1,20 @@
-import { notFound } from 'next/navigation.js'
-import {
-  type CollectionPermission,
-  type Document,
-  type EditViewComponent,
-  type GlobalPermission,
-  type OptionObject,
-  deepCopyObjectSimple,
+import type {
+  CollectionPermission,
+  Document,
+  EditViewComponent,
+  GlobalPermission,
+  OptionObject,
+  PayloadServerReactComponent,
 } from 'payload'
+
+import { notFound } from 'next/navigation.js'
+import { deepCopyObjectSimple } from 'payload'
 import React from 'react'
 
 import { getLatestVersion } from '../Versions/getLatestVersion.js'
 import { DefaultVersionView } from './Default/index.js'
 
-export const VersionView: EditViewComponent = async (props) => {
+export const VersionView: PayloadServerReactComponent<EditViewComponent> = async (props) => {
   const { initPageResult, routeSegments } = props
 
   const {

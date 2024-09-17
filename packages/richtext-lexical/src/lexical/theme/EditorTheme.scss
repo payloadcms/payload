@@ -4,51 +4,81 @@
   &__ltr {
     text-align: left;
   }
-  &__ltr {
-    text-align: left;
-  }
 
   &__rtl {
     text-align: right;
   }
 
   &__paragraph {
-    margin: 0 0 1.5em;
+    font-size: base(0.8);
+    margin-bottom: 0.55em;
     position: relative;
+    line-height: 1.5;
+    letter-spacing: normal;
   }
 
   // No bottom margin for last paragraph in editor. This also created nice animations when adding a new line at the end
-  .ContentEditable__root > &__paragraph:last-child {
-    margin-bottom: 0;
+  .ContentEditable__root {
+    font-size: base(0.8);
   }
 
   &__quote {
-    margin: 0 0 10px 20px;
-    font-size: 15px;
-    color: rgb(101, 103, 107);
-    border-left-color: rgb(206, 208, 212);
-    border-left-width: 4px;
-    border-left-style: solid;
-    padding-left: 16px;
+    font-size: base(0.8);
+    margin-block: base(0.8);
+    margin-inline: base(0.2);
+    border-inline-start-color: var(--theme-elevation-150);
+    border-inline-start-width: base(0.2);
+    border-inline-start-style: solid;
+    padding-inline-start: base(0.6);
+    padding-block: base(0.2);
   }
 
   &__h1 {
-    font-size: 2.8rem;
-    line-height: 1.125;
-    color: rgb(5, 5, 5);
-    font-weight: 500;
+    font-size: base(1.4);
+    font-weight: 700;
+    margin-block: 0.5em 0.4em;
+    line-height: base(1.2);
+    letter-spacing: normal;
   }
 
   &__h2 {
-    font-size: 2rem;
-    color: rgb(5, 5, 5);
+    font-size: base(1.25);
     font-weight: 700;
+    margin-block: 0.55em 0.4em;
+    line-height: base(1.2);
+    letter-spacing: normal;
   }
 
   &__h3 {
-    font-size: 1.4rem;
-    color: rgb(101, 103, 107);
+    font-size: base(1.1);
     font-weight: 700;
+    margin-block: 0.6em 0.4em;
+    line-height: base(1.3);
+    letter-spacing: normal;
+  }
+
+  &__h4 {
+    font-size: base(1);
+    font-weight: 700;
+    margin-block: 0.65em 0.4em;
+    line-height: base(1.4);
+    letter-spacing: normal;
+  }
+
+  &__h5 {
+    font-size: base(0.9);
+    font-weight: 700;
+    margin-block: 0.7em 0.4em;
+    line-height: base(1.5);
+    letter-spacing: normal;
+  }
+
+  &__h6 {
+    font-size: base(0.8);
+    font-weight: 700;
+    margin-block: 0.75em 0.4em;
+    line-height: base(1.5);
+    letter-spacing: 0.1em;
   }
 
   &__indent {
@@ -86,10 +116,15 @@
   }
 
   &__textCode {
-    background-color: rgb(240, 242, 245);
-    padding: 1px 0.25rem;
-    font-family: Menlo, Consolas, Monaco, monospace;
-    font-size: 94%;
+    background-color: var(--theme-elevation-50);
+    border: 1px solid var(--theme-elevation-150);
+    color: var(--theme-error-600);
+    padding: base(0.1) base(0.2);
+    font-family: 'SF Mono', Menlo, Consolas, Monaco, monospace;
+    font-size: 0.875em;
+    border-radius: var(--style-radius-s);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
   }
 
   &__hashtag {
@@ -102,7 +137,7 @@
   }
 
   &__link {
-    color: var(--color-blue-600);
+    color: var(--theme-success-750);
     text-decoration: none;
     border-bottom: 1px dotted;
   }
@@ -143,7 +178,7 @@
   &__ol1 {
     padding: 0;
     list-style-position: outside;
-    margin: 0 0 1.5em;
+    margin: base(0.4) 0 base(0.8);
   }
 
   &__ol2 {
@@ -176,7 +211,7 @@
 
   &__ul {
     padding: 0;
-    margin: 0 0 1.5em;
+    margin: base(0.4) 0 base(0.8);
     list-style-position: outside;
   }
 
@@ -185,16 +220,16 @@
   }
 
   &__listItem {
-    margin: 0 0 0.4em 16px;
+    font-size: base(0.8);
+    margin: 0 0 0.4em base(0.8);
   }
 
   &__listItemChecked,
   &__listItemUnchecked {
     position: relative;
-    margin-left: 8px;
-    margin-right: 8px;
-    padding-left: 24px;
-    padding-right: 24px;
+    margin-inline: 0;
+    padding-left: base(1.2);
+    padding-right: base(1.2);
     list-style-type: none;
     outline: none;
   }
@@ -206,9 +241,9 @@
   &__listItemUnchecked:before,
   &__listItemChecked:before {
     content: '';
-    width: 16px;
-    height: 16px;
-    top: 2px;
+    width: base(0.8);
+    height: base(0.8);
+    top: base(0.1);
     left: 0;
     cursor: pointer;
     display: block;
@@ -224,26 +259,28 @@
 
   &__listItemUnchecked:focus:before,
   &__listItemChecked:focus:before {
-    box-shadow: 0 0 0 2px #a6cdfe;
-    border-radius: $style-radius-m;
+    outline: 0;
+    box-shadow: 0 0 3px 3px var(--theme-success-400);
+    border: 1px solid var(--theme-elevation-250);
+    border-radius: var(--style-radius-s);
   }
 
   &__listItemUnchecked:before {
-    border: 1px solid #999;
-    border-radius: $style-radius-m;
+    border: 1px solid var(--theme-elevation-250);
+    border-radius: $style-radius-s;
   }
 
   &__listItemChecked:before {
-    border: 1px solid rgb(61, 135, 245);
-    border-radius: $style-radius-m;
-    background-color: #3d87f5;
+    border: 1px solid var(--theme-elevation-500);
+    border-radius: $style-radius-s;
+    background-color: var(--theme-elevation-100);
     background-repeat: no-repeat;
   }
 
   &__listItemChecked:after {
     content: '';
     cursor: pointer;
-    border-color: #fff;
+    border-color: var(--theme-text);
     border-style: solid;
     position: absolute;
     display: block;
@@ -325,30 +362,16 @@
   &__embedBlockFocus {
     outline: 2px solid rgb(60, 132, 244);
   }
+
+  .ContentEditable__root {
+    &:first-child {
+      margin-top: 0;
+    }
+  }
 }
 
 html[data-theme='dark'] {
-  .LexicalEditorTheme {
-    &__h1,
-    &__h2 {
-      color: rgb(255, 255, 255);
-    }
-
-    &__h3 {
-      color: rgb(148, 151, 157);
-    }
-
-    &__link {
-      color: var(--color-blue-600);
-    }
-
-    &__quote {
-      color: rgb(193, 198, 206);
-      border-left-color: var(--theme-elevation-150);
-    }
-
-    &__textCode {
-      background-color: rgb(0, 0, 0);
-    }
+  .LexicalEditorTheme__textCode {
+    color: var(--theme-warning-600);
   }
 }
