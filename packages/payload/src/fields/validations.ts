@@ -824,6 +824,7 @@ export const select: SelectFieldValidation = (
 ) => {
   if (
     Array.isArray(value) &&
+    value &&
     value.some(
       (input) =>
         !options.some(

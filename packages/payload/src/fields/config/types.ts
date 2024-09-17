@@ -359,7 +359,7 @@ export type Validate<
   TSiblingData = any,
   TFieldConfig extends object = object,
 > = (
-  value: TValue,
+  value: null | TValue | undefined,
   options: ValidateOptions<TData, TSiblingData, TFieldConfig, TValue>,
 ) => Promise<string | true> | string | true
 
@@ -681,6 +681,7 @@ export type GroupField = {
    */
   interfaceName?: string
   type: 'group'
+  validate?: Validate<unknown, unknown, unknown, GroupField>
 } & Omit<FieldBase, 'required' | 'validate'>
 
 export type GroupFieldClient = {
