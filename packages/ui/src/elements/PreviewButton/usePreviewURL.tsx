@@ -1,4 +1,5 @@
 'use client'
+import * as qs from 'qs-esm'
 import { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -13,11 +14,13 @@ export const usePreviewURL = (): {
   label: string
   previewURL: string
 } => {
-  const { id, collectionSlug, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug, versions } = useDocumentInfo()
 
   const [isLoading, setIsLoading] = useState(false)
   const [previewURL, setPreviewURL] = useState('')
   const { code: locale } = useLocale()
+
+  const hasVersions = versions?.totalDocs > 0
 
   const {
     config: {
@@ -51,7 +54,12 @@ export const usePreviewURL = (): {
           url = `${url}/globals/${globalSlug}/preview`
         }
 
-        const res = await fetch(`${url}${locale ? `?locale=${locale}` : ''}`)
+        const params = {
+          draft: hasVersions ? 'true' : 'false',
+          locale: locale || undefined,
+        }
+
+        const res = await fetch(`${url}?${qs.stringify(params)}`)
 
         if (!res.ok) {
           throw new Error()
@@ -72,7 +80,7 @@ export const usePreviewURL = (): {
         toast.error(t('error:previewing'))
       }
     },
-    [serverURL, api, collectionSlug, globalSlug, id, locale, t],
+    [serverURL, api, collectionSlug, globalSlug, hasVersions, locale, id, t],
   )
 
   return {
