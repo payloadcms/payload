@@ -23,7 +23,8 @@ export const getLatestGlobalVersion = async ({
 }: Args): Promise<{ global: Document; globalExists: boolean }> => {
   let latestVersion
 
-  const globalConfig = payload.config.globals[slug]
+  const globalConfig = payload.config.globals?.find((cfg) => cfg.slug === slug)
+
   if (config.versions?.drafts) {
     const findVersionsDbArgs = {
       global: slug,
