@@ -1,8 +1,8 @@
 import {
+  buildVersionGlobalFields,
   type PayloadRequest,
   type TypeWithID,
   type UpdateGlobalVersionArgs,
-  buildVersionGlobalFields,
 } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -39,6 +39,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     config: this.payload.config,
     data: versionData,
     fields: buildVersionGlobalFields(
+      this.payload.config,
       this.payload.config.globals.find((global) => global.slug === globalSlug),
     ),
   })

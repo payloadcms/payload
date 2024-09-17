@@ -1,4 +1,4 @@
-import { type PayloadRequest, type UpdateVersion, buildVersionCollectionFields } from 'payload'
+import { buildVersionCollectionFields, type PayloadRequest, type UpdateVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -26,7 +26,10 @@ export const updateVersion: UpdateVersion = async function updateVersion(
   const sanitizedData = sanitizeRelationshipIDs({
     config: this.payload.config,
     data: versionData,
-    fields: buildVersionCollectionFields(this.payload.collections[collection].config),
+    fields: buildVersionCollectionFields(
+      this.payload.config,
+      this.payload.collections[collection].config,
+    ),
   })
 
   const doc = await VersionModel.findOneAndUpdate(query, sanitizedData, options)
