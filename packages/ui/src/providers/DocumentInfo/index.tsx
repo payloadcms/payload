@@ -193,10 +193,7 @@ const DocumentInfo: React.FC<
           // Send a patch request to update the _lastEdited info
           await requests.patch(`${serverURL}${api}/payload-locked-documents/${lockId}`, {
             body: JSON.stringify({
-              _lastEdited: {
-                editedAt: new Date(),
-                user: { relationTo: user?.collection, value: user?.id },
-              },
+              user: { relationTo: user?.collection, value: user?.id },
             }),
             headers: {
               'Content-Type': 'application/json',
@@ -230,7 +227,7 @@ const DocumentInfo: React.FC<
           const { docs } = await request.json()
 
           if (docs.length > 0) {
-            const newEditor = docs[0]._lastEdited?.user?.value
+            const newEditor = docs[0].user?.value
             if (newEditor && newEditor.id !== currentEditor?.id) {
               setCurrentEditor(newEditor)
               setDocumentIsLocked(true)

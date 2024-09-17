@@ -258,34 +258,24 @@ export const buildFormState = async ({
       if (lockedDocument.docs && lockedDocument.docs.length > 0) {
         const lockedState = {
           isLocked: true,
-          user: lockedDocument.docs[0]?._lastEdited?.user?.value,
+          user: lockedDocument.docs[0]?.user?.value,
         }
 
         if (updateLastEdited) {
-          await req.payload.update({
+          await req.payload.db.updateOne({
             id: lockedDocument.docs[0].id,
             collection: 'payload-locked-documents',
-            data: {
-              _lastEdited: {
-                editedAt: new Date().toISOString(),
-              },
-            },
+            data: {},
+            req,
           })
         }
 
         return { lockedState, state: result }
       } else {
         // If no lock document exists, create it
-        await req.payload.create({
+        await req.payload.db.create({
           collection: 'payload-locked-documents',
           data: {
-            _lastEdited: {
-              editedAt: new Date().toISOString(),
-              user: {
-                relationTo: [req.user.collection],
-                value: req.user.id,
-              },
-            },
             document: collectionSlug
               ? {
                   relationTo: [collectionSlug],
@@ -293,8 +283,12 @@ export const buildFormState = async ({
                 }
               : undefined,
             globalSlug: globalSlug ? globalSlug : undefined,
-            isLocked: true,
+            user: {
+              relationTo: [req.user.collection],
+              value: req.user.id,
+            },
           },
+          req,
         })
 
         const lockedState = {

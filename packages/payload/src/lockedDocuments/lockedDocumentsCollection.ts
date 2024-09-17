@@ -19,27 +19,16 @@ export const getLockedDocumentsCollection = (config: Config): CollectionConfig =
       type: 'text',
     },
     {
-      name: '_lastEdited',
-      type: 'group',
-      fields: [
-        {
-          name: 'user',
-          type: 'relationship',
-          relationTo: config.collections
-            .filter((collectionConfig) => collectionConfig.auth)
-            .map((collectionConfig) => collectionConfig.slug),
-          required: true,
-        },
-        {
-          name: 'editedAt',
-          type: 'date',
-        },
-      ],
+      name: 'user',
+      type: 'relationship',
+      relationTo: config.collections
+        .filter((collectionConfig) => collectionConfig.auth)
+        .map((collectionConfig) => collectionConfig.slug),
+      required: true,
     },
     {
-      name: 'isLocked',
-      type: 'checkbox',
-      defaultValue: false,
+      name: 'editedAt',
+      type: 'date',
     },
   ],
 })

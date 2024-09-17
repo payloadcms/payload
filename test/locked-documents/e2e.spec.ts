@@ -89,19 +89,15 @@ describe('locked documents', () => {
       lockedDoc = await payload.create({
         collection: lockedDocumentCollection,
         data: {
-          _lastEdited: {
-            editedAt: new Date().toISOString(),
-            user: {
-              relationTo: 'users',
-              value: user2.id,
-            },
+          user: {
+            relationTo: 'users',
+            value: user2.id,
           },
           document: {
             relationTo: 'posts',
             value: postDoc.id,
           },
           globalSlug: undefined,
-          isLocked: true,
         },
       })
     })
@@ -292,19 +288,15 @@ describe('locked documents', () => {
       lockedDoc = await payload.create({
         collection: lockedDocumentCollection,
         data: {
-          _lastEdited: {
-            editedAt: new Date().toISOString(),
-            user: {
-              relationTo: 'users',
-              value: user2.id,
-            },
+          user: {
+            relationTo: 'users',
+            value: user2.id,
           },
           document: {
             relationTo: 'posts',
             value: postDoc.id,
           },
           globalSlug: undefined,
-          isLocked: true,
         },
       })
     })
@@ -399,12 +391,9 @@ describe('locked documents', () => {
       lockedDoc = await payload.create({
         collection: lockedDocumentCollection,
         data: {
-          _lastEdited: {
-            editedAt: new Date().toISOString(),
-            user: {
-              relationTo: 'users',
-              value: user2.id,
-            },
+          user: {
+            relationTo: 'users',
+            value: user2.id,
           },
           document: {
             relationTo: 'posts',
@@ -462,10 +451,10 @@ describe('locked documents', () => {
 
       const userEmail =
         // eslint-disable-next-line playwright/no-conditional-in-test
-        lockedDoc.docs[0]._lastEdited.user.value &&
-        typeof lockedDoc.docs[0]._lastEdited.user.value === 'object' &&
-        'email' in lockedDoc.docs[0]._lastEdited.user.value &&
-        lockedDoc.docs[0]._lastEdited.user.value.email
+        lockedDoc.docs[0].user.value &&
+        typeof lockedDoc.docs[0].user.value === 'object' &&
+        'email' in lockedDoc.docs[0].user.value &&
+        lockedDoc.docs[0].user.value.email
 
       expect(userEmail).toEqual('dev@payloadcms.com')
     })
@@ -492,12 +481,9 @@ describe('locked documents', () => {
       lockedDoc = await payload.create({
         collection: lockedDocumentCollection,
         data: {
-          _lastEdited: {
-            editedAt: new Date().toISOString(),
-            user: {
-              relationTo: 'users',
-              value: user2.id,
-            },
+          user: {
+            relationTo: 'users',
+            value: user2.id,
           },
           document: {
             relationTo: 'posts',
@@ -557,10 +543,10 @@ describe('locked documents', () => {
 
       const userEmail =
         // eslint-disable-next-line playwright/no-conditional-in-test
-        lockedDoc.docs[0]._lastEdited.user.value &&
-        typeof lockedDoc.docs[0]._lastEdited.user.value === 'object' &&
-        'email' in lockedDoc.docs[0]._lastEdited.user.value &&
-        lockedDoc.docs[0]._lastEdited.user.value.email
+        lockedDoc.docs[0].user.value &&
+        typeof lockedDoc.docs[0].user.value === 'object' &&
+        'email' in lockedDoc.docs[0].user.value &&
+        lockedDoc.docs[0].user.value.email
 
       expect(userEmail).toEqual('dev@payloadcms.com')
     })
@@ -784,16 +770,12 @@ describe('locked documents', () => {
       const lockedGlobal = await payload.create({
         collection: lockedDocumentCollection,
         data: {
-          _lastEdited: {
-            editedAt: new Date().toISOString(),
-            user: {
-              relationTo: 'users',
-              value: user2.id,
-            },
+          user: {
+            relationTo: 'users',
+            value: user2.id,
           },
           document: undefined,
           globalSlug: 'menu',
-          isLocked: true,
         },
       })
 

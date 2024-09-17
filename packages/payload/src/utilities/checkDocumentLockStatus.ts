@@ -13,11 +13,6 @@ type CheckDocumentLockStatusArgs = {
   req: PayloadRequest
 }
 
-type CheckDocumentLockResult = {
-  lockedDocument?: JsonObject & TypeWithID
-  shouldUnlockDocument: boolean
-}
-
 export const checkDocumentLockStatus = async ({
   id,
   collectionSlug,
@@ -25,7 +20,7 @@ export const checkDocumentLockStatus = async ({
   lockDurationDefault = 300, // Default 5 minutes in seconds
   lockErrorMessage,
   req,
-}: CheckDocumentLockStatusArgs): Promise<CheckDocumentLockResult> => {
+}: CheckDocumentLockStatusArgs): Promise<void> => {
   const { payload } = req
 
   // Retrieve the lockDocuments property for either collection or global
@@ -67,36 +62,36 @@ export const checkDocumentLockStatus = async ({
     limit: 1,
     pagination: false,
     req,
+    sort: '-updatedAt',
     where: lockedDocumentQuery,
   })
 
-  let shouldUnlockDocument = false
-
   // If there's a locked document, check lock conditions
-  if (lockedDocumentResult.docs.length > 0) {
-    const lockedDoc = lockedDocumentResult.docs[0]
-    const lastEditedAt = new Date(lockedDoc?._lastEdited?.editedAt)
-    const now = new Date()
-
-    const lockDuration =
-      typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
-
-    const lockDurationInMilliseconds = lockDuration * 1000
-    const currentUserId = req.user?.id
-
-    // If document is locked by another user and the lock hasn't expired
-    if (lockedDoc._lastEdited?.user?.value?.id !== currentUserId) {
-      if (now.getTime() - lastEditedAt.getTime() <= lockDurationInMilliseconds) {
-        throw new APIError(finalLockErrorMessage)
-      } else {
-        // If lock has expired, allow unlocking
-        shouldUnlockDocument = true
-      }
-    } else {
-      // If document is locked by the current user, allow unlocking
-      shouldUnlockDocument = true
-    }
+  const lockedDoc = lockedDocumentResult?.docs[0]
+  if (!lockedDoc) {
+    return
   }
 
-  return { lockedDocument: lockedDocumentResult.docs[0], shouldUnlockDocument }
+  const lastEditedAt = new Date(lockedDoc?.updatedAt)
+  const now = new Date()
+
+  const lockDuration =
+    typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
+
+  const lockDurationInMilliseconds = lockDuration * 1000
+  const currentUserId = req.user?.id
+
+  // document is locked by another user and the lock hasn't expired
+  if (
+    lockedDoc.user?.value?.id !== currentUserId &&
+    now.getTime() - lastEditedAt.getTime() <= lockDurationInMilliseconds
+  ) {
+    throw new APIError(finalLockErrorMessage)
+  }
+
+  await payload.db.deleteMany({
+    collection: 'payload-locked-documents',
+    req,
+    where: lockedDocumentQuery,
+  })
 }

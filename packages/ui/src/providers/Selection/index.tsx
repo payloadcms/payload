@@ -56,8 +56,8 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       const rows = new Map()
       if (allAvailable) {
         setSelectAll(SelectAllStatus.AllAvailable)
-        docs.forEach(({ id, isLocked }) => {
-          if (!isLocked) {
+        docs.forEach(({ id, _isLocked }) => {
+          if (!_isLocked) {
             rows.set(id, true)
           }
         })
@@ -67,8 +67,8 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       ) {
         setSelectAll(SelectAllStatus.None)
       } else {
-        docs.forEach(({ id, isLocked }) => {
-          if (!isLocked) {
+        docs.forEach(({ id, _isLocked }) => {
+          if (!_isLocked) {
             rows.set(id, selectAll !== SelectAllStatus.Some)
           }
         })
@@ -82,7 +82,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     (id) => {
       const doc = docs.find((doc) => doc.id === id)
 
-      if (doc?.isLocked) {
+      if (doc?._isLocked) {
         return // Prevent selection if the document is locked
       }
 
