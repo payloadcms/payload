@@ -17,6 +17,7 @@ export const pl: GenericTranslationsObject = {
       'Długość powinna wynosić od {{minLength}} do {{maxLength}} znaków. Po porady dotyczące pisania wysokiej jakości meta opisów zobacz ',
     lengthTipTitle:
       'Długość powinna wynosić od {{minLength}} do {{maxLength}} znaków. Po porady dotyczące pisania wysokiej jakości meta tytułów zobacz ',
+    missing: 'Brakuje',
     noImage: 'Brak obrazu',
     preview: 'Podgląd',
     previewDescription:

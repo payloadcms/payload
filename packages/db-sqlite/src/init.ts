@@ -39,8 +39,20 @@ export const init: Init = async function init(this: SQLiteAdapter) {
   })
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
     const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
+    const config = this.payload.config
 
     const baseExtraConfig: BaseExtraConfig = {}
+
+    if (collection.upload.filenameCompoundIndex) {
+      const indexName = `${tableName}_filename_compound_idx`
+
+      baseExtraConfig.filename_compound_index = (cols) => {
+        const colsConstraint = collection.upload.filenameCompoundIndex.map((f) => {
+          return cols[f]
+        })
+        return uniqueIndex(indexName).on(colsConstraint[0], ...colsConstraint.slice(1))
+      }
+    }
 
     if (collection.upload.filenameCompoundIndex) {
       const indexName = `${tableName}_filename_compound_idx`
@@ -68,7 +80,7 @@ export const init: Init = async function init(this: SQLiteAdapter) {
       const versionsTableName = this.tableNameMap.get(
         `_${toSnakeCase(collection.slug)}${this.versionsSuffix}`,
       )
-      const versionFields = buildVersionCollectionFields(collection)
+      const versionFields = buildVersionCollectionFields(config, collection)
 
       buildTable({
         adapter: this,
@@ -107,7 +119,8 @@ export const init: Init = async function init(this: SQLiteAdapter) {
         versions: true,
         versionsCustomName: true,
       })
-      const versionFields = buildVersionGlobalFields(global)
+      const config = this.payload.config
+      const versionFields = buildVersionGlobalFields(config, global)
 
       buildTable({
         adapter: this,

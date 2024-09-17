@@ -1,3 +1,4 @@
+import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
 import type { Table } from 'drizzle-orm'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
@@ -7,7 +8,7 @@ import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
 import path from 'path'
-import { commitTransaction, initTransaction, ValidationError } from 'payload'
+import { commitTransaction, initTransaction, QueryError } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'
@@ -704,5 +705,40 @@ describe('database', () => {
         }),
       ).rejects.toBeTruthy()
     })
+  })
+
+  describe('virtual fields', () => {
+    it('should not save a field with `virtual: true` to the db', async () => {
+      const createRes = await payload.create({
+        collection: 'fields-persistance',
+        data: { text: 'asd', array: [], textHooked: 'asd' },
+      })
+
+      const resLocal = await payload.findByID({
+        collection: 'fields-persistance',
+        id: createRes.id,
+      })
+
+      const resDb = (await payload.db.findOne({
+        collection: 'fields-persistance',
+        where: { id: { equals: createRes.id } },
+        req: {} as PayloadRequest,
+      })) as Record<string, unknown>
+
+      expect(resDb.text).toBeUndefined()
+      expect(resDb.array).toBeUndefined()
+      expect(resDb.textHooked).toBeUndefined()
+
+      expect(resLocal.textHooked).toBe('hooked')
+    })
+  })
+
+  it('should not allow to query by a field with `virtual: true`', async () => {
+    await expect(
+      payload.find({
+        collection: 'fields-persistance',
+        where: { text: { equals: 'asd' } },
+      }),
+    ).rejects.toThrow(QueryError)
   })
 })

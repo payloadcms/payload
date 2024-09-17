@@ -18,7 +18,9 @@ export interface Config {
     'pg-migrations': PgMigration;
     'custom-schema': CustomSchema;
     places: Place;
+    'fields-persistance': FieldsPersistance;
     users: User;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -212,6 +214,22 @@ export interface Place {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fields-persistance".
+ */
+export interface FieldsPersistance {
+  id: string;
+  text?: string | null;
+  textHooked?: string | null;
+  array?:
+    | {
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -226,6 +244,61 @@ export interface User {
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'default-values';
+        value: string | DefaultValue;
+      } | null)
+    | ({
+        relationTo: 'relation-a';
+        value: string | RelationA;
+      } | null)
+    | ({
+        relationTo: 'relation-b';
+        value: string | RelationB;
+      } | null)
+    | ({
+        relationTo: 'pg-migrations';
+        value: string | PgMigration;
+      } | null)
+    | ({
+        relationTo: 'custom-schema';
+        value: string | CustomSchema;
+      } | null)
+    | ({
+        relationTo: 'places';
+        value: string | Place;
+      } | null)
+    | ({
+        relationTo: 'fields-persistance';
+        value: string | FieldsPersistance;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  globalSlug?: string | null;
+  _lastEdited: {
+    user: {
+      relationTo: 'users';
+      value: string | User;
+    };
+    editedAt?: string | null;
+  };
+  isLocked?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

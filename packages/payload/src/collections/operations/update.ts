@@ -25,6 +25,7 @@ import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
+import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -127,7 +128,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
         collectionConfig: collection.config,
         overrideAccess,
         req,
-        versionFields: buildVersionCollectionFields(collection.config),
+        versionFields: buildVersionCollectionFields(payload.config, collection.config),
         where: versionsWhere,
       })
 
@@ -177,6 +178,17 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
       }
 
       try {
+        // /////////////////////////////////////
+        // Handle potentially locked documents
+        // /////////////////////////////////////
+
+        const { lockedDocument, shouldUnlockDocument } = await checkDocumentLockStatus({
+          id,
+          collectionSlug: collectionConfig.slug,
+          lockErrorMessage: `Document with ID ${id} is currently locked by another user and cannot be updated.`,
+          req,
+        })
+
         const originalDoc = await afterRead({
           collection: collectionConfig,
           context: req.context,
@@ -320,6 +332,20 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
             },
             payload,
             req,
+          })
+        }
+
+        // /////////////////////////////////////
+        // Unlock the document if necessary
+        // /////////////////////////////////////
+
+        if (shouldUnlockDocument && lockedDocument) {
+          await payload.db.deleteOne({
+            collection: 'payload-locked-documents',
+            req,
+            where: {
+              id: { equals: lockedDocument.id },
+            },
           })
         }
 

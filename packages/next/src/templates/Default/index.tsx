@@ -71,9 +71,11 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
         <RenderComponent mappedComponent={MappedCustomHeader} />
         <div style={{ position: 'relative' }}>
           <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
-            <NavToggler className={`${baseClass}__nav-toggler`}>
-              <NavHamburger />
-            </NavToggler>
+            <div className={`${baseClass}__nav-toggler-container`} id="nav-toggler">
+              <NavToggler className={`${baseClass}__nav-toggler`}>
+                <NavHamburger />
+              </NavToggler>
+            </div>
           </div>
           <Wrapper baseClass={baseClass} className={className}>
             <RenderComponent mappedComponent={MappedDefaultNav} />

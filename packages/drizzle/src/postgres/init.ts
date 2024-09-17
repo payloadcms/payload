@@ -66,7 +66,7 @@ export const init: Init = async function init(this: BasePostgresAdapter) {
       const versionsTableName = this.tableNameMap.get(
         `_${toSnakeCase(collection.slug)}${this.versionsSuffix}`,
       )
-      const versionFields = buildVersionCollectionFields(collection)
+      const versionFields = buildVersionCollectionFields(this.payload.config, collection)
 
       buildTable({
         adapter: this,
@@ -100,7 +100,7 @@ export const init: Init = async function init(this: BasePostgresAdapter) {
         versions: true,
         versionsCustomName: true,
       })
-      const versionFields = buildVersionGlobalFields(global)
+      const versionFields = buildVersionGlobalFields(this.payload.config, global)
 
       buildTable({
         adapter: this,

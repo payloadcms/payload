@@ -17,6 +17,7 @@ export const uk: GenericTranslationsObject = {
       'Має бути від {{minLength}} до {{maxLength}} символів. Щоб дізнатися, як писати якісні метаописи — перегляньте ',
     lengthTipTitle:
       'Має бути від {{minLength}} до {{maxLength}} символів. Щоб дізнатися, як писати якісні метазаголовки — перегляньте ',
+    missing: 'Відсутнє',
     noImage: 'Немає зображення',
     preview: 'Попередній перегляд',
     previewDescription:

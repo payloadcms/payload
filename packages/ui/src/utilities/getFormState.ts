@@ -1,4 +1,4 @@
-import type { FormState, SanitizedConfig } from 'payload'
+import type { ClientUser, FormState, SanitizedConfig } from 'payload'
 
 import type { BuildFormStateArgs } from '../forms/buildStateFromSchema/index.js'
 
@@ -9,7 +9,7 @@ export const getFormState = async (args: {
   serverURL: SanitizedConfig['serverURL']
   signal?: AbortSignal
   token?: string
-}): Promise<FormState> => {
+}): Promise<{ lockedState?: { isLocked: boolean; user: ClientUser }; state: FormState }> => {
   const { apiRoute, body, onError, serverURL, signal, token } = args
 
   const res = await fetch(`${serverURL}${apiRoute}/form-state`, {
@@ -23,7 +23,10 @@ export const getFormState = async (args: {
     signal,
   })
 
-  const json = (await res.json()) as FormState
+  const json = (await res.json()) as {
+    lockedState?: { isLocked: boolean; user: ClientUser }
+    state: FormState
+  }
 
   if (res.ok) {
     return json
@@ -33,5 +36,5 @@ export const getFormState = async (args: {
     }
   }
 
-  return body?.formState
+  return { state: body?.formState }
 }

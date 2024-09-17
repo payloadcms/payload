@@ -130,18 +130,21 @@ export const promise = async ({
         }
       }
 
-      const validationResult = await field.validate(valueToValidate, {
-        ...field,
-        id,
-        collectionSlug: collection?.slug,
-        data: deepMergeWithSourceArrays(doc, data),
-        jsonError,
-        operation,
-        preferences: { fields: {} },
-        previousValue: siblingDoc[field.name],
-        req,
-        siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
-      } as ValidateOptions<any, any, { jsonError: object }, any>)
+      const validationResult = await field.validate(
+        valueToValidate as never,
+        {
+          ...field,
+          id,
+          collectionSlug: collection?.slug,
+          data: deepMergeWithSourceArrays(doc, data),
+          jsonError,
+          operation,
+          preferences: { fields: {} },
+          previousValue: siblingDoc[field.name],
+          req,
+          siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
+        } as any,
+      )
 
       if (typeof validationResult === 'string') {
         errors.push({
@@ -296,14 +299,13 @@ export const promise = async ({
 
     case 'blocks': {
       const rows = siblingData[field.name]
-
       if (Array.isArray(rows)) {
         const promises = []
         rows.forEach((row, i) => {
           const rowSiblingDoc = getExistingRowDoc(row as JsonObject, siblingDoc[field.name])
           const rowSiblingDocWithLocales = getExistingRowDoc(
             row as JsonObject,
-            siblingDocWithLocales[field.name],
+            siblingDocWithLocales ? siblingDocWithLocales[field.name] : {},
           )
 
           const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
