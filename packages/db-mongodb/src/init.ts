@@ -18,12 +18,9 @@ import getBuildQueryPlugin from './queries/buildQuery'
 import { getDBName } from './utilities/getDBName'
 
 export const init: Init = async function init(this: MongooseAdapter) {
-  this.payload.config.collections.forEach(async (collection: SanitizedCollectionConfig) => {
+  this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
     // Skip collections that have an .init() method
-    if ('function' === typeof collection?.db?.init) {
-      await collection.db.init(this.payload)
-      return
-    }
+    if ('function' === typeof collection?.db?.init) return
 
     const schema = buildCollectionSchema(collection, this)
 
@@ -80,12 +77,9 @@ export const init: Init = async function init(this: MongooseAdapter) {
   const model = buildGlobalModel(this)
   this.globals = model
 
-  this.payload.config.globals.forEach(async (global) => {
+  this.payload.config.globals.forEach((global) => {
     // Skip globals that have an .init() method
-    if ('function' === typeof global?.db?.init) {
-      await global.db.init(this.payload)
-      return
-    }
+    if ('function' === typeof global?.db?.init) return
 
     if (global.versions) {
       const versionModelName = getDBName({ config: global, versions: true })
