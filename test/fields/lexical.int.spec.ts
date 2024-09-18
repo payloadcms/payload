@@ -18,7 +18,7 @@ import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
 import { textToLexicalJSON } from './collections/LexicalLocalized/textToLexicalJSON.js'
-import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
+import { getAlignIndentHTMLData, lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
 import { richTextDocData } from './collections/RichText/data.js'
 import { generateLexicalRichText } from './collections/RichText/generateLexicalRichText.js'
 import { textDoc } from './collections/Text/shared.js'
@@ -303,6 +303,22 @@ describe('Lexical', () => {
 
       const htmlField: string = lexicalDoc?.lexicalSimple_html
       expect(htmlField).toStrictEqual('<p>simple</p>')
+    })
+    it('htmlConverter: should output correct HTML for lexical data with indent and align', async () => {
+      const lexicalDoc: LexicalMigrateField = (
+        await payload.find({
+          collection: lexicalMigrateFieldsSlug,
+          depth: 0,
+          where: {
+            title: {
+              equals: lexicalMigrateDocData.title,
+            },
+          },
+        })
+      ).docs[0] as never
+
+      const htmlField: string = lexicalDoc?.lexicalStyledIndentAlign_html
+      expect(htmlField).toStrictEqual(getAlignIndentHTMLData('styled'))
     })
     it('htmlConverter: should output correct HTML for lexical field nested in group', async () => {
       const lexicalDoc: LexicalMigrateField = (

@@ -14,7 +14,7 @@ import {
 } from '@payloadcms/richtext-lexical/migrate'
 
 import { lexicalMigrateFieldsSlug } from '../../slugs.js'
-import { getSimpleLexicalData } from './data.js'
+import { getAlignIndentLexicalData, getSimpleLexicalData } from './data.js'
 
 export const LexicalMigrateFields: CollectionConfig = {
   slug: lexicalMigrateFieldsSlug,
@@ -122,6 +122,15 @@ export const LexicalMigrateFields: CollectionConfig = {
       defaultValue: getSimpleLexicalData('simple'),
     },
     lexicalHTML('lexicalSimple', { name: 'lexicalSimple_html' }),
+    {
+      name: 'lexicalStyledIndentAlign',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [...defaultFeatures, HTMLConverterFeature()],
+      }),
+      defaultValue: getAlignIndentLexicalData('styled'),
+    },
+    lexicalHTML('lexicalStyledIndentAlign', { name: 'lexicalStyledIndentAlign_html' }),
     {
       name: 'groupWithLexicalField',
       type: 'group',

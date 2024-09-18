@@ -56,3 +56,63 @@ export function getSimpleLexicalData(textContent: string) {
     },
   }
 }
+
+export function getAlignIndentLexicalData(textContent: string) {
+  return {
+    root: {
+      children: [
+        {
+          children: [
+            {
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: textContent,
+              type: 'text',
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 2,
+          type: 'heading',
+          version: 1,
+          tag: 'h2',
+        },
+        {
+          children: [
+            {
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: textContent,
+              type: 'text',
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: 'center',
+          indent: 0,
+          type: 'paragraph',
+          version: 1,
+          textFormat: 0,
+          textStyle: '',
+        },
+      ],
+      direction: 'ltr',
+      format: '',
+      indent: 0,
+      type: 'root',
+      version: 1,
+    },
+  }
+}
+
+/**
+ * If the HTML Conversion structure of the heading and paragraph changes, must edit this.
+ */
+export function getAlignIndentHTMLData(textContent: string) {
+  return `<h2 style="text-indent: 40px;">${textContent}</h2><p style="text-align: center;">${textContent}</p>`
+}
