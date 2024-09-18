@@ -123,39 +123,34 @@ export const TableColumnsProvider: React.FC<Props> = ({
   )
 
   const setActiveColumns = React.useCallback(
-    (activeColumnAccessors) => {
-      const activeColumns = tableColumns.map((col) => {
-        return {
-          ...col,
-          active: activeColumnAccessors.includes(col.accessor),
-        }
-      })
+    (activeColumnAccessors: string[]) => {
+      const activeColumns = tableColumns
+        .map((col) => {
+          return {
+            ...col,
+            active: activeColumnAccessors.includes(col.accessor),
+          }
+        })
+        .toSorted((first, second) => {
+          const firstFromArgs = activeColumnAccessors.indexOf(first.accessor)
+          const secondFromArgs = activeColumnAccessors.indexOf(second.accessor)
 
+          if (firstFromArgs === -1 || secondFromArgs === -1) {
+            return 0
+          }
+
+          return firstFromArgs > secondFromArgs ? 1 : -1
+        })
+
+      setTableColumns(activeColumns)
       updateColumnPreferences(activeColumns)
     },
     [tableColumns, updateColumnPreferences],
   )
 
   const resetColumnsState = React.useCallback(() => {
-    const initialState = buildColumnState({
-      cellProps,
-      columnPreferences: listPreferences?.columns,
-      columns: initialColumns,
-      enableRowSelections,
-      fields,
-      useAsTitle,
-    })
-    setTableColumns(initialState)
-    updateColumnPreferences(initialState)
-  }, [
-    cellProps,
-    listPreferences?.columns,
-    initialColumns,
-    enableRowSelections,
-    fields,
-    useAsTitle,
-    updateColumnPreferences,
-  ])
+    setActiveColumns(defaultColumns)
+  }, [defaultColumns, setActiveColumns])
 
   // //////////////////////////////////////////////
   // Get preferences on collection change (drawers)
