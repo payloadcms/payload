@@ -14,12 +14,29 @@ export const updateNoGlobal = (val: boolean) => {
   noGlobal = val
   return noGlobal
 }
+
+export let isInit = false
+export const updateIsInit = (val: boolean) => {
+  isInit = val
+  return isInit
+}
+
+export let isConnect = false
+export const updateIsConnect = (val: boolean) => {
+  isConnect = val
+  return isConnect
+}
 export default buildConfigWithDefaults({
   globals: [
     {
       slug: globalSlug,
       db: {
-        init: () => {
+        init: async () => {
+          updateIsInit(true)
+          return Promise.resolve()
+        },
+        connect: async () => {
+          updateIsConnect(true)
           return Promise.resolve()
         },
         // @ts-expect-error
