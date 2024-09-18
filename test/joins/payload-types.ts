@@ -16,6 +16,7 @@ export interface Config {
     'localized-posts': LocalizedPost;
     'localized-categories': LocalizedCategory;
     users: User;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -67,16 +68,7 @@ export interface Post {
 export interface Category {
   id: string;
   name?: string | null;
-  relatedPosts?: {
-    docs?: (string | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
-  group?: {
-    relatedPosts?: {
-      docs?: (string | Post)[] | null;
-      hasNextPage?: boolean | null;
-    } | null;
-  };
+  group?: {};
   updatedAt: string;
   createdAt: string;
 }
@@ -98,10 +90,6 @@ export interface LocalizedPost {
 export interface LocalizedCategory {
   id: string;
   name?: string | null;
-  relatedPosts?: {
-    docs?: (string | LocalizedPost)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -121,6 +109,42 @@ export interface User {
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
+      } | null)
+    | ({
+        relationTo: 'localized-posts';
+        value: string | LocalizedPost;
+      } | null)
+    | ({
+        relationTo: 'localized-categories';
+        value: string | LocalizedCategory;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  editedAt?: string | null;
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

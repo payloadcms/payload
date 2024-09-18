@@ -31,7 +31,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
-  const { path, value } = useField<PaginatedDocs>({
+  const { value } = useField<PaginatedDocs>({
     path: pathFromContext ?? pathFromProps ?? name,
   })
 

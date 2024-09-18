@@ -19,6 +19,7 @@ import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 import { Pill } from '../../elements/Pill/index.js'
 import { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
@@ -54,6 +55,8 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   } = useConfig()
 
   const { id: docID } = useDocumentInfo()
+
+  const { permissions } = useAuth()
 
   const [initialData, setInitialData] = useState<PaginatedDocs>(initialDataFromProps)
 
@@ -181,7 +184,9 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       <div className={`${baseClass}__header`}>
         {Label}
         <div className={`${baseClass}__actions`}>
-          <DocumentDrawerToggler>{i18n.t('fields:addNew')}</DocumentDrawerToggler>
+          {permissions?.collections?.[relationTo]?.create?.permission && (
+            <DocumentDrawerToggler>{i18n.t('fields:addNew')}</DocumentDrawerToggler>
+          )}
           <Pill
             aria-controls={`${baseClass}-columns`}
             aria-expanded={openColumnSelector}
