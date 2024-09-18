@@ -1,7 +1,7 @@
 import payload from '../../packages/payload/src'
 import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
-import { globalSlug, updateNoGlobal } from './config'
+import { globalSlug, updateNoGlobal, isConnect, isInit } from './config'
 import { doc } from './config'
 
 require('isomorphic-fetch')
@@ -46,10 +46,17 @@ describe('Global Database Operations', () => {
   })
 
   // --__--__--__--__--__--__--__--__--__
-  // Local API
+  // Custom Global DB Operations
   // --__--__--__--__--__--__--__--__--__
 
-  // Comment out
+  it('global DB Init', () => {
+    expect(isInit).toEqual(true)
+  })
+
+  it('global DB Connect', () => {
+    expect(isConnect).toEqual(true)
+  })
+
   it('global DB Create', async () => {
     updateNoGlobal(true)
     const result = await payload.updateGlobal({
