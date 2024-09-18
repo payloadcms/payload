@@ -11,7 +11,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 import { buildAfterOperation } from './utils.js'
 
-export type Arguments<DisableErrors extends boolean = false> = {
+export type Arguments<DisableErrors extends boolean> = {
   collection: Collection
   currentDepth?: number
   depth?: number
@@ -26,7 +26,7 @@ export type Arguments<DisableErrors extends boolean = false> = {
 
 export const findByIDOperation = async <
   TSlug extends CollectionSlug,
-  DisableErrors extends boolean = false,
+  DisableErrors extends boolean,
 >(
   incomingArgs: Arguments<DisableErrors>,
 ): Promise<

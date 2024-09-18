@@ -6,7 +6,7 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findByIDOperation } from '../findByID.js'
 
-export type Options<TSlug extends CollectionSlug, DisableErrors extends boolean = false> = {
+export type Options<TSlug extends CollectionSlug, DisableErrors extends boolean> = {
   collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
@@ -28,7 +28,7 @@ export type Options<TSlug extends CollectionSlug, DisableErrors extends boolean 
 
 export default async function findByIDLocal<
   TSlug extends CollectionSlug,
-  DisableErrors extends boolean = false,
+  DisableErrors extends boolean,
 >(
   payload: Payload,
   options: Options<TSlug, DisableErrors>,
