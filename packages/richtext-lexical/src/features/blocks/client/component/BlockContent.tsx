@@ -21,8 +21,8 @@ import React, { useCallback } from 'react'
 
 import type { LexicalRichTextFieldProps } from '../../../../types.js'
 import type { BlockFields } from '../../server/nodes/BlocksNode.js'
-import type { BlockNode } from '../nodes/BlocksNode.js'
 
+import { $isBlockNode } from '../nodes/BlocksNode.js'
 import { FormSavePlugin } from './FormSavePlugin.js'
 
 type Props = {
@@ -122,8 +122,8 @@ export const BlockContent: React.FC<Props> = (props) => {
         // ensure that the nested editor has finished its update cycle before we update the block node.
         setTimeout(() => {
           editor.update(() => {
-            const node: BlockNode = $getNodeByKey(nodeKey)
-            if (node) {
+            const node = $getNodeByKey(nodeKey)
+            if (node && $isBlockNode(node)) {
               formData = newFormData
               node.setFields(newFormData)
             }
@@ -176,7 +176,7 @@ export const BlockContent: React.FC<Props> = (props) => {
 
   const removeBlock = useCallback(() => {
     editor.update(() => {
-      $getNodeByKey(nodeKey).remove()
+      $getNodeByKey(nodeKey)?.remove()
     })
   }, [editor, nodeKey])
 
@@ -198,7 +198,7 @@ export const BlockContent: React.FC<Props> = (props) => {
                   className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
                   pillStyle="white"
                 >
-                  {typeof clientBlock?.labels.singular === 'string'
+                  {typeof clientBlock?.labels?.singular === 'string'
                     ? getTranslation(clientBlock?.labels.singular, i18n)
                     : clientBlock.slug}
                 </Pill>
