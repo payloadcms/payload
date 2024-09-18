@@ -178,6 +178,7 @@ export type GlobalConfig = {
     | DatabaseAdapter
     | Pick<
         DatabaseAdapter,
+        | 'connect'
         | 'count'
         | 'create'
         | 'createGlobal'

@@ -391,6 +391,7 @@ export type CollectionConfig = {
     | DatabaseAdapter
     | Pick<
         DatabaseAdapter,
+        | 'connect'
         | 'count'
         | 'create'
         | 'createGlobal'
