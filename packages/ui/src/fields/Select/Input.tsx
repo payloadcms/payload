@@ -36,7 +36,7 @@ export type SelectInputProps = {
   readonly isClearable?: boolean
   readonly isSortable?: boolean
   readonly Label?: MappedComponent
-  readonly label: StaticLabel
+  readonly label?: StaticLabel
   readonly labelProps?: Record<string, unknown>
   readonly name: string
   readonly onChange?: ReactSelectAdapterProps['onChange']

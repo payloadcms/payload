@@ -1,7 +1,6 @@
-import type { Payload } from 'payload'
-
-import { randomBytes } from 'crypto'
+import { randomBytes, randomUUID } from 'crypto'
 import path from 'path'
+import { NotFound, type Payload } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -33,7 +32,9 @@ describe('collections-rest', () => {
     if (payload.db.name === 'mongoose') {
       await new Promise((resolve, reject) => {
         payload.db.collections[pointSlug].ensureIndexes(function (err) {
-          if (err) reject(err)
+          if (err) {
+            reject(err)
+          }
           resolve(true)
         })
       })
@@ -1515,6 +1516,17 @@ describe('collections-rest', () => {
       expect(response.status).toBe(500)
       expect(Array.isArray(result.errors)).toEqual(true)
       expect(result.errors[0].message).toStrictEqual('Something went wrong.')
+    })
+  })
+
+  describe('Local', () => {
+    it('findByID should throw NotFound if the doc was not found, if disableErrors: true then return null', async () => {
+      const post = await createPost()
+      const id = typeof post.id === 'string' ? randomUUID() : 999
+      await expect(payload.findByID({ collection: 'posts', id })).rejects.toBeInstanceOf(NotFound)
+      await expect(
+        payload.findByID({ collection: 'posts', id, disableErrors: true }),
+      ).resolves.toBeNull()
     })
   })
 })

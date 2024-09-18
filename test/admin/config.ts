@@ -47,6 +47,7 @@ export default buildConfigWithDefaults({
       ],
       afterNavLinks: ['/components/AfterNavLinks/index.js#AfterNavLinks'],
       beforeLogin: ['/components/BeforeLogin/index.js#BeforeLogin'],
+      header: ['/components/CustomHeader/index.js#CustomHeader'],
       logout: {
         Button: '/components/Logout/index.js#Logout',
       },

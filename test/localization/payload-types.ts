@@ -138,6 +138,7 @@ export interface LocalizedPost {
   group?: {
     children?: string | null;
   };
+  unique?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -209,20 +210,56 @@ export interface ArrayField {
 export interface LocalizedRequired {
   id: string;
   title: string;
-  layout: (
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'text';
-      }
-    | {
-        number?: number | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'number';
-      }
-  )[];
+  nav: {
+    layout: (
+      | {
+          text?: string | null;
+          nestedArray?:
+            | {
+                text?: string | null;
+                l2?:
+                  | {
+                      l3?:
+                        | {
+                            l4?:
+                              | {
+                                  superNestedText?: string | null;
+                                  id?: string | null;
+                                }[]
+                              | null;
+                            id?: string | null;
+                          }[]
+                        | null;
+                      id?: string | null;
+                    }[]
+                  | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+          blockName?: string | null;
+          blockType: 'text';
+        }
+      | {
+          number?: number | null;
+          id?: string | null;
+          blockName?: string | null;
+          blockType: 'number';
+        }
+    )[];
+  };
+  myTab?: {
+    text?: string | null;
+    group?: {
+      nestedArray2?:
+        | {
+            nestedText?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      nestedText?: string | null;
+    };
+  };
   updatedAt: string;
   createdAt: string;
 }

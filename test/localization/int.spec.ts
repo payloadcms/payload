@@ -1,6 +1,5 @@
-import type { Payload, Where } from 'payload'
-
 import path from 'path'
+import { type Payload, type Where } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -709,12 +708,14 @@ describe('Localization', () => {
       const newDoc = await payload.create({
         collection: withRequiredLocalizedFields,
         data: {
-          layout: [
-            {
-              blockType: 'text',
-              text: 'laiwejfilwaje',
-            },
-          ],
+          nav: {
+            layout: [
+              {
+                blockType: 'text',
+                text: 'laiwejfilwaje',
+              },
+            ],
+          },
           title: 'hello',
         },
       })
@@ -723,12 +724,14 @@ describe('Localization', () => {
         id: newDoc.id,
         collection: withRequiredLocalizedFields,
         data: {
-          layout: [
-            {
-              blockType: 'number',
-              number: 12,
-            },
-          ],
+          nav: {
+            layout: [
+              {
+                blockType: 'number',
+                number: 12,
+              },
+            ],
+          },
           title: 'en espanol, big bird',
         },
         locale: spanishLocale,
@@ -742,7 +745,7 @@ describe('Localization', () => {
         },
       })
 
-      expect(updatedDoc.layout[0].blockType).toStrictEqual('text')
+      expect(updatedDoc.nav.layout[0].blockType).toStrictEqual('text')
 
       const spanishDoc = await payload.findByID({
         id: newDoc.id,
@@ -750,7 +753,7 @@ describe('Localization', () => {
         locale: spanishLocale,
       })
 
-      expect(spanishDoc.layout[0].blockType).toStrictEqual('number')
+      expect(spanishDoc.nav.layout[0].blockType).toStrictEqual('number')
     })
   })
 
@@ -1120,17 +1123,76 @@ describe('Localization', () => {
     })
 
     it('should duplicate with localized blocks', async () => {
+      // This test covers a few things:
+      // 1. make sure we can duplicate localized blocks
+      //    - in relational DBs, we need to create new block / array IDs
+      //    - and this needs to be done recursively for all block / array fields
+      // 2. make sure localized arrays / blocks work inside of localized groups / tabs
+      //    - this is covered with myTab.group.nestedArray2
+      // 3. the field schema for `nav` is within an unnamed tab, which tests that we
+      //    properly recursively loop through all field structures / types
+
       const englishText = 'english'
       const spanishText = 'spanish'
       const doc = await payload.create({
         collection: withRequiredLocalizedFields,
         data: {
-          layout: [
-            {
-              blockType: 'text',
-              text: englishText,
+          nav: {
+            layout: [
+              {
+                blockType: 'text',
+                text: englishText,
+                nestedArray: [
+                  {
+                    text: 'hello',
+                    l2: [
+                      {
+                        l3: [
+                          {
+                            l4: [
+                              {
+                                superNestedText: 'hello',
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    text: 'goodbye',
+                    l2: [
+                      {
+                        l3: [
+                          {
+                            l4: [
+                              {
+                                superNestedText: 'goodbye',
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          myTab: {
+            text: 'hello',
+            group: {
+              nestedText: 'hello',
+              nestedArray2: [
+                {
+                  nestedText: 'hello',
+                },
+                {
+                  nestedText: 'goodbye',
+                },
+              ],
             },
-          ],
+          },
           title: 'hello',
         },
         locale: defaultLocale,
@@ -1140,13 +1202,63 @@ describe('Localization', () => {
         id: doc.id,
         collection: withRequiredLocalizedFields,
         data: {
-          layout: [
-            {
-              blockType: 'text',
-              text: spanishText,
-            },
-          ],
+          nav: {
+            layout: [
+              {
+                blockType: 'text',
+                text: spanishText,
+                nestedArray: [
+                  {
+                    text: 'hola',
+                    l2: [
+                      {
+                        l3: [
+                          {
+                            l4: [
+                              {
+                                superNestedText: 'hola',
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    text: 'adios',
+                    l2: [
+                      {
+                        l3: [
+                          {
+                            l4: [
+                              {
+                                superNestedText: 'adios',
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
           title: 'hello',
+          myTab: {
+            text: 'hola',
+            group: {
+              nestedText: 'hola',
+              nestedArray2: [
+                {
+                  nestedText: 'hola',
+                },
+                {
+                  nestedText: 'adios',
+                },
+              ],
+            },
+          },
         },
         locale: spanishLocale,
       })
@@ -1164,10 +1276,18 @@ describe('Localization', () => {
       })
 
       // check fields
-      expect(result.layout[0].text).toStrictEqual(englishText)
+      expect(result.nav.layout[0].text).toStrictEqual(englishText)
 
-      expect(allLocales.layout.en[0].text).toStrictEqual(englishText)
-      expect(allLocales.layout.es[0].text).toStrictEqual(spanishText)
+      expect(allLocales.nav.layout.en[0].text).toStrictEqual(englishText)
+      expect(allLocales.nav.layout.es[0].text).toStrictEqual(spanishText)
+
+      expect(allLocales.myTab.group.en.nestedText).toStrictEqual('hello')
+      expect(allLocales.myTab.group.en.nestedArray2[0].nestedText).toStrictEqual('hello')
+      expect(allLocales.myTab.group.en.nestedArray2[1].nestedText).toStrictEqual('goodbye')
+
+      expect(allLocales.myTab.group.es.nestedText).toStrictEqual('hola')
+      expect(allLocales.myTab.group.es.nestedArray2[0].nestedText).toStrictEqual('hola')
+      expect(allLocales.myTab.group.es.nestedArray2[1].nestedText).toStrictEqual('adios')
     })
   })
 
@@ -1831,6 +1951,44 @@ describe('Localization', () => {
 
       expect(retrieved.array.en[0].text).toEqual(['hello', 'goodbye'])
       expect(retrieved.array.es[0].text).toEqual(['hola', 'adios'])
+    })
+  })
+
+  describe('localized with unique', () => {
+    it('localized with unique should work for each locale', async () => {
+      await payload.create({
+        collection: 'localized-posts',
+        locale: 'ar',
+        data: {
+          unique: 'text',
+        },
+      })
+
+      await payload.create({
+        collection: 'localized-posts',
+        locale: 'en',
+        data: {
+          unique: 'text',
+        },
+      })
+
+      await payload.create({
+        collection: 'localized-posts',
+        locale: 'es',
+        data: {
+          unique: 'text',
+        },
+      })
+
+      await expect(
+        payload.create({
+          collection: 'localized-posts',
+          locale: 'en',
+          data: {
+            unique: 'text',
+          },
+        }),
+      ).rejects.toBeTruthy()
     })
   })
 })

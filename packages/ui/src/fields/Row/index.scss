@@ -8,6 +8,9 @@
 
     > * {
       flex: 0 1 var(--field-width);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
     // If there is more than one child, add inline-margins to space them out.

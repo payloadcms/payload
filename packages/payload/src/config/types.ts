@@ -697,6 +697,10 @@ export type Config = {
         /** Replace the logo on the login page */
         Logo?: CustomComponent
       }
+      /**
+       * Add custom header to top of page globally
+       */
+      header?: CustomComponent[]
       /** Replace logout related components */
       logout?: {
         /** Replace the logout button  */

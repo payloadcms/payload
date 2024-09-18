@@ -1,0 +1,8 @@
+@import '../../scss/styles';
+
+.icon--lock {
+  .stroke {
+    stroke: currentColor;
+    stroke-width: $style-stroke-width;
+  }
+}

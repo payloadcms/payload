@@ -10,6 +10,11 @@
   border-right: 1px solid var(--theme-elevation-100);
   opacity: 0;
 
+  [dir='rtl'] & {
+    border-right: none;
+    border-left: 1px solid var(--theme-elevation-100);
+  }
+
   &--nav-animate {
     transition: opacity var(--nav-trans-time) ease-in-out;
   }

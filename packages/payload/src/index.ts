@@ -217,11 +217,15 @@ export class BasePayload {
    * @param options
    * @returns document with specified ID
    */
-  findByID = async <TSlug extends CollectionSlug>(
-    options: FindByIDOptions<TSlug>,
-  ): Promise<DataFromCollectionSlug<TSlug>> => {
+  findByID = async <TOptions extends FindByIDOptions>(
+    options: TOptions,
+  ): Promise<
+    TOptions['disableErrors'] extends true
+      ? DataFromCollectionSlug<TOptions['collection']> | null
+      : DataFromCollectionSlug<TOptions['collection']>
+  > => {
     const { findByID } = localOperations
-    return findByID<TSlug>(this, options)
+    return findByID<TOptions>(this, options)
   }
 
   findGlobal = async <TSlug extends GlobalSlug>(
@@ -937,15 +941,25 @@ export type {
   DateFieldValidation,
   EmailFieldValidation,
   JSONFieldValidation,
+  NumberFieldManyValidation,
+  NumberFieldSingleValidation,
   NumberFieldValidation,
   PasswordFieldValidation,
   PointFieldValidation,
   RadioFieldValidation,
+  RelationshipFieldManyValidation,
+  RelationshipFieldSingleValidation,
   RelationshipFieldValidation,
   RichTextFieldValidation,
+  SelectFieldManyValidation,
+  SelectFieldSingleValidation,
   SelectFieldValidation,
   TextareaFieldValidation,
+  TextFieldManyValidation,
+  TextFieldSingleValidation,
   TextFieldValidation,
+  UploadFieldManyValidation,
+  UploadFieldSingleValidation,
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
@@ -1005,6 +1019,12 @@ export {
   deepMergeWithSourceArrays,
 } from './utilities/deepMerge.js'
 export { getDependencies } from './utilities/dependencies/getDependencies.js'
+export {
+  findUp,
+  findUpSync,
+  pathExistsAndIsAccessible,
+  pathExistsAndIsAccessibleSync,
+} from './utilities/findUp.js'
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
 export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes.js'

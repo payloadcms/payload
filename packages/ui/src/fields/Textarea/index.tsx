@@ -90,8 +90,8 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
       descriptionProps={descriptionProps}
       Error={field?.admin?.components?.Error}
       errorProps={errorProps}
-      Label={field?.admin?.components?.Label}
       label={label}
+      Label={field?.admin?.components?.Label}
       labelProps={labelProps}
       onChange={(e) => {
         setValue(e.target.value)

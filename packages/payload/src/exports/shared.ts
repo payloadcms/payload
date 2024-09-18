@@ -12,6 +12,7 @@ export {
   fieldIsLocalized,
   fieldIsPresentationalOnly,
   fieldIsSidebar,
+  fieldIsVirtual,
   fieldSupportsMany,
   optionIsObject,
   optionIsValue,

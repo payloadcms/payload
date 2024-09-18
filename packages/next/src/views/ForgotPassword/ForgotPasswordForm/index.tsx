@@ -113,7 +113,7 @@ export const ForgotPasswordForm: React.FC = () => {
               type: 'email',
               data: {},
               preferences: { fields: {} },
-              req: { t } as PayloadRequest,
+              req: { payload: { config }, t } as unknown as PayloadRequest,
               required: true,
               siblingData: {},
             })

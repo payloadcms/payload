@@ -315,6 +315,16 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'rels-to-pages-and-custom-text-ids',
+      fields: [
+        {
+          name: 'rel',
+          type: 'relationship',
+          relationTo: ['pages', 'custom-id', 'custom-id-number'],
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({
