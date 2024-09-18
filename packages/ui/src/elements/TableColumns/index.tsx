@@ -15,6 +15,7 @@ import { getInitialColumns } from './getInitialColumns.js'
 export interface ITableColumns {
   columns: Column[]
   moveColumn: (args: { fromIndex: number; toIndex: number }) => void
+  resetColumnsState: () => void
   setActiveColumns: (columns: string[]) => void
   toggleColumn: (column: string) => void
 }
@@ -135,6 +136,27 @@ export const TableColumnsProvider: React.FC<Props> = ({
     [tableColumns, updateColumnPreferences],
   )
 
+  const resetColumnsState = React.useCallback(() => {
+    const initialState = buildColumnState({
+      cellProps,
+      columnPreferences: listPreferences?.columns,
+      columns: initialColumns,
+      enableRowSelections,
+      fields,
+      useAsTitle,
+    })
+    setTableColumns(initialState)
+    updateColumnPreferences(initialState)
+  }, [
+    cellProps,
+    listPreferences?.columns,
+    initialColumns,
+    enableRowSelections,
+    fields,
+    useAsTitle,
+    updateColumnPreferences,
+  ])
+
   // //////////////////////////////////////////////
   // Get preferences on collection change (drawers)
   // //////////////////////////////////////////////
@@ -182,6 +204,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
       value={{
         columns: tableColumns,
         moveColumn,
+        resetColumnsState,
         setActiveColumns,
         toggleColumn,
       }}
