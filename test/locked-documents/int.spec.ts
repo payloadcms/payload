@@ -1,5 +1,5 @@
 import path from 'path'
-import { APIError, NotFound, type Payload } from 'payload'
+import { Locked, NotFound, type Payload } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -272,7 +272,7 @@ describe('Locked documents', () => {
         id: newPost.id,
       })
     } catch (error) {
-      expect(error).toBeInstanceOf(APIError)
+      expect(error).toBeInstanceOf(Locked)
       expect(error.message).toMatch(/currently locked by another user and cannot be updated/)
     }
 
@@ -303,7 +303,7 @@ describe('Locked documents', () => {
         slug: menuSlug,
       })
     } catch (error) {
-      expect(error).toBeInstanceOf(APIError)
+      expect(error).toBeInstanceOf(Locked)
       expect(error.message).toMatch(/currently locked by another user and cannot be updated/)
     }
 
@@ -343,7 +343,7 @@ describe('Locked documents', () => {
         id: newPost3.id,
       })
     } catch (error) {
-      expect(error).toBeInstanceOf(APIError)
+      expect(error).toBeInstanceOf(Locked)
       expect(error.message).toMatch(/currently locked and cannot be deleted/)
     }
   })

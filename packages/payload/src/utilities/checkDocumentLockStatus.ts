@@ -2,7 +2,7 @@ import type { TypeWithID } from '../collections/config/types.js'
 import type { PaginatedDocs } from '../database/types.js'
 import type { JsonObject, PayloadRequest } from '../types/index.js'
 
-import { APIError } from '../errors/index.js'
+import { Locked } from '../errors/index.js'
 
 type CheckDocumentLockStatusArgs = {
   collectionSlug?: string
@@ -82,7 +82,7 @@ export const checkDocumentLockStatus = async ({
         lockedDoc.user?.value?.id !== currentUserId &&
         now.getTime() - lastEditedAt.getTime() <= lockDurationInMilliseconds
       ) {
-        throw new APIError(finalLockErrorMessage)
+        throw new Locked(finalLockErrorMessage)
       }
     }
   }
