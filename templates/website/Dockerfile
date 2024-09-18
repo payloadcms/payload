@@ -1,24 +1,23 @@
-FROM node:18.8-alpine as base
+# Use a Node.js base image
+FROM node:18-alpine AS base
 
-FROM base as builder
+# Enable Corepack to manage package managers like pnpm
+RUN corepack enable
 
-WORKDIR /home/node/app
-COPY package*.json ./
+# Set the working directory
+WORKDIR /app
 
+# Copy package.json and pnpm-lock.yaml
+COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies (only production dependencies if applicable)
+RUN pnpm install --frozen-lockfile --prod
+
+# Copy the rest of the app code including the build artifacts
 COPY . .
-RUN yarn install
-RUN yarn build
 
-FROM base as runtime
-
-ENV NODE_ENV=production
-
-WORKDIR /home/node/app
-COPY package*.json  ./
-COPY yarn.lock ./
-
-RUN yarn install --production
-
+# Expose the app port
 EXPOSE 3000
 
-CMD ["node", "dist/server.js"]
+# Start the app
+CMD ["pnpm", "start"]
