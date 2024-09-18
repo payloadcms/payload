@@ -35,10 +35,12 @@ export type UseListDrawer = (args: {
   React.FC<Pick<ListTogglerProps, 'children' | 'className' | 'disabled'>>, // toggler
   {
     closeDrawer: () => void
+    collectionSlugs: string[]
     drawerDepth: number
     drawerSlug: string
     isDrawerOpen: boolean
     openDrawer: () => void
+    setCollectionSlugs: React.Dispatch<React.SetStateAction<string[]>>
     toggleDrawer: () => void
   },
 ]
