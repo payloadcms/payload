@@ -1,9 +1,5 @@
 import type { JSONSchema4 } from 'json-schema'
-import type {
-  EditorConfig as LexicalEditorConfig,
-  SerializedEditorState,
-  SerializedLexicalNode,
-} from 'lexical'
+import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
 
 import {
   afterChangeTraverseFields,
