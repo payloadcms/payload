@@ -38,18 +38,18 @@ export const upgradeDocumentFieldsRecursively = ({
     } else if (field.type === 'tabs') {
       field.tabs.forEach((tab) => {
         found += upgradeDocumentFieldsRecursively({
-          data: tabHasName(tab) ? data[tab.name] : data,
+          data: (tabHasName(tab) ? data[tab.name] : data) as Record<string, unknown>,
           fields: tab.fields,
           found,
         })
       })
     } else if (Array.isArray(data[field.name])) {
       if (field.type === 'blocks') {
-        data[field.name].forEach((row, i) => {
+        ;(data[field.name] as Record<string, unknown>[]).forEach((row, i) => {
           const block = field.blocks.find(({ slug }) => slug === row?.blockType)
           if (block) {
             found += upgradeDocumentFieldsRecursively({
-              data: data[field.name][i],
+              data: (data[field.name] as Record<string, unknown>[])[i],
               fields: block.fields,
               found,
             })

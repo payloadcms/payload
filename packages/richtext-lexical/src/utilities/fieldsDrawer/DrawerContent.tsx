@@ -1,5 +1,4 @@
 'use client'
-import type { FormProps } from '@payloadcms/ui'
 import type { ClientField, FormState } from 'payload'
 
 import {
@@ -42,14 +41,14 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     `${schemaPath}.lexical_internal_feature.${featureKey}${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
 
   const fields: any =
-    fieldMapOverride ?? (richTextComponentMap.get(componentMapRenderedFieldsPath) as ClientField[]) // Field Schema
+    fieldMapOverride ?? (richTextComponentMap?.get(componentMapRenderedFieldsPath) as ClientField[]) // Field Schema
 
   useEffect(() => {
     const awaitInitialState = async () => {
       const state = await getFormState({
         apiRoute: config.routes.api,
         body: {
-          id,
+          id: id!,
           data: data ?? {},
           operation: 'update',
           schemaPath: schemaFieldsPath,
@@ -63,12 +62,12 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     void awaitInitialState()
   }, [config.routes.api, config.serverURL, schemaFieldsPath, id, data])
 
-  const onChange: FormProps['onChange'][0] = useCallback(
+  const onChange = useCallback(
     async ({ formState: prevFormState }) => {
       return await getFormState({
         apiRoute: config.routes.api,
         body: {
-          id,
+          id: id!,
           formState: prevFormState,
           operation: 'update',
           schemaPath: schemaFieldsPath,
