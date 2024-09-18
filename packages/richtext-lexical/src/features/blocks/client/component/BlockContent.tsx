@@ -202,7 +202,7 @@ export const BlockContent: React.FC<Props> = (props) => {
                     ? getTranslation(clientBlock?.labels.singular, i18n)
                     : clientBlock.slug}
                 </Pill>
-                <SectionTitle path="blockName" readOnly={field?.admin?.readOnly} />
+                <SectionTitle path="blockName" readOnly={field?.admin?.readOnly || false} />
                 {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
               </div>
               {editor.isEditable() && (

@@ -9,7 +9,7 @@ import type { LexicalRichTextAdapter } from '../../types.js'
 import { getEnabledNodes } from '../../lexical/nodes/index.js'
 
 type NestedRichTextFieldsArgs = {
-  data: unknown
+  data: Record<string, unknown>
 
   fields: Field[]
   found: number
@@ -24,7 +24,7 @@ export const upgradeDocumentFieldsRecursively = ({
     if (fieldHasSubFields(field) && !fieldIsArrayType(field)) {
       if (fieldAffectsData(field) && typeof data[field.name] === 'object') {
         found += upgradeDocumentFieldsRecursively({
-          data: data[field.name],
+          data: data[field.name] as Record<string, unknown>,
           fields: field.fields,
           found,
         })
@@ -58,9 +58,9 @@ export const upgradeDocumentFieldsRecursively = ({
       }
 
       if (field.type === 'array') {
-        data[field.name].forEach((_, i) => {
+        ;(data[field.name] as Record<string, unknown>[]).forEach((_, i) => {
           found += upgradeDocumentFieldsRecursively({
-            data: data[field.name][i],
+            data: (data[field.name] as Record<string, unknown>[])[i],
             fields: field.fields,
             found,
           })
@@ -72,14 +72,14 @@ export const upgradeDocumentFieldsRecursively = ({
       field.type === 'richText' &&
       data[field.name] &&
       !Array.isArray(data[field.name]) &&
-      'root' in data[field.name]
+      'root' in (data[field.name] as Record<string, unknown>)
     ) {
       // Lexical richText
       const editor: LexicalRichTextAdapter = field.editor as LexicalRichTextAdapter
       if (editor && typeof editor === 'object') {
         if ('features' in editor && editor.features?.length) {
           // Load lexical editor into lexical, then save it immediately
-          const editorState: SerializedEditorState = data[field.name]
+          const editorState = data[field.name] as SerializedEditorState
 
           const headlessEditor = createHeadlessEditor({
             nodes: getEnabledNodes({
