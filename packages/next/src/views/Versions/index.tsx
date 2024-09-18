@@ -59,7 +59,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
       ],
     }
 
-    if (localization) {
+    if (localization && collectionConfig?.versions?.drafts) {
       whereQuery.and.push({
         snapshot: {
           not_equals: true,
@@ -100,13 +100,14 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
 
   if (globalSlug) {
     limitToUse = limitToUse || 10
-    const whereQuery = localization
-      ? {
-          snapshot: {
-            not_equals: true,
-          },
-        }
-      : {}
+    const whereQuery =
+      localization && globalConfig?.versions?.drafts
+        ? {
+            snapshot: {
+              not_equals: true,
+            },
+          }
+        : {}
 
     try {
       versionsData = await payload.findGlobalVersions({
