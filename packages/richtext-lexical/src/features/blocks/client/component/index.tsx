@@ -1,7 +1,5 @@
 'use client'
 
-import type { FormProps } from '@payloadcms/ui'
-
 import {
   Collapsible,
   Form,

@@ -46,7 +46,7 @@ function SlashMenuItem({
   }
 
   let title = item.key
-  if (item.label) {
+  if (item.label && richTextComponentMap) {
     title =
       typeof item.label === 'function'
         ? item.label({ i18n, richTextComponentMap, schemaPath })
@@ -119,10 +119,11 @@ export function SlashMenuPlugin({
 
     if (queryString) {
       // Filter current groups first
+      // @ts-expect-error - TODO: fix this
       groupsWithItems = groupsWithItems.map((group) => {
         const filteredItems = group.items.filter((item) => {
           let itemTitle = item.key
-          if (item.label) {
+          if (item.label && richTextComponentMap) {
             itemTitle =
               typeof item.label === 'function'
                 ? item.label({ i18n, richTextComponentMap, schemaPath })
@@ -207,7 +208,7 @@ export function SlashMenuPlugin({
               <div className={baseClass}>
                 {groups.map((group) => {
                   let groupTitle = group.key
-                  if (group.label) {
+                  if (group.label && richTextComponentMap) {
                     groupTitle =
                       typeof group.label === 'function'
                         ? group.label({ i18n, richTextComponentMap, schemaPath })

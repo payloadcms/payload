@@ -80,7 +80,7 @@ function useDraggableBlockMenu(
     boundingBox?: DOMRect
     elem: HTMLElement | null
     isBelow: boolean
-  }>(null)
+  } | null>(null)
 
   const { editorConfig } = useEditorConfigContext()
 
@@ -223,7 +223,7 @@ function useDraggableBlockMenu(
               : -(menuRef?.current?.getBoundingClientRect()?.width ?? 0)),
           targetLineElem,
           targetBlockElem,
-          lastTargetBlock,
+          lastTargetBlock!,
           pageY,
           anchorElem,
           event,
@@ -243,8 +243,8 @@ function useDraggableBlockMenu(
             isBelow,
           })
         }
-      } else {
-        hideTargetLine(targetLineElem, lastTargetBlock?.elem)
+      } else if (lastTargetBlock?.elem) {
+        hideTargetLine(targetLineElem, lastTargetBlock.elem)
         setLastTargetBlock({
           boundingBox: targetBlockElem.getBoundingClientRect(),
           elem: targetBlockElem,
@@ -343,8 +343,10 @@ function useDraggableBlockMenu(
         setTimeout(() => {
           // add new temp html element to newInsertedElem with the same height and width and the class block-selected
           // to highlight the new inserted element
-          const newInsertedElemRect = newInsertedElem.getBoundingClientRect()
-
+          const newInsertedElemRect = newInsertedElem?.getBoundingClientRect()
+          if (!newInsertedElemRect) {
+            return
+          }
           const highlightElem = document.createElement('div')
           highlightElem.className = 'lexical-block-highlighter'
 
