@@ -58,7 +58,21 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const { permissions } = useAuth()
 
-  const [initialData, setInitialData] = useState<PaginatedDocs>(initialDataFromProps)
+  const [initialData, setInitialData] = useState<PaginatedDocs>(() => {
+    if (initialDataFromProps) {
+      return {
+        ...initialDataFromProps,
+        docs: Array.isArray(initialDataFromProps.docs)
+          ? initialDataFromProps.docs.reduce((acc, doc) => {
+              if (typeof doc === 'string') {
+                return acc
+              }
+              return [...acc, doc]
+            }, [])
+          : [],
+      }
+    }
+  })
 
   const { i18n, t } = useTranslation()
 
