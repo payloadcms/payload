@@ -5,7 +5,6 @@ import type { Operation, PayloadRequest, Where } from '../../types/index.js'
 import type { DataFromGlobalSlug, SanitizedGlobalConfig } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
-import { APIError } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
@@ -119,7 +118,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
     // Handle potentially locked global documents
     // ///////////////////////////////////////////
 
-    const { lockedDocument, shouldUnlockDocument } = await checkDocumentLockStatus({
+    await checkDocumentLockStatus({
       globalSlug: slug,
       lockErrorMessage: `Global with slug "${slug}" is currently locked by another user and cannot be updated.`,
       req,
@@ -260,22 +259,6 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
         ...result,
         globalType,
       }
-    }
-
-    // /////////////////////////////////////
-    // Unlock the global if necessary
-    // /////////////////////////////////////
-
-    if (shouldUnlockDocument && lockedDocument) {
-      await payload.db.deleteOne({
-        collection: 'payload-locked-documents',
-        req,
-        where: {
-          globalSlug: {
-            equals: slug,
-          },
-        },
-      })
     }
 
     // /////////////////////////////////////

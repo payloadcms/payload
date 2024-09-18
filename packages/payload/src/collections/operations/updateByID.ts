@@ -146,7 +146,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
     // Handle potentially locked documents
     // /////////////////////////////////////
 
-    const { lockedDocument, shouldUnlockDocument } = await checkDocumentLockStatus({
+    await checkDocumentLockStatus({
       id,
       collectionSlug: collectionConfig.slug,
       lockErrorMessage: `Document with ID ${id} is currently locked by another user and cannot be updated.`,
@@ -362,20 +362,6 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
         publishSpecificLocale,
         req,
         snapshot: versionSnapshotResult,
-      })
-    }
-
-    // /////////////////////////////////////
-    // Unlock the document if necessary
-    // /////////////////////////////////////
-
-    if (shouldUnlockDocument && lockedDocument) {
-      await payload.db.deleteOne({
-        collection: 'payload-locked-documents',
-        req,
-        where: {
-          id: { equals: lockedDocument.id },
-        },
       })
     }
 
