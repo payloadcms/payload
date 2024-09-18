@@ -43,6 +43,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   draft?: boolean
   id: number | string
   overrideAccess?: boolean
+  overrideLock?: boolean
   overwriteExistingFiles?: boolean
   publishSpecificLocale?: string
   req: PayloadRequest
@@ -86,6 +87,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       depth,
       draft: draftArg = false,
       overrideAccess,
+      overrideLock,
       overwriteExistingFiles = false,
       publishSpecificLocale,
       req: {
@@ -150,6 +152,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       id,
       collectionSlug: collectionConfig.slug,
       lockErrorMessage: `Document with ID ${id} is currently locked by another user and cannot be updated.`,
+      overrideLock,
       req,
     })
 
