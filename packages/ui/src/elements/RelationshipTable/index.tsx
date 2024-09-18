@@ -16,6 +16,7 @@ import { getTranslation } from '@payloadcms/translations'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 
+import { Button } from '../../elements/Button/index.js'
 import { Pill } from '../../elements/Pill/index.js'
 import { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
@@ -158,7 +159,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     setParams(params)
   }, [page, sort, where, search, collectionConfig, filterOptions, initialData, limit, setParams])
 
-  const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
+  const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer, openDrawer }] = useDocumentDrawer({
     collectionSlug: relationTo,
   })
 
@@ -193,12 +194,14 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const preferenceKey = `${relationTo}-list`
 
+  const hasCreatePermission = permissions?.collections?.[relationTo]?.create?.permission
+
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__header`}>
         {Label}
         <div className={`${baseClass}__actions`}>
-          {permissions?.collections?.[relationTo]?.create?.permission && (
+          {hasCreatePermission && (
             <DocumentDrawerToggler>{i18n.t('fields:addNew')}</DocumentDrawerToggler>
           )}
           <Pill
@@ -215,78 +218,98 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           </Pill>
         </div>
       </div>
-      <RelationshipProvider>
-        <ListQueryProvider
-          data={data}
-          defaultLimit={limit || collectionConfig?.admin?.pagination?.defaultLimit}
-          defaultSort={sort}
-          handlePageChange={setPage}
-          handlePerPageChange={setLimit}
-          handleSearchChange={setSearch}
-          handleSortChange={setSort}
-          handleWhereChange={setWhere}
-          modifySearchParams={false}
-          preferenceKey={preferenceKey}
-        >
-          <TableColumnsProvider
-            beforeRows={[
-              {
-                accessor: 'collection',
-                active: true,
-                cellProps: {
+      {data.docs && data.docs.length === 0 && (
+        <div className={`${baseClass}__no-results`}>
+          <p>
+            {i18n.t('general:noResults', {
+              label: getTranslation(collectionConfig?.labels?.plural, i18n),
+            })}
+          </p>
+          {hasCreatePermission && (
+            <Button onClick={openDrawer}>
+              {i18n.t('general:createNewLabel', {
+                label: getTranslation(collectionConfig?.labels?.singular, i18n),
+              })}
+            </Button>
+          )}
+        </div>
+      )}
+      {data.docs && data.docs.length > 0 && (
+        <RelationshipProvider>
+          <ListQueryProvider
+            data={data}
+            defaultLimit={limit || collectionConfig?.admin?.pagination?.defaultLimit}
+            defaultSort={sort}
+            handlePageChange={setPage}
+            handlePerPageChange={setLimit}
+            handleSearchChange={setSearch}
+            handleSortChange={setSort}
+            handleWhereChange={setWhere}
+            modifySearchParams={false}
+            preferenceKey={preferenceKey}
+          >
+            <TableColumnsProvider
+              beforeRows={[
+                {
+                  accessor: 'collection',
+                  active: true,
+                  cellProps: {
+                    field: {
+                      admin: {
+                        components: {
+                          Cell: {
+                            type: 'client',
+                            RenderedComponent: (
+                              <Pill>{getTranslation(collectionConfig.labels.singular, i18n)}</Pill>
+                            ),
+                          },
+                          Label: null,
+                        },
+                      },
+                    } as ClientField,
+                  },
+                  Heading: i18n.t('version:type'),
+                },
+              ]}
+              cellProps={[
+                {},
+                {
                   field: {
                     admin: {
                       components: {
                         Cell: {
                           type: 'client',
                           RenderedComponent: (
-                            <Pill>{getTranslation(collectionConfig.labels.singular, i18n)}</Pill>
+                            <DrawerLink field={field} onDrawerSave={onDrawerSave} />
                           ),
                         },
-                        Label: null,
                       },
                     },
                   } as ClientField,
+                  link: false,
                 },
-                Heading: i18n.t('version:type'),
-              },
-            ]}
-            cellProps={[
-              {},
-              {
-                field: {
-                  admin: {
-                    components: {
-                      Cell: {
-                        type: 'client',
-                        RenderedComponent: <DrawerLink field={field} onDrawerSave={onDrawerSave} />,
-                      },
-                    },
-                  },
-                } as ClientField,
-                link: false,
-              },
-            ]}
-            collectionSlug={relationTo}
-            preferenceKey={preferenceKey}
-            sortColumnProps={{
-              appearance: 'condensed',
-            }}
-          >
-            {/* @ts-expect-error TODO: get this CJS import to work, eslint keeps removing the type assertion */}
-            <AnimateHeight
-              className={`${baseClass}__columns`}
-              height={openColumnSelector ? 'auto' : 0}
-              id={`${baseClass}-columns`}
+              ]}
+              collectionSlug={relationTo}
+              preferenceKey={preferenceKey}
+              sortColumnProps={{
+                appearance: 'condensed',
+              }}
             >
-              <div className={`${baseClass}__columns-inner`}>
-                <ColumnSelector collectionSlug={collectionConfig.slug} />
-              </div>
-            </AnimateHeight>
-            <RelationshipTableWrapper collectionConfig={collectionConfig} />
-          </TableColumnsProvider>
-        </ListQueryProvider>
-      </RelationshipProvider>
+              {/* @ts-expect-error TODO: get this CJS import to work, eslint keeps removing the type assertion */}
+              <AnimateHeight
+                className={`${baseClass}__columns`}
+                height={openColumnSelector ? 'auto' : 0}
+                id={`${baseClass}-columns`}
+              >
+                <div className={`${baseClass}__columns-inner`}>
+                  <ColumnSelector collectionSlug={collectionConfig.slug} />
+                </div>
+              </AnimateHeight>
+              <RelationshipTableWrapper collectionConfig={collectionConfig} />
+            </TableColumnsProvider>
+          </ListQueryProvider>
+        </RelationshipProvider>
+      )}
       <DocumentDrawer
         initialData={{
           category: docID,
