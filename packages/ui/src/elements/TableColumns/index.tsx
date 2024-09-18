@@ -132,14 +132,14 @@ export const TableColumnsProvider: React.FC<Props> = ({
           }
         })
         .toSorted((first, second) => {
-          const firstFromArgs = activeColumnAccessors.indexOf(first.accessor)
-          const secondFromArgs = activeColumnAccessors.indexOf(second.accessor)
+          const indexOfFirst = activeColumnAccessors.indexOf(first.accessor)
+          const indexOfSecond = activeColumnAccessors.indexOf(second.accessor)
 
-          if (firstFromArgs === -1 || secondFromArgs === -1) {
+          if (indexOfFirst === -1 || indexOfSecond === -1) {
             return 0
           }
 
-          return firstFromArgs > secondFromArgs ? 1 : -1
+          return indexOfFirst > indexOfSecond ? 1 : -1
         })
 
       setTableColumns(activeColumns)
