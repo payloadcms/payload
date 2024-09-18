@@ -58,3 +58,22 @@ export const Posts: CollectionConfig = {
 Document locking affects both the Local API and the REST API, ensuring that if a document is locked, concurrent users will not be able to perform updates or deletes on that document (including globals). If a user attempts to update or delete a locked document, they will receive an error.
 
 Once the document is unlocked or the lock duration has expired, other users can proceed with updates or deletes as normal.
+
+#### Overriding Locks
+
+For operations like update and delete, Payload includes an `overrideLock` option. This boolean flag, when set to `true`, allows you to bypass the document lock, ensuring that the operation proceeds even if another user currently holds the lock.
+
+By default, `overrideLock` is set to `false`, which means that if a document is locked, the operation will not proceed and an error will be returned. When `overrideLock: true` is passed, the lock is ignored, and the update or delete operation is executed.
+
+```ts
+const result = await payload.update({
+  collection: 'posts',
+  id: '123',
+  data: {
+    title: 'New title',
+  },
+  overrideLock: true, // Allows the operation to bypass the document lock
+})
+```
+
+This option is particularly useful in scenarios where administrative privileges or specific workflows require you to override the lock and ensure the operation is completed.
