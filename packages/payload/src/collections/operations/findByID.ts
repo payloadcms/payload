@@ -11,11 +11,11 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 import { buildAfterOperation } from './utils.js'
 
-export type Arguments = {
+export type Arguments<DisableErrors extends boolean = false> = {
   collection: Collection
   currentDepth?: number
   depth?: number
-  disableErrors?: boolean
+  disableErrors?: DisableErrors
   draft?: boolean
   id: number | string
   includeLockStatus?: boolean
@@ -24,9 +24,14 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-export const findByIDOperation = async <TSlug extends CollectionSlug>(
-  incomingArgs: Arguments,
-): Promise<DataFromCollectionSlug<TSlug>> => {
+export const findByIDOperation = async <
+  TSlug extends CollectionSlug,
+  DisableErrors extends boolean = false,
+>(
+  incomingArgs: Arguments<DisableErrors>,
+): Promise<
+  DisableErrors extends true ? DataFromCollectionSlug<TSlug> | null : DataFromCollectionSlug<TSlug>
+> => {
   let args = incomingArgs
 
   try {
