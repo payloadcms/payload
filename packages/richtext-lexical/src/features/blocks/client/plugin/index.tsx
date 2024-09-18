@@ -34,7 +34,7 @@ import type { InlineBlockNode } from '../nodes/InlineBlocksNode.js'
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { FieldsDrawer } from '../../../../utilities/fieldsDrawer/Drawer.js'
 import { $createBlockNode, BlockNode } from '../nodes/BlocksNode.js'
-import { $createInlineBlockNode } from '../nodes/InlineBlocksNode.js'
+import { $createInlineBlockNode, $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
 import {
   INSERT_BLOCK_COMMAND,
   INSERT_INLINE_BLOCK_COMMAND,
@@ -46,7 +46,7 @@ export type InsertBlockPayload = Exclude<BlockFields, 'id'>
 export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   const [editor] = useLexicalComposerContext()
   const { closeModal, toggleModal } = useModal()
-  const [blockFields, setBlockFields] = useState<BlockFields>(null)
+  const [blockFields, setBlockFields] = useState<BlockFields | null>(null)
   const [blockType, setBlockType] = useState<string>('' as any)
   const [targetNodeKey, setTargetNodeKey] = useState<null | string>(null)
   const { i18n, t } = useTranslation<string, any>()
@@ -89,7 +89,7 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
                 $isParagraphNode(focusNode) &&
                 focusNode.getTextContentSize() === 0 &&
                 focusNode
-                  .getParent()
+                  .getParentOrThrow()
                   .getChildren()
                   .filter((node) => $isParagraphNode(node)).length > 1
               ) {
@@ -106,9 +106,9 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
         INSERT_INLINE_BLOCK_COMMAND,
         (fields) => {
           if (targetNodeKey) {
-            const node: InlineBlockNode = $getNodeByKey(targetNodeKey)
+            const node = $getNodeByKey(targetNodeKey)
 
-            if (!node) {
+            if (!node || !$isInlineBlockNode(node)) {
               return false
             }
 
@@ -167,7 +167,7 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.lexical_inline_blocks.${blockFields?.blockType}`
 
   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
-  const blocksField: BlocksFieldClient = richTextComponentMap.has(componentMapRenderedBlockPath)
+  const blocksField: BlocksFieldClient = richTextComponentMap?.has(componentMapRenderedBlockPath)
     ? richTextComponentMap.get(componentMapRenderedBlockPath)[0]
     : null
 
