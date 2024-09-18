@@ -6,15 +6,15 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findByIDOperation } from '../findByID.js'
 
-export type Options<TSlug extends CollectionSlug, DisableErrors extends boolean> = {
-  collection: TSlug
+export type Options = {
+  collection: CollectionSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: RequestContext
   currentDepth?: number
   depth?: number
-  disableErrors?: DisableErrors
+  disableErrors?: boolean
   draft?: boolean
   fallbackLocale?: TypedLocale
   id: number | string
@@ -26,14 +26,13 @@ export type Options<TSlug extends CollectionSlug, DisableErrors extends boolean>
   user?: Document
 }
 
-export default async function findByIDLocal<
-  TSlug extends CollectionSlug,
-  DisableErrors extends boolean,
->(
+export default async function findByIDLocal<TOptions extends Options>(
   payload: Payload,
-  options: Options<TSlug, DisableErrors>,
+  options: TOptions,
 ): Promise<
-  DisableErrors extends true ? DataFromCollectionSlug<TSlug> | null : DataFromCollectionSlug<TSlug>
+  TOptions['disableErrors'] extends true
+    ? DataFromCollectionSlug<TOptions['collection']> | null
+    : DataFromCollectionSlug<TOptions['collection']>
 > {
   const {
     id,
@@ -55,7 +54,7 @@ export default async function findByIDLocal<
     )
   }
 
-  return findByIDOperation<TSlug>({
+  return findByIDOperation<TOptions['collection']>({
     id,
     collection,
     currentDepth,
