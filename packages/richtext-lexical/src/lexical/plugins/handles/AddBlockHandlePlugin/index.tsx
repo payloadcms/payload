@@ -176,7 +176,7 @@ function useAddBlockHandle(
       // Otherwise, this won't work
       setTimeout(() => {
         editor.dispatchCommand(ENABLE_SLASH_MENU_COMMAND, {
-          node: hoveredElementToUse.node as ParagraphNode,
+          node: hoveredElementToUse?.node as ParagraphNode,
         })
       }, 2)
 

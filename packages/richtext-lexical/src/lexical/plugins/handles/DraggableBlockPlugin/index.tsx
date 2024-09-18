@@ -416,7 +416,9 @@ function useDraggableBlockMenu(
 
   function onDragEnd(): void {
     isDraggingBlockRef.current = false
-    hideTargetLine(targetLineRef.current, lastTargetBlock?.elem)
+    if (lastTargetBlock?.elem) {
+      hideTargetLine(targetLineRef.current, lastTargetBlock?.elem)
+    }
   }
 
   return createPortal(

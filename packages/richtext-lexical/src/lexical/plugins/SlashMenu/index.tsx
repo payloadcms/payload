@@ -101,11 +101,13 @@ export function SlashMenuPlugin({
     let groupWithItems: Array<SlashMenuGroup> = []
 
     for (const dynamicItem of editorConfig.features.slashMenu.dynamicGroups) {
-      const dynamicGroupWithItems = dynamicItem({
-        editor,
-        queryString,
-      })
-      groupWithItems = groupWithItems.concat(dynamicGroupWithItems)
+      if (queryString) {
+        const dynamicGroupWithItems = dynamicItem({
+          editor,
+          queryString,
+        })
+        groupWithItems = groupWithItems.concat(dynamicGroupWithItems)
+      }
     }
 
     return groupWithItems

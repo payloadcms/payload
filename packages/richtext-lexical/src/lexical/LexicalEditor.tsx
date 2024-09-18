@@ -22,7 +22,7 @@ import { LexicalContentEditable } from './ui/ContentEditable.js'
 
 export const LexicalEditor: React.FC<
   {
-    editorContainerRef: React.RefObject<HTMLDivElement>
+    editorContainerRef: React.RefObject<HTMLDivElement | null>
   } & Pick<LexicalProviderProps, 'editorConfig' | 'onChange'>
 > = (props) => {
   const { editorConfig, editorContainerRef, onChange } = props

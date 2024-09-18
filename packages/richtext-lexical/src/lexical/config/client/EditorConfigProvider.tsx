@@ -46,7 +46,7 @@ export const EditorConfigProvider = ({
 }: {
   children: React.ReactNode
   editorConfig: SanitizedClientEditorConfig
-  editorContainerRef: React.RefObject<HTMLDivElement>
+  editorContainerRef: React.RefObject<HTMLDivElement | null>
   field: LexicalRichTextFieldProps['field']
   parentContext?: EditorConfigContextType
 }): React.ReactNode => {
