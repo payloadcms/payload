@@ -138,8 +138,8 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
         // swallow error
       }
 
-      result.isLocked = !!lockStatus
-      result.userEditing = lockStatus?._lastEdited?.user?.value ?? null
+      result._isLocked = !!lockStatus
+      result._userEditing = lockStatus?.user?.value ?? null
     }
 
     // /////////////////////////////////////

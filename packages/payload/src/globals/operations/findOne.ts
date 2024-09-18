@@ -86,8 +86,8 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
         // swallow error
       }
 
-      doc.isLocked = !!lockStatus
-      doc.userEditing = lockStatus?._lastEdited?.user?.value ?? null
+      doc._isLocked = !!lockStatus
+      doc._userEditing = lockStatus?.user?.value ?? null
     }
 
     // /////////////////////////////////////

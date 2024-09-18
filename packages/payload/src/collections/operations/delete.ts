@@ -122,7 +122,7 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
         // Handle potentially locked documents
         // /////////////////////////////////////
 
-        const { lockedDocument, shouldUnlockDocument } = await checkDocumentLockStatus({
+        await checkDocumentLockStatus({
           id,
           collectionSlug: collectionConfig.slug,
           lockErrorMessage: `Document with ID ${id} is currently locked and cannot be deleted.`,
@@ -151,20 +151,6 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
           overrideDelete: true,
           req,
         })
-
-        // /////////////////////////////////////
-        // Unlock the document if necessary
-        // /////////////////////////////////////
-
-        if (shouldUnlockDocument && lockedDocument) {
-          await payload.db.deleteOne({
-            collection: 'payload-locked-documents',
-            req,
-            where: {
-              id: { equals: lockedDocument.id },
-            },
-          })
-        }
 
         // /////////////////////////////////////
         // Delete versions
