@@ -1,6 +1,6 @@
 'use client'
 
-import type { Data, TextFieldProps } from 'payload'
+import type { Data, TextFieldClientComponent } from 'payload'
 
 import { TextField, useLocale, useWatchForm } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
@@ -10,7 +10,7 @@ type FieldWithID = {
   name: string
 }
 
-export const DynamicPriceSelector: React.FC<TextFieldProps> = (props) => {
+export const DynamicPriceSelector: TextFieldClientComponent = (props) => {
   const { field } = props
 
   const { fields, getData, getDataByPath } = useWatchForm()

@@ -1,7 +1,7 @@
 'use client'
 
 import type { FieldType, Options } from '@payloadcms/ui'
-import type { TextareaFieldProps } from 'payload'
+import type { TextareaFieldClientProps } from 'payload'
 
 import {
   FieldLabel,
@@ -25,7 +25,7 @@ const { maxLength, minLength } = defaults.description
 
 type MetaDescriptionProps = {
   readonly hasGenerateDescriptionFn: boolean
-} & TextareaFieldProps
+} & TextareaFieldClientProps
 
 export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) => {
   const {
@@ -61,16 +61,20 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
     const genDescriptionResponse = await fetch('/api/plugin-seo/generate-description', {
       body: JSON.stringify({
         id: docInfo.id,
-        slug: docInfo.slug,
+        collectionSlug: docInfo.collectionSlug,
         doc: getData(),
         docPermissions: docInfo.docPermissions,
+        globalSlug: docInfo.globalSlug,
         hasPublishPermission: docInfo.hasPublishPermission,
         hasSavePermission: docInfo.hasSavePermission,
         initialData: docInfo.initialData,
         initialState: docInfo.initialState,
         locale: typeof locale === 'object' ? locale?.code : locale,
         title: docInfo.title,
-      } satisfies Omit<Parameters<GenerateDescription>[0], 'req'>),
+      } satisfies Omit<
+        Parameters<GenerateDescription>[0],
+        'collectionConfig' | 'globalConfig' | 'req'
+      >),
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',

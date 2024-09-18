@@ -107,7 +107,7 @@ Then, render `RefreshRouteOnSave` anywhere in your `page.tsx`. Here's an example
 
 ```tsx
 import { RefreshRouteOnSave } from './RefreshRouteOnSave.tsx'
-import { getPayloadHMR } from '@payloadcms/next'
+import { getPayloadHMR } from '@payloadcms/next/utilities'
 import config from '../payload.config'
 
 export default async function Page() {

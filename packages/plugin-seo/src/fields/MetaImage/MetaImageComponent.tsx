@@ -1,7 +1,7 @@
 'use client'
 
 import type { FieldType, Options } from '@payloadcms/ui'
-import type { UploadFieldProps } from 'payload'
+import type { UploadFieldClientProps } from 'payload'
 
 import {
   FieldLabel,
@@ -23,7 +23,7 @@ import { Pill } from '../../ui/Pill.js'
 
 type MetaImageProps = {
   readonly hasGenerateImageFn: boolean
-} & UploadFieldProps
+} & UploadFieldClientProps
 
 export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
   const {
@@ -58,16 +58,17 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
     const genImageResponse = await fetch('/api/plugin-seo/generate-image', {
       body: JSON.stringify({
         id: docInfo.id,
-        slug: docInfo.slug,
+        collectionSlug: docInfo.collectionSlug,
         doc: getData(),
         docPermissions: docInfo.docPermissions,
+        globalSlug: docInfo.globalSlug,
         hasPublishPermission: docInfo.hasPublishPermission,
         hasSavePermission: docInfo.hasSavePermission,
         initialData: docInfo.initialData,
         initialState: docInfo.initialState,
         locale: typeof locale === 'object' ? locale?.code : locale,
         title: docInfo.title,
-      } satisfies Omit<Parameters<GenerateImage>[0], 'req'>),
+      } satisfies Omit<Parameters<GenerateImage>[0], 'collectionConfig' | 'globalConfig' | 'req'>),
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',

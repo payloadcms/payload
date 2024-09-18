@@ -65,21 +65,22 @@ export const Nav: GlobalConfig = {
 
 The following options are available:
 
-| Option             | Description                                                                                                                                                                                                          |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`access`**       | Provide Access Control functions to define exactly who should be able to do what with this Global. [More details](../access-control/globals).                                                                    |
-| **`admin`**        | The configuration options for the Admin Panel. [More details](../admin/globals).                                                                           |
-| **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                            |
-| **`dbName`**       | Custom table or collection name for this Global depending on the Database Adapter. Auto-generated from slug if not defined. |
-| **`description`**  | Text or React component to display below the Global header to give editors more information.                                                                                                                         |
-| **`endpoints`**    | Add custom routes to the REST API. [More details](../rest-api/overview#custom-endpoints).                                                                                                                                  |
-| **`fields`** \*    | Array of field types that will determine the structure and functionality of the data stored within this Global. [More details](../fields/overview). |
-| **`graphQL.name`** | Text used in schema generation. Auto-generated from slug if not defined.                                                                                                                          |
-| **`hooks`**        | Entry point for Hooks. [More details](../hooks/overview#global-hooks).  |
-| **`label`**        | Text for the name in the Admin Panel or an object with keys for each language. Auto-generated from slug if not defined.                                                                                                                                                                                      |
-| **`slug`** \*      | Unique, URL-friendly string that will act as an identifier for this Global.                                                                                                                                          |
-| **`typescript`**   | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.    |
-| **`versions`**     | Set to true to enable default options, or configure with object properties. [More details](../versions/overview#globals-config).                                                                                           |
+| Option              | Description                                                                                                                                                                                    |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`access`**        | Provide Access Control functions to define exactly who should be able to do what with this Global. [More details](../access-control/globals).                                                  |
+| **`admin`**         | The configuration options for the Admin Panel. [More details](../admin/globals).                                                                                                               |
+| **`custom`**        | Extension point for adding custom data (e.g. for plugins)                                                                                                                                      |
+| **`dbName`**        | Custom table or collection name for this Global depending on the Database Adapter. Auto-generated from slug if not defined.                                                                    |
+| **`description`**   | Text or React component to display below the Global header to give editors more information.                                                                                                   |
+| **`endpoints`**     | Add custom routes to the REST API. [More details](../rest-api/overview#custom-endpoints).                                                                                                      |
+| **`fields`** \*     | Array of field types that will determine the structure and functionality of the data stored within this Global. [More details](../fields/overview).                                            |
+| **`graphQL.name`**  | Text used in schema generation. Auto-generated from slug if not defined.                                                                                                                       |
+| **`hooks`**         | Entry point for Hooks. [More details](../hooks/overview#global-hooks).                                                                                                                         |
+| **`label`**         | Text for the name in the Admin Panel or an object with keys for each language. Auto-generated from slug if not defined.                                                                        |
+| **`lockDocuments`** | Enables or disables document locking. By default, document locking is enabled. Set to an object to configure, or set to `false` to disable locking. [More details](../admin/locked-documents). |
+| **`slug`** \*       | Unique, URL-friendly string that will act as an identifier for this Global.                                                                                                                    |
+| **`typescript`**    | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                            |
+| **`versions`**      | Set to true to enable default options, or configure with object properties. [More details](../versions/overview#globals-config).                                                               |
 
 _\* An asterisk denotes that a property is required._
 

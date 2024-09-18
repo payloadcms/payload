@@ -1,4 +1,4 @@
-import type { Block, BlockField, Config, Field } from 'payload'
+import type { Block, BlocksField, Config, Field } from 'payload'
 
 import { fieldsToJSONSchema, sanitizeFields } from 'payload'
 
@@ -50,8 +50,8 @@ export const BlocksFeature = createServerFeature<
       validRelationships,
     })
 
-    props.blocks = (sanitized[0] as BlockField).blocks
-    props.inlineBlocks = (sanitized[1] as BlockField).blocks
+    props.blocks = (sanitized[0] as BlocksField).blocks
+    props.inlineBlocks = (sanitized[1] as BlocksField).blocks
 
     clientProps.clientBlockSlugs = props.blocks.map((block) => block.slug)
     clientProps.clientInlineBlockSlugs = props.inlineBlocks.map((block) => block.slug)
@@ -71,7 +71,7 @@ export const BlocksFeature = createServerFeature<
             return currentSchema
           }
 
-          const fields: BlockField[] = []
+          const fields: BlocksField[] = []
 
           if (props?.blocks?.length) {
             fields.push({

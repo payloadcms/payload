@@ -835,8 +835,8 @@ export type {
   ArrayFieldClient,
   BaseValidateOptions,
   Block,
-  BlockField,
-  BlockFieldClient,
+  BlocksField,
+  BlocksFieldClient,
   BlockJSX,
   CheckboxField,
   CheckboxFieldClient,
@@ -931,22 +931,32 @@ export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/b
 export { default as sortableFieldTypes } from './fields/sortableFieldTypes.js'
 export type {
   ArrayFieldValidation,
-  BlockFieldValidation,
+  BlocksFieldValidation,
   CheckboxFieldValidation,
   CodeFieldValidation,
   ConfirmPasswordFieldValidation,
   DateFieldValidation,
   EmailFieldValidation,
   JSONFieldValidation,
+  NumberFieldManyValidation,
+  NumberFieldSingleValidation,
   NumberFieldValidation,
   PasswordFieldValidation,
   PointFieldValidation,
   RadioFieldValidation,
+  RelationshipFieldManyValidation,
+  RelationshipFieldSingleValidation,
   RelationshipFieldValidation,
   RichTextFieldValidation,
+  SelectFieldManyValidation,
+  SelectFieldSingleValidation,
   SelectFieldValidation,
   TextareaFieldValidation,
+  TextFieldManyValidation,
+  TextFieldSingleValidation,
   TextFieldValidation,
+  UploadFieldManyValidation,
+  UploadFieldSingleValidation,
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
@@ -1006,6 +1016,12 @@ export {
   deepMergeWithSourceArrays,
 } from './utilities/deepMerge.js'
 export { getDependencies } from './utilities/dependencies/getDependencies.js'
+export {
+  findUp,
+  findUpSync,
+  pathExistsAndIsAccessible,
+  pathExistsAndIsAccessibleSync,
+} from './utilities/findUp.js'
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
 export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes.js'

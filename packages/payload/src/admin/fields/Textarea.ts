@@ -5,32 +5,64 @@ import type { TextareaField, TextareaFieldClient } from '../../fields/config/typ
 import type { TextareaFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
-  FormFieldBase,
 } from '../types.js'
 
 type TextareaFieldClientWithoutType = MarkOptional<TextareaFieldClient, 'type'>
 
-export type TextareaFieldProps = {
+type TextareaFieldBaseClientProps = {
   readonly inputRef?: React.Ref<HTMLInputElement>
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   readonly validate?: TextareaFieldValidation
-} & Omit<FormFieldBase<TextareaFieldClientWithoutType>, 'validate'>
+}
 
-export type TextareaFieldLabelServerComponent = FieldLabelServerComponent<TextareaField>
+export type TextareaFieldClientProps = ClientFieldBase<TextareaFieldClientWithoutType> &
+  TextareaFieldBaseClientProps
+
+export type TextareaFieldServerProps = ServerFieldBase<
+  TextareaField,
+  TextareaFieldClientWithoutType
+>
+
+export type TextareaFieldServerComponent = FieldServerComponent<
+  TextareaField,
+  TextareaFieldClientWithoutType
+>
+
+export type TextareaFieldClientComponent = FieldClientComponent<
+  TextareaFieldClientWithoutType,
+  TextareaFieldBaseClientProps
+>
+
+export type TextareaFieldLabelServerComponent = FieldLabelServerComponent<
+  TextareaField,
+  TextareaFieldClientWithoutType
+>
 
 export type TextareaFieldLabelClientComponent =
   FieldLabelClientComponent<TextareaFieldClientWithoutType>
 
-export type TextareaFieldDescriptionServerComponent = FieldDescriptionServerComponent<TextareaField>
+export type TextareaFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  TextareaField,
+  TextareaFieldClientWithoutType
+>
 
 export type TextareaFieldDescriptionClientComponent =
   FieldDescriptionClientComponent<TextareaFieldClientWithoutType>
 
-export type TextareaFieldErrorServerComponent = FieldErrorServerComponent<TextareaField>
+export type TextareaFieldErrorServerComponent = FieldErrorServerComponent<
+  TextareaField,
+  TextareaFieldClientWithoutType
+>
 
 export type TextareaFieldErrorClientComponent =
   FieldErrorClientComponent<TextareaFieldClientWithoutType>

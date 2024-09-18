@@ -21,7 +21,7 @@ export const init: Init = function init(this: MongooseAdapter) {
     if (collection.versions) {
       const versionModelName = getDBName({ config: collection, versions: true })
 
-      const versionCollectionFields = buildVersionCollectionFields(collection)
+      const versionCollectionFields = buildVersionCollectionFields(this.payload.config, collection)
 
       const versionSchema = buildSchema(this.payload.config, versionCollectionFields, {
         disableUnique: true,
@@ -64,7 +64,7 @@ export const init: Init = function init(this: MongooseAdapter) {
     if (global.versions) {
       const versionModelName = getDBName({ config: global, versions: true })
 
-      const versionGlobalFields = buildVersionGlobalFields(global)
+      const versionGlobalFields = buildVersionGlobalFields(this.payload.config, global)
 
       const versionSchema = buildSchema(this.payload.config, versionGlobalFields, {
         disableUnique: true,

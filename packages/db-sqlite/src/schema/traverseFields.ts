@@ -19,7 +19,7 @@ import {
   text,
 } from 'drizzle-orm/sqlite-core'
 import { InvalidConfiguration } from 'payload'
-import { fieldAffectsData, optionIsObject } from 'payload/shared'
+import { fieldAffectsData, fieldIsVirtual, optionIsObject } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, IDType, SQLiteAdapter } from '../types.js'
@@ -113,6 +113,11 @@ export const traverseFields = ({
     if ('name' in field && field.name === 'id') {
       return
     }
+
+    if (fieldIsVirtual(field)) {
+      return
+    }
+
     let columnName: string
     let fieldName: string
 
@@ -153,7 +158,7 @@ export const traverseFields = ({
           adapter.fieldConstraints[rootTableName][`${columnName}_idx`] = constraintValue
         }
         targetIndexes[`${newTableName}_${field.name}Idx`] = createIndex({
-          name: fieldName,
+          name: field.localized ? [fieldName, '_locale'] : fieldName,
           columnName,
           tableName: newTableName,
           unique,
@@ -166,7 +171,8 @@ export const traverseFields = ({
         if (field.hasMany) {
           const isLocalized =
             Boolean(field.localized && adapter.payload.config.localization) ||
-            withinLocalizedArrayOrBlock
+            withinLocalizedArrayOrBlock ||
+            forceLocalized
 
           if (isLocalized) {
             hasLocalizedManyTextField = true
@@ -199,7 +205,8 @@ export const traverseFields = ({
         if (field.hasMany) {
           const isLocalized =
             Boolean(field.localized && adapter.payload.config.localization) ||
-            withinLocalizedArrayOrBlock
+            withinLocalizedArrayOrBlock ||
+            forceLocalized
 
           if (isLocalized) {
             hasLocalizedManyNumberField = true
@@ -279,7 +286,8 @@ export const traverseFields = ({
 
           const isLocalized =
             Boolean(field.localized && adapter.payload.config.localization) ||
-            withinLocalizedArrayOrBlock
+            withinLocalizedArrayOrBlock ||
+            forceLocalized
 
           if (isLocalized) {
             baseColumns.locale = text('locale', { enum: locales }).notNull()
@@ -365,7 +373,8 @@ export const traverseFields = ({
 
         const isLocalized =
           Boolean(field.localized && adapter.payload.config.localization) ||
-          withinLocalizedArrayOrBlock
+          withinLocalizedArrayOrBlock ||
+          forceLocalized
 
         if (isLocalized) {
           baseColumns._locale = text('_locale', { enum: locales }).notNull()
@@ -503,7 +512,8 @@ export const traverseFields = ({
 
             const isLocalized =
               Boolean(field.localized && adapter.payload.config.localization) ||
-              withinLocalizedArrayOrBlock
+              withinLocalizedArrayOrBlock ||
+              forceLocalized
 
             if (isLocalized) {
               baseColumns._locale = text('_locale', { enum: locales }).notNull()

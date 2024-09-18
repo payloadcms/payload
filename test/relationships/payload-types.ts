@@ -24,6 +24,9 @@ export interface Config {
     movieReviews: MovieReview;
     'polymorphic-relationships': PolymorphicRelationship;
     tree: Tree;
+    pages: Page;
+    'rels-to-pages': RelsToPage;
+    'rels-to-pages-and-custom-text-ids': RelsToPagesAndCustomTextId;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -221,6 +224,53 @@ export interface Tree {
   id: string;
   text?: string | null;
   parent?: (string | null) | Tree;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: string;
+  menu?:
+    | {
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rels-to-pages".
+ */
+export interface RelsToPage {
+  id: string;
+  page?: (string | null) | Page;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rels-to-pages-and-custom-text-ids".
+ */
+export interface RelsToPagesAndCustomTextId {
+  id: string;
+  rel?:
+    | ({
+        relationTo: 'pages';
+        value: string | Page;
+      } | null)
+    | ({
+        relationTo: 'custom-id';
+        value: string | CustomId;
+      } | null)
+    | ({
+        relationTo: 'custom-id-number';
+        value: number | CustomIdNumber;
+      } | null);
   updatedAt: string;
   createdAt: string;
 }

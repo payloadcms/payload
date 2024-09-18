@@ -1,6 +1,6 @@
 import type { Field, SanitizedConfig, TabAsField } from 'payload'
 
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData, fieldIsVirtual } from 'payload/shared'
 
 import type { DrizzleAdapter } from '../../types.js'
 import type { BlocksMap } from '../../utilities/createBlocksMap.js'
@@ -125,6 +125,10 @@ export const traverseFields = <T extends Record<string, unknown>>({
     }
 
     if (fieldAffectsData(field)) {
+      if (fieldIsVirtual(field)) {
+        return result
+      }
+
       const fieldName = `${fieldPrefix || ''}${field.name}`
       const fieldData = table[fieldName]
       const localizedFieldData = {}
@@ -489,6 +493,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
           valuesToTransform.push({
             ref: localizedFieldData,
             table: {
+              ...table,
               ...localeRow,
             },
           })
@@ -526,7 +531,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
               relationships,
               table,
               texts,
-              withinArrayOrBlockLocale,
+              withinArrayOrBlockLocale: locale || withinArrayOrBlockLocale,
             })
 
             if ('_order' in ref) {

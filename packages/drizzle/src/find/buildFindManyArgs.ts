@@ -80,6 +80,7 @@ export const buildFindManyArgs = ({
     depth,
     fields,
     path: '',
+    tablePath: '',
     topLevelArgs: result,
     topLevelTableName: tableName,
   })
