@@ -2,8 +2,8 @@ import type { I18nClient } from '@payloadcms/translations'
 import type {
   AdminClient,
   ArrayFieldClient,
-  BlockFieldClient,
   BlockJSX,
+  BlocksFieldClient,
   ClientBlock,
   ClientField,
   CreateMappedComponent,
@@ -171,7 +171,7 @@ export const createClientField = ({
     }
 
     case 'blocks': {
-      const field = clientField as unknown as BlockFieldClient
+      const field = clientField as unknown as BlocksFieldClient
 
       if (incomingField.blocks?.length) {
         for (let i = 0; i < incomingField.blocks.length; i++) {

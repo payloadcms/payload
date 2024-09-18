@@ -140,7 +140,7 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                     key: 'block-' + blockSlug,
                     label: ({ i18n, richTextComponentMap }) => {
                       const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
-                      const blocksField: BlockFieldClient = richTextComponentMap.get(
+                      const blocksField: BlocksFieldClient = richTextComponentMap.get(
                         componentMapRenderedBlockPath,
                       )[0]
 
@@ -179,7 +179,7 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                     key: 'inlineBlock-' + inlineBlockSlug,
                     label: ({ i18n, richTextComponentMap }) => {
                       const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
-                      const blocksField: BlockFieldClient = richTextComponentMap.get(
+                      const blocksField: BlocksFieldClient = richTextComponentMap.get(
                         componentMapRenderedBlockPath,
                       )[0]
 
