@@ -1,7 +1,7 @@
 import payload from '../../packages/payload/src'
 import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
-import { collectionSlug } from './config'
+import { collectionSlug, isConnect, isInit } from './config'
 import { doc } from './config'
 
 require('isomorphic-fetch')
@@ -42,8 +42,16 @@ describe('Collection Database Operations', () => {
   })
 
   // --__--__--__--__--__--__--__--__--__
-  // Local API
+  // Custom Collection DB Operations
   // --__--__--__--__--__--__--__--__--__
+
+  it('collection DB Init', () => {
+    expect(isInit).toEqual(true)
+  })
+
+  it('collection DB Connect', () => {
+    expect(isConnect).toEqual(true)
+  })
 
   it('collection DB Create', async () => {
     const result = await payload.create({
