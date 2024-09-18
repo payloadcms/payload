@@ -230,65 +230,108 @@ describe('@payloadcms/plugin-form-builder', () => {
       await expect(req).rejects.toThrow(ValidationError)
     })
 
-    it('replaces curly braces with data when using slate serializer', () => {
-      const mockName = 'Test Submission'
-      const mockEmail = 'dev@payloadcms.com'
+    describe('replaces curly braces', () => {
+      describe('slate serializer', () => {
+        it('specific field names', () => {
+          const mockName = 'Test Submission'
+          const mockEmail = 'dev@payloadcms.com'
 
-      const serializedEmail = serializeSlate(
-        [
-          { text: 'Welcome {{name}}. Here is a dynamic ' },
-          {
-            type: 'link',
-            children: [
+          const serializedEmail = serializeSlate(
+            [
+              { text: 'Welcome {{name}}. Here is a dynamic ' },
               {
-                text: 'link',
-              },
-            ],
-            url: 'www.test.com?email={{email}}',
-          },
-        ],
-        [
-          { field: 'name', value: mockName },
-          { field: 'email', value: mockEmail },
-        ],
-      )
-
-      expect(serializedEmail).toContain(mockName)
-      expect(serializedEmail).toContain(mockEmail)
-    })
-
-    it('replaces curly braces with data when using lexical serializer', async () => {
-      const mockName = 'Test Submission'
-      const mockEmail = 'dev@payloadcms.com'
-
-      const serializedEmail = await serializeLexical(
-        {
-          root: {
-            type: 'root',
-            children: [
-              {
-                type: 'paragraph',
+                type: 'link',
                 children: [
                   {
-                    type: 'text',
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Name: {{name}}',
-                    version: 1,
+                    text: 'link',
                   },
+                ],
+                url: 'www.test.com?email={{email}}',
+              },
+            ],
+            [
+              { field: 'name', value: mockName },
+              { field: 'email', value: mockEmail },
+            ],
+          )
+
+          expect(serializedEmail).toContain(mockName)
+          expect(serializedEmail).toContain(mockEmail)
+        })
+
+        it('wildcard "{{*}}"', () => {
+          const mockName = 'Test Submission'
+          const mockEmail = 'dev@payloadcms.com'
+
+          const serializedEmail = serializeSlate(
+            [{ text: '{{*}}' }],
+            [
+              { field: 'name', value: mockName },
+              { field: 'email', value: mockEmail },
+            ],
+          )
+
+          expect(serializedEmail).toContain(`name : ${mockName}`)
+          expect(serializedEmail).toContain(`email : ${mockEmail}`)
+        })
+
+        it('wildcard with table formatting "{{*:table}}"', () => {
+          const mockName = 'Test Submission'
+          const mockEmail = 'dev@payloadcms.com'
+
+          const serializedEmail = serializeSlate(
+            [{ text: '{{*:table}}' }],
+            [
+              { field: 'name', value: mockName },
+              { field: 'email', value: mockEmail },
+            ],
+          )
+
+          expect(serializedEmail).toContain(`<table>`)
+          expect(serializedEmail).toContain(`<tr><td>name</td><td>${mockName}</td></tr>`)
+          expect(serializedEmail).toContain(`<tr><td>email</td><td>${mockEmail}</td></tr>`)
+        })
+      })
+
+      describe('lexical serializer', () => {
+        it('specific field names', async () => {
+          const mockName = 'Test Submission'
+          const mockEmail = 'dev@payloadcms.com'
+
+          const serializedEmail = await serializeLexical(
+            {
+              root: {
+                type: 'root',
+                children: [
                   {
-                    type: 'linebreak',
-                    version: 1,
-                  },
-                  {
-                    type: 'text',
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Email: {{email}}',
+                    type: 'paragraph',
+                    children: [
+                      {
+                        type: 'text',
+                        detail: 0,
+                        format: 0,
+                        mode: 'normal',
+                        style: '',
+                        text: 'Name: {{name}}',
+                        version: 1,
+                      },
+                      {
+                        type: 'linebreak',
+                        version: 1,
+                      },
+                      {
+                        type: 'text',
+                        detail: 0,
+                        format: 0,
+                        mode: 'normal',
+                        style: '',
+                        text: 'Email: {{email}}',
+                        version: 1,
+                      },
+                    ],
+                    direction: 'ltr',
+                    format: '',
+                    indent: 0,
                     version: 1,
                   },
                 ],
@@ -297,21 +340,106 @@ describe('@payloadcms/plugin-form-builder', () => {
                 indent: 0,
                 version: 1,
               },
+            },
+            [
+              { field: 'name', value: mockName },
+              { field: 'email', value: mockEmail },
             ],
-            direction: 'ltr',
-            format: '',
-            indent: 0,
-            version: 1,
-          },
-        },
-        [
-          { field: 'name', value: mockName },
-          { field: 'email', value: mockEmail },
-        ],
-      )
+          )
 
-      expect(serializedEmail).toContain(`Name: ${mockName}`)
-      expect(serializedEmail).toContain(`Email: ${mockEmail}`)
+          expect(serializedEmail).toContain(`Name: ${mockName}`)
+          expect(serializedEmail).toContain(`Email: ${mockEmail}`)
+        })
+
+        it('wildcard "{{*}}"', async () => {
+          const mockName = 'Test Submission'
+          const mockEmail = 'dev@payloadcms.com'
+
+          const serializedEmail = await serializeLexical(
+            {
+              root: {
+                type: 'root',
+                children: [
+                  {
+                    type: 'paragraph',
+                    children: [
+                      {
+                        type: 'text',
+                        detail: 0,
+                        format: 0,
+                        mode: 'normal',
+                        style: '',
+                        text: '{{*}}',
+                        version: 1,
+                      },
+                    ],
+                    direction: 'ltr',
+                    format: '',
+                    indent: 0,
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                version: 1,
+              },
+            },
+            [
+              { field: 'name', value: mockName },
+              { field: 'email', value: mockEmail },
+            ],
+          )
+
+          expect(serializedEmail).toContain(`name : ${mockName}`)
+          expect(serializedEmail).toContain(`email : ${mockEmail}`)
+        })
+
+        it('wildcard with table formatting "{{*:table}}"', async () => {
+          const mockName = 'Test Submission'
+          const mockEmail = 'dev@payloadcms.com'
+
+          const serializedEmail = await serializeLexical(
+            {
+              root: {
+                type: 'root',
+                children: [
+                  {
+                    type: 'paragraph',
+                    children: [
+                      {
+                        type: 'text',
+                        detail: 0,
+                        format: 0,
+                        mode: 'normal',
+                        style: '',
+                        text: '{{*:table}}',
+                        version: 1,
+                      },
+                    ],
+                    direction: 'ltr',
+                    format: '',
+                    indent: 0,
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                version: 1,
+              },
+            },
+            [
+              { field: 'name', value: mockName },
+              { field: 'email', value: mockEmail },
+            ],
+          )
+
+          expect(serializedEmail).toContain(`<table>`)
+          expect(serializedEmail).toContain(`<tr><td>name</td><td>${mockName}</td></tr>`)
+          expect(serializedEmail).toContain(`<tr><td>email</td><td>${mockEmail}</td></tr>`)
+        })
+      })
     })
   })
 })
