@@ -6,8 +6,8 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findByIDOperation } from '../findByID.js'
 
-export type Options = {
-  collection: CollectionSlug
+export type Options<TSlug extends CollectionSlug = CollectionSlug> = {
+  collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
