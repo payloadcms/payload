@@ -1,6 +1,6 @@
 import type { Payload, PayloadRequest } from 'payload'
 
-import { randomBytes } from 'crypto'
+import { randomBytes, randomUUID } from 'crypto'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -1199,6 +1199,19 @@ describe('Relationships', () => {
       })
 
       expect(res.docs).toHaveLength(1)
+
+      const res_2 = await payload.find({
+        collection: 'polymorphic-relationships',
+        where: {
+          polymorphic: {
+            equals: {
+              relationTo: 'movies',
+              value: payload.db.idType === 'uuid' ? randomUUID() : 99,
+            },
+          },
+        },
+      })
+      expect(res_2.docs).toHaveLength(0)
     })
   })
 })
