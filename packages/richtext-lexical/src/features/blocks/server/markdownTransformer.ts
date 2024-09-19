@@ -2,7 +2,7 @@
 import { $convertFromMarkdownString, $convertToMarkdownString } from '@lexical/markdown'
 import { Block } from 'payload'
 import { $createServerBlockNode, $isServerBlockNode, ServerBlockNode } from './nodes/BlocksNode.js'
-import type { Transformer } from '@lexical/markdown'
+import type { TextMatchTransformer, Transformer } from '@lexical/markdown'
 
 import { propsToJSXString } from '../../../utilities/jsx/jsx.js'
 
@@ -46,22 +46,22 @@ export const getBlockMarkdownTransformers = ({
 }): ((props: {
   allNodes: Array<NodeWithHooks>
   allTransformers: Transformer[]
-}) => MultilineElementTransformer)[] => {
+}) => MultilineElementTransformer | TextMatchTransformer)[] => {
   if (!blocks?.length && !inlineBlocks?.length) {
     return []
   }
 
-  const transformers: ((props: {
+  let transformers: ((props: {
     allNodes: Array<NodeWithHooks>
     allTransformers: Transformer[]
-  }) => MultilineElementTransformer)[] = []
+  }) => MultilineElementTransformer | TextMatchTransformer)[] = []
 
   if (blocks?.length) {
     for (const block of blocks) {
       const transformer = getMarkdownTransformerForBlock(block, false)
 
       if (transformer) {
-        transformers.push(transformer)
+        transformers = transformers.concat(transformer)
       }
     }
   }
@@ -71,7 +71,7 @@ export const getBlockMarkdownTransformers = ({
       const transformer = getMarkdownTransformerForBlock(block, true)
 
       if (transformer) {
-        transformers.push(transformer)
+        transformers = transformers.concat(transformer)
       }
     }
   }
@@ -82,18 +82,64 @@ export const getBlockMarkdownTransformers = ({
 function getMarkdownTransformerForBlock(
   block: Block,
   isInlineBlock: boolean,
-):
-  | ((props: {
-      allNodes: Array<NodeWithHooks>
-      allTransformers: Transformer[]
-    }) => MultilineElementTransformer)
-  | null {
+): Array<
+  (props: {
+    allNodes: Array<NodeWithHooks>
+    allTransformers: Transformer[]
+  }) => MultilineElementTransformer | TextMatchTransformer
+> | null {
   if (!block.jsx) {
     return null
   }
   const regex = createTagRegexes(block.slug)
+  const toReturn: Array<
+    (props: {
+      allNodes: Array<NodeWithHooks>
+      allTransformers: Transformer[]
+    }) => MultilineElementTransformer | TextMatchTransformer
+  > = []
 
-  return ({ allTransformers, allNodes }) => ({
+  if (isInlineBlock) {
+    toReturn.push(({ allTransformers, allNodes }) => ({
+      dependencies: [ServerInlineBlockNode],
+      export: (node) => {
+        if (!$isServerInlineBlockNode(node)) {
+          return null
+        }
+
+        if (node.getFields()?.blockType?.toLowerCase() !== block.slug.toLowerCase()) {
+          return null
+        }
+
+        const nodeFields = node.getFields()
+        const lexicalToMarkdown = getLexicalToMarkdown(allNodes, allTransformers)
+
+        const exportResult = block.jsx.export({
+          fields: nodeFields,
+          lexicalToMarkdown,
+        })
+        if (exportResult === false) {
+          return null
+        }
+        if (typeof exportResult === 'string') {
+          return exportResult
+        }
+
+        if (exportResult?.children?.length) {
+          return `<${nodeFields.blockType} ${propsToJSXString({ props: exportResult.props })}>\n  ${exportResult.children}\n</${nodeFields.blockType}>`
+        }
+
+        return `<${nodeFields.blockType} ${propsToJSXString({ props: exportResult.props })}/>`
+      },
+      importRegExp: /___ignoreignoreignore___/g,
+      regExp: /___ignoreignoreignore___/g,
+      replace: () => {},
+      trigger: '___ignoreignoreignore___',
+      type: 'text-match',
+    }))
+  }
+
+  toReturn.push(({ allTransformers, allNodes }) => ({
     dependencies: [ServerBlockNode, ServerInlineBlockNode],
     export: (node) => {
       if (isInlineBlock) {
@@ -276,7 +322,9 @@ function getMarkdownTransformerForBlock(
       return false // Run next transformer
     },
     type: 'multilineElement',
-  })
+  }))
+
+  return toReturn
 }
 
 export function getMarkdownToLexical(
