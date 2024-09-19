@@ -40,7 +40,7 @@ export const sanitizeJoinField = ({
 
   // Traverse fields and match based on the schema path
   traverseFields({
-    callback: ({ field, next, tab }) => {
+    callback: ({ field, next }) => {
       const currentSegment = pathSegments[currentSegmentIndex]
       // match field on path segments
       if ('name' in field && field.name === currentSegment) {
@@ -61,9 +61,6 @@ export const sanitizeJoinField = ({
         // skip fields in non-matching path segments
         next()
         return
-      }
-      if (tab) {
-        currentSegmentIndex++
       }
     },
     fields: joinCollection.fields,
