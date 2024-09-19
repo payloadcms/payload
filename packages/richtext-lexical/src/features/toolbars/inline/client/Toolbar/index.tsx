@@ -61,13 +61,13 @@ function ToolbarGroupComponent({
 }): React.ReactNode {
   const { editorConfig } = useEditorConfigContext()
 
-  const [DropdownIcon, setDropdownIcon] = React.useState<null | React.FC>(null)
+  const [DropdownIcon, setDropdownIcon] = React.useState<React.FC | undefined>()
 
   React.useEffect(() => {
     if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
       setDropdownIcon(() => group.ChildComponent)
     } else {
-      setDropdownIcon(null)
+      setDropdownIcon(undefined)
     }
   }, [group])
 
@@ -77,7 +77,7 @@ function ToolbarGroupComponent({
         if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
           setDropdownIcon(() => group.ChildComponent)
         } else {
-          setDropdownIcon(null)
+          setDropdownIcon(undefined)
         }
         return
       }
