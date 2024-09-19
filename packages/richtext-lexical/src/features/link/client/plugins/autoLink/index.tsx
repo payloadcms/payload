@@ -179,11 +179,11 @@ function $createAutoLinkNode_(
   endIndex: number,
   match: LinkMatcherResult,
 ): TextNode | undefined {
-  const fields: LinkFields = {
+  const fields = {
     linkType: 'custom',
     url: match.url,
     ...match.fields,
-  }
+  } as LinkFields
 
   const linkNode = $createAutoLinkNode({ fields })
   if (nodes.length === 1) {

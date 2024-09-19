@@ -38,7 +38,7 @@ export class LinkNode extends ElementNode {
       doc: null,
       linkType: 'custom',
       newTab: false,
-      url: undefined,
+      url: '',
     },
     key,
   }: {
@@ -269,14 +269,14 @@ export const TOGGLE_LINK_COMMAND: LexicalCommand<LinkPayload | null> =
 export function $toggleLink(payload: LinkPayload): void {
   const selection = $getSelection()
 
-  if (!$isRangeSelection(selection) && !payload.selectedNodes.length) {
+  if (!$isRangeSelection(selection) && !payload.selectedNodes?.length) {
     return
   }
   const nodes = $isRangeSelection(selection) ? selection.extract() : payload.selectedNodes
 
   if (payload === null) {
     // Remove LinkNodes
-    nodes.forEach((node) => {
+    nodes?.forEach((node) => {
       const parent = node.getParent()
 
       if ($isLinkNode(parent)) {
@@ -291,7 +291,7 @@ export function $toggleLink(payload: LinkPayload): void {
     })
   } else {
     // Add or merge LinkNodes
-    if (nodes.length === 1) {
+    if (nodes?.length === 1) {
       const firstNode = nodes[0]
       // if the first node is a LinkNode or if its
       // parent is a LinkNode, we update the URL, target and rel.
@@ -317,7 +317,7 @@ export function $toggleLink(payload: LinkPayload): void {
     let prevParent: ElementNodeType | LinkNode | null = null
     let linkNode: LinkNode | null = null
 
-    nodes.forEach((node) => {
+    nodes?.forEach((node) => {
       const parent = node.getParent()
 
       if (parent === linkNode || parent === null || ($isElementNode(node) && !node.isInline())) {
@@ -386,7 +386,9 @@ function $getAncestor(
   predicate: (ancestor: LexicalNode) => boolean,
 ): LexicalNode | null {
   let parent: LexicalNode | null = node
-  while (parent !== null && (parent = parent.getParent()) !== null && !predicate(parent)) {}
+  while (parent !== null && (parent = parent.getParent()) !== null && !predicate(parent)) {
+    void {}
+  }
   return parent
 }
 

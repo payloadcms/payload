@@ -71,7 +71,7 @@ export const LinkFeature = createServerFeature<
     const validRelationships = _config.collections.map((c) => c.slug) || []
 
     const _transformedFields = transformExtraFields(
-      deepCopyObject(props.fields),
+      deepCopyObject(props.fields!),
       _config,
       props.enabledCollections,
       props.disabledCollections,
@@ -150,7 +150,7 @@ export const LinkFeature = createServerFeature<
                   href =
                     typeof node.fields.doc?.value === 'string'
                       ? node.fields.doc?.value
-                      : node.fields.doc?.value?.id
+                      : (node.fields.doc?.value?.id as string)
                 }
 
                 return `<a href="${href}"${target}${rel}>${childrenText}</a>`
