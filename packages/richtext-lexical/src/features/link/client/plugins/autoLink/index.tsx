@@ -210,7 +210,7 @@ function $createAutoLinkNode_(
     } else {
       ;[, firstLinkTextNode] = firstTextNode.splitText(startIndex)
     }
-    const linkNodes = []
+    const linkNodes: LexicalNode[] = []
     let remainingTextNode
     for (let i = 1; i < nodes.length; i++) {
       const currentNode = nodes[i]

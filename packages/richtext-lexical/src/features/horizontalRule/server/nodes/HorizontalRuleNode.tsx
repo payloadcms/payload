@@ -35,7 +35,7 @@ export const INSERT_HORIZONTAL_RULE_COMMAND: LexicalCommand<void> = createComman
  *
  * If we used DecoratorBlockNode instead, we would only need a decorate method
  */
-export class HorizontalRuleServerNode extends DecoratorNode<null> {
+export class HorizontalRuleServerNode extends DecoratorNode<null | React.ReactElement> {
   static clone(node: HorizontalRuleServerNode): HorizontalRuleServerNode {
     return new this(node.__key)
   }
@@ -74,7 +74,7 @@ export class HorizontalRuleServerNode extends DecoratorNode<null> {
     return element
   }
 
-  decorate() {
+  decorate(): null | React.ReactElement {
     return null
   }
 
