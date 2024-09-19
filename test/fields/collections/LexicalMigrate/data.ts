@@ -74,8 +74,8 @@ export function getAlignIndentLexicalData(textContent: string) {
             },
           ],
           direction: 'ltr',
-          format: '',
-          indent: 2,
+          format: 'center',
+          indent: 0,
           type: 'heading',
           version: 1,
           tag: 'h2',
@@ -93,8 +93,8 @@ export function getAlignIndentLexicalData(textContent: string) {
             },
           ],
           direction: 'ltr',
-          format: 'center',
-          indent: 0,
+          format: 'left',
+          indent: 2,
           type: 'paragraph',
           version: 1,
           textFormat: 0,
@@ -114,5 +114,5 @@ export function getAlignIndentLexicalData(textContent: string) {
  * If the HTML Conversion structure of the heading and paragraph changes, must edit this.
  */
 export function getAlignIndentHTMLData(textContent: string) {
-  return `<h2 style="text-indent: 40px;">${textContent}</h2><p style="text-align: center;">${textContent}</p>`
+  return `<h2 style="text-align: center;">${textContent}</h2><p style="text-indent: 40px; text-align: left;">${textContent}</p>`
 }
