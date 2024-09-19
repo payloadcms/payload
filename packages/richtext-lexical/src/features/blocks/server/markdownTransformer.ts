@@ -193,16 +193,12 @@ function getMarkdownTransformerForBlock(
               ? transformer.regExpEnd.optional
               : !transformer.regExpEnd
 
-          const linesLength = lines.length
-
           const { propsString, content, endLineIndex, afterEndLine, beforeStartLine } =
             linesFromStartToContentAndPropsString({
               startMatch,
               regexpEndRegex,
               startLineIndex,
-              linesLength,
               lines,
-              endLineIndex: startLineIndex,
               isEndOptional,
             })
 

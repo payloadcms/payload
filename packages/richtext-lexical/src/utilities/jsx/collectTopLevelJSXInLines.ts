@@ -22,13 +22,9 @@ export function collectTopLevelJSXInLines(
       continue // Try next transformer
     }
 
-    const linesLength = lines.length
-
     const { content, endLineIndex, propsString } = linesFromStartToContentAndPropsString({
-      endLineIndex: i,
       isEndOptional: false,
       lines,
-      linesLength,
       regexpEndRegex: regex.regExpEnd,
       startLineIndex: i,
       startMatch,

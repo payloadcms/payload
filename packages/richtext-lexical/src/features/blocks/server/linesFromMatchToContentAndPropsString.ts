@@ -1,16 +1,12 @@
 export function linesFromStartToContentAndPropsString({
-  endLineIndex,
   isEndOptional,
   lines,
-  linesLength,
   regexpEndRegex,
   startLineIndex,
   startMatch,
 }: {
-  endLineIndex: number
   isEndOptional?: boolean
   lines: string[]
-  linesLength: number
   regexpEndRegex?: RegExp
   startLineIndex: number
   startMatch: RegExpMatchArray
@@ -42,7 +38,9 @@ export function linesFromStartToContentAndPropsString({
   const beforeStartLine = linesCopy[0].slice(0, startMatch.index)
   let endlineLastCharIndex = 0
 
-  mainLoop: for (let lineIndex = 0; lineIndex < linesLength; lineIndex++) {
+  let endLineIndex = startLineIndex
+
+  mainLoop: for (let lineIndex = 0; lineIndex < linesCopy.length; lineIndex++) {
     const line = linesCopy[lineIndex].trim()
 
     let charIndex = 0
@@ -136,7 +134,7 @@ export function linesFromStartToContentAndPropsString({
       }
     }
 
-    if (lineIndex === linesLength - 1 && !isEndOptional && !isSelfClosing) {
+    if (lineIndex === linesCopy.length - 1 && !isEndOptional && !isSelfClosing) {
       throw new Error('End match not found')
     }
   }
