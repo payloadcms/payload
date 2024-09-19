@@ -486,7 +486,6 @@ there\`\`\`
       ],
     },
     {
-      // This test ensures that the JSX within the code block is does not disrupt the main JSX parsing
       input: `
 <Banner>
   Some text 1 <InlineCode>code 1</InlineCode> some
