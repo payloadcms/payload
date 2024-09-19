@@ -1,4 +1,4 @@
-import type { Field } from '../fields/config/types.js'
+import type { Field, TabAsField } from '../fields/config/types.js'
 
 import { fieldHasSubFields } from '../fields/config/types.js'
 
@@ -6,7 +6,7 @@ export type TraverseFieldsCallback = (args: {
   /**
    * The current field
    */
-  field: Field
+  field: Field | TabAsField
   /**
    * Function that when called will skip the current field and continue to the next
    */
@@ -23,7 +23,7 @@ export type TraverseFieldsCallback = (args: {
 
 type TraverseFieldsArgs = {
   callback: TraverseFieldsCallback
-  fields: Field[]
+  fields: (Field | TabAsField)[]
   parentRef?: Record<string, unknown> | unknown
   ref?: Record<string, unknown> | unknown
 }
@@ -53,7 +53,22 @@ export const traverseFields = ({
     if (skip) {
       return false
     }
-    if (fieldHasSubFields(field)) {
+    if (field.type === 'tabs' && 'tabs' in field) {
+      field.tabs.forEach((tab) => {
+        if ('name' in tab && tab.name) {
+          if (typeof ref[tab.name] === 'undefined') {
+            ref[tab.name] = {}
+          }
+          ref = ref[tab.name]
+        }
+        if (callback && callback({ field: { ...tab, type: 'tab' }, next, parentRef, ref })) {
+          return true
+        }
+        traverseFields({ callback, fields: tab.fields, parentRef, ref })
+      })
+      return
+    }
+    if (field.type !== 'tab' && fieldHasSubFields(field)) {
       const parentRef = ref
       if ('name' in field && field.name) {
         if (typeof ref[field.name] === 'undefined') {
@@ -71,18 +86,6 @@ export const traverseFields = ({
         ref = ref[field.name]
       }
       traverseFields({ callback, fields: field.fields, parentRef, ref })
-    }
-
-    if (field.type === 'tabs' && 'tabs' in field) {
-      field.tabs.forEach((tab) => {
-        if ('name' in tab && tab.name) {
-          if (typeof ref[tab.name] === 'undefined') {
-            ref[tab.name] = {}
-          }
-          ref = ref[tab.name]
-        }
-        traverseFields({ callback, fields: tab.fields, parentRef, ref })
-      })
     }
   })
 }

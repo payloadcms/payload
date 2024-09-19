@@ -207,5 +207,29 @@ You can specify as many `joins` parameters as needed for the same or different j
 
 ### GraphQL
 
-Coming soon.
+The GraphQL API supports the same query options as the local and REST APIs. You can specify the query options for each join field in your query.
 
+Example:
+
+```graphql
+query {
+  Categories {
+    docs {
+      relatedPosts(
+        sort: "createdAt"
+        limit: 5
+        where: {
+          author: {
+              equals: "66e3431a3f23e684075aaeb9"
+            }
+          }
+      ) {
+        docs {
+          title
+        }
+        hasNextPage
+      }
+    }
+  }
+}
+```

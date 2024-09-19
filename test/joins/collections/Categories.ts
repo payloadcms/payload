@@ -12,6 +12,36 @@ export const Categories: CollectionConfig = {
       name: 'name',
       type: 'text',
     },
+    // Alternative tabs usage
+    // {
+    //   type: 'tabs',
+    //   tabs: [
+    //     {
+    //       label: 'Unnamed tab',
+    //       fields: [
+    //         {
+    //           name: 'relatedPosts',
+    //           label: 'Related Posts',
+    //           type: 'join',
+    //           collection: postsSlug,
+    //           on: 'category',
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       name: 'group',
+    //       fields: [
+    //         {
+    //           name: 'relatedPosts',
+    //           label: 'Related Posts (Group)',
+    //           type: 'join',
+    //           collection: postsSlug,
+    //           on: 'group.category',
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
     {
       name: 'relatedPosts',
       label: 'Related Posts',

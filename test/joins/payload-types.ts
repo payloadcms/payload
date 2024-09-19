@@ -68,7 +68,16 @@ export interface Post {
 export interface Category {
   id: string;
   name?: string | null;
-  group?: {};
+  relatedPosts?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  group?: {
+    relatedPosts?: {
+      docs?: (string | Post)[] | null;
+      hasNextPage?: boolean | null;
+    } | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -90,6 +99,10 @@ export interface LocalizedPost {
 export interface LocalizedCategory {
   id: string;
   name?: string | null;
+  relatedPosts?: {
+    docs?: (string | LocalizedPost)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }

@@ -1449,6 +1449,10 @@ export type JoinField = {
   defaultValue?: never
   hidden?: false
   index?: never
+  /**
+   * This does not need to be set and will be overridden by the relationship field's localized property.
+   */
+  localized?: boolean
   maxDepth?: number
   /**
    * A string for the field in the collection being joined to.
