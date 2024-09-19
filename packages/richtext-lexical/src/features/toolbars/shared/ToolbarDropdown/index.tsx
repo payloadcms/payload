@@ -49,7 +49,7 @@ const ToolbarItem = ({
   }
 
   let title = item.key
-  if (item.label) {
+  if (item.label && richTextComponentMap) {
     title =
       typeof item.label === 'function' ? item.label({ i18n, richTextComponentMap }) : item.label
   }
@@ -100,6 +100,9 @@ export const ToolbarDropdown = ({
   const updateStates = useCallback(() => {
     editor.getEditorState().read(() => {
       const selection = $getSelection()
+      if (!selection) {
+        return
+      }
 
       const _activeItemKeys: string[] = []
       const _activeItems: ToolbarGroupItem[] = []
