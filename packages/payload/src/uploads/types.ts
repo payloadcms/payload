@@ -155,7 +155,7 @@ export type UploadConfig = {
     req: PayloadRequest,
     args: {
       doc: TypeWithID
-      params: { collection: CollectionSlug; filename: string }
+      params: { collection: string; filename: string }
     },
   ) => Promise<Response> | Promise<void> | Response | void)[]
   imageSizes?: ImageSize[]
