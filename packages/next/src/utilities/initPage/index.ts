@@ -34,6 +34,11 @@ export const initPage = async ({
 
   const { i18n, permissions, user } = await initReq(payload.config)
 
+  // Ideally, we should not need to recreate the req, because
+  // we can get it from the above initReq.
+
+  // We just need to -overwrite- the url and query of the req
+  // we get above. Clone the req? We'll look into that eventually.
   const req = await createLocalReq(
     {
       fallbackLocale: null,
