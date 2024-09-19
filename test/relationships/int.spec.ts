@@ -1168,6 +1168,38 @@ describe('Relationships', () => {
       expect(queryOne.docs).toHaveLength(1)
       expect(queryTwo.docs).toHaveLength(1)
     })
+
+    it('should allow querying on polymorphic relationships with an object syntax', async () => {
+      const movie = await payload.create({
+        collection: 'movies',
+        data: {
+          name: 'Pulp Fiction 2',
+        },
+      })
+      await payload.create({
+        collection: polymorphicRelationshipsSlug,
+        data: {
+          polymorphic: {
+            relationTo: 'movies',
+            value: movie.id,
+          },
+        },
+      })
+
+      const res = await payload.find({
+        collection: 'polymorphic-relationships',
+        where: {
+          polymorphic: {
+            equals: {
+              relationTo: 'movies',
+              value: movie.id,
+            },
+          },
+        },
+      })
+
+      expect(res.docs).toHaveLength(1)
+    })
   })
 })
 
