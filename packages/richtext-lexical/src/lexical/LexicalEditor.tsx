@@ -98,13 +98,13 @@ export const LexicalEditor: React.FC<
 
   return (
     <React.Fragment>
-      {editorConfig.features.plugins.map((plugin) => {
+      {editorConfig.features.plugins?.map((plugin) => {
         if (plugin.position === 'aboveContainer') {
           return <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
         }
       })}
       <div className="editor-container" ref={editorContainerRef}>
-        {editorConfig.features.plugins.map((plugin) => {
+        {editorConfig.features.plugins?.map((plugin) => {
           if (plugin.position === 'top') {
             return (
               <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
@@ -143,7 +143,7 @@ export const LexicalEditor: React.FC<
                 <AddBlockHandlePlugin anchorElem={floatingAnchorElem} />
               </React.Fragment>
             )}
-            {editorConfig.features.plugins.map((plugin) => {
+            {editorConfig.features.plugins?.map((plugin) => {
               if (
                 plugin.position === 'floatingAnchorElem' &&
                 !(plugin.desktopOnly === true && isSmallWidthViewport)
@@ -173,14 +173,14 @@ export const LexicalEditor: React.FC<
         )}
 
         <TabIndentationPlugin />
-        {editorConfig.features.plugins.map((plugin) => {
+        {editorConfig.features.plugins?.map((plugin) => {
           if (plugin.position === 'normal') {
             return (
               <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
             )
           }
         })}
-        {editorConfig.features.plugins.map((plugin) => {
+        {editorConfig.features.plugins?.map((plugin) => {
           if (plugin.position === 'bottom') {
             return (
               <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
@@ -188,7 +188,7 @@ export const LexicalEditor: React.FC<
           }
         })}
       </div>
-      {editorConfig.features.plugins.map((plugin) => {
+      {editorConfig.features.plugins?.map((plugin) => {
         if (plugin.position === 'belowContainer') {
           return <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
         }
