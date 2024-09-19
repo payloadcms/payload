@@ -1,5 +1,6 @@
 'use client'
 
+import { $createQuoteNode, $isQuoteNode, QuoteNode } from '@lexical/rich-text'
 import { $setBlocksType } from '@lexical/selection'
 import { $getSelection, $isRangeSelection } from 'lexical'
 
@@ -10,7 +11,6 @@ import { createClientFeature } from '../../../utilities/createClientFeature.js'
 import { slashMenuBasicGroupWithItems } from '../../shared/slashMenu/basicGroup.js'
 import { toolbarTextDropdownGroupWithItems } from '../../shared/toolbar/textDropdownGroup.js'
 import { MarkdownTransformer } from '../markdownTransformer.js'
-import { $createQuoteNode, $isQuoteNode, QuoteNode } from './nodes/QuoteNode.js'
 
 const toolbarGroups: ToolbarGroup[] = [
   toolbarTextDropdownGroupWithItems([

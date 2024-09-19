@@ -17,11 +17,11 @@ const convertStyleObjectToString = (style: Record<string, unknown>): string => {
   return styleString
 }
 
-const getAlignStyle = (node: SerializedElementNode) => {
+export const getAlignStyle = (node: SerializedElementNode) => {
   return { 'text-align': node.format }
 }
 
-const getIndentStyle = (node: SerializedElementNode) => {
+export const getIndentStyle = (node: SerializedElementNode) => {
   if (!node.indent) {
     return {}
   }

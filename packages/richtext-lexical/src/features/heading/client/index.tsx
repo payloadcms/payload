@@ -2,6 +2,7 @@
 
 import type { HeadingTagType } from '@lexical/rich-text'
 
+import { $createHeadingNode, $isHeadingNode, HeadingNode } from '@lexical/rich-text'
 import { $setBlocksType } from '@lexical/selection'
 import { $getSelection, $isRangeSelection } from 'lexical'
 
@@ -18,7 +19,6 @@ import { createClientFeature } from '../../../utilities/createClientFeature.js'
 import { slashMenuBasicGroupWithItems } from '../../shared/slashMenu/basicGroup.js'
 import { toolbarTextDropdownGroupWithItems } from '../../shared/toolbar/textDropdownGroup.js'
 import { MarkdownTransformer } from '../markdownTransformer.js'
-import { $createHeadingNode, $isHeadingNode, HeadingNode } from './nodes/HeadingNode.js'
 
 const $setHeading = (headingSize: HeadingTagType) => {
   const selection = $getSelection()
