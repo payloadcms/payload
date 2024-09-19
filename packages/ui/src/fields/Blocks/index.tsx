@@ -1,5 +1,5 @@
 'use client'
-import type { BlockFieldProps } from 'payload'
+import type { BlocksFieldClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback } from 'react'
@@ -32,7 +32,7 @@ import './index.scss'
 
 const baseClass = 'blocks-field'
 
-const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
+const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
@@ -231,8 +231,6 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
                 as="span"
                 field={field}
                 Label={field?.admin?.components?.Description}
-                label={label}
-                required={required}
                 unstyled
                 {...(labelProps || {})}
               />

@@ -1,6 +1,7 @@
 import type {
   ClientCollectionConfig,
   ClientGlobalConfig,
+  ClientUser,
   Data,
   DocumentPermissions,
   DocumentPreferences,
@@ -24,6 +25,7 @@ export type DocumentInfoProps = {
   BeforeFields?: React.ReactNode
   collectionSlug?: SanitizedCollectionConfig['slug']
   disableActions?: boolean
+  disableCreate?: boolean
   disableLeaveWithoutSaving?: boolean
   docPermissions?: DocumentPermissions
   globalSlug?: SanitizedGlobalConfig['slug']
@@ -33,12 +35,31 @@ export type DocumentInfoProps = {
   initialData?: Data
   initialState?: FormState
   isEditing?: boolean
+  onDelete?: (args: {
+    collectionConfig?: ClientCollectionConfig
+    id: string
+  }) => Promise<void> | void
+  onDrawerCreate?: () => void
+  /* only available if `redirectAfterDuplicate` is `false` */
+  onDuplicate?: (args: {
+    collectionConfig?: ClientCollectionConfig
+    doc: TypeWithID
+  }) => Promise<void> | void
   onLoadError?: (data?: any) => Promise<void> | void
-  onSave?: (data: Data) => Promise<void> | void
+  onSave?: (args: {
+    collectionConfig?: ClientCollectionConfig
+    doc: TypeWithID
+    operation: 'create' | 'update'
+    result: Data
+  }) => Promise<void> | void
+  redirectAfterDelete?: boolean
+  redirectAfterDuplicate?: boolean
 }
 
 export type DocumentInfoContext = {
+  currentEditor?: ClientUser
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
+  documentIsLocked?: boolean
   getDocPermissions: (data?: Data) => Promise<void>
   getDocPreferences: () => Promise<DocumentPreferences>
   getVersions: () => Promise<void>
@@ -48,14 +69,17 @@ export type DocumentInfoContext = {
   isLoading: boolean
   preferencesKey?: string
   publishedDoc?: { _status?: string } & TypeWithID & TypeWithTimestamps
+  setCurrentEditor?: React.Dispatch<React.SetStateAction<ClientUser>>
   setDocFieldPreferences: (
     field: string,
     fieldPreferences: { [key: string]: unknown } & Partial<InsideFieldsPreferences>,
   ) => void
+  setDocumentIsLocked?: React.Dispatch<React.SetStateAction<boolean>>
   setDocumentTitle: (title: string) => void
-  slug?: string
   title: string
+  unlockDocument: (docId: number | string, slug: string) => Promise<void>
   unpublishedVersions?: PaginatedDocs<TypeWithVersion<any>>
+  updateDocumentEditor: (docId: number | string, slug: string, user: ClientUser) => Promise<void>
   versions?: PaginatedDocs<TypeWithVersion<any>>
   versionsCount?: PaginatedDocs<TypeWithVersion<any>>
 } & DocumentInfoProps

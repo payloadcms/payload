@@ -69,31 +69,34 @@ function ToolbarGroupComponent({
     }
   }, [group])
 
-  const onActiveChange = ({ activeItems }: { activeItems: ToolbarGroupItem[] }) => {
-    if (!activeItems.length) {
-      if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
-        setDropdownIcon(() => group.ChildComponent)
-        setDropdownLabel(null)
-      } else {
-        setDropdownIcon(null)
-        setDropdownLabel(null)
+  const onActiveChange = React.useCallback(
+    ({ activeItems }: { activeItems: ToolbarGroupItem[] }) => {
+      if (!activeItems.length) {
+        if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
+          setDropdownIcon(() => group.ChildComponent)
+          setDropdownLabel(null)
+        } else {
+          setDropdownIcon(null)
+          setDropdownLabel(null)
+        }
+        return
       }
-      return
-    }
-    const item = activeItems[0]
+      const item = activeItems[0]
 
-    let label = item.key
-    if (item.label) {
-      label =
-        typeof item.label === 'function' ? item.label({ i18n, richTextComponentMap }) : item.label
-    }
-    // Crop title to max. 25 characters
-    if (label.length > 25) {
-      label = label.substring(0, 25) + '...'
-    }
-    setDropdownLabel(label)
-    setDropdownIcon(() => item.ChildComponent)
-  }
+      let label = item.key
+      if (item.label) {
+        label =
+          typeof item.label === 'function' ? item.label({ i18n, richTextComponentMap }) : item.label
+      }
+      // Crop title to max. 25 characters
+      if (label.length > 25) {
+        label = label.substring(0, 25) + '...'
+      }
+      setDropdownLabel(label)
+      setDropdownIcon(() => item.ChildComponent)
+    },
+    [group, i18n, richTextComponentMap],
+  )
 
   return (
     <div className={`fixed-toolbar__group fixed-toolbar__group-${group.key}`} key={group.key}>

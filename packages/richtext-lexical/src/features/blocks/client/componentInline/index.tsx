@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 const baseClass = 'inline-block'
 
-import type { BlockFieldClient } from 'payload'
+import type { BlocksFieldClient } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
@@ -45,7 +45,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   } = useEditorConfigContext()
 
   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
-  const blocksField: BlockFieldClient = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
+  const blocksField: BlocksFieldClient = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
   const clientBlock = blocksField.blocks.find((block) => block.slug === formData.blockType)
 
   const removeInlineBlock = useCallback(() => {

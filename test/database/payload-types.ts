@@ -17,6 +17,7 @@ export interface Config {
     'relation-b': RelationB;
     'pg-migrations': PgMigration;
     'custom-schema': CustomSchema;
+    'fields-persistance': FieldsPersistance;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -197,6 +198,22 @@ export interface CustomSchema {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fields-persistance".
+ */
+export interface FieldsPersistance {
+  id: string;
+  text?: string | null;
+  textHooked?: string | null;
+  array?:
+    | {
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -136,7 +136,8 @@ All Field Components receive the following props:
 | Property         | Description                                                                                                                                                                                                                      |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`docPreferences`** | An object that contains the [Preferences](./preferences) for the document.
-| **`field`** | The sanitized, client-friendly version of the field's config. [More details](#the-field-prop) |
+| **`field`** | In Server Components, this is the original Field Config. In Client Components, this is the sanitized Client Field Config. [More details](#the-field-prop). |
+| **`clientField`** | Server components receive the Client Field Config through this prop. [More details](#the-field-prop). |
 | **`locale`**     | The locale of the field. [More details](../configuration/localization).                                                                                                                                                                   |
 | **`readOnly`**   | A boolean value that represents if the field is read-only or not.                                                                                                                                                                  |
 | **`user`**       | The currently authenticated user. [More details](../authentication/overview). |
@@ -175,51 +176,50 @@ export const CustomTextField: React.FC = () => {
 
 #### TypeScript
 
-When building Custom Field Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Field Component, one for every [Field Type](../fields/overview). The convention is to append `Props` to the type of field, i.e. `TextFieldProps`.
+When building Custom Field Components, you can import the component type to ensure type safety. There is an explicit type for the Field Component, one for every [Field Type](../fields/overview) and for every client/server environment. The convention is to prepend the field type onto the target type, i.e. `TextFieldClientComponent`:
 
 ```tsx
 import type {
-  ArrayFieldProps,
-  BlocksFieldProps,
-  CheckboxFieldProps,
-  CodeFieldProps,
-  CollapsibleFieldProps,
-  DateFieldProps,
-  EmailFieldProps,
-  GroupFieldProps,
-  HiddenFieldProps,
-  JSONFieldProps,
-  NumberFieldProps,
-  PointFieldProps,
-  RadioFieldProps,
-  RelationshipFieldProps,
-  RichTextFieldProps,
-  RowFieldProps,
-  SelectFieldProps,
-  TabsFieldProps,
-  TextFieldProps,
-  TextareaFieldProps,
-  UploadFieldProps
+  TextFieldClientComponent,
+  TextFieldServerComponent,
+  TextFieldClientProps,
+  TextFieldServerProps,
+  // ...and so on for each Field Type
 } from 'payload'
 ```
 
 ### The `field` Prop
 
-All Field Components are passed a client-friendly version of their Field Config through a common `field` prop. Since the raw Field Config is [non-serializable](https://react.dev/reference/rsc/use-client#serializable-types), Payload sanitized it into a [Client Config](./components#accessing-the-payload-config) that is safe to pass into Client Components.
+All Field Components are passed their own Field Config through a common `field` prop. Within Server Components, this is the original Field Config as written within your Payload Config. Within Client Components, however, this is a "Client Config", which is a sanitized, client-friendly version of the Field Config. This is because the original Field Config is [non-serializable](https://react.dev/reference/rsc/use-client#serializable-types), meaning it cannot be passed into Client Components without first being transformed.
 
-The exact shape of this prop is unique to the specific [Field Type](../fields/overview) being rendered, minus all non-serializable properties. Any [Custom Components](../components) are also resolved into a "mapped component" that is safe to pass.
+The Client Field Config is an exact copy of the original Field Config, minus all non-serializable properties, plus all evaluated functions such as field labels, [Custom Components](../components), etc.
+
+Server Component:
+
+```tsx
+import React from 'react'
+import type { TextFieldServerComponent } from 'payload'
+import { TextField } from '@payloadcms/ui'
+
+export const MyServerField: TextFieldServerComponent = ({ clientField }) => {
+  return <TextField field={clientField} />
+}
+```
+
+<Banner type="info">
+  <strong>Tip:</strong>
+  Server Components can still access the original Field Config through the `field` prop.
+</Banner>
+
+Client Component:
 
 ```tsx
 'use client'
 import React from 'react'
-import type { TextFieldProps } from 'payload'
+import type { TextFieldClientComponent } from 'payload'
 
-export const MyClientFieldComponent: React.FC<TextFieldProps> = ({ field: { name } }) => {
-  return (
-    <p>
-      {`This field's name is ${name}`}
-    </p>
-  )
+export const MyTextField: TextFieldClientComponent = ({ field }) => {
+  return <TextField field={field} />
 }
 ```
 
@@ -238,38 +238,16 @@ The following additional properties are also provided to the `field` prop:
 
 #### TypeScript
 
-When building Custom Field Components, you can import the client field props to ensure type safety in your component. There is an explicit type for the Field Component, one for every [Field Type](../fields/overview). The convention is to append `Client` to the type of field, i.e. `TextFieldClient`.
+When building Custom Field Components, you can import the client field props to ensure type safety in your component. There is an explicit type for the Field Component, one for every [Field Type](../fields/overview) and server/client environment. The convention is to prepend the field type onto the target type, i.e. `TextFieldClientComponent`:
 
 ```tsx
 import type {
-  ArrayFieldClient,
-  BlocksFieldClient,
-  CheckboxFieldClient,
-  CodeFieldClient,
-  CollapsibleFieldClient,
-  DateFieldClient,
-  EmailFieldClient,
-  GroupFieldClient,
-  HiddenFieldClient,
-  JSONFieldClient,
-  NumberFieldClient,
-  PointFieldClient,
-  RadioFieldClient,
-  RelationshipFieldClient,
-  RichTextFieldClient,
-  RowFieldClient,
-  SelectFieldClient,
-  TabsFieldClient,
-  TextFieldClient,
-  TextareaFieldClient,
-  UploadFieldClient
+  TextFieldClientComponent,
+  TextFieldServerComponent,
+  TextFieldClientProps,
+  TextFieldServerProps,
+  // ...and so on for each Field Type
 } from 'payload'
-```
-
-When working on the client, you will never have access to objects of type `Field`. This is reserved for the server-side. Instead, you can use `ClientField` which is a union type of all the client fields:
-
-```tsx
-import type { ClientField } from 'payload'
 ```
 
 ### The Cell Component
@@ -298,7 +276,8 @@ All Cell Components receive the following props:
 
 | Property         | Description                                                       |
 | ---------------- | ----------------------------------------------------------------- |
-| **`field`** | The sanitized, client-friendly version of the field's config. [More details](#the-field-prop) |
+| **`field`** | In Server Components, this is the original Field Config. In Client Components, this is the sanitized Client Field Config. [More details](#the-field-prop). |
+| **`clientField`** | Server components receive the Client Field Config through this prop. [More details](#the-field-prop). |
 | **`link`** | A boolean representing whether this cell should be wrapped in a link. |
 | **`onClick`** | A function that is called when the cell is clicked. |
 
@@ -338,7 +317,8 @@ Custom Label Components receive all [Field Component](#the-field-component) prop
 
 | Property       | Description                                                      |
 | -------------- | ---------------------------------------------------------------- |
-| **`field`** | The sanitized, client-friendly version of the field's config. [More details](#the-field-prop) |
+| **`field`** | In Server Components, this is the original Field Config. In Client Components, this is the sanitized Client Field Config. [More details](#the-field-prop). |
+| **`clientField`** | Server components receive the Client Field Config through this prop. [More details](#the-field-prop). |
 
 <Banner type="success">
   <strong>Reminder:</strong>
@@ -353,7 +333,7 @@ When building Custom Label Components, you can import the component props to ens
 import type {
   TextFieldLabelServerComponent,
   TextFieldLabelClientComponent,
-  // And so on for each Field Type
+  // ...and so on for each Field Type
 } from 'payload'
 ```
 
@@ -383,7 +363,8 @@ Custom Error Components receive all [Field Component](#the-field-component) prop
 
 | Property        | Description                                                   |
 | --------------- | ------------------------------------------------------------- |
-| **`field`** | The sanitized, client-friendly version of the field's config. [More details](#the-field-prop) |
+| **`field`** | In Server Components, this is the original Field Config. In Client Components, this is the sanitized Client Field Config. [More details](#the-field-prop). |
+| **`clientField`** | Server components receive the Client Field Config through this prop. [More details](#the-field-prop). |
 
 <Banner type="success">
   <strong>Reminder:</strong>
@@ -499,7 +480,8 @@ Custom Description Components receive all [Field Component](#the-field-component
 
 | Property       | Description                                                      |
 | -------------- | ---------------------------------------------------------------- |
-| **`field`** | The sanitized, client-friendly version of the field's config. [More details](#the-field-prop) |
+| **`field`** | In Server Components, this is the original Field Config. In Client Components, this is the sanitized Client Field Config. [More details](#the-field-prop). |
+| **`clientField`** | Server components receive the Client Field Config through this prop. [More details](#the-field-prop). |
 
 <Banner type="success">
   <strong>Reminder:</strong>

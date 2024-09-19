@@ -45,8 +45,6 @@ export const sanitizeCollection = async (
     validRelationships,
   })
 
-  validateUseAsTitle(sanitized)
-
   if (sanitized.timestamps !== false) {
     // add default timestamps fields only as needed
     let hasUpdatedAt = null
@@ -192,6 +190,8 @@ export const sanitizeCollection = async (
   if (collection?.admin?.pagination?.limits?.length) {
     sanitized.admin.pagination.limits = collection.admin.pagination.limits
   }
+
+  validateUseAsTitle(sanitized)
 
   return sanitized as SanitizedCollectionConfig
 }

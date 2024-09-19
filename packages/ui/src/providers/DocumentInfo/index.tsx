@@ -1,5 +1,6 @@
 'use client'
 import type {
+  ClientUser,
   Data,
   DocumentPermissions,
   DocumentPreferences,
@@ -18,6 +19,7 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
+import { requests } from '../../utilities/api.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
 import { getFormState } from '../../utilities/getFormState.js'
 import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
@@ -67,6 +69,10 @@ const DocumentInfo: React.FC<
   const globalConfig = globals.find((g) => g.slug === globalSlug)
   const docConfig = collectionConfig || globalConfig
 
+  const lockDocumentsProp = docConfig?.lockDocuments !== undefined ? docConfig?.lockDocuments : true
+
+  const isLockingEnabled = lockDocumentsProp !== false
+
   const { i18n } = useTranslation()
 
   const { uploadEdits } = useUploadEdits()
@@ -97,6 +103,10 @@ const DocumentInfo: React.FC<
   const [hasPublishPermission, setHasPublishPermission] = useState<boolean>(
     hasPublishPermissionFromProps,
   )
+
+  const [documentIsLocked, setDocumentIsLocked] = useState<boolean | undefined>(false)
+  const [currentEditor, setCurrentEditor] = useState<ClientUser | null>(null)
+
   const isInitializing = initialState === undefined || data === undefined
   const [unpublishedVersions, setUnpublishedVersions] =
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
@@ -106,8 +116,6 @@ const DocumentInfo: React.FC<
   const { code: locale } = useLocale()
   const prevLocale = useRef(locale)
   const hasInitializedDocPermissions = useRef(false)
-  // Separate locale cache used for handling permissions
-  const prevLocalePermissions = useRef(locale)
 
   const versionsConfig = docConfig?.versions
 
@@ -135,6 +143,107 @@ const DocumentInfo: React.FC<
   const operation = isEditing ? 'update' : 'create'
   const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions?.permission)
 
+  const unlockDocument = useCallback(
+    async (docId: number | string, slug: string) => {
+      try {
+        const isGlobal = slug === globalSlug
+
+        const query = isGlobal
+          ? `where[globalSlug][equals]=${slug}`
+          : `where[document.value][equals]=${docId}&where[document.relationTo][equals]=${slug}`
+
+        const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
+
+        const { docs } = await request.json()
+
+        if (docs.length > 0) {
+          const lockId = docs[0].id
+          await requests.delete(`${serverURL}${api}/payload-locked-documents/${lockId}`, {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+          setDocumentIsLocked(false)
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to unlock the document', error)
+      }
+    },
+    [serverURL, api, globalSlug],
+  )
+
+  const updateDocumentEditor = useCallback(
+    async (docId: number | string, slug: string, user: ClientUser) => {
+      try {
+        const isGlobal = slug === globalSlug
+
+        const query = isGlobal
+          ? `where[globalSlug][equals]=${slug}`
+          : `where[document.value][equals]=${docId}&where[document.relationTo][equals]=${slug}`
+
+        // Check if the document is already locked
+        const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
+
+        const { docs } = await request.json()
+
+        if (docs.length > 0) {
+          const lockId = docs[0].id
+
+          // Send a patch request to update the _lastEdited info
+          await requests.patch(`${serverURL}${api}/payload-locked-documents/${lockId}`, {
+            body: JSON.stringify({
+              editedAt: new Date(),
+              user: { relationTo: user?.collection, value: user?.id },
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to update the document editor', error)
+      }
+    },
+    [serverURL, api, globalSlug],
+  )
+
+  useEffect(() => {
+    if (!isLockingEnabled || (!id && !globalSlug)) {
+      return
+    }
+
+    const fetchDocumentLockState = async () => {
+      if (id || globalSlug) {
+        try {
+          const slug = collectionSlug ?? globalSlug
+          const isGlobal = slug === globalSlug
+
+          const query = isGlobal
+            ? `where[globalSlug][equals]=${slug}`
+            : `where[document.value][equals]=${id}&where[document.relationTo][equals]=${slug}`
+
+          const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
+          const { docs } = await request.json()
+
+          if (docs.length > 0) {
+            const newEditor = docs[0].user?.value
+            if (newEditor && newEditor.id !== currentEditor?.id) {
+              setCurrentEditor(newEditor)
+              setDocumentIsLocked(true)
+            }
+          } else {
+            setDocumentIsLocked(false)
+          }
+        } catch (error) {
+          // swallow error
+        }
+      }
+    }
+    void fetchDocumentLockState()
+  }, [id, serverURL, api, collectionSlug, globalSlug, currentEditor, isLockingEnabled])
+
   const getVersions = useCallback(async () => {
     let versionFetchURL
     let publishedFetchURL
@@ -144,6 +253,7 @@ const DocumentInfo: React.FC<
 
     const versionParams = {
       depth: 0,
+      limit: 0,
       where: {
         and: [],
       },
@@ -231,9 +341,18 @@ const DocumentInfo: React.FC<
               and: [
                 ...versionParams.where.and,
                 {
-                  updatedAt: {
-                    greater_than: publishedJSON?.updatedAt,
-                  },
+                  or: [
+                    {
+                      updatedAt: {
+                        greater_than: publishedJSON.updatedAt,
+                      },
+                    },
+                    {
+                      latest: {
+                        equals: true,
+                      },
+                    },
+                  ],
                 },
               ],
             },
@@ -379,7 +498,7 @@ const DocumentInfo: React.FC<
 
       const newData = collectionSlug ? json.doc : json.result
 
-      const newState = await getFormState({
+      const { state: newState } = await getFormState({
         apiRoute: api,
         body: {
           id,
@@ -396,6 +515,7 @@ const DocumentInfo: React.FC<
 
       setInitialState(newState)
       setData(newData)
+
       await getDocPermissions(newData)
     },
     [
@@ -430,7 +550,7 @@ const DocumentInfo: React.FC<
         setIsLoading(true)
 
         try {
-          const result = await getFormState({
+          const { state: result } = await getFormState({
             apiRoute: api,
             body: {
               id,
@@ -554,8 +674,10 @@ const DocumentInfo: React.FC<
   const value: DocumentInfoContext = {
     ...props,
     action,
+    currentEditor,
     docConfig,
     docPermissions,
+    documentIsLocked,
     getDocPermissions,
     getDocPreferences,
     getVersions,
@@ -568,10 +690,14 @@ const DocumentInfo: React.FC<
     onSave,
     preferencesKey,
     publishedDoc,
+    setCurrentEditor,
     setDocFieldPreferences,
+    setDocumentIsLocked,
     setDocumentTitle,
     title: documentTitle,
+    unlockDocument,
     unpublishedVersions,
+    updateDocumentEditor,
     versions,
   }
 
@@ -580,7 +706,7 @@ const DocumentInfo: React.FC<
 
 export const DocumentInfoProvider: React.FC<
   {
-    children: React.ReactNode
+    readonly children: React.ReactNode
   } & DocumentInfoProps
 > = (props) => {
   return (

@@ -136,13 +136,6 @@ export const ToolbarDropdown = ({
   }, [updateStates])
 
   useEffect(() => {
-    document.addEventListener('mouseup', updateStates)
-    return () => {
-      document.removeEventListener('mouseup', updateStates)
-    }
-  }, [updateStates])
-
-  useEffect(() => {
     return mergeRegister(
       editor.registerUpdateListener(() => {
         updateStates()

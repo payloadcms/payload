@@ -1,6 +1,6 @@
 'use client'
 
-import type { BlockFieldClient } from 'payload'
+import type { BlocksFieldClient } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $insertNodeToNearestRoot, $wrapNodeInElement, mergeRegister } from '@lexical/utils'
@@ -167,7 +167,7 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.lexical_inline_blocks.${blockFields?.blockType}`
 
   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
-  const blocksField: BlockFieldClient = richTextComponentMap.has(componentMapRenderedBlockPath)
+  const blocksField: BlocksFieldClient = richTextComponentMap.has(componentMapRenderedBlockPath)
     ? richTextComponentMap.get(componentMapRenderedBlockPath)[0]
     : null
 

@@ -1744,6 +1744,16 @@ describe('Fields', () => {
             json: { baz: 'bar', number: 10 },
           },
         })
+
+        // Create content for array 'in' and 'not_in' queries
+        for (let i = 1; i < 6; i++) {
+          await payload.create({
+            collection: 'json-fields',
+            data: {
+              json: { value: i },
+            },
+          })
+        }
       })
 
       it('should query nested properties - like', async () => {
@@ -1900,6 +1910,36 @@ describe('Fields', () => {
         })
 
         expect(result.docs).toHaveLength(1)
+      })
+
+      it('should query nested numbers - in', async () => {
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.value': { in: [1, 3] },
+          },
+        })
+
+        const docIDs = docs.map(({ json }) => json.value)
+
+        expect(docIDs).toContain(1)
+        expect(docIDs).toContain(3)
+        expect(docIDs).not.toContain(2)
+      })
+
+      it('should query nested numbers - not_in', async () => {
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.value': { not_in: [1, 3] },
+          },
+        })
+
+        const docIDs = docs.map(({ json }) => json.value)
+
+        expect(docIDs).not.toContain(1)
+        expect(docIDs).not.toContain(3)
+        expect(docIDs).toContain(2)
       })
     })
   })

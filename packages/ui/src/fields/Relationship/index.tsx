@@ -1,5 +1,5 @@
 'use client'
-import type { PaginatedDocs, RelationshipFieldProps, Where } from 'payload'
+import type { PaginatedDocs, RelationshipFieldClientComponent, Where } from 'payload'
 
 import { wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -36,7 +36,7 @@ const maxResultsPerRequest = 10
 
 const baseClass = 'relationship'
 
-const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => {
+const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => {
   const {
     descriptionProps,
     errorProps,
@@ -55,7 +55,6 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
         width,
       } = {},
       hasMany,
-      label,
       relationTo,
       required,
     },
@@ -251,8 +250,6 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
                 dispatchOptions({
                   type: 'ADD',
                   collection,
-                  // TODO: fix this
-                  // @ts-expect-error-next-line
                   config,
                   docs: data.docs,
                   i18n,
@@ -264,8 +261,6 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
               dispatchOptions({
                 type: 'ADD',
                 collection,
-                // TODO: fix this
-                // @ts-expect-error-next-line
                 config,
                 docs: [],
                 i18n,
@@ -380,8 +375,6 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
             dispatchOptions({
               type: 'ADD',
               collection,
-              // TODO: fix this
-              // @ts-expect-error-next-line
               config,
               docs,
               i18n,
@@ -458,14 +451,91 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
       dispatchOptions({
         type: 'UPDATE',
         collection: args.collectionConfig,
-        // TODO: fix this
-        // @ts-expect-error-next-line
         config,
         doc: args.doc,
         i18n,
       })
+
+      if (hasMany) {
+        setValue(
+          valueRef.current
+            ? (valueRef.current as Option[]).map((option) => {
+                if (option.value === args.doc.id) {
+                  return {
+                    relationTo: args.collectionConfig.slug,
+                    value: args.doc.id,
+                  }
+                }
+
+                return option
+              })
+            : null,
+        )
+      } else {
+        setValue({
+          relationTo: args.collectionConfig.slug,
+          value: args.doc.id,
+        })
+      }
     },
-    [i18n, config],
+    [i18n, config, hasMany, setValue],
+  )
+
+  const onDuplicate = useCallback<DocumentDrawerProps['onDuplicate']>(
+    (args) => {
+      dispatchOptions({
+        type: 'ADD',
+        collection: args.collectionConfig,
+        config,
+        docs: [args.doc],
+        i18n,
+        sort: true,
+      })
+
+      if (hasMany) {
+        setValue(
+          valueRef.current
+            ? (valueRef.current as Option[]).concat({
+                relationTo: args.collectionConfig.slug,
+                value: args.doc.id,
+              } as Option)
+            : null,
+        )
+      } else {
+        setValue({
+          relationTo: args.collectionConfig.slug,
+          value: args.doc.id,
+        })
+      }
+    },
+    [i18n, config, hasMany, setValue],
+  )
+
+  const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
+    (args) => {
+      dispatchOptions({
+        id: args.id,
+        type: 'REMOVE',
+        collection: args.collectionConfig,
+        config,
+        i18n,
+      })
+
+      if (hasMany) {
+        setValue(
+          valueRef.current
+            ? (valueRef.current as Option[]).filter((option) => {
+                return option.value !== args.id
+              })
+            : null,
+        )
+      } else {
+        setValue(null)
+      }
+
+      return
+    },
+    [i18n, config, hasMany, setValue],
   )
 
   const filterOption = useCallback((item: Option, searchFilter: string) => {
@@ -531,13 +601,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
         width,
       }}
     >
-      <FieldLabel
-        field={field}
-        Label={field?.admin?.components?.Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel field={field} Label={field?.admin?.components?.Label} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError
           CustomError={field?.admin?.components?.Error}
@@ -657,7 +721,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
         />
       </div>
       {currentlyOpenRelationship.collectionSlug && currentlyOpenRelationship.hasReadPermission && (
-        <DocumentDrawer onSave={onSave} />
+        <DocumentDrawer onDelete={onDelete} onDuplicate={onDuplicate} onSave={onSave} />
       )}
     </div>
   )

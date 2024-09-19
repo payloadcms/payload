@@ -20,6 +20,7 @@ export type Arguments = {
   depth?: number
   disableErrors?: boolean
   draft?: boolean
+  includeLockStatus?: boolean
   limit?: number
   overrideAccess?: boolean
   page?: number
@@ -60,6 +61,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
       depth,
       disableErrors,
       draft: draftsEnabled,
+      includeLockStatus,
       limit,
       overrideAccess,
       page,
@@ -116,7 +118,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
         collectionConfig: collection.config,
         overrideAccess,
         req,
-        versionFields: buildVersionCollectionFields(collection.config),
+        versionFields: buildVersionCollectionFields(payload.config, collection.config),
         where: fullWhere,
       })
 
@@ -148,6 +150,49 @@ export const findOperation = async <TSlug extends CollectionSlug>(
         sort,
         where: fullWhere,
       })
+    }
+
+    if (includeLockStatus) {
+      try {
+        const lockedDocuments = await payload.find({
+          collection: 'payload-locked-documents',
+          depth: 1,
+          limit: sanitizedLimit,
+          pagination: false,
+          req,
+          where: {
+            and: [
+              {
+                'document.relationTo': {
+                  equals: collectionConfig.slug,
+                },
+              },
+              {
+                'document.value': {
+                  in: result.docs.map((doc) => doc.id),
+                },
+              },
+            ],
+          },
+        })
+
+        const lockedDocs = Array.isArray(lockedDocuments?.docs) ? lockedDocuments.docs : []
+
+        result.docs = result.docs.map((doc) => {
+          const lockedDoc = lockedDocs.find((lock) => lock?.document?.value === doc.id)
+          return {
+            ...doc,
+            _isLocked: !!lockedDoc,
+            _userEditing: lockedDoc ? lockedDoc?.user?.value : null,
+          }
+        })
+      } catch (error) {
+        result.docs = result.docs.map((doc) => ({
+          ...doc,
+          _isLocked: false,
+          _userEditing: null,
+        }))
+      }
     }
 
     // /////////////////////////////////////
