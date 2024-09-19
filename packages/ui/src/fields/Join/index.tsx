@@ -29,7 +29,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
 
   const { id: docID } = useDocumentInfo()
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const { path: pathFromContext } = useFieldProps()
 
   const { value } = useField<PaginatedDocs>({
     path: pathFromContext ?? pathFromProps ?? name,
@@ -50,6 +50,13 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
         field={field as JoinFieldClient}
         filterOptions={filterOptions}
         initialData={docID && value ? value : ({ docs: [] } as PaginatedDocs)}
+        initialDrawerState={{
+          [on]: {
+            initialValue: docID,
+            valid: true,
+            value: docID,
+          },
+        }}
         Label={
           <h4 style={{ margin: 0 }}>
             <FieldLabel as="span" field={field} Label={Label} label={label} />

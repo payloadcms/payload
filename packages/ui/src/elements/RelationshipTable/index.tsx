@@ -40,12 +40,20 @@ type RelationshipTableComponentProps = {
   readonly field: JoinFieldClient
   readonly filterOptions?: boolean | Where
   readonly initialData?: PaginatedDocs
+  readonly initialDrawerState?: DocumentDrawerProps['initialState']
   readonly Label?: React.ReactNode
   readonly relationTo: string
 }
 
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
-  const { field, filterOptions, initialData: initialDataFromProps, Label, relationTo } = props
+  const {
+    field,
+    filterOptions,
+    initialData: initialDataFromProps,
+    initialDrawerState,
+    Label,
+    relationTo,
+  } = props
 
   const {
     config: {
@@ -314,13 +322,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         initialData={{
           category: docID,
         }}
-        initialState={{
-          category: {
-            initialValue: docID,
-            valid: true,
-            value: docID,
-          },
-        }}
+        initialState={initialDrawerState}
         onSave={onDrawerCreate}
       />
     </div>
