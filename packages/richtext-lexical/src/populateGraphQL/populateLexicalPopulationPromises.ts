@@ -44,7 +44,7 @@ export const populateLexicalPopulationPromises = ({
         for (const promise of editorPopulationPromisesOfNodeType) {
           promise({
             context,
-            currentDepth,
+            currentDepth: currentDepth!,
             depth,
             draft,
             editorPopulationPromises,
