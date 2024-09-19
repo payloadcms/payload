@@ -156,6 +156,7 @@ describe('Locked documents', () => {
       data: {
         text: 'updated post 2',
       },
+      overrideLock: false,
       id: newPost2.id,
     })
 
@@ -209,6 +210,7 @@ describe('Locked documents', () => {
       data: {
         globalText: 'global text 2',
       },
+      overrideLock: false,
       slug: menuSlug,
     })
 
@@ -269,6 +271,7 @@ describe('Locked documents', () => {
         data: {
           text: 'updated post',
         },
+        overrideLock: false, // necessary to trigger the lock check
         id: newPost.id,
       })
     } catch (error) {
@@ -276,8 +279,13 @@ describe('Locked documents', () => {
       expect(error.message).toMatch(/currently locked by another user and cannot be updated/)
     }
 
+    const updatedPost = await payload.findByID({
+      collection: postsSlug,
+      id: newPost.id,
+    })
+
     // Should not allow update - expect data not to change
-    expect(newPost.text).toEqual('some post')
+    expect(updatedPost.text).toEqual('some post')
   })
 
   it('should not allow update of locked document - global', async () => {
@@ -300,6 +308,7 @@ describe('Locked documents', () => {
         data: {
           globalText: 'updated global text',
         },
+        overrideLock: false, // necessary to trigger the lock check
         slug: menuSlug,
       })
     } catch (error) {
@@ -307,8 +316,12 @@ describe('Locked documents', () => {
       expect(error.message).toMatch(/currently locked by another user and cannot be updated/)
     }
 
+    const updatedGlobalMenu = await payload.findGlobal({
+      slug: menuSlug,
+    })
+
     // Should not allow update - expect data not to change
-    expect(menu.globalText).toEqual('global text')
+    expect(updatedGlobalMenu.globalText).toEqual('global text 2')
   })
 
   // Try to delete locked document (collection)
@@ -341,11 +354,21 @@ describe('Locked documents', () => {
       await payload.delete({
         collection: postsSlug,
         id: newPost3.id,
+        overrideLock: false, // necessary to trigger the lock check
       })
     } catch (error) {
       expect(error).toBeInstanceOf(Locked)
       expect(error.message).toMatch(/currently locked and cannot be deleted/)
     }
+
+    const findPostDocs = await payload.find({
+      collection: postsSlug,
+      where: {
+        id: { equals: newPost3.id },
+      },
+    })
+
+    expect(findPostDocs.docs).toHaveLength(1)
   })
 
   it('should allow delete of stale locked document - collection', async () => {
@@ -381,6 +404,7 @@ describe('Locked documents', () => {
     await payload.delete({
       collection: postsSlug,
       id: newPost4.id,
+      overrideLock: false,
     })
 
     const findPostDocs = await payload.find({

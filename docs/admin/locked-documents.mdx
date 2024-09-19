@@ -61,9 +61,9 @@ Once the document is unlocked or the lock duration has expired, other users can 
 
 #### Overriding Locks
 
-For operations like update and delete, Payload includes an `overrideLock` option. This boolean flag, when set to `true`, allows you to bypass the document lock, ensuring that the operation proceeds even if another user currently holds the lock.
+For operations like update and delete, Payload includes an `overrideLock` option. This boolean flag, when set to `false`, enforces document locks, ensuring that the operation will not proceed if another user currently holds the lock.
 
-By default, `overrideLock` is set to `false`, which means that if a document is locked, the operation will not proceed and an error will be returned. When `overrideLock: true` is passed, the lock is ignored, and the update or delete operation is executed.
+By default, `overrideLock` is set to `true`, which means that document locks are ignored, and the operation will proceed even if the document is locked. To enforce locks and prevent updates or deletes on locked documents, set `overrideLock: false`.
 
 ```ts
 const result = await payload.update({
@@ -72,7 +72,7 @@ const result = await payload.update({
   data: {
     title: 'New title',
   },
-  overrideLock: true, // Allows the operation to bypass the document lock
+  overrideLock: false, // Enforces the document lock, preventing updates if the document is locked
 })
 ```
 

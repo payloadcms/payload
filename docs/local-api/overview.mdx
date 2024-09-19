@@ -85,7 +85,7 @@ You can specify more options within the Local API vs. REST or GraphQL due to the
 | `locale`           | Specify [locale](/docs/configuration/localization) for any returned documents. |
 | `fallbackLocale`   | Specify a [fallback locale](/docs/configuration/localization) to use for any returned documents. |
 | `overrideAccess`   | Skip access control. By default, this property is set to true within all Local API operations. |
-| `overrideLock`     | Ignore document locks and proceed with the operation, even if another user has locked the document. Default is `false`. [More details](../admin/locked-documents).|
+| `overrideLock`     | By default, document locks are ignored (`true`). Set to `false` to enforce locks and prevent operations when a document is locked by another user. [More details](../admin/locked-documents).|
 | `user`             | If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks. |
 | `showHiddenFields` | Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config. |
 | `pagination`       | Set to false to return all documents and avoid querying for document counts. |
@@ -207,7 +207,7 @@ const result = await payload.update({
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
-  overrideLock: true, // Ignores document lock (optional)
+  overrideLock: false, // By default, document locks are ignored. Set to false to enforce locks.
   showHiddenFields: true,
 
   // If your collection supports uploads, you can upload
@@ -246,7 +246,7 @@ const result = await payload.update({
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
-  overrideLock: true, // Ignores document lock (optional)
+  overrideLock: false, // By default, document locks are ignored. Set to false to enforce locks.
   showHiddenFields: true,
 
   // If your collection supports uploads, you can upload
@@ -273,7 +273,7 @@ const result = await payload.delete({
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
-  overrideLock: true, // Ignores document lock (optional)
+  overrideLock: false, // By default, document locks are ignored. Set to false to enforce locks.
   showHiddenFields: true,
 })
 ```
@@ -297,7 +297,7 @@ const result = await payload.delete({
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
-  overrideLock: true, // Ignores document lock (optional)
+  overrideLock: false, // By default, document locks are ignored. Set to false to enforce locks.
   showHiddenFields: true,
 })
 ```
@@ -434,7 +434,7 @@ const result = await payload.updateGlobal({
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
-  overrideLock: true, // Ignores document lock (optional)
+  overrideLock: false, // By default, document locks are ignored. Set to false to enforce locks.
   showHiddenFields: true,
 })
 ```

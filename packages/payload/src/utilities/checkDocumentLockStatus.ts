@@ -20,7 +20,7 @@ export const checkDocumentLockStatus = async ({
   globalSlug,
   lockDurationDefault = 300, // Default 5 minutes in seconds
   lockErrorMessage,
-  overrideLock,
+  overrideLock = true,
   req,
 }: CheckDocumentLockStatusArgs): Promise<void> => {
   const { payload } = req
