@@ -10,8 +10,8 @@ import { getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared
 import React from 'react'
 
 import { getCustomViews } from './getCustomViews.js'
-import { getViewConfig } from './getViewConfig.js'
 import './index.scss'
+import { mergeTabViews } from './mergeTabViews.js'
 import { ShouldRenderTabs } from './ShouldRenderTabs.js'
 import { DocumentTab } from './Tab/index.js'
 import { tabs as defaultTabs } from './tabs/index.js'
@@ -30,98 +30,71 @@ export const DocumentTabs: React.FC<{
 
   const customViews = getCustomViews({ collectionConfig, globalConfig })
 
+  const mergedTabViews = mergeTabViews(
+    defaultTabs,
+    customViews,
+    collectionConfig,
+    globalConfig,
+    config,
+    permissions,
+  )
+
   return (
     <ShouldRenderTabs>
       <div className={baseClass}>
         <div className={`${baseClass}__tabs-container`}>
           <ul className={`${baseClass}__tabs`}>
-            {Object.entries(defaultTabs)
-              // sort `defaultViews` based on `order` property from smallest to largest
-              // if no `order`, append the view to the end
-              // TODO: open `order` to the config and merge `defaultViews` with `customViews`
-              ?.sort(([, a], [, b]) => {
-                if (a.order === undefined && b.order === undefined) {
-                  return 0
-                } else if (a.order === undefined) {
-                  return 1
-                } else if (b.order === undefined) {
-                  return -1
-                }
-                return a.order - b.order
-              })
-              ?.map(([name, tab], index) => {
-                const viewConfig = getViewConfig({ name, collectionConfig, globalConfig })
-                const tabFromConfig = viewConfig && 'tab' in viewConfig ? viewConfig.tab : undefined
-
-                const { condition } = tabFromConfig || {}
-
-                const meetsCondition =
-                  !condition ||
-                  (condition &&
-                    Boolean(condition({ collectionConfig, config, globalConfig, permissions })))
-
-                if (meetsCondition) {
-                  return (
-                    <DocumentTab
-                      key={`tab-${index}`}
-                      {...{
-                        ...props,
-                        ...(tab || {}),
-                        ...(tabFromConfig || {}),
-                      }}
-                    />
-                  )
-                }
-
-                return null
-              })}
-            {customViews?.map((CustomView, index) => {
-              if ('tab' in CustomView) {
-                const { path, tab } = CustomView
-
-                if (tab.Component) {
-                  const createMappedComponent = getCreateMappedComponent({
-                    importMap: payload.importMap,
-                    serverProps: {
-                      i18n,
-                      payload,
-                      permissions,
-                      ...props,
-                      key: `tab-custom-${index}`,
-                      path,
-                    },
-                  })
-
-                  const mappedTab = createMappedComponent(
-                    tab.Component,
-                    undefined,
-                    undefined,
-                    'tab.Component',
-                  )
-
-                  return (
-                    <RenderComponent
-                      clientProps={{
-                        key: `tab-custom-${index}`,
-                        path,
-                      }}
-                      key={`tab-custom-${index}`}
-                      mappedComponent={mappedTab}
-                    />
-                  )
-                }
-
+            {mergedTabViews.map((mergedTabView) => {
+              if (!mergedTabView.isDefault && mergedTabView.Component) {
+                const createMappedComponent = getCreateMappedComponent({
+                  importMap: payload.importMap,
+                  serverProps: {
+                    i18n,
+                    payload,
+                    permissions,
+                    ...props,
+                    key: `tab-custom-${mergedTabView.index}`,
+                    path: mergedTabView.path,
+                  },
+                })
+                const mappedTab = createMappedComponent(
+                  mergedTabView.Component,
+                  undefined,
+                  undefined,
+                  'tab.Component',
+                )
+                return (
+                  <RenderComponent
+                    clientProps={{
+                      key: `tab-custom-${mergedTabView.index}`,
+                      path: mergedTabView.path,
+                    }}
+                    key={`tab-custom-${mergedTabView.index}`}
+                    mappedComponent={mappedTab}
+                  />
+                )
+              } else if (!mergedTabView.isDefault) {
                 return (
                   <DocumentTab
-                    key={`tab-custom-${index}`}
+                    key={`tab-custom-${mergedTabView.index}`}
                     {...{
                       ...props,
-                      ...tab,
+                      ...mergedTabView.tab,
+                    }}
+                  />
+                )
+              } else if (mergedTabView.isDefault) {
+                return (
+                  <DocumentTab
+                    key={`tab-default-${mergedTabView.index}`}
+                    {...{
+                      ...props,
+                      ...(mergedTabView.tab || {}),
+                      ...(mergedTabView.tabFromConfig || {}),
                     }}
                   />
                 )
               }
-              return null
             })}
           </ul>
         </div>

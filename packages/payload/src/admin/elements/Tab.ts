@@ -39,6 +39,7 @@ export type DocumentTabConfig = {
   readonly isActive?: ((args: { href: string }) => boolean) | boolean
   readonly label?: ((args: { t: (key: string) => string }) => string) | string
   readonly newTab?: boolean
+  readonly order?: number
   readonly Pill?: PayloadComponent
 }
 
