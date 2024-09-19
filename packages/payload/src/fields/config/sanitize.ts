@@ -44,7 +44,6 @@ type Args = {
 }
 
 export const sanitizeFields = async ({
-  collectionConfig,
   config,
   existingFieldNames = new Set(),
   fields,
@@ -160,8 +159,12 @@ export const sanitizeFields = async ({
         if (defaultValidate) {
           field.validate = (val, options) => defaultValidate(val, { ...field, ...options })
         } else {
-          field.validate = () => true
+          field.validate = (): true => true
         }
+      }
+
+      if (typeof field.virtual === 'undefined') {
+        field.virtual = false
       }
 
       if (!field.hooks) {

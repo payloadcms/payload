@@ -17,6 +17,7 @@ export const es: GenericTranslationsObject = {
       'Esto debe estar entre {{minLength}} y {{maxLength}} caracteres. Para obtener ayuda sobre cómo escribir meta descripciones de calidad, consulte ',
     lengthTipTitle:
       'Debe tener entre {{minLength}} y {{maxLength}} caracteres. Para obtener ayuda sobre cómo escribir metatítulos de calidad, consulte ',
+    missing: 'Falta',
     noImage: 'Sin imagen',
     preview: 'Vista previa',
     previewDescription:

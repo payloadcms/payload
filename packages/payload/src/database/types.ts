@@ -311,7 +311,9 @@ export type CreateVersionArgs<T = TypeWithID> = {
   createdAt: string
   /** ID of the parent document for which the version should be created for */
   parent: number | string
+  publishedLocale?: string
   req: PayloadRequest
+  snapshot?: true
   updatedAt: string
   versionData: T
 }
@@ -326,7 +328,9 @@ export type CreateGlobalVersionArgs<T = TypeWithID> = {
   globalSlug: string
   /** ID of the parent document for which the version should be created for */
   parent: number | string
+  publishedLocale?: string
   req: PayloadRequest
+  snapshot?: true
   updatedAt: string
   versionData: T
 }

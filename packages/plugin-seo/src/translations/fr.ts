@@ -17,6 +17,7 @@ export const fr: GenericTranslationsObject = {
       "Ceci devrait contenir entre {{minLength}} et {{maxLength}} caractères. Pour obtenir de l'aide pour rédiger des descriptions meta de qualité, consultez les ",
     lengthTipTitle:
       "Ceci devrait contenir entre {{minLength}} et {{maxLength}} caractères. Pour obtenir de l'aide pour rédiger des titres meta de qualité, consultez les ",
+    missing: 'Manquant',
     noImage: "Pas d'image",
     preview: 'Aperçu',
     previewDescription:

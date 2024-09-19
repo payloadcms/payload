@@ -451,7 +451,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const reset = useCallback(
     async (data: unknown) => {
-      const newState = await getFormState({
+      const { state: newState } = await getFormState({
         apiRoute,
         body: {
           id,
@@ -482,7 +482,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const getFieldStateBySchemaPath = useCallback(
     async ({ data, schemaPath }) => {
-      const fieldSchema = await getFormState({
+      const { state: fieldSchema } = await getFormState({
         apiRoute,
         body: {
           collectionSlug,

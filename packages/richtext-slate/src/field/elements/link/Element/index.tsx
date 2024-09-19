@@ -100,7 +100,7 @@ export const LinkElement = () => {
         url: element.url,
       }
 
-      const state = await getFormState({
+      const { state } = await getFormState({
         apiRoute: config.routes.api,
         body: {
           data,

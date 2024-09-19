@@ -71,7 +71,7 @@ export const UploadDrawer: React.FC<{
     const data = deepCopyObject(element?.fields || {})
 
     const awaitInitialState = async () => {
-      const state = await getFormState({
+      const { state } = await getFormState({
         apiRoute: config.routes.api,
         body: {
           id,
@@ -101,7 +101,7 @@ export const UploadDrawer: React.FC<{
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      return await getFormState({
+      const { state } = await getFormState({
         apiRoute: config.routes.api,
         body: {
           id,
@@ -111,6 +111,8 @@ export const UploadDrawer: React.FC<{
         },
         serverURL: config.serverURL,
       })
+
+      return state
     },
 
     [config.routes.api, config.serverURL, relatedCollection.slug, schemaPath, id],

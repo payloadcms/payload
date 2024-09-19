@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-beta.105",
+  "version": "3.0.0-beta.107",
   "private": true,
   "type": "module",
   "scripts": {
@@ -160,7 +160,7 @@
     "swc-plugin-transform-remove-imports": "1.15.0",
     "tempy": "1.0.1",
     "tsx": "4.19.1",
-    "turbo": "^2.1.1",
+    "turbo": "^2.1.2",
     "typescript": "5.6.2"
   },
   "peerDependencies": {

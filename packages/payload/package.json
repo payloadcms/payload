@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.0.0-beta.105",
+  "version": "3.0.0-beta.107",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -94,8 +94,7 @@
     "console-table-printer": "2.11.2",
     "dataloader": "2.2.2",
     "deepmerge": "4.3.1",
-    "file-type": "17.1.6",
-    "find-up": "7.0.0",
+    "file-type": "19.3.0",
     "get-tsconfig": "^4.7.2",
     "http-status": "1.6.2",
     "image-size": "^1.1.1",
