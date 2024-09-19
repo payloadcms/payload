@@ -24,6 +24,7 @@ type Args<TSlug extends GlobalSlug> = {
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
   overrideAccess?: boolean
+  overrideLock?: boolean
   publishSpecificLocale?: string
   req: PayloadRequest
   showHiddenFields?: boolean
@@ -44,6 +45,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
     draft: draftArg,
     globalConfig,
     overrideAccess,
+    overrideLock,
     publishSpecificLocale,
     req: { fallbackLocale, locale, payload },
     req,
@@ -121,6 +123,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
     await checkDocumentLockStatus({
       globalSlug: slug,
       lockErrorMessage: `Global with slug "${slug}" is currently locked by another user and cannot be updated.`,
+      overrideLock,
       req,
     })
 

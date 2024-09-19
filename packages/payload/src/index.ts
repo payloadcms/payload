@@ -217,11 +217,15 @@ export class BasePayload {
    * @param options
    * @returns document with specified ID
    */
-  findByID = async <TSlug extends CollectionSlug>(
-    options: FindByIDOptions<TSlug>,
-  ): Promise<DataFromCollectionSlug<TSlug>> => {
+  findByID = async <TOptions extends FindByIDOptions>(
+    options: TOptions,
+  ): Promise<
+    TOptions['disableErrors'] extends true
+      ? DataFromCollectionSlug<TOptions['collection']> | null
+      : DataFromCollectionSlug<TOptions['collection']>
+  > => {
     const { findByID } = localOperations
-    return findByID<TSlug>(this, options)
+    return findByID<TOptions>(this, options)
   }
 
   findGlobal = async <TSlug extends GlobalSlug>(
@@ -813,6 +817,7 @@ export {
   InvalidConfiguration,
   InvalidFieldName,
   InvalidFieldRelationship,
+  Locked,
   LockedAuth,
   MissingCollectionLabel,
   MissingEditorProp,

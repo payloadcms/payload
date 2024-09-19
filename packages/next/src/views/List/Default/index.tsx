@@ -21,6 +21,7 @@ import {
   StaggeredShimmers,
   Table,
   UnpublishMany,
+  useAuth,
   useBulkUpload,
   useConfig,
   useEditDepth,
@@ -43,6 +44,7 @@ const baseClass = 'collection-list'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const DefaultListView: React.FC = () => {
+  const { user } = useAuth()
   const {
     beforeActions,
     collectionSlug,
@@ -125,7 +127,7 @@ export const DefaultListView: React.FC = () => {
   return (
     <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
       <SetViewActions actions={actions} />
-      <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
+      <SelectionProvider docs={data.docs} totalDocs={data.totalDocs} user={user}>
         <RenderComponent mappedComponent={beforeList} />
         <Gutter className={`${baseClass}__wrap`}>
           {Header || (

@@ -122,13 +122,24 @@ export const useListDrawer: UseListDrawer = ({
   const MemoizedDrawerState = useMemo(
     () => ({
       closeDrawer,
+      collectionSlugs,
       drawerDepth,
       drawerSlug,
       isDrawerOpen: isOpen,
       openDrawer,
+      setCollectionSlugs,
       toggleDrawer,
     }),
-    [drawerDepth, drawerSlug, isOpen, toggleDrawer, closeDrawer, openDrawer],
+    [
+      drawerDepth,
+      drawerSlug,
+      isOpen,
+      toggleDrawer,
+      closeDrawer,
+      openDrawer,
+      setCollectionSlugs,
+      collectionSlugs,
+    ],
   )
 
   return [MemoizedDrawer, MemoizedDrawerToggler, MemoizedDrawerState]
