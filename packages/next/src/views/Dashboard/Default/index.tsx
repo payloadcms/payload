@@ -140,7 +140,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                         <li key={entityIndex}>
                           <Card
                             actions={
-                              lockStatus ? (
+                              lockStatus && user?.id !== userEditing?.id ? (
                                 <Locked className={`${baseClass}__locked`} user={userEditing} />
                               ) : hasCreatePermission && type === EntityType.collection ? (
                                 <Button
