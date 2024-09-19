@@ -1,4 +1,4 @@
-import type { Field } from '../fields/config/types.js'
+import type { Field, NamedTab } from '../fields/config/types.js'
 
 import { fieldHasSubFields } from '../fields/config/types.js'
 
@@ -6,7 +6,7 @@ export type TraverseFieldsCallback = (args: {
   /**
    * The current field
    */
-  field: Field
+  field?: Field
   /**
    * Function that when called will skip the current field and continue to the next
    */
@@ -19,6 +19,7 @@ export type TraverseFieldsCallback = (args: {
    * The current reference object
    */
   ref?: Record<string, unknown> | unknown
+  tab?: NamedTab
 }) => boolean | void
 
 type TraverseFieldsArgs = {
@@ -78,6 +79,9 @@ export const traverseFields = ({
         if ('name' in tab && tab.name) {
           if (typeof ref[tab.name] === 'undefined') {
             ref[tab.name] = {}
+            if (callback && callback({ next, parentRef, ref, tab })) {
+              return true
+            }
           }
           ref = ref[tab.name]
         }
