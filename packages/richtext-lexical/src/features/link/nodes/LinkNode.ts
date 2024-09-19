@@ -386,9 +386,14 @@ function $getAncestor(
   predicate: (ancestor: LexicalNode) => boolean,
 ): LexicalNode | null {
   let parent: LexicalNode | null = node
-  while (parent !== null && (parent = parent.getParent()) !== null && !predicate(parent)) {
-    void {}
+  while (parent !== null) {
+    parent = parent.getParent()
+    if (parent === null || predicate(parent)) {
+      break
+    }
   }
+  return parent
+}
 
 function manageRel(input: string, action: 'add' | 'remove', value: string): string {
   let result: string

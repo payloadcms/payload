@@ -40,7 +40,6 @@ export const DynamicFieldSelector: React.FC<
     <SelectField
       {...props}
       field={{
-        name: props.field?.name || '',
         options,
         ...(props.field || {}),
       }}
