@@ -207,6 +207,7 @@ const result = await payload.update({
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
+  overrideLock: true, // Ignores document lock (optional)
   showHiddenFields: true,
 
   // If your collection supports uploads, you can upload
@@ -245,6 +246,7 @@ const result = await payload.update({
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
+  overrideLock: true, // Ignores document lock (optional)
   showHiddenFields: true,
 
   // If your collection supports uploads, you can upload
@@ -271,6 +273,7 @@ const result = await payload.delete({
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
+  overrideLock: true, // Ignores document lock (optional)
   showHiddenFields: true,
 })
 ```
@@ -294,6 +297,7 @@ const result = await payload.delete({
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
+  overrideLock: true, // Ignores document lock (optional)
   showHiddenFields: true,
 })
 ```
@@ -430,6 +434,7 @@ const result = await payload.updateGlobal({
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
+  overrideLock: true, // Ignores document lock (optional)
   showHiddenFields: true,
 })
 ```
