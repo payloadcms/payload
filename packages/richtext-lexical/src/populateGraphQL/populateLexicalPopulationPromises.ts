@@ -31,7 +31,7 @@ export const populateLexicalPopulationPromises = ({
   showHiddenFields,
   siblingDoc,
 }: Args) => {
-  const shouldPopulate = depth && currentDepth && currentDepth <= depth
+  const shouldPopulate = depth && currentDepth! <= depth
 
   if (!shouldPopulate) {
     return
