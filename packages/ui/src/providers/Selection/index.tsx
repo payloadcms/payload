@@ -56,8 +56,10 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       const rows = new Map()
       if (allAvailable) {
         setSelectAll(SelectAllStatus.AllAvailable)
-        docs.forEach(({ id }) => {
-          rows.set(id, true)
+        docs.forEach(({ id, _isLocked }) => {
+          if (!_isLocked) {
+            rows.set(id, true)
+          }
         })
       } else if (
         selectAll === SelectAllStatus.AllAvailable ||
@@ -65,8 +67,10 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       ) {
         setSelectAll(SelectAllStatus.None)
       } else {
-        docs.forEach(({ id }) => {
-          rows.set(id, selectAll !== SelectAllStatus.Some)
+        docs.forEach(({ id, _isLocked }) => {
+          if (!_isLocked) {
+            rows.set(id, selectAll !== SelectAllStatus.Some)
+          }
         })
       }
       setSelected(rows)
@@ -76,6 +80,12 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
 
   const setSelection = useCallback(
     (id) => {
+      const doc = docs.find((doc) => doc.id === id)
+
+      if (doc?._isLocked) {
+        return // Prevent selection if the document is locked
+      }
+
       const existingValue = selected.get(id)
       const isSelected = typeof existingValue === 'boolean' ? !existingValue : true
 
@@ -89,7 +99,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
 
       setSelected(newMap)
     },
-    [selected],
+    [selected, docs],
   )
 
   const getQueryParams = useCallback(

@@ -57,7 +57,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   // Field Schema
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await getFormState({
+      const { state } = await getFormState({
         apiRoute: config.routes.api,
         body: {
           id: id!,
@@ -87,7 +87,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      const formState = await getFormState({
+      const { state: formState } = await getFormState({
         apiRoute: config.routes.api,
         body: {
           id: id!,

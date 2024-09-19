@@ -76,6 +76,8 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   const localeValues = locales && locales.map((locale) => locale.value)
 
+  const draftsEnabled = Boolean((collectionConfig || globalConfig)?.versions.drafts)
+
   return (
     <main className={baseClass}>
       <SetViewActions
@@ -118,6 +120,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
         <div className={`${baseClass}__controls`}>
           <SelectComparison
             baseURL={compareBaseURL}
+            draftsEnabled={draftsEnabled}
             latestDraftVersion={latestDraftVersion}
             latestPublishedVersion={latestPublishedVersion}
             onChange={setCompareValue}

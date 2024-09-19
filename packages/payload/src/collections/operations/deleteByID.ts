@@ -9,6 +9,7 @@ import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
+import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -108,6 +109,17 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug>(
     if (!docToDelete && hasWhereAccess) {
       throw new Forbidden(req.t)
     }
+
+    // /////////////////////////////////////
+    // Handle potentially locked documents
+    // /////////////////////////////////////
+
+    await checkDocumentLockStatus({
+      id,
+      collectionSlug: collectionConfig.slug,
+      lockErrorMessage: `Document with ID ${id} is currently locked and cannot be deleted.`,
+      req,
+    })
 
     await deleteAssociatedFiles({
       collectionConfig,

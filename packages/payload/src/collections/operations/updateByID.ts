@@ -26,6 +26,7 @@ import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
+import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -140,6 +141,17 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
     if (!docWithLocales && hasWherePolicy) {
       throw new Forbidden(req.t)
     }
+
+    // /////////////////////////////////////
+    // Handle potentially locked documents
+    // /////////////////////////////////////
+
+    await checkDocumentLockStatus({
+      id,
+      collectionSlug: collectionConfig.slug,
+      lockErrorMessage: `Document with ID ${id} is currently locked by another user and cannot be updated.`,
+      req,
+    })
 
     const originalDoc = await afterRead({
       collection: collectionConfig,

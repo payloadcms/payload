@@ -119,6 +119,13 @@
       "type": "node-terminal"
     },
     {
+      "command": "node --no-deprecation test/dev.js locked-documents",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Locked Documents",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "node --no-deprecation test/dev.js uploads",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Uploads",

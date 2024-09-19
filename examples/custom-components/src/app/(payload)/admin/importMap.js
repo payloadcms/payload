@@ -55,59 +55,108 @@ import { CustomDefaultRootView as CustomDefaultRootView_53 } from '@/components/
 import { CustomMinimalRootView as CustomMinimalRootView_54 } from '@/components/views/CustomMinimalRootView'
 
 export const importMap = {
-  "@/collections/Fields/array/components/server/Label#CustomArrayFieldLabelServer": CustomArrayFieldLabelServer_0,
-  "@/collections/Fields/array/components/server/Field#CustomArrayFieldServer": CustomArrayFieldServer_1,
-  "@/collections/Fields/array/components/client/Label#CustomArrayFieldLabelClient": CustomArrayFieldLabelClient_2,
-  "@/collections/Fields/array/components/client/Field#CustomArrayFieldClient": CustomArrayFieldClient_3,
-  "@/collections/Fields/blocks/components/server/Field#CustomBlocksFieldServer": CustomBlocksFieldServer_4,
-  "@/collections/Fields/blocks/components/client/Field#CustomBlocksFieldClient": CustomBlocksFieldClient_5,
-  "@/collections/Fields/checkbox/components/server/Label#CustomCheckboxFieldLabelServer": CustomCheckboxFieldLabelServer_6,
-  "@/collections/Fields/checkbox/components/server/Field#CustomCheckboxFieldServer": CustomCheckboxFieldServer_7,
-  "@/collections/Fields/checkbox/components/client/Label#CustomCheckboxFieldLabelClient": CustomCheckboxFieldLabelClient_8,
-  "@/collections/Fields/checkbox/components/client/Field#CustomCheckboxFieldClient": CustomCheckboxFieldClient_9,
-  "@/collections/Fields/date/components/server/Label#CustomDateFieldLabelServer": CustomDateFieldLabelServer_10,
-  "@/collections/Fields/date/components/server/Field#CustomDateFieldServer": CustomDateFieldServer_11,
-  "@/collections/Fields/date/components/client/Label#CustomDateFieldLabelClient": CustomDateFieldLabelClient_12,
-  "@/collections/Fields/date/components/client/Field#CustomDateFieldClient": CustomDateFieldClient_13,
-  "@/collections/Fields/email/components/server/Label#CustomEmailFieldLabelServer": CustomEmailFieldLabelServer_14,
-  "@/collections/Fields/email/components/server/Field#CustomEmailFieldServer": CustomEmailFieldServer_15,
-  "@/collections/Fields/email/components/client/Label#CustomEmailFieldLabelClient": CustomEmailFieldLabelClient_16,
-  "@/collections/Fields/email/components/client/Field#CustomEmailFieldClient": CustomEmailFieldClient_17,
-  "@/collections/Fields/number/components/server/Label#CustomNumberFieldLabelServer": CustomNumberFieldLabelServer_18,
-  "@/collections/Fields/number/components/server/Field#CustomNumberFieldServer": CustomNumberFieldServer_19,
-  "@/collections/Fields/number/components/client/Label#CustomNumberFieldLabelClient": CustomNumberFieldLabelClient_20,
-  "@/collections/Fields/number/components/client/Field#CustomNumberFieldClient": CustomNumberFieldClient_21,
-  "@/collections/Fields/point/components/server/Label#CustomPointFieldLabelServer": CustomPointFieldLabelServer_22,
-  "@/collections/Fields/point/components/server/Field#CustomPointFieldServer": CustomPointFieldServer_23,
-  "@/collections/Fields/point/components/client/Label#CustomPointFieldLabelClient": CustomPointFieldLabelClient_24,
-  "@/collections/Fields/point/components/client/Field#CustomPointFieldClient": CustomPointFieldClient_25,
-  "@/collections/Fields/radio/components/server/Label#CustomRadioFieldLabelServer": CustomRadioFieldLabelServer_26,
-  "@/collections/Fields/radio/components/server/Field#CustomRadioFieldServer": CustomRadioFieldServer_27,
-  "@/collections/Fields/radio/components/client/Label#CustomRadioFieldLabelClient": CustomRadioFieldLabelClient_28,
-  "@/collections/Fields/radio/components/client/Field#CustomRadioFieldClient": CustomRadioFieldClient_29,
-  "@/collections/Fields/relationship/components/server/Label#CustomRelationshipFieldLabelServer": CustomRelationshipFieldLabelServer_30,
-  "@/collections/Fields/relationship/components/server/Field#CustomRelationshipFieldServer": CustomRelationshipFieldServer_31,
-  "@/collections/Fields/relationship/components/client/Label#CustomRelationshipFieldLabelClient": CustomRelationshipFieldLabelClient_32,
-  "@/collections/Fields/relationship/components/client/Field#CustomRelationshipFieldClient": CustomRelationshipFieldClient_33,
-  "@/collections/Fields/select/components/server/Label#CustomSelectFieldLabelServer": CustomSelectFieldLabelServer_34,
-  "@/collections/Fields/select/components/server/Field#CustomSelectFieldServer": CustomSelectFieldServer_35,
-  "@/collections/Fields/select/components/client/Label#CustomSelectFieldLabelClient": CustomSelectFieldLabelClient_36,
-  "@/collections/Fields/select/components/client/Field#CustomSelectFieldClient": CustomSelectFieldClient_37,
-  "@/collections/Fields/text/components/server/Label#CustomTextFieldLabelServer": CustomTextFieldLabelServer_38,
-  "@/collections/Fields/text/components/server/Field#CustomTextFieldServer": CustomTextFieldServer_39,
-  "@/collections/Fields/text/components/client/Label#CustomTextFieldLabelClient": CustomTextFieldLabelClient_40,
-  "@/collections/Fields/text/components/client/Field#CustomTextFieldClient": CustomTextFieldClient_41,
-  "@/collections/Fields/textarea/components/server/Label#CustomTextareaFieldLabelServer": CustomTextareaFieldLabelServer_42,
-  "@/collections/Fields/textarea/components/server/Field#CustomTextareaFieldServer": CustomTextareaFieldServer_43,
-  "@/collections/Fields/textarea/components/client/Label#CustomTextareaFieldLabelClient": CustomTextareaFieldLabelClient_44,
-  "@/collections/Fields/textarea/components/client/Field#CustomTextareaFieldClient": CustomTextareaFieldClient_45,
-  "@/collections/Views/components/CustomTabEditView#CustomTabEditView": CustomTabEditView_46,
-  "@/collections/Views/components/CustomDefaultEditView#CustomDefaultEditView": CustomDefaultEditView_47,
-  "@/collections/RootViews/components/CustomRootEditView#CustomRootEditView": CustomRootEditView_48,
-  "@/components/afterNavLinks/LinkToCustomView#LinkToCustomView": LinkToCustomView_49,
-  "@/components/afterNavLinks/LinkToCustomMinimalView#LinkToCustomMinimalView": LinkToCustomMinimalView_50,
-  "@/components/afterNavLinks/LinkToCustomDefaultView#LinkToCustomDefaultView": LinkToCustomDefaultView_51,
-  "@/components/views/CustomRootView#CustomRootView": CustomRootView_52,
-  "@/components/views/CustomDefaultRootView#CustomDefaultRootView": CustomDefaultRootView_53,
-  "@/components/views/CustomMinimalRootView#CustomMinimalRootView": CustomMinimalRootView_54
+  '@/collections/Fields/array/components/server/Label#CustomArrayFieldLabelServer':
+    CustomArrayFieldLabelServer_0,
+  '@/collections/Fields/array/components/server/Field#CustomArrayFieldServer':
+    CustomArrayFieldServer_1,
+  '@/collections/Fields/array/components/client/Label#CustomArrayFieldLabelClient':
+    CustomArrayFieldLabelClient_2,
+  '@/collections/Fields/array/components/client/Field#CustomArrayFieldClient':
+    CustomArrayFieldClient_3,
+  '@/collections/Fields/blocks/components/server/Field#CustomBlocksFieldServer':
+    CustomBlocksFieldServer_4,
+  '@/collections/Fields/blocks/components/client/Field#CustomBlocksFieldClient':
+    CustomBlocksFieldClient_5,
+  '@/collections/Fields/checkbox/components/server/Label#CustomCheckboxFieldLabelServer':
+    CustomCheckboxFieldLabelServer_6,
+  '@/collections/Fields/checkbox/components/server/Field#CustomCheckboxFieldServer':
+    CustomCheckboxFieldServer_7,
+  '@/collections/Fields/checkbox/components/client/Label#CustomCheckboxFieldLabelClient':
+    CustomCheckboxFieldLabelClient_8,
+  '@/collections/Fields/checkbox/components/client/Field#CustomCheckboxFieldClient':
+    CustomCheckboxFieldClient_9,
+  '@/collections/Fields/date/components/server/Label#CustomDateFieldLabelServer':
+    CustomDateFieldLabelServer_10,
+  '@/collections/Fields/date/components/server/Field#CustomDateFieldServer':
+    CustomDateFieldServer_11,
+  '@/collections/Fields/date/components/client/Label#CustomDateFieldLabelClient':
+    CustomDateFieldLabelClient_12,
+  '@/collections/Fields/date/components/client/Field#CustomDateFieldClient':
+    CustomDateFieldClient_13,
+  '@/collections/Fields/email/components/server/Label#CustomEmailFieldLabelServer':
+    CustomEmailFieldLabelServer_14,
+  '@/collections/Fields/email/components/server/Field#CustomEmailFieldServer':
+    CustomEmailFieldServer_15,
+  '@/collections/Fields/email/components/client/Label#CustomEmailFieldLabelClient':
+    CustomEmailFieldLabelClient_16,
+  '@/collections/Fields/email/components/client/Field#CustomEmailFieldClient':
+    CustomEmailFieldClient_17,
+  '@/collections/Fields/number/components/server/Label#CustomNumberFieldLabelServer':
+    CustomNumberFieldLabelServer_18,
+  '@/collections/Fields/number/components/server/Field#CustomNumberFieldServer':
+    CustomNumberFieldServer_19,
+  '@/collections/Fields/number/components/client/Label#CustomNumberFieldLabelClient':
+    CustomNumberFieldLabelClient_20,
+  '@/collections/Fields/number/components/client/Field#CustomNumberFieldClient':
+    CustomNumberFieldClient_21,
+  '@/collections/Fields/point/components/server/Label#CustomPointFieldLabelServer':
+    CustomPointFieldLabelServer_22,
+  '@/collections/Fields/point/components/server/Field#CustomPointFieldServer':
+    CustomPointFieldServer_23,
+  '@/collections/Fields/point/components/client/Label#CustomPointFieldLabelClient':
+    CustomPointFieldLabelClient_24,
+  '@/collections/Fields/point/components/client/Field#CustomPointFieldClient':
+    CustomPointFieldClient_25,
+  '@/collections/Fields/radio/components/server/Label#CustomRadioFieldLabelServer':
+    CustomRadioFieldLabelServer_26,
+  '@/collections/Fields/radio/components/server/Field#CustomRadioFieldServer':
+    CustomRadioFieldServer_27,
+  '@/collections/Fields/radio/components/client/Label#CustomRadioFieldLabelClient':
+    CustomRadioFieldLabelClient_28,
+  '@/collections/Fields/radio/components/client/Field#CustomRadioFieldClient':
+    CustomRadioFieldClient_29,
+  '@/collections/Fields/relationship/components/server/Label#CustomRelationshipFieldLabelServer':
+    CustomRelationshipFieldLabelServer_30,
+  '@/collections/Fields/relationship/components/server/Field#CustomRelationshipFieldServer':
+    CustomRelationshipFieldServer_31,
+  '@/collections/Fields/relationship/components/client/Label#CustomRelationshipFieldLabelClient':
+    CustomRelationshipFieldLabelClient_32,
+  '@/collections/Fields/relationship/components/client/Field#CustomRelationshipFieldClient':
+    CustomRelationshipFieldClient_33,
+  '@/collections/Fields/select/components/server/Label#CustomSelectFieldLabelServer':
+    CustomSelectFieldLabelServer_34,
+  '@/collections/Fields/select/components/server/Field#CustomSelectFieldServer':
+    CustomSelectFieldServer_35,
+  '@/collections/Fields/select/components/client/Label#CustomSelectFieldLabelClient':
+    CustomSelectFieldLabelClient_36,
+  '@/collections/Fields/select/components/client/Field#CustomSelectFieldClient':
+    CustomSelectFieldClient_37,
+  '@/collections/Fields/text/components/server/Label#CustomTextFieldLabelServer':
+    CustomTextFieldLabelServer_38,
+  '@/collections/Fields/text/components/server/Field#CustomTextFieldServer':
+    CustomTextFieldServer_39,
+  '@/collections/Fields/text/components/client/Label#CustomTextFieldLabelClient':
+    CustomTextFieldLabelClient_40,
+  '@/collections/Fields/text/components/client/Field#CustomTextFieldClient':
+    CustomTextFieldClient_41,
+  '@/collections/Fields/textarea/components/server/Label#CustomTextareaFieldLabelServer':
+    CustomTextareaFieldLabelServer_42,
+  '@/collections/Fields/textarea/components/server/Field#CustomTextareaFieldServer':
+    CustomTextareaFieldServer_43,
+  '@/collections/Fields/textarea/components/client/Label#CustomTextareaFieldLabelClient':
+    CustomTextareaFieldLabelClient_44,
+  '@/collections/Fields/textarea/components/client/Field#CustomTextareaFieldClient':
+    CustomTextareaFieldClient_45,
+  '@/collections/Views/components/CustomTabEditView#CustomTabEditView': CustomTabEditView_46,
+  '@/collections/Views/components/CustomDefaultEditView#CustomDefaultEditView':
+    CustomDefaultEditView_47,
+  '@/collections/RootViews/components/CustomRootEditView#CustomRootEditView': CustomRootEditView_48,
+  '@/components/afterNavLinks/LinkToCustomView#LinkToCustomView': LinkToCustomView_49,
+  '@/components/afterNavLinks/LinkToCustomMinimalView#LinkToCustomMinimalView':
+    LinkToCustomMinimalView_50,
+  '@/components/afterNavLinks/LinkToCustomDefaultView#LinkToCustomDefaultView':
+    LinkToCustomDefaultView_51,
+  '@/components/views/CustomRootView#CustomRootView': CustomRootView_52,
+  '@/components/views/CustomDefaultRootView#CustomDefaultRootView': CustomDefaultRootView_53,
+  '@/components/views/CustomMinimalRootView#CustomMinimalRootView': CustomMinimalRootView_54,
 }

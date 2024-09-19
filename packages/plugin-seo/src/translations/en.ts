@@ -3,6 +3,7 @@ import type { GenericTranslationsObject } from '@payloadcms/translations'
 export const en: GenericTranslationsObject = {
   $schema: './translation-schema.json',
   'plugin-seo': {
+    missing: 'Missing',
     almostThere: 'Almost there',
     autoGenerate: 'Auto-generate',
     bestPractices: 'best practices',

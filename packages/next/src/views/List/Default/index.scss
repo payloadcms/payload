@@ -45,6 +45,7 @@
 
       #heading-_select,
       .cell-_select {
+        display: flex;
         min-width: unset;
         width: base(1);
       }

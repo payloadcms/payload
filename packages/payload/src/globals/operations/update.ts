@@ -10,6 +10,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple } from '../../index.js'
+import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -111,6 +112,16 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
       overrideAccess: true,
       req,
       showHiddenFields,
+    })
+
+    // ///////////////////////////////////////////
+    // Handle potentially locked global documents
+    // ///////////////////////////////////////////
+
+    await checkDocumentLockStatus({
+      globalSlug: slug,
+      lockErrorMessage: `Global with slug "${slug}" is currently locked by another user and cannot be updated.`,
+      req,
     })
 
     // /////////////////////////////////////

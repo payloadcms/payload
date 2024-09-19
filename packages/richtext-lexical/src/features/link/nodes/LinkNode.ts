@@ -389,8 +389,6 @@ function $getAncestor(
   while (parent !== null && (parent = parent.getParent()) !== null && !predicate(parent)) {
     void {}
   }
-  return parent
-}
 
 function manageRel(input: string, action: 'add' | 'remove', value: string): string {
   let result: string
