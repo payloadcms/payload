@@ -26,15 +26,14 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
     const { richTextComponentMap } = field
 
     const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
-    const blocksField: BlocksFieldClient = richTextComponentMap.get(
-      componentMapRenderedBlockPath,
-    )[0]
 
-    const clientBlocks: ClientBlock[] = blocksField.blocks
+    const blocksField: BlocksFieldClient = richTextComponentMap.get(componentMapRenderedBlockPath)
+
+    const clientBlocks: ClientBlock[] = blocksField ? blocksField[0].blocks : []
 
     return {
       markdownTransformers: getBlockMarkdownTransformers({
-        blocks: clientBlocks,
+        blocks: clientBlocks, // TODO: Support inline blocks
       }),
       nodes: [BlockNode, InlineBlockNode],
       plugins: [
