@@ -73,6 +73,10 @@ export const sanitizeJoinField = ({
     throw new InvalidFieldJoin(join.field)
   }
 
+  if (joinRelationship.hasMany) {
+    throw new APIError('Join fields cannot be used with hasMany relationships.')
+  }
+
   // override the join field localized property to use whatever the relationship field has
   field.localized = joinRelationship.localized
 
