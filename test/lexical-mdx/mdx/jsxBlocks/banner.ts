@@ -1,8 +1,9 @@
 import type { Block } from 'payload'
 
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { bannerTypes } from '../../collections/Posts/shared.js'
+import { InlineCodeBlock } from './inlineCode.js'
 
 export const BannerBlock: Block = {
   slug: 'Banner',
@@ -35,7 +36,14 @@ export const BannerBlock: Block = {
     {
       name: 'content',
       type: 'richText',
-      editor: lexicalEditor(),
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          BlocksFeature({
+            inlineBlocks: [InlineCodeBlock],
+          }),
+        ],
+      }),
     },
   ],
 }

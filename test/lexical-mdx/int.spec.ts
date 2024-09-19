@@ -485,6 +485,168 @@ there\`\`\`
         },
       ],
     },
+    {
+      // This test ensures that the JSX within the code block is does not disrupt the main JSX parsing
+      input: `
+<Banner>
+  Some text 1 <InlineCode>code 1</InlineCode> some
+  text 2 <InlineCode>code 2</InlineCode> some text
+  3 <InlineCode>code 3</InlineCode> some text 4<InlineCode>code 4</InlineCode>
+</Banner>
+`,
+      blockNode: {
+        fields: {
+          blockType: 'Banner',
+          content: {
+            root: {
+              children: [
+                {
+                  children: [
+                    {
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: ' Some text 1 ',
+                      type: 'text',
+                      version: 1,
+                    },
+
+                    {
+                      type: 'inlineBlock',
+
+                      fields: {
+                        id: '66ecb561ff793f7eaca2d4be',
+                        code: 'code 1',
+                        blockType: 'InlineCode',
+                      },
+                      version: 1,
+                    },
+
+                    {
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: ' some',
+                      type: 'text',
+                      version: 1,
+                    },
+                  ],
+                  direction: 'ltr',
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+
+                {
+                  children: [
+                    {
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: ' text 2 ',
+                      type: 'text',
+                      version: 1,
+                    },
+
+                    {
+                      type: 'inlineBlock',
+
+                      fields: {
+                        id: '66ecb561ff793f7eaca2d4be',
+                        code: 'code 2',
+                        blockType: 'InlineCode',
+                      },
+                      version: 1,
+                    },
+
+                    {
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: ' some text',
+                      type: 'text',
+                      version: 1,
+                    },
+                  ],
+                  direction: 'ltr',
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+
+                {
+                  children: [
+                    {
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: ' 3 ',
+                      type: 'text',
+                      version: 1,
+                    },
+
+                    {
+                      type: 'inlineBlock',
+
+                      fields: {
+                        id: '66ecb561ff793f7eaca2d4be',
+                        code: 'code 3',
+                        blockType: 'InlineCode',
+                      },
+                      version: 1,
+                    },
+
+                    {
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: ' some text 4',
+                      type: 'text',
+                      version: 1,
+                    },
+
+                    {
+                      type: 'inlineBlock',
+
+                      fields: {
+                        id: '66ecb561ff793f7eaca2d4be',
+                        code: 'code 4',
+                        blockType: 'InlineCode',
+                      },
+                      version: 1,
+                    },
+                  ],
+                  direction: 'ltr',
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+              ],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              type: 'root',
+              version: 1,
+            },
+          },
+        },
+      },
+    },
   ]
 
   for (const {
