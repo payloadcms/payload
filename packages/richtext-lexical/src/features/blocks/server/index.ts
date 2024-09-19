@@ -130,6 +130,7 @@ export const BlocksFeature = createServerFeature<
       i18n,
       markdownTransformers: getBlockMarkdownTransformers({
         blocks: props.blocks,
+        inlineBlocks: props.inlineBlocks,
       }),
 
       nodes: [

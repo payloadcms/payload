@@ -9,10 +9,15 @@ import { propsToJSXString } from '../../../utilities/jsx/jsx.js'
 import { createHeadlessEditor } from '@lexical/headless'
 import { getEnabledNodesFromServerNodes } from '../../../lexical/nodes/index.js'
 import { NodeWithHooks } from '../../typesServer.js'
-import { SerializedEditorState } from 'lexical'
+import { $parseSerializedNode, ElementNode, SerializedEditorState } from 'lexical'
 import { extractPropsFromJSXPropsString } from '../../../utilities/jsx/extractPropsFromJSXPropsString.js'
 import type { MultilineElementTransformer } from '../../../utilities/jsx/lexicalMarkdownCopy.js'
 import { linesFromStartToContentAndPropsString } from './linesFromMatchToContentAndPropsString.js'
+import {
+  $createServerInlineBlockNode,
+  $isServerInlineBlockNode,
+  ServerInlineBlockNode,
+} from './nodes/InlineBlocksNode.js'
 
 export function createTagRegexes(tagName: string) {
   const escapedTagName = tagName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -34,14 +39,16 @@ export function createTagRegexes(tagName: string) {
 }
 export const getBlockMarkdownTransformers = ({
   blocks,
+  inlineBlocks,
 }: {
   blocks: Block[]
+  inlineBlocks: Block[]
 }): ((props: {
   allNodes: Array<NodeWithHooks>
   allTransformers: Transformer[]
 }) => MultilineElementTransformer)[] => {
-  if (!blocks?.length) {
-    return
+  if (!blocks?.length && !inlineBlocks?.length) {
+    return []
   }
 
   const transformers: ((props: {
@@ -49,62 +56,101 @@ export const getBlockMarkdownTransformers = ({
     allTransformers: Transformer[]
   }) => MultilineElementTransformer)[] = []
 
-  for (const block of blocks) {
-    if (!block.jsx) {
-      continue
-    }
-    const regex = createTagRegexes(block.slug)
+  if (blocks?.length) {
+    for (const block of blocks) {
+      const transformer = getMarkdownTransformerForBlock(block, false)
 
-    transformers.push(({ allTransformers, allNodes }) => ({
-      dependencies: [ServerBlockNode],
-      export: (node) => {
+      if (transformer) {
+        transformers.push(transformer)
+      }
+    }
+  }
+
+  if (inlineBlocks?.length) {
+    for (const block of inlineBlocks) {
+      const transformer = getMarkdownTransformerForBlock(block, true)
+
+      if (transformer) {
+        transformers.push(transformer)
+      }
+    }
+  }
+
+  return transformers
+}
+
+function getMarkdownTransformerForBlock(
+  block: Block,
+  isInlineBlock: boolean,
+):
+  | ((props: {
+      allNodes: Array<NodeWithHooks>
+      allTransformers: Transformer[]
+    }) => MultilineElementTransformer)
+  | null {
+  if (!block.jsx) {
+    return null
+  }
+  const regex = createTagRegexes(block.slug)
+
+  return ({ allTransformers, allNodes }) => ({
+    dependencies: [ServerBlockNode, ServerInlineBlockNode],
+    export: (node) => {
+      if (isInlineBlock) {
+        if (!$isServerInlineBlockNode(node)) {
+          return null
+        }
+      } else {
         if (!$isServerBlockNode(node)) {
           return null
         }
-        if (node.getFields()?.blockType?.toLowerCase() !== block.slug.toLowerCase()) {
-          return null
-        }
+      }
 
-        const nodeFields = node.getFields()
-        const lexicalToMarkdown = getLexicalToMarkdown(allNodes, allTransformers)
+      if (node.getFields()?.blockType?.toLowerCase() !== block.slug.toLowerCase()) {
+        return null
+      }
 
-        const exportResult = block.jsx.export({
-          fields: nodeFields,
-          lexicalToMarkdown,
-        })
-        if (exportResult === false) {
-          return null
-        }
-        if (typeof exportResult === 'string') {
-          return exportResult
-        }
+      const nodeFields = node.getFields()
+      const lexicalToMarkdown = getLexicalToMarkdown(allNodes, allTransformers)
 
-        if (exportResult?.children?.length) {
-          return `<${nodeFields.blockType} ${propsToJSXString({ props: exportResult.props })}>\n  ${exportResult.children}\n</${nodeFields.blockType}>`
-        }
+      const exportResult = block.jsx.export({
+        fields: nodeFields,
+        lexicalToMarkdown,
+      })
+      if (exportResult === false) {
+        return null
+      }
+      if (typeof exportResult === 'string') {
+        return exportResult
+      }
 
-        return `<${nodeFields.blockType} ${propsToJSXString({ props: exportResult.props })}/>`
-      },
-      regExpEnd: block.jsx?.customEndRegex ?? regex.regExpEnd,
-      regExpStart: block.jsx?.customStartRegex ?? regex.regExpStart,
-      handleImportAfterStartMatch: block.jsx?.customEndRegex
-        ? undefined
-        : ({ startLineIndex, lines, transformer, rootNode, startMatch }) => {
-            const regexpEndRegex: RegExp | undefined =
-              typeof transformer.regExpEnd === 'object' && 'regExp' in transformer.regExpEnd
-                ? transformer.regExpEnd.regExp
-                : transformer.regExpEnd
+      if (exportResult?.children?.length) {
+        return `<${nodeFields.blockType} ${propsToJSXString({ props: exportResult.props })}>\n  ${exportResult.children}\n</${nodeFields.blockType}>`
+      }
 
-            const isEndOptional =
-              transformer.regExpEnd &&
-              typeof transformer.regExpEnd === 'object' &&
-              'optional' in transformer.regExpEnd
-                ? transformer.regExpEnd.optional
-                : !transformer.regExpEnd
+      return `<${nodeFields.blockType} ${propsToJSXString({ props: exportResult.props })}/>`
+    },
+    regExpEnd: block.jsx?.customEndRegex ?? regex.regExpEnd,
+    regExpStart: block.jsx?.customStartRegex ?? regex.regExpStart,
+    handleImportAfterStartMatch: block.jsx?.customEndRegex
+      ? undefined
+      : ({ startLineIndex, lines, transformer, rootNode, startMatch }) => {
+          const regexpEndRegex: RegExp | undefined =
+            typeof transformer.regExpEnd === 'object' && 'regExp' in transformer.regExpEnd
+              ? transformer.regExpEnd.regExp
+              : transformer.regExpEnd
 
-            const linesLength = lines.length
+          const isEndOptional =
+            transformer.regExpEnd &&
+            typeof transformer.regExpEnd === 'object' &&
+            'optional' in transformer.regExpEnd
+              ? transformer.regExpEnd.optional
+              : !transformer.regExpEnd
 
-            const { propsString, content, endLineIndex } = linesFromStartToContentAndPropsString({
+          const linesLength = lines.length
+
+          const { propsString, content, endLineIndex, afterEndLine, beforeStartLine } =
+            linesFromStartToContentAndPropsString({
               startMatch,
               regexpEndRegex,
               startLineIndex,
@@ -114,86 +160,123 @@ export const getBlockMarkdownTransformers = ({
               isEndOptional,
             })
 
-            if (block.jsx.import) {
-              const markdownToLexical = getMarkdownToLexical(allNodes, allTransformers)
+          if (block.jsx.import) {
+            const markdownToLexical = getMarkdownToLexical(allNodes, allTransformers)
 
-              const blockFields = block.jsx.import({
-                children: content,
-                props: propsString
-                  ? extractPropsFromJSXPropsString({
-                      propsString,
-                    })
-                  : {},
-                openMatch: startMatch,
-                markdownToLexical: markdownToLexical,
-                htmlToLexical: null, // TODO
-              })
-              if (blockFields === false) {
-                return {
-                  return: [false, startLineIndex],
+            const blockFields = block.jsx.import({
+              children: content,
+              props: propsString
+                ? extractPropsFromJSXPropsString({
+                    propsString,
+                  })
+                : {},
+              openMatch: startMatch,
+              markdownToLexical: markdownToLexical,
+              htmlToLexical: null, // TODO
+            })
+            if (blockFields === false) {
+              return {
+                return: [false, startLineIndex],
+              }
+            }
+
+            const node = isInlineBlock
+              ? $createServerInlineBlockNode({
+                  blockType: block.slug,
+                  ...(blockFields as any),
+                })
+              : $createServerBlockNode({
+                  blockType: block.slug,
+                  ...blockFields,
+                } as any)
+
+            if (node) {
+              // Now handle beforeStartLine and afterEndLine. If those are not empty, we need to add them as text nodes before and after the block node.
+              // However, those themselves can contain other markdown matches, so we need to parse them as well.
+              // Example where this is needed: "Hello <InlineCode>inline code</InlineCode> test."
+              let prevNodes = null
+              let nextNodes = null
+              if (beforeStartLine?.length) {
+                prevNodes = markdownToLexical({ markdown: beforeStartLine })?.root?.children ?? []
+
+                if (prevNodes?.length) {
+                  rootNode.append($parseSerializedNode(prevNodes[0]))
                 }
               }
 
-              const node = $createServerBlockNode({
-                blockType: block.slug,
-                ...blockFields,
-              } as any)
-              if (node) {
+              if (rootNode?.getChildren()?.length) {
+                // Add node to the last child of the root node
+                const lastChild = rootNode.getChildren()[rootNode.getChildren().length - 1]
+
+                ;(lastChild as ElementNode).append(node)
+              } else {
                 rootNode.append(node)
               }
 
-              return {
-                return: [true, endLineIndex],
+              if (afterEndLine?.length) {
+                nextNodes = markdownToLexical({ markdown: afterEndLine })?.root?.children ?? []
+                const lastChild = rootNode.getChildren()[rootNode.getChildren().length - 1]
+
+                ;(lastChild as ElementNode).append(
+                  ($parseSerializedNode(nextNodes[0]) as ElementNode)?.getChildren()[0],
+                )
               }
             }
 
-            // No multiline transformer handled this line successfully
             return {
-              return: [false, startLineIndex],
+              return: [true, endLineIndex],
             }
-          },
-      // This replace is ONLY run for ``` code blocks (so any blocks with custom start and end regexes). For others, we use the special JSX handling above:
-      replace: (rootNode, children, openMatch, closeMatch, linesInBetween) => {
-        if (block.jsx.import) {
-          const childrenString = linesInBetween.join('\n').trim()
-
-          let propsString: string | null = openMatch?.length > 1 ? openMatch[1]?.trim() : null
-
-          const markdownToLexical = getMarkdownToLexical(allNodes, allTransformers)
-
-          const blockFields = block.jsx.import({
-            children: childrenString,
-            props: propsString
-              ? extractPropsFromJSXPropsString({
-                  propsString,
-                })
-              : {},
-            openMatch,
-            closeMatch,
-            markdownToLexical: markdownToLexical,
-            htmlToLexical: null, // TODO
-          })
-          if (blockFields === false) {
-            return false
           }
 
-          const node = $createServerBlockNode({
-            blockType: block.slug,
-            ...blockFields,
-          } as any)
-          if (node) {
-            rootNode.append(node)
+          // No multiline transformer handled this line successfully
+          return {
+            return: [false, startLineIndex],
           }
+        },
+    // This replace is ONLY run for ``` code blocks (so any blocks with custom start and end regexes). For others, we use the special JSX handling above:
+    replace: (rootNode, children, openMatch, closeMatch, linesInBetween) => {
+      if (block.jsx.import) {
+        const childrenString = linesInBetween.join('\n').trim()
 
-          return
+        let propsString: string | null = openMatch?.length > 1 ? openMatch[1]?.trim() : null
+
+        const markdownToLexical = getMarkdownToLexical(allNodes, allTransformers)
+
+        const blockFields = block.jsx.import({
+          children: childrenString,
+          props: propsString
+            ? extractPropsFromJSXPropsString({
+                propsString,
+              })
+            : {},
+          openMatch,
+          closeMatch,
+          markdownToLexical: markdownToLexical,
+          htmlToLexical: null, // TODO
+        })
+        if (blockFields === false) {
+          return false
         }
-        return false // Run next transformer
-      },
-      type: 'multilineElement',
-    }))
-  }
 
-  return transformers
+        const node = isInlineBlock
+          ? $createServerInlineBlockNode({
+              blockType: block.slug,
+              ...(blockFields as any),
+            })
+          : $createServerBlockNode({
+              blockType: block.slug,
+              ...blockFields,
+            } as any)
+        if (node) {
+          rootNode.append(node)
+        }
+
+        return
+      }
+      return false // Run next transformer
+    },
+    type: 'multilineElement',
+  })
 }
 
 export function getMarkdownToLexical(

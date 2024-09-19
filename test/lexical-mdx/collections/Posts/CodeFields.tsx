@@ -1,6 +1,6 @@
 'use client'
 
-import type { CodeFieldProps } from 'payload'
+import type { CodeFieldClientProps } from 'payload'
 
 import { CodeField, useFormFields } from '@payloadcms/ui'
 import React, { useMemo } from 'react'
@@ -13,7 +13,7 @@ const languageKeyToMonacoLanguageMap = {
   tsx: 'typescript',
 }
 
-export const Code: React.FC<CodeFieldProps> = ({ field }) => {
+export const Code: React.FC<CodeFieldClientProps> = ({ field }) => {
   const languageField = useFormFields(([fields]) => fields['language'])
 
   const language: string =

@@ -10,6 +10,7 @@ import {
 import { loadMDXAfterRead, saveMDXBeforeChange } from '../../mdx/hooks.js'
 import { BannerBlock } from '../../mdx/jsxBlocks/banner.js'
 import { CodeBlock } from '../../mdx/jsxBlocks/code/code.js'
+import { InlineCodeBlock } from '../../mdx/jsxBlocks/inlineCode.js'
 import { PackageInstallOptions } from '../../mdx/jsxBlocks/packageInstallOptions.js'
 
 export const postsSlug = 'posts'
@@ -62,6 +63,7 @@ export const PostsCollection: CollectionConfig = {
           FixedToolbarFeature(),
           BlocksFeature({
             blocks: [BannerBlock, CodeBlock, PackageInstallOptions],
+            inlineBlocks: [InlineCodeBlock],
           }),
         ],
       }),

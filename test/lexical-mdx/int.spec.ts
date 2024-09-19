@@ -166,7 +166,7 @@ describe('Lexical MDX', () => {
     packageId="444"
     someNestedObject={{test: "hello"}} test={4}
   >
-    ignored
+    ignoredi
   </PackageInstallOptions>
 </PackageInstallOptions>
 `,
@@ -178,6 +178,23 @@ describe('Lexical MDX', () => {
         },
       },
     },
+    // TODO: Write test for this:
+    /*
+<PackageInstallOptions
+  update
+  packageId="444"
+>
+  not ignored
+  <PackageInstallOptions
+    update
+    packageId="444"
+    someNestedObject={{test: "hello"}} test={4}
+  >
+    not ignored
+  </PackageInstallOptions>
+  not ignored
+</PackageInstallOptions>
+    */
     {
       input: `
 \`\`\`ts\n hello\`\`\`
@@ -396,6 +413,50 @@ there\`\`\`
         },
       },
     },
+    {
+      input: 'Hello <InlineCode>inline code</InlineCode> test.',
+      rootChildren: [
+        {
+          children: [
+            {
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: 'Hello ',
+              type: 'text',
+              version: 1,
+            },
+            {
+              type: 'inlineBlock',
+
+              fields: {
+                code: 'inline code',
+                blockType: 'InlineCode',
+              },
+              version: 1,
+            },
+
+            {
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: ' test.',
+              type: 'text',
+              version: 1,
+            },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          type: 'paragraph',
+          version: 1,
+          textFormat: 0,
+          textStyle: '',
+        },
+      ],
+    },
   ]
 
   for (const {
@@ -435,8 +496,10 @@ there\`\`\`
         expect(receivedBlockNodeToTest).toStrictEqual(blockNode)
       } else if (rootChildren) {
         const receivedRootChildren = result.editorState.root.children
-        removeUndefinedRecursively(receivedRootChildren)
-        //
+        removeUndefinedAndIDRecursively(receivedRootChildren)
+
+        console.log({ receivedRootChildren, rootChildren })
+
         expect(receivedRootChildren).toStrictEqual(rootChildren)
       } else {
         throw new Error('Test not configured properly')
@@ -478,12 +541,14 @@ there\`\`\`
   }
 })
 
-function removeUndefinedRecursively(obj: object) {
+function removeUndefinedAndIDRecursively(obj: object) {
   for (const key in obj) {
     const value = obj[key]
     if (value && typeof value === 'object') {
-      removeUndefinedRecursively(value)
+      removeUndefinedAndIDRecursively(value)
     } else if (value === undefined) {
+      delete obj[key]
+    } else if (key === 'id') {
       delete obj[key]
     }
   }
