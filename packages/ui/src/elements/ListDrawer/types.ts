@@ -5,7 +5,7 @@ import type { HTMLAttributes } from 'react'
 import type { useSelection } from '../../providers/Selection/index.js'
 
 export type ListDrawerProps = {
-  readonly collectionSlugs: string[]
+  readonly collectionSlugs: SanitizedCollectionConfig['slug'][]
   readonly customHeader?: React.ReactNode
   readonly drawerSlug?: string
   readonly enableRowSelections?: boolean
@@ -26,9 +26,9 @@ export type ListTogglerProps = {
 } & HTMLAttributes<HTMLButtonElement>
 
 export type UseListDrawer = (args: {
-  collectionSlugs?: string[]
+  collectionSlugs?: SanitizedCollectionConfig['slug'][]
   filterOptions?: FilterOptionsResult
-  selectedCollection?: string
+  selectedCollection?: SanitizedCollectionConfig['slug']
   uploads?: boolean // finds all collections with upload: true
 }) => [
   React.FC<Pick<ListDrawerProps, 'enableRowSelections' | 'onBulkSelect' | 'onSelect'>>, // drawer

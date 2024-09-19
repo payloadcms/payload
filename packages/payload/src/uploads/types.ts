@@ -1,6 +1,7 @@
 import type { ResizeOptions, Sharp } from 'sharp'
 
 import type { TypeWithID } from '../collections/config/types.js'
+import type { CollectionSlug } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { WithMetadata } from './optionallyAppendMetadata.js'
 
@@ -154,7 +155,7 @@ export type UploadConfig = {
     req: PayloadRequest,
     args: {
       doc: TypeWithID
-      params: { collection: string; filename: string }
+      params: { collection: CollectionSlug; filename: string }
     },
   ) => Promise<Response> | Promise<void> | Response | void)[]
   imageSizes?: ImageSize[]

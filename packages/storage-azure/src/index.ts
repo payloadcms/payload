@@ -4,7 +4,7 @@ import type {
   CollectionOptions,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Plugin } from 'payload'
+import type { CollectionSlug, Config, Plugin } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 
@@ -30,7 +30,7 @@ export type AzureStorageOptions = {
   /**
    * Collection options to apply the Azure Blob adapter to.
    */
-  collections: Record<string, Omit<CollectionOptions, 'adapter'> | true>
+  collections: Partial<Record<CollectionSlug, Omit<CollectionOptions, 'adapter'> | true>>
 
   /**
    * Azure Blob storage connection string
