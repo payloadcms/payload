@@ -1,5 +1,5 @@
 import path from 'path'
-import { APIError, NotFound, type Payload } from 'payload'
+import { Locked, NotFound, type Payload } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -156,6 +156,7 @@ describe('Locked documents', () => {
       data: {
         text: 'updated post 2',
       },
+      overrideLock: false,
       id: newPost2.id,
     })
 
@@ -209,6 +210,7 @@ describe('Locked documents', () => {
       data: {
         globalText: 'global text 2',
       },
+      overrideLock: false,
       slug: menuSlug,
     })
 
@@ -269,15 +271,21 @@ describe('Locked documents', () => {
         data: {
           text: 'updated post',
         },
+        overrideLock: false, // necessary to trigger the lock check
         id: newPost.id,
       })
     } catch (error) {
-      expect(error).toBeInstanceOf(APIError)
+      expect(error).toBeInstanceOf(Locked)
       expect(error.message).toMatch(/currently locked by another user and cannot be updated/)
     }
 
+    const updatedPost = await payload.findByID({
+      collection: postsSlug,
+      id: newPost.id,
+    })
+
     // Should not allow update - expect data not to change
-    expect(newPost.text).toEqual('some post')
+    expect(updatedPost.text).toEqual('some post')
   })
 
   it('should not allow update of locked document - global', async () => {
@@ -300,15 +308,20 @@ describe('Locked documents', () => {
         data: {
           globalText: 'updated global text',
         },
+        overrideLock: false, // necessary to trigger the lock check
         slug: menuSlug,
       })
     } catch (error) {
-      expect(error).toBeInstanceOf(APIError)
+      expect(error).toBeInstanceOf(Locked)
       expect(error.message).toMatch(/currently locked by another user and cannot be updated/)
     }
 
+    const updatedGlobalMenu = await payload.findGlobal({
+      slug: menuSlug,
+    })
+
     // Should not allow update - expect data not to change
-    expect(menu.globalText).toEqual('global text')
+    expect(updatedGlobalMenu.globalText).toEqual('global text 2')
   })
 
   // Try to delete locked document (collection)
@@ -341,11 +354,21 @@ describe('Locked documents', () => {
       await payload.delete({
         collection: postsSlug,
         id: newPost3.id,
+        overrideLock: false, // necessary to trigger the lock check
       })
     } catch (error) {
-      expect(error).toBeInstanceOf(APIError)
+      expect(error).toBeInstanceOf(Locked)
       expect(error.message).toMatch(/currently locked and cannot be deleted/)
     }
+
+    const findPostDocs = await payload.find({
+      collection: postsSlug,
+      where: {
+        id: { equals: newPost3.id },
+      },
+    })
+
+    expect(findPostDocs.docs).toHaveLength(1)
   })
 
   it('should allow delete of stale locked document - collection', async () => {
@@ -381,12 +404,180 @@ describe('Locked documents', () => {
     await payload.delete({
       collection: postsSlug,
       id: newPost4.id,
+      overrideLock: false,
     })
 
     const findPostDocs = await payload.find({
       collection: postsSlug,
       where: {
         id: { equals: newPost4.id },
+      },
+    })
+
+    expect(findPostDocs.docs).toHaveLength(0)
+
+    // Check to make sure the document does not exist in payload-locked-documents anymore
+    try {
+      await payload.findByID({
+        collection: lockedDocumentCollection,
+        id: lockedDocInstance.id,
+      })
+    } catch (error) {
+      expect(error).toBeInstanceOf(NotFound)
+    }
+
+    const docsFromLocksCollection = await payload.find({
+      collection: lockedDocumentCollection,
+      where: {
+        id: { equals: lockedDocInstance.id },
+      },
+    })
+
+    expect(docsFromLocksCollection.docs).toHaveLength(0)
+  })
+
+  it('should allow update of locked document w/ overrideLock flag - collection', async () => {
+    const newPost5 = await payload.create({
+      collection: postsSlug,
+      data: {
+        text: 'new post 5',
+      },
+    })
+
+    // Give locking ownership to another user
+    const lockedDocInstance = await payload.create({
+      collection: lockedDocumentCollection,
+      data: {
+        editedAt: new Date().toISOString(),
+        user: {
+          relationTo: 'users',
+          value: user2.id,
+        },
+        document: {
+          relationTo: 'posts',
+          value: newPost5.id,
+        },
+        globalSlug: undefined,
+      },
+    })
+
+    const updateLockedDoc = await payload.update({
+      collection: postsSlug,
+      data: {
+        text: 'updated post 5',
+      },
+      id: newPost5.id,
+      overrideLock: true,
+    })
+
+    // Should allow update since using overrideLock flag
+    expect(updateLockedDoc.text).toEqual('updated post 5')
+
+    // Check to make sure the document does not exist in payload-locked-documents anymore
+    try {
+      await payload.findByID({
+        collection: lockedDocumentCollection,
+        id: lockedDocInstance.id,
+      })
+    } catch (error) {
+      expect(error).toBeInstanceOf(NotFound)
+    }
+
+    const docsFromLocksCollection = await payload.find({
+      collection: lockedDocumentCollection,
+      where: {
+        id: { equals: lockedDocInstance.id },
+      },
+    })
+
+    // Updating a document with the local API should not keep a stored doc
+    // in the payload-locked-documents collection
+    expect(docsFromLocksCollection.docs).toHaveLength(0)
+  })
+
+  it('should allow update of locked document w/ overrideLock flag - global', async () => {
+    // Give locking ownership to another user
+    const lockedGlobalInstance = await payload.create({
+      collection: lockedDocumentCollection,
+      data: {
+        editedAt: new Date().toISOString(),
+        globalSlug: menuSlug,
+        user: {
+          relationTo: 'users',
+          value: user2.id,
+        },
+        document: undefined,
+      },
+    })
+
+    const updateGlobalLockedDoc = await payload.updateGlobal({
+      data: {
+        globalText: 'updated global text 2',
+      },
+      slug: menuSlug,
+      overrideLock: true,
+    })
+
+    // Should allow update since using overrideLock flag
+    expect(updateGlobalLockedDoc.globalText).toEqual('updated global text 2')
+
+    // Check to make sure the document does not exist in payload-locked-documents anymore
+    try {
+      await payload.findByID({
+        collection: lockedDocumentCollection,
+        id: lockedGlobalInstance.id,
+      })
+    } catch (error) {
+      expect(error).toBeInstanceOf(NotFound)
+    }
+
+    const docsFromLocksCollection = await payload.find({
+      collection: lockedDocumentCollection,
+      where: {
+        id: { equals: lockedGlobalInstance.id },
+      },
+    })
+
+    // Updating a document with the local API should not keep a stored doc
+    // in the payload-locked-documents collection
+    expect(docsFromLocksCollection.docs).toHaveLength(0)
+  })
+
+  it('should allow delete of locked document w/ overrideLock flag - collection', async () => {
+    const newPost6 = await payload.create({
+      collection: postsSlug,
+      data: {
+        text: 'new post 6',
+      },
+    })
+
+    // Give locking ownership to another user
+    const lockedDocInstance = await payload.create({
+      collection: lockedDocumentCollection,
+      data: {
+        editedAt: new Date().toISOString(),
+        user: {
+          relationTo: 'users',
+          value: user2.id,
+        },
+        document: {
+          relationTo: 'posts',
+          value: newPost6.id,
+        },
+        globalSlug: undefined,
+      },
+    })
+
+    await payload.delete({
+      collection: postsSlug,
+      id: newPost6.id,
+      overrideLock: true,
+    })
+
+    const findPostDocs = await payload.find({
+      collection: postsSlug,
+      where: {
+        id: { equals: newPost6.id },
       },
     })
 
