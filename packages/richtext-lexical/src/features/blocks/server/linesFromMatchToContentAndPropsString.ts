@@ -29,7 +29,7 @@ export function linesFromStartToContentAndPropsString({
 } {
   let propsString = ''
   let content = ''
-  const linesCopy = [...lines]
+  const linesCopy = lines.slice(startLineIndex)
 
   let isWithinContent = false // If false => is within prop
   let contentSubStartMatchesAmount = 0
@@ -39,15 +39,15 @@ export function linesFromStartToContentAndPropsString({
   let isSelfClosing = false
   let isWithinCodeBlockAmount = 0
 
-  const beforeStartLine = linesCopy[startLineIndex].slice(0, startMatch.index)
+  const beforeStartLine = linesCopy[0].slice(0, startMatch.index)
   let endlineLastCharIndex = 0
 
-  mainLoop: for (let lineIndex = startLineIndex; lineIndex < linesLength; lineIndex++) {
+  mainLoop: for (let lineIndex = 0; lineIndex < linesLength; lineIndex++) {
     const line = linesCopy[lineIndex].trim()
 
     let charIndex = 0
 
-    if (lineIndex === startLineIndex) {
+    if (lineIndex === 0) {
       charIndex = startMatch.index + startMatch[0].length // We need to also loop over the ">" in something like "<InlineCode>" in order to later set isWithinContent to true
     }
 
@@ -145,7 +145,13 @@ export function linesFromStartToContentAndPropsString({
   propsString = propsString.replace(/\n/g, ' ').trim()
   //console.log('Result:', { content, endLineIndex, lines, propsString })
 
-  const afterEndLine = lines[endLineIndex].trim().slice(endlineLastCharIndex)
+  const afterEndLine = linesCopy[endLineIndex].trim().slice(endlineLastCharIndex)
 
-  return { afterEndLine, beforeStartLine, content, endLineIndex, propsString }
+  return {
+    afterEndLine,
+    beforeStartLine,
+    content,
+    endLineIndex: startLineIndex + endLineIndex,
+    propsString,
+  }
 }
