@@ -21,6 +21,7 @@ const baseOptions = []
 export const SelectComparison: React.FC<Props> = (props) => {
   const {
     baseURL,
+    draftsEnabled,
     latestDraftVersion,
     latestPublishedVersion,
     onChange,
@@ -32,6 +33,7 @@ export const SelectComparison: React.FC<Props> = (props) => {
   const {
     config: {
       admin: { dateFormat },
+      localization,
     },
   } = useConfig()
 
@@ -45,9 +47,6 @@ export const SelectComparison: React.FC<Props> = (props) => {
   const [errorLoading, setErrorLoading] = useState('')
   const { i18n, t } = useTranslation()
   const loadedAllOptionsRef = React.useRef(false)
-  const {
-    config: { localization },
-  } = useConfig()
 
   const getResults = useCallback(
     async ({ lastLoadedPage: lastLoadedPageArg }) => {
@@ -68,11 +67,6 @@ export const SelectComparison: React.FC<Props> = (props) => {
                 not_equals: versionID,
               },
             },
-            {
-              snapshot: {
-                not_equals: true,
-              },
-            },
           ],
         },
       }
@@ -81,6 +75,14 @@ export const SelectComparison: React.FC<Props> = (props) => {
         query.where.and.push({
           parent: {
             equals: parentID,
+          },
+        })
+      }
+
+      if (localization && draftsEnabled) {
+        query.where.and.push({
+          snapshot: {
+            not_equals: true,
           },
         })
       }

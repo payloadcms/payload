@@ -35,6 +35,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
   const { limit, page, sort } = searchParams
 
   const {
+    localization,
     routes: { api: apiRoute },
     serverURL,
   } = config
@@ -46,6 +47,26 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
 
   if (collectionSlug) {
     limitToUse = limitToUse || collectionConfig.admin.pagination.defaultLimit
+    const whereQuery: {
+      and: Array<{ parent?: { equals: string }; snapshot?: { not_equals: boolean } }>
+    } = {
+      and: [
+        {
+          parent: {
+            equals: id,
+          },
+        },
+      ],
+    }
+
+    if (localization && collectionConfig?.versions?.drafts) {
+      whereQuery.and.push({
+        snapshot: {
+          not_equals: true,
+        },
+      })
+    }
+
     try {
       versionsData = await payload.findVersions({
         collection: collectionSlug,
@@ -56,20 +77,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
         req,
         sort: sort as string,
         user,
-        where: {
-          and: [
-            {
-              parent: {
-                equals: id,
-              },
-            },
-            {
-              snapshot: {
-                not_equals: true,
-              },
-            },
-          ],
-        },
+        where: whereQuery,
       })
       if (collectionConfig?.versions?.drafts) {
         latestDraftVersion = await getLatestVersion({
@@ -92,6 +100,15 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
 
   if (globalSlug) {
     limitToUse = limitToUse || 10
+    const whereQuery =
+      localization && globalConfig?.versions?.drafts
+        ? {
+            snapshot: {
+              not_equals: true,
+            },
+          }
+        : {}
+
     try {
       versionsData = await payload.findGlobalVersions({
         slug: globalSlug,
@@ -102,11 +119,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
         req,
         sort: sort as string,
         user,
-        where: {
-          snapshot: {
-            not_equals: true,
-          },
-        },
+        where: whereQuery,
       })
 
       if (globalConfig?.versions?.drafts) {
