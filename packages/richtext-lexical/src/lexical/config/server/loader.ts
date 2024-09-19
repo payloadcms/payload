@@ -188,9 +188,9 @@ export async function loadFeatures({
         : featureProvider.feature
     resolvedFeatures.set(featureProvider.key, {
       ...feature,
-      dependencies: featureProvider.dependencies,
-      dependenciesPriority: featureProvider.dependenciesPriority,
-      dependenciesSoft: featureProvider.dependenciesSoft,
+      dependencies: featureProvider.dependencies!,
+      dependenciesPriority: featureProvider.dependenciesPriority!,
+      dependenciesSoft: featureProvider.dependenciesSoft!,
       key: featureProvider.key,
       order: loaded,
     })

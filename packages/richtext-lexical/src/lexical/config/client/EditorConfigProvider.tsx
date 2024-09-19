@@ -31,6 +31,7 @@ export interface EditorConfigContextType {
   uuid: string
 }
 
+// @ts-expect-error: TODO: Fix this
 const Context: React.Context<EditorConfigContextType> = createContext({
   editorConfig: null,
   field: null,
@@ -87,7 +88,7 @@ export const EditorConfigProvider = ({
           if (parentContext?.uuid) {
             parentContext.focusEditor(editorContext)
           }
-          childrenEditors.current.forEach((childEditor, childUUID) => {
+          childrenEditors.current.forEach((childEditor) => {
             childEditor.focusEditor(editorContext)
           })
 
