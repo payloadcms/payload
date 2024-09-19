@@ -5,7 +5,6 @@ import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { Field } from './types.js'
 
 import {
-  APIError,
   DuplicateFieldName,
   InvalidFieldName,
   InvalidFieldRelationship,
@@ -17,6 +16,7 @@ import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
 import { setDefaultBeforeDuplicate } from '../setDefaultBeforeDuplicate.js'
 import validations from '../validations.js'
+import { sanitizeJoinField } from './sanitizeJoinField.js'
 import { fieldAffectsData, tabHasName } from './types.js'
 
 type Args = {
@@ -103,22 +103,7 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'join') {
-      // the `joins` arg is not passed for globals or for when recursing on fields that do not allow a join field
-      if (typeof joins === 'undefined') {
-        throw new APIError('Join fields cannot be added to arrays, blocks or globals.')
-      }
-      if (!field.maxDepth) {
-        field.maxDepth = 1
-      }
-      const join = {
-        field,
-        schemaPath: `${schemaPath || ''}${schemaPath ? '.' : ''}${field.name}`,
-      }
-      if (!joins[field.collection]) {
-        joins[field.collection] = [join]
-      } else {
-        joins[field.collection].push(join)
-      }
+      sanitizeJoinField({ config, field, joins, schemaPath })
     }
 
     if (field.type === 'relationship' || field.type === 'upload') {
