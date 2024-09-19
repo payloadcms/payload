@@ -326,7 +326,7 @@ export type CreateVersion = <T extends TypeWithID = TypeWithID>(
 export type CreateGlobalVersionArgs<T = TypeWithID> = {
   autosave: boolean
   createdAt: string
-  globalSlug: string
+  globalSlug: GlobalSlug
   /** ID of the parent document for which the version should be created for */
   parent: number | string
   publishedLocale?: string
