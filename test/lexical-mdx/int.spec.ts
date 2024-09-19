@@ -178,6 +178,34 @@ describe('Lexical MDX', () => {
         },
       },
     },
+    {
+      inputAfterConvertFromEditorJSON: `<PackageInstallOptions packageId="444" update/>`,
+
+      input: `
+<PackageInstallOptions
+  update
+  packageId="444"
+>
+  ignored
+  <PackageInstallOptions
+    update
+    packageId="444"
+    someNestedObject={{test: "hello"}} test={4}
+  >
+    ignoredi
+  </PackageInstallOptions>
+  <TagThatImmediatelyClosesShouldBeCorrectlyHandledByContentSubTagStartAmount />
+  <Tag2 test="hello" />
+</PackageInstallOptions>
+`,
+      blockNode: {
+        fields: {
+          blockType: 'PackageInstallOptions',
+          packageId: '444',
+          update: true,
+        },
+      },
+    },
     // TODO: Write test for this:
     /*
 <PackageInstallOptions

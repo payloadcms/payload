@@ -28,7 +28,7 @@ export function linesFromStartToContentAndPropsString({
   const linesCopy = lines.slice(startLineIndex)
 
   let isWithinContent = false // If false => is within prop
-  let contentSubStartMatchesAmount = 0
+  let contentSubTagStartAmount = 0
 
   let bracketCount = 0
   let quoteChar = null
@@ -48,8 +48,6 @@ export function linesFromStartToContentAndPropsString({
     if (lineIndex === 0) {
       charIndex = startMatch.index + startMatch[0].length // We need to also loop over the ">" in something like "<InlineCode>" in order to later set isWithinContent to true
     }
-
-    let contentSubStartMatchesAmountReduced = false
 
     while (charIndex < line.length) {
       const char = line[charIndex]
@@ -85,10 +83,10 @@ export function linesFromStartToContentAndPropsString({
         }
 
         if (isWithinCodeBlockAmount % 2 === 0) {
-          if (char === '<' && line.slice(charIndex).startsWith('</')) {
-            contentSubStartMatchesAmount--
-            contentSubStartMatchesAmountReduced = true
-            if (contentSubStartMatchesAmount < 0) {
+          if (char === '<' && nextChar === '/') {
+            contentSubTagStartAmount--
+
+            if (contentSubTagStartAmount < 0) {
               if (content[content.length - 1] === '\n') {
                 content = content.slice(0, -1) // Remove the last newline
               }
@@ -103,8 +101,19 @@ export function linesFromStartToContentAndPropsString({
               }
               break mainLoop
             }
-          } else if (char === '<' && !line.slice(charIndex).startsWith('</')) {
-            contentSubStartMatchesAmount++
+          } else if (char === '/' && nextChar === '>') {
+            contentSubTagStartAmount--
+
+            if (contentSubTagStartAmount < 0) {
+              if (content[content.length - 1] === '\n') {
+                content = content.slice(0, -1) // Remove the last newline
+              }
+              endLineIndex = lineIndex
+              endlineLastCharIndex = charIndex + 2
+              break mainLoop
+            }
+          } else if (char === '<' && nextChar !== '/') {
+            contentSubTagStartAmount++
           }
         }
 
@@ -120,11 +129,7 @@ export function linesFromStartToContentAndPropsString({
       propsString += '\n'
     }
 
-    if (
-      regexpEndRegex &&
-      contentSubStartMatchesAmount <= 0 &&
-      !(contentSubStartMatchesAmount === 0 && contentSubStartMatchesAmountReduced)
-    ) {
+    if (regexpEndRegex && contentSubTagStartAmount < 0) {
       // If 0 and in same line where it got lowered to 0 then this is not the match we are looking for
       const match = line.match(regexpEndRegex)
       if (match?.index !== undefined) {
