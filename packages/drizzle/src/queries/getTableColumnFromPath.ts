@@ -1,13 +1,6 @@
 import type { SQL } from 'drizzle-orm'
 import type { SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core'
-import type {
-  Field,
-  FieldAffectingData,
-  NumberField,
-  Operator,
-  TabAsField,
-  TextField,
-} from 'payload'
+import type { Field, FieldAffectingData, NumberField, TabAsField, TextField } from 'payload'
 
 import { and, eq, like, sql } from 'drizzle-orm'
 import { type PgTableWithColumns } from 'drizzle-orm/pg-core'
