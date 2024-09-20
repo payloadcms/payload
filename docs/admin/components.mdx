@@ -276,7 +276,8 @@ The following options are available:
 | **`graphics.Icon`**   | The simplified logo used in contexts like the the `Nav` component.                                                                                                                                                  |
 | **`graphics.Logo`**   | The full logo used in contexts like the `Login` view.                                                                                                                                                               |
 | **`providers`**       | Custom [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) providers that will wrap the entire Admin Panel. [More details](#custom-providers).                                       |
-| **`actions`**         | An array of Custom Components to be rendered in the header of the Admin Panel, providing additional interactivity and functionality.                                                                  |
+| **`actions`**         | An array of Custom Components to be rendered _within_ the header of the Admin Panel, providing additional interactivity and functionality.                                                                  |
+| **`header`**          | An array of Custom Components to be injected above the Payload header.                                                   |
 | **`views`**           | Override or create new views within the Admin Panel. [More details](./views).                                                                                                                                 |
 
 <Banner type="success">
@@ -356,7 +357,7 @@ Each Custom Component receives the following props by default:
 | Prop                      | Description                                                                                           |
 | ------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `payload`                 | The [Payload](../local-api/overview) class.                                                           |
-| `i18n`                    | The [i18n](../i18n) object.                                                                           |
+| `i18n`                    | The [i18n](../configuration/i18n) object.                                                                           |
 
 Custom Components also receive various other props that are specific to the context in which the Custom Component is being rendered. For example, [Custom Views](./views) receive the `user` prop. For a full list of available props, consult the documentation related to the specific component you are working with.
 
@@ -431,14 +432,14 @@ export const MyClientComponent: React.FC = () => {
   See [Using Hooks](#using-hooks) for more details.
 </Banner>
 
-All [Field Components](./fields) automatically receive their respective Client Field Config through a common [`field`](./fields#the-field-prop) prop:
+All [Field Components](./fields) automatically receive their respective Field Config through a common [`field`](./fields#the-field-prop) prop:
 
 ```tsx
 'use client'
 import React from 'react'
-import type { TextFieldProps } from 'payload'
+import type { TextFieldClientComponent } from 'payload'
 
-export const MyClientFieldComponent: TextFieldProps = ({ field: { name } }) => {
+export const MyClientFieldComponent: TextFieldClientComponent = ({ field: { name } }) => {
   return (
     <p>
       {`This field's name is ${name}`}

@@ -1,5 +1,6 @@
 import type {
   Data,
+  FormState,
   Locale,
   PayloadRequest,
   SanitizedCollectionConfig,
@@ -16,13 +17,16 @@ export const getDocumentData = async (args: {
   locale: Locale
   req: PayloadRequest
   schemaPath?: string
-}): Promise<Data> => {
+}): Promise<{
+  data: Data
+  formState: FormState
+}> => {
   const { id, collectionConfig, globalConfig, locale, req, schemaPath: schemaPathFromProps } = args
 
   const schemaPath = schemaPathFromProps || collectionConfig?.slug || globalConfig?.slug
 
   try {
-    const formState = await buildFormState({
+    const { state: formState } = await buildFormState({
       req: {
         ...req,
         data: {
@@ -44,6 +48,15 @@ export const getDocumentData = async (args: {
     }
   } catch (error) {
     console.error('Error getting document data', error) // eslint-disable-line no-console
-    return {}
+    return {
+      data: null,
+      formState: {
+        fields: {
+          initialValue: undefined,
+          valid: false,
+          value: undefined,
+        },
+      },
+    }
   }
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import type { FieldType, Options } from '@payloadcms/ui'
-import type { TextFieldProps } from 'payload'
+import type { TextFieldClientProps } from 'payload'
 
 import {
   FieldLabel,
@@ -26,7 +26,7 @@ const { maxLength, minLength } = defaults.title
 
 type MetaTitleProps = {
   readonly hasGenerateTitleFn: boolean
-} & TextFieldProps
+} & TextFieldClientProps
 
 export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const {
@@ -62,16 +62,17 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
     const genTitleResponse = await fetch('/api/plugin-seo/generate-title', {
       body: JSON.stringify({
         id: docInfo.id,
-        slug: docInfo.slug,
+        collectionSlug: docInfo.collectionSlug,
         doc: getData(),
         docPermissions: docInfo.docPermissions,
+        globalSlug: docInfo.globalSlug,
         hasPublishPermission: docInfo.hasPublishPermission,
         hasSavePermission: docInfo.hasSavePermission,
         initialData: docInfo.initialData,
         initialState: docInfo.initialState,
         locale: typeof locale === 'object' ? locale?.code : locale,
         title: docInfo.title,
-      } satisfies Omit<Parameters<GenerateTitle>[0], 'req'>),
+      } satisfies Omit<Parameters<GenerateTitle>[0], 'collectionConfig' | 'globalConfig' | 'req'>),
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',

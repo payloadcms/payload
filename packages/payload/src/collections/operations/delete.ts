@@ -12,6 +12,7 @@ import { APIError } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
+import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -22,6 +23,7 @@ export type Arguments = {
   collection: Collection
   depth?: number
   overrideAccess?: boolean
+  overrideLock?: boolean
   req: PayloadRequest
   showHiddenFields?: boolean
   where: Where
@@ -64,6 +66,7 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
       collection: { config: collectionConfig },
       depth,
       overrideAccess,
+      overrideLock,
       req: {
         fallbackLocale,
         locale,
@@ -117,6 +120,18 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
       const { id } = doc
 
       try {
+        // /////////////////////////////////////
+        // Handle potentially locked documents
+        // /////////////////////////////////////
+
+        await checkDocumentLockStatus({
+          id,
+          collectionSlug: collectionConfig.slug,
+          lockErrorMessage: `Document with ID ${id} is currently locked and cannot be deleted.`,
+          overrideLock,
+          req,
+        })
+
         // /////////////////////////////////////
         // beforeDelete - Collection
         // /////////////////////////////////////

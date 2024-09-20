@@ -18,7 +18,6 @@ import { toast } from 'sonner'
 
 import type { Props } from './types.js'
 
-import { MinimalTemplate } from '../../../templates/Minimal/index.js'
 import './index.scss'
 
 const baseClass = 'restore-version'
@@ -123,20 +122,25 @@ const Restore: React.FC<Props> = ({
         )}
       </div>
       <Modal className={`${baseClass}__modal`} slug={modalSlug}>
-        <MinimalTemplate className={`${baseClass}__modal-template`}>
-          <h1>{t('version:confirmVersionRestoration')}</h1>
-          <p>{restoreMessage}</p>
-          <Button
-            buttonStyle="secondary"
-            onClick={processing ? undefined : () => toggleModal(modalSlug)}
-            type="button"
-          >
-            {t('general:cancel')}
-          </Button>
-          <Button onClick={processing ? undefined : () => void handleRestore()}>
-            {processing ? t('version:restoring') : t('general:confirm')}
-          </Button>
-        </MinimalTemplate>
+        <div className={`${baseClass}__wrapper`}>
+          <div className={`${baseClass}__content`}>
+            <h1>{t('version:confirmVersionRestoration')}</h1>
+            <p>{restoreMessage}</p>
+          </div>
+          <div className={`${baseClass}__controls`}>
+            <Button
+              buttonStyle="secondary"
+              onClick={processing ? undefined : () => toggleModal(modalSlug)}
+              size="large"
+              type="button"
+            >
+              {t('general:cancel')}
+            </Button>
+            <Button onClick={processing ? undefined : () => void handleRestore()}>
+              {processing ? t('version:restoring') : t('general:confirm')}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </Fragment>
   )

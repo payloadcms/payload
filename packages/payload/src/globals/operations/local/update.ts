@@ -16,6 +16,8 @@ export type Options<TSlug extends GlobalSlug> = {
   fallbackLocale?: TypedLocale
   locale?: TypedLocale
   overrideAccess?: boolean
+  overrideLock?: boolean
+  publishSpecificLocale?: TypedLocale
   req?: PayloadRequest
   showHiddenFields?: boolean
   slug: TSlug
@@ -26,7 +28,16 @@ export default async function updateLocal<TSlug extends GlobalSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<DataFromGlobalSlug<TSlug>> {
-  const { slug: globalSlug, data, depth, draft, overrideAccess = true, showHiddenFields } = options
+  const {
+    slug: globalSlug,
+    data,
+    depth,
+    draft,
+    overrideAccess = true,
+    overrideLock,
+    publishSpecificLocale,
+    showHiddenFields,
+  } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
 
@@ -41,6 +52,8 @@ export default async function updateLocal<TSlug extends GlobalSlug>(
     draft,
     globalConfig,
     overrideAccess,
+    overrideLock,
+    publishSpecificLocale,
     req: await createLocalReq(options, payload),
     showHiddenFields,
   })

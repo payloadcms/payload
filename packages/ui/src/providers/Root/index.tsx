@@ -58,9 +58,12 @@ export const RootProvider: React.FC<Props> = ({
   translations,
   user,
 }) => {
+  const RouteCacheComponent =
+    process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true' ? RouteCache : Fragment
+
   return (
     <Fragment>
-      <RouteCache>
+      <RouteCacheComponent>
         <ConfigProvider config={config}>
           <FieldComponentsProvider fieldComponents={fieldComponents}>
             <ClientFunctionProvider>
@@ -114,7 +117,7 @@ export const RootProvider: React.FC<Props> = ({
             </ClientFunctionProvider>
           </FieldComponentsProvider>
         </ConfigProvider>
-      </RouteCache>
+      </RouteCacheComponent>
       <ToastContainer />
     </Fragment>
   )

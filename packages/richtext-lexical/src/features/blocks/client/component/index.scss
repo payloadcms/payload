@@ -81,6 +81,9 @@
 
   &__removeButton.btn {
     margin: 0;
+    &:hover {
+      background-color: var(--theme-elevation-200);
+    }
   }
 
   &__block-header {

@@ -1,5 +1,5 @@
 'use client'
-import type { JSONFieldProps } from 'payload'
+import type { JSONFieldClientComponent } from 'payload'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -17,7 +17,7 @@ import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 
-const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
+const JSONFieldComponent: JSONFieldClientComponent = (props) => {
   const {
     descriptionProps,
     errorProps,
@@ -133,13 +133,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        field={field}
-        Label={field?.admin?.components?.Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel field={field} Label={field?.admin?.components?.Label} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError
           CustomError={field?.admin?.components?.Error}

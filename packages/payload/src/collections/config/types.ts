@@ -29,7 +29,7 @@ import type {
   StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
-import type { Field } from '../../fields/config/types.js'
+import type { Field, JoinField } from '../../fields/config/types.js'
 import type {
   CollectionSlug,
   JsonObject,
@@ -437,6 +437,15 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
     plural?: LabelFunction | StaticLabel
     singular?: LabelFunction | StaticLabel
   }
+  /**
+   * Enables / Disables the ability to lock documents while editing
+   * @default true
+   */
+  lockDocuments?:
+    | {
+        duration: number
+      }
+    | false
   slug: string
   /**
    * Add `createdAt` and `updatedAt` fields
@@ -469,6 +478,21 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   versions?: boolean | IncomingCollectionVersions
 }
 
+export type SanitizedJoin = {
+  /**
+   * The field configuration defining the join
+   */
+  field: JoinField
+  /**
+   * The schemaPath of the join field in dot notation
+   */
+  schemaPath: string
+}
+
+export type SanitizedJoins = {
+  [collectionSlug: string]: SanitizedJoin[]
+}
+
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
@@ -477,6 +501,10 @@ export interface SanitizedCollectionConfig
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
+  /**
+   * Object of collections to join 'Join Fields object keyed by collection
+   */
+  joins: SanitizedJoins
   upload: SanitizedUploadConfig
   versions: SanitizedCollectionVersions
 }
@@ -509,6 +537,7 @@ export type AuthCollection = {
 }
 
 export type TypeWithID = {
+  docId?: any
   id: number | string
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/translations",
-  "version": "3.0.0-beta.99",
+  "version": "3.0.0-beta.107",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -50,11 +50,11 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@swc/core": "1.7.10",
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "dotenv": "16.4.5",
     "prettier": "3.3.3",
-    "typescript": "5.5.4"
+    "typescript": "5.6.2"
   },
   "publishConfig": {
     "exports": {
@@ -83,7 +83,7 @@
     "types": "./dist/exports/index.d.ts"
   },
   "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }

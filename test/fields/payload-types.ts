@@ -61,6 +61,7 @@ export interface Config {
     'uploads-poly': UploadsPoly;
     'uploads-multi-poly': UploadsMultiPoly;
     'ui-fields': UiField;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -345,6 +346,17 @@ export interface ArrayField {
   disableSort?:
     | {
         text: string;
+        id?: string | null;
+      }[]
+    | null;
+  nestedArrayLocalized?:
+    | {
+        array?:
+          | {
+              text?: string | null;
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
       }[]
     | null;
@@ -931,6 +943,20 @@ export interface GroupField {
       };
     };
   };
+  camelCaseGroup?: {
+    array?:
+      | {
+          text?: string | null;
+          array?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -943,8 +969,15 @@ export interface RowField {
   title: string;
   field_with_width_a?: string | null;
   field_with_width_b?: string | null;
+  field_with_width_30_percent?: string | null;
+  field_with_width_60_percent?: string | null;
+  field_with_width_20_percent?: string | null;
   field_within_collapsible_a?: string | null;
   field_within_collapsible_b?: string | null;
+  field_20_percent_width_within_row_a?: string | null;
+  no_set_width_within_row_b?: string | null;
+  no_set_width_within_row_c?: string | null;
+  field_20_percent_width_within_row_d?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1367,6 +1400,20 @@ export interface TabsField {
     afterChange?: boolean | null;
     afterRead?: boolean | null;
   };
+  camelCaseTab?: {
+    array?:
+      | {
+          text?: string | null;
+          array?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
   textarea?: string | null;
   anotherText: string;
   nestedTab?: {
@@ -1523,6 +1570,153 @@ export interface UploadsMultiPoly {
 export interface UiField {
   id: string;
   text: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'lexical-fields';
+        value: string | LexicalField;
+      } | null)
+    | ({
+        relationTo: 'lexical-migrate-fields';
+        value: string | LexicalMigrateField;
+      } | null)
+    | ({
+        relationTo: 'lexical-localized-fields';
+        value: string | LexicalLocalizedField;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'array-fields';
+        value: string | ArrayField;
+      } | null)
+    | ({
+        relationTo: 'block-fields';
+        value: string | BlockField;
+      } | null)
+    | ({
+        relationTo: 'checkbox-fields';
+        value: string | CheckboxField;
+      } | null)
+    | ({
+        relationTo: 'code-fields';
+        value: string | CodeField;
+      } | null)
+    | ({
+        relationTo: 'collapsible-fields';
+        value: string | CollapsibleField;
+      } | null)
+    | ({
+        relationTo: 'conditional-logic';
+        value: string | ConditionalLogic;
+      } | null)
+    | ({
+        relationTo: 'date-fields';
+        value: string | DateField;
+      } | null)
+    | ({
+        relationTo: 'email-fields';
+        value: string | EmailField;
+      } | null)
+    | ({
+        relationTo: 'radio-fields';
+        value: string | RadioField;
+      } | null)
+    | ({
+        relationTo: 'group-fields';
+        value: string | GroupField;
+      } | null)
+    | ({
+        relationTo: 'row-fields';
+        value: string | RowField;
+      } | null)
+    | ({
+        relationTo: 'indexed-fields';
+        value: string | IndexedField;
+      } | null)
+    | ({
+        relationTo: 'json-fields';
+        value: string | JsonField;
+      } | null)
+    | ({
+        relationTo: 'number-fields';
+        value: string | NumberField;
+      } | null)
+    | ({
+        relationTo: 'point-fields';
+        value: string | PointField;
+      } | null)
+    | ({
+        relationTo: 'relationship-fields';
+        value: string | RelationshipField;
+      } | null)
+    | ({
+        relationTo: 'lexical-relationship-fields';
+        value: string | LexicalRelationshipField;
+      } | null)
+    | ({
+        relationTo: 'rich-text-fields';
+        value: string | RichTextField;
+      } | null)
+    | ({
+        relationTo: 'select-fields';
+        value: string | SelectField;
+      } | null)
+    | ({
+        relationTo: 'tabs-fields-2';
+        value: string | TabsFields2;
+      } | null)
+    | ({
+        relationTo: 'tabs-fields';
+        value: string | TabsField;
+      } | null)
+    | ({
+        relationTo: 'text-fields';
+        value: string | TextField;
+      } | null)
+    | ({
+        relationTo: 'uploads';
+        value: string | Upload;
+      } | null)
+    | ({
+        relationTo: 'uploads2';
+        value: string | Uploads2;
+      } | null)
+    | ({
+        relationTo: 'uploads3';
+        value: string | Uploads3;
+      } | null)
+    | ({
+        relationTo: 'uploads-multi';
+        value: string | UploadsMulti;
+      } | null)
+    | ({
+        relationTo: 'uploads-poly';
+        value: string | UploadsPoly;
+      } | null)
+    | ({
+        relationTo: 'uploads-multi-poly';
+        value: string | UploadsMultiPoly;
+      } | null)
+    | ({
+        relationTo: 'ui-fields';
+        value: string | UiField;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
   updatedAt: string;
   createdAt: string;
 }

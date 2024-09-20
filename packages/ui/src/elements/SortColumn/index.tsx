@@ -5,11 +5,11 @@ import React from 'react'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
-import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
 export type SortColumnProps = {
+  readonly appearance?: 'condensed' | 'default'
   readonly disable?: boolean
   readonly Label: React.ReactNode
   readonly label?: FieldBase['label']
@@ -19,12 +19,11 @@ export type SortColumnProps = {
 const baseClass = 'sort-column'
 
 export const SortColumn: React.FC<SortColumnProps> = (props) => {
-  const { name, disable = false, Label, label } = props
-  const { searchParams } = useSearchParams()
-  const { handleSortChange } = useListQuery()
+  const { name, appearance, disable = false, Label, label } = props
+  const { handleSortChange, params } = useListQuery()
   const { t } = useTranslation()
 
-  const { sort } = searchParams
+  const { sort } = params
 
   const desc = `-${name}`
   const asc = name
@@ -40,7 +39,11 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
   }
 
   return (
-    <div className={baseClass}>
+    <div
+      className={[baseClass, appearance && `${baseClass}--appearance-${appearance}`]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <span className={`${baseClass}__label`}>{Label}</span>
       {!disable && (
         <div className={`${baseClass}__buttons`}>

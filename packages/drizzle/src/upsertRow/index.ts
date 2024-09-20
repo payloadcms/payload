@@ -20,6 +20,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   db,
   fields,
   ignoreResult,
+  joinQuery,
   operation,
   path = '',
   req,
@@ -413,6 +414,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     adapter,
     depth: 0,
     fields,
+    joinQuery,
     tableName,
   })
 
@@ -429,6 +431,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     config: adapter.payload.config,
     data: doc,
     fields,
+    joinQuery,
   })
 
   return result

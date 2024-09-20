@@ -17,7 +17,6 @@ type Args = {
    * The original data with locales (not modified by any hooks)
    */
   docWithLocales: JsonObject
-  duplicate: boolean
   errors: { field: string; message: string }[]
   fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
@@ -54,7 +53,6 @@ export const traverseFields = async ({
   data,
   doc,
   docWithLocales,
-  duplicate,
   errors,
   fields,
   global,
@@ -79,7 +77,6 @@ export const traverseFields = async ({
         data,
         doc,
         docWithLocales,
-        duplicate,
         errors,
         field,
         global,

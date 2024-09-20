@@ -21,6 +21,10 @@
   }
 
   &__drawer-toggler {
+    border: none;
+    background-color: transparent;
+    padding: 0;
+    cursor: pointer;
     position: relative;
     display: inline-flex;
     align-items: center;

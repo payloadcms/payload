@@ -6,10 +6,13 @@
  * @returns {import('next').NextConfig}
  * */
 export const withPayload = (nextConfig = {}, { adminRoute = '/admin' } = {}) => {
+  const env = nextConfig?.env || {}
+
   if (nextConfig.experimental?.staleTimes?.dynamic) {
     console.warn(
-      'Payload detected a non-zero value for the `staleTimes.dynamic` option in your Next.js config. This may cause stale data to load in the Admin Panel. To clear this warning, remove the `staleTimes.dynamic` option from your Next.js config or set it to 0. In the future, Next.js may support scoping this option to specific routes.',
+      'Payload detected a non-zero value for the `staleTimes.dynamic` option in your Next.js config. This will slow down page transitions and may cause stale data to load within the Admin panel. To clear this warning, remove the `staleTimes.dynamic` option from your Next.js config or set it to 0. In the future, Next.js may support scoping this option to specific routes.',
     )
+    env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH = 'true'
   }
 
   /**
@@ -17,9 +20,7 @@ export const withPayload = (nextConfig = {}, { adminRoute = '/admin' } = {}) => 
    */
   const toReturn = {
     ...nextConfig,
-    env: {
-      ...(nextConfig?.env || {}),
-    },
+    env,
     outputFileTracingExcludes: {
       ...(nextConfig?.outputFileTracingExcludes || {}),
       '**/*': [

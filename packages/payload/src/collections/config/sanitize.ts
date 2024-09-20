@@ -1,6 +1,6 @@
 import type { LoginWithUsernameOptions } from '../../auth/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
-import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
+import type { CollectionConfig, SanitizedCollectionConfig, SanitizedJoins } from './types.js'
 
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
@@ -14,6 +14,7 @@ import baseVersionFields from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { authDefaults, defaults, loginWithUsernameDefaults } from './defaults.js'
 import { sanitizeAuthFields, sanitizeUploadFields } from './reservedFieldNames.js'
+import { validateUseAsTitle } from './useAsTitle.js'
 
 export const sanitizeCollection = async (
   config: Config,
@@ -35,12 +36,15 @@ export const sanitizeCollection = async (
   // /////////////////////////////////
 
   const validRelationships = config.collections.map((c) => c.slug) || []
+  const joins: SanitizedJoins = {}
   sanitized.fields = await sanitizeFields({
     collectionConfig: sanitized,
     config,
     fields: sanitized.fields,
+    joins,
     parentIsLocalized: false,
     richTextSanitizationPromises,
+    schemaPath: '',
     validRelationships,
   })
 
@@ -190,5 +194,11 @@ export const sanitizeCollection = async (
     sanitized.admin.pagination.limits = collection.admin.pagination.limits
   }
 
-  return sanitized as SanitizedCollectionConfig
+  validateUseAsTitle(sanitized)
+
+  const sanitizedConfig = sanitized as SanitizedCollectionConfig
+
+  sanitizedConfig.joins = joins
+
+  return sanitizedConfig
 }

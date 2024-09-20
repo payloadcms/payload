@@ -2,7 +2,7 @@ import type { IndexOptions, Schema, SchemaOptions, SchemaTypeOptions } from 'mon
 import type {
   ArrayField,
   Block,
-  BlockField,
+  BlocksField,
   CheckboxField,
   CodeField,
   CollapsibleField,
@@ -34,6 +34,7 @@ import {
   fieldAffectsData,
   fieldIsLocalized,
   fieldIsPresentationalOnly,
+  fieldIsVirtual,
   tabHasName,
 } from 'payload/shared'
 
@@ -136,6 +137,10 @@ export const buildSchema = (
   const schema = new mongoose.Schema(fields, options)
 
   schemaFields.forEach((field) => {
+    if (fieldIsVirtual(field)) {
+      return
+    }
+
     if (!fieldIsPresentationalOnly(field)) {
       const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[field.type]
 
@@ -176,7 +181,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     })
   },
   blocks: (
-    field: BlockField,
+    field: BlocksField,
     schema: Schema,
     config: SanitizedConfig,
     buildSchemaOptions: BuildSchemaOptions,

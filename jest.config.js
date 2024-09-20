@@ -5,7 +5,6 @@ const esModules = [
   'readable-web-to-node-stream',
   'token-types',
   'peek-readable',
-  'find-up',
   'locate-path',
   'p-locate',
   'p-limit',
@@ -13,6 +12,7 @@ const esModules = [
   'unicorn-magic',
   'path-exists',
   'qs-esm',
+  'uint8array-extras',
 ].join('|')
 
 /** @type {import('jest').Config}  */

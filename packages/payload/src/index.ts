@@ -52,6 +52,7 @@ import type { Options as FindGlobalVersionsOptions } from './globals/operations/
 import type { Options as RestoreGlobalVersionOptions } from './globals/operations/local/restoreVersion.js'
 import type { Options as UpdateGlobalOptions } from './globals/operations/local/update.js'
 import type { JsonObject } from './types/index.js'
+import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 import type { TypeWithVersion } from './versions/types.js'
 
 import { decrypt, encrypt } from './auth/crypto.js'
@@ -66,6 +67,7 @@ import { checkDependencies } from './utilities/dependencies/dependencyChecker.js
 import flattenFields from './utilities/flattenTopLevelFields.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
+import { traverseFields } from './utilities/traverseFields.js'
 
 export interface GeneratedTypes {
   authUntyped: {
@@ -131,6 +133,8 @@ export type TypedAuthOperations = ResolveAuthOperationsType<GeneratedTypes>
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+let checkedDependencies = false
 
 /**
  * @description Payload
@@ -217,11 +221,15 @@ export class BasePayload {
    * @param options
    * @returns document with specified ID
    */
-  findByID = async <TSlug extends CollectionSlug>(
-    options: FindByIDOptions<TSlug>,
-  ): Promise<DataFromCollectionSlug<TSlug>> => {
+  findByID = async <TOptions extends FindByIDOptions>(
+    options: TOptions,
+  ): Promise<
+    TOptions['disableErrors'] extends true
+      ? DataFromCollectionSlug<TOptions['collection']> | null
+      : DataFromCollectionSlug<TOptions['collection']>
+  > => {
     const { findByID } = localOperations
-    return findByID<TSlug>(this, options)
+    return findByID<TOptions>(this, options)
   }
 
   findGlobal = async <TSlug extends GlobalSlug>(
@@ -429,8 +437,10 @@ export class BasePayload {
   async init(options: InitOptions): Promise<Payload> {
     if (
       process.env.NODE_ENV !== 'production' &&
-      process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true'
+      process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true' &&
+      !checkedDependencies
     ) {
+      checkedDependencies = true
       await checkPayloadDependencies()
     }
 
@@ -454,15 +464,22 @@ export class BasePayload {
     }
 
     this.config.collections.forEach((collection) => {
-      const customID = flattenFields(collection.fields).find(
-        (field) => fieldAffectsData(field) && field.name === 'id',
-      )
-
-      let customIDType
-
-      if (customID?.type === 'number' || customID?.type === 'text') {
-        customIDType = customID.type
+      let customIDType = undefined
+      const findCustomID: TraverseFieldsCallback = ({ field, next }) => {
+        if (['array', 'blocks'].includes(field.type)) {
+          next()
+          return
+        }
+        if (!fieldAffectsData(field)) {
+          return
+        }
+        if (field.name === 'id') {
+          customIDType = field.type
+          return true
+        }
       }
+
+      traverseFields({ callback: findCustomID, fields: collection.fields })
 
       this.collections[collection.slug] = {
         config: collection,
@@ -813,6 +830,7 @@ export {
   InvalidConfiguration,
   InvalidFieldName,
   InvalidFieldRelationship,
+  Locked,
   LockedAuth,
   MissingCollectionLabel,
   MissingEditorProp,
@@ -835,8 +853,8 @@ export type {
   ArrayFieldClient,
   BaseValidateOptions,
   Block,
-  BlockField,
-  BlockFieldClient,
+  BlocksField,
+  BlocksFieldClient,
   CheckboxField,
   CheckboxFieldClient,
   ClientBlock,
@@ -874,6 +892,8 @@ export type {
   GroupField,
   GroupFieldClient,
   HookName,
+  JoinField,
+  JoinFieldClient,
   JSONField,
   JSONFieldClient,
   Labels,
@@ -930,22 +950,32 @@ export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/b
 export { default as sortableFieldTypes } from './fields/sortableFieldTypes.js'
 export type {
   ArrayFieldValidation,
-  BlockFieldValidation,
+  BlocksFieldValidation,
   CheckboxFieldValidation,
   CodeFieldValidation,
   ConfirmPasswordFieldValidation,
   DateFieldValidation,
   EmailFieldValidation,
   JSONFieldValidation,
+  NumberFieldManyValidation,
+  NumberFieldSingleValidation,
   NumberFieldValidation,
   PasswordFieldValidation,
   PointFieldValidation,
   RadioFieldValidation,
+  RelationshipFieldManyValidation,
+  RelationshipFieldSingleValidation,
   RelationshipFieldValidation,
   RichTextFieldValidation,
+  SelectFieldManyValidation,
+  SelectFieldSingleValidation,
   SelectFieldValidation,
   TextareaFieldValidation,
+  TextFieldManyValidation,
+  TextFieldSingleValidation,
   TextFieldValidation,
+  UploadFieldManyValidation,
+  UploadFieldSingleValidation,
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
@@ -1004,7 +1034,17 @@ export {
   deepMergeWithReactComponents,
   deepMergeWithSourceArrays,
 } from './utilities/deepMerge.js'
+export {
+  checkDependencies,
+  type CustomVersionParser,
+} from './utilities/dependencies/dependencyChecker.js'
 export { getDependencies } from './utilities/dependencies/getDependencies.js'
+export {
+  findUp,
+  findUpSync,
+  pathExistsAndIsAccessible,
+  pathExistsAndIsAccessibleSync,
+} from './utilities/findUp.js'
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
 export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes.js'
@@ -1017,15 +1057,16 @@ export { isValidID } from './utilities/isValidID.js'
 export { killTransaction } from './utilities/killTransaction.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { mergeListSearchAndWhere } from './utilities/mergeListSearchAndWhere.js'
+export { traverseFields } from './utilities/traverseFields.js'
+export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
-export { checkDependencies }
 export { versionDefaults } from './versions/defaults.js'
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 export { saveVersion } from './versions/saveVersion.js'
-export type { TypeWithVersion } from './versions/types.js'
 
+export type { TypeWithVersion } from './versions/types.js'
 export { deepMergeSimple } from '@payloadcms/translations/utilities'

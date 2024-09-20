@@ -1,6 +1,6 @@
 import type { Field } from 'payload'
 
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData, fieldIsVirtual } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
@@ -93,6 +93,10 @@ export const traverseFields = ({
     let fieldData: unknown
 
     if (fieldAffectsData(field)) {
+      if (fieldIsVirtual(field)) {
+        return
+      }
+
       columnName = `${columnPrefix || ''}${toSnakeCase(field.name)}`
       fieldName = `${fieldPrefix || ''}${field.name}`
       fieldData = data[field.name]
@@ -264,6 +268,10 @@ export const traverseFields = ({
     if (field.type === 'tabs') {
       field.tabs.forEach((tab) => {
         if ('name' in tab) {
+          if (fieldIsVirtual(tab)) {
+            return
+          }
+
           if (typeof data[tab.name] === 'object' && data[tab.name] !== null) {
             if (tab.localized) {
               Object.entries(data[tab.name]).forEach(([localeKey, localeData]) => {

@@ -5,7 +5,12 @@ import * as path from 'path'
 import { adminRoute } from 'shared.js'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch, login } from '../helpers.js'
+import {
+  ensureCompilationIsDone,
+  initPageConsoleErrorCatch,
+  login,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -54,6 +59,18 @@ test.describe('Admin Panel (Root)', () => {
     expect(pageURL).not.toContain('/admin')
   })
 
+  test('collection — renders versions list', async () => {
+    await page.goto(url.create)
+    const textField = page.locator('#field-text')
+    await textField.fill('test')
+    await saveDocAndAssert(page)
+
+    const versionsTab = page.locator('.doc-tab a[href$="/versions"]')
+    await versionsTab.click()
+    const firstRow = page.locator('tbody .row-1')
+    await expect(firstRow).toBeVisible()
+  })
+
   test('global — navigates to edit view', async () => {
     await page.goto(url.global('menu'))
     const pageURL = page.url()
@@ -61,9 +78,20 @@ test.describe('Admin Panel (Root)', () => {
     expect(pageURL).not.toContain('/admin')
   })
 
+  test('global — renders versions list', async () => {
+    await page.goto(url.global('menu'))
+    const textField = page.locator('#field-globalText')
+    await textField.fill('test')
+    await saveDocAndAssert(page)
+
+    await page.goto(`${url.global('menu')}/versions`)
+    const firstRow = page.locator('tbody .row-1')
+    await expect(firstRow).toBeVisible()
+  })
+
   test('ui - should render default payload favicons', async () => {
     await page.goto(url.admin)
-    const favicons = page.locator('link[rel="icon"]')
+    const favicons = page.locator('link[rel="icon"][type="image/png"]')
     await expect(favicons).toHaveCount(2)
     await expect(favicons.nth(0)).toHaveAttribute('sizes', '32x32')
     await expect(favicons.nth(1)).toHaveAttribute('sizes', '32x32')

@@ -11,6 +11,11 @@
   opacity: 0;
   overflow: hidden;
 
+  [dir='rtl'] & {
+    border-right: none;
+    border-left: 1px solid var(--theme-elevation-100);
+  }
+
   &--nav-animate {
     transition: opacity var(--nav-trans-time) ease-in-out;
   }
@@ -149,7 +154,6 @@
 
     &__mobile-close {
       display: flex;
-      height: 100%;
       align-items: center;
     }
   }

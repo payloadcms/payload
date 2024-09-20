@@ -39,13 +39,16 @@ import { recurseNodeTree } from './utilities/recurseNodeTree.js'
 import { richTextValidateHOC } from './validate/index.js'
 
 let defaultSanitizedServerEditorConfig: SanitizedServerEditorConfig = null
+let checkedDependencies = false
 
 export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapterProvider {
   return async ({ config, isRoot, parentIsLocalized }) => {
     if (
       process.env.NODE_ENV !== 'production' &&
-      process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true'
+      process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true' &&
+      !checkedDependencies
     ) {
+      checkedDependencies = true
       await checkDependencies({
         dependencyGroups: [
           {
@@ -414,7 +417,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             const {
               collection,
               context: _context,
-              duplicate,
               errors,
               field,
               global,
@@ -494,7 +496,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                   }
                   node = await hook({
                     context,
-                    duplicate,
                     errors,
                     mergeLocaleActions,
                     node,
@@ -532,7 +533,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     data,
                     doc: originalData,
                     docWithLocales: originalDataWithLocales ?? {},
-                    duplicate,
                     errors,
                     fields: subFields,
                     global,
@@ -635,7 +635,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
              * - afterChange
              * - beforeChange
              * - beforeValidate
-             * - beforeDuplicate
              *
              * Other hooks are handled by the flattenedNodes. All nodes in the nodeIDMap are part of flattenedNodes.
              */
