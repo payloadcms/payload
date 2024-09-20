@@ -61,6 +61,7 @@ export const SingleValue: React.FC<
                 onMouseEnter={() => setShowTooltip(true)}
                 onMouseLeave={() => setShowTooltip(false)}
                 onTouchEnd={(e) => e.stopPropagation()} // prevents react-select dropdown from openingtype="button"
+                type="button"
               >
                 <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
                   {t('general:edit')}
