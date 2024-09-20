@@ -421,7 +421,6 @@ export const DefaultEditView: React.FC = () => {
           {BeforeDocument}
           {isLockingEnabled && shouldShowDocumentLockedModal && !isReadOnlyForIncomingUser && (
             <DocumentLocked
-              editedAt={lastUpdateTime}
               handleGoBack={handleGoBack}
               isActive={shouldShowDocumentLockedModal}
               onReadOnly={() => {
@@ -429,6 +428,7 @@ export const DefaultEditView: React.FC = () => {
                 setShowTakeOverModal(false)
               }}
               onTakeOver={handleTakeOver}
+              updatedAt={lastUpdateTime}
               user={currentEditor}
             />
           )}
