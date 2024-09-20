@@ -4,6 +4,7 @@ import type { CellComponentProps, SanitizedCollectionConfig } from 'payload'
 import React, { createContext, useCallback, useContext, useState } from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
+import type { SortColumnProps } from '../SortColumn/index.js'
 import type { Column } from '../Table/index.js'
 
 import { useConfig } from '../../providers/Config/index.js'
@@ -13,6 +14,7 @@ import { filterFields } from './filterFields.js'
 import { getInitialColumns } from './getInitialColumns.js'
 
 export interface ITableColumns {
+  cellProps?: Partial<CellComponentProps>[]
   columns: Column[]
   moveColumn: (args: { fromIndex: number; toIndex: number }) => void
   resetColumnsState: () => void
@@ -29,29 +31,31 @@ export type ListPreferences = {
 }
 
 type Props = {
+  readonly beforeRows?: Column[]
   readonly cellProps?: Partial<CellComponentProps>[]
   readonly children: React.ReactNode
   readonly collectionSlug: string
   readonly enableRowSelections?: boolean
   readonly listPreferences?: ListPreferences
   readonly preferenceKey: string
+  readonly sortColumnProps?: Partial<SortColumnProps>
 }
 
 export const TableColumnsProvider: React.FC<Props> = ({
+  beforeRows,
   cellProps,
   children,
   collectionSlug,
   enableRowSelections = false,
   listPreferences,
   preferenceKey,
+  sortColumnProps,
 }) => {
   const {
     config: { collections },
   } = useConfig()
 
-  const collectionConfig = collections.find(
-    (collectionConfig) => collectionConfig.slug === collectionSlug,
-  )
+  const collectionConfig = collections.find((c) => c.slug === collectionSlug)
 
   const {
     admin: { defaultColumns, useAsTitle },
@@ -67,11 +71,12 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
   const [tableColumns, setTableColumns] = React.useState(() =>
     buildColumnState({
-      cellProps,
+      beforeRows,
       columnPreferences: listPreferences?.columns,
       columns: initialColumns,
       enableRowSelections,
       fields,
+      sortColumnProps,
       useAsTitle,
     }),
   )
@@ -91,11 +96,9 @@ export const TableColumnsProvider: React.FC<Props> = ({
   const moveColumn = useCallback(
     (args: { fromIndex: number; toIndex: number }) => {
       const { fromIndex, toIndex } = args
-
       const withMovedColumn = [...tableColumns]
       const [columnToMove] = withMovedColumn.splice(fromIndex, 1)
       withMovedColumn.splice(toIndex, 0, columnToMove)
-
       setTableColumns(withMovedColumn)
       updateColumnPreferences(withMovedColumn)
     },
@@ -169,11 +172,12 @@ export const TableColumnsProvider: React.FC<Props> = ({
         if (currentPreferences?.columns) {
           setTableColumns(
             buildColumnState({
-              cellProps,
+              beforeRows,
               columnPreferences: currentPreferences?.columns,
               columns: initialColumns,
-              enableRowSelections: true,
+              enableRowSelections,
               fields,
+              sortColumnProps,
               useAsTitle,
             }),
           )
@@ -187,16 +191,19 @@ export const TableColumnsProvider: React.FC<Props> = ({
     getPreference,
     collectionSlug,
     fields,
-    cellProps,
     defaultColumns,
     useAsTitle,
     listPreferences,
     initialColumns,
+    beforeRows,
+    enableRowSelections,
+    sortColumnProps,
   ])
 
   return (
     <TableColumnContext.Provider
       value={{
+        cellProps,
         columns: tableColumns,
         moveColumn,
         resetColumnsState,

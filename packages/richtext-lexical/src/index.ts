@@ -35,13 +35,16 @@ import { recurseNodeTree } from './utilities/recurseNodeTree.js'
 import { richTextValidateHOC } from './validate/index.js'
 
 let defaultSanitizedServerEditorConfig: null | SanitizedServerEditorConfig = null
+let checkedDependencies = false
 
 export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapterProvider {
   return async ({ config, isRoot, parentIsLocalized }) => {
     if (
       process.env.NODE_ENV !== 'production' &&
-      process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true'
+      process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true' &&
+      !checkedDependencies
     ) {
+      checkedDependencies = true
       await checkDependencies({
         dependencyGroups: [
           {

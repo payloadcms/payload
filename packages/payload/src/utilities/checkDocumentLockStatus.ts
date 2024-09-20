@@ -2,7 +2,7 @@ import type { TypeWithID } from '../collections/config/types.js'
 import type { PaginatedDocs } from '../database/types.js'
 import type { JsonObject, PayloadRequest } from '../types/index.js'
 
-import { APIError } from '../errors/index.js'
+import { Locked } from '../errors/index.js'
 
 type CheckDocumentLockStatusArgs = {
   collectionSlug?: string
@@ -10,6 +10,7 @@ type CheckDocumentLockStatusArgs = {
   id?: number | string
   lockDurationDefault?: number
   lockErrorMessage?: string
+  overrideLock?: boolean
   req: PayloadRequest
 }
 
@@ -19,6 +20,7 @@ export const checkDocumentLockStatus = async ({
   globalSlug,
   lockDurationDefault = 300, // Default 5 minutes in seconds
   lockErrorMessage,
+  overrideLock = true,
   req,
 }: CheckDocumentLockStatusArgs): Promise<void> => {
   const { payload } = req
@@ -29,11 +31,6 @@ export const checkDocumentLockStatus = async ({
     : payload.config?.globals?.find((g) => g.slug === globalSlug)?.lockDocuments
 
   const isLockingEnabled = lockDocumentsProp !== false
-
-  // If lockDocuments is explicitly set to false, skip the lock logic and return early
-  if (isLockingEnabled === false) {
-    return
-  }
 
   let lockedDocumentQuery = {}
 
@@ -50,45 +47,46 @@ export const checkDocumentLockStatus = async ({
     throw new Error('Either collectionSlug or globalSlug must be provided.')
   }
 
-  const defaultLockErrorMessage = collectionSlug
-    ? `Document with ID ${id} is currently locked by another user and cannot be modified.`
-    : `Global document with slug "${globalSlug}" is currently locked by another user and cannot be modified.`
+  // Only perform lock checks if overrideLock is false and locking is enabled
+  if (!overrideLock && isLockingEnabled !== false) {
+    const defaultLockErrorMessage = collectionSlug
+      ? `Document with ID ${id} is currently locked by another user and cannot be modified.`
+      : `Global document with slug "${globalSlug}" is currently locked by another user and cannot be modified.`
 
-  const finalLockErrorMessage = lockErrorMessage || defaultLockErrorMessage
+    const finalLockErrorMessage = lockErrorMessage || defaultLockErrorMessage
 
-  const lockedDocumentResult: PaginatedDocs<JsonObject & TypeWithID> = await payload.find({
-    collection: 'payload-locked-documents',
-    depth: 1,
-    limit: 1,
-    pagination: false,
-    req,
-    sort: '-updatedAt',
-    where: lockedDocumentQuery,
-  })
+    const lockedDocumentResult: PaginatedDocs<JsonObject & TypeWithID> = await payload.db.find({
+      collection: 'payload-locked-documents',
+      limit: 1,
+      pagination: false,
+      req,
+      sort: '-updatedAt',
+      where: lockedDocumentQuery,
+    })
 
-  // If there's a locked document, check lock conditions
-  const lockedDoc = lockedDocumentResult?.docs[0]
-  if (!lockedDoc) {
-    return
+    // If there's a locked document, check lock conditions
+    const lockedDoc = lockedDocumentResult?.docs[0]
+    if (lockedDoc) {
+      const lastEditedAt = new Date(lockedDoc?.updatedAt).getTime()
+      const now = new Date().getTime()
+
+      const lockDuration =
+        typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
+
+      const lockDurationInMilliseconds = lockDuration * 1000
+      const currentUserId = req.user?.id
+
+      // document is locked by another user and the lock hasn't expired
+      if (
+        lockedDoc.user?.value !== currentUserId &&
+        now - lastEditedAt <= lockDurationInMilliseconds
+      ) {
+        throw new Locked(finalLockErrorMessage)
+      }
+    }
   }
 
-  const lastEditedAt = new Date(lockedDoc?.editedAt)
-  const now = new Date()
-
-  const lockDuration =
-    typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
-
-  const lockDurationInMilliseconds = lockDuration * 1000
-  const currentUserId = req.user?.id
-
-  // document is locked by another user and the lock hasn't expired
-  if (
-    lockedDoc.user?.value?.id !== currentUserId &&
-    now.getTime() - lastEditedAt.getTime() <= lockDurationInMilliseconds
-  ) {
-    throw new APIError(finalLockErrorMessage)
-  }
-
+  // Perform the delete operation regardless of overrideLock status
   await payload.db.deleteMany({
     collection: 'payload-locked-documents',
     req,

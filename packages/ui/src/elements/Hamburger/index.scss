@@ -18,6 +18,7 @@
   transition-property: box-shadow, background-color;
   transition-duration: 100ms;
   transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+  --hamburger-size: var(--base);
 
   &:hover {
     background-color: var(--theme-elevation-100);
@@ -36,5 +37,8 @@
   &__close-icon {
     width: var(--hamburger-size);
     height: var(--hamburger-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }

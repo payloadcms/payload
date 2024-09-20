@@ -31,7 +31,15 @@ export type BaseExtraConfig = Record<
   (cols: GenericColumns) => ForeignKeyBuilder | IndexBuilder | UniqueConstraintBuilder
 >
 
-export type RelationMap = Map<string, { localized: boolean; target: string; type: 'many' | 'one' }>
+export type RelationMap = Map<
+  string,
+  {
+    localized: boolean
+    relationName?: string
+    target: string
+    type: 'many' | 'one'
+  }
+>
 
 export type GenericColumn = PgColumn<
   ColumnBaseConfig<ColumnDataType, string>,

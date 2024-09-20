@@ -125,7 +125,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
       <div className={`${baseClass}__wrap`}>
         <SearchIcon />
         <SearchFilter
-          fieldName={'name' in titleField ? titleField?.name : null}
+          fieldName={titleField && 'name' in titleField ? titleField?.name : null}
           handleChange={(search) => {
             return void handleSearchChange(search)
           }}
@@ -153,10 +153,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               <Pill
                 aria-controls={`${baseClass}-columns`}
                 aria-expanded={visibleDrawer === 'columns'}
-                className={`${baseClass}__toggle-columns ${
-                  visibleDrawer === 'columns' ? `${baseClass}__buttons-active` : ''
-                }`}
-                icon={<ChevronIcon />}
+                className={`${baseClass}__toggle-columns`}
+                icon={<ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} />}
                 onClick={() =>
                   setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
                 }
@@ -168,10 +166,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             <Pill
               aria-controls={`${baseClass}-where`}
               aria-expanded={visibleDrawer === 'where'}
-              className={`${baseClass}__toggle-where ${
-                visibleDrawer === 'where' ? `${baseClass}__buttons-active` : ''
-              }`}
-              icon={<ChevronIcon />}
+              className={`${baseClass}__toggle-where`}
+              icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
               onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
               pillStyle="light"
             >

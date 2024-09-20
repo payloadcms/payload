@@ -38,13 +38,13 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "react": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801"
+    "react": "^19.0.0 || ^19.0.0-rc-5dcb0097-20240918",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-5dcb0097-20240918"
   },
   "publishConfig": {
     "exports": {
@@ -59,7 +59,7 @@
     "types": "./dist/index.d.ts"
   },
   "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }

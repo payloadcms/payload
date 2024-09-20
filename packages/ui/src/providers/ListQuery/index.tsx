@@ -14,11 +14,11 @@ import { useSearchParams } from '../SearchParams/index.js'
 export type ColumnPreferences = Pick<Column, 'accessor' | 'active'>[]
 
 type PropHandlers = {
-  handlePageChange?: (page: number) => Promise<void> | void
-  handlePerPageChange?: (limit: number) => Promise<void> | void
-  handleSearchChange?: (search: string) => Promise<void> | void
-  handleSortChange?: (sort: string) => Promise<void> | void
-  handleWhereChange?: (where: Where) => Promise<void> | void
+  readonly handlePageChange?: (page: number) => Promise<void> | void
+  readonly handlePerPageChange?: (limit: number) => Promise<void> | void
+  readonly handleSearchChange?: (search: string) => Promise<void> | void
+  readonly handleSortChange?: (sort: string) => Promise<void> | void
+  readonly handleWhereChange?: (where: Where) => Promise<void> | void
 }
 
 type ContextHandlers = {

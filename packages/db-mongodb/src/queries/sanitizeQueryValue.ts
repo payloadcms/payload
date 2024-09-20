@@ -1,5 +1,6 @@
 import type { Field, TabAsField } from 'payload'
 
+import ObjectIdImport from 'bson-objectid'
 import mongoose from 'mongoose'
 import { createArrayFromCommaDelineated } from 'payload'
 
@@ -11,6 +12,8 @@ type SanitizeQueryValueArgs = {
   val: any
 }
 
+const ObjectId = (ObjectIdImport.default ||
+  ObjectIdImport) as unknown as typeof ObjectIdImport.default
 export const sanitizeQueryValue = ({
   field,
   hasCustomID,
@@ -26,21 +29,49 @@ export const sanitizeQueryValue = ({
   let formattedOperator = operator
 
   // Disregard invalid _ids
-  if (path === '_id' && typeof val === 'string' && val.split(',').length === 1) {
-    if (!hasCustomID) {
-      const isValid = mongoose.Types.ObjectId.isValid(val)
+  if (path === '_id') {
+    if (typeof val === 'string' && val.split(',').length === 1) {
+      if (!hasCustomID) {
+        const isValid = mongoose.Types.ObjectId.isValid(val)
 
-      if (!isValid) {
-        return { operator: formattedOperator, val: undefined }
+        if (!isValid) {
+          return { operator: formattedOperator, val: undefined }
+        } else {
+          if (['in', 'not_in'].includes(operator)) {
+            formattedValue = createArrayFromCommaDelineated(formattedValue).map((id) =>
+              ObjectId(id),
+            )
+          } else {
+            formattedValue = ObjectId(val)
+          }
+        }
       }
-    }
 
-    if (field.type === 'number') {
-      const parsedNumber = parseFloat(val)
+      if (field.type === 'number') {
+        const parsedNumber = parseFloat(val)
 
-      if (Number.isNaN(parsedNumber)) {
-        return { operator: formattedOperator, val: undefined }
+        if (Number.isNaN(parsedNumber)) {
+          return { operator: formattedOperator, val: undefined }
+        }
       }
+    } else if (Array.isArray(val)) {
+      formattedValue = formattedValue.reduce((formattedValues, inVal) => {
+        const newValues = [inVal]
+        if (!hasCustomID) {
+          if (mongoose.Types.ObjectId.isValid(inVal)) {
+            newValues.push(ObjectId(inVal))
+          }
+        }
+
+        if (field.type === 'number') {
+          const parsedNumber = parseFloat(inVal)
+          if (!Number.isNaN(parsedNumber)) {
+            newValues.push(parsedNumber)
+          }
+        }
+
+        return [...formattedValues, ...newValues]
+      }, [])
     }
   }
 
@@ -86,6 +117,13 @@ export const sanitizeQueryValue = ({
       formattedValue.value &&
       formattedValue.relationTo
     ) {
+      const { value } = formattedValue
+      const isValid = mongoose.Types.ObjectId.isValid(value)
+
+      if (isValid) {
+        formattedValue.value = ObjectId(value)
+      }
+
       return {
         rawQuery: {
           $and: [
@@ -96,11 +134,11 @@ export const sanitizeQueryValue = ({
       }
     }
 
-    if (operator === 'in' && Array.isArray(formattedValue)) {
+    if (['in', 'not_in'].includes(operator) && Array.isArray(formattedValue)) {
       formattedValue = formattedValue.reduce((formattedValues, inVal) => {
         const newValues = [inVal]
         if (mongoose.Types.ObjectId.isValid(inVal)) {
-          newValues.push(new mongoose.Types.ObjectId(inVal))
+          newValues.push(ObjectId(inVal))
         }
 
         const parsedNumber = parseFloat(inVal)
@@ -110,6 +148,12 @@ export const sanitizeQueryValue = ({
 
         return [...formattedValues, ...newValues]
       }, [])
+    }
+
+    if (operator === 'contains' && typeof formattedValue === 'string') {
+      if (mongoose.Types.ObjectId.isValid(formattedValue)) {
+        formattedValue = ObjectId(formattedValue)
+      }
     }
   }
 
@@ -152,7 +196,7 @@ export const sanitizeQueryValue = ({
   }
 
   if (path !== '_id' || (path === '_id' && hasCustomID && field.type === 'text')) {
-    if (operator === 'contains') {
+    if (operator === 'contains' && !mongoose.Types.ObjectId.isValid(formattedValue)) {
       formattedValue = {
         $options: 'i',
         $regex: formattedValue.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),

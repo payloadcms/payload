@@ -52,7 +52,6 @@ jobs:
             plugin-form-builder
             plugin-nested-docs
             plugin-redirects
-            plugin-relationship-object-ids
             plugin-search
             plugin-sentry
             plugin-seo
