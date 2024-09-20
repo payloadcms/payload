@@ -32,7 +32,7 @@ export type DocumentInfoProps = {
   hasPublishPermission?: boolean
   hasSavePermission?: boolean
   id: null | number | string
-  initialData?: Data
+  initialData?: Data | null
   initialState?: FormState
   isEditing?: boolean
   onDelete?: (args: {

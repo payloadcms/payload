@@ -49,7 +49,7 @@ export const getDocumentData = async (args: {
   } catch (error) {
     console.error('Error getting document data', error) // eslint-disable-line no-console
     return {
-      data: {},
+      data: null,
       formState: {
         fields: {
           initialValue: undefined,
