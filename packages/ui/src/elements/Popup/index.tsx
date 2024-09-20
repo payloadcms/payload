@@ -17,6 +17,7 @@ export type PopupProps = {
   boundingRef?: React.RefObject<HTMLElement>
   button?: React.ReactNode
   buttonClassName?: string
+  buttonSize?: 'large' | 'medium' | 'small'
   buttonType?: 'custom' | 'default' | 'none'
   caret?: boolean
   children?: React.ReactNode
@@ -39,6 +40,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     boundingRef,
     button,
     buttonClassName,
+    buttonSize = 'medium',
     buttonType = 'default',
     caret = true,
     children,
@@ -156,6 +158,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     baseClass,
     className,
     `${baseClass}--size-${size}`,
+    `${baseClass}--button-size-${buttonSize}`,
     `${baseClass}--v-align-${verticalAlign}`,
     `${baseClass}--h-align-${horizontalAlign}`,
     active && `${baseClass}--active`,
@@ -182,6 +185,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
                 disabled,
                 noBackground,
                 setActive,
+                size: buttonSize,
               }}
             />
           </div>
@@ -195,6 +199,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
               disabled,
               noBackground,
               setActive,
+              size: buttonSize,
             }}
           />
         )}

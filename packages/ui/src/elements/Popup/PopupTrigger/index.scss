@@ -14,4 +14,16 @@
   &--background {
     background: transparent;
   }
+
+  &--size-small {
+    padding: base(0.1);
+  }
+
+  &--size-medium {
+    padding: base(0.3);
+  }
+
+  &--size-large {
+    padding: base(0.5);
+  }
 }
