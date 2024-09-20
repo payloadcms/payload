@@ -1,7 +1,7 @@
 import payload from '../../packages/payload/src'
 import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
-import { globalSlug, updateNoGlobal, isConnect, isInit } from './config'
+import { globalSlug, isConnected, isInit, updateNoGlobal } from './config'
 import { doc } from './config'
 
 require('isomorphic-fetch')
@@ -54,7 +54,7 @@ describe('Global Database Operations', () => {
   })
 
   it('global DB Connect', () => {
-    expect(isConnect).toEqual(true)
+    expect(isConnected).toEqual(true)
   })
 
   it('global DB Create', async () => {

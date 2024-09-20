@@ -21,10 +21,10 @@ export const updateIsInit = (val: boolean) => {
   return isInit
 }
 
-export let isConnect = false
+export let isConnected = false
 export const updateIsConnect = (val: boolean) => {
-  isConnect = val
-  return isConnect
+  isConnected = val
+  return isConnected
 }
 export default buildConfigWithDefaults({
   globals: [
