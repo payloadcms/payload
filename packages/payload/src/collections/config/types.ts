@@ -28,14 +28,8 @@ import type {
   PayloadComponent,
   StaticLabel,
 } from '../../config/types.js'
-import type { DBIdentifierName } from '../../database/types.js'
+import type { BaseDatabaseAdapter, DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'
-import type {
-  CollectionSlug,
-  JsonObject,
-  TypedAuthOperations,
-  TypedCollection,
-} from '../../index.js'
 import type { PayloadRequest, RequestContext } from '../../types/index.js'
 import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
 import type {
@@ -43,6 +37,14 @@ import type {
   SanitizedCollectionVersions,
 } from '../../versions/types.js'
 import type { AfterOperationArg, AfterOperationMap } from '../operations/utils.js'
+
+import {
+  type CollectionSlug,
+  type DatabaseAdapterObj,
+  type JsonObject,
+  type TypedAuthOperations,
+  type TypedCollection,
+} from '../../index.js'
 
 export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollection[TSlug]
 export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
@@ -369,6 +371,34 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   auth?: boolean | IncomingAuthType
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
+  /**
+   * Add a custom database adapter to this global.
+   */
+  db?:
+    | DatabaseAdapterObj
+    | Pick<
+        BaseDatabaseAdapter,
+        | 'connect'
+        | 'count'
+        | 'create'
+        | 'createGlobal'
+        | 'createGlobalVersion'
+        | 'createVersion'
+        | 'deleteMany'
+        | 'deleteOne'
+        | 'deleteVersions'
+        | 'find'
+        | 'findGlobal'
+        | 'findGlobalVersions'
+        | 'findOne'
+        | 'findVersions'
+        | 'init'
+        | 'queryDrafts'
+        | 'updateGlobal'
+        | 'updateGlobalVersion'
+        | 'updateOne'
+        | 'updateVersion'
+      >
   /**
    * Used to override the default naming of the database table or collection with your using a function or string
    * @WARNING: If you change this property with existing data, you will need to handle the renaming of the table in your database or by using migrations
