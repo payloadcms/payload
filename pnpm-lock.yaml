@@ -1577,8 +1577,8 @@ importers:
         specifier: 5.8.0
         version: 5.8.0(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.1)
       scheduler:
-        specifier: 0.25.0-rc-f994737d14-20240522
-        version: 0.25.0-rc-f994737d14-20240522
+        specifier: 0.0.0-experimental-5dcb0097-20240918
+        version: 0.0.0-experimental-5dcb0097-20240918
       sonner:
         specifier: ^1.5.0
         version: 1.5.0(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)
@@ -1587,7 +1587,7 @@ importers:
         version: 10.0.2(typescript@5.6.2)
       use-context-selector:
         specifier: 2.0.0
-        version: 2.0.0(react@19.0.0-rc-5dcb0097-20240918)(scheduler@0.25.0-rc-f994737d14-20240522)
+        version: 2.0.0(react@19.0.0-rc-5dcb0097-20240918)(scheduler@0.0.0-experimental-5dcb0097-20240918)
       uuid:
         specifier: 10.0.0
         version: 10.0.0
@@ -8488,11 +8488,11 @@ packages:
     resolution: {integrity: sha512-xAg7SOnEhrm5zI3puOOKyy1OMcMlIJZYNJY7xLBwSze0UjhPLnWfj2GF2EpT0jmzaJKIWKHLsaSSajf35bcYnA==}
     engines: {node: '>=v12.22.7'}
 
+  scheduler@0.0.0-experimental-5dcb0097-20240918:
+    resolution: {integrity: sha512-DQOQQIv61EhqH8n5MqmteGQgTuQNoyodKqEavr1J4wKNfFQoaCpNc0QDLtwK7SpIwUVRf/aREtXROSbzzURb+A==}
+
   scheduler@0.25.0-rc-5dcb0097-20240918:
     resolution: {integrity: sha512-Sr3CaLDHJIA1p7wzNF8EyZ/JzetrV21S0sY6byC3AhREQMoEuKol8BSmXM5gd8Aoxo92uW9WCjWL0hwdb2DtqQ==}
-
-  scheduler@0.25.0-rc-f994737d14-20240522:
-    resolution: {integrity: sha512-qS+xGFF7AljP2APO2iJe8zESNsK20k25MACz+WGOXPybUsRdi1ssvaoF93im2nSX2q/XT3wKkjdz6RQfbmaxdw==}
 
   scmp@2.1.0:
     resolution: {integrity: sha512-o/mRQGk9Rcer/jEEw/yw4mwo3EU/NvYvp577/Btqrym9Qy5/MdWGBqipbALgd2lrdWTJ5/gqDusxfnQBxOxT2Q==}
@@ -17784,9 +17784,9 @@ snapshots:
     dependencies:
       xmlchars: 2.2.0
 
-  scheduler@0.25.0-rc-5dcb0097-20240918: {}
+  scheduler@0.0.0-experimental-5dcb0097-20240918: {}
 
-  scheduler@0.25.0-rc-f994737d14-20240522: {}
+  scheduler@0.25.0-rc-5dcb0097-20240918: {}
 
   scmp@2.1.0: {}
 
@@ -18627,10 +18627,10 @@ snapshots:
       querystringify: 2.2.0
       requires-port: 1.0.0
 
-  use-context-selector@2.0.0(react@19.0.0-rc-5dcb0097-20240918)(scheduler@0.25.0-rc-f994737d14-20240522):
+  use-context-selector@2.0.0(react@19.0.0-rc-5dcb0097-20240918)(scheduler@0.0.0-experimental-5dcb0097-20240918):
     dependencies:
       react: 19.0.0-rc-5dcb0097-20240918
-      scheduler: 0.25.0-rc-f994737d14-20240522
+      scheduler: 0.0.0-experimental-5dcb0097-20240918
 
   use-isomorphic-layout-effect@1.1.2(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.1):
     dependencies:
