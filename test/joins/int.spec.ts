@@ -1,6 +1,7 @@
-import type { Payload } from 'payload'
+import type { Payload } from 'payload';
 
 import path from 'path'
+import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -9,6 +10,7 @@ import type { Category, Post } from './payload-types.js'
 import { devUser } from '../credentials.js'
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { categoriesSlug, uploadsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -40,11 +42,21 @@ describe('Joins Field', () => {
     token = data.token
 
     category = await payload.create({
-      collection: 'categories',
+      collection: categoriesSlug,
       data: {
         name: 'paginate example',
         group: {},
       },
+    })
+
+    // create an upload
+    const imageFilePath = path.resolve(dirname, './image.png')
+    const imageFile = await getFileByPath(imageFilePath)
+
+    const { id: uploadedImage } = await payload.create({
+      collection: uploadsSlug,
+      data: {},
+      file: imageFile,
     })
 
     categoryID = idToString(category.id, payload)
@@ -53,6 +65,7 @@ describe('Joins Field', () => {
       await createPost({
         title: `test ${i}`,
         category: category.id,
+        upload: uploadedImage,
         group: {
           category: category.id,
         },
@@ -92,6 +105,16 @@ describe('Joins Field', () => {
     expect(docs[0].category.id).toBeDefined()
     expect(docs[0].category.name).toBeDefined()
     expect(docs[0].category.relatedPosts.docs).toHaveLength(10)
+  })
+
+  it('should populate uploads in joins', async () => {
+    const { docs } = await payload.find({
+      limit: 1,
+      collection: 'posts',
+    })
+
+    expect(docs[0].upload.id).toBeDefined()
+    expect(docs[0].upload.relatedPosts.docs).toHaveLength(10)
   })
 
   it('should filter joins using where query', async () => {
