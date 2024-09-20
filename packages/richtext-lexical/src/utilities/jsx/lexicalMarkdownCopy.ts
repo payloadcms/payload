@@ -75,12 +75,16 @@ type TextFormatTransformersIndex = Readonly<{
 
 export function indexBy<T>(
   list: Array<T>,
-  callback: (arg0: T) => string,
+  callback: (arg0: T) => string | undefined,
 ): Readonly<Record<string, Array<T>>> {
   const index: Record<string, Array<T>> = {}
 
   for (const item of list) {
     const key = callback(item)
+
+    if (!key) {
+      continue
+    }
 
     if (index[key]) {
       index[key].push(item)
@@ -416,6 +420,10 @@ function importTextMatchTransformers(
 
   mainLoop: while (textNode) {
     for (const transformer of textMatchTransformers) {
+      if (!transformer.replace || !transformer.importRegExp) {
+        continue
+      }
+
       const match = textNode.getTextContent().match(transformer.importRegExp)
 
       if (!match) {
