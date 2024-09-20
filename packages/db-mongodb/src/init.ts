@@ -2,6 +2,7 @@
 import type { PaginateOptions } from 'mongoose'
 import type { Init } from 'payload/database'
 import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedGlobalConfig } from 'payload/types'
 
 import mongoose from 'mongoose'
 import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2'
@@ -77,7 +78,7 @@ export const init: Init = async function init(this: MongooseAdapter) {
   const model = buildGlobalModel(this)
   this.globals = model
 
-  this.payload.config.globals.forEach((global) => {
+  this.payload.config.globals.forEach((global: SanitizedGlobalConfig) => {
     // Skip globals that have an .init() method
     if ('function' === typeof global?.db?.init) return
 
