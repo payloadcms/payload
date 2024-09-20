@@ -173,7 +173,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
         params: { page: selectAll === SelectAllStatus.AllAvailable ? '1' : undefined },
       }),
     )
-    clearRouteCache()
+    clearRouteCache() // Use clearRouteCache instead of router.refresh, as we only need to clear the cache if the user has route caching enabled - clearRouteCache checks for this
     closeModal(drawerSlug)
   }
 

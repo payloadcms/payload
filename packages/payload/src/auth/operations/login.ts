@@ -173,6 +173,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       req,
       where: whereConstraint,
     })
+    user.collection = collectionConfig.slug
 
     if (!user || (args.collection.config.auth.verify && user._verified === false)) {
       throw new AuthenticationError(req.t, Boolean(canLoginWithUsername && sanitizedUsername))

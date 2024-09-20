@@ -61,19 +61,24 @@ export type Permissions = {
   }
 }
 
-export type User = {
-  [key: string]: any // This NEEDS to be an any, otherwise it breaks the Omit for ClientUser below
+type BaseUser = {
   collection: string
   email?: string
   id: number | string
   username?: string
 }
 
+export type User = {
+  [key: string]: any
+} & BaseUser
+
 /**
  * `collection` is not available one the client. It's only available on the server (req.user)
  * On the client, you can access the collection via config.admin.user. Config can be accessed using the useConfig() hook
  */
-export type ClientUser = Omit<User, 'collection'>
+export type ClientUser = {
+  [key: string]: any
+} & BaseUser
 
 type GenerateVerifyEmailHTML<TUser = any> = (args: {
   req: PayloadRequest
