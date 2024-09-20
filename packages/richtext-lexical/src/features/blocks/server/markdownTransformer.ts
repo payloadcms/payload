@@ -133,10 +133,7 @@ function getMarkdownTransformerForBlock(
 
         return `<${nodeFields.blockType} ${propsToJSXString({ props: exportResult.props })}/>`
       },
-      importRegExp: /___ignoreignoreignore___/g,
       regExp: /___ignoreignoreignore___/g,
-      replace: () => {},
-      trigger: '___ignoreignoreignore___',
     }))
   }
 
@@ -277,7 +274,7 @@ function getMarkdownTransformerForBlock(
     regExpEnd: block.jsx?.customEndRegex ?? regex.regExpEnd,
     regExpStart: block.jsx?.customStartRegex ?? regex.regExpStart,
     // This replace is ONLY run for ``` code blocks (so any blocks with custom start and end regexes). For others, we use the special JSX handling above:
-    type: 'multilineElement',
+    type: 'multiline-element',
     replace: (rootNode, children, openMatch, closeMatch, linesInBetween) => {
       if (block.jsx.import) {
         const childrenString = linesInBetween.join('\n').trim()

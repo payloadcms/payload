@@ -3667,7 +3667,7 @@ packages:
     resolution: {integrity: sha512-Ynqh9KHXUcB9qLOTGC9s+bbWtawOwRStkeIeAugTqrwckyYWeDaePpyJ6IhBBJy1E1CfpiZn71NDeP+FuRjnXQ==}
 
   '@lexical/markdown@file:packages/richtext-lexical/lexical-markdown-0.17.0.tgz':
-    resolution: {integrity: sha512-9mb0yJ1Jrhx4h6s5RMiFUbGzZHSMNG4f4hS2awNrAxCJbyLpkUD5I8DcOGOTU0UNZzaq05EvdNO4Ze8Dag0zEg==, tarball: file:packages/richtext-lexical/lexical-markdown-0.17.0.tgz}
+    resolution: {integrity: sha512-kEfHV7JQt2TubdxC5jr/A32j1JS/f5nK5V8GmL7hkkbNaUJ08lIDVUQherIFnhwEB5jFVveXDp/W/gR3T3giGQ==, tarball: file:packages/richtext-lexical/lexical-markdown-0.17.0.tgz}
     version: 0.17.0
 
   '@lexical/offset@0.17.0':

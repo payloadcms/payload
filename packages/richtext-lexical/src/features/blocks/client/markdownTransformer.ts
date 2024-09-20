@@ -41,7 +41,7 @@ export const getBlockMarkdownTransformers = ({
     }
     const regex = createTagRegexes(block.slug)
     transformers.push(({ allNodes, allTransformers }) => ({
-      type: 'multilineElement',
+      type: 'multiline-element',
       dependencies: [BlockNode],
       export: (node) => {
         if (!$isBlockNode(node)) {
