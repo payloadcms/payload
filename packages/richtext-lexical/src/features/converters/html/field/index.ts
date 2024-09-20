@@ -91,7 +91,7 @@ function findFieldPathAndSiblingFields(
 ): {
   path: string[]
   siblingFields: Field[]
-} {
+} | null {
   for (const curField of fields) {
     if (curField === field) {
       return {
@@ -172,7 +172,7 @@ export const lexicalHTML: (
           showHiddenFields,
           siblingData,
         }) => {
-          const fields = collection ? collection.fields : global.fields
+          const fields = collection ? collection.fields : global!.fields
 
           const foundSiblingFields = findFieldPathAndSiblingFields(fields, [], field)
 

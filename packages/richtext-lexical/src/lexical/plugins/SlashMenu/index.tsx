@@ -101,11 +101,13 @@ export function SlashMenuPlugin({
     let groupWithItems: Array<SlashMenuGroup> = []
 
     for (const dynamicItem of editorConfig.features.slashMenu.dynamicGroups) {
-      const dynamicGroupWithItems = dynamicItem({
-        editor,
-        queryString,
-      })
-      groupWithItems = groupWithItems.concat(dynamicGroupWithItems)
+      if (queryString) {
+        const dynamicGroupWithItems = dynamicItem({
+          editor,
+          queryString,
+        })
+        groupWithItems = groupWithItems.concat(dynamicGroupWithItems)
+      }
     }
 
     return groupWithItems
@@ -119,6 +121,7 @@ export function SlashMenuPlugin({
 
     if (queryString) {
       // Filter current groups first
+      // @ts-expect-error - TODO: fix this
       groupsWithItems = groupsWithItems.map((group) => {
         const filteredItems = group.items.filter((item) => {
           let itemTitle = item.key
@@ -207,7 +210,7 @@ export function SlashMenuPlugin({
               <div className={baseClass}>
                 {groups.map((group) => {
                   let groupTitle = group.key
-                  if (group.label) {
+                  if (group.label && richTextComponentMap) {
                     groupTitle =
                       typeof group.label === 'function'
                         ? group.label({ i18n, richTextComponentMap, schemaPath })

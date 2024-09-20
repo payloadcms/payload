@@ -52,7 +52,7 @@ const Component: React.FC<Props> = (props) => {
   const relationshipElemRef = useRef<HTMLDivElement | null>(null)
 
   const [editor] = useLexicalComposerContext()
-  const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
+  const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey!)
   const { field } = useEditorConfigContext()
   const {
     config: {
@@ -62,8 +62,8 @@ const Component: React.FC<Props> = (props) => {
     },
   } = useConfig()
 
-  const [relatedCollection, setRelatedCollection] = useState(() =>
-    collections.find((coll) => coll.slug === relationTo),
+  const [relatedCollection, setRelatedCollection] = useState(
+    () => collections.find((coll) => coll.slug === relationTo)!,
   )
 
   const { i18n, t } = useTranslation()
@@ -80,7 +80,7 @@ const Component: React.FC<Props> = (props) => {
 
   const removeRelationship = useCallback(() => {
     editor.update(() => {
-      $getNodeByKey(nodeKey).remove()
+      $getNodeByKey(nodeKey!)?.remove()
     })
   }, [editor, nodeKey])
 
@@ -102,7 +102,7 @@ const Component: React.FC<Props> = (props) => {
       if (isSelected && $isNodeSelection($getSelection())) {
         const event: KeyboardEvent = payload
         event.preventDefault()
-        const node = $getNodeByKey(nodeKey)
+        const node = $getNodeByKey(nodeKey!)
         if ($isRelationshipNode(node)) {
           node.remove()
           return true
@@ -172,9 +172,11 @@ const Component: React.FC<Props> = (props) => {
             el="div"
             icon="swap"
             onClick={() => {
-              editor.dispatchCommand(INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND, {
-                replace: { nodeKey },
-              })
+              if (nodeKey) {
+                editor.dispatchCommand(INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND, {
+                  replace: { nodeKey },
+                })
+              }
             }}
             round
             tooltip={t('fields:swapRelationship')}
