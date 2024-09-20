@@ -50,8 +50,14 @@ if (args.o) {
   await open(`http://localhost:3000${adminRoute}`)
 }
 
-// @ts-expect-error
-await nextDev({ port: process.env.PORT || 3000, dirname: rootDir }, 'default', rootDir)
+const port = process.env.PORT ? Number(process.env.PORT) : 3000
+
+await nextDev({ port }, 'default', rootDir)
 
 // fetch the admin url to force a render
-void fetch(`http://localhost:${process.env.PORT || 3000}${adminRoute}`)
+void fetch(`http://localhost:${port}${adminRoute}`)
+
+// This ensures that the next-server process is killed when this process is killed and doesn't linger around.
+process.on('SIGINT', function () {
+  process.exit(0)
+})
