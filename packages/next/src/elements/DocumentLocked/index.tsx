@@ -25,13 +25,13 @@ const formatDate = (date) => {
 }
 
 export const DocumentLocked: React.FC<{
-  editedAt?: null | number
   handleGoBack: () => void
   isActive: boolean
   onReadOnly: () => void
   onTakeOver: () => void
+  updatedAt?: null | number
   user?: ClientUser
-}> = ({ editedAt, handleGoBack, isActive, onReadOnly, onTakeOver, user }) => {
+}> = ({ handleGoBack, isActive, onReadOnly, onTakeOver, updatedAt, user }) => {
   const { closeModal, openModal } = useModal()
   const { t } = useTranslation()
 
@@ -52,7 +52,7 @@ export const DocumentLocked: React.FC<{
             <strong>{user?.email ?? user?.id}</strong> {t('general:currentlyEditing')}
           </p>
           <p>
-            {t('general:editedSince')} <strong>{formatDate(editedAt)}</strong>
+            {t('general:editedSince')} <strong>{formatDate(updatedAt)}</strong>
           </p>
         </div>
         <div className={`${baseClass}__controls`}>
