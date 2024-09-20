@@ -55,9 +55,8 @@ export const checkDocumentLockStatus = async ({
 
     const finalLockErrorMessage = lockErrorMessage || defaultLockErrorMessage
 
-    const lockedDocumentResult: PaginatedDocs<JsonObject & TypeWithID> = await payload.find({
+    const lockedDocumentResult: PaginatedDocs<JsonObject & TypeWithID> = await payload.db.find({
       collection: 'payload-locked-documents',
-      depth: 1,
       limit: 1,
       pagination: false,
       req,
@@ -68,8 +67,8 @@ export const checkDocumentLockStatus = async ({
     // If there's a locked document, check lock conditions
     const lockedDoc = lockedDocumentResult?.docs[0]
     if (lockedDoc) {
-      const lastEditedAt = new Date(lockedDoc?.editedAt)
-      const now = new Date()
+      const lastEditedAt = new Date(lockedDoc?.updatedAt).getTime()
+      const now = new Date().getTime()
 
       const lockDuration =
         typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
@@ -79,8 +78,8 @@ export const checkDocumentLockStatus = async ({
 
       // document is locked by another user and the lock hasn't expired
       if (
-        lockedDoc.user?.value?.id !== currentUserId &&
-        now.getTime() - lastEditedAt.getTime() <= lockDurationInMilliseconds
+        lockedDoc.user?.value !== currentUserId &&
+        now - lastEditedAt <= lockDurationInMilliseconds
       ) {
         throw new Locked(finalLockErrorMessage)
       }

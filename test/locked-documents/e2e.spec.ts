@@ -98,7 +98,6 @@ describe('locked documents', () => {
             relationTo: 'posts',
             value: postDoc.id,
           },
-          editedAt: new Date().toISOString(),
           globalSlug: undefined,
           user: {
             relationTo: 'users',
@@ -318,7 +317,6 @@ describe('locked documents', () => {
             relationTo: 'posts',
             value: postDoc.id,
           },
-          editedAt: new Date().toISOString(),
           globalSlug: undefined,
           user: {
             relationTo: 'users',
@@ -422,7 +420,6 @@ describe('locked documents', () => {
             relationTo: 'posts',
             value: postDoc.id,
           },
-          editedAt: new Date().toISOString(),
           globalSlug: undefined,
           user: {
             relationTo: 'users',
@@ -512,7 +509,6 @@ describe('locked documents', () => {
             relationTo: 'posts',
             value: postDoc.id,
           },
-          editedAt: new Date().toISOString(),
           globalSlug: undefined,
           user: {
             relationTo: 'users',
@@ -784,7 +780,6 @@ describe('locked documents', () => {
         collection: lockedDocumentCollection,
         data: {
           document: undefined,
-          editedAt: new Date().toISOString(),
           globalSlug: 'menu',
           user: {
             relationTo: 'users',

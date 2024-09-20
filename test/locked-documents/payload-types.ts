@@ -111,7 +111,6 @@ export interface PayloadLockedDocument {
     relationTo: 'users';
     value: string | User;
   };
-  editedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }

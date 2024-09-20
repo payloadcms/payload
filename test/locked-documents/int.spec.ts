@@ -1,5 +1,8 @@
+import type { Payload, SanitizedCollectionConfig } from 'payload'
+
 import path from 'path'
-import { Locked, NotFound, type Payload } from 'payload'
+import { Locked, NotFound } from 'payload'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -26,9 +29,12 @@ describe('Locked documents', () => {
   let menu: Menu
   let user: any
   let user2: any
+  let postConfig: SanitizedCollectionConfig
 
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
+
+    postConfig = payload.config.collections.find(({ slug }) => slug === postsSlug)
 
     const loginResult = await payload.login({
       collection: 'users',
@@ -75,6 +81,10 @@ describe('Locked documents', () => {
     if (typeof payload.db.destroy === 'function') {
       await payload.db.destroy()
     }
+  })
+
+  afterEach(() => {
+    postConfig.lockDocuments = { duration: 300 }
   })
 
   it('should update unlocked document - collection', async () => {
@@ -129,16 +139,13 @@ describe('Locked documents', () => {
       },
     })
 
-    // Subtract 3.5 minutes (210 seconds) from the current time
-    const pastEditedAt = new Date()
-    pastEditedAt.setMinutes(pastEditedAt.getMinutes() - 3)
-    pastEditedAt.setSeconds(pastEditedAt.getSeconds() - 30)
+    // Set lock duration to 1 second for testing purposes
+    postConfig.lockDocuments = { duration: 1 }
 
     // Give locking ownership to another user
     const lockedDocInstance = await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        editedAt: pastEditedAt.toISOString(),
         user: {
           relationTo: 'users',
           value: user2.id,
@@ -151,6 +158,8 @@ describe('Locked documents', () => {
       },
     })
 
+    await wait(1100)
+
     const updateLockedDoc = await payload.update({
       collection: postsSlug,
       data: {
@@ -159,6 +168,7 @@ describe('Locked documents', () => {
       overrideLock: false,
       id: newPost2.id,
     })
+    postConfig.lockDocuments = { duration: 300 }
 
     // Should allow update since editedAt date is past expiration duration.
     // Therefore the document is considered stale
@@ -187,16 +197,13 @@ describe('Locked documents', () => {
   })
 
   it('should allow update of stale locked document - global', async () => {
-    // Subtract 5.5 minutes (330 seconds) from the current time
-    const pastEditedAt = new Date()
-    pastEditedAt.setMinutes(pastEditedAt.getMinutes() - 5)
-    pastEditedAt.setSeconds(pastEditedAt.getSeconds() - 30)
-
+    // Set lock duration to 1 second for testing purposes
+    const globalConfig = payload.config.globals.find(({ slug }) => slug === menuSlug)
+    globalConfig.lockDocuments = { duration: 1 }
     // Give locking ownership to another user
     const lockedGlobalInstance = await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        editedAt: pastEditedAt.toISOString(), // stale date
         user: {
           relationTo: 'users',
           value: user2.id,
@@ -206,6 +213,8 @@ describe('Locked documents', () => {
       },
     })
 
+    await wait(1100)
+
     const updateGlobalLockedDoc = await payload.updateGlobal({
       data: {
         globalText: 'global text 2',
@@ -213,6 +222,7 @@ describe('Locked documents', () => {
       overrideLock: false,
       slug: menuSlug,
     })
+    globalConfig.lockDocuments = { duration: 300 }
 
     // Should allow update since editedAt date is past expiration duration.
     // Therefore the document is considered stale
@@ -379,16 +389,13 @@ describe('Locked documents', () => {
       },
     })
 
-    // Subtract 3.5 minutes (210 seconds) from the current time
-    const pastEditedAt = new Date()
-    pastEditedAt.setMinutes(pastEditedAt.getMinutes() - 3)
-    pastEditedAt.setSeconds(pastEditedAt.getSeconds() - 30)
+    // Set lock duration to 1 second for testing purposes
+    postConfig.lockDocuments = { duration: 1 }
 
     // Give locking ownership to another user
     const lockedDocInstance = await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        editedAt: pastEditedAt.toISOString(), // stale date
         user: {
           relationTo: 'users',
           value: user2.id,
@@ -400,6 +407,8 @@ describe('Locked documents', () => {
         globalSlug: undefined,
       },
     })
+
+    await wait(1100)
 
     await payload.delete({
       collection: postsSlug,

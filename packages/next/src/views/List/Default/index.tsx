@@ -28,13 +28,13 @@ import {
   useListInfo,
   useListQuery,
   useModal,
-  useRouteCache,
   useStepNav,
   useTranslation,
   useWindowInfo,
   ViewDescription,
 } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
+import { useRouter } from 'next/navigation.js'
 import { formatFilesize, isNumber } from 'payload/shared'
 import React, { Fragment, useEffect } from 'react'
 
@@ -55,9 +55,10 @@ export const DefaultListView: React.FC = () => {
     newDocumentURL,
   } = useListInfo()
 
+  const router = useRouter()
+
   const { data, defaultLimit, handlePageChange, handlePerPageChange, params } = useListQuery()
   const { openModal } = useModal()
-  const { clearRouteCache } = useRouteCache()
   const { setCollectionSlug, setOnSuccess } = useBulkUpload()
   const { drawerSlug } = useBulkUpload()
 
@@ -109,8 +110,8 @@ export const DefaultListView: React.FC = () => {
   const openBulkUpload = React.useCallback(() => {
     setCollectionSlug(collectionSlug)
     openModal(drawerSlug)
-    setOnSuccess(clearRouteCache)
-  }, [clearRouteCache, collectionSlug, drawerSlug, openModal, setCollectionSlug, setOnSuccess])
+    setOnSuccess(() => router.refresh())
+  }, [router, collectionSlug, drawerSlug, openModal, setCollectionSlug, setOnSuccess])
 
   useEffect(() => {
     if (drawerDepth <= 1) {
