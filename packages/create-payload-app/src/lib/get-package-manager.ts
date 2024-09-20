@@ -1,8 +1,12 @@
+import execa from 'execa'
 import fse from 'fs-extra'
 
 import type { CliArgs, PackageManager } from '../types.js'
 
-export function getPackageManager(args: { cliArgs?: CliArgs; projectDir: string }): PackageManager {
+export async function getPackageManager(args: {
+  cliArgs?: CliArgs
+  projectDir: string
+}): Promise<PackageManager> {
   const { cliArgs, projectDir } = args
 
   try {
@@ -16,6 +20,9 @@ export function getPackageManager(args: { cliArgs?: CliArgs; projectDir: string 
       detected = 'npm'
     } else if (cliArgs?.['--use-bun'] || fse.existsSync(`${projectDir}/bun.lockb`)) {
       detected = 'bun'
+    } else if (await commandExists('pnpm')) {
+      // Prefer pnpm if it's installed
+      detected = 'pnpm'
     } else {
       // Otherwise check the execution environment
       detected = getEnvironmentPackageManager()
@@ -43,4 +50,13 @@ function getEnvironmentPackageManager(): PackageManager {
   }
 
   return 'npm'
+}
+
+async function commandExists(command: string): Promise<boolean> {
+  try {
+    await execa.command(`command -v ${command}`)
+    return true
+  } catch {
+    return false
+  }
 }
