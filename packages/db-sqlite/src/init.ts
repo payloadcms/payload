@@ -1,5 +1,5 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type { Init, SanitizedCollectionConfig } from 'payload'
+import type { Init, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 import { createTableName } from '@payloadcms/drizzle'
 import { uniqueIndex } from 'drizzle-orm/sqlite-core'
@@ -21,6 +21,11 @@ export const init: Init = function init(this: SQLiteAdapter) {
   }
 
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
+    // Skip collections that have an .init() method
+    if ('function' === typeof collection?.db?.init) {
+      return
+    }
+
     createTableName({
       adapter: this as unknown as DrizzleAdapter,
       config: collection,
@@ -93,7 +98,12 @@ export const init: Init = function init(this: SQLiteAdapter) {
     }
   })
 
-  this.payload.config.globals.forEach((global) => {
+  this.payload.config.globals.forEach((global: SanitizedGlobalConfig) => {
+    // Skip globals that have an .init() method
+    if ('function' === typeof global?.db?.init) {
+      return
+    }
+
     const tableName = createTableName({
       adapter: this as unknown as DrizzleAdapter,
       config: global,
