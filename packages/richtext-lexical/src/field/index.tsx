@@ -26,13 +26,13 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
   } = props
 
   const [finalSanitizedEditorConfig, setFinalSanitizedEditorConfig] =
-    useState<SanitizedClientEditorConfig>(null)
+    useState<null | SanitizedClientEditorConfig>(null)
 
   useEffect(() => {
     if (finalSanitizedEditorConfig) {
       return
     }
-    const clientFeatures: GeneratedFeatureProviderComponent[] = richTextComponentMap.get(
+    const clientFeatures: GeneratedFeatureProviderComponent[] = richTextComponentMap?.get(
       'features',
     ) as GeneratedFeatureProviderComponent[]
 

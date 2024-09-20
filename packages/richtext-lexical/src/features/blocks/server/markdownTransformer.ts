@@ -1,5 +1,5 @@
 import type { TextMatchTransformer, Transformer } from '@lexical/markdown'
-import type { ElementNode, SerializedEditorState } from 'lexical'
+import type { ElementNode, SerializedEditorState, SerializedLexicalNode } from 'lexical'
 import type { Block } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
@@ -116,7 +116,7 @@ function getMarkdownTransformerForBlock(
         const nodeFields = node.getFields()
         const lexicalToMarkdown = getLexicalToMarkdown(allNodes, allTransformers)
 
-        const exportResult = block.jsx.export({
+        const exportResult = block.jsx!.export({
           fields: nodeFields,
           lexicalToMarkdown,
         })
@@ -128,10 +128,10 @@ function getMarkdownTransformerForBlock(
         }
 
         if (exportResult?.children?.length) {
-          return `<${nodeFields.blockType} ${propsToJSXString({ props: exportResult.props })}>\n  ${exportResult.children}\n</${nodeFields.blockType}>`
+          return `<${nodeFields.blockType}${exportResult.props ? ' ' + propsToJSXString({ props: exportResult.props }) : ''}>\n  ${exportResult.children}\n</${nodeFields.blockType}>`
         }
 
-        return `<${nodeFields.blockType} ${propsToJSXString({ props: exportResult.props })}/>`
+        return `<${nodeFields.blockType}${exportResult.props ? ' ' + propsToJSXString({ props: exportResult.props }) : ''}/>`
       },
       regExp: /___ignoreignoreignore___/g,
     }))
@@ -157,7 +157,7 @@ function getMarkdownTransformerForBlock(
       const nodeFields = node.getFields()
       const lexicalToMarkdown = getLexicalToMarkdown(allNodes, allTransformers)
 
-      const exportResult = block.jsx.export({
+      const exportResult = block.jsx!.export({
         fields: nodeFields,
         lexicalToMarkdown,
       })
@@ -169,10 +169,10 @@ function getMarkdownTransformerForBlock(
       }
 
       if (exportResult?.children?.length) {
-        return `<${nodeFields.blockType} ${propsToJSXString({ props: exportResult.props })}>\n  ${exportResult.children}\n</${nodeFields.blockType}>`
+        return `<${nodeFields.blockType}${exportResult.props ? ' ' + propsToJSXString({ props: exportResult.props }) : ''}>\n  ${exportResult.children}\n</${nodeFields.blockType}>`
       }
 
-      return `<${nodeFields.blockType} ${propsToJSXString({ props: exportResult.props })}/>`
+      return `<${nodeFields.blockType}${exportResult.props ? ' ' + propsToJSXString({ props: exportResult.props }) : ''}/>`
     },
     handleImportAfterStartMatch: block.jsx?.customEndRegex
       ? undefined
@@ -198,11 +198,12 @@ function getMarkdownTransformerForBlock(
               startMatch,
             })
 
-          if (block.jsx.import) {
+          if (block?.jsx?.import) {
             const markdownToLexical = getMarkdownToLexical(allNodes, allTransformers)
 
             const blockFields = block.jsx.import({
               children: content,
+              closeMatch: null,
               htmlToLexical: null, // TODO
               markdownToLexical,
               openMatch: startMatch,
@@ -232,8 +233,8 @@ function getMarkdownTransformerForBlock(
               // Now handle beforeStartLine and afterEndLine. If those are not empty, we need to add them as text nodes before and after the block node.
               // However, those themselves can contain other markdown matches, so we need to parse them as well.
               // Example where this is needed: "Hello <InlineCode>inline code</InlineCode> test."
-              let prevNodes = null
-              let nextNodes = null
+              let prevNodes: null | SerializedLexicalNode[] = null
+              let nextNodes: null | SerializedLexicalNode[] = null
               if (beforeStartLine?.length) {
                 prevNodes = markdownToLexical({ markdown: beforeStartLine })?.root?.children ?? []
 
@@ -276,7 +277,19 @@ function getMarkdownTransformerForBlock(
     // This replace is ONLY run for ``` code blocks (so any blocks with custom start and end regexes). For others, we use the special JSX handling above:
     type: 'multiline-element',
     replace: (rootNode, children, openMatch, closeMatch, linesInBetween) => {
-      if (block.jsx.import) {
+      if (block?.jsx?.import) {
+        if (!linesInBetween) {
+          // convert children to linesInBetween
+          let line = ''
+          if (children) {
+            for (const child of children) {
+              line += child.getTextContent()
+            }
+          }
+
+          linesInBetween = [line]
+        }
+
         const childrenString = linesInBetween.join('\n').trim()
 
         const propsString: null | string = openMatch?.length > 1 ? openMatch[1]?.trim() : null
@@ -363,7 +376,7 @@ export function getLexicalToMarkdown(
       console.error('getLexicalToMarkdown: ERROR parsing editor state', e)
     }
 
-    let markdown: string
+    let markdown: string = ''
     headlessEditor.getEditorState().read(() => {
       markdown = $convertToMarkdownString(allTransformers)
     })

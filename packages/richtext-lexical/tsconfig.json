@@ -5,6 +5,7 @@
     "noEmit": false /* Do not emit outputs. */,
     "emitDeclarationOnly": true,
     "esModuleInterop": true,
+    "strictNullChecks": true,
     "outDir": "./dist" /* Specify an output folder for all emitted files. */,
     "rootDir": "./src" /* Specify the root folder within your source files. */,
   },

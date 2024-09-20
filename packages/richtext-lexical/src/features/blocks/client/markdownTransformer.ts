@@ -27,7 +27,7 @@ export const getBlockMarkdownTransformers = ({
   allTransformers: Transformer[]
 }) => MultilineElementTransformer)[] => {
   if (!blocks?.length) {
-    return
+    return []
   }
 
   const transformers: ((props: {
@@ -54,7 +54,7 @@ export const getBlockMarkdownTransformers = ({
         const nodeFields = node.getFields()
         const lexicalToMarkdown = getLexicalToMarkdown(allNodes, allTransformers)
 
-        const exportResult = block.jsx.export({
+        const exportResult = block.jsx!.export({
           fields: nodeFields,
           lexicalToMarkdown,
         })
@@ -66,21 +66,24 @@ export const getBlockMarkdownTransformers = ({
         }
 
         if (exportResult?.children?.length) {
-          return `<${nodeFields.blockType} ${propsToJSXString({ props: exportResult.props })}>\n  ${exportResult.children}\n</${nodeFields.blockType}>`
+          return `<${nodeFields.blockType}${exportResult.props ? ' ' + propsToJSXString({ props: exportResult.props }) : ''}>\n  ${exportResult.children}\n</${nodeFields.blockType}>`
         }
 
-        return `<${nodeFields.blockType} ${propsToJSXString({ props: exportResult.props })}/>`
+        return `<${nodeFields.blockType}${exportResult.props ? ' ' + propsToJSXString({ props: exportResult.props }) : ''}/>`
       },
       regExpEnd: block.jsx?.customEndRegex ?? regex.regExpEnd,
       regExpStart: block.jsx?.customStartRegex ?? regex.regExpStart,
       replace: (rootNode, children, openMatch, closeMatch, linesInBetween) => {
-        if (block.jsx.import) {
+        if (block?.jsx?.import) {
           if (!linesInBetween) {
             // convert children to linesInBetween
             let line = ''
-            for (const child of children) {
-              line += child.getTextContent()
+            if (children) {
+              for (const child of children) {
+                line += child.getTextContent()
+              }
             }
+
             linesInBetween = [line]
           }
 
@@ -109,7 +112,8 @@ export const getBlockMarkdownTransformers = ({
           const node = $createBlockNode({
             blockType: block.slug,
             ...blockFields,
-          } as any)
+            blockName: blockFields.blockName || '',
+          })
           if (node) {
             rootNode.append(node)
           }
@@ -162,7 +166,7 @@ export function getLexicalToMarkdown(
       console.error('getLexicalToMarkdown: ERROR parsing editor state', e)
     }
 
-    let markdown: string
+    let markdown: string = ''
     headlessEditor.getEditorState().read(() => {
       markdown = $convertToMarkdownString(allTransformers)
     })

@@ -229,7 +229,7 @@ function $importMultiline(
 
       if (potentialSubStartMatch) {
         if (endMatch) {
-          if (potentialSubStartMatch.index < endMatch.index) {
+          if ((potentialSubStartMatch.index ?? 0) < (endMatch.index ?? 0)) {
             openedSubStartMatches++
           }
         } else {
@@ -260,7 +260,7 @@ function $importMultiline(
 
       // At this point, we have found the closing match. Next: calculate the lines in between open and closing match
       // This should not include the matches themselves, and be split up by lines
-      const linesInBetween = []
+      const linesInBetween: string[] = []
 
       if (endMatch && startLineIndex === endLineIndex) {
         linesInBetween.push(lines[startLineIndex].slice(startMatch[0].length, -endMatch[0].length))
@@ -503,7 +503,7 @@ function createTextFormatTransformersIndex(
 ): TextFormatTransformersIndex {
   const transformersByTag: Record<string, TextFormatTransformer> = {}
   const fullMatchRegExpByTag: Record<string, RegExp> = {}
-  const openTagsRegExp = []
+  const openTagsRegExp: string[] = []
   const escapeRegExp = `(?<![\\\\])`
 
   for (const transformer of textTransformers) {

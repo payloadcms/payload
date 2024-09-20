@@ -81,8 +81,8 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
-  const [relatedCollection] = useState<ClientCollectionConfig>(() =>
-    collections.find((coll) => coll.slug === relationTo),
+  const [relatedCollection] = useState<ClientCollectionConfig>(
+    () => collections.find((coll) => coll.slug === relationTo)!,
   )
 
   const componentID = useId()
@@ -107,7 +107,7 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const removeUpload = useCallback(() => {
     editor.update(() => {
-      $getNodeByKey(nodeKey).remove()
+      $getNodeByKey(nodeKey)?.remove()
     })
   }, [editor, nodeKey])
 

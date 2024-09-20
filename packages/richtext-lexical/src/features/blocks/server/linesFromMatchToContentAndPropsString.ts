@@ -31,7 +31,7 @@ export function linesFromStartToContentAndPropsString({
   let contentSubTagStartAmount = 0
 
   let bracketCount = 0
-  let quoteChar = null
+  let quoteChar: null | string = null
   let isSelfClosing = false
   let isWithinCodeBlockAmount = 0
 
@@ -46,7 +46,7 @@ export function linesFromStartToContentAndPropsString({
     let charIndex = 0
 
     if (lineIndex === 0) {
-      charIndex = startMatch.index + startMatch[0].length // We need to also loop over the ">" in something like "<InlineCode>" in order to later set isWithinContent to true
+      charIndex = (startMatch.index ?? 0) + startMatch[0].length // We need to also loop over the ">" in something like "<InlineCode>" in order to later set isWithinContent to true
     }
 
     while (charIndex < line.length) {

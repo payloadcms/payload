@@ -69,12 +69,12 @@ export async function convertLexicalToHTML({
     return await convertLexicalNodesToHTML({
       converters,
       currentDepth,
-      depth,
+      depth: depth!,
       draft: draft === undefined ? false : draft,
       lexicalNodes: data?.root?.children,
       overrideAccess: overrideAccess === undefined ? false : overrideAccess,
       parent: data?.root,
-      req,
+      req: req!,
       showHiddenFields: showHiddenFields === undefined ? false : showHiddenFields,
     })
   }

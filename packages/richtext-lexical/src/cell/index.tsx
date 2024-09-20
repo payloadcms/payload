@@ -66,7 +66,7 @@ export const RichTextCell: React.FC<
   }
 
   const finalSanitizedEditorConfig = useMemo<SanitizedClientEditorConfig>(() => {
-    const clientFeatures: GeneratedFeatureProviderComponent[] = richTextComponentMap.get(
+    const clientFeatures: GeneratedFeatureProviderComponent[] = richTextComponentMap?.get(
       'features',
     ) as GeneratedFeatureProviderComponent[]
 

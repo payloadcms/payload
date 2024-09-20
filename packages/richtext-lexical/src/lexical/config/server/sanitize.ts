@@ -51,18 +51,20 @@ export const sanitizeServerFeatures = (
     }
 
     if (feature?.hooks?.beforeValidate?.length) {
-      sanitized.hooks.beforeValidate = sanitized.hooks.beforeValidate.concat(
+      sanitized.hooks.beforeValidate = sanitized.hooks.beforeValidate?.concat(
         feature.hooks.beforeValidate,
       )
     }
     if (feature?.hooks?.beforeChange?.length) {
-      sanitized.hooks.beforeChange = sanitized.hooks.beforeChange.concat(feature.hooks.beforeChange)
+      sanitized.hooks.beforeChange = sanitized.hooks.beforeChange?.concat(
+        feature.hooks.beforeChange,
+      )
     }
     if (feature?.hooks?.afterRead?.length) {
-      sanitized.hooks.afterRead = sanitized.hooks.afterRead.concat(feature.hooks.afterRead)
+      sanitized.hooks.afterRead = sanitized.hooks.afterRead?.concat(feature.hooks.afterRead)
     }
     if (feature?.hooks?.afterChange?.length) {
-      sanitized.hooks.afterChange = sanitized.hooks.afterChange.concat(feature.hooks.afterChange)
+      sanitized.hooks.afterChange = sanitized.hooks.afterChange?.concat(feature.hooks.afterChange)
     }
 
     if (feature?.i18n) {
@@ -93,22 +95,22 @@ export const sanitizeServerFeatures = (
           sanitized.converters.html.push(node.converters.html)
         }
         if (node?.hooks?.afterChange) {
-          sanitized.nodeHooks.afterChange.set(nodeType, node.hooks.afterChange)
+          sanitized.nodeHooks?.afterChange?.set(nodeType, node.hooks.afterChange)
         }
         if (node?.hooks?.afterRead) {
-          sanitized.nodeHooks.afterRead.set(nodeType, node.hooks.afterRead)
+          sanitized.nodeHooks?.afterRead?.set(nodeType, node.hooks.afterRead)
         }
         if (node?.hooks?.beforeChange) {
-          sanitized.nodeHooks.beforeChange.set(nodeType, node.hooks.beforeChange)
+          sanitized.nodeHooks?.beforeChange?.set(nodeType, node.hooks.beforeChange)
         }
         if (node?.hooks?.beforeValidate) {
-          sanitized.nodeHooks.beforeValidate.set(nodeType, node.hooks.beforeValidate)
+          sanitized.nodeHooks?.beforeValidate?.set(nodeType, node.hooks.beforeValidate)
         }
         if (node?.getSubFields) {
-          sanitized.getSubFields.set(nodeType, node.getSubFields)
+          sanitized.getSubFields?.set(nodeType, node.getSubFields)
         }
         if (node?.getSubFieldsData) {
-          sanitized.getSubFieldsData.set(nodeType, node.getSubFieldsData)
+          sanitized.getSubFieldsData?.set(nodeType, node.getSubFieldsData)
         }
       })
     }
@@ -143,13 +145,13 @@ export async function sanitizeServerEditorConfig(
 ): Promise<SanitizedServerEditorConfig> {
   const resolvedFeatureMap = await loadFeatures({
     config,
-    parentIsLocalized,
+    parentIsLocalized: parentIsLocalized!,
     unSanitizedEditorConfig: editorConfig,
   })
 
   return {
     features: sanitizeServerFeatures(resolvedFeatureMap),
-    lexical: editorConfig.lexical,
+    lexical: editorConfig.lexical!,
     resolvedFeatureMap,
   }
 }

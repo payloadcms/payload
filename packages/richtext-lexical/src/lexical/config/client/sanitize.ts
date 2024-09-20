@@ -60,7 +60,7 @@ export const sanitizeClientFeatures = (
     }
     if (feature.plugins?.length) {
       feature.plugins.forEach((plugin, i) => {
-        sanitized.plugins.push({
+        sanitized.plugins?.push({
           clientProps: feature.sanitizedClientFeatureProps,
           Component: plugin.Component,
           key: feature.key + i,
@@ -232,7 +232,7 @@ export function sanitizeClientEditorConfig(
   return {
     admin,
     features: sanitizeClientFeatures(resolvedClientFeatureMap),
-    lexical,
+    lexical: lexical!,
     resolvedFeatureMap: resolvedClientFeatureMap,
   }
 }

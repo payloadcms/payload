@@ -443,7 +443,7 @@ export interface FieldBaseClient {
    * Must not be one of reserved field names: ['__v', 'salt', 'hash', 'file']
    * @link https://payloadcms.com/docs/fields/overview#field-names
    */
-  name?: string
+  name: string
   required?: boolean
   saveToJWT?: boolean | string
   /**
@@ -1346,8 +1346,8 @@ export type BlockJSX = {
     | string
   import: (props: {
     children: string
-    closeMatch?: RegExpMatchArray // Only available when customEndRegex is set
-    htmlToLexical?: (props: { html: string }) => any
+    closeMatch: null | RegExpMatchArray // Only available when customEndRegex is set
+    htmlToLexical?: ((props: { html: string }) => any) | null
     markdownToLexical?: (props: { markdown: string }) => Record<string, any>
     openMatch?: RegExpMatchArray
     props: Record<string, any>

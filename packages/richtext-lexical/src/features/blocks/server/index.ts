@@ -135,6 +135,7 @@ export const BlocksFeature = createServerFeature<
 
       nodes: [
         createNode({
+          // @ts-expect-error - TODO: fix this
           getSubFields: ({ node }) => {
             if (!node) {
               if (props?.blocks?.length) {
@@ -151,7 +152,7 @@ export const BlocksFeature = createServerFeature<
 
             const blockType = node.fields.blockType
 
-            const block = props.blocks.find((block) => block.slug === blockType)
+            const block = props.blocks?.find((block) => block.slug === blockType)
             return block?.fields
           },
           getSubFieldsData: ({ node }) => {
@@ -162,6 +163,7 @@ export const BlocksFeature = createServerFeature<
           validations: [blockValidationHOC(props.blocks)],
         }),
         createNode({
+          // @ts-expect-error - TODO: fix this
           getSubFields: ({ node }) => {
             if (!node) {
               if (props?.inlineBlocks?.length) {
@@ -178,7 +180,7 @@ export const BlocksFeature = createServerFeature<
 
             const blockType = node.fields.blockType
 
-            const block = props.inlineBlocks.find((block) => block.slug === blockType)
+            const block = props.inlineBlocks?.find((block) => block.slug === blockType)
             return block?.fields
           },
           getSubFieldsData: ({ node }) => {

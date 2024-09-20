@@ -34,7 +34,7 @@ export const TableMarkdownTransformer: (props: {
     const output: string[] = []
 
     for (const row of node.getChildren()) {
-      const rowOutput = []
+      const rowOutput: string[] = []
       if (!$isTableRowNode(row)) {
         continue
       }
