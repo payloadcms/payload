@@ -82,7 +82,6 @@ const collectionWithDb = (slug: string, relatedCollection: string): CollectionCo
   }
 }
 
-// eslint-disable-next-line no-restricted-exports
 export default buildConfigWithDefaults({
   collections: [
     collectionWithDb(collectionSlug, collectionSlugRelated),
