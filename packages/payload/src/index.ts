@@ -131,6 +131,8 @@ export type TypedAuthOperations = ResolveAuthOperationsType<GeneratedTypes>
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+let checkedDependencies = false
+
 /**
  * @description Payload
  */
@@ -432,8 +434,10 @@ export class BasePayload {
   async init(options: InitOptions): Promise<Payload> {
     if (
       process.env.NODE_ENV !== 'production' &&
-      process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true'
+      process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true' &&
+      !checkedDependencies
     ) {
+      checkedDependencies = true
       await checkPayloadDependencies()
     }
 
