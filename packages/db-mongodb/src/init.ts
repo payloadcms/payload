@@ -16,6 +16,11 @@ import { getDBName } from './utilities/getDBName.js'
 
 export const init: Init = function init(this: MongooseAdapter) {
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
+    // Skip collections that have an .init() method
+    if ('function' === typeof collection?.db?.init) {
+      return
+    }
+
     const schema = buildCollectionSchema(collection, this.payload.config)
 
     if (collection.versions) {
