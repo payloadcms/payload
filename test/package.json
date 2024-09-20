@@ -58,8 +58,8 @@
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "@sentry/react": "^7.77.0",
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "babel-plugin-react-compiler": "0.0.0-experimental-24ec0eb-20240918",
     "comment-json": "^4.2.3",
     "create-payload-app": "workspace:*",
@@ -85,7 +85,7 @@
     "uuid": "10.0.0"
   },
   "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }

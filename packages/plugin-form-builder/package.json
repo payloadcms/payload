@@ -61,8 +61,8 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/escape-html": "^1.0.4",
     "@types/express": "^4.17.21",
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
     "payload": "workspace:*"
@@ -96,7 +96,7 @@
   },
   "homepage:": "https://payloadcms.com",
   "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }

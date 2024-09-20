@@ -91,8 +91,8 @@
     "@next/eslint-plugin-next": "15.0.0-canary.160",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "1.5.4",
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "@types/uuid": "10.0.0",
     "@types/ws": "^8.5.10",
     "babel-plugin-react-compiler": "0.0.0-experimental-24ec0eb-20240918",
@@ -152,7 +152,7 @@
     "types": "./dist/index.js"
   },
   "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }

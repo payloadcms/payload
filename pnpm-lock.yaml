@@ -5,8 +5,8 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@types/react': npm:types-react@19.0.0-rc.0
-  '@types/react-dom': npm:types-react-dom@19.0.0-rc.0
+  '@types/react': npm:types-react@19.0.0-rc.1
+  '@types/react-dom': npm:types-react-dom@19.0.0-rc.1
   copyfiles: 2.4.1
   cross-env: 7.0.3
   dotenv: 16.4.5
@@ -70,11 +70,11 @@ importers:
         specifier: ^2.4.5
         version: 2.4.9
       '@types/react':
-        specifier: npm:types-react@19.0.0-rc.0
-        version: types-react@19.0.0-rc.0
+        specifier: npm:types-react@19.0.0-rc.1
+        version: types-react@19.0.0-rc.1
       '@types/react-dom':
-        specifier: npm:types-react-dom@19.0.0-rc.0
-        version: types-react-dom@19.0.0-rc.0
+        specifier: npm:types-react-dom@19.0.0-rc.1
+        version: types-react-dom@19.0.0-rc.1
       '@types/semver':
         specifier: ^7.5.3
         version: 7.5.8
@@ -107,7 +107,7 @@ importers:
         version: 0.23.2-df9e596
       drizzle-orm:
         specifier: 0.32.1
-        version: 0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8))(@neondatabase/serverless@0.9.4)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.0)
+        version: 0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8))(@neondatabase/serverless@0.9.4)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.1)
       escape-html:
         specifier: ^1.0.3
         version: 1.0.3
@@ -307,7 +307,7 @@ importers:
         version: 0.23.2-df9e596
       drizzle-orm:
         specifier: 0.32.1
-        version: 0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.0)
+        version: 0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.1)
       pg:
         specifier: 8.11.3
         version: 8.11.3
@@ -356,7 +356,7 @@ importers:
         version: 0.23.2-df9e596
       drizzle-orm:
         specifier: 0.32.1
-        version: 0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.0)
+        version: 0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.1)
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -396,7 +396,7 @@ importers:
         version: 0.23.2-df9e596
       drizzle-orm:
         specifier: 0.32.1
-        version: 0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.0)
+        version: 0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.1)
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -433,7 +433,7 @@ importers:
         version: 2.11.2
       drizzle-orm:
         specifier: 0.32.1
-        version: 0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.0)
+        version: 0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.1)
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -652,11 +652,11 @@ importers:
         specifier: workspace:*
         version: link:../eslint-config
       '@types/react':
-        specifier: npm:types-react@19.0.0-rc.0
-        version: types-react@19.0.0-rc.0
+        specifier: npm:types-react@19.0.0-rc.1
+        version: types-react@19.0.0-rc.1
       '@types/react-dom':
-        specifier: npm:types-react-dom@19.0.0-rc.0
-        version: types-react-dom@19.0.0-rc.0
+        specifier: npm:types-react-dom@19.0.0-rc.1
+        version: types-react-dom@19.0.0-rc.1
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -759,11 +759,11 @@ importers:
         specifier: 1.5.4
         version: 1.5.4
       '@types/react':
-        specifier: npm:types-react@19.0.0-rc.0
-        version: types-react@19.0.0-rc.0
+        specifier: npm:types-react@19.0.0-rc.1
+        version: types-react@19.0.0-rc.1
       '@types/react-dom':
-        specifier: npm:types-react-dom@19.0.0-rc.0
-        version: types-react-dom@19.0.0-rc.0
+        specifier: npm:types-react-dom@19.0.0-rc.1
+        version: types-react-dom@19.0.0-rc.1
       '@types/uuid':
         specifier: 10.0.0
         version: 10.0.0
@@ -1015,11 +1015,11 @@ importers:
         specifier: ^4.17.21
         version: 4.17.21
       '@types/react':
-        specifier: npm:types-react@19.0.0-rc.0
-        version: types-react@19.0.0-rc.0
+        specifier: npm:types-react@19.0.0-rc.1
+        version: types-react@19.0.0-rc.1
       '@types/react-dom':
-        specifier: npm:types-react-dom@19.0.0-rc.0
-        version: types-react-dom@19.0.0-rc.0
+        specifier: npm:types-react-dom@19.0.0-rc.1
+        version: types-react-dom@19.0.0-rc.1
       copyfiles:
         specifier: 2.4.1
         version: 2.4.1
@@ -1048,11 +1048,11 @@ importers:
         specifier: ^4.17.9
         version: 4.17.21
       '@types/react':
-        specifier: npm:types-react@19.0.0-rc.0
-        version: types-react@19.0.0-rc.0
+        specifier: npm:types-react@19.0.0-rc.1
+        version: types-react@19.0.0-rc.1
       '@types/react-dom':
-        specifier: npm:types-react-dom@19.0.0-rc.0
-        version: types-react-dom@19.0.0-rc.0
+        specifier: npm:types-react-dom@19.0.0-rc.1
+        version: types-react-dom@19.0.0-rc.1
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -1089,11 +1089,11 @@ importers:
         specifier: ^4.17.9
         version: 4.17.21
       '@types/react':
-        specifier: npm:types-react@19.0.0-rc.0
-        version: types-react@19.0.0-rc.0
+        specifier: npm:types-react@19.0.0-rc.1
+        version: types-react@19.0.0-rc.1
       '@types/react-dom':
-        specifier: npm:types-react-dom@19.0.0-rc.0
-        version: types-react-dom@19.0.0-rc.0
+        specifier: npm:types-react-dom@19.0.0-rc.1
+        version: types-react-dom@19.0.0-rc.1
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -1129,11 +1129,11 @@ importers:
         specifier: 22.5.4
         version: 22.5.4
       '@types/react':
-        specifier: npm:types-react@19.0.0-rc.0
-        version: types-react@19.0.0-rc.0
+        specifier: npm:types-react@19.0.0-rc.1
+        version: types-react@19.0.0-rc.1
       '@types/react-dom':
-        specifier: npm:types-react-dom@19.0.0-rc.0
-        version: types-react-dom@19.0.0-rc.0
+        specifier: npm:types-react-dom@19.0.0-rc.1
+        version: types-react-dom@19.0.0-rc.1
       copyfiles:
         specifier: 2.4.1
         version: 2.4.1
@@ -1175,11 +1175,11 @@ importers:
         specifier: workspace:*
         version: link:../next
       '@types/react':
-        specifier: npm:types-react@19.0.0-rc.0
-        version: types-react@19.0.0-rc.0
+        specifier: npm:types-react@19.0.0-rc.1
+        version: types-react@19.0.0-rc.1
       '@types/react-dom':
-        specifier: npm:types-react-dom@19.0.0-rc.0
-        version: types-react-dom@19.0.0-rc.0
+        specifier: npm:types-react-dom@19.0.0-rc.1
+        version: types-react-dom@19.0.0-rc.1
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -1215,11 +1215,11 @@ importers:
         specifier: ^4.4.7
         version: 4.4.9
       '@types/react':
-        specifier: npm:types-react@19.0.0-rc.0
-        version: types-react@19.0.0-rc.0
+        specifier: npm:types-react@19.0.0-rc.1
+        version: types-react@19.0.0-rc.1
       '@types/react-dom':
-        specifier: npm:types-react-dom@19.0.0-rc.0
-        version: types-react-dom@19.0.0-rc.0
+        specifier: npm:types-react-dom@19.0.0-rc.1
+        version: types-react-dom@19.0.0-rc.1
       '@types/uuid':
         specifier: 10.0.0
         version: 10.0.0
@@ -1333,11 +1333,11 @@ importers:
         specifier: 22.5.4
         version: 22.5.4
       '@types/react':
-        specifier: npm:types-react@19.0.0-rc.0
-        version: types-react@19.0.0-rc.0
+        specifier: npm:types-react@19.0.0-rc.1
+        version: types-react@19.0.0-rc.1
       '@types/react-dom':
-        specifier: npm:types-react-dom@19.0.0-rc.0
-        version: types-react-dom@19.0.0-rc.0
+        specifier: npm:types-react-dom@19.0.0-rc.1
+        version: types-react-dom@19.0.0-rc.1
       babel-plugin-react-compiler:
         specifier: 0.0.0-experimental-48eb8f4-20240822
         version: 0.0.0-experimental-48eb8f4-20240822
@@ -1397,11 +1397,11 @@ importers:
         specifier: 22.5.4
         version: 22.5.4
       '@types/react':
-        specifier: npm:types-react@19.0.0-rc.0
-        version: types-react@19.0.0-rc.0
+        specifier: npm:types-react@19.0.0-rc.1
+        version: types-react@19.0.0-rc.1
       '@types/react-dom':
-        specifier: npm:types-react-dom@19.0.0-rc.0
-        version: types-react-dom@19.0.0-rc.0
+        specifier: npm:types-react-dom@19.0.0-rc.1
+        version: types-react-dom@19.0.0-rc.1
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -1496,11 +1496,11 @@ importers:
         specifier: 1.7.10
         version: 1.7.10(@swc/helpers@0.5.13)
       '@types/react':
-        specifier: npm:types-react@19.0.0-rc.0
-        version: types-react@19.0.0-rc.0
+        specifier: npm:types-react@19.0.0-rc.1
+        version: types-react@19.0.0-rc.1
       '@types/react-dom':
-        specifier: npm:types-react-dom@19.0.0-rc.0
-        version: types-react-dom@19.0.0-rc.0
+        specifier: npm:types-react-dom@19.0.0-rc.1
+        version: types-react-dom@19.0.0-rc.1
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
@@ -1575,7 +1575,7 @@ importers:
         version: 10.1.8(react@19.0.0-rc-5dcb0097-20240918)
       react-select:
         specifier: 5.8.0
-        version: 5.8.0(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.0)
+        version: 5.8.0(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.1)
       scheduler:
         specifier: 0.25.0-rc-f994737d14-20240522
         version: 0.25.0-rc-f994737d14-20240522
@@ -1617,14 +1617,14 @@ importers:
         specifier: ^3.1.0
         version: 3.1.2
       '@types/react':
-        specifier: npm:types-react@19.0.0-rc.0
-        version: types-react@19.0.0-rc.0
+        specifier: npm:types-react@19.0.0-rc.1
+        version: types-react@19.0.0-rc.1
       '@types/react-datepicker':
         specifier: 6.2.0
         version: 6.2.0(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)
       '@types/react-dom':
-        specifier: npm:types-react-dom@19.0.0-rc.0
-        version: types-react-dom@19.0.0-rc.0
+        specifier: npm:types-react-dom@19.0.0-rc.1
+        version: types-react-dom@19.0.0-rc.1
       '@types/uuid':
         specifier: 10.0.0
         version: 10.0.0
@@ -1755,11 +1755,11 @@ importers:
         specifier: ^7.77.0
         version: 7.118.0(react@19.0.0-rc-5dcb0097-20240918)
       '@types/react':
-        specifier: npm:types-react@19.0.0-rc.0
-        version: types-react@19.0.0-rc.0
+        specifier: npm:types-react@19.0.0-rc.1
+        version: types-react@19.0.0-rc.1
       '@types/react-dom':
-        specifier: npm:types-react-dom@19.0.0-rc.0
-        version: types-react-dom@19.0.0-rc.0
+        specifier: npm:types-react-dom@19.0.0-rc.1
+        version: types-react-dom@19.0.0-rc.1
       babel-plugin-react-compiler:
         specifier: 0.0.0-experimental-24ec0eb-20240918
         version: 0.0.0-experimental-24ec0eb-20240918
@@ -5529,7 +5529,7 @@ packages:
       '@tidbcloud/serverless': '*'
       '@types/better-sqlite3': '*'
       '@types/pg': '*'
-      '@types/react': npm:types-react@19.0.0-rc.0
+      '@types/react': npm:types-react@19.0.0-rc.1
       '@types/sql.js': '*'
       '@vercel/postgres': '>=0.8.0'
       '@xata.io/client': '*'
@@ -9178,11 +9178,11 @@ packages:
     resolution: {integrity: sha512-/OxDN6OtAk5KBpGb28T+HZc2M+ADtvRxXrKKbUwtsLgdoxgX13hyy7ek6bFRl5+aBs2yZzB0c4CnQfAtVypW/g==}
     engines: {node: '>= 0.4'}
 
-  types-react-dom@19.0.0-rc.0:
-    resolution: {integrity: sha512-wGlQSD6H6EeCxhH+dSip1cPcCU7nNTOwHEr29rjiNtGkUPlmEofOizoQaPMEqQH2V76ME3NLvBDLGajRu3xZOw==}
+  types-react-dom@19.0.0-rc.1:
+    resolution: {integrity: sha512-VSLZJl8VXCD0fAWp7DUTFUDCcZ8DVXOQmjhJMD03odgeFmu14ZQJHCXeETm3BEAhJqfgJaFkLnGkQv88sRx0fQ==}
 
-  types-react@19.0.0-rc.0:
-    resolution: {integrity: sha512-JFd3qtgXZ+EdHht8WXMPSF231brd6Bu4yLKqyo0JjpzhmjYxJptT6TBh/xFqOhx+ee2Nagj7Ttkh5F/jc49TVQ==}
+  types-react@19.0.0-rc.1:
+    resolution: {integrity: sha512-RshndUfqTW6K3STLPis8BtAYCGOkMbtvYsi90gmVNDZBXUyUc5juf2PE9LfS/JmOlUIRO8cWTS/1MTnmhjDqyQ==}
 
   typescript-eslint@8.3.0:
     resolution: {integrity: sha512-EvWjwWLwwKDIJuBjk2I6UkV8KEQcwZ0VM10nR1rIunRDIP67QJTZAHBXTX0HW/oI1H10YESF8yWie8fRQxjvFA==}
@@ -11236,7 +11236,7 @@ snapshots:
 
   '@emotion/memoize@0.9.0': {}
 
-  '@emotion/react@11.13.0(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.0)':
+  '@emotion/react@11.13.0(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.1)':
     dependencies:
       '@babel/runtime': 7.25.0
       '@emotion/babel-plugin': 11.12.0
@@ -11248,7 +11248,7 @@ snapshots:
       hoist-non-react-statics: 3.3.2
       react: 19.0.0-rc-5dcb0097-20240918
     optionalDependencies:
-      '@types/react': types-react@19.0.0-rc.0
+      '@types/react': types-react@19.0.0-rc.1
     transitivePeerDependencies:
       - supports-color
 
@@ -13109,7 +13109,7 @@ snapshots:
   '@types/react-datepicker@6.2.0(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)':
     dependencies:
       '@floating-ui/react': 0.26.22(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)
-      '@types/react': types-react@19.0.0-rc.0
+      '@types/react': types-react@19.0.0-rc.1
       date-fns: 3.3.1
     transitivePeerDependencies:
       - react
@@ -13117,7 +13117,7 @@ snapshots:
 
   '@types/react-transition-group@4.4.11':
     dependencies:
-      '@types/react': types-react@19.0.0-rc.0
+      '@types/react': types-react@19.0.0-rc.1
 
   '@types/request@2.48.12':
     dependencies:
@@ -14325,22 +14325,22 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.0):
+  drizzle-orm@0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.1):
     optionalDependencies:
       '@libsql/client': 0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4)
       '@neondatabase/serverless': 0.9.4
       '@types/pg': 8.10.2
-      '@types/react': types-react@19.0.0-rc.0
+      '@types/react': types-react@19.0.0-rc.1
       '@vercel/postgres': 0.9.0
       pg: 8.11.3
       react: 19.0.0-rc-5dcb0097-20240918
 
-  drizzle-orm@0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8))(@neondatabase/serverless@0.9.4)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.0):
+  drizzle-orm@0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8))(@neondatabase/serverless@0.9.4)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.1):
     optionalDependencies:
       '@libsql/client': 0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4)
       '@neondatabase/serverless': 0.9.4
       '@types/pg': 8.11.6
-      '@types/react': types-react@19.0.0-rc.0
+      '@types/react': types-react@19.0.0-rc.1
       '@vercel/postgres': 0.9.0
       pg: 8.11.3
       react: 19.0.0-rc-5dcb0097-20240918
@@ -17456,11 +17456,11 @@ snapshots:
       react: 19.0.0-rc-5dcb0097-20240918
       react-dom: 19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918)
 
-  react-select@5.8.0(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.0):
+  react-select@5.8.0(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.1):
     dependencies:
       '@babel/runtime': 7.25.0
       '@emotion/cache': 11.13.1
-      '@emotion/react': 11.13.0(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.0)
+      '@emotion/react': 11.13.0(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.1)
       '@floating-ui/dom': 1.6.10
       '@types/react-transition-group': 4.4.11
       memoize-one: 6.0.0
@@ -17468,7 +17468,7 @@ snapshots:
       react: 19.0.0-rc-5dcb0097-20240918
       react-dom: 19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918)
       react-transition-group: 4.4.5(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)
-      use-isomorphic-layout-effect: 1.1.2(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.0)
+      use-isomorphic-layout-effect: 1.1.2(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.1)
     transitivePeerDependencies:
       - '@types/react'
       - supports-color
@@ -18535,11 +18535,11 @@ snapshots:
       is-typed-array: 1.1.13
       possible-typed-array-names: 1.0.0
 
-  types-react-dom@19.0.0-rc.0:
+  types-react-dom@19.0.0-rc.1:
     dependencies:
-      '@types/react': types-react@19.0.0-rc.0
+      '@types/react': types-react@19.0.0-rc.1
 
-  types-react@19.0.0-rc.0:
+  types-react@19.0.0-rc.1:
     dependencies:
       csstype: 3.1.3
 
@@ -18632,11 +18632,11 @@ snapshots:
       react: 19.0.0-rc-5dcb0097-20240918
       scheduler: 0.25.0-rc-f994737d14-20240522
 
-  use-isomorphic-layout-effect@1.1.2(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.0):
+  use-isomorphic-layout-effect@1.1.2(react@19.0.0-rc-5dcb0097-20240918)(types-react@19.0.0-rc.1):
     dependencies:
       react: 19.0.0-rc-5dcb0097-20240918
     optionalDependencies:
-      '@types/react': types-react@19.0.0-rc.0
+      '@types/react': types-react@19.0.0-rc.1
 
   utf-8-validate@6.0.4:
     dependencies:

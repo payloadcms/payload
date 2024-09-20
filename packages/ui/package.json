@@ -105,9 +105,9 @@
     "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/body-scroll-lock": "^3.1.0",
-    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react": "npm:types-react@19.0.0-rc.1",
     "@types/react-datepicker": "6.2.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "@types/uuid": "10.0.0",
     "babel-plugin-react-compiler": "0.0.0-experimental-24ec0eb-20240918",
     "esbuild": "0.23.1",
@@ -201,7 +201,7 @@
     "types": "./dist/exports/client/index.d.ts"
   },
   "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }

@@ -82,8 +82,8 @@
     "@types/escape-html": "1.0.4",
     "@types/json-schema": "7.0.15",
     "@types/node": "22.5.4",
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "babel-plugin-react-compiler": "0.0.0-experimental-48eb8f4-20240822",
     "babel-plugin-transform-remove-imports": "^1.8.0",
     "esbuild": "0.23.1",
@@ -142,7 +142,7 @@
     "types": "./dist/index.d.ts"
   },
   "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }

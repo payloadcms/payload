@@ -118,8 +118,8 @@
     "@types/minimist": "1.2.5",
     "@types/node": "22.5.4",
     "@types/prompts": "^2.4.5",
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "@types/semver": "^7.5.3",
     "@types/shelljs": "0.8.15",
     "chalk": "^4.1.2",
@@ -178,8 +178,8 @@
       "domexception": "4"
     },
     "overrides": {
-      "@types/react": "npm:types-react@19.0.0-rc.0",
-      "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
+      "@types/react": "npm:types-react@19.0.0-rc.1",
+      "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
       "copyfiles": "$copyfiles",
       "cross-env": "$cross-env",
       "dotenv": "$dotenv",
@@ -192,8 +192,8 @@
     }
   },
   "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   },
   "workspaces:": [
     "packages/*",
