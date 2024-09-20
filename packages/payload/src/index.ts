@@ -64,6 +64,7 @@ import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
 import { checkDependencies } from './utilities/dependencies/dependencyChecker.js'
+import flattenFields from './utilities/flattenTopLevelFields.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
@@ -132,6 +133,8 @@ export type TypedAuthOperations = ResolveAuthOperationsType<GeneratedTypes>
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+let checkedDependencies = false
 
 /**
  * @description Payload
@@ -434,8 +437,10 @@ export class BasePayload {
   async init(options: InitOptions): Promise<Payload> {
     if (
       process.env.NODE_ENV !== 'production' &&
-      process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true'
+      process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true' &&
+      !checkedDependencies
     ) {
+      checkedDependencies = true
       await checkPayloadDependencies()
     }
 
@@ -1029,6 +1034,10 @@ export {
   deepMergeWithReactComponents,
   deepMergeWithSourceArrays,
 } from './utilities/deepMerge.js'
+export {
+  checkDependencies,
+  type CustomVersionParser,
+} from './utilities/dependencies/dependencyChecker.js'
 export { getDependencies } from './utilities/dependencies/getDependencies.js'
 export {
   findUp,
@@ -1052,7 +1061,6 @@ export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
-export { checkDependencies }
 export { versionDefaults } from './versions/defaults.js'
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'

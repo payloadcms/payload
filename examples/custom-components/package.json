@@ -23,10 +23,10 @@
     "cross-env": "^7.0.3",
     "dotenv": "^8.2.0",
     "graphql": "^16.9.0",
-    "next": "15.0.0-canary.104",
+    "next": "15.0.0-canary.160",
     "payload": "3.0.0-beta.106",
-    "react": "19.0.0-rc-06d0b89e-20240801",
-    "react-dom": "19.0.0-rc-06d0b89e-20240801"
+    "react": "19.0.0-rc-5dcb0097-20240918",
+    "react-dom": "19.0.0-rc-5dcb0097-20240918"
   },
   "devDependencies": {
     "@payloadcms/graphql": "3.0.0-beta.106",
