@@ -101,9 +101,8 @@ function ToolbarGroupComponent({
           <ToolbarDropdown
             anchorElem={anchorElem}
             editor={editor}
-            groupKey={group.key}
+            group={group}
             Icon={DropdownIcon}
-            items={group.items}
             maxActiveItems={1}
             onActiveChange={onActiveChange}
           />
@@ -111,8 +110,7 @@ function ToolbarGroupComponent({
           <ToolbarDropdown
             anchorElem={anchorElem}
             editor={editor}
-            groupKey={group.key}
-            items={group.items}
+            group={group}
             maxActiveItems={1}
             onActiveChange={onActiveChange}
           />
