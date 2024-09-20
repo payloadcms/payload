@@ -23,8 +23,35 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'test',
+      fields: [
+        {
+          name: 'localizedGroupWithArray',
+          type: 'group',
+          localized: true,
+          fields: [
+            {
+              name: 'array',
+              type: 'array',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                  localized: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
     MediaCollection,
   ],
+  localization: {
+    defaultLocale: 'en',
+    locales: ['en', 'hu'],
+  },
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),

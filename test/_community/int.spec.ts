@@ -73,4 +73,13 @@ describe('_Community Tests', () => {
 
     expect(data.doc.text).toEqual('REST API EXAMPLE')
   })
+
+  it('sHOULD NOT WORK TO REPRODUCE', async () => {
+    const data = await payload.create({
+      collection: 'test',
+      data: { localizedGroupWithArray: { array: [{ text: 'asd' }] } },
+    })
+
+    expect(data.localizedGroupWithArray.array[0].text).toBe('asd')
+  })
 })
