@@ -4,10 +4,17 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
 
 export const doc = {
-  id: -1,
+  id: 'abc123',
+  name: 'Collection 1',
+  customData: true,
+}
+export const doc2 = {
+  id: 'abc456',
+  name: 'Collection 2',
   customData: true,
 }
 export const docs = [doc]
+export const docs2 = [doc2]
 
 export let isInit = false
 export const updateIsInit = (val: boolean) => {
@@ -15,14 +22,17 @@ export const updateIsInit = (val: boolean) => {
   return isInit
 }
 
-export let isConnect = false
+export let isConnected = false
 export const updateIsConnect = (val: boolean) => {
-  isConnect = val
-  return isConnect
+  isConnected = val
+  return isConnected
 }
-const collectionWithDb = (collectionSlug: string): CollectionConfig => {
+
+export const collectionSlug = 'collection-db'
+export const collectionSlugRelated = 'collection-related-db'
+const collectionWithDb = (slug: string, relatedCollection: string): CollectionConfig => {
   return {
-    slug: collectionSlug,
+    slug,
     db: {
       init: async () => {
         updateIsInit(true)
@@ -34,24 +44,24 @@ const collectionWithDb = (collectionSlug: string): CollectionConfig => {
       },
       // @ts-expect-error
       create: () => {
-        return doc
+        return slug === collectionSlug ? doc : doc2
       },
       // @ts-expect-error
       deleteOne: () => {
-        return docs
+        return slug === collectionSlug ? doc : doc2
       },
       // @ts-expect-error
       deleteMany: () => {
         // Only used in deleteUserPreferences on user collections
-        return docs
+        return slug === collectionSlug ? doc : doc2
       },
       // @ts-expect-error
       find: () => {
-        return { docs }
+        return { docs: slug === collectionSlug ? docs : docs2 }
       },
       // @ts-expect-error
       findOne: () => {
-        return doc
+        return slug === collectionSlug ? doc : doc2
       },
       // @ts-expect-error
       updateOne: () => {
@@ -63,14 +73,21 @@ const collectionWithDb = (collectionSlug: string): CollectionConfig => {
         name: 'name',
         type: 'text',
       },
+      {
+        name: 'otherCollection',
+        type: 'relationship',
+        relationTo: [relatedCollection],
+      },
     ],
   }
 }
 
-export const collectionSlug = 'collection-db'
 export default buildConfigWithDefaults({
   // @ts-expect-error
-  collections: [collectionWithDb(collectionSlug)],
+  collections: [
+    collectionWithDb(collectionSlug, collectionSlugRelated),
+    collectionWithDb(collectionSlugRelated, collectionSlug),
+  ],
   graphQL: {
     schemaOutputFile: './test/collections-db/schema.graphql',
   },
