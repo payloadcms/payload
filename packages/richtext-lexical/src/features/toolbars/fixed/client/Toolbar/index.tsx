@@ -88,7 +88,7 @@ function ToolbarGroupComponent({
       const item = activeItems[0]
 
       let label = item.key
-      if (item.label && richTextComponentMap) {
+      if (item.label) {
         label =
           typeof item.label === 'function' ? item.label({ i18n, richTextComponentMap }) : item.label
       }

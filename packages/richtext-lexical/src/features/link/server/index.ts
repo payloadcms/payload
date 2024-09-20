@@ -1,4 +1,11 @@
-import type { CollectionSlug, Config, Field, FieldAffectingData, SanitizedConfig } from 'payload'
+import type {
+  CollectionSlug,
+  Config,
+  DefaultDocumentIDType,
+  Field,
+  FieldAffectingData,
+  SanitizedConfig,
+} from 'payload'
 
 import escapeHTML from 'escape-html'
 import { sanitizeFields } from 'payload'
@@ -71,7 +78,7 @@ export const LinkFeature = createServerFeature<
     const validRelationships = _config.collections.map((c) => c.slug) || []
 
     const _transformedFields = transformExtraFields(
-      deepCopyObject(props.fields!),
+      props.fields ? deepCopyObject(props.fields) : null,
       _config,
       props.enabledCollections,
       props.disabledCollections,
@@ -148,9 +155,9 @@ export const LinkFeature = createServerFeature<
                 let href: string = node.fields.url
                 if (node.fields.linkType === 'internal') {
                   href =
-                    typeof node.fields.doc?.value === 'string'
-                      ? node.fields.doc?.value
-                      : (node.fields.doc?.value?.id as string)
+                    typeof node.fields.doc?.value !== 'object'
+                      ? String(node.fields.doc?.value)
+                      : String(node.fields.doc?.value?.id)
                 }
 
                 return `<a href="${href}"${target}${rel}>${childrenText}</a>`

@@ -40,10 +40,13 @@ function ButtonGroupItem({
       )
     )
   }
+  if (!item.ChildComponent) {
+    return null
+  }
 
   return (
     <ToolbarButton editor={editor} item={item} key={item.key}>
-      {item.ChildComponent! && <item.ChildComponent />}
+      <item.ChildComponent />
     </ToolbarButton>
   )
 }

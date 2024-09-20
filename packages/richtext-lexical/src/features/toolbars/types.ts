@@ -83,7 +83,7 @@ export type ToolbarGroupItem = {
   label?:
     | ((args: {
         i18n: I18nClient<{}, string>
-        richTextComponentMap: Map<string, React.ReactNode>
+        richTextComponentMap?: Map<string, React.ReactNode>
       }) => string)
     | string
   /** Each toolbar item needs to have a unique key. */

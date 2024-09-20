@@ -49,7 +49,7 @@ const ToolbarItem = ({
   }
 
   let title = item.key
-  if (item.label && richTextComponentMap) {
+  if (item.label) {
     title =
       typeof item.label === 'function' ? item.label({ i18n, richTextComponentMap }) : item.label
   }

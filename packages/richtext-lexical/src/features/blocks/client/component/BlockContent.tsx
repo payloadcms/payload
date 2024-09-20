@@ -74,9 +74,6 @@ export const BlockContent: React.FC<Props> = (props) => {
     let initialState = false
 
     void getDocPreferences().then((currentDocPreferences) => {
-      if (!field.name) {
-        return
-      }
       const currentFieldPreferences = currentDocPreferences?.fields[field.name]
 
       const collapsedArray = currentFieldPreferences?.collapsed
@@ -151,9 +148,6 @@ export const BlockContent: React.FC<Props> = (props) => {
   const onCollapsedChange = useCallback(
     (changedCollapsed: boolean) => {
       void getDocPreferences().then((currentDocPreferences) => {
-        if (!field.name) {
-          return
-        }
         const currentFieldPreferences = currentDocPreferences?.fields[field.name]
 
         const collapsedArray = currentFieldPreferences?.collapsed

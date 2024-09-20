@@ -27,9 +27,8 @@ import {
 import React, { useEffect, useState } from 'react'
 
 import type { PluginComponent } from '../../../typesClient.js'
-import type { BlockFields } from '../../server/nodes/BlocksNode.js'
+import type { BlockFields, BlockFieldsOptionalID } from '../../server/nodes/BlocksNode.js'
 import type { BlocksFeatureClientProps } from '../index.js'
-import type { InlineBlockNode } from '../nodes/InlineBlocksNode.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { FieldsDrawer } from '../../../../utilities/fieldsDrawer/Drawer.js'
@@ -41,7 +40,7 @@ import {
   OPEN_INLINE_BLOCK_DRAWER_COMMAND,
 } from './commands.js'
 
-export type InsertBlockPayload = Exclude<BlockFields, 'id'>
+export type InsertBlockPayload = BlockFieldsOptionalID
 
 export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   const [editor] = useLexicalComposerContext()

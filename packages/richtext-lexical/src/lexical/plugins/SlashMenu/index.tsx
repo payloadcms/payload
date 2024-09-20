@@ -46,7 +46,7 @@ function SlashMenuItem({
   }
 
   let title = item.key
-  if (item.label && richTextComponentMap) {
+  if (item.label) {
     title =
       typeof item.label === 'function'
         ? item.label({ i18n, richTextComponentMap, schemaPath })
@@ -125,7 +125,7 @@ export function SlashMenuPlugin({
       groupsWithItems = groupsWithItems.map((group) => {
         const filteredItems = group.items.filter((item) => {
           let itemTitle = item.key
-          if (item.label && richTextComponentMap) {
+          if (item.label) {
             itemTitle =
               typeof item.label === 'function'
                 ? item.label({ i18n, richTextComponentMap, schemaPath })

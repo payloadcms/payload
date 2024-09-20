@@ -39,6 +39,10 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                 key: 'block-' + blockSlug,
                 keywords: ['block', 'blocks', blockSlug],
                 label: ({ i18n, richTextComponentMap }) => {
+                  if (!richTextComponentMap) {
+                    return blockSlug
+                  }
+
                   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
                   const blocksField: BlocksFieldClient = richTextComponentMap.get(
                     componentMapRenderedBlockPath,
@@ -54,7 +58,6 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                 },
                 onSelect: ({ editor }) => {
                   editor.dispatchCommand(INSERT_BLOCK_COMMAND, {
-                    id: '',
                     blockName: '',
                     blockType: blockSlug,
                   })
@@ -75,6 +78,10 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                 key: 'inlineBlocks-' + inlineBlockSlug,
                 keywords: ['inlineBlock', 'inline block', inlineBlockSlug],
                 label: ({ i18n, richTextComponentMap }) => {
+                  if (!richTextComponentMap) {
+                    return inlineBlockSlug
+                  }
+
                   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
 
                   const blocksField: BlocksFieldClient = richTextComponentMap.get(
@@ -121,6 +128,9 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                 isActive: undefined, // At this point, we would be inside a sub-richtext-editor. And at this point this will be run against the focused sub-editor, not the parent editor which has the actual block. Thus, no point in running this
                 key: 'block-' + blockSlug,
                 label: ({ i18n, richTextComponentMap }) => {
+                  if (!richTextComponentMap) {
+                    return blockSlug
+                  }
                   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
                   const blocksField: BlocksFieldClient = richTextComponentMap.get(
                     componentMapRenderedBlockPath,
@@ -136,7 +146,6 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                 },
                 onSelect: ({ editor }) => {
                   editor.dispatchCommand(INSERT_BLOCK_COMMAND, {
-                    id: '',
                     blockName: '',
                     blockType: blockSlug,
                   })
@@ -158,6 +167,10 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                 isActive: undefined,
                 key: 'inlineBlock-' + inlineBlockSlug,
                 label: ({ i18n, richTextComponentMap }) => {
+                  if (!richTextComponentMap) {
+                    return inlineBlockSlug
+                  }
+
                   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
                   const blocksField: BlocksFieldClient = richTextComponentMap.get(
                     componentMapRenderedBlockPath,

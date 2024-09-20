@@ -16,12 +16,19 @@ import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import ObjectID from 'bson-objectid'
 import { deepCopyObjectSimple } from 'payload/shared'
 
-export type BlockFields<TBlockFields extends JsonObject = JsonObject> = {
+type BaseBlockFields<TBlockFields extends JsonObject = JsonObject> = {
   /** Block form data */
   blockName: string
   blockType: string
-  id: string
 } & TBlockFields
+
+export type BlockFields<TBlockFields extends JsonObject = JsonObject> = {
+  id: string
+} & BaseBlockFields<TBlockFields>
+
+export type BlockFieldsOptionalID<TBlockFields extends JsonObject = JsonObject> = {
+  id?: string
+} & BaseBlockFields<TBlockFields>
 
 export type SerializedBlockNode<TBlockFields extends JsonObject = JsonObject> = Spread<
   {
@@ -121,7 +128,7 @@ export class ServerBlockNode extends DecoratorBlockNode {
   }
 }
 
-export function $createServerBlockNode(fields: Exclude<BlockFields, 'id'>): ServerBlockNode {
+export function $createServerBlockNode(fields: BlockFieldsOptionalID): ServerBlockNode {
   return new ServerBlockNode({
     fields: {
       ...fields,
