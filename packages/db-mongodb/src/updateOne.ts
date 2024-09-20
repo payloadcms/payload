@@ -4,6 +4,7 @@ import type { MongooseAdapter } from './index.js'
 
 import { handleError } from './utilities/handleError.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
+import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
 import { withSession } from './withSession.js'
 
 export const updateOne: UpdateOne = async function updateOne(
@@ -26,8 +27,14 @@ export const updateOne: UpdateOne = async function updateOne(
 
   let result
 
+  const sanitizedData = sanitizeRelationshipIDs({
+    config: this.payload.config,
+    data,
+    fields: this.payload.collections[collection].config.fields,
+  })
+
   try {
-    result = await Model.findOneAndUpdate(query, data, options)
+    result = await Model.findOneAndUpdate(query, sanitizedData, options)
   } catch (error) {
     handleError({ collection, error, req })
   }

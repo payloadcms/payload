@@ -3,6 +3,7 @@ import type { Create, Document, PayloadRequest } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { handleError } from './utilities/handleError.js'
+import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
 import { withSession } from './withSession.js'
 
 export const create: Create = async function create(
@@ -12,8 +13,15 @@ export const create: Create = async function create(
   const Model = this.collections[collection]
   const options = await withSession(this, req)
   let doc
+
+  const sanitizedData = sanitizeRelationshipIDs({
+    config: this.payload.config,
+    data,
+    fields: this.payload.collections[collection].config.fields,
+  })
+
   try {
-    ;[doc] = await Model.create([data], options)
+    ;[doc] = await Model.create([sanitizedData], options)
   } catch (error) {
     handleError({ collection, error, req })
   }

@@ -39,7 +39,7 @@ export const useDocumentInfo = (): DocumentInfoContext => useContext(Context)
 
 const DocumentInfo: React.FC<
   {
-    children: React.ReactNode
+    readonly children: React.ReactNode
   } & DocumentInfoProps
 > = ({ children, ...props }) => {
   const {

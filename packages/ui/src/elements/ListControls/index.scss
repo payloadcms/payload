@@ -32,12 +32,6 @@
     }
   }
 
-  &__buttons-active {
-    svg {
-      transform: rotate(180deg);
-    }
-  }
-
   .column-selector,
   .where-builder,
   .sort-complex {

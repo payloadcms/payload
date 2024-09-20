@@ -25,6 +25,8 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   disableActions,
   drawerSlug,
   Header,
+  initialData,
+  initialState,
   onDelete: onDeleteFromProps,
   onDuplicate: onDuplicateFromProps,
   onSave: onSaveFromProps,
@@ -136,6 +138,8 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       disableActions={disableActions}
       disableLeaveWithoutSaving
       id={docID}
+      initialData={initialData}
+      initialState={initialState}
       isEditing={isEditing}
       onDelete={onDelete}
       onDrawerCreate={() => {

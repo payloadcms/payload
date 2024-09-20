@@ -292,7 +292,7 @@ export const promise = async ({
       })
     }
 
-    if (field.type === 'relationship' || field.type === 'upload') {
+    if (field.type === 'relationship' || field.type === 'upload' || field.type === 'join') {
       populationPromises.push(
         relationshipPopulationPromise({
           currentDepth,

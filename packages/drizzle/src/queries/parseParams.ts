@@ -22,7 +22,7 @@ type Args = {
   where: Where
 }
 
-export async function parseParams({
+export function parseParams({
   adapter,
   fields,
   joins,
@@ -30,7 +30,7 @@ export async function parseParams({
   selectFields,
   tableName,
   where,
-}: Args): Promise<SQL> {
+}: Args): SQL {
   let result: SQL
   const constraints: SQL[] = []
 
@@ -46,7 +46,7 @@ export async function parseParams({
           conditionOperator = or
         }
         if (Array.isArray(condition)) {
-          const builtConditions = await buildAndOrConditions({
+          const builtConditions = buildAndOrConditions({
             adapter,
             fields,
             joins,
