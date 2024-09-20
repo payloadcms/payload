@@ -70,12 +70,17 @@ describe('locked documents', () => {
 
   describe('list view - collections', () => {
     let postDoc
+    let anotherPostDoc
     let user2
     let lockedDoc
 
     beforeAll(async () => {
       postDoc = await createPostDoc({
         text: 'hello',
+      })
+
+      anotherPostDoc = await createPostDoc({
+        text: 'another post',
       })
 
       user2 = await payload.create({
@@ -93,7 +98,6 @@ describe('locked documents', () => {
             relationTo: 'posts',
             value: postDoc.id,
           },
-          editedAt: new Date().toISOString(),
           globalSlug: undefined,
           user: {
             relationTo: 'users',
@@ -115,6 +119,11 @@ describe('locked documents', () => {
       })
 
       await payload.delete({
+        collection: 'posts',
+        id: anotherPostDoc.id,
+      })
+
+      await payload.delete({
         collection: 'users',
         id: user2.id,
       })
@@ -124,14 +133,29 @@ describe('locked documents', () => {
       await page.goto(postsUrl.list)
       await page.waitForURL(postsUrl.list)
 
-      await expect(page.locator('.table .row-1 .locked svg')).toBeVisible()
+      await expect(page.locator('.table .row-2 .locked svg')).toBeVisible()
     })
 
-    test('should show no lock icon on document row if unlocked', async () => {
+    test('should not show lock icon on document row if unlocked', async () => {
       await page.goto(postsUrl.list)
       await page.waitForURL(postsUrl.list)
 
-      await expect(page.locator('.table .row-2 .checkbox-input__input')).toBeVisible()
+      await expect(page.locator('.table .row-3 .checkbox-input__input')).toBeVisible()
+    })
+
+    test('should not show lock icon on document row if locked by current user', async () => {
+      await page.goto(postsUrl.edit(anotherPostDoc.id))
+      await page.waitForURL(postsUrl.edit(anotherPostDoc.id))
+
+      const textInput = page.locator('#field-text')
+      await textInput.fill('testing')
+
+      await page.reload()
+
+      await page.goto(postsUrl.list)
+      await page.waitForURL(postsUrl.list)
+
+      await expect(page.locator('.table .row-1 .checkbox-input__input')).toBeVisible()
     })
 
     test('should only allow bulk delete on unlocked documents', async () => {
@@ -139,7 +163,7 @@ describe('locked documents', () => {
       await page.locator('input#select-all').check()
       await page.locator('.delete-documents__toggle').click()
       await expect(page.locator('.delete-documents__content p')).toHaveText(
-        'You are about to delete 1 Posts',
+        'You are about to delete 2 Posts',
       )
     })
   })
@@ -293,7 +317,6 @@ describe('locked documents', () => {
             relationTo: 'posts',
             value: postDoc.id,
           },
-          editedAt: new Date().toISOString(),
           globalSlug: undefined,
           user: {
             relationTo: 'users',
@@ -397,7 +420,6 @@ describe('locked documents', () => {
             relationTo: 'posts',
             value: postDoc.id,
           },
-          editedAt: new Date().toISOString(),
           globalSlug: undefined,
           user: {
             relationTo: 'users',
@@ -487,7 +509,6 @@ describe('locked documents', () => {
             relationTo: 'posts',
             value: postDoc.id,
           },
-          editedAt: new Date().toISOString(),
           globalSlug: undefined,
           user: {
             relationTo: 'users',
@@ -744,6 +765,7 @@ describe('locked documents', () => {
 
   describe('dashboard - globals', () => {
     let user2
+    let lockedGlobal
 
     beforeAll(async () => {
       user2 = await payload.create({
@@ -751,6 +773,18 @@ describe('locked documents', () => {
         data: {
           email: 'user2@payloadcms.com',
           password: '1234',
+        },
+      })
+
+      lockedGlobal = await payload.create({
+        collection: lockedDocumentCollection,
+        data: {
+          document: undefined,
+          globalSlug: 'menu',
+          user: {
+            relationTo: 'users',
+            value: user2.id,
+          },
         },
       })
     })
@@ -763,17 +797,17 @@ describe('locked documents', () => {
     })
 
     test('should show lock on document card in dashboard view if locked', async () => {
-      const lockedGlobal = await payload.create({
+      await page.goto(postsUrl.admin)
+      await page.waitForURL(postsUrl.admin)
+
+      const globalCardList = page.locator('.dashboard__group').nth(1)
+      await expect(globalCardList.locator('#card-menu .locked svg')).toBeVisible()
+    })
+
+    test('should not show lock on document card in dashboard view if unlocked', async () => {
+      await payload.delete({
         collection: lockedDocumentCollection,
-        data: {
-          document: undefined,
-          editedAt: new Date().toISOString(),
-          globalSlug: 'menu',
-          user: {
-            relationTo: 'users',
-            value: user2.id,
-          },
-        },
+        id: lockedGlobal.id,
       })
 
       // eslint-disable-next-line payload/no-wait-function
@@ -783,15 +817,18 @@ describe('locked documents', () => {
       await page.waitForURL(postsUrl.admin)
 
       const globalCardList = page.locator('.dashboard__group').nth(1)
-      await expect(globalCardList.locator('#card-menu .locked svg')).toBeVisible()
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: lockedGlobal.id,
-      })
+      await expect(globalCardList.locator('#card-menu .locked')).toBeHidden()
     })
 
-    test('should show no lock on document card in dashboard view if unlocked', async () => {
+    test('should not show lock on document card in dashboard view if locked by current user', async () => {
+      await page.goto(postsUrl.edit('menu'))
+      await page.waitForURL(postsUrl.edit('menu'))
+
+      const textInput = page.locator('#field-text')
+      await textInput.fill('this is a global menu text field')
+
+      await page.reload()
+
       await page.goto(postsUrl.admin)
       await page.waitForURL(postsUrl.admin)
 

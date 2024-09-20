@@ -1,17 +1,18 @@
-import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
-import type { ImportMap, PayloadRequest, SanitizedConfig } from 'payload'
+import type { AcceptedLanguages } from '@payloadcms/translations'
+import type { ImportMap, SanitizedConfig } from 'payload'
 
-import { initI18n, rtlLanguages } from '@payloadcms/translations'
+import { rtlLanguages } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui'
 import '@payloadcms/ui/scss/app.scss'
 import { createClientConfig } from '@payloadcms/ui/utilities/createClientConfig'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
-import { createLocalReq, parseCookies } from 'payload'
+import { parseCookies } from 'payload'
 import React from 'react'
 
 import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
+import { initReq } from '../../utilities/initReq.js'
 import { DefaultEditView } from '../../views/Edit/Default/index.js'
 import { DefaultListView } from '../../views/List/Default/index.js'
 
@@ -48,25 +49,7 @@ export const RootLayout = async ({
 
   const payload = await getPayloadHMR({ config })
 
-  const i18n: I18nClient = await initI18n({
-    config: config.i18n,
-    context: 'client',
-    language: languageCode,
-  })
-
-  const req = await createLocalReq(
-    {
-      fallbackLocale: null,
-      req: {
-        headers,
-        host: headers.get('host'),
-        i18n,
-        url: `${payload.config.serverURL}`,
-      } as PayloadRequest,
-    },
-    payload,
-  )
-  const { permissions, user } = await payload.auth({ headers, req })
+  const { i18n, permissions, req, user } = await initReq(config)
 
   const { clientConfig, render } = await createClientConfig({
     children,

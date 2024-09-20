@@ -193,7 +193,6 @@ const DocumentInfo: React.FC<
           // Send a patch request to update the _lastEdited info
           await requests.patch(`${serverURL}${api}/payload-locked-documents/${lockId}`, {
             body: JSON.stringify({
-              editedAt: new Date(),
               user: { relationTo: user?.collection, value: user?.id },
             }),
             headers: {

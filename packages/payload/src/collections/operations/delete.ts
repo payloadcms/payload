@@ -23,6 +23,7 @@ export type Arguments = {
   collection: Collection
   depth?: number
   overrideAccess?: boolean
+  overrideLock?: boolean
   req: PayloadRequest
   showHiddenFields?: boolean
   where: Where
@@ -65,6 +66,7 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
       collection: { config: collectionConfig },
       depth,
       overrideAccess,
+      overrideLock,
       req: {
         fallbackLocale,
         locale,
@@ -126,6 +128,7 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
           id,
           collectionSlug: collectionConfig.slug,
           lockErrorMessage: `Document with ID ${id} is currently locked and cannot be deleted.`,
+          overrideLock,
           req,
         })
 

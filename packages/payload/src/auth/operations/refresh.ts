@@ -75,6 +75,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       depth: isGraphQL ? 0 : args.collection.config.auth.depth,
       req: args.req,
     })
+    user.collection = args.req.user.collection
 
     let result: Result
 

@@ -17,6 +17,7 @@ export type BaseOptions<TSlug extends CollectionSlug> = {
   fallbackLocale?: TypedLocale
   locale?: TypedLocale
   overrideAccess?: boolean
+  overrideLock?: boolean
   req?: PayloadRequest
   showHiddenFields?: boolean
   user?: Document
@@ -55,6 +56,7 @@ async function deleteLocal<TSlug extends CollectionSlug>(
     collection: collectionSlug,
     depth,
     overrideAccess = true,
+    overrideLock,
     showHiddenFields,
     where,
   } = options
@@ -72,6 +74,7 @@ async function deleteLocal<TSlug extends CollectionSlug>(
     collection,
     depth,
     overrideAccess,
+    overrideLock,
     req: await createLocalReq(options, payload),
     showHiddenFields,
     where,

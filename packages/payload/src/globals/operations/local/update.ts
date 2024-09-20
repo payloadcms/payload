@@ -16,6 +16,7 @@ export type Options<TSlug extends GlobalSlug> = {
   fallbackLocale?: TypedLocale
   locale?: TypedLocale
   overrideAccess?: boolean
+  overrideLock?: boolean
   publishSpecificLocale?: TypedLocale
   req?: PayloadRequest
   showHiddenFields?: boolean
@@ -33,6 +34,7 @@ export default async function updateLocal<TSlug extends GlobalSlug>(
     depth,
     draft,
     overrideAccess = true,
+    overrideLock,
     publishSpecificLocale,
     showHiddenFields,
   } = options
@@ -50,6 +52,7 @@ export default async function updateLocal<TSlug extends GlobalSlug>(
     draft,
     globalConfig,
     overrideAccess,
+    overrideLock,
     publishSpecificLocale,
     req: await createLocalReq(options, payload),
     showHiddenFields,

@@ -30,6 +30,7 @@ export type BaseOptions<TSlug extends CollectionSlug> = {
   filePath?: string
   locale?: TypedLocale
   overrideAccess?: boolean
+  overrideLock?: boolean
   overwriteExistingFiles?: boolean
   publishSpecificLocale?: string
   req?: PayloadRequest
@@ -75,6 +76,7 @@ async function updateLocal<TSlug extends CollectionSlug>(
     file,
     filePath,
     overrideAccess = true,
+    overrideLock,
     overwriteExistingFiles = false,
     publishSpecificLocale,
     showHiddenFields,
@@ -100,6 +102,7 @@ async function updateLocal<TSlug extends CollectionSlug>(
     depth,
     draft,
     overrideAccess,
+    overrideLock,
     overwriteExistingFiles,
     payload,
     publishSpecificLocale,

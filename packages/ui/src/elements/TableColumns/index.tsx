@@ -17,6 +17,7 @@ export interface ITableColumns {
   cellProps?: Partial<CellComponentProps>[]
   columns: Column[]
   moveColumn: (args: { fromIndex: number; toIndex: number }) => void
+  resetColumnsState: () => void
   setActiveColumns: (columns: string[]) => void
   toggleColumn: (column: string) => void
 }
@@ -125,18 +126,34 @@ export const TableColumnsProvider: React.FC<Props> = ({
   )
 
   const setActiveColumns = React.useCallback(
-    (activeColumnAccessors) => {
-      const activeColumns = tableColumns.map((col) => {
-        return {
-          ...col,
-          active: activeColumnAccessors.includes(col.accessor),
-        }
-      })
+    (activeColumnAccessors: string[]) => {
+      const activeColumns = tableColumns
+        .map((col) => {
+          return {
+            ...col,
+            active: activeColumnAccessors.includes(col.accessor),
+          }
+        })
+        .toSorted((first, second) => {
+          const indexOfFirst = activeColumnAccessors.indexOf(first.accessor)
+          const indexOfSecond = activeColumnAccessors.indexOf(second.accessor)
 
+          if (indexOfFirst === -1 || indexOfSecond === -1) {
+            return 0
+          }
+
+          return indexOfFirst > indexOfSecond ? 1 : -1
+        })
+
+      setTableColumns(activeColumns)
       updateColumnPreferences(activeColumns)
     },
     [tableColumns, updateColumnPreferences],
   )
+
+  const resetColumnsState = React.useCallback(() => {
+    setActiveColumns(defaultColumns)
+  }, [defaultColumns, setActiveColumns])
 
   // //////////////////////////////////////////////
   // Get preferences on collection change (drawers)
@@ -189,6 +206,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
         cellProps,
         columns: tableColumns,
         moveColumn,
+        resetColumnsState,
         setActiveColumns,
         toggleColumn,
       }}
