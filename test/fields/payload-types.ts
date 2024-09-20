@@ -349,6 +349,17 @@ export interface ArrayField {
         id?: string | null;
       }[]
     | null;
+  nestedArrayLocalized?:
+    | {
+        array?:
+          | {
+              text?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1701,7 +1712,6 @@ export interface PayloadLockedDocument {
         relationTo: 'ui-fields';
         value: string | UiField;
       } | null);
-  editedAt?: string | null;
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
@@ -1807,6 +1817,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

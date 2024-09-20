@@ -27,7 +27,7 @@ import { TableColumnsProvider } from '../TableColumns/index.js'
 import { ViewDescription } from '../ViewDescription/index.js'
 import { baseClass } from './index.js'
 
-const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
+export const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
   if ('and' in where) {
     where.and.push(queryParams)
   } else if ('or' in where) {

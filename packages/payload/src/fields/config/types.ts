@@ -5,6 +5,12 @@ import type { JSONSchema4 } from 'json-schema'
 import type { CSSProperties } from 'react'
 import type { DeepUndefinable } from 'ts-essentials'
 
+import type {
+  JoinFieldErrorClientComponent,
+  JoinFieldErrorServerComponent,
+  JoinFieldLabelClientComponent,
+  JoinFieldLabelServerComponent,
+} from '../../admin/fields/Join.js'
 import type { FieldClientComponent, FieldServerComponent } from '../../admin/forms/Field.js'
 import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
 import type {
@@ -1465,6 +1471,53 @@ export type PointFieldClient = {
 } & FieldBaseClient &
   Pick<PointField, 'type'>
 
+/**
+ * A virtual field that loads in related collections by querying a relationship or upload field.
+ */
+export type JoinField = {
+  access?: {
+    create?: never
+    read?: FieldAccess
+    update?: never
+  }
+  admin?: {
+    components?: {
+      Error?: CustomComponent<JoinFieldErrorClientComponent | JoinFieldErrorServerComponent>
+      Label?: CustomComponent<JoinFieldLabelClientComponent | JoinFieldLabelServerComponent>
+    } & Admin['components']
+    disableBulkEdit?: never
+    readOnly?: never
+  } & Admin
+  /**
+   * The slug of the collection to relate with.
+   */
+  collection: CollectionSlug
+  defaultValue?: never
+  hidden?: false
+  index?: never
+  /**
+   * This does not need to be set and will be overridden by the relationship field's localized property.
+   */
+  localized?: boolean
+  maxDepth?: number
+  /**
+   * A string for the field in the collection being joined to.
+   */
+  on: string
+  type: 'join'
+  validate?: never
+} & FieldBase
+
+export type JoinFieldClient = {
+  admin?: {
+    components?: {
+      Label?: MappedComponent
+    } & AdminClient['components']
+  } & AdminClient &
+    Pick<JoinField['admin'], 'disableBulkEdit' | 'readOnly'>
+} & FieldBaseClient &
+  Pick<JoinField, 'collection' | 'index' | 'maxDepth' | 'on' | 'type'>
+
 export type Field =
   | ArrayField
   | BlocksField
@@ -1474,6 +1527,7 @@ export type Field =
   | DateField
   | EmailField
   | GroupField
+  | JoinField
   | JSONField
   | NumberField
   | PointField
@@ -1497,6 +1551,7 @@ export type ClientField =
   | DateFieldClient
   | EmailFieldClient
   | GroupFieldClient
+  | JoinFieldClient
   | JSONFieldClient
   | NumberFieldClient
   | PointFieldClient
@@ -1545,6 +1600,7 @@ export type FieldAffectingData =
   | DateField
   | EmailField
   | GroupField
+  | JoinField
   | JSONField
   | NumberField
   | PointField
@@ -1565,6 +1621,7 @@ export type FieldAffectingDataClient =
   | DateFieldClient
   | EmailFieldClient
   | GroupFieldClient
+  | JoinFieldClient
   | JSONFieldClient
   | NumberFieldClient
   | PointFieldClient
@@ -1644,7 +1701,7 @@ export type FieldWithMany = RelationshipField | SelectField
 export type FieldWithManyClient = RelationshipFieldClient | SelectFieldClient
 
 export type FieldWithMaxDepth = RelationshipField | UploadField
-export type FieldWithMaxDepthClient = RelationshipFieldClient | UploadFieldClient
+export type FieldWithMaxDepthClient = JoinFieldClient | RelationshipFieldClient | UploadFieldClient
 
 export function fieldHasSubFields<TField extends ClientField | Field>(
   field: TField,
@@ -1697,7 +1754,8 @@ export function fieldHasMaxDepth<TField extends ClientField | Field>(
   field: TField,
 ): field is TField & (TField extends ClientField ? FieldWithMaxDepthClient : FieldWithMaxDepth) {
   return (
-    (field.type === 'upload' || field.type === 'relationship') && typeof field.maxDepth === 'number'
+    (field.type === 'upload' || field.type === 'relationship' || field.type === 'join') &&
+    typeof field.maxDepth === 'number'
   )
 }
 

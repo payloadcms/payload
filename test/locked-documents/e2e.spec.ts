@@ -22,6 +22,7 @@ const { beforeAll, afterAll, describe } = test
 const lockedDocumentCollection = 'payload-locked-documents'
 
 let page: Page
+let globalUrl: AdminUrlUtil
 let postsUrl: AdminUrlUtil
 let pagesUrl: AdminUrlUtil
 let payload: PayloadTestSDK<Config>
@@ -32,6 +33,7 @@ describe('locked documents', () => {
     testInfo.setTimeout(TEST_TIMEOUT)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
 
+    globalUrl = new AdminUrlUtil(serverURL, 'menu')
     postsUrl = new AdminUrlUtil(serverURL, 'posts')
     pagesUrl = new AdminUrlUtil(serverURL, 'pages')
 
@@ -98,7 +100,6 @@ describe('locked documents', () => {
             relationTo: 'posts',
             value: postDoc.id,
           },
-          editedAt: new Date().toISOString(),
           globalSlug: undefined,
           user: {
             relationTo: 'users',
@@ -318,7 +319,6 @@ describe('locked documents', () => {
             relationTo: 'posts',
             value: postDoc.id,
           },
-          editedAt: new Date().toISOString(),
           globalSlug: undefined,
           user: {
             relationTo: 'users',
@@ -422,7 +422,6 @@ describe('locked documents', () => {
             relationTo: 'posts',
             value: postDoc.id,
           },
-          editedAt: new Date().toISOString(),
           globalSlug: undefined,
           user: {
             relationTo: 'users',
@@ -512,7 +511,6 @@ describe('locked documents', () => {
             relationTo: 'posts',
             value: postDoc.id,
           },
-          editedAt: new Date().toISOString(),
           globalSlug: undefined,
           user: {
             relationTo: 'users',
@@ -784,7 +782,6 @@ describe('locked documents', () => {
         collection: lockedDocumentCollection,
         data: {
           document: undefined,
-          editedAt: new Date().toISOString(),
           globalSlug: 'menu',
           user: {
             relationTo: 'users',
@@ -826,10 +823,10 @@ describe('locked documents', () => {
     })
 
     test('should not show lock on document card in dashboard view if locked by current user', async () => {
-      await page.goto(postsUrl.edit('menu'))
-      await page.waitForURL(postsUrl.edit('menu'))
+      await page.goto(globalUrl.global('menu'))
+      await page.waitForURL(globalUrl.global('menu'))
 
-      const textInput = page.locator('#field-text')
+      const textInput = page.locator('#field-globalText')
       await textInput.fill('this is a global menu text field')
 
       await page.reload()

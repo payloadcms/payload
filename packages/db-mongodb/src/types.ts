@@ -1,4 +1,11 @@
-import type { IndexDefinition, IndexOptions, Model, PaginateModel, SchemaOptions } from 'mongoose'
+import type {
+  AggregatePaginateModel,
+  IndexDefinition,
+  IndexOptions,
+  Model,
+  PaginateModel,
+  SchemaOptions,
+} from 'mongoose'
 import type {
   ArrayField,
   BlocksField,
@@ -9,6 +16,7 @@ import type {
   EmailField,
   Field,
   GroupField,
+  JoinField,
   JSONField,
   NumberField,
   Payload,
@@ -27,7 +35,10 @@ import type {
 
 import type { BuildQueryArgs } from './queries/buildQuery.js'
 
-export interface CollectionModel extends Model<any>, PaginateModel<any> {
+export interface CollectionModel
+  extends Model<any>,
+    PaginateModel<any>,
+    AggregatePaginateModel<any> {
   /** buildQuery is used to transform payload's where operator into what can be used by mongoose (e.g. id => _id) */
   buildQuery: (args: BuildQueryArgs) => Promise<Record<string, unknown>> // TODO: Delete this
 }
@@ -83,6 +94,7 @@ export type FieldToSchemaMap<TSchema> = {
   date: FieldGeneratorFunction<TSchema, DateField>
   email: FieldGeneratorFunction<TSchema, EmailField>
   group: FieldGeneratorFunction<TSchema, GroupField>
+  join: FieldGeneratorFunction<TSchema, JoinField>
   json: FieldGeneratorFunction<TSchema, JSONField>
   number: FieldGeneratorFunction<TSchema, NumberField>
   point: FieldGeneratorFunction<TSchema, PointField>
