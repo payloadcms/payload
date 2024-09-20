@@ -3,7 +3,6 @@ import type { GenericTranslationsObject } from '@payloadcms/translations'
 export const it: GenericTranslationsObject = {
   $schema: './translation-schema.json',
   'plugin-seo': {
-    missing: 'Mancante',
     almostThere: 'Ci siamo quasi',
     autoGenerate: 'Generazione automatica',
     bestPractices: 'migliori pratiche',
@@ -19,6 +18,7 @@ export const it: GenericTranslationsObject = {
       'Dovrebbe essere compreso tra {{minLength}} e {{maxLength}} caratteri. Per assistenza nella scrittura di meta descrizioni di qualità, vedere ',
     lengthTipTitle:
       'Dovrebbe essere compreso tra {{minLength}} e {{maxLength}} caratteri. Per assistenza nella scrittura di meta titoli di qualità, vedere ',
+    missing: 'Mancante',
     noImage: 'Nessuna Immagine',
     preview: 'Anteprima',
     previewDescription:

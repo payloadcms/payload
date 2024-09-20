@@ -34,7 +34,7 @@ export async function updateVersion<T extends TypeWithID>(
 
   const fields = buildVersionCollectionFields(this.payload.config, collectionConfig)
 
-  const { where } = await buildQuery({
+  const { where } = buildQuery({
     adapter: this,
     fields,
     locale,

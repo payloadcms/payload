@@ -3,7 +3,6 @@ import type { GenericTranslationsObject } from '@payloadcms/translations'
 export const vi: GenericTranslationsObject = {
   $schema: './translation-schema.json',
   'plugin-seo': {
-    missing: 'Không đạt',
     almostThere: 'Gần đạt',
     autoGenerate: 'Tự động tạo',
     bestPractices: 'các phương pháp hay nhất',
@@ -18,6 +17,7 @@ export const vi: GenericTranslationsObject = {
       'Độ dài nên từ {{minLength}}-{{maxLength}} kí tự. Để được hướng dẫn viết mô tả meta chất lượng, hãy xem ',
     lengthTipTitle:
       'Độ dài nên từ {{minLength}}-{{maxLength}} kí tự. Để được hướng dẫn viết mô tả meta chất lượng, hãy xem ',
+    missing: 'Không đạt',
     noImage: 'Chưa có ảnh',
     preview: 'Xem trước',
     previewDescription: 'Kết quả hiển thị có thể thay đổi tuỳ theo nội dung và công cụ tìm kiếm.',
