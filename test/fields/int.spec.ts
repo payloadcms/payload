@@ -1122,7 +1122,7 @@ describe('Fields', () => {
       expect(result.items[0].localizedText.es).toStrictEqual('spanish')
     })
 
-    it('should create and updated with appending inside of nested localized subfields with versions', async () => {
+    it('should create and append localized items to nested array with versions', async () => {
       const doc = await payload.create({
         collection,
         data: {
