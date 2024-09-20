@@ -66,6 +66,11 @@ export const init: Init = function init(this: MongooseAdapter) {
   this.globals = model
 
   this.payload.config.globals.forEach((global) => {
+    // Skip globals that have an .init() method
+    if ('function' === typeof global?.db?.init) {
+      return
+    }
+
     if (global.versions) {
       const versionModelName = getDBName({ config: global, versions: true })
 
