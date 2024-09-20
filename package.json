@@ -34,7 +34,6 @@
     "build:plugin-form-builder": "turbo build --filter \"@payloadcms/plugin-form-builder\"",
     "build:plugin-nested-docs": "turbo build --filter \"@payloadcms/plugin-nested-docs\"",
     "build:plugin-redirects": "turbo build --filter \"@payloadcms/plugin-redirects\"",
-    "build:plugin-relationship-object-ids": "turbo build --filter \"@payloadcms/plugin-relationship-object-ids\"",
     "build:plugin-search": "turbo build --filter \"@payloadcms/plugin-search\"",
     "build:plugin-sentry": "turbo build --filter \"@payloadcms/plugin-sentry\"",
     "build:plugin-seo": "turbo build --filter \"@payloadcms/plugin-seo\"",

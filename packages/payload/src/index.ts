@@ -52,6 +52,7 @@ import type { Options as FindGlobalVersionsOptions } from './globals/operations/
 import type { Options as RestoreGlobalVersionOptions } from './globals/operations/local/restoreVersion.js'
 import type { Options as UpdateGlobalOptions } from './globals/operations/local/update.js'
 import type { JsonObject } from './types/index.js'
+import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 import type { TypeWithVersion } from './versions/types.js'
 
 import { decrypt, encrypt } from './auth/crypto.js'
@@ -63,9 +64,9 @@ import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
 import { checkDependencies } from './utilities/dependencies/dependencyChecker.js'
-import flattenFields from './utilities/flattenTopLevelFields.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
+import { traverseFields } from './utilities/traverseFields.js'
 
 export interface GeneratedTypes {
   authUntyped: {
@@ -458,15 +459,22 @@ export class BasePayload {
     }
 
     this.config.collections.forEach((collection) => {
-      const customID = flattenFields(collection.fields).find(
-        (field) => fieldAffectsData(field) && field.name === 'id',
-      )
-
-      let customIDType
-
-      if (customID?.type === 'number' || customID?.type === 'text') {
-        customIDType = customID.type
+      let customIDType = undefined
+      const findCustomID: TraverseFieldsCallback = ({ field, next }) => {
+        if (['array', 'blocks'].includes(field.type)) {
+          next()
+          return
+        }
+        if (!fieldAffectsData(field)) {
+          return
+        }
+        if (field.name === 'id') {
+          customIDType = field.type
+          return true
+        }
       }
+
+      traverseFields({ callback: findCustomID, fields: collection.fields })
 
       this.collections[collection.slug] = {
         config: collection,
@@ -817,6 +825,7 @@ export {
   InvalidConfiguration,
   InvalidFieldName,
   InvalidFieldRelationship,
+  Locked,
   LockedAuth,
   MissingCollectionLabel,
   MissingEditorProp,
@@ -878,6 +887,8 @@ export type {
   GroupField,
   GroupFieldClient,
   HookName,
+  JoinField,
+  JoinFieldClient,
   JSONField,
   JSONFieldClient,
   Labels,
@@ -1037,6 +1048,8 @@ export { isValidID } from './utilities/isValidID.js'
 export { killTransaction } from './utilities/killTransaction.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { mergeListSearchAndWhere } from './utilities/mergeListSearchAndWhere.js'
+export { traverseFields } from './utilities/traverseFields.js'
+export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { checkDependencies }
@@ -1046,6 +1059,6 @@ export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 export { saveVersion } from './versions/saveVersion.js'
-export type { TypeWithVersion } from './versions/types.js'
 
+export type { TypeWithVersion } from './versions/types.js'
 export { deepMergeSimple } from '@payloadcms/translations/utilities'

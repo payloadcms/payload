@@ -19,8 +19,12 @@ export const reorderColumns = async (
     togglerSelector?: string
   },
 ) => {
-  await page.locator(togglerSelector).click()
-  const columnContainer = page.locator(columnContainerSelector)
+  const columnContainer = page.locator(columnContainerSelector).first()
+  const isAlreadyOpen = await columnContainer.isVisible()
+
+  if (!isAlreadyOpen) {
+    await page.locator(togglerSelector).first().click()
+  }
 
   await expect(page.locator(`${columnContainerSelector}.rah-static--height-auto`)).toBeVisible()
 
@@ -49,7 +53,7 @@ export const reorderColumns = async (
     columnContainer.locator('.column-selector .column-selector__column').first(),
   ).toHaveText(fromColumn)
 
-  await expect(page.locator('table thead tr th').nth(1)).toHaveText(fromColumn)
+  await expect(page.locator('table thead tr th').nth(1).first()).toHaveText(fromColumn)
   // TODO: This wait makes sure the preferences are actually saved. Just waiting for the UI to update is not enough. We should replace this wait
   await wait(1000)
 }

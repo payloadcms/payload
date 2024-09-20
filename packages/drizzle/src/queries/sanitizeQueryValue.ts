@@ -6,6 +6,9 @@ import { validate as uuidValidate } from 'uuid'
 
 import type { DrizzleAdapter } from '../types.js'
 
+import { getCollectionIdType } from '../utilities/getCollectionIdType.js'
+import { isPolymorphicRelationship } from '../utilities/isPolymorphicRelationship.js'
+
 type SanitizeQueryValueArgs = {
   adapter: DrizzleAdapter
   columns?: {
@@ -107,17 +110,28 @@ export const sanitizeQueryValue = ({
       // convert the value to the idType of the relationship
       let idType: 'number' | 'text'
       if (typeof field.relationTo === 'string') {
-        const collection = adapter.payload.collections[field.relationTo]
-        const mixedType: 'number' | 'serial' | 'text' | 'uuid' =
-          collection.customIDType || adapter.idType
-        const typeMap: Record<string, 'number' | 'text'> = {
-          number: 'number',
-          serial: 'number',
-          text: 'text',
-          uuid: 'text',
-        }
-        idType = typeMap[mixedType]
+        idType = getCollectionIdType({
+          adapter,
+          collection: adapter.payload.collections[field.relationTo],
+        })
       } else {
+        if (isPolymorphicRelationship(val)) {
+          if (operator !== 'equals') {
+            throw new APIError(
+              `Only 'equals' operator is supported for polymorphic relationship object notation. Given - ${operator}`,
+            )
+          }
+          idType = getCollectionIdType({
+            adapter,
+            collection: adapter.payload.collections[val.relationTo],
+          })
+
+          return {
+            operator,
+            value: idType === 'number' ? Number(val.value) : String(val.value),
+          }
+        }
+
         formattedColumns = columns
           .map(({ idType, rawColumn }) => {
             let formattedValue: number | number[] | string | string[]

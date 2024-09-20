@@ -56,6 +56,8 @@ export const saveVersion = async ({
         ;({ docs } = await payload.db.findVersions({
           ...findVersionArgs,
           collection: collection.slug,
+          limit: 1,
+          pagination: false,
           req,
           where: {
             parent: {
@@ -67,6 +69,8 @@ export const saveVersion = async ({
         ;({ docs } = await payload.db.findGlobalVersions({
           ...findVersionArgs,
           global: global.slug,
+          limit: 1,
+          pagination: false,
           req,
         }))
       }
@@ -131,7 +135,7 @@ export const saveVersion = async ({
 
       if (publishSpecificLocale && snapshot) {
         const snapshotData = deepCopyObjectSimple(snapshot)
-        if (snapshotData._id) delete snapshotData._id
+        if (snapshotData._id) {delete snapshotData._id}
 
         snapshotData._status = 'draft'
 

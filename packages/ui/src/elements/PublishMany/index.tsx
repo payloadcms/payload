@@ -81,7 +81,7 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
               }),
             )
 
-            clearRouteCache()
+            clearRouteCache() // Use clearRouteCache instead of router.refresh, as we only need to clear the cache if the user has route caching enabled - clearRouteCache checks for this
             return null
           }
 
