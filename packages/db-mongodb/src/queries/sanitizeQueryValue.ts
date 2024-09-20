@@ -204,17 +204,25 @@ export const sanitizeQueryValue = ({
     formattedValue = formattedValue === 'true' || formattedValue === true
 
     // Clearable fields
-    if (['relationship', 'select', 'upload'].includes(field.type)) {
+    if (['relationship', 'select', 'text', 'upload'].includes(field.type)) {
       if (formattedValue) {
         return {
           rawQuery: {
-            $and: [{ [path]: { $exists: true } }, { [path]: { $ne: null } }],
+            $and: [
+              { [path]: { $exists: true } },
+              { [path]: { $ne: null } },
+              { [path]: { $ne: '' } },
+            ],
           },
         }
       } else {
         return {
           rawQuery: {
-            $or: [{ [path]: { $exists: false } }, { [path]: { $eq: null } }],
+            $or: [
+              { [path]: { $exists: false } },
+              { [path]: { $eq: null } },
+              { [path]: { $eq: '' } }, // Treat empty string as null / undefined
+            ],
           },
         }
       }
