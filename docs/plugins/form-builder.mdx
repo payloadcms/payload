@@ -154,6 +154,10 @@ Override anything on the `forms` collection by sending a [Payload Collection Con
 
 Note that the `fields` property is a function that receives the default fields and returns an array of fields. This is because the `fields` property is a special case that is merged with the default fields, rather than replacing them. This allows you to map over default fields and modify them as needed.
 
+<Banner type="warning">
+Good to know: The form collection is publicly available to read by default. The emails field is locked for authenticated users only. If you have any frontend users you should override the access permissions for both the collection and the emails field to make sure you don't leak out any private emails.
+</Banner>
+
 ```ts
 // payload.config.ts
 formBuilder({
@@ -161,7 +165,7 @@ formBuilder({
   formOverrides: {
     slug: 'contact-forms',
     access: {
-      read: () => true,
+      read: ({ req: { user } }) => !!user, // authenticated users only
       update: () => false,
     },
     fields: ({ defaultFields }) => {

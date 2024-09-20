@@ -63,8 +63,8 @@ function computeSelectionCount(selection: TableSelection): {
 function isTableSelectionRectangular(selection: TableSelection): boolean {
   const nodes = selection.getNodes()
   const currentRows: Array<number> = []
-  let currentRow = null
-  let expectedColumns = null
+  let currentRow: null | TableRowNode = null
+  let expectedColumns: null | number = null
   let currentColumns = 0
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i]

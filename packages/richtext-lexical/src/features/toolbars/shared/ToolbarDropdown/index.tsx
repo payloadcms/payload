@@ -100,6 +100,9 @@ export const ToolbarDropdown = ({
   const updateStates = useCallback(() => {
     editor.getEditorState().read(() => {
       const selection = $getSelection()
+      if (!selection) {
+        return
+      }
 
       const _activeItemKeys: string[] = []
       const _activeItems: ToolbarGroupItem[] = []
