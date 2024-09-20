@@ -165,7 +165,7 @@ export async function buildSearchParam({
           const subQuery = priorQueryResult.value
           const result = await SubModel.find(subQuery, subQueryOptions)
 
-          const $in = result.map((doc) => doc._id.toString())
+          const $in = result.map((doc) => doc._id)
 
           // If it is the last recursion
           // then pass through the search param

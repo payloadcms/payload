@@ -1,3 +1,4 @@
+import type { Data, FormState } from 'payload'
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 
@@ -10,6 +11,8 @@ export type DocumentDrawerProps = {
   readonly disableActions?: boolean
   readonly drawerSlug?: string
   readonly id?: null | number | string
+  readonly initialData?: Data
+  readonly initialState?: FormState
   readonly onDelete?: DocumentInfoContext['onDelete']
   readonly onDuplicate?: DocumentInfoContext['onDuplicate']
   readonly onSave?: DocumentInfoContext['onSave']
@@ -24,7 +27,7 @@ export type DocumentTogglerProps = {
   readonly disabled?: boolean
   readonly drawerSlug?: string
   readonly id?: string
-} & HTMLAttributes<HTMLButtonElement>
+} & Readonly<HTMLAttributes<HTMLButtonElement>>
 
 export type UseDocumentDrawer = (args: { collectionSlug: string; id?: number | string }) => [
   React.FC<Omit<DocumentDrawerProps, 'collectionSlug' | 'id'>>, // drawer
