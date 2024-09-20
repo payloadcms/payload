@@ -1,18 +1,19 @@
-/* eslint-disable */
-import { $convertFromMarkdownString, $convertToMarkdownString } from '@lexical/markdown'
-import { Block } from 'payload'
-import { $createServerBlockNode, $isServerBlockNode, ServerBlockNode } from './nodes/BlocksNode.js'
 import type { TextMatchTransformer, Transformer } from '@lexical/markdown'
-
-import { propsToJSXString } from '../../../utilities/jsx/jsx.js'
+import type { ElementNode, SerializedEditorState } from 'lexical'
+import type { Block } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
-import { getEnabledNodesFromServerNodes } from '../../../lexical/nodes/index.js'
-import { NodeWithHooks } from '../../typesServer.js'
-import { $parseSerializedNode, ElementNode, SerializedEditorState } from 'lexical'
-import { extractPropsFromJSXPropsString } from '../../../utilities/jsx/extractPropsFromJSXPropsString.js'
+import { $convertFromMarkdownString, $convertToMarkdownString } from '@lexical/markdown'
+import { $parseSerializedNode } from 'lexical'
+
 import type { MultilineElementTransformer } from '../../../utilities/jsx/lexicalMarkdownCopy.js'
+import type { NodeWithHooks } from '../../typesServer.js'
+
+import { getEnabledNodesFromServerNodes } from '../../../lexical/nodes/index.js'
+import { extractPropsFromJSXPropsString } from '../../../utilities/jsx/extractPropsFromJSXPropsString.js'
+import { propsToJSXString } from '../../../utilities/jsx/jsx.js'
 import { linesFromStartToContentAndPropsString } from './linesFromMatchToContentAndPropsString.js'
+import { $createServerBlockNode, $isServerBlockNode, ServerBlockNode } from './nodes/BlocksNode.js'
 import {
   $createServerInlineBlockNode,
   $isServerInlineBlockNode,
@@ -33,8 +34,8 @@ export function createTagRegexes(tagName: string) {
   const endPattern = `${closingTag}${optionalWhitespace}${mandatoryClosingBracket}`
 
   return {
-    regExpStart: new RegExp(startPattern, 'i'),
     regExpEnd: new RegExp(endPattern, 'i'),
+    regExpStart: new RegExp(startPattern, 'i'),
   }
 }
 export const getBlockMarkdownTransformers = ({
@@ -100,7 +101,8 @@ function getMarkdownTransformerForBlock(
   > = []
 
   if (isInlineBlock) {
-    toReturn.push(({ allTransformers, allNodes }) => ({
+    toReturn.push(({ allNodes, allTransformers }) => ({
+      type: 'text-match',
       dependencies: [ServerInlineBlockNode],
       export: (node) => {
         if (!$isServerInlineBlockNode(node)) {
@@ -135,11 +137,10 @@ function getMarkdownTransformerForBlock(
       regExp: /___ignoreignoreignore___/g,
       replace: () => {},
       trigger: '___ignoreignoreignore___',
-      type: 'text-match',
     }))
   }
 
-  toReturn.push(({ allTransformers, allNodes }) => ({
+  toReturn.push(({ allNodes, allTransformers }) => ({
     dependencies: [ServerBlockNode, ServerInlineBlockNode],
     export: (node) => {
       if (isInlineBlock) {
@@ -176,11 +177,9 @@ function getMarkdownTransformerForBlock(
 
       return `<${nodeFields.blockType} ${propsToJSXString({ props: exportResult.props })}/>`
     },
-    regExpEnd: block.jsx?.customEndRegex ?? regex.regExpEnd,
-    regExpStart: block.jsx?.customStartRegex ?? regex.regExpStart,
     handleImportAfterStartMatch: block.jsx?.customEndRegex
       ? undefined
-      : ({ startLineIndex, lines, transformer, rootNode, startMatch }) => {
+      : ({ lines, rootNode, startLineIndex, startMatch, transformer }) => {
           const regexpEndRegex: RegExp | undefined =
             typeof transformer.regExpEnd === 'object' && 'regExp' in transformer.regExpEnd
               ? transformer.regExpEnd.regExp
@@ -193,13 +192,13 @@ function getMarkdownTransformerForBlock(
               ? transformer.regExpEnd.optional
               : !transformer.regExpEnd
 
-          const { propsString, content, endLineIndex, afterEndLine, beforeStartLine } =
+          const { afterEndLine, beforeStartLine, content, endLineIndex, propsString } =
             linesFromStartToContentAndPropsString({
-              startMatch,
+              isEndOptional,
+              lines,
               regexpEndRegex,
               startLineIndex,
-              lines,
-              isEndOptional,
+              startMatch,
             })
 
           if (block.jsx.import) {
@@ -207,14 +206,14 @@ function getMarkdownTransformerForBlock(
 
             const blockFields = block.jsx.import({
               children: content,
+              htmlToLexical: null, // TODO
+              markdownToLexical,
+              openMatch: startMatch,
               props: propsString
                 ? extractPropsFromJSXPropsString({
                     propsString,
                   })
                 : {},
-              openMatch: startMatch,
-              markdownToLexical: markdownToLexical,
-              htmlToLexical: null, // TODO
             })
             if (blockFields === false) {
               return {
@@ -275,26 +274,29 @@ function getMarkdownTransformerForBlock(
             return: [false, startLineIndex],
           }
         },
+    regExpEnd: block.jsx?.customEndRegex ?? regex.regExpEnd,
+    regExpStart: block.jsx?.customStartRegex ?? regex.regExpStart,
     // This replace is ONLY run for ``` code blocks (so any blocks with custom start and end regexes). For others, we use the special JSX handling above:
+    type: 'multilineElement',
     replace: (rootNode, children, openMatch, closeMatch, linesInBetween) => {
       if (block.jsx.import) {
         const childrenString = linesInBetween.join('\n').trim()
 
-        let propsString: string | null = openMatch?.length > 1 ? openMatch[1]?.trim() : null
+        const propsString: null | string = openMatch?.length > 1 ? openMatch[1]?.trim() : null
 
         const markdownToLexical = getMarkdownToLexical(allNodes, allTransformers)
 
         const blockFields = block.jsx.import({
           children: childrenString,
+          closeMatch,
+          htmlToLexical: null, // TODO
+          markdownToLexical,
+          openMatch,
           props: propsString
             ? extractPropsFromJSXPropsString({
                 propsString,
               })
             : {},
-          openMatch,
-          closeMatch,
-          markdownToLexical: markdownToLexical,
-          htmlToLexical: null, // TODO
         })
         if (blockFields === false) {
           return false
@@ -317,7 +319,6 @@ function getMarkdownTransformerForBlock(
       }
       return false // Run next transformer
     },
-    type: 'multilineElement',
   }))
 
   return toReturn

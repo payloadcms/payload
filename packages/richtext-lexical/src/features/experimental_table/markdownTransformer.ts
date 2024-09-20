@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import type { ElementTransformer, Transformer } from '@lexical/markdown'
 import type { LexicalNode } from 'lexical'
 
@@ -20,6 +18,7 @@ import { $isParagraphNode, $isTextNode } from 'lexical'
 
 // Very primitive table setup
 const TABLE_ROW_REG_EXP = /^\|(.+)\|\s?$/
+// eslint-disable-next-line regexp/no-unused-capturing-group
 const TABLE_ROW_DIVIDER_REG_EXP = /^(\| ?:?-*:? ?)+\|\s?$/
 
 export const TableMarkdownTransformer: (props: {

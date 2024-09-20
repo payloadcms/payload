@@ -1,27 +1,21 @@
-/* eslint-disable */
-import { $convertFromMarkdownString, $convertToMarkdownString } from '@lexical/markdown'
-import type { ClientBlock } from 'payload'
 import type { Transformer } from '@lexical/markdown'
-
-import { propsToJSXString } from '../../../utilities/jsx/jsx.js'
+import type { Klass, LexicalNode, LexicalNodeReplacement, SerializedEditorState } from 'lexical'
+import type { ClientBlock } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
+import { $convertFromMarkdownString, $convertToMarkdownString } from '@lexical/markdown'
 
-import {
-  type Klass,
-  type LexicalNode,
-  type LexicalNodeReplacement,
-  SerializedEditorState,
-} from 'lexical'
-import { $createBlockNode, $isBlockNode, BlockNode } from './nodes/BlocksNode.js'
-import { extractPropsFromJSXPropsString } from '../../../utilities/jsx/extractPropsFromJSXPropsString.js'
 import type { MultilineElementTransformer } from '../../../utilities/jsx/lexicalMarkdownCopy.js'
+
+import { extractPropsFromJSXPropsString } from '../../../utilities/jsx/extractPropsFromJSXPropsString.js'
+import { propsToJSXString } from '../../../utilities/jsx/jsx.js'
+import { $createBlockNode, $isBlockNode, BlockNode } from './nodes/BlocksNode.js'
 
 function createTagRegexes(tagName: string) {
   const escapedTagName = tagName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   return {
-    regExpStart: new RegExp(`<(${escapedTagName})([^>]*?)\\s*(/?)>`, 'i'),
     regExpEnd: new RegExp(`</(${escapedTagName})\\s*>|<${escapedTagName}[^>]*?/>`, 'i'),
+    regExpStart: new RegExp(`<(${escapedTagName})([^>]*?)\\s*(/?)>`, 'i'),
   }
 }
 export const getBlockMarkdownTransformers = ({
@@ -46,7 +40,8 @@ export const getBlockMarkdownTransformers = ({
       continue
     }
     const regex = createTagRegexes(block.slug)
-    transformers.push(({ allTransformers, allNodes }) => ({
+    transformers.push(({ allNodes, allTransformers }) => ({
+      type: 'multilineElement',
       dependencies: [BlockNode],
       export: (node) => {
         if (!$isBlockNode(node)) {
@@ -91,21 +86,21 @@ export const getBlockMarkdownTransformers = ({
 
           const childrenString = linesInBetween.join('\n').trim()
 
-          const propsString: string | null = openMatch?.length > 2 ? openMatch[2]?.trim() : null
+          const propsString: null | string = openMatch?.length > 2 ? openMatch[2]?.trim() : null
 
           const markdownToLexical = getMarkdownToLexical(allNodes, allTransformers)
 
           const blockFields = block.jsx.import({
             children: childrenString,
+            closeMatch,
+            htmlToLexical: null, // TODO
+            markdownToLexical,
+            openMatch,
             props: propsString
               ? extractPropsFromJSXPropsString({
                   propsString,
                 })
               : {},
-            openMatch,
-            closeMatch,
-            markdownToLexical: markdownToLexical,
-            htmlToLexical: null, // TODO
           })
           if (blockFields === false) {
             return false
@@ -123,7 +118,6 @@ export const getBlockMarkdownTransformers = ({
         }
         return false // Run next transformer
       },
-      type: 'multilineElement',
     }))
   }
 
