@@ -44,6 +44,7 @@ export const createClientGlobalConfig = ({
   })
 
   const serverOnlyProperties: Partial<ServerOnlyGlobalProperties>[] = [
+    'db',
     'hooks',
     'access',
     'endpoints',

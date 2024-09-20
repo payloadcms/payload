@@ -6,7 +6,7 @@ import type { SanitizedCollectionConfig } from './types.js'
 
 export type ServerOnlyCollectionProperties = keyof Pick<
   SanitizedCollectionConfig,
-  'access' | 'custom' | 'endpoints' | 'hooks'
+  'access' | 'custom' | 'db' | 'endpoints' | 'hooks'
 >
 
 export type ServerOnlyCollectionAdminProperties = keyof Pick<

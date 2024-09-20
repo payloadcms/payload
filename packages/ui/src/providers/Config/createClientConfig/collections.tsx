@@ -20,6 +20,7 @@ import { deepCopyObjectSimple } from 'payload'
 import { createClientFields } from './fields.js'
 
 const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
+  'db',
   'hooks',
   'access',
   'endpoints',
