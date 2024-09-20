@@ -1712,7 +1712,6 @@ export interface PayloadLockedDocument {
         relationTo: 'ui-fields';
         value: string | UiField;
       } | null);
-  editedAt?: string | null;
   globalSlug?: string | null;
   user: {
     relationTo: 'users';

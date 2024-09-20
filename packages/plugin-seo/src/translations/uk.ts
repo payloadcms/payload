@@ -3,6 +3,7 @@ import type { GenericTranslationsObject } from '@payloadcms/translations'
 export const uk: GenericTranslationsObject = {
   $schema: './translation-schema.json',
   'plugin-seo': {
+    missing: 'Відсутнє',
     almostThere: 'Ще трошки',
     autoGenerate: 'Згенерувати',
     bestPractices: 'найкращі практики',
@@ -17,7 +18,6 @@ export const uk: GenericTranslationsObject = {
       'Має бути від {{minLength}} до {{maxLength}} символів. Щоб дізнатися, як писати якісні метаописи — перегляньте ',
     lengthTipTitle:
       'Має бути від {{minLength}} до {{maxLength}} символів. Щоб дізнатися, як писати якісні метазаголовки — перегляньте ',
-    missing: 'Відсутнє',
     noImage: 'Немає зображення',
     preview: 'Попередній перегляд',
     previewDescription:

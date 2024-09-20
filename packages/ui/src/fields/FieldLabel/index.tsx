@@ -61,7 +61,7 @@ export const FieldLabel: FieldLabelClientComponent = (props) => {
       required={
         typeof props.required !== 'undefined'
           ? props.required
-          : props?.field && 'required' in props.field && (props.field?.required) // type assertion needed for `group` fields
+          : props?.field && 'required' in props.field && (props.field?.required as boolean) // type assertion needed for `group` fields
       }
     />
   )

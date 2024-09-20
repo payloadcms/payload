@@ -13,7 +13,6 @@ export interface Config {
   collections: {
     posts: Post;
     simple: Simple;
-    tests: Test;
     media: Media;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -21,13 +20,13 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   globals: {
     menu: Menu;
     'custom-ts': CustomT;
   };
-  locale: 'en' | 'es';
+  locale: null;
   user: User & {
     collection: 'users';
   };
@@ -55,7 +54,7 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: number;
+  id: string;
   text?: string | null;
   serverTextField?: string | null;
   richText?: {
@@ -98,28 +97,8 @@ export interface Post {
  * via the `definition` "simple".
  */
 export interface Simple {
-  id: number;
+  id: string;
   text?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tests".
- */
-export interface Test {
-  id: number;
-  menu?:
-    | {
-        array?:
-          | {
-              text?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-      }[]
-    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -128,7 +107,7 @@ export interface Test {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -172,7 +151,7 @@ export interface Media {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -221,10 +200,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -244,7 +223,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -255,7 +234,7 @@ export interface PayloadMigration {
  * via the `definition` "menu".
  */
 export interface Menu {
-  id: number;
+  id: string;
   globalText?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -265,7 +244,7 @@ export interface Menu {
  * via the `definition` "custom-ts".
  */
 export interface CustomT {
-  id: number;
+  id: string;
   custom?: 'hello' | 'world';
   withDefinitionsUsage?: ObjectWithNumber[];
   json: {
