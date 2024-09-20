@@ -1,4 +1,5 @@
 import type { TypeWithID } from '../collections/config/types.js'
+import type { CollectionSlug, GlobalSlug } from '../index.js'
 import type { Document, JoinQuery, Payload, PayloadRequest, Where } from '../types/index.js'
 import type { TypeWithVersion } from '../versions/types.js'
 
