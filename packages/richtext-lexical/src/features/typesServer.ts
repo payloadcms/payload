@@ -286,6 +286,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
    * This determines what props will be available on the Client.
    */
   clientFeatureProps?: ClientFeatureProps
+  // @ts-expect-error - TODO: fix this
   componentImports?: Config['admin']['importMap']['generators'][0] | PayloadComponent[]
   componentMap?:
     | ((args: { i18n: I18nClient; payload: Payload; props: ServerProps; schemaPath: string }) => {

@@ -63,8 +63,6 @@ import localOperations from './collections/operations/local/index.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
-import { checkDependencies } from './utilities/dependencies/dependencyChecker.js'
-import flattenFields from './utilities/flattenTopLevelFields.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
@@ -91,6 +89,9 @@ export interface GeneratedTypes {
   collectionsUntyped: {
     [slug: string]: JsonObject & TypeWithID
   }
+  dbUntyped: {
+    defaultIDType: number | string
+  }
   globalsUntyped: {
     [slug: string]: JsonObject
   }
@@ -115,6 +116,13 @@ type StringKeyOf<T> = Extract<keyof T, string>
 
 // Define the types for slugs using the appropriate collections and globals
 export type CollectionSlug = StringKeyOf<TypedCollection>
+
+type ResolveDbType<T> = 'db' extends keyof T
+  ? T['db']
+  : // @ts-expect-error
+    T['dbUntyped']
+
+export type DefaultDocumentIDType = ResolveDbType<GeneratedTypes>['defaultIDType']
 export type GlobalSlug = StringKeyOf<TypedGlobal>
 
 // now for locale and user

@@ -12,7 +12,7 @@ export const MarkdownTransformer: ElementTransformer = {
     }
 
     const lines = exportChildren(node).split('\n')
-    const output = []
+    const output: string[] = []
     for (const line of lines) {
       output.push('> ' + line)
     }
