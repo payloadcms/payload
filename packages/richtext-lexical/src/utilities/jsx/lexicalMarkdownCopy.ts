@@ -106,7 +106,7 @@ export function transformersByType(transformers: Array<Transformer>): Readonly<{
 
   return {
     element: (byType.element || []) as Array<ElementTransformer>,
-    multilineElement: (byType.multilineElement || []) as Array<MultilineElementTransformer>,
+    multilineElement: (byType['multiline-element'] || []) as Array<MultilineElementTransformer>,
     textFormat: (byType['text-format'] || []) as Array<TextFormatTransformer>,
     textMatch: (byType['text-match'] || []) as Array<TextMatchTransformer>,
   }
