@@ -202,22 +202,10 @@ export const sanitizeQueryValue = ({
         $regex: formattedValue.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
       }
     }
-  }
 
-  if (
-    (path === '_id' || path === 'parent') &&
-    operator === 'like' &&
-    formattedValue.length === 24 &&
-    !hasCustomID
-  ) {
-    formattedOperator = 'equals'
-  }
+    if (operator === 'exists') {
+      formattedValue = formattedValue === 'true' || formattedValue === true
 
-  if (operator === 'exists') {
-    formattedValue = formattedValue === 'true' || formattedValue === true
-
-    // Clearable fields
-    if (['relationship', 'select', 'text', 'upload'].includes(field.type)) {
       if (formattedValue) {
         return {
           rawQuery: {
@@ -236,6 +224,36 @@ export const sanitizeQueryValue = ({
               { [path]: { $eq: null } },
               { [path]: { $eq: '' } }, // Treat empty string as null / undefined
             ],
+          },
+        }
+      }
+    }
+  }
+
+  if (
+    (path === '_id' || path === 'parent') &&
+    operator === 'like' &&
+    formattedValue.length === 24 &&
+    !hasCustomID
+  ) {
+    formattedOperator = 'equals'
+  }
+
+  if (operator === 'exists') {
+    formattedValue = formattedValue === 'true' || formattedValue === true
+
+    // Clearable fields
+    if (['relationship', 'select', 'upload'].includes(field.type)) {
+      if (formattedValue) {
+        return {
+          rawQuery: {
+            $and: [{ [path]: { $exists: true } }, { [path]: { $ne: null } }],
+          },
+        }
+      } else {
+        return {
+          rawQuery: {
+            $or: [{ [path]: { $exists: false } }, { [path]: { $eq: null } }],
           },
         }
       }
