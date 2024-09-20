@@ -9,7 +9,7 @@ import { mergeRegister } from '@lexical/utils'
 import { useTranslation } from '@payloadcms/ui'
 import { $getSelection } from 'lexical'
 
-import type { ToolbarGroup, ToolbarGroupItem } from '../../types.js'
+import type { ToolbarDropdownGroup, ToolbarGroupItem } from '../../types.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { DropDown, DropDownItem } from './DropDown.js'
@@ -71,9 +71,7 @@ export const ToolbarDropdown = ({
   classNames,
   editor,
   group,
-  groupKey,
   Icon,
-  items,
   itemsContainerClassNames,
   label,
   maxActiveItems,
@@ -82,10 +80,8 @@ export const ToolbarDropdown = ({
   anchorElem: HTMLElement
   classNames?: string[]
   editor: LexicalEditor
-  group: { type: 'dropdown' } & ToolbarGroup
-  groupKey: string
+  group: ToolbarDropdownGroup
   Icon?: React.FC
-  items: ToolbarGroupItem[]
   itemsContainerClassNames?: string[]
   label?: string
   /**
@@ -99,6 +95,7 @@ export const ToolbarDropdown = ({
   const [enabledItemKeys, setEnabledItemKeys] = React.useState<string[]>([])
   const [enabledGroup, setEnabledGroup] = React.useState<boolean>(true)
   const editorConfigContext = useEditorConfigContext()
+  const { items, key: groupKey } = group
 
   const updateStates = useCallback(() => {
     editor.getEditorState().read(() => {

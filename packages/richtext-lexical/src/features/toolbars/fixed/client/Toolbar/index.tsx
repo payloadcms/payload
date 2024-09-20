@@ -104,9 +104,7 @@ function ToolbarGroupComponent({
             anchorElem={anchorElem}
             editor={editor}
             group={group}
-            groupKey={group.key}
             Icon={DropdownIcon}
-            items={group.items}
             itemsContainerClassNames={['fixed-toolbar__dropdown-items']}
             label={dropdownLabel}
             maxActiveItems={1}
@@ -117,8 +115,6 @@ function ToolbarGroupComponent({
             anchorElem={anchorElem}
             editor={editor}
             group={group}
-            groupKey={group.key}
-            items={group.items}
             itemsContainerClassNames={['fixed-toolbar__dropdown-items']}
             label={dropdownLabel}
             maxActiveItems={1}
