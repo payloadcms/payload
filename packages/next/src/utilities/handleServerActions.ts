@@ -1,15 +1,10 @@
-import type { Action, ImportMap, SanitizedConfig } from 'payload'
+import type { Action } from 'payload'
+
+import type { RenderConfigArgs } from './renderConfig.js'
 
 import { renderConfig } from './renderConfig.js'
 
-export const handleServerActions = async (
-  action: Action,
-  args: {
-    [key: string]: any
-    config: Promise<SanitizedConfig> | SanitizedConfig
-    importMap: ImportMap
-  },
-) => {
+export const handleServerActions = async (action: Action.RenderConfig, args: RenderConfigArgs) => {
   switch (action) {
     case 'render-config': {
       return renderConfig(args)

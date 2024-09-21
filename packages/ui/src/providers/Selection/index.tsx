@@ -40,6 +40,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   const contextRef = useRef({} as SelectionContext)
 
   const { code: locale } = useLocale()
+
   const [selected, setSelected] = useState<SelectionContext['selected']>(() => {
     const rows = new Map()
     docs.forEach(({ id }) => {

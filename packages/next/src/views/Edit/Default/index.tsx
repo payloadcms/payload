@@ -40,8 +40,8 @@ const baseClass = 'collection-edit'
 // When rendered within a drawer, props are empty
 // This is solely to support custom edit views which get server-rendered
 export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
-  clientCollectionConfig,
-  clientGlobalConfig,
+  collectionConfig,
+  globalConfig,
   payloadServerAction,
 }) => {
   const {
@@ -91,7 +91,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   } = useConfig()
 
   const [entityConfig, setEntityConfig] = useState<ClientCollectionConfig | ClientGlobalConfig>(
-    clientCollectionConfig || clientGlobalConfig,
+    collectionConfig || globalConfig,
   )
 
   const depth = useEditDepth()
@@ -115,9 +115,9 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
         })
       }
 
-      getNewConfig()
+      void getNewConfig()
     }
-  }, [payloadServerAction, entityConfig])
+  }, [payloadServerAction, entityConfig, collectionSlug, globalSlug, syncEntityConfigToContext])
 
   const { refreshCookieAsync, user } = useAuth()
 

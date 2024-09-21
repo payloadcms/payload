@@ -1,10 +1,9 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
-  AdminViewProps,
   ClientCollectionConfig,
   CreateMappedComponent,
+  Data,
   EditViewConfig,
-  EditViewProps,
   ImportMap,
   MappedView,
   Payload,
@@ -13,7 +12,6 @@ import type {
   ServerOnlyCollectionProperties,
   ServerOnlyUploadProperties,
 } from 'payload'
-import type React from 'react'
 
 import { deepCopyObjectSimple } from 'payload'
 
@@ -45,24 +43,22 @@ const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProp
 ]
 
 export const createClientCollectionConfig = ({
-  clientCollection,
   collection,
   createMappedComponent,
-  // DefaultEditView,
-  // DefaultListView,
+  data,
   i18n,
   importMap,
   payload,
 }: {
-  clientCollection: ClientCollectionConfig
   collection: SanitizedCollectionConfig
   createMappedComponent: CreateMappedComponent
-  // DefaultEditView: React.FC<EditViewProps>
-  // DefaultListView: React.FC<AdminViewProps>
+  data: Data
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
 }): ClientCollectionConfig => {
+  const clientCollection = deepCopyObjectSimple(collection) as unknown as ClientCollectionConfig
+
   clientCollection.fields = createClientFields({
     clientFields: clientCollection?.fields || [],
     createMappedComponent,
@@ -108,6 +104,10 @@ export const createClientCollectionConfig = ({
         clientCollection.labels[labelType] = collectionLabel({ t: i18n.t })
       }
     })
+  }
+
+  if (!clientCollection.admin) {
+    clientCollection.admin = {} as ClientCollectionConfig['admin']
   }
 
   serverOnlyCollectionAdminProperties.forEach((key) => {
@@ -268,22 +268,22 @@ export const createClientCollectionConfig = ({
       {} as ClientCollectionConfig['admin']['components']['views']['edit']
   }
 
-  // clientCollection.admin.components.views.edit.default = {
-  //   Component: createMappedComponent(
-  //     hasEditView &&
-  //       'Component' in collection.admin.components.views.edit.default &&
-  //       collection.admin.components.views.edit.default.Component
-  //       ? collection.admin.components.views.edit.default.Component
-  //       : null,
-  //     {
-  //       clientProps: {
-  //         collectionSlug: collection.slug,
-  //       },
-  //     },
-  //     DefaultEditView,
-  //     'collection.admin.components.views.edit.default',
-  //   ),
-  // }
+  clientCollection.admin.components.views.edit.default = {
+    Component: createMappedComponent(
+      hasEditView &&
+        'Component' in collection.admin.components.views.edit.default &&
+        collection.admin.components.views.edit.default.Component
+        ? collection.admin.components.views.edit.default.Component
+        : null,
+      {
+        clientProps: {
+          collectionSlug: collection.slug,
+        },
+      },
+      undefined,
+      'collection.admin.components.views.edit.default',
+    ),
+  }
 
   if (collection?.admin?.components?.views?.edit) {
     for (const key in collection.admin.components.views.edit) {
@@ -330,20 +330,20 @@ export const createClientCollectionConfig = ({
       {} as ClientCollectionConfig['admin']['components']['views']['list']
   }
 
-  // clientCollection.admin.components.views.list.Component = createMappedComponent(
-  //   hasListView &&
-  //     'Component' in collection.admin.components.views.list &&
-  //     collection.admin.components.views.list.Component
-  //     ? collection.admin.components.views.list.Component
-  //     : null,
-  //   {
-  //     clientProps: {
-  //       collectionSlug: collection.slug,
-  //     },
-  //   },
-  //   DefaultListView,
-  //   'collection.admin.components.views.list',
-  // )
+  clientCollection.admin.components.views.list.Component = createMappedComponent(
+    hasListView &&
+      'Component' in collection.admin.components.views.list &&
+      collection.admin.components.views.list.Component
+      ? collection.admin.components.views.list.Component
+      : null,
+    {
+      clientProps: {
+        collectionSlug: collection.slug,
+      },
+    },
+    undefined,
+    'collection.admin.components.views.list',
+  )
 
   if (
     hasListView &&
@@ -371,35 +371,30 @@ export const createClientCollectionConfig = ({
 
   return clientCollection
 }
-
 export const createClientCollectionConfigs = ({
-  clientCollections,
   collections,
   createMappedComponent,
-  DefaultEditView,
-  DefaultListView,
+  data,
   i18n,
   importMap,
   payload,
 }: {
-  clientCollections: ClientCollectionConfig[]
   collections: SanitizedCollectionConfig[]
   createMappedComponent: CreateMappedComponent
-  // DefaultEditView: React.FC<EditViewProps>
-  // DefaultListView: React.FC<AdminViewProps>
+  data: Data
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
 }): ClientCollectionConfig[] => {
+  const clientCollections = new Array(collections.length)
+
   for (let i = 0; i < collections.length; i++) {
     const collection = collections[i]
-    const clientCollection = clientCollections[i]
+
     clientCollections[i] = createClientCollectionConfig({
-      clientCollection,
       collection,
       createMappedComponent,
-      // DefaultEditView,
-      // DefaultListView,
+      data,
       i18n,
       importMap,
       payload,

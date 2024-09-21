@@ -1,22 +1,17 @@
 import type { I18nClient } from '@payloadcms/translations'
 
 import {
-  type AdminViewProps,
   type ClientConfig,
   deepCopyObjectSimple,
-  type EditViewProps,
-  type ImportMap,
-  type Payload,
   type PayloadComponent,
   type SanitizedConfig,
   serverOnlyConfigProperties,
 } from 'payload'
-import React from 'react'
+
+import type { getCreateMappedComponent } from './getCreateMappedComponent.js'
 
 import { createClientCollectionConfig, createClientCollectionConfigs } from './collections.js'
 import { createClientField, createClientFields } from './fields.js'
-import { getComponent } from './getComponent.js'
-import { getCreateMappedComponent } from './getCreateMappedComponent.js'
 import { createClientGlobalConfig, createClientGlobalConfigs } from './globals.js'
 
 export {
@@ -27,35 +22,17 @@ export {
 }
 
 export const createClientConfig = async ({
-  children,
   config,
-  DefaultEditView,
-  DefaultListView,
+  createMappedComponent,
   i18n,
-  importMap,
-  payload,
 }: {
-  children: React.ReactNode
   config: SanitizedConfig
-  DefaultEditView: React.FC<EditViewProps>
-  DefaultListView: React.FC<AdminViewProps>
+  createMappedComponent: ReturnType<typeof getCreateMappedComponent>
   i18n: I18nClient
-  importMap: ImportMap
-  payload: Payload
   // eslint-disable-next-line @typescript-eslint/require-await
-}): Promise<{ clientConfig: ClientConfig; render: React.ReactNode }> => {
+}): Promise<ClientConfig> => {
   // We can use deepCopySimple here, as the clientConfig should be JSON serializable anyways, since it will be sent from server => client
-  const clientConfig: ClientConfig = deepCopyObjectSimple(config) as unknown as ClientConfig
-
-  console.log('clientConfig', clientConfig)
-
-  const createMappedComponent = getCreateMappedComponent({
-    importMap,
-    serverProps: {
-      i18n,
-      payload,
-    },
-  })
+  const clientConfig = deepCopyObjectSimple(config) as unknown as ClientConfig
 
   for (const key of serverOnlyConfigProperties) {
     if (key in clientConfig) {
@@ -149,61 +126,76 @@ export const createClientConfig = async ({
     delete clientConfig.admin.livePreview.url
   }
 
-  clientConfig.collections = createClientCollectionConfigs({
-    clientCollections: clientConfig.collections,
-    collections: config.collections,
-    createMappedComponent,
-    i18n,
-    importMap,
-    payload,
-  })
+  clientConfig.collections = config.collections.map((collection) => ({
+    slug: collection.slug,
+    labels: Object.entries(collection.labels).reduce((acc, [labelType, collectionLabel]) => {
+      if (typeof collectionLabel === 'function') {
+        acc[labelType] = collectionLabel({ t: i18n.t })
+      }
+      return acc
+    }, {}),
+  }))
 
-  clientConfig.globals = createClientGlobalConfigs({
-    clientGlobals: clientConfig.globals,
-    createMappedComponent,
-    globals: config.globals,
-    i18n,
-    importMap,
-    payload,
-  })
+  clientConfig.globals = config.globals.map((global) => ({
+    slug: global.slug,
+  }))
 
-  const NestProviders = ({
-    children,
-    providers,
-  }: {
-    readonly children: React.ReactNode
-    readonly providers: React.FC<{ children?: React.ReactNode }>[]
-  }) => {
-    const Component = providers[0]
-    if (providers.length > 1) {
-      return (
-        <Component>
-          <NestProviders providers={providers.slice(1)}>{children}</NestProviders>
-        </Component>
-      )
-    }
-    return <Component>{children}</Component>
-  }
+  // clientConfig.collections = createClientCollectionConfigs({
+  //   clientCollections: clientConfig.collections,
+  //   collections: config.collections,
+  //   createMappedComponent,
+  //   i18n,
+  //   importMap,
+  //   payload,
+  // })
 
-  const render =
-    Array.isArray(config.admin?.components?.providers) &&
-    config.admin?.components?.providers.length > 0 ? (
-      <NestProviders
-        providers={config.admin?.components?.providers.map(
-          (Component) =>
-            getComponent({
-              identifier: 'config.admin?.components?.providers',
-              importMap,
-              payloadComponent: Component,
-            }).Component,
-        )}
-      >
-        {children}
-      </NestProviders>
-    ) : (
-      children
-    )
+  // clientConfig.globals = createClientGlobalConfigs({
+  //   clientGlobals: clientConfig.globals,
+  //   createMappedComponent,
+  //   globals: config.globals,
+  //   i18n,
+  //   importMap,
+  //   payload,
+  // })
 
-  return { clientConfig, render }
+  // const NestProviders = ({
+  //   children,
+  //   providers,
+  // }: {
+  //   readonly children: React.ReactNode
+  //   readonly providers: React.FC<{ children?: React.ReactNode }>[]
+  // }) => {
+  //   const Component = providers[0]
+  //   if (providers.length > 1) {
+  //     return (
+  //       <Component>
+  //         <NestProviders providers={providers.slice(1)}>{children}</NestProviders>
+  //       </Component>
+  //     )
+  //   }
+  //   return <Component>{children}</Component>
+  // }
+
+  // const render =
+  //   Array.isArray(config.admin?.components?.providers) &&
+  //   config.admin?.components?.providers.length > 0 ? (
+  //     <NestProviders
+  //       providers={config.admin?.components?.providers.map(
+  //         (Component) =>
+  //           getComponent({
+  //             identifier: 'config.admin?.components?.providers',
+  //             importMap,
+  //             payloadComponent: Component,
+  //           }).Component,
+  //       )}
+  //     >
+  //       {children}
+  //     </NestProviders>
+  //   ) : (
+  //     children
+  //   )
+
+  return clientConfig
 }
+
 export { createClientField, createClientFields }

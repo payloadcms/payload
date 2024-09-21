@@ -3,7 +3,6 @@ import type {
   ClientGlobalConfig,
   CreateMappedComponent,
   EditViewConfig,
-  EditViewProps,
   ImportMap,
   MappedView,
   Payload,
@@ -11,27 +10,26 @@ import type {
   ServerOnlyGlobalAdminProperties,
   ServerOnlyGlobalProperties,
 } from 'payload'
-import type React from 'react'
 
 import { deepCopyObjectSimple } from 'payload'
 
 import { createClientFields } from './fields.js'
 
 export const createClientGlobalConfig = ({
-  clientGlobal,
   createMappedComponent,
   global,
   i18n,
   importMap,
   payload,
 }: {
-  clientGlobal: ClientGlobalConfig
   createMappedComponent: CreateMappedComponent
   global: SanitizedConfig['globals'][0]
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
 }): ClientGlobalConfig => {
+  const clientGlobal = deepCopyObjectSimple(global) as unknown as ClientGlobalConfig
+
   clientGlobal.fields = createClientFields({
     clientFields: clientGlobal?.fields || [],
     createMappedComponent,
@@ -132,22 +130,22 @@ export const createClientGlobalConfig = ({
         {} as ClientGlobalConfig['admin']['components']['views']['edit']
     }
 
-    // clientGlobal.admin.components.views.edit.default = {
-    //   Component: createMappedComponent(
-    //     hasEditView &&
-    //       'Component' in global.admin.components.views.edit.default &&
-    //       global.admin.components.views.edit.default.Component
-    //       ? global.admin.components.views.edit.default.Component
-    //       : null,
-    //     {
-    //       clientProps: {
-    //         globalSlug: global.slug,
-    //       },
-    //     },
-    //     DefaultEditView,
-    //     'global.admin.components.views.edit.default',
-    //   ),
-    // }
+    clientGlobal.admin.components.views.edit.default = {
+      Component: createMappedComponent(
+        hasEditView &&
+          'Component' in global.admin.components.views.edit.default &&
+          global.admin.components.views.edit.default.Component
+          ? global.admin.components.views.edit.default.Component
+          : null,
+        {
+          clientProps: {
+            globalSlug: global.slug,
+          },
+        },
+        undefined,
+        'global.admin.components.views.edit.default',
+      ),
+    }
 
     if (global?.admin?.components?.views?.edit) {
       for (const key in global.admin.components.views.edit) {
@@ -195,25 +193,24 @@ export const createClientGlobalConfig = ({
 }
 
 export const createClientGlobalConfigs = ({
-  clientGlobals,
   createMappedComponent,
   globals,
   i18n,
   importMap,
   payload,
 }: {
-  clientGlobals: ClientGlobalConfig[]
   createMappedComponent: CreateMappedComponent
   globals: SanitizedConfig['globals']
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
 }): ClientGlobalConfig[] => {
+  const clientGlobals = new Array(globals.length)
+
   for (let i = 0; i < globals.length; i++) {
     const global = globals[i]
-    const clientGlobal = clientGlobals[i]
+
     clientGlobals[i] = createClientGlobalConfig({
-      clientGlobal,
       createMappedComponent,
       global,
       i18n,
@@ -221,5 +218,6 @@ export const createClientGlobalConfigs = ({
       payload,
     })
   }
+
   return clientGlobals
 }

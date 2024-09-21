@@ -69,7 +69,7 @@ export type ServerSideEditViewProps = {
 } & ClientSideEditViewProps
 
 export type ClientSideEditViewProps = {
-  clientCollectionConfig?: ClientCollectionConfig
-  clientGlobalConfig?: ClientGlobalConfig
+  collectionConfig?: ClientCollectionConfig
+  globalConfig?: ClientGlobalConfig
   payloadServerAction: PayloadServerAction
 }

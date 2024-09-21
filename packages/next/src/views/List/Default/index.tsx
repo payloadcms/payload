@@ -23,7 +23,6 @@ import {
   UnpublishMany,
   useAuth,
   useBulkUpload,
-  useConfig,
   useEditDepth,
   useListInfo,
   useListQuery,
@@ -36,7 +35,7 @@ import {
 import LinkImport from 'next/link.js'
 import { useRouter } from 'next/navigation.js'
 import { formatFilesize, isNumber } from 'payload/shared'
-import React, { Fragment, useEffect } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 
 import './index.scss'
 
@@ -44,10 +43,10 @@ const baseClass = 'collection-list'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const DefaultListView: React.FC<{
-  clientCollectionConfig: ClientCollectionConfig
+  collectionConfig: ClientCollectionConfig
   payloadServerAction: PayloadServerAction
 }> = (props) => {
-  const { clientCollectionConfig, payloadServerAction } = props
+  const { collectionConfig: collectionConfigFromProps, payloadServerAction } = props
 
   const { user } = useAuth()
 
@@ -68,6 +67,9 @@ export const DefaultListView: React.FC<{
   const { setCollectionSlug, setOnSuccess } = useBulkUpload()
   const { drawerSlug } = useBulkUpload()
 
+  const [collectionConfig, setCollectionConfig] =
+    useState<ClientCollectionConfig>(collectionConfigFromProps)
+
   const {
     admin: {
       components: {
@@ -76,17 +78,31 @@ export const DefaultListView: React.FC<{
         beforeList,
         beforeListTable,
         Description,
-        views: {
-          list: { actions },
-        },
-      },
+        views: { list: { actions } = {} } = {},
+      } = {},
       description,
     },
     fields,
     labels,
-  } = clientCollectionConfig
+  } = collectionConfig || {}
 
   const { i18n, t } = useTranslation()
+
+  useEffect(() => {
+    if (!collectionConfig) {
+      const getNewConfig = async () => {
+        const res = await payloadServerAction('render-config', {
+          collectionSlug,
+          data,
+          i18n,
+        })
+
+        setCollectionConfig(res)
+      }
+
+      void getNewConfig()
+    }
+  }, [payloadServerAction, collectionConfig, collectionSlug, data, i18n])
 
   const drawerDepth = useEditDepth()
 
@@ -98,7 +114,7 @@ export const DefaultListView: React.FC<{
 
   let docs = data.docs || []
 
-  const isUploadCollection = Boolean(clientCollectionConfig.upload)
+  const isUploadCollection = Boolean(collectionConfig.upload)
 
   if (isUploadCollection) {
     docs = docs?.map((doc) => {
@@ -125,7 +141,7 @@ export const DefaultListView: React.FC<{
     }
   }, [setStepNav, labels, drawerDepth])
 
-  const isBulkUploadEnabled = isUploadCollection && clientCollectionConfig.upload.bulkUpload
+  const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
 
   return (
     <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
@@ -163,7 +179,7 @@ export const DefaultListView: React.FC<{
                 </>
               )}
               {!smallBreak && (
-                <ListSelection label={getTranslation(clientCollectionConfig.labels.plural, i18n)} />
+                <ListSelection label={getTranslation(collectionConfig?.labels?.plural, i18n)} />
               )}
               {(description || Description) && (
                 <div className={`${baseClass}__sub-header`}>
@@ -172,7 +188,7 @@ export const DefaultListView: React.FC<{
               )}
             </ListHeader>
           )}
-          <ListControls collectionConfig={clientCollectionConfig} fields={fields} />
+          <ListControls collectionConfig={collectionConfig} fields={fields} />
           <RenderComponent mappedComponent={beforeListTable} />
           {!data.docs && (
             <StaggeredShimmers
@@ -185,7 +201,7 @@ export const DefaultListView: React.FC<{
               <Table
                 customCellContext={{
                   collectionSlug,
-                  uploadConfig: clientCollectionConfig.upload,
+                  uploadConfig: collectionConfig.upload,
                 }}
                 data={docs}
                 fields={fields}
@@ -230,24 +246,22 @@ export const DefaultListView: React.FC<{
                   <PerPage
                     handleChange={(limit) => void handlePerPageChange(limit)}
                     limit={isNumber(params?.limit) ? Number(params.limit) : defaultLimit}
-                    limits={clientCollectionConfig?.admin?.pagination?.limits}
+                    limits={collectionConfig?.admin?.pagination?.limits}
                     resetPage={data.totalDocs <= data.pagingCounter}
                   />
                   {smallBreak && (
                     <div className={`${baseClass}__list-selection`}>
-                      <ListSelection
-                        label={getTranslation(clientCollectionConfig.labels.plural, i18n)}
-                      />
+                      <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
                       <div className={`${baseClass}__list-selection-actions`}>
                         {beforeActions && beforeActions}
                         {!disableBulkEdit && (
                           <Fragment>
-                            <EditMany collection={clientCollectionConfig} fields={fields} />
-                            <PublishMany collection={clientCollectionConfig} />
-                            <UnpublishMany collection={clientCollectionConfig} />
+                            <EditMany collection={collectionConfig} fields={fields} />
+                            <PublishMany collection={collectionConfig} />
+                            <UnpublishMany collection={collectionConfig} />
                           </Fragment>
                         )}
-                        {!disableBulkDelete && <DeleteMany collection={clientCollectionConfig} />}
+                        {!disableBulkDelete && <DeleteMany collection={collectionConfig} />}
                       </div>
                     </div>
                   )}

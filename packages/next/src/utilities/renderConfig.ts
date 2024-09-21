@@ -1,33 +1,49 @@
 import type {
   ClientCollectionConfig,
+  ClientConfig,
   ClientField,
   ClientGlobalConfig,
-  ImportMap,
-  SanitizedConfig,
+  RenderConfigArgs,
 } from 'payload'
 
+import { getCreateMappedComponent } from '@payloadcms/ui/shared'
 import { createClientCollectionConfig } from '@payloadcms/ui/utilities/createClientCollectionConfig'
+import { createClientConfig } from '@payloadcms/ui/utilities/createClientConfig'
 import { createClientFields } from '@payloadcms/ui/utilities/createClientFields'
 import { createClientGlobalConfig } from '@payloadcms/ui/utilities/createClientGlobalConfig'
 
 import { getPayloadHMR } from './getPayloadHMR.js'
 
-export const renderConfig = async (args: {
-  collectionSlug?: string
-  config: Promise<SanitizedConfig> | SanitizedConfig
-  globalSlug?: string
-  importMap: ImportMap
-  schemaPath?: string
-}): Promise<ClientCollectionConfig | ClientField[] | ClientGlobalConfig> => {
-  const { collectionSlug, config: configPromise, globalSlug, importMap, schemaPath } = args
+export const renderConfig = async (
+  args: RenderConfigArgs,
+): Promise<ClientCollectionConfig | ClientConfig | ClientField[] | ClientGlobalConfig> => {
+  const {
+    collectionSlug,
+    config: configPromise,
+    data,
+    globalSlug,
+    i18n,
+    importMap,
+    schemaPath,
+    serverProps,
+  } = args
 
   const config = await configPromise
 
   const payload = await getPayloadHMR({ config })
 
+  const createMappedComponent = getCreateMappedComponent({
+    importMap,
+    serverProps: {
+      ...(serverProps || {}),
+      payload,
+    },
+  })
+
   if (schemaPath) {
     const renderedSchemaPath = createClientFields({
       config,
+      createMappedComponent,
       importMap,
       payload,
     })
@@ -37,9 +53,10 @@ export const renderConfig = async (args: {
 
   if (collectionSlug) {
     const renderedCollectionConfig = createClientCollectionConfig({
-      clientCollection: {} as ClientCollectionConfig,
       collection: config.collections.find((collection) => collection.slug === collectionSlug),
-      config,
+      createMappedComponent,
+      data,
+      i18n,
       importMap,
       payload,
     })
@@ -49,9 +66,9 @@ export const renderConfig = async (args: {
 
   if (globalSlug) {
     const renderedGlobalConfig = createClientGlobalConfig({
-      clientGlobal: {} as ClientGlobalConfig,
-      config,
+      createMappedComponent,
       global: config.globals.find((global) => global.slug === globalSlug),
+      i18n,
       importMap,
       payload,
     })
@@ -59,5 +76,11 @@ export const renderConfig = async (args: {
     return renderedGlobalConfig
   }
 
-  return null
+  const renderedRootConfig = await createClientConfig({
+    config,
+    createMappedComponent,
+    i18n,
+  })
+
+  return renderedRootConfig
 }

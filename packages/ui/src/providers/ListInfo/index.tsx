@@ -1,5 +1,10 @@
 'use client'
-import type { ClientConfig, FieldAffectingData, SanitizedCollectionConfig } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ClientConfig,
+  FieldAffectingData,
+  SanitizedCollectionConfig,
+} from 'payload'
 
 import React, { createContext, useContext } from 'react'
 
@@ -9,7 +14,7 @@ export type ColumnPreferences = Pick<Column, 'accessor' | 'active'>[]
 
 export type ListInfoProps = {
   readonly beforeActions?: React.ReactNode[]
-  readonly collectionConfig: ClientConfig['collections'][0]
+  readonly collectionConfig: ClientCollectionConfig
   readonly collectionSlug: SanitizedCollectionConfig['slug']
   readonly disableBulkDelete?: boolean
   readonly disableBulkEdit?: boolean

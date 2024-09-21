@@ -5,6 +5,7 @@ import type {
   LivePreviewConfig,
   SanitizedConfig,
   ServerOnlyLivePreviewProperties,
+  StaticLabel,
 } from './types.js'
 
 export type ServerOnlyRootProperties = keyof Pick<
@@ -42,9 +43,14 @@ export type ClientConfig = {
     dependencies?: Record<string, MappedComponent>
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
-  collections: ClientCollectionConfig[]
+  collections: {
+    labels: StaticLabel
+    slug: string
+  }[]
   custom?: Record<string, any>
-  globals: ClientGlobalConfig[]
+  globals: {
+    slug: string
+  }[]
 } & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | ServerOnlyRootProperties>
 
 export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperties>[] = [

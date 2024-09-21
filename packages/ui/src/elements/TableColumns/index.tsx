@@ -7,7 +7,7 @@ import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
 import type { SortColumnProps } from '../SortColumn/index.js'
 import type { Column } from '../Table/index.js'
 
-import { useConfig } from '../../providers/Config/index.js'
+import { useEntityConfig } from '../../providers/Config/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { buildColumnState } from './buildColumnState.js'
 import { filterFields } from './filterFields.js'
@@ -51,13 +51,10 @@ export const TableColumnsProvider: React.FC<Props> = ({
   preferenceKey,
   sortColumnProps,
 }) => {
-  const {
-    config: { collections },
-  } = useConfig()
+  const { collectionConfig: { admin: { defaultColumns, useAsTitle } = {}, fields } = {} } =
+    useEntityConfig()
 
-  const collectionConfig = collections.find((c) => c.slug === collectionSlug) || {}
-
-  const { admin: { defaultColumns, useAsTitle } = {}, fields } = collectionConfig
+  console.log('fields', fields)
 
   const prevCollection = React.useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
   const { getPreference, setPreference } = usePreferences()

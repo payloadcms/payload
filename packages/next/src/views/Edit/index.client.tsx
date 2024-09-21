@@ -5,26 +5,26 @@ import type { ClientSideEditViewProps } from 'payload'
 import { RenderComponent, SetViewActions } from '@payloadcms/ui'
 import React, { Fragment } from 'react'
 
+import { DefaultEditView } from './Default/index.js'
+
 export const EditViewClient: React.FC<ClientSideEditViewProps> = (props) => {
-  const { clientCollectionConfig, clientGlobalConfig } = props
+  const { collectionConfig, globalConfig } = props
 
-  const Edit = (clientCollectionConfig || clientGlobalConfig)?.admin?.components?.views?.edit
-    ?.default?.Component
-
-  if (!Edit) {
-    return null
-  }
+  const CustomEdit = (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.default
+    ?.Component
 
   return (
     <Fragment>
       <SetViewActions
         actions={
-          (clientCollectionConfig || clientGlobalConfig)?.admin?.components?.views?.edit?.default
-            ?.actions
+          (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.default?.actions
         }
       />
-      {/* <RenderComponent clientProps={props} mappedComponent={Edit} /> */}
-      hello, world!
+      {CustomEdit ? (
+        <RenderComponent clientProps={props} mappedComponent={CustomEdit} />
+      ) : (
+        <DefaultEditView {...props} />
+      )}
     </Fragment>
   )
 }

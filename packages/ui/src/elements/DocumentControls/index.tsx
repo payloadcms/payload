@@ -1,7 +1,5 @@
 'use client'
 import type {
-  ClientCollectionConfig,
-  ClientGlobalConfig,
   ClientUser,
   CollectionPermission,
   GlobalPermission,
@@ -13,7 +11,7 @@ import React, { Fragment, useEffect } from 'react'
 
 import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
 
-import { useConfig } from '../../providers/Config/index.js'
+import { useConfig, useEntityConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
@@ -59,7 +57,6 @@ export const DocumentControls: React.FC<{
 }> = (props) => {
   const {
     id,
-    slug,
     data,
     disableActions,
     disableCreate,
@@ -81,10 +78,9 @@ export const DocumentControls: React.FC<{
 
   const editDepth = useEditDepth()
 
-  const { config, getEntityConfig } = useConfig()
+  const { config } = useConfig()
 
-  const collectionConfig = getEntityConfig({ collectionSlug: slug }) as ClientCollectionConfig
-  const globalConfig = getEntityConfig({ globalSlug: slug }) as ClientGlobalConfig
+  const { collectionConfig, globalConfig } = useEntityConfig()
 
   const {
     admin: { dateFormat },

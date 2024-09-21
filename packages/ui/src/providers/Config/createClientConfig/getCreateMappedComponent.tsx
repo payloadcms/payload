@@ -13,6 +13,22 @@ import React from 'react'
 
 import { getComponent } from './getComponent.js'
 
+/**
+ * Creates a Mapped Component, which is an object representing a component.
+ * To determine the shape of this object, this function:
+ * 1. Conditionally renders either the given Custom Component, or its Payload fallback (if applicable).
+ * 2. For provided Custom Components, looks up that component in the `importMap`.
+ * 3. For all components, checks the component's type in order to thread proper client/server props accordingly.
+ * 4. If a Server Component, renders it. This way it can be passed to the client.
+ * 5. If a Client Component, returns it. This way the client can render it.
+ *
+ * @param payloadComponent - The component to render
+ * @param props - The props to pass to the component
+ * @param fallback - The fallback component to render if the payloadComponent is undefined
+ * @param identifier - The identifier of the component
+ * @returns The Mapped Component
+ *
+ */
 export function getCreateMappedComponent({
   importMap,
   serverProps,

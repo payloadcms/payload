@@ -20,7 +20,11 @@ type Args = {
 
 const payloadServerAction: PayloadServerAction = async function (action, additionalArgs) {
   'use server'
-  return handleServerActions(action, { config, importMap, ...(additionalArgs || {}) })
+  return handleServerActions(action, {
+    config,
+    importMap,
+    ...(additionalArgs || {}),
+  })
 }
 
 export const generateMetadata = ({ params, searchParams }: Args): Promise<Metadata> =>

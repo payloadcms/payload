@@ -4,18 +4,17 @@ import {
   HydrateAuthProvider,
   ListInfoProvider,
   ListQueryProvider,
+  LoadingOverlay,
   TableColumnsProvider,
 } from '@payloadcms/ui'
-import { formatAdminURL, getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
-import { createClientCollectionConfig } from '@payloadcms/ui/utilities/createClientConfig'
+import { formatAdminURL, HydrateEntityConfig, RenderComponent } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
-import { deepCopyObjectSimple, mergeListSearchAndWhere } from 'payload'
+import { mergeListSearchAndWhere } from 'payload'
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import type { ListPreferences } from './Default/types.js'
 
-import { DefaultEditView } from '../Edit/Default/index.js'
 import { DefaultListView } from './Default/index.js'
 
 export { generateListMetadata } from './meta.js'
@@ -99,9 +98,11 @@ export const ListView: React.FC<AdminViewProps> = async ({
         where: (query?.where as Where) || undefined,
       },
     })
+
     const limit = isNumber(query?.limit)
       ? Number(query.limit)
       : listPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
+
     const sort =
       query?.sort && typeof query.sort === 'string'
         ? query.sort
@@ -123,47 +124,43 @@ export const ListView: React.FC<AdminViewProps> = async ({
       where: whereQuery || {},
     })
 
-    const createMappedComponent = getCreateMappedComponent({
-      importMap: payload.importMap,
-      serverProps: {
-        collectionConfig,
-        collectionSlug,
-        data,
-        hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
-        i18n,
-        limit,
-        listPreferences,
-        listSearchableFields: collectionConfig.admin.listSearchableFields,
-        locale: fullLocale,
-        newDocumentURL: formatAdminURL({
-          adminRoute,
-          path: `/collections/${collectionSlug}/create`,
-        }),
-        params,
-        payload,
-        permissions,
-        searchParams,
-        user,
-      },
-    })
-
-    const ListComponent = createMappedComponent(
-      collectionConfig?.admin?.components?.views?.list?.Component,
-      undefined,
-      DefaultListView,
-      'collectionConfig?.admin?.components?.views?.list?.Component',
-    )
-
-    console.log('ListComponent', collectionSlug)
+    // const createMappedComponent = getCreateMappedComponent({
+    //   importMap: payload.importMap,
+    //   serverProps: {
+    //     collectionConfig,
+    //     collectionSlug,
+    //     data,
+    //     hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
+    //     i18n,
+    //     limit,
+    //     listPreferences,
+    //     listSearchableFields: collectionConfig.admin.listSearchableFields,
+    //     locale: fullLocale,
+    //     newDocumentURL: formatAdminURL({
+    //       adminRoute,
+    //       path: `/collections/${collectionSlug}/create`,
+    //     }),
+    //     params,
+    //     payload,
+    //     permissions,
+    //     searchParams,
+    //     user,
+    //   },
+    // })
 
     const clientCollectionConfig = collectionSlug
-      ? (payloadServerAction('render-config', {
+      ? ((await payloadServerAction('render-config', {
           collectionSlug,
-        }) as unknown as ClientCollectionConfig)
+          data,
+          i18n,
+        })) as unknown as ClientCollectionConfig)
       : null
+
+    const CustomListView = clientCollectionConfig?.admin?.components?.views?.list?.Component
 
     return (
       <Fragment>
+        <HydrateEntityConfig collectionConfig={clientCollectionConfig} />
         <HydrateAuthProvider permissions={permissions} />
         <ListInfoProvider
           collectionConfig={clientCollectionConfig}
@@ -181,21 +178,34 @@ export const ListView: React.FC<AdminViewProps> = async ({
             modifySearchParams
             preferenceKey={preferenceKey}
           >
-            {/* <TableColumnsProvider
+            <TableColumnsProvider
               collectionSlug={collectionSlug}
               enableRowSelections
               listPreferences={listPreferences}
               preferenceKey={preferenceKey}
             >
-              <RenderComponent
-                clientProps={{
-                  collectionSlug,
-                  listSearchableFields: collectionConfig?.admin?.listSearchableFields,
-                  clientCollectionConfig
-                }}
-                mappedComponent={ListComponent}
-              />
-            </TableColumnsProvider> */}
+              {!clientCollectionConfig ? (
+                <LoadingOverlay />
+              ) : (
+                <Fragment>
+                  {CustomListView ? (
+                    <RenderComponent
+                      clientProps={{
+                        clientCollectionConfig,
+                        collectionSlug,
+                        listSearchableFields: collectionConfig?.admin?.listSearchableFields,
+                      }}
+                      mappedComponent={CustomListView}
+                    />
+                  ) : (
+                    <DefaultListView
+                      collectionConfig={clientCollectionConfig}
+                      payloadServerAction={payloadServerAction}
+                    />
+                  )}
+                </Fragment>
+              )}
+            </TableColumnsProvider>
           </ListQueryProvider>
         </ListInfoProvider>
       </Fragment>

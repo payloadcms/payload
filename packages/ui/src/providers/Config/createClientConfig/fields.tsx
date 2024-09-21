@@ -42,7 +42,7 @@ function generateFieldPath(parentPath: string, name: string): string {
 }
 
 export const createClientField = ({
-  clientField,
+  clientField = {} as ClientField,
   createMappedComponent,
   field: incomingField,
   i18n,
@@ -181,7 +181,7 @@ export const createClientField = ({
               components: {},
               custom: block.admin?.custom,
             },
-            fields: field.blocks[i].fields,
+            fields: field.blocks?.[i]?.fields || [],
             imageAltText: block.imageAltText,
             imageURL: block.imageURL,
           }
@@ -220,6 +220,10 @@ export const createClientField = ({
             parentPath: `${field._schemaPath}.${block.slug}`,
             payload,
           })
+
+          if (!field.blocks) {
+            field.blocks = []
+          }
 
           field.blocks[i] = clientBlock
         }
@@ -333,6 +337,10 @@ export const createClientField = ({
           const option = incomingField.options[i]
 
           if (typeof option === 'object' && typeof option.label === 'function') {
+            if (!field.options) {
+              field.options = []
+            }
+
             field.options[i] = {
               label: option.label({ t: i18n.t }),
               value: option.value,

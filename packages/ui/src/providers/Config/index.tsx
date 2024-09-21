@@ -1,76 +1,96 @@
 'use client'
 import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig } from 'payload'
 
-import React, { createContext, useCallback, useContext, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 export type ClientConfigContext = {
   config: ClientConfig
-  getEntityConfig: (args: {
-    collectionSlug?: string
-    globalSlug?: string
-  }) => ClientConfig['collections'][number] | ClientConfig['globals'][number]
+}
+
+export type EntityConfigContext = {
+  collectionConfig?: ClientCollectionConfig
+  globalConfig?: ClientGlobalConfig
   setEntityConfig: (args: {
-    collectionSlug?: string
-    config: ClientCollectionConfig | ClientGlobalConfig
-    globalSlug?: string
+    collectionConfig: ClientCollectionConfig | null
+    globalConfig: ClientGlobalConfig | null
   }) => void
 }
 
-const Context = createContext<ClientConfigContext | undefined>(undefined)
+const RootConfigContext = createContext<ClientConfigContext | undefined>(undefined)
+
+const EntityConfigContext = createContext<EntityConfigContext | undefined>(undefined)
 
 export const ConfigProvider: React.FC<{
   readonly children: React.ReactNode
+  readonly collectionConfig?: ClientCollectionConfig
   readonly config: ClientConfig
-}> = ({ children, config: configFromProps }) => {
+  readonly globalConfig?: ClientGlobalConfig
+}> = ({
+  children,
+  collectionConfig: collectionConfigFromProps,
+  config: configFromProps,
+  globalConfig: globalConfigFromProps,
+}) => {
   const [config, setConfig] = useState<ClientConfig>(configFromProps)
 
-  const getEntityConfig = useCallback(
-    ({ collectionSlug, globalSlug }: { collectionSlug?: string; globalSlug?: string }) => {
-      if (collectionSlug) {
-        return config.collections.find((collection) => collection.slug === collectionSlug)
-      }
-
-      if (globalSlug) {
-        return config.globals.find((global) => global.slug === globalSlug)
-      }
-
-      return null
-    },
-    [config],
+  const [collectionConfig, setCollectionConfig] = useState<ClientCollectionConfig | undefined>(
+    collectionConfigFromProps,
   )
 
-  const setEntityConfig = useCallback<ClientConfigContext['setEntityConfig']>(
-    ({ collectionSlug, globalSlug, ...args }) => {
-      const newConfig = { ...config }
+  const [globalConfig, setGlobalConfig] = useState<ClientGlobalConfig | undefined>(
+    globalConfigFromProps,
+  )
 
-      if (collectionSlug) {
-        const index = config.collections.findIndex(
-          (collection) => collection.slug === collectionSlug,
-        )
-        if (index === -1) {
-          newConfig.collections.push(args.config as ClientCollectionConfig)
-        } else {
-          newConfig.collections[index] = args.config as ClientCollectionConfig
-        }
-      } else if (globalSlug) {
-        const index = config.globals.findIndex((global) => global.slug === globalSlug)
-        if (index === -1) {
-          newConfig.globals.push(args.config as ClientGlobalConfig)
-        } else {
-          newConfig.globals[index] = args.config as ClientGlobalConfig
-        }
+  const setEntityConfigHandler = useCallback(
+    (args: {
+      collectionConfig: ClientCollectionConfig | null
+      globalConfig: ClientGlobalConfig | null
+    }) => {
+      const { collectionConfig, globalConfig } = args
+
+      if (collectionConfig) {
+        setCollectionConfig(collectionConfig)
       }
 
-      setConfig(newConfig)
+      if (globalConfig) {
+        setGlobalConfig(globalConfig)
+      }
     },
-    [config, setConfig],
+    [setCollectionConfig, setGlobalConfig],
   )
 
   return (
-    <Context.Provider value={{ config, getEntityConfig, setEntityConfig }}>
-      {children}
-    </Context.Provider>
+    <RootConfigContext.Provider value={{ config }}>
+      <EntityConfigContext.Provider
+        value={{ collectionConfig, globalConfig, setEntityConfig: setEntityConfigHandler }}
+      >
+        {children}
+      </EntityConfigContext.Provider>
+    </RootConfigContext.Provider>
   )
 }
 
-export const useConfig = (): ClientConfigContext => useContext(Context)
+export const useConfig = (): ClientConfigContext => useContext(RootConfigContext)
+
+export const useEntityConfig = (): EntityConfigContext => {
+  const context = useContext(EntityConfigContext)
+
+  if (!context) {
+    throw new Error('useEntityConfig must be used within an EntityConfigProvider')
+  }
+
+  return context
+}
+
+export const HydrateEntityConfig: React.FC<{
+  readonly collectionConfig?: ClientCollectionConfig
+  readonly globalConfig?: ClientGlobalConfig
+}> = ({ collectionConfig, globalConfig }) => {
+  const { setEntityConfig } = useEntityConfig()
+
+  useEffect(() => {
+    setEntityConfig({ collectionConfig, globalConfig })
+  }, [collectionConfig, globalConfig, setEntityConfig])
+
+  return null
+}

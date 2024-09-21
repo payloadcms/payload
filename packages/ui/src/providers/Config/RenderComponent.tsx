@@ -43,6 +43,7 @@ export const RenderComponent: React.FC<{
       />
     )
   }
+
   if (!mappedComponent) {
     return null
   }

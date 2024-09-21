@@ -1,7 +1,10 @@
+import type { I18nClient } from 'packages/translations/src/types.js'
 import type React from 'react'
 
-import type { PayloadComponent } from '../config/types.js'
+import type { ImportMap } from '../bin/generateImportMap/index.js'
+import type { PayloadComponent, SanitizedConfig } from '../config/types.js'
 import type { JsonObject } from '../types/index.js'
+import type { Data } from './types.js'
 
 export type { CellComponentProps, DefaultCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
@@ -399,6 +402,40 @@ export type CreateMappedComponent = {
   ): MappedComponent<T>[]
 }
 
-export type Action = 'render-config'
+export enum Action {
+  RenderConfig = 'render-config',
+}
 
-export type PayloadServerAction = (action: Action) => Promise<string>
+export type RenderEntityConfigArgs = {
+  collectionSlug?: string
+  data?: Data
+  globalSlug?: string
+}
+
+export type RenderRootConfigArgs = {}
+
+export type RenderFieldConfigArgs = {
+  collectionSlug?: string
+  data?: Data
+  globalSlug?: string
+  schemaPath: string
+}
+
+export type RenderConfigArgs = {
+  config: Promise<SanitizedConfig> | SanitizedConfig
+  i18n: I18nClient
+  importMap: ImportMap
+  serverProps?: any
+} & (RenderEntityConfigArgs | RenderFieldConfigArgs | RenderRootConfigArgs)
+
+export type PayloadServerAction = (
+  args:
+    | {
+        action: Action
+        args: any
+      }
+    | {
+        action: Action.RenderConfig
+        args: RenderConfigArgs
+      },
+) => Promise<string>
