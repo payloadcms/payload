@@ -29,11 +29,15 @@ export type Group = {
   label: string
 }
 
+export type GroupedEntity = {
+  label: string
+}
+
 export function groupNavItems(
   entities: EntityToGroup[],
   permissions: Permissions,
   i18n: I18nClient,
-): Group[] {
+): GroupedEntity[] {
   const result = entities.reduce(
     (groups, entityToGroup) => {
       if (
@@ -41,11 +45,14 @@ export function groupNavItems(
           .permission
       ) {
         const translatedGroup = getTranslation(entityToGroup.entity.admin.group, i18n)
+
         if (entityToGroup.entity.admin.group) {
           const existingGroup = groups.find(
             (group) => getTranslation(group.label, i18n) === translatedGroup,
           ) as Group
+
           let matchedGroup: Group = existingGroup
+
           if (!existingGroup) {
             matchedGroup = { entities: [], label: translatedGroup }
             groups.push(matchedGroup)

@@ -346,6 +346,7 @@ export type {
   AdminViewComponent,
   AdminViewConfig,
   AdminViewProps,
+  ClientSideEditViewProps,
   EditViewProps,
   InitPageResult,
   ServerSideEditViewProps,
@@ -397,3 +398,7 @@ export type CreateMappedComponent = {
     identifier: string,
   ): MappedComponent<T>[]
 }
+
+export type Action = 'render-config'
+
+export type PayloadServerAction = (action: Action) => Promise<string>

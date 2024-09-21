@@ -23,6 +23,7 @@ export { generateListMetadata } from './meta.js'
 export const ListView: React.FC<AdminViewProps> = async ({
   initPageResult,
   params,
+  payloadServerAction,
   searchParams,
 }) => {
   const {
@@ -153,19 +154,13 @@ export const ListView: React.FC<AdminViewProps> = async ({
       'collectionConfig?.admin?.components?.views?.list?.Component',
     )
 
-    let clientCollectionConfig = deepCopyObjectSimple(
-      collectionConfig,
-    ) as unknown as ClientCollectionConfig
-    clientCollectionConfig = createClientCollectionConfig({
-      clientCollection: clientCollectionConfig,
-      collection: collectionConfig,
-      createMappedComponent,
-      DefaultEditView,
-      DefaultListView,
-      i18n,
-      importMap: payload.importMap,
-      payload,
-    })
+    console.log('ListComponent', collectionSlug)
+
+    const clientCollectionConfig = collectionSlug
+      ? (payloadServerAction('render-config', {
+          collectionSlug,
+        }) as unknown as ClientCollectionConfig)
+      : null
 
     return (
       <Fragment>
@@ -186,7 +181,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
             modifySearchParams
             preferenceKey={preferenceKey}
           >
-            <TableColumnsProvider
+            {/* <TableColumnsProvider
               collectionSlug={collectionSlug}
               enableRowSelections
               listPreferences={listPreferences}
@@ -196,10 +191,11 @@ export const ListView: React.FC<AdminViewProps> = async ({
                 clientProps={{
                   collectionSlug,
                   listSearchableFields: collectionConfig?.admin?.listSearchableFields,
+                  clientCollectionConfig
                 }}
                 mappedComponent={ListComponent}
               />
-            </TableColumnsProvider>
+            </TableColumnsProvider> */}
           </ListQueryProvider>
         </ListInfoProvider>
       </Fragment>

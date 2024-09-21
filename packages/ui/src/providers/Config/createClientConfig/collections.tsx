@@ -48,8 +48,8 @@ export const createClientCollectionConfig = ({
   clientCollection,
   collection,
   createMappedComponent,
-  DefaultEditView,
-  DefaultListView,
+  // DefaultEditView,
+  // DefaultListView,
   i18n,
   importMap,
   payload,
@@ -57,14 +57,14 @@ export const createClientCollectionConfig = ({
   clientCollection: ClientCollectionConfig
   collection: SanitizedCollectionConfig
   createMappedComponent: CreateMappedComponent
-  DefaultEditView: React.FC<EditViewProps>
-  DefaultListView: React.FC<AdminViewProps>
+  // DefaultEditView: React.FC<EditViewProps>
+  // DefaultListView: React.FC<AdminViewProps>
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
 }): ClientCollectionConfig => {
   clientCollection.fields = createClientFields({
-    clientFields: clientCollection.fields,
+    clientFields: clientCollection?.fields || [],
     createMappedComponent,
     fields: collection.fields,
     i18n,
@@ -268,22 +268,22 @@ export const createClientCollectionConfig = ({
       {} as ClientCollectionConfig['admin']['components']['views']['edit']
   }
 
-  clientCollection.admin.components.views.edit.default = {
-    Component: createMappedComponent(
-      hasEditView &&
-        'Component' in collection.admin.components.views.edit.default &&
-        collection.admin.components.views.edit.default.Component
-        ? collection.admin.components.views.edit.default.Component
-        : null,
-      {
-        clientProps: {
-          collectionSlug: collection.slug,
-        },
-      },
-      DefaultEditView,
-      'collection.admin.components.views.edit.default',
-    ),
-  }
+  // clientCollection.admin.components.views.edit.default = {
+  //   Component: createMappedComponent(
+  //     hasEditView &&
+  //       'Component' in collection.admin.components.views.edit.default &&
+  //       collection.admin.components.views.edit.default.Component
+  //       ? collection.admin.components.views.edit.default.Component
+  //       : null,
+  //     {
+  //       clientProps: {
+  //         collectionSlug: collection.slug,
+  //       },
+  //     },
+  //     DefaultEditView,
+  //     'collection.admin.components.views.edit.default',
+  //   ),
+  // }
 
   if (collection?.admin?.components?.views?.edit) {
     for (const key in collection.admin.components.views.edit) {
@@ -330,20 +330,20 @@ export const createClientCollectionConfig = ({
       {} as ClientCollectionConfig['admin']['components']['views']['list']
   }
 
-  clientCollection.admin.components.views.list.Component = createMappedComponent(
-    hasListView &&
-      'Component' in collection.admin.components.views.list &&
-      collection.admin.components.views.list.Component
-      ? collection.admin.components.views.list.Component
-      : null,
-    {
-      clientProps: {
-        collectionSlug: collection.slug,
-      },
-    },
-    DefaultListView,
-    'collection.admin.components.views.list',
-  )
+  // clientCollection.admin.components.views.list.Component = createMappedComponent(
+  //   hasListView &&
+  //     'Component' in collection.admin.components.views.list &&
+  //     collection.admin.components.views.list.Component
+  //     ? collection.admin.components.views.list.Component
+  //     : null,
+  //   {
+  //     clientProps: {
+  //       collectionSlug: collection.slug,
+  //     },
+  //   },
+  //   DefaultListView,
+  //   'collection.admin.components.views.list',
+  // )
 
   if (
     hasListView &&
@@ -385,8 +385,8 @@ export const createClientCollectionConfigs = ({
   clientCollections: ClientCollectionConfig[]
   collections: SanitizedCollectionConfig[]
   createMappedComponent: CreateMappedComponent
-  DefaultEditView: React.FC<EditViewProps>
-  DefaultListView: React.FC<AdminViewProps>
+  // DefaultEditView: React.FC<EditViewProps>
+  // DefaultListView: React.FC<AdminViewProps>
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
@@ -398,8 +398,8 @@ export const createClientCollectionConfigs = ({
       clientCollection,
       collection,
       createMappedComponent,
-      DefaultEditView,
-      DefaultListView,
+      // DefaultEditView,
+      // DefaultListView,
       i18n,
       importMap,
       payload,

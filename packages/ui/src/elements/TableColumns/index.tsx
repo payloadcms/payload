@@ -55,12 +55,9 @@ export const TableColumnsProvider: React.FC<Props> = ({
     config: { collections },
   } = useConfig()
 
-  const collectionConfig = collections.find((c) => c.slug === collectionSlug)
+  const collectionConfig = collections.find((c) => c.slug === collectionSlug) || {}
 
-  const {
-    admin: { defaultColumns, useAsTitle },
-    fields,
-  } = collectionConfig
+  const { admin: { defaultColumns, useAsTitle } = {}, fields } = collectionConfig
 
   const prevCollection = React.useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
   const { getPreference, setPreference } = usePreferences()

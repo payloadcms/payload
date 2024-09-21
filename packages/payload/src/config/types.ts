@@ -384,16 +384,19 @@ export type EditViewConfig = {
     }
 )
 
+type ClientProps = {
+  readonly [key: string]: unknown
+}
+
 export type ServerProps = {
   readonly i18n: I18nClient
   readonly locale?: Locale
   readonly params?: { [key: string]: string | string[] | undefined }
   readonly payload: Payload
   readonly permissions?: Permissions
-  readonly [key: string]: unknown
   readonly searchParams?: { [key: string]: string | string[] | undefined }
   readonly user?: TypedUser
-}
+} & ClientProps
 
 export const serverProps: (keyof ServerProps)[] = [
   'payload',

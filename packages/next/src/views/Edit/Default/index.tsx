@@ -1,6 +1,11 @@
 'use client'
 
-import type { ClientCollectionConfig, ClientGlobalConfig, ClientUser } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ClientGlobalConfig,
+  ClientSideEditViewProps,
+  ClientUser,
+} from 'payload'
 
 import {
   DocumentControls,
@@ -34,7 +39,11 @@ const baseClass = 'collection-edit'
 // This component receives props only on _pages_
 // When rendered within a drawer, props are empty
 // This is solely to support custom edit views which get server-rendered
-export const DefaultEditView: React.FC = () => {
+export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
+  clientCollectionConfig,
+  clientGlobalConfig,
+  payloadServerAction,
+}) => {
   const {
     id,
     action,
@@ -71,7 +80,6 @@ export const DefaultEditView: React.FC = () => {
     updateDocumentEditor,
   } = useDocumentInfo()
 
-  const { refreshCookieAsync, user } = useAuth()
   const {
     config,
     config: {
@@ -79,20 +87,46 @@ export const DefaultEditView: React.FC = () => {
       routes: { admin: adminRoute, api: apiRoute },
       serverURL,
     },
-    getEntityConfig,
+    setEntityConfig: syncEntityConfigToContext,
   } = useConfig()
 
-  const router = useRouter()
+  const [entityConfig, setEntityConfig] = useState<ClientCollectionConfig | ClientGlobalConfig>(
+    clientCollectionConfig || clientGlobalConfig,
+  )
+
   const depth = useEditDepth()
+
+  useEffect(() => {
+    if (!entityConfig) {
+      const getNewConfig = async () => {
+        const res = await payloadServerAction('render-config', {
+          collectionSlug,
+          globalSlug,
+        })
+
+        console.log('res', res)
+
+        setEntityConfig(res)
+
+        syncEntityConfigToContext({
+          collectionSlug,
+          config: res,
+          globalSlug,
+        })
+      }
+
+      getNewConfig()
+    }
+  }, [payloadServerAction, entityConfig])
+
+  const { refreshCookieAsync, user } = useAuth()
+
+  const router = useRouter()
   const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
   const { resetUploadEdits } = useUploadEdits()
 
   const locale = params.get('locale')
-
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
-
-  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
 
   const entitySlug = collectionConfig?.slug || globalConfig?.slug
 

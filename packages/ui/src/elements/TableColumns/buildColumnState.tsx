@@ -41,7 +41,7 @@ export const buildColumnState = (args: Args): Column[] => {
   // place the `ID` field first, if it exists
   // do the same for the `useAsTitle` field with precedence over the `ID` field
   // then sort the rest of the fields based on the `defaultColumns` or `columnPreferences`
-  const idFieldIndex = sortedFieldMap.findIndex((field) => 'name' in field && field.name === 'id')
+  const idFieldIndex = sortedFieldMap?.findIndex((field) => 'name' in field && field.name === 'id')
 
   if (idFieldIndex > -1) {
     const idField = sortedFieldMap.splice(idFieldIndex, 1)[0]
@@ -61,7 +61,7 @@ export const buildColumnState = (args: Args): Column[] => {
 
   if (sortTo) {
     // sort the fields to the order of `defaultColumns` or `columnPreferences`
-    sortedFieldMap = sortedFieldMap.sort((a, b) => {
+    sortedFieldMap = sortedFieldMap?.sort((a, b) => {
       const aIndex = sortTo.findIndex((column) => 'name' in a && column.accessor === a.name)
       const bIndex = sortTo.findIndex((column) => 'name' in b && column.accessor === b.name)
       if (aIndex === -1 && bIndex === -1) {
@@ -79,7 +79,7 @@ export const buildColumnState = (args: Args): Column[] => {
 
   const activeColumnsIndices = []
 
-  const sorted: Column[] = sortedFieldMap.reduce((acc, field, index) => {
+  const sorted: Column[] = sortedFieldMap?.reduce((acc, field, index) => {
     const columnPreference = columnPreferences?.find(
       (preference) => 'name' in field && preference.accessor === field.name,
     )
@@ -155,7 +155,7 @@ export const buildColumnState = (args: Args): Column[] => {
   }, [])
 
   if (enableRowSelections) {
-    sorted.unshift({
+    sorted?.unshift({
       accessor: '_select',
       active: true,
       cellProps: {

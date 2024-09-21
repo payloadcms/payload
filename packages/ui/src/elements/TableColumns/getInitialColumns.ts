@@ -6,7 +6,7 @@ import { fieldAffectsData } from 'payload/shared'
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
 
 const getRemainingColumns = (fields: ClientField[], useAsTitle: string): ColumnPreferences =>
-  fields.reduce((remaining, field) => {
+  fields?.reduce((remaining, field) => {
     if (fieldAffectsData(field) && field.name === useAsTitle) {
       return remaining
     }

@@ -53,7 +53,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
 
   const MappedDefaultNav: MappedComponent = createMappedComponent(
     CustomNav,
-    undefined,
+    { clientProps: { visibleEntities } },
     DefaultNav,
     'CustomNav',
   )

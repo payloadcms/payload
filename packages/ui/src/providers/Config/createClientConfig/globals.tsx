@@ -20,7 +20,6 @@ import { createClientFields } from './fields.js'
 export const createClientGlobalConfig = ({
   clientGlobal,
   createMappedComponent,
-  DefaultEditView,
   global,
   i18n,
   importMap,
@@ -28,14 +27,13 @@ export const createClientGlobalConfig = ({
 }: {
   clientGlobal: ClientGlobalConfig
   createMappedComponent: CreateMappedComponent
-  DefaultEditView: React.FC<EditViewProps>
   global: SanitizedConfig['globals'][0]
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
 }): ClientGlobalConfig => {
   clientGlobal.fields = createClientFields({
-    clientFields: clientGlobal.fields,
+    clientFields: clientGlobal?.fields || [],
     createMappedComponent,
     fields: global.fields,
     i18n,
@@ -134,22 +132,22 @@ export const createClientGlobalConfig = ({
         {} as ClientGlobalConfig['admin']['components']['views']['edit']
     }
 
-    clientGlobal.admin.components.views.edit.default = {
-      Component: createMappedComponent(
-        hasEditView &&
-          'Component' in global.admin.components.views.edit.default &&
-          global.admin.components.views.edit.default.Component
-          ? global.admin.components.views.edit.default.Component
-          : null,
-        {
-          clientProps: {
-            globalSlug: global.slug,
-          },
-        },
-        DefaultEditView,
-        'global.admin.components.views.edit.default',
-      ),
-    }
+    // clientGlobal.admin.components.views.edit.default = {
+    //   Component: createMappedComponent(
+    //     hasEditView &&
+    //       'Component' in global.admin.components.views.edit.default &&
+    //       global.admin.components.views.edit.default.Component
+    //       ? global.admin.components.views.edit.default.Component
+    //       : null,
+    //     {
+    //       clientProps: {
+    //         globalSlug: global.slug,
+    //       },
+    //     },
+    //     DefaultEditView,
+    //     'global.admin.components.views.edit.default',
+    //   ),
+    // }
 
     if (global?.admin?.components?.views?.edit) {
       for (const key in global.admin.components.views.edit) {
@@ -199,7 +197,6 @@ export const createClientGlobalConfig = ({
 export const createClientGlobalConfigs = ({
   clientGlobals,
   createMappedComponent,
-  DefaultEditView,
   globals,
   i18n,
   importMap,
@@ -207,7 +204,6 @@ export const createClientGlobalConfigs = ({
 }: {
   clientGlobals: ClientGlobalConfig[]
   createMappedComponent: CreateMappedComponent
-  DefaultEditView: React.FC<EditViewProps>
   globals: SanitizedConfig['globals']
   i18n: I18nClient
   importMap: ImportMap
@@ -219,7 +215,6 @@ export const createClientGlobalConfigs = ({
     clientGlobals[i] = createClientGlobalConfig({
       clientGlobal,
       createMappedComponent,
-      DefaultEditView,
       global,
       i18n,
       importMap,

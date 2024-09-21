@@ -9,7 +9,7 @@ export const filterFields = (incomingFields: ClientField[]): ClientField[] => {
     (field.type !== 'ui' && field.admin?.disabled === true) ||
     field?.admin?.disableListColumn === true
 
-  const fields: ClientField[] = incomingFields.reduce((formatted, field) => {
+  const fields: ClientField[] = incomingFields?.reduce((formatted, field) => {
     if (shouldSkipField(field)) {
       return formatted
     }

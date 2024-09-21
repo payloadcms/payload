@@ -1,6 +1,6 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { ImportMap, MappedComponent, SanitizedConfig } from 'payload'
+import type { ImportMap, MappedComponent, PayloadServerAction, SanitizedConfig } from 'payload'
 
 import { formatAdminURL, getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
@@ -24,6 +24,7 @@ export const RootPage = async ({
   config: configPromise,
   importMap,
   params,
+  payloadServerAction,
   searchParams,
 }: {
   readonly config: Promise<SanitizedConfig>
@@ -31,6 +32,7 @@ export const RootPage = async ({
   readonly params: {
     segments: string[]
   }
+  payloadServerAction: PayloadServerAction
   readonly searchParams: {
     [key: string]: string | string[]
   }
@@ -103,13 +105,16 @@ export const RootPage = async ({
       initPageResult,
       params,
       payload: initPageResult?.req.payload,
+      payloadServerAction,
       searchParams,
     },
   })
 
   const MappedView: MappedComponent = createMappedView(
     DefaultView.payloadComponent,
-    undefined,
+    {
+      clientProps: { payloadServerAction },
+    },
     DefaultView.Component,
     'createMappedView',
   )

@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, PayloadServerAction } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -43,8 +43,14 @@ import './index.scss'
 const baseClass = 'collection-list'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-export const DefaultListView: React.FC = () => {
+export const DefaultListView: React.FC<{
+  clientCollectionConfig: ClientCollectionConfig
+  payloadServerAction: PayloadServerAction
+}> = (props) => {
+  const { clientCollectionConfig, payloadServerAction } = props
+
   const { user } = useAuth()
+
   const {
     beforeActions,
     collectionSlug,
@@ -62,10 +68,6 @@ export const DefaultListView: React.FC = () => {
   const { setCollectionSlug, setOnSuccess } = useBulkUpload()
   const { drawerSlug } = useBulkUpload()
 
-  const { getEntityConfig } = useConfig()
-
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
-
   const {
     admin: {
       components: {
@@ -82,7 +84,7 @@ export const DefaultListView: React.FC = () => {
     },
     fields,
     labels,
-  } = collectionConfig
+  } = clientCollectionConfig
 
   const { i18n, t } = useTranslation()
 
@@ -96,7 +98,7 @@ export const DefaultListView: React.FC = () => {
 
   let docs = data.docs || []
 
-  const isUploadCollection = Boolean(collectionConfig.upload)
+  const isUploadCollection = Boolean(clientCollectionConfig.upload)
 
   if (isUploadCollection) {
     docs = docs?.map((doc) => {
@@ -123,7 +125,7 @@ export const DefaultListView: React.FC = () => {
     }
   }, [setStepNav, labels, drawerDepth])
 
-  const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
+  const isBulkUploadEnabled = isUploadCollection && clientCollectionConfig.upload.bulkUpload
 
   return (
     <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
@@ -161,7 +163,7 @@ export const DefaultListView: React.FC = () => {
                 </>
               )}
               {!smallBreak && (
-                <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
+                <ListSelection label={getTranslation(clientCollectionConfig.labels.plural, i18n)} />
               )}
               {(description || Description) && (
                 <div className={`${baseClass}__sub-header`}>
@@ -170,7 +172,7 @@ export const DefaultListView: React.FC = () => {
               )}
             </ListHeader>
           )}
-          <ListControls collectionConfig={collectionConfig} fields={fields} />
+          <ListControls collectionConfig={clientCollectionConfig} fields={fields} />
           <RenderComponent mappedComponent={beforeListTable} />
           {!data.docs && (
             <StaggeredShimmers
@@ -183,7 +185,7 @@ export const DefaultListView: React.FC = () => {
               <Table
                 customCellContext={{
                   collectionSlug,
-                  uploadConfig: collectionConfig.upload,
+                  uploadConfig: clientCollectionConfig.upload,
                 }}
                 data={docs}
                 fields={fields}
@@ -228,22 +230,24 @@ export const DefaultListView: React.FC = () => {
                   <PerPage
                     handleChange={(limit) => void handlePerPageChange(limit)}
                     limit={isNumber(params?.limit) ? Number(params.limit) : defaultLimit}
-                    limits={collectionConfig?.admin?.pagination?.limits}
+                    limits={clientCollectionConfig?.admin?.pagination?.limits}
                     resetPage={data.totalDocs <= data.pagingCounter}
                   />
                   {smallBreak && (
                     <div className={`${baseClass}__list-selection`}>
-                      <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
+                      <ListSelection
+                        label={getTranslation(clientCollectionConfig.labels.plural, i18n)}
+                      />
                       <div className={`${baseClass}__list-selection-actions`}>
                         {beforeActions && beforeActions}
                         {!disableBulkEdit && (
                           <Fragment>
-                            <EditMany collection={collectionConfig} fields={fields} />
-                            <PublishMany collection={collectionConfig} />
-                            <UnpublishMany collection={collectionConfig} />
+                            <EditMany collection={clientCollectionConfig} fields={fields} />
+                            <PublishMany collection={clientCollectionConfig} />
+                            <UnpublishMany collection={clientCollectionConfig} />
                           </Fragment>
                         )}
-                        {!disableBulkDelete && <DeleteMany collection={collectionConfig} />}
+                        {!disableBulkDelete && <DeleteMany collection={clientCollectionConfig} />}
                       </div>
                     </div>
                   )}

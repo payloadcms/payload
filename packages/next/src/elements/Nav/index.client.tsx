@@ -1,65 +1,29 @@
 'use client'
 
-import type { EntityToGroup } from '@payloadcms/ui/shared'
+import type { groupNavItems } from '@payloadcms/ui/shared'
 
 import { getTranslation } from '@payloadcms/translations'
-import {
-  NavGroup,
-  useAuth,
-  useConfig,
-  useEntityVisibility,
-  useNav,
-  useTranslation,
-} from '@payloadcms/ui'
-import { EntityType, formatAdminURL, groupNavItems } from '@payloadcms/ui/shared'
+import { NavGroup, useConfig, useNav, useTranslation } from '@payloadcms/ui'
+import { EntityType, formatAdminURL } from '@payloadcms/ui/shared'
 import LinkWithDefault from 'next/link.js'
 import { usePathname } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 const baseClass = 'nav'
 
-export const DefaultNavClient: React.FC = () => {
-  const { permissions } = useAuth()
-  const { isEntityVisible } = useEntityVisibility()
+export const DefaultNavClient: React.FC<{
+  groups: ReturnType<typeof groupNavItems>
+}> = ({ groups }) => {
   const pathname = usePathname()
 
   const {
     config: {
-      collections,
-      globals,
       routes: { admin: adminRoute },
     },
   } = useConfig()
 
   const { i18n } = useTranslation()
   const { navOpen } = useNav()
-
-  const groups = groupNavItems(
-    [
-      ...collections
-        .filter(({ slug }) => isEntityVisible({ collectionSlug: slug }))
-        .map((collection) => {
-          const entityToGroup: EntityToGroup = {
-            type: EntityType.collection,
-            entity: collection,
-          }
-
-          return entityToGroup
-        }),
-      ...globals
-        .filter(({ slug }) => isEntityVisible({ globalSlug: slug }))
-        .map((global) => {
-          const entityToGroup: EntityToGroup = {
-            type: EntityType.global,
-            entity: global,
-          }
-
-          return entityToGroup
-        }),
-    ],
-    permissions,
-    i18n,
-  )
 
   return (
     <Fragment>

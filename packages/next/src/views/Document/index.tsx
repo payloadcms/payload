@@ -30,6 +30,7 @@ export const Document: React.FC<AdminViewProps> = async ({
   importMap,
   initPageResult,
   params,
+  payloadServerAction,
   searchParams,
 }) => {
   const {
@@ -95,12 +96,15 @@ export const Document: React.FC<AdminViewProps> = async ({
       locale,
       params,
       payload,
+      payloadServerAction,
       permissions,
       routeSegments: segments,
       searchParams,
       user,
     },
   })
+
+  const clientProps = { payloadServerAction }
 
   if (collectionConfig) {
     if (!visibleEntities?.collections?.find((visibleSlug) => visibleSlug === collectionSlug)) {
@@ -124,7 +128,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       'Component' in collectionConfig.admin.components.views.edit.root
         ? createMappedComponent(
             collectionConfig?.admin?.components?.views?.edit?.root?.Component as EditViewComponent, // some type info gets lost from Config => SanitizedConfig due to our usage of Deep type operations from ts-essentials. Despite .Component being defined as EditViewComponent, this info is lost and we need cast it here.
-            undefined,
+            { clientProps },
             undefined,
             'collectionConfig?.admin?.components?.views?.edit?.root',
           )
@@ -140,28 +144,28 @@ export const Document: React.FC<AdminViewProps> = async ({
 
       CustomView = createMappedComponent(
         collectionViews?.CustomView?.payloadComponent,
-        undefined,
+        { clientProps },
         collectionViews?.CustomView?.Component,
         'collectionViews?.CustomView.payloadComponent',
       )
 
       DefaultView = createMappedComponent(
         collectionViews?.DefaultView?.payloadComponent,
-        undefined,
+        { clientProps },
         collectionViews?.DefaultView?.Component,
         'collectionViews?.DefaultView.payloadComponent',
       )
 
       ErrorView = createMappedComponent(
         collectionViews?.ErrorView?.payloadComponent,
-        undefined,
+        { clientProps },
         collectionViews?.ErrorView?.Component,
         'collectionViews?.ErrorView.payloadComponent',
       )
     }
 
     if (!CustomView && !DefaultView && !RootViewOverride && !ErrorView) {
-      ErrorView = createMappedComponent(undefined, undefined, NotFoundView, 'NotFoundView')
+      ErrorView = createMappedComponent(undefined, { clientProps }, NotFoundView, 'NotFoundView')
     }
   }
 
@@ -191,7 +195,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       'Component' in globalConfig.admin.components.views.edit.root
         ? createMappedComponent(
             globalConfig?.admin?.components?.views?.edit?.root?.Component as EditViewComponent, // some type info gets lost from Config => SanitizedConfig due to our usage of Deep type operations from ts-essentials. Despite .Component being defined as EditViewComponent, this info is lost and we need cast it here.
-            undefined,
+            { clientProps },
             undefined,
             'globalConfig?.admin?.components?.views?.edit?.root',
           )
@@ -207,27 +211,27 @@ export const Document: React.FC<AdminViewProps> = async ({
 
       CustomView = createMappedComponent(
         globalViews?.CustomView?.payloadComponent,
-        undefined,
+        { clientProps },
         globalViews?.CustomView?.Component,
         'globalViews?.CustomView.payloadComponent',
       )
 
       DefaultView = createMappedComponent(
         globalViews?.DefaultView?.payloadComponent,
-        undefined,
+        { clientProps },
         globalViews?.DefaultView?.Component,
         'globalViews?.DefaultView.payloadComponent',
       )
 
       ErrorView = createMappedComponent(
         globalViews?.ErrorView?.payloadComponent,
-        undefined,
+        { clientProps },
         globalViews?.ErrorView?.Component,
         'globalViews?.ErrorView.payloadComponent',
       )
 
       if (!CustomView && !DefaultView && !RootViewOverride && !ErrorView) {
-        ErrorView = createMappedComponent(undefined, undefined, NotFoundView, 'NotFoundView')
+        ErrorView = createMappedComponent(undefined, { clientProps }, NotFoundView, 'NotFoundView')
       }
     }
   }

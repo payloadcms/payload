@@ -47,6 +47,8 @@ export const createClientConfig = async ({
   // We can use deepCopySimple here, as the clientConfig should be JSON serializable anyways, since it will be sent from server => client
   const clientConfig: ClientConfig = deepCopyObjectSimple(config) as unknown as ClientConfig
 
+  console.log('clientConfig', clientConfig)
+
   const createMappedComponent = getCreateMappedComponent({
     importMap,
     serverProps: {
@@ -151,8 +153,6 @@ export const createClientConfig = async ({
     clientCollections: clientConfig.collections,
     collections: config.collections,
     createMappedComponent,
-    DefaultEditView,
-    DefaultListView,
     i18n,
     importMap,
     payload,
@@ -161,7 +161,6 @@ export const createClientConfig = async ({
   clientConfig.globals = createClientGlobalConfigs({
     clientGlobals: clientConfig.globals,
     createMappedComponent,
-    DefaultEditView,
     globals: config.globals,
     i18n,
     importMap,

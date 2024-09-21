@@ -1,5 +1,5 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { CustomVersionParser, ImportMap, SanitizedConfig } from 'payload'
+import type { ClientConfig, CustomVersionParser, ImportMap, SanitizedConfig } from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui'
@@ -103,16 +103,6 @@ export const RootLayout = async ({
 
   const { i18n, permissions, req, user } = await initReq(config)
 
-  const { clientConfig, render } = await createClientConfig({
-    children,
-    config,
-    DefaultEditView,
-    DefaultListView,
-    i18n,
-    importMap,
-    payload,
-  })
-
   const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(languageCode)
     ? 'RTL'
     : 'LTR'
@@ -178,9 +168,16 @@ export const RootLayout = async ({
     <html data-theme={theme} dir={dir} lang={languageCode}>
       <body>
         <RootProvider
-          config={clientConfig}
+          config={
+            {
+              admin: { components: {}, routes: {} },
+              collections: [],
+              globals: [],
+              routes: {},
+            } as ClientConfig
+          }
           dateFNSKey={i18n.dateFNSKey}
-          fallbackLang={clientConfig.i18n.fallbackLanguage}
+          // fallbackLang={clientConfig.i18n.fallbackLanguage}
           isNavOpen={isNavOpen}
           languageCode={languageCode}
           languageOptions={languageOptions}
@@ -190,7 +187,7 @@ export const RootLayout = async ({
           translations={i18n.translations}
           user={user}
         >
-          {render}
+          {children}
         </RootProvider>
         <div id="portal" />
       </body>
