@@ -1336,6 +1336,80 @@ describe('Fields', () => {
       expect(res.camelCaseGroup.array[0].text).toBe('text')
       expect(res.camelCaseGroup.array[0].array[0].text).toBe('nested')
     })
+
+    it('should insert/update/read localized group with array inside', async () => {
+      const doc = await payload.create({
+        collection: 'group-fields',
+        locale: 'en',
+        data: {
+          group: { text: 'req' },
+          localizedGroupArr: {
+            array: [{ text: 'text-en' }],
+          },
+        },
+      })
+
+      expect(doc.localizedGroupArr.array[0].text).toBe('text-en')
+
+      const esDoc = await payload.update({
+        collection: 'group-fields',
+        locale: 'es',
+        id: doc.id,
+        data: {
+          localizedGroupArr: {
+            array: [{ text: 'text-es' }],
+          },
+        },
+      })
+
+      expect(esDoc.localizedGroupArr.array[0].text).toBe('text-es')
+
+      const allDoc = await payload.findByID({
+        collection: 'group-fields',
+        id: doc.id,
+        locale: 'all',
+      })
+
+      expect(allDoc.localizedGroupArr.en.array[0].text).toBe('text-en')
+      expect(allDoc.localizedGroupArr.es.array[0].text).toBe('text-es')
+    })
+
+    it('should insert/update/read localized group with select hasMany inside', async () => {
+      const doc = await payload.create({
+        collection: 'group-fields',
+        locale: 'en',
+        data: {
+          group: { text: 'req' },
+          localizedGroupSelect: {
+            select: ['one', 'two'],
+          },
+        },
+      })
+
+      expect(doc.localizedGroupSelect.select).toStrictEqual(['one', 'two'])
+
+      const esDoc = await payload.update({
+        collection: 'group-fields',
+        locale: 'es',
+        id: doc.id,
+        data: {
+          localizedGroupSelect: {
+            select: ['one'],
+          },
+        },
+      })
+
+      expect(esDoc.localizedGroupSelect.select).toStrictEqual(['one'])
+
+      const allDoc = await payload.findByID({
+        collection: 'group-fields',
+        id: doc.id,
+        locale: 'all',
+      })
+
+      expect(allDoc.localizedGroupSelect.en.select).toStrictEqual(['one', 'two'])
+      expect(allDoc.localizedGroupSelect.es.select).toStrictEqual(['one'])
+    })
   })
 
   describe('tabs', () => {

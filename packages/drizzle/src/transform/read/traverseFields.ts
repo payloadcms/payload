@@ -534,6 +534,12 @@ export const traverseFields = <T extends Record<string, unknown>>({
       }
 
       if (field.localized && Array.isArray(table._locales)) {
+        if (!table._locales.length && adapter.payload.config.localization) {
+          adapter.payload.config.localization.localeCodes.forEach((_locale) =>
+            (table._locales as unknown[]).push({ _locale }),
+          )
+        }
+
         table._locales.forEach((localeRow) => {
           valuesToTransform.push({
             ref: localizedFieldData,

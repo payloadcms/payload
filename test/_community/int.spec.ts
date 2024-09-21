@@ -81,5 +81,20 @@ describe('_Community Tests', () => {
     })
 
     expect(data.localizedGroupWithArray.array[0].text).toBe('asd')
+
+    await payload.update({
+      id: data.id,
+      collection: 'test',
+      locale: 'hu',
+      data: {
+        localizedGroupWithArray: {
+          array: [{ text: 'hu-text' }],
+        },
+      },
+    })
+
+    const res = await payload.findByID({ id: data.id, collection: 'test', locale: 'all' })
+
+    expect(res).toBeTruthy()
   })
 })
