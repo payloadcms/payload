@@ -14,7 +14,7 @@ export const Users: CollectionConfig = {
   slug: 'users',
   access: {
     admin: ({ req: { user } }) => {
-      if (user) checkRole(['admin'], user)
+      if (user) return checkRole(['admin'], user)
 
       return false
     },
