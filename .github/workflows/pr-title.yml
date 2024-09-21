@@ -62,6 +62,7 @@ jobs:
             storage-\*
             storage-azure
             storage-gcs
+            storage-uploadthing
             storage-vercel-blob
             storage-s3
             translations
