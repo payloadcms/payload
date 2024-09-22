@@ -791,6 +791,12 @@ export type Config = {
       /** The route for the unauthorized page. */
       unauthorized?: string
     }
+    /**
+     * Attempt to force the browser to use a particular theme
+     *
+     * @default 'all' // allow the browser to determine the theme
+     */
+    theme?: 'all' | 'dark' | 'light'
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
