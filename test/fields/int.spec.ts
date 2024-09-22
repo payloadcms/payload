@@ -1410,6 +1410,55 @@ describe('Fields', () => {
       expect(allDoc.localizedGroupSelect.en.select).toStrictEqual(['one', 'two'])
       expect(allDoc.localizedGroupSelect.es.select).toStrictEqual(['one'])
     })
+
+    it('should insert/update/read localized group with relationship inside', async () => {
+      const rel_1 = await payload.create({
+        collection: 'email-fields',
+        data: { email: 'pro123@gmail.com' },
+      })
+
+      const rel_2 = await payload.create({
+        collection: 'email-fields',
+        data: { email: 'frank@gmail.com' },
+      })
+
+      const doc = await payload.create({
+        collection: 'group-fields',
+        depth: 0,
+        data: {
+          group: { text: 'requireddd' },
+          localizedGroupRel: {
+            email: rel_1.id,
+          },
+        },
+      })
+
+      expect(doc.localizedGroupRel.email).toBe(rel_1.id)
+
+      const upd = await payload.update({
+        collection: 'group-fields',
+        depth: 0,
+        id: doc.id,
+        locale: 'es',
+        data: {
+          localizedGroupRel: {
+            email: rel_2.id,
+          },
+        },
+      })
+
+      expect(upd.localizedGroupRel.email).toBe(rel_2.id)
+
+      const docAll = await payload.findByID({
+        collection: 'group-fields',
+        id: doc.id,
+        locale: 'all',
+        depth: 0,
+      })
+
+      expect(docAll.localizedGroupRel.en.email).toBe(rel_1.id)
+      expect(docAll.localizedGroupRel.es.email).toBe(rel_2.id)
+    })
   })
 
   describe('tabs', () => {

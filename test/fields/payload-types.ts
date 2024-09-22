@@ -968,6 +968,9 @@ export interface GroupField {
   localizedGroupSelect?: {
     select?: ('one' | 'two')[] | null;
   };
+  localizedGroupRel?: {
+    email?: (string | null) | EmailField;
+  };
   updatedAt: string;
   createdAt: string;
 }
