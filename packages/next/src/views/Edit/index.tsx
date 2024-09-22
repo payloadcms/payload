@@ -5,6 +5,7 @@ import type {
   PayloadServerReactComponent,
 } from 'payload'
 
+import { EntityConfigProvider } from '@payloadcms/ui'
 import React from 'react'
 
 import { EditViewClient } from './index.client.js'
@@ -17,22 +18,24 @@ export const EditView: PayloadServerReactComponent<EditViewComponent> = async (p
   const collectionConfig = collectionSlug
     ? ((await payloadServerAction('render-config', {
         collectionSlug,
-        i18n: initPageResult.req.i18n,
+        languageCode: initPageResult.req.i18n.language,
       })) as unknown as ClientCollectionConfig)
     : null
 
   const globalConfig = globalSlug
     ? ((await payloadServerAction('render-config', {
         globalSlug,
-        i18n: initPageResult.req.i18n,
+        languageCode: initPageResult.req.i18n.language,
       })) as unknown as ClientGlobalConfig)
     : null
 
   return (
-    <EditViewClient
-      collectionConfig={collectionConfig}
-      globalConfig={globalConfig}
-      payloadServerAction={payloadServerAction}
-    />
+    <EntityConfigProvider collectionConfig={collectionConfig} globalConfig={globalConfig}>
+      <EditViewClient
+        collectionConfig={collectionConfig}
+        globalConfig={globalConfig}
+        payloadServerAction={payloadServerAction}
+      />
+    </EntityConfigProvider>
   )
 }

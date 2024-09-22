@@ -128,12 +128,19 @@ export const createClientConfig = async ({
 
   clientConfig.collections = config.collections.map((collection) => ({
     slug: collection.slug,
+    admin: {
+      enableRichTextRelationship: collection.admin.enableRichTextRelationship,
+    },
+    auth: {
+      loginWithUsername: collection.auth.loginWithUsername,
+    },
     labels: Object.entries(collection.labels).reduce((acc, [labelType, collectionLabel]) => {
       if (typeof collectionLabel === 'function') {
         acc[labelType] = collectionLabel({ t: i18n.t })
       }
       return acc
     }, {}),
+    upload: collection.upload,
   }))
 
   clientConfig.globals = config.globals.map((global) => ({

@@ -1,11 +1,6 @@
 'use client'
 
-import type {
-  ClientCollectionConfig,
-  ClientGlobalConfig,
-  ClientSideEditViewProps,
-  ClientUser,
-} from 'payload'
+import type { ClientSideEditViewProps, ClientUser } from 'payload'
 
 import {
   DocumentControls,
@@ -42,7 +37,6 @@ const baseClass = 'collection-edit'
 export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   collectionConfig,
   globalConfig,
-  payloadServerAction,
 }) => {
   const {
     id,
@@ -87,37 +81,9 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       routes: { admin: adminRoute, api: apiRoute },
       serverURL,
     },
-    setEntityConfig: syncEntityConfigToContext,
   } = useConfig()
 
-  const [entityConfig, setEntityConfig] = useState<ClientCollectionConfig | ClientGlobalConfig>(
-    collectionConfig || globalConfig,
-  )
-
   const depth = useEditDepth()
-
-  useEffect(() => {
-    if (!entityConfig) {
-      const getNewConfig = async () => {
-        const res = await payloadServerAction('render-config', {
-          collectionSlug,
-          globalSlug,
-        })
-
-        console.log('res', res)
-
-        setEntityConfig(res)
-
-        syncEntityConfigToContext({
-          collectionSlug,
-          config: res,
-          globalSlug,
-        })
-      }
-
-      void getNewConfig()
-    }
-  }, [payloadServerAction, entityConfig, collectionSlug, globalSlug, syncEntityConfigToContext])
 
   const { refreshCookieAsync, user } = useAuth()
 

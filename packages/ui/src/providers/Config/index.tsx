@@ -5,6 +5,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 
 export type ClientConfigContext = {
   config: ClientConfig
+  setConfig: (config: ClientConfig) => void
 }
 
 export type EntityConfigContext = {
@@ -22,17 +23,26 @@ const EntityConfigContext = createContext<EntityConfigContext | undefined>(undef
 
 export const ConfigProvider: React.FC<{
   readonly children: React.ReactNode
-  readonly collectionConfig?: ClientCollectionConfig
   readonly config: ClientConfig
+}> = ({ children, config: configFromProps }) => {
+  const [config, setConfig] = useState<ClientConfig>(configFromProps)
+
+  return (
+    <RootConfigContext.Provider value={{ config, setConfig }}>
+      {children}
+    </RootConfigContext.Provider>
+  )
+}
+
+export const EntityConfigProvider: React.FC<{
+  readonly children: React.ReactNode
+  readonly collectionConfig?: ClientCollectionConfig
   readonly globalConfig?: ClientGlobalConfig
 }> = ({
   children,
   collectionConfig: collectionConfigFromProps,
-  config: configFromProps,
   globalConfig: globalConfigFromProps,
 }) => {
-  const [config, setConfig] = useState<ClientConfig>(configFromProps)
-
   const [collectionConfig, setCollectionConfig] = useState<ClientCollectionConfig | undefined>(
     collectionConfigFromProps,
   )
@@ -60,13 +70,11 @@ export const ConfigProvider: React.FC<{
   )
 
   return (
-    <RootConfigContext.Provider value={{ config }}>
-      <EntityConfigContext.Provider
-        value={{ collectionConfig, globalConfig, setEntityConfig: setEntityConfigHandler }}
-      >
-        {children}
-      </EntityConfigContext.Provider>
-    </RootConfigContext.Provider>
+    <EntityConfigContext.Provider
+      value={{ collectionConfig, globalConfig, setEntityConfig: setEntityConfigHandler }}
+    >
+      {children}
+    </EntityConfigContext.Provider>
   )
 }
 
@@ -80,17 +88,4 @@ export const useEntityConfig = (): EntityConfigContext => {
   }
 
   return context
-}
-
-export const HydrateEntityConfig: React.FC<{
-  readonly collectionConfig?: ClientCollectionConfig
-  readonly globalConfig?: ClientGlobalConfig
-}> = ({ collectionConfig, globalConfig }) => {
-  const { setEntityConfig } = useEntityConfig()
-
-  useEffect(() => {
-    setEntityConfig({ collectionConfig, globalConfig })
-  }, [collectionConfig, globalConfig, setEntityConfig])
-
-  return null
 }

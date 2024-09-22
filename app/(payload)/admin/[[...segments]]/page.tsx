@@ -18,12 +18,12 @@ type Args = {
   }
 }
 
-const payloadServerAction: PayloadServerAction = async function (action, additionalArgs) {
+const payloadServerAction: PayloadServerAction = async function (action, args) {
   'use server'
   return handleServerActions(action, {
     config,
     importMap,
-    ...(additionalArgs || {}),
+    ...(args || {}),
   })
 }
 

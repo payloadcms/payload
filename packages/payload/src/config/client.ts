@@ -43,10 +43,10 @@ export type ClientConfig = {
     dependencies?: Record<string, MappedComponent>
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
-  collections: {
+  collections: ({
+    admin: Pick<ClientCollectionConfig['admin'], 'enableRichTextRelationship'>
     labels: StaticLabel
-    slug: string
-  }[]
+  } & Pick<ClientCollectionConfig, 'slug' | 'upload'>)[]
   custom?: Record<string, any>
   globals: {
     slug: string

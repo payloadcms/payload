@@ -18,6 +18,7 @@ import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { ListInfoProvider } from '../../providers/ListInfo/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
+import { useServerActions } from '../../providers/ServerActions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { LoadingOverlay } from '../Loading/index.js'
@@ -67,6 +68,8 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const [showLoadingOverlay, setShowLoadingOverlay] = useState<boolean>(true)
   const hasInitialised = useRef(false)
 
+  const payloadServerAction = useServerActions()
+
   const params = {
     limit,
     page,
@@ -96,8 +99,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     },
   )
 
-  const List = selectedCollectionConfig?.admin?.components.views.list.Component
-
   const [selectedOption, setSelectedOption] = useState<Option | Option[]>(() =>
     selectedCollectionConfig
       ? {
@@ -106,6 +107,21 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
         }
       : undefined,
   )
+
+  useEffect(() => {
+    const getNewConfig = async () => {
+      const res = await payloadServerAction('render-config', {
+        collectionSlug: selectedCollection,
+        languageCode: i18n.language,
+      })
+
+      setSelectedCollectionConfig(res)
+    }
+
+    void getNewConfig()
+  }, [payloadServerAction, selectedCollection])
+
+  const List = selectedCollectionConfig?.admin?.components.views.list.Component
 
   // allow external control of selected collection, same as the initial state logic above
   useEffect(() => {

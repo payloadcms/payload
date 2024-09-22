@@ -1,17 +1,23 @@
-import type { Action } from 'payload'
-
-import type { RenderConfigArgs } from './renderConfig.js'
+import type { AcceptedLanguages } from '@payloadcms/translations'
+import type { ImportMap, SanitizedConfig } from 'payload'
 
 import { renderConfig } from './renderConfig.js'
 
-export const handleServerActions = async (action: Action.RenderConfig, args: RenderConfigArgs) => {
+export const handleServerActions = async (
+  action: string,
+  args: {
+    config: Promise<SanitizedConfig> | SanitizedConfig
+    importMap: ImportMap
+    languageCode: AcceptedLanguages
+  },
+): Promise<unknown> => {
   switch (action) {
     case 'render-config': {
       return renderConfig(args)
     }
 
     default: {
-      console.error(`Unknown Server Action: ${action as string}`) // eslint-disable-line no-console
+      console.error(`Unknown Server Action: ${action}`) // eslint-disable-line no-console
     }
   }
 }

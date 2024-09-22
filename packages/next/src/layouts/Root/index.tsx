@@ -169,8 +169,8 @@ export const RootLayout = async ({
   const isNavOpen = navPreferences?.value?.open ?? true
 
   const clientConfig = (await payloadServerAction('render-config', {
-    i18n,
-  })) as any as ClientConfig
+    languageCode,
+  })) as ClientConfig
 
   return (
     <html data-theme={theme} dir={dir} lang={languageCode}>
@@ -182,6 +182,7 @@ export const RootLayout = async ({
           isNavOpen={isNavOpen}
           languageCode={languageCode}
           languageOptions={languageOptions}
+          payloadServerAction={payloadServerAction}
           permissions={permissions}
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}

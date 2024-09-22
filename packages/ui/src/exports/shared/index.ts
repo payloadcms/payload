@@ -6,7 +6,6 @@ export { PayloadIcon } from '../../graphics/Icon/index.js'
 export { PayloadLogo } from '../../graphics/Logo/index.js'
 export { getComponent } from '../../providers/Config/createClientConfig/getComponent.js'
 export { getCreateMappedComponent } from '../../providers/Config/createClientConfig/getCreateMappedComponent.js'
-export { HydrateEntityConfig } from '../../providers/Config/index.js'
 
 export { RenderComponent } from '../../providers/Config/RenderComponent.js'
 export { requests } from '../../utilities/api.js'

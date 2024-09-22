@@ -6,6 +6,7 @@ import type {
   RenderConfigArgs,
 } from 'payload'
 
+import { type I18nClient, initI18n } from '@payloadcms/translations'
 import { getCreateMappedComponent } from '@payloadcms/ui/shared'
 import { createClientCollectionConfig } from '@payloadcms/ui/utilities/createClientCollectionConfig'
 import { createClientConfig } from '@payloadcms/ui/utilities/createClientConfig'
@@ -22,13 +23,23 @@ export const renderConfig = async (
     config: configPromise,
     data,
     globalSlug,
-    i18n,
     importMap,
+    languageCode,
     schemaPath,
     serverProps,
   } = args
 
+  if (!languageCode) {
+    throw new Error('Language code is required to render config')
+  }
+
   const config = await configPromise
+
+  const i18n: I18nClient = await initI18n({
+    config: config.i18n,
+    context: 'client',
+    language: languageCode,
+  })
 
   const payload = await getPayloadHMR({ config })
 

@@ -1,6 +1,9 @@
 'use client'
 
+import type { ClientCollectionConfig } from 'packages/payload/src/index.js'
+
 import { useModal } from '@faceless-ui/modal'
+import { LoadingOverlay } from '@payloadcms/ui'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -11,6 +14,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
+import { useServerActions } from '../../providers/ServerActions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useRelatedCollections } from '../AddNewRelation/useRelatedCollections.js'
 import { Gutter } from '../Gutter/index.js'
@@ -41,13 +45,30 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   } = config
 
   const { closeModal, modalState, toggleModal } = useModal()
-  const locale = useLocale()
-  const { t } = useTranslation()
+  const { locale } = useLocale()
+  const { i18n, t } = useTranslation()
   const [docID, setDocID] = useState(existingDocID)
   const [isOpen, setIsOpen] = useState(false)
-  const [collectionConfig] = useRelatedCollections(collectionSlug)
+  const [collectionConfig, setCollectionConfig] = useState<ClientCollectionConfig>()
 
-  const Edit = collectionConfig.admin.components.views.edit.default.Component
+  const payloadServerAction = useServerActions()
+
+  useEffect(() => {
+    const getNewConfig = async () => {
+      const res = await payloadServerAction('render-config', {
+        collectionSlug,
+        languageCode: i18n.language,
+      })
+
+      console.log('res', res)
+
+      setCollectionConfig(res)
+    }
+
+    void getNewConfig()
+  }, [payloadServerAction, collectionSlug])
+
+  const CustomEdit = collectionConfig?.admin.components.views.edit.default.Component
 
   const isEditing = Boolean(docID)
   const apiURL = docID
@@ -109,6 +130,10 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
     [onDeleteFromProps, collectionConfig, closeModal, drawerSlug],
   )
 
+  if (!collectionConfig) {
+    return <LoadingOverlay />
+  }
+
   return (
     <DocumentInfoProvider
       AfterFields={AfterFields}
@@ -134,7 +159,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
           <DocumentTitle />
         </Gutter>
       }
-      collectionSlug={collectionConfig.slug}
+      collectionSlug={collectionConfig?.slug}
       disableActions={disableActions}
       disableLeaveWithoutSaving
       id={docID}
@@ -151,7 +176,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       redirectAfterDelete={redirectAfterDelete !== undefined ? redirectAfterDelete : false}
       redirectAfterDuplicate={redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false}
     >
-      <RenderComponent mappedComponent={Edit} />
+      <RenderComponent mappedComponent={CustomEdit} />
     </DocumentInfoProvider>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, ClientUser, VisibleEntities } from 'payload'
+import type { ClientConfig, ClientUser, VisibleEntities } from 'payload'
 
 import { useAuth, useConfig, useEntityVisibility } from '@payloadcms/ui'
 import * as React from 'react'
@@ -12,9 +12,9 @@ type Options = {
 }
 
 type FilteredCollectionsT = (
-  collections: ClientCollectionConfig[],
+  collections: ClientConfig['collections'],
   options?: Options,
-) => ClientCollectionConfig[]
+) => ClientConfig['collections']
 
 const filterRichTextCollections: FilteredCollectionsT = (collections, options) => {
   return collections.filter(({ slug, admin: { enableRichTextRelationship }, upload }) => {

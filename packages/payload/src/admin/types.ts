@@ -1,4 +1,4 @@
-import type { I18nClient } from 'packages/translations/src/types.js'
+import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
 import type React from 'react'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
@@ -422,20 +422,20 @@ export type RenderFieldConfigArgs = {
 }
 
 export type RenderConfigArgs = {
+  action: Action.RenderConfig
   config: Promise<SanitizedConfig> | SanitizedConfig
   i18n: I18nClient
   importMap: ImportMap
+  languageCode: AcceptedLanguages
   serverProps?: any
 } & (RenderEntityConfigArgs | RenderFieldConfigArgs | RenderRootConfigArgs)
 
 export type PayloadServerAction = (
   args:
     | {
+        [key: string]: any
         action: Action
-        args: any
+        i18n: I18nClient
       }
-    | {
-        action: Action.RenderConfig
-        args: RenderConfigArgs
-      },
+    | RenderConfigArgs,
 ) => Promise<string>

@@ -5,9 +5,8 @@ import {
   ListInfoProvider,
   ListQueryProvider,
   LoadingOverlay,
-  TableColumnsProvider,
 } from '@payloadcms/ui'
-import { formatAdminURL, HydrateEntityConfig, RenderComponent } from '@payloadcms/ui/shared'
+import { formatAdminURL, RenderComponent } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import { mergeListSearchAndWhere } from 'payload'
 import { isNumber } from 'payload/shared'
@@ -152,7 +151,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
       ? ((await payloadServerAction('render-config', {
           collectionSlug,
           data,
-          i18n,
+          languageCode: i18n.language,
         })) as unknown as ClientCollectionConfig)
       : null
 
@@ -160,7 +159,6 @@ export const ListView: React.FC<AdminViewProps> = async ({
 
     return (
       <Fragment>
-        <HydrateEntityConfig collectionConfig={clientCollectionConfig} />
         <HydrateAuthProvider permissions={permissions} />
         <ListInfoProvider
           collectionConfig={clientCollectionConfig}
@@ -178,34 +176,29 @@ export const ListView: React.FC<AdminViewProps> = async ({
             modifySearchParams
             preferenceKey={preferenceKey}
           >
-            <TableColumnsProvider
-              collectionSlug={collectionSlug}
-              enableRowSelections
-              listPreferences={listPreferences}
-              preferenceKey={preferenceKey}
-            >
-              {!clientCollectionConfig ? (
-                <LoadingOverlay />
-              ) : (
-                <Fragment>
-                  {CustomListView ? (
-                    <RenderComponent
-                      clientProps={{
-                        clientCollectionConfig,
-                        collectionSlug,
-                        listSearchableFields: collectionConfig?.admin?.listSearchableFields,
-                      }}
-                      mappedComponent={CustomListView}
-                    />
-                  ) : (
-                    <DefaultListView
-                      collectionConfig={clientCollectionConfig}
-                      payloadServerAction={payloadServerAction}
-                    />
-                  )}
-                </Fragment>
-              )}
-            </TableColumnsProvider>
+            {!clientCollectionConfig ? (
+              <LoadingOverlay />
+            ) : (
+              <Fragment>
+                {CustomListView ? (
+                  <RenderComponent
+                    clientProps={{
+                      clientCollectionConfig,
+                      collectionSlug,
+                      listSearchableFields: collectionConfig?.admin?.listSearchableFields,
+                    }}
+                    mappedComponent={CustomListView}
+                  />
+                ) : (
+                  <DefaultListView
+                    collectionConfig={clientCollectionConfig}
+                    listPreferences={listPreferences}
+                    payloadServerAction={payloadServerAction}
+                    preferenceKey={preferenceKey}
+                  />
+                )}
+              </Fragment>
+            )}
           </ListQueryProvider>
         </ListInfoProvider>
       </Fragment>

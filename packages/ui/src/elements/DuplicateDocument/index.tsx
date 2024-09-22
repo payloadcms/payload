@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
+import type { SanitizedCollectionConfig } from 'payload'
 
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -11,7 +11,7 @@ import { toast } from 'sonner'
 import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
-import { useConfig } from '../../providers/Config/index.js'
+import { useConfig, useEntityConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -50,10 +50,9 @@ export const DuplicateDocument: React.FC<Props> = ({
       routes: { admin: adminRoute, api: apiRoute },
       serverURL,
     },
-    getEntityConfig,
   } = useConfig()
 
-  const collectionConfig = getEntityConfig({ collectionSlug: slug }) as ClientCollectionConfig
+  const { collectionConfig } = useEntityConfig()
 
   const [hasClicked, setHasClicked] = useState<boolean>(false)
   const { i18n, t } = useTranslation()

@@ -10,7 +10,7 @@ import { toast } from 'sonner'
 import type { DocumentInfoContext } from '../../providers/DocumentInfo/index.js'
 
 import { useForm } from '../../forms/Form/context.js'
-import { useConfig } from '../../providers/Config/index.js'
+import { useConfig, useEntityConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -51,10 +51,9 @@ export const DeleteDocument: React.FC<Props> = (props) => {
       routes: { admin: adminRoute, api },
       serverURL,
     },
-    getEntityConfig,
   } = useConfig()
 
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  const { collectionConfig } = useEntityConfig()
 
   const { setModified } = useForm()
   const [deleting, setDeleting] = useState(false)
