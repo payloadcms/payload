@@ -61,6 +61,14 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build",
     "translateNewKeys": "node --no-deprecation --import @swc-node/register/esm-register scripts/translateNewKeys.ts"
   },
+  "lint-staged": {
+    "**/package.json": "sort-package-json",
+    "*.{md,mdx,yml,json}": "prettier --write",
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --cache --fix"
+    ]
+  },
   "dependencies": {
     "@lexical/headless": "0.17.0",
     "@lexical/link": "0.17.0",
