@@ -387,7 +387,6 @@ there\`\`\`
               version: 1,
             },
           ],
-          direction: null,
           format: '',
           indent: 0,
           type: 'paragraph',
@@ -422,7 +421,6 @@ there\`\`\`
                       version: 1,
                     },
                   ],
-                  direction: null,
                   format: '',
                   indent: 0,
                   type: 'paragraph',
@@ -431,7 +429,6 @@ there\`\`\`
                   textStyle: '',
                 },
               ],
-              direction: null,
               format: '',
               indent: 0,
               type: 'root',
@@ -475,7 +472,6 @@ there\`\`\`
               version: 1,
             },
           ],
-          direction: null,
           format: '',
           indent: 0,
           type: 'paragraph',
@@ -506,7 +502,7 @@ there\`\`\`
                       format: 0,
                       mode: 'normal',
                       style: '',
-                      text: ' Some text 1 ',
+                      text: 'Some text 1 ',
                       type: 'text',
                       version: 1,
                     },
@@ -532,7 +528,6 @@ there\`\`\`
                       version: 1,
                     },
                   ],
-                  direction: 'ltr',
                   format: '',
                   indent: 0,
                   type: 'paragraph',
@@ -548,7 +543,7 @@ there\`\`\`
                       format: 0,
                       mode: 'normal',
                       style: '',
-                      text: ' text 2 ',
+                      text: 'text 2 ',
                       type: 'text',
                       version: 1,
                     },
@@ -574,7 +569,6 @@ there\`\`\`
                       version: 1,
                     },
                   ],
-                  direction: 'ltr',
                   format: '',
                   indent: 0,
                   type: 'paragraph',
@@ -590,7 +584,7 @@ there\`\`\`
                       format: 0,
                       mode: 'normal',
                       style: '',
-                      text: ' 3 ',
+                      text: '3 ',
                       type: 'text',
                       version: 1,
                     },
@@ -605,7 +599,6 @@ there\`\`\`
                       },
                       version: 1,
                     },
-
                     {
                       detail: 0,
                       format: 0,
@@ -615,10 +608,8 @@ there\`\`\`
                       type: 'text',
                       version: 1,
                     },
-
                     {
                       type: 'inlineBlock',
-
                       fields: {
                         id: '66ecb561ff793f7eaca2d4be',
                         code: 'code 4',
@@ -627,7 +618,6 @@ there\`\`\`
                       version: 1,
                     },
                   ],
-                  direction: 'ltr',
                   format: '',
                   indent: 0,
                   type: 'paragraph',
@@ -636,7 +626,6 @@ there\`\`\`
                   textStyle: '',
                 },
               ],
-              direction: 'ltr',
               format: '',
               indent: 0,
               type: 'root',
@@ -665,20 +654,14 @@ there\`\`\`
           .children[0] as unknown as SerializedBlockNode
         expect(receivedBlockNode).not.toBeNull()
 
-        // By doing it like this, the blockNode defined in the test does not need to have all the top-level properties
+        // By doing it like this, the blockNode defined in the test does not need to have all the top-level properties. We only wanna compare keys that are defined in the test
         const receivedBlockNodeToTest = {}
         for (const key in blockNode) {
           receivedBlockNodeToTest[key] = receivedBlockNode[key]
-          if (key === 'fields') {
-            delete receivedBlockNodeToTest[key].id
-            // Delete all undefined values
-            for (const fieldKey in receivedBlockNodeToTest[key]) {
-              if (receivedBlockNodeToTest[key][fieldKey] === undefined) {
-                delete receivedBlockNodeToTest[key][fieldKey]
-              }
-            }
-          }
         }
+
+        removeUndefinedAndIDRecursively(receivedBlockNodeToTest)
+        removeUndefinedAndIDRecursively(blockNode)
 
         console.log({ receivedBlockNodeToTest, blockNode })
 
@@ -686,6 +669,7 @@ there\`\`\`
       } else if (rootChildren) {
         const receivedRootChildren = result.editorState.root.children
         removeUndefinedAndIDRecursively(receivedRootChildren)
+        removeUndefinedAndIDRecursively(rootChildren)
 
         console.log({ receivedRootChildren, rootChildren })
 
@@ -708,7 +692,6 @@ there\`\`\`
                 },
               ]
             : rootChildren,
-          direction: null,
           format: '',
           indent: 0,
           type: 'root',
@@ -736,6 +719,8 @@ function removeUndefinedAndIDRecursively(obj: object) {
     if (value && typeof value === 'object') {
       removeUndefinedAndIDRecursively(value)
     } else if (value === undefined) {
+      delete obj[key]
+    } else if (value === null) {
       delete obj[key]
     } else if (key === 'id') {
       delete obj[key]
