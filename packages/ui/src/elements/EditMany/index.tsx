@@ -30,7 +30,6 @@ const baseClass = 'edit-many'
 
 export type EditManyProps = {
   readonly collection: ClientCollectionConfig
-  readonly fields: ClientField[]
 }
 
 const Submit: React.FC<{
@@ -99,7 +98,7 @@ const SaveDraftButton: React.FC<{ action: string; disabled: boolean }> = ({ acti
   )
 }
 export const EditMany: React.FC<EditManyProps> = (props) => {
-  const { collection: { slug, labels: { plural } } = {}, collection, fields } = props
+  const { collection: { slug, fields, labels: { plural } } = {}, collection } = props
 
   const { permissions } = useAuth()
   const { closeModal } = useModal()

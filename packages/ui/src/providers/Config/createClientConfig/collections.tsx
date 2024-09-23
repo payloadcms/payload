@@ -57,7 +57,6 @@ export const createClientCollectionConfig = ({
   importMap: ImportMap
   payload: Payload
 }): ClientCollectionConfig => {
-  console.log('collection slug', collection.slug)
   const clientCollection = deepCopyObjectSimple(collection) as unknown as ClientCollectionConfig
 
   clientCollection.fields = createClientFields({

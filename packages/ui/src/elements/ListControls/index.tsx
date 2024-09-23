@@ -140,7 +140,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 {beforeActions && beforeActions}
                 {!disableBulkEdit && (
                   <Fragment>
-                    <EditMany collection={collectionConfig} fields={fields} />
+                    <EditMany collection={collectionConfig} />
                     <PublishMany collection={collectionConfig} />
                     <UnpublishMany collection={collectionConfig} />
                   </Fragment>

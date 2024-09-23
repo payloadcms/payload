@@ -53,7 +53,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   filterOptions,
   onBulkSelect,
   onSelect,
-  selectedCollection,
+  selectedCollection: selectedCollectionFromProps,
 }) => {
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
@@ -87,150 +87,153 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     },
   } = useConfig()
 
-  const enabledCollectionConfigs = collections.filter(({ slug }) => {
+  const enabledCollections = collections.filter(({ slug }) => {
     return collectionSlugs.includes(slug)
   })
 
   const [selectedCollectionConfig, setSelectedCollectionConfig] = useState<ClientCollectionConfig>()
 
-  const [selectedOption, setSelectedOption] = useState<Option | Option[]>(() =>
-    selectedCollectionConfig
+  const [selectedOption, setSelectedOption] = useState<Option | Option[]>(() => {
+    const initialSelection = selectedCollectionConfig?.slug || enabledCollections[0]?.slug
+    const found = collections.find(({ slug }) => slug === initialSelection)
+
+    return found
       ? {
-          label: getTranslation(selectedCollectionConfig.labels.singular, i18n),
-          value: selectedCollectionConfig.slug,
+          label: found.labels,
+          value: found.slug,
         }
-      : undefined,
-  )
+      : undefined
+  })
 
   useEffect(() => {
-    const getNewConfig = async () => {
-      const res = (await payloadServerAction('render-config', {
-        collectionSlug: selectedCollection,
-        languageCode: i18n.language,
-      })) as any as ClientCollectionConfig
+    if (selectedOption) {
+      const getNewConfig = async () => {
+        const res = (await payloadServerAction('render-config', {
+          collectionSlug: selectedOption.value,
+          languageCode: i18n.language,
+        })) as any as ClientCollectionConfig
 
-      setSelectedCollectionConfig(res)
+        setSelectedCollectionConfig(res)
+      }
+
+      void getNewConfig()
     }
+  }, [payloadServerAction, selectedOption, i18n.language])
 
-    void getNewConfig()
-  }, [payloadServerAction, selectedCollection, i18n.language])
+  useEffect(() => {
+    if (selectedCollectionFromProps && selectedCollectionFromProps !== selectedOption?.value) {
+      setSelectedOption({
+        label: collections.find(({ slug }) => slug === selectedCollectionFromProps).labels,
+        value: selectedCollectionFromProps,
+      })
+    }
+  }, [selectedCollectionFromProps, collections, selectedOption])
 
   const CustomList = selectedCollectionConfig?.admin?.components?.views?.list?.Component
 
-  // allow external control of selected collection, same as the initial state logic above
-  useEffect(() => {
-    if (selectedCollection) {
-      // if passed a selection, find it and check if it's enabled
-      const selectedConfig =
-        enabledCollectionConfigs.find(({ slug }) => slug === selectedCollection) ||
-        enabledCollectionConfigs?.[0]
-      setSelectedCollectionConfig(selectedConfig)
-    }
-  }, [selectedCollection, enabledCollectionConfigs, onSelect, t])
-
-  const preferencesKey = `${selectedCollectionConfig.slug}-list`
+  const preferencesKey = selectedCollectionConfig ? `${selectedCollectionConfig.slug}-list` : null
 
   // this is the 'create new' drawer
   const [DocumentDrawer, DocumentDrawerToggler, { drawerSlug: documentDrawerSlug }] =
     useDocumentDrawer({
-      collectionSlug: selectedCollectionConfig.slug,
+      collectionSlug: selectedCollectionConfig?.slug,
     })
-
-  useEffect(() => {
-    if (selectedOption && !Array.isArray(selectedOption)) {
-      setSelectedCollectionConfig(
-        enabledCollectionConfigs.find(({ slug }) => selectedOption.value === slug),
-      )
-    }
-  }, [selectedOption, enabledCollectionConfigs])
 
   const collectionPermissions = permissions?.collections?.[selectedCollectionConfig?.slug]
   const hasCreatePermission = collectionPermissions?.create?.permission
 
   // If modal is open, get active page of upload gallery
   const isOpen = isModalOpen(drawerSlug)
-  const apiURL = isOpen ? `${serverURL}${api}/${selectedCollectionConfig.slug}` : null
+  const apiURL = isOpen ? `${serverURL}${api}/${selectedCollectionConfig?.slug}` : null
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0) // used to force a re-fetch even when apiURL is unchanged
   const [{ data, isError, isLoading: isLoadingList }, { setParams }] = usePayloadAPI(apiURL, {
     initialParams: {
       depth: 0,
     },
   })
-  const moreThanOneAvailableCollection = enabledCollectionConfigs.length > 1
+
+  const moreThanOneAvailableCollection = enabledCollections.length > 1
 
   useEffect(() => {
-    const {
-      slug,
-      admin: { listSearchableFields, useAsTitle } = {},
-      versions,
-    } = selectedCollectionConfig
+    if (selectedCollectionConfig) {
+      const {
+        slug,
+        admin: { listSearchableFields, useAsTitle } = {},
+        versions,
+      } = selectedCollectionConfig
 
-    const params: {
-      cacheBust?: number
-      depth?: number
-      draft?: string
-      limit?: number
-      page?: number
-      search?: string
-      sort?: string
-      where?: unknown
-    } = {
-      depth: 0,
-    }
-
-    let copyOfWhere = { ...(where || {}) }
-    const filterOption = filterOptions?.[slug]
-
-    if (filterOptions && typeof filterOption !== 'boolean') {
-      copyOfWhere = hoistQueryParamsToAnd(copyOfWhere, filterOption)
-    }
-
-    if (search) {
-      const searchAsConditions = (listSearchableFields || [useAsTitle]).map((fieldName) => {
-        return {
-          [fieldName]: {
-            like: search,
-          },
-        }
-      }, [])
-
-      if (searchAsConditions.length > 0) {
-        const searchFilter: Where = {
-          or: [...searchAsConditions],
-        }
-
-        copyOfWhere = hoistQueryParamsToAnd(copyOfWhere, searchFilter)
+      const params: {
+        cacheBust?: number
+        depth?: number
+        draft?: string
+        limit?: number
+        page?: number
+        search?: string
+        sort?: string
+        where?: unknown
+      } = {
+        depth: 0,
       }
-    }
 
-    if (page) {
-      params.page = page
-    }
-    if (sort) {
-      params.sort = sort
-    }
-    if (cacheBust) {
-      params.cacheBust = cacheBust
-    }
-    if (limit) {
-      params.limit = limit
+      let copyOfWhere = { ...(where || {}) }
+      const filterOption = filterOptions?.[slug]
 
-      if (limit !== previousLimit.current) {
-        previousLimit.current = limit
-
-        // Reset page if limit changes
-        // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
-        setPage(1)
+      if (filterOptions && typeof filterOption !== 'boolean') {
+        copyOfWhere = hoistQueryParamsToAnd(copyOfWhere, filterOption)
       }
-    }
-    if (copyOfWhere) {
-      params.where = copyOfWhere
-    }
-    if (versions?.drafts) {
-      params.draft = 'true'
-    }
 
-    setParams(params)
+      if (search) {
+        const searchAsConditions = (listSearchableFields || [useAsTitle]).map((fieldName) => {
+          return {
+            [fieldName]: {
+              like: search,
+            },
+          }
+        }, [])
+
+        if (searchAsConditions.length > 0) {
+          const searchFilter: Where = {
+            or: [...searchAsConditions],
+          }
+
+          copyOfWhere = hoistQueryParamsToAnd(copyOfWhere, searchFilter)
+        }
+      }
+
+      if (page) {
+        params.page = page
+      }
+
+      if (sort) {
+        params.sort = sort
+      }
+
+      if (cacheBust) {
+        params.cacheBust = cacheBust
+      }
+
+      if (limit) {
+        params.limit = limit
+
+        if (limit !== previousLimit.current) {
+          previousLimit.current = limit
+
+          // Reset page if limit changes
+          // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+          setPage(1)
+        }
+      }
+
+      if (copyOfWhere) {
+        params.where = copyOfWhere
+      }
+
+      if (versions?.drafts) {
+        params.draft = 'true'
+      }
+
+      setParams(params)
+    }
   }, [
     page,
     sort,
@@ -310,10 +313,8 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   )
 
   if (!selectedCollectionConfig || isError) {
-    return null
+    return <LoadingOverlay />
   }
-
-  console.log('selectedCollectionConfig', selectedCollectionConfig)
 
   return (
     <>
@@ -370,8 +371,8 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
                 <ReactSelect
                   className={`${baseClass}__select-collection`}
                   onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect
-                  options={enabledCollectionConfigs.map((coll) => ({
-                    label: getTranslation(coll.labels.singular, i18n),
+                  options={enabledCollections.map((coll) => ({
+                    label: coll.labels,
                     value: coll.slug,
                   }))}
                   value={selectedOption}
