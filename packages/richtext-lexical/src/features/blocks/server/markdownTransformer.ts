@@ -303,7 +303,7 @@ function getMarkdownTransformerForBlock(
                 }
               }
 
-              if (rootNode?.getChildren()?.length) {
+              if (isInlineBlock && rootNode?.getChildren()?.length) {
                 // Add node to the last child of the root node
                 const lastChild = rootNode.getChildren()[rootNode.getChildren().length - 1]
 

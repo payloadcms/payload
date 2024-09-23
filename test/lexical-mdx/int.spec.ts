@@ -696,6 +696,73 @@ there4
         },
       },
     },
+    {
+      input: `
+Text before banner
+
+<Banner>
+  test
+</Banner>
+`,
+      rootChildren: [
+        {
+          children: [
+            {
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: 'Text before banner',
+              type: 'text',
+              version: 1,
+            },
+          ],
+          format: '',
+          indent: 0,
+          type: 'paragraph',
+          version: 1,
+          textFormat: 0,
+          textStyle: '',
+        },
+        {
+          type: 'block',
+          format: '',
+          fields: {
+            blockType: 'Banner',
+            content: {
+              root: {
+                children: [
+                  {
+                    children: [
+                      {
+                        detail: 0,
+                        format: 0,
+                        mode: 'normal',
+                        style: '',
+                        text: 'test',
+                        type: 'text',
+                        version: 1,
+                      },
+                    ],
+                    format: '',
+                    indent: 0,
+                    textFormat: 0,
+                    textStyle: '',
+                    type: 'paragraph',
+                    version: 1,
+                  },
+                ],
+                format: '',
+                indent: 0,
+                type: 'root',
+                version: 1,
+              },
+            },
+          },
+          version: 2,
+        },
+      ],
+    },
   ]
 
   const INPUT_AND_OUTPUT: Tests = INPUT_AND_OUTPUTBase

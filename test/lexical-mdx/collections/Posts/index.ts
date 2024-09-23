@@ -5,6 +5,7 @@ import {
   EXPERIMENTAL_TableFeature,
   FixedToolbarFeature,
   lexicalEditor,
+  TreeViewFeature,
 } from '@payloadcms/richtext-lexical'
 
 import { loadMDXAfterRead, saveMDXBeforeChange } from '../../mdx/hooks.js'
@@ -59,6 +60,7 @@ export const PostsCollection: CollectionConfig = {
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
+          TreeViewFeature(),
           EXPERIMENTAL_TableFeature(),
           FixedToolbarFeature(),
           BlocksFeature({
