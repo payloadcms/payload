@@ -127,11 +127,11 @@ export type IDType = 'integer' | 'numeric' | 'text'
 
 export type MigrateUpArgs = {
   payload: Payload
-  req?: Partial<PayloadRequest>
+  req?: PayloadRequest
 }
 export type MigrateDownArgs = {
   payload: Payload
-  req?: Partial<PayloadRequest>
+  req?: PayloadRequest
 }
 
 declare module 'payload' {

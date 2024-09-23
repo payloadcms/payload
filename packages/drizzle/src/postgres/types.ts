@@ -156,5 +156,5 @@ export type PostgresDrizzleAdapter = Omit<
 
 export type IDType = 'integer' | 'numeric' | 'uuid' | 'varchar'
 
-export type MigrateUpArgs = { payload: Payload; req?: Partial<PayloadRequest> }
-export type MigrateDownArgs = { payload: Payload; req?: Partial<PayloadRequest> }
+export type MigrateUpArgs = { payload: Payload; req?: PayloadRequest }
+export type MigrateDownArgs = { payload: Payload; req?: PayloadRequest }
