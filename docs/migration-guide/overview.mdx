@@ -913,7 +913,7 @@ return <p>{t('general:cancel')}</p>
   method: 'post',
   handler: (req, res) => {
     res.json({
-      parameter: req.routeParams.parameter,
+      parameter: req.params.parameter,
       name: req.body.name,
       age: req.body.age,
     })
