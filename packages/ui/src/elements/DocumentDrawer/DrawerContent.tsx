@@ -10,7 +10,7 @@ import type { DocumentDrawerProps } from './types.js'
 
 import { LoadingOverlay } from '../../elements/Loading/index.js'
 import { XIcon } from '../../icons/X/index.js'
-import { useConfig } from '../../providers/Config/index.js'
+import { useConfig, useEntityConfig } from '../../providers/Config/index.js'
 import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -46,8 +46,8 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   } = config
 
   const { closeModal, modalState, toggleModal } = useModal()
-  const { locale } = useLocale()
-  const { i18n, t } = useTranslation()
+  const locale = useLocale()
+  const { t } = useTranslation()
   const [docID, setDocID] = useState(existingDocID)
   const [isOpen, setIsOpen] = useState(false)
 
@@ -76,11 +76,11 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       if (typeof onSaveFromProps === 'function') {
         void onSaveFromProps({
           ...args,
-          collectionConfig,
+          // collectionConfig,
         })
       }
     },
-    [onSaveFromProps, collectionConfig],
+    [onSaveFromProps],
   )
 
   const onDuplicate = useCallback<DocumentDrawerProps['onSave']>(
@@ -90,11 +90,11 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       if (typeof onDuplicateFromProps === 'function') {
         void onDuplicateFromProps({
           ...args,
-          collectionConfig,
+          // collectionConfig,
         })
       }
     },
-    [onDuplicateFromProps, collectionConfig],
+    [onDuplicateFromProps],
   )
 
   const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
@@ -102,18 +102,14 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       if (typeof onDeleteFromProps === 'function') {
         void onDeleteFromProps({
           ...args,
-          collectionConfig,
+          // collectionConfig,
         })
       }
 
       closeModal(drawerSlug)
     },
-    [onDeleteFromProps, collectionConfig, closeModal, drawerSlug],
+    [onDeleteFromProps, closeModal, drawerSlug],
   )
-
-  if (!collectionConfig) {
-    return <LoadingOverlay />
-  }
 
   return (
     <DocumentInfoProvider
@@ -140,7 +136,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
           <DocumentTitle />
         </Gutter>
       }
-      collectionSlug={collectionConfig?.slug}
+      collectionSlug={collectionSlug}
       disableActions={disableActions}
       disableLeaveWithoutSaving
       id={docID}

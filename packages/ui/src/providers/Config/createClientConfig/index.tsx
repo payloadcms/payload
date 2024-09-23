@@ -2,6 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 
 import {
   type ClientConfig,
+  type ClientField,
   deepCopyObjectSimple,
   type PayloadComponent,
   type SanitizedConfig,
@@ -130,10 +131,31 @@ export const createClientConfig = async ({
     slug: collection.slug,
     admin: {
       enableRichTextRelationship: collection.admin.enableRichTextRelationship,
+      useAsTitle: collection.admin.useAsTitle,
     },
     auth: {
       loginWithUsername: collection.auth.loginWithUsername,
     },
+    fields: collection.fields.reduce((acc, field) => {
+      // TODO: map over all fields to create a "lite" version of the client field config (no components)
+      // This is needed for places where _all_ collection are needing to be processed, for things like collection labels and useAsTitle
+      // The full client configs are generated on-demand when the views are loaded
+      acc.push({
+        ...('name' in field ? { name: field.name } : {}),
+        type: field.type,
+        ...(field.type === 'date'
+          ? {
+              admin: {
+                date: {
+                  displayFormat: field?.admin?.date?.displayFormat,
+                },
+              },
+            }
+          : {}),
+      } as ClientField)
+
+      return acc
+    }, [] as ClientField[]),
     labels: Object.entries(collection.labels).reduce((acc, [labelType, collectionLabel]) => {
       if (typeof collectionLabel === 'function') {
         acc[labelType] = collectionLabel({ t: i18n.t })

@@ -1,6 +1,7 @@
 import type { AdminViewProps, ClientCollectionConfig, Where } from 'payload'
 
 import {
+  EntityConfigProvider,
   HydrateAuthProvider,
   ListInfoProvider,
   ListQueryProvider,
@@ -144,18 +145,16 @@ export const ListView: React.FC<AdminViewProps> = async ({
     //   },
     // })
 
-    const clientCollectionConfig = collectionSlug
-      ? ((await payloadServerAction('render-config', {
-          collectionSlug,
-          data,
-          languageCode: i18n.language,
-        })) as unknown as ClientCollectionConfig)
-      : null
+    const clientCollectionConfig = (await payloadServerAction('render-config', {
+      collectionSlug,
+      data,
+      languageCode: initPageResult.req.i18n.language,
+    })) as unknown as ClientCollectionConfig
 
     const CustomListView = clientCollectionConfig?.admin?.components?.views?.list?.Component
 
     return (
-      <Fragment>
+      <EntityConfigProvider collectionConfig={clientCollectionConfig}>
         <HydrateAuthProvider permissions={permissions} />
         <ListInfoProvider
           collectionConfig={clientCollectionConfig}
@@ -198,7 +197,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
             )}
           </ListQueryProvider>
         </ListInfoProvider>
-      </Fragment>
+      </EntityConfigProvider>
     )
   }
 

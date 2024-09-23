@@ -20,8 +20,6 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 // import { DocumentTakeOver } from '../../../elements/DocumentTakeOver/index.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
-import { useServerActions } from '../../providers/ServerActions/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { getFormState } from '../../utilities/getFormState.js'
@@ -73,8 +71,6 @@ const EditView: React.FC<ClientSideEditViewProps> = ({ collectionConfig, globalC
     updateDocumentEditor,
   } = useDocumentInfo()
 
-  const { i18n } = useTranslation()
-
   const {
     config,
     config: {
@@ -83,21 +79,6 @@ const EditView: React.FC<ClientSideEditViewProps> = ({ collectionConfig, globalC
       serverURL,
     },
   } = useConfig()
-
-  const payloadServerAction = useServerActions()
-
-  useEffect(() => {
-    const getNewConfig = async () => {
-      const res = (await payloadServerAction('render-config', {
-        collectionSlug,
-        languageCode: i18n.language,
-      })) as any as ClientCollectionConfig
-
-      setCollectionConfig(res)
-    }
-
-    void getNewConfig()
-  }, [payloadServerAction, collectionSlug, i18n.language])
 
   const depth = useEditDepth()
 

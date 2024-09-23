@@ -19,6 +19,11 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'relationToSelf',
+      type: 'relationship',
+      relationTo: postsSlug,
+    },
+    {
       admin: {
         components: {
           Field: '/collections/Posts/MyServerField.js#MyServerFieldComponent',

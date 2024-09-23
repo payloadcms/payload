@@ -147,22 +147,32 @@ const DocumentInfo: React.FC<
   const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions?.permission)
 
   useEffect(() => {
-    const getNewConfig = async () => {
-      const res = (await payloadServerAction('render-config', {
-        collectionSlug,
-        data,
-        globalSlug,
-        languageCode: i18n.language,
-      })) as any as ClientCollectionConfig | ClientGlobalConfig
+    if (!collectionConfig && !globalConfig) {
+      const getNewConfig = async () => {
+        const res = (await payloadServerAction('render-config', {
+          collectionSlug,
+          data,
+          globalSlug,
+          languageCode: i18n.language,
+        })) as any as ClientCollectionConfig | ClientGlobalConfig
 
-      setEntityConfig({
-        ...(collectionSlug ? { collectionConfig: res as ClientCollectionConfig } : {}),
-        ...(globalSlug ? { globalConfig: res as ClientGlobalConfig } : {}),
-      })
+        setEntityConfig({
+          ...(collectionSlug ? { collectionConfig: res as ClientCollectionConfig } : {}),
+          ...(globalSlug ? { globalConfig: res as ClientGlobalConfig } : {}),
+        })
+      }
+      void getNewConfig()
     }
-
-    void getNewConfig()
-  }, [payloadServerAction, collectionSlug, i18n.language, globalSlug, data, setEntityConfig])
+  }, [
+    payloadServerAction,
+    collectionSlug,
+    i18n.language,
+    globalSlug,
+    data,
+    setEntityConfig,
+    collectionConfig,
+    globalConfig,
+  ])
 
   const unlockDocument = useCallback(
     async (docId: number | string, slug: string) => {
@@ -557,7 +567,7 @@ const DocumentInfo: React.FC<
     const localeChanged = locale !== prevLocale.current
 
     if (
-      initialStateFromProps === undefined ||
+      ((collectionSlug || globalSlug) && initialStateFromProps === undefined) ||
       initialDataFromProps === undefined ||
       localeChanged
     ) {
@@ -584,6 +594,7 @@ const DocumentInfo: React.FC<
             serverURL,
             signal: abortController.signal,
           })
+
           const data = reduceFieldsToValues(result, true)
           setData(data)
 
@@ -728,10 +739,12 @@ export const DocumentInfoProvider: React.FC<
   {
     readonly children: React.ReactNode
   } & DocumentInfoProps
-> = (props) => {
+> = ({ collectionConfig, globalConfig, ...rest }) => {
   return (
     <UploadEditsProvider>
-      <DocumentInfo {...props} />
+      <EntityConfigProvider collectionConfig={collectionConfig} globalConfig={globalConfig}>
+        <DocumentInfo {...rest} />
+      </EntityConfigProvider>
     </UploadEditsProvider>
   )
 }
