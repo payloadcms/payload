@@ -131,6 +131,8 @@ export const createClientConfig = async ({
     admin: {
       enableRichTextRelationship: collection.admin.enableRichTextRelationship,
       group: collection.admin.group,
+      listSearchableFields: collection.admin.listSearchableFields,
+      pagination: collection.admin.pagination,
       useAsTitle: collection.admin.useAsTitle,
     },
     auth: {
@@ -176,6 +178,7 @@ export const createClientConfig = async ({
       },
     ),
     upload: collection.upload,
+    versions: collection.versions,
   }))
 
   clientConfig.globals = config.globals.map((global) => ({
@@ -184,6 +187,7 @@ export const createClientConfig = async ({
       group: global.admin.group,
     },
     label: typeof global.label === 'string' ? global.label : getTranslation(global.label, i18n),
+    versions: global.versions,
   }))
 
   // clientConfig.collections = createClientCollectionConfigs({

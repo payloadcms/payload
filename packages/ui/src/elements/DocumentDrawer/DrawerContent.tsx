@@ -1,23 +1,17 @@
 'use client'
 
-import type { ClientCollectionConfig } from 'payload'
-
 import { useModal } from '@faceless-ui/modal'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { DocumentDrawerProps } from './types.js'
 
-import { LoadingOverlay } from '../../elements/Loading/index.js'
 import { XIcon } from '../../icons/X/index.js'
-import { useConfig, useEntityConfig } from '../../providers/Config/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
+import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
-import { useServerActions } from '../../providers/ServerActions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { DefaultEditView } from '../../views/Edit/index.js'
-import { useRelatedCollections } from '../AddNewRelation/useRelatedCollections.js'
+import { EditView as EditViewHandler } from '../../views/Edit/index.js'
 import { Gutter } from '../Gutter/index.js'
 import { IDLabel } from '../IDLabel/index.js'
 import { RenderTitle } from '../RenderTitle/index.js'
@@ -153,7 +147,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       redirectAfterDelete={redirectAfterDelete !== undefined ? redirectAfterDelete : false}
       redirectAfterDuplicate={redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false}
     >
-      <DefaultEditView />
+      <EditViewHandler />
     </DocumentInfoProvider>
   )
 }

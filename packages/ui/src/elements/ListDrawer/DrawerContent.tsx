@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, Where } from 'payload'
+import type { Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -14,13 +14,11 @@ import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { ListInfoProvider } from '../../providers/ListInfo/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
-import { useServerActions } from '../../providers/ServerActions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { DefaultListView } from '../../views/List/index.js'
+import { ListView as ListViewHandler } from '../../views/List/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { LoadingOverlay } from '../Loading/index.js'
 import { Pill } from '../Pill/index.js'
@@ -69,8 +67,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const [showLoadingOverlay, setShowLoadingOverlay] = useState<boolean>(true)
   const hasInitialised = useRef(false)
 
-  const payloadServerAction = useServerActions()
-
   const params = {
     limit,
     page,
@@ -91,10 +87,8 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     return collectionSlugs.includes(slug)
   })
 
-  const [selectedCollectionConfig, setSelectedCollectionConfig] = useState<ClientCollectionConfig>()
-
-  const [selectedOption, setSelectedOption] = useState<Option | Option[]>(() => {
-    const initialSelection = selectedCollectionConfig?.slug || enabledCollections[0]?.slug
+  const [selectedOption, setSelectedOption] = useState<Option<string>>(() => {
+    const initialSelection = selectedCollectionFromProps || enabledCollections[0]?.slug
     const found = collections.find(({ slug }) => slug === initialSelection)
 
     return found
@@ -106,21 +100,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   })
 
   useEffect(() => {
-    if (selectedOption) {
-      const getNewConfig = async () => {
-        const res = (await payloadServerAction('render-config', {
-          collectionSlug: selectedOption.value,
-          languageCode: i18n.language,
-        })) as any as ClientCollectionConfig
-
-        setSelectedCollectionConfig(res)
-      }
-
-      void getNewConfig()
-    }
-  }, [payloadServerAction, selectedOption, i18n.language])
-
-  useEffect(() => {
     if (selectedCollectionFromProps && selectedCollectionFromProps !== selectedOption?.value) {
       setSelectedOption({
         label: collections.find(({ slug }) => slug === selectedCollectionFromProps).labels,
@@ -129,22 +108,20 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     }
   }, [selectedCollectionFromProps, collections, selectedOption])
 
-  const CustomList = selectedCollectionConfig?.admin?.components?.views?.list?.Component
-
-  const preferencesKey = selectedCollectionConfig ? `${selectedCollectionConfig.slug}-list` : null
+  const preferencesKey = selectedOption.value ? `${selectedOption.value}-list` : null
 
   // this is the 'create new' drawer
   const [DocumentDrawer, DocumentDrawerToggler, { drawerSlug: documentDrawerSlug }] =
     useDocumentDrawer({
-      collectionSlug: selectedCollectionConfig?.slug,
+      collectionSlug: selectedOption.value,
     })
 
-  const collectionPermissions = permissions?.collections?.[selectedCollectionConfig?.slug]
+  const collectionPermissions = permissions?.collections?.[selectedOption.value]
   const hasCreatePermission = collectionPermissions?.create?.permission
 
   // If modal is open, get active page of upload gallery
   const isOpen = isModalOpen(drawerSlug)
-  const apiURL = isOpen ? `${serverURL}${api}/${selectedCollectionConfig?.slug}` : null
+  const apiURL = isOpen ? `${serverURL}${api}/${selectedOption?.value}` : null
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0) // used to force a re-fetch even when apiURL is unchanged
   const [{ data, isError, isLoading: isLoadingList }, { setParams }] = usePayloadAPI(apiURL, {
     initialParams: {
@@ -155,10 +132,14 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const moreThanOneAvailableCollection = enabledCollections.length > 1
 
   useEffect(() => {
+    const selectedCollectionConfig = enabledCollections.find(
+      ({ slug }) => slug === selectedOption.value,
+    )
+
     if (selectedCollectionConfig) {
       const {
         slug,
-        admin: { listSearchableFields, useAsTitle } = {},
+        admin: { listSearchableFields, useAsTitle },
         versions,
       } = selectedCollectionConfig
 
@@ -242,7 +223,8 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     limit,
     cacheBust,
     filterOptions,
-    selectedCollectionConfig,
+    enabledCollections,
+    selectedOption,
     t,
     setParams,
   ])
@@ -301,7 +283,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     ({ doc }) => {
       if (typeof onSelect === 'function') {
         onSelect({
-          collectionSlug: selectedCollectionConfig.slug,
+          collectionSlug: selectedOption.value,
           docID: doc.id,
         })
       }
@@ -309,12 +291,16 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       closeModal(documentDrawerSlug)
       closeModal(drawerSlug)
     },
-    [closeModal, documentDrawerSlug, drawerSlug, onSelect, selectedCollectionConfig],
+    [closeModal, documentDrawerSlug, drawerSlug, onSelect, selectedOption],
   )
 
-  if (!selectedCollectionConfig || isError) {
+  if (!selectedOption.value || isError) {
     return <LoadingOverlay />
   }
+
+  const selectedCollectionConfig = enabledCollections.find(
+    ({ slug }) => slug === selectedOption.value,
+  )
 
   return (
     <>
@@ -325,8 +311,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
             ? [<SelectMany key="select-many" onClick={onBulkSelect} />]
             : undefined
         }
-        collectionConfig={selectedCollectionConfig}
-        collectionSlug={selectedCollectionConfig.slug}
+        collectionSlug={selectedOption.value}
         disableBulkDelete
         disableBulkEdit
         hasCreatePermission={hasCreatePermission}
@@ -356,7 +341,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
                 <XIcon />
               </button>
             </div>
-            {(selectedCollectionConfig?.admin?.description ||
+            {/* {(selectedCollectionConfig?.admin?.description ||
               selectedCollectionConfig?.admin?.components?.Description) && (
               <div className={`${baseClass}__sub-header`}>
                 <ViewDescription
@@ -364,7 +349,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
                   description={selectedCollectionConfig.admin?.description}
                 />
               </div>
-            )}
+            )} */}
             {moreThanOneAvailableCollection && (
               <div className={`${baseClass}__select-collection-wrap`}>
                 <FieldLabel field={null} label={t('upload:selectCollectionToBrowse')} />
@@ -412,15 +397,11 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
                 },
               },
             ]}
-            collectionSlug={selectedCollectionConfig.slug}
+            collectionSlug={selectedOption.value}
             enableRowSelections={enableRowSelections}
             preferenceKey={preferencesKey}
           >
-            {CustomList ? (
-              <RenderComponent mappedComponent={CustomList} />
-            ) : (
-              <DefaultListView collectionConfig={selectedCollectionConfig} />
-            )}
+            <ListViewHandler />
             <DocumentDrawer onSave={onCreateNew} />
           </TableColumnsProvider>
         </ListQueryProvider>

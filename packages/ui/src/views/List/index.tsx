@@ -32,7 +32,7 @@ import { UnpublishMany } from '../../elements/UnpublishMany/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { SetViewActions } from '../../providers/Actions/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
-import { EntityConfigProvider } from '../../providers/Config/index.js'
+import { useEntityConfig } from '../../providers/Config/index.js'
 import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useListInfo } from '../../providers/ListInfo/index.js'
@@ -98,6 +98,7 @@ export const DefaultListView: React.FC<{
   useEffect(() => {
     if (!collectionConfig) {
       const getNewConfig = async () => {
+        // @ts-expect-error eslint-disable-next-line
         const res = (await payloadServerAction('render-config', {
           collectionSlug,
           languageCode: i18n.language,
@@ -276,7 +277,7 @@ export const DefaultListView: React.FC<{
                           {beforeActions && beforeActions}
                           {!disableBulkEdit && (
                             <Fragment>
-                              <EditMany collection={collectionConfig} fields={fields} />
+                              <EditMany collection={collectionConfig} />
                               <PublishMany collection={collectionConfig} />
                               <UnpublishMany collection={collectionConfig} />
                             </Fragment>
@@ -295,4 +296,20 @@ export const DefaultListView: React.FC<{
       </div>
     </TableColumnsProvider>
   )
+}
+
+export const ListView: React.FC = () => {
+  const { collectionConfig } = useEntityConfig()
+
+  if (!collectionConfig) {
+    return <LoadingOverlay />
+  }
+
+  const CustomList = collectionConfig?.admin?.components?.views?.list?.Component
+
+  if (CustomList) {
+    return <RenderComponent mappedComponent={CustomList} />
+  }
+
+  return <DefaultListView collectionConfig={collectionConfig} />
 }

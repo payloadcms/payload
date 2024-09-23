@@ -1,5 +1,6 @@
 import type { MappedComponent } from '../admin/types.js'
-import type { ClientCollectionConfig } from '../collections/config/client.js'
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
+import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type {
   LivePreviewConfig,
   SanitizedConfig,
@@ -42,18 +43,20 @@ export type ClientConfig = {
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
   collections: ({
-    admin: Pick<ClientCollectionConfig['admin'], 'enableRichTextRelationship' | 'group'>
+    admin: Pick<
+      SanitizedCollectionConfig['admin'],
+      'enableRichTextRelationship' | 'group' | 'listSearchableFields' | 'pagination' | 'useAsTitle'
+    >
     labels: {
       plural: string
       singular: string
     }
-  } & Pick<ClientCollectionConfig, 'slug' | 'upload'>)[]
+  } & Pick<SanitizedCollectionConfig, 'slug' | 'upload' | 'versions'>)[]
   custom?: Record<string, any>
-  globals: {
-    admin: Pick<SanitizedConfig['globals'][0]['admin'], 'group'>
+  globals: ({
+    admin: Pick<SanitizedGlobalConfig['admin'], 'group'>
     label: string
-    slug: string
-  }[]
+  } & Pick<SanitizedGlobalConfig, 'slug' | 'versions'>)[]
 } & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | ServerOnlyRootProperties>
 
 export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperties>[] = [

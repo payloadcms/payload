@@ -149,6 +149,7 @@ const DocumentInfo: React.FC<
   useEffect(() => {
     if (!collectionConfig && !globalConfig && initialState) {
       const getNewConfig = async () => {
+        // @ts-expect-error eslint-disable-next-line
         const res = (await payloadServerAction('render-config', {
           collectionSlug,
           formState: initialState,

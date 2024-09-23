@@ -244,9 +244,9 @@ export { NumberField as NumberCondition } from '../../elements/WhereBuilder/Cond
 export { DateField as DateCondition } from '../../elements/WhereBuilder/Condition/Date/index.js'
 export { RenderEmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
 
-export { DefaultListView } from '../../views/List/index.js'
+export { DefaultListView, ListView } from '../../views/List/index.js'
 export type { ListPreferences } from '../../views/List/types.js'
 
-export { DefaultEditView } from '../../views/Edit/index.js'
+export { DefaultEditView, EditView } from '../../views/Edit/index.js'
 export { SetDocumentStepNav } from '../../views/Edit/SetDocumentStepNav/index.js'
 export { SetDocumentTitle } from '../../views/Edit/SetDocumentTitle/index.js'

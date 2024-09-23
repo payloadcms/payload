@@ -35,7 +35,10 @@ const baseClass = 'collection-edit'
 // This component receives props only on _pages_
 // When rendered within a drawer, props are empty
 // This is solely to support custom edit views which get server-rendered
-const EditView: React.FC<ClientSideEditViewProps> = ({ collectionConfig, globalConfig }) => {
+export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
+  collectionConfig,
+  globalConfig,
+}) => {
   const {
     id,
     action,
@@ -529,12 +532,19 @@ const EditView: React.FC<ClientSideEditViewProps> = ({ collectionConfig, globalC
   )
 }
 
-export const DefaultEditView: React.FC = () => {
+export const EditView: React.FC = () => {
   const { collectionConfig, globalConfig } = useEntityConfig()
 
   if (!collectionConfig && !globalConfig) {
     return <LoadingOverlay />
   }
 
-  return <EditView collectionConfig={collectionConfig} globalConfig={globalConfig} />
+  const CustomEdit = (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.default
+    ?.Component
+
+  if (CustomEdit) {
+    return <RenderComponent mappedComponent={CustomEdit} />
+  }
+
+  return <DefaultEditView collectionConfig={collectionConfig} globalConfig={globalConfig} />
 }
