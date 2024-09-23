@@ -50,24 +50,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const { i18n, t } = useTranslation()
   const [docID, setDocID] = useState(existingDocID)
   const [isOpen, setIsOpen] = useState(false)
-  const [collectionConfig, setCollectionConfig] = useState<ClientCollectionConfig>()
-
-  const payloadServerAction = useServerActions()
-
-  useEffect(() => {
-    const getNewConfig = async () => {
-      const res = (await payloadServerAction('render-config', {
-        collectionSlug,
-        languageCode: i18n.language,
-      })) as any as ClientCollectionConfig
-
-      setCollectionConfig(res)
-    }
-
-    void getNewConfig()
-  }, [payloadServerAction, collectionSlug, i18n.language])
-
-  const CustomEdit = collectionConfig?.admin.components.views.edit.default.Component
 
   const isEditing = Boolean(docID)
   const apiURL = docID
@@ -175,11 +157,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       redirectAfterDelete={redirectAfterDelete !== undefined ? redirectAfterDelete : false}
       redirectAfterDuplicate={redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false}
     >
-      {CustomEdit ? (
-        <RenderComponent mappedComponent={CustomEdit} />
-      ) : (
-        <DefaultEditView collectionConfig={collectionConfig} />
-      )}
+      <DefaultEditView />
     </DocumentInfoProvider>
   )
 }

@@ -1,11 +1,18 @@
 import type {
   AdminViewProps,
+  ClientCollectionConfig,
+  ClientGlobalConfig,
   EditViewComponent,
   MappedComponent,
   ServerSideEditViewProps,
 } from 'payload'
 
-import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
+import {
+  DocumentInfoProvider,
+  EditDepthProvider,
+  EntityConfigProvider,
+  HydrateAuthProvider,
+} from '@payloadcms/ui'
 import {
   formatAdminURL,
   getCreateMappedComponent,
@@ -271,53 +278,74 @@ export const Document: React.FC<AdminViewProps> = async ({
     }
   }
 
+  const collectionClientConfig = collectionSlug
+    ? ((await payloadServerAction('render-config', {
+        collectionSlug,
+        data,
+        languageCode: initPageResult.req.i18n.language,
+      })) as unknown as ClientCollectionConfig)
+    : null
+
+  const globalClientConfig = globalSlug
+    ? ((await payloadServerAction('render-config', {
+        data,
+        globalSlug,
+        languageCode: initPageResult.req.i18n.language,
+      })) as unknown as ClientGlobalConfig)
+    : null
+
   return (
-    <DocumentInfoProvider
-      apiURL={apiURL}
-      collectionSlug={collectionConfig?.slug}
-      disableActions={false}
-      docPermissions={docPermissions}
-      globalSlug={globalConfig?.slug}
-      hasPublishPermission={hasPublishPermission}
-      hasSavePermission={hasSavePermission}
-      id={id}
-      initialData={data}
-      initialState={formState}
-      isEditing={isEditing}
-      key={locale?.code}
+    <EntityConfigProvider
+      collectionConfig={collectionClientConfig}
+      globalConfig={globalClientConfig}
     >
-      {!RootViewOverride && (
-        <DocumentHeader
-          collectionConfig={collectionConfig}
-          globalConfig={globalConfig}
-          i18n={i18n}
-          payload={payload}
-          permissions={permissions}
-        />
-      )}
-      <HydrateAuthProvider permissions={permissions} />
-      {/**
-       * After bumping the Next.js canary to 104, and React to 19.0.0-rc-06d0b89e-20240801" we have to deepCopy the permissions object (https://github.com/payloadcms/payload/pull/7541).
-       * If both HydrateClientUser and RenderCustomComponent receive the same permissions object (same object reference), we get a
-       * "TypeError: Cannot read properties of undefined (reading '$$typeof')" error when loading up some version views - for example a versions
-       * view in the draft-posts collection of the versions test suite. RenderCustomComponent is what renders the versions view.
-       *
-       * // TODO: Revisit this in the future and figure out why this is happening. Might be a React/Next.js bug. We don't know why it happens, and a future React/Next version might unbreak this (keep an eye on this and remove deepCopyObjectSimple if that's the case)
-       */}
-      <EditDepthProvider
-        depth={1}
-        key={`${collectionSlug || globalSlug}${locale?.code ? `-${locale?.code}` : ''}`}
+      <DocumentInfoProvider
+        apiURL={apiURL}
+        collectionSlug={collectionConfig?.slug}
+        disableActions={false}
+        docPermissions={docPermissions}
+        globalSlug={globalConfig?.slug}
+        hasPublishPermission={hasPublishPermission}
+        hasSavePermission={hasSavePermission}
+        id={id}
+        initialData={data}
+        initialState={formState}
+        isEditing={isEditing}
+        key={locale?.code}
       >
-        {ErrorView ? (
-          <RenderComponent mappedComponent={ErrorView} />
-        ) : (
-          <RenderComponent
-            mappedComponent={
-              RootViewOverride ? RootViewOverride : CustomView ? CustomView : DefaultView
-            }
+        {!RootViewOverride && (
+          <DocumentHeader
+            collectionConfig={collectionConfig}
+            globalConfig={globalConfig}
+            i18n={i18n}
+            payload={payload}
+            permissions={permissions}
           />
         )}
-      </EditDepthProvider>
-    </DocumentInfoProvider>
+        <HydrateAuthProvider permissions={permissions} />
+        {/**
+         * After bumping the Next.js canary to 104, and React to 19.0.0-rc-06d0b89e-20240801" we have to deepCopy the permissions object (https://github.com/payloadcms/payload/pull/7541).
+         * If both HydrateClientUser and RenderCustomComponent receive the same permissions object (same object reference), we get a
+         * "TypeError: Cannot read properties of undefined (reading '$$typeof')" error when loading up some version views - for example a versions
+         * view in the draft-posts collection of the versions test suite. RenderCustomComponent is what renders the versions view.
+         *
+         * // TODO: Revisit this in the future and figure out why this is happening. Might be a React/Next.js bug. We don't know why it happens, and a future React/Next version might unbreak this (keep an eye on this and remove deepCopyObjectSimple if that's the case)
+         */}
+        <EditDepthProvider
+          depth={1}
+          key={`${collectionSlug || globalSlug}${locale?.code ? `-${locale?.code}` : ''}`}
+        >
+          {ErrorView ? (
+            <RenderComponent mappedComponent={ErrorView} />
+          ) : (
+            <RenderComponent
+              mappedComponent={
+                RootViewOverride ? RootViewOverride : CustomView ? CustomView : DefaultView
+              }
+            />
+          )}
+        </EditDepthProvider>
+      </DocumentInfoProvider>
+    </EntityConfigProvider>
   )
 }

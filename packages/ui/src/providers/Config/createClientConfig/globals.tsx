@@ -2,6 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientGlobalConfig,
   CreateMappedComponent,
+  Data,
   EditViewConfig,
   ImportMap,
   MappedView,
@@ -17,12 +18,14 @@ import { createClientFields } from './fields.js'
 
 export const createClientGlobalConfig = ({
   createMappedComponent,
+  data,
   global,
   i18n,
   importMap,
   payload,
 }: {
   createMappedComponent: CreateMappedComponent
+  data: Data
   global: SanitizedConfig['globals'][0]
   i18n: I18nClient
   importMap: ImportMap
@@ -33,6 +36,7 @@ export const createClientGlobalConfig = ({
   clientGlobal.fields = createClientFields({
     clientFields: clientGlobal?.fields || [],
     createMappedComponent,
+    data,
     fields: global.fields,
     i18n,
     importMap,
@@ -194,12 +198,14 @@ export const createClientGlobalConfig = ({
 
 export const createClientGlobalConfigs = ({
   createMappedComponent,
+  data,
   globals,
   i18n,
   importMap,
   payload,
 }: {
   createMappedComponent: CreateMappedComponent
+  data: Data
   globals: SanitizedConfig['globals']
   i18n: I18nClient
   importMap: ImportMap
@@ -212,6 +218,7 @@ export const createClientGlobalConfigs = ({
 
     clientGlobals[i] = createClientGlobalConfig({
       createMappedComponent,
+      data,
       global,
       i18n,
       importMap,

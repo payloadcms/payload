@@ -1,7 +1,7 @@
 'use client'
 import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig } from 'payload'
 
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import React, { createContext, useCallback, useContext, useState } from 'react'
 
 export type ClientConfigContext = {
   config: ClientConfig
@@ -12,8 +12,8 @@ export type EntityConfigContext = {
   collectionConfig?: ClientCollectionConfig
   globalConfig?: ClientGlobalConfig
   setEntityConfig: (args: {
-    collectionConfig: ClientCollectionConfig | null
-    globalConfig: ClientGlobalConfig | null
+    collectionConfig?: ClientCollectionConfig | null
+    globalConfig?: ClientGlobalConfig | null
   }) => void
 }
 
@@ -53,8 +53,8 @@ export const EntityConfigProvider: React.FC<{
 
   const setEntityConfigHandler = useCallback(
     (args: {
-      collectionConfig: ClientCollectionConfig | null
-      globalConfig: ClientGlobalConfig | null
+      collectionConfig?: ClientCollectionConfig | null
+      globalConfig?: ClientGlobalConfig | null
     }) => {
       const { collectionConfig, globalConfig } = args
 

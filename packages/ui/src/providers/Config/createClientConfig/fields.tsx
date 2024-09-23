@@ -6,6 +6,7 @@ import type {
   ClientBlock,
   ClientField,
   CreateMappedComponent,
+  Data,
   Field,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
@@ -44,6 +45,7 @@ function generateFieldPath(parentPath: string, name: string): string {
 export const createClientField = ({
   clientField = {} as ClientField,
   createMappedComponent,
+  data,
   field: incomingField,
   i18n,
   importMap,
@@ -52,6 +54,7 @@ export const createClientField = ({
 }: {
   clientField: ClientField
   createMappedComponent: CreateMappedComponent
+  data?: Data
   field: Field
   i18n: I18nClient
   importMap: ImportMap
@@ -377,6 +380,7 @@ export const createClientField = ({
   } = {
     serverProps: {
       clientField,
+      data,
       field: incomingField,
     },
   }
@@ -535,6 +539,7 @@ export const createClientField = ({
 export const createClientFields = ({
   clientFields,
   createMappedComponent,
+  data,
   disableAddingID,
   fields,
   i18n,
@@ -544,6 +549,7 @@ export const createClientFields = ({
 }: {
   clientFields: ClientField[]
   createMappedComponent: CreateMappedComponent
+  data?: Data
   disableAddingID?: boolean
   fields: Field[]
   i18n: I18nClient
@@ -558,6 +564,7 @@ export const createClientFields = ({
     const newField = createClientField({
       clientField: clientFields[i],
       createMappedComponent,
+      data,
       field,
       i18n,
       importMap,

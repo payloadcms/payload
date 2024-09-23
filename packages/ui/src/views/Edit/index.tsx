@@ -13,13 +13,15 @@ import { DocumentFields } from '../../elements/DocumentFields/index.js'
 import { Upload } from '../../elements/Upload/index.js'
 import { Form } from '../../forms/Form/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
-import { useConfig } from '../../providers/Config/index.js'
+import { useConfig, useEntityConfig } from '../../providers/Config/index.js'
 import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 // import { DocumentTakeOver } from '../../../elements/DocumentTakeOver/index.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
+import { useServerActions } from '../../providers/ServerActions/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { getFormState } from '../../utilities/getFormState.js'
@@ -34,10 +36,7 @@ const baseClass = 'collection-edit'
 // This component receives props only on _pages_
 // When rendered within a drawer, props are empty
 // This is solely to support custom edit views which get server-rendered
-export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
-  collectionConfig,
-  globalConfig,
-}) => {
+const EditView: React.FC<ClientSideEditViewProps> = ({ collectionConfig, globalConfig }) => {
   const {
     id,
     action,
@@ -74,6 +73,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     updateDocumentEditor,
   } = useDocumentInfo()
 
+  const { i18n } = useTranslation()
+
   const {
     config,
     config: {
@@ -82,6 +83,21 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       serverURL,
     },
   } = useConfig()
+
+  const payloadServerAction = useServerActions()
+
+  useEffect(() => {
+    const getNewConfig = async () => {
+      const res = (await payloadServerAction('render-config', {
+        collectionSlug,
+        languageCode: i18n.language,
+      })) as any as ClientCollectionConfig
+
+      setCollectionConfig(res)
+    }
+
+    void getNewConfig()
+  }, [payloadServerAction, collectionSlug, i18n.language])
 
   const depth = useEditDepth()
 
@@ -132,6 +148,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   if (globalSlug) {
     classes.push(`global-edit--${globalSlug}`)
   }
+
   if (collectionSlug) {
     classes.push(`collection-edit--${collectionSlug}`)
   }
@@ -143,6 +160,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
 
     return entitySlug
   })
+
   const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(() => {
     if (operation === 'create' && auth && !auth.disableLocalStrategy) {
       return true
@@ -527,4 +545,14 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       </OperationProvider>
     </main>
   )
+}
+
+export const DefaultEditView: React.FC = () => {
+  const { collectionConfig, globalConfig } = useEntityConfig()
+
+  if (!collectionConfig && !globalConfig) {
+    return null
+  }
+
+  return <EditView collectionConfig={collectionConfig} globalConfig={globalConfig} />
 }

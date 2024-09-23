@@ -62,6 +62,7 @@ export const createClientCollectionConfig = ({
   clientCollection.fields = createClientFields({
     clientFields: clientCollection?.fields || [],
     createMappedComponent,
+    data,
     fields: collection.fields,
     i18n,
     importMap,
