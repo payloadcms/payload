@@ -461,7 +461,7 @@ there4
       // This test ensures that the JSX within the code block is does not disrupt the main JSX parsing
       input: `
 <Banner>
-    \`https://<some link>.payloadcms.com/page\`
+  \`https://<some link>.payloadcms.com/page\`
 </Banner>
 `,
       blockNode: {

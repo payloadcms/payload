@@ -134,7 +134,7 @@ function getMarkdownTransformerForBlock(
         const props = exportResult.props ?? {}
 
         if (exportResult?.children?.length) {
-          return `<${nodeFields.blockType}${hasProps ? ' ' + propsToJSXString({ props }) : ''}>\n  ${exportResult.children}\n</${nodeFields.blockType}>`
+          return `<${nodeFields.blockType}${hasProps ? ' ' + propsToJSXString({ props }) : ''}>${exportResult.children}</${nodeFields.blockType}>`
         }
 
         return `<${nodeFields.blockType}${hasProps ? ' ' + propsToJSXString({ props }) : ''}/>`
@@ -178,7 +178,58 @@ function getMarkdownTransformerForBlock(
       const props = exportResult.props ?? {}
 
       if (exportResult?.children?.length) {
-        return `<${nodeFields.blockType}${hasProps ? ' ' + propsToJSXString({ props }) : ''}>\n  ${exportResult.children}\n</${nodeFields.blockType}>`
+        const children = exportResult.children
+        let sanitizedChildren = ''
+        // Ensure it has a leftpad of 2 spaces
+        if (children.includes('\n')) {
+          for (const child of children.split('\n')) {
+            if (child.trim().length === 0) {
+              sanitizedChildren += child
+              continue
+            }
+            let spaceBeginningCount = 0
+            for (const char of child) {
+              if (char === ' ') {
+                spaceBeginningCount++
+              } else {
+                break
+              }
+            }
+            let spacesToAdd = 2 - spaceBeginningCount
+
+            if (spacesToAdd < 0) {
+              spacesToAdd = 0
+            }
+
+            if (spacesToAdd === 0) {
+              sanitizedChildren += child + '\n'
+            } else {
+              sanitizedChildren += ' '.repeat(spacesToAdd) + child + '\n'
+            }
+          }
+        } else {
+          let spaceBeginningCount = 0
+          for (const char of children) {
+            if (char === ' ') {
+              spaceBeginningCount++
+            } else {
+              break
+            }
+          }
+          let spacesToAdd = 2 - spaceBeginningCount
+
+          if (spacesToAdd < 0) {
+            spacesToAdd = 0
+          }
+
+          if (spacesToAdd === 0) {
+            sanitizedChildren += children + '\n'
+          } else {
+            sanitizedChildren += ' '.repeat(spacesToAdd) + children + '\n'
+          }
+        }
+
+        return `<${nodeFields.blockType}${hasProps ? ' ' + propsToJSXString({ props }) : ''}>\n${sanitizedChildren}</${nodeFields.blockType}>`
       }
 
       return `<${nodeFields.blockType}${hasProps ? ' ' + propsToJSXString({ props }) : ''}/>`
