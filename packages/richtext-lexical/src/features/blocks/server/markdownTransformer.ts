@@ -302,7 +302,13 @@ function getMarkdownTransformerForBlock(
           linesInBetween = [line]
         }
 
-        const childrenString = linesInBetween.join('\n').trim()
+        let childrenString = ''
+        if (block?.jsx?.doNotTrimChildren) {
+          // Do not trim, but remove empty lines
+          childrenString = linesInBetween.filter((line) => line.trim().length > 0).join('\n')
+        } else {
+          childrenString = linesInBetween.join('\n').trim()
+        }
 
         const propsString: null | string = openMatch?.length > 1 ? openMatch[1]?.trim() : null
 

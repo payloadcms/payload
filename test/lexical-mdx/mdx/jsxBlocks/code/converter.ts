@@ -6,6 +6,7 @@ export const codeConverter: BlockJSX = {
     optional: true,
     regExp: /[ \t]*```$/,
   },
+  doNotTrimChildren: true,
   import: ({ openMatch, children, closeMatch }) => {
     const language = openMatch[1]
 

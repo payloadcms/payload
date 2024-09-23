@@ -30,6 +30,7 @@ type Tests = Array<{
     MarkOptional<SerializedBlockNode, 'children' | 'fields' | 'format' | 'type' | 'version'>,
     'fields'
   >
+  ignoreSpacesAndNewlines?: boolean
   input: string
   inputAfterConvertFromEditorJSON?: string
   rootChildren?: any[]
@@ -54,6 +55,7 @@ describe('Lexical MDX', () => {
 
   const INPUT_AND_OUTPUT: Tests = [
     {
+      inputAfterConvertFromEditorJSON: `<PackageInstallOptions packageId="444" uniqueId="xxx" update/>`,
       input: `
 <PackageInstallOptions
   packageId="444"
@@ -225,12 +227,31 @@ describe('Lexical MDX', () => {
     */
     {
       input: `
-\`\`\`ts\n hello\`\`\`
+\`\`\`ts
+hello\`\`\`
+`,
+      inputAfterConvertFromEditorJSON: `
+\`\`\`ts
+hello
+\`\`\`
 `,
       blockNode: {
         fields: {
           blockType: 'Code',
           code: 'hello',
+          language: 'ts',
+        },
+      },
+    },
+    {
+      input: `
+\`\`\`ts
+ hello\`\`\`
+`,
+      blockNode: {
+        fields: {
+          blockType: 'Code',
+          code: ' hello',
           language: 'ts',
         },
       },
@@ -345,6 +366,7 @@ there\`\`\`
       },
     },
     {
+      ignoreSpacesAndNewlines: true,
       input: `
 | Option            | Default route           | Description                                     |
 | ----------------- | ----------------------- | ----------------------------------------------- |
@@ -641,6 +663,7 @@ there\`\`\`
     input,
     inputAfterConvertFromEditorJSON,
     blockNode,
+    ignoreSpacesAndNewlines,
     rootChildren,
   } of INPUT_AND_OUTPUT) {
     it(`can convert to editor JSON: ${input}"`, () => {
@@ -703,10 +726,12 @@ there\`\`\`
         editorState,
       })
       // Remove all spaces and newlines
-      const resultNoSpace = result.replace(/\s/g, '')
-      const inputNoSpace = (inputAfterConvertFromEditorJSON ?? input).replace(/\s/g, '')
+      const resultNoSpace = ignoreSpacesAndNewlines ? result.replace(/\s/g, '') : result
+      const inputNoSpace = ignoreSpacesAndNewlines
+        ? (inputAfterConvertFromEditorJSON ?? input).replace(/\s/g, '')
+        : (inputAfterConvertFromEditorJSON ?? input)
 
-      console.log({ result, expected: inputAfterConvertFromEditorJSON ?? input })
+      console.log({ result: resultNoSpace, expected: inputNoSpace })
 
       expect(resultNoSpace).toBe(inputNoSpace)
     })

@@ -1334,6 +1334,12 @@ export type BlockJSX = {
    * Override the default regex used to search for the start of the block in the JSX. My default, it's <BlockSlugHere/>
    */
   customStartRegex?: RegExp
+  /**
+   * By default, all spaces at the beginning and end of the children (text between the open and close match)
+   * is removed.
+   * Set this to true to disable this behavior. Currently, this only works if `customEndRegex` is set.
+   */
+  doNotTrimChildren?: boolean
   export: (props: {
     fields: BlockFields
     lexicalToMarkdown?: (props: { editorState: Record<string, any> }) => string
