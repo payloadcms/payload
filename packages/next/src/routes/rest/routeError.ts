@@ -1,4 +1,9 @@
-import type { Collection, PayloadRequest, SanitizedConfig } from 'payload'
+import type {
+  Collection,
+  PayloadRequest,
+  SanitizedCollectionConfig,
+  SanitizedConfig,
+} from 'payload'
 
 import httpStatus from 'http-status'
 import { APIError, APIErrorName, ValidationErrorName } from 'payload'
@@ -78,7 +83,7 @@ export const routeError = async ({
   collection?: Collection
   config: Promise<SanitizedConfig> | SanitizedConfig
   err: APIError
-  req: Partial<PayloadRequest>
+  req: PayloadRequest
 }) => {
   let payload = req?.payload
 
@@ -117,6 +122,24 @@ export const routeError = async ({
 
   if (config.debug && config.debug === true) {
     response.stack = err.stack
+  }
+
+  if (collection) {
+    await collection.config.hooks.afterError?.reduce(async (promise, hook) => {
+      await promise
+
+      const result = await hook({
+        collection: collection.config,
+        context: req.context,
+        err,
+        req,
+        res: response,
+      })
+
+      if (result && result.response) {
+        response = result.response
+      }
+    }, Promise.resolve())
   }
 
   if (collection && typeof collection.config.hooks.afterError === 'function') {

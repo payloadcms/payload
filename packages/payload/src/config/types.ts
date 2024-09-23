@@ -895,7 +895,7 @@ export type Config = {
    * @see https://payloadcms.com/docs/hooks/overview
    */
   hooks?: {
-    afterError?: AfterErrorHook
+    afterError?: AfterErrorHook[]
   }
   /** i18n config settings */
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type

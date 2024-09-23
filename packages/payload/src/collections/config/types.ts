@@ -178,13 +178,16 @@ export type AfterOperationHook<TOperationGeneric extends CollectionSlug = string
       >
     >
 
-export type AfterErrorHook = (
-  err: Error,
-  res: unknown,
-  context: RequestContext,
+type AfterErrorResult = { response?: Response } | void
+
+export type AfterErrorHook = (args: {
   /** The collection which this hook is being run on. This is null if the AfterError hook was be added to the payload-wide config */
-  collection: null | SanitizedCollectionConfig,
-) => { response: any; status: number } | void
+  collection: null | SanitizedCollectionConfig
+  context: RequestContext
+  err: Error
+  req: PayloadRequest
+  res: Response
+}) => AfterErrorResult | Promise<AfterErrorResult>
 
 export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
@@ -402,7 +405,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   hooks?: {
     afterChange?: AfterChangeHook[]
     afterDelete?: AfterDeleteHook[]
-    afterError?: AfterErrorHook
+    afterError?: AfterErrorHook[]
     afterForgotPassword?: AfterForgotPasswordHook[]
     afterLogin?: AfterLoginHook[]
     afterLogout?: AfterLogoutHook[]
