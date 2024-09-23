@@ -1,11 +1,12 @@
 import type { AdminViewProps } from 'payload'
 
-import { Button, Translation } from '@payloadcms/ui'
+import { Button } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'
 
 import { ForgotPasswordForm } from './ForgotPasswordForm/index.js'
+import { ForgotPasswordClient } from './index.client.js'
 
 export { generateForgotPasswordMetadata } from './meta.js'
 
@@ -33,22 +34,7 @@ export const ForgotPasswordView: React.FC<AdminViewProps> = ({ initPageResult })
       <Fragment>
         <h1>{i18n.t('authentication:alreadyLoggedIn')}</h1>
         <p>
-          <Translation
-            elements={{
-              '0': ({ children }) => (
-                <Link
-                  href={formatAdminURL({
-                    adminRoute,
-                    path: accountRoute,
-                  })}
-                >
-                  {children}
-                </Link>
-              ),
-            }}
-            i18nKey="authentication:loggedInChangePassword"
-            t={i18n.t}
-          />
+          <ForgotPasswordClient accountRoute={accountRoute} adminRoute={adminRoute} />
         </p>
         <br />
         <Button buttonStyle="secondary" el="link" Link={Link} size="large" to={adminRoute}>
