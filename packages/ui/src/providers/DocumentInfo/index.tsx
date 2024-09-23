@@ -566,11 +566,7 @@ const DocumentInfo: React.FC<
     const abortController = new AbortController()
     const localeChanged = locale !== prevLocale.current
 
-    if (
-      ((collectionSlug || globalSlug) && initialStateFromProps === undefined) ||
-      initialDataFromProps === undefined ||
-      localeChanged
-    ) {
+    if ((collectionSlug || globalSlug) && (!initialStateFromProps || localeChanged)) {
       if (localeChanged) {
         prevLocale.current = locale
       }

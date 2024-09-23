@@ -9,6 +9,7 @@ import type { FormProps } from '../../forms/Form/index.js'
 
 import { DocumentControls } from '../../elements/DocumentControls/index.js'
 import { DocumentFields } from '../../elements/DocumentFields/index.js'
+import { LoadingOverlay } from '../../elements/Loading/index.js'
 // import { DocumentLocked } from '../../../elements/DocumentLocked/index.js'
 import { Upload } from '../../elements/Upload/index.js'
 import { Form } from '../../forms/Form/index.js'
@@ -532,7 +533,7 @@ export const DefaultEditView: React.FC = () => {
   const { collectionConfig, globalConfig } = useEntityConfig()
 
   if (!collectionConfig && !globalConfig) {
-    return null
+    return <LoadingOverlay />
   }
 
   return <EditView collectionConfig={collectionConfig} globalConfig={globalConfig} />

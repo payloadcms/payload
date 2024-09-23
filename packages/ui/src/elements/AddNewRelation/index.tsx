@@ -1,7 +1,5 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload'
 
-import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import type { Value } from '../../fields/Relationship/types.js'
@@ -10,7 +8,6 @@ import type { Props } from './types.js'
 
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
-import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
@@ -34,11 +31,10 @@ export const AddNewRelation: React.FC<Props> = ({
   const relatedCollections = useRelatedCollections(relationTo)
   const { permissions } = useAuth()
   const [show, setShow] = useState(false)
-  const {
-    config: { collections },
-  } = useConfig()
 
-  const [selectedCollection, setSelectedCollection] = useState<string>()
+  const [selectedCollection, setSelectedCollection] = useState<string>(
+    typeof relationTo === 'string' ? relationTo : '',
+  )
 
   const relatedToMany = relatedCollections.length > 1
 
@@ -113,10 +109,7 @@ export const AddNewRelation: React.FC<Props> = ({
 
   useEffect(() => {
     if (relatedToMany && selectedCollection) {
-      // the drawer must be rendered on the page before before opening it
-      // this is why 'selectedCollection' is different from 'collectionConfig'
       toggleDrawer()
-      setSelectedCollection(undefined)
     }
   }, [toggleDrawer, relatedToMany, selectedCollection])
 
