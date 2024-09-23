@@ -147,7 +147,7 @@ const DocumentInfo: React.FC<
   const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions?.permission)
 
   useEffect(() => {
-    if (!collectionConfig && !globalConfig) {
+    if (!collectionConfig && !globalConfig && initialState) {
       const getNewConfig = async () => {
         const res = (await payloadServerAction('render-config', {
           collectionSlug,
@@ -169,7 +169,6 @@ const DocumentInfo: React.FC<
     initialState,
     i18n.language,
     globalSlug,
-    data,
     setEntityConfig,
     collectionConfig,
     globalConfig,
