@@ -16,7 +16,7 @@ export const codeConverter: BlockJSX = {
     if (isSingleLineAndComplete) {
       return {
         language: '',
-        code: language + (children?.length ? ` ${children}` : ''),
+        code: language + (children?.length ? children : ''), // No need to add space to children as they are not trimmed
       }
     }
 
@@ -26,6 +26,11 @@ export const codeConverter: BlockJSX = {
     }
   },
   export: ({ fields }) => {
+    const isSingleLine = !fields.code.includes('\n') && !fields.language?.length
+    if (isSingleLine) {
+      return '```' + fields.code + '```'
+    }
+
     return '```' + (fields.language || '') + (fields.code ? '\n' + fields.code : '') + '\n' + '```'
   },
 }

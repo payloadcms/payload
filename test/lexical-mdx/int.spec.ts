@@ -53,7 +53,7 @@ describe('Lexical MDX', () => {
     editorConfig = (richTextField.editor as LexicalRichTextAdapter).editorConfig
   })
 
-  const INPUT_AND_OUTPUT: Tests = [
+  const INPUT_AND_OUTPUTBase: Tests = [
     {
       inputAfterConvertFromEditorJSON: `<PackageInstallOptions packageId="444" uniqueId="xxx" update/>`,
       input: `
@@ -248,6 +248,11 @@ hello
 \`\`\`ts
  hello\`\`\`
 `,
+      inputAfterConvertFromEditorJSON: `
+\`\`\`ts
+ hello
+\`\`\`
+`,
       blockNode: {
         fields: {
           blockType: 'Code',
@@ -260,10 +265,16 @@ hello
       input: `
 \`\`\`ts x\n hello\`\`\`
 `,
+      inputAfterConvertFromEditorJSON: `
+\`\`\`ts
+ x
+ hello
+\`\`\`
+`,
       blockNode: {
         fields: {
           blockType: 'Code',
-          code: 'x\n hello',
+          code: ' x\n hello',
           language: 'ts',
         },
       },
@@ -309,13 +320,19 @@ hello
     {
       input: `
 \`\`\`ts hello
-there
+there1
+\`\`\`
+`,
+      inputAfterConvertFromEditorJSON: `
+\`\`\`ts
+ hello
+there1
 \`\`\`
 `,
       blockNode: {
         fields: {
           blockType: 'Code',
-          code: 'hello\nthere',
+          code: ' hello\nthere1',
           language: 'ts',
         },
       },
@@ -323,13 +340,20 @@ there
     {
       input: `
 \`\`\`ts hello
-there
+there2
 !!\`\`\`
+`,
+      inputAfterConvertFromEditorJSON: `
+\`\`\`ts
+ hello
+there2
+!!
+\`\`\`
 `,
       blockNode: {
         fields: {
           blockType: 'Code',
-          code: 'hello\nthere\n!!',
+          code: ' hello\nthere2\n!!',
           language: 'ts',
         },
       },
@@ -338,12 +362,18 @@ there
       input: `
 \`\`\`ts
 Hello
-there\`\`\`
+there3\`\`\`
+`,
+      inputAfterConvertFromEditorJSON: `
+\`\`\`ts
+Hello
+there3
+\`\`\`
 `,
       blockNode: {
         fields: {
           blockType: 'Code',
-          code: 'Hello\nthere',
+          code: 'Hello\nthere3',
           language: 'ts',
         },
       },
@@ -355,12 +385,21 @@ Hello
 \`\`\`ts
 nested
 \`\`\`!
-there\`\`\`
+there4\`\`\`
+`,
+      inputAfterConvertFromEditorJSON: `
+\`\`\`ts
+Hello
+\`\`\`ts
+nested
+\`\`\`!
+there4
+\`\`\`
 `,
       blockNode: {
         fields: {
           blockType: 'Code',
-          code: 'Hello\n```ts\nnested\n```!\nthere',
+          code: 'Hello\n```ts\nnested\n```!\nthere4',
           language: 'ts',
         },
       },
@@ -659,6 +698,8 @@ there\`\`\`
     },
   ]
 
+  const INPUT_AND_OUTPUT: Tests = INPUT_AND_OUTPUTBase
+
   for (const {
     input,
     inputAfterConvertFromEditorJSON,
@@ -666,9 +707,31 @@ there\`\`\`
     ignoreSpacesAndNewlines,
     rootChildren,
   } of INPUT_AND_OUTPUT) {
-    it(`can convert to editor JSON: ${input}"`, () => {
+    let sanitizedInput = input
+    // Remove beginning and end newline of input if exists (since the input is a template string)
+    if (sanitizedInput.startsWith('\n')) {
+      sanitizedInput = sanitizedInput.slice(1)
+    }
+    if (sanitizedInput.endsWith('\n')) {
+      sanitizedInput = sanitizedInput.slice(0, -1)
+    }
+
+    let sanitizedInputAfterConvertFromEditorJSON = inputAfterConvertFromEditorJSON
+    if (sanitizedInputAfterConvertFromEditorJSON) {
+      if (sanitizedInputAfterConvertFromEditorJSON.startsWith('\n')) {
+        sanitizedInputAfterConvertFromEditorJSON = sanitizedInputAfterConvertFromEditorJSON.slice(1)
+      }
+      if (sanitizedInputAfterConvertFromEditorJSON.endsWith('\n')) {
+        sanitizedInputAfterConvertFromEditorJSON = sanitizedInputAfterConvertFromEditorJSON.slice(
+          0,
+          -1,
+        )
+      }
+    }
+
+    it(`can convert to editor JSON: ${sanitizedInput}"`, () => {
       const result = mdxToEditorJSON({
-        mdxWithFrontmatter: input,
+        mdxWithFrontmatter: sanitizedInput,
         editorConfig,
       })
 
@@ -702,7 +765,7 @@ there\`\`\`
       }
     })
 
-    it(`can convert from editor JSON: ${input}"`, () => {
+    it(`can convert from editor JSON: ${sanitizedInput}"`, () => {
       const editorState = {
         root: {
           children: blockNode
@@ -728,8 +791,8 @@ there\`\`\`
       // Remove all spaces and newlines
       const resultNoSpace = ignoreSpacesAndNewlines ? result.replace(/\s/g, '') : result
       const inputNoSpace = ignoreSpacesAndNewlines
-        ? (inputAfterConvertFromEditorJSON ?? input).replace(/\s/g, '')
-        : (inputAfterConvertFromEditorJSON ?? input)
+        ? (sanitizedInputAfterConvertFromEditorJSON ?? sanitizedInput).replace(/\s/g, '')
+        : (sanitizedInputAfterConvertFromEditorJSON ?? sanitizedInput)
 
       console.log({ result: resultNoSpace, expected: inputNoSpace })
 
