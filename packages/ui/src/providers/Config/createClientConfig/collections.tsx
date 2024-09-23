@@ -2,7 +2,6 @@ import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientCollectionConfig,
   CreateMappedComponent,
-  Data,
   EditViewConfig,
   FormState,
   ImportMap,

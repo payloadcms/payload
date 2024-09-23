@@ -4,6 +4,7 @@ import type {
   CreateMappedComponent,
   Data,
   EditViewConfig,
+  FormState,
   ImportMap,
   MappedView,
   Payload,
@@ -18,14 +19,14 @@ import { createClientFields } from './fields.js'
 
 export const createClientGlobalConfig = ({
   createMappedComponent,
-  data,
+  formState,
   global,
   i18n,
   importMap,
   payload,
 }: {
   createMappedComponent: CreateMappedComponent
-  data: Data
+  formState: FormState
   global: SanitizedConfig['globals'][0]
   i18n: I18nClient
   importMap: ImportMap
@@ -36,8 +37,8 @@ export const createClientGlobalConfig = ({
   clientGlobal.fields = createClientFields({
     clientFields: clientGlobal?.fields || [],
     createMappedComponent,
-    data,
     fields: global.fields,
+    formState,
     i18n,
     importMap,
     payload,
@@ -198,14 +199,14 @@ export const createClientGlobalConfig = ({
 
 export const createClientGlobalConfigs = ({
   createMappedComponent,
-  data,
+  formState,
   globals,
   i18n,
   importMap,
   payload,
 }: {
   createMappedComponent: CreateMappedComponent
-  data: Data
+  formState: FormState
   globals: SanitizedConfig['globals']
   i18n: I18nClient
   importMap: ImportMap
@@ -218,7 +219,7 @@ export const createClientGlobalConfigs = ({
 
     clientGlobals[i] = createClientGlobalConfig({
       createMappedComponent,
-      data,
+      formState,
       global,
       i18n,
       importMap,

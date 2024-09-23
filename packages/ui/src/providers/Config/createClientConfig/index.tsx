@@ -1,5 +1,4 @@
-import type { I18nClient } from '@payloadcms/translations'
-
+import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import {
   type ClientConfig,
   type ClientField,
@@ -156,12 +155,25 @@ export const createClientConfig = async ({
 
       return acc
     }, [] as ClientField[]),
-    labels: Object.entries(collection.labels).reduce((acc, [labelType, collectionLabel]) => {
-      if (typeof collectionLabel === 'function') {
-        acc[labelType] = collectionLabel({ t: i18n.t })
-      }
-      return acc
-    }, {}),
+    labels: Object.entries(collection.labels).reduce(
+      (acc, [labelType, collectionLabel]) => {
+        if (typeof collectionLabel === 'function') {
+          acc[labelType] = collectionLabel({ t: i18n.t })
+        }
+
+        if (typeof collectionLabel === 'object') {
+          acc[labelType] = getTranslation(collectionLabel, i18n)
+        }
+
+        acc[labelType] = collectionLabel
+
+        return acc
+      },
+      {
+        plural: '',
+        singular: '',
+      },
+    ),
     upload: collection.upload,
   }))
 

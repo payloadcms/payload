@@ -100,7 +100,6 @@ export const DefaultListView: React.FC<{
       const getNewConfig = async () => {
         const res = (await payloadServerAction('render-config', {
           collectionSlug,
-          data,
           languageCode: i18n.language,
         })) as any as ClientCollectionConfig
 

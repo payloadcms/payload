@@ -1,11 +1,9 @@
 import type { MappedComponent } from '../admin/types.js'
 import type { ClientCollectionConfig } from '../collections/config/client.js'
-import type { ClientGlobalConfig } from '../globals/config/client.js'
 import type {
   LivePreviewConfig,
   SanitizedConfig,
   ServerOnlyLivePreviewProperties,
-  StaticLabel,
 } from './types.js'
 
 export type ServerOnlyRootProperties = keyof Pick<
@@ -45,7 +43,10 @@ export type ClientConfig = {
   } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
   collections: ({
     admin: Pick<ClientCollectionConfig['admin'], 'enableRichTextRelationship'>
-    labels: StaticLabel
+    labels: {
+      plural: string
+      singular: string
+    }
   } & Pick<ClientCollectionConfig, 'slug' | 'upload'>)[]
   custom?: Record<string, any>
   globals: {
