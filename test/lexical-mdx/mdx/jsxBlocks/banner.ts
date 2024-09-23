@@ -15,10 +15,13 @@ export const BannerBlock: Block = {
       }
     },
     export: ({ fields, lexicalToMarkdown }) => {
+      const props: any = {}
+      if (fields.type) {
+        props.type = fields.type
+      }
+
       return {
-        props: {
-          type: fields.type,
-        },
+        props,
         children: lexicalToMarkdown({ editorState: fields.content }),
       }
     },

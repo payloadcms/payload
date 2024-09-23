@@ -130,11 +130,14 @@ function getMarkdownTransformerForBlock(
           return exportResult
         }
 
+        const hasProps = exportResult.props && Object.keys(exportResult.props)?.length > 0
+        const props = exportResult.props ?? {}
+
         if (exportResult?.children?.length) {
-          return `<${nodeFields.blockType}${exportResult.props ? ' ' + propsToJSXString({ props: exportResult.props }) : ''}>\n  ${exportResult.children}\n</${nodeFields.blockType}>`
+          return `<${nodeFields.blockType}${hasProps ? ' ' + propsToJSXString({ props }) : ''}>\n  ${exportResult.children}\n</${nodeFields.blockType}>`
         }
 
-        return `<${nodeFields.blockType}${exportResult.props ? ' ' + propsToJSXString({ props: exportResult.props }) : ''}/>`
+        return `<${nodeFields.blockType}${hasProps ? ' ' + propsToJSXString({ props }) : ''}/>`
       },
       regExp: /___ignoreignoreignore___/g,
     }))
@@ -171,11 +174,14 @@ function getMarkdownTransformerForBlock(
         return exportResult
       }
 
+      const hasProps = exportResult.props && Object.keys(exportResult.props)?.length > 0
+      const props = exportResult.props ?? {}
+
       if (exportResult?.children?.length) {
-        return `<${nodeFields.blockType}${exportResult.props ? ' ' + propsToJSXString({ props: exportResult.props }) : ''}>\n  ${exportResult.children}\n</${nodeFields.blockType}>`
+        return `<${nodeFields.blockType}${hasProps ? ' ' + propsToJSXString({ props }) : ''}>\n  ${exportResult.children}\n</${nodeFields.blockType}>`
       }
 
-      return `<${nodeFields.blockType}${exportResult.props ? ' ' + propsToJSXString({ props: exportResult.props }) : ''}/>`
+      return `<${nodeFields.blockType}${hasProps ? ' ' + propsToJSXString({ props }) : ''}/>`
     },
     handleImportAfterStartMatch: block.jsx?.customEndRegex
       ? undefined
