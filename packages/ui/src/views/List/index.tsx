@@ -1,39 +1,8 @@
 'use client'
 
-import type { ClientCollectionConfig, PayloadServerAction } from 'payload'
+import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import {
-  Button,
-  DeleteMany,
-  EditMany,
-  EntityConfigProvider,
-  Gutter,
-  ListControls,
-  ListHeader,
-  ListSelection,
-  Pagination,
-  PerPage,
-  PublishMany,
-  RelationshipProvider,
-  RenderComponent,
-  SelectionProvider,
-  SetViewActions,
-  StaggeredShimmers,
-  Table,
-  TableColumnsProvider,
-  UnpublishMany,
-  useAuth,
-  useBulkUpload,
-  useEditDepth,
-  useListInfo,
-  useListQuery,
-  useModal,
-  useStepNav,
-  useTranslation,
-  useWindowInfo,
-  ViewDescription,
-} from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import { useRouter } from 'next/navigation.js'
 import { formatFilesize, isNumber } from 'payload/shared'
@@ -41,6 +10,37 @@ import React, { Fragment, useEffect, useState } from 'react'
 
 import type { ListPreferences } from './types.js'
 
+import { useBulkUpload } from '../../elements/BulkUpload/index.js'
+import { Button } from '../../elements/Button/index.js'
+import { DeleteMany } from '../../elements/DeleteMany/index.js'
+import { EditMany } from '../../elements/EditMany/index.js'
+import { Gutter } from '../../elements/Gutter/index.js'
+import { ListControls } from '../../elements/ListControls/index.js'
+import { ListHeader } from '../../elements/ListHeader/index.js'
+import { ListSelection } from '../../elements/ListSelection/index.js'
+import { LoadingOverlay } from '../../elements/Loading/index.js'
+import { useModal } from '../../elements/Modal/index.js'
+import { Pagination } from '../../elements/Pagination/index.js'
+import { PerPage } from '../../elements/PerPage/index.js'
+import { PublishMany } from '../../elements/PublishMany/index.js'
+import { StaggeredShimmers } from '../../elements/ShimmerEffect/index.js'
+import { useStepNav } from '../../elements/StepNav/index.js'
+import { Table } from '../../elements/Table/index.js'
+import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
+import { TableColumnsProvider } from '../../elements/TableColumns/index.js'
+import { UnpublishMany } from '../../elements/UnpublishMany/index.js'
+import { ViewDescription } from '../../elements/ViewDescription/index.js'
+import { SetViewActions } from '../../providers/Actions/index.js'
+import { useAuth } from '../../providers/Auth/index.js'
+import { EntityConfigProvider } from '../../providers/Config/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useListInfo } from '../../providers/ListInfo/index.js'
+import { useListQuery } from '../../providers/ListQuery/index.js'
+import { SelectionProvider } from '../../providers/Selection/index.js'
+import { useServerActions } from '../../providers/ServerActions/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import './index.scss'
 
 const baseClass = 'collection-list'
@@ -49,15 +49,11 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 export const DefaultListView: React.FC<{
   collectionConfig: ClientCollectionConfig
   listPreferences: ListPreferences
-  payloadServerAction: PayloadServerAction
   preferenceKey: string
 }> = (props) => {
-  const {
-    collectionConfig: collectionConfigFromProps,
-    listPreferences,
-    payloadServerAction,
-    preferenceKey,
-  } = props
+  const { collectionConfig: collectionConfigFromProps, listPreferences, preferenceKey } = props
+
+  const payloadServerAction = useServerActions()
 
   const { user } = useAuth()
 
@@ -102,10 +98,11 @@ export const DefaultListView: React.FC<{
   useEffect(() => {
     if (!collectionConfig) {
       const getNewConfig = async () => {
-        const res = await payloadServerAction('render-config', {
+        const res = (await payloadServerAction('render-config', {
           collectionSlug,
           data,
-        })
+          languageCode: i18n.language,
+        })) as any as ClientCollectionConfig
 
         setCollectionConfig(res)
       }
@@ -152,6 +149,10 @@ export const DefaultListView: React.FC<{
   }, [setStepNav, labels, drawerDepth])
 
   const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
+
+  if (!collectionConfig) {
+    return <LoadingOverlay />
+  }
 
   return (
     <EntityConfigProvider collectionConfig={collectionConfig}>
@@ -205,7 +206,7 @@ export const DefaultListView: React.FC<{
                   )}
                 </ListHeader>
               )}
-              <ListControls collectionConfig={collectionConfig} fields={fields} />
+              <ListControls collectionConfig={collectionConfig} />
               <RenderComponent mappedComponent={beforeListTable} />
               {!data.docs && (
                 <StaggeredShimmers

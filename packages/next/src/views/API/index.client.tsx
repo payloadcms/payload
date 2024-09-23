@@ -7,6 +7,7 @@ import {
   Gutter,
   MinimizeMaximizeIcon,
   NumberField,
+  SetDocumentStepNav,
   SetViewActions,
   useConfig,
   useDocumentInfo,
@@ -18,7 +19,6 @@ import { useSearchParams } from 'next/navigation.js'
 import * as React from 'react'
 import { toast } from 'sonner'
 
-import { SetDocumentStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'
 import './index.scss'
 import { LocaleSelector } from './LocaleSelector/index.js'
 import { RenderJSON } from './RenderJSON/index.js'

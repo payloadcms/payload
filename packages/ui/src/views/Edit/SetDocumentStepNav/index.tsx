@@ -2,17 +2,17 @@
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import {
-  type StepNavItem,
-  useConfig,
-  useDocumentInfo,
-  useEditDepth,
-  useEntityVisibility,
-  useStepNav,
-  useTranslation,
-} from '@payloadcms/ui'
-import { formatAdminURL } from '@payloadcms/ui/shared'
 import { useEffect } from 'react'
+
+import type { StepNavItem } from '../../../elements/StepNav/index.js'
+
+import { useStepNav } from '../../../elements/StepNav/index.js'
+import { useConfig } from '../../../providers/Config/index.js'
+import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
+import { useEditDepth } from '../../../providers/EditDepth/index.js'
+import { useEntityVisibility } from '../../../providers/EntityVisibility/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
+import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
 
 export const SetDocumentStepNav: React.FC<{
   collectionSlug?: SanitizedCollectionConfig['slug']

@@ -1,14 +1,14 @@
 'use client'
 
-import type { ClientCollectionConfig } from 'packages/payload/src/index.js'
+import type { ClientCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { LoadingOverlay } from '@payloadcms/ui'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { DocumentDrawerProps } from './types.js'
 
+import { LoadingOverlay } from '../../elements/Loading/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { RenderComponent } from '../../providers/Config/RenderComponent.js'
@@ -16,6 +16,7 @@ import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentI
 import { useLocale } from '../../providers/Locale/index.js'
 import { useServerActions } from '../../providers/ServerActions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { DefaultEditView } from '../../views/Edit/index.js'
 import { useRelatedCollections } from '../AddNewRelation/useRelatedCollections.js'
 import { Gutter } from '../Gutter/index.js'
 import { IDLabel } from '../IDLabel/index.js'
@@ -55,18 +56,16 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   useEffect(() => {
     const getNewConfig = async () => {
-      const res = await payloadServerAction('render-config', {
+      const res = (await payloadServerAction('render-config', {
         collectionSlug,
         languageCode: i18n.language,
-      })
-
-      console.log('res', res)
+      })) as any as ClientCollectionConfig
 
       setCollectionConfig(res)
     }
 
     void getNewConfig()
-  }, [payloadServerAction, collectionSlug])
+  }, [payloadServerAction, collectionSlug, i18n.language])
 
   const CustomEdit = collectionConfig?.admin.components.views.edit.default.Component
 
@@ -176,7 +175,11 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       redirectAfterDelete={redirectAfterDelete !== undefined ? redirectAfterDelete : false}
       redirectAfterDuplicate={redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false}
     >
-      <RenderComponent mappedComponent={CustomEdit} />
+      {CustomEdit ? (
+        <RenderComponent mappedComponent={CustomEdit} />
+      ) : (
+        <DefaultEditView collectionConfig={collectionConfig} />
+      )}
     </DocumentInfoProvider>
   )
 }

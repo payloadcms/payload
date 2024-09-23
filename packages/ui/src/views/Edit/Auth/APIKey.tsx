@@ -2,19 +2,18 @@
 import type { PayloadRequest, TextFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import {
-  CopyToClipboard,
-  FieldLabel,
-  GenerateConfirmation,
-  useConfig,
-  useDocumentInfo,
-  useField,
-  useFormFields,
-  useTranslation,
-} from '@payloadcms/ui'
 import { text } from 'payload/shared'
 import React, { useEffect, useMemo, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
+
+import { CopyToClipboard } from '../../../elements/CopyToClipboard/index.js'
+import { GenerateConfirmation } from '../../../elements/GenerateConfirmation/index.js'
+import { FieldLabel } from '../../../fields/FieldLabel/index.js'
+import { useFormFields } from '../../../forms/Form/context.js'
+import { useField } from '../../../forms/useField/index.js'
+import { useConfig } from '../../../providers/Config/index.js'
+import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 
 const path = 'apiKey'
 const baseClass = 'api-key'

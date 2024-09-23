@@ -7,14 +7,13 @@ import {
   type FormProps,
   FormSubmit,
   PasswordField,
+  RenderEmailAndUsernameFields,
   RenderFields,
   useConfig,
   useTranslation,
 } from '@payloadcms/ui'
 import { getFormState } from '@payloadcms/ui/shared'
 import React from 'react'
-
-import { RenderEmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
 
 export const CreateFirstUserClient: React.FC<{
   initialState: FormState

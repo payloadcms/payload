@@ -31,11 +31,7 @@ export const EditView: PayloadServerReactComponent<EditViewComponent> = async (p
 
   return (
     <EntityConfigProvider collectionConfig={collectionConfig} globalConfig={globalConfig}>
-      <EditViewClient
-        collectionConfig={collectionConfig}
-        globalConfig={globalConfig}
-        payloadServerAction={payloadServerAction}
-      />
+      <EditViewClient collectionConfig={collectionConfig} globalConfig={globalConfig} />
     </EntityConfigProvider>
   )
 }

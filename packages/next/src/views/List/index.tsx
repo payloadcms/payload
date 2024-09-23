@@ -6,15 +6,12 @@ import {
   ListQueryProvider,
   LoadingOverlay,
 } from '@payloadcms/ui'
+import { DefaultListView, type ListPreferences } from '@payloadcms/ui'
 import { formatAdminURL, RenderComponent } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import { mergeListSearchAndWhere } from 'payload'
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
-
-import type { ListPreferences } from './Default/types.js'
-
-import { DefaultListView } from './Default/index.js'
 
 export { generateListMetadata } from './meta.js'
 

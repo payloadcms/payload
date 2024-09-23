@@ -2,28 +2,28 @@
 
 import type { ClientSideEditViewProps, ClientUser } from 'payload'
 
-import {
-  DocumentControls,
-  DocumentFields,
-  Form,
-  type FormProps,
-  OperationProvider,
-  RenderComponent,
-  Upload,
-  useAuth,
-  useConfig,
-  useDocumentEvents,
-  useDocumentInfo,
-  useEditDepth,
-  useUploadEdits,
-} from '@payloadcms/ui'
-import { formatAdminURL, getFormState } from '@payloadcms/ui/shared'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
-import { DocumentLocked } from '../../../elements/DocumentLocked/index.js'
-import { DocumentTakeOver } from '../../../elements/DocumentTakeOver/index.js'
-import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving/index.js'
+import type { FormProps } from '../../forms/Form/index.js'
+
+import { DocumentControls } from '../../elements/DocumentControls/index.js'
+import { DocumentFields } from '../../elements/DocumentFields/index.js'
+// import { DocumentLocked } from '../../../elements/DocumentLocked/index.js'
+import { Upload } from '../../elements/Upload/index.js'
+import { Form } from '../../forms/Form/index.js'
+import { useAuth } from '../../providers/Auth/index.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
+import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
+// import { DocumentTakeOver } from '../../../elements/DocumentTakeOver/index.js'
+import { OperationProvider } from '../../providers/Operation/index.js'
+import { useUploadEdits } from '../../providers/UploadEdits/index.js'
+import { formatAdminURL } from '../../utilities/formatAdminURL.js'
+import { getFormState } from '../../utilities/getFormState.js'
+// import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving/index.js'
 import { Auth } from './Auth/index.js'
 import './index.scss'
 import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
@@ -419,7 +419,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
           onSuccess={onSave}
         >
           {BeforeDocument}
-          {isLockingEnabled && shouldShowDocumentLockedModal && !isReadOnlyForIncomingUser && (
+          {/* {isLockingEnabled && shouldShowDocumentLockedModal && !isReadOnlyForIncomingUser && (
             <DocumentLocked
               handleGoBack={handleGoBack}
               isActive={shouldShowDocumentLockedModal}
@@ -431,8 +431,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
               updatedAt={lastUpdateTime}
               user={currentEditor}
             />
-          )}
-          {isLockingEnabled && showTakeOverModal && (
+          )} */}
+          {/* {isLockingEnabled && showTakeOverModal && (
             <DocumentTakeOver
               handleBackToDashboard={handleBackToDashboard}
               isActive={showTakeOverModal}
@@ -441,8 +441,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
                 setShowTakeOverModal(false)
               }}
             />
-          )}
-          {!isReadOnlyForIncomingUser && preventLeaveWithoutSaving && <LeaveWithoutSaving />}
+          )} */}
+          {/* {!isReadOnlyForIncomingUser && preventLeaveWithoutSaving && <LeaveWithoutSaving />} */}
           <SetDocumentStepNav
             collectionSlug={collectionConfig?.slug}
             globalSlug={globalConfig?.slug}

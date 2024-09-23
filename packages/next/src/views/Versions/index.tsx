@@ -1,11 +1,10 @@
 import type { EditViewComponent, PaginatedDocs, PayloadServerReactComponent } from 'payload'
 
-import { Gutter, ListQueryProvider } from '@payloadcms/ui'
+import { Gutter, ListQueryProvider, SetDocumentStepNav } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
 import React from 'react'
 
-import { SetDocumentStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'
 import { buildVersionColumns } from './buildColumns.js'
 import { getLatestVersion } from './getLatestVersion.js'
 import { VersionsViewClient } from './index.client.js'

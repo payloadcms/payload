@@ -20,6 +20,7 @@ import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useServerActions } from '../../providers/ServerActions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { DefaultListView } from '../../views/List/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { LoadingOverlay } from '../Loading/index.js'
 import { Pill } from '../Pill/index.js'
@@ -90,14 +91,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     return collectionSlugs.includes(slug)
   })
 
-  const [selectedCollectionConfig, setSelectedCollectionConfig] = useState<ClientCollectionConfig>(
-    () => {
-      return (
-        enabledCollectionConfigs.find(({ slug }) => slug === selectedCollection) ||
-        enabledCollectionConfigs?.[0]
-      )
-    },
-  )
+  const [selectedCollectionConfig, setSelectedCollectionConfig] = useState<ClientCollectionConfig>()
 
   const [selectedOption, setSelectedOption] = useState<Option | Option[]>(() =>
     selectedCollectionConfig
@@ -110,18 +104,18 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   useEffect(() => {
     const getNewConfig = async () => {
-      const res = await payloadServerAction('render-config', {
+      const res = (await payloadServerAction('render-config', {
         collectionSlug: selectedCollection,
         languageCode: i18n.language,
-      })
+      })) as any as ClientCollectionConfig
 
       setSelectedCollectionConfig(res)
     }
 
     void getNewConfig()
-  }, [payloadServerAction, selectedCollection])
+  }, [payloadServerAction, selectedCollection, i18n.language])
 
-  const List = selectedCollectionConfig?.admin?.components.views.list.Component
+  const CustomList = selectedCollectionConfig?.admin?.components?.views?.list?.Component
 
   // allow external control of selected collection, same as the initial state logic above
   useEffect(() => {
@@ -319,6 +313,8 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     return null
   }
 
+  console.log('selectedCollectionConfig', selectedCollectionConfig)
+
   return (
     <>
       {showLoadingOverlay && <LoadingOverlay />}
@@ -419,7 +415,11 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
             enableRowSelections={enableRowSelections}
             preferenceKey={preferencesKey}
           >
-            <RenderComponent mappedComponent={List} />
+            {CustomList ? (
+              <RenderComponent mappedComponent={CustomList} />
+            ) : (
+              <DefaultListView collectionConfig={selectedCollectionConfig} />
+            )}
             <DocumentDrawer onSave={onCreateNew} />
           </TableColumnsProvider>
         </ListQueryProvider>

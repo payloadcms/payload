@@ -2,10 +2,8 @@
 
 import type { ClientSideEditViewProps } from 'payload'
 
-import { RenderComponent, SetViewActions } from '@payloadcms/ui'
+import { DefaultEditView, RenderComponent, SetViewActions } from '@payloadcms/ui'
 import React, { Fragment } from 'react'
-
-import { DefaultEditView } from './Default/index.js'
 
 export const EditViewClient: React.FC<ClientSideEditViewProps> = (props) => {
   const { collectionConfig, globalConfig } = props

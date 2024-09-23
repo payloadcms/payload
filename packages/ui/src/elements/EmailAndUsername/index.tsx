@@ -2,9 +2,13 @@
 
 import type { FieldPermissions, LoginWithUsernameOptions } from 'payload'
 
-import { EmailField, RenderFields, TextField, useTranslation } from '@payloadcms/ui'
 import { email, username } from 'payload/shared'
 import React from 'react'
+
+import { EmailField } from '../../fields/Email/index.js'
+import { TextField } from '../../fields/Text/index.js'
+import { RenderFields } from '../../forms/RenderFields/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 
 type Props = {
   readonly loginWithUsername?: false | LoginWithUsernameOptions

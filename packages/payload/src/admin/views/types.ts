@@ -64,6 +64,7 @@ export type InitPageResult = {
 export type ServerSideEditViewProps = {
   readonly initPageResult: InitPageResult
   readonly params: { [key: string]: string | string[] | undefined }
+  readonly payloadServerAction: PayloadServerAction
   readonly routeSegments: string[]
   readonly searchParams: { [key: string]: string | string[] | undefined }
 } & ClientSideEditViewProps
@@ -71,5 +72,4 @@ export type ServerSideEditViewProps = {
 export type ClientSideEditViewProps = {
   collectionConfig?: ClientCollectionConfig
   globalConfig?: ClientGlobalConfig
-  payloadServerAction: PayloadServerAction
 }

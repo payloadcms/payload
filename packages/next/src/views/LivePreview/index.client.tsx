@@ -14,6 +14,8 @@ import {
   DocumentFields,
   Form,
   OperationProvider,
+  SetDocumentStepNav,
+  SetDocumentTitle,
   SetViewActions,
   useAuth,
   useConfig,
@@ -25,8 +27,6 @@ import { getFormState } from '@payloadcms/ui/shared'
 import React, { Fragment, useCallback } from 'react'
 
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
-import { SetDocumentStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'
-import { SetDocumentTitle } from '../Edit/Default/SetDocumentTitle/index.js'
 import { useLivePreviewContext } from './Context/context.js'
 import { LivePreviewProvider } from './Context/index.js'
 import './index.scss'

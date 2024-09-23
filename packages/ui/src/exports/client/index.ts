@@ -242,3 +242,11 @@ export { Select as SelectCondition } from '../../elements/WhereBuilder/Condition
 export { RelationshipField as RelationshipCondition } from '../../elements/WhereBuilder/Condition/Relationship/index.js'
 export { NumberField as NumberCondition } from '../../elements/WhereBuilder/Condition/Number/index.js'
 export { DateField as DateCondition } from '../../elements/WhereBuilder/Condition/Date/index.js'
+export { RenderEmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
+
+export { DefaultListView } from '../../views/List/index.js'
+export type { ListPreferences } from '../../views/List/types.js'
+
+export { DefaultEditView } from '../../views/Edit/index.js'
+export { SetDocumentStepNav } from '../../views/Edit/SetDocumentStepNav/index.js'
+export { SetDocumentTitle } from '../../views/Edit/SetDocumentTitle/index.js'
