@@ -130,6 +130,7 @@ export const createClientConfig = async ({
     slug: collection.slug,
     admin: {
       enableRichTextRelationship: collection.admin.enableRichTextRelationship,
+      group: collection.admin.group,
       useAsTitle: collection.admin.useAsTitle,
     },
     auth: {
@@ -179,6 +180,10 @@ export const createClientConfig = async ({
 
   clientConfig.globals = config.globals.map((global) => ({
     slug: global.slug,
+    admin: {
+      group: global.admin.group,
+    },
+    label: typeof global.label === 'string' ? global.label : getTranslation(global.label, i18n),
   }))
 
   // clientConfig.collections = createClientCollectionConfigs({

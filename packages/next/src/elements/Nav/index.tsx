@@ -90,7 +90,7 @@ export const DefaultNav: React.FC<NavProps> = (props) => {
     <NavWrapper baseClass={baseClass}>
       <nav className={`${baseClass}__wrap`}>
         <RenderComponent mappedComponent={mappedBeforeNavLinks} />
-        {/* <DefaultNavClient groups={groups} /> */}
+        <DefaultNavClient groups={groups} />
         <RenderComponent mappedComponent={mappedAfterNavLinks} />
         <div className={`${baseClass}__controls`}>
           <Logout />

@@ -30,21 +30,18 @@ export const DefaultNavClient: React.FC<{
       {groups.map(({ entities, label }, key) => {
         return (
           <NavGroup key={key} label={label}>
-            {entities.map(({ type, entity }, i) => {
-              let entityLabel: string
+            {entities.map(({ slug, type, label }, i) => {
               let href: string
               let id: string
 
               if (type === EntityType.collection) {
-                href = formatAdminURL({ adminRoute, path: `/collections/${entity.slug}` })
-                entityLabel = getTranslation(entity.labels.plural, i18n)
-                id = `nav-${entity.slug}`
+                href = formatAdminURL({ adminRoute, path: `/collections/${slug}` })
+                id = `nav-${slug}`
               }
 
               if (type === EntityType.global) {
-                href = formatAdminURL({ adminRoute, path: `/globals/${entity.slug}` })
-                entityLabel = getTranslation(entity.label, i18n)
-                id = `nav-global-${entity.slug}`
+                href = formatAdminURL({ adminRoute, path: `/globals/${slug}` })
+                id = `nav-global-${slug}`
               }
 
               const Link = (LinkWithDefault.default ||
@@ -65,7 +62,7 @@ export const DefaultNavClient: React.FC<{
                   tabIndex={!navOpen ? -1 : undefined}
                 >
                   {activeCollection && <div className={`${baseClass}__link-indicator`} />}
-                  <span className={`${baseClass}__link-label`}>{entityLabel}</span>
+                  <span className={`${baseClass}__link-label`}>{getTranslation(label, i18n)}</span>
                 </LinkElement>
               )
             })}

@@ -14,7 +14,11 @@ import type { DeepRequired } from 'ts-essentials'
 
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type { DocumentTabConfig, RichTextAdapter } from '../admin/types.js'
-import type { AdminViewConfig, ServerSideEditViewProps } from '../admin/views/types.js'
+import type {
+  AdminViewConfig,
+  ServerSideEditViewProps,
+  VisibleEntities,
+} from '../admin/views/types.js'
 import type { Permissions } from '../auth/index.js'
 import type {
   AddToImportMap,
@@ -396,6 +400,7 @@ export type ServerProps = {
   readonly permissions?: Permissions
   readonly searchParams?: { [key: string]: string | string[] | undefined }
   readonly user?: TypedUser
+  readonly visibleEntities?: VisibleEntities
 } & ClientProps
 
 export const serverProps: (keyof ServerProps)[] = [

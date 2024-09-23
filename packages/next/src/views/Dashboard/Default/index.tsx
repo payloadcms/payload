@@ -89,8 +89,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                 <div className={`${baseClass}__group`} key={groupIndex}>
                   <h2 className={`${baseClass}__label`}>{label}</h2>
                   <ul className={`${baseClass}__card-list`}>
-                    {entities.map(({ type, entity }, entityIndex) => {
-                      let title: string
+                    {entities.map(({ slug, type, label }, entityIndex) => {
                       let buttonAriaLabel: string
                       let createHREF: string
                       let href: string
@@ -99,37 +98,30 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                       let userEditing = null
 
                       if (type === EntityType.collection) {
-                        title = getTranslation(entity.labels.plural, i18n)
+                        buttonAriaLabel = t('general:showAllLabel', { label })
 
-                        buttonAriaLabel = t('general:showAllLabel', { label: title })
-
-                        href = formatAdminURL({ adminRoute, path: `/collections/${entity.slug}` })
+                        href = formatAdminURL({ adminRoute, path: `/collections/${slug}` })
 
                         createHREF = formatAdminURL({
                           adminRoute,
-                          path: `/collections/${entity.slug}/create`,
+                          path: `/collections/${slug}/create`,
                         })
 
-                        hasCreatePermission =
-                          permissions?.collections?.[entity.slug]?.create?.permission
+                        hasCreatePermission = permissions?.collections?.[slug]?.create?.permission
                       }
 
                       if (type === EntityType.global) {
-                        title = getTranslation(entity.label, i18n)
-
                         buttonAriaLabel = t('general:editLabel', {
-                          label: getTranslation(entity.label, i18n),
+                          label: getTranslation(label, i18n),
                         })
 
                         href = formatAdminURL({
                           adminRoute,
-                          path: `/globals/${entity.slug}`,
+                          path: `/globals/${slug}`,
                         })
 
                         // Find the lock status for the global
-                        const globalLockData = globalData.find(
-                          (global) => global.slug === entity.slug,
-                        )
+                        const globalLockData = globalData.find((global) => global.slug === slug)
                         if (globalLockData) {
                           lockStatus = globalLockData.data._isLocked
                           userEditing = globalLockData.data._userEditing
@@ -145,7 +137,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                               ) : hasCreatePermission && type === EntityType.collection ? (
                                 <Button
                                   aria-label={t('general:createNewLabel', {
-                                    label: getTranslation(entity.labels.singular, i18n),
+                                    label,
                                   })}
                                   buttonStyle="icon-label"
                                   el="link"
@@ -159,9 +151,9 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                             }
                             buttonAriaLabel={buttonAriaLabel}
                             href={href}
-                            id={`card-${entity.slug}`}
+                            id={`card-${slug}`}
                             Link={Link}
-                            title={title}
+                            title={getTranslation(label, i18n)}
                             titleAs="h3"
                           />
                         </li>

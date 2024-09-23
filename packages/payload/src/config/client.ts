@@ -42,7 +42,7 @@ export type ClientConfig = {
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
   collections: ({
-    admin: Pick<ClientCollectionConfig['admin'], 'enableRichTextRelationship'>
+    admin: Pick<ClientCollectionConfig['admin'], 'enableRichTextRelationship' | 'group'>
     labels: {
       plural: string
       singular: string
@@ -50,6 +50,8 @@ export type ClientConfig = {
   } & Pick<ClientCollectionConfig, 'slug' | 'upload'>)[]
   custom?: Record<string, any>
   globals: {
+    admin: Pick<SanitizedConfig['globals'][0]['admin'], 'group'>
+    label: string
     slug: string
   }[]
 } & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | ServerOnlyRootProperties>
