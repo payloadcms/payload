@@ -373,7 +373,19 @@ export const DefaultEditView: React.FC = () => {
         return
       }
 
-      if ((id || globalSlug) && documentIsLocked) {
+      const currentPath = window.location.pathname
+
+      const documentId = id || globalSlug
+
+      // Routes where we do NOT want to unlock the document
+      const stayWithinDocumentPaths = ['preview', 'api', 'versions']
+
+      const isStayingWithinDocument = stayWithinDocumentPaths.some((path) =>
+        currentPath.includes(path),
+      )
+
+      // Unlock the document only if we're actually navigating away from the document
+      if (documentId && documentIsLocked && !isStayingWithinDocument) {
         // Check if this user is still the current editor
         if (documentLockStateRef.current?.user?.id === user.id) {
           void unlockDocument(id, collectionSlug ?? globalSlug)
@@ -494,6 +506,7 @@ export const DefaultEditView: React.FC = () => {
                       requirePassword={!id}
                       setSchemaPath={setSchemaPath}
                       setValidateBeforeSubmit={setValidateBeforeSubmit}
+                      // eslint-disable-next-line react-compiler/react-compiler
                       useAPIKey={auth.useAPIKey}
                       username={data?.username}
                       verify={auth.verify}
