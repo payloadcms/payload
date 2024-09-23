@@ -202,6 +202,32 @@ export const sanitizeQueryValue = ({
         $regex: formattedValue.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
       }
     }
+
+    if (operator === 'exists') {
+      formattedValue = formattedValue === 'true' || formattedValue === true
+
+      if (formattedValue) {
+        return {
+          rawQuery: {
+            $and: [
+              { [path]: { $exists: true } },
+              { [path]: { $ne: null } },
+              { [path]: { $ne: '' } },
+            ],
+          },
+        }
+      } else {
+        return {
+          rawQuery: {
+            $or: [
+              { [path]: { $exists: false } },
+              { [path]: { $eq: null } },
+              { [path]: { $eq: '' } }, // Treat empty string as null / undefined
+            ],
+          },
+        }
+      }
+    }
   }
 
   if (

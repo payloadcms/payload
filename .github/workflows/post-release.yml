@@ -15,7 +15,6 @@ jobs:
           fetch-depth: 0
           # Only needed if debugging on a branch other than default
           # ref: ${{ github.event.release.target_commitish || github.ref }}
-      - run: echo "npm_version=$(npm pkg get version | tr -d '"')" >> "$GITHUB_ENV"
       - uses: ./.github/actions/release-commenter
         continue-on-error: true
         env:

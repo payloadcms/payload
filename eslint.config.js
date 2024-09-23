@@ -21,8 +21,7 @@ export const defaultESLintIgnores = [
   '**/temp/',
 ]
 
-/** @typedef {import('eslint').Linter.FlatConfig} */
-let FlatConfig
+/** @typedef {import('eslint').Linter.Config} Config */
 
 export const rootParserOptions = {
   sourceType: 'module',
@@ -33,7 +32,7 @@ export const rootParserOptions = {
   },
 }
 
-/** @type {FlatConfig[]} */
+/** @type {Config[]} */
 export const rootEslintConfig = [
   ...payloadEsLintConfig,
   {
