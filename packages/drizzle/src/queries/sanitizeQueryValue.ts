@@ -98,11 +98,8 @@ export const sanitizeQueryValue = ({
     }
   }
 
-  if (field.type === 'text' && isUUID && ['equals', 'not_equals'].includes(operator)) {
-    if (typeof val !== 'string') {
-      formattedValue = String(val)
-    }
-    if (!uuidValidate(formattedValue)) {
+  if (isUUID && typeof formattedValue === 'string') {
+    if (!uuidValidate(val)) {
       formattedValue = null
     }
   }
