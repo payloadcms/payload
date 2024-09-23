@@ -69,6 +69,10 @@ export interface Post {
  */
 export interface Upload {
   id: string;
+  relatedPosts?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;

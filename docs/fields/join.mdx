@@ -6,8 +6,8 @@ desc: The Join field provides the ability to work on related documents. Learn ho
 keywords: join, relationship, junction, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-The Join Field is used to make Relationship fields in the opposite direction. It is used to show the relationship from
-the other side. The field itself acts as a virtual field, in that no new data is stored on the collection with a Join
+The Join Field is used to make Relationship and Upload fields available in the opposite direction. With a Join you can edit and view collections
+having reference to a specific collection document. The field itself acts as a virtual field, in that no new data is stored on the collection with a Join
 field. Instead, the Admin UI surfaces the related documents for a better editing experience and is surfaced by Payload's
 APIs.
 
@@ -16,9 +16,10 @@ The Join field is useful in scenarios including:
 - To surface `Order`s for a given `Product`
 - To view and edit `Posts` belonging to a `Category`
 - To work with any bi-directional relationship data
+- Displaying where a document or upload is used in other documents
 
-For the Join field to work, you must have an existing [relationship](./relationship) field in the collection you are
-joining. This will reference the collection and path of the field of the related documents.
+For the Join field to work, you must have an existing [relationship](./relationship) or [upload](./upload) field in the
+collection you are joining. This will reference the collection and path of the field of the related documents.
 To add a Relationship Field, set the `type` to `join` in your [Field Config](./overview):
 
 ```ts
@@ -115,7 +116,7 @@ complete control over any type of relational architecture in Payload, all wrappe
 |------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`name`** \*          | To be used as the property name when retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                   |
 | **`collection`** \*    | The `slug`s having the relationship field.                                                                                                                                                    |
-| **`on`** \*            | The relationship field name of the field that relates to collection document. Use dot notation for nested paths, like 'myGroup.relationName'.                                                 |
+| **`on`** \*            | The name of the relationship or upload field that relates to the collection document. Use dot notation for nested paths, like 'myGroup.relationName'.                                         |
 | **`maxDepth`**         | Default is 1, Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached. [Max Depth](/docs/getting-started/concepts#field-level-max-depth) |
 | **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                                       |
 | **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                                         |
