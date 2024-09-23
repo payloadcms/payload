@@ -1166,7 +1166,7 @@ export type SingleRelationshipField = {
 } & SharedRelationshipProperties
 
 export type SingleRelationshipFieldClient = {
-  admin?: Pick<SingleRelationshipField['admin'], 'sortOptions'> & RelationshipAdminClient
+  admin?: Partial<Pick<SingleRelationshipField['admin'], 'sortOptions'>> & RelationshipAdminClient
 } & Pick<SingleRelationshipField, 'relationTo'> &
   SharedRelationshipPropertiesClient
 
