@@ -3,15 +3,18 @@ import type { ElementNode, SerializedEditorState, SerializedLexicalNode } from '
 import type { Block } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
-import { $convertFromMarkdownString, $convertToMarkdownString } from '@lexical/markdown'
+import { $convertToMarkdownString } from '@lexical/markdown'
 import { $parseSerializedNode } from 'lexical'
 
-import type { MultilineElementTransformer } from '../../../utilities/jsx/lexicalMarkdownCopy.js'
 import type { NodeWithHooks } from '../../typesServer.js'
 
 import { getEnabledNodesFromServerNodes } from '../../../lexical/nodes/index.js'
 import { extractPropsFromJSXPropsString } from '../../../utilities/jsx/extractPropsFromJSXPropsString.js'
 import { propsToJSXString } from '../../../utilities/jsx/jsx.js'
+import {
+  $customConvertFromMarkdownString,
+  type MultilineElementTransformer,
+} from '../../../utilities/jsx/lexicalMarkdownCopy.js'
 import { linesFromStartToContentAndPropsString } from './linesFromMatchToContentAndPropsString.js'
 import { $createServerBlockNode, $isServerBlockNode, ServerBlockNode } from './nodes/BlocksNode.js'
 import {
@@ -256,9 +259,12 @@ function getMarkdownTransformerForBlock(
                 nextNodes = markdownToLexical({ markdown: afterEndLine })?.root?.children ?? []
                 const lastChild = rootNode.getChildren()[rootNode.getChildren().length - 1]
 
-                ;(lastChild as ElementNode).append(
-                  ($parseSerializedNode(nextNodes[0]) as ElementNode)?.getChildren()[0],
-                )
+                const children = ($parseSerializedNode(nextNodes[0]) as ElementNode)?.getChildren()
+                if (children?.length) {
+                  for (const child of children) {
+                    ;(lastChild as ElementNode).append(child)
+                  }
+                }
               }
             }
 
@@ -347,14 +353,12 @@ export function getMarkdownToLexical(
 
     headlessEditor.update(
       () => {
-        $convertFromMarkdownString(markdown, allTransformers)
+        $customConvertFromMarkdownString(markdown, allTransformers)
       },
       { discrete: true },
     )
 
-    const editorJSON = headlessEditor.getEditorState().toJSON()
-
-    return editorJSON
+    return headlessEditor.getEditorState().toJSON()
   }
   return markdownToLexical
 }

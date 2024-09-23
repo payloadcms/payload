@@ -42,11 +42,19 @@ export function linesFromStartToContentAndPropsString({
 
   mainLoop: for (let lineIndex = 0; lineIndex < linesCopy.length; lineIndex++) {
     const line = linesCopy[lineIndex].trim()
+    let amountOfBeginningSpacesRemoved = 0
+    for (let i = 0; i < linesCopy[lineIndex].length; i++) {
+      if (linesCopy[lineIndex][i] === ' ') {
+        amountOfBeginningSpacesRemoved++
+      } else {
+        break
+      }
+    }
 
     let charIndex = 0
 
     if (lineIndex === 0) {
-      charIndex = (startMatch.index ?? 0) + startMatch[0].length // We need to also loop over the ">" in something like "<InlineCode>" in order to later set isWithinContent to true
+      charIndex = (startMatch.index ?? 0) + startMatch[0].length - amountOfBeginningSpacesRemoved // We need to also loop over the ">" in something like "<InlineCode>" in order to later set isWithinContent to true
     }
 
     while (charIndex < line.length) {
@@ -140,7 +148,7 @@ export function linesFromStartToContentAndPropsString({
     }
 
     if (lineIndex === linesCopy.length - 1 && !isEndOptional && !isSelfClosing) {
-      throw new Error('End match not found')
+      throw new Error('End match not found for lines ' + lines)
     }
   }
 
