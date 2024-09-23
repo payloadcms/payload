@@ -1,12 +1,14 @@
 import { APIError } from 'payload/errors'
 import { type Field, type TabAsField, fieldAffectsData } from 'payload/types'
 import { createArrayFromCommaDelineated } from 'payload/utilities'
+import { validate as uuidValidate } from 'uuid'
 
 import type { PostgresAdapter } from '../types'
 
 type SanitizeQueryValueArgs = {
   adapter: PostgresAdapter
   field: Field | TabAsField
+  isUUID: boolean
   operator: string
   relationOrPath: string
   val: any
@@ -15,6 +17,7 @@ type SanitizeQueryValueArgs = {
 export const sanitizeQueryValue = ({
   adapter,
   field,
+  isUUID,
   operator: operatorArg,
   relationOrPath,
   val,
@@ -64,6 +67,16 @@ export const sanitizeQueryValue = ({
 
   if (field.type === 'number' && typeof formattedValue === 'string') {
     formattedValue = Number(val)
+
+    if (Number.isNaN(formattedValue)) {
+      formattedValue = null
+    }
+  }
+
+  if (isUUID && typeof formattedValue === 'string') {
+    if (!uuidValidate(val)) {
+      formattedValue = null
+    }
   }
 
   if (field.type === 'date' && operator !== 'exists') {
