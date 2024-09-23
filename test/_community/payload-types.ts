@@ -56,6 +56,7 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   text?: string | null;
+  relationToSelf?: (string | null) | Post;
   serverTextField?: string | null;
   richText?: {
     root: {

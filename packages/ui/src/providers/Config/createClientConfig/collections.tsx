@@ -4,6 +4,7 @@ import type {
   CreateMappedComponent,
   Data,
   EditViewConfig,
+  FormState,
   ImportMap,
   MappedView,
   Payload,
@@ -45,14 +46,14 @@ const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProp
 export const createClientCollectionConfig = ({
   collection,
   createMappedComponent,
-  data,
+  formState,
   i18n,
   importMap,
   payload,
 }: {
   collection: SanitizedCollectionConfig
   createMappedComponent: CreateMappedComponent
-  data: Data
+  formState: FormState
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
@@ -62,8 +63,8 @@ export const createClientCollectionConfig = ({
   clientCollection.fields = createClientFields({
     clientFields: clientCollection?.fields || [],
     createMappedComponent,
-    data,
     fields: collection.fields,
+    formState,
     i18n,
     importMap,
     payload,
@@ -372,17 +373,18 @@ export const createClientCollectionConfig = ({
 
   return clientCollection
 }
+
 export const createClientCollectionConfigs = ({
   collections,
   createMappedComponent,
-  data,
+  formState,
   i18n,
   importMap,
   payload,
 }: {
   collections: SanitizedCollectionConfig[]
   createMappedComponent: CreateMappedComponent
-  data: Data
+  formState: FormState
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
@@ -395,7 +397,7 @@ export const createClientCollectionConfigs = ({
     clientCollections[i] = createClientCollectionConfig({
       collection,
       createMappedComponent,
-      data,
+      formState,
       i18n,
       importMap,
       payload,

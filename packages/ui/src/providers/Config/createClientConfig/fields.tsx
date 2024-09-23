@@ -6,10 +6,11 @@ import type {
   ClientBlock,
   ClientField,
   CreateMappedComponent,
-  Data,
   Field,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
+  FormField,
+  FormState,
   ImportMap,
   LabelsClient,
   MappedComponent,
@@ -45,8 +46,8 @@ function generateFieldPath(parentPath: string, name: string): string {
 export const createClientField = ({
   clientField = {} as ClientField,
   createMappedComponent,
-  data,
   field: incomingField,
+  fieldState,
   i18n,
   importMap,
   parentPath,
@@ -54,8 +55,8 @@ export const createClientField = ({
 }: {
   clientField: ClientField
   createMappedComponent: CreateMappedComponent
-  data?: Data
   field: Field
+  fieldState?: FormField
   i18n: I18nClient
   importMap: ImportMap
   parentPath?: string
@@ -380,8 +381,8 @@ export const createClientField = ({
   } = {
     serverProps: {
       clientField,
-      data,
       field: incomingField,
+      fieldState,
     },
   }
 
@@ -539,9 +540,9 @@ export const createClientField = ({
 export const createClientFields = ({
   clientFields,
   createMappedComponent,
-  data,
   disableAddingID,
   fields,
+  formState,
   i18n,
   importMap,
   parentPath,
@@ -549,9 +550,9 @@ export const createClientFields = ({
 }: {
   clientFields: ClientField[]
   createMappedComponent: CreateMappedComponent
-  data?: Data
   disableAddingID?: boolean
   fields: Field[]
+  formState?: FormState
   i18n: I18nClient
   importMap: ImportMap
   parentPath?: string
@@ -564,8 +565,8 @@ export const createClientFields = ({
     const newField = createClientField({
       clientField: clientFields[i],
       createMappedComponent,
-      data,
       field,
+      fieldState: 'name' in field ? formState?.[field.name] : undefined,
       i18n,
       importMap,
       parentPath,

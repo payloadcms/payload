@@ -282,6 +282,7 @@ export const Document: React.FC<AdminViewProps> = async ({
     ? ((await payloadServerAction('render-config', {
         collectionSlug,
         data,
+        formState,
         languageCode: initPageResult.req.i18n.language,
       })) as unknown as ClientCollectionConfig)
     : null
@@ -289,6 +290,7 @@ export const Document: React.FC<AdminViewProps> = async ({
   const globalClientConfig = globalSlug
     ? ((await payloadServerAction('render-config', {
         data,
+        formState,
         globalSlug,
         languageCode: initPageResult.req.i18n.language,
       })) as unknown as ClientGlobalConfig)

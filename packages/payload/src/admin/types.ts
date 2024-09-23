@@ -4,7 +4,7 @@ import type React from 'react'
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { PayloadComponent, SanitizedConfig } from '../config/types.js'
 import type { JsonObject } from '../types/index.js'
-import type { Data } from './types.js'
+import type { Data, FormState } from './types.js'
 
 export type { CellComponentProps, DefaultCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
@@ -416,7 +416,7 @@ export type RenderRootConfigArgs = {}
 
 export type RenderFieldConfigArgs = {
   collectionSlug?: string
-  data?: Data
+  formState?: FormState
   globalSlug?: string
   schemaPath: string
 }

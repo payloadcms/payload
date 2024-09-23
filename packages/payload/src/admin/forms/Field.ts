@@ -6,7 +6,7 @@ import type { ClientField, Field, Validate } from '../../fields/config/types.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { FieldDescriptionClientProps, FieldDescriptionServerProps } from './Description.js'
 import type { FieldErrorClientProps, FieldErrorServerProps } from './Error.js'
-import type { Data } from './Form.js'
+import type { FormState } from './Form.js'
 import type { FieldLabelClientProps, FieldLabelServerProps } from './Label.js'
 
 export type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
@@ -25,10 +25,10 @@ export type ServerFieldBase<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
 > = {
   readonly clientField: TFieldClient
-  readonly data?: Data
   readonly descriptionProps?: FieldDescriptionServerProps<TFieldServer, TFieldClient>
   readonly errorProps?: FieldErrorServerProps<TFieldServer, TFieldClient>
   readonly field: TFieldServer
+  readonly formState?: FormState
   readonly labelProps?: FieldLabelServerProps<TFieldServer, TFieldClient>
 } & FormFieldBase &
   Partial<ServerProps>

@@ -21,7 +21,7 @@ export const renderConfig = async (
   const {
     collectionSlug,
     config: configPromise,
-    data,
+    formState,
     globalSlug,
     importMap,
     languageCode,
@@ -55,6 +55,7 @@ export const renderConfig = async (
     const renderedSchemaPath = createClientFields({
       config,
       createMappedComponent,
+      formState,
       importMap,
       payload,
     })
@@ -66,7 +67,7 @@ export const renderConfig = async (
     const renderedCollectionConfig = createClientCollectionConfig({
       collection: config.collections.find((collection) => collection.slug === collectionSlug),
       createMappedComponent,
-      data,
+      formState,
       i18n,
       importMap,
       payload,
@@ -78,6 +79,7 @@ export const renderConfig = async (
   if (globalSlug) {
     const renderedGlobalConfig = createClientGlobalConfig({
       createMappedComponent,
+      formState,
       global: config.globals.find((global) => global.slug === globalSlug),
       i18n,
       importMap,

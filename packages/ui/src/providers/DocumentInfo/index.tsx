@@ -151,7 +151,7 @@ const DocumentInfo: React.FC<
       const getNewConfig = async () => {
         const res = (await payloadServerAction('render-config', {
           collectionSlug,
-          data,
+          formState: initialState,
           globalSlug,
           languageCode: i18n.language,
         })) as any as ClientCollectionConfig | ClientGlobalConfig
@@ -166,6 +166,7 @@ const DocumentInfo: React.FC<
   }, [
     payloadServerAction,
     collectionSlug,
+    initialState,
     i18n.language,
     globalSlug,
     data,
