@@ -886,7 +886,7 @@ export const traverseFields = ({
           // add relationship to table
           relationsToBuild.set(fieldName, {
             type: 'one',
-            localized: adapter.payload.config.localization && field.localized,
+            localized: adapter.payload.config.localization && (field.localized || forceLocalized),
             target: tableName,
           })
 

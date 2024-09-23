@@ -184,7 +184,7 @@ type Contributor = { name: string; username: string }
 function formatCommitForChangelog(commit: GitCommit, includeBreakingNotes = false): string {
   const { scope, references, description, isBreaking } = commit
 
-  let formatted = `* ${scope ? `${scope}: ` : ''}${description}`
+  let formatted = `* ${scope ? `**${scope}:** ` : ''}${description}`
   references.forEach((ref) => {
     if (ref.type === 'pull-request') {
       // /issues will redirect to /pulls if the issue is a PR

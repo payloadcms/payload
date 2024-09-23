@@ -1336,6 +1336,129 @@ describe('Fields', () => {
       expect(res.camelCaseGroup.array[0].text).toBe('text')
       expect(res.camelCaseGroup.array[0].array[0].text).toBe('nested')
     })
+
+    it('should insert/update/read localized group with array inside', async () => {
+      const doc = await payload.create({
+        collection: 'group-fields',
+        locale: 'en',
+        data: {
+          group: { text: 'req' },
+          localizedGroupArr: {
+            array: [{ text: 'text-en' }],
+          },
+        },
+      })
+
+      expect(doc.localizedGroupArr.array[0].text).toBe('text-en')
+
+      const esDoc = await payload.update({
+        collection: 'group-fields',
+        locale: 'es',
+        id: doc.id,
+        data: {
+          localizedGroupArr: {
+            array: [{ text: 'text-es' }],
+          },
+        },
+      })
+
+      expect(esDoc.localizedGroupArr.array[0].text).toBe('text-es')
+
+      const allDoc = await payload.findByID({
+        collection: 'group-fields',
+        id: doc.id,
+        locale: 'all',
+      })
+
+      expect(allDoc.localizedGroupArr.en.array[0].text).toBe('text-en')
+      expect(allDoc.localizedGroupArr.es.array[0].text).toBe('text-es')
+    })
+
+    it('should insert/update/read localized group with select hasMany inside', async () => {
+      const doc = await payload.create({
+        collection: 'group-fields',
+        locale: 'en',
+        data: {
+          group: { text: 'req' },
+          localizedGroupSelect: {
+            select: ['one', 'two'],
+          },
+        },
+      })
+
+      expect(doc.localizedGroupSelect.select).toStrictEqual(['one', 'two'])
+
+      const esDoc = await payload.update({
+        collection: 'group-fields',
+        locale: 'es',
+        id: doc.id,
+        data: {
+          localizedGroupSelect: {
+            select: ['one'],
+          },
+        },
+      })
+
+      expect(esDoc.localizedGroupSelect.select).toStrictEqual(['one'])
+
+      const allDoc = await payload.findByID({
+        collection: 'group-fields',
+        id: doc.id,
+        locale: 'all',
+      })
+
+      expect(allDoc.localizedGroupSelect.en.select).toStrictEqual(['one', 'two'])
+      expect(allDoc.localizedGroupSelect.es.select).toStrictEqual(['one'])
+    })
+
+    it('should insert/update/read localized group with relationship inside', async () => {
+      const rel_1 = await payload.create({
+        collection: 'email-fields',
+        data: { email: 'pro123@gmail.com' },
+      })
+
+      const rel_2 = await payload.create({
+        collection: 'email-fields',
+        data: { email: 'frank@gmail.com' },
+      })
+
+      const doc = await payload.create({
+        collection: 'group-fields',
+        depth: 0,
+        data: {
+          group: { text: 'requireddd' },
+          localizedGroupRel: {
+            email: rel_1.id,
+          },
+        },
+      })
+
+      expect(doc.localizedGroupRel.email).toBe(rel_1.id)
+
+      const upd = await payload.update({
+        collection: 'group-fields',
+        depth: 0,
+        id: doc.id,
+        locale: 'es',
+        data: {
+          localizedGroupRel: {
+            email: rel_2.id,
+          },
+        },
+      })
+
+      expect(upd.localizedGroupRel.email).toBe(rel_2.id)
+
+      const docAll = await payload.findByID({
+        collection: 'group-fields',
+        id: doc.id,
+        locale: 'all',
+        depth: 0,
+      })
+
+      expect(docAll.localizedGroupRel.en.email).toBe(rel_1.id)
+      expect(docAll.localizedGroupRel.es.email).toBe(rel_2.id)
+    })
   })
 
   describe('tabs', () => {
