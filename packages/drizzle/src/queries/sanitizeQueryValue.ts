@@ -16,6 +16,7 @@ type SanitizeQueryValueArgs = {
     rawColumn: SQL<unknown>
   }[]
   field: Field | TabAsField
+  isUUID: boolean
   operator: string
   relationOrPath: string
   val: any
@@ -30,6 +31,7 @@ export const sanitizeQueryValue = ({
   adapter,
   columns,
   field,
+  isUUID,
   operator: operatorArg,
   relationOrPath,
   val,
@@ -90,6 +92,19 @@ export const sanitizeQueryValue = ({
 
   if (field.type === 'number' && typeof formattedValue === 'string') {
     formattedValue = Number(val)
+
+    if (Number.isNaN(formattedValue)) {
+      formattedValue = null
+    }
+  }
+
+  if (field.type === 'text' && isUUID && !Array.isArray(formattedValue)) {
+    if (typeof val !== 'string') {
+      formattedValue = String(val)
+    }
+    if (!uuidValidate(formattedValue)) {
+      formattedValue = null
+    }
   }
 
   if (field.type === 'date' && operator !== 'exists') {
