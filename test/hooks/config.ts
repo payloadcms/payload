@@ -52,6 +52,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     await payload.create({
       collection: hooksSlug,
       data: {
+        check: true,
         fieldBeforeValidate: false,
         collectionBeforeValidate: false,
         fieldBeforeChange: false,
