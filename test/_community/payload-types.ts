@@ -26,7 +26,7 @@ export interface Config {
     menu: Menu;
     'custom-ts': CustomT;
   };
-  locale: 'en';
+  locale: null;
   user: User & {
     collection: 'users';
   };
