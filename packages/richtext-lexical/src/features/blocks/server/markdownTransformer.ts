@@ -262,8 +262,6 @@ function getMarkdownTransformerForBlock(
               startMatch,
             })
 
-          console.log('linesFromStartToContentAndPropsString', { content, lines })
-
           if (block?.jsx?.import) {
             const markdownToLexical = getMarkdownToLexical(allNodes, allTransformers)
 
