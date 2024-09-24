@@ -1,11 +1,12 @@
 {
-  "name": "template-blank-3.0",
+  "name": "payload-vercel-postgres-template",
   "version": "1.0.0",
   "description": "A blank template to get started with Payload 3.0",
   "license": "MIT",
   "type": "module",
   "scripts": {
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
+    "ci": "payload migrate && pnpm build",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
@@ -15,17 +16,17 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
-    "@payloadcms/db-mongodb": "beta",
+    "@payloadcms/db-vercel-postgres": "beta",
     "@payloadcms/next": "beta",
     "@payloadcms/plugin-cloud": "beta",
     "@payloadcms/richtext-lexical": "beta",
+    "@payloadcms/storage-vercel-blob": "beta",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
     "next": "15.0.0-canary.160",
     "payload": "beta",
     "react": "19.0.0-rc-5dcb0097-20240918",
-    "react-dom": "19.0.0-rc-5dcb0097-20240918",
-    "sharp": "0.32.6"
+    "react-dom": "19.0.0-rc-5dcb0097-20240918"
   },
   "devDependencies": {
     "@types/node": "^22.5.4",

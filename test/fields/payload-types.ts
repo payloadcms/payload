@@ -957,6 +957,20 @@ export interface GroupField {
         }[]
       | null;
   };
+  localizedGroupArr?: {
+    array?:
+      | {
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  localizedGroupSelect?: {
+    select?: ('one' | 'two')[] | null;
+  };
+  localizedGroupRel?: {
+    email?: (string | null) | EmailField;
+  };
   updatedAt: string;
   createdAt: string;
 }
