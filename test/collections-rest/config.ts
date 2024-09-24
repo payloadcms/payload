@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-import type { CollectionConfig } from 'payload'
+import { APIError, type CollectionConfig } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -287,6 +287,14 @@ export default buildConfigWithDefaults({
       },
       method: 'get',
       path: '/internal-error-here',
+    },
+    {
+      handler: () => {
+        // Throwing an internal error with potentially sensitive data
+        throw new APIError('Connected to the Pentagon. Secret data: ******')
+      },
+      method: 'get',
+      path: '/api-error-here',
     },
   ],
   onInit: async (payload) => {
