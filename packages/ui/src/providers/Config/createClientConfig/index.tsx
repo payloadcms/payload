@@ -137,7 +137,7 @@ export const createClientConfig = async ({
     i18n,
     importMap,
     payload,
-    skipComponents: false,
+    skipComponents: true,
   })
 
   clientConfig.globals = createClientGlobalConfigs({

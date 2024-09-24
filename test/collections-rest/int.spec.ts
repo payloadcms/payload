@@ -934,6 +934,22 @@ describe('collections-rest', () => {
         expect(result.totalDocs).toEqual(1)
       })
 
+      it('like - id should not crash', async () => {
+        const post = await createPost({ title: 'post' })
+
+        const response = await restClient.GET(`/${slug}`, {
+          query: {
+            where: {
+              id: {
+                like: 'words partial',
+              },
+            },
+          },
+        })
+
+        expect(response.status).toEqual(200)
+      })
+
       it('exists - true', async () => {
         const postWithDesc = await createPost({ description: 'exists' })
         await createPost({ description: undefined })

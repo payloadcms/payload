@@ -52,7 +52,7 @@ async function main() {
     {
       name: 'payload-vercel-postgres-template',
       dirname: 'with-vercel-postgres',
-      db: 'vercelPostgres',
+      db: 'vercel-postgres',
       storage: 'vercelBlobStorage',
       sharp: false,
       vercelDeployButtonLink:

@@ -443,7 +443,7 @@ export interface FieldBaseClient {
    * Must not be one of reserved field names: ['__v', 'salt', 'hash', 'file']
    * @link https://payloadcms.com/docs/fields/overview#field-names
    */
-  name?: string
+  name: string
   required?: boolean
   saveToJWT?: boolean | string
   /**
@@ -1166,7 +1166,7 @@ export type SingleRelationshipField = {
 } & SharedRelationshipProperties
 
 export type SingleRelationshipFieldClient = {
-  admin?: Pick<SingleRelationshipField['admin'], 'sortOptions'> & RelationshipAdminClient
+  admin?: Partial<Pick<SingleRelationshipField['admin'], 'sortOptions'>> & RelationshipAdminClient
 } & Pick<SingleRelationshipField, 'relationTo'> &
   SharedRelationshipPropertiesClient
 

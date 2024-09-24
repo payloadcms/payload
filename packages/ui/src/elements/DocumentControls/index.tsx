@@ -239,7 +239,7 @@ export const DocumentControls: React.FC<{
               </Button>
             )}
           </div>
-          {showDotMenu && (
+          {showDotMenu && !readOnlyForIncomingUser && (
             <Popup
               button={
                 <div className={`${baseClass}__dots`}>

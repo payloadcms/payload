@@ -42,6 +42,7 @@ export const getGenerateComponentMap =
             for (const componentKey in components) {
               const payloadComponent = components[componentKey]
 
+              // @ts-expect-error - TODO: fix this
               const mappedComponent: MappedComponent = createMappedComponent(
                 payloadComponent,
                 {

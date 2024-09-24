@@ -1,5 +1,10 @@
 'use client'
-import type { ClientCollectionConfig, FormState, LoginWithUsernameOptions } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ClientUser,
+  FormState,
+  LoginWithUsernameOptions,
+} from 'payload'
 
 import {
   ConfirmPasswordField,
@@ -9,6 +14,7 @@ import {
   PasswordField,
   RenderEmailAndUsernameFields,
   RenderFields,
+  useAuth,
   useConfig,
   useTranslation,
 } from '@payloadcms/ui'
@@ -29,6 +35,7 @@ export const CreateFirstUserClient: React.FC<{
   } = useConfig()
 
   const { t } = useTranslation()
+  const { setUser } = useAuth()
 
   const collectionConfig = getEntityConfig({ collectionSlug: userSlug }) as ClientCollectionConfig
 
@@ -49,12 +56,17 @@ export const CreateFirstUserClient: React.FC<{
     [apiRoute, userSlug, serverURL],
   )
 
+  const handleFirstRegister = (data: { user: ClientUser }) => {
+    setUser(data.user)
+  }
+
   return (
     <Form
       action={`${serverURL}${apiRoute}/${userSlug}/first-register`}
       initialState={initialState}
       method="POST"
       onChange={[onChange]}
+      onSuccess={handleFirstRegister}
       redirect={admin}
       validationOperation="create"
     >
