@@ -1,4 +1,4 @@
-import type { APIError, NotFound, type Payload, SanitizedCollectionConfig } from 'payload'
+import type { APIError, NotFound, Payload, SanitizedCollectionConfig } from 'payload'
 
 import { randomBytes, randomUUID } from 'crypto'
 import path from 'path'
