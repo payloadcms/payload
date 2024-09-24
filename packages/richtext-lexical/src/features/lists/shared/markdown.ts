@@ -45,7 +45,7 @@ export const listExport = (
   exportChildren: (node: ElementNode) => string,
   depth: number,
 ): string => {
-  const output = []
+  const output: string[] = []
   const children = listNode.getChildren()
   let index = 0
   for (const listItemNode of children) {

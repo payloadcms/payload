@@ -35,45 +35,43 @@ export const SingleValue: React.FC<
   const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read?.permission)
 
   return (
-    <React.Fragment>
-      <SelectComponents.SingleValue {...props} className={baseClass}>
-        <div className={`${baseClass}__label`}>
-          <div className={`${baseClass}__label-text`}>
-            <div className={`${baseClass}__text`}>{children}</div>
-            {relationTo && hasReadPermission && (
-              <Fragment>
-                <button
-                  aria-label={t('general:editLabel', { label })}
-                  className={`${baseClass}__drawer-toggler`}
-                  onClick={() => {
-                    setShowTooltip(false)
-                    onDocumentDrawerOpen({
-                      id: value,
-                      collectionSlug: relationTo,
-                      hasReadPermission,
-                    })
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.stopPropagation()
-                    }
-                  }}
-                  onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
-                  onMouseEnter={() => setShowTooltip(true)}
-                  onMouseLeave={() => setShowTooltip(false)}
-                  onTouchEnd={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
-                  type="button"
-                >
-                  <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
-                    {t('general:edit')}
-                  </Tooltip>
-                  <EditIcon />
-                </button>
-              </Fragment>
-            )}
-          </div>
+    <SelectComponents.SingleValue {...props} className={baseClass}>
+      <div className={`${baseClass}__label`}>
+        <div className={`${baseClass}__label-text`}>
+          <div className={`${baseClass}__text`}>{children}</div>
+          {relationTo && hasReadPermission && (
+            <Fragment>
+              <button
+                aria-label={t('general:editLabel', { label })}
+                className={`${baseClass}__drawer-toggler`}
+                onClick={() => {
+                  setShowTooltip(false)
+                  onDocumentDrawerOpen({
+                    id: value,
+                    collectionSlug: relationTo,
+                    hasReadPermission,
+                  })
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.stopPropagation()
+                  }
+                }}
+                onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
+                onMouseEnter={() => setShowTooltip(true)}
+                onMouseLeave={() => setShowTooltip(false)}
+                onTouchEnd={(e) => e.stopPropagation()} // prevents react-select dropdown from openingtype="button"
+                type="button"
+              >
+                <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
+                  {t('general:edit')}
+                </Tooltip>
+                <EditIcon />
+              </button>
+            </Fragment>
+          )}
         </div>
-      </SelectComponents.SingleValue>
-    </React.Fragment>
+      </div>
+    </SelectComponents.SingleValue>
   )
 }

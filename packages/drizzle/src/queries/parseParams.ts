@@ -2,6 +2,7 @@ import type { SQL } from 'drizzle-orm'
 import type { Field, Operator, Where } from 'payload'
 
 import { and, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
+import { PgUUID } from 'drizzle-orm/pg-core'
 import { QueryError } from 'payload'
 import { validOperators } from 'payload/shared'
 
@@ -22,7 +23,7 @@ type Args = {
   where: Where
 }
 
-export async function parseParams({
+export function parseParams({
   adapter,
   fields,
   joins,
@@ -30,7 +31,7 @@ export async function parseParams({
   selectFields,
   tableName,
   where,
-}: Args): Promise<SQL> {
+}: Args): SQL {
   let result: SQL
   const constraints: SQL[] = []
 
@@ -46,7 +47,7 @@ export async function parseParams({
           conditionOperator = or
         }
         if (Array.isArray(condition)) {
-          const builtConditions = await buildAndOrConditions({
+          const builtConditions = buildAndOrConditions({
             adapter,
             fields,
             joins,
@@ -194,6 +195,7 @@ export async function parseParams({
                   adapter,
                   columns,
                   field,
+                  isUUID: table?.[columnName] instanceof PgUUID,
                   operator,
                   relationOrPath,
                   val,

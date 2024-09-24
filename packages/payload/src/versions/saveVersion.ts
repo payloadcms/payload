@@ -56,6 +56,8 @@ export const saveVersion = async ({
         const findVersionsDbArgs = {
           ...findVersionArgs,
           collection: collection.slug,
+          limit: 1,
+          pagination: false,
           req,
           where: {
             parent: {
@@ -75,6 +77,8 @@ export const saveVersion = async ({
         const findGlobalVersionsDbArgs = {
           ...findVersionArgs,
           global: global.slug,
+          limit: 1,
+          pagination: false,
           req,
         }
 

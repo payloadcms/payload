@@ -12,6 +12,7 @@ import { validate as uuidValidate } from 'uuid'
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
+import { isPolymorphicRelationship } from '../utilities/isPolymorphicRelationship.js'
 import { getTableAlias } from './getTableAlias.js'
 
 type Constraint = {
@@ -601,6 +602,19 @@ export const getTableColumnFromPath = ({
                 }
                 return undefined
               },
+              table: aliasRelationshipTable,
+            }
+          } else if (isPolymorphicRelationship(value)) {
+            const { relationTo } = value
+
+            const relationTableName = adapter.tableNameMap.get(
+              toSnakeCase(adapter.payload.collections[relationTo].config.slug),
+            )
+
+            return {
+              constraints,
+              field,
+              rawColumn: sql.raw(`"${aliasRelationshipTableName}"."${relationTableName}_id"`),
               table: aliasRelationshipTable,
             }
           } else {

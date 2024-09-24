@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "3.0.0-beta.107",
+  "version": "3.0.0-beta.108",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -82,13 +82,13 @@
     "@types/escape-html": "1.0.4",
     "@types/json-schema": "7.0.15",
     "@types/node": "22.5.4",
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "babel-plugin-react-compiler": "0.0.0-experimental-48eb8f4-20240822",
     "babel-plugin-transform-remove-imports": "^1.8.0",
     "esbuild": "0.23.1",
     "esbuild-sass-plugin": "3.3.1",
-    "eslint-plugin-react-compiler": "0.0.0-experimental-72f06b2-20240822",
+    "eslint-plugin-react-compiler": "0.0.0-experimental-7670337-20240918",
     "payload": "workspace:*",
     "swc-plugin-transform-remove-imports": "1.15.0"
   },
@@ -108,8 +108,8 @@
     "@payloadcms/next": "workspace:*",
     "lexical": "0.17.0",
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801"
+    "react": "^19.0.0 || ^19.0.0-rc-5dcb0097-20240918",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-5dcb0097-20240918"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
@@ -142,7 +142,7 @@
     "types": "./dist/index.d.ts"
   },
   "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }

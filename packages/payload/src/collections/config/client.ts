@@ -6,7 +6,7 @@ import type { SanitizedCollectionConfig } from './types.js'
 
 export type ServerOnlyCollectionProperties = keyof Pick<
   SanitizedCollectionConfig,
-  'access' | 'custom' | 'db' | 'endpoints' | 'hooks'
+  'access' | 'custom' | 'db' | 'endpoints' | 'hooks' | 'joins'
 >
 
 export type ServerOnlyCollectionAdminProperties = keyof Pick<
@@ -58,7 +58,7 @@ export type ClientCollectionConfig = {
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<
     SanitizedCollectionConfig['admin'],
-    'components' | 'description' | 'livePreview' | ServerOnlyCollectionAdminProperties
+    'components' | 'description' | 'joins' | 'livePreview' | ServerOnlyCollectionAdminProperties
   >
   fields: ClientField[]
 } & Omit<SanitizedCollectionConfig, 'admin' | 'fields' | ServerOnlyCollectionProperties>

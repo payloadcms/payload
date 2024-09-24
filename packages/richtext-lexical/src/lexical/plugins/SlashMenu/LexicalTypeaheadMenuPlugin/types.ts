@@ -18,7 +18,7 @@ export type SlashMenuItem = {
   label?:
     | ((args: {
         i18n: I18nClient<{}, string>
-        richTextComponentMap: Map<string, React.ReactNode>
+        richTextComponentMap?: Map<string, React.ReactNode>
         schemaPath: string
       }) => string)
     | string

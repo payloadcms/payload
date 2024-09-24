@@ -106,7 +106,7 @@ function sanitizeSelection(selection: Selection) {
 
 function getPathFromNodeToEditor(node: Node, rootElement: HTMLElement | null) {
   let currentNode: Node | null | undefined = node
-  const path = []
+  const path: number[] = []
   while (currentNode !== rootElement) {
     if (currentNode !== null && currentNode !== undefined) {
       path.unshift(

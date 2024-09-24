@@ -138,9 +138,9 @@ export const buildTable = ({
   const localizedRelations = new Map()
   const nonLocalizedRelations = new Map()
 
-  relationsToBuild.forEach(({ type, localized, target }, key) => {
+  relationsToBuild.forEach(({ type, localized, relationName, target }, key) => {
     const map = localized ? localizedRelations : nonLocalizedRelations
-    map.set(key, { type, target })
+    map.set(key, { type, relationName, target })
   })
 
   if (timestamps) {
@@ -444,7 +444,7 @@ export const buildTable = ({
   adapter.relations[`relations_${tableName}`] = relations(table, ({ many, one }) => {
     const result: Record<string, Relation<string>> = {}
 
-    nonLocalizedRelations.forEach(({ type, target }, key) => {
+    nonLocalizedRelations.forEach(({ type, relationName, target }, key) => {
       if (type === 'one') {
         result[key] = one(adapter.tables[target], {
           fields: [table[key]],
@@ -453,7 +453,7 @@ export const buildTable = ({
         })
       }
       if (type === 'many') {
-        result[key] = many(adapter.tables[target], { relationName: key })
+        result[key] = many(adapter.tables[target], { relationName: relationName || key })
       }
     })
 

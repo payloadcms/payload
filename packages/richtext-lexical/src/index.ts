@@ -1,9 +1,5 @@
 import type { JSONSchema4 } from 'json-schema'
-import type {
-  EditorConfig as LexicalEditorConfig,
-  SerializedEditorState,
-  SerializedLexicalNode,
-} from 'lexical'
+import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
 
 import {
   afterChangeTraverseFields,
@@ -38,14 +34,17 @@ import { getGenerateSchemaMap } from './utilities/generateSchemaMap.js'
 import { recurseNodeTree } from './utilities/recurseNodeTree.js'
 import { richTextValidateHOC } from './validate/index.js'
 
-let defaultSanitizedServerEditorConfig: SanitizedServerEditorConfig = null
+let defaultSanitizedServerEditorConfig: null | SanitizedServerEditorConfig = null
+let checkedDependencies = false
 
 export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapterProvider {
   return async ({ config, isRoot, parentIsLocalized }) => {
     if (
       process.env.NODE_ENV !== 'production' &&
-      process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true'
+      process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true' &&
+      !checkedDependencies
     ) {
+      checkedDependencies = true
       await checkDependencies({
         dependencyGroups: [
           {
@@ -103,8 +102,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         features = deepCopyObject(defaultEditorFeatures)
       }
 
-      const lexical: LexicalEditorConfig =
-        props.lexical ?? deepCopyObjectSimple(defaultEditorConfig.lexical)
+      const lexical = props.lexical ?? deepCopyObjectSimple(defaultEditorConfig.lexical)!
 
       resolvedFeatureMap = await loadFeatures({
         config,
@@ -209,8 +207,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               }
             }
             if (
-              !finalSanitizedEditorConfig.features.nodeHooks.afterChange.size &&
-              !finalSanitizedEditorConfig.features.getSubFields.size
+              !finalSanitizedEditorConfig.features.nodeHooks?.afterChange?.size &&
+              !finalSanitizedEditorConfig.features.getSubFields?.size
             ) {
               return value
             }
@@ -237,9 +235,10 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
             // eslint-disable-next-line prefer-const
             for (let [id, node] of Object.entries(nodeIDMap)) {
-              const afterChangeHooks = finalSanitizedEditorConfig.features.nodeHooks.afterChange
-              if (afterChangeHooks?.has(node.type)) {
-                for (const hook of afterChangeHooks.get(node.type)) {
+              const afterChangeHooks = finalSanitizedEditorConfig.features.nodeHooks?.afterChange
+              const afterChangeHooksForNode = afterChangeHooks?.get(node.type)
+              if (afterChangeHooksForNode) {
+                for (const hook of afterChangeHooksForNode) {
                   if (!originalNodeIDMap[id]) {
                     console.warn(
                       '(afterChange) No original node found for node with id',
@@ -262,12 +261,12 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                   })
                 }
               }
-              const subFieldFn = finalSanitizedEditorConfig.features.getSubFields.get(node.type)
-              const subFieldDataFn = finalSanitizedEditorConfig.features.getSubFieldsData.get(
+              const subFieldFn = finalSanitizedEditorConfig.features.getSubFields?.get(node.type)
+              const subFieldDataFn = finalSanitizedEditorConfig.features.getSubFieldsData?.get(
                 node.type,
               )
 
-              if (subFieldFn) {
+              if (subFieldFn && subFieldDataFn) {
                 const subFields = subFieldFn({ node, req })
                 const data = subFieldDataFn({ node, req }) ?? {}
                 const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
@@ -330,8 +329,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             }
 
             if (
-              !finalSanitizedEditorConfig.features.nodeHooks.afterRead.size &&
-              !finalSanitizedEditorConfig.features.getSubFields.size
+              !finalSanitizedEditorConfig.features.nodeHooks?.afterRead?.size &&
+              !finalSanitizedEditorConfig.features.getSubFields?.size
             ) {
               return value
             }
@@ -343,37 +342,38 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             })
 
             for (let node of flattenedNodes) {
-              const afterReadHooks = finalSanitizedEditorConfig.features.nodeHooks.afterRead
-              if (afterReadHooks?.has(node.type)) {
-                for (const hook of afterReadHooks.get(node.type)) {
+              const afterReadHooks = finalSanitizedEditorConfig.features.nodeHooks?.afterRead
+              const afterReadHooksForNode = afterReadHooks?.get(node.type)
+              if (afterReadHooksForNode) {
+                for (const hook of afterReadHooksForNode) {
                   node = await hook({
                     context,
-                    currentDepth,
-                    depth,
-                    draft,
-                    fallbackLocale,
-                    fieldPromises,
-                    findMany,
-                    flattenLocales,
-                    locale,
+                    currentDepth: currentDepth!,
+                    depth: depth!,
+                    draft: draft!,
+                    fallbackLocale: fallbackLocale!,
+                    fieldPromises: fieldPromises!,
+                    findMany: findMany!,
+                    flattenLocales: flattenLocales!,
+                    locale: locale!,
                     node,
-                    overrideAccess,
+                    overrideAccess: overrideAccess!,
                     parentRichTextFieldPath: path,
                     parentRichTextFieldSchemaPath: schemaPath,
-                    populationPromises,
+                    populationPromises: populationPromises!,
                     req,
-                    showHiddenFields,
-                    triggerAccessControl,
-                    triggerHooks,
+                    showHiddenFields: showHiddenFields!,
+                    triggerAccessControl: triggerAccessControl!,
+                    triggerHooks: triggerHooks!,
                   })
                 }
               }
-              const subFieldFn = finalSanitizedEditorConfig.features.getSubFields.get(node.type)
-              const subFieldDataFn = finalSanitizedEditorConfig.features.getSubFieldsData.get(
+              const subFieldFn = finalSanitizedEditorConfig.features.getSubFields?.get(node.type)
+              const subFieldDataFn = finalSanitizedEditorConfig.features.getSubFieldsData?.get(
                 node.type,
               )
 
-              if (subFieldFn) {
+              if (subFieldFn && subFieldDataFn) {
                 const subFields = subFieldFn({ node, req })
                 const data = subFieldDataFn({ node, req }) ?? {}
 
@@ -381,23 +381,23 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                   afterReadTraverseFields({
                     collection,
                     context,
-                    currentDepth,
-                    depth,
+                    currentDepth: currentDepth!,
+                    depth: depth!,
                     doc: data,
-                    draft,
-                    fallbackLocale,
-                    fieldPromises,
+                    draft: draft!,
+                    fallbackLocale: fallbackLocale!,
+                    fieldPromises: fieldPromises!,
                     fields: subFields,
-                    findMany,
-                    flattenLocales,
+                    findMany: findMany!,
+                    flattenLocales: flattenLocales!,
                     global,
-                    locale,
-                    overrideAccess,
+                    locale: locale!,
+                    overrideAccess: overrideAccess!,
                     path,
-                    populationPromises,
+                    populationPromises: populationPromises!,
                     req,
                     schemaPath,
-                    showHiddenFields,
+                    showHiddenFields: showHiddenFields!,
                     siblingDoc: data,
                     triggerAccessControl,
                     triggerHooks,
@@ -435,8 +435,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             }
 
             if (
-              !finalSanitizedEditorConfig.features.nodeHooks.beforeChange.size &&
-              !finalSanitizedEditorConfig.features.getSubFields.size
+              !finalSanitizedEditorConfig.features.nodeHooks?.beforeChange?.size &&
+              !finalSanitizedEditorConfig.features.getSubFields?.size
             ) {
               return value
             }
@@ -466,7 +466,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               nodes: (value as SerializedEditorState)?.root?.children ?? [],
             })
 
-            if (siblingDocWithLocales?.[field.name]) {
+            if (field.name && siblingDocWithLocales?.[field.name]) {
               recurseNodeTree({
                 nodeIDMap: originalNodeWithLocalesIDMap,
                 nodes:
@@ -477,9 +477,10 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
             // eslint-disable-next-line prefer-const
             for (let [id, node] of Object.entries(nodeIDMap)) {
-              const beforeChangeHooks = finalSanitizedEditorConfig.features.nodeHooks.beforeChange
-              if (beforeChangeHooks?.has(node.type)) {
-                for (const hook of beforeChangeHooks.get(node.type)) {
+              const beforeChangeHooks = finalSanitizedEditorConfig.features.nodeHooks?.beforeChange
+              const beforeChangeHooksForNode = beforeChangeHooks?.get(node.type)
+              if (beforeChangeHooksForNode) {
+                for (const hook of beforeChangeHooksForNode) {
                   if (!originalNodeIDMap[id]) {
                     console.warn(
                       '(beforeChange) No original node found for node with id',
@@ -493,26 +494,26 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                   }
                   node = await hook({
                     context,
-                    errors,
-                    mergeLocaleActions,
+                    errors: errors!,
+                    mergeLocaleActions: mergeLocaleActions!,
                     node,
-                    operation,
+                    operation: operation!,
                     originalNode: originalNodeIDMap[id],
                     originalNodeWithLocales: originalNodeWithLocalesIDMap[id],
                     parentRichTextFieldPath: path,
                     parentRichTextFieldSchemaPath: schemaPath,
                     req,
-                    skipValidation,
+                    skipValidation: skipValidation!,
                   })
                 }
               }
 
-              const subFieldFn = finalSanitizedEditorConfig.features.getSubFields.get(node.type)
-              const subFieldDataFn = finalSanitizedEditorConfig.features.getSubFieldsData.get(
+              const subFieldFn = finalSanitizedEditorConfig.features.getSubFields?.get(node.type)
+              const subFieldDataFn = finalSanitizedEditorConfig.features.getSubFieldsData?.get(
                 node.type,
               )
 
-              if (subFieldFn) {
+              if (subFieldFn && subFieldDataFn) {
                 const subFields = subFieldFn({ node, req })
                 const data = subFieldDataFn({ node, req }) ?? {}
                 const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
@@ -530,11 +531,11 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     data,
                     doc: originalData,
                     docWithLocales: originalDataWithLocales ?? {},
-                    errors,
+                    errors: errors!,
                     fields: subFields,
                     global,
-                    mergeLocaleActions,
-                    operation,
+                    mergeLocaleActions: mergeLocaleActions!,
+                    operation: operation!,
                     path,
                     req,
                     schemaPath,
@@ -561,7 +562,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               [key: string]: SerializedLexicalNode
             } = {}
 
-            const previousValue = siblingData[field.name]
+            const previousValue = siblingData[field.name!]
 
             recurseNodeTree({
               nodeIDMap: newOriginalNodeIDMap,
@@ -604,10 +605,10 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
             // return value if there are NO hooks
             if (
-              !finalSanitizedEditorConfig.features.nodeHooks.beforeValidate.size &&
-              !finalSanitizedEditorConfig.features.nodeHooks.afterChange.size &&
-              !finalSanitizedEditorConfig.features.nodeHooks.beforeChange.size &&
-              !finalSanitizedEditorConfig.features.getSubFields.size
+              !finalSanitizedEditorConfig.features.nodeHooks?.beforeValidate?.size &&
+              !finalSanitizedEditorConfig.features.nodeHooks?.afterChange?.size &&
+              !finalSanitizedEditorConfig.features.nodeHooks?.beforeChange?.size &&
+              !finalSanitizedEditorConfig.features.getSubFields?.size
             ) {
               return value
             }
@@ -659,7 +660,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             /**
              * Now that the maps for all hooks are set up, we can run the validate hook
              */
-            if (!finalSanitizedEditorConfig.features.nodeHooks.beforeValidate.size) {
+            if (!finalSanitizedEditorConfig.features.nodeHooks?.beforeValidate?.size) {
               return value
             }
             const nodeIDMap: {
@@ -675,8 +676,9 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             for (let [id, node] of Object.entries(nodeIDMap)) {
               const beforeValidateHooks =
                 finalSanitizedEditorConfig.features.nodeHooks.beforeValidate
-              if (beforeValidateHooks?.has(node.type)) {
-                for (const hook of beforeValidateHooks.get(node.type)) {
+              const beforeValidateHooksForNode = beforeValidateHooks?.get(node.type)
+              if (beforeValidateHooksForNode) {
+                for (const hook of beforeValidateHooksForNode) {
                   if (!originalNodeIDMap[id]) {
                     console.warn(
                       '(beforeValidate) No original node found for node with id',
@@ -693,19 +695,19 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     node,
                     operation,
                     originalNode: originalNodeIDMap[id],
-                    overrideAccess,
+                    overrideAccess: overrideAccess!,
                     parentRichTextFieldPath: path,
                     parentRichTextFieldSchemaPath: schemaPath,
                     req,
                   })
                 }
               }
-              const subFieldFn = finalSanitizedEditorConfig.features.getSubFields.get(node.type)
-              const subFieldDataFn = finalSanitizedEditorConfig.features.getSubFieldsData.get(
+              const subFieldFn = finalSanitizedEditorConfig.features.getSubFields?.get(node.type)
+              const subFieldDataFn = finalSanitizedEditorConfig.features.getSubFieldsData?.get(
                 node.type,
               )
 
-              if (subFieldFn) {
+              if (subFieldFn && subFieldDataFn) {
                 const subFields = subFieldFn({ node, req })
                 const data = subFieldDataFn({ node, req }) ?? {}
                 const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
@@ -720,7 +722,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     fields: subFields,
                     global,
                     operation,
-                    overrideAccess,
+                    overrideAccess: overrideAccess!,
                     path,
                     req,
                     schemaPath,

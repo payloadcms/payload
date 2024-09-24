@@ -879,7 +879,7 @@ export const traverseFields = ({
           // add relationship to table
           relationsToBuild.set(fieldName, {
             type: 'one',
-            localized: adapter.payload.config.localization && field.localized,
+            localized: adapter.payload.config.localization && (field.localized || forceLocalized),
             target: tableName,
           })
 
@@ -897,6 +897,21 @@ export const traverseFields = ({
         }
 
         break
+
+      case 'join': {
+        // fieldName could be 'posts' or 'group_posts'
+        // using on as the key for the relation
+        const localized = adapter.payload.config.localization && field.localized
+        const target = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${localized ? adapter.localesSuffix : ''}`
+        relationsToBuild.set(fieldName, {
+          type: 'many',
+          // joins are not localized on the parent table
+          localized: false,
+          relationName: toSnakeCase(field.on),
+          target,
+        })
+        break
+      }
 
       default:
         break

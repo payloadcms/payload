@@ -91,7 +91,7 @@ test.describe('Admin Panel (Root)', () => {
 
   test('ui - should render default payload favicons', async () => {
     await page.goto(url.admin)
-    const favicons = page.locator('link[rel="icon"]')
+    const favicons = page.locator('link[rel="icon"][type="image/png"]')
     await expect(favicons).toHaveCount(2)
     await expect(favicons.nth(0)).toHaveAttribute('sizes', '32x32')
     await expect(favicons.nth(1)).toHaveAttribute('sizes', '32x32')

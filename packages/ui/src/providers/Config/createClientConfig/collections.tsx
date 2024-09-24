@@ -25,6 +25,7 @@ const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] 
   'access',
   'endpoints',
   'custom',
+  'joins',
   // `upload`
   // `admin`
   // are all handled separately
@@ -248,6 +249,15 @@ export const createClientCollectionConfig = ({
       undefined,
       'collection.admin.components.Description',
     )
+  }
+
+  // Ensure that the label in Edit view is a string, translate it if it's a function
+  if (collection?.admin?.components?.views?.edit) {
+    Object.entries(collection?.admin?.components?.views?.edit).forEach(([key, view]) => {
+      if ('tab' in view && 'label' in view.tab && typeof view.tab.label === 'function') {
+        collection.admin.components.views.edit[key].tab.label = view.tab.label({ t: i18n.t })
+      }
+    })
   }
 
   clientCollection.admin.components.views = (
