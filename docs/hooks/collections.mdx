@@ -305,14 +305,14 @@ const afterDeleteHook: CollectionAfterErrorHook = async ({
 ```
 The following arguments are provided to the `afterError` Hook:
 
-| Argument            | Description                                                                                                                  |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| **`error`**         | The error that occurred.                                                                                                     |
-| **`context`**       | Custom context passed between Hooks. [More details](./context).                                                              |
-| **`graphqlResult`** | The GraphQL result object, available if the hook is executed within a GraphQL context.                                       |
-| **`req`**           | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
-| **`collection`**    | The [Collection](../configuration/collections) in which this Hook is running against.                                        |
-| **`result`**        | The formatted error result object, available if the hook is executed from a REST context.                                    |
+| Argument            | Description                                                                                                                                                                                     |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`error`**         | The error that occurred.                                                                                                                                                                        |
+| **`context`**       | Custom context passed between Hooks. [More details](./context).                                                                                                                                 |
+| **`graphqlResult`** | The GraphQL result object, available if the hook is executed within a GraphQL context.                                                                                                          |
+| **`req`**           | The `PayloadRequest` object that extends [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request). Contains currently authenticated `user` and the Local API instance `payload`. |
+| **`collection`**    | The [Collection](../configuration/collections) in which this Hook is running against.                                                                                                           |
+| **`result`**        | The formatted error result object, available if the hook is executed from a REST context.                                                                                                       |
 
 ### beforeLogin
 

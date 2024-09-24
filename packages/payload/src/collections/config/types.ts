@@ -1,9 +1,4 @@
-import type {
-  GraphQLFormattedError,
-  GraphQLInputObjectType,
-  GraphQLNonNull,
-  GraphQLObjectType,
-} from 'graphql'
+import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, MarkOptional } from 'ts-essentials'
 
 import type {
@@ -21,6 +16,7 @@ import type {
 import type { Auth, ClientUser, IncomingAuthType } from '../../auth/types.js'
 import type {
   Access,
+  AfterErrorHookArgs,
   AfterErrorResult,
   CustomComponent,
   EditConfig,
@@ -32,7 +28,6 @@ import type {
   LivePreviewConfig,
   MetaConfig,
   PayloadComponent,
-  AfterErrorHookArgs as RootAfterErrorHookArgs,
   StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
@@ -237,7 +232,7 @@ export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
 }) => any
 
 export type AfterErrorHook = (
-  args: { collection: SanitizedCollectionConfig } & RootAfterErrorHookArgs,
+  args: { collection: SanitizedCollectionConfig } & AfterErrorHookArgs,
 ) => AfterErrorResult | Promise<AfterErrorResult>
 
 export type AfterForgotPasswordHook = (args: {
