@@ -11,7 +11,6 @@ import { validate as uuidValidate } from 'uuid'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
-import type { Table } from './getTableAlias.js'
 
 import { isPolymorphicRelationship } from '../utilities/isPolymorphicRelationship.js'
 import { getTableAlias } from './getTableAlias.js'
