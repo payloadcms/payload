@@ -368,7 +368,6 @@ export const DefaultEditView: React.FC = () => {
                   false,
                   updateDocumentEditor,
                   setCurrentEditor,
-                  () => {},
                   documentLockStateRef,
                   isLockingEnabled,
                 )
@@ -423,9 +422,9 @@ export const DefaultEditView: React.FC = () => {
                 true,
                 updateDocumentEditor,
                 setCurrentEditor,
-                setIsReadOnlyForIncomingUser,
                 documentLockStateRef,
                 isLockingEnabled,
+                setIsReadOnlyForIncomingUser,
               )
             }
             permissions={docPermissions}

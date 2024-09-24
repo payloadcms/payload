@@ -8,13 +8,13 @@ export const handleTakeOver = (
   isWithinDoc: boolean,
   updateDocumentEditor: (docId: number | string, slug: string, user: ClientUser) => Promise<void>,
   setCurrentEditor: (value: React.SetStateAction<ClientUser>) => void,
-  setIsReadOnlyForIncomingUser: (value: React.SetStateAction<boolean>) => void,
   documentLockStateRef: React.RefObject<{
     hasShownLockedModal: boolean
     isLocked: boolean
     user: ClientUser
   } | null>,
   isLockingEnabled: boolean,
+  setIsReadOnlyForIncomingUser?: (value: React.SetStateAction<boolean>) => void,
 ): void => {
   if (!isLockingEnabled) {
     return

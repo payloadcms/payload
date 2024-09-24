@@ -315,7 +315,6 @@ const PreviewView: React.FC<Props> = ({
                 false,
                 updateDocumentEditor,
                 setCurrentEditor,
-                () => {},
                 documentLockStateRef,
                 isLockingEnabled,
               )
@@ -372,9 +371,9 @@ const PreviewView: React.FC<Props> = ({
               true,
               updateDocumentEditor,
               setCurrentEditor,
-              setIsReadOnlyForIncomingUser,
               documentLockStateRef,
               isLockingEnabled,
+              setIsReadOnlyForIncomingUser,
             )
           }
           permissions={docPermissions}
