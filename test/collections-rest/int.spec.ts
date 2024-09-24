@@ -1,4 +1,4 @@
-import type { Payload, SanitizedCollectionConfig } from 'payload';
+import type { Payload, SanitizedCollectionConfig } from 'payload'
 
 import { randomBytes, randomUUID } from 'crypto'
 import path from 'path'
@@ -1582,7 +1582,11 @@ describe('collections-rest', () => {
         },
       ]
 
-      const response = await restClient.GET(`/${slug}/some-not-found-post`)
+      const post = await createPost({})
+
+      const response = await restClient.GET(
+        `/${slug}/${typeof post.id === 'number' ? 1000 : randomUUID()}`,
+      )
       expect(response.status).toBe(404)
 
       expect(collection.slug).toBe(slug)
