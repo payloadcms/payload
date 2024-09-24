@@ -17,7 +17,13 @@ import {
   useEditDepth,
   useUploadEdits,
 } from '@payloadcms/ui'
-import { formatAdminURL, getFormState } from '@payloadcms/ui/shared'
+import {
+  formatAdminURL,
+  getFormState,
+  handleBackToDashboard,
+  handleGoBack,
+  handleTakeOver,
+} from '@payloadcms/ui/shared'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
@@ -28,9 +34,6 @@ import { Auth } from './Auth/index.js'
 import './index.scss'
 import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
 import { SetDocumentTitle } from './SetDocumentTitle/index.js'
-import { handleBackToDashboard } from './utilities/handleBackToDashboard.js'
-import { handleGoBack } from './utilities/handleGoBack.js'
-import { handleTakeOver } from './utilities/handleTakeOver.js'
 
 const baseClass = 'collection-edit'
 

@@ -2,8 +2,8 @@ import type { ClientUser } from 'payload'
 
 export const handleTakeOver = (
   id: number | string,
-  collectionSlug: string | undefined,
-  globalSlug: string | undefined,
+  collectionSlug: string,
+  globalSlug: string,
   user: ClientUser,
   isWithinDoc: boolean,
   updateDocumentEditor: (docId: number | string, slug: string, user: ClientUser) => Promise<void>,
@@ -12,7 +12,7 @@ export const handleTakeOver = (
     hasShownLockedModal: boolean
     isLocked: boolean
     user: ClientUser
-  } | null>,
+  }>,
   isLockingEnabled: boolean,
   setIsReadOnlyForIncomingUser?: (value: React.SetStateAction<boolean>) => void,
 ): void => {
@@ -37,7 +37,7 @@ export const handleTakeOver = (
     setCurrentEditor(user)
 
     // If this is a takeover within the document, ensure the document is editable
-    if (isWithinDoc) {
+    if (isWithinDoc && setIsReadOnlyForIncomingUser) {
       setIsReadOnlyForIncomingUser(false)
     }
   } catch (error) {
