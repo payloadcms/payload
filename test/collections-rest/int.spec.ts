@@ -1,4 +1,4 @@
-import type { APIError, NotFound, type Payload, SanitizedCollectionConfig } from 'payload';
+import type { APIError, NotFound, type Payload, SanitizedCollectionConfig } from 'payload'
 
 import { randomBytes, randomUUID } from 'crypto'
 import path from 'path'
@@ -1535,7 +1535,7 @@ describe('collections-rest', () => {
       expect(result.errors[0].message).toStrictEqual('Something went wrong.')
     })
 
-    it('should ran afterError hook on root level and modify result/status', async () => {
+    it('should execute afterError hook on root level and modify result/status', async () => {
       let err: unknown
       let errResult: any
 
@@ -1566,7 +1566,7 @@ describe('collections-rest', () => {
       payload.config.hooks.afterError = []
     })
 
-    it('should ran afterError hook on collection level and modify result', async () => {
+    it('should execute afterError hook on collection level and modify result', async () => {
       let err: unknown
       let errResult: any
       let collection: SanitizedCollectionConfig
