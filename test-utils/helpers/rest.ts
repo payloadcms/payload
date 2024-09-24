@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Config, PaginatedDocs, Where } from 'payload'
 
-import { devUser } from '@test-utils/credentials.js'
 import * as qs from 'qs-esm'
+
+import { devUser } from '../credentials.js'
 
 type Args = {
   defaultSlug: string

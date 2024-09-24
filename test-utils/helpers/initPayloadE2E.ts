@@ -1,7 +1,9 @@
+import type { Payload } from 'payload'
+
 import { createServer } from 'http'
 import nextImport from 'next'
 import path from 'path'
-import { type Payload, getPayload } from 'payload'
+import { getPayload } from 'payload'
 import { wait } from 'payload/shared'
 import { parse } from 'url'
 
@@ -39,9 +41,9 @@ export async function initPayloadE2E({ dirname }: Args): Promise<Result> {
   // @ts-expect-error
   const app = nextImport({
     dev: true,
+    dir: path.resolve(dirname, '../../'),
     hostname: 'localhost',
     port,
-    dir: path.resolve(dirname, '../../'),
   })
 
   const handle = app.getRequestHandler()
