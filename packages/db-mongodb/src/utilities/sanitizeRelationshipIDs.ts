@@ -1,6 +1,6 @@
-import type mongoose from 'mongoose'
 import type { CollectionConfig, Field, SanitizedConfig, TraverseFieldsCallback } from 'payload'
 
+import mongoose from 'mongoose'
 import { APIError, traverseFields } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
 
@@ -30,11 +30,18 @@ const convertValue = ({
     (field) => fieldAffectsData(field) && field.name === 'id',
   )
 
-  if (customIDField) {
-    return value
-  } else {
-    throw new APIError(`Failed to create ObjectId from value: ${value}.`, 400)
+  if (!customIDField) {
+    try {
+      return new mongoose.Types.ObjectId(value)
+    } catch (error) {
+      throw new APIError(
+        `Failed to create ObjectId from value: ${value}. Error: ${error.message}`,
+        400,
+      )
+    }
   }
+
+  return value
 }
 
 const sanitizeRelationship = ({ config, field, locale, ref, value }) => {
