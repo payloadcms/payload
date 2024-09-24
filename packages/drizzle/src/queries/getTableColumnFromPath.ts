@@ -737,7 +737,7 @@ export const getTableColumnFromPath = ({
         }
       }
 
-      const targetTable = aliasTable || adapter.tables[newTableName]
+      const targetTable = aliasTable || newTable
 
       selectFields[`${newTableName}.${columnPrefix}${field.name}`] =
         targetTable[`${columnPrefix}${field.name}`]
