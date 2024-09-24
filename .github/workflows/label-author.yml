@@ -33,7 +33,11 @@ jobs:
             const type = context.payload.pull_request ? 'pull_request' : 'issue';
             const association = context.payload[type].author_association;
             let label = ''
-            if (association === 'MEMBER' || association === 'OWNER') {
+            if (
+              association === 'MEMBER' ||
+              association === 'OWNER' ||
+              ['paulpopus', 'r1tsuu'].includes(context.actor)
+            ) {
               label = 'created-by: Payload team';
             } else if (association === 'CONTRIBUTOR') {
               label = 'created-by: Contributor';
