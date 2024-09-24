@@ -792,9 +792,9 @@ export type Config = {
       unauthorized?: string
     }
     /**
-     * Attempt to force the browser to use a particular theme
+     * Restrict the Admin Panel theme to use only one of your choice
      *
-     * @default 'all' // allow the browser to determine the theme
+     * @default 'all' // The theme can be configured by users
      */
     theme?: 'all' | 'dark' | 'light'
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
