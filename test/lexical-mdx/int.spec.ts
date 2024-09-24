@@ -30,6 +30,7 @@ type Tests = Array<{
     MarkOptional<SerializedBlockNode, 'children' | 'fields' | 'format' | 'type' | 'version'>,
     'fields'
   >
+  description?: string
   ignoreSpacesAndNewlines?: boolean
   input: string
   inputAfterConvertFromEditorJSON?: string
@@ -764,21 +765,92 @@ Text before banner
       ],
     },
     {
+      description: 'TextContainerNoTrim with nested, no-leftpad content',
       input: `
-<BannerNoTrim>
+<TextContainerNoTrim>
 no indent
   indent 2
     indent 4
 no indent
-</BannerNoTrim>
+</TextContainerNoTrim>
 `,
       blockNode: {
         fields: {
-          blockType: 'BannerNoTrim',
+          blockType: 'TextContainerNoTrim',
           text: `no indent
   indent 2
     indent 4
 no indent`,
+        },
+      },
+    },
+    {
+      description: 'TextContainer with nested, no-leftpad content',
+
+      input: `
+<TextContainer>
+no indent
+  indent 2
+    indent 4
+no indent
+</TextContainer>
+`,
+      inputAfterConvertFromEditorJSON: `
+<TextContainer>
+  no indent
+    indent 2
+      indent 4
+  no indent
+</TextContainer>
+`,
+      blockNode: {
+        fields: {
+          blockType: 'TextContainer',
+          text: `no indent
+  indent 2
+    indent 4
+no indent`,
+        },
+      },
+    },
+    {
+      description: 'TextContainerNoTrim with nested, leftpad content',
+
+      input: `
+<TextContainerNoTrim>
+  indent 2
+    indent 4
+      indent 6
+  indent 2
+</TextContainerNoTrim>
+`,
+      blockNode: {
+        fields: {
+          blockType: 'TextContainerNoTrim',
+          text: `  indent 2
+    indent 4
+      indent 6
+  indent 2`,
+        },
+      },
+    },
+    {
+      description: 'TextContainer with nested, leftpad content',
+      input: `
+<TextContainer>
+  indent 2
+    indent 4
+      indent 6
+  indent 2
+</TextContainer>
+`,
+      blockNode: {
+        fields: {
+          blockType: 'TextContainer',
+          text: `indent 2
+  indent 4
+    indent 6
+indent 2`,
         },
       },
     },
@@ -792,6 +864,7 @@ no indent`,
     blockNode,
     ignoreSpacesAndNewlines,
     rootChildren,
+    description,
   } of INPUT_AND_OUTPUT) {
     let sanitizedInput = input
     // Remove beginning and end newline of input if exists (since the input is a template string)
@@ -815,7 +888,7 @@ no indent`,
       }
     }
 
-    it(`can convert to editor JSON: ${sanitizedInput}"`, () => {
+    it(`can convert to editor JSON: ${description ?? sanitizedInput}"`, () => {
       const result = mdxToEditorJSON({
         mdxWithFrontmatter: sanitizedInput,
         editorConfig,
@@ -851,7 +924,7 @@ no indent`,
       }
     })
 
-    it(`can convert from editor JSON: ${sanitizedInput}"`, () => {
+    it(`can convert from editor JSON: ${description ?? sanitizedInput}"`, () => {
       const editorState = {
         root: {
           children: blockNode

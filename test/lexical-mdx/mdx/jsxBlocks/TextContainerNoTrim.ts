@@ -1,7 +1,7 @@
 import type { Block } from 'payload'
 
-export const BannerNoTrimBlock: Block = {
-  slug: 'BannerNoTrim',
+export const TextContainerNoTrimBlock: Block = {
+  slug: 'TextContainerNoTrim',
   jsx: {
     import: ({ children }) => {
       return {
