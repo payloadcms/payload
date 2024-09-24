@@ -33,6 +33,9 @@ export default buildConfigWithDefaults({
       Component: '/collections/Posts/MyAvatar.js#MyAvatar',
     },
   },
+  graphQL: {
+    //disable: true,
+  },
   editor: lexicalEditor({
     features: ({ defaultFeatures }) => [
       ...defaultFeatures,
