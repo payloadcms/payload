@@ -49,13 +49,15 @@ export const createClientCollectionConfig = ({
   i18n,
   importMap,
   payload,
+  skipComponents,
 }: {
   collection: SanitizedCollectionConfig
   createMappedComponent: CreateMappedComponent
-  formState: FormState
+  formState?: FormState
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
+  skipComponents?: boolean
 }): ClientCollectionConfig => {
   const clientCollection = deepCopyObjectSimple(collection) as unknown as ClientCollectionConfig
 
@@ -67,6 +69,7 @@ export const createClientCollectionConfig = ({
     i18n,
     importMap,
     payload,
+    skipComponents,
   })
 
   serverOnlyCollectionProperties.forEach((key) => {
@@ -123,158 +126,221 @@ export const createClientCollectionConfig = ({
 
   clientCollection.admin.components = {} as ClientCollectionConfig['admin']['components']
 
-  if (collection?.admin?.components) {
-    if (collection.admin.components?.edit) {
-      clientCollection.admin.components.edit =
-        {} as ClientCollectionConfig['admin']['components']['edit']
+  if (!skipComponents) {
+    if (collection?.admin?.components) {
+      if (collection.admin.components?.edit) {
+        clientCollection.admin.components.edit =
+          {} as ClientCollectionConfig['admin']['components']['edit']
 
-      if (collection.admin.components.edit?.PreviewButton) {
-        clientCollection.admin.components.edit.PreviewButton = createMappedComponent(
-          collection.admin.components.edit.PreviewButton,
-          undefined,
-          undefined,
-          'collection.admin.components.edit.PreviewButton',
+        if (collection.admin.components.edit?.PreviewButton) {
+          clientCollection.admin.components.edit.PreviewButton = createMappedComponent(
+            collection.admin.components.edit.PreviewButton,
+            undefined,
+            undefined,
+            'collection.admin.components.edit.PreviewButton',
+          )
+        }
+
+        if (collection.admin.components.edit?.PublishButton) {
+          clientCollection.admin.components.edit.PublishButton = createMappedComponent(
+            collection.admin.components.edit.PublishButton,
+            undefined,
+            undefined,
+            'collection.admin.components.edit.PublishButton',
+          )
+        }
+
+        if (collection.admin.components.edit?.SaveButton) {
+          clientCollection.admin.components.edit.SaveButton = createMappedComponent(
+            collection.admin.components.edit.SaveButton,
+            undefined,
+            undefined,
+            'collection.admin.components.edit.SaveButton',
+          )
+        }
+
+        if (collection.admin.components.edit?.SaveDraftButton) {
+          clientCollection.admin.components.edit.SaveDraftButton = createMappedComponent(
+            collection.admin.components.edit.SaveDraftButton,
+            undefined,
+            undefined,
+            'collection.admin.components.edit.SaveDraftButton',
+          )
+        }
+
+        if (collection.admin.components.edit?.Upload) {
+          clientCollection.admin.components.edit.Upload = createMappedComponent(
+            collection.admin.components.edit.Upload,
+            undefined,
+            undefined,
+            'collection.admin.components.edit.Upload',
+          )
+        }
+      }
+
+      if (collection.admin.components?.beforeList) {
+        clientCollection.admin.components.beforeList = collection.admin.components.beforeList.map(
+          (Component) =>
+            createMappedComponent(
+              Component,
+              undefined,
+              undefined,
+              'collection.admin.components.beforeList',
+            ),
         )
       }
 
-      if (collection.admin.components.edit?.PublishButton) {
-        clientCollection.admin.components.edit.PublishButton = createMappedComponent(
-          collection.admin.components.edit.PublishButton,
-          undefined,
-          undefined,
-          'collection.admin.components.edit.PublishButton',
+      if (collection.admin.components?.beforeListTable) {
+        clientCollection.admin.components.beforeListTable =
+          collection.admin.components.beforeListTable.map((Component) =>
+            createMappedComponent(
+              Component,
+              undefined,
+              undefined,
+              'collection.admin.components.beforeListTable',
+            ),
+          )
+      }
+
+      if (collection.admin.components?.afterList) {
+        clientCollection.admin.components.afterList = collection.admin.components.afterList.map(
+          (Component) =>
+            createMappedComponent(
+              Component,
+              undefined,
+              undefined,
+              'collection.admin.components.afterList',
+            ),
         )
       }
 
-      if (collection.admin.components.edit?.SaveButton) {
-        clientCollection.admin.components.edit.SaveButton = createMappedComponent(
-          collection.admin.components.edit.SaveButton,
-          undefined,
-          undefined,
-          'collection.admin.components.edit.SaveButton',
-        )
-      }
-
-      if (collection.admin.components.edit?.SaveDraftButton) {
-        clientCollection.admin.components.edit.SaveDraftButton = createMappedComponent(
-          collection.admin.components.edit.SaveDraftButton,
-          undefined,
-          undefined,
-          'collection.admin.components.edit.SaveDraftButton',
-        )
-      }
-
-      if (collection.admin.components.edit?.Upload) {
-        clientCollection.admin.components.edit.Upload = createMappedComponent(
-          collection.admin.components.edit.Upload,
-          undefined,
-          undefined,
-          'collection.admin.components.edit.Upload',
-        )
+      if (collection.admin.components?.afterListTable) {
+        clientCollection.admin.components.afterListTable =
+          collection.admin.components.afterListTable.map((Component) =>
+            createMappedComponent(
+              Component,
+              undefined,
+              undefined,
+              'collection.admin.components.afterListTable',
+            ),
+          )
       }
     }
 
-    if (collection.admin.components?.beforeList) {
-      clientCollection.admin.components.beforeList = collection.admin.components.beforeList.map(
-        (Component) =>
-          createMappedComponent(
-            Component,
-            undefined,
-            undefined,
-            'collection.admin.components.beforeList',
-          ),
-      )
+    let description = undefined
+
+    if (collection.admin?.description) {
+      if (
+        typeof collection.admin?.description === 'string' ||
+        typeof collection.admin?.description === 'object'
+      ) {
+        description = collection.admin.description
+      } else if (typeof collection.admin?.description === 'function') {
+        description = collection.admin?.description({ t: i18n.t })
+      }
     }
 
-    if (collection.admin.components?.beforeListTable) {
-      clientCollection.admin.components.beforeListTable =
-        collection.admin.components.beforeListTable.map((Component) =>
-          createMappedComponent(
-            Component,
-            undefined,
-            undefined,
-            'collection.admin.components.beforeListTable',
-          ),
-        )
-    }
+    clientCollection.admin.description = description
 
-    if (collection.admin.components?.afterList) {
-      clientCollection.admin.components.afterList = collection.admin.components.afterList.map(
-        (Component) =>
-          createMappedComponent(
-            Component,
-            undefined,
-            undefined,
-            'collection.admin.components.afterList',
-          ),
-      )
-    }
-
-    if (collection.admin.components?.afterListTable) {
-      clientCollection.admin.components.afterListTable =
-        collection.admin.components.afterListTable.map((Component) =>
-          createMappedComponent(
-            Component,
-            undefined,
-            undefined,
-            'collection.admin.components.afterListTable',
-          ),
-        )
-    }
-  }
-
-  let description = undefined
-
-  if (collection.admin?.description) {
-    if (
-      typeof collection.admin?.description === 'string' ||
-      typeof collection.admin?.description === 'object'
-    ) {
-      description = collection.admin.description
-    } else if (typeof collection.admin?.description === 'function') {
-      description = collection.admin?.description({ t: i18n.t })
-    }
-  }
-
-  clientCollection.admin.description = description
-
-  if (collection.admin.components?.Description) {
-    clientCollection.admin.components.Description = createMappedComponent(
-      collection.admin.components.Description,
-      {
-        clientProps: {
-          description,
+    if (collection.admin.components?.Description) {
+      clientCollection.admin.components.Description = createMappedComponent(
+        collection.admin.components.Description,
+        {
+          clientProps: {
+            description,
+          },
         },
-      },
-      undefined,
-      'collection.admin.components.Description',
-    )
-  }
+        undefined,
+        'collection.admin.components.Description',
+      )
+    }
 
-  clientCollection.admin.components.views = (
-    collection?.admin?.components?.views
-      ? deepCopyObjectSimple(collection?.admin?.components?.views)
-      : {}
-  ) as ClientCollectionConfig['admin']['components']['views']
+    clientCollection.admin.components.views = (
+      collection?.admin?.components?.views
+        ? deepCopyObjectSimple(collection?.admin?.components?.views)
+        : {}
+    ) as ClientCollectionConfig['admin']['components']['views']
 
-  const hasEditView =
-    'admin' in collection &&
-    'components' in collection.admin &&
-    'views' in collection.admin.components &&
-    'edit' in collection.admin.components.views &&
-    'default' in collection.admin.components.views.edit
+    const hasEditView =
+      'admin' in collection &&
+      'components' in collection.admin &&
+      'views' in collection.admin.components &&
+      'edit' in collection.admin.components.views &&
+      'default' in collection.admin.components.views.edit
 
-  if (!clientCollection.admin.components.views.edit) {
-    clientCollection.admin.components.views.edit =
-      {} as ClientCollectionConfig['admin']['components']['views']['edit']
-  }
+    if (!clientCollection.admin.components.views.edit) {
+      clientCollection.admin.components.views.edit =
+        {} as ClientCollectionConfig['admin']['components']['views']['edit']
+    }
 
-  clientCollection.admin.components.views.edit.default = {
-    Component: createMappedComponent(
-      hasEditView &&
-        'Component' in collection.admin.components.views.edit.default &&
-        collection.admin.components.views.edit.default.Component
-        ? collection.admin.components.views.edit.default.Component
+    clientCollection.admin.components.views.edit.default = {
+      Component: createMappedComponent(
+        hasEditView &&
+          'Component' in collection.admin.components.views.edit.default &&
+          collection.admin.components.views.edit.default.Component
+          ? collection.admin.components.views.edit.default.Component
+          : null,
+        {
+          clientProps: {
+            collectionSlug: collection.slug,
+          },
+        },
+        undefined,
+        'collection.admin.components.views.edit.default',
+      ),
+    }
+
+    if (collection?.admin?.components?.views?.edit) {
+      for (const key in collection.admin.components.views.edit) {
+        const view: EditViewConfig = collection.admin.components.views.edit[key]
+
+        if (!clientCollection.admin.components.views.edit[key]) {
+          clientCollection.admin.components.views.edit[key] = {} as MappedView
+        }
+
+        if ('Component' in view && key !== 'default') {
+          clientCollection.admin.components.views.edit[key].Component = createMappedComponent(
+            view.Component,
+            {
+              clientProps: {
+                collectionSlug: collection.slug,
+              },
+            },
+            undefined,
+            'collection.admin.components.views.edit.key.Component',
+          )
+        }
+
+        if ('actions' in view && view.actions?.length) {
+          clientCollection.admin.components.views.edit[key].actions = view.actions.map(
+            (Component) =>
+              createMappedComponent(
+                Component,
+                undefined,
+                undefined,
+                'collection.admin.components.views.key.admin',
+              ),
+          )
+        }
+      }
+    }
+
+    const hasListView =
+      'admin' in collection &&
+      'components' in collection.admin &&
+      'views' in collection.admin.components &&
+      'list' in collection.admin.components.views
+
+    if (!clientCollection.admin.components.views.list) {
+      clientCollection.admin.components.views.list =
+        {} as ClientCollectionConfig['admin']['components']['views']['list']
+    }
+
+    clientCollection.admin.components.views.list.Component = createMappedComponent(
+      hasListView &&
+        'Component' in collection.admin.components.views.list &&
+        collection.admin.components.views.list.Component
+        ? collection.admin.components.views.list.Component
         : null,
       {
         clientProps: {
@@ -282,84 +348,24 @@ export const createClientCollectionConfig = ({
         },
       },
       undefined,
-      'collection.admin.components.views.edit.default',
-    ),
-  }
+      'collection.admin.components.views.list',
+    )
 
-  if (collection?.admin?.components?.views?.edit) {
-    for (const key in collection.admin.components.views.edit) {
-      const view: EditViewConfig = collection.admin.components.views.edit[key]
-
-      if (!clientCollection.admin.components.views.edit[key]) {
-        clientCollection.admin.components.views.edit[key] = {} as MappedView
-      }
-
-      if ('Component' in view && key !== 'default') {
-        clientCollection.admin.components.views.edit[key].Component = createMappedComponent(
-          view.Component,
-          {
-            clientProps: {
-              collectionSlug: collection.slug,
-            },
-          },
-          undefined,
-          'collection.admin.components.views.edit.key.Component',
-        )
-      }
-
-      if ('actions' in view && view.actions?.length) {
-        clientCollection.admin.components.views.edit[key].actions = view.actions.map((Component) =>
+    if (
+      hasListView &&
+      'actions' in collection.admin.components.views.list &&
+      collection.admin.components.views.list.actions
+    ) {
+      clientCollection.admin.components.views.list.actions =
+        collection.admin.components.views.list.actions.map((Component) =>
           createMappedComponent(
             Component,
             undefined,
             undefined,
-            'collection.admin.components.views.key.admin',
+            'collection.admin.components.views.list',
           ),
         )
-      }
     }
-  }
-
-  const hasListView =
-    'admin' in collection &&
-    'components' in collection.admin &&
-    'views' in collection.admin.components &&
-    'list' in collection.admin.components.views
-
-  if (!clientCollection.admin.components.views.list) {
-    clientCollection.admin.components.views.list =
-      {} as ClientCollectionConfig['admin']['components']['views']['list']
-  }
-
-  clientCollection.admin.components.views.list.Component = createMappedComponent(
-    hasListView &&
-      'Component' in collection.admin.components.views.list &&
-      collection.admin.components.views.list.Component
-      ? collection.admin.components.views.list.Component
-      : null,
-    {
-      clientProps: {
-        collectionSlug: collection.slug,
-      },
-    },
-    undefined,
-    'collection.admin.components.views.list',
-  )
-
-  if (
-    hasListView &&
-    'actions' in collection.admin.components.views.list &&
-    collection.admin.components.views.list.actions
-  ) {
-    clientCollection.admin.components.views.list.actions =
-      collection.admin.components.views.list.actions.map((Component) =>
-        createMappedComponent(
-          Component,
-          undefined,
-          undefined,
-          'collection.admin.components.views.list',
-        ),
-      )
   }
 
   if (
@@ -380,13 +386,15 @@ export const createClientCollectionConfigs = ({
   i18n,
   importMap,
   payload,
+  skipComponents,
 }: {
   collections: SanitizedCollectionConfig[]
   createMappedComponent: CreateMappedComponent
-  formState: FormState
+  formState?: FormState
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
+  skipComponents?: boolean
 }): ClientCollectionConfig[] => {
   const clientCollections = new Array(collections.length)
 
@@ -400,6 +408,7 @@ export const createClientCollectionConfigs = ({
       i18n,
       importMap,
       payload,
+      skipComponents,
     })
   }
 

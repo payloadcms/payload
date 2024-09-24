@@ -145,6 +145,7 @@ export function UploadInput(props: UploadInputProps) {
       collectionSlugs: typeof relationTo === 'string' ? [relationTo] : relationTo,
       filterOptions,
     })
+
   const [
     CreateDocDrawer,
     ,

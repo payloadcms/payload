@@ -1,13 +1,11 @@
 'use client'
-import type { ClientConfig } from 'payload'
+import type { ClientCollectionConfig } from 'payload'
 
 import { useState } from 'react'
 
 import { useConfig } from '../../providers/Config/index.js'
 
-export const useRelatedCollections = (
-  relationTo: string | string[],
-): ClientConfig['collections'] => {
+export const useRelatedCollections = (relationTo: string | string[]): ClientCollectionConfig[] => {
   const { config } = useConfig()
 
   const [relatedCollections] = useState(() => {

@@ -52,6 +52,7 @@ export const createClientField = ({
   importMap,
   parentPath,
   payload,
+  skipComponents,
 }: {
   clientField: ClientField
   createMappedComponent: CreateMappedComponent
@@ -61,6 +62,7 @@ export const createClientField = ({
   importMap: ImportMap
   parentPath?: string
   payload: Payload
+  skipComponents?: boolean
 }): ClientField => {
   const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
     'hooks',
@@ -159,15 +161,18 @@ export const createClientField = ({
         importMap,
         parentPath: field._schemaPath,
         payload,
+        skipComponents,
       })
 
-      if (incomingField?.admin?.components && 'RowLabel' in incomingField.admin.components) {
-        ;(field as unknown as ArrayFieldClient).admin.components.RowLabel = createMappedComponent(
-          incomingField.admin.components.RowLabel,
-          serverProps,
-          undefined,
-          'incomingField.admin.components.RowLabel',
-        )
+      if (!skipComponents) {
+        if (incomingField?.admin?.components && 'RowLabel' in incomingField.admin.components) {
+          ;(field as unknown as ArrayFieldClient).admin.components.RowLabel = createMappedComponent(
+            incomingField.admin.components.RowLabel,
+            serverProps,
+            undefined,
+            'incomingField.admin.components.RowLabel',
+          )
+        }
       }
 
       break
@@ -206,13 +211,15 @@ export const createClientField = ({
             }
           }
 
-          if (block.admin?.components?.Label) {
-            clientBlock.admin.components.Label = createMappedComponent(
-              block.admin.components.Label,
-              serverProps,
-              undefined,
-              'block.admin.components.Label',
-            )
+          if (!skipComponents) {
+            if (block.admin?.components?.Label) {
+              clientBlock.admin.components.Label = createMappedComponent(
+                block.admin.components.Label,
+                serverProps,
+                undefined,
+                'block.admin.components.Label',
+              )
+            }
           }
 
           clientBlock.fields = createClientFields({
@@ -223,6 +230,7 @@ export const createClientField = ({
             importMap,
             parentPath: `${field._schemaPath}.${block.slug}`,
             payload,
+            skipComponents,
           })
 
           if (!field.blocks) {
@@ -255,19 +263,21 @@ export const createClientField = ({
         field.admin.components = {}
       }
 
-      field.admin.components.Field = createMappedComponent(
-        incomingField.editor.FieldComponent,
-        serverProps,
-        undefined,
-        'incomingField.editor.FieldComponent',
-      )
+      if (!skipComponents) {
+        field.admin.components.Field = createMappedComponent(
+          incomingField.editor.FieldComponent,
+          serverProps,
+          undefined,
+          'incomingField.editor.FieldComponent',
+        )
 
-      field.admin.components.Cell = createMappedComponent(
-        incomingField.editor.CellComponent,
-        serverProps,
-        undefined,
-        'incomingField.editor.CellComponent',
-      )
+        field.admin.components.Cell = createMappedComponent(
+          incomingField.editor.CellComponent,
+          serverProps,
+          undefined,
+          'incomingField.editor.CellComponent',
+        )
+      }
 
       if (incomingField.editor.generateComponentMap) {
         const { Component: generateComponentMap, serverProps: richTextServerProps } = getComponent({
@@ -321,16 +331,13 @@ export const createClientField = ({
             importMap,
             parentPath: field._schemaPath,
             payload,
+            skipComponents,
           })
         }
       }
 
       break
     }
-
-    // case 'joins': {
-    //
-    // }
 
     case 'select':
     case 'radio': {
@@ -403,135 +410,141 @@ export const createClientField = ({
     }
   }
 
-  if (incomingField?.admin?.components?.Cell !== undefined) {
-    clientField.admin.components.Cell = createMappedComponent(
-      incomingField.admin.components.Cell,
-      fieldServerProps,
-      undefined,
-      'incomingField.admin.components.Cell',
-    )
-  }
-
-  type FieldWithDescriptionComponent = {
-    admin: AdminClient
-  } & ClientField
-
-  if (
-    incomingField?.admin?.components &&
-    'Description' in incomingField.admin.components &&
-    incomingField?.admin?.components?.Description !== undefined
-  ) {
-    ;(clientField as FieldWithDescriptionComponent).admin.components.Description =
-      createMappedComponent(
-        incomingField.admin.components.Description,
+  if (!skipComponents) {
+    if (incomingField?.admin?.components?.Cell !== undefined) {
+      clientField.admin.components.Cell = createMappedComponent(
+        incomingField.admin.components.Cell,
         fieldServerProps,
         undefined,
-        'incomingField.admin.components.Description',
+        'incomingField.admin.components.Cell',
       )
-  }
+    }
 
-  type FieldWithErrorComponent = {
-    admin: {
-      components: {
-        Error: MappedComponent
-      }
-    } & AdminClient
-  } & ClientField
-  if (
-    incomingField?.admin?.components &&
-    'Error' in incomingField.admin.components &&
-    incomingField.admin.components.Error !== undefined
-  ) {
-    ;(clientField as FieldWithErrorComponent).admin.components.Error = createMappedComponent(
-      incomingField.admin.components.Error,
-      fieldServerProps,
-      undefined,
-      'incomingField.admin.components.Error',
-    )
-  }
+    type FieldWithDescriptionComponent = {
+      admin: AdminClient
+    } & ClientField
 
-  if (incomingField?.admin?.components?.Field !== undefined) {
-    clientField.admin.components.Field = createMappedComponent(
-      incomingField.admin.components.Field,
-      fieldServerProps,
-      undefined,
-      'incomingField.admin.components.Field',
-    )
-  }
+    if (
+      incomingField?.admin?.components &&
+      'Description' in incomingField.admin.components &&
+      incomingField?.admin?.components?.Description !== undefined
+    ) {
+      ;(clientField as FieldWithDescriptionComponent).admin.components.Description =
+        createMappedComponent(
+          incomingField.admin.components.Description,
+          fieldServerProps,
+          undefined,
+          'incomingField.admin.components.Description',
+        )
+    }
 
-  if (
-    incomingField?.admin?.components &&
-    'Filter' in incomingField.admin.components &&
-    incomingField.admin.components.Filter !== undefined
-  ) {
-    clientField.admin.components.Filter = createMappedComponent(
-      incomingField.admin.components.Filter,
-      fieldServerProps,
-      undefined,
-      'incomingField.admin.components.Filter',
-    )
-  }
+    type FieldWithErrorComponent = {
+      admin: {
+        components: {
+          Error: MappedComponent
+        }
+      } & AdminClient
+    } & ClientField
 
-  type FieldWithLabelComponent = {
-    admin: {
-      components: {
-        Label: MappedComponent
-      }
-    } & AdminClient
-  } & ClientField
-  if (
-    incomingField?.admin?.components &&
-    'Label' in incomingField.admin.components &&
-    incomingField.admin.components.Label !== undefined
-  ) {
-    ;(clientField as FieldWithLabelComponent).admin.components.Label = createMappedComponent(
-      CustomLabel,
-      fieldServerProps,
-      undefined,
-      'incomingField.admin.components.Label',
-    )
-  }
-
-  type FieldWithBeforeInputComponent = {
-    admin: {
-      components: {
-        beforeInput: MappedComponent[]
-      }
-    } & AdminClient
-  } & ClientField
-  if (
-    incomingField?.admin?.components &&
-    'beforeInput' in incomingField.admin.components &&
-    incomingField.admin.components.beforeInput !== undefined
-  ) {
-    ;(clientField as FieldWithBeforeInputComponent).admin.components.beforeInput =
-      createMappedComponent(
-        incomingField.admin?.components?.beforeInput,
+    if (
+      incomingField?.admin?.components &&
+      'Error' in incomingField.admin.components &&
+      incomingField.admin.components.Error !== undefined
+    ) {
+      ;(clientField as FieldWithErrorComponent).admin.components.Error = createMappedComponent(
+        incomingField.admin.components.Error,
         fieldServerProps,
         undefined,
-        'incomingField.admin.components.beforeInput',
+        'incomingField.admin.components.Error',
       )
-  }
+    }
 
-  type FieldWithAfterInputComponent = {
-    admin: {
-      components: {
-        afterInput: MappedComponent[]
-      }
-    } & AdminClient
-  } & ClientField
-  if (
-    incomingField?.admin?.components &&
-    'afterInput' in incomingField.admin.components &&
-    incomingField.admin.components.afterInput !== undefined
-  ) {
-    ;(clientField as FieldWithAfterInputComponent).admin.components.afterInput =
-      createMappedComponent(
-        incomingField.admin?.components?.afterInput,
+    if (incomingField?.admin?.components?.Field !== undefined) {
+      clientField.admin.components.Field = createMappedComponent(
+        incomingField.admin.components.Field,
         fieldServerProps,
         undefined,
-        'incomingField.admin.components.afterInput',
+        'incomingField.admin.components.Field',
       )
+    }
+
+    if (
+      incomingField?.admin?.components &&
+      'Filter' in incomingField.admin.components &&
+      incomingField.admin.components.Filter !== undefined
+    ) {
+      clientField.admin.components.Filter = createMappedComponent(
+        incomingField.admin.components.Filter,
+        fieldServerProps,
+        undefined,
+        'incomingField.admin.components.Filter',
+      )
+    }
+
+    type FieldWithLabelComponent = {
+      admin: {
+        components: {
+          Label: MappedComponent
+        }
+      } & AdminClient
+    } & ClientField
+
+    if (
+      incomingField?.admin?.components &&
+      'Label' in incomingField.admin.components &&
+      incomingField.admin.components.Label !== undefined
+    ) {
+      ;(clientField as FieldWithLabelComponent).admin.components.Label = createMappedComponent(
+        CustomLabel,
+        fieldServerProps,
+        undefined,
+        'incomingField.admin.components.Label',
+      )
+    }
+
+    type FieldWithBeforeInputComponent = {
+      admin: {
+        components: {
+          beforeInput: MappedComponent[]
+        }
+      } & AdminClient
+    } & ClientField
+
+    if (
+      incomingField?.admin?.components &&
+      'beforeInput' in incomingField.admin.components &&
+      incomingField.admin.components.beforeInput !== undefined
+    ) {
+      ;(clientField as FieldWithBeforeInputComponent).admin.components.beforeInput =
+        createMappedComponent(
+          incomingField.admin?.components?.beforeInput,
+          fieldServerProps,
+          undefined,
+          'incomingField.admin.components.beforeInput',
+        )
+    }
+
+    type FieldWithAfterInputComponent = {
+      admin: {
+        components: {
+          afterInput: MappedComponent[]
+        }
+      } & AdminClient
+    } & ClientField
+
+    if (
+      incomingField?.admin?.components &&
+      'afterInput' in incomingField.admin.components &&
+      incomingField.admin.components.afterInput !== undefined
+    ) {
+      ;(clientField as FieldWithAfterInputComponent).admin.components.afterInput =
+        createMappedComponent(
+          incomingField.admin?.components?.afterInput,
+          fieldServerProps,
+          undefined,
+          'incomingField.admin.components.afterInput',
+        )
+    }
   }
 
   return clientField
@@ -547,6 +560,7 @@ export const createClientFields = ({
   importMap,
   parentPath,
   payload,
+  skipComponents,
 }: {
   clientFields: ClientField[]
   createMappedComponent: CreateMappedComponent
@@ -557,6 +571,7 @@ export const createClientFields = ({
   importMap: ImportMap
   parentPath?: string
   payload: Payload
+  skipComponents?: boolean
 }): ClientField[] => {
   const newClientFields: ClientField[] = []
   for (let i = 0; i < fields.length; i++) {
@@ -571,6 +586,7 @@ export const createClientFields = ({
       importMap,
       parentPath,
       payload,
+      skipComponents,
     })
 
     if (newField) {

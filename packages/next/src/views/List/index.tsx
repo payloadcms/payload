@@ -165,11 +165,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
             modifySearchParams
             preferenceKey={preferenceKey}
           >
-            <ListViewHandler
-              collectionConfig={clientCollectionConfig}
-              listPreferences={listPreferences}
-              preferenceKey={preferenceKey}
-            />
+            <ListViewHandler listPreferences={listPreferences} preferenceKey={preferenceKey} />
           </ListQueryProvider>
         </ListInfoProvider>
       </Fragment>

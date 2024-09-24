@@ -2,7 +2,6 @@ import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientGlobalConfig,
   CreateMappedComponent,
-  Data,
   EditViewConfig,
   FormState,
   ImportMap,
@@ -24,13 +23,15 @@ export const createClientGlobalConfig = ({
   i18n,
   importMap,
   payload,
+  skipComponents,
 }: {
   createMappedComponent: CreateMappedComponent
-  formState: FormState
+  formState?: FormState
   global: SanitizedConfig['globals'][0]
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
+  skipComponents?: boolean
 }): ClientGlobalConfig => {
   const clientGlobal = deepCopyObjectSimple(global) as unknown as ClientGlobalConfig
 
@@ -42,6 +43,7 @@ export const createClientGlobalConfig = ({
     i18n,
     importMap,
     payload,
+    skipComponents,
   })
 
   const serverOnlyProperties: Partial<ServerOnlyGlobalProperties>[] = [
@@ -76,111 +78,115 @@ export const createClientGlobalConfig = ({
 
     clientGlobal.admin.components = {} as ClientGlobalConfig['admin']['components']
 
-    if (global?.admin?.components) {
-      if (global.admin.components.elements) {
-        clientGlobal.admin.components.elements =
-          {} as ClientGlobalConfig['admin']['components']['elements']
+    if (!skipComponents) {
+      if (global?.admin?.components) {
+        if (global.admin.components.elements) {
+          clientGlobal.admin.components.elements =
+            {} as ClientGlobalConfig['admin']['components']['elements']
 
-        if (global.admin.components.elements?.PreviewButton) {
-          clientGlobal.admin.components.elements.PreviewButton = createMappedComponent(
-            global.admin.components.elements.PreviewButton,
-            undefined,
-            undefined,
-            'global.admin.components.elements.PreviewButton',
-          )
-        }
+          if (global.admin.components.elements?.PreviewButton) {
+            clientGlobal.admin.components.elements.PreviewButton = createMappedComponent(
+              global.admin.components.elements.PreviewButton,
+              undefined,
+              undefined,
+              'global.admin.components.elements.PreviewButton',
+            )
+          }
 
-        if (global.admin.components.elements?.PublishButton) {
-          clientGlobal.admin.components.elements.PublishButton = createMappedComponent(
-            global.admin.components.elements.PublishButton,
-            undefined,
-            undefined,
-            'global.admin.components.elements.PublishButton',
-          )
-        }
+          if (global.admin.components.elements?.PublishButton) {
+            clientGlobal.admin.components.elements.PublishButton = createMappedComponent(
+              global.admin.components.elements.PublishButton,
+              undefined,
+              undefined,
+              'global.admin.components.elements.PublishButton',
+            )
+          }
 
-        if (global.admin.components.elements?.SaveButton) {
-          clientGlobal.admin.components.elements.SaveButton = createMappedComponent(
-            global.admin.components.elements.SaveButton,
-            undefined,
-            undefined,
-            'global.admin.components.elements.SaveButton',
-          )
-        }
+          if (global.admin.components.elements?.SaveButton) {
+            clientGlobal.admin.components.elements.SaveButton = createMappedComponent(
+              global.admin.components.elements.SaveButton,
+              undefined,
+              undefined,
+              'global.admin.components.elements.SaveButton',
+            )
+          }
 
-        if (global.admin.components.elements?.SaveDraftButton) {
-          clientGlobal.admin.components.elements.SaveDraftButton = createMappedComponent(
-            global.admin.components.elements.SaveDraftButton,
-            undefined,
-            undefined,
-            'global.admin.components.elements.SaveDraftButton',
-          )
+          if (global.admin.components.elements?.SaveDraftButton) {
+            clientGlobal.admin.components.elements.SaveDraftButton = createMappedComponent(
+              global.admin.components.elements.SaveDraftButton,
+              undefined,
+              undefined,
+              'global.admin.components.elements.SaveDraftButton',
+            )
+          }
         }
       }
-    }
 
-    clientGlobal.admin.components.views = (
-      global?.admin?.components?.views ? deepCopyObjectSimple(global?.admin?.components?.views) : {}
-    ) as ClientGlobalConfig['admin']['components']['views']
+      clientGlobal.admin.components.views = (
+        global?.admin?.components?.views
+          ? deepCopyObjectSimple(global?.admin?.components?.views)
+          : {}
+      ) as ClientGlobalConfig['admin']['components']['views']
 
-    const hasEditView =
-      'admin' in global &&
-      'components' in global.admin &&
-      'views' in global.admin.components &&
-      'edit' in global.admin.components.views &&
-      'default' in global.admin.components.views.edit
+      const hasEditView =
+        'admin' in global &&
+        'components' in global.admin &&
+        'views' in global.admin.components &&
+        'edit' in global.admin.components.views &&
+        'default' in global.admin.components.views.edit
 
-    if (!clientGlobal.admin.components.views.edit) {
-      clientGlobal.admin.components.views.edit =
-        {} as ClientGlobalConfig['admin']['components']['views']['edit']
-    }
+      if (!clientGlobal.admin.components.views.edit) {
+        clientGlobal.admin.components.views.edit =
+          {} as ClientGlobalConfig['admin']['components']['views']['edit']
+      }
 
-    clientGlobal.admin.components.views.edit.default = {
-      Component: createMappedComponent(
-        hasEditView &&
-          'Component' in global.admin.components.views.edit.default &&
-          global.admin.components.views.edit.default.Component
-          ? global.admin.components.views.edit.default.Component
-          : null,
-        {
-          clientProps: {
-            globalSlug: global.slug,
-          },
-        },
-        undefined,
-        'global.admin.components.views.edit.default',
-      ),
-    }
-
-    if (global?.admin?.components?.views?.edit) {
-      for (const key in global.admin.components.views.edit) {
-        const view: EditViewConfig = global.admin.components.views.edit[key]
-        if (!clientGlobal.admin.components.views.edit[key]) {
-          clientGlobal.admin.components.views.edit[key] = {} as MappedView
-        }
-
-        if ('Component' in view && key !== 'default') {
-          clientGlobal.admin.components.views.edit[key].Component = createMappedComponent(
-            view.Component,
-            {
-              clientProps: {
-                globalSlug: global.slug,
-              },
+      clientGlobal.admin.components.views.edit.default = {
+        Component: createMappedComponent(
+          hasEditView &&
+            'Component' in global.admin.components.views.edit.default &&
+            global.admin.components.views.edit.default.Component
+            ? global.admin.components.views.edit.default.Component
+            : null,
+          {
+            clientProps: {
+              globalSlug: global.slug,
             },
-            undefined,
-            'global.admin.components.views.edit.key.Component',
-          )
-        }
+          },
+          undefined,
+          'global.admin.components.views.edit.default',
+        ),
+      }
 
-        if ('actions' in view && view.actions?.length) {
-          clientGlobal.admin.components.views.edit[key].actions = view.actions.map((Component) =>
-            createMappedComponent(
-              Component,
+      if (global?.admin?.components?.views?.edit) {
+        for (const key in global.admin.components.views.edit) {
+          const view: EditViewConfig = global.admin.components.views.edit[key]
+          if (!clientGlobal.admin.components.views.edit[key]) {
+            clientGlobal.admin.components.views.edit[key] = {} as MappedView
+          }
+
+          if ('Component' in view && key !== 'default') {
+            clientGlobal.admin.components.views.edit[key].Component = createMappedComponent(
+              view.Component,
+              {
+                clientProps: {
+                  globalSlug: global.slug,
+                },
+              },
               undefined,
-              undefined,
-              'global.admin.components.views.key.actions',
-            ),
-          )
+              'global.admin.components.views.edit.key.Component',
+            )
+          }
+
+          if ('actions' in view && view.actions?.length) {
+            clientGlobal.admin.components.views.edit[key].actions = view.actions.map((Component) =>
+              createMappedComponent(
+                Component,
+                undefined,
+                undefined,
+                'global.admin.components.views.key.actions',
+              ),
+            )
+          }
         }
       }
     }
@@ -204,13 +210,15 @@ export const createClientGlobalConfigs = ({
   i18n,
   importMap,
   payload,
+  skipComponents,
 }: {
   createMappedComponent: CreateMappedComponent
-  formState: FormState
+  formState?: FormState
   globals: SanitizedConfig['globals']
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
+  skipComponents?: boolean
 }): ClientGlobalConfig[] => {
   const clientGlobals = new Array(globals.length)
 
@@ -224,6 +232,7 @@ export const createClientGlobalConfigs = ({
       i18n,
       importMap,
       payload,
+      skipComponents,
     })
   }
 

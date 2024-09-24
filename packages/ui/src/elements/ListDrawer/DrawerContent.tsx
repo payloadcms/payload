@@ -1,5 +1,5 @@
 'use client'
-import type { Where } from 'payload'
+import type { ClientCollectionConfig, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -81,6 +81,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       routes: { api },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
 
   const enabledCollections = collections.filter(({ slug }) => {
@@ -89,7 +90,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   const [selectedOption, setSelectedOption] = useState<Option<string>>(() => {
     const initialSelection = selectedCollectionFromProps || enabledCollections[0]?.slug
-    const found = collections.find(({ slug }) => slug === initialSelection)
+    const found = getEntityConfig({ collectionSlug: initialSelection }) as ClientCollectionConfig
 
     return found
       ? {
@@ -132,9 +133,9 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const moreThanOneAvailableCollection = enabledCollections.length > 1
 
   useEffect(() => {
-    const selectedCollectionConfig = enabledCollections.find(
-      ({ slug }) => slug === selectedOption.value,
-    )
+    const selectedCollectionConfig = getEntityConfig({
+      collectionSlug: selectedOption.value,
+    }) as ClientCollectionConfig
 
     if (selectedCollectionConfig) {
       const {
@@ -223,7 +224,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     limit,
     cacheBust,
     filterOptions,
-    enabledCollections,
+    collections,
     selectedOption,
     t,
     setParams,
@@ -355,7 +356,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
                 <FieldLabel field={null} label={t('upload:selectCollectionToBrowse')} />
                 <ReactSelect
                   className={`${baseClass}__select-collection`}
-                  onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect
+                  onChange={setSelectedOption as (option: Option<string>) => void}
                   options={enabledCollections.map((coll) => ({
                     label: coll.labels,
                     value: coll.slug,
@@ -401,7 +402,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
             enableRowSelections={enableRowSelections}
             preferenceKey={preferencesKey}
           >
-            <ListViewHandler />
+            <ListViewHandler preferenceKey={preferencesKey} />
             <DocumentDrawer onSave={onCreateNew} />
           </TableColumnsProvider>
         </ListQueryProvider>

@@ -168,6 +168,7 @@ export const RootLayout = async ({
 
   const isNavOpen = navPreferences?.value?.open ?? true
 
+  // @ts-expect-error eslint-disable-next-line
   const clientConfig = (await payloadServerAction('render-config', {
     languageCode,
   })) as ClientConfig

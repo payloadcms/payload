@@ -48,8 +48,8 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 
 export const DefaultListView: React.FC<{
   collectionConfig: ClientCollectionConfig
-  listPreferences: ListPreferences
-  preferenceKey: string
+  listPreferences?: ListPreferences
+  preferenceKey?: string
 }> = (props) => {
   const { collectionConfig: collectionConfigFromProps, listPreferences, preferenceKey } = props
 
@@ -298,7 +298,10 @@ export const DefaultListView: React.FC<{
   )
 }
 
-export const ListView: React.FC = () => {
+export const ListView: React.FC<{
+  listPreferences?: ListPreferences
+  preferenceKey: string
+}> = ({ listPreferences, preferenceKey }) => {
   const { collectionConfig } = useEntityConfig()
 
   if (!collectionConfig) {
@@ -311,5 +314,11 @@ export const ListView: React.FC = () => {
     return <RenderComponent mappedComponent={CustomList} />
   }
 
-  return <DefaultListView collectionConfig={collectionConfig} />
+  return (
+    <DefaultListView
+      collectionConfig={collectionConfig}
+      listPreferences={listPreferences}
+      preferenceKey={preferenceKey}
+    />
+  )
 }

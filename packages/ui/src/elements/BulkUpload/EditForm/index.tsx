@@ -10,7 +10,7 @@ import type { EditFormProps } from './types.js'
 import { Form, useForm } from '../../../forms/Form/index.js'
 import { type FormProps } from '../../../forms/Form/types.js'
 import { WatchChildErrors } from '../../../forms/WatchChildErrors/index.js'
-import { useConfig } from '../../../providers/Config/index.js'
+import { useConfig, useEntityConfig } from '../../../providers/Config/index.js'
 import { RenderComponent } from '../../../providers/Config/RenderComponent.js'
 import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
@@ -54,8 +54,9 @@ export function EditForm({ submitted }: EditFormProps) {
       routes: { admin: adminRoute, api: apiRoute },
       serverURL,
     },
-    getEntityConfig,
   } = useConfig()
+
+  const { collectionConfig } = useEntityConfig()
 
   const router = useRouter()
   const depth = useEditDepth()
@@ -65,7 +66,6 @@ export function EditForm({ submitted }: EditFormProps) {
 
   const locale = params.get('locale')
 
-  const collectionConfig = getEntityConfig({ collectionSlug: docSlug }) as ClientCollectionConfig
   const collectionSlug = collectionConfig.slug
 
   const [schemaPath] = React.useState(collectionSlug)

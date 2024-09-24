@@ -1,5 +1,6 @@
 'use client'
 
+import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import type { Value } from '../../fields/Relationship/types.js'
@@ -39,7 +40,7 @@ export const AddNewRelation: React.FC<Props> = ({
   const relatedToMany = relatedCollections.length > 1
 
   const [popupOpen, setPopupOpen] = useState(false)
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const [showTooltip, setShowTooltip] = useState(false)
 
   const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen, toggleDrawer }] = useDocumentDrawer(
@@ -183,7 +184,7 @@ export const AddNewRelation: React.FC<Props> = ({
                             setSelectedCollection(relatedCollection?.slug)
                           }}
                         >
-                          {relatedCollection?.labels.singular}
+                          {getTranslation(relatedCollection?.labels.singular, i18n)}
                         </PopupList.Button>
                       )
                     }

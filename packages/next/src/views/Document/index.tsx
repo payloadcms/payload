@@ -7,12 +7,7 @@ import type {
   ServerSideEditViewProps,
 } from 'payload'
 
-import {
-  DocumentInfoProvider,
-  EditDepthProvider,
-  EntityConfigProvider,
-  HydrateAuthProvider,
-} from '@payloadcms/ui'
+import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import {
   formatAdminURL,
   getCreateMappedComponent,
@@ -279,7 +274,8 @@ export const Document: React.FC<AdminViewProps> = async ({
   }
 
   const collectionClientConfig = collectionSlug
-    ? ((await payloadServerAction('render-config', {
+    ? // @ts-expect-error eslint-disable-next-line
+      ((await payloadServerAction('render-config', {
         collectionSlug,
         data,
         formState,
@@ -288,7 +284,8 @@ export const Document: React.FC<AdminViewProps> = async ({
     : null
 
   const globalClientConfig = globalSlug
-    ? ((await payloadServerAction('render-config', {
+    ? // @ts-expect-error eslint-disable-next-line
+      ((await payloadServerAction('render-config', {
         data,
         formState,
         globalSlug,

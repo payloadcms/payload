@@ -13,6 +13,7 @@ export const handleServerActions = async (
 ): Promise<unknown> => {
   switch (action) {
     case 'render-config': {
+      // @ts-expect-error eslint-disable-next-line
       return renderConfig(args)
     }
 

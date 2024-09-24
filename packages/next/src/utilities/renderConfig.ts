@@ -1,3 +1,4 @@
+// @ts-nocheck eslint-disable-next-line
 import type {
   ClientCollectionConfig,
   ClientConfig,
@@ -53,7 +54,6 @@ export const renderConfig = async (
 
   if (schemaPath) {
     const renderedSchemaPath = createClientFields({
-      config,
       createMappedComponent,
       formState,
       importMap,
@@ -93,6 +93,8 @@ export const renderConfig = async (
     config,
     createMappedComponent,
     i18n,
+    importMap,
+    payload,
   })
 
   return renderedRootConfig
