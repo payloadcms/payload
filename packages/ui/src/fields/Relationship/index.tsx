@@ -46,6 +46,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       _path: pathFromProps,
       admin: {
         allowCreate = true,
+        allowEdit = true,
         className,
         description,
         isSortable = true,
@@ -576,7 +577,8 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     }
   }, [openDrawer, currentlyOpenRelationship])
 
-  const valueToRender = findOptionsByValue({ options, value })
+  const optionsByValue = findOptionsByValue({ options, value })
+  const valueToRender = optionsByValue ? { allowEdit, ...optionsByValue } : undefined
 
   if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') {
     valueToRender.value = null

@@ -45,6 +45,14 @@ const RelationshipFields: CollectionConfig = {
       type: 'relationship',
     },
     {
+      name: 'relationToSelfRestrictCreate',
+      admin: {
+        allowEdit: false,
+      },
+      relationTo: relationshipFieldsSlug,
+      type: 'relationship',
+    },
+    {
       name: 'relationWithDynamicDefault',
       defaultValue: ({ user }) => user?.id,
       relationTo: 'users',

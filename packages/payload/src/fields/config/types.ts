@@ -1125,6 +1125,7 @@ type SharedRelationshipPropertiesClient = FieldBaseClient &
 
 type RelationshipAdmin = {
   allowCreate?: boolean
+  allowEdit?: boolean
   components?: {
     Error?: CustomComponent<
       RelationshipFieldErrorClientComponent | RelationshipFieldErrorServerComponent
