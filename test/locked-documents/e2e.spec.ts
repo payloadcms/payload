@@ -298,7 +298,7 @@ describe('locked documents', () => {
       await page.waitForURL(postsUrl.edit(postDoc.id))
 
       const textInput = page.locator('#field-text')
-      await textInput.fill('hello world')
+      await textInput.fill('testing tab navigation...')
 
       // eslint-disable-next-line payload/no-wait-function
       await wait(500)
