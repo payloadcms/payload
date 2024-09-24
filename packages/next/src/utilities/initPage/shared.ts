@@ -41,6 +41,22 @@ export const isAdminAuthRoute = ({
   return authRoutes.some((r) => getRouteWithoutAdmin({ adminRoute, route }).startsWith(r))
 }
 
+export const isGraphQLPlaygroundRoute = ({
+  adminRoute,
+  config: {
+    admin: {
+      routes: { graphqlPlayground },
+    },
+  },
+  route,
+}: {
+  adminRoute: string
+  config: SanitizedConfig
+  route: string
+}): boolean => {
+  return getRouteWithoutAdmin({ adminRoute, route }) === graphqlPlayground
+}
+
 export const getRouteWithoutAdmin = ({
   adminRoute,
   route,

@@ -7,7 +7,12 @@ import type {
 
 import { notFound } from 'next/navigation.js'
 
-import { getRouteWithoutAdmin, isAdminAuthRoute, isAdminRoute } from './shared.js'
+import {
+  getRouteWithoutAdmin,
+  isAdminAuthRoute,
+  isAdminRoute,
+  isGraphQLPlaygroundRoute,
+} from './shared.js'
 
 export const handleAdminPage = ({
   adminRoute,
@@ -47,7 +52,11 @@ export const handleAdminPage = ({
       }
     }
 
-    if (!permissions.canAccessAdmin && !isAdminAuthRoute({ adminRoute, config, route })) {
+    if (
+      !permissions.canAccessAdmin &&
+      !isAdminAuthRoute({ adminRoute, config, route }) &&
+      !isGraphQLPlaygroundRoute({ adminRoute, config, route })
+    ) {
       notFound()
     }
 

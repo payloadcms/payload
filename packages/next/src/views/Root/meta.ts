@@ -7,6 +7,7 @@ import { generateCreateFirstUserMetadata } from '../CreateFirstUser/index.js'
 import { generateDashboardMetadata } from '../Dashboard/index.js'
 import { generateDocumentMetadata } from '../Document/meta.js'
 import { generateForgotPasswordMetadata } from '../ForgotPassword/index.js'
+import { generateGraphQLPlaygroundMetadata } from '../GraphQLPlayground/index.js'
 import { generateListMetadata } from '../List/index.js'
 import { generateLoginMetadata } from '../Login/index.js'
 import { generateNotFoundMeta } from '../NotFound/meta.js'
@@ -19,6 +20,7 @@ import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 const oneSegmentMeta = {
   'create-first-user': generateCreateFirstUserMetadata,
   forgot: generateForgotPasswordMetadata,
+  'graphql-playground': generateGraphQLPlaygroundMetadata,
   login: generateLoginMetadata,
   logout: generateUnauthorizedMetadata,
   'logout-inactivity': generateUnauthorizedMetadata,
