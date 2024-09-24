@@ -8,7 +8,8 @@ type Args = {
 }
 
 const docWithFilenameExists = async ({ collectionSlug, filename, req }: Args): Promise<boolean> => {
-  const doc = await req.payload.db.findOne({
+  const collectionConfig = req.payload.config.collections[collectionSlug]
+  const dbArgs = {
     collection: collectionSlug,
     req,
     where: {
@@ -16,7 +17,15 @@ const docWithFilenameExists = async ({ collectionSlug, filename, req }: Args): P
         equals: filename,
       },
     },
-  })
+  }
+
+  let doc: any
+  if (collectionConfig?.db?.findOne) {
+    doc = await collectionConfig.db.findOne(dbArgs)
+  } else {
+    doc = await req.payload.db.findOne(dbArgs)
+  }
+
   if (doc) {
     return true
   }

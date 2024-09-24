@@ -338,13 +338,20 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
     // /////////////////////////////////////
 
     if (!shouldSaveDraft || data._status === 'published') {
-      result = await req.payload.db.updateOne({
+      const dbArgs = {
         id,
         collection: collectionConfig.slug,
         data: dataToUpdate,
         locale,
         req,
-      })
+      }
+      // @ts-expect-error exists
+      if (collectionConfig?.db?.updateOne) {
+        // @ts-expect-error exists
+        result = await collectionConfig.db.updateOne(dbArgs)
+      } else {
+        result = await req.payload.db.updateOne(dbArgs)
+      }
     }
 
     // /////////////////////////////////////

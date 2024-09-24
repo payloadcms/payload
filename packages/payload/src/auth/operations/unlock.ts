@@ -81,12 +81,21 @@ export const unlockOperation = async <TSlug extends CollectionSlug>(
       }
     }
 
-    const user = await req.payload.db.findOne({
+    const userDbArgs = {
       collection: collectionConfig.slug,
       locale,
       req,
       where: whereConstraint,
-    })
+    }
+
+    let user: any
+    // @ts-expect-error exists
+    if (collectionConfig?.db?.findOne) {
+      // @ts-expect-error exists
+      user = await collectionConfig.db.findOne<any>(userDbArgs)
+    } else {
+      user = await req.payload.db.findOne<any>(userDbArgs)
+    }
 
     let result
 

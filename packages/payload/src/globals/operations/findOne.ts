@@ -48,12 +48,20 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     // Perform database operation
     // /////////////////////////////////////
 
-    let doc = await req.payload.db.findGlobal({
+    const findGlobalArgs = {
       slug,
       locale,
       req,
       where: overrideAccess ? undefined : (accessResult as Where),
-    })
+    }
+    let doc
+    // @ts-expect-error exists
+    if (globalConfig?.db?.findGlobal) {
+      // @ts-expect-error exists
+      doc = await globalConfig.db.findGlobal(findGlobalArgs)
+    } else {
+      doc = await req.payload.db.findGlobal(findGlobalArgs)
+    }
     if (!doc) {
       doc = {}
     }

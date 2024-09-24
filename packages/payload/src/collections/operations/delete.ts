@@ -105,12 +105,22 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
     // Retrieve documents
     // /////////////////////////////////////
 
-    const { docs } = await payload.db.find<DataFromCollectionSlug<TSlug>>({
+    const dbArgs = {
       collection: collectionConfig.slug,
       locale,
       req,
       where: fullWhere,
-    })
+    }
+    let docs
+    // @ts-expect-error exists
+    if (collectionConfig?.db?.find) {
+      // @ts-expect-error exists
+      const result = await collectionConfig.db.find<DataFromCollectionSlug<TSlug>>(dbArgs)
+      docs = result.docs
+    } else {
+      const result = await payload.db.find<DataFromCollectionSlug<TSlug>>(dbArgs)
+      docs = result.docs
+    }
 
     const errors = []
 
@@ -172,7 +182,7 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
         // Delete document
         // /////////////////////////////////////
 
-        await payload.db.deleteOne({
+        const deleteOneArgs = {
           collection: collectionConfig.slug,
           req,
           where: {
@@ -180,7 +190,14 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
               equals: id,
             },
           },
-        })
+        }
+        // @ts-expect-error exists
+        if (collectionConfig?.db?.deleteOne) {
+          // @ts-expect-error exists
+          await collectionConfig.db.deleteOne(deleteOneArgs)
+        } else {
+          await payload.db.deleteOne(deleteOneArgs)
+        }
 
         // /////////////////////////////////////
         // afterRead - Fields

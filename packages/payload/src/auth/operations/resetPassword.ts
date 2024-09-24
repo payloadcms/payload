@@ -55,14 +55,23 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
     // Reset Password
     // /////////////////////////////////////
 
-    const user = await payload.db.findOne<any>({
+    const userDbArgs = {
       collection: collectionConfig.slug,
       req,
       where: {
         resetPasswordExpiration: { greater_than: new Date().toISOString() },
         resetPasswordToken: { equals: data.token },
       },
-    })
+    }
+
+    let user: any
+    // @ts-expect-error exists
+    if (collectionConfig?.db?.findOne) {
+      // @ts-expect-error exists
+      user = await collectionConfig.db.findOne<any>(userDbArgs)
+    } else {
+      user = await payload.db.findOne<any>(userDbArgs)
+    }
 
     if (!user) {
       throw new APIError('Token is either invalid or has expired.', httpStatus.FORBIDDEN)
@@ -84,12 +93,20 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
       user._verified = true
     }
 
-    const doc = await payload.db.updateOne({
+    const updateDbArgs = {
       id: user.id,
       collection: collectionConfig.slug,
       data: user,
       req,
-    })
+    }
+    let doc: any
+    // @ts-expect-error exists
+    if (collectionConfig?.db?.updateOne) {
+      // @ts-expect-error exists
+      doc = await collectionConfig.db.updateOne(updateDbArgs)
+    } else {
+      doc = await payload.db.updateOne(updateDbArgs)
+    }
 
     await authenticateLocalStrategy({ doc, password: data.password })
 

@@ -68,7 +68,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     // Find
     // /////////////////////////////////////
 
-    const paginatedDocs = await payload.db.findVersions<TData>({
+    const findVersionsDbArgs = {
       collection: collectionConfig.slug,
       limit: limit ?? 10,
       locale,
@@ -77,7 +77,16 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
       req,
       sort,
       where: fullWhere,
-    })
+    }
+    let paginatedDocs
+
+    // @ts-expect-error exists
+    if (collectionConfig?.db?.findVersions) {
+      // @ts-expect-error exists
+      paginatedDocs = await collectionConfig.db.findVersions<TData>(findVersionsDbArgs)
+    } else {
+      paginatedDocs = await payload.db.findVersions<TData>(findVersionsDbArgs)
+    }
 
     // /////////////////////////////////////
     // beforeRead - Collection

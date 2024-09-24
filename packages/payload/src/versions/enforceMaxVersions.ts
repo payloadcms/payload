@@ -31,7 +31,7 @@ export const enforceMaxVersions = async ({
         equals: id,
       }
 
-      const query = await payload.db.findVersions({
+      const findVersionsDbArgs = {
         collection: collection.slug,
         limit: 1,
         pagination: false,
@@ -39,11 +39,19 @@ export const enforceMaxVersions = async ({
         skip: max,
         sort: '-updatedAt',
         where,
-      })
+      }
+      let query: any
+      // @ts-expect-error exists
+      if (collection?.db?.findVersions) {
+        // @ts-expect-error exists
+        query = await collection.db.findVersions(findVersionsDbArgs)
+      } else {
+        query = await payload.db.findVersions(findVersionsDbArgs)
+      }
 
       ;[oldestAllowedDoc] = query.docs
     } else if (global) {
-      const query = await payload.db.findGlobalVersions({
+      const findGlobalVersionsDbArgs = {
         global: global.slug,
         limit: 1,
         pagination: false,
@@ -51,7 +59,15 @@ export const enforceMaxVersions = async ({
         skip: max,
         sort: '-updatedAt',
         where,
-      })
+      }
+      let query: any
+      // @ts-expect-error exists
+      if (global?.db?.findGlobalVersions) {
+        // @ts-expect-error exists
+        query = await global.db.findGlobalVersions(findGlobalVersionsDbArgs)
+      } else {
+        query = await payload.db.findGlobalVersions(findGlobalVersionsDbArgs)
+      }
 
       ;[oldestAllowedDoc] = query.docs
     }

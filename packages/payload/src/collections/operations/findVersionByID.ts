@@ -62,14 +62,23 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     // Find by ID
     // /////////////////////////////////////
 
-    const versionsQuery = await payload.db.findVersions<TData>({
+    const findVersionsDbArgs = {
       collection: collectionConfig.slug,
       limit: 1,
       locale,
       pagination: false,
       req,
       where: fullWhere,
-    })
+    }
+
+    let versionsQuery
+    // @ts-expect-error exists
+    if (collectionConfig?.db?.findVersions) {
+      // @ts-expect-error exists
+      versionsQuery = await collectionConfig.db.findVersions<TData>(findVersionsDbArgs)
+    } else {
+      versionsQuery = await payload.db.findVersions<TData>(findVersionsDbArgs)
+    }
 
     const result = versionsQuery.docs[0]
 
