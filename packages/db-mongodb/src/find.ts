@@ -15,7 +15,7 @@ export const find: Find = async function find(
   {
     collection,
     joins = {},
-    limit,
+    limit = 0,
     locale,
     page,
     pagination,
