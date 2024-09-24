@@ -623,21 +623,30 @@ export type FetchAPIFileUploadOptions = {
 
 export type ErrorResult = { data?: any; errors: unknown[]; stack?: string }
 
-type AfterErrorResult = {
+export type AfterErrorResult = {
   graphqlResult?: GraphQLFormattedError
-  response?: ErrorResult
+  response?: Partial<ErrorResult> & Record<string, unknown>
   status?: number
 } | void
 
-export type AfterErrorHook = (args: {
-  /** The collection which this hook is being run on. This is null if the AfterError hook was be added to the payload-wide config */
+export type AfterErrorHookArgs = {
+  /** The Collection that the hook is operating on. This will be undefined if the hook is executed from a non-collection endpoint or GraphQL. */
   collection?: SanitizedCollectionConfig
+  /** 	Custom context passed between hooks */
   context: RequestContext
-  err: Error
+  /** The error that occurred. */
+  error: Error
+  /** The GraphQL result object, available if the hook is executed within a GraphQL context. */
   graphqlResult?: GraphQLFormattedError
+  /** The Request object containing the currently authenticated user. */
   req: PayloadRequest
+  /** The formatted error result object, available if the hook is executed from a REST context. */
   result?: ErrorResult
-}) => AfterErrorResult | Promise<AfterErrorResult>
+}
+
+export type AfterErrorHook = (
+  args: AfterErrorHookArgs,
+) => AfterErrorResult | Promise<AfterErrorResult>
 
 /**
  * This is the central configuration

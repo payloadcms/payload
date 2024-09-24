@@ -47,7 +47,7 @@ const handleError = async ({
 
     const result = await hook({
       context: req.context,
-      err,
+      error: err,
       graphqlResult: response,
       req,
     })

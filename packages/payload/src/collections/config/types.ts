@@ -21,7 +21,7 @@ import type {
 import type { Auth, ClientUser, IncomingAuthType } from '../../auth/types.js'
 import type {
   Access,
-  AfterErrorHook,
+  AfterErrorResult,
   CustomComponent,
   EditConfig,
   Endpoint,
@@ -32,6 +32,7 @@ import type {
   LivePreviewConfig,
   MetaConfig,
   PayloadComponent,
+  AfterErrorHookArgs as RootAfterErrorHookArgs,
   StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
@@ -234,6 +235,10 @@ export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest
   token: string
 }) => any
+
+export type AfterErrorHook = (
+  args: { collection: SanitizedCollectionConfig } & RootAfterErrorHookArgs,
+) => AfterErrorResult | Promise<AfterErrorResult>
 
 export type AfterForgotPasswordHook = (args: {
   args?: any

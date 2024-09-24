@@ -127,13 +127,13 @@ export const routeError = async ({
       const result = await hook({
         collection: collection.config,
         context: req.context,
-        err,
+        error: err,
         req,
         result: response,
       })
 
       if (result) {
-        response = result.response || response
+        response = (result.response as ErrorResult) || response
         status = result.status || status
       }
     }, Promise.resolve())
@@ -145,13 +145,13 @@ export const routeError = async ({
     const result = await hook({
       collection: collection?.config,
       context: req.context,
-      err,
+      error: err,
       req,
       result: response,
     })
 
     if (result) {
-      response = result.response || response
+      response = (result.response as ErrorResult) || response
       status = result.status || status
     }
   }, Promise.resolve())

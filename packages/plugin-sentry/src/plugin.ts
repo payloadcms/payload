@@ -18,8 +18,8 @@ export const sentryPlugin =
       ...(incomingConfig.hooks || {}),
 
       afterError: [
-        ({ err }) => {
-          captureException(err)
+        ({ error }) => {
+          captureException(error)
         },
       ],
     }

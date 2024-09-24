@@ -698,6 +698,7 @@ export type {
 export type {
   AfterChangeHook as CollectionAfterChangeHook,
   AfterDeleteHook as CollectionAfterDeleteHook,
+  AfterErrorHook as CollectionAfterErrorHook,
   AfterForgotPasswordHook as CollectionAfterForgotPasswordHook,
   AfterLoginHook as CollectionAfterLoginHook,
   AfterLogoutHook as CollectionAfterLogoutHook,
