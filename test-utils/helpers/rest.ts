@@ -1,11 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Where } from 'payload'
-import type { Config } from 'payload'
-import type { PaginatedDocs } from 'payload'
+import type { Config, PaginatedDocs, Where } from 'payload'
 
+import { devUser } from '@test-utils/credentials.js'
 import * as qs from 'qs-esm'
-
-import { devUser } from '../credentials.js'
 
 type Args = {
   defaultSlug: string
@@ -254,7 +251,9 @@ export class RESTClient {
     const response = await fetch(`${this.serverURL}/api/${slug}${whereQuery}`, options)
     const { status } = response
     const result = await response.json()
-    if (result.errors) throw new Error(result.errors[0].message)
+    if (result.errors) {
+      throw new Error(result.errors[0].message)
+    }
     return { result, status }
   }
 

@@ -29,7 +29,7 @@ const {
   ...args
 } = minimist(process.argv.slice(2))
 
-if (!fs.existsSync(path.resolve(dirname, testSuiteArg))) {
+if (!fs.existsSync(path.resolve(dirname, '../test', testSuiteArg))) {
   console.log(chalk.red(`ERROR: The test folder "${testSuiteArg}" does not exist`))
   process.exit(0)
 }

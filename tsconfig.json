@@ -39,6 +39,9 @@
       "@payload-config": [
         "./test/_community/config.ts"
       ],
+      "@test-utils/*": [
+        "./test-utils/*"
+      ],
       "@payloadcms/live-preview": [
         "./packages/live-preview/src"
       ],

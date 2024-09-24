@@ -18,7 +18,8 @@
       "@payloadcms/ui/scss/app.scss": ["../../packages/ui/src/scss/app.scss"],
       "payload/types": ["../../packages/payload/src/exports/types.ts"],
       "@payloadcms/next/*": ["../../packages/next/src/*"],
-      "@payloadcms/next": ["../../packages/next/src/exports/*"]
+      "@payloadcms/next": ["../../packages/next/src/exports/*"],
+      "@test-utils/*": ["../../test-utils/*"],
     }
   },
   "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],

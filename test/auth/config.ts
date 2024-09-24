@@ -4,8 +4,8 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { v4 as uuid } from 'uuid'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { buildConfigWithDefaults } from '@test-utils/buildConfigWithDefaults.js'
+import { devUser } from '@test-utils/credentials.js'
 import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared.js'
 
 export default buildConfigWithDefaults({

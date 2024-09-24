@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { buildConfigWithDefaults } from '@test-utils/buildConfigWithDefaults.js'
 import { devUser, regularUser } from '../credentials.js'
 import { PagesCollection, pagesSlug } from './collections/Pages/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'

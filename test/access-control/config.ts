@@ -4,10 +4,11 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { FieldAccess } from 'payload'
 
+import { buildConfigWithDefaults } from '@test-utils/buildConfigWithDefaults.js'
+import { devUser } from '@test-utils/credentials.js'
+
 import type { Config, User } from './payload-types.js'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
 import { Disabled } from './collections/Disabled/index.js'
 import {
   createNotUpdateCollectionSlug,
@@ -41,8 +42,12 @@ const openAccess = {
 }
 
 const PublicReadabilityAccess: FieldAccess = ({ req: { user }, siblingData }) => {
-  if (user) return true
-  if (siblingData?.allowPublicReadability) return true
+  if (user) {
+    return true
+  }
+  if (siblingData?.allowPublicReadability) {
+    return true
+  }
 
   return false
 }
@@ -261,7 +266,9 @@ export default buildConfigWithDefaults({
       slug: restrictedVersionsSlug,
       access: {
         read: ({ req: { user } }) => {
-          if (user) return true
+          if (user) {
+            return true
+          }
 
           return {
             hidden: {
@@ -270,7 +277,9 @@ export default buildConfigWithDefaults({
           }
         },
         readVersions: ({ req: { user } }) => {
-          if (user) return true
+          if (user) {
+            return true
+          }
 
           return {
             'version.hidden': {
@@ -428,7 +437,9 @@ export default buildConfigWithDefaults({
       slug: hiddenAccessSlug,
       access: {
         read: ({ req: { user } }) => {
-          if (user) return true
+          if (user) {
+            return true
+          }
 
           return {
             hidden: {
@@ -454,7 +465,9 @@ export default buildConfigWithDefaults({
       slug: hiddenAccessCountSlug,
       access: {
         read: ({ req: { user } }) => {
-          if (user) return true
+          if (user) {
+            return true
+          }
 
           return {
             hidden: {

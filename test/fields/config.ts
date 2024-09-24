@@ -5,7 +5,7 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { buildConfigWithDefaults } from '@test-utils/buildConfigWithDefaults.js'
 import ArrayFields from './collections/Array/index.js'
 import BlockFields from './collections/Blocks/index.js'
 import CheckboxFields from './collections/Checkbox/index.js'

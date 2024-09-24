@@ -2,8 +2,6 @@ import fs from 'fs'
 import path, { resolve } from 'path'
 import { fileURLToPath } from 'url'
 
-import { adminRoute as rootAdminRoute } from '../admin-root/shared.js'
-
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -17,7 +15,9 @@ export function getNextRootDir(testSuite?: string) {
    * Handle test suites that have their own app directory
    */
   if (testSuite) {
-    const testSuiteDir = resolve(dirname, `../${testSuite}`)
+    const testSuiteDir = resolve(dirname, `../../test/${testSuite}`)
+
+    console.log('testSuiteDir', testSuiteDir)
 
     let hasNextConfig = false
 
@@ -29,7 +29,7 @@ export function getNextRootDir(testSuite?: string) {
     }
 
     if (testSuite === 'admin-root') {
-      adminRoute = rootAdminRoute
+      adminRoute = '/'
     }
 
     if (hasNextConfig) {

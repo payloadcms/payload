@@ -6,7 +6,7 @@ import type { SanitizedConfig } from 'payload'
 
 import { APIError } from 'payload'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { buildConfigWithDefaults } from '@test-utils/buildConfigWithDefaults.js'
 import { AfterOperationCollection } from './collections/AfterOperation/index.js'
 import ChainingHooks from './collections/ChainingHooks/index.js'
 import ContextHooks from './collections/ContextHooks/index.js'

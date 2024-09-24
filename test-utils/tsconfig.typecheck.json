@@ -1,0 +1,104 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": ".",
+    "baseUrl": ".",
+    "target": "esnext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "allowJs": true,
+    "checkJs": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "preserve",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "types": ["jest", "node", "@types/jest"],
+    // "incremental": true,
+    "isolatedModules": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@payload-config": ["./_community/config.ts"]
+    }
+  },
+  "exclude": ["dist", "build", "temp", "node_modules"],
+  "include": [
+    // "./test/_community/**/*.ts"
+    // "./_community/**/*.ts"
+    "/**/*.ts",
+    "!.d.ts"
+    // "../packages/**/src/**/*.ts",
+    // "../packages/**/src/**/*.tsx"
+  ],
+  "references": [
+    {
+      "path": "../packages/create-payload-app"
+    },
+    {
+      "path": "../packages/db-mongodb"
+    },
+    {
+      "path": "../packages/db-postgres"
+    },
+    {
+      "path": "../packages/graphql"
+    },
+    {
+      "path": "../packages/live-preview"
+    },
+    {
+      "path": "../packages/live-preview-react"
+    },
+    {
+      "path": "../packages/next"
+    },
+    {
+      "path": "../packages/payload"
+    },
+    {
+      "path": "../packages/plugin-cloud-storage"
+    },
+    {
+      "path": "../packages/plugin-cloud"
+    },
+    {
+      "path": "../packages/plugin-form-builder"
+    },
+    {
+      "path": "../packages/plugin-nested-docs"
+    },
+    {
+      "path": "../packages/plugin-redirects"
+    },
+    {
+      "path": "../packages/plugin-search"
+    },
+    {
+      "path": "../packages/plugin-sentry"
+    },
+    {
+      "path": "../packages/plugin-seo"
+    },
+    {
+      "path": "../packages/plugin-stripe"
+    },
+    {
+      "path": "../packages/richtext-slate"
+    },
+    {
+      "path": "../packages/richtext-lexical"
+    },
+    {
+      "path": "../packages/translations"
+    },
+    {
+      "path": "../packages/ui"
+    }
+  ]
+}

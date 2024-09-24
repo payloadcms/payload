@@ -41,7 +41,7 @@ export async function initDevAndTest(
   }
 
   // Generate importMap
-  const testDir = path.resolve(dirname, testSuiteArg)
+  const testDir = path.resolve(dirname, '../test', testSuiteArg)
   console.log('Generating import map for config:', testDir)
 
   const configUrl = pathToFileURL(path.resolve(testDir, 'config.ts')).href

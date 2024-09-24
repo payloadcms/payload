@@ -1,20 +1,22 @@
 {
-  "name": "payload-test-suite",
+  "name": "payload-test-utils",
   "version": "0.0.1",
   "private": true,
-  "description": "Payload test suite",
+  "description": "Payload test utils",
   "type": "module",
   "scripts": {
-    "dev": "cross-env NODE_OPTIONS=--no-deprecation node ./dev.js",
+    "dev": "pnpm -C \"../\" run dev",
     "test": "pnpm -C \"../\" run test",
     "test:e2e": "pnpm -C \"../\" run test:e2e",
     "test:int": "pnpm -C \"../\" run test:int",
-    "typecheck": "pnpm turbo build --filter test && tsc --project tsconfig.typecheck.json"
+    "typecheck": "pnpm turbo build --filter payload-test-utils && tsc --project tsconfig.typecheck.json"
+  },
+  "exports": {
+    "./*": {
+      "import": "./**/*.ts"
+    }
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "^3.614.0",
-    "@lexical/headless": "0.17.0",
-    "@lexical/markdown": "0.17.0",
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/db-sqlite": "workspace:*",
@@ -46,29 +48,15 @@
     "@payloadcms/storage-vercel-blob": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
-    "@sentry/react": "^7.77.0",
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "babel-plugin-react-compiler": "0.0.0-experimental-24ec0eb-20240918",
     "comment-json": "^4.2.3",
-    "create-payload-app": "workspace:*",
     "dotenv": "16.4.5",
-    "eslint-plugin-playwright": "1.6.2",
-    "execa": "5.1.1",
-    "jwt-decode": "4.0.0",
-    "lexical": "0.17.0",
+    "drizzle-kit": "0.23.2-df9e596",
+    "http-status": "1.6.2",
     "next": "15.0.0-canary.160",
     "payload": "workspace:*",
     "qs-esm": "7.0.2",
-    "react": "19.0.0-rc-5dcb0097-20240918",
-    "react-dom": "19.0.0-rc-5dcb0097-20240918",
-    "slate": "0.91.4",
-    "tempy": "^1.0.1",
-    "typescript": "5.6.2",
-    "uuid": "10.0.0"
-  },
-  "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
+    "ts-essentials": "10.0.2",
+    "typescript": "5.6.2"
   }
 }

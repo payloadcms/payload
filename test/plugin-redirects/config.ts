@@ -4,8 +4,8 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { buildConfigWithDefaults } from '@test-utils/buildConfigWithDefaults.js'
+import { devUser } from '@test-utils/credentials.js'
 import { Pages } from './collections/Pages.js'
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'

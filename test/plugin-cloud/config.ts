@@ -5,8 +5,8 @@ import { payloadCloudPlugin } from '@payloadcms/plugin-cloud'
 import dotenv from 'dotenv'
 import path from 'path'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { buildConfigWithDefaults } from '@test-utils/buildConfigWithDefaults.js'
+import { devUser } from '@test-utils/credentials.js'
 import { Media } from './collections/Media.js'
 import { Users } from './collections/Users.js'
 

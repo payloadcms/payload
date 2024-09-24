@@ -10,7 +10,7 @@ import {
 } from '@payloadcms/next/routes'
 import * as qs from 'qs-esm'
 
-import { devUser } from '../credentials.js'
+import { devUser } from '@test-utils/credentials.js'
 
 type ValidPath = `/${string}`
 type RequestOptions = {
@@ -62,7 +62,9 @@ export class NextRESTClient {
 
   constructor(config: SanitizedConfig) {
     this.config = config
-    if (config?.serverURL) {this.serverURL = config.serverURL}
+    if (config?.serverURL) {
+      this.serverURL = config.serverURL
+    }
     this._GET = createGET(config)
     this._POST = createPOST(config)
     this._DELETE = createDELETE(config)

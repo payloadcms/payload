@@ -4,8 +4,8 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { CollectionConfig, FilterOptionsProps } from 'payload'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { buildConfigWithDefaults } from '@test-utils/buildConfigWithDefaults.js'
+import { devUser } from '@test-utils/credentials.js'
 import { VersionedRelationshipFieldCollection } from './collections/VersionedRelationshipField/index.js'
 import {
   collection1Slug,
