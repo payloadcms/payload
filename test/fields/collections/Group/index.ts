@@ -221,6 +221,48 @@ const GroupFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'localizedGroupArr',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          name: 'array',
+          type: 'array',
+          fields: [
+            {
+              type: 'text',
+              name: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'localizedGroupSelect',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          type: 'select',
+          hasMany: true,
+          options: ['one', 'two'],
+          name: 'select',
+        },
+      ],
+    },
+    {
+      name: 'localizedGroupRel',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'email-fields',
+          name: 'email',
+        },
+      ],
+    },
   ],
 }
 

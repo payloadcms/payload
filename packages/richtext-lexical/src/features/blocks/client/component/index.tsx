@@ -57,9 +57,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
   // Field Schema
   useEffect(() => {
     const awaitInitialState = async () => {
-      if (!id) {
-        return
-      }
       const { state } = await getFormState({
         apiRoute: config.routes.api,
         body: {
@@ -90,9 +87,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      if (!id) {
-        throw new Error('No ID found')
-      }
       const { state: formState } = await getFormState({
         apiRoute: config.routes.api,
         body: {
