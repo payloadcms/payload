@@ -38,6 +38,7 @@ jobs:
             db-\*
             db-mongodb
             db-postgres
+            db-vercel-postgres
             db-sqlite
             drizzle
             email-nodemailer
