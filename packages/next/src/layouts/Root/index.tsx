@@ -1,17 +1,11 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type {
-  ClientConfig,
-  CustomVersionParser,
-  ImportMap,
-  PayloadServerAction,
-  SanitizedConfig,
-} from 'payload'
+import type { CustomVersionParser, ImportMap, PayloadServerAction, SanitizedConfig } from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui'
 import '@payloadcms/ui/scss/app.scss'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
-import { checkDependencies, parseCookies } from 'payload'
+import { checkDependencies, createClientConfig, parseCookies } from 'payload'
 import React from 'react'
 
 import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
@@ -168,10 +162,10 @@ export const RootLayout = async ({
 
   const isNavOpen = navPreferences?.value?.open ?? true
 
-  // @ts-expect-error eslint-disable-next-line
-  const clientConfig = (await payloadServerAction('render-config', {
-    languageCode,
-  })) as ClientConfig
+  const clientConfig = await createClientConfig({
+    config,
+    i18n,
+  })
 
   return (
     <html data-theme={theme} dir={dir} lang={languageCode}>

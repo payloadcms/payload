@@ -4,9 +4,6 @@ export { withMergedProps } from '../../elements/withMergedProps/index.js' // can
 export { WithServerSideProps } from '../../elements/WithServerSideProps/index.js'
 export { PayloadIcon } from '../../graphics/Icon/index.js'
 export { PayloadLogo } from '../../graphics/Logo/index.js'
-export { getComponent } from '../../providers/Config/createClientConfig/getComponent.js'
-export { getCreateMappedComponent } from '../../providers/Config/createClientConfig/getCreateMappedComponent.js'
-
 export { RenderComponent } from '../../providers/Config/RenderComponent.js'
 export { requests } from '../../utilities/api.js'
 export { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'

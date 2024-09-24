@@ -24,26 +24,6 @@
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
     },
-    "./utilities/createClientConfig": {
-      "import": "./src/providers/Config/createClientConfig/index.tsx",
-      "types": "./src/providers/Config/createClientConfig/index.tsx",
-      "default": "./src/providers/Config/createClientConfig/index.tsx"
-    },
-    "./utilities/createClientFields": {
-      "import": "./src/providers/Config/createClientConfig/fields.tsx",
-      "types": "./src/providers/Config/createClientConfig/fields.tsx",
-      "default": "./src/providers/Config/createClientConfig/fields.tsx"
-    },
-    "./utilities/createClientCollectionConfig": {
-      "import": "./src/providers/Config/createClientConfig/collections.tsx",
-      "types": "./src/providers/Config/createClientConfig/collections.tsx",
-      "default": "./src/providers/Config/createClientConfig/collections.tsx"
-    },
-    "./utilities/createClientGlobalConfig": {
-      "import": "./src/providers/Config/createClientConfig/globals.tsx",
-      "types": "./src/providers/Config/createClientConfig/globals.tsx",
-      "default": "./src/providers/Config/createClientConfig/globals.tsx"
-    },
     "./utilities/buildFormState": {
       "import": "./src/utilities/buildFormState.ts",
       "types": "./src/utilities/buildFormState.ts",
