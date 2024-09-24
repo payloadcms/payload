@@ -73,4 +73,20 @@ describe('_Community Tests', () => {
 
     expect(data.doc.text).toEqual('REST API EXAMPLE')
   })
+
+  it('test', async () => {
+    await payload.create({ collection: 'simple', data: { text: 'some-text' } })
+
+    const { docs } = await payload.find({
+      collection: 'simple',
+      where: {
+        text: {
+          equals: 'some-text',
+        },
+      },
+      sort: 'text',
+    })
+
+    expect(docs).toHaveLength(1)
+  })
 })
