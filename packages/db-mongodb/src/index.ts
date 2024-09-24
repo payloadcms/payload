@@ -1,7 +1,7 @@
 import type { CollationOptions, TransactionOptions } from 'mongodb'
 import type { MongoMemoryReplSet } from 'mongodb-memory-server'
-import type { ClientSession, Connection, ConnectOptions } from 'mongoose'
-import type { BaseDatabaseAdapter, DatabaseAdapterObj, Payload } from 'payload'
+import type { ClientSession, Connection, ConnectOptions, QueryOptions } from 'mongoose'
+import type { BaseDatabaseAdapter, DatabaseAdapterObj, Payload, UpdateOneArgs } from 'payload'
 
 import fs from 'fs'
 import mongoose from 'mongoose'
@@ -36,6 +36,7 @@ import { updateGlobal } from './updateGlobal.js'
 import { updateGlobalVersion } from './updateGlobalVersion.js'
 import { updateOne } from './updateOne.js'
 import { updateVersion } from './updateVersion.js'
+import { upsert } from './upsert.js'
 
 export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
@@ -124,6 +125,7 @@ declare module 'payload' {
     }[]
     sessions: Record<number | string, ClientSession>
     transactionOptions: TransactionOptions
+    updateOne: (args: { options?: QueryOptions } & UpdateOneArgs) => Promise<Document>
     versions: {
       [slug: string]: CollectionModel
     }
@@ -191,6 +193,7 @@ export function mongooseAdapter({
       updateGlobalVersion,
       updateOne,
       updateVersion,
+      upsert,
     })
   }
 

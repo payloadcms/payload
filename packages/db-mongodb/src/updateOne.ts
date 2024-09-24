@@ -1,3 +1,4 @@
+import type { QueryOptions } from 'mongoose'
 import type { PayloadRequest, UpdateOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -9,11 +10,20 @@ import { withSession } from './withSession.js'
 
 export const updateOne: UpdateOne = async function updateOne(
   this: MongooseAdapter,
-  { id, collection, data, locale, req = {} as PayloadRequest, where: whereArg },
+  {
+    id,
+    collection,
+    data,
+    locale,
+    options: optionsArgs = {},
+    req = {} as PayloadRequest,
+    where: whereArg,
+  },
 ) {
   const where = id ? { id: { equals: id } } : whereArg
   const Model = this.collections[collection]
-  const options = {
+  const options: QueryOptions = {
+    ...optionsArgs,
     ...(await withSession(this, req)),
     lean: true,
     new: true,

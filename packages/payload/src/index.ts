@@ -822,6 +822,7 @@ export type {
   UpdateOneArgs,
   UpdateVersion,
   UpdateVersionArgs,
+  Upsert,
 } from './database/types.js'
 export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
 export {
