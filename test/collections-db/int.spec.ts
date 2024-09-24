@@ -7,7 +7,7 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { collectionSlug, doc, isConnected , isInit } from './config.js'
+import { collectionSlug, doc, isConnected, isInit } from './config.js'
 
 let payload: Payload
 let token: string
