@@ -1,4 +1,9 @@
-import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
+import type {
+  GraphQLFormattedError,
+  GraphQLInputObjectType,
+  GraphQLNonNull,
+  GraphQLObjectType,
+} from 'graphql'
 import type { DeepRequired, MarkOptional } from 'ts-essentials'
 
 import type {
@@ -16,6 +21,7 @@ import type {
 import type { Auth, ClientUser, IncomingAuthType } from '../../auth/types.js'
 import type {
   Access,
+  AfterErrorHook,
   CustomComponent,
   EditConfig,
   Endpoint,
@@ -177,17 +183,6 @@ export type AfterOperationHook<TOperationGeneric extends CollectionSlug = string
         ReturnType<AfterOperationMap<TOperationGeneric>[keyof AfterOperationMap<TOperationGeneric>]>
       >
     >
-
-type AfterErrorResult = { response?: Response } | void
-
-export type AfterErrorHook = (args: {
-  /** The collection which this hook is being run on. This is null if the AfterError hook was be added to the payload-wide config */
-  collection: null | SanitizedCollectionConfig
-  context: RequestContext
-  err: Error
-  req: PayloadRequest
-  res: Response
-}) => AfterErrorResult | Promise<AfterErrorResult>
 
 export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */

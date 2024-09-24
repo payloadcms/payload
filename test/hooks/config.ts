@@ -45,14 +45,13 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     },
   ],
   hooks: {
-    afterError: () => console.log('Running afterError hook'),
+    afterError: [() => console.log('Running afterError hook')],
   },
   onInit: async (payload) => {
     await seedHooksUsers(payload)
     await payload.create({
       collection: hooksSlug,
       data: {
-        check: 'update',
         fieldBeforeValidate: false,
         collectionBeforeValidate: false,
         fieldBeforeChange: false,

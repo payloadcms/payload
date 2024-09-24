@@ -6,6 +6,7 @@ import type {
 } from '@payloadcms/translations'
 import type { BusboyConfig } from 'busboy'
 import type GraphQL from 'graphql'
+import type { GraphQLFormattedError } from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
 import type { DestinationStream, pino } from 'pino'
 import type React from 'react'
@@ -23,7 +24,6 @@ import type {
   InternalImportMap,
 } from '../bin/generateImportMap/index.js'
 import type {
-  AfterErrorHook,
   Collection,
   CollectionConfig,
   SanitizedCollectionConfig,
@@ -31,7 +31,7 @@ import type {
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { Payload, TypedUser } from '../index.js'
+import type { Payload, RequestContext, TypedUser } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -620,6 +620,24 @@ export type FetchAPIFileUploadOptions = {
    */
   useTempFiles?: boolean | undefined
 } & Partial<BusboyConfig>
+
+export type ErrorResult = { data?: any; errors: unknown[]; stack?: string }
+
+type AfterErrorResult = {
+  graphqlResult?: GraphQLFormattedError
+  response?: ErrorResult
+  status?: number
+} | void
+
+export type AfterErrorHook = (args: {
+  /** The collection which this hook is being run on. This is null if the AfterError hook was be added to the payload-wide config */
+  collection?: SanitizedCollectionConfig
+  context: RequestContext
+  err: Error
+  graphqlResult?: GraphQLFormattedError
+  req: PayloadRequest
+  result?: ErrorResult
+}) => AfterErrorResult | Promise<AfterErrorResult>
 
 /**
  * This is the central configuration

@@ -16,10 +16,12 @@ export const sentryPlugin =
 
     config.hooks = {
       ...(incomingConfig.hooks || {}),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      afterError: (err: any) => {
-        captureException(err)
-      },
+
+      afterError: [
+        ({ err }) => {
+          captureException(err)
+        },
+      ],
     }
 
     config.onInit = async (payload) => {
