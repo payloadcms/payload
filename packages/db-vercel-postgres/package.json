@@ -62,7 +62,8 @@
     "@types/pg": "8.10.2",
     "@types/to-snake-case": "1.0.0",
     "esbuild": "0.23.1",
-    "payload": "workspace:*"
+    "payload": "workspace:*",
+    "pg": "8.11.3"
   },
   "peerDependencies": {
     "payload": "workspace:*"
