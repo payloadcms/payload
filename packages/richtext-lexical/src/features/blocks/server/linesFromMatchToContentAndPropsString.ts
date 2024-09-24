@@ -1,10 +1,12 @@
 export function linesFromStartToContentAndPropsString({
+  doNotTrimChildren,
   isEndOptional,
   lines,
   regexpEndRegex,
   startLineIndex,
   startMatch,
 }: {
+  doNotTrimChildren?: boolean
   isEndOptional?: boolean
   lines: string[]
   regexpEndRegex?: RegExp
@@ -41,13 +43,15 @@ export function linesFromStartToContentAndPropsString({
   let endLineIndex = startLineIndex
 
   mainLoop: for (let lineIndex = 0; lineIndex < linesCopy.length; lineIndex++) {
-    const line = linesCopy[lineIndex].trim()
+    const line = doNotTrimChildren ? linesCopy[lineIndex] : linesCopy[lineIndex].trim()
     let amountOfBeginningSpacesRemoved = 0
-    for (let i = 0; i < linesCopy[lineIndex].length; i++) {
-      if (linesCopy[lineIndex][i] === ' ') {
-        amountOfBeginningSpacesRemoved++
-      } else {
-        break
+    if (!doNotTrimChildren) {
+      for (let i = 0; i < linesCopy[lineIndex].length; i++) {
+        if (linesCopy[lineIndex][i] === ' ') {
+          amountOfBeginningSpacesRemoved++
+        } else {
+          break
+        }
       }
     }
 
@@ -132,7 +136,9 @@ export function linesFromStartToContentAndPropsString({
     }
 
     if (isWithinContent) {
-      content += '\n'
+      if (content?.length > 0 && lineIndex > 0) {
+        content += '\n'
+      }
     } else {
       propsString += '\n'
     }

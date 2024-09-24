@@ -10,6 +10,7 @@ import {
 
 import { loadMDXAfterRead, saveMDXBeforeChange } from '../../mdx/hooks.js'
 import { BannerBlock } from '../../mdx/jsxBlocks/banner.js'
+import { BannerNoTrimBlock } from '../../mdx/jsxBlocks/BannerNoTrim.js'
 import { CodeBlock } from '../../mdx/jsxBlocks/code/code.js'
 import { InlineCodeBlock } from '../../mdx/jsxBlocks/inlineCode.js'
 import { PackageInstallOptions } from '../../mdx/jsxBlocks/packageInstallOptions.js'
@@ -64,7 +65,7 @@ export const PostsCollection: CollectionConfig = {
           EXPERIMENTAL_TableFeature(),
           FixedToolbarFeature(),
           BlocksFeature({
-            blocks: [BannerBlock, CodeBlock, PackageInstallOptions],
+            blocks: [BannerBlock, CodeBlock, PackageInstallOptions, BannerNoTrimBlock],
             inlineBlocks: [InlineCodeBlock],
           }),
         ],

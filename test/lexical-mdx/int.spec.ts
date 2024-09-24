@@ -763,6 +763,25 @@ Text before banner
         },
       ],
     },
+    {
+      input: `
+<BannerNoTrim>
+no indent
+  indent 2
+    indent 4
+no indent
+</BannerNoTrim>
+`,
+      blockNode: {
+        fields: {
+          blockType: 'BannerNoTrim',
+          text: `no indent
+  indent 2
+    indent 4
+no indent`,
+        },
+      },
+    },
   ]
 
   const INPUT_AND_OUTPUT: Tests = INPUT_AND_OUTPUTBase

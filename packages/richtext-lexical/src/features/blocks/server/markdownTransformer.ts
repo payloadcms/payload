@@ -180,6 +180,7 @@ function getMarkdownTransformerForBlock(
       if (exportResult?.children?.length) {
         const children = exportResult.children
         let sanitizedChildren = ''
+
         // Ensure it has a leftpad of 2 spaces
         if (children.includes('\n')) {
           for (const child of children.split('\n')) {
@@ -204,7 +205,8 @@ function getMarkdownTransformerForBlock(
             if (spacesToAdd === 0) {
               sanitizedChildren += child + '\n'
             } else {
-              sanitizedChildren += ' '.repeat(spacesToAdd) + child + '\n'
+              sanitizedChildren +=
+                (block?.jsx?.doNotTrimChildren ? '' : ' '.repeat(spacesToAdd)) + child + '\n'
             }
           }
         } else {
@@ -225,7 +227,8 @@ function getMarkdownTransformerForBlock(
           if (spacesToAdd === 0) {
             sanitizedChildren += children + '\n'
           } else {
-            sanitizedChildren += ' '.repeat(spacesToAdd) + children + '\n'
+            sanitizedChildren +=
+              (block?.jsx?.doNotTrimChildren ? '' : ' '.repeat(spacesToAdd)) + children + '\n'
           }
         }
 
@@ -251,12 +254,15 @@ function getMarkdownTransformerForBlock(
 
           const { afterEndLine, beforeStartLine, content, endLineIndex, propsString } =
             linesFromStartToContentAndPropsString({
+              doNotTrimChildren: !!block?.jsx?.doNotTrimChildren,
               isEndOptional,
               lines,
               regexpEndRegex,
               startLineIndex,
               startMatch,
             })
+
+          console.log('linesFromStartToContentAndPropsString', { content, lines })
 
           if (block?.jsx?.import) {
             const markdownToLexical = getMarkdownToLexical(allNodes, allTransformers)

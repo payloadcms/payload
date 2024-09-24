@@ -1335,9 +1335,9 @@ export type BlockJSX = {
    */
   customStartRegex?: RegExp
   /**
-   * By default, all spaces at the beginning and end of the children (text between the open and close match)
+   * By default, all spaces at the beginning and end of every line of the children (text between the open and close match)
    * is removed.
-   * Set this to true to disable this behavior. Currently, this only works if `customEndRegex` is set.
+   * Set this to true to disable this behavior.
    */
   doNotTrimChildren?: boolean
   export: (props: {
