@@ -15,7 +15,7 @@ export function propsToJSXString({ props }: { props: Record<string, any> }): str
     } else if (value !== null && typeof value === 'object') {
       if (Array.isArray(value)) {
         // Handle array props
-        propsArray.push(`${key}=[${value.map((v) => JSON.stringify(v, replacer)).join(', ')}]`)
+        propsArray.push(`${key}={[${value.map((v) => JSON.stringify(v, replacer)).join(', ')}]}`)
       } else {
         // Handle complex object props
         propsArray.push(`${key}={${JSON.stringify(value, replacer)}}`)

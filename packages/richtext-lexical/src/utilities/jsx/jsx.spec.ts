@@ -11,13 +11,13 @@ describe('jsx', () => {
         },
       },
       {
-        input: 'key=[1, 2, 3]',
+        input: 'key={[1, 2, 3]}',
         output: {
           key: [1, 2, 3],
         },
       },
       {
-        input: 'key=[1, 2, 3, [1, 2]]',
+        input: 'key={[1, 2, 3, [1, 2]]}',
         output: {
           key: [1, 2, 3, [1, 2]],
         },
@@ -36,14 +36,12 @@ describe('jsx', () => {
       },
       {
         input: 'object={[1, 2, 3, [1, 2]]}',
-        inputFromOutput: 'object=[1, 2, 3, [1, 2]]',
         output: {
           object: [1, 2, 3, [1, 2]],
         },
       },
       {
         input: 'object={[1, 2]}',
-        inputFromOutput: 'object=[1, 2]',
         output: {
           object: [1, 2],
         },
