@@ -51,6 +51,12 @@ export const Status: React.FC = () => {
     statusToRender = 'published'
   }
 
+  const lastVersion = unpublishedVersions?.docs?.[0]
+
+  if (lastVersion && lastVersion.publishedLocale) {
+    statusToRender = locale === lastVersion.publishedLocale ? 'published' : 'draft'
+  }
+
   const performAction = useCallback(
     async (action: 'revert' | 'unpublish') => {
       let url
