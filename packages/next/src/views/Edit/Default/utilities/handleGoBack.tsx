@@ -4,7 +4,7 @@ import { formatAdminURL } from '@payloadcms/ui/shared'
 
 type GoBackProps = {
   adminRoute: string
-  collectionSlug: string
+  collectionSlug: string | undefined
   router: AppRouterInstance
 }
 
