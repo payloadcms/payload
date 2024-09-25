@@ -23,13 +23,11 @@ export type DocumentInfoProps = {
   readonly apiURL?: string
   readonly BeforeDocument?: React.ReactNode
   readonly BeforeFields?: React.ReactNode
-  readonly collectionConfig?: ClientCollectionConfig
   readonly collectionSlug?: SanitizedCollectionConfig['slug']
   readonly disableActions?: boolean
   readonly disableCreate?: boolean
   readonly disableLeaveWithoutSaving?: boolean
   readonly docPermissions?: DocumentPermissions
-  readonly globalConfig?: ClientGlobalConfig
   readonly globalSlug?: SanitizedGlobalConfig['slug']
   readonly hasPublishPermission?: boolean
   readonly hasSavePermission?: boolean

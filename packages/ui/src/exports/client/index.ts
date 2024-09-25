@@ -241,6 +241,6 @@ export { RenderEmailAndUsernameFields } from '../../elements/EmailAndUsername/in
 export { DefaultListView } from '../../views/List/index.js'
 export type { ListPreferences } from '../../views/List/types.js'
 
-export { DefaultEditView, EditView } from '../../views/Edit/index.js'
+export { DefaultEditView } from '../../views/Edit/index.js'
 export { SetDocumentStepNav } from '../../views/Edit/SetDocumentStepNav/index.js'
 export { SetDocumentTitle } from '../../views/Edit/SetDocumentTitle/index.js'

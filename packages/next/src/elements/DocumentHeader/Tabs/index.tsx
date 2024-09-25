@@ -90,12 +90,13 @@ export const DocumentTabs: React.FC<{
                       importMap={payload.importMap}
                       key={`tab-custom-${index}`}
                       serverProps={{
+                        collectionConfig,
+                        globalConfig,
                         i18n,
-                        payload,
-                        permissions,
-                        ...props,
                         key: `tab-custom-${index}`,
                         path,
+                        payload,
+                        permissions,
                       }}
                     />
                   )

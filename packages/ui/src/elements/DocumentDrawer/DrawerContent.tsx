@@ -11,7 +11,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { EditView as EditViewHandler } from '../../views/Edit/index.js'
+import { DefaultEditView } from '../../views/Edit/index.js'
 import { Gutter } from '../Gutter/index.js'
 import { IDLabel } from '../IDLabel/index.js'
 import { RenderTitle } from '../RenderTitle/index.js'
@@ -147,7 +147,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       redirectAfterDelete={redirectAfterDelete !== undefined ? redirectAfterDelete : false}
       redirectAfterDuplicate={redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false}
     >
-      <EditViewHandler />
+      <DefaultEditView />
     </DocumentInfoProvider>
   )
 }

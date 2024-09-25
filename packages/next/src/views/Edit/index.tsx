@@ -2,10 +2,10 @@
 
 import type { ClientSideEditViewProps } from 'payload'
 
-import { EditView as EditViewHandler } from '@payloadcms/ui'
+import { DefaultEditView } from '@payloadcms/ui'
 import React, { Fragment } from 'react'
 
-export const EditView: React.FC<ClientSideEditViewProps> = () => {
+export const EditView: React.FC<ClientSideEditViewProps> = ({ Fields }) => {
   // const { collectionConfig, globalConfig } = useEntityConfig()
 
   return (
@@ -15,7 +15,7 @@ export const EditView: React.FC<ClientSideEditViewProps> = () => {
           (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.default?.actions
         }
       /> */}
-      <EditViewHandler />
+      <DefaultEditView Fields={Fields} />
     </Fragment>
   )
 }

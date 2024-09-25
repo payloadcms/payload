@@ -20,7 +20,7 @@ export { generateListMetadata } from './meta.js'
 export const ListView: React.FC<AdminViewProps> = async ({
   initPageResult,
   params,
-  payloadServerAction,
+  // payloadServerAction,
   searchParams,
 }) => {
   const {
@@ -122,20 +122,10 @@ export const ListView: React.FC<AdminViewProps> = async ({
       where: whereQuery || {},
     })
 
-    // @ts-expect-error eslint-disable-next-line
-    // const clientCollectionConfig = (await payloadServerAction('render-config', {
-    //   collectionSlug,
-    //   data,
-    //   languageCode: initPageResult.req.i18n.language,
-    //   params,
-    //   searchParams,
-    // })) as unknown as ClientCollectionConfig
-
     return (
       <Fragment>
         <HydrateAuthProvider permissions={permissions} />
         <ListInfoProvider
-          collectionConfig={{}}
           collectionSlug={collectionSlug}
           hasCreatePermission={permissions?.collections?.[collectionSlug]?.create?.permission}
           newDocumentURL={formatAdminURL({

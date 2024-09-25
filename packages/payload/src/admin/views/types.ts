@@ -70,6 +70,5 @@ export type ServerSideEditViewProps = {
 } & ClientSideEditViewProps
 
 export type ClientSideEditViewProps = {
-  collectionConfig?: ClientCollectionConfig
-  globalConfig?: ClientGlobalConfig
+  Fields: React.ReactNode
 }

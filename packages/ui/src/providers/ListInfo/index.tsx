@@ -1,19 +1,18 @@
 'use client'
 import type { ClientCollectionConfig, FieldAffectingData, SanitizedCollectionConfig } from 'payload'
 
-import React, { createContext, useContext, useEffect } from 'react'
+import React, { createContext, useContext } from 'react'
 
 import type { Column } from '../../elements/Table/index.js'
 
 import { useConfig } from '../Config/index.js'
-import { useServerActions } from '../ServerActions/index.js'
-import { useTranslation } from '../Translation/index.js'
+// import { useServerActions } from '../ServerActions/index.js'
+// import { useTranslation } from '../Translation/index.js'
 
 export type ColumnPreferences = Pick<Column, 'accessor' | 'active'>[]
 
 export type ListInfoProps = {
   readonly beforeActions?: React.ReactNode[]
-  readonly collectionConfig?: ClientCollectionConfig
   readonly collectionSlug: SanitizedCollectionConfig['slug']
   readonly disableBulkDelete?: boolean
   readonly disableBulkEdit?: boolean
@@ -25,6 +24,7 @@ export type ListInfoProps = {
 
 export type ListInfoContext = {
   readonly beforeActions?: React.ReactNode[]
+  readonly collectionConfig?: ClientCollectionConfig
   readonly collectionSlug: string
   readonly disableBulkDelete?: boolean
   readonly disableBulkEdit?: boolean
@@ -48,23 +48,32 @@ export const ListInfoProvider: React.FC<
 
   const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
-  const payloadServerAction = useServerActions()
+  // const payloadServerAction = useServerActions()
 
-  const { i18n } = useTranslation()
+  // const { i18n } = useTranslation()
 
-  useEffect(() => {
-    // TODO: rewrite this to use the new pattern
-    if (!collectionConfig) {
-      const getNewConfig = async () => {
-        // @ts-expect-error eslint-disable-next-line
-        const res = (await payloadServerAction('render-config', {
-          collectionSlug,
-          languageCode: i18n.language,
-        })) as any as ClientCollectionConfig
-      }
-      void getNewConfig()
-    }
-  }, [payloadServerAction, collectionSlug, i18n.language, collectionConfig])
+  // useEffect(() => {
+  //   // TODO: rewrite this to use the new pattern
+  //   if (!collectionConfig) {
+  //     const getNewConfig = async () => {
+  //       // @ts-expect-error eslint-disable-next-line
+  //       const res = (await payloadServerAction('render-config', {
+  //         collectionSlug,
+  //         languageCode: i18n.language,
+  //       })) as any as ClientCollectionConfig
+  //     }
+  //     void getNewConfig()
+  //   }
+  // }, [payloadServerAction, collectionSlug, i18n.language, collectionConfig])
 
-  return <Context.Provider value={props}>{children}</Context.Provider>
+  return (
+    <Context.Provider
+      value={{
+        ...props,
+        collectionConfig,
+      }}
+    >
+      {children}
+    </Context.Provider>
+  )
 }

@@ -1,6 +1,11 @@
 'use client'
 
-import type { ClientSideEditViewProps, ClientUser } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ClientGlobalConfig,
+  ClientSideEditViewProps,
+  ClientUser,
+} from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
@@ -36,10 +41,7 @@ const baseClass = 'collection-edit'
 // This component receives props only on _pages_
 // When rendered within a drawer, props are empty
 // This is solely to support custom edit views which get server-rendered
-export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
-  collectionConfig,
-  globalConfig,
-}) => {
+export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({ Fields }) => {
   const {
     id,
     action,
@@ -83,7 +85,11 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       routes: { admin: adminRoute, api: apiRoute },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
+
+  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
 
   const depth = useEditDepth()
 
@@ -478,6 +484,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
               )
             }
             docPermissions={docPermissions}
+            Fields={Fields}
             fields={(collectionConfig || globalConfig)?.fields}
             readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
             schemaPath={schemaPath}
@@ -487,21 +494,4 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       </OperationProvider>
     </main>
   )
-}
-
-export const EditView: React.FC = () => {
-  // const { collectionConfig, globalConfig } = useEntityConfig()
-
-  // if (!collectionConfig && !globalConfig) {
-  //   return <LoadingOverlay />
-  // }
-
-  // const CustomEdit = (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.default
-  //   ?.Component
-
-  // if (CustomEdit) {
-  //   return <RenderComponent mappedComponent={CustomEdit} />
-  // }
-
-  return <DefaultEditView />
 }

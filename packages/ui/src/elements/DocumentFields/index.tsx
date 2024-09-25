@@ -16,6 +16,7 @@ type Args = {
   readonly description?: Description
   readonly docPermissions: DocumentPermissions
   readonly fields: ClientField[]
+  readonly Fields: React.ReactNode
   readonly forceSidebarWrap?: boolean
   readonly readOnly: boolean
   readonly schemaPath: string
@@ -26,6 +27,7 @@ export const DocumentFields: React.FC<Args> = ({
   BeforeFields,
   description,
   docPermissions,
+  Fields,
   fields,
   forceSidebarWrap,
   readOnly,
@@ -57,15 +59,7 @@ export const DocumentFields: React.FC<Args> = ({
             )}
           </header>
           {BeforeFields}
-          <RenderFields
-            className={`${baseClass}__fields`}
-            fields={mainFields}
-            forceRender={10}
-            path=""
-            permissions={docPermissions?.fields}
-            readOnly={readOnly}
-            schemaPath={schemaPath}
-          />
+          {Fields}
           {AfterFields}
         </Gutter>
       </div>

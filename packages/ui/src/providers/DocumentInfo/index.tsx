@@ -68,6 +68,7 @@ const DocumentInfo: React.FC<
   } = useConfig()
 
   const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+
   const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
 
   const docConfig = collectionConfig || globalConfig

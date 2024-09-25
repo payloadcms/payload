@@ -1,4 +1,3 @@
-'use client'
 import type { DocumentTabConfig, DocumentTabProps } from 'payload'
 import type React from 'react'
 
