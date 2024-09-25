@@ -175,18 +175,22 @@ describe('relationship', () => {
     await page.goto(url.create)
     await page.waitForURL(url.create)
     const count1 = await page
-      .locator(
-        '#relationWithAllowCreateToFalse button.relationship--single-value-label__drawer-toggler',
-      )
+      .locator('#field-relationWithAllowEditToFalse')
+      .getByLabel('Edit dev@payloadcms.com')
       .count()
-    expect(count1).toEqual(1)
-    // expect the button to not exist in the field
+    expect(count1).toEqual(0)
     const count2 = await page
-      .locator(
-        '#relationWithAllowEditToFalse button.relationship--single-value-label__drawer-toggler',
-      )
+      .locator('#field-relationWithAllowCreateToFalse')
+      .getByLabel('Edit dev@payloadcms.com')
       .count()
-    expect(count2).toEqual(0)
+    expect(count2).toEqual(1)
+    // This is the same as count1. The reason is that I've noticed that sometimes
+    // the default value does not appear after count1 is tested IDK why.
+    const count3 = await page
+      .locator('#field-relationWithAllowEditToFalse')
+      .getByLabel('Edit dev@payloadcms.com')
+      .count()
+    expect(count3).toEqual(0)
   })
 
   // TODO: Flaky test in CI - fix this. https://github.com/payloadcms/payload/actions/runs/8910825395/job/24470963991
