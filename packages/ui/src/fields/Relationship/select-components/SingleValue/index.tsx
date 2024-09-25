@@ -39,7 +39,7 @@ export const SingleValue: React.FC<
       <div className={`${baseClass}__label`}>
         <div className={`${baseClass}__label-text`}>
           <div className={`${baseClass}__text`}>{children}</div>
-          {relationTo && hasReadPermission && allowEdit && (
+          {relationTo && hasReadPermission && allowEdit !== false && (
             <Fragment>
               <button
                 aria-label={t('general:editLabel', { label })}

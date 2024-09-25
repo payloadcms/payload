@@ -44,7 +44,7 @@ export const MultiValueLabel: React.FC<
           }}
         />
       </div>
-      {relationTo && hasReadPermission && allowEdit && (
+      {relationTo && hasReadPermission && allowEdit !== false && (
         <Fragment>
           <button
             aria-label={`Edit ${label}`}
