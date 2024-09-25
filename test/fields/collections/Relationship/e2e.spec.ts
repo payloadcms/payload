@@ -159,11 +159,32 @@ describe('relationship', () => {
 
   test('should hide relationship add new button', async () => {
     await page.goto(url.create)
-    // expect the button to not exist in the field
-    const count = await page
-      .locator('#relationToSelfSelectOnly-add-new .relationship-add-new__add-button')
+    const count1 = await page
+      .locator('#relationWithAllowEditToFalse-add-new .relationship-add-new__add-button')
       .count()
-    expect(count).toEqual(0)
+    expect(count1).toEqual(1)
+    // expect the button to not exist in the field
+    const count2 = await page
+      .locator('#relationWithAllowCreateToFalse-add-new .relationship-add-new__add-button')
+      .count()
+    expect(count2).toEqual(0)
+  })
+
+  test('should hide relationship edit button', async () => {
+    await page.goto(url.create)
+    const count1 = await page
+      .locator(
+        '#relationWithAllowCreateToFalse button.relationship--single-value-label__drawer-toggler',
+      )
+      .count()
+    expect(count1).toEqual(1)
+    // expect the button to not exist in the field
+    const count2 = await page
+      .locator(
+        '#relationWithAllowEditToFalse button.relationship--single-value-label__drawer-toggler',
+      )
+      .count()
+    expect(count2).toEqual(0)
   })
 
   // TODO: Flaky test in CI - fix this. https://github.com/payloadcms/payload/actions/runs/8910825395/job/24470963991
