@@ -3,9 +3,11 @@ import type { MarkOptional } from 'ts-essentials'
 import type {
   ClientField,
   NamedTab,
+  NamedTabWithCondition,
   TabsField,
   TabsFieldClient,
   UnnamedTab,
+  UnnamedTabWithCondition,
 } from '../../fields/config/types.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
@@ -24,6 +26,8 @@ import type {
 export type ClientTab =
   | ({ fields: ClientField[] } & Omit<NamedTab, 'fields'>)
   | ({ fields: ClientField[] } & Omit<UnnamedTab, 'fields'>)
+  | ({ fields: ClientField[]; passesCondition: boolean } & Omit<NamedTabWithCondition, 'fields'>)
+  | ({ fields: ClientField[]; passesCondition: boolean } & Omit<UnnamedTabWithCondition, 'fields'>)
 
 type TabsFieldClientWithoutType = MarkOptional<TabsFieldClient, 'type'>
 

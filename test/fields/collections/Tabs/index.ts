@@ -22,8 +22,36 @@ const TabsFields: CollectionConfig = {
       },
     },
     {
+      name: 'conditionalTabVisible',
+      type: 'checkbox',
+      label: 'Toggle Conditional Tab',
+      admin: {
+        position: 'sidebar',
+        description:
+          'When active, the conditional tab should be visible. When inactive, it should be hidden.',
+      },
+    },
+    {
       type: 'tabs',
+      id: 'conditional-tabs',
       tabs: [
+        {
+          name: 'conditionalTab',
+          label: 'Conditional Tab',
+          description: 'This tab should only be visible when the conditional field is checked.',
+          fields: [
+            {
+              name: 'conditionalTabField',
+              type: 'text',
+              label: 'Conditional Tab Field',
+              defaultValue:
+                'This field should only be visible when the conditional tab is visible.',
+            },
+          ],
+          admin: {
+            condition: ({ conditionalTabVisible }) => !!conditionalTabVisible,
+          },
+        },
         {
           label: 'Tab with Array',
           description: 'This tab has an array.',

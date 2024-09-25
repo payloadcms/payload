@@ -77,6 +77,8 @@ export const createClientField = ({
     // `admin`
   ]
 
+  const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = ['condition']
+
   serverOnlyFieldProperties.forEach((key) => {
     if (key in clientField) {
       delete clientField[key]
@@ -293,6 +295,10 @@ export const createClientField = ({
     case 'tabs': {
       const field = clientField as unknown as TabsFieldClient
 
+      if (field?.id) {
+        field._schemaPath = generateFieldPath(parentPath, field.id)
+      }
+
       if (incomingField.tabs?.length) {
         for (let i = 0; i < incomingField.tabs.length; i++) {
           const tab = incomingField.tabs[i]
@@ -303,6 +309,14 @@ export const createClientField = ({
               delete clientTab[key]
             }
           })
+
+          if ('admin' in clientTab) {
+            serverOnlyFieldAdminProperties.forEach((key) => {
+              if (key in clientTab.admin) {
+                delete clientTab.admin[key]
+              }
+            })
+          }
 
           clientTab.fields = createClientFields({
             clientFields: clientTab.fields,
@@ -347,8 +361,6 @@ export const createClientField = ({
     default:
       break
   }
-
-  const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = ['condition']
 
   if (!clientField.admin) {
     clientField.admin = {}
