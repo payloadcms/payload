@@ -8,7 +8,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import type { Option } from '../../elements/ReactSelect/types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
-import { RenderComponent } from '../../elements/RenderComponent.js'
+import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'

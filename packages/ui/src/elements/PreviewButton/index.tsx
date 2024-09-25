@@ -4,7 +4,7 @@ import type { MappedComponent } from 'payload'
 import React from 'react'
 
 import { Button } from '../Button/index.js'
-import { RenderComponent } from '../RenderComponent.js'
+import { RenderComponent } from '../RenderComponent/index.js'
 import { usePreviewURL } from './usePreviewURL.js'
 
 const baseClass = 'preview-btn'

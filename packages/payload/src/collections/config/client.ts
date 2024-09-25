@@ -1,7 +1,13 @@
+import type { I18nClient } from '@payloadcms/translations'
+
 import type { StaticDescription } from '../../admin/types.js'
 import type { LivePreviewConfig, ServerOnlyLivePreviewProperties } from '../../config/types.js'
 import type { ClientField } from '../../fields/config/client.js'
+import type { Payload } from '../../types/index.js'
 import type { SanitizedCollectionConfig } from './types.js'
+
+import { createClientFields } from '../../fields/config/client.js'
+import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 
 export type ServerOnlyCollectionProperties = keyof Pick<
   SanitizedCollectionConfig,
@@ -34,13 +40,6 @@ export type ClientCollectionConfig = {
   >
   fields: ClientField[]
 } & Omit<SanitizedCollectionConfig, 'admin' | 'fields' | ServerOnlyCollectionProperties>
-
-import type { I18nClient } from '@payloadcms/translations'
-
-import type { Payload } from '../../types/index.js'
-
-import { createClientFields } from '../../fields/config/client.js'
-import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 
 const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
   'hooks',

@@ -10,7 +10,7 @@ import { useHotkey } from '../../hooks/useHotkey.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { RenderComponent } from '../RenderComponent.js'
+import { RenderComponent } from '../RenderComponent/index.js'
 
 export const DefaultSaveButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
   const { t } = useTranslation()

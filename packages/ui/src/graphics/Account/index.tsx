@@ -2,7 +2,7 @@
 import { usePathname } from 'next/navigation.js'
 import React from 'react'
 
-import { RenderComponent } from '../../elements/RenderComponent.js'
+import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'

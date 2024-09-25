@@ -13,7 +13,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { RenderComponent } from '../RenderComponent.js'
+import { RenderComponent } from '../RenderComponent/index.js'
 
 const baseClass = 'save-draft'
 

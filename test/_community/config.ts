@@ -23,7 +23,6 @@ export default buildConfigWithDefaults({
         },
       ],
     },
-    MediaCollection,
   ],
   admin: {
     importMap: {

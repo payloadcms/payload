@@ -4,7 +4,7 @@ import type { ClientField, FieldPermissions } from 'payload'
 
 import React from 'react'
 
-import { RenderComponent } from '../../elements/RenderComponent.js'
+import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { HiddenField } from '../../fields/Hidden/index.js'
 import { useFieldComponents } from '../../providers/FieldComponents/index.js'
 import { useOperation } from '../../providers/Operation/index.js'

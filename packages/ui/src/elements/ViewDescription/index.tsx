@@ -5,7 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { useTranslation } from '../../providers/Translation/index.js'
-import { RenderComponent } from '../RenderComponent.js'
+import { RenderComponent } from '../RenderComponent/index.js'
 import './index.scss'
 
 export type ViewDescriptionComponent = React.ComponentType<any>

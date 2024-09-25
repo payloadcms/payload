@@ -4,7 +4,7 @@ import type { FieldDescriptionClientComponent, GenericDescriptionProps } from 'p
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import { RenderComponent } from '../../elements/RenderComponent.js'
+import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'

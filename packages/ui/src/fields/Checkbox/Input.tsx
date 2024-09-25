@@ -9,7 +9,7 @@ import type { MarkOptional } from 'ts-essentials'
 
 import React from 'react'
 
-import { RenderComponent } from '../../elements/RenderComponent.js'
+import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { CheckIcon } from '../../icons/Check/index.js'
 import { LineIcon } from '../../icons/Line/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'

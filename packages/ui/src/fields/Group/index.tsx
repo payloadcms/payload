@@ -7,7 +7,7 @@ import React from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import { RenderComponent } from '../../elements/RenderComponent.js'
+import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import {
   useFormInitializing,

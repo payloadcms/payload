@@ -12,7 +12,7 @@ import { Localizer } from '../Localizer/index.js'
 import { LocalizerLabel } from '../Localizer/LocalizerLabel/index.js'
 import { useNav } from '../Nav/context.js'
 import { NavToggler } from '../Nav/NavToggler/index.js'
-import { RenderComponent } from '../RenderComponent.js'
+import { RenderComponent } from '../RenderComponent/index.js'
 import { StepNav } from '../StepNav/index.js'
 import './index.scss'
 

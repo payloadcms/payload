@@ -8,7 +8,7 @@ import type {
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
-import { RenderComponent } from '../../elements/RenderComponent.js'
+import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'

@@ -5,7 +5,7 @@ import { LogOutIcon } from '../../icons/LogOut/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
-import { RenderComponent } from '../RenderComponent.js'
+import { RenderComponent } from '../RenderComponent/index.js'
 
 const baseClass = 'nav'
 

@@ -12,7 +12,7 @@ import './index.scss'
 
 const baseClass = 'json-field'
 
-import { RenderComponent } from '../../elements/RenderComponent.js'
+import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'

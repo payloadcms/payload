@@ -1,3 +1,8 @@
+import type { I18nClient } from '@payloadcms/translations'
+
+import type { Payload } from '../../types/index.js'
+
+import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import {
   type AdminClient,
   type BlocksFieldClient,
@@ -30,12 +35,6 @@ export type ServerOnlyFieldProperties =
   | keyof Pick<FieldBase, 'access' | 'custom' | 'defaultValue' | 'hooks'>
 
 export type ServerOnlyFieldAdminProperties = keyof Pick<FieldBase['admin'], 'condition'>
-
-import type { I18nClient } from '@payloadcms/translations'
-
-import type { Payload } from '../../types/index.js'
-
-import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 
 function generateFieldPath(parentPath: string, name: string): string {
   let tabPath = parentPath || ''

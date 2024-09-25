@@ -15,7 +15,7 @@ import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { PopupList } from '../Popup/index.js'
-import { RenderComponent } from '../RenderComponent.js'
+import { RenderComponent } from '../RenderComponent/index.js'
 export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
   const {
     id,

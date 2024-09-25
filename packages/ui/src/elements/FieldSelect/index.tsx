@@ -9,7 +9,7 @@ import { useForm } from '../../forms/Form/context.js'
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ReactSelect } from '../ReactSelect/index.js'
-import { RenderComponent } from '../RenderComponent.js'
+import { RenderComponent } from '../RenderComponent/index.js'
 import './index.scss'
 
 const baseClass = 'field-select'

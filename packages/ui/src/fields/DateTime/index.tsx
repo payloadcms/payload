@@ -13,7 +13,7 @@ import './index.scss'
 
 const baseClass = 'date-time-field'
 
-import { RenderComponent } from '../../elements/RenderComponent.js'
+import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'

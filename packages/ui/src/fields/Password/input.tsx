@@ -6,7 +6,7 @@ import React from 'react'
 
 import type { PasswordInputProps } from './types.js'
 
-import { RenderComponent } from '../../elements/RenderComponent.js'
+import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
