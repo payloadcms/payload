@@ -63,7 +63,6 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
           />
         )}
         <Fragment>
-          <SetViewActions actions={[]} />
           {!navGroups || navGroups?.length === 0 ? (
             <p>no nav groups....</p>
           ) : (

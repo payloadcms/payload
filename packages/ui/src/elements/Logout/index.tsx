@@ -46,17 +46,17 @@ export const Logout: React.FC<{
   Link?: React.ComponentType
   tabIndex?: number
 }> = ({ Link, tabIndex = 0 }) => {
-  const {
-    config: {
-      admin: {
-        components: { LogoutButton: CustomLogout },
-      },
-    },
-  } = useConfig()
+  // const {
+  //   config: {
+  //     admin: {
+  //       components: { LogoutButton: CustomLogout },
+  //     },
+  //   },
+  // } = useConfig()
 
-  if (CustomLogout) {
-    return <RenderComponent mappedComponent={CustomLogout} />
-  }
+  // if (CustomLogout) {
+  //   return <RenderComponent mappedComponent={CustomLogout} />
+  // }
 
   return <DefaultLogout Link={Link} tabIndex={tabIndex} />
 }

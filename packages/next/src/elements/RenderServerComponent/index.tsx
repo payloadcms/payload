@@ -74,22 +74,22 @@ export const RenderServerComponent: React.FC<{
       schemaPath: '',
     })
 
-    if (!ResolvedComponent) {
-      return Fallback ? (
-        <RenderServerComponent
-          clientProps={clientProps}
-          Component={Fallback}
-          importMap={importMap}
-          serverProps={serverProps}
+    if (ResolvedComponent) {
+      return (
+        <ResolvedComponent
+          {...clientProps}
+          {...(isReactServerComponentOrFunction(ResolvedComponent) ? serverProps : {})}
         />
-      ) : null
+      )
     }
-
-    return (
-      <ResolvedComponent
-        {...clientProps}
-        {...(isReactServerComponentOrFunction(ResolvedComponent) ? serverProps : {})}
-      />
-    )
   }
+
+  return Fallback ? (
+    <RenderServerComponent
+      clientProps={clientProps}
+      Component={Fallback}
+      importMap={importMap}
+      serverProps={serverProps}
+    />
+  ) : null
 }

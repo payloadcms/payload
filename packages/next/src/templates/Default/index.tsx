@@ -44,7 +44,6 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
         <RenderServerComponent
           clientProps={{ clientProps: { visibleEntities } }}
           Component={CustomHeader}
-          Fallback={AppHeader}
           importMap={payload.importMap}
           serverProps={{
             i18n,
