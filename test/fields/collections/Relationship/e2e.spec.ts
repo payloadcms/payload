@@ -159,6 +159,7 @@ describe('relationship', () => {
 
   test('should hide relationship add new button', async () => {
     await page.goto(url.create)
+    await page.waitForURL(url.create)
     const count1 = await page
       .locator('#relationWithAllowEditToFalse-add-new .relationship-add-new__add-button')
       .count()
@@ -172,6 +173,7 @@ describe('relationship', () => {
 
   test('should hide relationship edit button', async () => {
     await page.goto(url.create)
+    await page.waitForURL(url.create)
     const count1 = await page
       .locator(
         '#relationWithAllowCreateToFalse button.relationship--single-value-label__drawer-toggler',
