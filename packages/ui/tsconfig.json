@@ -28,6 +28,6 @@
     "src/**/*.tsx",
     "src/**/*.d.ts",
     "src/**/*.json"
-  ],
+, "../next/src/elements/server.tsx"  ],
   "references": [{ "path": "../payload" }, { "path": "../translations" }]
 }

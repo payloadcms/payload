@@ -242,7 +242,6 @@ export { RelationshipField as RelationshipCondition } from '../../elements/Where
 export { NumberField as NumberCondition } from '../../elements/WhereBuilder/Condition/Number/index.js'
 export { DateField as DateCondition } from '../../elements/WhereBuilder/Condition/Date/index.js'
 export { RenderEmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
-export { RenderComponent } from '../../elements/RenderComponent/index.js'
 
 export { DefaultListView, ListView } from '../../views/List/index.js'
 export type { ListPreferences } from '../../views/List/types.js'

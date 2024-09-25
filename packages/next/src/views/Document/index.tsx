@@ -8,13 +8,14 @@ import type {
 } from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
-import { formatAdminURL, isEditing as getIsEditing, RenderComponent } from '@payloadcms/ui/shared'
+import { formatAdminURL, isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { NotFoundView } from '../NotFound/index.js'
 import { getDocumentData } from './getDocumentData.js'
 import { getDocumentPermissions } from './getDocumentPermissions.js'
@@ -328,12 +329,10 @@ export const Document: React.FC<AdminViewProps> = async ({
         key={`${collectionSlug || globalSlug}${locale?.code ? `-${locale?.code}` : ''}`}
       >
         {ErrorView ? (
-          <RenderComponent mappedComponent={ErrorView} />
+          <RenderServerComponent Component={ErrorView} />
         ) : (
-          <RenderComponent
-            mappedComponent={
-              RootViewOverride ? RootViewOverride : CustomView ? CustomView : DefaultView
-            }
+          <RenderServerComponent
+            Component={RootViewOverride ? RootViewOverride : CustomView ? CustomView : DefaultView}
           />
         )}
       </EditDepthProvider>

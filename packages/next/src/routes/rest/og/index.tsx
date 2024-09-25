@@ -1,6 +1,5 @@
 import type { PayloadRequest } from 'payload'
 
-import { RenderComponent } from '@payloadcms/ui'
 import { PayloadIcon } from '@payloadcms/ui/shared'
 import fs from 'fs/promises'
 import { ImageResponse } from 'next/og.js'
@@ -9,6 +8,7 @@ import path from 'path'
 import React from 'react'
 import { fileURLToPath } from 'url'
 
+import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
 import { OGImage } from './image.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -51,14 +51,10 @@ export const generateOGImage = async ({ req }: { req: PayloadRequest }) => {
       (
         <OGImage
           description={description}
+          Fallback={PayloadIcon}
           fontFamily={fontFamily}
-          Icon={
-            <RenderComponent
-              Component={config.admin?.components?.graphics?.Icon}
-              Fallback={PayloadIcon}
-              importMap={req.payload.importMap}
-            />
-          }
+          Icon={config.admin?.components?.graphics?.Icon}
+          importMap={req.payload.importMap}
           leader={leader}
           title={title}
         />

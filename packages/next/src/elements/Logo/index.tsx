@@ -1,7 +1,9 @@
 import type { ServerProps } from 'payload'
 
-import { PayloadLogo, RenderComponent } from '@payloadcms/ui/shared'
+import { PayloadLogo } from '@payloadcms/ui/shared'
 import React from 'react'
+
+import { RenderServerComponent } from '../RenderServerComponent/index.js'
 
 export const Logo: React.FC<ServerProps> = (props) => {
   const { i18n, locale, params, payload, permissions, searchParams, user } = props
@@ -17,7 +19,7 @@ export const Logo: React.FC<ServerProps> = (props) => {
   } = payload.config
 
   return (
-    <RenderComponent
+    <RenderServerComponent
       Component={CustomLogo}
       Fallback={PayloadLogo}
       importMap={payload.importMap}

@@ -1,10 +1,10 @@
 import type { AdminViewProps } from 'payload'
 
-import { RenderComponent } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import './index.scss'
 import { LoginForm } from './LoginForm/index.js'
 
@@ -65,7 +65,7 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           user={user}
         />
       </div>
-      <RenderComponent
+      <RenderServerComponent
         Component={beforeLogin}
         importMap={payload.importMap}
         serverProps={{
@@ -86,7 +86,7 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           searchParams={searchParams}
         />
       )}
-      <RenderComponent
+      <RenderServerComponent
         Component={afterLogin}
         importMap={payload.importMap}
         serverProps={{

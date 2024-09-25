@@ -2,9 +2,10 @@ import type { EntityToGroup } from '@payloadcms/ui/shared'
 import type { ServerProps } from 'payload'
 
 import { Logout } from '@payloadcms/ui'
-import { EntityType, groupNavItems, RenderComponent } from '@payloadcms/ui/shared'
+import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import React from 'react'
 
+import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import './index.scss'
 import { NavHamburger } from './NavHamburger/index.js'
 import { NavWrapper } from './NavWrapper/index.js'
@@ -58,7 +59,7 @@ export const DefaultNav: React.FC<NavProps> = (props) => {
   return (
     <NavWrapper baseClass={baseClass}>
       <nav className={`${baseClass}__wrap`}>
-        <RenderComponent
+        <RenderServerComponent
           Component={beforeNavLinks}
           importMap={payload.importMap}
           serverProps={{
@@ -72,7 +73,7 @@ export const DefaultNav: React.FC<NavProps> = (props) => {
           }}
         />
         <DefaultNavClient groups={groups} />
-        <RenderComponent
+        <RenderServerComponent
           Component={afterNavLinks}
           importMap={payload.importMap}
           serverProps={{

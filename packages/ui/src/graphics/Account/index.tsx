@@ -2,7 +2,7 @@
 import { usePathname } from 'next/navigation.js'
 import React from 'react'
 
-import { RenderComponent } from '../../elements/RenderComponent/index.js'
+// import { RenderComponent } from '../../elements/RenderComponent/client.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
@@ -14,7 +14,6 @@ export const Account = () => {
     config: {
       admin: {
         avatar,
-        components: { Avatar: CustomAvatar },
         routes: { account: accountRoute },
       },
       routes: { admin: adminRoute },
@@ -25,16 +24,16 @@ export const Account = () => {
   const pathname = usePathname()
   const isOnAccountPage = pathname === formatAdminURL({ adminRoute, path: accountRoute })
 
-  if (CustomAvatar) {
-    return (
-      <RenderComponent
-        clientProps={{
-          active: isOnAccountPage,
-        }}
-        mappedComponent={CustomAvatar}
-      />
-    )
-  }
+  // if (CustomAvatar) {
+  //   return (
+  //     <RenderComponent
+  //       clientProps={{
+  //         active: isOnAccountPage,
+  //       }}
+  //       mappedComponent={CustomAvatar}
+  //     />
+  //   )
+  // }
 
   if (!user?.email || avatar === 'default') {
     return <DefaultAccountIcon active={isOnAccountPage} />

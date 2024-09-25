@@ -2,10 +2,11 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { ImportMap, PayloadServerAction, SanitizedConfig } from 'payload'
 
-import { formatAdminURL, RenderComponent } from '@payloadcms/ui/shared'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { initPage } from '../../utilities/initPage/index.js'
@@ -98,7 +99,7 @@ export const RootPage = async ({
   }
 
   const RenderedView = (
-    <RenderComponent
+    <RenderServerComponent
       Component={DefaultView.payloadComponent}
       Fallback={DefaultView.Component}
       importMap={importMap}

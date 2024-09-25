@@ -1,10 +1,10 @@
 import type { ServerProps, VisibleEntities } from 'payload'
 
 import { AppHeader, BulkUploadProvider, EntityVisibilityProvider, NavToggler } from '@payloadcms/ui'
-import { RenderComponent } from '@payloadcms/ui/shared'
 import React from 'react'
 
 import { DefaultNav } from '../../elements/Nav/index.js'
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import './index.scss'
 import { NavHamburger } from './NavHamburger/index.js'
 import { Wrapper } from './Wrapper/index.js'
@@ -41,7 +41,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
       <BulkUploadProvider>
-        <RenderComponent
+        <RenderServerComponent
           clientProps={{ clientProps: { visibleEntities } }}
           Component={CustomHeader}
           Fallback={AppHeader}
@@ -66,7 +66,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
             </div>
           </div>
           <Wrapper baseClass={baseClass} className={className}>
-            <RenderComponent
+            <RenderServerComponent
               clientProps={{ clientProps: { visibleEntities } }}
               Component={CustomNav}
               Fallback={DefaultNav}

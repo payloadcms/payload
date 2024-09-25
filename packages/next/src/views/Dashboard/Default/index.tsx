@@ -3,9 +3,10 @@ import type { ClientUser, Permissions, ServerProps, VisibleEntities } from 'payl
 
 import { getTranslation } from '@payloadcms/translations'
 import { Button, Card, Gutter, Locked, SetStepNav, SetViewActions } from '@payloadcms/ui'
-import { EntityType, formatAdminURL, RenderComponent } from '@payloadcms/ui/shared'
+import { EntityType, formatAdminURL } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
+import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
 import './index.scss'
 
 const baseClass = 'dashboard'
@@ -47,7 +48,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
       <SetViewActions actions={[]} />
       <Gutter className={`${baseClass}__wrap`}>
         {beforeDashboard && (
-          <RenderComponent
+          <RenderServerComponent
             Component={beforeDashboard}
             importMap={payload.importMap}
             serverProps={{
@@ -148,7 +149,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
           )}
         </Fragment>
         {afterDashboard && (
-          <RenderComponent
+          <RenderServerComponent
             Component={afterDashboard}
             importMap={payload.importMap}
             serverProps={{

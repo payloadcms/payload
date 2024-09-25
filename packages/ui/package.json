@@ -24,6 +24,11 @@
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
     },
+    "./elements/RenderComponent": {
+      "import": "./src/elements/RenderComponent/index.tsx",
+      "types": "./src/elements/RenderComponent/index.tsx",
+      "default": "./src/elements/RenderComponent/index.tsx"
+    },
     "./utilities/buildFormState": {
       "import": "./src/utilities/buildFormState.ts",
       "types": "./src/utilities/buildFormState.ts",
