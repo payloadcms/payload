@@ -43,8 +43,7 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
   const { code } = useLocale()
   const label = labelProp || t('version:publishChanges')
 
-  const hasNewerVersions =
-    unpublishedVersions?.totalDocs > 0 && unpublishedVersions?.docs[0]?.version?._status === 'draft'
+  const hasNewerVersions = unpublishedVersions?.totalDocs > 0
   const canPublish = hasPublishPermission && (modified || hasNewerVersions || !publishedDoc)
   const operation = useOperation()
 
