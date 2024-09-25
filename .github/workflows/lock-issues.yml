@@ -18,6 +18,7 @@ jobs:
         with:
           process-only: 'issues'
           issue-inactive-days: '1'
+          exclude-any-issue-labels: 'status: awaiting-reply'
           log-output: true
           issue-comment: >
             This issue has been automatically locked.
