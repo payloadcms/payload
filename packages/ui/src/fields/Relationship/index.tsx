@@ -578,7 +578,13 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   }, [openDrawer, currentlyOpenRelationship])
 
   const optionsByValue = findOptionsByValue({ options, value })
-  const valueToRender = optionsByValue ? { allowEdit, ...optionsByValue } : undefined
+  const valueToRender = Array.isArray(optionsByValue)
+    ? optionsByValue.map((option) => {
+        return { allowEdit, ...option }
+      })
+    : optionsByValue
+      ? { allowEdit, ...optionsByValue }
+      : undefined
 
   if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') {
     valueToRender.value = null
