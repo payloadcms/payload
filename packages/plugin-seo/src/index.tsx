@@ -28,7 +28,7 @@ export const seoPlugin =
           OverviewField({}),
           MetaTitleField({
             hasGenerateFn: typeof pluginConfig?.generateTitle === 'function',
-            overrides: pluginConfig?.fieldOverrides?.title as unknown as TextField,
+            overrides: pluginConfig?.fieldOverrides?.title,
           }),
           MetaDescriptionField({
             hasGenerateFn: typeof pluginConfig?.generateDescription === 'function',

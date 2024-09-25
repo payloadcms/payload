@@ -102,7 +102,13 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel field={null} Label={Label} label={label} {...(labelProps || {})} />
+          <FieldLabel
+            field={null}
+            Label={Label}
+            label={label}
+            required={required}
+            {...(labelProps || {})}
+          />
           {hasGenerateImageFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
@@ -151,7 +157,6 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
             RenderedComponent: errorMessage,
           }}
           filterOptions={field.filterOptions}
-          label={undefined}
           onChange={(incomingImage) => {
             if (incomingImage !== null) {
               if (typeof incomingImage === 'object') {
