@@ -231,7 +231,7 @@ export const DocumentControls: React.FC<{
               <Button
                 buttonStyle="secondary"
                 id="take-over"
-                onClick={() => void onTakeOver()}
+                onClick={onTakeOver}
                 size="medium"
                 type="button"
               >

@@ -6,6 +6,7 @@ import type {
 } from '@payloadcms/translations'
 import type { BusboyConfig } from 'busboy'
 import type GraphQL from 'graphql'
+import type { GraphQLFormattedError } from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
 import type { DestinationStream, pino } from 'pino'
 import type React from 'react'
@@ -27,7 +28,6 @@ import type {
   InternalImportMap,
 } from '../bin/generateImportMap/index.js'
 import type {
-  AfterErrorHook,
   Collection,
   CollectionConfig,
   SanitizedCollectionConfig,
@@ -35,7 +35,7 @@ import type {
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { Payload, TypedUser } from '../index.js'
+import type { Payload, RequestContext, TypedUser } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -629,6 +629,33 @@ export type FetchAPIFileUploadOptions = {
   useTempFiles?: boolean | undefined
 } & Partial<BusboyConfig>
 
+export type ErrorResult = { data?: any; errors: unknown[]; stack?: string }
+
+export type AfterErrorResult = {
+  graphqlResult?: GraphQLFormattedError
+  response?: Partial<ErrorResult> & Record<string, unknown>
+  status?: number
+} | void
+
+export type AfterErrorHookArgs = {
+  /** The Collection that the hook is operating on. This will be undefined if the hook is executed from a non-collection endpoint or GraphQL. */
+  collection?: SanitizedCollectionConfig
+  /** 	Custom context passed between hooks */
+  context: RequestContext
+  /** The error that occurred. */
+  error: Error
+  /** The GraphQL result object, available if the hook is executed within a GraphQL context. */
+  graphqlResult?: GraphQLFormattedError
+  /** The Request object containing the currently authenticated user. */
+  req: PayloadRequest
+  /** The formatted error result object, available if the hook is executed from a REST context. */
+  result?: ErrorResult
+}
+
+export type AfterErrorHook = (
+  args: AfterErrorHookArgs,
+) => AfterErrorResult | Promise<AfterErrorResult>
+
 /**
  * This is the central configuration
  *
@@ -903,7 +930,7 @@ export type Config = {
    * @see https://payloadcms.com/docs/hooks/overview
    */
   hooks?: {
-    afterError?: AfterErrorHook
+    afterError?: AfterErrorHook[]
   }
   /** i18n config settings */
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type

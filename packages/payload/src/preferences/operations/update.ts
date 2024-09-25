@@ -35,23 +35,10 @@ export async function update(args: PreferenceUpdateRequest) {
     value,
   }
 
-  let result
-
-  try {
-    // try/catch because we attempt to update without first reading to check if it exists first to save on db calls
-    result = await payload.db.updateOne({
-      collection,
-      data: preference,
-      req,
-      where,
-    })
-  } catch (err: unknown) {
-    result = await payload.db.create({
-      collection,
-      data: preference,
-      req,
-    })
-  }
-
-  return result
+  return await payload.db.upsert({
+    collection,
+    data: preference,
+    req,
+    where,
+  })
 }

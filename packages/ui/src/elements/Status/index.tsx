@@ -41,12 +41,20 @@ export const Status: React.FC = () => {
 
   let statusToRender: 'changed' | 'draft' | 'published'
 
-  if (unpublishedVersions?.docs?.length > 0 && publishedDoc) {
+  const isChangedFromPublished = unpublishedVersions?.docs?.[0]?.version?._status === 'draft'
+
+  if (unpublishedVersions?.docs?.length > 0 && isChangedFromPublished && publishedDoc) {
     statusToRender = 'changed'
   } else if (!publishedDoc) {
     statusToRender = 'draft'
-  } else if (publishedDoc && unpublishedVersions?.docs?.length <= 1) {
+  } else if (publishedDoc && unpublishedVersions?.docs?.length <= 2) {
     statusToRender = 'published'
+  }
+
+  const lastVersion = unpublishedVersions?.docs?.[0]
+
+  if (lastVersion && lastVersion.publishedLocale) {
+    statusToRender = locale === lastVersion.publishedLocale ? 'published' : 'draft'
   }
 
   const performAction = useCallback(

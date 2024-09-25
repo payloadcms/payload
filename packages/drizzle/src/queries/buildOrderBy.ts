@@ -55,6 +55,7 @@ export const buildOrderBy = ({
         pathSegments: sortPath.replace(/__/g, '.').split('.'),
         selectFields,
         tableName,
+        useAlias: true,
         value: sortPath,
       })
       orderBy.column = sortTable?.[sortTableColumnName]
