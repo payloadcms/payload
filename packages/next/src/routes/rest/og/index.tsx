@@ -1,6 +1,7 @@
 import type { PayloadRequest } from 'payload'
 
-import { getCreateMappedComponent, PayloadIcon } from '@payloadcms/ui/shared'
+import { RenderComponent } from '@payloadcms/ui'
+import { PayloadIcon } from '@payloadcms/ui/shared'
 import fs from 'fs/promises'
 import { ImageResponse } from 'next/og.js'
 import { NextResponse } from 'next/server.js'
@@ -33,18 +34,6 @@ export const generateOGImage = async ({ req }: { req: PayloadRequest }) => {
     const leader = hasLeader ? searchParams.get('leader')?.slice(0, 100).replace('-', ' ') : ''
     const description = searchParams.has('description') ? searchParams.get('description') : ''
 
-    const createMappedComponent = getCreateMappedComponent({
-      importMap: req.payload.importMap,
-      serverProps: {},
-    })
-
-    const mappedIcon = createMappedComponent(
-      config.admin?.components?.graphics?.Icon,
-      undefined,
-      PayloadIcon,
-      'config.admin.components.graphics.Icon',
-    )
-
     let fontData
 
     try {
@@ -63,7 +52,13 @@ export const generateOGImage = async ({ req }: { req: PayloadRequest }) => {
         <OGImage
           description={description}
           fontFamily={fontFamily}
-          Icon={mappedIcon}
+          Icon={
+            <RenderComponent
+              Component={config.admin?.components?.graphics?.Icon}
+              Fallback={PayloadIcon}
+              importMap={req.payload.importMap}
+            />
+          }
           leader={leader}
           title={title}
         />

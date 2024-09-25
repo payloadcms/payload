@@ -3,12 +3,7 @@ import type { ClientUser, Permissions, ServerProps, VisibleEntities } from 'payl
 
 import { getTranslation } from '@payloadcms/translations'
 import { Button, Card, Gutter, Locked, SetStepNav, SetViewActions } from '@payloadcms/ui'
-import {
-  EntityType,
-  formatAdminURL,
-  getCreateMappedComponent,
-  RenderComponent,
-} from '@payloadcms/ui/shared'
+import { EntityType, formatAdminURL, RenderComponent } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
 import './index.scss'
@@ -46,39 +41,26 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
     user,
   } = props
 
-  const createMappedComponent = getCreateMappedComponent({
-    importMap: payload.importMap,
-    serverProps: {
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-    },
-  })
-
-  const mappedBeforeDashboards = createMappedComponent(
-    beforeDashboard,
-    undefined,
-    undefined,
-    'beforeDashboard',
-  )
-
-  const mappedAfterDashboards = createMappedComponent(
-    afterDashboard,
-    undefined,
-    undefined,
-    'afterDashboard',
-  )
-
   return (
     <div className={baseClass}>
       <SetStepNav nav={[]} />
       <SetViewActions actions={[]} />
       <Gutter className={`${baseClass}__wrap`}>
-        <RenderComponent mappedComponent={mappedBeforeDashboards} />
+        {beforeDashboard && (
+          <RenderComponent
+            Component={beforeDashboard}
+            importMap={payload.importMap}
+            serverProps={{
+              i18n,
+              locale,
+              params,
+              payload,
+              permissions,
+              searchParams,
+              user,
+            }}
+          />
+        )}
         <Fragment>
           <SetViewActions actions={[]} />
           {!navGroups || navGroups?.length === 0 ? (
@@ -165,7 +147,21 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
             })
           )}
         </Fragment>
-        <RenderComponent mappedComponent={mappedAfterDashboards} />
+        {afterDashboard && (
+          <RenderComponent
+            Component={afterDashboard}
+            importMap={payload.importMap}
+            serverProps={{
+              i18n,
+              locale,
+              params,
+              payload,
+              permissions,
+              searchParams,
+              user,
+            }}
+          />
+        )}
       </Gutter>
     </div>
   )

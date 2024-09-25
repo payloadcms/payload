@@ -4,10 +4,10 @@ import type { FieldErrorClientComponent, GenericErrorProps } from 'payload'
 
 import React from 'react'
 
+import { RenderComponent } from '../../elements/RenderComponent.js'
 import { Tooltip } from '../../elements/Tooltip/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useFormFields, useFormSubmitted } from '../../forms/Form/context.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import './index.scss'
 
 const baseClass = 'field-error'

@@ -1,7 +1,7 @@
-import type { MappedComponent, ServerProps, VisibleEntities } from 'payload'
+import type { ServerProps, VisibleEntities } from 'payload'
 
 import { AppHeader, BulkUploadProvider, EntityVisibilityProvider, NavToggler } from '@payloadcms/ui'
-import { getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
+import { RenderComponent } from '@payloadcms/ui/shared'
 import React from 'react'
 
 import { DefaultNav } from '../../elements/Nav/index.js'
@@ -38,37 +38,25 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     } = {},
   } = payload.config || {}
 
-  const createMappedComponent = getCreateMappedComponent({
-    importMap: payload.importMap,
-    serverProps: {
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-    },
-  })
-
-  const MappedDefaultNav: MappedComponent = createMappedComponent(
-    CustomNav,
-    { clientProps: { visibleEntities } },
-    DefaultNav,
-    'CustomNav',
-  )
-
-  const MappedCustomHeader = createMappedComponent(
-    CustomHeader,
-    undefined,
-    undefined,
-    'CustomHeader',
-  )
-
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
       <BulkUploadProvider>
-        <RenderComponent mappedComponent={MappedCustomHeader} />
+        <RenderComponent
+          clientProps={{ clientProps: { visibleEntities } }}
+          Component={CustomHeader}
+          Fallback={AppHeader}
+          importMap={payload.importMap}
+          serverProps={{
+            i18n,
+            locale,
+            params,
+            payload,
+            permissions,
+            searchParams,
+            user,
+            visibleEntities,
+          }}
+        />
         <div style={{ position: 'relative' }}>
           <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
             <div className={`${baseClass}__nav-toggler-container`} id="nav-toggler">
@@ -78,8 +66,22 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
             </div>
           </div>
           <Wrapper baseClass={baseClass} className={className}>
-            <RenderComponent mappedComponent={MappedDefaultNav} />
-
+            <RenderComponent
+              clientProps={{ clientProps: { visibleEntities } }}
+              Component={CustomNav}
+              Fallback={DefaultNav}
+              importMap={payload.importMap}
+              serverProps={{
+                i18n,
+                locale,
+                params,
+                payload,
+                permissions,
+                searchParams,
+                user,
+                visibleEntities,
+              }}
+            />
             <div className={`${baseClass}__wrap`}>
               <AppHeader />
               {children}

@@ -32,10 +32,10 @@ export const PostsCollection: CollectionConfig = {
       name: 'serverTextField',
       type: 'text',
     },
-    {
-      name: 'richText',
-      type: 'richText',
-    },
+    // {
+    //   name: 'richText',
+    //   type: 'richText',
+    // },
     {
       name: 'myBlocks',
       type: 'blocks',

@@ -5,7 +5,7 @@ import React from 'react'
 import type { RowLabelProps } from './types.js'
 export type { RowLabelProps }
 
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
+import { RenderComponent } from '../../elements/RenderComponent.js'
 import { RowLabelProvider } from '../RowLabel/Context/index.js'
 
 const baseClass = 'row-label'

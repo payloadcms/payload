@@ -8,12 +8,7 @@ import type {
 } from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
-import {
-  formatAdminURL,
-  getCreateMappedComponent,
-  isEditing as getIsEditing,
-  RenderComponent,
-} from '@payloadcms/ui/shared'
+import { formatAdminURL, isEditing as getIsEditing, RenderComponent } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React from 'react'
 

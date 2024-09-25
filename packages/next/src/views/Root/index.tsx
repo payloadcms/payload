@@ -1,8 +1,8 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { ImportMap, MappedComponent, PayloadServerAction, SanitizedConfig } from 'payload'
+import type { ImportMap, PayloadServerAction, SanitizedConfig } from 'payload'
 
-import { formatAdminURL, getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
+import { formatAdminURL, RenderComponent } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
@@ -97,29 +97,22 @@ export const RootPage = async ({
     }
   }
 
-  const createMappedView = getCreateMappedComponent({
-    importMap,
-    serverProps: {
-      i18n: initPageResult?.req.i18n,
-      importMap,
-      initPageResult,
-      params,
-      payload: initPageResult?.req.payload,
-      payloadServerAction,
-      searchParams,
-    },
-  })
-
-  const MappedView: MappedComponent = createMappedView(
-    DefaultView.payloadComponent,
-    {
-      clientProps: { payloadServerAction },
-    },
-    DefaultView.Component,
-    'createMappedView',
+  const RenderedView = (
+    <RenderComponent
+      Component={DefaultView.payloadComponent}
+      Fallback={DefaultView.Component}
+      importMap={importMap}
+      serverProps={{
+        i18n: initPageResult?.req.i18n,
+        importMap,
+        initPageResult,
+        params,
+        payload: initPageResult?.req.payload,
+        payloadServerAction,
+        searchParams,
+      }}
+    />
   )
-
-  const RenderedView = <RenderComponent mappedComponent={MappedView} />
 
   return (
     <Fragment>

@@ -2,12 +2,7 @@ import type { EntityToGroup } from '@payloadcms/ui/shared'
 import type { AdminViewProps } from 'payload'
 
 import { HydrateAuthProvider } from '@payloadcms/ui'
-import {
-  EntityType,
-  getCreateMappedComponent,
-  groupNavItems,
-  RenderComponent,
-} from '@payloadcms/ui/shared'
+import { EntityType, groupNavItems, RenderComponent } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'
 
@@ -94,30 +89,6 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
     i18n,
   )
 
-  const createMappedComponent = getCreateMappedComponent({
-    importMap: payload.importMap,
-    serverProps: {
-      globalData,
-      i18n,
-      Link,
-      locale,
-      navGroups,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-      visibleEntities,
-    },
-  })
-
-  const mappedDashboardComponent = createMappedComponent(
-    CustomDashboardComponent?.Component,
-    undefined,
-    DefaultDashboard,
-    'CustomDashboardComponent.Component',
-  )
-
   return (
     <Fragment>
       <HydrateAuthProvider permissions={permissions} />
@@ -126,7 +97,22 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
           Link,
           locale,
         }}
-        mappedComponent={mappedDashboardComponent}
+        Component={CustomDashboardComponent}
+        Fallback={DefaultDashboard}
+        importMap={payload.importMap}
+        serverProps={{
+          globalData,
+          i18n,
+          Link,
+          locale,
+          navGroups,
+          params,
+          payload,
+          permissions,
+          searchParams,
+          user,
+          visibleEntities,
+        }}
       />
     </Fragment>
   )

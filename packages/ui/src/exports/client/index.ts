@@ -194,7 +194,7 @@ export { ActionsProvider, SetViewActions, useActions } from '../../providers/Act
 export { AuthProvider, useAuth } from '../../providers/Auth/index.js'
 export { ClientFunctionProvider, useClientFunctions } from '../../providers/ClientFunction/index.js'
 export { useAddClientFunction } from '../../providers/ClientFunction/index.js'
-export { RenderComponent } from '../../providers/Config/RenderComponent.js'
+export { RenderComponent } from '../../elements/RenderComponent.jsx'
 
 export {
   ConfigProvider,

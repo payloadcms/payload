@@ -6,14 +6,12 @@ import {
   HydrateAuthProvider,
   RenderComponent,
 } from '@payloadcms/ui'
-import { getCreateMappedComponent } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { getDocumentData } from '../Document/getDocumentData.js'
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
-import { EditView } from '../Edit/index.js'
 import { AccountClient } from './index.client.js'
 import { Settings } from './Settings/index.js'
 
@@ -61,28 +59,6 @@ export const Account: React.FC<AdminViewProps> = async ({
       req,
     })
 
-    const createMappedComponent = getCreateMappedComponent({
-      importMap: payload.importMap,
-      serverProps: {
-        i18n,
-        initPageResult,
-        locale,
-        params,
-        payload,
-        permissions,
-        routeSegments: [],
-        searchParams,
-        user,
-      },
-    })
-
-    const mappedAccountComponent = createMappedComponent(
-      CustomAccountComponent?.Component,
-      undefined,
-      EditView,
-      'CustomAccountComponent.Component',
-    )
-
     return (
       <DocumentInfoProvider
         AfterFields={<Settings i18n={i18n} languageOptions={languageOptions} />}
@@ -105,7 +81,22 @@ export const Account: React.FC<AdminViewProps> = async ({
             permissions={permissions}
           />
           <HydrateAuthProvider permissions={permissions} />
-          <RenderComponent mappedComponent={mappedAccountComponent} />
+          <RenderComponent
+            Component={CustomAccountComponent}
+            Fallback={AccountClient}
+            importMap={payload.importMap}
+            serverProps={{
+              i18n,
+              initPageResult,
+              locale,
+              params,
+              payload,
+              permissions,
+              routeSegments: [],
+              searchParams,
+              user,
+            }}
+          />
           <AccountClient />
         </EditDepthProvider>
       </DocumentInfoProvider>

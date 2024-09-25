@@ -5,9 +5,9 @@ import type { FieldLabelClientComponent, GenericLabelProps, StaticLabel } from '
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
+import { RenderComponent } from '../../elements/RenderComponent.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useForm } from '../../forms/Form/context.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { generateFieldID } from '../../utilities/generateFieldID.js'
@@ -61,7 +61,7 @@ export const FieldLabel: FieldLabelClientComponent = (props) => {
       required={
         typeof props.required !== 'undefined'
           ? props.required
-          : props?.field && 'required' in props.field && (props.field?.required as boolean) // type assertion needed for `group` fields
+          : props?.field && 'required' in props.field && (props.field?.required) // type assertion needed for `group` fields
       }
     />
   )

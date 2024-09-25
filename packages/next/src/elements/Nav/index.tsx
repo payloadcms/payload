@@ -2,12 +2,7 @@ import type { EntityToGroup } from '@payloadcms/ui/shared'
 import type { ServerProps } from 'payload'
 
 import { Logout } from '@payloadcms/ui'
-import {
-  EntityType,
-  getCreateMappedComponent,
-  groupNavItems,
-  RenderComponent,
-} from '@payloadcms/ui/shared'
+import { EntityType, groupNavItems, RenderComponent } from '@payloadcms/ui/shared'
 import React from 'react'
 
 import './index.scss'
@@ -34,32 +29,6 @@ export const DefaultNav: React.FC<NavProps> = (props) => {
     collections,
     globals,
   } = payload.config
-
-  const createMappedComponent = getCreateMappedComponent({
-    importMap: payload.importMap,
-    serverProps: {
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-    },
-  })
-
-  const mappedBeforeNavLinks = createMappedComponent(
-    beforeNavLinks,
-    undefined,
-    undefined,
-    'beforeNavLinks',
-  )
-  const mappedAfterNavLinks = createMappedComponent(
-    afterNavLinks,
-    undefined,
-    undefined,
-    'afterNavLinks',
-  )
 
   const groups = groupNavItems(
     [
@@ -89,9 +58,33 @@ export const DefaultNav: React.FC<NavProps> = (props) => {
   return (
     <NavWrapper baseClass={baseClass}>
       <nav className={`${baseClass}__wrap`}>
-        <RenderComponent mappedComponent={mappedBeforeNavLinks} />
+        <RenderComponent
+          Component={beforeNavLinks}
+          importMap={payload.importMap}
+          serverProps={{
+            i18n,
+            locale,
+            params,
+            payload,
+            permissions,
+            searchParams,
+            user,
+          }}
+        />
         <DefaultNavClient groups={groups} />
-        <RenderComponent mappedComponent={mappedAfterNavLinks} />
+        <RenderComponent
+          Component={afterNavLinks}
+          importMap={payload.importMap}
+          serverProps={{
+            i18n,
+            locale,
+            params,
+            payload,
+            permissions,
+            searchParams,
+            user,
+          }}
+        />
         <div className={`${baseClass}__controls`}>
           <Logout />
         </div>
