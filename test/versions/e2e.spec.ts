@@ -647,7 +647,7 @@ describe('versions', () => {
 
       await textField.fill('spanish published')
       await saveDocAndAssert(page)
-      await expect(status).toContainText('Published')
+      await expect(status).toContainText('Changed')
 
       await textField.fill('spanish draft')
       await saveDocAndAssert(page, '#action-save-draft')
