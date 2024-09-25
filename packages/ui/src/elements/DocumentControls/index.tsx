@@ -1,5 +1,7 @@
 'use client'
 import type {
+  ClientCollectionConfig,
+  ClientGlobalConfig,
   ClientUser,
   CollectionPermission,
   GlobalPermission,
@@ -11,7 +13,7 @@ import React, { Fragment, useEffect } from 'react'
 
 import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
 
-import { useConfig, useEntityConfig } from '../../providers/Config/index.js'
+import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
@@ -78,9 +80,15 @@ export const DocumentControls: React.FC<{
 
   const editDepth = useEditDepth()
 
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
 
-  const { collectionConfig, globalConfig } = useEntityConfig()
+  const collectionConfig = getEntityConfig({
+    collectionSlug: props.slug,
+  }) as ClientCollectionConfig
+
+  const globalConfig = getEntityConfig({
+    collectionSlug: 'global',
+  }) as ClientGlobalConfig
 
   const {
     admin: { dateFormat },
@@ -196,7 +204,7 @@ export const DocumentControls: React.FC<{
             )}
             {hasSavePermission && (
               <React.Fragment>
-                {collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts ? (
+                {/* {collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts ? (
                   <React.Fragment>
                     {((collectionConfig?.versions?.drafts &&
                       !collectionConfig?.versions?.drafts?.autosave) ||
@@ -224,7 +232,7 @@ export const DocumentControls: React.FC<{
                       globalConfig?.admin?.components?.elements?.SaveButton
                     }
                   />
-                )}
+                )} */}
               </React.Fragment>
             )}
             {user && readOnlyForIncomingUser && (

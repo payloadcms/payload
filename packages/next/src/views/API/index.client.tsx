@@ -1,5 +1,7 @@
 'use client'
 
+import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
+
 import {
   CheckboxField,
   CopyToClipboard,
@@ -11,7 +13,6 @@ import {
   SetViewActions,
   useConfig,
   useDocumentInfo,
-  useEntityConfig,
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
@@ -38,9 +39,11 @@ export const APIViewClient: React.FC = () => {
       routes: { api: apiRoute },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
 
-  const { collectionConfig, globalConfig } = useEntityConfig()
+  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
 
   const localeOptions =
     localization &&
@@ -115,9 +118,9 @@ export const APIViewClient: React.FC = () => {
         useAsTitle={collectionConfig ? collectionConfig?.admin?.useAsTitle : undefined}
         view="API"
       />
-      <SetViewActions
+      {/* <SetViewActions
         actions={(collectionConfig || globalConfig)?.admin?.components?.views?.edit?.api?.actions}
-      />
+      /> */}
       <div className={`${baseClass}__configuration`}>
         <div className={`${baseClass}__api-url`}>
           <span className={`${baseClass}__label`}>

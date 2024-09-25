@@ -5,7 +5,7 @@ import React, { createContext, useContext, useEffect } from 'react'
 
 import type { Column } from '../../elements/Table/index.js'
 
-import { EntityConfigProvider, useEntityConfig } from '../Config/index.js'
+import { useConfig } from '../Config/index.js'
 import { useServerActions } from '../ServerActions/index.js'
 import { useTranslation } from '../Translation/index.js'
 
@@ -37,20 +37,23 @@ const Context = createContext({} as ListInfoContext)
 
 export const useListInfo = (): ListInfoContext => useContext(Context)
 
-const ListInfo: React.FC<
+export const ListInfoProvider: React.FC<
   {
     readonly children: React.ReactNode
   } & ListInfoProps
 > = ({ children, ...props }) => {
   const { collectionSlug } = props
 
-  const { collectionConfig, setEntityConfig } = useEntityConfig()
+  const { getEntityConfig } = useConfig()
+
+  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
   const payloadServerAction = useServerActions()
 
   const { i18n } = useTranslation()
 
   useEffect(() => {
+    // TODO: rewrite this to use the new pattern
     if (!collectionConfig) {
       const getNewConfig = async () => {
         // @ts-expect-error eslint-disable-next-line
@@ -58,26 +61,10 @@ const ListInfo: React.FC<
           collectionSlug,
           languageCode: i18n.language,
         })) as any as ClientCollectionConfig
-
-        setEntityConfig({
-          ...(collectionSlug ? { collectionConfig: res } : {}),
-        })
       }
       void getNewConfig()
     }
-  }, [payloadServerAction, collectionSlug, i18n.language, setEntityConfig, collectionConfig])
+  }, [payloadServerAction, collectionSlug, i18n.language, collectionConfig])
 
   return <Context.Provider value={props}>{children}</Context.Provider>
-}
-
-export const ListInfoProvider: React.FC<
-  {
-    readonly children: React.ReactNode
-  } & ListInfoProps
-> = ({ children, collectionConfig, ...rest }) => {
-  return (
-    <EntityConfigProvider collectionConfig={collectionConfig}>
-      <ListInfo {...rest}>{children}</ListInfo>
-    </EntityConfigProvider>
-  )
 }

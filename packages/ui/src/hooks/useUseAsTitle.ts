@@ -10,5 +10,5 @@ export const useUseTitleField = (collection: ClientCollectionConfig): ClientFiel
   } = collection
 
   const topLevelFields = flattenFieldMap(fields)
-  return topLevelFields.find((field) => 'name' in field && field.name === useAsTitle)
+  return topLevelFields?.find((field) => 'name' in field && field.name === useAsTitle)
 }

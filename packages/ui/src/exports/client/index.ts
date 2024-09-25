@@ -195,12 +195,7 @@ export { AuthProvider, useAuth } from '../../providers/Auth/index.js'
 export { ClientFunctionProvider, useClientFunctions } from '../../providers/ClientFunction/index.js'
 export { useAddClientFunction } from '../../providers/ClientFunction/index.js'
 
-export {
-  ConfigProvider,
-  EntityConfigProvider,
-  useConfig,
-  useEntityConfig,
-} from '../../providers/Config/index.js'
+export { ConfigProvider, useConfig } from '../../providers/Config/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 export type { DocumentInfoContext, DocumentInfoProps } from '../../providers/DocumentInfo/index.js'
@@ -243,7 +238,7 @@ export { NumberField as NumberCondition } from '../../elements/WhereBuilder/Cond
 export { DateField as DateCondition } from '../../elements/WhereBuilder/Condition/Date/index.js'
 export { RenderEmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
 
-export { DefaultListView, ListView } from '../../views/List/index.js'
+export { DefaultListView } from '../../views/List/index.js'
 export type { ListPreferences } from '../../views/List/types.js'
 
 export { DefaultEditView, EditView } from '../../views/Edit/index.js'

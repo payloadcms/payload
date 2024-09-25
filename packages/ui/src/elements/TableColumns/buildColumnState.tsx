@@ -98,16 +98,16 @@ export const buildColumnState = (args: Args): Column[] => {
       activeColumnsIndices.push(index)
     }
 
-    const CustomLabelToRender =
-      field &&
-      'admin' in field &&
-      'components' in field.admin &&
-      'Label' in field.admin.components &&
-      field.admin.components.Label !== undefined // let it return `null`
-        ? field.admin.components.Label
-        : undefined
+    // const CustomLabelToRender =
+    //   field &&
+    //   'admin' in field &&
+    //   'components' in field.admin &&
+    //   'Label' in field.admin.components &&
+    //   field.admin.components.Label !== undefined // let it return `null`
+    //     ? field.admin.components.Label
+    //     : undefined
 
-    const Label = <FieldLabel field={field} Label={CustomLabelToRender} unstyled />
+    const Label = null
 
     const fieldAffectsDataSubFields =
       field &&
@@ -133,15 +133,15 @@ export const buildColumnState = (args: Args): Column[] => {
             ...(field || ({} as ClientField)),
             admin: {
               ...(field.admin || {}),
-              components: {
-                ...(field.admin?.components || {}),
-                Cell: field.admin?.components?.Cell || {
-                  type: 'client',
-                  Component: DefaultCell,
-                  RenderedComponent: null,
-                },
-                Label,
-              },
+              // components: {
+              //   ...(field.admin?.components || {}),
+              //   Cell: field.admin?.components?.Cell || {
+              //     type: 'client',
+              //     Component: DefaultCell,
+              //     RenderedComponent: null,
+              //   },
+              //   Label,
+              // },
             },
           } as ClientField,
         },

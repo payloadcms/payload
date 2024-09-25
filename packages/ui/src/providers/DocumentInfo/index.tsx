@@ -27,7 +27,7 @@ import { getFormState } from '../../utilities/getFormState.js'
 import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
 import { isEditing as getIsEditing } from '../../utilities/isEditing.js'
 import { useAuth } from '../Auth/index.js'
-import { EntityConfigProvider, useConfig, useEntityConfig } from '../Config/index.js'
+import { useConfig } from '../Config/index.js'
 import { useLocale } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useServerActions } from '../ServerActions/index.js'
@@ -64,9 +64,11 @@ const DocumentInfo: React.FC<
       routes: { api },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
 
-  const { collectionConfig, globalConfig, setEntityConfig } = useEntityConfig()
+  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
 
   const docConfig = collectionConfig || globalConfig
 
@@ -156,11 +158,6 @@ const DocumentInfo: React.FC<
           globalSlug,
           languageCode: i18n.language,
         })) as any as ClientCollectionConfig | ClientGlobalConfig
-
-        setEntityConfig({
-          ...(collectionSlug ? { collectionConfig: res as ClientCollectionConfig } : {}),
-          ...(globalSlug ? { globalConfig: res as ClientGlobalConfig } : {}),
-        })
       }
       void getNewConfig()
     }
@@ -170,7 +167,6 @@ const DocumentInfo: React.FC<
     initialState,
     i18n.language,
     globalSlug,
-    setEntityConfig,
     collectionConfig,
     globalConfig,
   ])
@@ -736,12 +732,10 @@ export const DocumentInfoProvider: React.FC<
   {
     readonly children: React.ReactNode
   } & DocumentInfoProps
-> = ({ collectionConfig, globalConfig, ...rest }) => {
+> = (props) => {
   return (
     <UploadEditsProvider>
-      <EntityConfigProvider collectionConfig={collectionConfig} globalConfig={globalConfig}>
-        <DocumentInfo {...rest} />
-      </EntityConfigProvider>
+      <DocumentInfo {...props} />
     </UploadEditsProvider>
   )
 }

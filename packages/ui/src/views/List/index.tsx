@@ -18,22 +18,20 @@ import { Gutter } from '../../elements/Gutter/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
 import { ListHeader } from '../../elements/ListHeader/index.js'
 import { ListSelection } from '../../elements/ListSelection/index.js'
-import { LoadingOverlay } from '../../elements/Loading/index.js'
 import { useModal } from '../../elements/Modal/index.js'
 import { Pagination } from '../../elements/Pagination/index.js'
 import { PerPage } from '../../elements/PerPage/index.js'
 import { PublishMany } from '../../elements/PublishMany/index.js'
-import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { StaggeredShimmers } from '../../elements/ShimmerEffect/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { Table } from '../../elements/Table/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../../elements/TableColumns/index.js'
 import { UnpublishMany } from '../../elements/UnpublishMany/index.js'
-import { ViewDescription } from '../../elements/ViewDescription/index.js'
-import { SetViewActions } from '../../providers/Actions/index.js'
+// import { ViewDescription } from '../../elements/ViewDescription/index.js'
+// import { SetViewActions } from '../../providers/Actions/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
-import { useEntityConfig } from '../../providers/Config/index.js'
+import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useListInfo } from '../../providers/ListInfo/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
@@ -67,6 +65,7 @@ export const DefaultListView: React.FC<{
     newDocumentURL,
   } = useListInfo()
 
+  const { getEntityConfig } = useConfig()
   const router = useRouter()
 
   const { data, defaultLimit, handlePageChange, handlePerPageChange, params } = useListQuery()
@@ -74,24 +73,11 @@ export const DefaultListView: React.FC<{
   const { setCollectionSlug, setOnSuccess } = useBulkUpload()
   const { drawerSlug } = useBulkUpload()
 
-  const [collectionConfig, setCollectionConfig] =
-    useState<ClientCollectionConfig>(collectionConfigFromProps)
+  const [collectionConfig] = useState(
+    () => getEntityConfig({ collectionSlug }) as ClientCollectionConfig,
+  )
 
-  const {
-    admin: {
-      components: {
-        afterList,
-        afterListTable,
-        beforeList,
-        beforeListTable,
-        Description,
-        views: { list: { actions } = {} } = {},
-      } = {},
-      description,
-    },
-    fields,
-    labels,
-  } = collectionConfig || {}
+  const { admin: { description } = {}, fields, labels } = collectionConfig
 
   const { i18n, t } = useTranslation()
 
@@ -103,8 +89,6 @@ export const DefaultListView: React.FC<{
           collectionSlug,
           languageCode: i18n.language,
         })) as any as ClientCollectionConfig
-
-        setCollectionConfig(res)
       }
 
       void getNewConfig()
@@ -121,7 +105,7 @@ export const DefaultListView: React.FC<{
 
   let docs = data.docs || []
 
-  const isUploadCollection = Boolean(collectionConfig.upload)
+  const isUploadCollection = Boolean(collectionConfig?.upload)
 
   if (isUploadCollection) {
     docs = docs?.map((doc) => {
@@ -150,10 +134,6 @@ export const DefaultListView: React.FC<{
 
   const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
 
-  if (!collectionConfig) {
-    return <LoadingOverlay />
-  }
-
   return (
     <TableColumnsProvider
       collectionSlug={collectionSlug}
@@ -162,9 +142,9 @@ export const DefaultListView: React.FC<{
       preferenceKey={preferenceKey}
     >
       <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
-        <SetViewActions actions={actions} />
+        {/* <SetViewActions actions={actions} /> */}
         <SelectionProvider docs={data.docs} totalDocs={data.totalDocs} user={user}>
-          <RenderComponent mappedComponent={beforeList} />
+          {/* <RenderComponent mappedComponent={beforeList} /> */}
           <Gutter className={`${baseClass}__wrap`}>
             {Header || (
               <ListHeader heading={getTranslation(labels?.plural, i18n)}>
@@ -198,15 +178,15 @@ export const DefaultListView: React.FC<{
                 {!smallBreak && (
                   <ListSelection label={getTranslation(collectionConfig?.labels?.plural, i18n)} />
                 )}
-                {(description || Description) && (
+                {/* {(description || Description) && (
                   <div className={`${baseClass}__sub-header`}>
                     <ViewDescription Description={Description} description={description} />
                   </div>
-                )}
+                )} */}
               </ListHeader>
             )}
             <ListControls collectionConfig={collectionConfig} />
-            <RenderComponent mappedComponent={beforeListTable} />
+            {/* <RenderComponent mappedComponent={beforeListTable} /> */}
             {!data.docs && (
               <StaggeredShimmers
                 className={[`${baseClass}__shimmer`, `${baseClass}__shimmer--rows`].join(' ')}
@@ -239,7 +219,7 @@ export const DefaultListView: React.FC<{
                 )}
               </div>
             )}
-            <RenderComponent mappedComponent={afterListTable} />
+            {/* <RenderComponent mappedComponent={afterListTable} /> */}
             {data.docs && data.docs.length > 0 && (
               <div className={`${baseClass}__page-controls`}>
                 <Pagination
@@ -291,34 +271,9 @@ export const DefaultListView: React.FC<{
               </div>
             )}
           </Gutter>
-          <RenderComponent mappedComponent={afterList} />
+          {/* <RenderComponent mappedComponent={afterList} /> */}
         </SelectionProvider>
       </div>
     </TableColumnsProvider>
-  )
-}
-
-export const ListView: React.FC<{
-  listPreferences?: ListPreferences
-  preferenceKey: string
-}> = ({ listPreferences, preferenceKey }) => {
-  const { collectionConfig } = useEntityConfig()
-
-  if (!collectionConfig) {
-    return <LoadingOverlay />
-  }
-
-  const CustomList = collectionConfig?.admin?.components?.views?.list?.Component
-
-  if (CustomList) {
-    return <RenderComponent mappedComponent={CustomList} />
-  }
-
-  return (
-    <DefaultListView
-      collectionConfig={collectionConfig}
-      listPreferences={listPreferences}
-      preferenceKey={preferenceKey}
-    />
   )
 }

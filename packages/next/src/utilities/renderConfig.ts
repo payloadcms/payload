@@ -44,57 +44,54 @@ export const renderConfig = async (
 
   const payload = await getPayloadHMR({ config })
 
-  const createMappedComponent = getCreateMappedComponent({
-    importMap,
-    serverProps: {
-      ...(serverProps || {}),
-      payload,
-    },
-  })
+  // const createMappedComponent = getCreateMappedComponent({
+  //   importMap,
+  //   serverProps: {
+  //     ...(serverProps || {}),
+  //     payload,
+  //   },
+  // })
 
   if (schemaPath) {
-    const renderedSchemaPath = createClientFields({
-      createMappedComponent,
-      formState,
-      importMap,
-      payload,
-    })
-
-    return renderedSchemaPath
+    // const renderedSchemaPath = createClientFields({
+    //   createMappedComponent,
+    //   formState,
+    //   importMap,
+    //   payload,
+    // })
+    // return renderedSchemaPath
   }
 
   if (collectionSlug) {
-    const renderedCollectionConfig = createClientCollectionConfig({
-      collection: config.collections.find((collection) => collection.slug === collectionSlug),
-      createMappedComponent,
-      formState,
-      i18n,
-      importMap,
-      payload,
-    })
-
-    return renderedCollectionConfig
+    // const renderedCollectionConfig = createClientCollectionConfig({
+    //   collection: config.collections.find((collection) => collection.slug === collectionSlug),
+    //   createMappedComponent,
+    //   formState,
+    //   i18n,
+    //   importMap,
+    //   payload,
+    // })
+    // return renderedCollectionConfig
   }
 
   if (globalSlug) {
-    const renderedGlobalConfig = createClientGlobalConfig({
-      createMappedComponent,
-      formState,
-      global: config.globals.find((global) => global.slug === globalSlug),
-      i18n,
-      importMap,
-      payload,
-    })
-
-    return renderedGlobalConfig
+    // const renderedGlobalConfig = createClientGlobalConfig({
+    //   createMappedComponent,
+    //   formState,
+    //   global: config.globals.find((global) => global.slug === globalSlug),
+    //   i18n,
+    //   importMap,
+    //   payload,
+    // })
+    // return renderedGlobalConfig
   }
 
-  const renderedRootConfig = await createClientConfig({
-    config,
-    i18n,
-    importMap,
-    payload,
-  })
+  // const renderedRootConfig = await createClientConfig({
+  //   config,
+  //   i18n,
+  //   importMap,
+  //   payload,
+  // })
 
-  return renderedRootConfig
+  return {}
 }

@@ -110,6 +110,10 @@ export const createClientField = ({
     clientField.label = incomingField.label({ t: i18n.t })
   }
 
+  if (!(clientField.admin instanceof Object)) {
+    clientField.admin = {} as AdminClient
+  }
+
   if ('admin' in incomingField && 'width' in incomingField.admin) {
     clientField.admin.style = {
       ...clientField.admin.style,
@@ -117,10 +121,6 @@ export const createClientField = ({
       width: undefined, // avoid needlessly adding this to the element's style attribute
     }
   } else {
-    if (!(clientField.admin instanceof Object)) {
-      clientField.admin = {} as AdminClient
-    }
-
     if (!(clientField.admin.style instanceof Object)) {
       clientField.admin.style = {}
     }

@@ -9,13 +9,13 @@ import type { FormProps } from '../../forms/Form/index.js'
 
 import { DocumentControls } from '../../elements/DocumentControls/index.js'
 import { DocumentFields } from '../../elements/DocumentFields/index.js'
-import { LoadingOverlay } from '../../elements/Loading/index.js'
-import { RenderComponent } from '../../elements/RenderComponent/index.js'
+// import { LoadingOverlay } from '../../elements/Loading/index.js'
+// import { RenderComponent } from '../../elements/RenderComponent/index.js'
 // import { DocumentLocked } from '../../../elements/DocumentLocked/index.js'
-import { Upload } from '../../elements/Upload/index.js'
+// import { Upload } from '../../elements/Upload/index.js'
 import { Form } from '../../forms/Form/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
-import { useConfig, useEntityConfig } from '../../providers/Config/index.js'
+import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
@@ -460,7 +460,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
                   )}
                   {upload && (
                     <React.Fragment>
-                      {collectionConfig?.admin?.components?.edit?.Upload ? (
+                      TODO: Upload
+                      {/* {collectionConfig?.admin?.components?.edit?.Upload ? (
                         <RenderComponent
                           mappedComponent={collectionConfig.admin.components.edit.Upload}
                         />
@@ -470,7 +471,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
                           initialState={initialState}
                           uploadConfig={upload}
                         />
-                      )}
+                      )} */}
                     </React.Fragment>
                   )}
                 </Fragment>
@@ -489,18 +490,18 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
 }
 
 export const EditView: React.FC = () => {
-  const { collectionConfig, globalConfig } = useEntityConfig()
+  // const { collectionConfig, globalConfig } = useEntityConfig()
 
-  if (!collectionConfig && !globalConfig) {
-    return <LoadingOverlay />
-  }
+  // if (!collectionConfig && !globalConfig) {
+  //   return <LoadingOverlay />
+  // }
 
-  const CustomEdit = (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.default
-    ?.Component
+  // const CustomEdit = (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.default
+  //   ?.Component
 
-  if (CustomEdit) {
-    return <RenderComponent mappedComponent={CustomEdit} />
-  }
+  // if (CustomEdit) {
+  //   return <RenderComponent mappedComponent={CustomEdit} />
+  // }
 
-  return <DefaultEditView collectionConfig={collectionConfig} globalConfig={globalConfig} />
+  return <DefaultEditView />
 }

@@ -1,5 +1,5 @@
 'use client'
-import type { CellComponentProps, SanitizedCollectionConfig } from 'payload'
+import type { CellComponentProps, ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
@@ -7,7 +7,7 @@ import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
 import type { SortColumnProps } from '../SortColumn/index.js'
 import type { Column } from '../Table/index.js'
 
-import { useEntityConfig } from '../../providers/Config/index.js'
+import { useConfig } from '../../providers/Config/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { buildColumnState } from './buildColumnState.js'
 import { filterFields } from './filterFields.js'
@@ -51,8 +51,11 @@ export const TableColumnsProvider: React.FC<Props> = ({
   preferenceKey,
   sortColumnProps,
 }) => {
-  const { collectionConfig: { admin: { defaultColumns, useAsTitle } = {}, fields } = {} } =
-    useEntityConfig()
+  const { getEntityConfig } = useConfig()
+
+  const { admin: { defaultColumns, useAsTitle } = {}, fields } = getEntityConfig({
+    collectionSlug,
+  }) as ClientCollectionConfig
 
   const prevCollection = React.useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
   const { getPreference, setPreference } = usePreferences()

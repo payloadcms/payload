@@ -402,7 +402,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
             enableRowSelections={enableRowSelections}
             preferenceKey={preferencesKey}
           >
-            <ListViewHandler preferenceKey={preferencesKey} />
+            {/* <ListViewHandler preferenceKey={preferencesKey} /> */}
             <DocumentDrawer onSave={onCreateNew} />
           </TableColumnsProvider>
         </ListQueryProvider>

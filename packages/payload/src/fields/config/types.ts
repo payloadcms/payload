@@ -297,7 +297,6 @@ type Admin = {
 
 export type AdminClient = {
   className?: string
-  components: null
   /** Extension point to add your custom data. Available in server and client. */
   custom?: Record<string, any>
   description?: StaticDescription
