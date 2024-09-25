@@ -34,7 +34,7 @@ import {
   updateVersion,
 } from '@payloadcms/drizzle'
 import { like } from 'drizzle-orm'
-import { createDatabaseAdapter } from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
 
 import type { Args, SQLiteAdapter } from './types.js'
 
@@ -106,7 +106,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       versionsSuffix: args.versionsSuffix || '_v',
 
       // DatabaseAdapter
-      beginTransaction: args.transactionOptions === false ? () => null : beginTransaction,
+      beginTransaction: args.transactionOptions ? beginTransaction : defaultBeginTransaction(),
       commitTransaction,
       connect,
       convertPathToJSONTraversal,
