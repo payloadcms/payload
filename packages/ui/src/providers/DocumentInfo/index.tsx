@@ -661,7 +661,6 @@ const DocumentInfo: React.FC<
     notFound()
   }
 
-  console.log({ versions })
   const value: DocumentInfoContext = {
     ...props,
     action,
