@@ -22,7 +22,7 @@
     "@payloadcms/richtext-slate": "^1.0.0",
     "cross-env": "^7.0.3",
     "dotenv": "^8.2.0",
-    "express": "^4.19.2",
+    "express": "^4.20.0",
     "payload": "^2.0.0"
   },
   "devDependencies": {
