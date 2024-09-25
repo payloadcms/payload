@@ -105,7 +105,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       versionsSuffix: args.versionsSuffix || '_v',
 
       // DatabaseAdapter
-      beginTransaction: args.transactionOptions === false ? undefined : beginTransaction,
+      beginTransaction: args.transactionOptions === false ? () => null : beginTransaction,
       commitTransaction,
       connect,
       convertPathToJSONTraversal,

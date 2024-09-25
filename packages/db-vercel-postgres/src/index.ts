@@ -105,7 +105,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       versionsSuffix: args.versionsSuffix || '_v',
 
       // DatabaseAdapter
-      beginTransaction: args.transactionOptions === false ? undefined : beginTransaction,
+      beginTransaction: args.transactionOptions === false ? () => null : beginTransaction,
       commitTransaction,
       connect,
       convertPathToJSONTraversal,

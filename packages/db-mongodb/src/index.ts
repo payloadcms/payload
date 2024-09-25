@@ -163,7 +163,7 @@ export function mongooseAdapter({
       url,
       versions: {},
       // DatabaseAdapter
-      beginTransaction: transactionOptions ? beginTransaction : undefined,
+      beginTransaction: transactionOptions === false ? () => null : beginTransaction,
       commitTransaction,
       connect,
       create,
