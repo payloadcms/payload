@@ -1,3 +1,5 @@
+import ObjectIdImport from 'bson-objectid'
+import { isValidObjectId } from 'mongoose'
 import {
   buildVersionCollectionFields,
   type CreateVersion,
@@ -10,6 +12,8 @@ import type { MongooseAdapter } from './index.js'
 import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
 import { withSession } from './withSession.js'
 
+const ObjectId = (ObjectIdImport.default ||
+  ObjectIdImport) as unknown as typeof ObjectIdImport.default
 export const createVersion: CreateVersion = async function createVersion(
   this: MongooseAdapter,
   {
@@ -47,6 +51,23 @@ export const createVersion: CreateVersion = async function createVersion(
 
   const [doc] = await VersionModel.create([data], options, req)
 
+  const parentQuery = {
+    or: [
+      {
+        parent: {
+          $eq: data.parent,
+        },
+      },
+    ],
+  }
+  if (isValidObjectId(data.parent)) {
+    parentQuery.or.push({
+      parent: {
+        $eq: ObjectId(data.parent as string),
+      },
+    })
+  }
+
   await VersionModel.updateMany(
     {
       $and: [
@@ -56,9 +77,7 @@ export const createVersion: CreateVersion = async function createVersion(
           },
         },
         {
-          parent: {
-            $eq: data.parent,
-          },
+          parentQuery,
         },
         {
           latest: {
