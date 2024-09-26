@@ -1,6 +1,6 @@
 import type { Block } from 'payload'
 
-import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+import { BlocksFeature, lexicalEditor, TreeViewFeature } from '@payloadcms/richtext-lexical'
 
 import { bannerTypes } from '../../collections/Posts/shared.js'
 import { InlineCodeBlock } from './inlineCode.js'
@@ -42,6 +42,7 @@ export const BannerBlock: Block = {
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
+          TreeViewFeature(),
           BlocksFeature({
             inlineBlocks: [InlineCodeBlock],
           }),

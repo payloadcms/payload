@@ -431,7 +431,11 @@ function importTextMatchTransformers(
       }
 
       const startIndex = match.index || 0
-      const endIndex = startIndex + match[0].length
+      // @ts-expect-error TODO: PR to lexical
+      const endIndex = transformer?.getEndIndex
+        ? // @ts-expect-error TODO: PR to lexical
+          transformer?.getEndIndex(textNode, match)
+        : startIndex + match[0].length
       let newTextNode, replaceNode
 
       if (startIndex === 0) {

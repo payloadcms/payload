@@ -78,6 +78,28 @@ export const PostsCollection: CollectionConfig = {
         ],
       }),
     },
+    {
+      name: 'richTextUnconverted',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          TreeViewFeature(),
+          EXPERIMENTAL_TableFeature(),
+          FixedToolbarFeature(),
+          BlocksFeature({
+            blocks: [
+              BannerBlock,
+              CodeBlock,
+              PackageInstallOptions,
+              TextContainerNoTrimBlock,
+              TextContainerBlock,
+            ],
+            inlineBlocks: [InlineCodeBlock],
+          }),
+        ],
+      }),
+    },
   ],
   versions: {
     drafts: true,

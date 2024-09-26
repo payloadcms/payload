@@ -1,17 +1,17 @@
 export function linesFromStartToContentAndPropsString({
-  doNotTrimChildren,
   isEndOptional,
   lines,
   regexpEndRegex,
   startLineIndex,
   startMatch,
+  trimChildren,
 }: {
-  doNotTrimChildren?: boolean
   isEndOptional?: boolean
   lines: string[]
   regexpEndRegex?: RegExp
   startLineIndex: number
   startMatch: RegExpMatchArray
+  trimChildren?: boolean
 }): {
   /**
    * The matched string after the end match, in the same line as the end match. Useful for inline matches.
@@ -23,6 +23,7 @@ export function linesFromStartToContentAndPropsString({
   beforeStartLine: string
   content: string
   endLineIndex: number
+  endlineLastCharIndex: number
   propsString: string
 } {
   let propsString = ''
@@ -43,9 +44,9 @@ export function linesFromStartToContentAndPropsString({
   let endLineIndex = startLineIndex
 
   mainLoop: for (let lineIndex = 0; lineIndex < linesCopy.length; lineIndex++) {
-    const line = doNotTrimChildren ? linesCopy[lineIndex] : linesCopy[lineIndex].trim()
+    const line = trimChildren ? linesCopy[lineIndex].trim() : linesCopy[lineIndex]
     let amountOfBeginningSpacesRemoved = 0
-    if (!doNotTrimChildren) {
+    if (trimChildren) {
       for (let i = 0; i < linesCopy[lineIndex].length; i++) {
         if (linesCopy[lineIndex][i] === ' ') {
           amountOfBeginningSpacesRemoved++
@@ -169,6 +170,7 @@ export function linesFromStartToContentAndPropsString({
     beforeStartLine,
     content,
     endLineIndex: startLineIndex + endLineIndex,
+    endlineLastCharIndex,
     propsString,
   }
 }

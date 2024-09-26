@@ -547,10 +547,13 @@ there4
       input: `
 <Banner>
   Some text 1 <InlineCode>code 1</InlineCode> some
+
   text 2 <InlineCode>code 2</InlineCode> some text
+
   3 <InlineCode>code 3</InlineCode> some text 4<InlineCode>code 4</InlineCode>
 </Banner>
 `,
+      description: 'Banner with inline codes, each line a paragraph',
       blockNode: {
         fields: {
           blockType: 'Banner',
@@ -573,7 +576,6 @@ there4
                       type: 'inlineBlock',
 
                       fields: {
-                        id: '66ecb561ff793f7eaca2d4be',
                         code: 'code 1',
                         blockType: 'InlineCode',
                       },
@@ -614,7 +616,6 @@ there4
                       type: 'inlineBlock',
 
                       fields: {
-                        id: '66ecb561ff793f7eaca2d4be',
                         code: 'code 2',
                         blockType: 'InlineCode',
                       },
@@ -655,7 +656,6 @@ there4
                       type: 'inlineBlock',
 
                       fields: {
-                        id: '66ecb561ff793f7eaca2d4be',
                         code: 'code 3',
                         blockType: 'InlineCode',
                       },
@@ -673,7 +673,136 @@ there4
                     {
                       type: 'inlineBlock',
                       fields: {
-                        id: '66ecb561ff793f7eaca2d4be',
+                        code: 'code 4',
+                        blockType: 'InlineCode',
+                      },
+                      version: 1,
+                    },
+                  ],
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+              ],
+              format: '',
+              indent: 0,
+              type: 'root',
+              version: 1,
+            },
+          },
+        },
+      },
+    },
+    {
+      input: `
+<Banner>
+  Some text 1 <InlineCode>code 1</InlineCode> some
+  text 2 <InlineCode>code 2</InlineCode> some text
+  3 <InlineCode>code 3</InlineCode> some text 4<InlineCode>code 4</InlineCode>
+</Banner>
+`,
+      description: 'Banner with inline codes, each line a linebreak, one paragraph',
+
+      blockNode: {
+        fields: {
+          blockType: 'Banner',
+          content: {
+            root: {
+              children: [
+                {
+                  children: [
+                    {
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: 'Some text 1 ',
+                      type: 'text',
+                      version: 1,
+                    },
+                    {
+                      type: 'inlineBlock',
+                      fields: {
+                        code: 'code 1',
+                        blockType: 'InlineCode',
+                      },
+                      version: 1,
+                    },
+                    {
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: ' some',
+                      type: 'text',
+                      version: 1,
+                    },
+                    {
+                      type: 'linebreak',
+                      version: 1,
+                    },
+                    {
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: 'text 2 ',
+                      type: 'text',
+                      version: 1,
+                    },
+                    {
+                      type: 'inlineBlock',
+                      fields: {
+                        code: 'code 2',
+                        blockType: 'InlineCode',
+                      },
+                      version: 1,
+                    },
+                    {
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: ' some text',
+                      type: 'text',
+                      version: 1,
+                    },
+                    {
+                      type: 'linebreak',
+                      version: 1,
+                    },
+                    {
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: '3 ',
+                      type: 'text',
+                      version: 1,
+                    },
+                    {
+                      type: 'inlineBlock',
+                      fields: {
+                        code: 'code 3',
+                        blockType: 'InlineCode',
+                      },
+                      version: 1,
+                    },
+                    {
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: ' some text 4',
+                      type: 'text',
+                      version: 1,
+                    },
+                    {
+                      type: 'inlineBlock',
+                      fields: {
                         code: 'code 4',
                         blockType: 'InlineCode',
                       },
@@ -798,8 +927,8 @@ no indent
       inputAfterConvertFromEditorJSON: `
 <TextContainer>
   no indent
-    indent 2
-      indent 4
+  indent 2
+    indent 4
   no indent
 </TextContainer>
 `,
@@ -807,8 +936,8 @@ no indent
         fields: {
           blockType: 'TextContainer',
           text: `no indent
-  indent 2
-    indent 4
+indent 2
+  indent 4
 no indent`,
         },
       },
@@ -853,6 +982,46 @@ no indent`,
 indent 2`,
         },
       },
+    },
+    {
+      input: `
+Some text 1
+<InlineCode>code 2</InlineCode>
+`,
+      description: 'InlineCode after text, split by linebreak',
+      rootChildren: [
+        {
+          children: [
+            {
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: 'Some text 1',
+              type: 'text',
+              version: 1,
+            },
+            {
+              type: 'linebreak',
+              version: 1,
+            },
+            {
+              type: 'inlineBlock',
+              fields: {
+                code: 'code 2',
+                blockType: 'InlineCode',
+              },
+              version: 1,
+            },
+          ],
+          format: '',
+          indent: 0,
+          type: 'paragraph',
+          version: 1,
+          textFormat: 0,
+          textStyle: '',
+        },
+      ],
     },
   ]
 

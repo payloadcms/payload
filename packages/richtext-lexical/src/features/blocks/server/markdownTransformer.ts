@@ -139,21 +139,73 @@ function getMarkdownTransformerForBlock(
 
         return `<${nodeFields.blockType}${hasProps ? ' ' + propsToJSXString({ props }) : ''}/>`
       },
+      getEndIndex: (node, match) => {
+        const { endlineLastCharIndex } = linesFromStartToContentAndPropsString({
+          isEndOptional: false,
+          lines: [node.getTextContent()],
+          regexpEndRegex: regex.regExpEnd,
+          startLineIndex: 0,
+          startMatch: match,
+          trimChildren: false,
+        })
+
+        return endlineLastCharIndex
+      },
+      importRegExp: block.jsx?.customStartRegex ?? regex.regExpStart,
       regExp: /___ignoreignoreignore___/g,
+      replace(node, match) {
+        const { content, propsString } = linesFromStartToContentAndPropsString({
+          isEndOptional: false,
+          lines: [node.getTextContent()],
+          regexpEndRegex: regex.regExpEnd,
+          startLineIndex: 0,
+          startMatch: {
+            ...match,
+            index: 0,
+          },
+          trimChildren: false,
+        })
+
+        if (!block?.jsx?.import) {
+          // No multiline transformer handled this line successfully
+          return
+        }
+
+        const markdownToLexical = getMarkdownToLexical(allNodes, allTransformers)
+
+        const blockFields = block.jsx.import({
+          children: content,
+          closeMatch: null,
+          htmlToLexical: null, // TODO
+          markdownToLexical,
+          openMatch: match,
+          props: propsString
+            ? extractPropsFromJSXPropsString({
+                propsString,
+              })
+            : {},
+        })
+        if (blockFields === false) {
+          return
+        }
+
+        const inlineBlockNode = $createServerInlineBlockNode({
+          blockType: block.slug,
+          ...(blockFields as any),
+        })
+
+        node.replace(inlineBlockNode)
+      },
     }))
+
+    return toReturn
   }
 
   toReturn.push(({ allNodes, allTransformers }) => ({
-    dependencies: [ServerBlockNode, ServerInlineBlockNode],
+    dependencies: [ServerBlockNode],
     export: (node) => {
-      if (isInlineBlock) {
-        if (!$isServerInlineBlockNode(node)) {
-          return null
-        }
-      } else {
-        if (!$isServerBlockNode(node)) {
-          return null
-        }
+      if (!$isServerBlockNode(node)) {
+        return null
       }
 
       if (node.getFields()?.blockType?.toLowerCase() !== block.slug.toLowerCase()) {
@@ -181,55 +233,19 @@ function getMarkdownTransformerForBlock(
         const children = exportResult.children
         let sanitizedChildren = ''
 
-        // Ensure it has a leftpad of 2 spaces
+        // Ensure it has a leftpad of at least 2 spaces. The data is saved without those spaces, so we can just blindly add it to every child
         if (children.includes('\n')) {
           for (const child of children.split('\n')) {
-            if (child.trim().length === 0) {
-              sanitizedChildren += child
-              continue
+            let sanitizedChild = ''
+            if (!block?.jsx?.doNotTrimChildren && child !== '') {
+              sanitizedChild = '  '
             }
-            let spaceBeginningCount = 0
-            for (const char of child) {
-              if (char === ' ') {
-                spaceBeginningCount++
-              } else {
-                break
-              }
-            }
-            let spacesToAdd = 2 - spaceBeginningCount
+            sanitizedChild += child + '\n'
 
-            if (spacesToAdd < 0) {
-              spacesToAdd = 0
-            }
-
-            if (spacesToAdd === 0) {
-              sanitizedChildren += child + '\n'
-            } else {
-              sanitizedChildren +=
-                (block?.jsx?.doNotTrimChildren ? '' : ' '.repeat(spacesToAdd)) + child + '\n'
-            }
+            sanitizedChildren += sanitizedChild
           }
         } else {
-          let spaceBeginningCount = 0
-          for (const char of children) {
-            if (char === ' ') {
-              spaceBeginningCount++
-            } else {
-              break
-            }
-          }
-          let spacesToAdd = 2 - spaceBeginningCount
-
-          if (spacesToAdd < 0) {
-            spacesToAdd = 0
-          }
-
-          if (spacesToAdd === 0) {
-            sanitizedChildren += children + '\n'
-          } else {
-            sanitizedChildren +=
-              (block?.jsx?.doNotTrimChildren ? '' : ' '.repeat(spacesToAdd)) + children + '\n'
-          }
+          sanitizedChildren = (block?.jsx?.doNotTrimChildren ? '' : '  ') + children + '\n'
         }
 
         return `<${nodeFields.blockType}${hasProps ? ' ' + propsToJSXString({ props }) : ''}>\n${sanitizedChildren}</${nodeFields.blockType}>`
@@ -252,91 +268,106 @@ function getMarkdownTransformerForBlock(
               ? transformer.regExpEnd.optional
               : !transformer.regExpEnd
 
-          const { afterEndLine, beforeStartLine, content, endLineIndex, propsString } =
-            linesFromStartToContentAndPropsString({
-              doNotTrimChildren: !!block?.jsx?.doNotTrimChildren,
-              isEndOptional,
-              lines,
-              regexpEndRegex,
-              startLineIndex,
-              startMatch,
-            })
+          const {
+            afterEndLine,
+            beforeStartLine,
+            content: unsanitizedContent,
+            endLineIndex,
+            propsString,
+          } = linesFromStartToContentAndPropsString({
+            isEndOptional,
+            lines,
+            regexpEndRegex,
+            startLineIndex,
+            startMatch,
+            trimChildren: false,
+          })
 
-          if (block?.jsx?.import) {
-            const markdownToLexical = getMarkdownToLexical(allNodes, allTransformers)
+          let content = ''
 
-            const blockFields = block.jsx.import({
-              children: content,
-              closeMatch: null,
-              htmlToLexical: null, // TODO
-              markdownToLexical,
-              openMatch: startMatch,
-              props: propsString
-                ? extractPropsFromJSXPropsString({
-                    propsString,
-                  })
-                : {},
-            })
-            if (blockFields === false) {
-              return {
-                return: [false, startLineIndex],
-              }
+          // Ensure it has a leftpad of at least 2 spaces. The data is saved without those spaces, so we can just blindly add it to every child
+          if (unsanitizedContent.includes('\n')) {
+            const split = unsanitizedContent.split('\n')
+            let index = 0
+            for (const child of split) {
+              index++
+              content +=
+                (block?.jsx?.doNotTrimChildren || !child.startsWith('  ')
+                  ? child
+                  : child.slice(2)) + (index === split.length ? '' : '\n')
             }
+          } else {
+            content =
+              (block?.jsx?.doNotTrimChildren || !unsanitizedContent.startsWith('  ')
+                ? unsanitizedContent
+                : unsanitizedContent.slice(2)) + '\n'
+          }
 
-            const node = isInlineBlock
-              ? $createServerInlineBlockNode({
-                  blockType: block.slug,
-                  ...(blockFields as any),
-                })
-              : $createServerBlockNode({
-                  blockType: block.slug,
-                  ...blockFields,
-                } as any)
-
-            if (node) {
-              // Now handle beforeStartLine and afterEndLine. If those are not empty, we need to add them as text nodes before and after the block node.
-              // However, those themselves can contain other markdown matches, so we need to parse them as well.
-              // Example where this is needed: "Hello <InlineCode>inline code</InlineCode> test."
-              let prevNodes: null | SerializedLexicalNode[] = null
-              let nextNodes: null | SerializedLexicalNode[] = null
-              if (beforeStartLine?.length) {
-                prevNodes = markdownToLexical({ markdown: beforeStartLine })?.root?.children ?? []
-
-                if (prevNodes?.length) {
-                  rootNode.append($parseSerializedNode(prevNodes[0]))
-                }
-              }
-
-              if (isInlineBlock && rootNode?.getChildren()?.length) {
-                // Add node to the last child of the root node
-                const lastChild = rootNode.getChildren()[rootNode.getChildren().length - 1]
-
-                ;(lastChild as ElementNode).append(node)
-              } else {
-                rootNode.append(node)
-              }
-
-              if (afterEndLine?.length) {
-                nextNodes = markdownToLexical({ markdown: afterEndLine })?.root?.children ?? []
-                const lastChild = rootNode.getChildren()[rootNode.getChildren().length - 1]
-
-                const children = ($parseSerializedNode(nextNodes[0]) as ElementNode)?.getChildren()
-                if (children?.length) {
-                  for (const child of children) {
-                    ;(lastChild as ElementNode).append(child)
-                  }
-                }
-              }
-            }
-
+          if (!block?.jsx?.import) {
+            // No multiline transformer handled this line successfully
             return {
-              return: [true, endLineIndex],
+              return: [false, startLineIndex],
             }
           }
 
-          // No multiline transformer handled this line successfully
+          const markdownToLexical = getMarkdownToLexical(allNodes, allTransformers)
+
+          const blockFields = block.jsx.import({
+            children: content,
+            closeMatch: null,
+            htmlToLexical: null, // TODO
+            markdownToLexical,
+            openMatch: startMatch,
+            props: propsString
+              ? extractPropsFromJSXPropsString({
+                  propsString,
+                })
+              : {},
+          })
+          if (blockFields === false) {
+            return {
+              return: [false, startLineIndex],
+            }
+          }
+
+          const node = $createServerBlockNode({
+            blockType: block.slug,
+            ...blockFields,
+          } as any)
+
+          if (node) {
+            // Now handle beforeStartLine and afterEndLine. If those are not empty, we need to add them as text nodes before and after the block node.
+            // However, those themselves can contain other markdown matches, so we need to parse them as well.
+            // Example where this is needed: "Hello <InlineCode>inline code</InlineCode> test."
+            let prevNodes: null | SerializedLexicalNode[] = null
+            let nextNodes: null | SerializedLexicalNode[] = null
+            // TODO: Might not need this prevNodes and nextNodes handling if inline nodes are handled by textmatch transformers
+
+            if (beforeStartLine?.length) {
+              prevNodes = markdownToLexical({ markdown: beforeStartLine })?.root?.children ?? []
+
+              if (prevNodes?.length) {
+                rootNode.append($parseSerializedNode(prevNodes[0]))
+              }
+            }
+
+            rootNode.append(node)
+
+            if (afterEndLine?.length) {
+              nextNodes = markdownToLexical({ markdown: afterEndLine })?.root?.children ?? []
+              const lastChild = rootNode.getChildren()[rootNode.getChildren().length - 1]
+
+              const children = ($parseSerializedNode(nextNodes[0]) as ElementNode)?.getChildren()
+              if (children?.length) {
+                for (const child of children) {
+                  ;(lastChild as ElementNode).append(child)
+                }
+              }
+            }
+          }
+
           return {
-            return: [false, startLineIndex],
+            return: [true, endLineIndex],
           }
         },
     regExpEnd: block.jsx?.customEndRegex ?? regex.regExpEnd,
@@ -385,15 +416,11 @@ function getMarkdownTransformerForBlock(
           return false
         }
 
-        const node = isInlineBlock
-          ? $createServerInlineBlockNode({
-              blockType: block.slug,
-              ...(blockFields as any),
-            })
-          : $createServerBlockNode({
-              blockType: block.slug,
-              ...blockFields,
-            } as any)
+        const node = $createServerBlockNode({
+          blockType: block.slug,
+          ...blockFields,
+        } as any)
+
         if (node) {
           rootNode.append(node)
         }
