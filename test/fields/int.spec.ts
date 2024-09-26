@@ -1,9 +1,9 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
-import type { PaginatedDocs, Payload } from 'payload'
 
 import { reload } from '@payloadcms/next/utilities'
 import path from 'path'
+import { type PaginatedDocs, type Payload, ValidationError } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -1003,6 +1003,218 @@ describe('Fields', () => {
         })
         return result.error
       }).toBeDefined()
+    })
+
+    it('should throw validation error saving on unique relationship fields hasMany: false non polymorphic', async () => {
+      const textDoc = await payload.create({ collection: 'text-fields', data: { text: 'asd' } })
+
+      await payload
+        .create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '1',
+            text: '2',
+            uniqueRequiredText: '3',
+            uniqueRelationship: textDoc.id,
+          },
+        })
+        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        .then((doc) =>
+          payload.update({
+            locale: 'es',
+            collection: 'indexed-fields',
+            data: { localizedUniqueRequiredText: '20' },
+            id: doc.id,
+          }),
+        )
+
+      await expect(
+        payload.create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '4',
+            text: '5',
+            uniqueRequiredText: '10',
+            uniqueRelationship: textDoc.id,
+          },
+        }),
+      ).rejects.toBeTruthy()
+    })
+
+    it('should throw validation error saving on unique relationship fields hasMany: true', async () => {
+      const textDoc = await payload.create({ collection: 'text-fields', data: { text: 'asd' } })
+
+      await payload
+        .create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '1',
+            text: '2',
+            uniqueRequiredText: '3',
+            uniqueHasManyRelationship: [textDoc.id],
+          },
+        })
+        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        .then((doc) =>
+          payload.update({
+            locale: 'es',
+            collection: 'indexed-fields',
+            data: { localizedUniqueRequiredText: '40' },
+            id: doc.id,
+          }),
+        )
+
+      // Should allow the same relationship on a diferrent field!
+      await payload
+        .create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '31',
+            text: '24',
+            uniqueRequiredText: '55',
+            uniqueHasManyRelationship_2: [textDoc.id],
+          },
+        })
+        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        .then((doc) =>
+          payload.update({
+            locale: 'es',
+            collection: 'indexed-fields',
+            data: { localizedUniqueRequiredText: '30' },
+            id: doc.id,
+          }),
+        )
+
+      await expect(
+        payload.create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '4',
+            text: '5',
+            uniqueRequiredText: '10',
+            uniqueHasManyRelationship: [textDoc.id],
+          },
+        }),
+      ).rejects.toBeTruthy()
+    })
+
+    it('should throw validation error saving on unique relationship fields polymorphic', async () => {
+      const textDoc = await payload.create({ collection: 'text-fields', data: { text: 'asd' } })
+
+      await payload
+        .create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '1',
+            text: '2',
+            uniqueRequiredText: '3',
+            uniquePolymorphicRelationship: { relationTo: 'text-fields', value: textDoc.id },
+          },
+        })
+        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        .then((doc) =>
+          payload.update({
+            locale: 'es',
+            collection: 'indexed-fields',
+            data: { localizedUniqueRequiredText: '20' },
+            id: doc.id,
+          }),
+        )
+
+      // Should allow the same relationship on a diferrent field!
+      await payload
+        .create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '31',
+            text: '24',
+            uniqueRequiredText: '55',
+            uniquePolymorphicRelationship_2: { relationTo: 'text-fields', value: textDoc.id },
+          },
+        })
+        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        .then((doc) =>
+          payload.update({
+            locale: 'es',
+            collection: 'indexed-fields',
+            data: { localizedUniqueRequiredText: '100' },
+            id: doc.id,
+          }),
+        )
+
+      await expect(
+        payload.create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '4',
+            text: '5',
+            uniqueRequiredText: '10',
+            uniquePolymorphicRelationship: { relationTo: 'text-fields', value: textDoc.id },
+          },
+        }),
+      ).rejects.toBeTruthy()
+    })
+
+    it('should throw validation error saving on unique relationship fields polymorphic hasMany: true', async () => {
+      const textDoc = await payload.create({ collection: 'text-fields', data: { text: 'asd' } })
+
+      await payload
+        .create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '1',
+            text: '2',
+            uniqueRequiredText: '3',
+            uniqueHasManyPolymorphicRelationship: [
+              { relationTo: 'text-fields', value: textDoc.id },
+            ],
+          },
+        })
+        .then((doc) =>
+          payload.update({
+            locale: 'es',
+            collection: 'indexed-fields',
+            data: { localizedUniqueRequiredText: '100' },
+            id: doc.id,
+          }),
+        )
+
+      // Should allow the same relationship on a diferrent field!
+      await payload
+        .create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '31',
+            text: '24',
+            uniqueRequiredText: '55',
+            uniqueHasManyPolymorphicRelationship_2: [
+              { relationTo: 'text-fields', value: textDoc.id },
+            ],
+          },
+        })
+        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        .then((doc) =>
+          payload.update({
+            locale: 'es',
+            collection: 'indexed-fields',
+            data: { localizedUniqueRequiredText: '300' },
+            id: doc.id,
+          }),
+        )
+
+      await expect(
+        payload.create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '4',
+            text: '5',
+            uniqueRequiredText: '10',
+            uniqueHasManyPolymorphicRelationship: [
+              { relationTo: 'text-fields', value: textDoc.id },
+            ],
+          },
+        }),
+      ).rejects.toBeTruthy()
     })
 
     it('should not throw validation error saving multiple null values for unique fields', async () => {

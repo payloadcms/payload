@@ -1003,6 +1003,29 @@ export interface IndexedField {
   id: string;
   text: string;
   uniqueText?: string | null;
+  uniqueRelationship?: (string | null) | TextField;
+  uniqueHasManyRelationship?: (string | TextField)[] | null;
+  uniqueHasManyRelationship_2?: (string | TextField)[] | null;
+  uniquePolymorphicRelationship?: {
+    relationTo: 'text-fields';
+    value: string | TextField;
+  } | null;
+  uniquePolymorphicRelationship_2?: {
+    relationTo: 'text-fields';
+    value: string | TextField;
+  } | null;
+  uniqueHasManyPolymorphicRelationship?:
+    | {
+        relationTo: 'text-fields';
+        value: string | TextField;
+      }[]
+    | null;
+  uniqueHasManyPolymorphicRelationship_2?:
+    | {
+        relationTo: 'text-fields';
+        value: string | TextField;
+      }[]
+    | null;
   uniqueRequiredText: string;
   localizedUniqueRequiredText: string;
   /**

@@ -40,10 +40,6 @@ export async function createVersion<T extends TypeWithID>(
     version,
   }
 
-  if ('createdAt' in version) {
-    data.createdAt = version.createdAt
-  }
-
   const result = await upsertRow<TypeWithVersion<T>>({
     adapter: this,
     data,
@@ -66,6 +62,10 @@ export async function createVersion<T extends TypeWithID>(
           AND ${table.parent} = ${parent}
       `,
     })
+  }
+
+  if ('createdAt' in result.version) {
+    result.createdAt = result.version.createdAt as string
   }
 
   return result
