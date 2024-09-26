@@ -142,6 +142,7 @@ export const Auth: React.FC<Props> = (props) => {
             operation={operation}
             permissions={docPermissions?.fields}
             readOnly={readOnly}
+            t={t}
           />
           {(showPasswordFields || requirePassword) && (
             <div className={`${baseClass}__changing-password`}>

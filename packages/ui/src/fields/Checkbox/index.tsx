@@ -15,8 +15,6 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { generateFieldID } from '../../utilities/generateFieldID.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 import { CheckboxInput } from './Input.js'
@@ -28,25 +26,24 @@ export { CheckboxFieldClientProps, CheckboxInput, type CheckboxInputProps }
 const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
   const {
     id,
+    AfterInput,
+    BeforeInput,
     checked: checkedFromProps,
-    descriptionProps,
+    Description,
     disableFormData,
-    errorProps,
-    field,
+    Error,
     field: {
       name,
       _path: pathFromProps,
       admin: {
         className,
-        description,
         readOnly: readOnlyFromAdmin,
         style,
         width,
       } = {} as CheckboxFieldClientProps['field']['admin'],
-      label,
       required,
     } = {} as CheckboxFieldClientProps['field'],
-    labelProps,
+    Label,
     onChange: onChangeFromProps,
     partialChecked,
     readOnly: readOnlyFromTopLevelProps,
@@ -107,34 +104,21 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
         width,
       }}
     >
-      <FieldError
-        CustomError={field?.admin?.components?.Error}
-        field={field}
-        path={path}
-        {...(errorProps || {})}
-        alignCaret="left"
-      />
+      {Error}
       <CheckboxInput
-        afterInput={field?.admin?.components?.afterInput}
-        beforeInput={field?.admin?.components?.beforeInput}
+        AfterInput={AfterInput}
+        BeforeInput={BeforeInput}
         checked={checked}
         id={fieldID}
         inputRef={null}
-        Label={field?.admin?.components?.Label}
-        label={label}
-        labelProps={labelProps}
+        Label={Label}
         name={path}
         onToggle={onToggle}
         partialChecked={partialChecked}
         readOnly={disabled}
         required={required}
       />
-      <FieldDescription
-        Description={field?.admin?.components?.Description}
-        description={description}
-        field={field}
-        {...(descriptionProps || {})}
-      />
+      {Description}
     </div>
   )
 }

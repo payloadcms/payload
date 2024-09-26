@@ -1,3 +1,4 @@
+import { fieldAffectsData } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import type { Props } from './types.js'
@@ -66,8 +67,17 @@ export const RenderServerFields: React.FC<Props> = (props) => {
 
             if (
               fieldPermissions?.read?.permission === false ||
-              ('disabled' in field.admin && field?.admin?.disabled)
+              (field.admin && 'disabled' in field.admin && field.admin.disabled)
             ) {
+              return null
+            }
+
+            const isHidden = 'hidden' in field && field?.hidden
+
+            const disabledFromAdmin =
+              field?.admin && 'disabled' in field.admin && field.admin.disabled
+
+            if (fieldAffectsData(field) && (isHidden || disabledFromAdmin)) {
               return null
             }
 

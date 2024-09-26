@@ -4,13 +4,9 @@ import type { CodeFieldClientComponent } from 'payload'
 import React, { useCallback } from 'react'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
-import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
@@ -23,27 +19,25 @@ const baseClass = 'code-field'
 
 const CodeFieldComponent: CodeFieldClientComponent = (props) => {
   const {
-    descriptionProps,
-    errorProps,
-    field,
+    AfterInput,
+    BeforeInput,
+    Description,
+    Error,
     field: {
       name,
       _path: pathFromProps,
       admin: {
         className,
-        description,
         editorOptions = {},
         language = 'javascript',
         readOnly: readOnlyFromAdmin,
         style,
         width,
       } = {},
-      label,
       required,
     },
-    labelProps,
+    Label,
     readOnly: readOnlyFromTopLevelProps,
-
     validate,
   } = props
 
@@ -83,15 +77,10 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
         width,
       }}
     >
-      <FieldLabel field={field} Label={field?.admin?.components?.Label} {...(labelProps || {})} />
+      {Label}
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError
-          CustomError={field?.admin?.components?.Error}
-          field={field}
-          path={path}
-          {...(errorProps || {})}
-        />
-        <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
+        {Error}
+        {BeforeInput}
         <CodeEditor
           defaultLanguage={prismToMonacoLanguageMap[language] || language}
           onChange={disabled ? () => null : (val) => setValue(val)}
@@ -99,14 +88,9 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
           readOnly={disabled}
           value={(value as string) || ''}
         />
-        <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
+        {AfterInput}
       </div>
-      <FieldDescription
-        Description={field?.admin?.components?.Description}
-        description={description}
-        field={field}
-        {...(descriptionProps || {})}
-      />
+      {Description}
     </div>
   )
 }

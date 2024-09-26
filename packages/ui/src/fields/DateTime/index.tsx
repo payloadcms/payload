@@ -7,42 +7,38 @@ import React, { useCallback } from 'react'
 import { DatePickerField } from '../../elements/DatePicker/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 const baseClass = 'date-time-field'
 
-import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
 
 const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
   const {
-    descriptionProps,
-    errorProps,
-    field,
+    AfterInput,
+    BeforeInput,
+    Description,
+    Error,
     field: {
       name,
       _path: pathFromProps,
       admin: {
         className,
         date: datePickerProps,
-        description,
         placeholder,
         readOnly: readOnlyFromAdmin,
         style,
         width,
       } = {},
-      label,
       required,
     },
-    labelProps,
+    Label,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n } = useTranslation()
@@ -81,15 +77,10 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
         width,
       }}
     >
-      <FieldLabel field={field} Label={field?.admin?.components?.Label} {...(labelProps || {})} />
+      {Label}
       <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
-        <FieldError
-          CustomError={field?.admin?.components?.Error}
-          field={field}
-          path={path}
-          {...(errorProps || {})}
-        />
-        <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
+        {Error}
+        {BeforeInput}
         <DatePickerField
           {...datePickerProps}
           onChange={(incomingDate) => {
@@ -101,14 +92,9 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
           readOnly={disabled}
           value={value}
         />
-        <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
+        {AfterInput}
       </div>
-      <FieldDescription
-        Description={field?.admin?.components?.Description}
-        description={description}
-        field={field}
-        {...(descriptionProps || {})}
-      />
+      {Description}
     </div>
   )
 }

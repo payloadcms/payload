@@ -1,30 +1,17 @@
 'use client'
-import type {
-  CheckboxFieldClient,
-  FieldLabelClientProps,
-  MappedComponent,
-  StaticLabel,
-} from 'payload'
-import type { MarkOptional } from 'ts-essentials'
-
 import React from 'react'
 
-import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { CheckIcon } from '../../icons/Check/index.js'
 import { LineIcon } from '../../icons/Line/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 
 export type CheckboxInputProps = {
-  readonly afterInput?: MappedComponent[]
-  readonly beforeInput?: MappedComponent[]
+  readonly AfterInput?: React.ReactNode
+  readonly BeforeInput?: React.ReactNode
   readonly checked?: boolean
   readonly className?: string
-  readonly field?: MarkOptional<CheckboxFieldClient, 'type'>
   readonly id?: string
   readonly inputRef?: React.RefObject<HTMLInputElement | null>
-  readonly Label?: MappedComponent
-  readonly label?: StaticLabel
-  readonly labelProps?: FieldLabelClientProps<MarkOptional<CheckboxFieldClient, 'type'>>
+  readonly Label?: React.ReactNode
   readonly name?: string
   readonly onToggle: (event: React.ChangeEvent<HTMLInputElement>) => void
   readonly partialChecked?: boolean
@@ -37,15 +24,12 @@ export const inputBaseClass = 'checkbox-input'
 export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   id,
   name,
-  afterInput,
-  beforeInput,
+  AfterInput,
+  BeforeInput,
   checked,
   className,
-  field,
   inputRef,
   Label,
-  label,
-  labelProps,
   onToggle,
   partialChecked,
   readOnly,
@@ -63,7 +47,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
         .join(' ')}
     >
       <div className={`${inputBaseClass}__input`}>
-        <RenderComponent mappedComponent={beforeInput} />
+        {BeforeInput}
         <input
           aria-label=""
           defaultChecked={Boolean(checked)}
@@ -83,16 +67,9 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
           {checked && <CheckIcon />}
           {!checked && partialChecked && <LineIcon />}
         </span>
-        <RenderComponent mappedComponent={afterInput} />
+        {AfterInput}
       </div>
-      <FieldLabel
-        field={field}
-        htmlFor={id}
-        Label={Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      {Label}
     </div>
   )
 }

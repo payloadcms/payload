@@ -71,7 +71,6 @@ import type {
   ImportMap,
   Payload,
   SanitizedConfig,
-  StaticDescription,
 } from 'payload'
 
 import { type I18nClient } from '@payloadcms/translations'
@@ -110,6 +109,16 @@ export const RenderServerField = (props: {
 
   const fieldSlots: FieldSlots = {}
 
+  // TODO: type this
+  let clientProps = {
+    field: clientField,
+    fieldState,
+    path: fieldPath,
+    permissions: fieldPermissions,
+    readOnly,
+    schemaPath: fieldSchemaPath,
+  }
+
   if ('label' in field) {
     fieldSlots.Label = (
       <FieldLabel
@@ -125,83 +134,84 @@ export const RenderServerField = (props: {
     )
   }
 
-  if ('description' in field.admin) {
-    fieldSlots.Description = (
-      <FieldDescription
-        description={
-          typeof field.admin?.description === 'string' ||
-          typeof field.admin?.description === 'object'
-            ? field.admin.description
-            : typeof field.admin?.description === 'function'
-              ? field.admin?.description({ t: i18n.t })
-              : ''
-        }
-        path={fieldPath}
-      />
-    )
-  }
-
-  if (field.admin?.components) {
-    if ('afterInput' in field.admin.components) {
-      fieldSlots.AfterInput = (
-        <RenderServerComponent
-          Component={field.admin.components.afterInput}
-          importMap={importMap}
-          key="field.admin.components.afterInput"
-        />
-      )
-    }
-
-    if ('beforeInput' in field.admin.components) {
-      fieldSlots.BeforeInput = (
-        <RenderServerComponent
-          Component={field.admin.components.beforeInput}
-          importMap={importMap}
-          key="field.admin.components.beforeInput"
-        />
-      )
-    }
-
-    if ('Description' in field.admin.components) {
+  if (field.admin) {
+    if ('description' in field.admin) {
       fieldSlots.Description = (
-        <RenderServerComponent
-          Component={field.admin.components.Description}
-          importMap={importMap}
-          key="field.admin.components.Description"
+        <FieldDescription
+          description={
+            typeof field.admin?.description === 'string' ||
+            typeof field.admin?.description === 'object'
+              ? field.admin.description
+              : typeof field.admin?.description === 'function'
+                ? field.admin?.description({ t: i18n.t })
+                : ''
+          }
+          path={fieldPath}
         />
       )
     }
 
-    if ('Error' in field.admin.components) {
-      fieldSlots.Error = (
-        <RenderServerComponent
-          Component={field.admin.components.Error}
-          importMap={importMap}
-          key="field.admin.components.Error"
-        />
-      )
-    }
+    if (field.admin?.components) {
+      if ('afterInput' in field.admin.components) {
+        fieldSlots.AfterInput = (
+          <RenderServerComponent
+            clientProps={clientProps}
+            Component={field.admin.components.afterInput}
+            importMap={importMap}
+            key="field.admin.components.afterInput"
+          />
+        )
+      }
 
-    if ('Label' in field.admin.components) {
-      fieldSlots.Label = (
-        <RenderServerComponent
-          Component={field.admin.components.Label}
-          importMap={importMap}
-          key="field.admin.components.Label"
-        />
-      )
+      if ('beforeInput' in field.admin.components) {
+        fieldSlots.BeforeInput = (
+          <RenderServerComponent
+            clientProps={clientProps}
+            Component={field.admin.components.beforeInput}
+            importMap={importMap}
+            key="field.admin.components.beforeInput"
+          />
+        )
+      }
+
+      if ('Description' in field.admin.components) {
+        fieldSlots.Description = (
+          <RenderServerComponent
+            clientProps={clientProps}
+            Component={field.admin.components.Description}
+            importMap={importMap}
+            key="field.admin.components.Description"
+          />
+        )
+      }
+
+      if ('Error' in field.admin.components) {
+        fieldSlots.Error = (
+          <RenderServerComponent
+            clientProps={clientProps}
+            Component={field.admin.components.Error}
+            importMap={importMap}
+            key="field.admin.components.Error"
+          />
+        )
+      }
+
+      if ('Label' in field.admin.components) {
+        fieldSlots.Label = (
+          <RenderServerComponent
+            clientProps={clientProps}
+            Component={field.admin.components.Label}
+            importMap={importMap}
+            key="field.admin.components.Label"
+          />
+        )
+      }
     }
   }
 
-  // TODO: type this to match Client Field Props
-  const clientProps = {
+  clientProps = {
+    ...clientProps,
     ...fieldSlots,
-    field: clientField,
-    fieldState,
-    path: fieldPath,
-    permissions: fieldPermissions,
-    readOnly,
-    schemaPath: fieldSchemaPath,
   }
 
   // TODO: type this to match Server Field Props

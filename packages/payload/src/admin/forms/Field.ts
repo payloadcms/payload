@@ -4,6 +4,7 @@ import type { User } from '../../auth/types.js'
 import type { Locale, ServerProps } from '../../config/types.js'
 import type { ClientField, Field, Validate } from '../../fields/config/types.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
+import type { FieldSlots } from '../types.js'
 import type { FieldDescriptionServerProps } from './Description.js'
 import type { FieldErrorServerProps } from './Error.js'
 import type { FormField } from './Form.js'
@@ -15,7 +16,8 @@ export type ClientFieldBase<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
 > = {
   readonly field: TFieldClient
-} & FormFieldBase
+} & FieldSlots &
+  FormFieldBase
 
 export type ServerFieldBase<
   TFieldServer extends Field = Field,

@@ -6,6 +6,9 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import CheckboxFields from './collections/Checkbox/index.js'
+import CodeFields from './collections/Code/index.js'
+import EmailFields from './collections/Email/index.js'
 import TextFields from './collections/Text/index.js'
 // import Uploads3 from './collections/Uploads3/index.js'
 // import TabsWithRichText from './globals/TabsWithRichText.js'
@@ -15,28 +18,28 @@ export const collectionSlugs: CollectionConfig[] = [
   // LexicalFields,
   // LexicalMigrateFields,
   // LexicalLocalizedFields,
-  // {
-  //   slug: 'users',
-  //   admin: {
-  //     useAsTitle: 'email',
-  //   },
-  //   auth: true,
-  //   fields: [
-  //     {
-  //       name: 'canViewConditionalField',
-  //       type: 'checkbox',
-  //       defaultValue: true,
-  //     },
-  //   ],
-  // },
+  {
+    slug: 'users',
+    admin: {
+      useAsTitle: 'email',
+    },
+    auth: true,
+    fields: [
+      {
+        name: 'canViewConditionalField',
+        type: 'checkbox',
+        defaultValue: true,
+      },
+    ],
+  },
   // ArrayFields,
   // BlockFields,
-  // CheckboxFields,
-  // CodeFields,
+  CheckboxFields,
+  CodeFields,
   // CollapsibleFields,
   // ConditionalLogic,
   // DateFields,
-  // EmailFields,
+  EmailFields,
   // RadioFields,
   // GroupFields,
   // RowFields,

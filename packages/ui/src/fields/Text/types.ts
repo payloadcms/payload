@@ -1,7 +1,5 @@
-import type { StaticLabel, TextFieldClient } from 'payload'
 import type { ChangeEvent } from 'react'
 import type React from 'react'
-import type { MarkOptional } from 'ts-essentials'
 
 import type { Option, ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 
@@ -21,7 +19,6 @@ export type TextInputProps = {
   readonly className?: string
   readonly Description?: React.ReactNode
   readonly Error?: React.ReactNode
-  readonly field?: MarkOptional<TextFieldClient, 'type'>
   readonly inputRef?: React.RefObject<HTMLInputElement>
   readonly Label?: React.ReactNode
   readonly maxRows?: number

@@ -19,15 +19,14 @@ import './index.scss'
 const baseClass = 'collapsible-field'
 
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
-import { FieldDescription } from '../FieldDescription/index.js'
 
 const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
   const {
-    descriptionProps,
+    Description,
     field,
     field: {
       _path: pathFromProps,
-      admin: { className, description, initCollapsed = false, readOnly: readOnlyFromAdmin } = {},
+      admin: { className, initCollapsed = false, readOnly: readOnlyFromAdmin } = {},
       fields,
       label,
     },
@@ -141,7 +140,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
           collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
           header={
             <div className={`${baseClass}__row-label-wrap`}>
-              <RowLabel
+              {/* <RowLabel
                 i18n={i18n}
                 path={path}
                 RowLabel={
@@ -150,7 +149,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
                     : undefined
                 }
                 rowLabel={label}
-              />
+              /> */}
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
           }
@@ -168,12 +167,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
             schemaPath={schemaPath}
           />
         </CollapsibleElement>
-        <FieldDescription
-          Description={field?.admin?.components?.Description}
-          description={description}
-          field={field}
-          {...(descriptionProps || {})}
-        />
+        {Description}
       </div>
     </Fragment>
   )

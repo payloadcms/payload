@@ -8,39 +8,33 @@ import type {
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
-import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 const EmailFieldComponent: EmailFieldClientComponent = (props) => {
   const {
+    AfterInput,
     autoComplete,
-    descriptionProps,
-    errorProps,
+    BeforeInput,
+    Description,
+    Error,
     field: {
       name,
       _path: pathFromProps,
       admin: {
-        readOnly: readOnlyFromAdmin,
-
         className,
-        description,
         placeholder,
+        readOnly: readOnlyFromAdmin,
         style,
         width,
       } = {} as EmailFieldClientProps['field']['admin'],
-      label,
       required,
     } = {} as EmailFieldClientProps['field'],
-    field,
-    labelProps,
+    Label,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
@@ -77,15 +71,10 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
         width,
       }}
     >
-      <FieldLabel field={field} Label={field?.admin?.components?.Label} {...(labelProps || {})} />
+      {Label}
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError
-          CustomError={field?.admin?.components?.Error}
-          field={field}
-          path={path}
-          {...(errorProps || {})}
-        />
-        <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
+        {Error}
+        {BeforeInput}
         {/* disable eslint here because the label is dynamic */}
         {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
         <input
@@ -99,14 +88,9 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
           type="email"
           value={(value as string) || ''}
         />
-        <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
+        {AfterInput}
       </div>
-      <FieldDescription
-        Description={field?.admin?.components?.Description}
-        description={description}
-        field={field}
-        {...(descriptionProps || {})}
-      />
+      {Description}
     </div>
   )
 }
