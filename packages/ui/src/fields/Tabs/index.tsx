@@ -164,9 +164,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
                   }}
                   tab={tab}
                 />
-              ) : (
-                <></>
-              )
+              ) : null
             })}
           </div>
         </div>
