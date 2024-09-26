@@ -52,7 +52,7 @@ export const createVersion: CreateVersion = async function createVersion(
   const [doc] = await VersionModel.create([data], options, req)
 
   const parentQuery = {
-    or: [
+    $or: [
       {
         parent: {
           $eq: data.parent,
@@ -60,10 +60,10 @@ export const createVersion: CreateVersion = async function createVersion(
       },
     ],
   }
-  if (isValidObjectId(data.parent)) {
-    parentQuery.or.push({
+  if (typeof data.parent === 'string' && isValidObjectId(data.parent)) {
+    parentQuery.$or.push({
       parent: {
-        $eq: ObjectId(data.parent as string),
+        $eq: ObjectId(data.parent),
       },
     })
   }
@@ -76,9 +76,7 @@ export const createVersion: CreateVersion = async function createVersion(
             $ne: doc._id,
           },
         },
-        {
-          parentQuery,
-        },
+        parentQuery,
         {
           latest: {
             $eq: true,
