@@ -276,6 +276,19 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: 'places',
+      fields: [
+        {
+          name: 'country',
+          type: 'text',
+        },
+        {
+          name: 'city',
+          type: 'text',
+        },
+      ],
+    },
+    {
       slug: 'fields-persistance',
       fields: [
         {

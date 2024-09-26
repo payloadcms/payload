@@ -79,6 +79,8 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
 
     return createDatabaseAdapter<SQLiteAdapter>({
       name: 'sqlite',
+      afterSchemaInit: args.afterSchemaInit ?? [],
+      beforeSchemaInit: args.beforeSchemaInit ?? [],
       client: undefined,
       clientConfig: args.client,
       defaultDrizzleSnapshot,
@@ -151,6 +153,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       updateGlobalVersion,
       updateOne,
       updateVersion,
+      upsert: updateOne,
     })
   }
 

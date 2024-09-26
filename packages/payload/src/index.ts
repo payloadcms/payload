@@ -24,6 +24,7 @@ import type {
   DataFromCollectionSlug,
   TypeWithID,
 } from './collections/config/types.js'
+export type * from './admin/types.js'
 import type { Options as CountOptions } from './collections/operations/local/count.js'
 import type { Options as CreateOptions } from './collections/operations/local/create.js'
 import type {
@@ -31,6 +32,7 @@ import type {
   ManyOptions as DeleteManyOptions,
   Options as DeleteOptions,
 } from './collections/operations/local/delete.js'
+export type { MappedView } from './admin/views/types.js'
 import type { Options as DuplicateOptions } from './collections/operations/local/duplicate.js'
 import type { Options as FindOptions } from './collections/operations/local/find.js'
 import type { Options as FindByIDOptions } from './collections/operations/local/findByID.js'
@@ -654,8 +656,6 @@ interface RequestContext {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
-export type * from './admin/types.js'
-export type { MappedView } from './admin/views/types.js'
 export { default as executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
 export { getAccessResults } from './auth/getAccessResults.js'
@@ -687,7 +687,6 @@ export type {
   VerifyConfig,
 } from './auth/types.js'
 export { generateImportMap } from './bin/generateImportMap/index.js'
-
 export type { ImportMap } from './bin/generateImportMap/index.js'
 export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
 export type { ClientCollectionConfig } from './collections/config/client.js'
@@ -822,6 +821,7 @@ export type {
   UpdateOneArgs,
   UpdateVersion,
   UpdateVersionArgs,
+  Upsert,
 } from './database/types.js'
 export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
 export {
