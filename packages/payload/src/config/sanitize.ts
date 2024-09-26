@@ -18,6 +18,7 @@ import { sanitizeGlobals } from '../globals/config/sanitize.js'
 import { getLockedDocumentsCollection } from '../lockedDocuments/lockedDocumentsCollection.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections.js'
+import checkDuplicateTabsIds from '../utilities/checkDuplicateTabsIds.js'
 import { defaults } from './defaults.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
@@ -199,6 +200,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       config.i18n.translations = deepMergeSimple(config.i18n.translations, config.editor.i18n)
     }
   }
+
+  checkDuplicateTabsIds(config.collections)
 
   const promises: Promise<void>[] = []
   for (const sanitizeFunction of richTextSanitizationPromises) {
