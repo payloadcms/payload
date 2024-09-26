@@ -221,15 +221,17 @@
 
   &__listItem {
     font-size: base(0.8);
-    margin: 0 0 0.4em base(0.8);
+    margin: 0 0 0.4em 40px;
   }
 
   &__listItemChecked,
   &__listItemUnchecked {
     position: relative;
-    margin-inline: 0;
-    padding-left: base(1.2);
-    padding-right: base(1.2);
+    // Instead of having margin-left: 40px like other list-items or indented paragraphs, 
+    // we use padding-left: 25px + margin-left: 15px = 40px, so that the click position 
+    // calculation in `CheckListPlugin` matches the checkbox
+    margin-left: 15px;
+    padding-left: 25px;
     list-style-type: none;
     outline: none;
   }
@@ -245,6 +247,7 @@
     height: base(0.8);
     top: base(0.1);
     left: 0;
+    // transform: translateX(- base(1.2));
     cursor: pointer;
     display: block;
     background-size: cover;
