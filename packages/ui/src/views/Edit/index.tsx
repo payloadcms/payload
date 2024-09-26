@@ -41,7 +41,13 @@ const baseClass = 'collection-edit'
 // This component receives props only on _pages_
 // When rendered within a drawer, props are empty
 // This is solely to support custom edit views which get server-rendered
-export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({ Fields }) => {
+export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
+  Fields,
+  PreviewButton,
+  PublishButton,
+  SaveButton,
+  SaveDraftButton,
+}) => {
   const {
     id,
     action,
@@ -435,9 +441,13 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({ Fields }) =
               )
             }
             permissions={docPermissions}
+            PreviewButton={PreviewButton}
+            PublishButton={PublishButton}
             readOnlyForIncomingUser={isReadOnlyForIncomingUser}
             redirectAfterDelete={redirectAfterDelete}
             redirectAfterDuplicate={redirectAfterDuplicate}
+            SaveButton={SaveButton}
+            SaveDraftButton={SaveDraftButton}
             slug={collectionConfig?.slug || globalConfig?.slug}
             user={currentEditor}
           />

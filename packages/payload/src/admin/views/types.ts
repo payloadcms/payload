@@ -10,7 +10,7 @@ import type { ClientGlobalConfig } from '../../globals/config/client.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { LanguageOptions } from '../LanguageOptions.js'
-import type { MappedComponent, PayloadServerAction } from '../types.js'
+import type { EntitySlots, MappedComponent, PayloadServerAction } from '../types.js'
 
 export type AdminViewConfig = {
   Component: AdminViewComponent
@@ -69,6 +69,4 @@ export type ServerSideEditViewProps = {
   readonly searchParams: { [key: string]: string | string[] | undefined }
 } & ClientSideEditViewProps
 
-export type ClientSideEditViewProps = {
-  Fields: React.ReactNode
-}
+export type ClientSideEditViewProps = {} & EntitySlots

@@ -15,7 +15,7 @@ import type { ViewFromConfig } from './getViewsFromConfig.js'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
-import { RenderServerFields } from '../../elements/RenderServerFields/index.js'
+import { renderEntity } from '../../utilities/renderEntity.js'
 import { NotFoundView } from '../NotFound/index.js'
 import { getDocumentData } from './getDocumentData.js'
 import { getDocumentPermissions } from './getDocumentPermissions.js'
@@ -57,12 +57,8 @@ export const Document: React.FC<AdminViewProps> = async ({
   const segments = Array.isArray(params?.segments) ? params.segments : []
 
   const collectionSlug = collectionConfig?.slug || undefined
-  const clientCollectionConfig = clientConfig.collections?.find(
-    (collection) => collection.slug === collectionSlug,
-  )
 
   const globalSlug = globalConfig?.slug || undefined
-  const clientGlobalConfig = clientConfig.globals?.find((global) => global.slug === globalSlug)
 
   const isEditing = getIsEditing({ id, collectionSlug, globalSlug })
 
@@ -231,26 +227,20 @@ export const Document: React.FC<AdminViewProps> = async ({
     }
   }
 
-  const Fields = (
-    <RenderServerFields
-      clientFields={(clientCollectionConfig || clientGlobalConfig)?.fields}
-      config={config}
-      fields={(collectionConfig || globalConfig)?.fields}
-      formState={formState}
-      i18n={i18n}
-      importMap={importMap}
-      payload={payload}
-      permissions={
-        collectionSlug
-          ? permissions?.collections?.[collectionSlug]?.fields
-          : globalSlug
-            ? permissions?.globals?.[globalSlug]?.fields
-            : undefined
-      }
-    />
-  )
+  const entitySlots = renderEntity({
+    clientConfig,
+    collectionConfig,
+    config,
+    formState,
+    globalConfig,
+    hasSavePermission,
+    i18n,
+    importMap,
+    payload,
+    permissions,
+  })
 
-  const clientProps = { Fields, payloadServerAction }
+  const clientProps = { payloadServerAction, ...entitySlots }
 
   return (
     <DocumentInfoProvider
