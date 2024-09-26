@@ -3,8 +3,8 @@ import React, { Fragment } from 'react'
 import type { Props } from './types.js'
 
 import './index.scss'
-import { RenderServerField } from './RenderField.js'
 import { RenderIfInViewport } from './RenderIfInViewport.js'
+import { RenderServerField } from './RenderServerField.js'
 
 const baseClass = 'render-fields'
 

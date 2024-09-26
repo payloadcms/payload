@@ -1,10 +1,9 @@
 'use client'
 
-import type { FieldErrorClientComponent, GenericErrorProps } from 'payload'
+import type { GenericErrorProps } from 'payload'
 
 import React from 'react'
 
-import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { Tooltip } from '../../elements/Tooltip/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useFormFields, useFormSubmitted } from '../../forms/Form/context.js'
@@ -12,7 +11,7 @@ import './index.scss'
 
 const baseClass = 'field-error'
 
-const DefaultFieldError: React.FC<GenericErrorProps> = (props) => {
+export const FieldError: React.FC<GenericErrorProps> = (props) => {
   const {
     alignCaret = 'right',
     message: messageFromProps,
@@ -40,14 +39,4 @@ const DefaultFieldError: React.FC<GenericErrorProps> = (props) => {
   }
 
   return null
-}
-
-export const FieldError: FieldErrorClientComponent = (props) => {
-  const { CustomError, ...rest } = props
-
-  if (CustomError) {
-    return <RenderComponent clientProps={rest} mappedComponent={CustomError} />
-  }
-
-  return <DefaultFieldError {...rest} />
 }

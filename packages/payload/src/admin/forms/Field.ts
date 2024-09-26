@@ -4,20 +4,17 @@ import type { User } from '../../auth/types.js'
 import type { Locale, ServerProps } from '../../config/types.js'
 import type { ClientField, Field, Validate } from '../../fields/config/types.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { FieldDescriptionClientProps, FieldDescriptionServerProps } from './Description.js'
-import type { FieldErrorClientProps, FieldErrorServerProps } from './Error.js'
-import type { FormField, FormState } from './Form.js'
-import type { FieldLabelClientProps, FieldLabelServerProps } from './Label.js'
+import type { FieldDescriptionServerProps } from './Description.js'
+import type { FieldErrorServerProps } from './Error.js'
+import type { FormField } from './Form.js'
+import type { FieldLabelServerProps } from './Label.js'
 
 export type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
 
 export type ClientFieldBase<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
 > = {
-  readonly descriptionProps?: FieldDescriptionClientProps<TFieldClient>
-  readonly errorProps?: FieldErrorClientProps<TFieldClient>
   readonly field: TFieldClient
-  readonly labelProps?: FieldLabelClientProps<TFieldClient>
 } & FormFieldBase
 
 export type ServerFieldBase<

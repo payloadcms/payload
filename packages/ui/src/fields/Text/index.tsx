@@ -19,19 +19,15 @@ export { TextInput, TextInputProps }
 
 const TextFieldComponent: TextFieldClientComponent = (props) => {
   const {
+    AfterInput,
+    BeforeInput,
+    Description,
+    Error,
     field,
     field: {
       name,
       _path: pathFromProps,
-      admin: {
-        className,
-        description,
-        placeholder,
-        readOnly: readOnlyFromAdmin,
-        rtl,
-        style,
-        width,
-      } = {},
+      admin: { className, placeholder, readOnly: readOnlyFromAdmin, rtl, style, width } = {},
       hasMany,
       localized,
       maxLength,
@@ -41,6 +37,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
       required,
     },
     inputRef,
+    Label,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
@@ -120,16 +117,15 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
 
   return (
     <TextInput
-      afterInput={field?.admin?.components?.afterInput}
-      beforeInput={field?.admin?.components?.beforeInput}
+      AfterInput={AfterInput}
+      BeforeInput={BeforeInput}
       className={className}
-      Description={field?.admin?.components?.Description}
-      description={description}
-      Error={field?.admin?.components?.Error}
+      Description={Description}
+      Error={Error}
       field={field}
       hasMany={hasMany}
       inputRef={inputRef}
-      Label={field?.admin?.components?.Label}
+      Label={Label}
       maxRows={maxRows}
       minRows={minRows}
       onChange={

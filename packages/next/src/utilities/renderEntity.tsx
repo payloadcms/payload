@@ -142,6 +142,7 @@ export const renderEntity: (args: {
 
   components.SidebarFields = (
     <RenderServerFields
+      clientConfig={clientConfig}
       clientFields={sidebarClientFields}
       config={config}
       fields={sidebarFields}

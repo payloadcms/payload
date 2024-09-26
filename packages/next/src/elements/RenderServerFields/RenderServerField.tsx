@@ -8,6 +8,7 @@ import {
   DateTimeField,
   EmailField,
   FieldDescription,
+  FieldLabel,
   GroupField,
   HiddenField,
   JoinField,
@@ -59,7 +60,6 @@ export const fieldComponents: FieldTypesComponents = {
   upload: UploadField,
 }
 
-import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientConfig,
   ClientField,
@@ -71,7 +71,10 @@ import type {
   ImportMap,
   Payload,
   SanitizedConfig,
+  StaticDescription,
 } from 'payload'
+
+import { type I18nClient } from '@payloadcms/translations'
 
 import { RenderServerComponent } from '../RenderServerComponent/index.js'
 
@@ -107,12 +110,42 @@ export const RenderServerField = (props: {
 
   const fieldSlots: FieldSlots = {}
 
+  if ('label' in field) {
+    fieldSlots.Label = (
+      <FieldLabel
+        label={
+          typeof field.label === 'string' || typeof field.label === 'object'
+            ? field.label
+            : typeof field.label === 'function'
+              ? field.label({ t: i18n.t })
+              : ''
+        }
+        required={'required' in field && field.required}
+      />
+    )
+  }
+
+  if ('description' in field.admin) {
+    fieldSlots.Description = (
+      <FieldDescription
+        description={
+          typeof field.admin?.description === 'string' ||
+          typeof field.admin?.description === 'object'
+            ? field.admin.description
+            : typeof field.admin?.description === 'function'
+              ? field.admin?.description({ t: i18n.t })
+              : ''
+        }
+        path={fieldPath}
+      />
+    )
+  }
+
   if (field.admin?.components) {
     if ('afterInput' in field.admin.components) {
       fieldSlots.AfterInput = (
         <RenderServerComponent
           Component={field.admin.components.afterInput}
-          Fallback={null}
           importMap={importMap}
           key="field.admin.components.afterInput"
         />
@@ -123,7 +156,6 @@ export const RenderServerField = (props: {
       fieldSlots.BeforeInput = (
         <RenderServerComponent
           Component={field.admin.components.beforeInput}
-          Fallback={null}
           importMap={importMap}
           key="field.admin.components.beforeInput"
         />
@@ -134,7 +166,6 @@ export const RenderServerField = (props: {
       fieldSlots.Description = (
         <RenderServerComponent
           Component={field.admin.components.Description}
-          Fallback={FieldDescription}
           importMap={importMap}
           key="field.admin.components.Description"
         />
@@ -145,7 +176,6 @@ export const RenderServerField = (props: {
       fieldSlots.Error = (
         <RenderServerComponent
           Component={field.admin.components.Error}
-          Fallback={null}
           importMap={importMap}
           key="field.admin.components.Error"
         />
@@ -156,7 +186,6 @@ export const RenderServerField = (props: {
       fieldSlots.Label = (
         <RenderServerComponent
           Component={field.admin.components.Label}
-          Fallback={null}
           importMap={importMap}
           key="field.admin.components.Label"
         />

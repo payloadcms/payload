@@ -20,7 +20,12 @@ import type {
 type TextFieldClientWithoutType = MarkOptional<TextFieldClient, 'type'>
 
 type TextFieldBaseClientProps = {
+  readonly AfterInput?: React.ReactNode
+  readonly BeforeInput?: React.ReactNode
+  readonly Description?: React.ReactNode
+  readonly Error?: React.ReactNode
   readonly inputRef?: React.RefObject<HTMLInputElement>
+  readonly Label?: React.ReactNode
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   readonly validate?: TextFieldValidation
 }
