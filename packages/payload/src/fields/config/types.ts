@@ -810,16 +810,11 @@ export type TabWithoutCondition = NamedTab | UnnamedTab
 export type TabWithCondition = NamedTabWithCondition | UnnamedTabWithCondition
 export type Tab = TabWithCondition | TabWithoutCondition
 
-export type TabsFieldBase = {
+export type TabsField = {
   admin?: Omit<Admin, 'description'>
   type: 'tabs'
-} & Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT' | 'virtual'>
-
-export type TabsField = (
-  | { id: string; tabs: TabWithCondition[] }
-  | { id?: never; tabs: TabWithoutCondition[] }
-) &
-  TabsFieldBase
+} & ({ id: string; tabs: TabWithCondition[] } | { id?: never; tabs: TabWithoutCondition[] }) &
+  Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT' | 'virtual'>
 
 export type TabsFieldClient = {
   admin?: Omit<AdminClient, 'description'>

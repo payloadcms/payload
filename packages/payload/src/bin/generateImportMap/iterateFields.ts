@@ -69,25 +69,41 @@ export function genImportMapIterateFields({
       }
     }
 
-    hasKey(field?.admin?.components, 'Label') && addToImportMap(field.admin.components.Label)
+    if ('admin' in field && 'components' in field.admin) {
+      if (hasKey(field?.admin?.components, 'Label')) {
+        addToImportMap(field.admin.components.Label)
+      }
 
-    hasKey(field?.admin?.components, 'Cell') && addToImportMap(field?.admin?.components?.Cell)
+      if (hasKey(field?.admin?.components, 'Cell')) {
+        addToImportMap(field?.admin?.components?.Cell)
+      }
 
-    hasKey(field?.admin?.components, 'Description') &&
-      addToImportMap(field?.admin?.components?.Description)
+      if (hasKey(field?.admin?.components, 'Description')) {
+        addToImportMap(field?.admin?.components?.Description)
+      }
 
-    hasKey(field?.admin?.components, 'Field') && addToImportMap(field?.admin?.components?.Field)
-    hasKey(field?.admin?.components, 'Filter') && addToImportMap(field?.admin?.components?.Filter)
+      if (hasKey(field?.admin?.components, 'Field')) {
+        addToImportMap(field?.admin?.components?.Field)
+      }
+      if (hasKey(field?.admin?.components, 'Filter')) {
+        addToImportMap(field?.admin?.components?.Filter)
+      }
 
-    hasKey(field?.admin?.components, 'Error') && addToImportMap(field?.admin?.components?.Error)
+      if (hasKey(field?.admin?.components, 'Error')) {
+        addToImportMap(field?.admin?.components?.Error)
+      }
 
-    hasKey(field?.admin?.components, 'afterInput') &&
-      addToImportMap(field?.admin?.components?.afterInput)
+      if (hasKey(field?.admin?.components, 'afterInput')) {
+        addToImportMap(field?.admin?.components?.afterInput)
+      }
 
-    hasKey(field?.admin?.components, 'beforeInput') &&
-      addToImportMap(field?.admin?.components?.beforeInput)
+      if (hasKey(field?.admin?.components, 'beforeInput')) {
+        addToImportMap(field?.admin?.components?.beforeInput)
+      }
 
-    hasKey(field?.admin?.components, 'RowLabel') &&
-      addToImportMap(field?.admin?.components?.RowLabel)
+      if (hasKey(field?.admin?.components, 'RowLabel')) {
+        addToImportMap(field?.admin?.components?.RowLabel)
+      }
+    }
   }
 }
