@@ -1,71 +1,9 @@
-import {
-  ArrayField,
-  BlocksField,
-  CheckboxField,
-  CodeField,
-  CollapsibleField,
-  ConfirmPasswordField,
-  DateTimeField,
-  EmailField,
-  GroupField,
-  HiddenField,
-  JoinField,
-  JSONField,
-  NumberField,
-  PasswordField,
-  PointField,
-  RadioGroupField,
-  RelationshipField,
-  RichTextField,
-  RowField,
-  SelectField,
-  TabsField,
-  TextareaField,
-  TextField,
-  UIField,
-  UploadField,
-} from '@payloadcms/ui'
-
-export type FieldTypesComponents = {
-  [K in 'confirmPassword' | 'hidden' | 'password' | FieldTypes]: React.FC
-}
-
-export const fieldComponents: FieldTypesComponents = {
-  array: ArrayField,
-  blocks: BlocksField,
-  checkbox: CheckboxField,
-  code: CodeField,
-  collapsible: CollapsibleField,
-  confirmPassword: ConfirmPasswordField,
-  date: DateTimeField,
-  email: EmailField,
-  group: GroupField,
-  hidden: HiddenField,
-  join: JoinField,
-  json: JSONField,
-  number: NumberField,
-  password: PasswordField,
-  point: PointField,
-  radio: RadioGroupField,
-  relationship: RelationshipField,
-  richText: RichTextField,
-  row: RowField,
-  select: SelectField,
-  tabs: TabsField,
-  text: TextField,
-  textarea: TextareaField,
-  ui: UIField,
-  upload: UploadField,
-}
-
-import type { FieldTypes } from 'payload'
-
 import React, { Fragment } from 'react'
 
 import type { Props } from './types.js'
 
-import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import './index.scss'
+import { RenderServerField } from './RenderField.js'
 import { RenderIfInViewport } from './RenderIfInViewport.js'
 
 const baseClass = 'render-fields'
@@ -75,6 +13,7 @@ export { Props }
 export const RenderServerFields: React.FC<Props> = (props) => {
   const {
     className,
+    clientConfig,
     clientFields,
     config,
     fields,
@@ -120,8 +59,6 @@ export const RenderServerFields: React.FC<Props> = (props) => {
 
             const fieldSchemaPath = [schemaPath, name].filter(Boolean).join('.')
 
-            const fieldState = formState?.[fieldPath]
-
             const fieldPermissions = permissions?.[name]
 
             const fieldIndexPath =
@@ -138,6 +75,7 @@ export const RenderServerFields: React.FC<Props> = (props) => {
               return (
                 <RenderServerFields
                   className={className}
+                  clientConfig={clientConfig}
                   clientFields={'fields' in clientField && clientField?.fields}
                   config={config}
                   fields={field.fields}
@@ -161,35 +99,20 @@ export const RenderServerFields: React.FC<Props> = (props) => {
               )
             }
 
-            const isHidden = 'admin' in field && 'hidden' in field.admin && field.admin.hidden
-
-            // TODO: type this to match Client Field Props
-            const clientProps = {
-              field: clientField,
-              fieldState,
-              path: fieldPath,
-              permissions: fieldPermissions,
-              readOnly,
-              schemaPath: fieldSchemaPath,
-            }
-
-            // TODO: type this to match Server Field Props
-            const serverProps = {
-              clientField,
-              config,
-              field,
-              i18n,
-              payload,
-            }
-
             return (
-              <RenderServerComponent
-                clientProps={clientProps}
-                Component={isHidden ? HiddenField : field.admin?.components?.Field}
-                Fallback={fieldComponents?.[field?.type]}
+              <RenderServerField
+                clientConfig={clientConfig}
+                clientField={clientField}
+                config={config}
+                field={field}
+                fieldPath={fieldPath}
+                fieldPermissions={fieldPermissions}
+                fieldSchemaPath={fieldSchemaPath}
+                fieldState={formState[fieldPath]}
+                i18n={i18n}
                 importMap={importMap}
                 key={fieldIndex}
-                serverProps={serverProps}
+                payload={payload}
               />
             )
           })}

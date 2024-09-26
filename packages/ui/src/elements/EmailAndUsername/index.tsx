@@ -1,65 +1,13 @@
 'use client'
 
+import type { TFunction } from '@payloadcms/translations'
 import type { FieldPermissions, LoginWithUsernameOptions } from 'payload'
 
 import { email, username } from 'payload/shared'
-import React from 'react'
+import React, { Fragment } from 'react'
 
 import { EmailField } from '../../fields/Email/index.js'
 import { TextField } from '../../fields/Text/index.js'
-import { RenderFields } from '../../forms/RenderFields/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
-
-type Props = {
-  readonly loginWithUsername?: false | LoginWithUsernameOptions
-}
-function EmailFieldComponent(props: Props) {
-  const { loginWithUsername } = props
-  const { t } = useTranslation()
-
-  const requireEmail = !loginWithUsername || (loginWithUsername && loginWithUsername.requireEmail)
-  const showEmailField =
-    !loginWithUsername || loginWithUsername?.requireEmail || loginWithUsername?.allowEmailLogin
-
-  if (showEmailField) {
-    return (
-      <EmailField
-        autoComplete="off"
-        field={{
-          name: 'email',
-          label: t('general:email'),
-          required: requireEmail,
-        }}
-        validate={email}
-      />
-    )
-  }
-
-  return null
-}
-
-function UsernameFieldComponent(props: Props) {
-  const { loginWithUsername } = props
-  const { t } = useTranslation()
-
-  const requireUsername = loginWithUsername && loginWithUsername.requireUsername
-  const showUsernameField = Boolean(loginWithUsername)
-
-  if (showUsernameField) {
-    return (
-      <TextField
-        field={{
-          name: 'username',
-          label: t('authentication:username'),
-          required: requireUsername,
-        }}
-        validate={username}
-      />
-    )
-  }
-
-  return null
-}
 
 type RenderEmailAndUsernameFieldsProps = {
   className?: string
@@ -69,50 +17,40 @@ type RenderEmailAndUsernameFieldsProps = {
     [fieldName: string]: FieldPermissions
   }
   readOnly: boolean
+  t: TFunction
 }
-export function RenderEmailAndUsernameFields(props: RenderEmailAndUsernameFieldsProps) {
-  const { className, loginWithUsername, operation, permissions, readOnly } = props
+
+export function EmailAndUsernameFields(props: RenderEmailAndUsernameFieldsProps) {
+  const { className, loginWithUsername, t } = props
+
+  const showEmailField =
+    !loginWithUsername || loginWithUsername?.requireEmail || loginWithUsername?.allowEmailLogin
+
+  const showUsernameField = Boolean(loginWithUsername)
 
   return (
-    <RenderFields
-      className={className}
-      fields={[
-        {
-          name: 'email',
-          type: 'text',
-          admin: {
-            autoComplete: 'off',
-            components: {
-              Field: {
-                type: 'client',
-                Component: null,
-                RenderedComponent: <EmailFieldComponent loginWithUsername={loginWithUsername} />,
-              },
-            },
-          },
-          localized: false,
-        },
-        {
-          name: 'username',
-          type: 'text',
-          admin: {
-            components: {
-              Field: {
-                type: 'client',
-                Component: null,
-                RenderedComponent: <UsernameFieldComponent loginWithUsername={loginWithUsername} />,
-              },
-            },
-          },
-          localized: false,
-        },
-      ]}
-      forceRender
-      operation={operation}
-      path=""
-      permissions={permissions}
-      readOnly={readOnly}
-      schemaPath=""
-    />
+    <Fragment>
+      {showEmailField ? (
+        <EmailField
+          autoComplete="off"
+          field={{
+            name: 'email',
+            label: t('general:email'),
+            required: !loginWithUsername || (loginWithUsername && loginWithUsername.requireEmail),
+          }}
+          validate={email}
+        />
+      ) : null}
+      {showUsernameField && (
+        <TextField
+          field={{
+            name: 'username',
+            label: t('authentication:username'),
+            required: loginWithUsername && loginWithUsername.requireUsername,
+          }}
+          validate={username}
+        />
+      )}
+    </Fragment>
   )
 }

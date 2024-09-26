@@ -21,11 +21,11 @@ export const UploadAndRichTextBlock: Block = {
       relationTo: 'uploads',
       required: true,
     },
-    {
-      name: 'richText',
-      type: 'richText',
-      editor: lexicalEditor(),
-    },
+    // {
+    //   name: 'richText',
+    //   type: 'richText',
+    //   editor: lexicalEditor(),
+    // },
   ],
   slug: 'uploadAndRichText',
 }

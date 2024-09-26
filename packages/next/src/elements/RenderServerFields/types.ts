@@ -1,6 +1,9 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
+  ClientCollectionConfig,
+  ClientConfig,
   ClientField,
+  ClientGlobalConfig,
   Field,
   FieldPermissions,
   FormState,
@@ -12,7 +15,10 @@ import type {
 
 export type Props = {
   readonly className?: string
+  readonly clientCollectionConfig?: ClientCollectionConfig
+  readonly clientConfig: ClientConfig
   readonly clientFields: ClientField[]
+  readonly clientGlobalConfig?: ClientGlobalConfig
   readonly config: SanitizedConfig
   readonly fields: Field[]
   /**

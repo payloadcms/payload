@@ -8,12 +8,11 @@ import type {
 
 import {
   ConfirmPasswordField,
+  EmailAndUsernameFields,
   Form,
   type FormProps,
   FormSubmit,
   PasswordField,
-  RenderEmailAndUsernameFields,
-  RenderFields,
   useAuth,
   useConfig,
   useTranslation,
@@ -70,11 +69,12 @@ export const CreateFirstUserClient: React.FC<{
       redirect={admin}
       validationOperation="create"
     >
-      <RenderEmailAndUsernameFields
+      <EmailAndUsernameFields
         className="emailAndUsername"
         loginWithUsername={loginWithUsername}
         operation="create"
         readOnly={false}
+        t={t}
       />
       <PasswordField
         autoComplete={'off'}
@@ -85,14 +85,14 @@ export const CreateFirstUserClient: React.FC<{
         }}
       />
       <ConfirmPasswordField />
-      <RenderFields
+      {/* <RenderFields
         fields={collectionConfig.fields}
         forceRender
         operation="create"
         path=""
         readOnly={false}
         schemaPath={userSlug}
-      />
+      /> */}
       <FormSubmit size="large">{t('general:create')}</FormSubmit>
     </Form>
   )

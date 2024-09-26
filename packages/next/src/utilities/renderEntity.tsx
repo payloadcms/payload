@@ -122,6 +122,7 @@ export const renderEntity: (args: {
 
   components.MainFields = (
     <RenderServerFields
+      clientConfig={clientConfig}
       clientFields={mainClientFields}
       config={config}
       fields={mainFields}

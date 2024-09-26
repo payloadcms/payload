@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import type { Props } from './types.js'
 
 import { Button } from '../../../elements/Button/index.js'
-import { RenderEmailAndUsernameFields } from '../../../elements/EmailAndUsername/index.js'
+import { EmailAndUsernameFields } from '../../../elements/EmailAndUsername/index.js'
 import { CheckboxField } from '../../../fields/Checkbox/index.js'
 import { ConfirmPasswordField } from '../../../fields/ConfirmPassword/index.js'
 import { PasswordField } from '../../../fields/Password/index.js'
@@ -137,7 +137,7 @@ export const Auth: React.FC<Props> = (props) => {
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       {!disableLocalStrategy && (
         <React.Fragment>
-          <RenderEmailAndUsernameFields
+          <EmailAndUsernameFields
             loginWithUsername={loginWithUsername}
             operation={operation}
             permissions={docPermissions?.fields}

@@ -440,6 +440,14 @@ export type PayloadServerAction = (
     | RenderConfigArgs,
 ) => Promise<string>
 
+export type FieldSlots = {
+  AfterInput?: React.ReactNode
+  BeforeInput?: React.ReactNode
+  Description?: React.ReactNode
+  Error?: React.ReactNode
+  Label?: React.ReactNode
+}
+
 export type EntitySlots = {
   MainFields: React.ReactNode
   PreviewButton?: React.ReactNode
