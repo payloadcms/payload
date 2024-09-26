@@ -83,6 +83,25 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
     if (collectionConfig.auth.verify) {
       user._verified = true
     }
+    // /////////////////////////////////////
+    // beforeValidate - Collection
+    // /////////////////////////////////////
+
+    await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
+      await priorHook
+
+      await hook({
+        collection: args.collection?.config,
+        context: req.context,
+        data: user,
+        operation: 'update',
+        req,
+      })
+    }, Promise.resolve())
+
+    // /////////////////////////////////////
+    // Update new password
+    // /////////////////////////////////////
 
     const doc = await payload.db.updateOne({
       id: user.id,
