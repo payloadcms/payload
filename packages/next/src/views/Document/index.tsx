@@ -15,7 +15,7 @@ import type { ViewFromConfig } from './getViewsFromConfig.js'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
-import { RenderServerFields as RenderFields } from '../../elements/RenderServerFields/index.js'
+import { RenderServerFields } from '../../elements/RenderServerFields/index.js'
 import { NotFoundView } from '../NotFound/index.js'
 import { getDocumentData } from './getDocumentData.js'
 import { getDocumentPermissions } from './getDocumentPermissions.js'
@@ -232,10 +232,11 @@ export const Document: React.FC<AdminViewProps> = async ({
   }
 
   const Fields = (
-    <RenderFields
+    <RenderServerFields
       clientFields={(clientCollectionConfig || clientGlobalConfig)?.fields}
       config={config}
       fields={(collectionConfig || globalConfig)?.fields}
+      formState={formState}
       i18n={i18n}
       importMap={importMap}
       payload={payload}

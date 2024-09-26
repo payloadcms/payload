@@ -64,7 +64,7 @@ import React, { Fragment } from 'react'
 
 import type { Props } from './types.js'
 
-import { RenderServerComponent as RenderComponent } from '../RenderServerComponent/index.js'
+import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import './index.scss'
 import { RenderIfInViewport } from './RenderIfInViewport.js'
 
@@ -79,6 +79,7 @@ export const RenderServerFields: React.FC<Props> = (props) => {
     config,
     fields,
     forceRender,
+    formState,
     i18n,
     importMap,
     indexPath,
@@ -116,8 +117,13 @@ export const RenderServerFields: React.FC<Props> = (props) => {
             const name = 'name' in field ? field.name : undefined
 
             const fieldPath = [path, name].filter(Boolean).join('.')
+
             const fieldSchemaPath = [schemaPath, name].filter(Boolean).join('.')
+
+            const fieldState = formState?.[fieldPath]
+
             const fieldPermissions = permissions?.[name]
+
             const fieldIndexPath =
               indexPath !== undefined ? `${indexPath}.${fieldIndex}` : `${fieldIndex}`
 
@@ -136,6 +142,7 @@ export const RenderServerFields: React.FC<Props> = (props) => {
                   config={config}
                   fields={field.fields}
                   forceRender={forceRenderChildren}
+                  formState={formState}
                   i18n={i18n}
                   importMap={importMap}
                   indexPath={
@@ -159,6 +166,7 @@ export const RenderServerFields: React.FC<Props> = (props) => {
             // TODO: type this to match Client Field Props
             const clientProps = {
               field: clientField,
+              fieldState,
               path: fieldPath,
               permissions: fieldPermissions,
               readOnly,
@@ -167,6 +175,7 @@ export const RenderServerFields: React.FC<Props> = (props) => {
 
             // TODO: type this to match Server Field Props
             const serverProps = {
+              clientField,
               config,
               field,
               i18n,
@@ -174,7 +183,7 @@ export const RenderServerFields: React.FC<Props> = (props) => {
             }
 
             return (
-              <RenderComponent
+              <RenderServerComponent
                 clientProps={clientProps}
                 Component={isHidden ? HiddenField : field.admin?.components?.Field}
                 Fallback={fieldComponents?.[field?.type]}

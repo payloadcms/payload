@@ -9,29 +9,29 @@ export const PostsCollection: CollectionConfig = {
   },
   fields: [
     {
-      // admin: {
-      //   components: {
-      //     Field: '/collections/Posts/MyClientField.js#MyClientFieldComponent',
-      //   },
-      // },
+      admin: {
+        components: {
+          Field: '/collections/Posts/MyClientField.js#MyClientFieldComponent',
+        },
+      },
       name: 'text',
       label: 'Client Text Field',
       type: 'text',
     },
-    // {
-    //   name: 'relationToSelf',
-    //   type: 'relationship',
-    //   relationTo: postsSlug,
-    // },
-    // {
-    //   admin: {
-    //     components: {
-    //       Field: '/collections/Posts/MyServerField.js#MyServerFieldComponent',
-    //     },
-    //   },
-    //   name: 'serverTextField',
-    //   type: 'text',
-    // },
+    {
+      admin: {
+        components: {
+          Field: '/collections/Posts/MyServerField.js#MyServerFieldComponent',
+        },
+      },
+      name: 'serverTextField',
+      type: 'text',
+    },
+    {
+      name: 'relationToSelf',
+      type: 'relationship',
+      relationTo: postsSlug,
+    },
     // {
     //   name: 'richText',
     //   type: 'richText',

@@ -3,6 +3,7 @@ import type {
   ClientField,
   Field,
   FieldPermissions,
+  FormState,
   ImportMap,
   Operation,
   Payload,
@@ -22,6 +23,7 @@ export type Props = {
    * If a number is provided, will immediately render fields _up to that index_.
    */
   readonly forceRender?: boolean | number
+  readonly formState?: FormState
   readonly i18n: I18nClient
   readonly importMap: ImportMap
   readonly indexPath?: string
