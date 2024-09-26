@@ -1,6 +1,5 @@
 import type { I18nClient } from '@payloadcms/translations'
 
-import type { MappedComponent } from '../admin/types.js'
 import type {
   LivePreviewConfig,
   SanitizedConfig,
@@ -39,7 +38,7 @@ export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'],
 export type ClientConfig = {
   admin: {
     components: null
-    dependencies?: Record<string, MappedComponent>
+    dependencies?: Record<string, React.ReactNode>
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
   collections: ClientCollectionConfig[]

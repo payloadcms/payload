@@ -14,13 +14,12 @@ import type {
   FieldDescriptionServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
-  MappedComponent,
 } from '../types.js'
 
 type ArrayFieldClientWithoutType = MarkOptional<ArrayFieldClient, 'type'>
 
 type ArrayFieldBaseClientProps = {
-  readonly CustomRowLabel?: MappedComponent
+  readonly CustomRowLabel?: React.ReactNode
   readonly validate?: ArrayFieldValidation
 }
 

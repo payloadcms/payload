@@ -57,7 +57,6 @@ import type {
   JSONFieldErrorServerComponent,
   JSONFieldLabelClientComponent,
   JSONFieldLabelServerComponent,
-  MappedComponent,
   NumberFieldClientProps,
   NumberFieldErrorClientComponent,
   NumberFieldErrorServerComponent,
@@ -1208,10 +1207,11 @@ export type Block = {
   labels?: Labels
   slug: string
 }
+
 export type ClientBlock = {
   admin?: {
     components?: {
-      Label?: MappedComponent
+      Label?: React.ReactNode
     }
   } & Pick<Block['admin'], 'custom'>
   fields: ClientField[]

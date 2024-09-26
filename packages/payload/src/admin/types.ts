@@ -374,34 +374,6 @@ export type MappedEmptyComponent = {
   type: 'empty'
 }
 
-export type MappedComponent<TComponentClientProps extends JsonObject = JsonObject> =
-  | MappedClientComponent<TComponentClientProps>
-  | MappedEmptyComponent
-  | MappedServerComponent<TComponentClientProps>
-  | undefined
-
-export type CreateMappedComponent = {
-  <T extends JsonObject>(
-    component: { Component: React.FC<T> } | null | PayloadComponent<T>,
-    props: {
-      clientProps?: JsonObject
-      serverProps?: object
-    },
-    fallback: React.FC,
-    identifier: string,
-  ): MappedComponent<T>
-
-  <T extends JsonObject>(
-    components: ({ Component: React.FC<T> } | PayloadComponent<T>)[],
-    props: {
-      clientProps?: JsonObject
-      serverProps?: object
-    },
-    fallback: React.FC,
-    identifier: string,
-  ): MappedComponent<T>[]
-}
-
 export enum Action {
   RenderConfig = 'render-config',
 }

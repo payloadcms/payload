@@ -2,15 +2,13 @@ import type { ClientTranslationsObject } from '@payloadcms/translations'
 
 import type { Permissions } from '../../auth/index.js'
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
-import type { ClientCollectionConfig } from '../../collections/config/client.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { ClientConfig } from '../../config/client.js'
 import type { Locale, MetaConfig, PayloadComponent } from '../../config/types.js'
-import type { ClientGlobalConfig } from '../../globals/config/client.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { LanguageOptions } from '../LanguageOptions.js'
-import type { EntitySlots, MappedComponent, PayloadServerAction } from '../types.js'
+import type { EntitySlots, PayloadServerAction } from '../types.js'
 
 export type AdminViewConfig = {
   Component: AdminViewComponent
@@ -20,11 +18,6 @@ export type AdminViewConfig = {
   path?: string
   sensitive?: boolean
   strict?: boolean
-}
-
-export type MappedView = {
-  actions?: MappedComponent[]
-  Component: MappedComponent
 }
 
 export type AdminViewProps = {
