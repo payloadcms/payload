@@ -42,11 +42,12 @@ const baseClass = 'collection-edit'
 // When rendered within a drawer, props are empty
 // This is solely to support custom edit views which get server-rendered
 export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
-  Fields,
+  MainFields,
   PreviewButton,
   PublishButton,
   SaveButton,
   SaveDraftButton,
+  SidebarFields,
 }) => {
   const {
     id,
@@ -493,11 +494,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
                 </Fragment>
               )
             }
-            docPermissions={docPermissions}
-            Fields={Fields}
-            fields={(collectionConfig || globalConfig)?.fields}
-            readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
-            schemaPath={schemaPath}
+            MainFields={MainFields}
+            SidebarFields={SidebarFields}
           />
           {AfterDocument}
         </Form>

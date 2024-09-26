@@ -1,10 +1,8 @@
 'use client'
-import type { ClientField, Description, DocumentPermissions } from 'payload'
+import type { Description } from 'payload'
 
-import { fieldIsSidebar } from 'payload/shared'
 import React from 'react'
 
-import { RenderFields } from '../../forms/RenderFields/index.js'
 import { Gutter } from '../Gutter/index.js'
 import './index.scss'
 
@@ -14,36 +12,24 @@ type Args = {
   readonly AfterFields?: React.ReactNode
   readonly BeforeFields?: React.ReactNode
   readonly description?: Description
-  readonly docPermissions: DocumentPermissions
-  readonly fields: ClientField[]
-  readonly Fields: React.ReactNode
   readonly forceSidebarWrap?: boolean
-  readonly readOnly: boolean
-  readonly schemaPath: string
+  readonly MainFields: React.ReactNode
+  readonly SidebarFields?: React.ReactNode
 }
 
 export const DocumentFields: React.FC<Args> = ({
   AfterFields,
   BeforeFields,
   description,
-  docPermissions,
-  Fields,
-  fields,
   forceSidebarWrap,
-  readOnly,
-  schemaPath,
+  MainFields,
+  SidebarFields,
 }) => {
-  const mainFields = fields.filter((field) => !fieldIsSidebar(field))
-
-  const sidebarFields = fields.filter((field) => fieldIsSidebar(field))
-
-  const hasSidebarFields = sidebarFields && sidebarFields.length > 0
-
   return (
     <div
       className={[
         baseClass,
-        hasSidebarFields ? `${baseClass}--has-sidebar` : `${baseClass}--no-sidebar`,
+        SidebarFields ? `${baseClass}--has-sidebar` : `${baseClass}--no-sidebar`,
         forceSidebarWrap && `${baseClass}--force-sidebar-wrap`,
       ]
         .filter(Boolean)
@@ -59,26 +45,17 @@ export const DocumentFields: React.FC<Args> = ({
             )}
           </header>
           {BeforeFields}
-          {Fields}
+          {MainFields}
           {AfterFields}
         </Gutter>
       </div>
-      {hasSidebarFields && (
+      {SidebarFields ? (
         <div className={`${baseClass}__sidebar-wrap`}>
           <div className={`${baseClass}__sidebar`}>
-            <div className={`${baseClass}__sidebar-fields`}>
-              <RenderFields
-                fields={sidebarFields}
-                forceRender={10}
-                path=""
-                permissions={docPermissions?.fields}
-                readOnly={readOnly}
-                schemaPath={schemaPath}
-              />
-            </div>
+            <div className={`${baseClass}__sidebar-fields`}>{SidebarFields}</div>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

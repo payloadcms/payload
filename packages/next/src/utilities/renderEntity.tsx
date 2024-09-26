@@ -12,6 +12,7 @@ import type {
 } from 'payload'
 
 import { DefaultPublishButton, DefaultSaveButton, DefaultSaveDraftButton } from '@payloadcms/ui'
+import { fieldIsSidebar } from 'payload/shared'
 import React from 'react'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
@@ -49,6 +50,9 @@ export const renderEntity: (args: {
   const clientGlobalConfig = clientConfig.globals?.find(
     (global) => global.slug === globalConfig?.slug,
   )
+
+  const fields = (collectionConfig || globalConfig)?.fields
+  const clientFields = (clientCollectionConfig || clientGlobalConfig)?.fields
 
   const components: EntitySlots = {} as EntitySlots
 
@@ -110,11 +114,36 @@ export const renderEntity: (args: {
     }
   }
 
-  components.Fields = (
+  const mainFields = fields.filter((field) => !fieldIsSidebar(field))
+  const mainClientFields = clientFields?.filter((field) => !fieldIsSidebar(field))
+
+  const sidebarFields = fields.filter((field) => fieldIsSidebar(field))
+  const sidebarClientFields = clientFields?.filter((field) => fieldIsSidebar(field))
+
+  components.MainFields = (
     <RenderServerFields
-      clientFields={(clientCollectionConfig || clientGlobalConfig)?.fields}
+      clientFields={mainClientFields}
       config={config}
-      fields={(collectionConfig || globalConfig)?.fields}
+      fields={mainFields}
+      formState={formState}
+      i18n={i18n}
+      importMap={importMap}
+      payload={payload}
+      permissions={
+        collectionConfig
+          ? permissions?.collections?.[collectionConfig?.slug]?.fields
+          : globalConfig
+            ? permissions?.globals?.[globalConfig.slug]?.fields
+            : undefined
+      }
+    />
+  )
+
+  components.SidebarFields = (
+    <RenderServerFields
+      clientFields={sidebarClientFields}
+      config={config}
+      fields={sidebarFields}
       formState={formState}
       i18n={i18n}
       importMap={importMap}

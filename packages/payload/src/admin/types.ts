@@ -441,9 +441,10 @@ export type PayloadServerAction = (
 ) => Promise<string>
 
 export type EntitySlots = {
-  Fields: React.ReactNode
+  MainFields: React.ReactNode
   PreviewButton?: React.ReactNode
   PublishButton?: React.ReactNode
   SaveButton?: React.ReactNode
   SaveDraftButton?: React.ReactNode
+  SidebarFields: React.ReactNode
 }
