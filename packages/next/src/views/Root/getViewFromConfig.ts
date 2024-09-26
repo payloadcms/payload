@@ -65,6 +65,7 @@ export const getViewFromConfig = ({
 }): {
   DefaultView: ViewFromConfig
   initPageOptions: Parameters<typeof initPage>[0]
+  serverProps: Record<string, unknown>
   templateClassName: string
   templateType: 'default' | 'minimal'
 } => {
@@ -83,6 +84,15 @@ export const getViewFromConfig = ({
 
   const isGlobal = segmentOne === 'globals'
   const isCollection = segmentOne === 'collections'
+
+  const serverProps: {
+    [key: string]: unknown
+  } = {
+    ...(isCollection
+      ? { collectionConfig: config.collections.find(({ slug }) => slug === segmentTwo) }
+      : {}),
+    ...(isGlobal ? { globalConfig: config.globals.find(({ slug }) => slug === segmentTwo) } : {}),
+  }
 
   switch (segments.length) {
     case 0: {
@@ -220,6 +230,7 @@ export const getViewFromConfig = ({
   return {
     DefaultView: ViewToRender,
     initPageOptions,
+    serverProps,
     templateClassName,
     templateType,
   }

@@ -1,7 +1,5 @@
 import type {
   AdminViewProps,
-  ClientCollectionConfig,
-  ClientGlobalConfig,
   PayloadComponent,
   ServerProps,
   ServerSideEditViewProps,
@@ -17,6 +15,7 @@ import type { ViewFromConfig } from './getViewsFromConfig.js'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+import { RenderServerFields as RenderFields } from '../../elements/RenderServerFields/index.js'
 import { NotFoundView } from '../NotFound/index.js'
 import { getDocumentData } from './getDocumentData.js'
 import { getDocumentPermissions } from './getDocumentPermissions.js'
@@ -26,6 +25,7 @@ import { getViewsFromConfig } from './getViewsFromConfig.js'
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
 
 export const Document: React.FC<AdminViewProps> = async ({
+  clientConfig,
   importMap,
   initPageResult,
   params,
@@ -55,8 +55,14 @@ export const Document: React.FC<AdminViewProps> = async ({
   } = initPageResult
 
   const segments = Array.isArray(params?.segments) ? params.segments : []
+
   const collectionSlug = collectionConfig?.slug || undefined
+  const clientCollectionConfig = clientConfig.collections?.find(
+    (collection) => collection.slug === collectionSlug,
+  )
+
   const globalSlug = globalConfig?.slug || undefined
+  const clientGlobalConfig = clientConfig.globals?.find((global) => global.slug === globalSlug)
 
   const isEditing = getIsEditing({ id, collectionSlug, globalSlug })
 
@@ -225,7 +231,23 @@ export const Document: React.FC<AdminViewProps> = async ({
     }
   }
 
-  const Fields = <div>These are the fields.</div>
+  const Fields = (
+    <RenderFields
+      clientFields={(clientCollectionConfig || clientGlobalConfig)?.fields}
+      config={config}
+      fields={(collectionConfig || globalConfig)?.fields}
+      i18n={i18n}
+      importMap={importMap}
+      payload={payload}
+      permissions={
+        collectionSlug
+          ? permissions?.collections?.[collectionSlug]?.fields
+          : globalSlug
+            ? permissions?.globals?.[globalSlug]?.fields
+            : undefined
+      }
+    />
+  )
 
   const clientProps = { Fields, payloadServerAction }
 

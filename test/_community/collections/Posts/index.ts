@@ -9,57 +9,57 @@ export const PostsCollection: CollectionConfig = {
   },
   fields: [
     {
-      admin: {
-        components: {
-          Field: '/collections/Posts/MyClientField.js#MyClientFieldComponent',
-        },
-      },
+      // admin: {
+      //   components: {
+      //     Field: '/collections/Posts/MyClientField.js#MyClientFieldComponent',
+      //   },
+      // },
       name: 'text',
       label: 'Client Text Field',
       type: 'text',
     },
-    {
-      name: 'relationToSelf',
-      type: 'relationship',
-      relationTo: postsSlug,
-    },
-    {
-      admin: {
-        components: {
-          Field: '/collections/Posts/MyServerField.js#MyServerFieldComponent',
-        },
-      },
-      name: 'serverTextField',
-      type: 'text',
-    },
+    // {
+    //   name: 'relationToSelf',
+    //   type: 'relationship',
+    //   relationTo: postsSlug,
+    // },
+    // {
+    //   admin: {
+    //     components: {
+    //       Field: '/collections/Posts/MyServerField.js#MyServerFieldComponent',
+    //     },
+    //   },
+    //   name: 'serverTextField',
+    //   type: 'text',
+    // },
     // {
     //   name: 'richText',
     //   type: 'richText',
     // },
-    {
-      name: 'myBlocks',
-      type: 'blocks',
-      blocks: [
-        {
-          slug: 'test',
-          fields: [
-            {
-              name: 'test',
-              type: 'text',
-            },
-          ],
-        },
-        {
-          slug: 'someBlock2',
-          fields: [
-            {
-              name: 'test2',
-              type: 'text',
-            },
-          ],
-        },
-      ],
-    },
+    // {
+    //   name: 'myBlocks',
+    //   type: 'blocks',
+    //   blocks: [
+    //     {
+    //       slug: 'test',
+    //       fields: [
+    //         {
+    //           name: 'test',
+    //           type: 'text',
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       slug: 'someBlock2',
+    //       fields: [
+    //         {
+    //           name: 'test2',
+    //           type: 'text',
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
     // {
     //   type: 'row',
     //   fields: [],
