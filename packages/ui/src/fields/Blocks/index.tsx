@@ -22,9 +22,6 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { BlockRow } from './BlockRow.js'
 import { BlocksDrawer } from './BlocksDrawer/index.js'
@@ -36,15 +33,13 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
-    descriptionProps,
-    errorProps,
-    field,
+    Description,
+    Error,
     field: {
       name,
       _path: pathFromProps,
-      admin: { className, description, isSortable = true, readOnly: readOnlyFromAdmin } = {},
+      admin: { className, isSortable = true, readOnly: readOnlyFromAdmin } = {},
       blocks,
-      label,
       labels: labelsFromProps,
       localized,
       maxRows,
@@ -52,7 +47,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       required,
     },
     forceRender = false,
-    labelProps,
+    Label,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
@@ -215,26 +210,11 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
     >
-      {showError && (
-        <FieldError
-          CustomError={field?.admin?.components?.Error}
-          field={field}
-          path={path}
-          {...(errorProps || {})}
-        />
-      )}
+      {showError && Error}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__heading-with-error`}>
-            <h3>
-              <FieldLabel
-                as="span"
-                field={field}
-                Label={field?.admin?.components?.Description}
-                unstyled
-                {...(labelProps || {})}
-              />
-            </h3>
+            <h3>{Label}</h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
             )}
@@ -262,12 +242,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
             </ul>
           )}
         </div>
-        <FieldDescription
-          Description={field?.admin?.components?.Description}
-          description={description}
-          field={field}
-          {...(descriptionProps || {})}
-        />
+        {Description}
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (

@@ -4,33 +4,22 @@ import React from 'react'
 
 import type { TextAreaInputProps } from './types.js'
 
-import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
   const {
-    afterInput,
-    beforeInput,
+    AfterInput,
+    BeforeInput,
     className,
     Description,
-    description,
-    descriptionProps,
     Error,
-    errorProps,
-    field,
     Label,
-    label,
-    labelProps,
     onChange,
     path,
     placeholder,
     readOnly,
-    required,
     rows,
     rtl,
     showError,
@@ -57,16 +46,10 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        field={field}
-        Label={Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      {Label}
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={Error} field={field} path={path} {...(errorProps || {})} />
-        <RenderComponent mappedComponent={beforeInput} />
+        {Error}
+        {BeforeInput}
         <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
           <div className="textarea-inner">
             <div className="textarea-clone" data-value={value || placeholder || ''} />
@@ -83,13 +66,8 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
             />
           </div>
         </label>
-        <RenderComponent mappedComponent={afterInput} />
-        <FieldDescription
-          Description={Description}
-          description={description}
-          field={field}
-          {...(descriptionProps || {})}
-        />
+        {AfterInput}
+        {Description}
       </div>
     </div>
   )

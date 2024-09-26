@@ -32,9 +32,6 @@ import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { UploadComponentHasMany } from './HasMany/index.js'
 import { UploadComponentHasOne } from './HasOne/index.js'
@@ -53,16 +50,12 @@ export type UploadInputProps = {
   readonly className?: string
   readonly collection?: ClientCollectionConfig
   readonly customUploadActions?: React.ReactNode[]
-  readonly Description?: MappedComponent
-  readonly description?: StaticDescription
-  readonly descriptionProps?: FieldDescriptionClientProps<MarkOptional<UploadFieldClient, 'type'>>
-  readonly Error?: MappedComponent
-  readonly errorProps?: FieldErrorClientProps<MarkOptional<UploadFieldClient, 'type'>>
-  readonly field?: MarkOptional<UploadFieldClient, 'type'>
+  readonly Description?: React.ReactNode
+  readonly Error?: React.ReactNode
   readonly filterOptions?: FilterOptionsResult
   readonly hasMany?: boolean
   readonly isSortable?: boolean
-  readonly Label?: MappedComponent
+  readonly Label?: React.ReactNode
   readonly label?: StaticLabel
   readonly labelProps?: FieldLabelClientProps<MarkOptional<UploadFieldClient, 'type'>>
   readonly maxRows?: number
@@ -84,23 +77,16 @@ export function UploadInput(props: UploadInputProps) {
     api,
     className,
     Description,
-    description,
-    descriptionProps,
     Error,
-    errorProps,
-    field,
     filterOptions: filterOptionsFromProps,
     hasMany,
     isSortable,
     Label,
-    label,
-    labelProps,
     maxRows,
     onChange: onChangeFromProps,
     path,
     readOnly,
     relationTo,
-    required,
     serverURL,
     showError,
     style,
@@ -430,22 +416,8 @@ export function UploadInput(props: UploadInputProps) {
         width,
       }}
     >
-      <FieldLabel
-        Label={Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-        field={field as UploadFieldClient}
-      />
-      <div className={`${baseClass}__wrap`}>
-        <FieldError
-          CustomError={Error}
-          path={path}
-          {...(errorProps || {})}
-          field={field as UploadFieldClient}
-        />
-      </div>
-
+      {Label}
+      <div className={`${baseClass}__wrap`}>{Error}</div>
       <div className={`${baseClass}__dropzoneAndUpload`}>
         {hasMany && Array.isArray(value) && value.length > 0 ? (
           <>
@@ -540,12 +512,7 @@ export function UploadInput(props: UploadInputProps) {
           </>
         )}
       </div>
-      <FieldDescription
-        Description={Description}
-        description={description}
-        {...(descriptionProps || {})}
-        field={field as UploadFieldClient}
-      />
+      {Description}
     </div>
   )
 }

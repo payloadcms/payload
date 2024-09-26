@@ -7,7 +7,6 @@ import { Collapsible as CollapsibleElement } from '../../elements/Collapsible/in
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
-import { RowLabel } from '../../forms/RowLabel/index.js'
 import { WatchChildErrors } from '../../forms/WatchChildErrors/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -28,7 +27,6 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
       _path: pathFromProps,
       admin: { className, initCollapsed = false, readOnly: readOnlyFromAdmin } = {},
       fields,
-      label,
     },
     readOnly: readOnlyFromTopLevelProps,
   } = props

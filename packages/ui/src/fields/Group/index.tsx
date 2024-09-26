@@ -7,7 +7,6 @@ import React from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import {
   useFormInitializing,
@@ -18,7 +17,6 @@ import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
 import { useRow } from '../Row/provider.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { useTabs } from '../Tabs/provider.js'
@@ -29,13 +27,13 @@ const baseClass = 'group-field'
 
 export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const {
-    descriptionProps,
-    field,
+    Description,
     field: {
-      admin: { className, description, hideGutter, readOnly: readOnlyFromAdmin, style, width } = {},
+      admin: { className, hideGutter, readOnly: readOnlyFromAdmin, style, width } = {},
       fields,
       label,
     },
+    Label,
     readOnly: readOnlyFromTopLevelProps,
   } = props
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
@@ -81,24 +79,14 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
       <GroupProvider>
         <div className={`${baseClass}__wrap`}>
           <div className={`${baseClass}__header`}>
-            {(field?.admin?.components?.Label ||
-              field?.admin?.components?.Description ||
-              label) && (
+            {(Label || Description || label) && (
               <header>
-                {field?.admin?.components?.Label !== undefined ? (
-                  <RenderComponent
-                    clientProps={{ label }}
-                    mappedComponent={field?.admin?.components?.Label}
-                  />
+                {Label ? (
+                  Label
                 ) : label ? (
                   <h3 className={`${baseClass}__title`}>{getTranslation(label, i18n)}</h3>
                 ) : null}
-                <FieldDescription
-                  Description={field?.admin?.components?.Description}
-                  description={description}
-                  field={field}
-                  {...(descriptionProps || {})}
-                />
+                {Description}
               </header>
             )}
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}

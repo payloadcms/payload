@@ -19,29 +19,20 @@ export { TextareaInput, TextAreaInputProps }
 
 const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
   const {
-    descriptionProps,
-    errorProps,
-    field,
+    AfterInput,
+    BeforeInput,
+    Description,
+    Error,
     field: {
       name,
       _path: pathFromProps,
-      admin: {
-        className,
-        description,
-        placeholder,
-        readOnly: readOnlyFromAdmin,
-        rows,
-        rtl,
-        style,
-        width,
-      } = {},
-      label,
+      admin: { className, placeholder, readOnly: readOnlyFromAdmin, rows, rtl, style, width } = {},
       localized,
       maxLength,
       minLength,
       required,
     },
-    labelProps,
+    Label,
     locale,
     readOnly: readOnlyFromTopLevelProps,
     validate,
@@ -82,17 +73,12 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
 
   return (
     <TextareaInput
-      afterInput={field?.admin?.components?.afterInput}
-      beforeInput={field?.admin?.components?.beforeInput}
+      AfterInput={AfterInput}
+      BeforeInput={BeforeInput}
       className={className}
-      Description={field?.admin?.components?.Description}
-      description={description}
-      descriptionProps={descriptionProps}
-      Error={field?.admin?.components?.Error}
-      errorProps={errorProps}
-      label={label}
-      Label={field?.admin?.components?.Label}
-      labelProps={labelProps}
+      Description={Description}
+      Error={Error}
+      Label={Label}
       onChange={(e) => {
         setValue(e.target.value)
       }}

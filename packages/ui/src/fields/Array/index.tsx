@@ -24,9 +24,6 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { ArrayRow } from './ArrayRow.js'
 import './index.scss'
@@ -35,28 +32,25 @@ const baseClass = 'array-field'
 
 export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const {
-    descriptionProps,
-    errorProps,
-    field,
+    Description,
+    Error,
     field: {
       name,
       _path: pathFromProps,
       admin: {
         className,
-        components: { RowLabel },
-        description,
+        // components: { RowLabel },
         isSortable = true,
         readOnly: readOnlyFromAdmin,
       } = {},
       fields,
-      label,
       localized,
       maxRows,
       minRows: minRowsProp,
       required,
     },
     forceRender = false,
-    labelProps,
+    Label,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
@@ -223,26 +217,11 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
     >
-      {showError && (
-        <FieldError
-          CustomError={field?.admin?.components?.Error}
-          field={field}
-          path={path}
-          {...(errorProps || {})}
-        />
-      )}
+      {showError && Error}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__header-content`}>
-            <h3 className={`${baseClass}__title`}>
-              <FieldLabel
-                as="span"
-                field={field}
-                Label={field?.admin?.components?.Label}
-                unstyled
-                {...(labelProps || {})}
-              />
-            </h3>
+            <h3 className={`${baseClass}__title`}>{Label}</h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
             )}
@@ -270,12 +249,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
             </ul>
           )}
         </div>
-        <FieldDescription
-          Description={field?.admin?.components?.Description}
-          description={description}
-          field={field}
-          {...(descriptionProps || {})}
-        />
+        {Description}
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
@@ -310,7 +284,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     row={row}
                     rowCount={rows.length}
                     rowIndex={i}
-                    RowLabel={RowLabel}
+                    // RowLabel={RowLabel}
                     schemaPath={schemaPath}
                     setCollapse={setCollapse}
                   />

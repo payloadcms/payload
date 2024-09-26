@@ -21,9 +21,6 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { createRelationMap } from './createRelationMap.js'
 import { findOptionsByValue } from './findOptionsByValue.js'
@@ -38,9 +35,8 @@ const baseClass = 'relationship'
 
 const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => {
   const {
-    descriptionProps,
-    errorProps,
-    field,
+    Description,
+    Error,
     field: {
       name,
       _path: pathFromProps,
@@ -58,7 +54,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       relationTo,
       required,
     },
-    labelProps,
+    Label,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
@@ -601,14 +597,9 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         width,
       }}
     >
-      <FieldLabel field={field} Label={field?.admin?.components?.Label} {...(labelProps || {})} />
+      {Label}
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError
-          CustomError={field?.admin?.components?.Error}
-          field={field}
-          path={path}
-          {...(errorProps || {})}
-        />
+        {Error}
         {!errorLoading && (
           <div className={`${baseClass}__wrap`}>
             <ReactSelect
@@ -713,12 +704,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
           </div>
         )}
         {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
-        <FieldDescription
-          Description={field?.admin?.components?.Description}
-          description={description}
-          field={field}
-          {...(descriptionProps || {})}
-        />
+        {Description}
       </div>
       {currentlyOpenRelationship.collectionSlug && currentlyOpenRelationship.hasReadPermission && (
         <DocumentDrawer onDelete={onDelete} onDuplicate={onDuplicate} onSave={onSave} />
