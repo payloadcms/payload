@@ -79,6 +79,8 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       afterSchemaInit: args.afterSchemaInit ?? [],
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       defaultDrizzleSnapshot,
+      disableConvertRadioAndGroupFieldsToSnakeCase:
+        args.disableConvertRadioAndGroupFieldsToSnakeCase ?? false,
       drizzle: undefined,
       enums: {},
       features: {

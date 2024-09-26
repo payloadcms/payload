@@ -25,6 +25,16 @@ export type Args = {
    */
   beforeSchemaInit?: PostgresSchemaHook[]
   connectionString?: string
+  /**
+   * Compatibillity flag for https://github.com/payloadcms/payload/issues/8027 and https://github.com/payloadcms/payload/issues/8402
+   * If you're migrating, you can as well run
+   * ```sh
+   * pnpm payload migrate:create
+   * ```
+   * And select "rename field" for targeted fields
+   * @default false
+   */
+  disableConvertRadioAndGroupFieldsToSnakeCase?: boolean
   idType?: 'serial' | 'uuid'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']

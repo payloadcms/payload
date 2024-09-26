@@ -121,6 +121,16 @@ export type BasePostgresAdapter = {
   countDistinct: CountDistinct
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
   deleteWhere: DeleteWhere
+  /**
+   * Compatibillity flag for https://github.com/payloadcms/payload/issues/8027 and https://github.com/payloadcms/payload/issues/8402
+   * If you're migrating, you can as well run
+   * ```sh
+   * pnpm payload migrate:create
+   * ```
+   * And select "rename field" for targeted fields
+   * @default false
+   */
+  disableConvertRadioAndGroupFieldsToSnakeCase?: boolean
   drizzle: PostgresDB
   dropDatabase: DropDatabase
   enums: Record<string, GenericEnum>

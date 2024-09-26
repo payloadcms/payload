@@ -79,6 +79,8 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       afterSchemaInit: args.afterSchemaInit ?? [],
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       defaultDrizzleSnapshot,
+      disableConvertRadioAndGroupFieldsToSnakeCase:
+        args.disableConvertRadioAndGroupFieldsToSnakeCase ?? false,
       drizzle: undefined,
       enums: {},
       features: {
