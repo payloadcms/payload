@@ -1320,6 +1320,13 @@ export interface TabsFields2 {
 export interface TabsField {
   id: string;
   sidebarField?: string | null;
+  conditionalTabVisible?: boolean | null;
+  conditionalTab?: {
+    conditionalTabField?: string | null;
+    nestedConditionalTabVisible?: boolean | null;
+    nestedUnconditionalTabInput?: string | null;
+    nestedConditionalTabInput?: string | null;
+  };
   array: {
     text: string;
     id?: string | null;
