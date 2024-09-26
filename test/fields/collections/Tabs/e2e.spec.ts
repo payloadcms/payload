@@ -136,4 +136,42 @@ describe('Tabs', () => {
       "Hello, I'm the first row, in a named tab",
     )
   })
+
+  test('should render conditional tab when checkbox is toggled', async () => {
+    await navigateToDoc(page, url)
+    const conditionalTabSelector = '.tabs-field__tab-button:text-is("Conditional Tab")'
+    await expect(page.locator(conditionalTabSelector)).toHaveCount(0)
+
+    const checkboxSelector = `input#field-conditionalTabVisible`
+    await page.locator(checkboxSelector).check()
+    await expect(page.locator(checkboxSelector)).toBeChecked()
+
+    await wait(300)
+
+    await expect(page.locator(conditionalTabSelector)).toHaveCount(1)
+    await switchTab(page, conditionalTabSelector)
+
+    await expect(
+      page.locator('label[for="field-conditionalTab__conditionalTabField"]'),
+    ).toHaveCount(1)
+  })
+
+  test('should hide nested conditional tab when checkbox is toggled', async () => {
+    await navigateToDoc(page, url)
+
+    // Show the conditional tab
+    const conditionalTabSelector = '.tabs-field__tab-button:text-is("Conditional Tab")'
+    const checkboxSelector = `input#field-conditionalTabVisible`
+    await page.locator(checkboxSelector).check()
+    await switchTab(page, conditionalTabSelector)
+
+    // Now assert on the nested conditional tab
+    const nestedConditionalTabSelector = '.tabs-field__tab-button:text-is("Nested Conditional Tab")'
+    await expect(page.locator(nestedConditionalTabSelector)).toHaveCount(1)
+
+    const nestedCheckboxSelector = `input#field-conditionalTab__nestedConditionalTabVisible`
+    await page.locator(nestedCheckboxSelector).uncheck()
+
+    await expect(page.locator(nestedConditionalTabSelector)).toHaveCount(0)
+  })
 })
