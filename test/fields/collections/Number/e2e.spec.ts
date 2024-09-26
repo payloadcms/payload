@@ -138,4 +138,16 @@ describe('Number', () => {
       'The following field is invalid: withMinRows',
     )
   })
+
+  test('should keep data removed on save if deleted', async () => {
+    const input = 1
+    await page.goto(url.create)
+    const field = page.locator('#field-number')
+    await field.fill(String(input))
+    await saveDocAndAssert(page)
+    await expect(field).toHaveValue(String(input))
+    await field.fill('')
+    await saveDocAndAssert(page)
+    await expect(field).toHaveValue('')
+  })
 })
