@@ -54,7 +54,9 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
 
   const tabInfos = useFormFields(([fields]) => {
     return tabs.map((tab, index) => {
-      const formStateID = `${schemaPath}.${index}`
+      const tabRef = 'name' in tab ? tab.name : index
+      const formStateID = `${field.id}.${tabRef}`
+
       return {
         index,
         passesCondition: fields?.[formStateID]?.passesCondition ?? true,

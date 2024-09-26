@@ -47,6 +47,45 @@ const TabsFields: CollectionConfig = {
               defaultValue:
                 'This field should only be visible when the conditional tab is visible.',
             },
+            {
+              name: 'nestedConditionalTabVisible',
+              type: 'checkbox',
+              label: 'Toggle Nested Conditional Tab',
+              admin: {
+                description:
+                  'When active, the nested conditional tab should be visible. When inactive, it should be hidden.',
+              },
+            },
+            {
+              type: 'tabs',
+              id: 'nested-conditional-tabs',
+              tabs: [
+                {
+                  label: 'Nested Unconditional Tab',
+                  description: 'Description for a nested unconditional tab',
+                  fields: [
+                    {
+                      name: 'nestedUnconditionalTabInput',
+                      type: 'text',
+                    },
+                  ],
+                },
+                {
+                  label: 'Nested Conditional Tab',
+                  description: 'Here is a description for a nested conditional tab',
+                  fields: [
+                    {
+                      name: 'nestedConditionalTabInput',
+                      type: 'textarea',
+                    },
+                  ],
+                  admin: {
+                    condition: ({ conditionalTab }) =>
+                      !!conditionalTab?.nestedConditionalTabVisible,
+                  },
+                },
+              ],
+            },
           ],
           admin: {
             condition: ({ conditionalTabVisible }) => !!conditionalTabVisible,

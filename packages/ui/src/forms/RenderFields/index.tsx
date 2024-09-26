@@ -80,7 +80,7 @@ export const RenderFields: React.FC<Props> = (props) => {
                 name={name}
                 path={path}
                 permissions={permissions?.[name]}
-                schemaPath={field.type === 'tabs' ? (field._schemaPath ?? schemaPath) : schemaPath}
+                schemaPath={schemaPath}
                 siblingPermissions={permissions}
               />
             )

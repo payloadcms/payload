@@ -295,10 +295,6 @@ export const createClientField = ({
     case 'tabs': {
       const field = clientField as unknown as TabsFieldClient
 
-      if (field?.id) {
-        field._schemaPath = generateFieldPath(parentPath, field.id)
-      }
-
       if (incomingField.tabs?.length) {
         for (let i = 0; i < incomingField.tabs.length; i++) {
           const tab = incomingField.tabs[i]

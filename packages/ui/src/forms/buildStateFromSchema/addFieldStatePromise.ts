@@ -518,18 +518,22 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     })
   } else if (field.type === 'tabs') {
     const hasTabWithCondition = field.tabs.some((tab) => tab.admin?.condition)
-
     if (hasTabWithCondition && !field.id) {
       throw new Error('Cannot use tab conditions without a tabs field ID')
     }
 
     const promises = field.tabs.map((tab, i) => {
       const isNamedTab = tabHasName(tab)
+
       const tabData = isNamedTab ? data?.[tab.name] || {} : data
       const tabPath = isNamedTab ? `${path}${tab.name}.` : path
 
-      if (hasTabWithCondition && field.id) {
-        state[`${path}${field.id}.${i}`] = {
+      const tabHasCondition = typeof tab.admin?.condition === 'function'
+
+      if (tabHasCondition && field.id) {
+        const statePath = `${field.id}.${isNamedTab ? tab.name : i}`
+
+        state[statePath] = {
           disableFormData: true,
           errorPaths: [],
           initialValue: undefined,
