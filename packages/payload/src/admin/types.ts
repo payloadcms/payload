@@ -11,6 +11,7 @@ export type { CustomPublishButton } from './elements/PublishButton.js'
 export type { CustomSaveButton } from './elements/SaveButton.js'
 export type { CustomSaveDraftButton } from './elements/SaveDraftButton.js'
 export type {
+  ClientDocumentTabConfig,
   DocumentTabComponent,
   DocumentTabCondition,
   DocumentTabConfig,
