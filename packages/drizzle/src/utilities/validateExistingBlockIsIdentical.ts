@@ -1,4 +1,4 @@
-import type { Block, Field } from 'payload'
+import type { Block, Field, Tab } from 'payload'
 
 import { InvalidConfiguration } from 'payload'
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/shared'
@@ -33,7 +33,7 @@ const getFlattenedFieldNames = (
     if (field.type === 'tabs') {
       return [
         ...fieldsToUse,
-        ...field.tabs.reduce((tabFields, tab) => {
+        ...(field.tabs as Tab[]).reduce((tabFields, tab) => {
           fieldPrefix = 'name' in tab ? `${prefix}_${tab.name}` : prefix
           return [
             ...tabFields,

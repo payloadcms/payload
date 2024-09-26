@@ -21,6 +21,7 @@ import type {
   RowField,
   SanitizedConfig,
   SelectField,
+  Tab,
   TabsField,
   TextareaField,
   TextField,
@@ -614,7 +615,7 @@ export function buildObjectType({
       }
     },
     tabs: (objectTypeConfig: ObjectTypeConfig, field: TabsField) =>
-      field.tabs.reduce((tabSchema, tab) => {
+      (field.tabs as Tab[]).reduce((tabSchema, tab) => {
         if (tabHasName(tab)) {
           const interfaceName =
             tab?.interfaceName || combineParentName(parentName, toWords(tab.name, true))
