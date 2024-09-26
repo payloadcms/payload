@@ -8,6 +8,7 @@ import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
 import { checkDependencies, createClientConfig, parseCookies } from 'payload'
 import React from 'react'
 
+import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
@@ -162,7 +163,7 @@ export const RootLayout = async ({
 
   const isNavOpen = navPreferences?.value?.open ?? true
 
-  const clientConfig = await createClientConfig({
+  const clientConfig = await getClientConfig({
     config,
     i18n,
   })

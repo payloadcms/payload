@@ -9,6 +9,7 @@ import React, { Fragment } from 'react'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
+import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { initPage } from '../../utilities/initPage/index.js'
 import { getViewFromConfig } from './getViewFromConfig.js'
 
@@ -55,18 +56,19 @@ export const RootPage = async ({
 
   const segments = Array.isArray(params.segments) ? params.segments : []
 
-  const { DefaultView, initPageOptions, templateClassName, templateType } = getViewFromConfig({
-    adminRoute,
-    config,
-    currentRoute,
-    importMap,
-    searchParams,
-    segments,
-  })
+  const { DefaultView, initPageOptions, serverProps, templateClassName, templateType } =
+    getViewFromConfig({
+      adminRoute,
+      config,
+      currentRoute,
+      importMap,
+      searchParams,
+      segments,
+    })
 
   let dbHasUser = false
 
-  if (!DefaultView?.Component && !DefaultView?.payloadComponent) {
+  if (!DefaultView) {
     notFound()
   }
 
@@ -98,12 +100,19 @@ export const RootPage = async ({
     }
   }
 
+  const clientConfig = await getClientConfig({
+    config,
+    i18n: initPageResult?.req.i18n,
+  })
+
   const RenderedView = (
     <RenderServerComponent
+      clientProps={{ clientConfig }}
       Component={DefaultView.payloadComponent}
       Fallback={DefaultView.Component}
       importMap={importMap}
       serverProps={{
+        ...serverProps,
         i18n: initPageResult?.req.i18n,
         importMap,
         initPageResult,
