@@ -818,6 +818,12 @@ export type Config = {
       /** The route for the unauthorized page. */
       unauthorized?: string
     }
+    /**
+     * Restrict the Admin Panel theme to use only one of your choice
+     *
+     * @default 'all' // The theme can be configured by users
+     */
+    theme?: 'all' | 'dark' | 'light'
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
