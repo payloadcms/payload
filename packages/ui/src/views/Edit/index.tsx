@@ -122,10 +122,19 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
 
   const isLockingEnabled = lockDocumentsProp !== false
 
-  const preventLeaveWithoutSaving =
-    (!(collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
-      !(globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)) &&
-    !disableLeaveWithoutSaving
+  let preventLeaveWithoutSaving = true
+
+  if (collectionConfig) {
+    preventLeaveWithoutSaving = !(
+      collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave
+    )
+  } else if (globalConfig) {
+    preventLeaveWithoutSaving = !(
+      globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave
+    )
+  } else if (typeof disableLeaveWithoutSaving !== 'undefined') {
+    preventLeaveWithoutSaving = !disableLeaveWithoutSaving
+  }
 
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)

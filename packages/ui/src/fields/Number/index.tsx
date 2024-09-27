@@ -74,7 +74,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
       let newVal = val
 
       if (Number.isNaN(val)) {
-        newVal = undefined
+        newVal = null
       }
 
       if (typeof onChangeFromProps === 'function') {

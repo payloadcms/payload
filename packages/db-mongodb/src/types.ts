@@ -20,6 +20,7 @@ import type {
   JSONField,
   NumberField,
   Payload,
+  PayloadRequest,
   PointField,
   RadioField,
   RelationshipField,
@@ -109,5 +110,5 @@ export type FieldToSchemaMap<TSchema> = {
   upload: FieldGeneratorFunction<TSchema, UploadField>
 }
 
-export type MigrateUpArgs = { payload: Payload }
-export type MigrateDownArgs = { payload: Payload }
+export type MigrateUpArgs = { payload: Payload; req: PayloadRequest }
+export type MigrateDownArgs = { payload: Payload; req: PayloadRequest }

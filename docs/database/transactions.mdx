@@ -69,6 +69,48 @@ The following functions can be used for managing transactions:
 `payload.db.commitTransaction` - Takes the identifier for the transaction, finalizes any changes.
 `payload.db.rollbackTransaction` - Takes the identifier for the transaction, discards any changes.
 
+Payload uses the `req` object to pass the transaction ID through to the database adapter. If you are not using the `req` object, you can make a new object to pass the transaction ID directly to database adapter methods and local API calls.
+Example:
+
+```ts
+import payload from 'payload'
+import config from './payload.config'
+
+const standalonePayloadScript = async () => {
+  // initialize Payload
+  await payload.init({ config })
+
+  const transactionID = await payload.db.beginTransaction()
+
+  try {
+    // Make an update using the local API
+    await payload.update({
+      collection: 'posts',
+      data: {
+        some: 'data',
+      },
+      where: {
+        slug: { equals: 'my-slug' }
+      },
+      req: { transactionID },
+    })
+
+    /*
+      You can make additional db changes or run other functions
+      that need to be committed on an all or nothing basis
+     */
+
+    // Commit the transaction
+    await payload.db.commitTransaction(transactionID)
+  } catch (error) {
+    // Rollback the transaction
+    await payload.db.rollbackTransaction(transactionID)
+  }
+}
+
+standalonePayloadScript()
+```
+
 ## Disabling Transactions
 
 If you wish to disable transactions entirely, you can do so by passing `false` as the `transactionOptions` in your database adapter configuration. All the official Payload database adapters support this option.

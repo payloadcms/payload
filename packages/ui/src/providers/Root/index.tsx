@@ -4,7 +4,6 @@ import type { ClientConfig, LanguageOptions, PayloadServerAction, Permissions, U
 
 import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
-import { WindowInfoProvider } from '@faceless-ui/window-info'
 import React, { Fragment } from 'react'
 
 import type { Theme } from '../Theme/index.js'
@@ -14,6 +13,7 @@ import { NavProvider } from '../../elements/Nav/context.js'
 import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
 import { StepNavProvider } from '../../elements/StepNav/index.js'
 import { fieldComponents } from '../../fields/index.js'
+import { WindowInfoProvider } from '../../providers/WindowInfo/index.js'
 import { ActionsProvider } from '../Actions/index.js'
 import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
@@ -92,7 +92,7 @@ export const RootProvider: React.FC<Props> = ({
                         <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
                           <AuthProvider permissions={permissions} user={user}>
                             <PreferencesProvider>
-                              <ThemeProvider cookiePrefix={config.cookiePrefix} theme={theme}>
+                              <ThemeProvider theme={theme}>
                                 <ParamsProvider>
                                   <LocaleProvider>
                                     <StepNavProvider>

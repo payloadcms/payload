@@ -11,9 +11,9 @@ export type GenericLabelProps = {
 }
 
 export type FieldLabelClientProps<
-  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+  TFieldClient extends Partial<ClientFieldWithOptionalType> = Partial<ClientFieldWithOptionalType>,
 > = {
-  field: TFieldClient
+  field?: TFieldClient
 } & GenericLabelProps
 
 export type FieldLabelServerProps<

@@ -78,7 +78,11 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
   }, [fields, href, locale, docInfo, hasGenerateURLFn, getData])
 
   return (
-    <div>
+    <div
+      style={{
+        marginBottom: '20px',
+      }}
+    >
       <div>{t('plugin-seo:preview')}</div>
       <div
         style={{
