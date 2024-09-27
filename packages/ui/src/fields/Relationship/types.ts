@@ -2,6 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { ClientCollectionConfig, ClientConfig, FilterOptionsResult } from 'payload'
 
 export type Option = {
+  allowEdit: boolean
   label: string
   options?: Option[]
   relationTo?: string

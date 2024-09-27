@@ -45,7 +45,7 @@ export const Status: React.FC = () => {
     statusToRender = 'changed'
   } else if (!publishedDoc) {
     statusToRender = 'draft'
-  } else if (publishedDoc && unpublishedVersions?.docs?.length <= 1) {
+  } else if (publishedDoc && unpublishedVersions?.docs?.length <= 0) {
     statusToRender = 'published'
   }
 

@@ -37,11 +37,11 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
       label,
       required,
     },
+    field: fieldFromProps,
     hasGenerateTitleFn,
     labelProps,
   } = props || {}
   const { path: pathFromContext } = useFieldProps()
-
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
   const field: FieldType<string> = useField({
@@ -98,7 +98,13 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel field={null} Label={Label} label={label} {...(labelProps || {})} />
+          <FieldLabel
+            field={fieldFromProps}
+            Label={Label}
+            label={label}
+            required={required}
+            {...(labelProps || {})}
+          />
           {hasGenerateTitleFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
@@ -150,7 +156,6 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
             Component: null,
             RenderedComponent: errorMessage,
           }}
-          label={label}
           onChange={setValue}
           path={pathFromContext}
           required={required}

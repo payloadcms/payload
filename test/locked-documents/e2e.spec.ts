@@ -292,6 +292,51 @@ describe('locked documents', () => {
 
       expect(unlockedDocs.docs.length).toBe(0)
     })
+
+    test('should keep document locked when navigating to other tabs i.e. api', async () => {
+      await page.goto(postsUrl.edit(postDoc.id))
+      await page.waitForURL(postsUrl.edit(postDoc.id))
+
+      const textInput = page.locator('#field-text')
+      await textInput.fill('testing tab navigation...')
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      const lockedDocs = await payload.find({
+        collection: lockedDocumentCollection,
+        limit: 1,
+        pagination: false,
+        where: {
+          'document.value': { equals: postDoc.id },
+        },
+      })
+
+      expect(lockedDocs.docs.length).toBe(1)
+
+      await page.locator('li[aria-label="API"] a').click()
+
+      // Locate the modal container
+      const modalContainer = page.locator('.payload__modal-container')
+      await expect(modalContainer).toBeVisible()
+
+      // Click the "Leave anyway" button
+      await page.locator('.leave-without-saving__controls .btn--style-primary').click()
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      const unlockedDocs = await payload.find({
+        collection: lockedDocumentCollection,
+        limit: 1,
+        pagination: false,
+        where: {
+          'document.value': { equals: postDoc.id },
+        },
+      })
+
+      expect(unlockedDocs.docs.length).toBe(1)
+    })
   })
 
   describe('document locking - incoming user', () => {

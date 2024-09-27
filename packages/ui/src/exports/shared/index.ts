@@ -20,5 +20,8 @@ export {
   type Group,
   groupNavItems,
 } from '../../utilities/groupNavItems.js'
+export { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
+export { handleGoBack } from '../../utilities/handleGoBack.js'
+export { handleTakeOver } from '../../utilities/handleTakeOver.js'
 export { hasSavePermission } from '../../utilities/hasSavePermission.js'
 export { isEditing } from '../../utilities/isEditing.js'

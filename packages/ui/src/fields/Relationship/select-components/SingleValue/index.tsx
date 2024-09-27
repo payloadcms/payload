@@ -25,7 +25,7 @@ export const SingleValue: React.FC<
 > = (props) => {
   const {
     children,
-    data: { label, relationTo, value },
+    data: { allowEdit, label, relationTo, value },
     selectProps: { customProps: { onDocumentDrawerOpen } = {} } = {},
   } = props
 
@@ -39,7 +39,7 @@ export const SingleValue: React.FC<
       <div className={`${baseClass}__label`}>
         <div className={`${baseClass}__label-text`}>
           <div className={`${baseClass}__text`}>{children}</div>
-          {relationTo && hasReadPermission && (
+          {relationTo && hasReadPermission && allowEdit !== false && (
             <Fragment>
               <button
                 aria-label={t('general:editLabel', { label })}

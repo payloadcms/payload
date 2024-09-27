@@ -1,4 +1,4 @@
-import type { Payload } from 'payload';
+import type { Payload } from 'payload'
 
 import path from 'path'
 import { getFileByPath } from 'payload'
@@ -140,6 +140,9 @@ describe('Joins Field', () => {
   it('should populate joins using find', async () => {
     const result = await payload.find({
       collection: 'categories',
+      where: {
+        id: { equals: category.id },
+      },
     })
 
     const [categoryWithPosts] = result.docs
@@ -147,6 +150,29 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.group.relatedPosts.docs).toHaveLength(10)
     expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('title')
     expect(categoryWithPosts.group.relatedPosts.docs[0].title).toBe('test 14')
+  })
+
+  it('should not error when deleting documents with joins', async () => {
+    const category = await payload.create({
+      collection: 'categories',
+      data: {
+        name: 'category with post',
+      },
+    })
+
+    const post = await createPost({
+      category: category.id,
+    })
+
+    const result = await payload.delete({
+      collection: 'categories',
+      // id: category.id,
+      where: {
+        id: { equals: category.id },
+      },
+    })
+
+    expect(result.docs[0].id).toStrictEqual(category.id)
   })
 
   describe('Joins with localization', () => {
