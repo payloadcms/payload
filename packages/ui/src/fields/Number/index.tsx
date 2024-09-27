@@ -12,6 +12,7 @@ import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
@@ -33,6 +34,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
         width,
       } = {} as NumberFieldClientProps['field']['admin'],
       hasMany = false,
+      label,
       max = Infinity,
       maxRows = Infinity,
       min = -Infinity,
@@ -143,7 +145,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Label}
+      {Label || <FieldLabel label={label} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
         {Error}
         {hasMany ? (

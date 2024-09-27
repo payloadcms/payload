@@ -13,6 +13,7 @@ import { Radio } from './Radio/index.js'
 
 const baseClass = 'radio-group'
 
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 
 const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
@@ -29,6 +30,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
         style,
         width,
       } = {} as RadioFieldClientProps['field']['admin'],
+      label,
       options = [],
       required,
     } = {} as RadioFieldClientProps['field'],
@@ -88,7 +90,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
       }}
     >
       {Error}
-      {Label}
+      {Label || <FieldLabel label={label} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
         <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
           {options.map((option) => {

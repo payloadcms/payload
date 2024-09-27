@@ -4,6 +4,7 @@ import React from 'react'
 
 import type { TextAreaInputProps } from './types.js'
 
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
@@ -16,10 +17,12 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
     Description,
     Error,
     Label,
+    label,
     onChange,
     path,
     placeholder,
     readOnly,
+    required,
     rows,
     rtl,
     showError,
@@ -46,7 +49,7 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
         width,
       }}
     >
-      {Label}
+      {Label || <FieldLabel label={label} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
         {Error}
         {BeforeInput}

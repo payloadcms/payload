@@ -12,6 +12,7 @@ import type { GetResults, Option, Value } from './types.js'
 import { AddNewRelation } from '../../elements/AddNewRelation/index.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
@@ -51,6 +52,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         width,
       } = {},
       hasMany,
+      label,
       relationTo,
       required,
     },
@@ -597,7 +599,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         width,
       }}
     >
-      {Label}
+      {Label || <FieldLabel label={label} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
         {Error}
         {!errorLoading && (

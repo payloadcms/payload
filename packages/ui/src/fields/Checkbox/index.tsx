@@ -41,6 +41,7 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
         style,
         width,
       } = {} as CheckboxFieldClientProps['field']['admin'],
+      label,
       required,
     } = {} as CheckboxFieldClientProps['field'],
     Label,
@@ -112,6 +113,7 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
         id={fieldID}
         inputRef={null}
         Label={Label}
+        label={label}
         name={path}
         onToggle={onToggle}
         partialChecked={partialChecked}

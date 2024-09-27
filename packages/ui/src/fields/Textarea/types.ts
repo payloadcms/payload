@@ -1,3 +1,4 @@
+import type { StaticLabel } from 'payload'
 import type React from 'react'
 
 import { type ChangeEvent } from 'react'
@@ -10,6 +11,7 @@ export type TextAreaInputProps = {
   readonly Error?: React.ReactNode
   readonly inputRef?: React.RefObject<HTMLInputElement>
   readonly Label?: React.ReactNode
+  readonly label?: StaticLabel
   readonly onChange?: (e: ChangeEvent<HTMLTextAreaElement>) => void
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   readonly path: string

@@ -1,6 +1,9 @@
 'use client'
+import type { StaticLabel } from 'payload'
+
 import React from 'react'
 
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { CheckIcon } from '../../icons/Check/index.js'
 import { LineIcon } from '../../icons/Line/index.js'
 
@@ -12,6 +15,7 @@ export type CheckboxInputProps = {
   readonly id?: string
   readonly inputRef?: React.RefObject<HTMLInputElement | null>
   readonly Label?: React.ReactNode
+  readonly label?: StaticLabel
   readonly name?: string
   readonly onToggle: (event: React.ChangeEvent<HTMLInputElement>) => void
   readonly partialChecked?: boolean
@@ -30,6 +34,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   className,
   inputRef,
   Label,
+  label,
   onToggle,
   partialChecked,
   readOnly,
@@ -69,7 +74,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
         </span>
         {AfterInput}
       </div>
-      {Label}
+      {Label || <FieldLabel label={label} required={required} />}
     </div>
   )
 }

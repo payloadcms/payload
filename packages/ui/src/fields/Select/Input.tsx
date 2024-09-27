@@ -1,5 +1,5 @@
 'use client'
-import type { OptionObject } from 'payload'
+import type { OptionObject, StaticLabel } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -7,6 +7,7 @@ import React from 'react'
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
@@ -21,6 +22,7 @@ export type SelectInputProps = {
   readonly isClearable?: boolean
   readonly isSortable?: boolean
   readonly Label?: React.ReactNode
+  readonly label?: StaticLabel
   readonly name: string
   readonly onChange?: ReactSelectAdapterProps['onChange']
   readonly options?: OptionObject[]
@@ -42,6 +44,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     hasMany = false,
     isClearable = true,
     isSortable = true,
+    label,
     Label,
     onChange,
     options,
@@ -90,7 +93,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         width,
       }}
     >
-      {Label}
+      {Label || <FieldLabel label={label} required={false} />}
       <div className={`${fieldBaseClass}__wrap`}>
         {Error}
         {BeforeInput}

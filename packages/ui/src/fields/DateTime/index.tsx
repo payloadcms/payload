@@ -12,6 +12,7 @@ import './index.scss'
 
 const baseClass = 'date-time-field'
 
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 
@@ -32,6 +33,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
         style,
         width,
       } = {},
+      label,
       required,
     },
     Label,
@@ -77,7 +79,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Label}
+      {Label || <FieldLabel label={label} required={required} />}
       <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
         {Error}
         {BeforeInput}

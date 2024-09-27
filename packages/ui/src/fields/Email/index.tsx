@@ -12,6 +12,7 @@ import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
@@ -32,6 +33,7 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
         style,
         width,
       } = {} as EmailFieldClientProps['field']['admin'],
+      label,
       required,
     } = {} as EmailFieldClientProps['field'],
     Label,
@@ -71,7 +73,7 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Label}
+      {Label || <FieldLabel label={label} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
         {Error}
         {BeforeInput}

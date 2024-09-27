@@ -12,6 +12,7 @@ import './index.scss'
 
 const baseClass = 'point'
 
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 
 export const PointFieldComponent: PointFieldClientComponent = (props) => {
@@ -24,6 +25,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
       name,
       _path: pathFromProps,
       admin: { className, placeholder, readOnly: readOnlyFromAdmin, step, style, width } = {},
+      label,
       required,
     },
     Label,
@@ -97,7 +99,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
     >
       <ul className={`${baseClass}__wrap`}>
         <li>
-          {Label}
+          {Label || <FieldLabel label={label} required={required} />}
           <div className="input-wrapper">
             {BeforeInput}
             {/* disable eslint rule because the label is dynamic */}

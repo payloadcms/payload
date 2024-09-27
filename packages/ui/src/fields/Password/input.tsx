@@ -6,6 +6,7 @@ import React from 'react'
 
 import type { PasswordInputProps } from './types.js'
 
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
@@ -26,6 +27,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
     path,
     placeholder,
     readOnly,
+    required,
     rtl,
     showError,
     style,
@@ -51,7 +53,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
         width,
       }}
     >
-      {Label}
+      {Label || <FieldLabel label={label} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
         {Error}
         <div>

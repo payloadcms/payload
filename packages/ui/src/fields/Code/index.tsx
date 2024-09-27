@@ -4,6 +4,7 @@ import type { CodeFieldClientComponent } from 'payload'
 import React, { useCallback } from 'react'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
@@ -34,6 +35,7 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
         style,
         width,
       } = {},
+      label,
       required,
     },
     Label,
@@ -77,7 +79,7 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Label}
+      {Label || <FieldLabel label={label} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
         {Error}
         {BeforeInput}

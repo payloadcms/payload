@@ -23,6 +23,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
       _path,
       admin: { className, isSortable, readOnly: readOnlyFromAdmin, style, width } = {},
       hasMany,
+      label,
       maxRows,
       relationTo,
       required,
@@ -68,6 +69,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
       filterOptions={filterOptions}
       hasMany={hasMany}
       isSortable={isSortable}
+      label={label}
       Label={Label}
       maxRows={maxRows}
       onChange={setValue}

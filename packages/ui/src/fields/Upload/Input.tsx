@@ -2,14 +2,10 @@
 
 import type {
   ClientCollectionConfig,
-  FieldDescriptionClientProps,
-  FieldErrorClientProps,
   FieldLabelClientProps,
   FilterOptionsResult,
   JsonObject,
-  MappedComponent,
   PaginatedDocs,
-  StaticDescription,
   StaticLabel,
   UploadFieldClient,
   UploadField as UploadFieldType,
@@ -29,6 +25,7 @@ import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { Dropzone } from '../../elements/Dropzone/index.js'
 import { useListDrawer } from '../../elements/ListDrawer/index.js'
 import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -82,11 +79,13 @@ export function UploadInput(props: UploadInputProps) {
     hasMany,
     isSortable,
     Label,
+    label,
     maxRows,
     onChange: onChangeFromProps,
     path,
     readOnly,
     relationTo,
+    required,
     serverURL,
     showError,
     style,
@@ -416,7 +415,7 @@ export function UploadInput(props: UploadInputProps) {
         width,
       }}
     >
-      {Label}
+      {Label || <FieldLabel label={label} required={required} />}
       <div className={`${baseClass}__wrap`}>{Error}</div>
       <div className={`${baseClass}__dropzoneAndUpload`}>
         {hasMany && Array.isArray(value) && value.length > 0 ? (

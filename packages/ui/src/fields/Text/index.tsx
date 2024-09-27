@@ -23,12 +23,12 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
     BeforeInput,
     Description,
     Error,
-    field,
     field: {
       name,
       _path: pathFromProps,
       admin: { className, placeholder, readOnly: readOnlyFromAdmin, rtl, style, width } = {},
       hasMany,
+      label,
       localized,
       maxLength,
       maxRows,
@@ -122,10 +122,10 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
       className={className}
       Description={Description}
       Error={Error}
-      field={field}
       hasMany={hasMany}
       inputRef={inputRef}
       Label={Label}
+      label={label}
       maxRows={maxRows}
       minRows={minRows}
       onChange={

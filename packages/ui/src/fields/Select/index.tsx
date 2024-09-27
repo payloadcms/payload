@@ -46,6 +46,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
         width,
       } = {} as SelectFieldClientProps['field']['admin'],
       hasMany = false,
+      label,
       options: optionsFromProps = [],
       required,
     },
@@ -112,6 +113,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       isClearable={isClearable}
       isSortable={isSortable}
       Label={Label}
+      label={label}
       name={name}
       onChange={onChange}
       options={options}

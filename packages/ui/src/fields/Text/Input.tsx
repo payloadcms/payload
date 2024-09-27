@@ -7,6 +7,7 @@ import React from 'react'
 import type { TextInputProps } from './types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
@@ -21,12 +22,14 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
     hasMany,
     inputRef,
     Label,
+    label,
     maxRows,
     onChange,
     onKeyDown,
     path,
     placeholder,
     readOnly,
+    required,
     rtl,
     showError,
     style,
@@ -54,7 +57,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
         width,
       }}
     >
-      {Label}
+      {Label || <FieldLabel label={label} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
         {Error}
         {BeforeInput}
