@@ -22,17 +22,7 @@ const RowFieldComponent: RowFieldClientComponent = (props) => {
   return (
     <RowProvider>
       <div className={[fieldBaseClass, baseClass, className].filter(Boolean).join(' ')}>
-        <RenderFields
-          className={`${baseClass}__fields`}
-          fields={fields}
-          forceRender={forceRender}
-          indexPath={indexPath}
-          margins={false}
-          path={path}
-          permissions={siblingPermissions}
-          readOnly={readOnly}
-          schemaPath={_schemaPath}
-        />
+        {/* Fields Here */}
       </div>
     </RowProvider>
   )

@@ -8,8 +8,6 @@ import {
   Collapsible,
   ErrorPill,
   Pill,
-  RenderComponent,
-  RenderFields,
   SectionTitle,
   useDocumentInfo,
   useFormSubmitted,
@@ -31,6 +29,7 @@ type Props = {
   field: LexicalRichTextFieldProps['field']
   formData: BlockFields
   formSchema: ClientField[]
+  Label?: React.ReactNode
   nodeKey: string
   path: string
   schemaPath: string
@@ -60,7 +59,7 @@ function removeUndefinedAndNullAndEmptyArraysRecursively(obj: object) {
  * not the whole document.
  */
 export const BlockContent: React.FC<Props> = (props) => {
-  const { baseClass, clientBlock, field, formSchema, nodeKey, schemaPath } = props
+  const { baseClass, clientBlock, field, formSchema, Label, nodeKey, schemaPath } = props
   let { formData } = props
 
   const { i18n } = useTranslation()
@@ -186,12 +185,7 @@ export const BlockContent: React.FC<Props> = (props) => {
         className={classNames}
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
         header={
-          clientBlock?.admin?.components?.Label ? (
-            <RenderComponent
-              clientProps={{ blockKind: 'lexicalBlock', formData }}
-              mappedComponent={clientBlock.admin.components.Label}
-            />
-          ) : (
+          Label || (
             <div className={`${baseClass}__block-header`}>
               <div>
                 <Pill
@@ -229,15 +223,7 @@ export const BlockContent: React.FC<Props> = (props) => {
           setIsCollapsed(incomingCollapsedState)
         }}
       >
-        <RenderFields
-          className={`${baseClass}__fields`}
-          fields={formSchema}
-          forceRender
-          margins="small"
-          path="" // Leaving path empty makes it so field values are not prefixed / scoped by the entire schemaPath. e.g. we can access "myField" instead of "someLexicalField.feature.blocks.someArrayB" // TODO: Could there be any implications leaving path different than schemaPath?
-          readOnly={false}
-          schemaPath={schemaPath} // Having the correct schemaPath here allows sub-fields (like array > addRow) to run correct form-state calls and retrieve their needed form state from the server
-        />
+        {/* Fields Here */}
       </Collapsible>
 
       <FormSavePlugin onChange={onFormChange} />

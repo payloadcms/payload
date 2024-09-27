@@ -132,12 +132,7 @@ export const UploadDrawer: React.FC<{
         onChange={[onChange]}
         onSubmit={handleUpdateEditData}
       >
-        <RenderFields
-          fields={Array.isArray(fields) ? fields : []}
-          path=""
-          readOnly={false}
-          schemaPath=""
-        />
+        {/* Fields Here */}
         <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
       </Form>
     </Drawer>

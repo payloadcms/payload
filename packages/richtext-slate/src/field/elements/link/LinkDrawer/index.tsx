@@ -10,7 +10,6 @@ import {
   useConfig,
   useDocumentInfo,
   useEditDepth,
-  useFieldProps,
   useHotkey,
   useTranslation,
 } from '@payloadcms/ui'
@@ -29,9 +28,9 @@ export const LinkDrawer: React.FC<Props> = ({
   fields,
   handleModalSubmit,
   initialState,
+  schemaPath,
 }) => {
   const { t } = useTranslation()
-  const { schemaPath } = useFieldProps()
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
   const { id } = useDocumentInfo()
   const { config } = useConfig()

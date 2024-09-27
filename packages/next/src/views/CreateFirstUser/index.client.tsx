@@ -85,14 +85,7 @@ export const CreateFirstUserClient: React.FC<{
         }}
       />
       <ConfirmPasswordField />
-      {/* <RenderFields
-        fields={collectionConfig.fields}
-        forceRender
-        operation="create"
-        path=""
-        readOnly={false}
-        schemaPath={userSlug}
-      /> */}
+      {/* Fields Here */}
       <FormSubmit size="large">{t('general:create')}</FormSubmit>
     </Form>
   )

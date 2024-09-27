@@ -6,7 +6,6 @@ import { tabHasName, toKebabCase } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
-import { RenderFields } from '../../forms/RenderFields/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
@@ -145,7 +144,8 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
                 .join(' ')}
             >
               {Description}
-              <RenderFields
+              {/* Fields Here */}
+              {/* <RenderFields
                 fields={activeTabConfig.fields}
                 forceRender={forceRender}
                 key={
@@ -162,7 +162,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
                 }
                 readOnly={readOnly}
                 schemaPath={`${_schemaPath ? `${_schemaPath}` : ''}${tabHasName(activeTabConfig) && activeTabConfig.name ? `.${activeTabConfig.name}` : ''}`}
-              />
+              /> */}
             </div>
           )}
         </div>

@@ -144,16 +144,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
         key={row.id}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        <RenderFields
-          className={`${baseClass}__fields`}
-          fields={block.fields}
-          forceRender={forceRender}
-          margins="small"
-          path={path}
-          permissions={permissions?.blocks?.[block.slug]?.fields}
-          readOnly={readOnly}
-          schemaPath={`${schemaPath}.${block.slug}`}
-        />
+        {/* Fields Here */}
       </Collapsible>
     </div>
   )

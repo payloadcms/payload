@@ -1,15 +1,7 @@
 'use client'
 import type { ClientField, FormState } from 'payload'
 
-import {
-  Form,
-  FormSubmit,
-  RenderFields,
-  useConfig,
-  useDocumentInfo,
-  useFieldProps,
-  useTranslation,
-} from '@payloadcms/ui'
+import { Form, FormSubmit, useConfig, useDocumentInfo, useTranslation } from '@payloadcms/ui'
 import { getFormState } from '@payloadcms/ui/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 import { v4 as uuid } from 'uuid'
@@ -24,11 +16,11 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   fieldMapOverride,
   handleDrawerSubmit,
   schemaFieldsPathOverride,
+  schemaPath,
   schemaPathSuffix,
 }) => {
   const { t } = useTranslation()
   const { id } = useDocumentInfo()
-  const { schemaPath } = useFieldProps()
   const { config } = useConfig()
   const [initialState, setInitialState] = useState<false | FormState>(false)
   const {
@@ -95,14 +87,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
       onSubmit={handleDrawerSubmit}
       uuid={uuid()}
     >
-      <RenderFields
-        fields={Array.isArray(fields) ? fields : []}
-        forceRender
-        path="" // See Blocks feature path for details as for why this is empty
-        readOnly={false}
-        schemaPath={schemaFieldsPath}
-      />
-
+      {/* Fields Here */}
       <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
     </Form>
   )

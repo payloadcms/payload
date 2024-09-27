@@ -5,7 +5,6 @@ import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import { Collapsible as CollapsibleElement } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import { RenderFields } from '../../forms/RenderFields/index.js'
 import { WatchChildErrors } from '../../forms/WatchChildErrors/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -144,16 +143,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
           initCollapsed={collapsedOnMount}
           onToggle={onToggle}
         >
-          <RenderFields
-            fields={fields}
-            forceRender
-            indexPath={indexPath}
-            margins="small"
-            path={path}
-            permissions={siblingPermissions}
-            readOnly={disabled}
-            schemaPath={_schemaPath}
-          />
+          {/* Fields Here */}
         </CollapsibleElement>
         {Description}
       </div>
