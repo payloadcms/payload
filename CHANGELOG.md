@@ -1,3 +1,7 @@
+## [2.30.0](https://github.com/payloadcms/payload/compare/v2.29.0...v2.30.0) (2024-09-27)
+
+* export toast from react toastify in payload ([#8438](https://github.com/payloadcms/payload/issues/8438)) ([17fc2d1](https://github.com/payloadcms/payload/commit/17fc2d13d06b6de01f839c27fd706bc0d6a185eb))
+
 ## [2.29.0](https://github.com/payloadcms/payload/compare/v2.28.0...v2.29.0) (2024-09-25)
 
 
