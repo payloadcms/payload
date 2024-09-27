@@ -14,6 +14,8 @@ import { arrayCollectionSlug } from './collections/Array'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock'
 import configPromise from './config'
 import { defaultLocale, hungarianLocale, localizedSortSlug } from './shared'
+import { tabSlug } from './collections/Tab'
+import { groupSlug } from './collections/Group'
 import {
   englishTitle,
   localizedPostsSlug,
@@ -1058,6 +1060,282 @@ describe('Localization', () => {
       expect(rowDefault.textNotLocalized).toEqual('test')
       expect(rowSpanish.text).toEqual('spanish')
       expect(rowSpanish.textNotLocalized).toEqual('test')
+    })
+  })
+
+  describe('Localized group and tabs', () => {
+    it('should properly create/update/read localized group field', async () => {
+      const result = await payload.create({
+        collection: groupSlug,
+        data: {
+          groupLocalized: {
+            title: 'hello en',
+          },
+        },
+        locale: englishLocale,
+      })
+
+      expect(result.groupLocalized?.title).toBe('hello en')
+
+      await payload.update({
+        collection: groupSlug,
+        locale: spanishLocale,
+        id: result.id,
+        data: {
+          groupLocalized: {
+            title: 'hello es',
+          },
+        },
+      })
+
+      const docEn = await payload.findByID({
+        collection: groupSlug,
+        locale: englishLocale,
+        id: result.id,
+      })
+      const docEs = await payload.findByID({
+        collection: groupSlug,
+        locale: spanishLocale,
+        id: result.id,
+      })
+
+      expect(docEn.groupLocalized.title).toBe('hello en')
+      expect(docEs.groupLocalized.title).toBe('hello es')
+    })
+
+    it('should properly create/update/read localized field inside of group', async () => {
+      const result = await payload.create({
+        collection: groupSlug,
+        locale: englishLocale,
+        data: {
+          group: {
+            title: 'hello en',
+          },
+        },
+      })
+
+      expect(result.group.title).toBe('hello en')
+
+      await payload.update({
+        collection: groupSlug,
+        locale: spanishLocale,
+        id: result.id,
+        data: {
+          group: {
+            title: 'hello es',
+          },
+        },
+      })
+
+      const docEn = await payload.findByID({
+        collection: groupSlug,
+        locale: englishLocale,
+        id: result.id,
+      })
+      const docEs = await payload.findByID({
+        collection: groupSlug,
+        locale: spanishLocale,
+        id: result.id,
+      })
+
+      expect(docEn.group.title).toBe('hello en')
+      expect(docEs.group.title).toBe('hello es')
+    })
+
+    it('should properly create/update/read deep localized field inside of group', async () => {
+      const result = await payload.create({
+        collection: groupSlug,
+        locale: englishLocale,
+        data: {
+          deep: {
+            blocks: [
+              {
+                blockType: 'first',
+                title: 'hello en',
+              },
+            ],
+            array: [{ title: 'hello en' }],
+          },
+        },
+      })
+
+      expect(result.deep.array[0].title).toBe('hello en')
+
+      await payload.update({
+        collection: groupSlug,
+        locale: spanishLocale,
+        id: result.id,
+        data: {
+          deep: {
+            blocks: [
+              {
+                blockType: 'first',
+                title: 'hello es',
+                id: result.deep.blocks[0].id,
+              },
+            ],
+            array: [
+              {
+                id: result.deep.array[0].id,
+                title: 'hello es',
+              },
+            ],
+          },
+        },
+      })
+
+      const docEn = await payload.findByID({
+        collection: groupSlug,
+        locale: englishLocale,
+        id: result.id,
+      })
+      const docEs = await payload.findByID({
+        collection: groupSlug,
+        locale: spanishLocale,
+        id: result.id,
+      })
+
+      expect(docEn.deep.array[0].title).toBe('hello en')
+      expect(docEn.deep.blocks[0].title).toBe('hello en')
+      expect(docEs.deep.array[0].title).toBe('hello es')
+      expect(docEs.deep.blocks[0].title).toBe('hello es')
+    })
+
+    it('should properly create/update/read localized tab field', async () => {
+      const result = await payload.create({
+        collection: tabSlug,
+        locale: englishLocale,
+        data: {
+          tabLocalized: {
+            title: 'hello en',
+          },
+        },
+      })
+
+      expect(result.tabLocalized?.title).toBe('hello en')
+
+      await payload.update({
+        collection: tabSlug,
+        locale: spanishLocale,
+        id: result.id,
+        data: {
+          tabLocalized: {
+            title: 'hello es',
+          },
+        },
+      })
+
+      const docEn = await payload.findByID({
+        collection: tabSlug,
+        locale: englishLocale,
+        id: result.id,
+      })
+      const docEs = await payload.findByID({
+        collection: tabSlug,
+        locale: spanishLocale,
+        id: result.id,
+      })
+
+      expect(docEn.tabLocalized.title).toBe('hello en')
+      expect(docEs.tabLocalized.title).toBe('hello es')
+    })
+
+    it('should properly create/update/read localized field inside of tab', async () => {
+      const result = await payload.create({
+        collection: tabSlug,
+        locale: englishLocale,
+        data: {
+          tab: {
+            title: 'hello en',
+          },
+        },
+      })
+
+      expect(result.tab.title).toBe('hello en')
+
+      await payload.update({
+        collection: tabSlug,
+        locale: spanishLocale,
+        id: result.id,
+        data: {
+          tab: {
+            title: 'hello es',
+          },
+        },
+      })
+
+      const docEn = await payload.findByID({
+        collection: tabSlug,
+        locale: englishLocale,
+        id: result.id,
+      })
+      const docEs = await payload.findByID({
+        collection: tabSlug,
+        locale: spanishLocale,
+        id: result.id,
+      })
+
+      expect(docEn.tab.title).toBe('hello en')
+      expect(docEs.tab.title).toBe('hello es')
+    })
+
+    it('should properly create/update/read deep localized field inside of tab', async () => {
+      const result = await payload.create({
+        collection: tabSlug,
+        locale: englishLocale,
+        data: {
+          deep: {
+            blocks: [
+              {
+                blockType: 'first',
+                title: 'hello en',
+              },
+            ],
+            array: [{ title: 'hello en' }],
+          },
+        },
+      })
+
+      expect(result.deep.array[0].title).toBe('hello en')
+
+      await payload.update({
+        collection: tabSlug,
+        locale: spanishLocale,
+        id: result.id,
+        data: {
+          deep: {
+            blocks: [
+              {
+                blockType: 'first',
+                title: 'hello es',
+                id: result.deep.blocks[0].id,
+              },
+            ],
+            array: [
+              {
+                id: result.deep.array[0].id,
+                title: 'hello es',
+              },
+            ],
+          },
+        },
+      })
+
+      const docEn = await payload.findByID({
+        collection: tabSlug,
+        locale: englishLocale,
+        id: result.id,
+      })
+      const docEs = await payload.findByID({
+        collection: tabSlug,
+        locale: spanishLocale,
+        id: result.id,
+      })
+
+      expect(docEn.deep.array[0].title).toBe('hello en')
+      expect(docEn.deep.blocks[0].title).toBe('hello en')
+      expect(docEs.deep.array[0].title).toBe('hello es')
+      expect(docEs.deep.blocks[0].title).toBe('hello es')
     })
   })
 })

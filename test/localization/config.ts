@@ -1,11 +1,13 @@
 import type { LocalizedPost } from './payload-types'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
 import { englishLocale } from '../globals/config'
 import { ArrayCollection } from './collections/Array'
 import { NestedToArrayAndBlock } from './collections/NestedToArrayAndBlock'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { RestrictedByLocaleCollection } from './collections/RestrictedByLocale'
+import { Group } from './collections/Group'
+import { Tab } from './collections/Tab'
 import {
   blocksWithLocalizedSameName,
   defaultLocale,
@@ -235,6 +237,8 @@ export default buildConfigWithDefaults({
       slug: 'dummy',
     },
     NestedToArrayAndBlock,
+    Group,
+    Tab,
     {
       slug: localizedSortSlug,
       access: openAccess,
