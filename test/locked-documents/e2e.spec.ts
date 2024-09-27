@@ -22,6 +22,7 @@ const { beforeAll, afterAll, describe } = test
 const lockedDocumentCollection = 'payload-locked-documents'
 
 let page: Page
+let globalUrl: AdminUrlUtil
 let postsUrl: AdminUrlUtil
 let pagesUrl: AdminUrlUtil
 let payload: PayloadTestSDK<Config>
@@ -32,6 +33,7 @@ describe('locked documents', () => {
     testInfo.setTimeout(TEST_TIMEOUT)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
 
+    globalUrl = new AdminUrlUtil(serverURL, 'menu')
     postsUrl = new AdminUrlUtil(serverURL, 'posts')
     pagesUrl = new AdminUrlUtil(serverURL, 'pages')
 
@@ -290,6 +292,51 @@ describe('locked documents', () => {
 
       expect(unlockedDocs.docs.length).toBe(0)
     })
+
+    test('should keep document locked when navigating to other tabs i.e. api', async () => {
+      await page.goto(postsUrl.edit(postDoc.id))
+      await page.waitForURL(postsUrl.edit(postDoc.id))
+
+      const textInput = page.locator('#field-text')
+      await textInput.fill('testing tab navigation...')
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      const lockedDocs = await payload.find({
+        collection: lockedDocumentCollection,
+        limit: 1,
+        pagination: false,
+        where: {
+          'document.value': { equals: postDoc.id },
+        },
+      })
+
+      expect(lockedDocs.docs.length).toBe(1)
+
+      await page.locator('li[aria-label="API"] a').click()
+
+      // Locate the modal container
+      const modalContainer = page.locator('.payload__modal-container')
+      await expect(modalContainer).toBeVisible()
+
+      // Click the "Leave anyway" button
+      await page.locator('.leave-without-saving__controls .btn--style-primary').click()
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      const unlockedDocs = await payload.find({
+        collection: lockedDocumentCollection,
+        limit: 1,
+        pagination: false,
+        where: {
+          'document.value': { equals: postDoc.id },
+        },
+      })
+
+      expect(unlockedDocs.docs.length).toBe(1)
+    })
   })
 
   describe('document locking - incoming user', () => {
@@ -389,6 +436,7 @@ describe('locked documents', () => {
       // save buttons should be readOnly / disabled
       await expect(page.locator('#action-save-draft')).toBeDisabled()
       await expect(page.locator('#action-save')).toBeDisabled()
+      await expect(page.locator('.doc-controls__dots')).toBeHidden()
 
       // fields should be readOnly / disabled
       await expect(page.locator('#field-text')).toBeDisabled()
@@ -821,10 +869,10 @@ describe('locked documents', () => {
     })
 
     test('should not show lock on document card in dashboard view if locked by current user', async () => {
-      await page.goto(postsUrl.edit('menu'))
-      await page.waitForURL(postsUrl.edit('menu'))
+      await page.goto(globalUrl.global('menu'))
+      await page.waitForURL(globalUrl.global('menu'))
 
-      const textInput = page.locator('#field-text')
+      const textInput = page.locator('#field-globalText')
       await textInput.fill('this is a global menu text field')
 
       await page.reload()

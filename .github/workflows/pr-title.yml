@@ -38,6 +38,7 @@ jobs:
             db-\*
             db-mongodb
             db-postgres
+            db-vercel-postgres
             db-sqlite
             drizzle
             email-nodemailer
@@ -62,6 +63,7 @@ jobs:
             storage-\*
             storage-azure
             storage-gcs
+            storage-uploadthing
             storage-vercel-blob
             storage-s3
             translations

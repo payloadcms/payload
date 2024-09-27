@@ -16,6 +16,8 @@ import type {
 import type { Auth, ClientUser, IncomingAuthType } from '../../auth/types.js'
 import type {
   Access,
+  AfterErrorHookArgs,
+  AfterErrorResult,
   CustomComponent,
   EditConfig,
   Endpoint,
@@ -178,14 +180,6 @@ export type AfterOperationHook<TOperationGeneric extends CollectionSlug = string
       >
     >
 
-export type AfterErrorHook = (
-  err: Error,
-  res: unknown,
-  context: RequestContext,
-  /** The collection which this hook is being run on. This is null if the AfterError hook was be added to the payload-wide config */
-  collection: null | SanitizedCollectionConfig,
-) => { response: any; status: number } | void
-
 export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
@@ -236,6 +230,10 @@ export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest
   token: string
 }) => any
+
+export type AfterErrorHook = (
+  args: { collection: SanitizedCollectionConfig } & AfterErrorHookArgs,
+) => AfterErrorResult | Promise<AfterErrorResult>
 
 export type AfterForgotPasswordHook = (args: {
   args?: any
@@ -402,7 +400,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   hooks?: {
     afterChange?: AfterChangeHook[]
     afterDelete?: AfterDeleteHook[]
-    afterError?: AfterErrorHook
+    afterError?: AfterErrorHook[]
     afterForgotPassword?: AfterForgotPasswordHook[]
     afterLogin?: AfterLoginHook[]
     afterLogout?: AfterLogoutHook[]

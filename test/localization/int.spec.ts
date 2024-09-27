@@ -281,6 +281,29 @@ describe('Localization', () => {
         expect(result.docs.map(({ id }) => id)).toContain(localizedPost.id)
       })
 
+      it('by localized field value with sorting', async () => {
+        const doc_1 = await payload.create({ collection, data: { title: 'word_b' } })
+        const doc_2 = await payload.create({ collection, data: { title: 'word_a' } })
+        const doc_3 = await payload.create({ collection, data: { title: 'word_c' } })
+
+        await payload.create({ collection, data: { title: 'others_c' } })
+
+        const { docs } = await payload.find({
+          collection,
+          sort: 'title',
+          where: {
+            title: {
+              like: 'word',
+            },
+          },
+        })
+
+        expect(docs).toHaveLength(3)
+        expect(docs[0].id).toBe(doc_2.id)
+        expect(docs[1].id).toBe(doc_1.id)
+        expect(docs[2].id).toBe(doc_3.id)
+      })
+
       if (['mongodb'].includes(process.env.PAYLOAD_DATABASE)) {
         describe('Localized sorting', () => {
           let localizedAccentPostOne: LocalizedPost

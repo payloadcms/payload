@@ -34,9 +34,13 @@ function ButtonGroupItem({
     )
   }
 
+  if (!item.ChildComponent) {
+    return null
+  }
+
   return (
     <ToolbarButton editor={editor} item={item} key={item.key}>
-      {item?.ChildComponent && <item.ChildComponent />}
+      {<item.ChildComponent />}
     </ToolbarButton>
   )
 }
@@ -58,14 +62,14 @@ function ToolbarGroupComponent({
   const {
     field: { richTextComponentMap },
   } = useEditorConfigContext()
-  const [dropdownLabel, setDropdownLabel] = React.useState<null | string>(null)
-  const [DropdownIcon, setDropdownIcon] = React.useState<null | React.FC>(null)
+  const [dropdownLabel, setDropdownLabel] = React.useState<string | undefined>(undefined)
+  const [DropdownIcon, setDropdownIcon] = React.useState<React.FC | undefined>(undefined)
 
   React.useEffect(() => {
     if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
-      setDropdownIcon(() => group.ChildComponent)
+      setDropdownIcon(() => group.ChildComponent!)
     } else {
-      setDropdownIcon(null)
+      setDropdownIcon(undefined)
     }
   }, [group])
 
@@ -73,11 +77,11 @@ function ToolbarGroupComponent({
     ({ activeItems }: { activeItems: ToolbarGroupItem[] }) => {
       if (!activeItems.length) {
         if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
-          setDropdownIcon(() => group.ChildComponent)
-          setDropdownLabel(null)
+          setDropdownIcon(() => group.ChildComponent!)
+          setDropdownLabel(undefined)
         } else {
-          setDropdownIcon(null)
-          setDropdownLabel(null)
+          setDropdownIcon(undefined)
+          setDropdownLabel(undefined)
         }
         return
       }
@@ -106,9 +110,8 @@ function ToolbarGroupComponent({
           <ToolbarDropdown
             anchorElem={anchorElem}
             editor={editor}
-            groupKey={group.key}
+            group={group}
             Icon={DropdownIcon}
-            items={group.items}
             itemsContainerClassNames={['fixed-toolbar__dropdown-items']}
             label={dropdownLabel}
             maxActiveItems={1}
@@ -118,8 +121,7 @@ function ToolbarGroupComponent({
           <ToolbarDropdown
             anchorElem={anchorElem}
             editor={editor}
-            groupKey={group.key}
-            items={group.items}
+            group={group}
             itemsContainerClassNames={['fixed-toolbar__dropdown-items']}
             label={dropdownLabel}
             maxActiveItems={1}
@@ -153,7 +155,7 @@ function FixedToolbar({
 }): React.ReactNode {
   const currentToolbarRef = React.useRef<HTMLDivElement>(null)
 
-  const { y } = useScrollInfo()
+  const { y } = useScrollInfo!()
 
   // Memoize the parent toolbar element
   const parentToolbarElem = useMemo(() => {
@@ -192,13 +194,13 @@ function FixedToolbar({
       )
 
       if (overlapping) {
-        currentToolbarRef.current.className = 'fixed-toolbar fixed-toolbar--overlapping'
+        currentToolbarElem.className = 'fixed-toolbar fixed-toolbar--overlapping'
         parentToolbarElem.className = 'fixed-toolbar fixed-toolbar--hide'
       } else {
-        if (!currentToolbarRef.current.classList.contains('fixed-toolbar--overlapping')) {
+        if (!currentToolbarElem.classList.contains('fixed-toolbar--overlapping')) {
           return
         }
-        currentToolbarRef.current.className = 'fixed-toolbar'
+        currentToolbarElem.className = 'fixed-toolbar'
         parentToolbarElem.className = 'fixed-toolbar'
       }
     },

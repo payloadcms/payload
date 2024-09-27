@@ -29,7 +29,7 @@ import './index.scss'
 
 type Props = {
   readonly formData: InlineBlockFields
-  readonly nodeKey?: string
+  readonly nodeKey: string
 }
 
 export const InlineBlockComponent: React.FC<Props> = (props) => {
@@ -45,12 +45,12 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   } = useEditorConfigContext()
 
   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
-  const blocksField: BlocksFieldClient = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
+  const blocksField: BlocksFieldClient = richTextComponentMap?.get(componentMapRenderedBlockPath)[0]
   const clientBlock = blocksField.blocks.find((block) => block.slug === formData.blockType)
 
   const removeInlineBlock = useCallback(() => {
     editor.update(() => {
-      $getNodeByKey(nodeKey).remove()
+      $getNodeByKey(nodeKey)?.remove()
     })
   }, [editor, nodeKey])
 
@@ -103,7 +103,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   const blockDisplayName = clientBlock?.labels?.singular
     ? getTranslation(clientBlock.labels.singular, i18n)
-    : clientBlock.slug
+    : clientBlock?.slug
 
   return (
     <div
@@ -122,7 +122,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           mappedComponent={clientBlock.admin.components.Label}
         />
       ) : (
-        <div>{getTranslation(clientBlock.labels?.singular, i18n)}</div>
+        <div>{getTranslation(clientBlock!.labels!.singular, i18n)}</div>
       )}
       {editor.isEditable() && (
         <div className={`${baseClass}__actions`}>

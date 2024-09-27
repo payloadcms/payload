@@ -2,6 +2,7 @@ import type { SQL } from 'drizzle-orm'
 import type { Field, Operator, Where } from 'payload'
 
 import { and, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
+import { PgUUID } from 'drizzle-orm/pg-core'
 import { QueryError } from 'payload'
 import { validOperators } from 'payload/shared'
 
@@ -194,6 +195,7 @@ export function parseParams({
                   adapter,
                   columns,
                   field,
+                  isUUID: table?.[columnName] instanceof PgUUID,
                   operator,
                   relationOrPath,
                   val,

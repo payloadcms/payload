@@ -31,7 +31,7 @@ export type DocumentInfoProps = {
   readonly globalSlug?: SanitizedGlobalConfig['slug']
   readonly hasPublishPermission?: boolean
   readonly hasSavePermission?: boolean
-  readonly id: null | number | string
+  readonly id?: number | string
   readonly initialData?: Data
   readonly initialState?: FormState
   readonly isEditing?: boolean

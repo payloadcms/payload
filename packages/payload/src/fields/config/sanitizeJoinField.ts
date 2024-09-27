@@ -41,6 +41,9 @@ export const sanitizeJoinField = ({
   // Traverse fields and match based on the schema path
   traverseFields({
     callback: ({ field, next }) => {
+      if (!('name' in field) || !field.name) {
+        return
+      }
       const currentSegment = pathSegments[currentSegmentIndex]
       // match field on path segments
       if ('name' in field && field.name === currentSegment) {

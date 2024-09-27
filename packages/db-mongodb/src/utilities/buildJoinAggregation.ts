@@ -111,9 +111,10 @@ export const buildJoinAggregation = async ({
                     input: `$${as}.docs`,
                   },
                 }, // Slicing the docs to match the limit
-                [`${as}.hasNextPage`]: {
-                  $gt: [{ $size: `$${as}.docs` }, limitJoin || Number.MAX_VALUE],
-                }, // Boolean indicating if more docs than limit
+                [`${as}.hasNextPage`]: limitJoin
+                  ? { $gt: [{ $size: `$${as}.docs` }, limitJoin] }
+                  : false,
+                // Boolean indicating if more docs than limit
               },
             },
           )

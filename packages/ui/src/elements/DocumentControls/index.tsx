@@ -235,7 +235,7 @@ export const DocumentControls: React.FC<{
               <Button
                 buttonStyle="secondary"
                 id="take-over"
-                onClick={() => void onTakeOver()}
+                onClick={onTakeOver}
                 size="medium"
                 type="button"
               >
@@ -243,7 +243,7 @@ export const DocumentControls: React.FC<{
               </Button>
             )}
           </div>
-          {showDotMenu && (
+          {showDotMenu && !readOnlyForIncomingUser && (
             <Popup
               button={
                 <div className={`${baseClass}__dots`}>

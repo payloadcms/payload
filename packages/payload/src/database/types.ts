@@ -136,6 +136,8 @@ export interface BaseDatabaseAdapter {
   updateOne: UpdateOne
 
   updateVersion: UpdateVersion
+
+  upsert: Upsert
 }
 
 export type Init = () => Promise<void> | void
@@ -381,6 +383,10 @@ export type UpdateOneArgs = {
   draft?: boolean
   joins?: JoinQuery
   locale?: string
+  /**
+   * Additional database adapter specific options to pass to the query
+   */
+  options?: Record<string, unknown>
   req: PayloadRequest
 } & (
   | {
@@ -394,6 +400,17 @@ export type UpdateOneArgs = {
 )
 
 export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
+
+export type UpsertArgs = {
+  collection: string
+  data: Record<string, unknown>
+  joins?: JoinQuery
+  locale?: string
+  req: PayloadRequest
+  where: Where
+}
+
+export type Upsert = (args: UpsertArgs) => Promise<Document>
 
 export type DeleteOneArgs = {
   collection: CollectionSlug

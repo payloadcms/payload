@@ -647,7 +647,7 @@ describe('versions', () => {
 
       await textField.fill('spanish published')
       await saveDocAndAssert(page)
-      await expect(status).toContainText('Changed')
+      await expect(status).toContainText('Published')
 
       await textField.fill('spanish draft')
       await saveDocAndAssert(page, '#action-save-draft')
@@ -661,6 +661,16 @@ describe('versions', () => {
       const publishSpecificLocale = page.locator('.popup-button-list button').first()
       await expect(publishSpecificLocale).toContainText('English')
       await publishSpecificLocale.click()
+
+      await wait(500)
+
+      await expect(async () => {
+        await expect(
+          page.locator('.payload-toast-item:has-text("Updated successfully.")'),
+        ).toBeVisible()
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
 
       id = await page.locator('.id-label').getAttribute('title')
 

@@ -1,12 +1,12 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { ImportMap, SanitizedConfig } from 'payload'
+import type { CustomVersionParser, ImportMap, SanitizedConfig } from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui'
 import '@payloadcms/ui/scss/app.scss'
 import { createClientConfig } from '@payloadcms/ui/utilities/createClientConfig'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
-import { parseCookies } from 'payload'
+import { checkDependencies, parseCookies } from 'payload'
 import React from 'react'
 
 import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
@@ -21,6 +21,23 @@ export const metadata = {
   title: 'Next.js',
 }
 
+const customReactVersionParser: CustomVersionParser = (version) => {
+  const [mainVersion, ...preReleases] = version.split('-')
+
+  if (preReleases?.length === 3) {
+    // Needs different handling, as it's in a format like 19.0.0-rc-06d0b89e-20240801 format
+    const date = preReleases[2]
+
+    const parts = mainVersion.split('.').map(Number)
+    return { parts, preReleases: [date] }
+  }
+
+  const parts = mainVersion.split('.').map(Number)
+  return { parts, preReleases }
+}
+
+let checkedDependencies = false
+
 export const RootLayout = async ({
   children,
   config: configPromise,
@@ -30,6 +47,41 @@ export const RootLayout = async ({
   readonly config: Promise<SanitizedConfig>
   readonly importMap: ImportMap
 }) => {
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true' &&
+    !checkedDependencies
+  ) {
+    // eslint-disable-next-line react-compiler/react-compiler
+    checkedDependencies = true
+    // First check if there are mismatching dependency versions of next / react packages
+    await checkDependencies({
+      dependencyGroups: [
+        {
+          name: 'react',
+          dependencies: ['react', 'react-dom'],
+          targetVersionDependency: 'react',
+        },
+      ],
+      dependencyVersions: {
+        next: {
+          required: false,
+          version: '>=15.0.0-canary.160',
+        },
+        react: {
+          customVersionParser: customReactVersionParser,
+          required: false,
+          version: '>=19.0.0-rc-5dcb0097-20240918',
+        },
+        'react-dom': {
+          customVersionParser: customReactVersionParser,
+          required: false,
+          version: '>=19.0.0-rc-5dcb0097-20240918',
+        },
+      },
+    })
+  }
+
   const config = await configPromise
 
   const headers = getHeaders()
