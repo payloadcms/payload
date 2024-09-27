@@ -1,7 +1,5 @@
 import type { Access } from 'payload'
 
-import { parseCookies } from 'payload'
-
 import { isSuperAdmin } from '../../../access/isSuperAdmin'
 import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
 
@@ -9,7 +7,9 @@ export const filterByTenantRead: Access = (args) => {
   const req = args.req
 
   // Super admin can read all
-  if (isSuperAdmin(args)) return true
+  if (isSuperAdmin(args)) {
+    return true
+  }
 
   const tenantIDs = getTenantAccessIDs(req.user)
 
@@ -42,14 +42,14 @@ export const canMutateTenant: Access = (args) => {
   const req = args.req
   const superAdmin = isSuperAdmin(args)
 
-  if (!req.user) return false
+  if (!req.user) {
+    return false
+  }
 
   // super admins can mutate pages for any tenant
   if (superAdmin) {
     return true
   }
-
-  const cookies = parseCookies(req.headers)
 
   return {
     id: {

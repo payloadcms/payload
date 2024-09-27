@@ -15,6 +15,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
     data: {
       name: 'Tenant 1',
       slug: 'tenant-1',
+      domains: [{ domain: 'abc.localhost.com:3000' }],
     },
   })
 
@@ -23,6 +24,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
     data: {
       name: 'Tenant 2',
       slug: 'tenant-2',
+      domains: [{ domain: 'bbc.localhost.com:3000' }],
     },
   })
 
@@ -31,13 +33,15 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
     data: {
       name: 'Tenant 3',
       slug: 'tenant-3',
+      domains: [{ domain: 'cbc.localhost.com:3000' }],
     },
   })
 
   await payload.create({
     collection: 'users',
     data: {
-      email: 'tenant1@payloadcms.com',
+      // email: 'tenant1@payloadcms.com',
+      email: 'tenant1@abc.com',
       password: 'test',
       tenants: [
         {
@@ -52,7 +56,8 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
   await payload.create({
     collection: 'users',
     data: {
-      email: 'tenant2@payloadcms.com',
+      // email: 'tenant2@payloadcms.com',
+      email: 'tenant2@bbc.com',
       password: 'test',
       tenants: [
         {
@@ -67,7 +72,8 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
   await payload.create({
     collection: 'users',
     data: {
-      email: 'tenant3@payloadcms.com',
+      // email: 'tenant3@payloadcms.com',
+      email: 'tenant3@cbc.com',
       password: 'test',
       tenants: [
         {

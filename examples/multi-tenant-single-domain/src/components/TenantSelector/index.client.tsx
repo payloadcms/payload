@@ -19,7 +19,9 @@ export const TenantSelector = ({ initialCookie }: { initialCookie?: string }) =>
   const tenantIDs =
     user?.tenants?.map(({ tenant }) => {
       if (tenant) {
-        if (typeof tenant === 'string') return tenant
+        if (typeof tenant === 'string') {
+          return tenant
+        }
         return tenant.id
       }
     }) || []

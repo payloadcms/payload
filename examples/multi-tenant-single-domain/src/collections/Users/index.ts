@@ -1,13 +1,11 @@
 import type { CollectionConfig } from 'payload'
 
-import type { User } from '../../payload-types'
-
-import { getTenantAdminTenantAccessIDs } from '../../utilities/getTenantAccessIDs'
 import { createAccess } from './access/create'
 import { readAccess } from './access/read'
 import { updateAndDeleteAccess } from './access/updateAndDelete'
 import { externalUsersLogin } from './endpoints/externalUsersLogin'
 import { ensureUniqueUsername } from './hooks/ensureUniqueUsername'
+import { setCookieBasedOnDomain } from './hooks/setCookieBasedOnDomain'
 
 const Users: CollectionConfig = {
   slug: 'users',
@@ -62,6 +60,9 @@ const Users: CollectionConfig = {
       index: true,
     },
   ],
+  hooks: {
+    afterLogin: [setCookieBasedOnDomain],
+  },
 }
 
 export default Users
