@@ -224,6 +224,10 @@
     margin: 0 0 0.4em 40px;
   }
 
+  &__listItem[dir='rtl'] {
+    margin: 0 40px 0.4em 0;
+  }
+
   &__listItemChecked,
   &__listItemUnchecked {
     position: relative;
@@ -234,6 +238,15 @@
     padding-left: 25px;
     list-style-type: none;
     outline: none;
+  }
+
+  // See comment above for why we need this
+  &__listItemUnchecked[dir='rtl'],
+  &__listItemChecked[dir='rtl'] {
+    margin-left: 0;
+    padding-left: 0;
+    padding-right: 25px;
+    margin-right: 15px;
   }
 
   &__listItemChecked {
