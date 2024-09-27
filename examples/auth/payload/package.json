@@ -21,7 +21,7 @@
     "@payloadcms/db-mongodb": "latest",
     "@payloadcms/richtext-slate": "latest",
     "dotenv": "^8.2.0",
-    "express": "^4.19.2",
+    "express": "^4.20.0",
     "payload": "latest"
   },
   "devDependencies": {
