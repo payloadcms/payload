@@ -51,6 +51,7 @@ const middleware = (payload: Payload): any => {
     localizationMiddleware,
     express.json(payload.config.express.json),
     fileUpload({
+      defParamCharset: 'utf8',
       parseNested: true,
       ...payload.config.upload,
     }),
