@@ -1140,6 +1140,8 @@ export interface RelationshipField {
     | null;
   relationToSelf?: (string | null) | RelationshipField;
   relationToSelfSelectOnly?: (string | null) | RelationshipField;
+  relationWithAllowCreateToFalse?: (string | null) | User;
+  relationWithAllowEditToFalse?: (string | null) | User;
   relationWithDynamicDefault?: (string | null) | User;
   relationHasManyWithDynamicDefault?: {
     relationTo: 'users';
