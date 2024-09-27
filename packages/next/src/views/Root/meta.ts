@@ -85,7 +85,7 @@ export const generatePageMetadata = async ({ config: configPromise, params }: Ar
       break
     }
     case 2: {
-      if (segmentOne === 'reset') {
+      if (`/${segmentOne}` === config.admin.routes.reset) {
         // --> /reset/:token
         meta = await generateResetPasswordMetadata({ config, i18n })
       }
