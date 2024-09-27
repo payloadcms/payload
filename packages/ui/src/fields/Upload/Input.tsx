@@ -153,6 +153,9 @@ export function UploadInput(props: UploadInputProps) {
     collectionSlug: activeRelationTo,
   })
 
+  /**
+   * Prevent initial retrieval of documents from running more than once
+   */
   const loadedValueDocsRef = React.useRef<boolean>(false)
 
   const canCreate = useMemo(() => {
@@ -388,6 +391,7 @@ export function UploadInput(props: UploadInputProps) {
   useEffect(() => {
     async function loadInitialDocs() {
       if (value) {
+        loadedValueDocsRef.current = true
         const loadedDocs = await populateDocs(
           Array.isArray(value) ? value : [value],
           activeRelationTo,
@@ -398,8 +402,6 @@ export function UploadInput(props: UploadInputProps) {
           )
         }
       }
-
-      loadedValueDocsRef.current = true
     }
 
     if (!loadedValueDocsRef.current) {
