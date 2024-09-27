@@ -878,6 +878,7 @@ export type {
   CheckboxFieldClient,
   ClientBlock,
   ClientField,
+  ClientFieldProps,
   CodeField,
   CodeFieldClient,
   CollapsibleField,

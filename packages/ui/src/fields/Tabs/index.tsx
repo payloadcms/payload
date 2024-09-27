@@ -22,13 +22,9 @@ export { TabsProvider }
 const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const {
     Description,
-    field: {
-      _path: path,
-      _schemaPath,
-      admin: { className, readOnly: readOnlyFromAdmin } = {},
-      tabs = [],
-    },
+    field: { _path: path, admin: { className, readOnly: readOnlyFromAdmin } = {}, tabs = [] },
     forceRender = false,
+    indexPath,
     readOnly: readOnlyFromTopLevelProps,
   } = props
 

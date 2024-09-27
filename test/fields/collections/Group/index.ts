@@ -251,18 +251,18 @@ const GroupFields: CollectionConfig = {
         },
       ],
     },
-    {
-      name: 'localizedGroupRel',
-      type: 'group',
-      localized: true,
-      fields: [
-        {
-          type: 'relationship',
-          relationTo: 'email-fields',
-          name: 'email',
-        },
-      ],
-    },
+    // {
+    //   name: 'localizedGroupRel',
+    //   type: 'group',
+    //   localized: true,
+    //   fields: [
+    //     {
+    //       type: 'relationship',
+    //       relationTo: 'email-fields',
+    //       name: 'email',
+    //     },
+    //   ],
+    // },
   ],
 }
 

@@ -1,21 +1,28 @@
 'use client'
+import type { ClientFieldProps } from 'payload'
+
 import React from 'react'
 
 import { WatchCondition } from './WatchCondition.js'
 
-export const withCondition = <P extends Record<string, unknown>>(
+export const withCondition = <P extends ClientFieldProps>(
   Field: React.ComponentType<P>,
 ): React.FC<P> => {
   const CheckForCondition: React.FC<P> = (props) => {
     const {
-      name,
+      type,
+      _indexPath,
       field: { _path: pathFromProps },
     } = props
+
+    const name = 'name' in props.field ? props.field.name : undefined
+
+    console.log(_indexPath)
 
     const path = pathFromProps ?? name
 
     return (
-      <WatchCondition indexPath={indexPath} name={name as string} path={path as string} type={type}>
+      <WatchCondition indexPath={_indexPath} name={name} path={path} type={type}>
         <Field {...props} />
       </WatchCondition>
     )

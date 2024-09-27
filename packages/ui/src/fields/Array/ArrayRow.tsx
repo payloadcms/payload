@@ -1,5 +1,5 @@
 'use client'
-import type { ArrayField, ClientField, FieldPermissions, Row } from 'payload'
+import type { ArrayField, Row } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -22,19 +22,16 @@ type ArrayRowProps = {
   readonly Fields: React.ReactNode[]
   readonly forceRender?: boolean
   readonly hasMaxRows?: boolean
-  readonly indexPath: string
   readonly isSortable?: boolean
   readonly labels: Partial<ArrayField['labels']>
   readonly moveRow: (fromIndex: number, toIndex: number) => void
   readonly path: string
-  readonly permissions: FieldPermissions
   readonly readOnly?: boolean
   readonly removeRow: (rowIndex: number) => void
   readonly row: Row
   readonly rowCount: number
   readonly rowIndex: number
   readonly RowLabel?: React.ReactNode
-  readonly schemaPath: string
   readonly setCollapse: (rowID: string, collapsed: boolean) => void
 } & UseDraggableSortableReturn
 
@@ -46,21 +43,18 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   Fields,
   forceRender = false,
   hasMaxRows,
-  indexPath,
   isDragging,
   isSortable,
   labels,
   listeners,
   moveRow,
   path: parentPath,
-  permissions,
   readOnly,
   removeRow,
   row,
   rowCount,
   rowIndex,
   RowLabel,
-  schemaPath,
   setCollapse,
   setNodeRef,
   transform,

@@ -3,7 +3,6 @@ import type {
   ArrayFieldClientComponent,
   ArrayFieldClientProps,
   ArrayField as ArrayFieldType,
-  Row,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -88,12 +87,15 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     if ('labels' in p && p?.labels) {
       return p.labels
     }
+
     if ('labels' in p.field && p.field.labels) {
       return { plural: p.field.labels?.plural, singular: p.field.labels?.singular }
     }
+
     if ('label' in p.field && p.field.label) {
       return { plural: undefined, singular: p.field.label }
     }
+
     return { plural: t('general:rows'), singular: t('general:row') }
   }
 
@@ -105,6 +107,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       if (!editingDefaultLocale && value === null) {
         return true
       }
+
       if (typeof validate === 'function') {
         return validate(value, { ...options, maxRows, minRows, required })
       }
@@ -190,6 +193,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         collapsed,
         rows,
       })
+
       dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, updatedRows })
       setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
@@ -203,6 +207,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         rowID,
         rows,
       })
+
       dispatchFields({ type: 'SET_ROW_COLLAPSED', path, updatedRows })
       setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
@@ -264,15 +269,13 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         {Description}
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
-      {(Fields?.length > 0 || (!valid && (showRequired || showMinRows))) && (
+      {(rows?.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
           className={`${baseClass}__draggable-rows`}
           ids={rows.map((row) => row.id)}
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
         >
-          {Fields.map((Subfields, i) => {
-            const row = rows[i] || ({} as Row)
-
+          {rows.map((row, i) => {
             const rowErrorCount = errorPaths?.filter((errorPath) =>
               errorPath.startsWith(`${path}.${i}.`),
             ).length
@@ -285,22 +288,19 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     addRow={addRow}
                     duplicateRow={duplicateRow}
                     errorCount={rowErrorCount}
-                    Fields={Subfields}
+                    Fields={Fields?.[i]}
                     forceRender={forceRender}
                     hasMaxRows={hasMaxRows}
-                    indexPath={indexPath}
                     isSortable={isSortable}
                     labels={labels}
                     moveRow={moveRow}
                     path={path}
-                    permissions={permissions}
                     readOnly={disabled}
                     removeRow={removeRow}
                     row={row}
                     rowCount={rows.length}
                     rowIndex={i}
                     // RowLabel={RowLabel}
-                    schemaPath={_schemaPath}
                     setCollapse={setCollapse}
                   />
                 )}

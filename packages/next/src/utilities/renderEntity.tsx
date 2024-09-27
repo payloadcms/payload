@@ -16,7 +16,7 @@ import { fieldIsSidebar } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
-import { renderServerFields } from '../elements/RenderServerFields/index.js'
+import { renderFields } from './renderFields.js'
 
 export const renderEntity: (args: {
   clientConfig: ClientConfig
@@ -122,7 +122,7 @@ export const renderEntity: (args: {
 
   components.MainFields = (
     <Fragment>
-      {renderServerFields({
+      {renderFields({
         clientConfig,
         clientFields: mainClientFields,
         config,
@@ -142,7 +142,7 @@ export const renderEntity: (args: {
 
   components.SidebarFields = (
     <Fragment>
-      {renderServerFields({
+      {renderFields({
         clientConfig,
         clientFields: sidebarClientFields,
         config,

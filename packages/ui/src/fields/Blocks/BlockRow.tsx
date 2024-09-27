@@ -9,9 +9,7 @@ import type { UseDraggableSortableReturn } from '../../elements/DraggableSortabl
 import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { Pill } from '../../elements/Pill/index.js'
-import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
-import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { RowActions } from './RowActions.js'
 import { SectionTitle } from './SectionTitle/index.js'
@@ -24,20 +22,19 @@ type BlocksFieldProps = {
   blocks: ClientBlock[]
   duplicateRow: (rowIndex: number) => void
   errorCount: number
+  Fields?: React.ReactNode[]
   forceRender?: boolean
   hasMaxRows?: boolean
-  indexPath: string
   isSortable?: boolean
+  Label?: React.ReactNode
   labels: Labels
   moveRow: (fromIndex: number, toIndex: number) => void
   path: string
-  permissions: FieldPermissions
   readOnly: boolean
   removeRow: (rowIndex: number) => void
   row: Row
   rowCount: number
   rowIndex: number
-  schemaPath: string
   setCollapse: (id: string, collapsed: boolean) => void
 } & UseDraggableSortableReturn
 
@@ -48,20 +45,20 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   blocks,
   duplicateRow,
   errorCount,
+  Fields,
   forceRender,
   hasMaxRows,
   isSortable,
+  Label,
   labels,
   listeners,
   moveRow,
   path: parentPath,
-  permissions,
   readOnly,
   removeRow,
   row,
   rowCount,
   rowIndex,
-  schemaPath,
   setCollapse,
   setNodeRef,
   transform,
@@ -81,7 +78,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
 
   return (
     <div
-      id={`${parentPath.split('.').join('-')}-row-${rowIndex}`}
+      id={`${parentPath?.split('.').join('-')}-row-${rowIndex}`}
       key={`${parentPath}-row-${rowIndex}`}
       ref={setNodeRef}
       style={{
@@ -119,12 +116,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
             : undefined
         }
         header={
-          block?.admin?.components?.Label ? (
-            <RenderComponent
-              clientProps={{ blockKind: 'block', formData: row }}
-              mappedComponent={block.admin.components.Label}
-            />
-          ) : (
+          Label || (
             <div className={`${baseClass}__block-header`}>
               <span className={`${baseClass}__block-number`}>
                 {String(rowIndex + 1).padStart(2, '0')}
@@ -144,7 +136,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
         key={row.id}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        {/* Fields Here */}
+        {Fields ? Fields.map((Field) => Field) : null}
       </Collapsible>
     </div>
   )

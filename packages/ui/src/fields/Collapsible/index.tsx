@@ -27,7 +27,10 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
       admin: { className, initCollapsed = false, readOnly: readOnlyFromAdmin } = {},
       fields,
     },
+    Fields,
+    indexPath,
     readOnly: readOnlyFromTopLevelProps,
+    RowLabel,
   } = props
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
@@ -39,7 +42,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
   const [collapsedOnMount, setCollapsedOnMount] = useState<boolean>()
-  const fieldPreferencesKey = `collapsible-${indexPath.replace(/\./g, '__')}`
+  const fieldPreferencesKey = `collapsible-${indexPath?.replace(/\./g, '__')}`
   const [errorCount, setErrorCount] = useState(0)
   const fieldHasErrors = errorCount > 0
 
@@ -127,23 +130,14 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
           collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
           header={
             <div className={`${baseClass}__row-label-wrap`}>
-              {/* <RowLabel
-                i18n={i18n}
-                path={path}
-                RowLabel={
-                  field?.admin?.components && 'RowLabel' in field.admin.components
-                    ? field.admin.components.RowLabel
-                    : undefined
-                }
-                rowLabel={label}
-              /> */}
+              {RowLabel}
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
           }
           initCollapsed={collapsedOnMount}
           onToggle={onToggle}
         >
-          {/* Fields Here */}
+          {Fields ? Fields?.map((Field) => Field) : null}
         </CollapsibleElement>
         {Description}
       </div>

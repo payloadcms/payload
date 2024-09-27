@@ -32,6 +32,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
+    Blocks,
     Description,
     Error,
     field: {
@@ -202,7 +203,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      id={`field-${path.replace(/\./g, '__')}`}
+      id={`field-${path?.replace(/\./g, '__')}`}
     >
       {showError && Error}
       <header className={`${baseClass}__header`}>
@@ -247,9 +248,9 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         >
           {rows.map((row, i) => {
             const { blockType } = row
-            const blockToRender = blocks.find((block) => block.slug === blockType)
+            const blockConfig = blocks.find((block) => block.slug === blockType)
 
-            if (blockToRender) {
+            if (blockConfig) {
               const rowErrorCount = errorPaths.filter((errorPath) =>
                 errorPath.startsWith(`${path}.${i}.`),
               ).length
@@ -259,24 +260,23 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                     <BlockRow
                       {...draggableSortableItemProps}
                       addRow={addRow}
-                      block={blockToRender}
+                      block={blockConfig}
                       blocks={blocks}
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}
+                      Fields={Blocks}
                       forceRender={forceRender}
                       hasMaxRows={hasMaxRows}
-                      indexPath={indexPath}
                       isSortable={isSortable}
+                      Label={Label}
                       labels={labels}
                       moveRow={moveRow}
                       path={path}
-                      permissions={permissions}
                       readOnly={disabled}
                       removeRow={removeRow}
                       row={row}
                       rowCount={rows.length}
                       rowIndex={i}
-                      schemaPath={_schemaPath}
                       setCollapse={setCollapse}
                     />
                   )}

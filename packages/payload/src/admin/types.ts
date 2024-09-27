@@ -415,9 +415,12 @@ export type PayloadServerAction = (
 export type FieldSlots = {
   AfterInput?: React.ReactNode
   BeforeInput?: React.ReactNode
+  Blocks?: React.ReactNode[]
   Description?: React.ReactNode
   Error?: React.ReactNode
+  Fields?: React.ReactNode[]
   Label?: React.ReactNode
+  RowLabel?: React.ReactNode
 }
 
 export type EntitySlots = {

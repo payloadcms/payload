@@ -33,11 +33,13 @@ export type ServerFieldBase<
   Partial<ServerProps>
 
 export type FormFieldBase = {
+  readonly Blocks?: React.ReactNode[]
   readonly docPreferences?: DocumentPreferences
   /**
    * `forceRender` is added by RenderField automatically.
    */
   readonly forceRender?: boolean
+  readonly indexPath?: string
   readonly locale?: Locale
   /**
    * `readOnly` is added by RenderField automatically. This should be used instead of `field.admin.readOnly`.
