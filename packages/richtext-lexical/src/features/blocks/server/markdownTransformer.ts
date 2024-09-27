@@ -285,22 +285,40 @@ function getMarkdownTransformerForBlock(
 
           let content = ''
 
-          // Ensure it has a leftpad of at least 2 spaces. The data is saved without those spaces, so we can just blindly add it to every child
-          if (unsanitizedContent.includes('\n')) {
-            const split = unsanitizedContent.split('\n')
-            let index = 0
-            for (const child of split) {
-              index++
-              content +=
-                (block?.jsx?.doNotTrimChildren || !child.startsWith('  ')
-                  ? child
-                  : child.slice(2)) + (index === split.length ? '' : '\n')
-            }
+          if (block?.jsx?.doNotTrimChildren) {
+            content = unsanitizedContent.endsWith('\n')
+              ? unsanitizedContent.slice(0, -1)
+              : unsanitizedContent
           } else {
-            content =
-              (block?.jsx?.doNotTrimChildren || !unsanitizedContent.startsWith('  ')
-                ? unsanitizedContent
-                : unsanitizedContent.slice(2)) + '\n'
+            // Ensure it has a leftpad of at least 2 spaces. The data is saved without those spaces, so we can just blindly add it to every child
+            if (unsanitizedContent.includes('\n')) {
+              const split = unsanitizedContent.split('\n')
+              let index = 0
+              for (const child of split) {
+                index++
+
+                if (child.startsWith('  ')) {
+                  content += child.slice(2)
+                } else {
+                  // If one child is misaligned, skip aligning completely, unless it's just empty
+                  if (child === '') {
+                    content += child
+                  } else {
+                    content = unsanitizedContent.endsWith('\n')
+                      ? unsanitizedContent.slice(0, -1)
+                      : unsanitizedContent
+                    break
+                  }
+                }
+
+                content += index === split.length ? '' : '\n'
+              }
+            } else {
+              content =
+                (!unsanitizedContent.startsWith('  ')
+                  ? unsanitizedContent
+                  : unsanitizedContent.slice(2)) + '\n'
+            }
           }
 
           if (!block?.jsx?.import) {

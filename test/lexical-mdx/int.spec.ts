@@ -927,8 +927,8 @@ no indent
       inputAfterConvertFromEditorJSON: `
 <TextContainer>
   no indent
-  indent 2
-    indent 4
+    indent 2
+      indent 4
   no indent
 </TextContainer>
 `,
@@ -936,8 +936,8 @@ no indent
         fields: {
           blockType: 'TextContainer',
           text: `no indent
-indent 2
-  indent 4
+  indent 2
+    indent 4
 no indent`,
         },
       },
@@ -1022,6 +1022,192 @@ Some text 1
           textStyle: '',
         },
       ],
+    },
+    {
+      description: 'Code block with nested within Banner',
+      input: `
+<Banner>
+  \`\`\`ts
+    indent 1;
+  \`\`\`
+</Banner>
+`,
+      blockNode: {
+        fields: {
+          blockType: 'Banner',
+          content: {
+            root: {
+              children: [
+                {
+                  fields: {
+                    blockType: 'Code',
+                    code: '  indent 1;',
+                    language: 'ts',
+                  },
+                  format: '',
+                  type: 'block',
+                  version: 2,
+                },
+              ],
+              format: '',
+              indent: 0,
+              type: 'root',
+              version: 1,
+            },
+          },
+        },
+      },
+    },
+    {
+      description: 'Code block with nested within Banner 2',
+      input: `
+<Banner>
+\`\`\`ts
+  indent 1;
+\`\`\`
+</Banner>
+`,
+      inputAfterConvertFromEditorJSON: `
+<Banner>
+  \`\`\`ts
+    indent 1;
+  \`\`\`
+</Banner>
+`,
+      blockNode: {
+        fields: {
+          blockType: 'Banner',
+          content: {
+            root: {
+              children: [
+                {
+                  fields: {
+                    blockType: 'Code',
+                    code: '  indent 1;',
+                    language: 'ts',
+                  },
+                  format: '',
+                  type: 'block',
+                  version: 2,
+                },
+              ],
+              format: '',
+              indent: 0,
+              type: 'root',
+              version: 1,
+            },
+          },
+        },
+      },
+    },
+    {
+      description: 'One-line Banner',
+      input: `
+<Banner>Hi</Banner>
+`,
+      inputAfterConvertFromEditorJSON: `
+<Banner>
+  Hi
+</Banner>
+`,
+      blockNode: {
+        fields: {
+          blockType: 'Banner',
+          content: {
+            root: {
+              children: [
+                {
+                  children: [
+                    {
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: 'Hi',
+                      type: 'text',
+                      version: 1,
+                    },
+                  ],
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+              ],
+              format: '',
+              indent: 0,
+              type: 'root',
+              version: 1,
+            },
+          },
+        },
+      },
+    },
+    {
+      description: 'Code block with nested within 2 Banners',
+      input: `
+<Banner>
+<Banner>
+\`\`\`ts
+  indent 1;
+\`\`\`
+</Banner>
+</Banner>
+`,
+      inputAfterConvertFromEditorJSON: `
+<Banner>
+  <Banner>
+    \`\`\`ts
+      indent 1;
+    \`\`\`
+  </Banner>
+</Banner>
+`,
+      blockNode: {
+        fields: {
+          blockType: 'Banner',
+          content: {
+            root: {
+              children: [
+                {
+                  type: 'block',
+                  format: '',
+                  fields: {
+                    blockType: 'Banner',
+                    content: {
+                      root: {
+                        children: [
+                          {
+                            fields: {
+                              blockType: 'Code',
+                              code: '  indent 1;',
+                              language: 'ts',
+                            },
+                            format: '',
+                            type: 'block',
+                            version: 2,
+                          },
+                        ],
+                        format: '',
+                        indent: 0,
+                        type: 'root',
+                        version: 1,
+                      },
+                    },
+                  },
+                  version: 2,
+                },
+              ],
+              format: '',
+              indent: 0,
+              type: 'root',
+              version: 1,
+            },
+          },
+        },
+      },
     },
   ]
 
