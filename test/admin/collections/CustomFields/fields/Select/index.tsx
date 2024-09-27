@@ -1,12 +1,11 @@
 'use client'
 
-import type { Option } from 'payload'
+import type { Option, SelectFieldClientComponent } from 'payload'
 
-import { SelectField, useField, useFieldProps } from '@payloadcms/ui'
+import { SelectField, useField } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomSelect = () => {
-  const { path } = useFieldProps()
+export const CustomSelect: SelectFieldClientComponent = ({ field: { _path: path } }) => {
   const { setValue, value } = useField<string>({ path })
   const [options, setOptions] = React.useState<{ label: string; value: string }[]>([])
 

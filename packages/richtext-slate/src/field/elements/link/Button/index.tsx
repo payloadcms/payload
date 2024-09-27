@@ -2,7 +2,7 @@
 
 import type { FormState } from 'payload'
 
-import { useConfig, useDrawerSlug, useFieldProps, useModal, useTranslation } from '@payloadcms/ui'
+import { useConfig, useDrawerSlug, useModal, useTranslation } from '@payloadcms/ui'
 import { getFormState } from '@payloadcms/ui/shared'
 import { reduceFieldsToValues } from 'payload/shared'
 import React, { Fragment, useState } from 'react'
@@ -55,7 +55,9 @@ const insertLink = (editor, fields) => {
   ReactEditor.focus(editor)
 }
 
-export const LinkButton: React.FC = () => {
+export const LinkButton: React.FC<{
+  schemaPath: string
+}> = ({ schemaPath }) => {
   const { fieldProps } = useElementButton()
   const [initialState, setInitialState] = useState<FormState>({})
 
@@ -65,7 +67,6 @@ export const LinkButton: React.FC = () => {
 
   const { closeModal, openModal } = useModal()
   const drawerSlug = useDrawerSlug('rich-text-link')
-  const { schemaPath } = useFieldProps()
 
   const {
     field: { richTextComponentMap },
