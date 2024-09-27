@@ -1,17 +1,59 @@
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
+
 import { fieldAffectsData } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import type { Props } from './types.js'
 
 import './index.scss'
-import { RenderIfInViewport } from './RenderIfInViewport.js'
 import { RenderServerField } from './RenderServerField.js'
-
-const baseClass = 'render-fields'
 
 export { Props }
 
-export const RenderServerFields: React.FC<Props> = (props) => {
+export const RenderServerFields: React.FC<
+  {
+    collectionConfig?: SanitizedCollectionConfig
+    globalConfig?: SanitizedGlobalConfig
+  } & Props
+> = (props) => {
+  const {
+    clientConfig,
+    clientFields,
+    collectionConfig,
+    config,
+    fields,
+    formState,
+    globalConfig,
+    i18n,
+    importMap,
+    margins,
+    payload,
+    permissions,
+  } = props
+
+  return (
+    <Fragment>
+      {renderServerFields({
+        clientConfig,
+        clientFields,
+        config,
+        fields,
+        formState,
+        i18n,
+        importMap,
+        margins,
+        payload,
+        permissions: collectionConfig
+          ? permissions?.collections?.[collectionConfig?.slug]?.fields
+          : globalConfig
+            ? permissions?.globals?.[globalConfig.slug]?.fields
+            : undefined,
+      })?.map((F) => F)}
+    </Fragment>
+  )
+}
+
+export const renderServerFields = (props: Props): React.ReactNode[] => {
   const {
     className,
     clientConfig,
@@ -27,7 +69,6 @@ export const RenderServerFields: React.FC<Props> = (props) => {
     path,
     payload,
     permissions,
-    readOnly,
     schemaPath,
   } = props
 
@@ -36,99 +77,62 @@ export const RenderServerFields: React.FC<Props> = (props) => {
   }
 
   if (fields) {
-    return (
-      <RenderIfInViewport
-        className={[
-          baseClass,
-          className,
-          margins && `${baseClass}--margins-${margins}`,
-          margins === false && `${baseClass}--margins-none`,
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        <Fragment>
-          {fields?.map((field, fieldIndex) => {
-            const clientField = clientFields[fieldIndex]
+    return fields?.map((field, fieldIndex) => {
+      const clientField = clientFields[fieldIndex]
 
-            const forceRenderChildren =
-              (typeof forceRender === 'number' && fieldIndex <= forceRender) || true
+      const forceRenderChildren =
+        (typeof forceRender === 'number' && fieldIndex <= forceRender) || true
 
-            const name = 'name' in field ? field.name : undefined
+      const name = 'name' in field ? field.name : undefined
 
-            const fieldPath = [path, name].filter(Boolean).join('.')
+      const fieldPermissions = permissions?.[name]
 
-            const fieldSchemaPath = [schemaPath, name].filter(Boolean).join('.')
+      if (
+        fieldPermissions?.read?.permission === false ||
+        (field.admin && 'disabled' in field.admin && field.admin.disabled)
+      ) {
+        return null
+      }
 
-            const fieldPermissions = permissions?.[name]
+      const isHidden = 'hidden' in field && field?.hidden
 
-            const fieldIndexPath =
-              indexPath !== undefined ? `${indexPath}.${fieldIndex}` : `${fieldIndex}`
+      const disabledFromAdmin = field?.admin && 'disabled' in field.admin && field.admin.disabled
 
-            if (
-              fieldPermissions?.read?.permission === false ||
-              (field.admin && 'disabled' in field.admin && field.admin.disabled)
-            ) {
-              return null
-            }
+      if (fieldAffectsData(field) && (isHidden || disabledFromAdmin)) {
+        return null
+      }
 
-            const isHidden = 'hidden' in field && field?.hidden
+      const fieldIndexPath =
+        indexPath !== undefined ? `${indexPath}.${fieldIndex}` : `${fieldIndex}`
 
-            const disabledFromAdmin =
-              field?.admin && 'disabled' in field.admin && field.admin.disabled
+      const fieldPath = [path, name].filter(Boolean).join('.')
 
-            if (fieldAffectsData(field) && (isHidden || disabledFromAdmin)) {
-              return null
-            }
+      const fieldSchemaPath = [schemaPath, name].filter(Boolean).join('.')
 
-            if ('fields' in field) {
-              return (
-                <RenderServerFields
-                  className={className}
-                  clientConfig={clientConfig}
-                  clientFields={'fields' in clientField && clientField?.fields}
-                  config={config}
-                  fields={field.fields}
-                  forceRender={forceRenderChildren}
-                  formState={formState}
-                  i18n={i18n}
-                  importMap={importMap}
-                  indexPath={
-                    fieldIndexPath !== undefined
-                      ? `${fieldIndexPath}.${fieldIndex}`
-                      : `${fieldIndex}`
-                  }
-                  key={fieldIndex}
-                  margins={margins}
-                  path={fieldPath}
-                  payload={payload}
-                  permissions={permissions}
-                  readOnly={readOnly}
-                  schemaPath={fieldSchemaPath}
-                />
-              )
-            }
-
-            return (
-              <RenderServerField
-                clientConfig={clientConfig}
-                clientField={clientField}
-                config={config}
-                field={field}
-                fieldPath={fieldPath}
-                fieldPermissions={fieldPermissions}
-                fieldSchemaPath={fieldSchemaPath}
-                fieldState={formState[fieldPath]}
-                i18n={i18n}
-                importMap={importMap}
-                key={fieldIndex}
-                payload={payload}
-              />
-            )
-          })}
-        </Fragment>
-      </RenderIfInViewport>
-    )
+      return (
+        <RenderServerField
+          className={className}
+          clientConfig={clientConfig}
+          clientField={clientField}
+          config={config}
+          field={field}
+          fieldIndexPath={fieldIndexPath}
+          fieldPath={fieldPath}
+          fieldPermissions={fieldPermissions}
+          fieldSchemaPath={fieldSchemaPath}
+          forceRender={forceRenderChildren}
+          formState={formState}
+          i18n={i18n}
+          importMap={importMap}
+          key={fieldIndex}
+          margins={margins}
+          path={path}
+          payload={payload}
+          permissions={permissions}
+          renderServerFields={renderServerFields}
+        />
+      )
+    })
   }
 
   return null

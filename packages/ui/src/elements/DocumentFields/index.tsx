@@ -4,9 +4,12 @@ import type { Description } from 'payload'
 import React from 'react'
 
 import { Gutter } from '../Gutter/index.js'
+import { RenderIfInViewport } from '../RenderIfInViewport/index.js'
 import './index.scss'
 
 const baseClass = 'document-fields'
+
+const fieldsBaseClass = 'render-fields'
 
 type Args = {
   readonly AfterFields?: React.ReactNode
@@ -45,14 +48,38 @@ export const DocumentFields: React.FC<Args> = ({
             )}
           </header>
           {BeforeFields}
-          {MainFields}
+          <RenderIfInViewport
+            className={[
+              fieldsBaseClass,
+              // className,
+              // margins && `${baseClass}--margins-${margins}`,
+              // margins === false && `${baseClass}--margins-none`,
+            ]
+              .filter(Boolean)
+              .join(' ')}
+          >
+            {MainFields}
+          </RenderIfInViewport>
           {AfterFields}
         </Gutter>
       </div>
       {SidebarFields ? (
         <div className={`${baseClass}__sidebar-wrap`}>
           <div className={`${baseClass}__sidebar`}>
-            <div className={`${baseClass}__sidebar-fields`}>{SidebarFields}</div>
+            <div className={`${baseClass}__sidebar-fields`}>
+              <RenderIfInViewport
+                className={[
+                  fieldsBaseClass,
+                  // className,
+                  // margins && `${baseClass}--margins-${margins}`,
+                  // margins === false && `${baseClass}--margins-none`,
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                {SidebarFields}
+              </RenderIfInViewport>
+            </div>
           </div>
         </div>
       ) : null}

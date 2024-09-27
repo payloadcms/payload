@@ -72,9 +72,9 @@ import * as PopupList from '../../elements/Popup/PopupButtonList/index.js'
 export { PopupList }
 export { Popup } from '../../elements/Popup/index.js'
 export { PublishMany } from '../../elements/PublishMany/index.js'
-export { DefaultPublishButton, PublishButton } from '../../elements/PublishButton/index.js'
-export { DefaultSaveButton, SaveButton } from '../../elements/SaveButton/index.js'
-export { DefaultSaveDraftButton, SaveDraftButton } from '../../elements/SaveDraftButton/index.js'
+export { PublishButton } from '../../elements/PublishButton/index.js'
+export { SaveButton } from '../../elements/SaveButton/index.js'
+export { SaveDraftButton } from '../../elements/SaveDraftButton/index.js'
 
 export { type Option as ReactSelectOption, ReactSelect } from '../../elements/ReactSelect/index.js'
 export { ReactSelect as Select } from '../../elements/ReactSelect/index.js'

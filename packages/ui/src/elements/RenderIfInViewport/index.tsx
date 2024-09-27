@@ -1,6 +1,7 @@
 'use client'
-import { useIntersect } from '@payloadcms/ui'
 import React from 'react'
+
+import { useIntersect } from '../../hooks/useIntersect.js'
 
 export const RenderIfInViewport: React.FC<{
   children: React.ReactNode

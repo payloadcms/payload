@@ -11,12 +11,12 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
-import { DefaultPublishButton, DefaultSaveButton, DefaultSaveDraftButton } from '@payloadcms/ui'
+import { PublishButton, SaveButton, SaveDraftButton } from '@payloadcms/ui'
 import { fieldIsSidebar } from 'payload/shared'
-import React from 'react'
+import React, { Fragment } from 'react'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
-import { RenderServerFields } from '../elements/RenderServerFields/index.js'
+import { renderServerFields } from '../elements/RenderServerFields/index.js'
 
 export const renderEntity: (args: {
   clientConfig: ClientConfig
@@ -65,7 +65,7 @@ export const renderEntity: (args: {
           collectionConfig?.admin?.components?.edit?.PreviewButton ||
           globalConfig?.admin?.components?.elements?.PreviewButton
         }
-        Fallback={DefaultPublishButton}
+        Fallback={PublishButton}
         importMap={importMap}
       />
     )
@@ -79,7 +79,7 @@ export const renderEntity: (args: {
             collectionConfig?.admin?.components?.edit?.PublishButton ||
             globalConfig?.admin?.components?.elements?.PublishButton
           }
-          Fallback={DefaultPublishButton}
+          Fallback={PublishButton}
           importMap={importMap}
         />
       )
@@ -95,7 +95,7 @@ export const renderEntity: (args: {
               collectionConfig?.admin?.components?.edit?.SaveDraftButton ||
               globalConfig?.admin?.components?.elements?.SaveDraftButton
             }
-            Fallback={DefaultSaveDraftButton}
+            Fallback={SaveDraftButton}
             importMap={importMap}
           />
         )
@@ -107,7 +107,7 @@ export const renderEntity: (args: {
             collectionConfig?.admin?.components?.edit?.SaveButton ||
             globalConfig?.admin?.components?.elements?.SaveButton
           }
-          Fallback={DefaultSaveButton}
+          Fallback={SaveButton}
           importMap={importMap}
         />
       )
@@ -121,43 +121,43 @@ export const renderEntity: (args: {
   const sidebarClientFields = clientFields?.filter((field) => fieldIsSidebar(field))
 
   components.MainFields = (
-    <RenderServerFields
-      clientConfig={clientConfig}
-      clientFields={mainClientFields}
-      config={config}
-      fields={mainFields}
-      formState={formState}
-      i18n={i18n}
-      importMap={importMap}
-      payload={payload}
-      permissions={
-        collectionConfig
+    <Fragment>
+      {renderServerFields({
+        clientConfig,
+        clientFields: mainClientFields,
+        config,
+        fields: mainFields,
+        formState,
+        i18n,
+        importMap,
+        payload,
+        permissions: collectionConfig
           ? permissions?.collections?.[collectionConfig?.slug]?.fields
           : globalConfig
             ? permissions?.globals?.[globalConfig.slug]?.fields
-            : undefined
-      }
-    />
+            : undefined,
+      })?.map((F) => F)}
+    </Fragment>
   )
 
   components.SidebarFields = (
-    <RenderServerFields
-      clientConfig={clientConfig}
-      clientFields={sidebarClientFields}
-      config={config}
-      fields={sidebarFields}
-      formState={formState}
-      i18n={i18n}
-      importMap={importMap}
-      payload={payload}
-      permissions={
-        collectionConfig
+    <Fragment>
+      {renderServerFields({
+        clientConfig,
+        clientFields: sidebarClientFields,
+        config,
+        fields: sidebarFields,
+        formState,
+        i18n,
+        importMap,
+        payload,
+        permissions: collectionConfig
           ? permissions?.collections?.[collectionConfig?.slug]?.fields
           : globalConfig
             ? permissions?.globals?.[globalConfig.slug]?.fields
-            : undefined
-      }
-    />
+            : undefined,
+      })?.map((F) => F)}
+    </Fragment>
   )
 
   return components

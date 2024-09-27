@@ -3,10 +3,11 @@ import type {
   ArrayFieldClientComponent,
   ArrayFieldClientProps,
   ArrayField as ArrayFieldType,
+  Row,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -22,6 +23,7 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
+import { useServerActions } from '../../providers/ServerActions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -43,17 +45,19 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         isSortable = true,
         readOnly: readOnlyFromAdmin,
       } = {},
-      fields,
       localized,
       maxRows,
       minRows: minRowsProp,
       required,
     },
+    Fields: InitialFields,
     forceRender = false,
     Label,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+
+  const [Fields, setFields] = useState<React.ReactNode[][]>(InitialFields)
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
@@ -71,6 +75,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const submitted = useFormSubmitted()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
+  const payloadServerAction = useServerActions()
 
   const {
     config: { localization },
@@ -130,6 +135,16 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
+  const loadNewFields = useCallback(async () => {
+    // @ts-expect-error eslint-disable-next-line
+    const NewFields = (await payloadServerAction('render-fields', {
+      language: i18n.language,
+      schemaPath,
+    })) as any as React.ReactNode[][]
+
+    setFields(NewFields)
+  }, [i18n.language, payloadServerAction, schemaPath])
+
   const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const addRow = useCallback(
@@ -137,23 +152,27 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       await addFieldRow({ path, rowIndex, schemaPath })
       setModified(true)
 
+      await loadNewFields()
+
       setTimeout(() => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, setModified, schemaPath],
+    [addFieldRow, path, setModified, schemaPath, loadNewFields],
   )
 
   const duplicateRow = useCallback(
-    (rowIndex: number) => {
+    async (rowIndex: number) => {
       dispatchFields({ type: 'DUPLICATE_ROW', path, rowIndex })
       setModified(true)
+
+      await loadNewFields()
 
       setTimeout(() => {
         scrollToID(`${path}-row-${rowIndex}`)
       }, 0)
     },
-    [dispatchFields, path, setModified],
+    [dispatchFields, path, setModified, loadNewFields],
   )
 
   const removeRow = useCallback(
@@ -226,7 +245,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
             )}
           </div>
-          {rows.length > 0 && (
+          {Fields?.length > 0 && (
             <ul className={`${baseClass}__header-actions`}>
               <li>
                 <button
@@ -252,16 +271,19 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         {Description}
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
-      {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
+      {(Fields?.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
           className={`${baseClass}__draggable-rows`}
           ids={rows.map((row) => row.id)}
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
         >
-          {rows.map((row, i) => {
+          {Fields.map((Subfields, i) => {
+            const row = rows[i] || ({} as Row)
+
             const rowErrorCount = errorPaths?.filter((errorPath) =>
               errorPath.startsWith(`${path}.${i}.`),
             ).length
+
             return (
               <DraggableSortableItem disabled={disabled || !isSortable} id={row.id} key={row.id}>
                 {(draggableSortableItemProps) => (
@@ -270,7 +292,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     addRow={addRow}
                     duplicateRow={duplicateRow}
                     errorCount={rowErrorCount}
-                    fields={fields}
+                    Fields={Subfields}
                     forceRender={forceRender}
                     hasMaxRows={hasMaxRows}
                     indexPath={indexPath}
