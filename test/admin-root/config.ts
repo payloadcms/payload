@@ -1,8 +1,8 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { buildConfigWithDefaults } from '@test-utils/buildConfigWithDefaults.js'
+import { devUser } from '@test-utils/credentials.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
 import { adminRoute } from './shared.js'

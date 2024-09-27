@@ -1,6 +1,6 @@
 import type { Payload } from 'payload'
 
-import { devUser } from '../credentials.js'
+import { devUser } from '@test-utils/credentials.js'
 import { seedDB } from '../helpers/seed.js'
 import { categoriesSlug, collectionSlugs, postsSlug } from './shared.js'
 

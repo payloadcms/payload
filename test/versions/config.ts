@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { buildConfigWithDefaults } from '@test-utils/buildConfigWithDefaults.js'
 import AutosavePosts from './collections/Autosave.js'
 import CustomIDs from './collections/CustomIDs.js'
 import DisablePublish from './collections/DisablePublish.js'

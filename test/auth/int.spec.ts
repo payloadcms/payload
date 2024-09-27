@@ -7,7 +7,7 @@ import { v4 as uuid } from 'uuid'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
-import { devUser } from '../credentials.js'
+import { devUser } from '@test-utils/credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared.js'
 

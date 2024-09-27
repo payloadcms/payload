@@ -4,8 +4,8 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { LocalizedPost } from './payload-types.js'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { buildConfigWithDefaults } from '@test-utils/buildConfigWithDefaults.js'
+import { devUser } from '@test-utils/credentials.js'
 import { ArrayCollection } from './collections/Array/index.js'
 import { BlocksCollection } from './collections/Blocks/index.js'
 import { Group } from './collections/Group/index.js'

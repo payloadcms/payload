@@ -3,7 +3,7 @@ import type { Payload } from 'payload'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { devUser } from '../credentials.js'
+import { devUser } from '@test-utils/credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 
 let payload: Payload

@@ -2,7 +2,7 @@ import { type Payload } from 'payload'
 
 import type { DraftPost } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
+import { devUser } from '@test-utils/credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
 import { titleToDelete } from './shared.js'
 import { draftCollectionSlug } from './slugs.js'

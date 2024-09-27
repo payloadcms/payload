@@ -6,8 +6,8 @@ import { slateEditor } from '@payloadcms/richtext-slate'
 
 import type { Post } from './payload-types.js'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { buildConfigWithDefaults } from '@test-utils/buildConfigWithDefaults.js'
+import { devUser } from '@test-utils/credentials.js'
 
 export default buildConfigWithDefaults({
   admin: {

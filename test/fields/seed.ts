@@ -4,7 +4,7 @@ import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
-import { devUser } from '../credentials.js'
+import { devUser } from '@test-utils/credentials.js'
 import { seedDB } from '../helpers/seed.js'
 import { anotherArrayDoc, arrayDoc } from './collections/Array/shared.js'
 import { blocksDoc } from './collections/Blocks/shared.js'

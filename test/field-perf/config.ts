@@ -2,8 +2,8 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { buildConfigWithDefaults } from '@test-utils/buildConfigWithDefaults.js'
+import { devUser } from '@test-utils/credentials.js'
 
 export default buildConfigWithDefaults({
   admin: {

@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Category, Post } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
+import { devUser } from '@test-utils/credentials.js'
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 

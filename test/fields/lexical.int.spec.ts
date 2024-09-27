@@ -12,7 +12,7 @@ import { fileURLToPath } from 'url'
 
 import type { LexicalField, LexicalMigrateField, RichTextField } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
+import { devUser } from '@test-utils/credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { lexicalDocData } from './collections/Lexical/data.js'

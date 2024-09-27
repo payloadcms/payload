@@ -11,7 +11,7 @@ import path from 'path'
 import { commitTransaction, initTransaction, QueryError } from 'payload'
 import { fileURLToPath } from 'url'
 
-import { devUser } from '../credentials.js'
+import { devUser } from '@test-utils/credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import removeFiles from '../helpers/removeFiles.js'
 

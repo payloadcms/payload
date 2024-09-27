@@ -1,4 +1,5 @@
 {
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
     "rootDir": ".",
@@ -26,10 +27,6 @@
       }
     ],
     "baseUrl": ".",
-    "paths": {
-      "@payload-config": ["./_community/config.ts"],
-      "@test-utils/*": ["../test-utils/*"],
-    }
   },
   "exclude": [
     "dist",

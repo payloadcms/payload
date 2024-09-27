@@ -9,6 +9,7 @@ const [testConfigDir] = process.argv.slice(2)
 
 import type { SanitizedConfig } from 'payload'
 
+import { topLevelTestDir } from 'constants.js'
 import { fileURLToPath } from 'url'
 
 import { generateDatabaseAdapter } from './generateDatabaseAdapter.js'
@@ -26,7 +27,7 @@ async function run() {
   }
 
   if (testConfigDir) {
-    testDir = path.resolve(dirname, testConfigDir)
+    testDir = path.resolve(topLevelTestDir, testConfigDir)
 
     const pathWithConfig = path.resolve(testDir, 'config.ts')
     console.log('Generating types for config:', pathWithConfig)

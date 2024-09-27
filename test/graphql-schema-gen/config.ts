@@ -1,7 +1,7 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { buildConfigWithDefaults } from '@test-utils/buildConfigWithDefaults.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

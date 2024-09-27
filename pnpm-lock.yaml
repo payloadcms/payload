@@ -1762,21 +1762,12 @@ importers:
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
-      drizzle-kit:
-        specifier: 0.23.2-df9e596
-        version: 0.23.2-df9e596
       eslint-plugin-playwright:
         specifier: 1.6.2
         version: 1.6.2(eslint-plugin-jest@28.8.1(@typescript-eslint/eslint-plugin@8.3.0(@typescript-eslint/parser@8.3.0(eslint@9.9.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.9.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.9.1(jiti@1.21.6))(jest@29.7.0(@types/node@22.5.4)(babel-plugin-macros@3.1.0))(typescript@5.6.2))(eslint@9.9.1(jiti@1.21.6))
       execa:
         specifier: 5.1.1
         version: 5.1.1
-      file-type:
-        specifier: 19.3.0
-        version: 19.3.0
-      http-status:
-        specifier: 1.6.2
-        version: 1.6.2
       jwt-decode:
         specifier: 4.0.0
         version: 4.0.0
@@ -1798,27 +1789,144 @@ importers:
       react-dom:
         specifier: 19.0.0-rc-5dcb0097-20240918
         version: 19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918)
-      server-only:
-        specifier: ^0.0.1
-        version: 0.0.1
       slate:
         specifier: 0.91.4
         version: 0.91.4
       tempy:
         specifier: ^1.0.1
         version: 1.0.1
+      typescript:
+        specifier: 5.6.2
+        version: 5.6.2
+      uuid:
+        specifier: 10.0.0
+        version: 10.0.0
+
+  test-utils:
+    devDependencies:
+      '@payloadcms/db-mongodb':
+        specifier: workspace:*
+        version: link:../packages/db-mongodb
+      '@payloadcms/db-postgres':
+        specifier: workspace:*
+        version: link:../packages/db-postgres
+      '@payloadcms/db-sqlite':
+        specifier: workspace:*
+        version: link:../packages/db-sqlite
+      '@payloadcms/db-vercel-postgres':
+        specifier: workspace:*
+        version: link:../packages/db-vercel-postgres
+      '@payloadcms/drizzle':
+        specifier: workspace:*
+        version: link:../packages/drizzle
+      '@payloadcms/email-nodemailer':
+        specifier: workspace:*
+        version: link:../packages/email-nodemailer
+      '@payloadcms/email-resend':
+        specifier: workspace:*
+        version: link:../packages/email-resend
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../packages/eslint-config
+      '@payloadcms/eslint-plugin':
+        specifier: workspace:*
+        version: link:../packages/eslint-plugin
+      '@payloadcms/graphql':
+        specifier: workspace:*
+        version: link:../packages/graphql
+      '@payloadcms/live-preview':
+        specifier: workspace:*
+        version: link:../packages/live-preview
+      '@payloadcms/live-preview-react':
+        specifier: workspace:*
+        version: link:../packages/live-preview-react
+      '@payloadcms/next':
+        specifier: workspace:*
+        version: link:../packages/next
+      '@payloadcms/plugin-cloud':
+        specifier: workspace:*
+        version: link:../packages/plugin-cloud
+      '@payloadcms/plugin-cloud-storage':
+        specifier: workspace:*
+        version: link:../packages/plugin-cloud-storage
+      '@payloadcms/plugin-form-builder':
+        specifier: workspace:*
+        version: link:../packages/plugin-form-builder
+      '@payloadcms/plugin-nested-docs':
+        specifier: workspace:*
+        version: link:../packages/plugin-nested-docs
+      '@payloadcms/plugin-redirects':
+        specifier: workspace:*
+        version: link:../packages/plugin-redirects
+      '@payloadcms/plugin-search':
+        specifier: workspace:*
+        version: link:../packages/plugin-search
+      '@payloadcms/plugin-sentry':
+        specifier: workspace:*
+        version: link:../packages/plugin-sentry
+      '@payloadcms/plugin-seo':
+        specifier: workspace:*
+        version: link:../packages/plugin-seo
+      '@payloadcms/plugin-stripe':
+        specifier: workspace:*
+        version: link:../packages/plugin-stripe
+      '@payloadcms/richtext-lexical':
+        specifier: workspace:*
+        version: link:../packages/richtext-lexical
+      '@payloadcms/richtext-slate':
+        specifier: workspace:*
+        version: link:../packages/richtext-slate
+      '@payloadcms/storage-azure':
+        specifier: workspace:*
+        version: link:../packages/storage-azure
+      '@payloadcms/storage-gcs':
+        specifier: workspace:*
+        version: link:../packages/storage-gcs
+      '@payloadcms/storage-s3':
+        specifier: workspace:*
+        version: link:../packages/storage-s3
+      '@payloadcms/storage-uploadthing':
+        specifier: workspace:*
+        version: link:../packages/storage-uploadthing
+      '@payloadcms/storage-vercel-blob':
+        specifier: workspace:*
+        version: link:../packages/storage-vercel-blob
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../packages/translations
+      '@payloadcms/ui':
+        specifier: workspace:*
+        version: link:../packages/ui
+      babel-plugin-react-compiler:
+        specifier: 0.0.0-experimental-24ec0eb-20240918
+        version: 0.0.0-experimental-24ec0eb-20240918
+      comment-json:
+        specifier: ^4.2.3
+        version: 4.2.5
+      dotenv:
+        specifier: 16.4.5
+        version: 16.4.5
+      drizzle-kit:
+        specifier: 0.23.2-df9e596
+        version: 0.23.2-df9e596
+      http-status:
+        specifier: 1.6.2
+        version: 1.6.2
+      next:
+        specifier: 15.0.0-canary.160
+        version: 15.0.0-canary.160(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)(sass@1.77.4)
+      payload:
+        specifier: workspace:*
+        version: link:../packages/payload
+      qs-esm:
+        specifier: 7.0.2
+        version: 7.0.2
       ts-essentials:
         specifier: 10.0.2
         version: 10.0.2(typescript@5.6.2)
       typescript:
         specifier: 5.6.2
         version: 5.6.2
-      uploadthing:
-        specifier: ^6.10.1
-        version: 6.13.2(express@4.19.2)(next@15.0.0-canary.160(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)(sass@1.77.4))
-      uuid:
-        specifier: 10.0.0
-        version: 10.0.0
 
 packages:
 
@@ -8535,9 +8643,6 @@ packages:
   serve-static@1.15.0:
     resolution: {integrity: sha512-XGuRDNjXUijsUL0vl6nSD7cwURuzEgglbOaFuZM9g3kwDXOWVTck0jLzjPzGD+TazWbboZYu52/9/XPdUgne9g==}
     engines: {node: '>= 0.8.0'}
-
-  server-only@0.0.1:
-    resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
 
   set-function-length@1.2.2:
     resolution: {integrity: sha512-pgRc4hJ4/sNjWCSS9AmnS40x3bNMDTknHgL5UaMBTMyJnU90EgWh1Rz+MC9eFu4BuN/UwZjKQuY/1v3rM7HMfg==}
@@ -17842,8 +17947,6 @@ snapshots:
       send: 0.18.0
     transitivePeerDependencies:
       - supports-color
-
-  server-only@0.0.1: {}
 
   set-function-length@1.2.2:
     dependencies:
