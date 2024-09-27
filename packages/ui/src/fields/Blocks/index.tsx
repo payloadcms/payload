@@ -11,7 +11,6 @@ import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { DrawerToggler } from '../../elements/Drawer/index.js'
 import { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
@@ -37,7 +36,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     Error,
     field: {
       name,
-      _path: pathFromProps,
+      _path: path,
+      _schemaPath,
       admin: { className, isSortable = true, readOnly: readOnlyFromAdmin } = {},
       blocks,
       labels: labelsFromProps,
@@ -54,7 +54,6 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
-  const { indexPath, readOnly: readOnlyFromContext } = useFieldProps()
   const minRows = (minRowsProp ?? required) ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
@@ -94,26 +93,21 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     [maxRows, minRows, required, validate, editingDefaultLocale],
   )
 
-  const { path: pathFromContext } = useFieldProps()
-
   const {
     errorPaths,
     formInitializing,
     formProcessing,
-    path,
-    permissions,
     rows = [],
-    schemaPath,
     showError,
     valid,
     value,
   } = useField<number>({
     hasRows: true,
-    path: pathFromContext ?? pathFromProps ?? name,
+    path: path ?? name,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const addRow = useCallback(
     async (rowIndex: number, blockType: string): Promise<void> => {
@@ -121,7 +115,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         data: { blockType },
         path,
         rowIndex,
-        schemaPath: `${schemaPath}.${blockType}`,
+        schemaPath: `${_schemaPath}.${blockType}`,
       })
       setModified(true)
 
@@ -129,7 +123,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, setModified, schemaPath],
+    [addFieldRow, path, setModified, _schemaPath],
   )
 
   const duplicateRow = useCallback(
@@ -282,7 +276,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       row={row}
                       rowCount={rows.length}
                       rowIndex={i}
-                      schemaPath={schemaPath}
+                      schemaPath={_schemaPath}
                       setCollapse={setCollapse}
                     />
                   )}

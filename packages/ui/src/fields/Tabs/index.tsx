@@ -6,7 +6,6 @@ import { tabHasName, toKebabCase } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -25,7 +24,8 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const {
     Description,
     field: {
-      _path: pathFromProps,
+      _path: path,
+      _schemaPath,
       admin: { className, readOnly: readOnlyFromAdmin } = {},
       tabs = [],
     },
@@ -33,17 +33,8 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
     readOnly: readOnlyFromTopLevelProps,
   } = props
 
-  const {
-    indexPath,
-    path: pathFromContext,
-    readOnly: readOnlyFromContext,
-    schemaPath,
-    siblingPermissions,
-  } = useFieldProps()
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
+  const readOnly = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
-  const readOnly = readOnlyFromProps || readOnlyFromContext
-  const path = pathFromContext ?? pathFromProps
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
   const { i18n } = useTranslation()
@@ -170,7 +161,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
                     : siblingPermissions
                 }
                 readOnly={readOnly}
-                schemaPath={`${schemaPath ? `${schemaPath}` : ''}${tabHasName(activeTabConfig) && activeTabConfig.name ? `.${activeTabConfig.name}` : ''}`}
+                schemaPath={`${_schemaPath ? `${_schemaPath}` : ''}${tabHasName(activeTabConfig) && activeTabConfig.name ? `.${activeTabConfig.name}` : ''}`}
               />
             </div>
           )}

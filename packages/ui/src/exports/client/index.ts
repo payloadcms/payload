@@ -137,8 +137,7 @@ export type { UploadInputProps } from '../../fields/Upload/index.js'
 export { fieldBaseClass } from '../../fields/shared/index.js'
 
 // forms
-export { FieldPropsProvider } from '../../forms/FieldPropsProvider/index.js'
-export { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+
 export {
   useAllFormFields,
   useForm,

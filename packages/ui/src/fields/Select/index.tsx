@@ -11,7 +11,6 @@ import React, { useCallback } from 'react'
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 import type { SelectInputProps } from './Input.js'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { SelectInput } from './Input.js'
@@ -69,14 +68,14 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
     [validate, required, hasMany, options],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const path = pathFromProps ?? name
 
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
-    path: pathFromContext ?? pathFromProps ?? name,
+  const { formInitializing, formProcessing, setValue, showError, value } = useField({
+    path,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const onChange: ReactSelectAdapterProps['onChange'] = useCallback(
     (selectedOption: OptionObject | OptionObject[]) => {

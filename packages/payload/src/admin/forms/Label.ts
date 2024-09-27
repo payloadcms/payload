@@ -6,6 +6,7 @@ export type GenericLabelProps = {
   readonly as?: 'label' | 'span'
   readonly htmlFor?: string
   readonly label?: StaticLabel
+  readonly path?: string
   readonly required?: boolean
   readonly unstyled?: boolean
 }

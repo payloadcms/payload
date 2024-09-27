@@ -5,7 +5,6 @@ import type { GenericLabelProps } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -17,12 +16,12 @@ export const FieldLabel: React.FC<GenericLabelProps> = (props) => {
     as: Element = 'label',
     htmlFor: htmlForFromProps,
     label,
+    path,
     required = false,
     unstyled = false,
   } = props
 
   const { uuid } = useForm()
-  const { path } = useFieldProps()
   const editDepth = useEditDepth()
   const htmlFor = htmlForFromProps || generateFieldID(path, editDepth, uuid)
 

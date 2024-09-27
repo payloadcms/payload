@@ -20,7 +20,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
     Description,
     Error,
     field: {
-      _path,
+      _path: path,
       admin: { className, isSortable, readOnly: readOnlyFromAdmin, style, width } = {},
       hasMany,
       label,
@@ -44,17 +44,17 @@ export function UploadComponent(props: UploadFieldClientProps) {
     },
     [validate, required],
   )
+
   const {
     filterOptions,
     formInitializing,
     formProcessing,
-    path,
     readOnly: readOnlyFromField,
     setValue,
     showError,
     value,
   } = useField<string | string[]>({
-    path: _path,
+    path,
     validate: memoizedValidate,
   })
 

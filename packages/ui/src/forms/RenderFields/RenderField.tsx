@@ -8,7 +8,6 @@ import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { HiddenField } from '../../fields/Hidden/index.js'
 import { useFieldComponents } from '../../providers/FieldComponents/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
-import { FieldPropsProvider, useFieldProps } from '../FieldPropsProvider/index.js'
 
 type Props = {
   readonly fieldComponentProps?: {
@@ -38,7 +37,6 @@ export const RenderField: React.FC<Props> = ({
 }) => {
   const fieldComponents = useFieldComponents()
   const operation = useOperation()
-  const { readOnly: readOnlyFromContext } = useFieldProps()
 
   if (!fieldComponents) {
     return null
@@ -102,18 +100,5 @@ export const RenderField: React.FC<Props> = ({
     )
   }
 
-  return (
-    <FieldPropsProvider
-      custom={fieldComponentProps?.field?.admin?.custom}
-      indexPath={indexPath}
-      path={path}
-      permissions={permissions}
-      readOnly={fieldComponentProps.readOnly}
-      schemaPath={schemaPath}
-      siblingPermissions={siblingPermissions}
-      type={fieldComponentProps?.field?.type}
-    >
-      {RenderedField}
-    </FieldPropsProvider>
-  )
+  return null
 }

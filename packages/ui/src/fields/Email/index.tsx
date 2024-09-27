@@ -8,7 +8,6 @@ import type {
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -54,14 +53,14 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
     [validate, required],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const path = pathFromProps ?? name
 
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
-    path: pathFromContext ?? pathFromProps ?? name,
+  const { formInitializing, formProcessing, setValue, showError, value } = useField({
+    path,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   return (
     <div

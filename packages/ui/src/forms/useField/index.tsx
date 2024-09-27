@@ -14,7 +14,6 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { useFieldProps } from '../FieldPropsProvider/index.js'
 import {
   useForm,
   useFormFields,
@@ -30,12 +29,7 @@ import {
  * @see https://payloadcms.com/docs/admin/hooks#usefield
  */
 export const useField = <T,>(options: Options): FieldType<T> => {
-  const { disableFormData = false, hasRows, validate } = options
-
-  const { path: pathFromContext, permissions, readOnly, schemaPath } = useFieldProps()
-
-  // Prioritize passed in path over context path. If the context path should be prioritized (which is the case for top-level useField calls in fields), it should be passed in as the options path.
-  const path = options.path || pathFromContext
+  const { disableFormData = false, hasRows, path, validate } = options
 
   const submitted = useFormSubmitted()
   const processing = useFormProcessing()
@@ -117,10 +111,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
       formSubmitted: submitted,
       initialValue,
       path,
-      permissions,
-      readOnly: readOnly || false,
       rows: field?.rows,
-      schemaPath,
       setValue,
       showError,
       valid: field?.valid,
@@ -138,9 +129,6 @@ export const useField = <T,>(options: Options): FieldType<T> => {
       value,
       initialValue,
       path,
-      schemaPath,
-      readOnly,
-      permissions,
       filterOptions,
       initializing,
     ],

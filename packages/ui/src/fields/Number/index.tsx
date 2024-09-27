@@ -8,7 +8,6 @@ import React, { useCallback, useEffect, useState } from 'react'
 import type { Option } from '../../elements/ReactSelect/types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -59,16 +58,16 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
     [validate, min, max, required],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const path = pathFromProps ?? name
 
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField<
+  const { formInitializing, formProcessing, setValue, showError, value } = useField<
     number | number[]
   >({
-    path: pathFromContext ?? pathFromProps ?? name,
+    path,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const handleChange = useCallback(
     (e) => {

@@ -3,7 +3,6 @@ import type { RowFieldClientComponent } from 'payload'
 
 import React from 'react'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -16,11 +15,9 @@ const baseClass = 'row'
 
 const RowFieldComponent: RowFieldClientComponent = (props) => {
   const {
-    field: { admin: { className } = {}, fields },
+    field: { _path: path, _schemaPath, admin: { className, readOnly } = {}, fields },
     forceRender = false,
   } = props
-
-  const { indexPath, path, readOnly, schemaPath, siblingPermissions } = useFieldProps()
 
   return (
     <RowProvider>
@@ -34,7 +31,7 @@ const RowFieldComponent: RowFieldClientComponent = (props) => {
           path={path}
           permissions={siblingPermissions}
           readOnly={readOnly}
-          schemaPath={schemaPath}
+          schemaPath={_schemaPath}
         />
       </div>
     </RowProvider>

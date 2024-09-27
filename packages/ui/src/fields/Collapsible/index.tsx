@@ -5,7 +5,6 @@ import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import { Collapsible as CollapsibleElement } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { WatchChildErrors } from '../../forms/WatchChildErrors/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
@@ -24,7 +23,8 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
     Description,
     field,
     field: {
-      _path: pathFromProps,
+      _path: path,
+      _schemaPath,
       admin: { className, initCollapsed = false, readOnly: readOnlyFromAdmin } = {},
       fields,
     },
@@ -33,18 +33,8 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
-  const {
-    indexPath,
-    path: pathFromContext,
-    readOnly: readOnlyFromContext,
-    schemaPath,
-    siblingPermissions,
-  } = useFieldProps()
-
   const formInitializing = useFormInitializing()
   const formProcessing = useFormProcessing()
-
-  const path = pathFromContext ?? pathFromProps
 
   const { i18n } = useTranslation()
   const { getPreference, setPreference } = usePreferences()
@@ -111,7 +101,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
     return null
   }
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const style: AdminClient['style'] = {
     ...field.admin?.style,
@@ -162,7 +152,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
             path={path}
             permissions={siblingPermissions}
             readOnly={disabled}
-            schemaPath={schemaPath}
+            schemaPath={_schemaPath}
           />
         </CollapsibleElement>
         {Description}

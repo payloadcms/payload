@@ -5,7 +5,6 @@ import type { JoinFieldClient, JoinFieldClientComponent, PaginatedDocs, Where } 
 import React, { useMemo } from 'react'
 
 import { RelationshipTable } from '../../elements/RelationshipTable/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -14,16 +13,14 @@ import { fieldBaseClass } from '../index.js'
 const JoinFieldComponent: JoinFieldClientComponent = (props) => {
   const {
     field,
-    field: { name, _path: pathFromProps, collection, on },
+    field: { name, _path: path, collection, on },
     Label,
   } = props
 
   const { id: docID } = useDocumentInfo()
 
-  const { path: pathFromContext } = useFieldProps()
-
   const { value } = useField<PaginatedDocs>({
-    path: pathFromContext ?? pathFromProps ?? name,
+    path: path ?? name,
   })
 
   const filterOptions: Where = useMemo(

@@ -9,7 +9,6 @@ import React, { useCallback } from 'react'
 
 import type { CheckboxInputProps } from './Input.js'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
@@ -65,15 +64,15 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
     [validate, required],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const path = pathFromProps ?? name
 
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
+  const { formInitializing, formProcessing, setValue, showError, value } = useField({
     disableFormData,
-    path: pathFromContext ?? pathFromProps ?? name,
+    path,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const onToggle = useCallback(() => {
     if (!disabled) {

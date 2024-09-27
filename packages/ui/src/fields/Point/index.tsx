@@ -13,7 +13,6 @@ import './index.scss'
 const baseClass = 'point'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 
 export const PointFieldComponent: PointFieldClientComponent = (props) => {
   const {
@@ -23,7 +22,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
     Error,
     field: {
       name,
-      _path: pathFromProps,
+      _path: path,
       admin: { className, placeholder, readOnly: readOnlyFromAdmin, step, style, width } = {},
       label,
       required,
@@ -32,7 +31,8 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
+
+  const readOnly = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n, t } = useTranslation()
 
@@ -45,16 +45,12 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
     [validate, required],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
-
   const {
-    path,
     setValue,
     showError,
     value = [null, null],
   } = useField<[number, number]>({
-    path: pathFromContext ?? pathFromProps ?? name,
+    path: path ?? name,
     validate: memoizedValidate,
   })
 

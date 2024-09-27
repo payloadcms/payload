@@ -13,7 +13,6 @@ import './index.scss'
 const baseClass = 'date-time-field'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 
 const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
@@ -54,14 +53,14 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
     [validate, required],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const path = pathFromProps ?? name
 
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField<Date>({
-    path: pathFromContext ?? pathFromProps ?? name,
+  const { formInitializing, formProcessing, setValue, showError, value } = useField<Date>({
+    path,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   return (
     <div

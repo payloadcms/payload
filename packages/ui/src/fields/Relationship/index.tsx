@@ -13,7 +13,6 @@ import { AddNewRelation } from '../../elements/AddNewRelation/index.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
@@ -44,7 +43,6 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       admin: {
         allowCreate = true,
         className,
-        description,
         isSortable = true,
         readOnly: readOnlyFromAdmin,
         sortOptions,
@@ -100,24 +98,24 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     },
     [validate, required],
   )
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+
+  const path = pathFromProps ?? name
 
   const {
     filterOptions,
     formInitializing,
     formProcessing,
     initialValue,
-    path,
     setValue,
     showError,
     value,
   } = useField<Value | Value[]>({
-    path: pathFromContext ?? pathFromProps ?? name,
+    path,
     validate: memoizedValidate,
   })
   const [options, dispatchOptions] = useReducer(optionsReducer, [])
 
-  const readOnly = readOnlyFromProps || readOnlyFromContext || formInitializing
+  const readOnly = readOnlyFromProps || formInitializing
 
   const valueRef = useRef(value)
   valueRef.current = value

@@ -11,8 +11,6 @@ import './index.scss'
 
 const baseClass = 'json-field'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-
 const JSONFieldComponent: JSONFieldClientComponent = (props) => {
   const {
     AfterInput,
@@ -21,7 +19,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     Error,
     field: {
       name,
-      _path: pathFromProps,
+      _path: path,
       admin: { className, editorOptions, readOnly: readOnlyFromAdmin, style, width } = {},
       jsonSchema,
       required,
@@ -46,15 +44,13 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     [validate, required, jsonError],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-
-  const { formInitializing, formProcessing, initialValue, path, setValue, showError, value } =
+  const { formInitializing, formProcessing, initialValue, setValue, showError, value } =
     useField<string>({
-      path: pathFromContext ?? pathFromProps ?? name,
+      path: path ?? name,
       validate: memoizedValidate,
     })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const handleMount = useCallback(
     (editor, monaco) => {

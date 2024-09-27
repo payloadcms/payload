@@ -6,7 +6,6 @@ import React, { useCallback } from 'react'
 
 import type { TextAreaInputProps } from './types.js'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -63,14 +62,14 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
     [validate, required, maxLength, minLength],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const path = pathFromProps ?? name
 
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField<string>({
-    path: pathFromContext ?? pathFromProps ?? name,
+  const { formInitializing, formProcessing, setValue, showError, value } = useField<string>({
+    path,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   return (
     <TextareaInput

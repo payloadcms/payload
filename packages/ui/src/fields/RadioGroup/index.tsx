@@ -14,7 +14,6 @@ import { Radio } from './Radio/index.js'
 const baseClass = 'radio-group'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 
 const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
   const {
@@ -54,21 +53,20 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
     [validate, options, required],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const path = pathFromProps ?? name
 
   const {
     formInitializing,
     formProcessing,
-    path,
     setValue,
     showError,
     value: valueFromContext,
   } = useField<string>({
-    path: pathFromContext ?? pathFromProps ?? name,
+    path,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const value = valueFromContext || valueFromProps
 

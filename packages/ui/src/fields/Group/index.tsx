@@ -7,7 +7,6 @@ import React from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import {
   useFormInitializing,
   useFormProcessing,
@@ -29,6 +28,8 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const {
     Description,
     field: {
+      _path: path,
+      _schemaPath,
       admin: { className, hideGutter, readOnly: readOnlyFromAdmin, style, width } = {},
       fields,
       label,
@@ -36,9 +37,9 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
     Label,
     readOnly: readOnlyFromTopLevelProps,
   } = props
+
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
-  const { path, permissions, readOnly: readOnlyFromContext, schemaPath } = useFieldProps()
   const { i18n } = useTranslation()
   const { isWithinCollapsible } = useCollapsible()
   const isWithinGroup = useGroup()
@@ -50,7 +51,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const submitted = useFormSubmitted()
   const errorCount = errorPaths.length
   const fieldHasErrors = submitted && errorCount > 0
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const isTopLevel = !(isWithinCollapsible || isWithinGroup || isWithinRow)
 
@@ -79,7 +80,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
       <GroupProvider>
         <div className={`${baseClass}__wrap`}>
           <div className={`${baseClass}__header`}>
-            {(Label || Description || label) && (
+            {Boolean(Label || Description || label) && (
               <header>
                 {Label ? (
                   Label
@@ -97,7 +98,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
             path={path}
             permissions={permissions?.fields}
             readOnly={disabled}
-            schemaPath={schemaPath}
+            schemaPath={_schemaPath}
           />
         </div>
       </GroupProvider>

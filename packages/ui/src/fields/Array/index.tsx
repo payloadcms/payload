@@ -14,7 +14,6 @@ import { Button } from '../../elements/Button/index.js'
 import { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
@@ -39,6 +38,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     field: {
       name,
       _path: pathFromProps,
+      _schemaPath,
       admin: {
         className,
         // components: { RowLabel },
@@ -60,13 +60,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const [Fields, setFields] = useState<React.ReactNode[][]>(InitialFields)
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
-
-  const {
-    indexPath,
-    path: pathFromContext,
-    permissions,
-    readOnly: readOnlyFromContext,
-  } = useFieldProps()
 
   const minRows = (minRowsProp ?? required) ? 1 : 0
 
@@ -119,19 +112,19 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     [maxRows, minRows, required, validate, editingDefaultLocale],
   )
 
+  const path = pathFromProps ?? name
+
   const {
     errorPaths,
     formInitializing,
     formProcessing,
-    path,
     rows = [],
-    schemaPath,
     showError,
     valid,
     value,
   } = useField<number>({
     hasRows: true,
-    path: pathFromContext ?? pathFromProps ?? name,
+    path,
     validate: memoizedValidate,
   })
 
@@ -139,17 +132,17 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     // @ts-expect-error eslint-disable-next-line
     const NewFields = (await payloadServerAction('render-fields', {
       language: i18n.language,
-      schemaPath,
+      schemaPath: _schemaPath,
     })) as any as React.ReactNode[][]
 
     setFields(NewFields)
-  }, [i18n.language, payloadServerAction, schemaPath])
+  }, [i18n.language, payloadServerAction, _schemaPath])
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const addRow = useCallback(
     async (rowIndex: number): Promise<void> => {
-      await addFieldRow({ path, rowIndex, schemaPath })
+      await addFieldRow({ path, rowIndex, schemaPath: _schemaPath })
       setModified(true)
 
       await loadNewFields()
@@ -158,7 +151,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, setModified, schemaPath, loadNewFields],
+    [addFieldRow, path, setModified, _schemaPath, loadNewFields],
   )
 
   const duplicateRow = useCallback(
@@ -307,7 +300,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     rowCount={rows.length}
                     rowIndex={i}
                     // RowLabel={RowLabel}
-                    schemaPath={schemaPath}
+                    schemaPath={_schemaPath}
                     setCollapse={setCollapse}
                   />
                 )}

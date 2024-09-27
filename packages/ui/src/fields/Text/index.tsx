@@ -6,7 +6,6 @@ import React, { useCallback, useEffect, useState } from 'react'
 import type { Option } from '../../elements/ReactSelect/types.js'
 import type { TextInputProps } from './types.js'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -41,7 +40,8 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
+
+  const readOnly = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const locale = useLocale()
 
@@ -58,14 +58,14 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
     [validate, minLength, maxLength, required],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const path = pathFromProps ?? name
 
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
-    path: pathFromContext ?? pathFromProps ?? name,
+  const { formInitializing, formProcessing, setValue, showError, value } = useField({
+    path,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const disabled = readOnly || formProcessing || formInitializing
 
   const renderRTL = isFieldRTL({
     fieldLocalized: localized,
