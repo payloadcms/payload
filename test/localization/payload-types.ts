@@ -180,6 +180,15 @@ export interface NestedFieldTable {
               blockType: 'content';
             }[]
           | null;
+        array?:
+          | {
+              relation?: {
+                relationTo: 'localized-posts';
+                value: string | LocalizedPost;
+              } | null;
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'block';

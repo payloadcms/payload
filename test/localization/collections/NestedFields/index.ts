@@ -67,6 +67,17 @@ export const NestedFields: CollectionConfig = {
                 },
               ],
             },
+            {
+              name: 'array',
+              type: 'array',
+              fields: [
+                {
+                  name: 'relation',
+                  type: 'relationship',
+                  relationTo: ['localized-posts'],
+                },
+              ],
+            },
           ],
         },
       ],
