@@ -2,6 +2,7 @@
   "$schema": "./translation-schema.json",
   "plugin-seo": {
     "almostThere": "Ще трошки",
+    "missing": "Missing",
     "autoGenerate": "Згенерувати",
     "bestPractices": "найкращі практики",
     "characterCount": "{{current}}/{{minLength}}-{{maxLength}} символів, ",

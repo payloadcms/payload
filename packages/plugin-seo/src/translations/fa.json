@@ -10,6 +10,7 @@
     "tooLong": "خیلی طولانی",
     "tooShort": "خیلی کوتاه",
     "almostThere": "چیزیی باقی نمونده",
+    "missing": "Missing",
     "characterCount": "{{current}}/{{minLength}}-{{maxLength}} کلمه، ",
     "charactersToGo": "{{characters}} باقی مانده",
     "charactersLeftOver": "{{characters}} باقی مانده",

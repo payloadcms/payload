@@ -35,6 +35,9 @@
         "almostThere": {
           "type": "string"
         },
+        "missing": {
+          "type": "string"
+        },
         "characterCount": {
           "type": "string"
         },
@@ -70,6 +73,7 @@
         "tooLong",
         "tooShort",
         "almostThere",
+        "missing",
         "characterCount",
         "charactersToGo",
         "charactersLeftOver",

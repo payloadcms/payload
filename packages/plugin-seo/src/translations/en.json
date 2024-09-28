@@ -10,6 +10,7 @@
     "tooLong": "Too long",
     "tooShort": "Too short",
     "almostThere": "Almost there",
+    "missing": "Missing",
     "characterCount": "{{current}}/{{minLength}}-{{maxLength}} chars, ",
     "charactersToGo": "{{characters}} to go",
     "charactersLeftOver": "{{characters}} left over",
