@@ -99,7 +99,7 @@
       "prettier --write",
       "eslint --cache --fix"
     ],
-    "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --ignore-workspace; pnpm run lint --fix\"",
+    "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --no-frozen-lockfile --ignore-workspace; pnpm run lint --fix\"",
     "tsconfig.json": "node scripts/reset-tsconfig.js"
   },
   "devDependencies": {
