@@ -252,9 +252,9 @@ function TableActionMenu({
           throw new Error('Expected to find tableElement in DOM')
         }
 
-        const tableSelection = getTableObserverFromTableElement(tableElement)
-        if (tableSelection !== null) {
-          tableSelection.clearHighlight()
+        const tableObserver = getTableObserverFromTableElement(tableElement)
+        if (tableObserver !== null) {
+          tableObserver.clearHighlight()
         }
 
         tableNode.markDirty()
@@ -421,6 +421,19 @@ function TableActionMenu({
 
         tableCell.toggleHeaderStyle(TableCellHeaderStates.COLUMN)
       }
+      clearTableSelection()
+      onClose()
+    })
+  }, [editor, tableCellNode, clearTableSelection, onClose])
+
+  const toggleRowStriping = useCallback(() => {
+    editor.update(() => {
+      if (tableCellNode.isAttached()) {
+        const tableNode = $getTableNodeFromLexicalNodeOrThrow(tableCellNode)
+        if (tableNode) {
+          tableNode.setRowStriping(!tableNode.getRowStriping())
+        }
+      }
 
       clearTableSelection()
       onClose()
@@ -470,6 +483,14 @@ function TableActionMenu({
         </React.Fragment>
       ) : null}
 
+      <button
+        className="item"
+        data-test-id="table-row-striping"
+        onClick={() => toggleRowStriping()}
+        type="button"
+      >
+        <span className="text">Toggle Row Striping</span>
+      </button>
       <button
         className="item"
         data-test-id="table-insert-row-above"

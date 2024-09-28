@@ -20,6 +20,10 @@
     }
   }
 
+  &__tableRowStriping tr:nth-child(even) {
+    background-color: var(--theme-elevation-100);
+  }
+
   &__tableSelected {
     outline: 2px solid rgb(60, 132, 244);
   }

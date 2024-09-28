@@ -119,13 +119,12 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
     }
 
     const removeRootListener = editor.registerRootListener((rootElement, prevRootElement) => {
-      rootElement?.addEventListener('mousemove', onMouseMove)
-      rootElement?.addEventListener('mousedown', onMouseDown)
-      rootElement?.addEventListener('mouseup', onMouseUp)
-
       prevRootElement?.removeEventListener('mousemove', onMouseMove)
       prevRootElement?.removeEventListener('mousedown', onMouseDown)
       prevRootElement?.removeEventListener('mouseup', onMouseUp)
+      rootElement?.addEventListener('mousemove', onMouseMove)
+      rootElement?.addEventListener('mousedown', onMouseDown)
+      rootElement?.addEventListener('mouseup', onMouseUp)
     })
 
     return () => {
