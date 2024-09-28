@@ -154,7 +154,8 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
 
           const tableNode = $getTableNodeFromLexicalNodeOrThrow(tableCellNode)
 
-          const tableRowIndex = $getTableRowIndexFromTableCellNode(tableCellNode)
+          const tableRowIndex =
+            $getTableRowIndexFromTableCellNode(tableCellNode) + tableCellNode.getRowSpan() - 1
 
           const tableRows = tableNode.getChildren()
 
@@ -218,7 +219,7 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
     for (let row = 0; row < tableMap.length; row++) {
       for (let column = 0; column < tableMap[row].length; column++) {
         if (tableMap[row][column].cell === tableCellNode) {
-          return column
+          return column + tableCellNode.getColSpan() - 1
         }
       }
     }
