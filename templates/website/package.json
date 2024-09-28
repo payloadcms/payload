@@ -25,6 +25,7 @@
     "@payloadcms/plugin-form-builder": "beta",
     "@payloadcms/plugin-nested-docs": "beta",
     "@payloadcms/plugin-redirects": "beta",
+    "@payloadcms/plugin-search": "beta",
     "@payloadcms/plugin-seo": "beta",
     "@payloadcms/richtext-lexical": "beta",
     "@payloadcms/ui": "beta",
