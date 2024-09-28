@@ -57,19 +57,18 @@ describe('Fields', () => {
   })
 
   beforeEach(async () => {
-    await clearAndSeedEverything(payload)
-    await restClient.login({
-      slug: 'users',
-      credentials: devUser,
-    })
-
-    user = await payload.login({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
+    // await clearAndSeedEverything(payload)
+    // await restClient.login({
+    //   slug: 'users',
+    //   credentials: devUser,
+    // })
+    // user = await payload.login({
+    //   collection: 'users',
+    //   data: {
+    //     email: devUser.email,
+    //     password: devUser.password,
+    //   },
+    // })
   })
 
   describe('text', () => {
