@@ -126,17 +126,20 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const $onDelete = useCallback(
     (event: KeyboardEvent) => {
-      if (isSelected && $isNodeSelection($getSelection())) {
+      const deleteSelection = $getSelection()
+      if (isSelected && $isNodeSelection(deleteSelection)) {
         event.preventDefault()
-        const node = $getNodeByKey(nodeKey)
-        if ($isUploadNode(node)) {
-          node.remove()
-          return true
-        }
+        editor.update(() => {
+          deleteSelection.getNodes().forEach((node) => {
+            if ($isUploadNode(node)) {
+              node.remove()
+            }
+          })
+        })
       }
       return false
     },
-    [isSelected, nodeKey],
+    [editor, isSelected],
   )
 
   useEffect(() => {
