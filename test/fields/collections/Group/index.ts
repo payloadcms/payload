@@ -288,6 +288,19 @@ const GroupFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'localizedGroupPolyHasManyRel',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: ['email-fields'],
+          name: 'email',
+          hasMany: true,
+        },
+      ],
+    },
   ],
 }
 

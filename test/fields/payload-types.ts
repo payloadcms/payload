@@ -980,6 +980,14 @@ export interface GroupField {
       value: string | EmailField;
     } | null;
   };
+  localizedGroupPolyHasManyRel?: {
+    email?:
+      | {
+          relationTo: 'email-fields';
+          value: string | EmailField;
+        }[]
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
