@@ -210,12 +210,13 @@ export const traverseFields = <T extends Record<string, unknown>>({
       }
       if (field.type === 'blocks') {
         const blockFieldPath = `${sanitizedPath}${field.name}`
+        const blocksByPath = blocks[blockFieldPath]
 
-        if (Array.isArray(blocks[blockFieldPath])) {
+        if (Array.isArray(blocksByPath)) {
           if (field.localized) {
             result[field.name] = {}
 
-            blocks[blockFieldPath].forEach((row) => {
+            blocksByPath.forEach((row) => {
               if (row._uuid) {
                 row.id = row._uuid
                 delete row._uuid
@@ -255,7 +256,23 @@ export const traverseFields = <T extends Record<string, unknown>>({
               })
             })
           } else {
-            result[field.name] = blocks[blockFieldPath].reduce((acc, row, i) => {
+            // Add locale-specific index to have a proper blockFieldPath for current locale
+            // because blocks can be in the same array for different locales!
+            if (withinArrayOrBlockLocale && config.localization) {
+              for (const locale of config.localization.localeCodes) {
+                let localeIndex = 0
+
+                for (let i = 0; i < blocksByPath.length; i++) {
+                  const row = blocksByPath[i]
+                  if (row._locale === locale) {
+                    row._index = localeIndex
+                    localeIndex++
+                  }
+                }
+              }
+            }
+
+            result[field.name] = blocksByPath.reduce((acc, row, i) => {
               delete row._order
               if (row._uuid) {
                 row.id = row._uuid
@@ -270,6 +287,10 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 ) {
                   if (row._locale) {
                     delete row._locale
+                  }
+                  if (typeof row._index === 'number') {
+                    i = row._index
+                    delete row._index
                   }
 
                   acc.push(
