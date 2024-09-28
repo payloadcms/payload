@@ -286,6 +286,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
               })
             })
           } else {
+            // Add locale-specific index to have a proper blockFieldPath for current locale
+            // because blocks can be in the same array for different locales!
             if (withinArrayOrBlockLocale && config.localization) {
               for (const locale of config.localization.localeCodes) {
                 let localeIndex = 0
