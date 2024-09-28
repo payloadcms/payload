@@ -8,7 +8,7 @@
     overflow-y: scroll;
     overflow-x: scroll;
     table-layout: fixed;
-    width: max-content;
+    width: fit-content;
     margin: 0 25px 30px 0;
 
     ::selection {
@@ -30,7 +30,6 @@
 
   &__tableCell {
     border: 1px solid var(--theme-elevation-200);
-    min-width: 75px;
     vertical-align: top;
     text-align: start;
     padding: 6px 8px;
