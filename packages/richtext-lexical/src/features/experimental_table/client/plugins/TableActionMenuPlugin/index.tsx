@@ -58,47 +58,6 @@ function computeSelectionCount(selection: TableSelection): {
   }
 }
 
-// This is important when merging cells as there is no good way to re-merge weird shapes (a result
-// of selecting merged cells and non-merged)
-function isTableSelectionRectangular(selection: TableSelection): boolean {
-  const nodes = selection.getNodes()
-  const currentRows: Array<number> = []
-  let currentRow: null | TableRowNode = null
-  let expectedColumns: null | number = null
-  let currentColumns = 0
-  for (let i = 0; i < nodes.length; i++) {
-    const node = nodes[i]
-    if ($isTableCellNode(node)) {
-      const row = node.getParentOrThrow()
-      if (!$isTableRowNode(row)) {
-        throw new Error('Expected CellNode to have a RowNode parent')
-      }
-      if (currentRow !== row) {
-        if (expectedColumns !== null && currentColumns !== expectedColumns) {
-          return false
-        }
-        if (currentRow !== null) {
-          expectedColumns = currentColumns
-        }
-        currentRow = row
-        currentColumns = 0
-      }
-      const colSpan = node.__colSpan
-      for (let j = 0; j < colSpan; j++) {
-        if (currentRows[currentColumns + j] === undefined) {
-          currentRows[currentColumns + j] = 0
-        }
-        currentRows[currentColumns + j] += node.__rowSpan
-      }
-      currentColumns += colSpan
-    }
-  }
-  return (
-    (expectedColumns === null || currentColumns === expectedColumns) &&
-    currentRows.every((v) => v === currentRows[0])
-  )
-}
-
 function $canUnmerge(): boolean {
   const selection = $getSelection()
   if (
@@ -183,10 +142,8 @@ function TableActionMenu({
       if ($isTableSelection(selection)) {
         const currentSelectionCounts = computeSelectionCount(selection)
         updateSelectionCounts(computeSelectionCount(selection))
-        setCanMergeCells(
-          isTableSelectionRectangular(selection) &&
-            (currentSelectionCounts.columns > 1 || currentSelectionCounts.rows > 1),
-        )
+
+        setCanMergeCells(currentSelectionCounts.columns > 1 || currentSelectionCounts.rows > 1)
       }
       // Unmerge cell
       setCanUnmergeCell($canUnmerge())
@@ -374,12 +331,13 @@ function TableActionMenu({
         throw new Error('Expected table row')
       }
 
+      const newStyle = tableCellNode.getHeaderStyles() ^ TableCellHeaderStates.ROW
       tableRow.getChildren().forEach((tableCell) => {
         if (!$isTableCellNode(tableCell)) {
           throw new Error('Expected table cell')
         }
 
-        tableCell.toggleHeaderStyle(TableCellHeaderStates.ROW)
+        tableCell.setHeaderStyles(newStyle, TableCellHeaderStates.ROW)
       })
 
       clearTableSelection()
@@ -400,6 +358,7 @@ function TableActionMenu({
         throw new Error('Expected table cell to be inside of table row.')
       }
 
+      const newStyle = tableCellNode.getHeaderStyles() ^ TableCellHeaderStates.COLUMN
       for (let r = 0; r < tableRows.length; r++) {
         const tableRow = tableRows[r]
 
@@ -419,7 +378,7 @@ function TableActionMenu({
           throw new Error('Expected table cell')
         }
 
-        tableCell.toggleHeaderStyle(TableCellHeaderStates.COLUMN)
+        tableCell.setHeaderStyles(newStyle, TableCellHeaderStates.COLUMN)
       }
       clearTableSelection()
       onClose()
