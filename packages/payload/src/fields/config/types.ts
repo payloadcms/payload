@@ -1125,6 +1125,7 @@ type SharedRelationshipPropertiesClient = FieldBaseClient &
 
 type RelationshipAdmin = {
   allowCreate?: boolean
+  allowEdit?: boolean
   components?: {
     Error?: CustomComponent<
       RelationshipFieldErrorClientComponent | RelationshipFieldErrorServerComponent
@@ -1142,7 +1143,7 @@ type RelationshipAdminClient = {
     Label?: MappedComponent
   } & AdminClient['components']
 } & AdminClient &
-  Pick<RelationshipAdmin, 'allowCreate' | 'isSortable'>
+  Pick<RelationshipAdmin, 'allowCreate' | 'allowEdit' | 'isSortable'>
 
 export type PolymorphicRelationshipField = {
   admin?: {
