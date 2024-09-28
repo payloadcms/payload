@@ -1,4 +1,3 @@
-import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientCollectionConfig,
   ClientConfig,
@@ -16,6 +15,7 @@ import type {
   SanitizedConfig,
 } from 'payload'
 
+import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import {
   ArrayField,
   BlocksField,
@@ -38,6 +38,7 @@ import {
   RelationshipField,
   RichTextField,
   RowField,
+  RowLabel,
   SelectField,
   TabsField,
   TextareaField,
@@ -267,6 +268,16 @@ export const renderField = (props: {
     schemaPath,
   }
 
+  // TODO: type this to match Server Field Props
+  const serverProps = {
+    clientField,
+    config,
+    field,
+    i18n,
+    indexPath,
+    payload,
+  }
+
   if ('label' in field) {
     fieldSlots.Label = (
       <FieldLabel
@@ -284,8 +295,8 @@ export const renderField = (props: {
 
   switch (field.type) {
     case 'array': {
-      clientProps.Fields = fieldState?.rows?.map((row, rowIndex) =>
-        renderFields({
+      fieldSlots.rows = fieldState?.rows?.map((row, rowIndex) => ({
+        Fields: renderFields({
           className,
           clientConfig,
           clientFields: 'fields' in clientField ? clientField.fields : undefined,
@@ -302,7 +313,22 @@ export const renderField = (props: {
           permissions,
           schemaPath,
         }),
-      )
+        RowLabel: (
+          <RenderServerComponent
+            clientProps={{
+              ...clientProps,
+              rowLabel: `${getTranslation(field.labels.singular, i18n)} ${String(
+                rowIndex + 1,
+              ).padStart(2, '0')}`,
+              rowNumber: rowIndex + 1,
+            }}
+            Component={field.admin?.components?.RowLabel}
+            Fallback={RowLabel}
+            importMap={importMap}
+            serverProps={serverProps}
+          />
+        ),
+      }))
 
       break
     }
@@ -360,6 +386,32 @@ export const renderField = (props: {
       break
     }
 
+    case 'tabs': {
+      clientProps.Fields = field.tabs.map((tab, tabIndex) => {
+        const clientTabConfig = 'tabs' in clientField && clientField.tabs[tabIndex]
+
+        return renderFields({
+          className,
+          clientConfig,
+          clientFields: 'fields' in clientTabConfig ? clientTabConfig.fields : undefined,
+          config,
+          fields: tab.fields,
+          forceRender,
+          formState,
+          i18n,
+          importMap,
+          indexPath: `${indexPath}.${tabIndex}`,
+          margins,
+          path,
+          payload,
+          permissions,
+          schemaPath,
+        })
+      })
+
+      break
+    }
+
     default: {
       break
     }
@@ -390,6 +442,7 @@ export const renderField = (props: {
             Component={field.admin.components.afterInput}
             importMap={importMap}
             key="field.admin.components.afterInput"
+            serverProps={serverProps}
           />
         )
       }
@@ -401,6 +454,7 @@ export const renderField = (props: {
             Component={field.admin.components.beforeInput}
             importMap={importMap}
             key="field.admin.components.beforeInput"
+            serverProps={serverProps}
           />
         )
       }
@@ -412,6 +466,7 @@ export const renderField = (props: {
             Component={field.admin.components.Description}
             importMap={importMap}
             key="field.admin.components.Description"
+            serverProps={serverProps}
           />
         )
       }
@@ -423,6 +478,7 @@ export const renderField = (props: {
             Component={field.admin.components.Error}
             importMap={importMap}
             key="field.admin.components.Error"
+            serverProps={serverProps}
           />
         )
       }
@@ -434,6 +490,7 @@ export const renderField = (props: {
             Component={field.admin.components.Label}
             importMap={importMap}
             key="field.admin.components.Label"
+            serverProps={serverProps}
           />
         )
       }
@@ -443,16 +500,6 @@ export const renderField = (props: {
   clientProps = {
     ...clientProps,
     ...fieldSlots,
-  }
-
-  // TODO: type this to match Server Field Props
-  const serverProps = {
-    clientField,
-    config,
-    field,
-    i18n,
-    indexPath,
-    payload,
   }
 
   return (

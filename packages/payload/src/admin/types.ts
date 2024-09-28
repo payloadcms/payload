@@ -420,7 +420,10 @@ export type FieldSlots = {
   Error?: React.ReactNode
   Fields?: React.ReactNode[]
   Label?: React.ReactNode
-  RowLabel?: React.ReactNode
+  rows?: {
+    Fields: React.ReactNode[]
+    RowLabel?: React.ReactNode
+  }[]
 }
 
 export type EntitySlots = {

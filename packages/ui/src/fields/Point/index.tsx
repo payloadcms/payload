@@ -102,7 +102,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
             {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
               disabled={readOnly}
-              id={`field-longitude-${path.replace(/\./g, '__')}`}
+              id={`field-longitude-${path?.replace(/\./g, '__')}`}
               name={`${path}.longitude`}
               onChange={(e) => handleChange(e, 0)}
               placeholder={getTranslation(placeholder, i18n)}
@@ -122,7 +122,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
             {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
               disabled={readOnly}
-              id={`field-latitude-${path.replace(/\./g, '__')}`}
+              id={`field-latitude-${path?.replace(/\./g, '__')}`}
               name={`${path}.latitude`}
               onChange={(e) => handleChange(e, 1)}
               placeholder={getTranslation(placeholder, i18n)}

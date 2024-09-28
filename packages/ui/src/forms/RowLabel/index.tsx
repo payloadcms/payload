@@ -5,22 +5,10 @@ import React from 'react'
 import type { RowLabelProps } from './types.js'
 export type { RowLabelProps }
 
-import { RenderComponent } from '../../elements/RenderComponent/index.js'
-import { RowLabelProvider } from '../RowLabel/Context/index.js'
-
 const baseClass = 'row-label'
 
 export const RowLabel: React.FC<RowLabelProps> = (props) => {
-  const { className, i18n, path, RowLabel: RowLabelComponent, rowLabel, rowNumber } = props
-
-  if (RowLabelComponent) {
-    return (
-      <RowLabelProvider path={path} rowNumber={rowNumber}>
-        <RenderComponent clientProps={{ label: rowLabel }} mappedComponent={RowLabelComponent} />
-      </RowLabelProvider>
-    )
-  }
-
+  const { className, i18n, rowLabel } = props
   const label = rowLabel
     ? typeof rowLabel === 'object'
       ? getTranslation(rowLabel, i18n)

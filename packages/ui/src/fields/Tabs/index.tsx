@@ -23,6 +23,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const {
     Description,
     field: { _path: path, admin: { className, readOnly: readOnlyFromAdmin } = {}, tabs = [] },
+    Fields,
     forceRender = false,
     indexPath,
     readOnly: readOnlyFromTopLevelProps,
@@ -140,25 +141,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
                 .join(' ')}
             >
               {Description}
-              {/* Fields Here */}
-              {/* <RenderFields
-                fields={activeTabConfig.fields}
-                forceRender={forceRender}
-                key={
-                  activeTabConfig.label
-                    ? getTranslation(activeTabConfig.label, i18n)
-                    : activeTabConfig['name']
-                }
-                margins="small"
-                path={generateTabPath()}
-                permissions={
-                  'name' in activeTabConfig && siblingPermissions?.[activeTabConfig.name]?.fields
-                    ? siblingPermissions[activeTabConfig.name]?.fields
-                    : siblingPermissions
-                }
-                readOnly={readOnly}
-                schemaPath={`${_schemaPath ? `${_schemaPath}` : ''}${tabHasName(activeTabConfig) && activeTabConfig.name ? `.${activeTabConfig.name}` : ''}`}
-              /> */}
+              {Fields}
             </div>
           )}
         </div>
