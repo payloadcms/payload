@@ -179,7 +179,6 @@
       "domexception": "4"
     },
     "overrides": {
-      "@lexical/markdown": "file:./packages/richtext-lexical/lexical-markdown-0.17.0.tgz",
       "@types/react": "npm:types-react@19.0.0-rc.1",
       "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
       "copyfiles": "$copyfiles",
