@@ -9,6 +9,7 @@ import { loadEnv } from 'payload/node'
 
 import { getNextRootDir } from './helpers/getNextRootDir.js'
 import { runInit } from './runInit.js'
+import { safelyRunScriptFunction } from './safelyRunScript.js'
 import { createTestHooks } from './testHooks.js'
 
 const prod = process.argv.includes('--prod')
@@ -43,7 +44,7 @@ await beforeTest()
 
 const { rootDir, adminRoute } = getNextRootDir(testSuiteArg)
 
-await runInit(testSuiteArg, true)
+await safelyRunScriptFunction(runInit, 4000, testSuiteArg)
 
 // Open the admin if the -o flag is passed
 if (args.o) {
