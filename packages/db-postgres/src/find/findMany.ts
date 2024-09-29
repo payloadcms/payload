@@ -146,7 +146,7 @@ export const findMany = async function find({
           count:
             joinAliases.length > 0
               ? sql<number>`count
-            (DISTINCT ${this.tables[tableName].id})`
+            (DISTINCT ${adapter.tables[tableName].id})`
               : sqlCount(),
         })
         .from(table)
