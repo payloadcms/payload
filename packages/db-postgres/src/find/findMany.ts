@@ -144,7 +144,7 @@ export const findMany = async function find({
       query: db
         .select({
           count:
-            joinAliases.length > 0
+            selectCountMethods.length > 0
               ? sql<number>`count
             (DISTINCT ${adapter.tables[tableName].id})`
               : sqlCount(),

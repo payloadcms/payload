@@ -52,7 +52,7 @@ export const count: Count = async function count(
     query: db
       .select({
         count:
-          joinAliases.length > 0
+          selectCountMethods.length > 0
             ? sql<number>`count
           (DISTINCT ${this.tables[tableName].id})`
             : sqlCount(),
