@@ -647,7 +647,7 @@ export const traverseFields = ({
           rootTableIDColType,
           rootTableName,
           versions,
-          withinLocalizedArrayOrBlock,
+          withinLocalizedArrayOrBlock: withinLocalizedArrayOrBlock || field.localized,
         })
 
         if (groupHasLocalizedField) hasLocalizedField = true

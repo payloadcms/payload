@@ -432,7 +432,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
               return selectResult
             }, {})
           } else {
-            result[field.name] = fieldData.map(({ value }) => value)
+            let selectData = fieldData
+            if (withinArrayOrBlockLocale) {
+              selectData = selectData.filter(({ locale }) => locale === withinArrayOrBlockLocale)
+            }
+            result[field.name] = selectData.map(({ value }) => value)
           }
         }
         return result
@@ -445,6 +449,12 @@ export const traverseFields = <T extends Record<string, unknown>>({
       }[] = []
 
       if (field.localized && Array.isArray(table._locales)) {
+        if (!table._locales.length && config.localization) {
+          config.localization.localeCodes.forEach((_locale) =>
+            (table._locales as unknown[]).push({ _locale }),
+          )
+        }
+
         table._locales.forEach((localeRow) => {
           valuesToTransform.push({
             ref: localizedFieldData,
