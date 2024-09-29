@@ -272,10 +272,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
                     delete row._locale
                   }
 
-                  if (withinArrayOrBlockLocale == 'es') {
-                    debugger
-                  }
-
                   acc.push(
                     traverseFields<T>({
                       blocks,
