@@ -1,7 +1,6 @@
 module.exports = () => {
   process.env.PAYLOAD_DISABLE_ADMIN = 'true'
 
-  process.env.PAYLOAD_DATABASE = 'postgres'
   if (process.env.PAYLOAD_DATABASE) {
     console.log('\n\nUsing database:', process.env.PAYLOAD_DATABASE)
     if (process.env.PAYLOAD_DATABASE === 'postgres') {
