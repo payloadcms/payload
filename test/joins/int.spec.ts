@@ -23,6 +23,7 @@ const { email, password } = devUser
 
 describe('Joins Field', () => {
   let category: Category
+  let otherCategory: Category
   let categoryID
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
@@ -49,6 +50,14 @@ describe('Joins Field', () => {
       },
     })
 
+    otherCategory = await payload.create({
+      collection: categoriesSlug,
+      data: {
+        name: 'otherCategory',
+        group: {},
+      },
+    })
+
     // create an upload
     const imageFilePath = path.resolve(dirname, './image.png')
     const imageFile = await getFileByPath(imageFilePath)
@@ -62,10 +71,15 @@ describe('Joins Field', () => {
     categoryID = idToString(category.id, payload)
 
     for (let i = 0; i < 15; i++) {
+      let categories = [category.id]
+      if (i % 2 === 0) {
+        categories = [category.id, otherCategory.id]
+      }
       await createPost({
         title: `test ${i}`,
         category: category.id,
         upload: uploadedImage,
+        categories,
         group: {
           category: category.id,
           camelCaseCategory: category.id,
@@ -162,6 +176,31 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.group.relatedPosts.docs).toHaveLength(10)
     expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('title')
     expect(categoryWithPosts.group.relatedPosts.docs[0].title).toBe('test 14')
+  })
+
+  it('should populate joins using find with hasMany relationships', async () => {
+    const result = await payload.find({
+      collection: 'categories',
+      where: {
+        id: { equals: category.id },
+      },
+    })
+    const otherResult = await payload.find({
+      collection: 'categories',
+      where: {
+        id: { equals: otherCategory.id },
+      },
+    })
+
+    const [categoryWithPosts] = result.docs
+    const [otherCategoryWithPosts] = otherResult.docs
+
+    expect(categoryWithPosts.hasManyPosts.docs).toHaveLength(10)
+    expect(categoryWithPosts.hasManyPosts.docs[0]).toHaveProperty('title')
+    expect(categoryWithPosts.hasManyPosts.docs[0].title).toBe('test 14')
+    expect(otherCategoryWithPosts.hasManyPosts.docs).toHaveLength(8)
+    expect(otherCategoryWithPosts.hasManyPosts.docs[0]).toHaveProperty('title')
+    expect(otherCategoryWithPosts.hasManyPosts.docs[0].title).toBe('test 14')
   })
 
   it('should not error when deleting documents with joins', async () => {
