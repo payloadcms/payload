@@ -4,6 +4,7 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Categories } from './collections/Categories.js'
 import { Posts } from './collections/Posts.js'
+import { Uploads } from './collections/Uploads.js'
 import { seed } from './seed.js'
 import { localizedCategoriesSlug, localizedPostsSlug } from './shared.js'
 
@@ -14,6 +15,7 @@ export default buildConfigWithDefaults({
   collections: [
     Posts,
     Categories,
+    Uploads,
     {
       slug: localizedPostsSlug,
       admin: {

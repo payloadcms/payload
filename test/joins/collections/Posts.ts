@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { categoriesSlug, postsSlug } from '../shared.js'
+import { categoriesSlug, postsSlug, uploadsSlug } from '../shared.js'
 
 export const Posts: CollectionConfig = {
   slug: postsSlug,
@@ -12,6 +12,11 @@ export const Posts: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
+    },
+    {
+      name: 'upload',
+      type: 'upload',
+      relationTo: uploadsSlug,
     },
     {
       name: 'category',
