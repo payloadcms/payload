@@ -31,21 +31,26 @@ updates:
     labels:
       - dependencies
     groups:
-      production:
+      production-deps:
         dependency-type: production
         update-types:
           - minor
           - patch
         patterns:
           - '*'
-      dev:
+        exclude-patterns:
+          - 'drizzle*'
+      dev-deps:
         dependency-type: development
         update-types:
           - minor
           - patch
         patterns:
           - '*'
+        exclude-patterns:
+          - 'drizzle*'
 
+  # Only bump patch versions for 2.x
   - package-ecosystem: npm
     directory: /
     target-branch: main
@@ -59,9 +64,11 @@ updates:
     labels:
       - dependencies
     groups:
-      production:
+      production-deps:
         dependency-type: production
         update-types:
           - patch
         patterns:
           - '*'
+        exclude-patterns:
+          - 'drizzle*'
