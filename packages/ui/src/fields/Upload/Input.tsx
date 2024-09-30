@@ -105,7 +105,7 @@ export function UploadInput(props: UploadInputProps) {
     value,
     width,
   } = props
-  const allowCreate = field.admin.allowCreate !== false
+  const allowCreate = field?.admin?.allowCreate !== false
 
   const [populatedDocs, setPopulatedDocs] = React.useState<
     {
