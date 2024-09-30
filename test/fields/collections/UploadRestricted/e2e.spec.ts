@@ -92,13 +92,10 @@ describe('Upload with restrictions', () => {
     await expect(drawer).toBeVisible()
     const createNewHeader = page
       .locator('.list-drawer__header')
-      .getByRole('button', { name: 'Create New' })
+      .locator('button', { hasText: 'Create New' })
     await expect(createNewHeader).toBeVisible()
-    await page.getByLabel('Close').click()
+    await page.locator('.list-drawer__header-close').click()
     await expect(drawer).toBeHidden()
-    await page.getByText('UploadsCreate New').click({
-      button: 'right',
-    })
     const fieldWithAllowCreateFalse = page.locator('#field-uploadWithAllowCreateFalse')
     await expect(fieldWithAllowCreateFalse).toBeVisible()
     await fieldWithAllowCreateFalse.getByRole('button', { name: 'Choose from existing' }).click()
