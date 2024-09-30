@@ -128,7 +128,7 @@ export function EditForm({ submitted }: EditFormProps) {
           operation: 'create',
           schemaPath,
         },
-      })) as { state: FormState } // TODO: infer the return type
+      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       return newFormState
     },

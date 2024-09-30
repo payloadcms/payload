@@ -58,7 +58,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
           operation: 'update',
           schemaPath: schemaFieldsPath,
         },
-      })) as { state: FormState } // TODO: infer the return type
+      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       setInitialState(state)
     }
@@ -77,7 +77,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
           operation: 'update',
           schemaPath: schemaFieldsPath,
         },
-      })) as { state: FormState } // TODO: infer the return type
+      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       return state
     },

@@ -48,7 +48,7 @@ export const LinkDrawer: React.FC<Props> = ({
           operation: 'update',
           schemaPath: fieldMapPath,
         },
-      })) as { state: FormState } // TODO: infer the return type
+      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       return state
     },

@@ -164,7 +164,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             operation: 'create',
             schemaPath: collectionSlug,
           },
-        })) as { state: FormState } // TODO: infer the return type
+        })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
         initialStateRef.current = formStateWithoutFiles
         setHasInitializedState(true)
       } catch (error) {

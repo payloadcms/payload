@@ -1,6 +1,7 @@
-import type { ImportMap, SanitizedConfig } from 'payload'
+import type { ImportMap, Payload, SanitizedConfig, User } from 'payload'
 
 import { buildFormState, type BuildFormStateArgs } from '@payloadcms/ui/utilities/buildFormState'
+import { headers } from 'next/headers.js'
 
 import { getPayloadHMR } from './getPayloadHMR.js'
 
@@ -32,13 +33,19 @@ export const handleServerActions = async (args: Args): Promise<unknown> => {
 
   const payload = await getPayloadHMR({ config })
 
+  const { user } = await payload.auth({ headers: headers() })
+
   // const req = createPayloadRequest({ config })
 
-  const augmentedArgs = {
+  const augmentedArgs: {
+    payload: Payload
+    user: User
+  } & Args['defaultArgs'] = {
     ...fnArgs,
     config,
     importMap,
     payload,
+    user,
   }
 
   const action = actions[actionKey]

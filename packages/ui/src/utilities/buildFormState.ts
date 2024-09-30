@@ -4,7 +4,7 @@ import {
   initI18n,
   type SupportedLanguages,
 } from '@payloadcms/translations'
-import { headers as getHeaders } from 'next/headers.js'
+import { headers } from 'next/headers.js'
 import {
   type ClientUser,
   createLocalReq,
@@ -15,6 +15,7 @@ import {
   type Payload,
   type SanitizedConfig,
   type TypeWithID,
+  type User,
 } from 'payload'
 import { reduceFieldsToValues } from 'payload/shared'
 
@@ -66,6 +67,7 @@ export type BuildFormStateArgs = {
   returnLockStatus?: boolean
   schemaPath: string
   updateLastEdited?: boolean
+  user?: User
 }
 
 export const buildFormState = async (
@@ -90,6 +92,7 @@ export const buildFormState = async (
     returnLockStatus,
     schemaPath,
     updateLastEdited,
+    user: userFromArgs,
   } = args
 
   if (!payload) {
@@ -100,12 +103,11 @@ export const buildFormState = async (
     throw new Error('No config provided')
   }
 
-  const headers = getHeaders()
+  let user = userFromArgs
 
-  const { user } = await payload.auth({ headers })
-
-  if (!user) {
-    throw new Error('No user provided')
+  if (user === undefined) {
+    const userResult = await payload.auth({ headers: headers() })
+    user = userResult.user
   }
 
   let i18n = i18nFromArgs as I18n // TODO: fix this type

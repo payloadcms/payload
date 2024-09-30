@@ -255,7 +255,7 @@ export const DefaultEditView: React.FC = () => {
           schemaPath,
           updateLastEdited,
         },
-      })) as { lockedState: any; state: FormState } // TODO: infer the return type
+      })) as { lockedState: any; state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       setDocumentIsLocked(true)
 

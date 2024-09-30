@@ -38,7 +38,7 @@ export const CreateFirstUserClient: React.FC<{
   const { payloadServerAction } = useServerActions()
 
   const { i18n, t } = useTranslation()
-  const { setUser, user } = useAuth()
+  const { setUser } = useAuth()
 
   const collectionConfig = getEntityConfig({ collectionSlug: userSlug }) as ClientCollectionConfig
 
@@ -53,7 +53,7 @@ export const CreateFirstUserClient: React.FC<{
           operation: 'create',
           schemaPath: `_${userSlug}.auth`,
         },
-      })) as { state: FormState } // TODO: infer the return type
+      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       return state
     },

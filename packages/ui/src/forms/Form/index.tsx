@@ -1,7 +1,6 @@
 'use client'
-import type { FormState, PayloadRequest } from 'payload'
-
-import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
+import { dequal } from 'dequal/lite'
+import { type FormState, type PayloadRequest } from 'payload' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
 import {
@@ -43,6 +42,7 @@ import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
+import { prepareFields } from './prepareFields.js'
 
 const baseClass = 'form'
 
@@ -230,7 +230,7 @@ export const Form: React.FC<FormProps> = (props) => {
           await priorOnChange
 
           const result = await beforeSubmitFn({
-            formState: fields,
+            formState: prepareFields(fields),
           })
 
           revalidatedFormState = result
@@ -460,7 +460,7 @@ export const Form: React.FC<FormProps> = (props) => {
           operation,
           schemaPath: collectionSlug || globalSlug,
         },
-      })) as { state: FormState } // TODO: infer the return type
+      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
@@ -489,7 +489,7 @@ export const Form: React.FC<FormProps> = (props) => {
           language: i18n.language,
           schemaPath,
         },
-      })) as { state: FormState } // TODO: infer the return type
+      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       return fieldSchema
     },
@@ -608,7 +608,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
           for (const onChangeFn of onChange) {
             revalidatedFormState = await onChangeFn({
-              formState: revalidatedFormState,
+              formState: prepareFields(revalidatedFormState),
             })
           }
 
