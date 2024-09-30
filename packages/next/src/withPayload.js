@@ -1,9 +1,11 @@
 /**
  * @param {import('next').NextConfig} nextConfig
+ * @param {Object} [options] - Optional configuration object.
+ * @param {string} [options.adminRoute='/admin'] - The route for the admin panel. This should match the routes.admin value in the Payload config.
  *
  * @returns {import('next').NextConfig}
  * */
-export const withPayload = (nextConfig = {}) => {
+export const withPayload = (nextConfig = {}, { adminRoute = '/admin' } = {}) => {
   const env = nextConfig?.env || {}
 
   if (nextConfig.experimental?.staleTimes?.dynamic) {
@@ -47,7 +49,7 @@ export const withPayload = (nextConfig = {}) => {
       return [
         ...(headersFromConfig || []),
         {
-          source: '/:path*',
+          source: `${adminRoute}/:path*`,
           headers: [
             {
               key: 'Accept-CH',
