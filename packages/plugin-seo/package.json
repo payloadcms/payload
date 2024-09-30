@@ -69,8 +69,8 @@
   },
   "peerDependencies": {
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-5dcb0097-20240918",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-5dcb0097-20240918"
+    "react": "^19.0.0 || ^19.0.0-rc-3edc000d-20240926",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-3edc000d-20240926"
   },
   "publishConfig": {
     "exports": {

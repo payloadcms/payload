@@ -84,7 +84,7 @@ export const RootLayout = async ({
 
   const config = await configPromise
 
-  const headers = getHeaders()
+  const headers = await getHeaders()
   const cookies = parseCookies(headers)
 
   const languageCode = getRequestLanguage({
@@ -131,10 +131,10 @@ export const RootLayout = async ({
     [],
   )
 
-  // eslint-disable-next-line @typescript-eslint/require-await
   async function switchLanguageServerAction(lang: string): Promise<void> {
     'use server'
-    nextCookies().set({
+    const cookies = await nextCookies()
+    cookies.set({
       name: `${config.cookiePrefix || 'payload'}-lng`,
       path: '/',
       value: lang,
