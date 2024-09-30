@@ -23,7 +23,7 @@ import type { PgTableFn } from 'drizzle-orm/pg-core/table'
 import type { Payload, PayloadRequest } from 'payload'
 import type { QueryResult } from 'pg'
 
-import type { Operators } from '../index.js'
+import type { extendDrizzleTable, Operators } from '../index.js'
 import type { BuildQueryJoinAliases, DrizzleAdapter, TransactionPg } from '../types.js'
 
 export type BaseExtraConfig = Record<
@@ -31,7 +31,15 @@ export type BaseExtraConfig = Record<
   (cols: GenericColumns) => ForeignKeyBuilder | IndexBuilder | UniqueConstraintBuilder
 >
 
-export type RelationMap = Map<string, { localized: boolean; target: string; type: 'many' | 'one' }>
+export type RelationMap = Map<
+  string,
+  {
+    localized: boolean
+    relationName?: string
+    target: string
+    type: 'many' | 'one'
+  }
+>
 
 export type GenericColumn = PgColumn<
   ColumnBaseConfig<ColumnDataType, string>,
@@ -91,7 +99,25 @@ type Schema =
     }
   | PgSchema
 
+type PostgresSchema = {
+  enums: Record<string, GenericEnum>
+  relations: Record<string, GenericRelation>
+  tables: Record<string, PgTableWithColumns<any>>
+}
+
+type PostgresSchemaHookArgs = {
+  adapter: PostgresDrizzleAdapter
+  extendTable: typeof extendDrizzleTable
+  schema: PostgresSchema
+}
+
+export type PostgresSchemaHook = (
+  args: PostgresSchemaHookArgs,
+) => PostgresSchema | Promise<PostgresSchema>
+
 export type BasePostgresAdapter = {
+  afterSchemaInit: PostgresSchemaHook[]
+  beforeSchemaInit: PostgresSchemaHook[]
   countDistinct: CountDistinct
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
   deleteWhere: DeleteWhere
@@ -148,5 +174,5 @@ export type PostgresDrizzleAdapter = Omit<
 
 export type IDType = 'integer' | 'numeric' | 'uuid' | 'varchar'
 
-export type MigrateUpArgs = { payload: Payload; req?: Partial<PayloadRequest> }
-export type MigrateDownArgs = { payload: Payload; req?: Partial<PayloadRequest> }
+export type MigrateUpArgs = { payload: Payload; req: PayloadRequest }
+export type MigrateDownArgs = { payload: Payload; req: PayloadRequest }

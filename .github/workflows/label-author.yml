@@ -32,8 +32,26 @@ jobs:
           script: |
             const type = context.payload.pull_request ? 'pull_request' : 'issue';
             const association = context.payload[type].author_association;
-            let label = ''
-            if (association === 'MEMBER' || association === 'OWNER') {
+            let label = '';
+            if (
+              association === 'MEMBER' ||
+              association === 'OWNER' ||
+              [
+                'denolfe',
+                'jmikrut',
+                'danribbens',
+
+                'alessiogr',
+                'jacobsfletch',
+                'jarrodmflesch',
+                'jesschowdhury',
+                'kendelljoseph',
+                'patrikkozak',
+                'paulpopus',
+                'r1tsuu',
+                'tylandavis',
+              ].includes(context.actor.toLowerCase())
+            ) {
               label = 'created-by: Payload team';
             } else if (association === 'CONTRIBUTOR') {
               label = 'created-by: Contributor';
@@ -47,4 +65,4 @@ jobs:
               repo: context.repo.repo,
               labels: [label],
             });
-            console.log('Added created-by: Payload team label');
+            console.log(`Added '${label}' label`);

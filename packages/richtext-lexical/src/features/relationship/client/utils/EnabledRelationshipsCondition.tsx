@@ -17,7 +17,7 @@ type FilteredCollectionsT = (
 
 const filterRichTextCollections: FilteredCollectionsT = (collections, options) => {
   return collections.filter(({ slug, admin: { enableRichTextRelationship }, upload }) => {
-    if (!options.visibleEntities.collections.includes(slug)) {
+    if (!options?.visibleEntities.collections.includes(slug)) {
       return false
     }
 
@@ -38,7 +38,7 @@ export const EnabledRelationshipsCondition: React.FC<any> = (props) => {
   const { visibleEntities } = useEntityVisibility()
 
   const [enabledCollectionSlugs] = React.useState(() =>
-    filterRichTextCollections(collections, { uploads, user, visibleEntities }).map(
+    filterRichTextCollections(collections, { uploads, user: user!, visibleEntities }).map(
       ({ slug }) => slug,
     ),
   )

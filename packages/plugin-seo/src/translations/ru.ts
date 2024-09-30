@@ -17,6 +17,7 @@ export const ru: GenericTranslationsObject = {
       'Должно быть от {{minLength}} до {{maxLength}} символов. Для помощи в написании качественных метаописаний см.',
     lengthTipTitle:
       'Должно быть от {{minLength}} до {{maxLength}} символов. Для помощи в написании качественных метазаголовков см.',
+    missing: 'Отсутствует',
     noImage: 'Нет изображения',
     preview: 'Предварительный просмотр',
     previewDescription:

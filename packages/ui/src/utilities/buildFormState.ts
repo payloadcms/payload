@@ -1,4 +1,11 @@
-import type { DocumentPreferences, Field, FormState, PayloadRequest, TypeWithID } from 'payload'
+import type {
+  ClientUser,
+  DocumentPreferences,
+  Field,
+  FormState,
+  PayloadRequest,
+  TypeWithID,
+} from 'payload'
 
 import { reduceFieldsToValues } from 'payload/shared'
 
@@ -27,9 +34,25 @@ export const getFieldSchemaMap = (req: PayloadRequest): FieldSchemaMap => {
   return cached
 }
 
-export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<FormState> => {
+export const buildFormState = async ({
+  req,
+}: {
+  req: PayloadRequest
+}): Promise<{
+  lockedState?: { isLocked: boolean; user: ClientUser | number | string }
+  state: FormState
+}> => {
   const reqData: BuildFormStateArgs = (req.data || {}) as BuildFormStateArgs
-  const { collectionSlug, formState, globalSlug, locale, operation, schemaPath } = reqData
+  const {
+    collectionSlug,
+    formState,
+    globalSlug,
+    locale,
+    operation,
+    returnLockStatus,
+    schemaPath,
+    updateLastEdited,
+  } = reqData
 
   const incomingUserSlug = req.user?.collection
   const adminUserSlug = req.payload.config.admin.user
@@ -69,7 +92,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
 
   let fieldSchema: Field[]
 
-  if (schemaPathSegments.length === 1) {
+  if (schemaPathSegments && schemaPathSegments.length === 1) {
     if (req.payload.collections[schemaPath]) {
       fieldSchema = req.payload.collections[schemaPath].config.fields
     } else {
@@ -186,7 +209,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
     promises.data = fetchData()
   }
 
-  if (Object.keys(promises).length > 0) {
+  if (Object.keys(promises) && Object.keys(promises).length > 0) {
     await Promise.all(Object.values(promises))
   }
 
@@ -207,5 +230,76 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
     }
   }
 
-  return result
+  if (returnLockStatus && req.user && (id || globalSlug)) {
+    let lockedDocumentQuery
+
+    if (collectionSlug) {
+      lockedDocumentQuery = {
+        and: [
+          { 'document.relationTo': { equals: collectionSlug } },
+          { 'document.value': { equals: id } },
+        ],
+      }
+    } else if (globalSlug) {
+      lockedDocumentQuery = {
+        globalSlug: { equals: globalSlug },
+      }
+    }
+
+    if (lockedDocumentQuery) {
+      const lockedDocument = await req.payload.find({
+        collection: 'payload-locked-documents',
+        depth: 1,
+        limit: 1,
+        pagination: false,
+        where: lockedDocumentQuery,
+      })
+
+      if (lockedDocument.docs && lockedDocument.docs.length > 0) {
+        const lockedState = {
+          isLocked: true,
+          user: lockedDocument.docs[0]?.user?.value,
+        }
+
+        if (updateLastEdited) {
+          await req.payload.db.updateOne({
+            id: lockedDocument.docs[0].id,
+            collection: 'payload-locked-documents',
+            data: {},
+            req,
+          })
+        }
+
+        return { lockedState, state: result }
+      } else {
+        // If no lock document exists, create it
+        await req.payload.db.create({
+          collection: 'payload-locked-documents',
+          data: {
+            document: collectionSlug
+              ? {
+                  relationTo: [collectionSlug],
+                  value: id,
+                }
+              : undefined,
+            globalSlug: globalSlug ? globalSlug : undefined,
+            user: {
+              relationTo: [req.user.collection],
+              value: req.user.id,
+            },
+          },
+          req,
+        })
+
+        const lockedState = {
+          isLocked: true,
+          user: req.user,
+        }
+
+        return { lockedState, state: result }
+      }
+    }
+  }
+
+  return { state: result }
 }

@@ -95,31 +95,23 @@ const Restore: React.FC<Props> = ({
   return (
     <Fragment>
       <div className={[baseClass, className].filter(Boolean).join(' ')}>
-        <Pill
+        <Button
+          buttonStyle="pill"
           className={[canRestoreAsDraft && `${baseClass}__button`].filter(Boolean).join(' ')}
           onClick={() => toggleModal(modalSlug)}
-        >
-          {t('version:restoreThisVersion')}
-        </Pill>
-        {canRestoreAsDraft && (
-          <Popup
-            button={
-              <Pill className={`${baseClass}__chevron`}>
-                <ChevronIcon />
-              </Pill>
-            }
-            caret={false}
-            render={() => (
+          size="small"
+          SubMenuPopupContent={
+            canRestoreAsDraft && (
               <PopupList.ButtonGroup>
                 <PopupList.Button onClick={() => [setDraft(true), toggleModal(modalSlug)]}>
                   {t('version:restoreAsDraft')}
                 </PopupList.Button>
               </PopupList.ButtonGroup>
-            )}
-            size="large"
-            verticalAlign="bottom"
-          />
-        )}
+            )
+          }
+        >
+          {t('version:restoreThisVersion')}
+        </Button>
       </div>
       <Modal className={`${baseClass}__modal`} slug={modalSlug}>
         <div className={`${baseClass}__wrapper`}>

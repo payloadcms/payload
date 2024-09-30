@@ -16,6 +16,8 @@ import type {
 import type { Auth, ClientUser, IncomingAuthType } from '../../auth/types.js'
 import type {
   Access,
+  AfterErrorHookArgs,
+  AfterErrorResult,
   CustomComponent,
   EditConfig,
   Endpoint,
@@ -29,7 +31,7 @@ import type {
   StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
-import type { Field } from '../../fields/config/types.js'
+import type { Field, JoinField } from '../../fields/config/types.js'
 import type {
   CollectionSlug,
   JsonObject,
@@ -178,14 +180,6 @@ export type AfterOperationHook<TOperationGeneric extends CollectionSlug = string
       >
     >
 
-export type AfterErrorHook = (
-  err: Error,
-  res: unknown,
-  context: RequestContext,
-  /** The collection which this hook is being run on. This is null if the AfterError hook was be added to the payload-wide config */
-  collection: null | SanitizedCollectionConfig,
-) => { response: any; status: number } | void
-
 export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
@@ -236,6 +230,10 @@ export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest
   token: string
 }) => any
+
+export type AfterErrorHook = (
+  args: { collection: SanitizedCollectionConfig } & AfterErrorHookArgs,
+) => AfterErrorResult | Promise<AfterErrorResult>
 
 export type AfterForgotPasswordHook = (args: {
   args?: any
@@ -402,7 +400,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   hooks?: {
     afterChange?: AfterChangeHook[]
     afterDelete?: AfterDeleteHook[]
-    afterError?: AfterErrorHook
+    afterError?: AfterErrorHook[]
     afterForgotPassword?: AfterForgotPasswordHook[]
     afterLogin?: AfterLoginHook[]
     afterLogout?: AfterLogoutHook[]
@@ -437,6 +435,15 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
     plural?: LabelFunction | StaticLabel
     singular?: LabelFunction | StaticLabel
   }
+  /**
+   * Enables / Disables the ability to lock documents while editing
+   * @default true
+   */
+  lockDocuments?:
+    | {
+        duration: number
+      }
+    | false
   slug: string
   /**
    * Add `createdAt` and `updatedAt` fields
@@ -469,6 +476,21 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   versions?: boolean | IncomingCollectionVersions
 }
 
+export type SanitizedJoin = {
+  /**
+   * The field configuration defining the join
+   */
+  field: JoinField
+  /**
+   * The schemaPath of the join field in dot notation
+   */
+  schemaPath: string
+}
+
+export type SanitizedJoins = {
+  [collectionSlug: string]: SanitizedJoin[]
+}
+
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
@@ -477,6 +499,10 @@ export interface SanitizedCollectionConfig
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
+  /**
+   * Object of collections to join 'Join Fields object keyed by collection
+   */
+  joins: SanitizedJoins
   upload: SanitizedUploadConfig
   versions: SanitizedCollectionVersions
 }
@@ -509,6 +535,7 @@ export type AuthCollection = {
 }
 
 export type TypeWithID = {
+  docId?: any
   id: number | string
 }
 

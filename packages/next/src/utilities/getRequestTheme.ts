@@ -12,6 +12,10 @@ type GetRequestLanguageArgs = {
 const acceptedThemes: Theme[] = ['dark', 'light']
 
 export const getRequestTheme = ({ config, cookies, headers }: GetRequestLanguageArgs): Theme => {
+  if (config.admin.theme !== 'all' && acceptedThemes.includes(config.admin.theme)) {
+    return config.admin.theme
+  }
+
   const themeCookie = cookies.get(`${config.cookiePrefix || 'payload'}-theme`)
 
   const themeFromCookie: Theme = (

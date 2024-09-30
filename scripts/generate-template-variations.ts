@@ -52,7 +52,7 @@ async function main() {
     {
       name: 'payload-vercel-postgres-template',
       dirname: 'with-vercel-postgres',
-      db: 'vercelPostgres',
+      db: 'vercel-postgres',
       storage: 'vercelBlobStorage',
       sharp: false,
       vercelDeployButtonLink:
@@ -160,7 +160,15 @@ async function main() {
     })
 
     // Copy in initial migration if db is postgres. This contains user and media.
-    if (db === 'postgres') {
+    if (db === 'postgres' || db === 'vercel-postgres') {
+      // Add "ci" script to package.json
+      const packageJsonPath = path.join(destDir, 'package.json')
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'))
+      packageJson.scripts = packageJson.scripts || {}
+      packageJson.scripts.ci = 'payload migrate && pnpm build'
+      await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2))
+
+      // Handle copying migrations
       const migrationSrcDir = path.join(templatesDir, '_data/migrations')
       const migrationDestDir = path.join(destDir, 'src/migrations')
 
@@ -170,6 +178,20 @@ async function main() {
       }
       log(`Copying migrations from ${migrationSrcDir} to ${migrationDestDir}`)
       copyRecursiveSync(migrationSrcDir, migrationDestDir)
+
+      // Change all '@payloadcms/db-postgres' import to be '@payloadcms/db-vercel-postgres'
+      if (db === 'vercel-postgres') {
+        const migrationFiles = await fs.readdir(migrationDestDir)
+        for (const migrationFile of migrationFiles) {
+          const migrationFilePath = path.join(migrationDestDir, migrationFile)
+          const migrationFileContents = await fs.readFile(migrationFilePath, 'utf8')
+          const updatedFileContents = migrationFileContents.replaceAll(
+            '@payloadcms/db-postgres',
+            '@payloadcms/db-vercel-postgres',
+          )
+          await fs.writeFile(migrationFilePath, updatedFileContents)
+        }
+      }
     }
 
     // TODO: Email?

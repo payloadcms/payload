@@ -38,6 +38,7 @@ jobs:
             db-\*
             db-mongodb
             db-postgres
+            db-vercel-postgres
             db-sqlite
             drizzle
             email-nodemailer
@@ -52,7 +53,6 @@ jobs:
             plugin-form-builder
             plugin-nested-docs
             plugin-redirects
-            plugin-relationship-object-ids
             plugin-search
             plugin-sentry
             plugin-seo
@@ -63,6 +63,7 @@ jobs:
             storage-\*
             storage-azure
             storage-gcs
+            storage-uploadthing
             storage-vercel-blob
             storage-s3
             translations

@@ -10,15 +10,25 @@
   }
 
   &__nav-toggler-wrapper {
-    position: fixed;
+    position: sticky;
     z-index: var(--z-modal);
     top: 0;
     left: 0;
-    height: var(--app-header-height);
+    height: 0;
     width: var(--gutter-h);
     display: flex;
-    align-items: center;
     justify-content: center;
+  }
+
+  &__nav-toggler-container {
+    height: var(--app-header-height);
+    display: flex;
+    align-items: center;
+  }
+
+  &__nav-toggler {
+    display: flex;
+    align-items: center;
   }
 
   &__wrap {

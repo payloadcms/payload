@@ -2,6 +2,7 @@
 import type {
   ClientCollectionConfig,
   ClientGlobalConfig,
+  ClientUser,
   CollectionPermission,
   GlobalPermission,
   SanitizedCollectionConfig,
@@ -18,9 +19,11 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { formatDate } from '../../utilities/formatDate.js'
 import { Autosave } from '../Autosave/index.js'
+import { Button } from '../Button/index.js'
 import { DeleteDocument } from '../DeleteDocument/index.js'
 import { DuplicateDocument } from '../DuplicateDocument/index.js'
 import { Gutter } from '../Gutter/index.js'
+import { Locked } from '../Locked/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { PreviewButton } from '../PreviewButton/index.js'
 import { PublishButton } from '../PublishButton/index.js'
@@ -46,10 +49,13 @@ export const DocumentControls: React.FC<{
   /* Only available if `redirectAfterDuplicate` is `false` */
   readonly onDuplicate?: DocumentInfoContext['onDuplicate']
   readonly onSave?: DocumentInfoContext['onSave']
+  readonly onTakeOver?: () => void
   readonly permissions: CollectionPermission | GlobalPermission | null
+  readonly readOnlyForIncomingUser?: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
   readonly slug: SanitizedCollectionConfig['slug']
+  readonly user?: ClientUser
 }> = (props) => {
   const {
     id,
@@ -63,12 +69,15 @@ export const DocumentControls: React.FC<{
     onDelete,
     onDrawerCreate,
     onDuplicate,
+    onTakeOver,
     permissions,
+    readOnlyForIncomingUser,
     redirectAfterDelete,
     redirectAfterDuplicate,
+    user,
   } = props
 
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const editDepth = useEditDepth()
 
@@ -124,6 +133,9 @@ export const DocumentControls: React.FC<{
                   })}
                 </p>
               </li>
+            )}
+            {user && readOnlyForIncomingUser && (
+              <Locked className={`${baseClass}__locked-controls`} user={user} />
             )}
             {(collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) && (
               <Fragment>
@@ -219,8 +231,19 @@ export const DocumentControls: React.FC<{
                 )}
               </React.Fragment>
             )}
+            {user && readOnlyForIncomingUser && (
+              <Button
+                buttonStyle="secondary"
+                id="take-over"
+                onClick={onTakeOver}
+                size="medium"
+                type="button"
+              >
+                {t('general:takeOver')}
+              </Button>
+            )}
           </div>
-          {showDotMenu && (
+          {showDotMenu && !readOnlyForIncomingUser && (
             <Popup
               button={
                 <div className={`${baseClass}__dots`}>

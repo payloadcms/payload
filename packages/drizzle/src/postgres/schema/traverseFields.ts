@@ -18,7 +18,7 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core'
 import { InvalidConfiguration } from 'payload'
-import { fieldAffectsData, optionIsObject } from 'payload/shared'
+import { fieldAffectsData, fieldIsVirtual, optionIsObject } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type {
@@ -119,6 +119,10 @@ export const traverseFields = ({
     if ('name' in field && field.name === 'id') {
       return
     }
+    if (fieldIsVirtual(field)) {
+      return
+    }
+
     let columnName: string
     let fieldName: string
 
@@ -159,7 +163,7 @@ export const traverseFields = ({
           adapter.fieldConstraints[rootTableName][`${columnName}_idx`] = constraintValue
         }
         targetIndexes[`${newTableName}_${field.name}Idx`] = createIndex({
-          name: fieldName,
+          name: field.localized ? [fieldName, '_locale'] : fieldName,
           columnName,
           tableName: newTableName,
           unique,
@@ -717,7 +721,7 @@ export const traverseFields = ({
           rootTableIDColType,
           rootTableName,
           versions,
-          withinLocalizedArrayOrBlock,
+          withinLocalizedArrayOrBlock: withinLocalizedArrayOrBlock || field.localized,
         })
 
         if (groupHasLocalizedField) {
@@ -882,7 +886,7 @@ export const traverseFields = ({
           // add relationship to table
           relationsToBuild.set(fieldName, {
             type: 'one',
-            localized: adapter.payload.config.localization && field.localized,
+            localized: adapter.payload.config.localization && (field.localized || forceLocalized),
             target: tableName,
           })
 
@@ -901,6 +905,21 @@ export const traverseFields = ({
         }
 
         break
+
+      case 'join': {
+        // fieldName could be 'posts' or 'group_posts'
+        // using on as the key for the relation
+        const localized = adapter.payload.config.localization && field.localized
+        const target = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${localized ? adapter.localesSuffix : ''}`
+        relationsToBuild.set(fieldName, {
+          type: 'many',
+          // joins are not localized on the parent table
+          localized: false,
+          relationName: toSnakeCase(field.on),
+          target,
+        })
+        break
+      }
 
       default:
         break

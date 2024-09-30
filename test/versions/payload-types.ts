@@ -16,6 +16,7 @@ export interface Config {
     'autosave-posts': AutosavePost;
     'draft-posts': DraftPost;
     'draft-with-max-posts': DraftWithMaxPost;
+    'localized-posts': LocalizedPost;
     'version-posts': VersionPost;
     'custom-ids': CustomId;
     users: User;
@@ -30,8 +31,9 @@ export interface Config {
     'draft-global': DraftGlobal;
     'draft-with-max-global': DraftWithMaxGlobal;
     'disable-publish-global': DisablePublishGlobal;
+    'localized-global': LocalizedGlobal;
   };
-  locale: 'en' | 'es';
+  locale: 'en' | 'es' | 'de';
   user: User & {
     collection: 'users';
   };
@@ -150,6 +152,22 @@ export interface DraftWithMaxPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-posts".
+ */
+type LocalizedString = {
+  [k: string]: string;
+};
+
+export interface LocalizedPost {
+  id: string;
+  text?: string | LocalizedString | null;
+  description?: string | LocalizedString | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-ids".
  */
 export interface CustomId {
@@ -255,6 +273,18 @@ export interface DisablePublishGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-global".
+ */
+export interface LocalizedGlobal {
+  id: string;
+  title?: string | null;
+  content?: string | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
@@ -263,6 +293,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

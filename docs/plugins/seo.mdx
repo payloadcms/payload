@@ -119,10 +119,32 @@ A function that allows you to return any meta title, including from document's c
 {
   // ...
   seoPlugin({
-    generateTitle: ({ ...docInfo, doc, locale, req }) => `Website.com — ${doc?.title}`,
+    generateTitle: ({ doc }) => `Website.com — ${doc?.title}`,
   })
 }
 ```
+
+All "generate" functions receive the following arguments:
+
+| Argument | Description |
+| --- | --- |
+| **`collectionConfig`** | The configuration of the collection. |
+| **`collectionSlug`** | The slug of the collection. |
+| **`doc`** | The data of the current document. |
+| **`docPermissions`** | The permissions of the document. |
+| **`globalConfig`** | The configuration of the global. |
+| **`globalSlug`** | The slug of the global. |
+| **`hasPublishPermission`** | Whether the user has permission to publish the document. |
+| **`hasSavePermission`** | Whether the user has permission to save the document. |
+| **`id`** | The ID of the document. |
+| **`initialData`** | The initial data of the document. |
+| **`initialState`** | The initial state of the document. |
+| **`locale`** | The locale of the document. |
+| **`preferencesKey`**  | The preferences key of the document. |
+| **`publishedDoc`** | The published document. |
+| **`req`** | The Payload request object containing `user`, `payload`, `i18n`, etc. |
+| **`title`** | The title of the document. |
+| **`versionsCount`** | The number of versions of the document. |
 
 ##### `generateDescription`
 
@@ -133,10 +155,12 @@ A function that allows you to return any meta description, including from docume
 {
   // ...
   seoPlugin({
-    generateDescription: ({ ...docInfo, doc, locale, req }) => doc?.excerpt,
+    generateDescription: ({ doc }) => doc?.excerpt,
   })
 }
 ```
+
+For a full list of arguments, see the [`generateTitle`](#generateTitle) function.
 
 ##### `generateImage`
 
@@ -147,10 +171,12 @@ A function that allows you to return any meta image, including from document's c
 {
   // ...
   seoPlugin({
-    generateImage: ({ ...docInfo, doc, locale, req }) => doc?.featuredImage,
+    generateImage: ({ doc }) => doc?.featuredImage,
   })
 }
 ```
+
+For a full list of arguments, see the [`generateTitle`](#generateTitle) function.
 
 ##### `generateURL`
 
@@ -161,11 +187,13 @@ A function called by the search preview component to display the actual URL of y
 {
   // ...
   seoPlugin({
-    generateURL: ({ ...docInfo, doc, locale, req }) =>
-      `https://yoursite.com/${collection?.slug}/${doc?.slug}`,
+    generateURL: ({ doc, collectionSlug }) =>
+      `https://yoursite.com/${collectionSlug}/${doc?.slug}`,
   })
 }
 ```
+
+For a full list of arguments, see the [`generateTitle`](#generateTitle) function.
 
 #### `interfaceName`
 

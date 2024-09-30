@@ -2,7 +2,7 @@
 
 import type { PaginatedDocs, Where } from 'payload'
 
-import { fieldBaseClass, ReactSelect, useConfig, useTranslation } from '@payloadcms/ui'
+import { fieldBaseClass, Pill, ReactSelect, useConfig, useTranslation } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -21,6 +21,7 @@ const baseOptions = []
 export const SelectComparison: React.FC<Props> = (props) => {
   const {
     baseURL,
+    draftsEnabled,
     latestDraftVersion,
     latestPublishedVersion,
     onChange,
@@ -32,6 +33,7 @@ export const SelectComparison: React.FC<Props> = (props) => {
   const {
     config: {
       admin: { dateFormat },
+      localization,
     },
   } = useConfig()
 
@@ -77,6 +79,14 @@ export const SelectComparison: React.FC<Props> = (props) => {
         })
       }
 
+      if (localization && draftsEnabled) {
+        query.where.and.push({
+          snapshot: {
+            not_equals: true,
+          },
+        })
+      }
+
       const search = qs.stringify(query)
 
       const response = await fetch(`${baseURL}?${search}`, {
@@ -107,8 +117,23 @@ export const SelectComparison: React.FC<Props> = (props) => {
 
           const additionalOptions = data.docs.map((doc) => {
             const status = doc.version._status
+            let publishedLocalePill = null
+            const publishedLocale = doc.publishedLocale || undefined
             const { currentLabel, latestVersion, pillStyle, previousLabel } =
               versionInfo[status] || {}
+
+            if (localization && localization?.locales && publishedLocale) {
+              const localeCode = Array.isArray(publishedLocale)
+                ? publishedLocale[0]
+                : publishedLocale
+
+              const locale = localization.locales.find((loc) => loc.code === localeCode)
+              const formattedLabel = locale?.label?.[i18n?.language] || locale?.label
+
+              if (formattedLabel) {
+                publishedLocalePill = <Pill>{formattedLabel}</Pill>
+              }
+            }
 
             return {
               label: (
@@ -116,6 +141,7 @@ export const SelectComparison: React.FC<Props> = (props) => {
                   {formatDate({ date: doc.updatedAt, i18n, pattern: dateFormat })}
                   &nbsp;&nbsp;
                   {renderPill(doc, latestVersion, currentLabel, previousLabel, pillStyle)}
+                  {publishedLocalePill}
                 </div>
               ),
               value: doc.id,

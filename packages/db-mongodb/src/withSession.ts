@@ -10,7 +10,7 @@ import type { MongooseAdapter } from './index.js'
 export async function withSession(
   db: MongooseAdapter,
   req: PayloadRequest,
-): Promise<{ session: ClientSession } | object> {
+): Promise<{ session: ClientSession } | Record<string, never>> {
   let transactionID = req.transactionID
 
   if (transactionID instanceof Promise) {

@@ -12,6 +12,10 @@
     flex-wrap: nowrap;
   }
 
+  .rs__indicators {
+    gap: calc(var(--base) / 4);
+  }
+
   .rs__indicator {
     padding: 0px 4px;
     cursor: pointer;

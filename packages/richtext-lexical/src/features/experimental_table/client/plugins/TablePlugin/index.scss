@@ -3,11 +3,12 @@
 .LexicalEditorTheme {
   &__table {
     border-collapse: collapse;
+    max-width: 100%;
     border-spacing: 0;
     overflow-y: scroll;
     overflow-x: scroll;
     table-layout: fixed;
-    width: max-content;
+    width: fit-content;
     margin: 0 25px 30px 0;
 
     ::selection {
@@ -19,13 +20,16 @@
     }
   }
 
+  &__tableRowStriping tr:nth-child(even) {
+    background-color: var(--theme-elevation-100);
+  }
+
   &__tableSelected {
     outline: 2px solid rgb(60, 132, 244);
   }
 
   &__tableCell {
     border: 1px solid var(--theme-elevation-200);
-    min-width: 75px;
     vertical-align: top;
     text-align: start;
     padding: 6px 8px;

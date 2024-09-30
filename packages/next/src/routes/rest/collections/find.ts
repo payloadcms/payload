@@ -1,4 +1,4 @@
-import type { Where } from 'payload'
+import type { JoinQuery, Where } from 'payload'
 
 import httpStatus from 'http-status'
 import { findOperation } from 'payload'
@@ -7,11 +7,13 @@ import { isNumber } from 'payload/shared'
 import type { CollectionRouteHandler } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
+import { sanitizeJoinParams } from '../utilities/sanitizeJoinParams.js'
 
 export const find: CollectionRouteHandler = async ({ collection, req }) => {
-  const { depth, draft, limit, page, sort, where } = req.query as {
+  const { depth, draft, joins, limit, page, sort, where } = req.query as {
     depth?: string
     draft?: string
+    joins?: JoinQuery
     limit?: string
     page?: string
     sort?: string
@@ -22,6 +24,7 @@ export const find: CollectionRouteHandler = async ({ collection, req }) => {
     collection,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: draft === 'true',
+    joins: sanitizeJoinParams(joins),
     limit: isNumber(limit) ? Number(limit) : undefined,
     page: isNumber(page) ? Number(page) : undefined,
     req,

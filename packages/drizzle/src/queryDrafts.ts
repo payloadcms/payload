@@ -15,7 +15,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   const tableName = this.tableNameMap.get(
     `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`,
   )
-  const fields = buildVersionCollectionFields(collectionConfig)
+  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig)
 
   const combinedWhere = combineQueries({ latest: { equals: true } }, where)
 

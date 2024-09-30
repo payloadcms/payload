@@ -1,5 +1,5 @@
 import type { TypeWithID } from '../collections/config/types.js'
-import type { Document, Payload, PayloadRequest, Where } from '../types/index.js'
+import type { Document, JoinQuery, Payload, PayloadRequest, Where } from '../types/index.js'
 import type { TypeWithVersion } from '../versions/types.js'
 
 export type { TypeWithVersion }
@@ -49,7 +49,7 @@ export interface BaseDatabaseAdapter {
    */
   destroy?: Destroy
 
-  find: <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>
+  find: Find
 
   findGlobal: FindGlobal
 
@@ -135,6 +135,8 @@ export interface BaseDatabaseAdapter {
   updateOne: UpdateOne
 
   updateVersion: UpdateVersion
+
+  upsert: Upsert
 }
 
 export type Init = () => Promise<void> | void
@@ -185,6 +187,7 @@ export type QueryDrafts = <T = TypeWithID>(args: QueryDraftsArgs) => Promise<Pag
 
 export type FindOneArgs = {
   collection: string
+  joins?: JoinQuery
   locale?: string
   req: PayloadRequest
   where?: Where
@@ -194,11 +197,13 @@ export type FindOne = <T extends TypeWithID>(args: FindOneArgs) => Promise<null 
 
 export type FindArgs = {
   collection: string
+  joins?: JoinQuery
   /** Setting limit to 1 is equal to the previous Model.findOne(). Setting limit to 0 disables the limit */
   limit?: number
   locale?: string
   page?: number
   pagination?: boolean
+  projection?: Record<string, unknown>
   req: PayloadRequest
   skip?: number
   sort?: string
@@ -311,7 +316,9 @@ export type CreateVersionArgs<T = TypeWithID> = {
   createdAt: string
   /** ID of the parent document for which the version should be created for */
   parent: number | string
+  publishedLocale?: string
   req: PayloadRequest
+  snapshot?: true
   updatedAt: string
   versionData: T
 }
@@ -326,7 +333,9 @@ export type CreateGlobalVersionArgs<T = TypeWithID> = {
   globalSlug: string
   /** ID of the parent document for which the version should be created for */
   parent: number | string
+  publishedLocale?: string
   req: PayloadRequest
+  snapshot?: true
   updatedAt: string
   versionData: T
 }
@@ -371,7 +380,12 @@ export type UpdateOneArgs = {
   collection: string
   data: Record<string, unknown>
   draft?: boolean
+  joins?: JoinQuery
   locale?: string
+  /**
+   * Additional database adapter specific options to pass to the query
+   */
+  options?: Record<string, unknown>
   req: PayloadRequest
 } & (
   | {
@@ -386,8 +400,20 @@ export type UpdateOneArgs = {
 
 export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
+export type UpsertArgs = {
+  collection: string
+  data: Record<string, unknown>
+  joins?: JoinQuery
+  locale?: string
+  req: PayloadRequest
+  where: Where
+}
+
+export type Upsert = (args: UpsertArgs) => Promise<Document>
+
 export type DeleteOneArgs = {
   collection: string
+  joins?: JoinQuery
   req: PayloadRequest
   where: Where
 }
@@ -396,6 +422,7 @@ export type DeleteOne = (args: DeleteOneArgs) => Promise<Document>
 
 export type DeleteManyArgs = {
   collection: string
+  joins?: JoinQuery
   req: PayloadRequest
   where: Where
 }

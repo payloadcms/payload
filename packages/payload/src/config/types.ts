@@ -6,6 +6,7 @@ import type {
 } from '@payloadcms/translations'
 import type { BusboyConfig } from 'busboy'
 import type GraphQL from 'graphql'
+import type { GraphQLFormattedError } from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
 import type { DestinationStream, pino } from 'pino'
 import type React from 'react'
@@ -23,7 +24,6 @@ import type {
   InternalImportMap,
 } from '../bin/generateImportMap/index.js'
 import type {
-  AfterErrorHook,
   Collection,
   CollectionConfig,
   SanitizedCollectionConfig,
@@ -31,7 +31,7 @@ import type {
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { Payload, TypedUser } from '../index.js'
+import type { Payload, RequestContext, TypedUser } from '../index.js'
 import type { QueueConfig } from '../queues/config/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
@@ -622,6 +622,33 @@ export type FetchAPIFileUploadOptions = {
   useTempFiles?: boolean | undefined
 } & Partial<BusboyConfig>
 
+export type ErrorResult = { data?: any; errors: unknown[]; stack?: string }
+
+export type AfterErrorResult = {
+  graphqlResult?: GraphQLFormattedError
+  response?: Partial<ErrorResult> & Record<string, unknown>
+  status?: number
+} | void
+
+export type AfterErrorHookArgs = {
+  /** The Collection that the hook is operating on. This will be undefined if the hook is executed from a non-collection endpoint or GraphQL. */
+  collection?: SanitizedCollectionConfig
+  /** 	Custom context passed between hooks */
+  context: RequestContext
+  /** The error that occurred. */
+  error: Error
+  /** The GraphQL result object, available if the hook is executed within a GraphQL context. */
+  graphqlResult?: GraphQLFormattedError
+  /** The Request object containing the currently authenticated user. */
+  req: PayloadRequest
+  /** The formatted error result object, available if the hook is executed from a REST context. */
+  result?: ErrorResult
+}
+
+export type AfterErrorHook = (
+  args: AfterErrorHookArgs,
+) => AfterErrorResult | Promise<AfterErrorResult>
+
 /**
  * This is the central configuration
  *
@@ -698,6 +725,10 @@ export type Config = {
         /** Replace the logo on the login page */
         Logo?: CustomComponent
       }
+      /**
+       * Add custom header to top of page globally
+       */
+      header?: CustomComponent[]
       /** Replace logout related components */
       logout?: {
         /** Replace the logout button  */
@@ -788,6 +819,12 @@ export type Config = {
       /** The route for the unauthorized page. */
       unauthorized?: string
     }
+    /**
+     * Restrict the Admin Panel theme to use only one of your choice
+     *
+     * @default 'all' // The theme can be configured by users
+     */
+    theme?: 'all' | 'dark' | 'light'
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
@@ -892,7 +929,7 @@ export type Config = {
    * @see https://payloadcms.com/docs/hooks/overview
    */
   hooks?: {
-    afterError?: AfterErrorHook
+    afterError?: AfterErrorHook[]
   }
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   i18n?: I18nOptions<{} | DefaultTranslationsObject> // loosen the type here to allow for custom translations

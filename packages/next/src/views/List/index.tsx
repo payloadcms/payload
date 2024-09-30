@@ -111,6 +111,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
       depth: 0,
       draft: true,
       fallbackLocale: null,
+      includeLockStatus: true,
       limit,
       locale,
       overrideAccess: false,

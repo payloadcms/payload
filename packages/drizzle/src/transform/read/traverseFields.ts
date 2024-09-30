@@ -1,6 +1,6 @@
-import type { Field, SanitizedConfig, TabAsField } from 'payload'
+import type { Field, JoinQuery, SanitizedConfig, TabAsField } from 'payload'
 
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData, fieldIsVirtual } from 'payload/shared'
 
 import type { DrizzleAdapter } from '../../types.js'
 import type { BlocksMap } from '../../utilities/createBlocksMap.js'
@@ -39,6 +39,10 @@ type TraverseFieldsArgs = {
    */
   fields: (Field | TabAsField)[]
   /**
+   *
+   */
+  joinQuery?: JoinQuery
+  /**
    * All hasMany number fields, as returned by Drizzle, keyed on an object by field path
    */
   numbers: Record<string, Record<string, unknown>[]>
@@ -74,6 +78,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
   deletions,
   fieldPrefix,
   fields,
+  joinQuery,
   numbers,
   path,
   relationships,
@@ -93,6 +98,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         deletions,
         fieldPrefix,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+        joinQuery,
         numbers,
         path,
         relationships,
@@ -115,6 +121,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         deletions,
         fieldPrefix,
         fields: field.fields,
+        joinQuery,
         numbers,
         path,
         relationships,
@@ -125,6 +132,10 @@ export const traverseFields = <T extends Record<string, unknown>>({
     }
 
     if (fieldAffectsData(field)) {
+      if (fieldIsVirtual(field)) {
+        return result
+      }
+
       const fieldName = `${fieldPrefix || ''}${field.name}`
       const fieldData = table[fieldName]
       const localizedFieldData = {}
@@ -226,12 +237,13 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
       if (field.type === 'blocks') {
         const blockFieldPath = `${sanitizedPath}${field.name}`
+        const blocksByPath = blocks[blockFieldPath]
 
-        if (Array.isArray(blocks[blockFieldPath])) {
+        if (Array.isArray(blocksByPath)) {
           if (field.localized) {
             result[field.name] = {}
 
-            blocks[blockFieldPath].forEach((row) => {
+            blocksByPath.forEach((row) => {
               if (row._uuid) {
                 row.id = row._uuid
                 delete row._uuid
@@ -274,7 +286,23 @@ export const traverseFields = <T extends Record<string, unknown>>({
               })
             })
           } else {
-            result[field.name] = blocks[blockFieldPath].reduce((acc, row, i) => {
+            // Add locale-specific index to have a proper blockFieldPath for current locale
+            // because blocks can be in the same array for different locales!
+            if (withinArrayOrBlockLocale && config.localization) {
+              for (const locale of config.localization.localeCodes) {
+                let localeIndex = 0
+
+                for (let i = 0; i < blocksByPath.length; i++) {
+                  const row = blocksByPath[i]
+                  if (row._locale === locale) {
+                    row._index = localeIndex
+                    localeIndex++
+                  }
+                }
+              }
+            }
+
+            result[field.name] = blocksByPath.reduce((acc, row, i) => {
               delete row._order
               if (row._uuid) {
                 row.id = row._uuid
@@ -289,6 +317,10 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 ) {
                   if (row._locale) {
                     delete row._locale
+                  }
+                  if (typeof row._index === 'number') {
+                    i = row._index
+                    delete row._index
                   }
 
                   acc.push(
@@ -339,6 +371,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
           }
         } else {
           const relationPathMatch = relationships[`${sanitizedPath}${field.name}`]
+
           if (!relationPathMatch) {
             if ('hasMany' in field && field.hasMany) {
               if (field.localized && config.localization && config.localization.locales) {
@@ -384,6 +417,44 @@ export const traverseFields = <T extends Record<string, unknown>>({
           }
           return result
         }
+      }
+
+      if (field.type === 'join') {
+        const { limit = 10 } = joinQuery?.[`${fieldPrefix.replaceAll('_', '.')}${field.name}`] || {}
+
+        let fieldResult:
+          | { docs: unknown[]; hasNextPage: boolean }
+          | Record<string, { docs: unknown[]; hasNextPage: boolean }>
+        if (Array.isArray(fieldData)) {
+          if (field.localized) {
+            fieldResult = fieldData.reduce((joinResult, row) => {
+              if (typeof row._locale === 'string') {
+                if (!joinResult[row._locale]) {
+                  joinResult[row._locale] = {
+                    docs: [],
+                    hasNextPage: false,
+                  }
+                }
+                joinResult[row._locale].docs.push(row._parentID)
+              }
+
+              return joinResult
+            }, {})
+            Object.keys(fieldResult).forEach((locale) => {
+              fieldResult[locale].hasNextPage = fieldResult[locale].docs.length > limit
+              fieldResult[locale].docs = fieldResult[locale].docs.slice(0, limit)
+            })
+          } else {
+            const hasNextPage = limit !== 0 && fieldData.length > limit
+            fieldResult = {
+              docs: hasNextPage ? fieldData.slice(0, limit) : fieldData,
+              hasNextPage,
+            }
+          }
+        }
+
+        result[field.name] = fieldResult
+        return result
       }
 
       if (field.type === 'text' && field?.hasMany) {
@@ -478,13 +549,23 @@ export const traverseFields = <T extends Record<string, unknown>>({
               return selectResult
             }, {})
           } else {
-            result[field.name] = fieldData.map(({ value }) => value)
+            let selectData = fieldData
+            if (withinArrayOrBlockLocale) {
+              selectData = selectData.filter(({ locale }) => locale === withinArrayOrBlockLocale)
+            }
+            result[field.name] = selectData.map(({ value }) => value)
           }
         }
         return result
       }
 
       if (field.localized && Array.isArray(table._locales)) {
+        if (!table._locales.length && adapter.payload.config.localization) {
+          adapter.payload.config.localization.localeCodes.forEach((_locale) =>
+            (table._locales as unknown[]).push({ _locale }),
+          )
+        }
+
         table._locales.forEach((localeRow) => {
           valuesToTransform.push({
             ref: localizedFieldData,

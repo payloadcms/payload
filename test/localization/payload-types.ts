@@ -26,6 +26,8 @@ export interface Config {
     tabs: Tab;
     'localized-sort': LocalizedSort;
     'blocks-same-name': BlocksSameName;
+    'localized-within-localized': LocalizedWithinLocalized;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -74,6 +76,14 @@ export interface BlocksField {
               blockType: 'textBlock';
             }[]
           | null;
+        array?:
+          | {
+              link?: {
+                label?: string | null;
+              };
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'blockInsideBlock';
@@ -93,6 +103,9 @@ export interface NestedArray {
         blocksWithinArray?:
           | {
               relationWithinBlock?: (string | null) | LocalizedPost;
+              myGroup?: {
+                text?: string | null;
+              };
               id?: string | null;
               blockName?: string | null;
               blockType: 'someBlock';
@@ -109,6 +122,7 @@ export interface NestedArray {
     | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -124,6 +138,7 @@ export interface LocalizedPost {
   group?: {
     children?: string | null;
   };
+  unique?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -150,6 +165,33 @@ export interface NestedFieldTable {
         number?: number[] | null;
         text?: string[] | null;
         id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | {
+        nestedBlocks?:
+          | {
+              relation?: {
+                relationTo: 'localized-posts';
+                value: string | LocalizedPost;
+              } | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'content';
+            }[]
+          | null;
+        array?:
+          | {
+              relation?: {
+                relationTo: 'localized-posts';
+                value: string | LocalizedPost;
+              } | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
       }[]
     | null;
   updatedAt: string;
@@ -195,20 +237,56 @@ export interface ArrayField {
 export interface LocalizedRequired {
   id: string;
   title: string;
-  layout: (
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'text';
-      }
-    | {
-        number?: number | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'number';
-      }
-  )[];
+  nav: {
+    layout: (
+      | {
+          text?: string | null;
+          nestedArray?:
+            | {
+                text?: string | null;
+                l2?:
+                  | {
+                      l3?:
+                        | {
+                            l4?:
+                              | {
+                                  superNestedText?: string | null;
+                                  id?: string | null;
+                                }[]
+                              | null;
+                            id?: string | null;
+                          }[]
+                        | null;
+                      id?: string | null;
+                    }[]
+                  | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+          blockName?: string | null;
+          blockType: 'text';
+        }
+      | {
+          number?: number | null;
+          id?: string | null;
+          blockName?: string | null;
+          blockType: 'number';
+        }
+    )[];
+  };
+  myTab?: {
+    text?: string | null;
+    group?: {
+      nestedArray2?:
+        | {
+            nestedText?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      nestedText?: string | null;
+    };
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -410,6 +488,114 @@ export interface BlocksSameName {
           }
       )[]
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-within-localized".
+ */
+export interface LocalizedWithinLocalized {
+  id: string;
+  myTab?: {
+    shouldNotBeLocalized?: string | null;
+  };
+  myArray?:
+    | {
+        shouldNotBeLocalized?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  myBlocks?:
+    | {
+        shouldNotBeLocalized?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'myBlock';
+      }[]
+    | null;
+  myGroup?: {
+    shouldNotBeLocalized?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'blocks-fields';
+        value: string | BlocksField;
+      } | null)
+    | ({
+        relationTo: 'nested-arrays';
+        value: string | NestedArray;
+      } | null)
+    | ({
+        relationTo: 'nested-field-tables';
+        value: string | NestedFieldTable;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'localized-posts';
+        value: string | LocalizedPost;
+      } | null)
+    | ({
+        relationTo: 'array-fields';
+        value: string | ArrayField;
+      } | null)
+    | ({
+        relationTo: 'localized-required';
+        value: string | LocalizedRequired;
+      } | null)
+    | ({
+        relationTo: 'with-localized-relationship';
+        value: string | WithLocalizedRelationship;
+      } | null)
+    | ({
+        relationTo: 'relationship-localized';
+        value: string | RelationshipLocalized;
+      } | null)
+    | ({
+        relationTo: 'dummy';
+        value: string | Dummy;
+      } | null)
+    | ({
+        relationTo: 'nested';
+        value: string | Nested;
+      } | null)
+    | ({
+        relationTo: 'groups';
+        value: string | Group;
+      } | null)
+    | ({
+        relationTo: 'tabs';
+        value: string | Tab;
+      } | null)
+    | ({
+        relationTo: 'localized-sort';
+        value: string | LocalizedSort;
+      } | null)
+    | ({
+        relationTo: 'blocks-same-name';
+        value: string | BlocksSameName;
+      } | null)
+    | ({
+        relationTo: 'localized-within-localized';
+        value: string | LocalizedWithinLocalized;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
   updatedAt: string;
   createdAt: string;
 }

@@ -23,10 +23,7 @@
 
   &:disabled {
     cursor: not-allowed;
-
-    .icon {
-      opacity: 0.2;
-    }
+    opacity: 0.2;
   }
 
   &:hover:not([disabled]) {
@@ -87,6 +84,10 @@
       &:hover:not([disabled]),
       &.active {
         background-color: var(--theme-elevation-100);
+      }
+      &.disabled {
+        cursor: not-allowed;
+        opacity: 0.2;
       }
 
       padding-left: 6.25px;

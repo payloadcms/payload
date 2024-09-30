@@ -81,8 +81,8 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
-  const [relatedCollection] = useState<ClientCollectionConfig>(() =>
-    collections.find((coll) => coll.slug === relationTo),
+  const [relatedCollection] = useState<ClientCollectionConfig>(
+    () => collections.find((coll) => coll.slug === relationTo)!,
   )
 
   const componentID = useId()
@@ -107,7 +107,7 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const removeUpload = useCallback(() => {
     editor.update(() => {
-      $getNodeByKey(nodeKey).remove()
+      $getNodeByKey(nodeKey)?.remove()
     })
   }, [editor, nodeKey])
 
@@ -126,17 +126,20 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const $onDelete = useCallback(
     (event: KeyboardEvent) => {
-      if (isSelected && $isNodeSelection($getSelection())) {
+      const deleteSelection = $getSelection()
+      if (isSelected && $isNodeSelection(deleteSelection)) {
         event.preventDefault()
-        const node = $getNodeByKey(nodeKey)
-        if ($isUploadNode(node)) {
-          node.remove()
-          return true
-        }
+        editor.update(() => {
+          deleteSelection.getNodes().forEach((node) => {
+            if ($isUploadNode(node)) {
+              node.remove()
+            }
+          })
+        })
       }
       return false
     },
-    [isSelected, nodeKey],
+    [editor, isSelected],
   )
 
   useEffect(() => {

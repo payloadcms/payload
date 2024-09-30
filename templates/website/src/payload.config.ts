@@ -6,6 +6,7 @@ import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
+import { searchPlugin } from '@payloadcms/plugin-search'
 import {
   BoldFeature,
   FixedToolbarFeature,
@@ -31,6 +32,9 @@ import { Header } from './Header/config'
 import { revalidateRedirects } from './hooks/revalidateRedirects'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { Page, Post } from 'src/payload-types'
+
+import { searchFields } from '@/search/fieldOverrides'
+import { beforeSyncWithSearch } from '@/search/beforeSync'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -185,6 +189,15 @@ export default buildConfig({
             }
             return field
           })
+        },
+      },
+    }),
+    searchPlugin({
+      collections: ['posts'],
+      beforeSync: beforeSyncWithSearch,
+      searchOverrides: {
+        fields: ({ defaultFields }) => {
+          return [...defaultFields, ...searchFields]
         },
       },
     }),

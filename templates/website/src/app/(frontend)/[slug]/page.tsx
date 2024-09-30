@@ -39,7 +39,7 @@ export default async function Page({ params: { slug = 'home' } }) {
   })
 
   // Remove this code once your website is seeded
-  if (!page) {
+  if (!page && slug === 'home') {
     page = homeStatic
   }
 

@@ -1,6 +1,6 @@
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
-import type { CollectionConfig } from '../../collections/config/types.js'
+import type { CollectionConfig, SanitizedJoins } from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { Field } from './types.js'
 
@@ -8,14 +8,15 @@ import {
   DuplicateFieldName,
   InvalidFieldName,
   InvalidFieldRelationship,
+  MissingEditorProp,
   MissingFieldType,
 } from '../../errors/index.js'
-import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
 import { setDefaultBeforeDuplicate } from '../setDefaultBeforeDuplicate.js'
 import validations from '../validations.js'
+import { sanitizeJoinField } from './sanitizeJoinField.js'
 import { fieldAffectsData, tabHasName } from './types.js'
 
 type Args = {
@@ -23,6 +24,10 @@ type Args = {
   config: Config
   existingFieldNames?: Set<string>
   fields: Field[]
+  /**
+   * When not passed in, assume that join are not supported (globals, arrays, blocks)
+   */
+  joins?: SanitizedJoins
   parentIsLocalized: boolean
   /**
    * If true, a richText field will require an editor property to be set, as the sanitizeFields function will not add it from the payload config if not present.
@@ -36,6 +41,7 @@ type Args = {
    * so that you can sanitize them together, after the config has been sanitized.
    */
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>
+  schemaPath?: string
   /**
    * If not null, will validate that upload and relationship fields do not relate to a collection that is not in this array.
    * This validation will be skipped if validRelationships is null.
@@ -44,18 +50,21 @@ type Args = {
 }
 
 export const sanitizeFields = async ({
-  collectionConfig,
   config,
   existingFieldNames = new Set(),
   fields,
+  joins,
   parentIsLocalized,
   requireFieldLevelRichTextEditor = false,
   richTextSanitizationPromises,
+  schemaPath: schemaPathArg,
   validRelationships,
 }: Args): Promise<Field[]> => {
   if (!fields) {
     return []
   }
+
+  let schemaPath = schemaPathArg
 
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]
@@ -91,6 +100,10 @@ export const sanitizeFields = async ({
       field.required === true
     ) {
       field.defaultValue = false
+    }
+
+    if (field.type === 'join') {
+      sanitizeJoinField({ config, field, joins, schemaPath })
     }
 
     if (field.type === 'relationship' || field.type === 'upload') {
@@ -160,8 +173,12 @@ export const sanitizeFields = async ({
         if (defaultValidate) {
           field.validate = (val, options) => defaultValidate(val, { ...field, ...options })
         } else {
-          field.validate = () => true
+          field.validate = (): true => true
         }
+      }
+
+      if (typeof field.virtual === 'undefined') {
+        field.virtual = false
       }
 
       if (!field.hooks) {
@@ -231,13 +248,18 @@ export const sanitizeFields = async ({
     }
 
     if ('fields' in field && field.fields) {
+      if ('name' in field && field.name) {
+        schemaPath = `${schemaPath || ''}${schemaPath ? '.' : ''}${field.name}`
+      }
       field.fields = await sanitizeFields({
         config,
         existingFieldNames: fieldAffectsData(field) ? new Set() : existingFieldNames,
         fields: field.fields,
+        joins,
         parentIsLocalized: parentIsLocalized || field.localized,
         requireFieldLevelRichTextEditor,
         richTextSanitizationPromises,
+        schemaPath,
         validRelationships,
       })
     }
@@ -245,17 +267,22 @@ export const sanitizeFields = async ({
     if (field.type === 'tabs') {
       for (let j = 0; j < field.tabs.length; j++) {
         const tab = field.tabs[j]
-        if (tabHasName(tab) && typeof tab.label === 'undefined') {
-          tab.label = toWords(tab.name)
+        if (tabHasName(tab)) {
+          schemaPath = `${schemaPath || ''}${schemaPath ? '.' : ''}${tab.name}`
+          if (typeof tab.label === 'undefined') {
+            tab.label = toWords(tab.name)
+          }
         }
 
         tab.fields = await sanitizeFields({
           config,
           existingFieldNames: tabHasName(tab) ? new Set() : existingFieldNames,
           fields: tab.fields,
+          joins,
           parentIsLocalized: parentIsLocalized || (tabHasName(tab) && tab.localized),
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
+          schemaPath,
           validRelationships,
         })
         field.tabs[j] = tab

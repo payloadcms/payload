@@ -58,16 +58,17 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
     const genImageResponse = await fetch('/api/plugin-seo/generate-image', {
       body: JSON.stringify({
         id: docInfo.id,
-        slug: docInfo.slug,
+        collectionSlug: docInfo.collectionSlug,
         doc: getData(),
         docPermissions: docInfo.docPermissions,
+        globalSlug: docInfo.globalSlug,
         hasPublishPermission: docInfo.hasPublishPermission,
         hasSavePermission: docInfo.hasSavePermission,
         initialData: docInfo.initialData,
         initialState: docInfo.initialState,
         locale: typeof locale === 'object' ? locale?.code : locale,
         title: docInfo.title,
-      } satisfies Omit<Parameters<GenerateImage>[0], 'req'>),
+      } satisfies Omit<Parameters<GenerateImage>[0], 'collectionConfig' | 'globalConfig' | 'req'>),
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
@@ -101,7 +102,13 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel field={null} Label={Label} label={label} {...(labelProps || {})} />
+          <FieldLabel
+            field={null}
+            Label={Label}
+            label={label}
+            required={required}
+            {...(labelProps || {})}
+          />
           {hasGenerateImageFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
@@ -150,7 +157,6 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
             RenderedComponent: errorMessage,
           }}
           filterOptions={field.filterOptions}
-          label={undefined}
           onChange={(incomingImage) => {
             if (incomingImage !== null) {
               if (typeof incomingImage === 'object') {

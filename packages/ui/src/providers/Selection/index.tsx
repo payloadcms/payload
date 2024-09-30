@@ -1,5 +1,5 @@
 'use client'
-import type { Where } from 'payload'
+import type { ClientUser, Where } from 'payload'
 
 import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
@@ -33,9 +33,10 @@ type Props = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly docs: any[]
   readonly totalDocs: number
+  user: ClientUser
 }
 
-export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalDocs }) => {
+export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalDocs, user }) => {
   const contextRef = useRef({} as SelectionContext)
 
   const { code: locale } = useLocale()
@@ -56,8 +57,10 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       const rows = new Map()
       if (allAvailable) {
         setSelectAll(SelectAllStatus.AllAvailable)
-        docs.forEach(({ id }) => {
-          rows.set(id, true)
+        docs.forEach(({ id, _isLocked, _userEditing }) => {
+          if (!_isLocked || _userEditing?.id === user?.id) {
+            rows.set(id, true)
+          }
         })
       } else if (
         selectAll === SelectAllStatus.AllAvailable ||
@@ -65,17 +68,25 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       ) {
         setSelectAll(SelectAllStatus.None)
       } else {
-        docs.forEach(({ id }) => {
-          rows.set(id, selectAll !== SelectAllStatus.Some)
+        docs.forEach(({ id, _isLocked, _userEditing }) => {
+          if (!_isLocked || _userEditing?.id === user?.id) {
+            rows.set(id, selectAll !== SelectAllStatus.Some)
+          }
         })
       }
       setSelected(rows)
     },
-    [docs, selectAll],
+    [docs, selectAll, user?.id],
   )
 
   const setSelection = useCallback(
     (id) => {
+      const doc = docs.find((doc) => doc.id === id)
+
+      if (doc?._isLocked && user?.id !== doc?._userEditing.id) {
+        return // Prevent selection if the document is locked
+      }
+
       const existingValue = selected.get(id)
       const isSelected = typeof existingValue === 'boolean' ? !existingValue : true
 
@@ -89,7 +100,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
 
       setSelected(newMap)
     },
-    [selected],
+    [selected, docs, user?.id],
   )
 
   const getQueryParams = useCallback(

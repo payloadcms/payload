@@ -34,6 +34,7 @@ import {
   fieldAffectsData,
   fieldIsLocalized,
   fieldIsPresentationalOnly,
+  fieldIsVirtual,
   tabHasName,
 } from 'payload/shared'
 
@@ -136,6 +137,10 @@ export const buildSchema = (
   const schema = new mongoose.Schema(fields, options)
 
   schemaFields.forEach((field) => {
+    if (fieldIsVirtual(field)) {
+      return
+    }
+
     if (!fieldIsPresentationalOnly(field)) {
       const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[field.type]
 

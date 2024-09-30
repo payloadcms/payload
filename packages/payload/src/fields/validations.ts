@@ -20,6 +20,8 @@ import type {
   RadioField,
   RelationshipField,
   RelationshipValue,
+  RelationshipValueMany,
+  RelationshipValueSingle,
   RichTextField,
   SelectField,
   TextareaField,
@@ -32,6 +34,11 @@ import { isNumber } from '../utilities/isNumber.js'
 import { isValidID } from '../utilities/isValidID.js'
 
 export type TextFieldValidation = Validate<string, unknown, unknown, TextField>
+
+export type TextFieldManyValidation = Validate<string[], unknown, unknown, TextField>
+
+export type TextFieldSingleValidation = Validate<string, unknown, unknown, TextField>
+
 export const text: TextFieldValidation = (
   value,
   {
@@ -93,6 +100,7 @@ export const text: TextFieldValidation = (
 }
 
 export type PasswordFieldValidation = Validate<string, unknown, unknown, TextField>
+
 export const password: PasswordFieldValidation = (
   value,
   {
@@ -135,6 +143,7 @@ export type ConfirmPasswordFieldValidation = Validate<
   { password: string },
   TextField
 >
+
 export const confirmPassword: ConfirmPasswordFieldValidation = (
   value,
   { req: { t }, required, siblingData },
@@ -151,6 +160,7 @@ export const confirmPassword: ConfirmPasswordFieldValidation = (
 }
 
 export type EmailFieldValidation = Validate<string, unknown, { username?: string }, EmailField>
+
 export const email: EmailFieldValidation = (
   value,
   {
@@ -185,6 +195,7 @@ export const email: EmailFieldValidation = (
 }
 
 export type UsernameFieldValidation = Validate<string, unknown, { email?: string }, TextField>
+
 export const username: UsernameFieldValidation = (
   value,
   {
@@ -229,6 +240,7 @@ export const username: UsernameFieldValidation = (
 }
 
 export type TextareaFieldValidation = Validate<string, unknown, unknown, TextareaField>
+
 export const textarea: TextareaFieldValidation = (
   value,
   {
@@ -265,6 +277,7 @@ export const textarea: TextareaFieldValidation = (
 }
 
 export type CodeFieldValidation = Validate<string, unknown, unknown, CodeField>
+
 export const code: CodeFieldValidation = (value, { req: { t }, required }) => {
   if (required && value === undefined) {
     return t('validation:required')
@@ -279,6 +292,7 @@ export type JSONFieldValidation = Validate<
   unknown,
   { jsonError?: string } & JSONField
 >
+
 export const json: JSONFieldValidation = async (
   value,
   { jsonError, jsonSchema, req: { t }, required },
@@ -348,6 +362,7 @@ export const json: JSONFieldValidation = async (
 }
 
 export type CheckboxFieldValidation = Validate<boolean, unknown, unknown, CheckboxField>
+
 export const checkbox: CheckboxFieldValidation = (value, { req: { t }, required }) => {
   if ((value && typeof value !== 'boolean') || (required && typeof value !== 'boolean')) {
     return t('validation:trueOrFalse')
@@ -357,6 +372,7 @@ export const checkbox: CheckboxFieldValidation = (value, { req: { t }, required 
 }
 
 export type DateFieldValidation = Validate<Date, unknown, unknown, DateField>
+
 export const date: DateFieldValidation = (value, { req: { t }, required }) => {
   if (value && !isNaN(Date.parse(value.toString()))) {
     return true
@@ -374,6 +390,7 @@ export const date: DateFieldValidation = (value, { req: { t }, required }) => {
 }
 
 export type RichTextFieldValidation = Validate<object, unknown, unknown, RichTextField>
+
 export const richText: RichTextFieldValidation = async (value, options) => {
   if (!options?.editor) {
     throw new Error('richText field has no editor property.')
@@ -420,6 +437,11 @@ const validateArrayLength = (
 }
 
 export type NumberFieldValidation = Validate<number | number[], unknown, unknown, NumberField>
+
+export type NumberFieldManyValidation = Validate<number[], unknown, unknown, NumberField>
+
+export type NumberFieldSingleValidation = Validate<number, unknown, unknown, NumberField>
+
 export const number: NumberFieldValidation = (
   value,
   { hasMany, max, maxRows, min, minRows, req: { t }, required },
@@ -611,6 +633,10 @@ const validateFilterOptions: Validate<
 
 export type UploadFieldValidation = Validate<unknown, unknown, unknown, UploadField>
 
+export type UploadFieldManyValidation = Validate<unknown[], unknown, unknown, UploadField>
+
+export type UploadFieldSingleValidation = Validate<unknown, unknown, unknown, UploadField>
+
 export const upload: UploadFieldValidation = async (value, options) => {
   const {
     maxRows,
@@ -694,6 +720,21 @@ export type RelationshipFieldValidation = Validate<
   unknown,
   RelationshipField
 >
+
+export type RelationshipFieldManyValidation = Validate<
+  RelationshipValueMany,
+  unknown,
+  unknown,
+  RelationshipField
+>
+
+export type RelationshipFieldSingleValidation = Validate<
+  RelationshipValueSingle,
+  unknown,
+  unknown,
+  RelationshipField
+>
+
 export const relationship: RelationshipFieldValidation = async (value, options) => {
   const {
     maxRows,
@@ -772,6 +813,11 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
 }
 
 export type SelectFieldValidation = Validate<string | string[], unknown, unknown, SelectField>
+
+export type SelectFieldManyValidation = Validate<string[], unknown, unknown, SelectField>
+
+export type SelectFieldSingleValidation = Validate<string, unknown, unknown, SelectField>
+
 export const select: SelectFieldValidation = (
   value,
   { hasMany, options, req: { t }, required },
@@ -810,6 +856,7 @@ export const select: SelectFieldValidation = (
 }
 
 export type RadioFieldValidation = Validate<unknown, unknown, unknown, RadioField>
+
 export const radio: RadioFieldValidation = (value, { options, req: { t }, required }) => {
   if (value) {
     const valueMatchesOption = options.some(
@@ -827,6 +874,7 @@ export type PointFieldValidation = Validate<
   unknown,
   PointField
 >
+
 export const point: PointFieldValidation = (value = ['', ''], { req: { t }, required }) => {
   const lng = parseFloat(String(value[0]))
   const lat = parseFloat(String(value[1]))

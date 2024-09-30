@@ -28,4 +28,19 @@ const baseVersionFields: Field[] = [
   },
 ]
 
+// When publishing a specific locale,
+// we need to create a new draft which acts as a
+// "snapshot" to retain all existing draft data.
+// This field will be used to exclude any snapshot versions
+// from the admin Versions list
+export const versionSnapshotField: Field = {
+  name: 'snapshot',
+  type: 'checkbox',
+  admin: {
+    disableBulkEdit: true,
+    disabled: true,
+  },
+  index: true,
+}
+
 export default baseVersionFields

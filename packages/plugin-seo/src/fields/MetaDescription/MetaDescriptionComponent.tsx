@@ -61,16 +61,20 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
     const genDescriptionResponse = await fetch('/api/plugin-seo/generate-description', {
       body: JSON.stringify({
         id: docInfo.id,
-        slug: docInfo.slug,
+        collectionSlug: docInfo.collectionSlug,
         doc: getData(),
         docPermissions: docInfo.docPermissions,
+        globalSlug: docInfo.globalSlug,
         hasPublishPermission: docInfo.hasPublishPermission,
         hasSavePermission: docInfo.hasSavePermission,
         initialData: docInfo.initialData,
         initialState: docInfo.initialState,
         locale: typeof locale === 'object' ? locale?.code : locale,
         title: docInfo.title,
-      } satisfies Omit<Parameters<GenerateDescription>[0], 'req'>),
+      } satisfies Omit<
+        Parameters<GenerateDescription>[0],
+        'collectionConfig' | 'globalConfig' | 'req'
+      >),
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
@@ -96,7 +100,13 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel field={null} Label={Label} label={label} {...(labelProps || {})} />
+          <FieldLabel
+            field={null}
+            Label={Label}
+            label={label}
+            required={required}
+            {...(labelProps || {})}
+          />
           {hasGenerateDescriptionFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
@@ -147,7 +157,6 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
             Component: null,
             RenderedComponent: errorMessage,
           }}
-          label={label}
           onChange={setValue}
           path={pathFromContext}
           required={required}

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "3.0.0-beta.106",
+  "version": "3.0.0-beta.109",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -52,22 +52,22 @@
     "translateNewKeys": "node --no-deprecation --import @swc-node/register/esm-register scripts/translateNewKeys.ts"
   },
   "dependencies": {
-    "@lexical/headless": "0.17.0",
-    "@lexical/link": "0.17.0",
-    "@lexical/list": "0.17.0",
-    "@lexical/mark": "0.17.0",
-    "@lexical/markdown": "0.17.0",
-    "@lexical/react": "0.17.0",
-    "@lexical/rich-text": "0.17.0",
-    "@lexical/selection": "0.17.0",
-    "@lexical/utils": "0.17.0",
+    "@lexical/headless": "0.18.0",
+    "@lexical/link": "0.18.0",
+    "@lexical/list": "0.18.0",
+    "@lexical/mark": "0.18.0",
+    "@lexical/markdown": "0.18.0",
+    "@lexical/react": "0.18.0",
+    "@lexical/rich-text": "0.18.0",
+    "@lexical/selection": "0.18.0",
+    "@lexical/utils": "0.18.0",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "@types/uuid": "10.0.0",
     "bson-objectid": "2.0.4",
     "dequal": "2.0.3",
     "escape-html": "1.0.3",
-    "lexical": "0.17.0",
+    "lexical": "0.18.0",
     "react-error-boundary": "4.0.13",
     "uuid": "10.0.0"
   },
@@ -77,39 +77,39 @@
     "@babel/preset-env": "^7.24.5",
     "@babel/preset-react": "^7.24.1",
     "@babel/preset-typescript": "^7.24.1",
-    "@lexical/eslint-plugin": "0.17.0",
+    "@lexical/eslint-plugin": "0.18.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/escape-html": "1.0.4",
     "@types/json-schema": "7.0.15",
     "@types/node": "22.5.4",
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "babel-plugin-react-compiler": "0.0.0-experimental-48eb8f4-20240822",
     "babel-plugin-transform-remove-imports": "^1.8.0",
     "esbuild": "0.23.1",
     "esbuild-sass-plugin": "3.3.1",
-    "eslint-plugin-react-compiler": "0.0.0-experimental-72f06b2-20240822",
+    "eslint-plugin-react-compiler": "0.0.0-experimental-7670337-20240918",
     "payload": "workspace:*",
     "swc-plugin-transform-remove-imports": "1.15.0"
   },
   "peerDependencies": {
     "@faceless-ui/modal": "3.0.0-beta.2",
     "@faceless-ui/scroll-info": "2.0.0-beta.0",
-    "@lexical/headless": "0.17.0",
-    "@lexical/link": "0.17.0",
-    "@lexical/list": "0.17.0",
-    "@lexical/mark": "0.17.0",
-    "@lexical/markdown": "0.17.0",
-    "@lexical/react": "0.17.0",
-    "@lexical/rich-text": "0.17.0",
-    "@lexical/selection": "0.17.0",
-    "@lexical/table": "0.17.0",
-    "@lexical/utils": "0.17.0",
+    "@lexical/headless": "0.18.0",
+    "@lexical/link": "0.18.0",
+    "@lexical/list": "0.18.0",
+    "@lexical/mark": "0.18.0",
+    "@lexical/markdown": "0.18.0",
+    "@lexical/react": "0.18.0",
+    "@lexical/rich-text": "0.18.0",
+    "@lexical/selection": "0.18.0",
+    "@lexical/table": "0.18.0",
+    "@lexical/utils": "0.18.0",
     "@payloadcms/next": "workspace:*",
-    "lexical": "0.17.0",
+    "lexical": "0.18.0",
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801"
+    "react": "^19.0.0 || ^19.0.0-rc-5dcb0097-20240918",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-5dcb0097-20240918"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
@@ -142,7 +142,7 @@
     "types": "./dist/index.d.ts"
   },
   "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }

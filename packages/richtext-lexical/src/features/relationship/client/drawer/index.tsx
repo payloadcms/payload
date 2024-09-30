@@ -44,12 +44,12 @@ type Props = {
 const RelationshipDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }) => {
   const [editor] = useLexicalComposerContext()
   const [selectedCollectionSlug, setSelectedCollectionSlug] = useState(
-    () => enabledCollectionSlugs[0],
+    () => enabledCollectionSlugs?.[0],
   )
   const [replaceNodeKey, setReplaceNodeKey] = useState<null | string>(null)
 
   const [ListDrawer, ListDrawerToggler, { closeDrawer, isDrawerOpen, openDrawer }] = useListDrawer({
-    collectionSlugs: enabledCollectionSlugs,
+    collectionSlugs: enabledCollectionSlugs!,
     selectedCollection: selectedCollectionSlug,
   })
 
@@ -83,14 +83,14 @@ const RelationshipDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }
   useEffect(() => {
     // always reset back to first option
     // TODO: this is not working, see the ListDrawer component
-    setSelectedCollectionSlug(enabledCollectionSlugs[0])
+    setSelectedCollectionSlug(enabledCollectionSlugs?.[0])
   }, [isDrawerOpen, enabledCollectionSlugs])
 
   return <ListDrawer onSelect={onSelect} />
 }
 
 export const RelationshipDrawer = (props: Props): React.ReactNode => {
-  return props?.enabledCollectionSlugs?.length > 0 ? ( // If enabledCollectionSlugs it overrides what EnabledRelationshipsCondition is doing
+  return (props?.enabledCollectionSlugs?.length ?? -1) > 0 ? ( // If enabledCollectionSlugs it overrides what EnabledRelationshipsCondition is doing
     <RelationshipDrawerComponent {...props} />
   ) : (
     <EnabledRelationshipsCondition {...props}>
