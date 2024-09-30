@@ -18,15 +18,15 @@ jobs:
       - run: echo "npm_version=$(npm pkg get version | tr -d '"')" >> "$GITHUB_ENV"
       - uses: ./.github/actions/release-commenter
         continue-on-error: true
+        env:
+          ACTIONS_STEP_DEBUG: true
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           tag-filter: 'v\d'
 
-          # Disable commenting for now
-          # Possible limitation because we release off of main and beta branches:
-          # https://github.com/apexskier/github-release-commenter#known-limitations
-          comment-template: ''
 
-          # TODO: Re-enable this after verifying that the action works as expected
-          # comment-template: |
-          #   🚀 This is included in version {release_link}
+          # Change to blank to disable commenting
+          # comment-template: ''
+
+          comment-template: |
+            🚀 This is included in version {release_link}

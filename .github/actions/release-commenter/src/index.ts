@@ -288,12 +288,48 @@ const releaseTagTemplateRegex = /{release_tag}/g
         issue_number: issueNumber,
       }
       if (comment) {
-        const request = {
+        const commentRequest = {
           ...baseRequest,
           body: comment,
         }
-        // core.info(JSON.stringify(request, null, 2))
-        requests.push(octokit.rest.issues.createComment(request))
+
+        // Check if issue is locked or not
+        const { data: issue } = await octokit.rest.issues.get(baseRequest)
+
+        let createCommentPromise: () => Promise<void>
+        if (!issue.locked) {
+          createCommentPromise = async () => {
+            try {
+              await octokit.rest.issues.createComment(commentRequest)
+            } catch (error) {
+              core.error(error as Error)
+              core.error(
+                `Failed to comment on issue/PR: ${issueNumber}. ${payload.repository.html_url}/pull/${issueNumber}`,
+              )
+            }
+          }
+        } else {
+          core.info(
+            `Issue/PR is locked: ${issueNumber}. Unlocking, commenting, and re-locking. ${payload.repository.html_url}/pull/${issueNumber}`,
+          )
+          createCommentPromise = async () => {
+            try {
+              core.debug(`Unlocking issue/PR: ${issueNumber}`)
+              await octokit.rest.issues.unlock(baseRequest)
+              core.debug(`Commenting on issue/PR: ${issueNumber}`)
+              await octokit.rest.issues.createComment(commentRequest)
+              core.debug(`Re-locking issue/PR: ${issueNumber}`)
+              await octokit.rest.issues.lock(baseRequest)
+            } catch (error) {
+              core.error(error as Error)
+              core.error(
+                `Failed to unlock, comment, and re-lock issue/PR: ${issueNumber}. ${payload.repository.html_url}/pull/${issueNumber}`,
+              )
+            }
+          }
+        }
+
+        requests.push(createCommentPromise())
       }
       if (labels) {
         const request = {

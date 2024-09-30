@@ -45,3 +45,23 @@ updates:
           - patch
         patterns:
           - '*'
+
+  - package-ecosystem: npm
+    directory: /
+    target-branch: main
+    schedule:
+      interval: weekly
+      day: sunday
+      timezone: America/Detroit
+      time: '06:00'
+    commit-message:
+      prefix: 'chore(deps)'
+    labels:
+      - dependencies
+    groups:
+      production:
+        dependency-type: production
+        update-types:
+          - patch
+        patterns:
+          - '*'

@@ -842,6 +842,37 @@ describe('Fields', () => {
 
       expect(resInSecond.totalDocs).toBe(1)
     })
+
+    it('should properly query numbers with exists operator', async () => {
+      await payload.create({
+        collection: 'number-fields',
+        data: {
+          number: null,
+        },
+      })
+
+      const numbersExist = await payload.find({
+        collection: 'number-fields',
+        where: {
+          number: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(numbersExist.totalDocs).toBe(4)
+
+      const numbersNotExists = await payload.find({
+        collection: 'number-fields',
+        where: {
+          number: {
+            exists: false,
+          },
+        },
+      })
+
+      expect(numbersNotExists.docs).toHaveLength(1)
+    })
   })
 
   if (isMongoose(payload)) {
@@ -1115,6 +1146,61 @@ describe('Fields', () => {
       expect(result.items[0].localizedText.es).toStrictEqual('spanish')
     })
 
+    it('should create and append localized items to nested array with versions', async () => {
+      const doc = await payload.create({
+        collection,
+        data: {
+          items: [{ text: 'req' }],
+          localized: [{ text: 'req' }],
+          nestedArrayLocalized: [
+            {
+              array: [
+                {
+                  text: 'marcelo',
+                },
+              ],
+            },
+          ],
+        },
+      })
+
+      const res = await payload.update({
+        id: doc.id,
+        collection,
+        data: {
+          nestedArrayLocalized: [
+            ...doc.nestedArrayLocalized,
+            {
+              array: [
+                {
+                  text: 'alejandro',
+                },
+                {
+                  text: 'raul',
+                },
+              ],
+            },
+            {
+              array: [
+                {
+                  text: 'amigo',
+                },
+              ],
+            },
+          ],
+        },
+      })
+
+      expect(res.nestedArrayLocalized).toHaveLength(3)
+
+      expect(res.nestedArrayLocalized[0].array[0].text).toBe('marcelo')
+
+      expect(res.nestedArrayLocalized[1].array[0].text).toBe('alejandro')
+      expect(res.nestedArrayLocalized[1].array[1].text).toBe('raul')
+
+      expect(res.nestedArrayLocalized[2].array[0].text).toBe('amigo')
+    })
+
     it('should create with nested array', async () => {
       const subArrayText = 'something expected'
       const doc = await payload.create({
@@ -1219,6 +1305,31 @@ describe('Fields', () => {
         },
       })
     })
+
+    it('should insert/read camelCase group with nested arrays + localized', async () => {
+      const res = await payload.create({
+        collection: 'group-fields',
+        data: {
+          camelCaseGroup: {
+            nesGroup: { arr: [{ text: 'nestedCamel' }] },
+            array: [
+              {
+                text: 'text',
+                array: [
+                  {
+                    text: 'nested',
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      })
+
+      expect(res.camelCaseGroup.array[0].text).toBe('text')
+      expect(res.camelCaseGroup.array[0].array[0].text).toBe('nested')
+      expect(res.camelCaseGroup.nesGroup.arr[0].text).toBe('nestedCamel')
+    })
   })
 
   describe('tabs', () => {
@@ -1279,6 +1390,37 @@ describe('Fields', () => {
       })
 
       expect(doc.potentiallyEmptyGroup).toBeDefined()
+    })
+
+    it('should insert/read camelCase tab with nested arrays + localized', async () => {
+      const res = await payload.create({
+        collection: tabsFieldsSlug,
+        data: {
+          anotherText: 'req',
+          array: [{ text: 'req' }],
+          blocks: [{ blockType: 'content', text: 'req' }],
+          group: { number: 1 },
+          numberInRow: 1,
+          textInRow: 'req',
+          tab: { array: [{ text: 'req' }] },
+
+          camelCaseTab: {
+            array: [
+              {
+                text: 'text',
+                array: [
+                  {
+                    text: 'nested',
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      })
+
+      expect(res.camelCaseTab.array[0].text).toBe('text')
+      expect(res.camelCaseTab.array[0].array[0].text).toBe('nested')
     })
   })
 

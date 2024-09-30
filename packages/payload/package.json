@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "2.28.0",
+  "version": "2.30.0",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "main": "./dist/index.js",
@@ -73,7 +73,7 @@
     "deep-equal": "2.2.2",
     "deepmerge": "4.3.1",
     "dotenv": "8.6.0",
-    "express": "4.18.2",
+    "express": "4.21.0",
     "express-fileupload": "1.4.0",
     "express-rate-limit": "5.5.1",
     "file-type": "16.5.4",
