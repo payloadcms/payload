@@ -2,8 +2,6 @@ import type { CollectionConfig, Field } from 'payload'
 
 import type { SearchPluginConfig } from '../types.js'
 
-import { LinkToDoc } from './ui/index.js'
-
 // all settings can be overridden by the config
 export const generateSearchCollection = (pluginConfig: SearchPluginConfig): CollectionConfig => {
   const defaultFields: Field[] = [
@@ -38,7 +36,7 @@ export const generateSearchCollection = (pluginConfig: SearchPluginConfig): Coll
       type: 'ui',
       admin: {
         components: {
-          Field: LinkToDoc,
+          Field: '@payloadcms/plugin-search/client#LinkToDoc',
         },
         position: 'sidebar',
       },
@@ -66,12 +64,11 @@ export const generateSearchCollection = (pluginConfig: SearchPluginConfig): Coll
       typeof pluginConfig?.searchOverrides?.fields === 'function'
         ? pluginConfig?.searchOverrides.fields({ defaultFields })
         : defaultFields,
-    hooks: {
-      ...(pluginConfig?.searchOverrides?.hooks || {}),
-    },
     labels: {
-      plural: 'Search Results',
-      singular: 'Search Result',
+      ...(pluginConfig?.searchOverrides?.labels || {
+        plural: 'Search Results',
+        singular: 'Search Result',
+      }),
     },
   }
 

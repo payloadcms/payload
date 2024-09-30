@@ -6,7 +6,11 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     components: {},
     custom: {},
     dateFormat: 'MMMM do yyyy, h:mm a',
+    dependencies: {},
     disable: false,
+    importMap: {
+      baseDir: `${typeof process?.cwd === 'function' ? process.cwd() : ''}`,
+    },
     meta: {
       defaultOGImageType: 'dynamic',
       titleSuffix: '- Payload',
@@ -21,6 +25,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
       reset: '/reset',
       unauthorized: '/unauthorized',
     },
+    theme: 'all',
   },
   bin: [],
   collections: [],

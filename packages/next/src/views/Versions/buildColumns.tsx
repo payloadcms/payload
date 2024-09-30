@@ -28,32 +28,58 @@ export const buildVersionColumns = ({
 
   const columns: Column[] = [
     {
-      name: '',
-      type: 'date',
-      Label: '',
       accessor: 'updatedAt',
       active: true,
-      components: {
-        Cell: (
-          <CreatedAtCell
-            collectionSlug={collectionConfig?.slug}
-            docID={docID}
-            globalSlug={globalConfig?.slug}
-          />
-        ),
-        Heading: <SortColumn Label={t('general:updatedAt')} name="updatedAt" />,
+      cellProps: {
+        field: {
+          name: '',
+          type: 'date',
+          admin: {
+            components: {
+              Cell: {
+                type: 'client',
+                Component: null,
+                RenderedComponent: (
+                  <CreatedAtCell
+                    collectionSlug={collectionConfig?.slug}
+                    docID={docID}
+                    globalSlug={globalConfig?.slug}
+                  />
+                ),
+              },
+              Label: {
+                type: 'client',
+                Component: null,
+              },
+            },
+          },
+        },
       },
+      Heading: <SortColumn Label={t('general:updatedAt')} name="updatedAt" />,
     },
     {
-      name: '',
-      type: 'text',
-      Label: '',
       accessor: 'id',
       active: true,
-      components: {
-        Cell: <IDCell />,
-        Heading: <SortColumn Label={t('version:versionID')} disable name="id" />,
+      cellProps: {
+        field: {
+          name: '',
+          type: 'text',
+          admin: {
+            components: {
+              Cell: {
+                type: 'client',
+                Component: null,
+                RenderedComponent: <IDCell />,
+              },
+              Label: {
+                type: 'client',
+                Component: null,
+              },
+            },
+          },
+        },
       },
+      Heading: <SortColumn disable Label={t('version:versionID')} name="id" />,
     },
   ]
 
@@ -62,20 +88,33 @@ export const buildVersionColumns = ({
     (entityConfig?.versions?.drafts && entityConfig.versions.drafts?.autosave)
   ) {
     columns.push({
-      name: '',
-      type: 'checkbox',
-      Label: '',
       accessor: '_status',
       active: true,
-      components: {
-        Cell: (
-          <AutosaveCell
-            latestDraftVersion={latestDraftVersion}
-            latestPublishedVersion={latestPublishedVersion}
-          />
-        ),
-        Heading: <SortColumn Label={t('version:status')} disable name="status" />,
+      cellProps: {
+        field: {
+          name: '',
+          type: 'checkbox',
+          admin: {
+            components: {
+              Cell: {
+                type: 'client',
+                Component: null,
+                RenderedComponent: (
+                  <AutosaveCell
+                    latestDraftVersion={latestDraftVersion}
+                    latestPublishedVersion={latestPublishedVersion}
+                  />
+                ),
+              },
+              Label: {
+                type: 'client',
+                Component: null,
+              },
+            },
+          },
+        },
       },
+      Heading: <SortColumn disable Label={t('version:status')} name="status" />,
     })
   }
 

@@ -2,7 +2,6 @@ import type {
   Data,
   DocumentPreferences,
   Field,
-  FilterOptionsResult,
   FormField,
   FormState,
   PayloadRequest,
@@ -23,6 +22,7 @@ export type AddFieldStatePromiseArgs = {
    * if all parents are localized, then the field is localized
    */
   anyParentLocalized?: boolean
+  collectionSlug?: string
   data: Data
   field: Field
   fieldIndex: number
@@ -47,8 +47,8 @@ export type AddFieldStatePromiseArgs = {
   operation: 'create' | 'update'
   passesCondition: boolean
   path: string
-  preferences: DocumentPreferences
 
+  preferences: DocumentPreferences
   /**
    * Req is used for validation and defaultValue calculation. If you don't need validation,
    * just create your own req and pass in the locale and the user
@@ -74,6 +74,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     id,
     addErrorPathToParent: addErrorPathToParentArg,
     anyParentLocalized = false,
+    collectionSlug,
     data,
     field,
     fieldIndex,
@@ -117,17 +118,20 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         }
       }
 
-      validationResult = await validate(data?.[field.name], {
-        ...field,
-        id,
-        data: fullData,
-        operation,
-        req,
-        siblingData: data,
-        // @ts-expect-error-next-line
-        jsonError,
-        preferences,
-      })
+      validationResult = await validate(
+        data?.[field.name] as never,
+        {
+          ...field,
+          id,
+          collectionSlug,
+          data: fullData,
+          jsonError,
+          operation,
+          preferences,
+          req,
+          siblingData: data,
+        } as any,
+      )
     }
 
     const addErrorPathToParent = (errorPath: string) => {
@@ -378,7 +382,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         break
       }
-
+      case 'upload':
       case 'relationship': {
         if (field.filterOptions) {
           if (typeof field.filterOptions === 'object') {
@@ -456,41 +460,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           fieldState.value = relationshipValue
           fieldState.initialValue = relationshipValue
         }
-
-        if (!filter || filter(args)) {
-          state[`${path}${field.name}`] = fieldState
-        }
-
-        break
-      }
-
-      case 'upload': {
-        if (field.filterOptions) {
-          if (typeof field.filterOptions === 'object') {
-            fieldState.filterOptions = {
-              [field.relationTo]: field.filterOptions,
-            }
-          }
-
-          if (typeof field.filterOptions === 'function') {
-            const query = await getFilterOptionsQuery(field.filterOptions, {
-              id,
-              data: fullData,
-              relationTo: field.relationTo,
-              siblingData: data,
-              user: req.user,
-            })
-
-            fieldState.filterOptions = query
-          }
-        }
-
-        const relationshipValue =
-          data[field.name] && typeof data[field.name] === 'object' && 'id' in data[field.name]
-            ? data[field.name].id
-            : data[field.name]
-        fieldState.value = relationshipValue
-        fieldState.initialValue = relationshipValue
 
         if (!filter || filter(args)) {
           state[`${path}${field.name}`] = fieldState

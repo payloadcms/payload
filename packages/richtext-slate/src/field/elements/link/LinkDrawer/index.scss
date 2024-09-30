@@ -35,11 +35,11 @@
     height: base(1);
 
     svg {
-      width: base(2.75);
-      height: base(2.75);
+      width: base(2);
+      height: base(2);
       position: relative;
-      left: base(-0.825);
-      top: base(-0.825);
+      inset-inline-start: base(-0.5);
+      top: base(-0.5);
 
       .stroke {
         stroke-width: 2px;

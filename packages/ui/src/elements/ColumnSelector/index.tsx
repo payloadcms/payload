@@ -16,12 +16,12 @@ import './index.scss'
 const baseClass = 'column-selector'
 
 export type Props = {
-  collectionSlug: SanitizedCollectionConfig['slug']
+  readonly collectionSlug: SanitizedCollectionConfig['slug']
 }
 
 const filterColumnFields = (fields: Column[]): Column[] => {
   return fields.filter((field) => {
-    return !field.admin?.disableListColumn
+    return !field.cellProps?.field?.admin?.disableListColumn
   })
 }
 
@@ -49,11 +49,26 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
       }}
     >
       {filteredColumns.map((col, i) => {
-        if (!col) return null
+        if (!col) {
+          return null
+        }
 
-        const { Label, accessor, active } = col
+        const {
+          accessor,
+          active,
+          cellProps: {
+            field: {
+              admin: {
+                // @ts-expect-error // TODO: `Label` does not exist on the UI field
+                components: { Label } = {},
+              } = {},
+            } = {},
+          },
+        } = col
 
-        if (col.accessor === '_select') return null
+        if (col.accessor === '_select' || Label === null) {
+          return null
+        }
 
         return (
           <Pill
@@ -65,7 +80,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
             draggable
             icon={active ? <XIcon /> : <PlusIcon />}
             id={accessor}
-            key={`${collectionSlug}-${col.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
+            key={`${collectionSlug}-${col.cellProps?.field && 'name' in col.cellProps.field ? col.cellProps?.field?.name : i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
             onClick={() => {
               toggleColumn(accessor)
             }}

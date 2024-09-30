@@ -1,6 +1,16 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
-import { Button, Modal, Pill, useConfig, useModal, useTranslation } from '@payloadcms/ui'
+import {
+  Button,
+  ChevronIcon,
+  Modal,
+  Pill,
+  Popup,
+  PopupList,
+  useConfig,
+  useModal,
+  useTranslation,
+} from '@payloadcms/ui'
 import { formatAdminURL, requests } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import React, { Fragment, useCallback, useState } from 'react'
@@ -8,7 +18,6 @@ import { toast } from 'sonner'
 
 import type { Props } from './types.js'
 
-import { MinimalTemplate } from '../../../templates/Minimal/index.js'
 import './index.scss'
 
 const baseClass = 'restore-version'
@@ -20,18 +29,25 @@ const Restore: React.FC<Props> = ({
   globalSlug,
   label,
   originalDocID,
+  status,
   versionDate,
   versionID,
 }) => {
   const {
-    routes: { admin: adminRoute, api: apiRoute },
-    serverURL,
+    config: {
+      collections,
+      routes: { admin: adminRoute, api: apiRoute },
+      serverURL,
+    },
   } = useConfig()
+
+  const collectionConfig = collections.find((collection) => collection.slug === collectionSlug)
 
   const { toggleModal } = useModal()
   const [processing, setProcessing] = useState(false)
   const router = useRouter()
   const { i18n, t } = useTranslation()
+  const [draft, setDraft] = useState(false)
 
   const restoreMessage = t('version:aboutToRestoreGlobal', {
     label: getTranslation(label, i18n),
@@ -41,8 +57,10 @@ const Restore: React.FC<Props> = ({
   let fetchURL = `${serverURL}${apiRoute}`
   let redirectURL: string
 
+  const canRestoreAsDraft = status !== 'draft' && collectionConfig?.versions?.drafts
+
   if (collectionSlug) {
-    fetchURL = `${fetchURL}/${collectionSlug}/versions/${versionID}`
+    fetchURL = `${fetchURL}/${collectionSlug}/versions/${versionID}?draft=${draft}`
     redirectURL = formatAdminURL({
       adminRoute,
       path: `/collections/${collectionSlug}/${originalDocID}`,
@@ -50,7 +68,7 @@ const Restore: React.FC<Props> = ({
   }
 
   if (globalSlug) {
-    fetchURL = `${fetchURL}/globals/${globalSlug}/versions/${versionID}`
+    fetchURL = `${fetchURL}/globals/${globalSlug}/versions/${versionID}?draft=${draft}`
     redirectURL = formatAdminURL({
       adminRoute,
       path: `/globals/${globalSlug}`,
@@ -74,30 +92,47 @@ const Restore: React.FC<Props> = ({
       toast.error(t('version:problemRestoringVersion'))
     }
   }, [fetchURL, redirectURL, t, i18n, router])
-
   return (
     <Fragment>
-      <Pill
-        className={[baseClass, className].filter(Boolean).join(' ')}
-        onClick={() => toggleModal(modalSlug)}
-      >
-        {t('version:restoreThisVersion')}
-      </Pill>
+      <div className={[baseClass, className].filter(Boolean).join(' ')}>
+        <Button
+          buttonStyle="pill"
+          className={[canRestoreAsDraft && `${baseClass}__button`].filter(Boolean).join(' ')}
+          onClick={() => toggleModal(modalSlug)}
+          size="small"
+          SubMenuPopupContent={
+            canRestoreAsDraft && (
+              <PopupList.ButtonGroup>
+                <PopupList.Button onClick={() => [setDraft(true), toggleModal(modalSlug)]}>
+                  {t('version:restoreAsDraft')}
+                </PopupList.Button>
+              </PopupList.ButtonGroup>
+            )
+          }
+        >
+          {t('version:restoreThisVersion')}
+        </Button>
+      </div>
       <Modal className={`${baseClass}__modal`} slug={modalSlug}>
-        <MinimalTemplate className={`${baseClass}__modal-template`}>
-          <h1>{t('version:confirmVersionRestoration')}</h1>
-          <p>{restoreMessage}</p>
-          <Button
-            buttonStyle="secondary"
-            onClick={processing ? undefined : () => toggleModal(modalSlug)}
-            type="button"
-          >
-            {t('general:cancel')}
-          </Button>
-          <Button onClick={processing ? undefined : handleRestore}>
-            {processing ? t('version:restoring') : t('general:confirm')}
-          </Button>
-        </MinimalTemplate>
+        <div className={`${baseClass}__wrapper`}>
+          <div className={`${baseClass}__content`}>
+            <h1>{t('version:confirmVersionRestoration')}</h1>
+            <p>{restoreMessage}</p>
+          </div>
+          <div className={`${baseClass}__controls`}>
+            <Button
+              buttonStyle="secondary"
+              onClick={processing ? undefined : () => toggleModal(modalSlug)}
+              size="large"
+              type="button"
+            >
+              {t('general:cancel')}
+            </Button>
+            <Button onClick={processing ? undefined : () => void handleRestore()}>
+              {processing ? t('version:restoring') : t('general:confirm')}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </Fragment>
   )

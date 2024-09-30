@@ -1,4 +1,6 @@
+'use client'
 import type { FieldTypes } from 'payload'
+import type React from 'react'
 
 import { ArrayField } from './Array/index.js'
 import { BlocksField } from './Blocks/index.js'
@@ -10,6 +12,7 @@ import { DateTimeField } from './DateTime/index.js'
 import { EmailField } from './Email/index.js'
 import { GroupField } from './Group/index.js'
 import { HiddenField } from './Hidden/index.js'
+import { JoinField } from './Join/index.js'
 import { JSONField } from './JSON/index.js'
 import { NumberField } from './Number/index.js'
 import { PasswordField } from './Password/index.js'
@@ -27,7 +30,11 @@ import { UploadField } from './Upload/index.js'
 
 export * from './shared/index.js'
 
-export const fieldComponents: FieldTypes = {
+export type FieldTypesComponents = {
+  [K in 'confirmPassword' | 'hidden' | 'password' | FieldTypes]: React.FC
+}
+
+export const fieldComponents: FieldTypesComponents = {
   array: ArrayField,
   blocks: BlocksField,
   checkbox: CheckboxField,
@@ -38,6 +45,7 @@ export const fieldComponents: FieldTypes = {
   email: EmailField,
   group: GroupField,
   hidden: HiddenField,
+  join: JoinField,
   json: JSONField,
   number: NumberField,
   password: PasswordField,

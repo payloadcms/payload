@@ -40,12 +40,14 @@ export const Autosave: React.FC<Props> = ({
   publishedDocUpdatedAt,
 }) => {
   const {
-    routes: { api },
-    serverURL,
+    config: {
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
   const { docConfig, getVersions, versions } = useDocumentInfo()
   const { reportUpdate } = useDocumentEvents()
-  const { dispatchFields, setModified, setSubmitted } = useForm()
+  const { dispatchFields, setSubmitted } = useForm()
   const submitted = useFormSubmitted()
   const versionsConfig = docConfig?.versions
 
@@ -55,8 +57,9 @@ export const Autosave: React.FC<Props> = ({
   const { i18n, t } = useTranslation()
 
   let interval = versionDefaults.autosaveInterval
-  if (versionsConfig.drafts && versionsConfig.drafts.autosave)
+  if (versionsConfig.drafts && versionsConfig.drafts.autosave) {
     interval = versionsConfig.drafts.autosave.interval
+  }
 
   const [saving, setSaving] = useState(false)
   const [lastSaved, setLastSaved] = useState<number>()
@@ -146,14 +149,14 @@ export const Autosave: React.FC<Props> = ({
                       entitySlug,
                       updatedAt: newDate.toISOString(),
                     })
-                    setModified(false)
+
                     void getVersions()
                   } else {
                     return res.json()
                   }
                 })
                 .then((json) => {
-                  if (versionsConfig?.drafts && versionsConfig?.drafts?.validate && json.errors) {
+                  if (versionsConfig?.drafts && versionsConfig?.drafts?.validate && json?.errors) {
                     if (Array.isArray(json.errors)) {
                       const [fieldErrors, nonFieldErrors] = json.errors.reduce(
                         ([fieldErrs, nonFieldErrs], err) => {
@@ -219,10 +222,12 @@ export const Autosave: React.FC<Props> = ({
     void autosave()
 
     return () => {
-      if (autosaveTimeout) clearTimeout(autosaveTimeout)
+      if (autosaveTimeout) {
+        clearTimeout(autosaveTimeout)
+      }
       if (abortController.signal) {
         try {
-          abortController.abort()
+          abortController.abort('Autosave closed early.')
         } catch (error) {
           // swallow error
         }
@@ -242,7 +247,6 @@ export const Autosave: React.FC<Props> = ({
     reportUpdate,
     serverURL,
     setSubmitted,
-    setModified,
     versionsConfig?.drafts,
     debouncedFields,
     submitted,

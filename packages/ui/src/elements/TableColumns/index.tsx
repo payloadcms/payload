@@ -4,9 +4,9 @@ import type { CellComponentProps, SanitizedCollectionConfig } from 'payload'
 import React, { createContext, useCallback, useContext, useState } from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
+import type { SortColumnProps } from '../SortColumn/index.js'
 import type { Column } from '../Table/index.js'
 
-import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { buildColumnState } from './buildColumnState.js'
@@ -14,8 +14,10 @@ import { filterFields } from './filterFields.js'
 import { getInitialColumns } from './getInitialColumns.js'
 
 export interface ITableColumns {
+  cellProps?: Partial<CellComponentProps>[]
   columns: Column[]
   moveColumn: (args: { fromIndex: number; toIndex: number }) => void
+  resetColumnsState: () => void
   setActiveColumns: (columns: string[]) => void
   toggleColumn: (column: string) => void
 }
@@ -29,50 +31,52 @@ export type ListPreferences = {
 }
 
 type Props = {
-  cellProps?: Partial<CellComponentProps>[]
-  children: React.ReactNode
-  collectionSlug: string
-  enableRowSelections?: boolean
-  listPreferences?: ListPreferences
-  preferenceKey: string
+  readonly beforeRows?: Column[]
+  readonly cellProps?: Partial<CellComponentProps>[]
+  readonly children: React.ReactNode
+  readonly collectionSlug: string
+  readonly enableRowSelections?: boolean
+  readonly listPreferences?: ListPreferences
+  readonly preferenceKey: string
+  readonly sortColumnProps?: Partial<SortColumnProps>
 }
 
 export const TableColumnsProvider: React.FC<Props> = ({
+  beforeRows,
   cellProps,
   children,
   collectionSlug,
   enableRowSelections = false,
   listPreferences,
   preferenceKey,
+  sortColumnProps,
 }) => {
-  const config = useConfig()
+  const {
+    config: { collections },
+  } = useConfig()
 
-  const { componentMap } = useComponentMap()
-
-  const { fieldMap } = componentMap.collections[collectionSlug]
-
-  const collectionConfig = config.collections.find(
-    (collectionConfig) => collectionConfig.slug === collectionSlug,
-  )
+  const collectionConfig = collections.find((c) => c.slug === collectionSlug)
 
   const {
     admin: { defaultColumns, useAsTitle },
+    fields,
   } = collectionConfig
 
   const prevCollection = React.useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
   const { getPreference, setPreference } = usePreferences()
 
   const [initialColumns] = useState<ColumnPreferences>(() =>
-    getInitialColumns(filterFields(fieldMap), useAsTitle, defaultColumns),
+    getInitialColumns(filterFields(fields), useAsTitle, defaultColumns),
   )
 
   const [tableColumns, setTableColumns] = React.useState(() =>
     buildColumnState({
-      cellProps,
+      beforeRows,
       columnPreferences: listPreferences?.columns,
       columns: initialColumns,
       enableRowSelections,
-      fieldMap,
+      fields,
+      sortColumnProps,
       useAsTitle,
     }),
   )
@@ -89,35 +93,14 @@ export const TableColumnsProvider: React.FC<Props> = ({
     [preferenceKey, setPreference],
   )
 
-  const reassignLinkColumn = (columns: Column[]): Column[] => {
-    let foundFirstActive = false
-    const newColumns = columns.map((col) => {
-      const linkColumn = col.active && !foundFirstActive && col.accessor !== '_select'
-      if (linkColumn) foundFirstActive = true
-
-      return {
-        ...col,
-        cellProps: {
-          ...col.cellProps,
-          link: linkColumn,
-        },
-      }
-    })
-
-    return newColumns
-  }
-
   const moveColumn = useCallback(
     (args: { fromIndex: number; toIndex: number }) => {
       const { fromIndex, toIndex } = args
-
       const withMovedColumn = [...tableColumns]
       const [columnToMove] = withMovedColumn.splice(fromIndex, 1)
       withMovedColumn.splice(toIndex, 0, columnToMove)
-
-      const newColumns = reassignLinkColumn(withMovedColumn)
-      setTableColumns(newColumns)
-      updateColumnPreferences(newColumns)
+      setTableColumns(withMovedColumn)
+      updateColumnPreferences(withMovedColumn)
     },
     [tableColumns, updateColumnPreferences],
   )
@@ -127,31 +110,50 @@ export const TableColumnsProvider: React.FC<Props> = ({
       const toggledColumns = tableColumns.map((col) => {
         return {
           ...col,
-          active: col?.name === column ? !col.active : col.active,
+          active:
+            col?.cellProps?.field &&
+            'name' in col.cellProps.field &&
+            col?.cellProps?.field?.name === column
+              ? !col.active
+              : col.active,
         }
       })
 
-      const newColumns = reassignLinkColumn(toggledColumns)
-      setTableColumns(newColumns)
-      updateColumnPreferences(newColumns)
+      setTableColumns(toggledColumns)
+      updateColumnPreferences(toggledColumns)
     },
     [tableColumns, updateColumnPreferences],
   )
 
   const setActiveColumns = React.useCallback(
-    (activeColumnAccessors) => {
-      const activeColumns = tableColumns.map((col) => {
-        return {
-          ...col,
-          active: activeColumnAccessors.includes(col.accessor),
-        }
-      })
+    (activeColumnAccessors: string[]) => {
+      const activeColumns = tableColumns
+        .map((col) => {
+          return {
+            ...col,
+            active: activeColumnAccessors.includes(col.accessor),
+          }
+        })
+        .toSorted((first, second) => {
+          const indexOfFirst = activeColumnAccessors.indexOf(first.accessor)
+          const indexOfSecond = activeColumnAccessors.indexOf(second.accessor)
 
-      const newColumns = reassignLinkColumn(activeColumns)
-      updateColumnPreferences(newColumns)
+          if (indexOfFirst === -1 || indexOfSecond === -1) {
+            return 0
+          }
+
+          return indexOfFirst > indexOfSecond ? 1 : -1
+        })
+
+      setTableColumns(activeColumns)
+      updateColumnPreferences(activeColumns)
     },
     [tableColumns, updateColumnPreferences],
   )
+
+  const resetColumnsState = React.useCallback(() => {
+    setActiveColumns(defaultColumns)
+  }, [defaultColumns, setActiveColumns])
 
   // //////////////////////////////////////////////
   // Get preferences on collection change (drawers)
@@ -170,11 +172,12 @@ export const TableColumnsProvider: React.FC<Props> = ({
         if (currentPreferences?.columns) {
           setTableColumns(
             buildColumnState({
-              cellProps,
+              beforeRows,
               columnPreferences: currentPreferences?.columns,
               columns: initialColumns,
-              enableRowSelections: true,
-              fieldMap,
+              enableRowSelections,
+              fields,
+              sortColumnProps,
               useAsTitle,
             }),
           )
@@ -187,19 +190,23 @@ export const TableColumnsProvider: React.FC<Props> = ({
     preferenceKey,
     getPreference,
     collectionSlug,
-    fieldMap,
-    cellProps,
+    fields,
     defaultColumns,
     useAsTitle,
     listPreferences,
     initialColumns,
+    beforeRows,
+    enableRowSelections,
+    sortColumnProps,
   ])
 
   return (
     <TableColumnContext.Provider
       value={{
+        cellProps,
         columns: tableColumns,
         moveColumn,
+        resetColumnsState,
         setActiveColumns,
         toggleColumn,
       }}

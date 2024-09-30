@@ -1,8 +1,12 @@
+import type { PayloadServerReactComponent, SanitizedGlobalConfig } from 'payload'
+
 import React from 'react'
 
 const baseClass = 'global-live-preview-button'
 
-const GlobalLivePreviewButton: React.FC = () => {
+export const GlobalLivePreviewButton: PayloadServerReactComponent<
+  SanitizedGlobalConfig['admin']['components']['views']['edit']['livePreview']
+> = () => {
   return (
     <div
       className={baseClass}
@@ -18,5 +22,3 @@ const GlobalLivePreviewButton: React.FC = () => {
     </div>
   )
 }
-
-export default GlobalLivePreviewButton

@@ -6,13 +6,13 @@ import { toast } from 'sonner'
 
 import type { DocumentDrawerProps } from './types.js'
 
-import { useRelatedCollections } from '../../fields/Relationship/AddNew/useRelatedCollections.js'
 import { XIcon } from '../../icons/X/index.js'
-import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useRelatedCollections } from '../AddNewRelation/useRelatedCollections.js'
 import { Gutter } from '../Gutter/index.js'
 import { IDLabel } from '../IDLabel/index.js'
 import { RenderTitle } from '../RenderTitle/index.js'
@@ -20,12 +20,20 @@ import { baseClass } from './index.js'
 
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   id: existingDocID,
-  Header,
+  AfterFields,
   collectionSlug,
+  disableActions,
   drawerSlug,
+  Header,
+  initialData,
+  initialState,
+  onDelete: onDeleteFromProps,
+  onDuplicate: onDuplicateFromProps,
   onSave: onSaveFromProps,
+  redirectAfterDelete,
+  redirectAfterDuplicate,
 }) => {
-  const config = useConfig()
+  const { config } = useConfig()
 
   const {
     routes: { api: apiRoute },
@@ -39,9 +47,8 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const [isOpen, setIsOpen] = useState(false)
   const [collectionConfig] = useRelatedCollections(collectionSlug)
 
-  const { componentMap } = useComponentMap()
+  const Edit = collectionConfig.admin.components.views.edit.default.Component
 
-  const { Edit } = componentMap[`${collectionSlug ? 'collections' : 'globals'}`][collectionSlug]
   const isEditing = Boolean(docID)
   const apiURL = docID
     ? `${serverURL}${apiRoute}/${collectionSlug}/${docID}${locale?.code ? `?locale=${locale.code}` : ''}`
@@ -74,8 +81,38 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
     [onSaveFromProps, collectionConfig],
   )
 
+  const onDuplicate = useCallback<DocumentDrawerProps['onSave']>(
+    (args) => {
+      setDocID(args.doc.id)
+
+      if (typeof onDuplicateFromProps === 'function') {
+        void onDuplicateFromProps({
+          ...args,
+          collectionConfig,
+        })
+      }
+    },
+    [onDuplicateFromProps, collectionConfig],
+  )
+
+  const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
+    (args) => {
+      if (typeof onDeleteFromProps === 'function') {
+        void onDeleteFromProps({
+          ...args,
+          collectionConfig,
+        })
+      }
+
+      closeModal(drawerSlug)
+    },
+    [onDeleteFromProps, collectionConfig, closeModal, drawerSlug],
+  )
+
   return (
     <DocumentInfoProvider
+      AfterFields={AfterFields}
+      apiURL={apiURL}
       BeforeDocument={
         <Gutter className={`${baseClass}__header`}>
           <div className={`${baseClass}__header-content`}>
@@ -97,16 +134,24 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
           <DocumentTitle />
         </Gutter>
       }
-      apiURL={apiURL}
       collectionSlug={collectionConfig.slug}
-      disableActions
+      disableActions={disableActions}
       disableLeaveWithoutSaving
       id={docID}
+      initialData={initialData}
+      initialState={initialState}
       isEditing={isEditing}
+      onDelete={onDelete}
+      onDrawerCreate={() => {
+        setDocID(null)
+      }}
+      onDuplicate={onDuplicate}
       onLoadError={onLoadError}
       onSave={onSave}
+      redirectAfterDelete={redirectAfterDelete !== undefined ? redirectAfterDelete : false}
+      redirectAfterDuplicate={redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false}
     >
-      {Edit}
+      <RenderComponent mappedComponent={Edit} />
     </DocumentInfoProvider>
   )
 }

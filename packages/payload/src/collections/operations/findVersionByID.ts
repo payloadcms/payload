@@ -8,8 +8,6 @@ import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
-import { commitTransaction } from '../../utilities/commitTransaction.js'
-import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 
 export type Arguments = {
@@ -43,8 +41,6 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
   }
 
   try {
-    const shouldCommit = await initTransaction(req)
-
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
@@ -54,7 +50,9 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
       : true
 
     // If errors are disabled, and access returns false, return null
-    if (accessResults === false) return null
+    if (accessResults === false) {
+      return null
+    }
 
     const hasWhereAccess = typeof accessResults === 'object'
 
@@ -77,8 +75,12 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
 
     if (!result) {
       if (!disableErrors) {
-        if (!hasWhereAccess) throw new NotFound(req.t)
-        if (hasWhereAccess) throw new Forbidden(req.t)
+        if (!hasWhereAccess) {
+          throw new NotFound(req.t)
+        }
+        if (hasWhereAccess) {
+          throw new Forbidden(req.t)
+        }
       }
 
       return null
@@ -140,8 +142,6 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     // /////////////////////////////////////
     // Return results
     // /////////////////////////////////////
-
-    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

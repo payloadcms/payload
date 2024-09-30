@@ -26,7 +26,7 @@ const baseClass = 'rich-text-link-edit-modal'
 
 export const LinkDrawer: React.FC<Props> = ({
   drawerSlug,
-  fieldMap,
+  fields,
   handleModalSubmit,
   initialState,
 }) => {
@@ -34,11 +34,11 @@ export const LinkDrawer: React.FC<Props> = ({
   const { schemaPath } = useFieldProps()
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
   const { id } = useDocumentInfo()
-  const config = useConfig()
+  const { config } = useConfig()
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      return await getFormState({
+      const { state } = await getFormState({
         apiRoute: config.routes.api,
         body: {
           id,
@@ -48,6 +48,8 @@ export const LinkDrawer: React.FC<Props> = ({
         },
         serverURL: config.serverURL,
       })
+
+      return state
     },
 
     [config.routes.api, config.serverURL, fieldMapPath, id],
@@ -62,7 +64,7 @@ export const LinkDrawer: React.FC<Props> = ({
         onChange={[onChange]}
         onSubmit={handleModalSubmit}
       >
-        <RenderFields fieldMap={fieldMap} forceRender path="" readOnly={false} schemaPath="" />
+        <RenderFields fields={fields} forceRender path="" readOnly={false} schemaPath="" />
         <LinkSubmit />
       </Form>
     </Drawer>

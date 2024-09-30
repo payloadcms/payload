@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/drizzle",
-  "version": "3.0.0-beta.71",
+  "version": "3.0.0-beta.109",
   "description": "A library of shared functions used by different payload database adapters",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -16,6 +16,11 @@
       "import": "./src/index.ts",
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./postgres": {
+      "import": "./src/exports/postgres.ts",
+      "types": "./src/exports/postgres.ts",
+      "default": "./src/exports/postgres.ts"
     },
     "./types": {
       "import": "./src/types.ts",
@@ -34,12 +39,14 @@
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "prepack": "pnpm clean && pnpm turbo build",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
     "console-table-printer": "2.11.2",
-    "drizzle-orm": "0.29.4",
+    "drizzle-orm": "0.32.1",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
     "uuid": "9.0.0"
@@ -58,11 +65,18 @@
     "exports": {
       ".": {
         "import": "./dist/index.js",
-        "types": "./dist/index.d.ts"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./postgres": {
+        "import": "./dist/exports/postgres.js",
+        "types": "./dist/exports/postgres.d.ts",
+        "default": "./dist/exports/postgres.js"
       },
       "./types": {
         "import": "./dist/types.js",
-        "types": "./dist/types.d.ts"
+        "types": "./dist/types.d.ts",
+        "default": "./dist/types.js"
       }
     },
     "main": "./dist/index.js",

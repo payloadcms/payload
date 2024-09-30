@@ -1,4 +1,6 @@
 'use client'
+import type React from 'react'
+
 import * as qs from 'qs-esm'
 import { useEffect, useRef, useState } from 'react'
 
@@ -71,6 +73,7 @@ export const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
         }
 
         const json = await response.json()
+
         setData(json)
         setIsLoading(false)
       } catch (error) {

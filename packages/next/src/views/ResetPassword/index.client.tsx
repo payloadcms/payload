@@ -9,7 +9,6 @@ import {
   PasswordField,
   useAuth,
   useConfig,
-  useFormFields,
   useTranslation,
 } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
@@ -18,7 +17,7 @@ import React from 'react'
 import { toast } from 'sonner'
 
 type Args = {
-  token: string
+  readonly token: string
 }
 
 const initialState: FormState = {
@@ -37,12 +36,14 @@ const initialState: FormState = {
 export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
   const i18n = useTranslation()
   const {
-    admin: {
-      routes: { login: loginRoute },
-      user: userSlug,
+    config: {
+      admin: {
+        routes: { login: loginRoute },
+        user: userSlug,
+      },
+      routes: { admin: adminRoute, api: apiRoute },
+      serverURL,
     },
-    routes: { admin: adminRoute, api: apiRoute },
-    serverURL,
   } = useConfig()
 
   const history = useRouter()
@@ -64,7 +65,7 @@ export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
         toast.success(i18n.t('general:updatedSuccessfully'))
       }
     },
-    [fetchFullUser, history, adminRoute, i18n],
+    [adminRoute, fetchFullUser, history, i18n, loginRoute],
   )
 
   return (
@@ -74,42 +75,24 @@ export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
       method="POST"
       onSuccess={onSuccess}
     >
-      <PasswordToConfirm />
-      <ConfirmPasswordField />
-      <HiddenField forceUsePathFromProps name="token" value={token} />
-      <FormSubmit>{i18n.t('authentication:resetPassword')}</FormSubmit>
+      <div className={'inputWrap'}>
+        <PasswordField
+          field={{
+            name: 'password',
+            label: i18n.t('authentication:newPassword'),
+            required: true,
+          }}
+        />
+        <ConfirmPasswordField />
+        <HiddenField
+          field={{
+            name: 'token',
+          }}
+          forceUsePathFromProps
+          value={token}
+        />
+      </div>
+      <FormSubmit size="large">{i18n.t('authentication:resetPassword')}</FormSubmit>
     </Form>
-  )
-}
-
-const PasswordToConfirm = () => {
-  const { t } = useTranslation()
-  const { value: confirmValue } = useFormFields(
-    ([fields]) => (fields && fields?.['confirm-password']) || null,
-  )
-
-  const validate = React.useCallback(
-    (value: string) => {
-      if (!value) {
-        return t('validation:required')
-      }
-
-      if (value === confirmValue) {
-        return true
-      }
-
-      return t('fields:passwordsDoNotMatch')
-    },
-    [confirmValue, t],
-  )
-
-  return (
-    <PasswordField
-      autoComplete="off"
-      label={t('authentication:newPassword')}
-      name="password"
-      required
-      validate={validate}
-    />
   )
 }

@@ -1,4 +1,9 @@
-import type { EditViewComponent, LivePreviewConfig, TypeWithID } from 'payload'
+import type {
+  EditViewComponent,
+  LivePreviewConfig,
+  PayloadServerReactComponent,
+  TypeWithID,
+} from 'payload'
 
 import { notFound } from 'next/navigation.js'
 import React from 'react'
@@ -6,7 +11,7 @@ import React from 'react'
 import { LivePreviewClient } from './index.client.js'
 import './index.scss'
 
-export const LivePreviewView: EditViewComponent = async (props) => {
+export const LivePreviewView: PayloadServerReactComponent<EditViewComponent> = async (props) => {
   const { initPageResult } = props
 
   const {

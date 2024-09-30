@@ -1,14 +1,14 @@
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
-import type { CollectionConfig } from '../../collections/config/types.js'
+import type { CollectionConfig, SanitizedJoins } from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { Field } from './types.js'
 
-import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import {
   DuplicateFieldName,
   InvalidFieldName,
   InvalidFieldRelationship,
+  MissingEditorProp,
   MissingFieldType,
 } from '../../errors/index.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
@@ -16,6 +16,7 @@ import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
 import { setDefaultBeforeDuplicate } from '../setDefaultBeforeDuplicate.js'
 import validations from '../validations.js'
+import { sanitizeJoinField } from './sanitizeJoinField.js'
 import { fieldAffectsData, tabHasName } from './types.js'
 
 type Args = {
@@ -24,17 +25,23 @@ type Args = {
   existingFieldNames?: Set<string>
   fields: Field[]
   /**
+   * When not passed in, assume that join are not supported (globals, arrays, blocks)
+   */
+  joins?: SanitizedJoins
+  parentIsLocalized: boolean
+  /**
    * If true, a richText field will require an editor property to be set, as the sanitizeFields function will not add it from the payload config if not present.
    *
    * @default false
    */
   requireFieldLevelRichTextEditor?: boolean
+
   /**
    * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
    * so that you can sanitize them together, after the config has been sanitized.
    */
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>
-
+  schemaPath?: string
   /**
    * If not null, will validate that upload and relationship fields do not relate to a collection that is not in this array.
    * This validation will be skipped if validRelationships is null.
@@ -43,20 +50,32 @@ type Args = {
 }
 
 export const sanitizeFields = async ({
-  collectionConfig,
   config,
   existingFieldNames = new Set(),
   fields,
+  joins,
+  parentIsLocalized,
   requireFieldLevelRichTextEditor = false,
   richTextSanitizationPromises,
+  schemaPath: schemaPathArg,
   validRelationships,
 }: Args): Promise<Field[]> => {
-  if (!fields) return []
+  if (!fields) {
+    return []
+  }
+
+  let schemaPath = schemaPathArg
 
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]
 
-    if (!field.type) throw new MissingFieldType(field)
+    if ('_sanitized' in field && field._sanitized === true) {
+      continue
+    }
+
+    if (!field.type) {
+      throw new MissingFieldType(field)
+    }
 
     // assert that field names do not contain forbidden characters
     if (fieldAffectsData(field) && field.name.includes('.')) {
@@ -83,6 +102,10 @@ export const sanitizeFields = async ({
       field.defaultValue = false
     }
 
+    if (field.type === 'join') {
+      sanitizeJoinField({ config, field, joins, schemaPath })
+    }
+
     if (field.type === 'relationship' || field.type === 'upload') {
       if (validRelationships) {
         const relationships = Array.isArray(field.relationTo)
@@ -95,29 +118,27 @@ export const sanitizeFields = async ({
         })
       }
 
-      if (field.type === 'relationship') {
-        if (field.min && !field.minRows) {
-          console.warn(
-            `(payload): The "min" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "minRows" instead.`,
-          )
-        }
-        if (field.max && !field.maxRows) {
-          console.warn(
-            `(payload): The "max" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "maxRows" instead.`,
-          )
-        }
-        field.minRows = field.minRows || field.min
-        field.maxRows = field.maxRows || field.max
+      if (field.min && !field.minRows) {
+        console.warn(
+          `(payload): The "min" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "minRows" instead.`,
+        )
       }
+      if (field.max && !field.maxRows) {
+        console.warn(
+          `(payload): The "max" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "maxRows" instead.`,
+        )
+      }
+      field.minRows = field.minRows || field.min
+      field.maxRows = field.maxRows || field.max
     }
 
-    if (field.type === 'blocks' && field.blocks) {
-      field.blocks = field.blocks.map((block) => {
-        return {
-          ...block,
-          fields: block.fields.concat(baseBlockFields),
+    if (field.type === 'upload') {
+      if (!field.admin || !('isSortable' in field.admin)) {
+        field.admin = {
+          isSortable: true,
+          ...field.admin,
         }
-      })
+      }
     }
 
     if (field.type === 'array' && field.fields) {
@@ -135,19 +156,37 @@ export const sanitizeFields = async ({
         existingFieldNames.add(field.name)
       }
 
-      if (field.localized && !config.localization) delete field.localized
+      if (typeof field.localized !== 'undefined') {
+        let shouldDisableLocalized = !config.localization
+
+        if (!config.compatibility?.allowLocalizedWithinLocalized && parentIsLocalized) {
+          shouldDisableLocalized = true
+        }
+
+        if (shouldDisableLocalized) {
+          delete field.localized
+        }
+      }
 
       if (typeof field.validate === 'undefined') {
         const defaultValidate = validations[field.type]
         if (defaultValidate) {
           field.validate = (val, options) => defaultValidate(val, { ...field, ...options })
         } else {
-          field.validate = () => true
+          field.validate = (): true => true
         }
       }
 
-      if (!field.hooks) field.hooks = {}
-      if (!field.access) field.access = {}
+      if (typeof field.virtual === 'undefined') {
+        field.virtual = false
+      }
+
+      if (!field.hooks) {
+        field.hooks = {}
+      }
+      if (!field.access) {
+        field.access = {}
+      }
 
       setDefaultBeforeDuplicate(field)
     }
@@ -172,6 +211,7 @@ export const sanitizeFields = async ({
           field.editor = await field.editor({
             config: _config,
             isRoot: requireFieldLevelRichTextEditor,
+            parentIsLocalized: parentIsLocalized || field.localized,
           })
         }
 
@@ -186,13 +226,40 @@ export const sanitizeFields = async ({
       }
     }
 
+    if (field.type === 'blocks' && field.blocks) {
+      for (const block of field.blocks) {
+        if (block._sanitized === true) {
+          continue
+        }
+        block._sanitized = true
+        block.fields = block.fields.concat(baseBlockFields)
+        block.labels = !block.labels ? formatLabels(block.slug) : block.labels
+
+        block.fields = await sanitizeFields({
+          config,
+          existingFieldNames: new Set(),
+          fields: block.fields,
+          parentIsLocalized: parentIsLocalized || field.localized,
+          requireFieldLevelRichTextEditor,
+          richTextSanitizationPromises,
+          validRelationships,
+        })
+      }
+    }
+
     if ('fields' in field && field.fields) {
+      if ('name' in field && field.name) {
+        schemaPath = `${schemaPath || ''}${schemaPath ? '.' : ''}${field.name}`
+      }
       field.fields = await sanitizeFields({
         config,
         existingFieldNames: fieldAffectsData(field) ? new Set() : existingFieldNames,
         fields: field.fields,
+        joins,
+        parentIsLocalized: parentIsLocalized || field.localized,
         requireFieldLevelRichTextEditor,
         richTextSanitizationPromises,
+        schemaPath,
         validRelationships,
       })
     }
@@ -200,37 +267,30 @@ export const sanitizeFields = async ({
     if (field.type === 'tabs') {
       for (let j = 0; j < field.tabs.length; j++) {
         const tab = field.tabs[j]
-        if (tabHasName(tab) && typeof tab.label === 'undefined') {
-          tab.label = toWords(tab.name)
+        if (tabHasName(tab)) {
+          schemaPath = `${schemaPath || ''}${schemaPath ? '.' : ''}${tab.name}`
+          if (typeof tab.label === 'undefined') {
+            tab.label = toWords(tab.name)
+          }
         }
 
         tab.fields = await sanitizeFields({
           config,
           existingFieldNames: tabHasName(tab) ? new Set() : existingFieldNames,
           fields: tab.fields,
+          joins,
+          parentIsLocalized: parentIsLocalized || (tabHasName(tab) && tab.localized),
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
+          schemaPath,
           validRelationships,
         })
         field.tabs[j] = tab
       }
     }
 
-    if ('blocks' in field && field.blocks) {
-      for (let j = 0; j < field.blocks.length; j++) {
-        const block = field.blocks[j]
-        block.labels = !block.labels ? formatLabels(block.slug) : block.labels
-
-        block.fields = await sanitizeFields({
-          config,
-          existingFieldNames: new Set(),
-          fields: block.fields,
-          requireFieldLevelRichTextEditor,
-          richTextSanitizationPromises,
-          validRelationships,
-        })
-        field.blocks[j] = block
-      }
+    if ('_sanitized' in field) {
+      field._sanitized = true
     }
 
     fields[i] = field

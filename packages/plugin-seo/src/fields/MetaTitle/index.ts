@@ -1,9 +1,5 @@
 import type { TextField } from 'payload'
 
-import { withMergedProps } from '@payloadcms/ui/shared'
-
-import { MetaTitleComponent } from './MetaTitleComponent.js'
-
 interface FieldFunctionProps {
   /**
    * Tell the component if the generate function is available as configured in the plugin config
@@ -20,13 +16,12 @@ export const MetaTitleField: FieldFunction = ({ hasGenerateFn = false, overrides
     type: 'text',
     admin: {
       components: {
-        Field: withMergedProps({
-          Component: MetaTitleComponent,
-          sanitizeServerOnlyProps: true,
-          toMergeIntoProps: {
+        Field: {
+          clientProps: {
             hasGenerateTitleFn: hasGenerateFn,
           },
-        }),
+          path: '@payloadcms/plugin-seo/client#MetaTitleComponent',
+        },
       },
     },
     localized: true,

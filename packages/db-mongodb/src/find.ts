@@ -6,12 +6,24 @@ import { flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
-import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
+import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
+import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
 export const find: Find = async function find(
   this: MongooseAdapter,
-  { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
+  {
+    collection,
+    joins = {},
+    limit = 0,
+    locale,
+    page,
+    pagination,
+    projection,
+    req = {} as PayloadRequest,
+    sort: sortArg,
+    where,
+  },
 ) {
   const Model = this.collections[collection]
   const collectionConfig = this.payload.collections[collection].config
@@ -50,6 +62,7 @@ export const find: Find = async function find(
     options,
     page,
     pagination,
+    projection,
     sort,
     useEstimatedCount,
   }
@@ -88,7 +101,24 @@ export const find: Find = async function find(
     }
   }
 
-  const result = await Model.paginate(query, paginationOptions)
+  let result
+
+  const aggregate = await buildJoinAggregation({
+    adapter: this,
+    collection,
+    collectionConfig,
+    joins,
+    limit,
+    locale,
+    query,
+  })
+  // build join aggregation
+  if (aggregate) {
+    result = await Model.aggregatePaginate(Model.aggregate(aggregate), paginationOptions)
+  } else {
+    result = await Model.paginate(query, paginationOptions)
+  }
+
   const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {

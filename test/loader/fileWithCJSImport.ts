@@ -1,6 +1,6 @@
-//@ts-expect-error
-import Link from 'next/link' // Intentionally omit the .js extension. This needs to be a CJS .js file not included in the packages package.json main or exports fields
+import Link from 'next/link.js'
 
+//@ts-expect-error
 if (typeof Link.render !== 'function') {
   throw new Error('Link.render is not a function')
 }

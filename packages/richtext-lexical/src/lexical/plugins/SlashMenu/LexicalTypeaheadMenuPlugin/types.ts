@@ -15,7 +15,13 @@ export type SlashMenuItem = {
    */
   keywords?: Array<string>
   /** The label will be displayed in your slash menu item. In order to make use of i18n, this can be a function. */
-  label?: (({ i18n }: { i18n: I18nClient<{}, string> }) => string) | string
+  label?:
+    | ((args: {
+        i18n: I18nClient<{}, string>
+        richTextComponentMap?: Map<string, React.ReactNode>
+        schemaPath: string
+      }) => string)
+    | string
   /** A function which is called when the slash menu item is selected. */
   onSelect: ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => void
 }
@@ -30,7 +36,13 @@ export type SlashMenuGroup = {
    */
   key: string
   /** The label will be displayed before your Slash Menu group. In order to make use of i18n, this can be a function. */
-  label?: (({ i18n }: { i18n: I18nClient<{}, string> }) => string) | string
+  label?:
+    | ((args: {
+        i18n: I18nClient<{}, string>
+        richTextComponentMap: Map<string, React.ReactNode>
+        schemaPath: string
+      }) => string)
+    | string
 }
 
 export type SlashMenuItemInternal = {

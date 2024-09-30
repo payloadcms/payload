@@ -1,11 +1,11 @@
 'use client'
 
-import type { RowLabelComponent } from 'payload'
+import type { PayloadClientReactComponent, RowLabelComponent } from 'payload'
 
 import { useRowLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const ArrayRowLabel: RowLabelComponent = () => {
+export const ArrayRowLabel: PayloadClientReactComponent<RowLabelComponent> = () => {
   const { data } = useRowLabel<{ title: string }>()
   return (
     <div style={{ color: 'coral', textTransform: 'uppercase' }}>{data.title || 'Untitled'}</div>

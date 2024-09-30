@@ -62,7 +62,9 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       },
     } = args
 
-    if (!args.req.user) throw new Forbidden(args.req.t)
+    if (!args.req.user) {
+      throw new Forbidden(args.req.t)
+    }
 
     const parsedURL = url.parse(args.req.url)
     const isGraphQL = parsedURL.pathname === config.routes.graphQL
@@ -73,6 +75,10 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       depth: isGraphQL ? 0 : args.collection.config.auth.depth,
       req: args.req,
     })
+
+    if (user) {
+      user.collection = args.req.user.collection
+    }
 
     let result: Result
 
@@ -143,7 +149,9 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return result
   } catch (error: unknown) {

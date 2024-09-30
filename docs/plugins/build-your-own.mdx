@@ -1,7 +1,7 @@
 ---
 title: Building Your Own Plugin
 label: Build Your Own
-order: 50
+order: 20
 desc: Starting to build your own plugin? Find everything you need and learn best practices with the Payload plugin template.
 keywords: plugins, template, config, configuration, extensions, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
@@ -159,36 +159,60 @@ export const seed = async (payload: Payload): Promise<void> => {
 
 ```
 
-## Overview of the src folder
+## Building a Plugin
 
 Now that we have our environment setup and dev project ready to go - it&apos;s time to build the plugin!
 
-**index.ts**
-
-First up, the `src/index.ts` file - this is where the plugin should be imported from. It is best practice not to build the plugin directly in this file, instead we use this to export the plugin and types from their respective files.
-
-**Plugin.ts**
-
-To reiterate, the essence of a [Payload Plugin](./overview) is simply to extend the [Payload Config](../configuration/overview) - and that is exactly what we are doing in this file.
 
 ```
+import type { Config } from 'payload'
+
 export const samplePlugin =
   (pluginOptions: PluginTypes) =>
   (incomingConfig: Config): Config => {
+    // create copy of incoming config
     let config = { ...incomingConfig }
 
-   // do something cool with the config here
+    /**
+    * This is where you could modify the
+    * config based on the plugin options
+    */
 
+    // If you wanted to add a new collection:
+    config.collections = [
+      ...(config.collections || []),
+      newCollection,
+    ]
+
+    // If you wanted to add a new global:
+    config.globals = [
+      ...(config.globals || []),
+      newGlobal,
+    ]
+
+    /**
+    * If you wanted to add a new field to a collection:
+    *
+    * 1. Loop over collections
+    * 2. Find the collection you want to add the field to
+    * 3. Add the field to the collection
+    */
+
+    // If you wanted to add to the onInit:
+    config.onInit = async payload => {
+      if (incomingConfig.onInit) await incomingConfig.onInit(payload)
+      // Add additional onInit code here
+    }
+
+    // Finally, return the modified config
     return config
  }
 ```
 
-1. First, you need to receive the existing Payload Config along with any plugin options.
-2. Then set the variable `config` to be equal to a copy of the existing config.
-3. From here, you can extend the config however you like!
-4. Finally, return the config and you&apos;re all set.
+To reiterate, the essence of a [Payload Plugin](./overview) is simply to extend the [Payload Config](../configuration/overview) - and that is exactly what we are doing in this file.
 
-## Spread Syntax
+
+### Spread syntax
 
 [Spread syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax) (or the spread operator) is a feature in JavaScript that uses the dot notation **(...)** to spread elements from arrays, strings, or objects into various contexts.
 
@@ -206,7 +230,7 @@ config.collections = [
 
 First, you need to spread the `config.collections` to ensure that we don&apos;t lose the existing collections. Then you can add any additional collections, just as you would in a regular Payload Config.
 
-This same logic is applied to other properties like admin, globals, hooks:
+This same logic is applied to other array and object like properties such as admin, globals and hooks:
 
 ```
 config.globals = [
@@ -220,7 +244,10 @@ config.hooks = {
 }
 ```
 
-Some properties will be slightly different to extend, for instance the `onInit` property:
+### Extending functions
+Function properties cannot use spread syntax. The way to extend them is to execute the existing function if it exists and then run your additional functionality. 
+
+Here is an example extending the `onInit` property:
 
 ```
 config.onInit = async payload => {
@@ -230,10 +257,6 @@ config.onInit = async payload => {
   onInitExtension(pluginOptions, payload)
 }
 ```
-
-If you wish to add to the `onInit`, you must include the async/await. We don&apos;t use spread syntax in this case, instead you must await the existing `onInit` before running additional functionality.
-
-In the template, we have stubbed out a basic `onInitExtension` file that you can use, if not needed feel free to delete it.
 
 ## Types
 

@@ -12,13 +12,22 @@
   border-radius: $style-radius-m;
   cursor: pointer;
   padding: 0;
+  transition: background-color 0.15s cubic-bezier(0, 0.2, 0.2, 1);
 
   &.spaced {
     margin-right: 2px;
   }
 
+  &:hover:not(.disabled) {
+    background-color: var(--theme-elevation-100);
+  }
+
   &.active {
-    background-color: var(--color-base-100);
+    background-color: var(--theme-elevation-150);
+    color: var(--theme-text);
+    &:hover {
+      background-color: var(--theme-elevation-200);
+    }
 
     .icon {
       opacity: 1;
@@ -31,9 +40,5 @@
     .icon {
       opacity: 0.2;
     }
-  }
-
-  &:hover:not([disabled]) {
-    background-color: var(--color-base-100);
   }
 }

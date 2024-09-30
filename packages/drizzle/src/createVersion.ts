@@ -14,29 +14,41 @@ export async function createVersion<T extends TypeWithID>(
     autosave,
     collectionSlug,
     parent,
+    publishedLocale,
     req = {} as PayloadRequest,
+    snapshot,
     versionData,
   }: CreateVersionArgs<T>,
 ) {
-  const db = this.sessions[await req.transactionID]?.db || this.drizzle
+  const db = this.sessions[await req?.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config
   const defaultTableName = toSnakeCase(collection.slug)
 
   const tableName = this.tableNameMap.get(`_${defaultTableName}${this.versionsSuffix}`)
 
   const version = { ...versionData }
-  if (version.id) delete version.id
+  if (version.id) {
+    delete version.id
+  }
+
+  const data: Record<string, unknown> = {
+    autosave,
+    latest: true,
+    parent,
+    publishedLocale,
+    snapshot,
+    version,
+  }
+
+  if ('createdAt' in version) {
+    data.createdAt = version.createdAt
+  }
 
   const result = await upsertRow<TypeWithVersion<T>>({
     adapter: this,
-    data: {
-      autosave,
-      latest: true,
-      parent,
-      version,
-    },
+    data,
     db,
-    fields: buildVersionCollectionFields(collection),
+    fields: buildVersionCollectionFields(this.payload.config, collection),
     operation: 'create',
     req,
     tableName,
@@ -48,11 +60,11 @@ export async function createVersion<T extends TypeWithID>(
     await this.execute({
       db,
       sql: sql`
-      UPDATE ${table}
-      SET latest = false
-      WHERE ${table.id} != ${result.id}
-        AND ${table.parent} = ${parent}
-    `,
+        UPDATE ${table}
+        SET latest = false
+        WHERE ${table.id} != ${result.id}
+          AND ${table.parent} = ${parent}
+      `,
     })
   }
 

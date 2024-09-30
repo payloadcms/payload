@@ -1,13 +1,11 @@
+import type { Where } from '../../types/index.js'
 import type { PreferenceUpdateRequest } from '../types.js'
 
-import defaultAccess from '../../auth/defaultAccess.js'
-import executeAccess from '../../auth/executeAccess.js'
 import { UnauthorizedError } from '../../errors/UnathorizedError.js'
 
-async function update(args: PreferenceUpdateRequest) {
+export async function update(args: PreferenceUpdateRequest) {
   const {
     key,
-    overrideAccess,
     req: { payload },
     req,
     user,
@@ -20,10 +18,12 @@ async function update(args: PreferenceUpdateRequest) {
 
   const collection = 'payload-preferences'
 
-  const filter = {
-    key: { equals: key },
-    'user.relationTo': { equals: user.collection },
-    'user.value': { equals: user.id },
+  const where: Where = {
+    and: [
+      { key: { equals: key } },
+      { 'user.value': { equals: user.id } },
+      { 'user.relationTo': { equals: user.collection } },
+    ],
   }
 
   const preference = {
@@ -35,27 +35,10 @@ async function update(args: PreferenceUpdateRequest) {
     value,
   }
 
-  if (!overrideAccess) {
-    await executeAccess({ req }, defaultAccess)
-  }
-
-  try {
-    // try/catch because we attempt to update without first reading to check if it exists first to save on db calls
-    await payload.db.updateOne({
-      collection,
-      data: preference,
-      req,
-      where: filter,
-    })
-  } catch (err: unknown) {
-    await payload.db.create({
-      collection,
-      data: preference,
-      req,
-    })
-  }
-
-  return preference
+  return await payload.db.upsert({
+    collection,
+    data: preference,
+    req,
+    where,
+  })
 }
-
-export default update

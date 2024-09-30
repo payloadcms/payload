@@ -1,13 +1,14 @@
 import type { Payload, User } from 'payload'
 
 import { jwtDecode } from 'jwt-decode'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import configPromise from './config.js'
 import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared.js'
 
 let restClient: NextRESTClient
@@ -15,9 +16,12 @@ let payload: Payload
 
 const { email, password } = devUser
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 describe('Auth', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
   })
 
   afterAll(async () => {
@@ -97,7 +101,7 @@ describe('Auth', () => {
 
     describe('logged in', () => {
       let token: string | undefined
-      let loggedInUser: User | undefined
+      let loggedInUser: undefined | User
 
       beforeAll(async () => {
         const response = await restClient.POST(`/${slug}/login`, {
@@ -367,13 +371,73 @@ describe('Auth', () => {
             collection: 'payload-preferences',
             depth: 0,
             where: {
-              key: { equals: key },
+              and: [
+                {
+                  key: { equals: key },
+                },
+                {
+                  'user.relationTo': {
+                    equals: 'users',
+                  },
+                },
+                {
+                  'user.value': {
+                    equals: loggedInUser.id,
+                  },
+                },
+              ],
             },
           })
 
           expect(data.doc.key).toStrictEqual(key)
           expect(data.doc.value.property).toStrictEqual('updated')
           expect(data.doc.value.property2).toStrictEqual('test')
+
+          expect(result.docs).toHaveLength(1)
+        })
+
+        it('should only have one preference per user per key', async () => {
+          await restClient.POST(`/payload-preferences/${key}`, {
+            body: JSON.stringify({
+              value: { property: 'test', property2: 'test' },
+            }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          await restClient.POST(`/payload-preferences/${key}`, {
+            body: JSON.stringify({
+              value: { property: 'updated', property2: 'updated' },
+            }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+
+          const result = await payload.find({
+            collection: 'payload-preferences',
+            depth: 0,
+            where: {
+              and: [
+                {
+                  key: { equals: key },
+                },
+                {
+                  'user.relationTo': {
+                    equals: 'users',
+                  },
+                },
+                {
+                  'user.value': {
+                    equals: loggedInUser.id,
+                  },
+                },
+              ],
+            },
+          })
+
+          expect(result.docs[0].value.property).toStrictEqual('updated')
+          expect(result.docs[0].value.property2).toStrictEqual('updated')
 
           expect(result.docs).toHaveLength(1)
         })
@@ -390,7 +454,21 @@ describe('Auth', () => {
             collection: 'payload-preferences',
             depth: 0,
             where: {
-              key: { equals: key },
+              and: [
+                {
+                  key: { equals: key },
+                },
+                {
+                  'user.relationTo': {
+                    equals: 'users',
+                  },
+                },
+                {
+                  'user.value': {
+                    equals: loggedInUser.id,
+                  },
+                },
+              ],
             },
           })
 

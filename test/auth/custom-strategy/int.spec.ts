@@ -1,9 +1,11 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import type { NextRESTClient } from '../../helpers/NextRESTClient.js'
 
 import { initPayloadInt } from '../../helpers/initPayloadInt.js'
-import configPromise from './config.js'
 import { usersSlug } from './shared.js'
 
 let payload: Payload
@@ -15,9 +17,12 @@ const headers = {
   'Content-Type': 'application/json',
 }
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 describe('AuthStrategies', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(dirname, 'auth/custom-strategy'))
   })
 
   afterAll(async () => {

@@ -1,3 +1,4 @@
+'use client'
 import React, { createContext, useContext, useState } from 'react'
 
 import type { ContextType } from './types.js'

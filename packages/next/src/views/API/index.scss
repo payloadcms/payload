@@ -111,8 +111,7 @@
       position: relative;
       width: 100%;
       top: 0;
-      padding-right: var(--gutter-h);
-      padding-left: var(--gutter-h);
+      padding-inline-end: var(--gutter-h);
     }
   }
 }

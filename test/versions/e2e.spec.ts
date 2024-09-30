@@ -22,7 +22,7 @@
  *  - specify locales to show
  */
 
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -32,7 +32,6 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import { globalSlug } from '../admin/slugs.js'
 import {
   changeLocale,
   ensureCompilationIsDone,
@@ -41,6 +40,7 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   selectTableRow,
+  throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
@@ -48,8 +48,8 @@ import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { titleToDelete } from './shared.js'
 import {
-  autoSaveGlobalSlug,
   autosaveCollectionSlug,
+  autoSaveGlobalSlug,
   customIDSlug,
   disablePublishGlobalSlug,
   disablePublishSlug,
@@ -57,6 +57,8 @@ import {
   draftGlobalSlug,
   draftWithMaxCollectionSlug,
   draftWithMaxGlobalSlug,
+  localizedCollectionSlug,
+  localizedGlobalSlug,
   postCollectionSlug,
 } from './slugs.js'
 
@@ -66,6 +68,8 @@ const dirname = path.dirname(filename)
 const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
+let global: AdminUrlUtil
+let id: string
 
 const waitForAutoSaveToComplete = async (page: Page) => {
   await expect(async () => {
@@ -87,6 +91,8 @@ const waitForAutoSaveToRunAndComplete = async (page: Page) => {
   await waitForAutoSaveToComplete(page)
 }
 
+let context: BrowserContext
+
 describe('versions', () => {
   let page: Page
   let url: AdminUrlUtil
@@ -95,13 +101,15 @@ describe('versions', () => {
   let disablePublishURL: AdminUrlUtil
   let customIDURL: AdminUrlUtil
   let postURL: AdminUrlUtil
+  let global: AdminUrlUtil
+  let id: string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
@@ -280,7 +288,7 @@ describe('versions', () => {
         hasText: 'Versions',
       })
       await versionsTab.waitFor({ state: 'visible' })
-      const versionsPill = versionsTab.locator('.doc-tab__count--has-count')
+      const versionsPill = versionsTab.locator('.doc-tab__count')
       await versionsPill.waitFor({ state: 'visible' })
       const versionCount = versionsTab.locator('.doc-tab__count').first()
       await expect(versionCount).toHaveText('11')
@@ -318,14 +326,13 @@ describe('versions', () => {
       await saveDocAndAssert(page, '#action-save-draft')
       const savedDocURL = page.url()
       await page.goto(`${savedDocURL}/versions`)
-      await page.waitForURL(new RegExp(`${savedDocURL}/versions`))
       const row2 = page.locator('tbody .row-2')
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
-      await page.waitForURL(new RegExp(`${savedDocURL}/versions/${versionID}`))
-      await page.locator('.pill.restore-version').click()
+      await page.waitForURL(`${savedDocURL}/versions/${versionID}`)
+      await page.locator('.restore-version__button').click()
       await page.locator('button:has-text("Confirm")').click()
-      await page.waitForURL(new RegExp(savedDocURL))
+      await page.waitForURL(savedDocURL)
       await expect(page.locator('#field-title')).toHaveValue('v1')
     })
 
@@ -393,8 +400,8 @@ describe('versions', () => {
     })
 
     test('global — has versions route', async () => {
-      const global = new AdminUrlUtil(serverURL, globalSlug)
-      const versionsURL = `${global.global(globalSlug)}/versions`
+      const global = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
+      const versionsURL = `${global.global(autoSaveGlobalSlug)}/versions`
       await page.goto(versionsURL)
       expect(page.url()).toMatch(/\/versions$/)
     })
@@ -418,9 +425,7 @@ describe('versions', () => {
       const spanishTitle = 'spanish title'
       const newDescription = 'new description'
       await page.goto(autosaveURL.create)
-      // gets redirected from /create to /slug/id due to autosave
-      await page.waitForURL(new RegExp(`${autosaveURL.edit('')}`))
-      await wait(500)
+      await waitForAutoSaveToComplete(page)
       const titleField = page.locator('#field-title')
       await expect(titleField).toBeEnabled()
       await titleField.fill(englishTitle)
@@ -484,9 +489,7 @@ describe('versions', () => {
 
     test('collection — autosave should only update the current document', async () => {
       await page.goto(autosaveURL.create)
-      // gets redirected from /create to /slug/id due to autosave
-      await page.waitForURL(new RegExp(`${autosaveURL.edit('')}`))
-      await wait(500)
+      await waitForAutoSaveToComplete(page)
       await expect(page.locator('#field-title')).toBeEnabled()
       await page.locator('#field-title').fill('first post title')
       await expect(page.locator('#field-description')).toBeEnabled()
@@ -494,8 +497,6 @@ describe('versions', () => {
       await saveDocAndAssert(page)
       await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
       await page.goto(autosaveURL.create)
-      // gets redirected from /create to /slug/id due to autosave
-      await page.waitForURL(new RegExp(`${autosaveURL.edit('')}`))
       await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
       await wait(500)
       await expect(page.locator('#field-title')).toBeEnabled()
@@ -559,8 +560,8 @@ describe('versions', () => {
       await payload.create({
         collection: autosaveCollectionSlug,
         data: {
-          title: 'some title',
           description: 'some description',
+          title: 'some title',
         },
         draft: true,
       })
@@ -580,8 +581,8 @@ describe('versions', () => {
       const maxOneCollection = await payload.create({
         collection: draftWithMaxCollectionSlug,
         data: {
-          title: 'initial title',
           description: 'some description',
+          title: 'initial title',
         },
         draft: true,
       })
@@ -614,6 +615,102 @@ describe('versions', () => {
       await versionsTabUpdated.waitFor({ state: 'visible' })
 
       expect(versionsTabUpdated).toBeTruthy()
+    })
+  })
+  describe('Collections - publish specific locale', () => {
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, localizedCollectionSlug)
+      global = new AdminUrlUtil(serverURL, localizedGlobalSlug)
+    })
+    test('should show publish individual locale dropdown', async () => {
+      await page.goto(url.create)
+      const publishOptions = page.locator('.doc-controls__controls .popup')
+
+      await expect(publishOptions).toBeVisible()
+    })
+
+    test('should show option to publish current locale', async () => {
+      await page.goto(url.create)
+      const publishOptions = page.locator('.doc-controls__controls .popup')
+      await publishOptions.click()
+
+      const publishSpecificLocale = page.locator('.doc-controls__controls .popup__content')
+
+      await expect(publishSpecificLocale).toContainText('English')
+    })
+
+    test('should publish specific locale', async () => {
+      await page.goto(url.create)
+      await changeLocale(page, 'es')
+      const textField = page.locator('#field-text')
+      const status = page.locator('.status__value')
+
+      await textField.fill('spanish published')
+      await saveDocAndAssert(page)
+      await expect(status).toContainText('Published')
+
+      await textField.fill('spanish draft')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await expect(status).toContainText('Changed')
+
+      await changeLocale(page, 'en')
+      await textField.fill('english published')
+      const publishOptions = page.locator('.doc-controls__controls .popup')
+      await publishOptions.click()
+
+      const publishSpecificLocale = page.locator('.popup-button-list button').first()
+      await expect(publishSpecificLocale).toContainText('English')
+      await publishSpecificLocale.click()
+
+      await wait(500)
+
+      await expect(async () => {
+        await expect(
+          page.locator('.payload-toast-item:has-text("Updated successfully.")'),
+        ).toBeVisible()
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+
+      id = await page.locator('.id-label').getAttribute('title')
+
+      const data = await payload.find({
+        collection: localizedCollectionSlug,
+        locale: '*',
+        where: {
+          id: { equals: id },
+        },
+      })
+
+      const publishedDoc = data.docs[0]
+
+      expect(publishedDoc.text).toStrictEqual({
+        en: 'english published',
+        es: 'spanish published',
+      })
+    })
+  })
+
+  describe('Globals - publish individual locale', () => {
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, localizedGlobalSlug)
+    })
+
+    test('should show publish individual locale dropdown', async () => {
+      await page.goto(url.global(localizedGlobalSlug))
+      const publishOptions = page.locator('.doc-controls__controls .popup')
+
+      await expect(publishOptions).toBeVisible()
+    })
+
+    test('should show option to publish current locale', async () => {
+      await page.goto(url.global(localizedGlobalSlug))
+      const publishOptions = page.locator('.doc-controls__controls .popup')
+      await publishOptions.click()
+
+      const publishSpecificLocale = page.locator('.doc-controls__controls .popup__content')
+
+      await expect(publishSpecificLocale).toContainText('English')
     })
   })
 })

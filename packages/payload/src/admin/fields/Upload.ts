@@ -1,17 +1,62 @@
-import type { DescriptionComponent, FormFieldBase, LabelComponent, UploadField } from 'payload'
+import type { MarkOptional } from 'ts-essentials'
 
-import type { ErrorComponent } from '../forms/Error.js'
+import type { UploadField, UploadFieldClient } from '../../fields/config/types.js'
+import type { UploadFieldValidation } from '../../fields/validations.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+} from '../types.js'
 
-export type UploadFieldProps = {
-  filterOptions?: UploadField['filterOptions']
-  name?: string
-  path?: string
-  relationTo?: UploadField['relationTo']
-  width?: string
-} & FormFieldBase
+type UploadFieldClientWithoutType = MarkOptional<UploadFieldClient, 'type'>
 
-export type UploadFieldLabelComponent = LabelComponent<'upload'>
+type UploadFieldBaseClientProps = {
+  readonly validate?: UploadFieldValidation
+}
 
-export type UploadFieldDescriptionComponent = DescriptionComponent<'upload'>
+export type UploadFieldClientProps = ClientFieldBase<UploadFieldClientWithoutType> &
+  UploadFieldBaseClientProps
 
-export type UploadFieldErrorComponent = ErrorComponent<'upload'>
+export type UploadFieldServerProps = ServerFieldBase<UploadField, UploadFieldClientWithoutType>
+
+export type UploadFieldServerComponent = FieldServerComponent<
+  UploadField,
+  UploadFieldClientWithoutType
+>
+
+export type UploadFieldClientComponent = FieldClientComponent<
+  UploadFieldClientWithoutType,
+  UploadFieldBaseClientProps
+>
+
+export type UploadFieldLabelServerComponent = FieldLabelServerComponent<
+  UploadField,
+  UploadFieldClientWithoutType
+>
+
+export type UploadFieldLabelClientComponent =
+  FieldLabelClientComponent<UploadFieldClientWithoutType>
+
+export type UploadFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  UploadField,
+  UploadFieldClientWithoutType
+>
+
+export type UploadFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<UploadFieldClientWithoutType>
+
+export type UploadFieldErrorServerComponent = FieldErrorServerComponent<
+  UploadField,
+  UploadFieldClientWithoutType
+>
+
+export type UploadFieldErrorClientComponent =
+  FieldErrorClientComponent<UploadFieldClientWithoutType>

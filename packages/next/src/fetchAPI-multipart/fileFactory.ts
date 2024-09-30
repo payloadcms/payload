@@ -1,4 +1,6 @@
-import type { FetchAPIFileUploadOptions, FileShape } from './index.js'
+import type { FetchAPIFileUploadOptions } from 'payload'
+
+import type { FileShape } from './index.js'
 
 import {
   checkAndMakeDir,

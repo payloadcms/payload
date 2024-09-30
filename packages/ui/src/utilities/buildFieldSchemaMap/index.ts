@@ -1,5 +1,7 @@
 import type { I18n } from '@payloadcms/translations'
-import type { SanitizedConfig } from 'payload'
+import type { Field, SanitizedConfig } from 'payload'
+
+import { confirmPassword, password } from 'payload/shared'
 
 import type { FieldSchemaMap } from './types.js'
 
@@ -14,6 +16,28 @@ export const buildFieldSchemaMap = (args: {
   const result: FieldSchemaMap = new Map()
 
   config.collections.forEach((collection) => {
+    if (collection.auth && !collection.auth.disableLocalStrategy) {
+      // register schema with auth schemaPath
+      const baseAuthFields: Field[] = [
+        {
+          name: 'password',
+          type: 'text',
+          label: i18n.t('general:password'),
+          required: true,
+          validate: password,
+        },
+        {
+          name: 'confirm-password',
+          type: 'text',
+          label: i18n.t('authentication:confirmPassword'),
+          required: true,
+          validate: confirmPassword,
+        },
+      ]
+
+      result.set(`_${collection.slug}.auth`, [...collection.fields, ...baseAuthFields])
+    }
+
     traverseFields({
       config,
       fields: collection.fields,

@@ -2,7 +2,7 @@ import type { BatchLoadFn } from 'dataloader'
 
 import DataLoader from 'dataloader'
 
-import type { JsonValue, PayloadRequest } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
 import type { TypeWithID } from './config/types.js'
 
 import { isValidID } from '../utilities/isValidID.js'
@@ -23,7 +23,7 @@ const batchAndLoadDocs =
 
     // Create docs array of same length as keys, using null as value
     // We will replace nulls with injected docs as they are retrieved
-    const docs: (TypeWithID | null)[] = keys.map(() => null)
+    const docs: (null | TypeWithID)[] = keys.map(() => null)
 
     /**
     * Batch IDs by their `find` args
@@ -75,7 +75,9 @@ const batchAndLoadDocs =
 
       let sanitizedID: number | string = id
 
-      if (idType === 'number') sanitizedID = parseFloat(id)
+      if (idType === 'number') {
+        sanitizedID = parseFloat(id)
+      }
 
       if (isValidID(sanitizedID, idType)) {
         return {
@@ -134,8 +136,8 @@ const batchAndLoadDocs =
           depth,
           docID: doc.id,
           draft,
-          fallbackLocale: req.fallbackLocale,
-          locale: req.locale,
+          fallbackLocale,
+          locale,
           overrideAccess,
           showHiddenFields,
           transactionID: req.transactionID,
@@ -166,7 +168,7 @@ type CreateCacheKeyArgs = {
   locale: string
   overrideAccess: boolean
   showHiddenFields: boolean
-  transactionID: Promise<number | string> | number | string
+  transactionID: number | Promise<number | string> | string
 }
 export const createDataloaderCacheKey = ({
   collectionSlug,

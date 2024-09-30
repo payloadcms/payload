@@ -40,7 +40,9 @@ export const defaultValuePromise = async <T>({
   // Traverse subfields
   switch (field.type) {
     case 'group': {
-      if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {}
+      if (typeof siblingData[field.name] !== 'object') {
+        siblingData[field.name] = {}
+      }
 
       const groupData = siblingData[field.name] as Record<string, unknown>
 
@@ -125,7 +127,9 @@ export const defaultValuePromise = async <T>({
     case 'tab': {
       let tabSiblingData
       if (tabHasName(field)) {
-        if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {}
+        if (typeof siblingData[field.name] !== 'object') {
+          siblingData[field.name] = {}
+        }
 
         tabSiblingData = siblingData[field.name] as Record<string, unknown>
       } else {

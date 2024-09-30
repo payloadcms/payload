@@ -16,7 +16,9 @@ type FilesSizesWithUrl = {
 }
 
 const sortSizes = (sizes: FilesSizesWithUrl, imageSizes: SanitizedUploadConfig['imageSizes']) => {
-  if (!imageSizes || imageSizes.length === 0) return sizes
+  if (!imageSizes || imageSizes.length === 0) {
+    return sizes
+  }
 
   const orderedSizes: FilesSizesWithUrl = {}
 
@@ -50,8 +52,12 @@ const PreviewSizeCard: React.FC<PreviewSizeCardProps> = ({
         .join(' ')}
       onClick={typeof onClick === 'function' ? onClick : undefined}
       onKeyDown={(e) => {
-        if (typeof onClick !== 'function') return
-        if (e.key === 'Enter') onClick()
+        if (typeof onClick !== 'function') {
+          return
+        }
+        if (e.key === 'Enter') {
+          onClick()
+        }
       }}
       role="button"
       tabIndex={0}
@@ -85,8 +91,12 @@ export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, 
   const [selectedSize, setSelectedSize] = useState<null | string>(null)
 
   const generateImageUrl = (doc) => {
-    if (!doc.filename) return null
-    if (doc.url) return `${doc.url}${imageCacheTag ? `?${imageCacheTag}` : ''}`
+    if (!doc.filename) {
+      return null
+    }
+    if (doc.url) {
+      return `${doc.url}${imageCacheTag ? `?${imageCacheTag}` : ''}`
+    }
   }
   useEffect(() => {
     setOrderedSizes(sortSizes(sizes, imageSizes))

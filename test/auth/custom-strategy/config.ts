@@ -42,6 +42,9 @@ const customAuthenticationStrategy: AuthStrategyFunction = async ({ headers, pay
 export default buildConfigWithDefaults({
   admin: {
     user: 'users',
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
   },
   collections: [
     {

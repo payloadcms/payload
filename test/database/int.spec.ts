@@ -1,16 +1,19 @@
+import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
+import type { Table } from 'drizzle-orm'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type { Payload, PayloadRequest, TypeWithID } from 'payload'
 
+import * as drizzlePg from 'drizzle-orm/pg-core'
+import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
 import path from 'path'
-import { commitTransaction, initTransaction } from 'payload'
+import { commitTransaction, initTransaction, QueryError } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import removeFiles from '../helpers/removeFiles.js'
-import configPromise from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -25,7 +28,7 @@ process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
 describe('database', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
     payload.db.migrationDir = path.join(dirname, './migrations')
 
     const loginResult = await payload.login({
@@ -89,11 +92,10 @@ describe('database', () => {
     })
 
     it('should allow createdAt to be set in create', async () => {
-      const createdAt = new Date('2021-01-01T00:00:00.000Z')
+      const createdAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
       const result = await payload.create({
         collection: 'posts',
         data: {
-          // TODO: createdAt should be optional on RequiredDataFromCollectionSlug
           createdAt,
           title: 'hello',
         },
@@ -104,8 +106,8 @@ describe('database', () => {
         collection: 'posts',
       })
 
-      expect(result.createdAt).toStrictEqual(createdAt.toISOString())
-      expect(doc.createdAt).toStrictEqual(createdAt.toISOString())
+      expect(result.createdAt).toStrictEqual(createdAt)
+      expect(doc.createdAt).toStrictEqual(createdAt)
     })
 
     it('updatedAt cannot be set in create', async () => {
@@ -123,24 +125,21 @@ describe('database', () => {
   })
 
   describe('migrations', () => {
-    beforeAll(async () => {
+    beforeEach(async () => {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true' && 'drizzle' in payload.db) {
         const db = payload.db as unknown as PostgresAdapter
         await db.dropDatabase({ adapter: db })
       }
-    })
-
-    afterAll(() => {
       removeFiles(path.join(dirname, './migrations'))
-    })
 
-    it('should run migrate:create', async () => {
       await payload.db.createMigration({
         forceAcceptWarning: true,
         migrationName: 'test',
         payload,
       })
+    })
 
+    it('should run migrate:create', () => {
       // read files names in migrationsDir
       const migrationFile = path.normalize(fs.readdirSync(payload.db.migrationDir)[0])
       expect(migrationFile).toContain('_test')
@@ -362,103 +361,384 @@ describe('database', () => {
           expect(firstResult.id).toStrictEqual(first.id)
           expect(secondResult.id).toStrictEqual(second.id)
         })
-      }
 
-      it('should commit multiple operations async', async () => {
-        const req = {
-          payload,
-          user,
-        } as unknown as PayloadRequest
+        it('should commit multiple operations async', async () => {
+          const req = {
+            payload,
+            user,
+          } as unknown as PayloadRequest
 
-        let first
-        let second
+          let first
+          let second
 
-        const firstReq = payload
-          .create({
-            collection,
-            data: {
-              title,
-            },
-            req,
-          })
-          .then((res) => {
-            first = res
-          })
+          const firstReq = payload
+            .create({
+              collection,
+              data: {
+                title,
+              },
+              req,
+            })
+            .then((res) => {
+              first = res
+            })
 
-        const secondReq = payload
-          .create({
-            collection,
-            data: {
-              title,
-            },
-            req,
-          })
-          .then((res) => {
-            second = res
-          })
+          const secondReq = payload
+            .create({
+              collection,
+              data: {
+                title,
+              },
+              req,
+            })
+            .then((res) => {
+              second = res
+            })
 
-        await Promise.all([firstReq, secondReq])
+          await Promise.all([firstReq, secondReq])
 
-        await commitTransaction(req)
-        expect(req.transactionID).toBeUndefined()
+          await commitTransaction(req)
+          expect(req.transactionID).toBeUndefined()
 
-        const firstResult = await payload.findByID({
-          id: first.id,
-          collection,
-          req,
-        })
-        const secondResult = await payload.findByID({
-          id: second.id,
-          collection,
-          req,
-        })
-
-        expect(firstResult.id).toStrictEqual(first.id)
-        expect(secondResult.id).toStrictEqual(second.id)
-      })
-
-      it('should rollback operations on failure', async () => {
-        const req = {
-          payload,
-          user,
-        } as unknown as PayloadRequest
-
-        await initTransaction(req)
-
-        const first = await payload.create({
-          collection,
-          data: {
-            title,
-          },
-          req,
-        })
-
-        try {
-          await payload.create({
-            collection,
-            data: {
-              throwAfterChange: true,
-              title,
-            },
-            req,
-          })
-        } catch (error: unknown) {
-          // catch error and carry on
-        }
-
-        expect(req.transactionID).toBeFalsy()
-
-        // this should not do anything but is needed to be certain about the next assertion
-        await commitTransaction(req)
-
-        await expect(() =>
-          payload.findByID({
+          const firstResult = await payload.findByID({
             id: first.id,
             collection,
             req,
-          }),
-        ).rejects.toThrow('Not Found')
-      })
+          })
+          const secondResult = await payload.findByID({
+            id: second.id,
+            collection,
+            req,
+          })
+
+          expect(firstResult.id).toStrictEqual(first.id)
+          expect(secondResult.id).toStrictEqual(second.id)
+        })
+
+        it('should rollback operations on failure', async () => {
+          const req = {
+            payload,
+            user,
+          } as unknown as PayloadRequest
+
+          await initTransaction(req)
+
+          const first = await payload.create({
+            collection,
+            data: {
+              title,
+            },
+            req,
+          })
+
+          try {
+            await payload.create({
+              collection,
+              data: {
+                throwAfterChange: true,
+                title,
+              },
+              req,
+            })
+          } catch (error: unknown) {
+            // catch error and carry on
+          }
+
+          expect(req.transactionID).toBeFalsy()
+
+          // this should not do anything but is needed to be certain about the next assertion
+          await commitTransaction(req)
+
+          await expect(() =>
+            payload.findByID({
+              id: first.id,
+              collection,
+              req,
+            }),
+          ).rejects.toThrow('Not Found')
+        })
+      }
     })
+  })
+
+  describe('defaultValue', () => {
+    it('should set default value from db.create', async () => {
+      // call the db adapter create directly to bypass Payload's default value assignment
+      const result = await payload.db.create({
+        collection: 'default-values',
+        data: {
+          // for drizzle DBs, we need to pass an array of objects to test subfields
+          array: [{ id: 1 }],
+          title: 'hello',
+        },
+        req: undefined,
+      })
+
+      expect(result.defaultValue).toStrictEqual('default value from database')
+      expect(result.array[0].defaultValue).toStrictEqual('default value from database')
+      expect(result.group.defaultValue).toStrictEqual('default value from database')
+      expect(result.select).toStrictEqual('default')
+    })
+  })
+  describe('drizzle: schema hooks', () => {
+    it('should add tables with hooks', async () => {
+      // eslint-disable-next-line jest/no-conditional-in-test
+      if (payload.db.name === 'mongoose') {
+        return
+      }
+
+      let added_table_before: Table
+      let added_table_after: Table
+
+      // eslint-disable-next-line jest/no-conditional-in-test
+      if (payload.db.name.includes('postgres')) {
+        added_table_before = drizzlePg.pgTable('added_table_before', {
+          id: drizzlePg.serial('id').primaryKey(),
+          text: drizzlePg.text('text'),
+        })
+
+        added_table_after = drizzlePg.pgTable('added_table_after', {
+          id: drizzlePg.serial('id').primaryKey(),
+          text: drizzlePg.text('text'),
+        })
+      }
+
+      // eslint-disable-next-line jest/no-conditional-in-test
+      if (payload.db.name.includes('sqlite')) {
+        added_table_before = drizzleSqlite.sqliteTable('added_table_before', {
+          id: drizzleSqlite.integer('id').primaryKey(),
+          text: drizzleSqlite.text('text'),
+        })
+
+        added_table_after = drizzleSqlite.sqliteTable('added_table_after', {
+          id: drizzleSqlite.integer('id').primaryKey(),
+          text: drizzleSqlite.text('text'),
+        })
+      }
+
+      payload.db.beforeSchemaInit = [
+        ({ schema }) => ({
+          ...schema,
+          tables: {
+            ...schema.tables,
+            added_table_before,
+          },
+        }),
+      ]
+
+      payload.db.afterSchemaInit = [
+        ({ schema }) => {
+          return {
+            ...schema,
+            tables: {
+              ...schema.tables,
+              added_table_after,
+            },
+          }
+        },
+      ]
+
+      delete payload.db.pool
+      await payload.db.init()
+
+      expect(payload.db.tables.added_table_before).toBeDefined()
+
+      await payload.db.connect()
+
+      await payload.db.execute({
+        drizzle: payload.db.drizzle,
+        raw: `INSERT into added_table_before (text) VALUES ('some-text')`,
+      })
+
+      const res_before = await payload.db.execute({
+        drizzle: payload.db.drizzle,
+        raw: 'SELECT * from added_table_before',
+      })
+      expect(res_before.rows[0].text).toBe('some-text')
+
+      await payload.db.execute({
+        drizzle: payload.db.drizzle,
+        raw: `INSERT into added_table_after (text) VALUES ('some-text')`,
+      })
+
+      const res_after = await payload.db.execute({
+        drizzle: payload.db.drizzle,
+        raw: `SELECT * from added_table_after`,
+      })
+
+      expect(res_after.rows[0].text).toBe('some-text')
+    })
+
+    it('should extend the existing table with extra column and modify the existing column with enforcing DB level length', async () => {
+      // eslint-disable-next-line jest/no-conditional-in-test
+      if (payload.db.name === 'mongoose') {
+        return
+      }
+
+      const isSQLite = payload.db.name === 'sqlite'
+
+      payload.db.afterSchemaInit = [
+        ({ schema, extendTable }) => {
+          extendTable({
+            table: schema.tables.places,
+            columns: {
+              // SQLite doesn't have DB length enforcement
+              // eslint-disable-next-line jest/no-conditional-in-test
+              ...(payload.db.name === 'postgres' && {
+                city: drizzlePg.varchar('city', { length: 10 }),
+              }),
+              // eslint-disable-next-line jest/no-conditional-in-test
+              extraColumn: isSQLite
+                ? drizzleSqlite.integer('extra_column')
+                : drizzlePg.integer('extra_column'),
+            },
+          })
+
+          return schema
+        },
+      ]
+
+      delete payload.db.pool
+      await payload.db.init()
+      await payload.db.connect()
+
+      expect(payload.db.tables.places.extraColumn).toBeDefined()
+
+      await payload.create({
+        collection: 'places',
+        data: {
+          city: 'Berlin',
+          country: 'Germany',
+        },
+      })
+
+      // eslint-disable-next-line jest/no-conditional-in-test
+      const tableName = payload.db.schemaName ? `"${payload.db.schemaName}"."places"` : 'places'
+
+      await payload.db.execute({
+        drizzle: payload.db.drizzle,
+        raw: `UPDATE ${tableName} SET extra_column = 10`,
+      })
+
+      const res_with_extra_col = await payload.db.execute({
+        drizzle: payload.db.drizzle,
+        raw: `SELECT * from ${tableName}`,
+      })
+
+      expect(res_with_extra_col.rows[0].extra_column).toBe(10)
+
+      // SQLite doesn't have DB length enforcement
+      // eslint-disable-next-line jest/no-conditional-in-test
+      if (payload.db.name === 'postgres') {
+        await expect(
+          payload.db.execute({
+            drizzle: payload.db.drizzle,
+            raw: `UPDATE ${tableName} SET city = 'MoreThan10Chars'`,
+          }),
+        ).rejects.toBeTruthy()
+      }
+    })
+
+    it('should extend the existing table with composite unique and throw ValidationError on it', async () => {
+      // eslint-disable-next-line jest/no-conditional-in-test
+      if (payload.db.name === 'mongoose') {
+        return
+      }
+
+      const isSQLite = payload.db.name === 'sqlite'
+
+      payload.db.afterSchemaInit = [
+        ({ schema, extendTable }) => {
+          extendTable({
+            table: schema.tables.places,
+            extraConfig: (t) => ({
+              // eslint-disable-next-line jest/no-conditional-in-test
+              uniqueOnCityAndCountry: (isSQLite ? drizzleSqlite : drizzlePg)
+                .unique()
+                .on(t.city, t.country),
+            }),
+          })
+
+          return schema
+        },
+      ]
+
+      delete payload.db.pool
+      await payload.db.init()
+      await payload.db.connect()
+
+      await payload.create({
+        collection: 'places',
+        data: {
+          city: 'A',
+          country: 'B',
+        },
+      })
+
+      await expect(
+        payload.create({
+          collection: 'places',
+          data: {
+            city: 'C',
+            country: 'B',
+          },
+        }),
+      ).resolves.toBeTruthy()
+
+      await expect(
+        payload.create({
+          collection: 'places',
+          data: {
+            city: 'A',
+            country: 'D',
+          },
+        }),
+      ).resolves.toBeTruthy()
+
+      await expect(
+        payload.create({
+          collection: 'places',
+          data: {
+            city: 'A',
+            country: 'B',
+          },
+        }),
+      ).rejects.toBeTruthy()
+    })
+  })
+
+  describe('virtual fields', () => {
+    it('should not save a field with `virtual: true` to the db', async () => {
+      const createRes = await payload.create({
+        collection: 'fields-persistance',
+        data: { text: 'asd', array: [], textHooked: 'asd' },
+      })
+
+      const resLocal = await payload.findByID({
+        collection: 'fields-persistance',
+        id: createRes.id,
+      })
+
+      const resDb = (await payload.db.findOne({
+        collection: 'fields-persistance',
+        where: { id: { equals: createRes.id } },
+        req: {} as PayloadRequest,
+      })) as Record<string, unknown>
+
+      expect(resDb.text).toBeUndefined()
+      expect(resDb.array).toBeUndefined()
+      expect(resDb.textHooked).toBeUndefined()
+
+      expect(resLocal.textHooked).toBe('hooked')
+    })
+  })
+
+  it('should not allow to query by a field with `virtual: true`', async () => {
+    await expect(
+      payload.find({
+        collection: 'fields-persistance',
+        where: { text: { equals: 'asd' } },
+      }),
+    ).rejects.toThrow(QueryError)
   })
 })

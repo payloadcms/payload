@@ -1,9 +1,9 @@
-import type { SerializedHeadingNode } from '../../../../../heading/feature.server.js'
+import type { SerializedHeadingNode } from '../../../../../heading/server/index.js'
 import type { SlateNodeConverter } from '../../types.js'
 
 import { convertSlateNodesToLexical } from '../../index.js'
 
-export const _SlateHeadingConverter: SlateNodeConverter = {
+export const SlateHeadingConverter: SlateNodeConverter = {
   converter({ converters, slateNode }) {
     return {
       type: 'heading',
@@ -11,7 +11,7 @@ export const _SlateHeadingConverter: SlateNodeConverter = {
         canContainParagraphs: false,
         converters,
         parentNodeType: 'heading',
-        slateNodes: slateNode.children,
+        slateNodes: slateNode.children!,
       }),
       direction: 'ltr',
       format: '',

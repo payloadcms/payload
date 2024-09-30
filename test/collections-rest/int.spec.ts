@@ -1,13 +1,16 @@
-import type { Payload } from 'payload'
+import type { Payload, SanitizedCollectionConfig } from 'payload'
 
-import { randomBytes } from 'crypto'
+import { randomBytes, randomUUID } from 'crypto'
+import path from 'path'
+import { APIError, NotFound } from 'payload'
+import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import config, {
+import {
   customIdNumberSlug,
   customIdSlug,
   errorOnHookSlug,
@@ -16,19 +19,24 @@ import config, {
   slug,
 } from './config.js'
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 let restClient: NextRESTClient
 let payload: Payload
 
 describe('collections-rest', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(config))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
 
     // Wait for indexes to be created,
     // as we need them to query by point
     if (payload.db.name === 'mongoose') {
       await new Promise((resolve, reject) => {
         payload.db.collections[pointSlug].ensureIndexes(function (err) {
-          if (err) reject(err)
+          if (err) {
+            reject(err)
+          }
           resolve(true)
         })
       })
@@ -928,6 +936,22 @@ describe('collections-rest', () => {
         expect(result.totalDocs).toEqual(1)
       })
 
+      it('like - id should not crash', async () => {
+        const post = await createPost({ title: 'post' })
+
+        const response = await restClient.GET(`/${slug}`, {
+          query: {
+            where: {
+              id: {
+                like: 'words partial',
+              },
+            },
+          },
+        })
+
+        expect(response.status).toEqual(200)
+      })
+
       it('exists - true', async () => {
         const postWithDesc = await createPost({ description: 'exists' })
         await createPost({ description: undefined })
@@ -1510,6 +1534,86 @@ describe('collections-rest', () => {
       expect(response.status).toBe(500)
       expect(Array.isArray(result.errors)).toEqual(true)
       expect(result.errors[0].message).toStrictEqual('Something went wrong.')
+    })
+
+    it('should execute afterError hook on root level and modify result/status', async () => {
+      let err: unknown
+      let errResult: any
+
+      payload.config.hooks.afterError = [
+        ({ error, result }) => {
+          err = error
+          errResult = result
+
+          return { status: 400, response: { modified: true } }
+        },
+      ]
+
+      const response = await restClient.GET(`/api-error-here`)
+      expect(response.status).toBe(400)
+
+      expect(err).toBeInstanceOf(APIError)
+      expect(errResult).toStrictEqual({
+        errors: [
+          {
+            message: 'Something went wrong.',
+          },
+        ],
+      })
+      const result = await response.json()
+
+      expect(result.modified).toBe(true)
+
+      payload.config.hooks.afterError = []
+    })
+
+    it('should execute afterError hook on collection level and modify result', async () => {
+      let err: unknown
+      let errResult: any
+      let collection: SanitizedCollectionConfig
+
+      payload.collections.posts.config.hooks.afterError = [
+        ({ error, result, collection: incomingCollection }) => {
+          err = error
+          errResult = result
+          collection = incomingCollection
+
+          return { response: { modified: true } }
+        },
+      ]
+
+      const post = await createPost({})
+
+      const response = await restClient.GET(
+        `/${slug}/${typeof post.id === 'number' ? 1000 : randomUUID()}`,
+      )
+      expect(response.status).toBe(404)
+
+      expect(collection.slug).toBe(slug)
+      expect(err).toBeInstanceOf(NotFound)
+      expect(errResult).toStrictEqual({
+        errors: [
+          {
+            message: 'Not Found',
+          },
+        ],
+      })
+      const result = await response.json()
+
+      expect(result.modified).toBe(true)
+
+      payload.collections.posts.config.hooks.afterError = []
+    })
+  })
+
+  describe('Local', () => {
+    it('findByID should throw NotFound if the doc was not found, if disableErrors: true then return null', async () => {
+      const post = await createPost()
+      const id = typeof post.id === 'string' ? randomUUID() : 999
+      await expect(payload.findByID({ collection: 'posts', id })).rejects.toBeInstanceOf(NotFound)
+      await expect(
+        payload.findByID({ collection: 'posts', id, disableErrors: true }),
+      ).resolves.toBeNull()
     })
   })
 })

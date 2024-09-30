@@ -8,9 +8,12 @@
   .rs__control {
     @include formInput;
     height: auto;
-    padding-top: base(0.25);
-    padding-bottom: base(0.25);
+    padding: base(0.4) base(0.6);
     flex-wrap: nowrap;
+  }
+
+  .rs__indicators {
+    gap: calc(var(--base) / 4);
   }
 
   .rs__indicator {
@@ -73,6 +76,6 @@
   }
 
   &.rs--is-disabled .rs__control {
-    background: var(--theme-elevation-200);
+    @include readOnly;
   }
 }

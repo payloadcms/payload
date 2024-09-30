@@ -12,6 +12,11 @@ import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [Pages, Categories, Users],
   localization: {
     defaultLocale: 'en',

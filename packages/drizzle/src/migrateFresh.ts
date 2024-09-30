@@ -42,7 +42,7 @@ export async function migrateFresh(
 
   await this.dropDatabase({ adapter: this })
 
-  const migrationFiles = (await readMigrationFiles({ payload })) as Migration[]
+  const migrationFiles = await readMigrationFiles({ payload })
   payload.logger.debug({
     msg: `Found ${migrationFiles.length} migration files.`,
   })
@@ -74,6 +74,7 @@ export async function migrateFresh(
         err,
         msg: parseError(err, `Error running migration ${migration.name}. Rolling back`),
       })
+      process.exit(1)
     }
   }
 }

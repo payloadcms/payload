@@ -2,9 +2,6 @@ import type { CollectionConfig } from 'payload'
 
 import { slateEditor } from '@payloadcms/richtext-slate'
 
-import { CustomCell } from '../components/CustomCell/index.js'
-import { DemoUIFieldCell } from '../components/DemoUIField/Cell.js'
-import { DemoUIField } from '../components/DemoUIField/Field.js'
 import { slugPluralLabel, slugSingularLabel } from '../shared.js'
 import { postsCollectionSlug } from '../slugs.js'
 
@@ -12,9 +9,12 @@ export const Posts: CollectionConfig = {
   slug: postsCollectionSlug,
   admin: {
     defaultColumns: ['id', 'number', 'title', 'description', 'demoUIField'],
-    description: 'Description',
+    description: 'This is a custom collection description.',
     group: 'One',
     listSearchableFields: ['id', 'title', 'description', 'number'],
+    components: {
+      beforeListTable: ['/components/ResetColumns/index.js#ResetDefaultColumnsButton'],
+    },
     meta: {
       description: 'This is a custom meta description for posts',
       openGraph: {
@@ -57,8 +57,8 @@ export const Posts: CollectionConfig = {
               type: 'ui',
               admin: {
                 components: {
-                  Cell: DemoUIFieldCell,
-                  Field: DemoUIField,
+                  Cell: '/components/DemoUIField/Cell.js#DemoUIFieldCell',
+                  Field: '/components/DemoUIField/Field.js#DemoUIField',
                 },
               },
               label: 'Demo UI Field',
@@ -91,7 +91,7 @@ export const Posts: CollectionConfig = {
       type: 'text',
       admin: {
         components: {
-          Cell: CustomCell,
+          Cell: '/components/CustomCell/index.js#CustomCell',
         },
       },
     },

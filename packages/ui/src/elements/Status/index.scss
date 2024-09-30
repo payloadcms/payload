@@ -20,21 +20,41 @@
   &__modal {
     @include blur-bg;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     height: 100%;
 
     &__toggle {
       @extend %btn-reset;
     }
+  }
 
-    .btn {
-      margin-right: $baseline;
+  &__wrapper {
+    z-index: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: base(0.8);
+    padding: base(2);
+    max-width: base(36);
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: base(0.4);
+
+    > * {
+      margin: 0;
     }
   }
 
-  &__modal-template {
-    position: relative;
-    z-index: 1;
+  &__controls {
+    display: flex;
+    gap: base(0.4);
+
+    .btn {
+      margin: 0;
+    }
   }
 }

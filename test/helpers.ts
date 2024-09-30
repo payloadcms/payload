@@ -1,6 +1,7 @@
 import type { BrowserContext, ChromiumBrowserContext, Locator, Page } from '@playwright/test'
 import type { Config } from 'payload'
 
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 import { defaults } from 'payload'
 import { wait } from 'payload/shared'
@@ -65,7 +66,7 @@ export async function ensureCompilationIsDone({
 }): Promise<void> {
   const {
     routes: { admin: adminRoute },
-  } = getAdminRoutes({ customAdminRoutes, customRoutes })
+  } = getRoutes({ customAdminRoutes, customRoutes })
 
   const adminURL = `${serverURL}${adminRoute}`
 
@@ -114,7 +115,7 @@ export async function firstRegister(args: FirstRegisterArgs): Promise<void> {
 
   const {
     routes: { admin: adminRoute },
-  } = getAdminRoutes({ customAdminRoutes, customRoutes })
+  } = getRoutes({ customAdminRoutes, customRoutes })
 
   await page.goto(`${serverURL}${adminRoute}`)
   await page.fill('#field-email', devUser.email)
@@ -130,27 +131,37 @@ export async function login(args: LoginArgs): Promise<void> {
 
   const {
     admin: {
-      routes: { createFirstUser: createFirstUserRoute, login: loginRoute },
+      routes: { createFirstUser, login: incomingLoginRoute },
     },
-    routes: { admin: adminRoute },
-  } = getAdminRoutes({ customAdminRoutes, customRoutes })
+    routes: { admin: incomingAdminRoute },
+  } = getRoutes({ customAdminRoutes, customRoutes })
 
-  await page.goto(`${serverURL}${adminRoute}${loginRoute}`)
-  await page.waitForURL(`${serverURL}${adminRoute}${loginRoute}`)
+  const adminRoute = formatAdminURL({ serverURL, adminRoute: incomingAdminRoute, path: '' })
+  const loginRoute = formatAdminURL({
+    serverURL,
+    adminRoute: incomingAdminRoute,
+    path: incomingLoginRoute,
+  })
+  const createFirstUserRoute = formatAdminURL({
+    serverURL,
+    adminRoute: incomingAdminRoute,
+    path: createFirstUser,
+  })
+
+  await page.goto(loginRoute)
+  await page.waitForURL(loginRoute)
   await wait(500)
   await page.fill('#field-email', data.email)
   await page.fill('#field-password', data.password)
   await wait(500)
   await page.click('[type=submit]')
-  await page.waitForURL(`${serverURL}${adminRoute}`)
+  await page.waitForURL(adminRoute)
 
-  await expect(() => expect(page.url()).not.toContain(`${adminRoute}${loginRoute}`)).toPass({
+  await expect(() => expect(page.url()).not.toContain(loginRoute)).toPass({
     timeout: POLL_TOPASS_TIMEOUT,
   })
 
-  await expect(() =>
-    expect(page.url()).not.toContain(`${adminRoute}${createFirstUserRoute}`),
-  ).toPass({
+  await expect(() => expect(page.url()).not.toContain(createFirstUserRoute)).toPass({
     timeout: POLL_TOPASS_TIMEOUT,
   })
 }
@@ -187,7 +198,9 @@ export async function openNav(page: Page): Promise<void> {
   // check to see if the nav is already open and if not, open it
   // use the `--nav-open` modifier class to check if the nav is open
   // this will prevent clicking nav links that are bleeding off the screen
-  if (await page.locator('.template-default.template-default--nav-open').isVisible()) return
+  if (await page.locator('.template-default.template-default--nav-open').isVisible()) {
+    return
+  }
   // playwright: get first element with .nav-toggler which is VISIBLE (not hidden), could be 2 elements with .nav-toggler on mobile and desktop but only one is visible
   await page.locator('.nav-toggler >> visible=true').click()
   await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
@@ -210,14 +223,11 @@ export async function openCreateDocDrawer(page: Page, fieldSelector: string): Pr
 }
 
 export async function closeNav(page: Page): Promise<void> {
-  if (!(await page.locator('.template-default.template-default--nav-open').isVisible())) return
+  if (!(await page.locator('.template-default.template-default--nav-open').isVisible())) {
+    return
+  }
   await page.locator('.nav-toggler >> visible=true').click()
   await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
-}
-
-export async function openDocControls(page: Page): Promise<void> {
-  await page.locator('.doc-controls__popup >> .popup-button').click()
-  await expect(page.locator('.doc-controls__popup >> .popup__content')).toBeVisible()
 }
 
 export async function changeLocale(page: Page, newLocale: string) {
@@ -298,7 +308,9 @@ export function initPageConsoleErrorCatch(page: Page) {
       // https://github.com/JedWatson/react-select/issues/3590
       !msg.text().includes('did not match. Server:') &&
       !msg.text().includes('the server responded with a status of') &&
-      !msg.text().includes('Failed to fetch RSC payload for')
+      !msg.text().includes('Failed to fetch RSC payload for') &&
+      !msg.text().includes('Error: NEXT_NOT_FOUND') &&
+      !msg.text().includes('Error getting document data')
     ) {
       // "Failed to fetch RSC payload for" happens seemingly randomly. There are lots of issues in the next.js repository for this. Causes e2e tests to fail and flake. Will ignore for now
       // the the server responded with a status of error happens frequently. Will ignore it for now.
@@ -328,7 +340,7 @@ export function describeIfInCIOrHasLocalstack(): jest.Describe {
 
 type AdminRoutes = Config['admin']['routes']
 
-export function getAdminRoutes({
+export function getRoutes({
   customAdminRoutes,
   customRoutes,
 }: {

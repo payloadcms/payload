@@ -1,10 +1,10 @@
 'use client'
-import type { CustomComponent, UIField } from 'payload'
+import type { CustomComponent, PayloadClientReactComponent } from 'payload'
 
 import { CopyToClipboard, useFieldProps, useFormFields } from '@payloadcms/ui'
 import React from 'react'
 
-export const LinkToDoc: CustomComponent<UIField> = () => {
+export const LinkToDoc: PayloadClientReactComponent<CustomComponent> = () => {
   const { custom } = useFieldProps()
   const { isTestKey, nameOfIDField, stripeResourceType } = custom
 

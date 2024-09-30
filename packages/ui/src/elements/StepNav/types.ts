@@ -1,7 +1,7 @@
-import type { LabelFunction, LabelStatic } from 'payload'
+import type { LabelFunction, StaticLabel } from 'payload'
 
 export type StepNavItem = {
-  label: LabelFunction | LabelStatic
+  label: LabelFunction | StaticLabel
   url?: string
 }
 

@@ -12,14 +12,14 @@ export const deleteVersions: DeleteVersions = async function deleteVersion(
   this: DrizzleAdapter,
   { collection, locale, req = {} as PayloadRequest, where: where },
 ) {
-  const db = this.sessions[await req.transactionID]?.db || this.drizzle
+  const db = this.sessions[await req?.transactionID]?.db || this.drizzle
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
 
   const tableName = this.tableNameMap.get(
     `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`,
   )
 
-  const fields = buildVersionCollectionFields(collectionConfig)
+  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig)
 
   const { docs } = await findMany({
     adapter: this,

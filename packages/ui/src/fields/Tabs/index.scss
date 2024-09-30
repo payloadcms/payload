@@ -29,7 +29,8 @@
   }
 
   &__tabs-wrap {
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
     margin-bottom: $baseline;
   }
 

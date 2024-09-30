@@ -3,12 +3,13 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { slugs } from './shared.js'
+import { collectionSlugs } from './shared.js'
 
 const { beforeAll, describe } = test
 const filename = fileURLToPath(import.meta.url)
@@ -20,13 +21,17 @@ describe('field error states', () => {
   let validateDraftsOff: AdminUrlUtil
   let validateDraftsOn: AdminUrlUtil
   let validateDraftsOnAutosave: AdminUrlUtil
+  let prevValue: AdminUrlUtil
+  let prevValueRelation: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
-    validateDraftsOff = new AdminUrlUtil(serverURL, slugs.validateDraftsOff)
-    validateDraftsOn = new AdminUrlUtil(serverURL, slugs.validateDraftsOn)
-    validateDraftsOnAutosave = new AdminUrlUtil(serverURL, slugs.validateDraftsOnAutosave)
+    validateDraftsOff = new AdminUrlUtil(serverURL, collectionSlugs.validateDraftsOff)
+    validateDraftsOn = new AdminUrlUtil(serverURL, collectionSlugs.validateDraftsOn)
+    validateDraftsOnAutosave = new AdminUrlUtil(serverURL, collectionSlugs.validateDraftsOnAutosave)
+    prevValue = new AdminUrlUtil(serverURL, collectionSlugs.prevValue)
+    prevValueRelation = new AdminUrlUtil(serverURL, collectionSlugs.prevValueRelation)
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
@@ -85,6 +90,36 @@ describe('field error states', () => {
       await saveDocAndAssert(page)
       await page.locator('#field-title').fill('')
       await saveDocAndAssert(page, '#action-save', 'error')
+    })
+  })
+
+  describe('previous values', () => {
+    test('should pass previous value into validate function', async () => {
+      // save original
+      await page.goto(prevValue.create)
+      await page.locator('#field-title').fill('original value')
+      await saveDocAndAssert(page)
+      await page.locator('#field-title').fill('original value 2')
+      await saveDocAndAssert(page)
+      await wait(500)
+
+      // create relation to doc
+      await page.goto(prevValueRelation.create)
+      await page.locator('#field-previousValueRelation .react-select').click()
+      await page.locator('#field-previousValueRelation .rs__option').first().click()
+      await saveDocAndAssert(page)
+
+      // go back to doc
+      await page.goto(prevValue.list)
+      await page.locator('.row-1 a').click()
+      await page.locator('#field-description').fill('some description')
+      await saveDocAndAssert(page)
+      await page.locator('#field-title').fill('changed')
+      await saveDocAndAssert(page, '#action-save', 'error')
+
+      // ensure value is the value before relationship association
+      await page.reload()
+      await expect(page.locator('#field-title')).toHaveValue('original value 2')
     })
   })
 })

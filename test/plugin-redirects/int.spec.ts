@@ -1,17 +1,22 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import type { Page } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import configPromise from './config.js'
 import { pagesSlug } from './shared.js'
 
 let payload: Payload
 let page: Page
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 describe('@payloadcms/plugin-redirects', () => {
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(configPromise))
+    ;({ payload } = await initPayloadInt(dirname))
 
     page = await payload.create({
       collection: 'pages',
@@ -49,6 +54,7 @@ describe('@payloadcms/plugin-redirects', () => {
             value: page.id,
           },
         },
+        type: '301',
       },
     })
 
@@ -66,6 +72,7 @@ describe('@payloadcms/plugin-redirects', () => {
           type: 'custom',
           url: '/test',
         },
+        type: '301',
       },
     })
 

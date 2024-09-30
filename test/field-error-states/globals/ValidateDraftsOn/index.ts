@@ -1,9 +1,9 @@
 import type { GlobalConfig } from 'payload'
 
-import { slugs } from '../../shared.js'
+import { globalSlugs } from '../../shared.js'
 
 export const GlobalValidateDraftsOn: GlobalConfig = {
-  slug: slugs.globalValidateDraftsOn,
+  slug: globalSlugs.globalValidateDraftsOn,
   fields: [
     {
       name: 'group',

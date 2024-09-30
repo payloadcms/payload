@@ -5,33 +5,33 @@
   align-items: center;
   vertical-align: middle;
   justify-content: center;
-  height: 30px;
+  gap: base(0.2);
+  height: base(1.5);
   border: 0;
   background: none;
   border-radius: $style-radius-m;
   cursor: pointer;
   position: relative;
-  padding: 0 10px;
+  padding: 0 base(0.4) 0 base(0.3);
+  transition: background-color 0.15s cubic-bezier(0, 0.2, 0.2, 1);
 
   &-label {
-    color: var(--color-base-600);
-    padding: 0 10px;
+    color: var(--theme-elevation-600);
+    padding-block: 0;
+    padding-inline: base(0.2) base(0.4);
   }
 
   &:disabled {
     cursor: not-allowed;
-
-    .icon {
-      opacity: 0.2;
-    }
+    opacity: 0.2;
   }
 
   &:hover:not([disabled]) {
-    background-color: var(--color-base-100);
+    background-color: var(--theme-elevation-100);
   }
 
   .active {
-    background-color: var(--color-base-100);
+    background-color: var(--theme-elevation-100);
 
     .toolbar-popup__dropdown-caret {
       &:after {
@@ -41,28 +41,29 @@
   }
 
   &-caret {
+    width: base(0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: rotate(45deg);
     &:after {
-      transform: rotate(180deg);
-
+      display: block;
       content: ' ';
       position: absolute;
-      top: 13px;
 
       /* Vector 3 */
 
-      width: 7px;
+      width: 4px;
       height: 4px;
-
-      opacity: 0.3;
-      background-image: url(../../../../lexical/ui/icons/Caret/index.svg);
-      background-position-y: 0;
-      background-position-x: 0;
+      transform: translateY(-2px);
+      border: solid 1px var(--theme-elevation-600);
+      border-width: 0 1px 1px 0;
     }
   }
 
   &-items {
     position: absolute;
-    background: var(--color-base-0);
+    background: var(--theme-elevation-0);
     border-radius: $style-radius-m;
     min-width: 132.5px;
     max-width: 200px;
@@ -71,7 +72,8 @@
     .toolbar-popup__dropdown-item {
       all: unset; // reset all default button styles
       cursor: pointer;
-      color: var(--color-base-900);
+      color: var(--theme-elevation-900);
+      transition: background-color 0.15s cubic-bezier(0, 0.2, 0.2, 1);
 
       .text {
         overflow: hidden;
@@ -81,7 +83,11 @@
 
       &:hover:not([disabled]),
       &.active {
-        background-color: var(--color-base-100);
+        background-color: var(--theme-elevation-100);
+      }
+      &.disabled {
+        cursor: not-allowed;
+        opacity: 0.2;
       }
 
       padding-left: 6.25px;
@@ -97,7 +103,7 @@
       .icon {
         min-width: 20px;
         height: 20px;
-        color: var(--color-base-600);
+        color: var(--theme-elevation-600);
       }
     }
   }

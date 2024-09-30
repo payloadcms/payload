@@ -7,9 +7,7 @@ import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
-import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
-import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 
 export type Arguments = {
@@ -39,8 +37,6 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
   } = args
 
   try {
-    const shouldCommit = await initTransaction(req)
-
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
@@ -50,7 +46,9 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
       : true
 
     // If errors are disabled, and access returns false, return null
-    if (accessResults === false) return null
+    if (accessResults === false) {
+      return null
+    }
 
     const hasWhereAccess = typeof accessResults === 'object'
 
@@ -66,13 +64,19 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     // Find by ID
     // /////////////////////////////////////
 
-    if (!findGlobalVersionsArgs.where.and[0].id) throw new NotFound(req.t)
+    if (!findGlobalVersionsArgs.where.and[0].id) {
+      throw new NotFound(req.t)
+    }
 
     const { docs: results } = await payload.db.findGlobalVersions(findGlobalVersionsArgs)
     if (!results || results?.length === 0) {
       if (!disableErrors) {
-        if (!hasWhereAccess) throw new NotFound(req.t)
-        if (hasWhereAccess) throw new Forbidden(req.t)
+        if (!hasWhereAccess) {
+          throw new NotFound(req.t)
+        }
+        if (hasWhereAccess) {
+          throw new Forbidden(req.t)
+        }
       }
 
       return null
@@ -135,12 +139,6 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
           req,
         })) || result.version
     }, Promise.resolve())
-
-    // /////////////////////////////////////
-    // Return results
-    // /////////////////////////////////////
-
-    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

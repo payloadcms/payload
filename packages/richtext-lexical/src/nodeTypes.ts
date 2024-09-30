@@ -7,25 +7,35 @@ import type {
   Spread,
 } from 'lexical'
 
-import type { SerializedQuoteNode } from './features/blockquote/feature.server.js'
-import type { SerializedBlockNode } from './features/blocks/nodes/BlocksNode.js'
-import type { SerializedHeadingNode } from './features/heading/feature.server.js'
-import type { SerializedHorizontalRuleNode } from './features/horizontalRule/nodes/HorizontalRuleNode.js'
+import type { SerializedQuoteNode } from './features/blockquote/server/index.js'
+import type { SerializedInlineBlockNode } from './features/blocks/client/nodes/InlineBlocksNode.js'
+import type { SerializedBlockNode } from './features/blocks/server/nodes/BlocksNode.js'
+import type {
+  SerializedTableCellNode,
+  SerializedTableNode,
+  SerializedTableRowNode,
+} from './features/experimental_table/server/index.js'
+import type { SerializedHeadingNode } from './features/heading/server/index.js'
+import type { SerializedHorizontalRuleNode } from './features/horizontalRule/server/nodes/HorizontalRuleNode.js'
 import type { SerializedAutoLinkNode, SerializedLinkNode } from './features/link/nodes/types.js'
 import type { SerializedListItemNode, SerializedListNode } from './features/lists/plugin/index.js'
-import type { SerializedRelationshipNode } from './features/relationship/nodes/RelationshipNode.js'
-import type { SerializedUploadNode } from './features/upload/nodes/UploadNode.js'
+import type { SerializedRelationshipNode } from './features/relationship/server/nodes/RelationshipNode.js'
+import type { SerializedUploadNode } from './features/upload/server/nodes/UploadNode.js'
 
 export type {
   SerializedAutoLinkNode,
   SerializedBlockNode,
   SerializedHeadingNode,
   SerializedHorizontalRuleNode,
+  SerializedInlineBlockNode,
   SerializedLinkNode,
   SerializedListItemNode,
   SerializedListNode,
   SerializedQuoteNode,
   SerializedRelationshipNode,
+  SerializedTableCellNode,
+  SerializedTableNode,
+  SerializedTableRowNode,
   SerializedUploadNode,
 }
 

@@ -1,28 +1,40 @@
 import type { CollectionConfig } from 'payload'
 
 import { customFieldsSlug } from '../../slugs.js'
-import { AfterInput } from './AfterInput.js'
-import { BeforeInput } from './BeforeInput.js'
-import { CustomError } from './CustomError.js'
-import { FieldDescriptionComponent } from './FieldDescription/index.js'
-import { CustomSelect } from './fields/Select/index.js'
-import { CustomDescription } from './fields/Text/Description.js'
-import { CustomLabel } from './fields/Text/Label.js'
 
 export const CustomFields: CollectionConfig = {
   slug: customFieldsSlug,
   fields: [
     {
-      name: 'customTextField',
+      name: 'customTextServerField',
       type: 'text',
       maxLength: 100,
       admin: {
+        placeholder: 'This is a placeholder',
         components: {
-          afterInput: [AfterInput],
-          beforeInput: [BeforeInput],
-          Label: CustomLabel,
-          Description: CustomDescription,
-          Error: CustomError,
+          afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
+          beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
+          Label: '/collections/CustomFields/fields/Text/LabelServer.js#CustomServerLabel',
+          Description:
+            '/collections/CustomFields/fields/Text/DescriptionServer.js#CustomServerDescription',
+          Error: '/collections/CustomFields/CustomError.js#CustomError',
+        },
+      },
+      minLength: 3,
+    },
+    {
+      name: 'customTextClientField',
+      type: 'text',
+      maxLength: 100,
+      admin: {
+        placeholder: 'This is a placeholder',
+        components: {
+          afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
+          beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
+          Label: '/collections/CustomFields/fields/Text/LabelClient.js#CustomClientLabel',
+          Description:
+            '/collections/CustomFields/fields/Text/DescriptionClient.js#CustomClientDescription',
+          Error: '/collections/CustomFields/CustomError.js#CustomError',
         },
       },
       minLength: 3,
@@ -46,7 +58,8 @@ export const CustomFields: CollectionConfig = {
       type: 'text',
       admin: {
         components: {
-          Description: FieldDescriptionComponent,
+          Description:
+            '/collections/CustomFields/FieldDescription/index.js#FieldDescriptionComponent',
         },
       },
     },
@@ -55,7 +68,7 @@ export const CustomFields: CollectionConfig = {
       type: 'text',
       admin: {
         components: {
-          Field: CustomSelect,
+          Field: '/collections/CustomFields/fields/Select/index.js#CustomSelect',
         },
       },
     },

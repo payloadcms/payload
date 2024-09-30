@@ -4,6 +4,7 @@
   position: relative;
   margin-bottom: var(--base);
   background: var(--theme-elevation-50);
+  border-radius: var(--style-radius-s);
 
   &__upload {
     display: flex;
@@ -27,6 +28,7 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
+      border-radius: var(--style-radius-s) 0 0 var(--style-radius-s);
     }
   }
 
@@ -60,7 +62,7 @@
       cursor: pointer;
       background-color: var(--theme-elevation-150);
       border: none;
-      border-radius: $style-radius-s;
+      border-radius: $style-radius-m;
       padding: base(0.25) base(0.5);
       text-wrap: nowrap;
       overflow: hidden;
@@ -80,6 +82,37 @@
       text-overflow: ellipsis;
       max-width: calc(100% - base(2));
     }
+  }
+
+  .dropzone {
+    background-color: transparent;
+    padding-block: calc(var(--base) * 2.25);
+  }
+
+  &__dropzoneContent {
+    display: flex;
+    flex-wrap: wrap;
+    gap: base(0.4);
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  &__dropzoneButtons {
+    display: flex;
+    gap: calc(var(--base) * 0.5);
+  }
+
+  &__orText {
+    color: var(--theme-elevation-500);
+    text-transform: lowercase;
+  }
+
+  &__dragAndDropText {
+    flex-shrink: 0;
+    margin: 0;
+    text-transform: lowercase;
+    align-self: center;
+    color: var(--theme-elevation-500);
   }
 
   @include small-break {
@@ -110,6 +143,12 @@
     }
 
     &__edit {
+      display: none;
+    }
+  }
+
+  @include small-break {
+    &__dropzoneContent {
       display: none;
     }
   }

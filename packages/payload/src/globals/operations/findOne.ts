@@ -4,8 +4,6 @@ import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
-import { commitTransaction } from '../../utilities/commitTransaction.js'
-import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 
@@ -13,6 +11,7 @@ type Args = {
   depth?: number
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
+  includeLockStatus?: boolean
   overrideAccess?: boolean
   req: PayloadRequest
   showHiddenFields?: boolean
@@ -27,6 +26,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     depth,
     draft: draftEnabled = false,
     globalConfig,
+    includeLockStatus,
     overrideAccess = false,
     req: { fallbackLocale, locale },
     req,
@@ -34,8 +34,6 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
   } = args
 
   try {
-    const shouldCommit = await initTransaction(req)
-
     // /////////////////////////////////////
     // Retrieve and execute access
     // /////////////////////////////////////
@@ -58,6 +56,38 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     })
     if (!doc) {
       doc = {}
+    }
+
+    // /////////////////////////////////////
+    // Include Lock Status if required
+    // /////////////////////////////////////
+
+    if (includeLockStatus && slug) {
+      let lockStatus = null
+
+      try {
+        const lockedDocument = await req.payload.find({
+          collection: 'payload-locked-documents',
+          depth: 1,
+          limit: 1,
+          pagination: false,
+          req,
+          where: {
+            globalSlug: {
+              equals: slug,
+            },
+          },
+        })
+
+        if (lockedDocument && lockedDocument.docs.length > 0) {
+          lockStatus = lockedDocument.docs[0]
+        }
+      } catch {
+        // swallow error
+      }
+
+      doc._isLocked = !!lockStatus
+      doc._userEditing = lockStatus?.user?.value ?? null
     }
 
     // /////////////////////////////////////
@@ -124,12 +154,6 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
           req,
         })) || doc
     }, Promise.resolve())
-
-    // /////////////////////////////////////
-    // Return results
-    // /////////////////////////////////////
-
-    if (shouldCommit) await commitTransaction(req)
 
     // /////////////////////////////////////
     // Return results

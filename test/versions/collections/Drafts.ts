@@ -1,8 +1,5 @@
 import type { CollectionConfig } from 'payload'
 
-import CollectionVersionButton from '../elements/CollectionVersionButton/index.js'
-import CollectionVersionsButton from '../elements/CollectionVersionsButton/index.js'
-import { CustomPublishButton } from '../elements/CustomSaveButton/index.js'
 import { draftCollectionSlug } from '../slugs.js'
 
 const DraftPosts: CollectionConfig = {
@@ -33,15 +30,15 @@ const DraftPosts: CollectionConfig = {
   admin: {
     components: {
       edit: {
-        PublishButton: CustomPublishButton,
+        PublishButton: '/elements/CustomSaveButton/index.js#CustomPublishButton',
       },
       views: {
-        Edit: {
-          Version: {
-            actions: [CollectionVersionButton],
+        edit: {
+          version: {
+            actions: ['/elements/CollectionVersionButton/index.js'],
           },
-          Versions: {
-            actions: [CollectionVersionsButton],
+          versions: {
+            actions: ['/elements/CollectionVersionsButton/index.js'],
           },
         },
       },

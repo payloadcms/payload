@@ -6,13 +6,18 @@
 
   .stroke {
     fill: none;
-    stroke: var(--theme-elevation-800);
-    stroke-width: $style-stroke-width-m;
+    stroke: currentColor;
+    stroke-width: $style-stroke-width-s;
     vector-effect: non-scaling-stroke;
   }
 
-  &--size-large {
+  &.icon--size-large {
     height: var(--base);
     width: var(--base);
+  }
+
+  &.icon--size-small {
+    height: 8px;
+    width: 8px;
   }
 }

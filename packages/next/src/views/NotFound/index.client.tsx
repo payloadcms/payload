@@ -18,7 +18,9 @@ export const NotFoundClient: React.FC<{
   const { t } = useTranslation()
 
   const {
-    routes: { admin: adminRoute },
+    config: {
+      routes: { admin: adminRoute },
+    },
   } = useConfig()
 
   useEffect(() => {
@@ -36,9 +38,17 @@ export const NotFoundClient: React.FC<{
         .join(' ')}
     >
       <Gutter className={`${baseClass}__wrap`}>
-        <h1>{t('general:nothingFound')}</h1>
-        <p>{t('general:sorryNotFound')}</p>
-        <Button Link={Link} className={`${baseClass}__button`} el="link" to={adminRoute}>
+        <div className={`${baseClass}__content`}>
+          <h1>{t('general:nothingFound')}</h1>
+          <p>{t('general:sorryNotFound')}</p>
+        </div>
+        <Button
+          className={`${baseClass}__button`}
+          el="link"
+          Link={Link}
+          size="large"
+          to={adminRoute}
+        >
           {t('general:backToDashboard')}
         </Button>
       </Gutter>

@@ -1,7 +1,5 @@
 import type { GlobalConfig } from 'payload'
 
-import { GlobalAPIButton } from '../components/GlobalAPIButton/index.js'
-import { GlobalEditButton } from '../components/GlobalEditButton/index.js'
 import { globalSlug } from '../slugs.js'
 
 export const Global: GlobalConfig = {
@@ -9,12 +7,12 @@ export const Global: GlobalConfig = {
   admin: {
     components: {
       views: {
-        Edit: {
-          API: {
-            actions: [GlobalAPIButton],
+        edit: {
+          api: {
+            actions: ['/components/GlobalAPIButton/index.js#GlobalAPIButton'],
           },
-          Default: {
-            actions: [GlobalEditButton],
+          default: {
+            actions: ['/components/GlobalEditButton/index.js#GlobalEditButton'],
           },
         },
       },

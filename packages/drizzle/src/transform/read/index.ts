@@ -1,5 +1,4 @@
-/* eslint-disable no-param-reassign */
-import type { Field, SanitizedConfig, TypeWithID } from 'payload'
+import type { Field, JoinQuery, SanitizedConfig, TypeWithID } from 'payload'
 
 import type { DrizzleAdapter } from '../../types.js'
 
@@ -13,6 +12,7 @@ type TransformArgs = {
   data: Record<string, unknown>
   fallbackLocale?: false | string
   fields: Field[]
+  joinQuery?: JoinQuery
   locale?: string
 }
 
@@ -23,6 +23,7 @@ export const transform = <T extends Record<string, unknown> | TypeWithID>({
   config,
   data,
   fields,
+  joinQuery,
 }: TransformArgs): T => {
   let relationships: Record<string, Record<string, unknown>[]> = {}
   let texts: Record<string, Record<string, unknown>[]> = {}
@@ -56,6 +57,7 @@ export const transform = <T extends Record<string, unknown> | TypeWithID>({
     deletions,
     fieldPrefix: '',
     fields,
+    joinQuery,
     numbers,
     path: '',
     relationships,

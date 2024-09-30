@@ -1,3 +1,4 @@
+'use client'
 export function getBoundingClientRectWithoutTransform(elem: HTMLElement): DOMRect {
   const rect = elem.getBoundingClientRect()
 
@@ -8,7 +9,7 @@ export function getBoundingClientRectWithoutTransform(elem: HTMLElement): DOMRec
   }
 
   const lastNumberOfTransformValue = transformValue.split(',').pop()
-  rect.y = rect.y - Number(lastNumberOfTransformValue.replace(')', ''))
+  rect.y = rect.y - Number(lastNumberOfTransformValue?.replace(')', ''))
 
   // Return the original bounding rect if no translation is applied
   return rect

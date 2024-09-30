@@ -1,14 +1,21 @@
 import type { CommonProps, GroupBase, Props as ReactSelectStateManagerProps } from 'react-select'
 
-import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
+import type { DocumentDrawerProps, UseDocumentDrawer } from '../DocumentDrawer/types.js'
 
 type CustomSelectProps = {
   disableKeyDown?: boolean
   disableMouseDown?: boolean
+  DocumentDrawerToggler?: ReturnType<UseDocumentDrawer>[1]
   draggableProps?: any
   droppableRef?: React.RefObject<HTMLDivElement | null>
+  onDelete?: DocumentDrawerProps['onDelete']
+  onDocumentDrawerOpen: (args: {
+    collectionSlug: string
+    hasReadPermission: boolean
+    id: number | string
+  }) => void
+  onDuplicate?: DocumentDrawerProps['onSave']
   onSave?: DocumentDrawerProps['onSave']
-  setDrawerIsOpen?: (isOpen: boolean) => void
 }
 
 // augment the types for the `Select` component from `react-select`
@@ -56,7 +63,12 @@ export type ReactSelectAdapterProps = {
   disabled?: boolean
   filterOption?:
     | ((
-        { data, label, value }: { data: Option; label: string; value: string },
+        {
+          allowEdit,
+          data,
+          label,
+          value,
+        }: { allowEdit: boolean; data: Option; label: string; value: string },
         search: string,
       ) => boolean)
     | undefined

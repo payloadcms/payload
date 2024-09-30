@@ -14,6 +14,7 @@ export interface Config {
     relation: Relation;
     audio: Audio;
     'gif-resize': GifResize;
+    'filename-compound-index': FilenameCompoundIndex;
     'no-image-sizes': NoImageSize;
     'object-fit': ObjectFit;
     'with-meta-data': WithMetaDatum;
@@ -27,6 +28,7 @@ export interface Config {
     enlarge: Enlarge;
     reduce: Reduce;
     'media-trim': MediaTrim;
+    'custom-file-name-media': CustomFileNameMedia;
     'unstored-media': UnstoredMedia;
     'externally-served-media': ExternallyServedMedia;
     'uploads-1': Uploads1;
@@ -37,6 +39,9 @@ export interface Config {
     'required-file': RequiredFile;
     versions: Version;
     'custom-upload-field': CustomUploadField;
+    'media-with-relation-preview': MediaWithRelationPreview;
+    'media-without-relation-preview': MediaWithoutRelationPreview;
+    'relation-preview': RelationPreview;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -53,6 +58,7 @@ export interface Config {
 export interface UserAuthOperations {
   forgotPassword: {
     email: string;
+    password: string;
   };
   login: {
     email: string;
@@ -64,6 +70,7 @@ export interface UserAuthOperations {
   };
   unlock: {
     email: string;
+    password: string;
   };
 }
 /**
@@ -72,8 +79,8 @@ export interface UserAuthOperations {
  */
 export interface Relation {
   id: string;
-  image?: string | Media | null;
-  versionedImage?: string | Version | null;
+  image?: (string | null) | Media;
+  versionedImage?: (string | null) | Version;
   updatedAt: string;
   createdAt: string;
 }
@@ -243,7 +250,7 @@ export interface Version {
  */
 export interface Audio {
   id: string;
-  audio?: string | Media | null;
+  audio?: (string | null) | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -253,6 +260,43 @@ export interface Audio {
  */
 export interface GifResize {
   id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    small?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    large?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "filename-compound-index".
+ */
+export interface FilenameCompoundIndex {
+  id: string;
+  alt?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -753,6 +797,34 @@ export interface MediaTrim {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-file-name-media".
+ */
+export interface CustomFileNameMedia {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    custom?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "unstored-media".
  */
 export interface UnstoredMedia {
@@ -793,7 +865,8 @@ export interface ExternallyServedMedia {
  */
 export interface Uploads1 {
   id: string;
-  media?: string | Uploads2 | null;
+  hasManyUpload?: (string | Uploads2)[] | null;
+  singleUpload?: (string | null) | Uploads2;
   richText?: {
     root: {
       type: string;
@@ -948,6 +1021,59 @@ export interface CustomUploadField {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-relation-preview".
+ */
+export interface MediaWithRelationPreview {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-relation-preview".
+ */
+export interface MediaWithoutRelationPreview {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-preview".
+ */
+export interface RelationPreview {
+  id: string;
+  imageWithPreview1?: (string | null) | MediaWithRelationPreview;
+  imageWithPreview2?: (string | null) | MediaWithRelationPreview;
+  imageWithoutPreview1?: (string | null) | MediaWithRelationPreview;
+  imageWithoutPreview2?: (string | null) | MediaWithoutRelationPreview;
+  imageWithPreview3?: (string | null) | MediaWithoutRelationPreview;
+  imageWithoutPreview3?: (string | null) | MediaWithoutRelationPreview;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

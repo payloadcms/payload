@@ -1,22 +1,24 @@
+import type { SanitizedConfig } from 'payload'
+
 import { generateSchema } from '@payloadcms/graphql/utilities'
 import fs from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
 
 import { setTestEnvPaths } from './helpers/setTestEnvPaths.js'
 
 const [testConfigDir] = process.argv.slice(2)
-import { fileURLToPath } from 'url'
 
-import { load } from './loader/load.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const loadConfig = async (configPath: string) => {
-  const configPromise = await load(configPath)
-  return configPromise
+const loadConfig = async (configPath: string): Promise<SanitizedConfig> => {
+  return await (
+    await import(configPath)
+  ).default
 }
 
-let testDir
+let testDir: string
 if (testConfigDir) {
   testDir = path.resolve(dirname, testConfigDir)
   const config = await loadConfig(path.resolve(testDir, 'config.ts'))

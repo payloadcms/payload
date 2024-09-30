@@ -1,10 +1,11 @@
+import type { FetchAPIFileUploadOptions } from 'payload'
 import type { Readable } from 'stream'
 
 import Busboy from 'busboy'
 import httpStatus from 'http-status'
 import { APIError } from 'payload'
 
-import type { FetchAPIFileUploadOptions, FetchAPIFileUploadResponse } from './index.js'
+import type { FetchAPIFileUploadResponse } from './index.js'
 
 import { fileFactory } from './fileFactory.js'
 import { memHandler, tempFileHandler } from './handlers.js'
@@ -162,6 +163,8 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     debugLog(options, `New upload started ${field}->${filename}, bytes:${getFileSize()}`)
     uploadTimer.set()
   })
+
+  // TODO: Valid eslint error - this will likely be a floating promise. Evaluate if we need to handle this differently.
 
   busboy.on('finish', async () => {
     debugLog(options, `Busboy finished parsing request.`)

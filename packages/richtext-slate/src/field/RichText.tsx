@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientValidate, FormFieldBase } from 'payload'
+import type { PayloadRequest } from 'payload'
 import type { BaseEditor, BaseOperation } from 'slate'
 import type { HistoryEditor } from 'slate-history'
 import type { ReactEditor } from 'slate-react'
@@ -10,6 +10,7 @@ import {
   FieldDescription,
   FieldError,
   FieldLabel,
+  RenderComponent,
   useEditDepth,
   useField,
   useFieldProps,
@@ -18,12 +19,12 @@ import {
 } from '@payloadcms/ui'
 import { isHotkey } from 'is-hotkey'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
-import { Node, Element as SlateElement, Text, Transforms, createEditor } from 'slate'
+import { createEditor, Node, Element as SlateElement, Text, Transforms } from 'slate'
 import { withHistory } from 'slate-history'
 import { Editable, Slate, withReact } from 'slate-react'
 
-import type { ElementNode, RichTextPlugin, TextNode } from '../types.js'
-import type { EnabledFeatures } from './types.js'
+import type { ElementNode, TextNode } from '../types.js'
+import type { LoadedSlateFieldProps } from './types.js'
 
 import { defaultRichTextValue } from '../data/defaultValue.js'
 import { richTextValidate } from '../data/validation.js'
@@ -48,38 +49,33 @@ declare module 'slate' {
   }
 }
 
-const RichTextField: React.FC<
-  {
-    elements: EnabledFeatures['elements']
-    leaves: EnabledFeatures['leaves']
-    name: string
-    placeholder?: string
-    plugins: RichTextPlugin[]
-    richTextComponentMap: Map<string, React.ReactNode>
-    width?: string
-  } & FormFieldBase
-> = (props) => {
+const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
   const {
-    name,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
     descriptionProps,
     elements,
     errorProps,
-    label,
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: { Description, Error, Label },
+        placeholder,
+        readOnly: readOnlyFromAdmin,
+        style,
+        width,
+      } = {},
+      required,
+    },
     labelProps,
     leaves,
-    path: pathFromProps,
-    placeholder,
     plugins,
-    readOnly: readOnlyFromProps,
-    required,
-    style,
+    readOnly: readOnlyFromTopLevelProps,
     validate = richTextValidate,
-    width,
   } = props
+
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n } = useTranslation()
   const editorRef = useRef(null)
@@ -88,14 +84,14 @@ const RichTextField: React.FC<
   const drawerDepth = useEditDepth()
   const drawerIsOpen = drawerDepth > 1
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate = useCallback(
     (value, validationOptions) => {
       if (typeof validate === 'function') {
         return validate(value, {
           ...validationOptions,
           req: {
             t: i18n.t,
-          },
+          } as PayloadRequest,
           required,
         })
       }
@@ -183,7 +179,7 @@ const RichTextField: React.FC<
             path={path}
             schemaPath={schemaPath}
           >
-            {Element}
+            <RenderComponent mappedComponent={Element} />
           </ElementProvider>
         )
 
@@ -216,7 +212,7 @@ const RichTextField: React.FC<
                   result={result}
                   schemaPath={schemaPath}
                 >
-                  {Leaf}
+                  <RenderComponent mappedComponent={Leaf} />
                 </LeafProvider>
               )
             }
@@ -264,7 +260,9 @@ const RichTextField: React.FC<
         const isButton = child.tagName === 'BUTTON'
         const isDisabling = clickState === 'disabled'
         child.setAttribute('tabIndex', isDisabling ? '-1' : '0')
-        if (isButton) child.setAttribute('disabled', isDisabling ? 'disabled' : null)
+        if (isButton) {
+          child.setAttribute('disabled', isDisabling ? 'disabled' : null)
+        }
       })
     }
 
@@ -310,7 +308,9 @@ const RichTextField: React.FC<
     }
   }
 
-  if (!valueToRender) valueToRender = defaultRichTextValue
+  if (!valueToRender) {
+    valueToRender = defaultRichTextValue
+  }
 
   return (
     <div
@@ -320,14 +320,9 @@ const RichTextField: React.FC<
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel Label={Label} {...(labelProps || {})} field={field} />
       <div className={`${baseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+        <FieldError CustomError={Error} field={field} path={path} {...(errorProps || {})} />
         <Slate
           editor={editor}
           key={JSON.stringify({ initialValue, path })} // makes sure slate is completely re-rendered when initialValue changes, bypassing the slate-internal value memoization. That way, external changes to the form will update the editor
@@ -355,7 +350,7 @@ const RichTextField: React.FC<
                           path={path}
                           schemaPath={schemaPath}
                         >
-                          {Button}
+                          <RenderComponent mappedComponent={Button} />
                         </ElementButtonProvider>
                       )
                     }
@@ -373,7 +368,7 @@ const RichTextField: React.FC<
                           path={path}
                           schemaPath={schemaPath}
                         >
-                          {Button}
+                          <RenderComponent mappedComponent={Button} />
                         </LeafButtonProvider>
                       )
                     }
@@ -458,11 +453,7 @@ const RichTextField: React.FC<
             </div>
           </div>
         </Slate>
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <FieldDescription Description={Description} field={field} {...(descriptionProps || {})} />
       </div>
     </div>
   )

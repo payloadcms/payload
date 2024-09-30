@@ -2,10 +2,12 @@
 
 .relationship--multi-value-label {
   display: flex;
+  padding-inline-start: base(0.4);
+  gap: base(0.2);
 
   &__content {
     @extend %small;
-    padding: 0 base(0.125) 0 base(0.25);
+    line-height: base(1.1);
     max-width: 150px;
     color: currentColor;
     display: flex;
@@ -19,20 +21,25 @@
   }
 
   &__drawer-toggler {
+    border: none;
+    background-color: transparent;
+    padding: 0;
+    cursor: pointer;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: base(0.25);
+    margin-left: base(0.2);
     pointer-events: all;
 
     .icon {
-      width: base(0.75);
-      height: base(0.75);
+      width: base(1);
+      height: base(1);
+      padding: base(0.1);
     }
 
     &:hover {
-      background-color: var(--theme-elevation-100);
+      background-color: var(--theme-elevation-150);
     }
 
     &:focus-visible {

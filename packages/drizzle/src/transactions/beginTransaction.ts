@@ -6,6 +6,7 @@ import type { DrizzleAdapter, DrizzleTransaction } from '../types.js'
 
 export const beginTransaction: BeginTransaction = async function beginTransaction(
   this: DrizzleAdapter,
+  options: DrizzleAdapter['transactionOptions'],
 ) {
   let id
   try {
@@ -36,12 +37,13 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
             return done
           }
           reject = () => {
+            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
             rej()
             return done
           }
           transactionReady()
         })
-      }, this.transactionOptions)
+      }, options || this.transactionOptions)
       .catch(() => {
         // swallow
       })
@@ -56,7 +58,7 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
       resolve,
     }
   } catch (err) {
-    this.payload.logger.error(`Error: cannot begin transaction: ${err.message}`, err)
+    this.payload.logger.error({ err, msg: `Error: cannot begin transaction: ${err.message}` })
     process.exit(1)
   }
 

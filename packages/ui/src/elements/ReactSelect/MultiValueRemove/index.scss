@@ -2,8 +2,7 @@
 
 .multi-value-remove {
   cursor: pointer;
-  width: base(0.75);
-  height: base(0.75);
+  width: base(1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -11,10 +10,11 @@
   background-color: transparent;
   border: none;
   padding: 0;
+  color: inherit;
 
   &:hover {
     color: var(--theme-elevation-800);
-    background: var(--theme-error-150);
+    background: var(--theme-elevation-150);
   }
 
   &__icon {

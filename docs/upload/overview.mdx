@@ -92,10 +92,13 @@ _An asterisk denotes that an option is required._
 | Option                         | Description                                                                                                                                                                                                                           |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`adminThumbnail`**           | Set the way that the [Admin Panel](../admin/overview) will display thumbnails for this Collection. [More](#admin-thumbnails)                                                                                                          |
+| **`bulkUpload`**               | Allow users to upload in bulk from the list view, default is true                                                                                                                                                                     |
 | **`crop`**                     | Set to `false` to disable the cropping tool in the [Admin Panel](../admin/overview). Crop is enabled by default. [More](#crop-and-focal-point-selector)                                                                               |
 | **`disableLocalStorage`**      | Completely disable uploading files to disk locally. [More](#disabling-local-upload-storage)                                                                                                                                           |
+| **`displayPreview`**           | Enable displaying preview of the uploaded file in Upload fields related to this Collection. Can be locally overridden by `displayPreview` option in Upload field. [More](/docs/fields/upload#config-options).                         |
 | **`externalFileHeaderFilter`** | Accepts existing headers and returns the headers after filtering or modifying.                                                                                                                                                        |
 | **`filesRequiredOnCreate`**    | Mandate file data on creation, default is true.                                                                                                                                                                                       |
+| **`filenameCompoundIndex`**    | Field slugs to use for a compount index instead of the default filename index.
 | **`focalPoint`**               | Set to `false` to disable the focal point selection tool in the [Admin Panel](../admin/overview). The focal point selector is only available when `imageSizes` or `resizeOptions` are defined. [More](#crop-and-focal-point-selector) |
 | **`formatOptions`**            | An object with `format` and `options` that are used with the Sharp image library to format the upload file. [More](https://sharp.pixelplumbing.com/api-output#toformat)                                                               |
 | **`handlers`**                 | Array of Request handlers to execute when fetching a file, if a handler returns a Response it will be sent to the client. Otherwise Payload will retrieve and send back the file.                                                     |
@@ -167,6 +170,22 @@ When an uploaded image is smaller than the defined image size, we have 3 options
   By default, the image size will return NULL when the uploaded image is smaller than the defined
   image size. Use the `withoutEnlargement` prop to change this.
 </Banner>
+
+#### Custom file name per size
+
+Each image size supports a `generateImageName` function that can be used to generate a custom file name for the resized image.
+This function receives the original file name, the resize name, the extension, height and width as arguments.
+
+```ts
+{
+  name: 'thumbnail',
+  width: 400,
+  height: 300,
+  generateImageName: ({ height, sizeName, extension, width }) => {
+    return `custom-${sizeName}-${height}-${width}.${extension}`
+  },
+}
+```
 
 ## Crop and Focal Point Selector
 

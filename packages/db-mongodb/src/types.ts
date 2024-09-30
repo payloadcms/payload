@@ -1,7 +1,14 @@
-import type { IndexDefinition, IndexOptions, Model, PaginateModel, SchemaOptions } from 'mongoose'
+import type {
+  AggregatePaginateModel,
+  IndexDefinition,
+  IndexOptions,
+  Model,
+  PaginateModel,
+  SchemaOptions,
+} from 'mongoose'
 import type {
   ArrayField,
-  BlockField,
+  BlocksField,
   CheckboxField,
   CodeField,
   CollapsibleField,
@@ -9,9 +16,11 @@ import type {
   EmailField,
   Field,
   GroupField,
+  JoinField,
   JSONField,
   NumberField,
   Payload,
+  PayloadRequest,
   PointField,
   RadioField,
   RelationshipField,
@@ -20,14 +29,17 @@ import type {
   SanitizedConfig,
   SelectField,
   TabsField,
-  TextField,
   TextareaField,
+  TextField,
   UploadField,
 } from 'payload'
 
 import type { BuildQueryArgs } from './queries/buildQuery.js'
 
-export interface CollectionModel extends Model<any>, PaginateModel<any> {
+export interface CollectionModel
+  extends Model<any>,
+    PaginateModel<any>,
+    AggregatePaginateModel<any> {
   /** buildQuery is used to transform payload's where operator into what can be used by mongoose (e.g. id => _id) */
   buildQuery: (args: BuildQueryArgs) => Promise<Record<string, unknown>> // TODO: Delete this
 }
@@ -67,31 +79,6 @@ export type FieldGenerator<TSchema, TField> = {
   schema: TSchema
 }
 
-/**
- * Field config types that need representation in the database
- */
-type FieldType =
-  | 'array'
-  | 'blocks'
-  | 'checkbox'
-  | 'code'
-  | 'collapsible'
-  | 'date'
-  | 'email'
-  | 'group'
-  | 'json'
-  | 'number'
-  | 'point'
-  | 'radio'
-  | 'relationship'
-  | 'richText'
-  | 'row'
-  | 'select'
-  | 'tabs'
-  | 'text'
-  | 'textarea'
-  | 'upload'
-
 export type FieldGeneratorFunction<TSchema, TField extends Field> = (
   args: FieldGenerator<TSchema, TField>,
 ) => void
@@ -101,13 +88,14 @@ export type FieldGeneratorFunction<TSchema, TField extends Field> = (
  */
 export type FieldToSchemaMap<TSchema> = {
   array: FieldGeneratorFunction<TSchema, ArrayField>
-  blocks: FieldGeneratorFunction<TSchema, BlockField>
+  blocks: FieldGeneratorFunction<TSchema, BlocksField>
   checkbox: FieldGeneratorFunction<TSchema, CheckboxField>
   code: FieldGeneratorFunction<TSchema, CodeField>
   collapsible: FieldGeneratorFunction<TSchema, CollapsibleField>
   date: FieldGeneratorFunction<TSchema, DateField>
   email: FieldGeneratorFunction<TSchema, EmailField>
   group: FieldGeneratorFunction<TSchema, GroupField>
+  join: FieldGeneratorFunction<TSchema, JoinField>
   json: FieldGeneratorFunction<TSchema, JSONField>
   number: FieldGeneratorFunction<TSchema, NumberField>
   point: FieldGeneratorFunction<TSchema, PointField>
@@ -122,5 +110,5 @@ export type FieldToSchemaMap<TSchema> = {
   upload: FieldGeneratorFunction<TSchema, UploadField>
 }
 
-export type MigrateUpArgs = { payload: Payload }
-export type MigrateDownArgs = { payload: Payload }
+export type MigrateUpArgs = { payload: Payload; req: PayloadRequest }
+export type MigrateDownArgs = { payload: Payload; req: PayloadRequest }

@@ -134,7 +134,7 @@ describe('Users', () => {
 
 ```json
 "scripts": {
-  "test": "NODE_OPTIONS=--experimental-vm-modules jest --forceExit --detectOpenHandles"
+  "test": "jest --forceExit --detectOpenHandles"
 }
 ```
 

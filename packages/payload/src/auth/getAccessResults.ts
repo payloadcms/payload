@@ -2,7 +2,6 @@ import type { AllOperations, PayloadRequest } from '../types/index.js'
 import type { Permissions } from './types.js'
 
 import { getEntityPolicies } from '../utilities/getEntityPolicies.js'
-import isolateObjectProperty from '../utilities/isolateObjectProperty.js'
 
 type GetAccessResultsArgs = {
   req: PayloadRequest
@@ -45,9 +44,7 @@ export async function getAccessResults({ req }: GetAccessResultsArgs): Promise<P
         type: 'collection',
         entity: collection,
         operations: collectionOperations,
-        // Do not re-use our existing req object, as we need a new req.transactionID. Cannot re-use our existing one, as this is run in parallel (Promise.all above) which is
-        // not supported on the same transaction ID. Not passing a transaction ID here creates a new transaction ID.
-        req: isolateObjectProperty(req, 'transactionID'),
+        req,
       })
       results.collections = {
         ...results.collections,
@@ -68,9 +65,7 @@ export async function getAccessResults({ req }: GetAccessResultsArgs): Promise<P
         type: 'global',
         entity: global,
         operations: globalOperations,
-        // Do not re-use our existing req object, as we need a new req.transactionID. Cannot re-use our existing one, as this is run in parallel (Promise.all above) which is
-        // not supported on the same transaction ID. Not passing a transaction ID here creates a new transaction ID.
-        req: isolateObjectProperty(req, 'transactionID'),
+        req,
       })
       results.globals = {
         ...results.globals,

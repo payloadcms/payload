@@ -22,7 +22,9 @@ export const generateSubmissionCollection = (
       required: true,
       validate: async (value, { req: { payload }, req }) => {
         /* Don't run in the client side */
-        if (!payload) return true
+        if (!payload) {
+          return true
+        }
 
         if (payload) {
           let _existingForm

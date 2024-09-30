@@ -1,4 +1,4 @@
-import type { SanitizedConfig } from 'payload'
+import type { PayloadServerReactComponent, SanitizedConfig } from 'payload'
 
 import React from 'react'
 
@@ -6,7 +6,9 @@ import './index.scss'
 
 const baseClass = 'after-dashboard'
 
-export const AfterDashboard: SanitizedConfig['admin']['components']['afterDashboard'][0] = () => {
+export const AfterDashboard: PayloadServerReactComponent<
+  SanitizedConfig['admin']['components']['afterDashboard'][0]
+> = () => {
   return (
     <div className={baseClass}>
       <h4>Test Config</h4>

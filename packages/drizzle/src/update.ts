@@ -10,15 +10,15 @@ import { upsertRow } from './upsertRow/index.js'
 
 export const updateOne: UpdateOne = async function updateOne(
   this: DrizzleAdapter,
-  { id, collection: collectionSlug, data, draft, locale, req, where: whereArg },
+  { id, collection: collectionSlug, data, draft, joins: joinQuery, locale, req, where: whereArg },
 ) {
-  const db = this.sessions[await req.transactionID]?.db || this.drizzle
+  const db = this.sessions[await req?.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
   const whereToUse = whereArg || { id: { equals: id } }
   let idToUpdate = id
 
-  const { joins, selectFields, where } = await buildQuery({
+  const { joins, selectFields, where } = buildQuery({
     adapter: this,
     fields: collection.fields,
     locale,
@@ -46,6 +46,7 @@ export const updateOne: UpdateOne = async function updateOne(
     data,
     db,
     fields: collection.fields,
+    joinQuery,
     operation: 'update',
     req,
     tableName,

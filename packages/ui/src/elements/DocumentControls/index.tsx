@@ -1,18 +1,29 @@
 'use client'
-import type { CollectionPermission, GlobalPermission, SanitizedCollectionConfig } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ClientGlobalConfig,
+  ClientUser,
+  CollectionPermission,
+  GlobalPermission,
+  SanitizedCollectionConfig,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useEffect } from 'react'
 
-import { useComponentMap } from '../../providers/ComponentMap/index.js'
+import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
+
 import { useConfig } from '../../providers/Config/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { formatDate } from '../../utilities/formatDate.js'
 import { Autosave } from '../Autosave/index.js'
+import { Button } from '../Button/index.js'
 import { DeleteDocument } from '../DeleteDocument/index.js'
 import { DuplicateDocument } from '../DuplicateDocument/index.js'
 import { Gutter } from '../Gutter/index.js'
+import { Locked } from '../Locked/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { PreviewButton } from '../PreviewButton/index.js'
 import { PublishButton } from '../PublishButton/index.js'
@@ -24,40 +35,56 @@ import './index.scss'
 const baseClass = 'doc-controls'
 
 export const DocumentControls: React.FC<{
-  apiURL: string
-  data?: any
-  disableActions?: boolean
-  hasPublishPermission?: boolean
-  hasSavePermission?: boolean
+  readonly apiURL: string
+  readonly data?: any
+  readonly disableActions?: boolean
+  readonly disableCreate?: boolean
+  readonly hasPublishPermission?: boolean
+  readonly hasSavePermission?: boolean
   id?: number | string
-  isAccountView?: boolean
-  isEditing?: boolean
-  permissions: CollectionPermission | GlobalPermission | null
-  slug: SanitizedCollectionConfig['slug']
+  readonly isAccountView?: boolean
+  readonly isEditing?: boolean
+  readonly onDelete?: DocumentInfoContext['onDelete']
+  readonly onDrawerCreate?: () => void
+  /* Only available if `redirectAfterDuplicate` is `false` */
+  readonly onDuplicate?: DocumentInfoContext['onDuplicate']
+  readonly onSave?: DocumentInfoContext['onSave']
+  readonly onTakeOver?: () => void
+  readonly permissions: CollectionPermission | GlobalPermission | null
+  readonly readOnlyForIncomingUser?: boolean
+  readonly redirectAfterDelete?: boolean
+  readonly redirectAfterDuplicate?: boolean
+  readonly slug: SanitizedCollectionConfig['slug']
+  readonly user?: ClientUser
 }> = (props) => {
   const {
     id,
     slug,
     data,
     disableActions,
+    disableCreate,
     hasSavePermission,
     isAccountView,
     isEditing,
+    onDelete,
+    onDrawerCreate,
+    onDuplicate,
+    onTakeOver,
     permissions,
+    readOnlyForIncomingUser,
+    redirectAfterDelete,
+    redirectAfterDuplicate,
+    user,
   } = props
 
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
-  const config = useConfig()
-  const { getComponentMap } = useComponentMap()
+  const editDepth = useEditDepth()
 
-  const collectionConfig = config.collections.find((coll) => coll.slug === slug)
-  const globalConfig = config.globals.find((global) => global.slug === slug)
+  const { config, getEntityConfig } = useConfig()
 
-  const componentMap = getComponentMap({
-    collectionSlug: collectionConfig?.slug,
-    globalSlug: globalConfig?.slug,
-  })
+  const collectionConfig = getEntityConfig({ collectionSlug: slug }) as ClientCollectionConfig
+  const globalConfig = getEntityConfig({ globalSlug: slug }) as ClientGlobalConfig
 
   const {
     admin: { dateFormat },
@@ -106,6 +133,9 @@ export const DocumentControls: React.FC<{
                   })}
                 </p>
               </li>
+            )}
+            {user && readOnlyForIncomingUser && (
+              <Locked className={`${baseClass}__locked-controls`} user={user} />
             )}
             {(collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) && (
               <Fragment>
@@ -160,8 +190,13 @@ export const DocumentControls: React.FC<{
         </div>
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
-            {componentMap?.isPreviewEnabled && (
-              <PreviewButton CustomComponent={componentMap.PreviewButton} />
+            {(collectionConfig?._isPreviewEnabled || globalConfig?._isPreviewEnabled) && (
+              <PreviewButton
+                CustomComponent={
+                  collectionConfig?.admin?.components?.edit?.PreviewButton ||
+                  globalConfig?.admin?.components?.elements?.PreviewButton
+                }
+              />
             )}
             {hasSavePermission && (
               <React.Fragment>
@@ -172,17 +207,43 @@ export const DocumentControls: React.FC<{
                       unsavedDraftWithValidations ||
                       (globalConfig?.versions?.drafts &&
                         !globalConfig?.versions?.drafts?.autosave)) && (
-                      <SaveDraftButton CustomComponent={componentMap.SaveDraftButton} />
+                      <SaveDraftButton
+                        CustomComponent={
+                          collectionConfig?.admin?.components?.edit?.SaveDraftButton ||
+                          globalConfig?.admin?.components?.elements?.SaveDraftButton
+                        }
+                      />
                     )}
-                    <PublishButton CustomComponent={componentMap.PublishButton} />
+                    <PublishButton
+                      CustomComponent={
+                        collectionConfig?.admin?.components?.edit?.PublishButton ||
+                        globalConfig?.admin?.components?.elements?.PublishButton
+                      }
+                    />
                   </React.Fragment>
                 ) : (
-                  <SaveButton CustomComponent={componentMap.SaveButton} />
+                  <SaveButton
+                    CustomComponent={
+                      collectionConfig?.admin?.components?.edit?.SaveButton ||
+                      globalConfig?.admin?.components?.elements?.SaveButton
+                    }
+                  />
                 )}
               </React.Fragment>
             )}
+            {user && readOnlyForIncomingUser && (
+              <Button
+                buttonStyle="secondary"
+                id="take-over"
+                onClick={onTakeOver}
+                size="medium"
+                type="button"
+              >
+                {t('general:takeOver')}
+              </Button>
+            )}
           </div>
-          {showDotMenu && (
+          {showDotMenu && !readOnlyForIncomingUser && (
             <Popup
               button={
                 <div className={`${baseClass}__dots`}>
@@ -199,18 +260,30 @@ export const DocumentControls: React.FC<{
               <PopupList.ButtonGroup>
                 {hasCreatePermission && (
                   <React.Fragment>
-                    <PopupList.Button
-                      href={formatAdminURL({
-                        adminRoute,
-                        path: `/collections/${collectionConfig?.slug}/create`,
-                      })}
-                      id="action-create"
-                    >
-                      {i18n.t('general:createNew')}
-                    </PopupList.Button>
+                    {!disableCreate && (
+                      <Fragment>
+                        {editDepth > 1 ? (
+                          <PopupList.Button id="action-create" onClick={onDrawerCreate}>
+                            {i18n.t('general:createNew')}
+                          </PopupList.Button>
+                        ) : (
+                          <PopupList.Button
+                            href={formatAdminURL({
+                              adminRoute,
+                              path: `/collections/${collectionConfig?.slug}/create`,
+                            })}
+                            id="action-create"
+                          >
+                            {i18n.t('general:createNew')}
+                          </PopupList.Button>
+                        )}
+                      </Fragment>
+                    )}
                     {!collectionConfig.disableDuplicate && isEditing && (
                       <DuplicateDocument
                         id={id.toString()}
+                        onDuplicate={onDuplicate}
+                        redirectAfterDuplicate={redirectAfterDuplicate}
                         singularLabel={collectionConfig?.labels?.singular}
                         slug={collectionConfig?.slug}
                       />
@@ -222,6 +295,8 @@ export const DocumentControls: React.FC<{
                     buttonId="action-delete"
                     collectionSlug={collectionConfig?.slug}
                     id={id.toString()}
+                    onDelete={onDelete}
+                    redirectAfterDelete={redirectAfterDelete}
                     singularLabel={collectionConfig?.labels?.singular}
                     useAsTitle={collectionConfig?.admin?.useAsTitle}
                   />

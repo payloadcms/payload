@@ -16,9 +16,14 @@ export interface Config {
     'validate-drafts-on': ValidateDraftsOn;
     'validate-drafts-off': ValidateDraftsOff;
     'validate-drafts-on-autosave': ValidateDraftsOnAutosave;
+    'prev-value': PrevValue;
+    'prev-value-relation': PrevValueRelation;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+  };
+  db: {
+    defaultIDType: string;
   };
   globals: {
     'global-validate-drafts-on': GlobalValidateDraftsOn;
@@ -31,12 +36,17 @@ export interface Config {
 export interface UserAuthOperations {
   forgotPassword: {
     email: string;
+    password: string;
   };
   login: {
-    password: string;
     email: string;
+    password: string;
   };
   registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
     email: string;
     password: string;
   };
@@ -251,7 +261,7 @@ export interface User {
 export interface Upload {
   id: string;
   text?: string | null;
-  media?: string | Upload | null;
+  media?: (string | null) | Upload;
   richText?: {
     root: {
       type: string;
@@ -311,6 +321,27 @@ export interface ValidateDraftsOnAutosave {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "prev-value".
+ */
+export interface PrevValue {
+  id: string;
+  title: string;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "prev-value-relation".
+ */
+export interface PrevValueRelation {
+  id: string;
+  previousValueRelation?: (string | null) | PrevValue;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

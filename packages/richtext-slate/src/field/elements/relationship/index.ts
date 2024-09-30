@@ -1,13 +1,10 @@
 import type { RichTextCustomElement } from '../../../types.js'
 
-import { Button } from './Button/index.js'
-import { Element } from './Element/index.js'
-import { WithRelationship } from './plugin.js'
 import { relationshipName } from './shared.js'
 
 export const relationship: RichTextCustomElement = {
   name: relationshipName,
-  Button,
-  Element,
-  plugins: [WithRelationship],
+  Button: '@payloadcms/richtext-slate/client#RelationshipButton',
+  Element: '@payloadcms/richtext-slate/client#RelationshipElement',
+  plugins: ['@payloadcms/richtext-slate/client#WithRelationship'],
 }

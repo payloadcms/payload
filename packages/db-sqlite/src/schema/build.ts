@@ -1,9 +1,8 @@
-/* eslint-disable no-param-reassign */
-import type { ColumnDataType, Relation } from 'drizzle-orm'
+import type { Relation } from 'drizzle-orm'
 import type {
+  AnySQLiteColumn,
   ForeignKeyBuilder,
   IndexBuilder,
-  SQLiteColumn,
   SQLiteColumnBuilder,
   SQLiteTableWithColumns,
   UniqueConstraintBuilder,
@@ -32,26 +31,27 @@ import { traverseFields } from './traverseFields.js'
 export type BaseExtraConfig = Record<
   string,
   (cols: {
-    [x: string]: SQLiteColumn<{
-      baseColumn: never
-      columnType: string
-      data: unknown
-      dataType: ColumnDataType
-      driverParam: unknown
-      enumValues: string[]
-      hasDefault: false
-      name: string
-      notNull: false
-      tableName: string
-    }>
+    [x: string]: AnySQLiteColumn
   }) => ForeignKeyBuilder | IndexBuilder | UniqueConstraintBuilder
 >
 
-export type RelationMap = Map<string, { localized: boolean; target: string; type: 'many' | 'one' }>
+export type RelationMap = Map<
+  string,
+  {
+    localized: boolean
+    relationName?: string
+    target: string
+    type: 'many' | 'one'
+  }
+>
 
 type Args = {
   adapter: SQLiteAdapter
   baseColumns?: Record<string, SQLiteColumnBuilder>
+  /**
+   * After table is created, run these functions to add extra config to the table
+   * ie. indexes, multiple columns, etc
+   */
   baseExtraConfig?: BaseExtraConfig
   buildNumbers?: boolean
   buildRelationships?: boolean
@@ -59,16 +59,24 @@ type Args = {
   disableUnique: boolean
   fields: Field[]
   locales?: [string, ...string[]]
-  rootRelationsToBuild?: RelationMap
   rootRelationships?: Set<string>
+  rootRelationsToBuild?: RelationMap
   rootTableIDColType?: IDType
   rootTableName?: string
   tableName: string
   timestamps?: boolean
   versions: boolean
+  /**
+   * Tracks whether or not this table is built
+   * from the result of a localized array or block field at some point
+   */
+  withinLocalizedArrayOrBlock?: boolean
 }
 
 type Result = {
+  hasLocalizedManyNumberField: boolean
+  hasLocalizedManyTextField: boolean
+  hasLocalizedRelationshipField: boolean
   hasManyNumberField: 'index' | boolean
   hasManyTextField: 'index' | boolean
   relationsToBuild: RelationMap
@@ -82,13 +90,14 @@ export const buildTable = ({
   disableUnique = false,
   fields,
   locales,
-  rootRelationsToBuild,
   rootRelationships,
+  rootRelationsToBuild,
   rootTableIDColType,
   rootTableName: incomingRootTableName,
   tableName,
   timestamps,
   versions,
+  withinLocalizedArrayOrBlock,
 }: Args): Result => {
   const isRoot = !incomingRootTableName
   const rootTableName = incomingRootTableName || tableName
@@ -130,21 +139,22 @@ export const buildTable = ({
     localesIndexes,
     newTableName: tableName,
     parentTableName: tableName,
-    relationsToBuild,
     relationships,
+    relationsToBuild,
     rootRelationsToBuild: rootRelationsToBuild || relationsToBuild,
     rootTableIDColType: rootTableIDColType || idColType,
     rootTableName,
     versions,
+    withinLocalizedArrayOrBlock,
   })
 
   // split the relationsToBuild by localized and non-localized
   const localizedRelations = new Map()
   const nonLocalizedRelations = new Map()
 
-  relationsToBuild.forEach(({ type, localized, target }, key) => {
+  relationsToBuild.forEach(({ type, localized, relationName, target }, key) => {
     const map = localized ? localizedRelations : nonLocalizedRelations
-    map.set(key, { type, target })
+    map.set(key, { type, relationName, target })
   })
 
   if (timestamps) {
@@ -373,8 +383,12 @@ export const buildTable = ({
         const relatedCollectionCustomIDType =
           adapter.payload.collections[relationshipConfig.slug]?.customIDType
 
-        if (relatedCollectionCustomIDType === 'number') colType = 'numeric'
-        if (relatedCollectionCustomIDType === 'text') colType = 'text'
+        if (relatedCollectionCustomIDType === 'number') {
+          colType = 'numeric'
+        }
+        if (relatedCollectionCustomIDType === 'text') {
+          colType = 'text'
+        }
 
         relationshipColumns[`${relationTo}ID`] = getIDColumn({
           name: `${formattedRelationTo}_id`,
@@ -452,7 +466,7 @@ export const buildTable = ({
   adapter.relations[`relations_${tableName}`] = relations(table, ({ many, one }) => {
     const result: Record<string, Relation<string>> = {}
 
-    nonLocalizedRelations.forEach(({ type, target }, key) => {
+    nonLocalizedRelations.forEach(({ type, relationName, target }, key) => {
       if (type === 'one') {
         result[key] = one(adapter.tables[target], {
           fields: [table[key]],
@@ -461,7 +475,7 @@ export const buildTable = ({
         })
       }
       if (type === 'many') {
-        result[key] = many(adapter.tables[target], { relationName: key })
+        result[key] = many(adapter.tables[target], { relationName: relationName || key })
       }
     })
 
@@ -486,5 +500,12 @@ export const buildTable = ({
     return result
   })
 
-  return { hasManyNumberField, hasManyTextField, relationsToBuild }
+  return {
+    hasLocalizedManyNumberField,
+    hasLocalizedManyTextField,
+    hasLocalizedRelationshipField,
+    hasManyNumberField,
+    hasManyTextField,
+    relationsToBuild,
+  }
 }

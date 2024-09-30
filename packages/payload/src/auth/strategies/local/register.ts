@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { JsonObject, Payload } from '../../../index.js'
-import type { PayloadRequest } from '../../../types/index.js'
+import type { PayloadRequest, Where } from '../../../types/index.js'
 
 import { ValidationError } from '../../../errors/index.js'
 import { generatePasswordSaltHash } from './generatePasswordSaltHash.js'
@@ -22,23 +22,43 @@ export const registerLocalStrategy = async ({
 }: Args): Promise<Record<string, unknown>> => {
   const loginWithUsername = collection?.auth?.loginWithUsername
 
+  let whereConstraint: Where
+
+  if (!loginWithUsername) {
+    whereConstraint = {
+      email: {
+        equals: doc.email,
+      },
+    }
+  } else {
+    whereConstraint = {
+      or: [],
+    }
+
+    if (doc.email) {
+      whereConstraint.or.push({
+        email: {
+          equals: doc.email,
+        },
+      })
+    }
+
+    if (doc.username) {
+      whereConstraint.or.push({
+        username: {
+          equals: doc.username,
+        },
+      })
+    }
+  }
+
   const existingUser = await payload.find({
     collection: collection.slug,
     depth: 0,
     limit: 1,
     pagination: false,
     req,
-    where: loginWithUsername
-      ? {
-          username: {
-            equals: doc.username,
-          },
-        }
-      : {
-          email: {
-            equals: doc.email,
-          },
-        },
+    where: whereConstraint,
   })
 
   if (existingUser.docs.length > 0) {
@@ -55,10 +75,12 @@ export const registerLocalStrategy = async ({
     })
   }
 
-  const { hash, salt } = await generatePasswordSaltHash({ collection, password })
+  const { hash, salt } = await generatePasswordSaltHash({ collection, password, req })
 
   const sanitizedDoc = { ...doc }
-  if (sanitizedDoc.password) delete sanitizedDoc.password
+  if (sanitizedDoc.password) {
+    delete sanitizedDoc.password
+  }
 
   return payload.db.create({
     collection: collection.slug,

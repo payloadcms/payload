@@ -3,7 +3,6 @@ import type { BlockField, CollectionConfig } from 'payload'
 import { slateEditor } from '@payloadcms/richtext-slate'
 
 import { blockFieldsSlug, textFieldsSlug } from '../../slugs.js'
-import { AddCustomBlocks } from './components/AddCustomBlocks/index.js'
 import { getBlocksFieldSeedData } from './shared.js'
 
 export const getBlocksField = (prefix?: string): BlockField => ({
@@ -185,6 +184,28 @@ const BlockFields: CollectionConfig = {
       },
     },
     {
+      name: 'blocksWithLocalizedArray',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'localizedArray',
+          fields: [
+            {
+              name: 'array',
+              type: 'array',
+              localized: true,
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'blocksWithSimilarConfigs',
       type: 'blocks',
       blocks: [
@@ -323,7 +344,7 @@ const BlockFields: CollectionConfig = {
       type: 'ui',
       admin: {
         components: {
-          Field: AddCustomBlocks,
+          Field: '/collections/Blocks/components/AddCustomBlocks/index.js#AddCustomBlocks',
         },
       },
     },

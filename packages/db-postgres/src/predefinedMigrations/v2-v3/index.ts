@@ -1,5 +1,5 @@
 import type { TransactionPg } from '@payloadcms/drizzle/types'
-import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
+import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
 import type { Payload, PayloadRequest } from 'payload'
 
 import { sql } from 'drizzle-orm'
@@ -43,7 +43,7 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
   const dir = payload.db.migrationDir
 
   // get the drizzle migrateUpSQL from drizzle using the last schema
-  const { generateDrizzleJson, generateMigration } = require('drizzle-kit/payload')
+  const { generateDrizzleJson, generateMigration } = require('drizzle-kit/api')
   const drizzleJsonAfter = generateDrizzleJson(adapter.schema)
 
   // Get the previous migration snapshot
@@ -118,7 +118,7 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
       const versionsTableName = adapter.tableNameMap.get(
         `_${toSnakeCase(collection.slug)}${adapter.versionsSuffix}`,
       )
-      const versionFields = buildVersionCollectionFields(collection)
+      const versionFields = buildVersionCollectionFields(payload.config, collection)
       const versionPathsToQuery: PathsToQuery = new Set()
 
       traverseFields({
@@ -191,7 +191,7 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
         `_${toSnakeCase(global.slug)}${adapter.versionsSuffix}`,
       )
 
-      const versionFields = buildVersionGlobalFields(global)
+      const versionFields = buildVersionGlobalFields(payload.config, global)
 
       const versionPathsToQuery: PathsToQuery = new Set()
 

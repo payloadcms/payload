@@ -1,9 +1,5 @@
 import type { UIField } from 'payload'
 
-import { withMergedProps } from '@payloadcms/ui/shared'
-
-import { PreviewComponent } from './PreviewComponent.js'
-
 interface FieldFunctionProps {
   /**
    * Path to the description field to use for the preview
@@ -37,15 +33,14 @@ export const PreviewField: FieldFunction = ({
     type: 'ui',
     admin: {
       components: {
-        Field: withMergedProps({
-          Component: PreviewComponent,
-          sanitizeServerOnlyProps: true,
-          toMergeIntoProps: {
+        Field: {
+          clientProps: {
             descriptionPath,
             hasGenerateURLFn: hasGenerateFn,
             titlePath,
           },
-        }),
+          path: '@payloadcms/plugin-seo/client#PreviewComponent',
+        },
       },
     },
     label: 'Preview',

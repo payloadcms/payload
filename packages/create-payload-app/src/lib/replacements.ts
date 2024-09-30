@@ -29,9 +29,35 @@ const postgresReplacement: DbAdapterReplacement = {
   packageName: '@payloadcms/db-postgres',
 }
 
+const vercelPostgresReplacement: DbAdapterReplacement = {
+  configReplacement: (envName = 'POSTGRES_URL') => [
+    '  db: vercelPostgresAdapter({',
+    '    pool: {',
+    `      connectionString: process.env.${envName} || '',`,
+    '    },',
+    '  }),',
+  ],
+  importReplacement: "import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'",
+  packageName: '@payloadcms/db-vercel-postgres',
+}
+
+const sqliteReplacement: DbAdapterReplacement = {
+  configReplacement: (envName = 'DATABASE_URI') => [
+    '  db: sqliteAdapter({',
+    '    client: {',
+    `      url: process.env.${envName} || '',`,
+    '    },',
+    '  }),',
+  ],
+  importReplacement: "import { sqliteAdapter } from '@payloadcms/db-sqlite'",
+  packageName: '@payloadcms/db-sqlite',
+}
+
 export const dbReplacements: Record<DbType, DbAdapterReplacement> = {
   mongodb: mongodbReplacement,
   postgres: postgresReplacement,
+  sqlite: sqliteReplacement,
+  'vercel-postgres': vercelPostgresReplacement,
 }
 
 type StorageAdapterReplacement = {

@@ -2,7 +2,7 @@
 
 .pill {
   font-size: 1rem;
-  line-height: base(1);
+  line-height: base(1.2);
   display: inline-flex;
   background: var(--theme-elevation-150);
   color: var(--theme-elevation-800);
@@ -12,9 +12,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   border: 0;
-  padding: 0 base(0.25);
+  padding: 0 base(0.4);
   align-items: center;
   flex-shrink: 0;
+  gap: base(0.2);
 
   &--rounded {
     border-radius: var(--style-radius-l);
@@ -34,16 +35,13 @@
 
   .icon {
     flex-shrink: 0;
+    margin: base(0.1);
   }
 
   &__label {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-
-  &__icon {
-    padding: calc(var(--base) / 4);
   }
 
   &--has-action {
@@ -56,27 +54,18 @@
   }
 
   &--has-icon {
+    padding-inline-start: base(0.4);
+    padding-inline-end: base(0.3);
+
     svg {
       display: block;
     }
   }
 
-  [dir='rtl'] &--align-icon-left {
-    padding-right: 0;
-    padding-left: 10px;
-  }
-
-  [dir='rtl'] &--align-icon-right {
-    padding-right: 10px;
-    padding-left: 0;
-  }
-
   &--align-icon-left {
-    padding-left: 0;
-  }
-
-  &--align-icon-right {
-    padding-right: 0;
+    flex-direction: row-reverse;
+    padding-inline-start: base(0.1);
+    padding-inline-end: base(0.4);
   }
 
   &--style-white {

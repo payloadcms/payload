@@ -1,3 +1,4 @@
+'use client'
 import { arraysHaveSameStrings } from '../../utilities/arraysHaveSameStrings.js'
 
 export const mergeErrorPaths = (

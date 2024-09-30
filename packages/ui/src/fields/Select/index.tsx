@@ -1,5 +1,10 @@
 'use client'
-import type { ClientValidate, Option, OptionObject, SelectFieldProps } from 'payload'
+import type {
+  Option,
+  OptionObject,
+  SelectFieldClientComponent,
+  SelectFieldClientProps,
+} from 'payload'
 
 import React, { useCallback } from 'react'
 
@@ -23,38 +28,38 @@ const formatOptions = (options: Option[]): OptionObject[] =>
     } as OptionObject
   })
 
-const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
+const SelectFieldComponent: SelectFieldClientComponent = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
-    descriptionProps,
-    errorProps,
-    hasMany = false,
-    isClearable = true,
-    isSortable = true,
-    label,
-    labelProps,
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        description,
+        isClearable = true,
+        isSortable = true,
+        readOnly: readOnlyFromAdmin,
+        style,
+        width,
+      } = {} as SelectFieldClientProps['field']['admin'],
+      hasMany = false,
+      options: optionsFromProps = [],
+      required,
+    },
     onChange: onChangeFromProps,
-    options: optionsFromProps = [],
-    path: pathFromProps,
-    readOnly: readOnlyFromProps,
-    required,
-    style,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
-    width,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const options = React.useMemo(() => formatOptions(optionsFromProps), [optionsFromProps])
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate = useCallback(
     (value, validationOptions) => {
-      if (typeof validate === 'function')
+      if (typeof validate === 'function') {
         return validate(value, { ...validationOptions, hasMany, options, required })
+      }
     },
     [validate, required, hasMany, options],
   )
@@ -94,19 +99,17 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
 
   return (
     <SelectInput
-      AfterInput={AfterInput}
-      BeforeInput={BeforeInput}
-      CustomDescription={CustomDescription}
-      CustomError={CustomError}
-      CustomLabel={CustomLabel}
+      afterInput={field?.admin?.components?.afterInput}
+      beforeInput={field?.admin?.components?.beforeInput}
       className={className}
-      descriptionProps={descriptionProps}
-      errorProps={errorProps}
+      Description={field?.admin?.components?.Description}
+      description={description}
+      Error={field?.admin?.components?.Error}
+      field={field}
       hasMany={hasMany}
       isClearable={isClearable}
       isSortable={isSortable}
-      label={label}
-      labelProps={labelProps}
+      Label={field?.admin?.components?.Label}
       name={name}
       onChange={onChange}
       options={options}

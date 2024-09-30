@@ -2,10 +2,9 @@ import { defaultESLintIgnores, rootEslintConfig, rootParserOptions } from '../es
 import payloadPlugin from '@payloadcms/eslint-plugin'
 import playwright from 'eslint-plugin-playwright'
 
-/** @typedef {import('eslint').Linter.FlatConfig} */
-let FlatConfig
+/** @typedef {import('eslint').Linter.Config} Config */
 
-/** @type {FlatConfig[]} */
+/** @type {Config[]} */
 export const testEslintConfig = [
   ...rootEslintConfig,
   {
@@ -14,9 +13,8 @@ export const testEslintConfig = [
   {
     languageOptions: {
       parserOptions: {
-        project: './tsconfig.json',
-        tsconfigDirName: import.meta.dirname,
         ...rootParserOptions,
+        tsconfigRootDir: import.meta.dirname,
       },
     },
     plugins: {

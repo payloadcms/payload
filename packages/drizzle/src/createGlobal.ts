@@ -10,7 +10,7 @@ export async function createGlobal<T extends Record<string, unknown>>(
   this: DrizzleAdapter,
   { slug, data, req = {} as PayloadRequest }: CreateGlobalArgs,
 ): Promise<T> {
-  const db = this.sessions[await req.transactionID]?.db || this.drizzle
+  const db = this.sessions[await req?.transactionID]?.db || this.drizzle
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
 
   const tableName = this.tableNameMap.get(toSnakeCase(globalConfig.slug))

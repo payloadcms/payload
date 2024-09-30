@@ -48,6 +48,7 @@ export interface Config {
     'number-fields': NumberField;
     'point-fields': PointField;
     'relationship-fields': RelationshipField;
+    'lexical-relationship-fields': LexicalRelationshipField;
     'rich-text-fields': RichTextField;
     'select-fields': SelectField;
     'tabs-fields-2': TabsFields2;
@@ -56,7 +57,11 @@ export interface Config {
     uploads: Upload;
     uploads2: Uploads2;
     uploads3: Uploads3;
+    'uploads-multi': UploadsMulti;
+    'uploads-poly': UploadsPoly;
+    'uploads-multi-poly': UploadsMultiPoly;
     'ui-fields': UiField;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -74,6 +79,7 @@ export interface Config {
 export interface UserAuthOperations {
   forgotPassword: {
     email: string;
+    password: string;
   };
   login: {
     email: string;
@@ -85,6 +91,7 @@ export interface UserAuthOperations {
   };
   unlock: {
     email: string;
+    password: string;
   };
 }
 /**
@@ -342,6 +349,17 @@ export interface ArrayField {
         id?: string | null;
       }[]
     | null;
+  nestedArrayLocalized?:
+    | {
+        array?:
+          | {
+              text?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -594,6 +612,19 @@ export interface BlockField {
         blockType: 'text';
       }[]
     | null;
+  blocksWithLocalizedArray?:
+    | {
+        array?:
+          | {
+              text?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedArray';
+      }[]
+    | null;
   blocksWithSimilarConfigs?:
     | (
         | {
@@ -709,6 +740,20 @@ export interface TextField {
   withMaxRows?: string[] | null;
   disableListColumnText?: string | null;
   disableListFilterText?: string | null;
+  array?:
+    | {
+        texts?: string[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | {
+        texts?: string[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -898,6 +943,51 @@ export interface GroupField {
       };
     };
   };
+  camelCaseGroup?: {
+    array?:
+      | {
+          text?: string | null;
+          array?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  localizedGroupArr?: {
+    array?:
+      | {
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  localizedGroupSelect?: {
+    select?: ('one' | 'two')[] | null;
+  };
+  localizedGroupRel?: {
+    email?: (string | null) | EmailField;
+  };
+  localizedGroupManyRel?: {
+    email?: (string | EmailField)[] | null;
+  };
+  localizedGroupPolyRel?: {
+    email?: {
+      relationTo: 'email-fields';
+      value: string | EmailField;
+    } | null;
+  };
+  localizedGroupPolyHasManyRel?: {
+    email?:
+      | {
+          relationTo: 'email-fields';
+          value: string | EmailField;
+        }[]
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -910,8 +1000,15 @@ export interface RowField {
   title: string;
   field_with_width_a?: string | null;
   field_with_width_b?: string | null;
+  field_with_width_30_percent?: string | null;
+  field_with_width_60_percent?: string | null;
+  field_with_width_20_percent?: string | null;
   field_within_collapsible_a?: string | null;
   field_within_collapsible_b?: string | null;
+  field_20_percent_width_within_row_a?: string | null;
+  no_set_width_within_row_b?: string | null;
+  no_set_width_within_row_c?: string | null;
+  field_20_percent_width_within_row_d?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -987,6 +1084,20 @@ export interface NumberField {
   validatesHasMany?: number[] | null;
   localizedHasMany?: number[] | null;
   withMinRows?: number[] | null;
+  array?:
+    | {
+        numbers?: number[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | {
+        numbers?: number[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1046,6 +1157,8 @@ export interface RelationshipField {
     | null;
   relationToSelf?: (string | null) | RelationshipField;
   relationToSelfSelectOnly?: (string | null) | RelationshipField;
+  relationWithAllowCreateToFalse?: (string | null) | User;
+  relationWithAllowEditToFalse?: (string | null) | User;
   relationWithDynamicDefault?: (string | null) | User;
   relationHasManyWithDynamicDefault?: {
     relationTo: 'users';
@@ -1066,6 +1179,45 @@ export interface RelationshipField {
         value: string | TextField;
       }[]
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-relationship-fields".
+ */
+export interface LexicalRelationshipField {
+  id: string;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  richText2?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1281,6 +1433,20 @@ export interface TabsField {
     afterChange?: boolean | null;
     afterRead?: boolean | null;
   };
+  camelCaseTab?: {
+    array?:
+      | {
+          text?: string | null;
+          array?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
   textarea?: string | null;
   anotherText: string;
   nestedTab?: {
@@ -1296,7 +1462,7 @@ export interface TabsField {
 export interface Upload {
   id: string;
   text?: string | null;
-  media?: string | Upload | null;
+  media?: (string | null) | Upload;
   richText?: {
     root: {
       type: string;
@@ -1331,7 +1497,7 @@ export interface Upload {
 export interface Uploads2 {
   id: string;
   text?: string | null;
-  media?: string | Uploads2 | null;
+  media?: (string | null) | Uploads2;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1350,7 +1516,7 @@ export interface Uploads2 {
  */
 export interface Uploads3 {
   id: string;
-  media?: string | Uploads3 | null;
+  media?: (string | null) | Uploads3;
   richText?: {
     root: {
       type: string;
@@ -1380,11 +1546,210 @@ export interface Uploads3 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-multi".
+ */
+export interface UploadsMulti {
+  id: string;
+  text?: string | null;
+  media?: (string | Upload)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-poly".
+ */
+export interface UploadsPoly {
+  id: string;
+  text?: string | null;
+  media?:
+    | ({
+        relationTo: 'uploads';
+        value: string | Upload;
+      } | null)
+    | ({
+        relationTo: 'uploads2';
+        value: string | Uploads2;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-multi-poly".
+ */
+export interface UploadsMultiPoly {
+  id: string;
+  text?: string | null;
+  media?:
+    | (
+        | {
+            relationTo: 'uploads';
+            value: string | Upload;
+          }
+        | {
+            relationTo: 'uploads2';
+            value: string | Uploads2;
+          }
+      )[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ui-fields".
  */
 export interface UiField {
   id: string;
   text: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'lexical-fields';
+        value: string | LexicalField;
+      } | null)
+    | ({
+        relationTo: 'lexical-migrate-fields';
+        value: string | LexicalMigrateField;
+      } | null)
+    | ({
+        relationTo: 'lexical-localized-fields';
+        value: string | LexicalLocalizedField;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'array-fields';
+        value: string | ArrayField;
+      } | null)
+    | ({
+        relationTo: 'block-fields';
+        value: string | BlockField;
+      } | null)
+    | ({
+        relationTo: 'checkbox-fields';
+        value: string | CheckboxField;
+      } | null)
+    | ({
+        relationTo: 'code-fields';
+        value: string | CodeField;
+      } | null)
+    | ({
+        relationTo: 'collapsible-fields';
+        value: string | CollapsibleField;
+      } | null)
+    | ({
+        relationTo: 'conditional-logic';
+        value: string | ConditionalLogic;
+      } | null)
+    | ({
+        relationTo: 'date-fields';
+        value: string | DateField;
+      } | null)
+    | ({
+        relationTo: 'email-fields';
+        value: string | EmailField;
+      } | null)
+    | ({
+        relationTo: 'radio-fields';
+        value: string | RadioField;
+      } | null)
+    | ({
+        relationTo: 'group-fields';
+        value: string | GroupField;
+      } | null)
+    | ({
+        relationTo: 'row-fields';
+        value: string | RowField;
+      } | null)
+    | ({
+        relationTo: 'indexed-fields';
+        value: string | IndexedField;
+      } | null)
+    | ({
+        relationTo: 'json-fields';
+        value: string | JsonField;
+      } | null)
+    | ({
+        relationTo: 'number-fields';
+        value: string | NumberField;
+      } | null)
+    | ({
+        relationTo: 'point-fields';
+        value: string | PointField;
+      } | null)
+    | ({
+        relationTo: 'relationship-fields';
+        value: string | RelationshipField;
+      } | null)
+    | ({
+        relationTo: 'lexical-relationship-fields';
+        value: string | LexicalRelationshipField;
+      } | null)
+    | ({
+        relationTo: 'rich-text-fields';
+        value: string | RichTextField;
+      } | null)
+    | ({
+        relationTo: 'select-fields';
+        value: string | SelectField;
+      } | null)
+    | ({
+        relationTo: 'tabs-fields-2';
+        value: string | TabsFields2;
+      } | null)
+    | ({
+        relationTo: 'tabs-fields';
+        value: string | TabsField;
+      } | null)
+    | ({
+        relationTo: 'text-fields';
+        value: string | TextField;
+      } | null)
+    | ({
+        relationTo: 'uploads';
+        value: string | Upload;
+      } | null)
+    | ({
+        relationTo: 'uploads2';
+        value: string | Uploads2;
+      } | null)
+    | ({
+        relationTo: 'uploads3';
+        value: string | Uploads3;
+      } | null)
+    | ({
+        relationTo: 'uploads-multi';
+        value: string | UploadsMulti;
+      } | null)
+    | ({
+        relationTo: 'uploads-poly';
+        value: string | UploadsPoly;
+      } | null)
+    | ({
+        relationTo: 'uploads-multi-poly';
+        value: string | UploadsMultiPoly;
+      } | null)
+    | ({
+        relationTo: 'ui-fields';
+        value: string | UiField;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
   updatedAt: string;
   createdAt: string;
 }

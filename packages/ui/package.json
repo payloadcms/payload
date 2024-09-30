@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.0.0-beta.71",
+  "version": "3.0.0-beta.109",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -24,10 +24,10 @@
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
     },
-    "./utilities/buildComponentMap": {
-      "import": "./src/utilities/buildComponentMap.ts",
-      "types": "./src/utilities/buildComponentMap.ts",
-      "default": "./src/utilities/buildComponentMap.ts"
+    "./utilities/createClientConfig": {
+      "import": "./src/providers/Config/createClientConfig/index.tsx",
+      "types": "./src/providers/Config/createClientConfig/index.tsx",
+      "default": "./src/providers/Config/createClientConfig/index.tsx"
     },
     "./utilities/buildFormState": {
       "import": "./src/utilities/buildFormState.ts",
@@ -57,17 +57,18 @@
     "dist"
   ],
   "scripts": {
-    "build": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:esbuild",
-    "build:babel": "babel src --out-dir dist --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs",
-    "build:esbuild": "node bundle.js",
-    "build:reactcompiler": "pnpm copyfiles && pnpm build:babel && pnpm build:types",
+    "build": "pnpm build:reactcompiler",
+    "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
+    "build:esbuild": "node bundle.js && rm -rf dist/exports/client && mv dist/exports/client_optimized dist/exports/client",
+    "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild && pnpm build:types",
     "build:remove-artifact": "rm dist/prod/index.js",
     "build:swc": "swc ./src -d dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
-    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
@@ -76,7 +77,7 @@
     "@faceless-ui/modal": "3.0.0-beta.2",
     "@faceless-ui/scroll-info": "2.0.0-beta.0",
     "@faceless-ui/window-info": "3.0.0-beta.0",
-    "@monaco-editor/react": "4.5.1",
+    "@monaco-editor/react": "4.6.0",
     "@payloadcms/translations": "workspace:*",
     "body-scroll-lock": "4.0.0-beta.0",
     "bson-objectid": "2.0.4",
@@ -89,8 +90,9 @@
     "react-datepicker": "6.9.0",
     "react-image-crop": "10.1.8",
     "react-select": "5.8.0",
-    "scheduler": "0.25.0-rc-f994737d14-20240522",
+    "scheduler": "0.0.0-experimental-5dcb0097-20240918",
     "sonner": "^1.5.0",
+    "ts-essentials": "10.0.2",
     "use-context-selector": "2.0.0",
     "uuid": "10.0.0"
   },
@@ -103,20 +105,21 @@
     "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/body-scroll-lock": "^3.1.0",
-    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react": "npm:types-react@19.0.0-rc.1",
     "@types/react-datepicker": "6.2.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "@types/uuid": "10.0.0",
-    "babel-plugin-react-compiler": "0.0.0-experimental-592953e-20240517",
-    "esbuild": "0.23.0",
+    "babel-plugin-react-compiler": "0.0.0-experimental-24ec0eb-20240918",
+    "esbuild": "0.23.1",
     "esbuild-sass-plugin": "3.3.1",
+    "eslint-plugin-react-compiler": "0.0.0-experimental-7670337-20240918",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "next": "^15.0.0-canary.53",
+    "next": "^15.0.0-canary.160",
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-6230622a1a-20240610",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-6230622a1a-20240610"
+    "react": "^19.0.0 || ^19.0.0-rc-5dcb0097-20240918",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-5dcb0097-20240918"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
@@ -133,9 +136,14 @@
         "types": "./dist/exports/shared/index.d.ts",
         "default": "./dist/exports/shared/index.js"
       },
+      "./utilities/createClientConfig": {
+        "import": "./dist/providers/Config/createClientConfig/index.js",
+        "types": "./dist/providers/Config/createClientConfig/index.d.ts",
+        "default": "./dist/providers/Config/createClientConfig/index.js"
+      },
       "./css": {
-        "import": "./dist/prod/styles.css",
-        "default": "./dist/prod/styles.css"
+        "import": "./dist/styles.css",
+        "default": "./dist/styles.css"
       },
       "./scss": {
         "import": "./dist/scss/styles.scss",
@@ -193,7 +201,7 @@
     "types": "./dist/exports/client/index.d.ts"
   },
   "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }

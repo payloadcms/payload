@@ -14,7 +14,7 @@ export const GlobalsProvider: React.FC<
   IGlobals & {
     children: React.ReactNode
   }
-> = props => {
+> = (props) => {
   const { mainMenu, children } = props
 
   return (

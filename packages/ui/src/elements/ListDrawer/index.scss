@@ -20,6 +20,7 @@
     flex-wrap: wrap;
     flex-grow: 1;
     align-items: flex-start;
+    align-items: center;
 
     button .pill {
       pointer-events: none;
@@ -43,10 +44,16 @@
     padding: 0;
     cursor: pointer;
     color: inherit;
+    border-radius: var(--style-radius-s);
 
     &:focus:not(:focus-visible),
     &:focus-within:not(:focus-visible) {
       outline: none;
+    }
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
     }
 
     &:disabled {
@@ -65,11 +72,11 @@
     height: base(1);
 
     svg {
-      width: base(2.75);
-      height: base(2.75);
+      width: base(2);
+      height: base(2);
       position: relative;
-      left: base(-0.825);
-      top: base(-0.825);
+      inset-inline-start: base(-0.5);
+      top: base(-0.5);
 
       .stroke {
         stroke-width: 2px;

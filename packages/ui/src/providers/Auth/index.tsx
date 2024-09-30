@@ -26,21 +26,30 @@ export type AuthContext<T = ClientUser> = {
   strategy?: string
   token?: string
   tokenExpiration?: number
-  user?: T | null
+  user?: null | T
 }
 
 const Context = createContext({} as AuthContext)
 
 const maxTimeoutTime = 2147483647
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<ClientUser | null>()
+type Props = {
+  children: React.ReactNode
+  permissions?: Permissions
+  user?: ClientUser | null
+}
+export function AuthProvider({
+  children,
+  permissions: initialPermissions,
+  user: initialUser,
+}: Props) {
+  const [user, setUser] = useState<ClientUser | null>(initialUser)
   const [tokenInMemory, setTokenInMemory] = useState<string>()
   const [tokenExpiration, setTokenExpiration] = useState<number>()
   const pathname = usePathname()
   const router = useRouter()
 
-  const config = useConfig()
+  const { config } = useConfig()
 
   const {
     admin: {
@@ -51,7 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     serverURL,
   } = config
 
-  const [permissions, setPermissions] = useState<Permissions>()
+  const [permissions, setPermissions] = useState<Permissions>(initialPermissions)
 
   const { i18n } = useTranslation()
   const { closeAllModals, openModal } = useModal()
@@ -254,6 +263,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [debouncedLocationChange, refreshCookie, id])
 
+  // When initialUser changes, reset in state
+  useEffect(() => {
+    setUser(initialUser)
+  }, [initialUser])
+
   useEffect(() => {
     setLastLocationChange(Date.now())
   }, [pathname])
@@ -273,7 +287,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     return () => {
-      if (reminder) clearTimeout(reminder)
+      if (reminder) {
+        clearTimeout(reminder)
+      }
     }
   }, [tokenExpiration, openModal])
 
@@ -294,7 +310,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     return () => {
-      if (forceLogOut) clearTimeout(forceLogOut)
+      if (forceLogOut) {
+        clearTimeout(forceLogOut)
+      }
     }
   }, [tokenExpiration, closeAllModals, i18n, redirectToInactivityRoute, revokeTokenAndExpire])
 

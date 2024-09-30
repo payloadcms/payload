@@ -111,6 +111,9 @@ $header-height: base(5);
   &__crop,
   &__focalOnly {
     padding: base(1.5) base(1.5) base(1.5) 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
   }
 
   &__crop {
@@ -181,7 +184,7 @@ $header-height: base(5);
     height: fit-content;
     border-radius: var(--style-radius-s);
     background-color: var(--theme-elevation-150);
-    padding: 0 base(0.25);
+    padding: 0 base(0.4);
   }
 
   &__input {

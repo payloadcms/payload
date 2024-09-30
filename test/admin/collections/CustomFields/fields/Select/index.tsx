@@ -35,11 +35,12 @@ export const CustomSelect = () => {
   return (
     <div>
       <SelectField
-        hasMany
-        name={path}
+        field={{
+          name: path,
+          hasMany: true,
+          options,
+        }}
         onChange={onChange}
-        options={options}
-        path={path}
         value={value}
       />
     </div>

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-stripe",
-  "version": "3.0.0-beta.71",
+  "version": "3.0.0-beta.109",
   "description": "Stripe plugin for Payload",
   "keywords": [
     "payload",
@@ -31,6 +31,11 @@
       "import": "./src/exports/types.ts",
       "types": "./src/exports/types.ts",
       "default": "./src/exports/types.ts"
+    },
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
     }
   },
   "main": "./src/index.ts",
@@ -44,11 +49,12 @@
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "lint": "eslint src",
-    "lint:fix": "eslint --fix --ext .ts,.tsx src",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
+    "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "lodash.get": "^4.4.2",
     "stripe": "^10.2.0",
@@ -57,18 +63,14 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/next": "workspace:*",
-    "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*",
     "@types/express": "^4.17.9",
     "@types/lodash.get": "^4.4.7",
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "@types/uuid": "10.0.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*",
     "payload": "workspace:*"
   },
   "publishConfig": {
@@ -82,6 +84,11 @@
         "import": "./dist/exports/types.js",
         "types": "./dist/exports/types.d.ts",
         "default": "./dist/exports/types.js"
+      },
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts",
+        "default": "./dist/exports/client.js"
       }
     },
     "main": "./dist/index.js",
@@ -90,7 +97,7 @@
   },
   "homepage:": "https://payloadcms.com",
   "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }

@@ -7,13 +7,11 @@ import React, { useEffect, useState } from 'react'
 import type { WhereBuilderProps } from './types.js'
 
 import { useListQuery } from '../../providers/ListQuery/index.js'
-import { useLocale } from '../../providers/Locale/index.js'
-import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { Condition } from './Condition/index.js'
 import './index.scss'
-import { reduceFieldMap } from './reduceFieldMap.js'
+import { reduceClientFields } from './reduceClientFields.js'
 import { transformWhereQuery } from './transformWhereQuery.js'
 import validateWhereQuery from './validateWhereQuery.js'
 
@@ -26,18 +24,17 @@ export { WhereBuilderProps }
  * It is part of the {@link ListControls} component which is used to render the controls (search, filter, where).
  */
 export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
-  const { collectionPluralLabel, fieldMap } = props
+  const { collectionPluralLabel, fields } = props
   const { i18n, t } = useTranslation()
-  const { code: currentLocale } = useLocale()
 
-  const [reducedFields, setReducedColumns] = useState(() => reduceFieldMap({ fieldMap, i18n }))
+  const [reducedFields, setReducedColumns] = useState(() => reduceClientFields({ fields, i18n }))
 
   useEffect(() => {
-    setReducedColumns(reduceFieldMap({ fieldMap, i18n }))
-  }, [fieldMap, i18n])
+    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+    setReducedColumns(reduceClientFields({ fields, i18n }))
+  }, [fields, i18n])
 
-  const { searchParams } = useSearchParams()
-  const { handleWhereChange } = useListQuery()
+  const { handleWhereChange, params } = useListQuery()
   const [shouldUpdateQuery, setShouldUpdateQuery] = React.useState(false)
 
   // This handles initializing the where conditions from the search query (URL). That way, if you pass in
@@ -69,7 +66,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   */
 
   const [conditions, setConditions] = React.useState(() => {
-    const whereFromSearch = searchParams.where
+    const whereFromSearch = params.where
     if (whereFromSearch) {
       if (validateWhereQuery(whereFromSearch)) {
         return whereFromSearch.or
@@ -81,7 +78,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         return transformedWhere.or
       }
 
-      console.warn(`Invalid where query in URL: ${JSON.stringify(whereFromSearch)}`)
+      console.warn(`Invalid where query in URL: ${JSON.stringify(whereFromSearch)}`) // eslint-disable-line no-console
     }
 
     return []
@@ -116,8 +113,9 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         }
 
         if (JSON.stringify(existingRowCondition) !== JSON.stringify(newRowCondition)) {
-          conditions[orIndex].and[andIndex] = newRowCondition
-          setConditions(conditions)
+          const newConditions = [...conditions]
+          newConditions[orIndex].and[andIndex] = newRowCondition
+          setConditions(newConditions)
           if (![null, undefined].includes(value)) {
             // only update query when field/operator/value are filled out
             setShouldUpdateQuery(true)
@@ -143,8 +141,11 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
 
   React.useEffect(() => {
     if (shouldUpdateQuery) {
-      handleWhereChange({ or: conditions })
-      setShouldUpdateQuery(false)
+      async function handleChange() {
+        await handleWhereChange({ or: conditions })
+        setShouldUpdateQuery(false)
+      }
+      void handleChange()
     }
   }, [conditions, handleWhereChange, shouldUpdateQuery])
 

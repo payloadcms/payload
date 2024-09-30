@@ -1,6 +1,6 @@
 'use client'
 
-import type { SanitizedConfig } from 'payload'
+import type { PayloadClientReactComponent, SanitizedConfig } from 'payload'
 
 import LinkImport from 'next/link.js'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
@@ -10,9 +10,13 @@ import React from 'react'
 
 const baseClass = 'after-nav-links'
 
-export const AfterNavLinks: SanitizedConfig['admin']['components']['afterNavLinks'][0] = () => {
+export const AfterNavLinks: PayloadClientReactComponent<
+  SanitizedConfig['admin']['components']['afterNavLinks'][0]
+> = () => {
   const {
-    routes: { admin: adminRoute },
+    config: {
+      routes: { admin: adminRoute },
+    },
   } = useConfig()
 
   return (

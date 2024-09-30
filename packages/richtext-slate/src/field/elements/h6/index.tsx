@@ -1,19 +1,14 @@
-import React from 'react'
-
 import type { RichTextCustomElement } from '../../../types.js'
-
-import { H6Icon } from '../../icons/headings/H6/index.js'
-import { ElementButton } from '../Button.js'
-import { Heading6 } from './Heading6.js'
 
 const name = 'h6'
 
 export const h6: RichTextCustomElement = {
   name,
-  Button: () => (
-    <ElementButton format={name}>
-      <H6Icon />
-    </ElementButton>
-  ),
-  Element: Heading6,
+  Button: {
+    clientProps: {
+      format: name,
+    },
+    path: '@payloadcms/richtext-slate/client#H6ElementButton',
+  },
+  Element: '@payloadcms/richtext-slate/client#Heading6Element',
 }

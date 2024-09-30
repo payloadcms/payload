@@ -3,8 +3,8 @@ import type { LexicalPluginNodeConverter } from '../../types.js'
 
 import { convertLexicalPluginNodesToLexical } from '../../index.js'
 
-export const _ListItemConverter: LexicalPluginNodeConverter = {
-  converter({ childIndex, converters, lexicalPluginNode }) {
+export const ListItemConverter: LexicalPluginNodeConverter = {
+  converter({ childIndex, converters, lexicalPluginNode, quiet }) {
     return {
       ...lexicalPluginNode,
       type: 'listitem',
@@ -13,6 +13,7 @@ export const _ListItemConverter: LexicalPluginNodeConverter = {
         converters,
         lexicalPluginNodes: lexicalPluginNode.children,
         parentNodeType: 'listitem',
+        quiet,
       }),
       value: childIndex + 1,
       version: 1,

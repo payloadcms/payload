@@ -38,7 +38,9 @@ jobs:
             db-\*
             db-mongodb
             db-postgres
+            db-vercel-postgres
             db-sqlite
+            drizzle
             email-nodemailer
             eslint
             graphql
@@ -51,7 +53,6 @@ jobs:
             plugin-form-builder
             plugin-nested-docs
             plugin-redirects
-            plugin-relationship-object-ids
             plugin-search
             plugin-sentry
             plugin-seo
@@ -62,6 +63,7 @@ jobs:
             storage-\*
             storage-azure
             storage-gcs
+            storage-uploadthing
             storage-vercel-blob
             storage-s3
             translations
@@ -106,14 +108,15 @@ jobs:
   label-pr-on-open:
     name: label-pr-on-open
     runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
     steps:
       - name: Tag with main branch with v2
-        if: github.event.action == 'opened' && github.event.pull_request.base.ref == 'main'
+        if: github.event.pull_request.base.ref == 'main'
         uses: actions-ecosystem/action-add-labels@v1
         with:
           labels: v2
       - name: Tag with beta branch with v3
-        if: github.event.action == 'opened' && github.event.pull_request.base.ref == 'beta'
+        if: github.event.pull_request.base.ref == 'beta'
         uses: actions-ecosystem/action-add-labels@v1
         with:
           labels: v3

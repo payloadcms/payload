@@ -30,8 +30,10 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
   const { collection: { slug, labels: { plural }, versions } = {} } = props
 
   const {
-    routes: { api },
-    serverURL,
+    config: {
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
   const { permissions } = useAuth()
   const { toggleModal } = useModal()
@@ -79,7 +81,7 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
               }),
             )
 
-            clearRouteCache()
+            clearRouteCache() // Use clearRouteCache instead of router.refresh, as we only need to clear the cache if the user has route caching enabled - clearRouteCache checks for this
             return null
           }
 
@@ -125,20 +127,29 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
         {t('version:publish')}
       </Pill>
       <Modal className={baseClass} slug={modalSlug}>
-        <div className={`${baseClass}__template`}>
-          <h1>{t('version:confirmPublish')}</h1>
-          <p>{t('version:aboutToPublishSelection', { label: getTranslation(plural, i18n) })}</p>
-          <Button
-            buttonStyle="secondary"
-            id="confirm-cancel"
-            onClick={submitted ? undefined : () => toggleModal(modalSlug)}
-            type="button"
-          >
-            {t('general:cancel')}
-          </Button>
-          <Button id="confirm-publish" onClick={submitted ? undefined : handlePublish}>
-            {submitted ? t('version:publishing') : t('general:confirm')}
-          </Button>
+        <div className={`${baseClass}__wrapper`}>
+          <div className={`${baseClass}__content`}>
+            <h1>{t('version:confirmPublish')}</h1>
+            <p>{t('version:aboutToPublishSelection', { label: getTranslation(plural, i18n) })}</p>
+          </div>
+          <div className={`${baseClass}__controls`}>
+            <Button
+              buttonStyle="secondary"
+              id="confirm-cancel"
+              onClick={submitted ? undefined : () => toggleModal(modalSlug)}
+              size="large"
+              type="button"
+            >
+              {t('general:cancel')}
+            </Button>
+            <Button
+              id="confirm-publish"
+              onClick={submitted ? undefined : handlePublish}
+              size="large"
+            >
+              {submitted ? t('version:publishing') : t('general:confirm')}
+            </Button>
+          </div>
         </div>
       </Modal>
     </React.Fragment>

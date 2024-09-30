@@ -27,6 +27,7 @@ export interface Config {
     customIdTab: CustomIdTab;
     customIdRow: CustomIdRow;
     'disable-duplicate': DisableDuplicate;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -50,6 +51,7 @@ export interface Config {
 export interface UserAuthOperations {
   forgotPassword: {
     email: string;
+    password: string;
   };
   login: {
     email: string;
@@ -61,6 +63,7 @@ export interface UserAuthOperations {
   };
   unlock: {
     email: string;
+    password: string;
   };
 }
 /**
@@ -170,7 +173,8 @@ export interface CustomViewsTwo {
  */
 export interface CustomField {
   id: string;
-  customTextField?: string | null;
+  customTextServerField?: string | null;
+  customTextClientField?: string | null;
   descriptionAsString?: string | null;
   descriptionAsFunction?: string | null;
   descriptionAsComponent?: string | null;
@@ -263,6 +267,86 @@ export interface CustomIdRow {
 export interface DisableDuplicate {
   id: string;
   title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'uploads';
+        value: string | Upload;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'hidden-collection';
+        value: string | HiddenCollection;
+      } | null)
+    | ({
+        relationTo: 'collection-no-api-view';
+        value: string | CollectionNoApiView;
+      } | null)
+    | ({
+        relationTo: 'custom-views-one';
+        value: string | CustomViewsOne;
+      } | null)
+    | ({
+        relationTo: 'custom-views-two';
+        value: string | CustomViewsTwo;
+      } | null)
+    | ({
+        relationTo: 'custom-fields';
+        value: string | CustomField;
+      } | null)
+    | ({
+        relationTo: 'group-one-collection-ones';
+        value: string | GroupOneCollectionOne;
+      } | null)
+    | ({
+        relationTo: 'group-one-collection-twos';
+        value: string | GroupOneCollectionTwo;
+      } | null)
+    | ({
+        relationTo: 'group-two-collection-ones';
+        value: string | GroupTwoCollectionOne;
+      } | null)
+    | ({
+        relationTo: 'group-two-collection-twos';
+        value: string | GroupTwoCollectionTwo;
+      } | null)
+    | ({
+        relationTo: 'geo';
+        value: string | Geo;
+      } | null)
+    | ({
+        relationTo: 'customIdTab';
+        value: string | CustomIdTab;
+      } | null)
+    | ({
+        relationTo: 'customIdRow';
+        value: string | CustomIdRow;
+      } | null)
+    | ({
+        relationTo: 'disable-duplicate';
+        value: string | DisableDuplicate;
+      } | null);
+  editedAt?: string | null;
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
   updatedAt: string;
   createdAt: string;
 }

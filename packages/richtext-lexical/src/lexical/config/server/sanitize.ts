@@ -23,13 +23,19 @@ export const sanitizeServerFeatures = (
     getSubFieldsData: new Map(),
     graphQLPopulationPromises: new Map(),
     hooks: {
+      afterChange: [],
+      afterRead: [],
+      beforeChange: [],
+      beforeValidate: [],
+    },
+    i18n: {},
+    markdownTransformers: [],
+    nodeHooks: {
       afterChange: new Map(),
       afterRead: new Map(),
       beforeChange: new Map(),
       beforeValidate: new Map(),
     },
-    i18n: {},
-    markdownTransformers: [],
     nodes: [],
 
     validations: new Map(),
@@ -42,6 +48,23 @@ export const sanitizeServerFeatures = (
   features.forEach((feature) => {
     if (feature?.generatedTypes?.modifyOutputSchema) {
       sanitized.generatedTypes.modifyOutputSchemas.push(feature.generatedTypes.modifyOutputSchema)
+    }
+
+    if (feature?.hooks?.beforeValidate?.length) {
+      sanitized.hooks.beforeValidate = sanitized.hooks.beforeValidate?.concat(
+        feature.hooks.beforeValidate,
+      )
+    }
+    if (feature?.hooks?.beforeChange?.length) {
+      sanitized.hooks.beforeChange = sanitized.hooks.beforeChange?.concat(
+        feature.hooks.beforeChange,
+      )
+    }
+    if (feature?.hooks?.afterRead?.length) {
+      sanitized.hooks.afterRead = sanitized.hooks.afterRead?.concat(feature.hooks.afterRead)
+    }
+    if (feature?.hooks?.afterChange?.length) {
+      sanitized.hooks.afterChange = sanitized.hooks.afterChange?.concat(feature.hooks.afterChange)
     }
 
     if (feature?.i18n) {
@@ -69,22 +92,22 @@ export const sanitizeServerFeatures = (
           sanitized.converters.html.push(node.converters.html)
         }
         if (node?.hooks?.afterChange) {
-          sanitized.hooks.afterChange.set(nodeType, node.hooks.afterChange)
+          sanitized.nodeHooks?.afterChange?.set(nodeType, node.hooks.afterChange)
         }
         if (node?.hooks?.afterRead) {
-          sanitized.hooks.afterRead.set(nodeType, node.hooks.afterRead)
+          sanitized.nodeHooks?.afterRead?.set(nodeType, node.hooks.afterRead)
         }
         if (node?.hooks?.beforeChange) {
-          sanitized.hooks.beforeChange.set(nodeType, node.hooks.beforeChange)
+          sanitized.nodeHooks?.beforeChange?.set(nodeType, node.hooks.beforeChange)
         }
         if (node?.hooks?.beforeValidate) {
-          sanitized.hooks.beforeValidate.set(nodeType, node.hooks.beforeValidate)
+          sanitized.nodeHooks?.beforeValidate?.set(nodeType, node.hooks.beforeValidate)
         }
         if (node?.getSubFields) {
-          sanitized.getSubFields.set(nodeType, node.getSubFields)
+          sanitized.getSubFields?.set(nodeType, node.getSubFields)
         }
         if (node?.getSubFieldsData) {
-          sanitized.getSubFieldsData.set(nodeType, node.getSubFieldsData)
+          sanitized.getSubFieldsData?.set(nodeType, node.getSubFieldsData)
         }
       })
     }
@@ -104,15 +127,17 @@ export const sanitizeServerFeatures = (
 export async function sanitizeServerEditorConfig(
   editorConfig: ServerEditorConfig,
   config: SanitizedConfig,
+  parentIsLocalized?: boolean,
 ): Promise<SanitizedServerEditorConfig> {
   const resolvedFeatureMap = await loadFeatures({
     config,
+    parentIsLocalized: parentIsLocalized!,
     unSanitizedEditorConfig: editorConfig,
   })
 
   return {
     features: sanitizeServerFeatures(resolvedFeatureMap),
-    lexical: editorConfig.lexical,
+    lexical: editorConfig.lexical!,
     resolvedFeatureMap,
   }
 }

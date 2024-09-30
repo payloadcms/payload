@@ -1,17 +1,57 @@
-import type { JSONField } from '../../fields/config/types.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { MarkOptional } from 'ts-essentials'
 
-export type JSONFieldProps = {
-  editorOptions?: JSONField['admin']['editorOptions']
-  jsonSchema?: Record<string, unknown>
-  name?: string
-  path?: string
-  width?: string
-} & FormFieldBase
+import type { JSONField, JSONFieldClient } from '../../fields/config/types.js'
+import type { JSONFieldValidation } from '../../fields/validations.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+} from '../types.js'
 
-export type JSONFieldLabelComponent = LabelComponent<'json'>
+type JSONFieldClientWithoutType = MarkOptional<JSONFieldClient, 'type'>
 
-export type JSONFieldDescriptionComponent = DescriptionComponent<'json'>
+type JSONFieldBaseClientProps = {
+  readonly validate?: JSONFieldValidation
+}
 
-export type JSONFieldErrorComponent = ErrorComponent<'json'>
+export type JSONFieldClientProps = ClientFieldBase<JSONFieldClientWithoutType> &
+  JSONFieldBaseClientProps
+
+export type JSONFieldServerProps = ServerFieldBase<JSONField, JSONFieldClientWithoutType>
+
+export type JSONFieldServerComponent = FieldServerComponent<JSONField, JSONFieldClientWithoutType>
+
+export type JSONFieldClientComponent = FieldClientComponent<
+  JSONFieldClientWithoutType,
+  JSONFieldBaseClientProps
+>
+
+export type JSONFieldLabelServerComponent = FieldLabelServerComponent<
+  JSONField,
+  JSONFieldClientWithoutType
+>
+
+export type JSONFieldLabelClientComponent = FieldLabelClientComponent<JSONFieldClientWithoutType>
+
+export type JSONFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  JSONField,
+  JSONFieldClientWithoutType
+>
+
+export type JSONFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<JSONFieldClientWithoutType>
+
+export type JSONFieldErrorServerComponent = FieldErrorServerComponent<
+  JSONField,
+  JSONFieldClientWithoutType
+>
+
+export type JSONFieldErrorClientComponent = FieldErrorClientComponent<JSONFieldClientWithoutType>

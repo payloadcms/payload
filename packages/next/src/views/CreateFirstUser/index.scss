@@ -1,5 +1,19 @@
+@import '../../scss/styles.scss';
+
 .create-first-user {
+  display: flex;
+  flex-direction: column;
+  gap: base(0.4);
+
   > form > .field-type {
     margin-bottom: var(--base);
+
+    & .form-submit {
+      margin: 0;
+    }
   }
+}
+
+.emailAndUsername {
+  margin-bottom: var(--base);
 }

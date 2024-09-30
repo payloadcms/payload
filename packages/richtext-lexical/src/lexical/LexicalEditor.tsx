@@ -5,31 +5,29 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin.js'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin.js'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin.js'
 import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin.js'
-import { useTranslation } from '@payloadcms/ui'
 import { BLUR_COMMAND, COMMAND_PRIORITY_LOW, FOCUS_COMMAND } from 'lexical'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
 
 import type { LexicalProviderProps } from './LexicalProvider.js'
 
+import { useEditorConfigContext } from './config/client/EditorConfigProvider.js'
 import { EditorPlugin } from './EditorPlugin.js'
 import './LexicalEditor.scss'
-import { useEditorConfigContext } from './config/client/EditorConfigProvider.js'
-import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut/index.js'
-import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
 import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin/index.js'
 import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin/index.js'
+import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut/index.js'
+import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
 import { LexicalContentEditable } from './ui/ContentEditable.js'
 
 export const LexicalEditor: React.FC<
   {
-    editorContainerRef: React.RefObject<HTMLDivElement>
+    editorContainerRef: React.RefObject<HTMLDivElement | null>
   } & Pick<LexicalProviderProps, 'editorConfig' | 'onChange'>
 > = (props) => {
   const { editorConfig, editorContainerRef, onChange } = props
   const editorConfigContext = useEditorConfigContext()
   const [editor] = useLexicalComposerContext()
-  const { t } = useTranslation<{}, string>()
 
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null)
   const onRef = (_floatingAnchorElem: HTMLDivElement) => {
@@ -100,13 +98,13 @@ export const LexicalEditor: React.FC<
 
   return (
     <React.Fragment>
-      {editorConfig.features.plugins.map((plugin) => {
+      {editorConfig.features.plugins?.map((plugin) => {
         if (plugin.position === 'aboveContainer') {
           return <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
         }
       })}
       <div className="editor-container" ref={editorContainerRef}>
-        {editorConfig.features.plugins.map((plugin) => {
+        {editorConfig.features.plugins?.map((plugin) => {
           if (plugin.position === 'top') {
             return (
               <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
@@ -114,7 +112,6 @@ export const LexicalEditor: React.FC<
           }
         })}
         <RichTextPlugin
-          ErrorBoundary={LexicalErrorBoundary}
           contentEditable={
             <div className="editor-scroller">
               <div className="editor" ref={onRef}>
@@ -122,7 +119,7 @@ export const LexicalEditor: React.FC<
               </div>
             </div>
           }
-          placeholder={<p className="editor-placeholder">{t('lexical:general:placeholder')}</p>}
+          ErrorBoundary={LexicalErrorBoundary}
         />
         <OnChangePlugin
           // Selection changes can be ignored here, reducing the
@@ -132,7 +129,9 @@ export const LexicalEditor: React.FC<
           onChange={(editorState, editor, tags) => {
             // Ignore any onChange event triggered by focus only
             if (!tags.has('focus') || tags.size > 1) {
-              if (onChange != null) onChange(editorState, editor, tags)
+              if (onChange != null) {
+                onChange(editorState, editor, tags)
+              }
             }
           }}
         />
@@ -144,7 +143,7 @@ export const LexicalEditor: React.FC<
                 <AddBlockHandlePlugin anchorElem={floatingAnchorElem} />
               </React.Fragment>
             )}
-            {editorConfig.features.plugins.map((plugin) => {
+            {editorConfig.features.plugins?.map((plugin) => {
               if (
                 plugin.position === 'floatingAnchorElem' &&
                 !(plugin.desktopOnly === true && isSmallWidthViewport)
@@ -174,14 +173,14 @@ export const LexicalEditor: React.FC<
         )}
 
         <TabIndentationPlugin />
-        {editorConfig.features.plugins.map((plugin) => {
+        {editorConfig.features.plugins?.map((plugin) => {
           if (plugin.position === 'normal') {
             return (
               <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
             )
           }
         })}
-        {editorConfig.features.plugins.map((plugin) => {
+        {editorConfig.features.plugins?.map((plugin) => {
           if (plugin.position === 'bottom') {
             return (
               <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
@@ -189,7 +188,7 @@ export const LexicalEditor: React.FC<
           }
         })}
       </div>
-      {editorConfig.features.plugins.map((plugin) => {
+      {editorConfig.features.plugins?.map((plugin) => {
         if (plugin.position === 'belowContainer') {
           return <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
         }

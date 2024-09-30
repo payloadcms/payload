@@ -7,7 +7,14 @@
   --popup-caret-size: 10px;
   --popup-x-padding: calc(var(--base) * 0.33);
   --popup-padding: calc(var(--base) * 0.5);
+  --button-size-offset: -8px;
   position: relative;
+
+  &__trigger-wrap {
+    display: flex;
+    align-items: stretch;
+    height: 100%;
+  }
 
   &__content {
     position: absolute;
@@ -78,6 +85,22 @@
   }
 
   ////////////////////////////////
+  /// BUTTON SIZE
+  ////////////////////////////////
+
+  &--button-size-small {
+    --button-size-offset: -8px;
+  }
+
+  &--button-size-medium {
+    --button-size-offset: -4px;
+  }
+
+  &--button-size-large {
+    --button-size-offset: 0px;
+  }
+
+  ////////////////////////////////
   // HORIZONTAL ALIGNMENT
   ////////////////////////////////
   [dir='rtl'] &--h-align-left {
@@ -117,7 +140,7 @@
 
   &--h-align-right {
     .popup__content {
-      right: 0;
+      right: var(--button-size-offset);
     }
 
     .popup__caret {

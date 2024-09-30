@@ -11,6 +11,7 @@ import type {
   RequiredDataFromCollectionSlug,
 } from '../config/types.js'
 
+import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
 import executeAccess from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
@@ -48,6 +49,14 @@ export const createOperation = async <TSlug extends CollectionSlug>(
 
   try {
     const shouldCommit = await initTransaction(args.req)
+
+    ensureUsernameOrEmail<TSlug>({
+      authOptions: args.collection.config.auth,
+      collectionSlug: args.collection.config.slug,
+      data: args.data,
+      operation: 'create',
+      req: args.req,
+    })
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -355,7 +364,9 @@ export const createOperation = async <TSlug extends CollectionSlug>(
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return result
   } catch (error: unknown) {

@@ -14,10 +14,9 @@ import { withCondition } from '../../forms/withCondition/index.js'
  */
 const HiddenFieldComponent: React.FC<HiddenFieldProps> = (props) => {
   const {
-    name,
     disableModifyingForm = true,
+    field: { name, _path: pathFromProps },
     forceUsePathFromProps,
-    path: pathFromProps,
     value: valueFromProps,
   } = props
 

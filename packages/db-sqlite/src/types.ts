@@ -1,10 +1,10 @@
 import type { Client, Config, ResultSet } from '@libsql/client'
-import type { Operators } from '@payloadcms/drizzle'
+import type { extendDrizzleTable, Operators } from '@payloadcms/drizzle'
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type { ColumnDataType, DrizzleConfig, Relation, Relations, SQL } from 'drizzle-orm'
+import type { DrizzleConfig, Relation, Relations, SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type {
-  SQLiteColumn,
+  AnySQLiteColumn,
   SQLiteInsertOnConflictDoUpdateConfig,
   SQLiteTableWithColumns,
   SQLiteTransactionConfig,
@@ -12,37 +12,50 @@ import type {
 import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 import type { Payload, PayloadRequest } from 'payload'
 
+type SQLiteSchema = {
+  relations: Record<string, GenericRelation>
+  tables: Record<string, SQLiteTableWithColumns<any>>
+}
+
+type SQLiteSchemaHookArgs = {
+  extendTable: typeof extendDrizzleTable
+  schema: SQLiteSchema
+}
+
+export type SQLiteSchemaHook = (args: SQLiteSchemaHookArgs) => Promise<SQLiteSchema> | SQLiteSchema
+
 export type Args = {
+  /**
+   * Transform the schema after it's built.
+   * You can use it to customize the schema with features that aren't supported by Payload.
+   * Examples may include: composite indices, generated columns, vectors
+   */
+  afterSchemaInit?: SQLiteSchemaHook[]
+  /**
+   * Transform the schema before it's built.
+   * You can use it to preserve an existing database schema and if there are any collissions Payload will override them.
+   * To generate Drizzle schema from the database, see [Drizzle Kit introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
+   */
+  beforeSchemaInit?: SQLiteSchemaHook[]
   client: Config
   idType?: 'serial' | 'uuid'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
   migrationDir?: string
+  prodMigrations?: {
+    down: (args: MigrateDownArgs) => Promise<void>
+    name: string
+    up: (args: MigrateUpArgs) => Promise<void>
+  }[]
   push?: boolean
   relationshipsSuffix?: string
   schemaName?: string
-  transactionOptions?: SQLiteTransactionConfig | false
+  transactionOptions?: false | SQLiteTransactionConfig
   versionsSuffix?: string
 }
 
-export type GenericColumn = SQLiteColumn<
-  {
-    baseColumn: never
-    columnType: string
-    data: unknown
-    dataType: ColumnDataType
-    driverParam: unknown
-    enumValues: string[]
-    hasDefault: false
-    name: string
-    notNull: false
-    tableName: string
-  },
-  object
->
-
 export type GenericColumns = {
-  [x: string]: GenericColumn
+  [x: string]: AnySQLiteColumn
 }
 
 export type GenericTable = SQLiteTableWithColumns<{
@@ -97,6 +110,8 @@ type SQLiteDrizzleAdapter = Omit<
 >
 
 export type SQLiteAdapter = {
+  afterSchemaInit: SQLiteSchemaHook[]
+  beforeSchemaInit: SQLiteSchemaHook[]
   client: Client
   clientConfig: Args['client']
   countDistinct: CountDistinct
@@ -116,6 +131,11 @@ export type SQLiteAdapter = {
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   operators: Operators
+  prodMigrations?: {
+    down: (args: MigrateDownArgs) => Promise<void>
+    name: string
+    up: (args: MigrateUpArgs) => Promise<void>
+  }[]
   push: boolean
   rejectInitializing: () => void
   relations: Record<string, GenericRelation>
@@ -133,17 +153,18 @@ export type IDType = 'integer' | 'numeric' | 'text'
 
 export type MigrateUpArgs = {
   payload: Payload
-  req?: Partial<PayloadRequest>
+  req: PayloadRequest
 }
 export type MigrateDownArgs = {
   payload: Payload
-  req?: Partial<PayloadRequest>
+  req: PayloadRequest
 }
 
 declare module 'payload' {
   export interface DatabaseAdapter
     extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
       DrizzleAdapter {
+    beginTransaction: (options?: SQLiteTransactionConfig) => Promise<null | number | string>
     drizzle: LibSQLDatabase
     /**
      * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
@@ -154,6 +175,11 @@ declare module 'payload' {
     initializing: Promise<void>
     localesSuffix?: string
     logger: DrizzleConfig['logger']
+    prodMigrations?: {
+      down: (args: MigrateDownArgs) => Promise<void>
+      name: string
+      up: (args: MigrateUpArgs) => Promise<void>
+    }[]
     push: boolean
     rejectInitializing: () => void
     relationshipsSuffix?: string

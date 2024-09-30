@@ -136,7 +136,7 @@ export const AccountForm: React.FC = () => {
             register={register}
             required
             type="password"
-            validate={value => value === password.current || 'The passwords do not match'}
+            validate={(value) => value === password.current || 'The passwords do not match'}
           />
         </Fragment>
       )}

@@ -1,7 +1,8 @@
 @import '../../scss/styles.scss';
 
 .icon--menu {
-  .fill {
-    fill: var(--theme-text);
+  .stroke {
+    stroke-width: $style-stroke-width-s;
+    stroke: currentColor;
   }
 }

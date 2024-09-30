@@ -1,12 +1,17 @@
-import type { DocumentPreferences, Field, FormState, PayloadRequest, TypeWithID } from 'payload'
+import type {
+  ClientUser,
+  DocumentPreferences,
+  Field,
+  FormState,
+  PayloadRequest,
+  TypeWithID,
+} from 'payload'
 
 import { reduceFieldsToValues } from 'payload/shared'
 
 import type { BuildFormStateArgs } from '../forms/buildStateFromSchema/index.js'
 import type { FieldSchemaMap } from './buildFieldSchemaMap/types.js'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import {} from '../exports/client/index.js'
 import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
 
@@ -29,9 +34,25 @@ export const getFieldSchemaMap = (req: PayloadRequest): FieldSchemaMap => {
   return cached
 }
 
-export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<FormState> => {
+export const buildFormState = async ({
+  req,
+}: {
+  req: PayloadRequest
+}): Promise<{
+  lockedState?: { isLocked: boolean; user: ClientUser | number | string }
+  state: FormState
+}> => {
   const reqData: BuildFormStateArgs = (req.data || {}) as BuildFormStateArgs
-  const { collectionSlug, formState, globalSlug, locale, operation, schemaPath } = reqData
+  const {
+    collectionSlug,
+    formState,
+    globalSlug,
+    locale,
+    operation,
+    returnLockStatus,
+    schemaPath,
+    updateLastEdited,
+  } = reqData
 
   const incomingUserSlug = req.user?.collection
   const adminUserSlug = req.payload.config.admin.user
@@ -71,7 +92,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
 
   let fieldSchema: Field[]
 
-  if (schemaPathSegments.length === 1) {
+  if (schemaPathSegments && schemaPathSegments.length === 1) {
     if (req.payload.collections[schemaPath]) {
       fieldSchema = req.payload.collections[schemaPath].config.fields
     } else {
@@ -82,7 +103,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
   }
 
   if (!fieldSchema) {
-    throw new Error('Could not find field schema for given path')
+    throw new Error(`Could not find field schema for given path "${schemaPath}"`)
   }
 
   let docPreferences = reqData.docPreferences
@@ -96,7 +117,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
   // If the request does not include doc preferences,
   // we should fetch them. This is useful for DocumentInfoProvider
   // as it reduces the amount of client-side fetches necessary
-  // when we fetch data for the Edit view
+  // when we fetch data for the Edit View
   if (!docPreferences) {
     let preferencesKey
 
@@ -115,13 +136,29 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
           depth: 0,
           limit: 1,
           where: {
-            key: {
-              equals: preferencesKey,
-            },
+            and: [
+              {
+                key: {
+                  equals: preferencesKey,
+                },
+              },
+              {
+                'user.relationTo': {
+                  equals: req.user.collection,
+                },
+              },
+              {
+                'user.value': {
+                  equals: req.user.id,
+                },
+              },
+            ],
           },
         })) as unknown as { docs: { value: DocumentPreferences }[] }
 
-        if (preferencesResult?.docs?.[0]?.value) docPreferences = preferencesResult.docs[0].value
+        if (preferencesResult?.docs?.[0]?.value) {
+          docPreferences = preferencesResult.docs[0].value
+        }
       }
 
       promises.preferences = fetchPreferences()
@@ -130,7 +167,9 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
 
   // If there is a form state,
   // then we can deduce data from that form state
-  if (formState) data = reduceFieldsToValues(formState, true)
+  if (formState) {
+    data = reduceFieldsToValues(formState, true)
+  }
 
   // If we do not have data at this point,
   // we can fetch it. This is useful for DocumentInfoProvider
@@ -170,12 +209,13 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
     promises.data = fetchData()
   }
 
-  if (Object.keys(promises).length > 0) {
+  if (Object.keys(promises) && Object.keys(promises).length > 0) {
     await Promise.all(Object.values(promises))
   }
 
   const result = await buildStateFromSchema({
     id,
+    collectionSlug,
     data,
     fieldSchema,
     operation,
@@ -188,17 +228,78 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
     if (req.payload.collections[collectionSlug]?.config?.upload && formState.file) {
       result.file = formState.file
     }
+  }
 
-    if (
-      req.payload.collections[collectionSlug]?.config?.auth &&
-      !req.payload.collections[collectionSlug].config.auth.disableLocalStrategy
-    ) {
-      if (formState.username) result.username = formState.username
-      if (formState.password) result.password = formState.password
-      if (formState['confirm-password']) result['confirm-password'] = formState['confirm-password']
-      if (formState.email) result.email = formState.email
+  if (returnLockStatus && req.user && (id || globalSlug)) {
+    let lockedDocumentQuery
+
+    if (collectionSlug) {
+      lockedDocumentQuery = {
+        and: [
+          { 'document.relationTo': { equals: collectionSlug } },
+          { 'document.value': { equals: id } },
+        ],
+      }
+    } else if (globalSlug) {
+      lockedDocumentQuery = {
+        globalSlug: { equals: globalSlug },
+      }
+    }
+
+    if (lockedDocumentQuery) {
+      const lockedDocument = await req.payload.find({
+        collection: 'payload-locked-documents',
+        depth: 1,
+        limit: 1,
+        pagination: false,
+        where: lockedDocumentQuery,
+      })
+
+      if (lockedDocument.docs && lockedDocument.docs.length > 0) {
+        const lockedState = {
+          isLocked: true,
+          user: lockedDocument.docs[0]?.user?.value,
+        }
+
+        if (updateLastEdited) {
+          await req.payload.db.updateOne({
+            id: lockedDocument.docs[0].id,
+            collection: 'payload-locked-documents',
+            data: {},
+            req,
+          })
+        }
+
+        return { lockedState, state: result }
+      } else {
+        // If no lock document exists, create it
+        await req.payload.db.create({
+          collection: 'payload-locked-documents',
+          data: {
+            document: collectionSlug
+              ? {
+                  relationTo: [collectionSlug],
+                  value: id,
+                }
+              : undefined,
+            globalSlug: globalSlug ? globalSlug : undefined,
+            user: {
+              relationTo: [req.user.collection],
+              value: req.user.id,
+            },
+          },
+          req,
+        })
+
+        const lockedState = {
+          isLocked: true,
+          user: req.user,
+        }
+
+        return { lockedState, state: result }
+      }
     }
   }
 
-  return result
+  return { state: result }
 }

@@ -37,7 +37,7 @@
     ],
     "paths": {
       "@payload-config": [
-        "./test/admin/config.ts"
+        "./test/_community/config.ts"
       ],
       "@payloadcms/live-preview": [
         "./packages/live-preview/src"
@@ -62,6 +62,30 @@
       ],
       "@payloadcms/next/*": [
         "./packages/next/src/exports/*.ts"
+      ],
+      "@payloadcms/richtext-lexical/client": [
+        "./packages/richtext-lexical/src/exports/client/index.ts"
+      ],
+      "@payloadcms/richtext-lexical/generateComponentMap": [
+        "./packages/richtext-lexical/src/utilities/generateComponentMap.tsx"
+      ],
+      "@payloadcms/richtext-slate/client": [
+        "./packages/richtext-slate/src/exports/client/index.ts"
+      ],
+      "@payloadcms/richtext-slate/generateComponentMap": [
+        "./packages/richtext-slate/src/generateComponentMap.tsx"
+      ],
+      "@payloadcms/plugin-seo/client": [
+        "./packages/plugin-seo/src/exports/client.ts"
+      ],
+      "@payloadcms/plugin-stripe/client": [
+        "./packages/plugin-stripe/src/exports/client.ts"
+      ],
+      "@payloadcms/plugin-search/client": [
+        "./packages/plugin-search/src/exports/client.ts"
+      ],
+      "@payloadcms/plugin-form-builder/client": [
+        "./packages/plugin-form-builder/src/exports/client.ts"
       ],
       "@payloadcms/next": [
         "./packages/next/src/exports/*"

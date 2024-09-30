@@ -1,5 +1,5 @@
 import type { TypeWithID } from '../collections/config/types.js'
-import type { Document, Payload, PayloadRequest, Where } from '../types/index.js'
+import type { Document, JoinQuery, Payload, PayloadRequest, Where } from '../types/index.js'
 import type { TypeWithVersion } from '../versions/types.js'
 
 export type { TypeWithVersion }
@@ -44,13 +44,12 @@ export interface BaseDatabaseAdapter {
   deleteOne: DeleteOne
 
   deleteVersions: DeleteVersions
-
   /**
    * Terminate the connection with the database
    */
   destroy?: Destroy
 
-  find: <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>
+  find: Find
 
   findGlobal: FindGlobal
 
@@ -68,7 +67,7 @@ export interface BaseDatabaseAdapter {
   /**
    * Run any migration up functions that have not yet been performed and update the status
    */
-  migrate: () => Promise<void>
+  migrate: (args?: { migrations?: Migration[] }) => Promise<void>
 
   /**
    * Run any migration down functions that have been performed
@@ -79,15 +78,16 @@ export interface BaseDatabaseAdapter {
    * Drop the current database and run all migrate up functions
    */
   migrateFresh: (args: { forceAcceptWarning?: boolean }) => Promise<void>
+
   /**
    * Run all migration down functions before running up
    */
   migrateRefresh: () => Promise<void>
-
   /**
    * Run all migrate down functions
    */
   migrateReset: () => Promise<void>
+
   /**
    * Read the current state of migrations and output the result to show which have been run
    */
@@ -100,6 +100,13 @@ export interface BaseDatabaseAdapter {
    * The name of the database adapter
    */
   name: string
+  /**
+   * Full package name of the database adapter
+   *
+   * @example @payloadcms/db-postgres
+   */
+  packageName: string
+
   /**
    * reference to the instance of payload
    */
@@ -128,6 +135,8 @@ export interface BaseDatabaseAdapter {
   updateOne: UpdateOne
 
   updateVersion: UpdateVersion
+
+  upsert: Upsert
 }
 
 export type Init = () => Promise<void> | void
@@ -148,7 +157,7 @@ export type CreateMigration = (args: {
   forceAcceptWarning?: boolean
   migrationName?: string
   payload: Payload
-}) => Promise<void>
+}) => Promise<void> | void
 
 export type Transaction = (
   callback: () => Promise<void>,
@@ -159,9 +168,9 @@ export type BeginTransaction = (
   options?: Record<string, unknown>,
 ) => Promise<null | number | string>
 
-export type RollbackTransaction = (id: Promise<number | string> | number | string) => Promise<void>
+export type RollbackTransaction = (id: number | Promise<number | string> | string) => Promise<void>
 
-export type CommitTransaction = (id: Promise<number | string> | number | string) => Promise<void>
+export type CommitTransaction = (id: number | Promise<number | string> | string) => Promise<void>
 
 export type QueryDraftsArgs = {
   collection: string
@@ -178,20 +187,23 @@ export type QueryDrafts = <T = TypeWithID>(args: QueryDraftsArgs) => Promise<Pag
 
 export type FindOneArgs = {
   collection: string
+  joins?: JoinQuery
   locale?: string
   req: PayloadRequest
   where?: Where
 }
 
-export type FindOne = <T extends TypeWithID>(args: FindOneArgs) => Promise<T | null>
+export type FindOne = <T extends TypeWithID>(args: FindOneArgs) => Promise<null | T>
 
 export type FindArgs = {
   collection: string
+  joins?: JoinQuery
   /** Setting limit to 1 is equal to the previous Model.findOne(). Setting limit to 0 disables the limit */
   limit?: number
   locale?: string
   page?: number
   pagination?: boolean
+  projection?: Record<string, unknown>
   req: PayloadRequest
   skip?: number
   sort?: string
@@ -304,7 +316,9 @@ export type CreateVersionArgs<T = TypeWithID> = {
   createdAt: string
   /** ID of the parent document for which the version should be created for */
   parent: number | string
+  publishedLocale?: string
   req: PayloadRequest
+  snapshot?: true
   updatedAt: string
   versionData: T
 }
@@ -319,7 +333,9 @@ export type CreateGlobalVersionArgs<T = TypeWithID> = {
   globalSlug: string
   /** ID of the parent document for which the version should be created for */
   parent: number | string
+  publishedLocale?: string
   req: PayloadRequest
+  snapshot?: true
   updatedAt: string
   versionData: T
 }
@@ -364,7 +380,12 @@ export type UpdateOneArgs = {
   collection: string
   data: Record<string, unknown>
   draft?: boolean
+  joins?: JoinQuery
   locale?: string
+  /**
+   * Additional database adapter specific options to pass to the query
+   */
+  options?: Record<string, unknown>
   req: PayloadRequest
 } & (
   | {
@@ -379,8 +400,20 @@ export type UpdateOneArgs = {
 
 export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
+export type UpsertArgs = {
+  collection: string
+  data: Record<string, unknown>
+  joins?: JoinQuery
+  locale?: string
+  req: PayloadRequest
+  where: Where
+}
+
+export type Upsert = (args: UpsertArgs) => Promise<Document>
+
 export type DeleteOneArgs = {
   collection: string
+  joins?: JoinQuery
   req: PayloadRequest
   where: Where
 }
@@ -389,6 +422,7 @@ export type DeleteOne = (args: DeleteOneArgs) => Promise<Document>
 
 export type DeleteManyArgs = {
   collection: string
+  joins?: JoinQuery
   req: PayloadRequest
   where: Where
 }
@@ -396,8 +430,8 @@ export type DeleteManyArgs = {
 export type DeleteMany = (args: DeleteManyArgs) => Promise<void>
 
 export type Migration = {
-  down: ({ payload, req }: { payload: Payload; req: PayloadRequest }) => Promise<boolean>
-  up: ({ payload, req }: { payload: Payload; req: PayloadRequest }) => Promise<boolean>
+  down: (args: unknown) => Promise<void>
+  up: (args: unknown) => Promise<void>
 } & MigrationData
 
 export type MigrationData = {
@@ -434,5 +468,6 @@ export type DBIdentifierName =
 export type MigrationTemplateArgs = {
   downSQL?: string
   imports?: string
+  packageName?: string
   upSQL?: string
 }

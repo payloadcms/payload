@@ -1,15 +1,15 @@
 'use client'
+import type { MappedComponent } from 'payload'
+
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
-import type { ActionMap } from '../ComponentMap/buildComponentMap/types.js'
-
-import { useComponentMap } from '../ComponentMap/index.js'
+import { useConfig } from '../../providers/Config/index.js'
 
 export { SetViewActions } from './SetViewActions/index.js'
 
 type ActionsContextType = {
-  actions: ActionMap['Edit'][string]
-  setViewActions: (actions: ActionMap['Edit'][string]) => void
+  actions: MappedComponent[]
+  setViewActions: (actions: MappedComponent[]) => void
 }
 
 const ActionsContext = createContext<ActionsContextType>({
@@ -19,13 +19,19 @@ const ActionsContext = createContext<ActionsContextType>({
 
 export const useActions = () => useContext(ActionsContext)
 
-export const ActionsProvider = ({ children }) => {
+export const ActionsProvider: React.FC<{
+  readonly children: React.ReactNode
+}> = ({ children }) => {
   const [viewActions, setViewActions] = useState([])
   const [adminActions, setAdminActions] = useState([])
 
   const {
-    componentMap: { actions },
-  } = useComponentMap()
+    config: {
+      admin: {
+        components: { actions },
+      },
+    },
+  } = useConfig()
 
   useEffect(() => {
     setAdminActions(actions || [])

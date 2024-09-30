@@ -1,4 +1,4 @@
-import type { Adapter, GeneratedAdapter } from '@payloadcms/plugin-cloud-storage/types'
+import type { Adapter, GeneratedAdapter } from '../../types.js'
 
 import { getGenerateUrl } from './generateURL.js'
 import { getHandleDelete } from './handleDelete.js'

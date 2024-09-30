@@ -5,6 +5,10 @@
   align-items: center;
   white-space: nowrap;
   display: flex;
+  padding-inline-start: base(0.4);
+  padding-inline-end: base(0.4);
+  background-color: var(--theme-elevation-100);
+  border-radius: var(--style-radius-s);
 
   &__label {
     color: var(--theme-elevation-500);
@@ -14,6 +18,12 @@
     .stroke {
       stroke: currentColor;
     }
+  }
+
+  &__current {
+    display: flex;
+    align-items: center;
+    gap: base(0.3);
   }
 
   button {

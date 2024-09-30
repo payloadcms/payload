@@ -1,6 +1,6 @@
 import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
-import perfectionistNatural from 'eslint-plugin-perfectionist/configs/recommended-natural'
+import perfectionist from 'eslint-plugin-perfectionist'
 import { configs as regexpPluginConfigs } from 'eslint-plugin-regexp'
 import eslintConfigPrettier from 'eslint-config-prettier'
 import payloadPlugin from '@payloadcms/eslint-plugin'
@@ -14,6 +14,7 @@ import { deepMerge } from './deepMerge.js'
 const baseRules = {
   // This rule makes no sense when overriding class methods. This is used a lot in richtext-lexical.
   'class-methods-use-this': 'off',
+  curly: ['warn', 'all'],
   'arrow-body-style': 0,
   'import-x/prefer-default-export': 'off',
   'no-restricted-exports': ['warn', { restrictDefaultExports: { direct: true } }],
@@ -29,10 +30,10 @@ const baseRules = {
     {
       type: 'natural',
       order: 'asc',
-      'partition-by-comment': true,
-      'partition-by-new-line': true,
+      partitionByComment: true,
+      partitionByNewLine: true,
       groups: ['top', 'unknown'],
-      'custom-groups': {
+      customGroups: {
         top: ['_id', 'id', 'name', 'slug', 'type'],
       },
     },
@@ -40,13 +41,13 @@ const baseRules = {
   /*'perfectionist/sort-object-types': [
     'error',
     {
-      'partition-by-new-line': true,
+      partitionByNewLine: true,
     },
   ],
   'perfectionist/sort-interfaces': [
     'error',
     {
-      'partition-by-new-line': true,
+      partitionByNewLine': true,
     },
   ],*/
   'payload/no-jsx-import-statements': 'error',
@@ -61,7 +62,6 @@ const reactA11yRules = {
 
 const typescriptRules = {
   '@typescript-eslint/no-use-before-define': 'off',
-  '@typescript-eslint/ban-ts-comment': 'off',
 
   // Type-aware any rules:
   '@typescript-eslint/no-unsafe-assignment': 'off',
@@ -75,7 +75,7 @@ const typescriptRules = {
   // Type-aware any rules end
 
   // ts-expect preferred over ts-ignore. It will error if the expected error is no longer present.
-  '@typescript-eslint/prefer-ts-expect-error': 'error',
+  '@typescript-eslint/ban-ts-comment': 'warn', // Recommended over deprecated @typescript-eslint/prefer-ts-expect-error: https://github.com/typescript-eslint/typescript-eslint/issues/8333. Set to warn to ease migration.
   // By default, it errors for unused variables. This is annoying, warnings are enough.
   '@typescript-eslint/no-unused-vars': [
     'warn',
@@ -86,27 +86,37 @@ const typescriptRules = {
       argsIgnorePattern: '^_',
       varsIgnorePattern: '^_',
       destructuredArrayIgnorePattern: '^_',
-      caughtErrorsIgnorePattern: '^ignore',
+      caughtErrorsIgnorePattern: '^(_|ignore)',
     },
   ],
   '@typescript-eslint/no-base-to-string': 'warn',
   '@typescript-eslint/restrict-template-expressions': 'warn',
   '@typescript-eslint/no-redundant-type-constituents': 'warn',
   '@typescript-eslint/no-unnecessary-type-constraint': 'warn',
-  '@typescript-eslint/ban-types': 'warn',
+  '@typescript-eslint/no-misused-promises': [
+    'error',
+    {
+      // See https://github.com/typescript-eslint/typescript-eslint/issues/4619 and https://github.com/typescript-eslint/typescript-eslint/pull/4623
+      // Don't want something like <button onClick={someAsyncFunction}> to error
+      checksVoidReturn: {
+        attributes: false,
+        arguments: false,
+      },
+    },
+  ],
+  '@typescript-eslint/no-empty-object-type': 'warn',
 }
 
-/** @typedef {import('eslint').Linter.FlatConfig} */
-let FlatConfig
+/** @typedef {import('eslint').Linter.Config} Config */
 
 /** @type {FlatConfig} */
 const baseExtends = deepMerge(
   js.configs.recommended,
-  perfectionistNatural,
+  perfectionist.configs['recommended-natural'],
   regexpPluginConfigs['flat/recommended'],
 )
 
-/** @type {FlatConfig[]} */
+/** @type {Config[]} */
 export const rootEslintConfig = [
   {
     name: 'Settings',

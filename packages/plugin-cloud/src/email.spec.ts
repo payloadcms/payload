@@ -1,7 +1,6 @@
 import type { Config, Payload } from 'payload'
 
 import { jest } from '@jest/globals'
-import nodemailer from 'nodemailer'
 import { defaults } from 'payload'
 
 import { payloadCloudEmail } from './email.js'
@@ -11,24 +10,11 @@ describe('email', () => {
   const skipVerify = true
   const defaultDomain = 'test.com'
   const apiKey = 'test'
-  let createTransportSpy: jest.Spied<any>
 
   const mockedPayload: Payload = jest.fn() as unknown as Payload
 
   beforeEach(() => {
     defaultConfig = defaults as Config
-
-    createTransportSpy = jest.spyOn(nodemailer, 'createTransport').mockImplementation(() => {
-      return {
-        verify: jest.fn(),
-      } as unknown as ReturnType<typeof nodemailer.createTransport>
-    })
-
-    const createTestAccountSpy = jest.spyOn(nodemailer, 'createTestAccount').mockResolvedValue({
-      pass: 'password',
-      user: 'user',
-      web: 'ethereal.email',
-    } as unknown as nodemailer.TestAccount)
   })
 
   describe('not in Payload Cloud', () => {
@@ -76,8 +62,8 @@ describe('email', () => {
 
       const initializedEmail = email({ payload: mockedPayload })
 
-      expect(initializedEmail.defaultFromName).toEqual(defaultFromName)
-      expect(initializedEmail.defaultFromAddress).toEqual(defaultFromAddress)
+      expect(initializedEmail.defaultFromName).toStrictEqual(defaultFromName)
+      expect(initializedEmail.defaultFromAddress).toStrictEqual(defaultFromAddress)
     })
   })
 })

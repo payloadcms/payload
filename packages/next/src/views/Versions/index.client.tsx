@@ -1,5 +1,5 @@
 'use client'
-import type { SanitizedCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, ClientGlobalConfig, SanitizedCollectionConfig } from 'payload'
 
 import {
   type Column,
@@ -8,7 +8,7 @@ import {
   PerPage,
   SetViewActions,
   Table,
-  useComponentMap,
+  useConfig,
   useDocumentInfo,
   useListQuery,
   useTranslation,
@@ -17,21 +17,20 @@ import { useSearchParams } from 'next/navigation.js'
 import React from 'react'
 
 export const VersionsViewClient: React.FC<{
-  baseClass: string
-  columns: Column[]
-  fetchURL: string
-  paginationLimits?: SanitizedCollectionConfig['admin']['pagination']['limits']
+  readonly baseClass: string
+  readonly columns: Column[]
+  readonly fetchURL: string
+  readonly paginationLimits?: SanitizedCollectionConfig['admin']['pagination']['limits']
 }> = (props) => {
   const { baseClass, columns, paginationLimits } = props
 
-  const { getComponentMap } = useComponentMap()
   const { collectionSlug, globalSlug } = useDocumentInfo()
-  const { data, handlePerPageChange } = useListQuery()
+  const { data, handlePageChange, handlePerPageChange } = useListQuery()
 
-  const componentMap = getComponentMap({
-    collectionSlug,
-    globalSlug,
-  })
+  const { getEntityConfig } = useConfig()
+
+  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
 
   const searchParams = useSearchParams()
   const limit = searchParams.get('limit')
@@ -42,7 +41,11 @@ export const VersionsViewClient: React.FC<{
 
   return (
     <React.Fragment>
-      <SetViewActions actions={componentMap?.actionsMap?.Edit?.Versions} />
+      <SetViewActions
+        actions={
+          (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.versions?.actions
+        }
+      />
       <LoadingOverlayToggle name="versions" show={!data} />
       {versionCount === 0 && (
         <div className={`${baseClass}__no-versions`}>
@@ -51,7 +54,11 @@ export const VersionsViewClient: React.FC<{
       )}
       {versionCount > 0 && (
         <React.Fragment>
-          <Table columns={columns} data={data?.docs} fieldMap={componentMap?.fieldMap} />
+          <Table
+            columns={columns}
+            data={data?.docs}
+            fields={(collectionConfig || globalConfig)?.fields}
+          />
           <div className={`${baseClass}__page-controls`}>
             <Pagination
               hasNextPage={data.hasNextPage}
@@ -59,6 +66,7 @@ export const VersionsViewClient: React.FC<{
               limit={data.limit}
               nextPage={data.nextPage}
               numberOfNeighbors={1}
+              onChange={handlePageChange}
               page={data.page}
               prevPage={data.prevPage}
               totalPages={data.totalPages}

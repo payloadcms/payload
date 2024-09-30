@@ -1,4 +1,4 @@
-import type { SanitizedConfig } from 'payload'
+import type { ImportMap, SanitizedConfig } from 'payload'
 
 export type Args = {
   /**
@@ -6,6 +6,7 @@ export type Args = {
    * If unresolved, this function will await the promise.
    */
   config: Promise<SanitizedConfig> | SanitizedConfig
+  importMap: ImportMap
   /**
    * If true, redirects unauthenticated users to the admin login page.
    * If a string is provided, the user will be redirected to that specific URL.

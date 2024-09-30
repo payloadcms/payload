@@ -1,91 +1,119 @@
 'use client'
 
-import type { FieldComponentProps, FieldPermissions, FieldTypes, MappedField } from 'payload'
+import type { ClientField, FieldPermissions } from 'payload'
 
 import React from 'react'
 
 import { HiddenField } from '../../fields/Hidden/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useFieldComponents } from '../../providers/FieldComponents/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { FieldPropsProvider, useFieldProps } from '../FieldPropsProvider/index.js'
 
 type Props = {
-  CustomField: MappedField['CustomField']
-  custom?: Record<any, string>
-  disabled: boolean
-  fieldComponentProps?: {
+  readonly fieldComponentProps?: {
+    field: ClientField
     forceRender?: boolean
-  } & FieldComponentProps
-  indexPath?: string
-  isHidden?: boolean
-  name?: string
-  path: string
-  permissions?: FieldPermissions
-  readOnly?: boolean
-  schemaPath: string
-  siblingPermissions: {
+    readOnly?: boolean
+  }
+  readonly indexPath?: string
+  readonly isHidden?: boolean
+  readonly name?: string
+  readonly path: string
+  readonly permissions?: FieldPermissions
+  readonly schemaPath: string
+  readonly siblingPermissions: {
     [fieldName: string]: FieldPermissions
   }
-  type: keyof FieldTypes
 }
 
 export const RenderField: React.FC<Props> = ({
   name,
-  type,
-  CustomField,
-  custom,
-  disabled,
   fieldComponentProps,
   indexPath,
-  isHidden,
   path: pathFromProps,
   permissions,
-  readOnly: readOnlyFromProps,
   schemaPath: schemaPathFromProps,
   siblingPermissions,
 }) => {
+  const fieldComponents = useFieldComponents()
   const operation = useOperation()
   const { readOnly: readOnlyFromContext } = useFieldProps()
-  const fieldComponents = useFieldComponents()
+
+  if (!fieldComponents) {
+    return null
+  }
 
   const path = [pathFromProps, name].filter(Boolean).join('.')
   const schemaPath = [schemaPathFromProps, name].filter(Boolean).join('.')
 
   // if the user cannot read the field, then filter it out
   // this is different from `admin.readOnly` which is executed based on `operation`
-  if (permissions?.read?.permission === false || disabled) {
+  if (permissions?.read?.permission === false || fieldComponentProps?.field?.admin?.disabled) {
     return null
   }
 
+  // Combine readOnlyFromContext with the readOnly prop passed down from RenderFields
+  const isReadOnly = fieldComponentProps.readOnly ?? readOnlyFromContext
+
   // `admin.readOnly` displays the value but prevents the field from being edited
-  let readOnly = readOnlyFromProps
+  fieldComponentProps.readOnly = fieldComponentProps?.field?.admin?.readOnly
 
   // if parent field is `readOnly: true`, but this field is `readOnly: false`, the field should still be editable
-  if (readOnlyFromContext && readOnly !== false) readOnly = true
+  if (isReadOnly && fieldComponentProps.readOnly !== false) {
+    fieldComponentProps.readOnly = true
+  }
 
   // if the user does not have access control to begin with, force it to be read-only
   if (permissions?.[operation]?.permission === false) {
-    readOnly = true
+    fieldComponentProps.readOnly = true
   }
 
-  const DefaultField = isHidden ? HiddenField : fieldComponents[type]
+  let RenderedField: React.ReactElement
 
-  if (CustomField === undefined && !DefaultField) {
+  if (fieldComponentProps?.field?.admin?.components?.Field === null) {
     return null
+  }
+
+  // hide from admin if field is `admin.hidden: true`
+  if (
+    'admin' in fieldComponentProps.field &&
+    'hidden' in fieldComponentProps.field.admin &&
+    fieldComponentProps.field.admin.hidden
+  ) {
+    RenderedField = (
+      <HiddenField
+        field={fieldComponentProps.field}
+        forceRender={fieldComponentProps.forceRender}
+        readOnly={fieldComponentProps.readOnly}
+      />
+    )
+  } else {
+    RenderedField = (
+      <RenderComponent
+        clientProps={{
+          field: fieldComponentProps.field,
+          forceRender: fieldComponentProps.forceRender,
+          readOnly: fieldComponentProps.readOnly,
+        }}
+        Component={fieldComponents?.[fieldComponentProps?.field?.type]}
+        mappedComponent={fieldComponentProps?.field?.admin?.components?.Field}
+      />
+    )
   }
 
   return (
     <FieldPropsProvider
-      custom={custom}
+      custom={fieldComponentProps?.field?.admin?.custom}
       indexPath={indexPath}
       path={path}
       permissions={permissions}
-      readOnly={readOnly}
+      readOnly={fieldComponentProps.readOnly}
       schemaPath={schemaPath}
       siblingPermissions={siblingPermissions}
-      type={type}
+      type={fieldComponentProps?.field?.type}
     >
-      {CustomField !== undefined ? CustomField : <DefaultField {...fieldComponentProps} />}
+      {RenderedField}
     </FieldPropsProvider>
   )
 }

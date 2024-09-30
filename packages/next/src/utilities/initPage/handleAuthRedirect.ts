@@ -22,8 +22,10 @@ export const handleAuthRedirect = ({
     routes: { admin: adminRoute },
   } = config
 
-  if (!isAdminAuthRoute(config, route, adminRoute)) {
-    if (searchParams && 'redirect' in searchParams) delete searchParams.redirect
+  if (!isAdminAuthRoute({ adminRoute, config, route })) {
+    if (searchParams && 'redirect' in searchParams) {
+      delete searchParams.redirect
+    }
 
     const redirectRoute = encodeURIComponent(
       route + Object.keys(searchParams ?? {}).length
@@ -36,7 +38,7 @@ export const handleAuthRedirect = ({
     const customLoginRoute =
       typeof redirectUnauthenticatedUser === 'string' ? redirectUnauthenticatedUser : undefined
 
-    const loginRoute = isAdminRoute(route, adminRoute)
+    const loginRoute = isAdminRoute({ adminRoute, config, route })
       ? adminLoginRoute
       : customLoginRoute || loginRouteFromConfig
 

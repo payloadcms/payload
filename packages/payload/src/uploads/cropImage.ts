@@ -38,7 +38,9 @@ export async function cropImage({
 
     const sharpOptions: SharpOptions = {}
 
-    if (fileIsAnimatedType) sharpOptions.animated = true
+    if (fileIsAnimatedType) {
+      sharpOptions.animated = true
+    }
 
     const formattedCropData = {
       height: Number(heightInPixels),

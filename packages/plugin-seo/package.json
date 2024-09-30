@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-seo",
-  "version": "3.0.0-beta.71",
+  "version": "3.0.0-beta.109",
   "description": "SEO plugin for Payload",
   "keywords": [
     "payload",
@@ -34,6 +34,11 @@
       "import": "./src/exports/fields.ts",
       "types": "./src/exports/fields.ts",
       "default": "./src/exports/fields.ts"
+    },
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
     }
   },
   "main": "./src/index.tsx",
@@ -47,25 +52,25 @@
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "lint": "eslint src",
-    "lint:fix": "eslint --fix --ext .ts,.tsx src",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
+  },
+  "dependencies": {
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/next": "workspace:*",
-    "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*",
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*",
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-6230622a1a-20240610",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-6230622a1a-20240610"
+    "react": "^19.0.0 || ^19.0.0-rc-5dcb0097-20240918",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-5dcb0097-20240918"
   },
   "publishConfig": {
     "exports": {
@@ -83,6 +88,11 @@
         "import": "./dist/exports/fields.js",
         "types": "./dist/exports/fields.d.ts",
         "default": "./dist/exports/fields.js"
+      },
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts",
+        "default": "./dist/exports/client.js"
       }
     },
     "main": "./dist/index.js",
@@ -91,7 +101,7 @@
   },
   "homepage:": "https://payloadcms.com",
   "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }

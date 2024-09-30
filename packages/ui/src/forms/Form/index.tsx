@@ -1,5 +1,5 @@
 'use client'
-import type { FormState } from 'payload'
+import type { FormState, PayloadRequest } from 'payload'
 
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
@@ -54,9 +54,9 @@ export const Form: React.FC<FormProps> = (props) => {
     beforeSubmit,
     children,
     className,
+    disabled: disabledFromProps,
     disableSuccessStatus,
     disableValidationOnSubmit,
-    disabled: disabledFromProps,
     // fields: fieldsFromProps = collection?.fields || global?.fields,
     handleResponse,
     initialState, // fully formed initial field state
@@ -79,7 +79,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const { refreshCookie, user } = useAuth()
   const operation = useOperation()
 
-  const config = useConfig()
+  const { config } = useConfig()
   const {
     routes: { api: apiRoute },
     serverURL,
@@ -126,13 +126,20 @@ export const Form: React.FC<FormProps> = (props) => {
             }
 
             validationResult = await field.validate(valueToValidate, {
+              ...field,
               id,
-              config,
+              collectionSlug,
               data,
               operation,
+              preferences: {} as any,
+              req: {
+                payload: {
+                  config,
+                },
+                t,
+                user,
+              } as unknown as PayloadRequest,
               siblingData: contextRef.current.getSiblingData(path),
-              t,
-              user,
             })
 
             if (typeof validationResult === 'string') {
@@ -160,7 +167,7 @@ export const Form: React.FC<FormProps> = (props) => {
     }
 
     return isValid
-  }, [id, user, operation, t, dispatchFields, config])
+  }, [collectionSlug, config, dispatchFields, id, operation, t, user])
 
   const submit = useCallback(
     async (options: SubmitOptions = {}, e): Promise<void> => {
@@ -179,7 +186,7 @@ export const Form: React.FC<FormProps> = (props) => {
       }
 
       // create new toast promise which will resolve manually later
-      let successToast, errorToast
+      let errorToast, successToast
       const promise = new Promise((resolve, reject) => {
         successToast = resolve
         errorToast = reject
@@ -213,7 +220,9 @@ export const Form: React.FC<FormProps> = (props) => {
       setProcessing(true)
       setDisabled(true)
 
-      if (waitForAutocomplete) await wait(100)
+      if (waitForAutocomplete) {
+        await wait(100)
+      }
 
       // Execute server side validations
       if (Array.isArray(beforeSubmit)) {
@@ -300,9 +309,13 @@ export const Form: React.FC<FormProps> = (props) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let json: Record<string, any> = {}
 
-        if (isJSON) json = await res.json()
+        if (isJSON) {
+          json = await res.json()
+        }
         if (res.status < 400) {
-          if (typeof onSuccess === 'function') await onSuccess(json)
+          if (typeof onSuccess === 'function') {
+            await onSuccess(json)
+          }
           setSubmitted(false)
           setProcessing(false)
 
@@ -438,7 +451,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const reset = useCallback(
     async (data: unknown) => {
-      const newState = await getFormState({
+      const { state: newState } = await getFormState({
         apiRoute,
         body: {
           id,
@@ -469,7 +482,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const getFieldStateBySchemaPath = useCallback(
     async ({ data, schemaPath }) => {
-      const fieldSchema = await getFormState({
+      const { state: fieldSchema } = await getFormState({
         apiRoute,
         body: {
           collectionSlug,
@@ -555,11 +568,15 @@ export const Form: React.FC<FormProps> = (props) => {
   }, [])
 
   useEffect(() => {
-    if (typeof disabledFromProps === 'boolean') setDisabled(disabledFromProps)
+    if (typeof disabledFromProps === 'boolean') {
+      setDisabled(disabledFromProps)
+    }
   }, [disabledFromProps])
 
   useEffect(() => {
-    if (typeof submittedFromProps === 'boolean') setSubmitted(submittedFromProps)
+    if (typeof submittedFromProps === 'boolean') {
+      setSubmitted(submittedFromProps)
+    }
   }, [submittedFromProps])
 
   useEffect(() => {
@@ -611,7 +628,9 @@ export const Form: React.FC<FormProps> = (props) => {
         }
       }
 
-      if (modified) void executeOnChange()
+      if (modified) {
+        void executeOnChange()
+      }
     },
     150,
     // Make sure we trigger this whenever modified changes (not just when `fields` changes), otherwise we will miss merging server form state for the first form update/onChange. Here's why:
@@ -621,11 +640,11 @@ export const Form: React.FC<FormProps> = (props) => {
 
   return (
     <form
-      action={action}
+      action={typeof action === 'function' ? void action : action}
       className={classes}
       method={method}
       noValidate
-      onSubmit={(e) => contextRef.current.submit({}, e)}
+      onSubmit={(e) => void contextRef.current.submit({}, e)}
       ref={formRef}
     >
       <FormContext.Provider value={contextRef.current}>

@@ -1,5 +1,9 @@
 'use client'
-import type { ClientValidate, EmailFieldProps } from 'payload'
+import type {
+  EmailFieldClientComponent,
+  EmailFieldClientProps,
+  EmailFieldValidation,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -7,6 +11,7 @@ import React, { useCallback } from 'react'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
@@ -14,32 +19,37 @@ import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
-const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
+const EmailFieldComponent: EmailFieldClientComponent = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
     autoComplete,
-    className,
     descriptionProps,
     errorProps,
-    label,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        readOnly: readOnlyFromAdmin,
+
+        className,
+        description,
+        placeholder,
+        style,
+        width,
+      } = {} as EmailFieldClientProps['field']['admin'],
+      label,
+      required,
+    } = {} as EmailFieldClientProps['field'],
+    field,
     labelProps,
-    path: pathFromProps,
-    placeholder,
-    readOnly: readOnlyFromProps,
-    required,
-    style,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
-    width,
   } = props
+
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n } = useTranslation()
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate: EmailFieldValidation = useCallback(
     (value, options) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })
@@ -67,15 +77,17 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel field={field} Label={field?.admin?.components?.Label} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        {BeforeInput}
+        <FieldError
+          CustomError={field?.admin?.components?.Error}
+          field={field}
+          path={path}
+          {...(errorProps || {})}
+        />
+        <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
+        {/* disable eslint here because the label is dynamic */}
+        {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
         <input
           autoComplete={autoComplete}
           disabled={disabled}
@@ -83,16 +95,18 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
           name={path}
           onChange={setValue}
           placeholder={getTranslation(placeholder, i18n)}
+          required={required}
           type="email"
           value={(value as string) || ''}
         />
-        {AfterInput}
+        <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
       </div>
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <FieldDescription
+        Description={field?.admin?.components?.Description}
+        description={description}
+        field={field}
+        {...(descriptionProps || {})}
+      />
     </div>
   )
 }

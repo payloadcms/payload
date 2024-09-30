@@ -10,10 +10,19 @@ export const NavWrapper: React.FC<{
 }> = (props) => {
   const { baseClass, children } = props
 
-  const { navOpen, navRef } = useNav()
+  const { hydrated, navOpen, navRef, shouldAnimate } = useNav()
 
   return (
-    <aside className={[baseClass, navOpen && `${baseClass}--nav-open`].filter(Boolean).join(' ')}>
+    <aside
+      className={[
+        baseClass,
+        navOpen && `${baseClass}--nav-open`,
+        shouldAnimate && `${baseClass}--nav-animate`,
+        hydrated && `${baseClass}--nav-hydrated`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <div className={`${baseClass}__scroll`} ref={navRef}>
         {children}
       </div>

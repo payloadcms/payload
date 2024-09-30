@@ -1,14 +1,14 @@
 import type { CollationOptions, TransactionOptions } from 'mongodb'
 import type { MongoMemoryReplSet } from 'mongodb-memory-server'
-import type { ClientSession, ConnectOptions, Connection } from 'mongoose'
-import type { BaseDatabaseAdapter, DatabaseAdapterObj, Payload } from 'payload'
+import type { ClientSession, Connection, ConnectOptions, QueryOptions } from 'mongoose'
+import type { BaseDatabaseAdapter, DatabaseAdapterObj, Payload, UpdateOneArgs } from 'payload'
 
 import fs from 'fs'
 import mongoose from 'mongoose'
 import path from 'path'
 import { createDatabaseAdapter } from 'payload'
 
-import type { CollectionModel, GlobalModel } from './types.js'
+import type { CollectionModel, GlobalModel, MigrateDownArgs, MigrateUpArgs } from './types.js'
 
 import { connect } from './connect.js'
 import { count } from './count.js'
@@ -36,6 +36,7 @@ import { updateGlobal } from './updateGlobal.js'
 import { updateGlobalVersion } from './updateGlobalVersion.js'
 import { updateOne } from './updateOne.js'
 import { updateVersion } from './updateVersion.js'
+import { upsert } from './upsert.js'
 
 export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
@@ -78,7 +79,12 @@ export interface Args {
    * typed as any to avoid dependency
    */
   mongoMemoryServer?: MongoMemoryReplSet
-  transactionOptions?: TransactionOptions | false
+  prodMigrations?: {
+    down: (args: MigrateDownArgs) => Promise<void>
+    name: string
+    up: (args: MigrateUpArgs) => Promise<void>
+  }[]
+  transactionOptions?: false | TransactionOptions
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
 }
@@ -90,6 +96,11 @@ export type MongooseAdapter = {
   connection: Connection
   globals: GlobalModel
   mongoMemoryServer: MongoMemoryReplSet
+  prodMigrations?: {
+    down: (args: MigrateDownArgs) => Promise<void>
+    name: string
+    up: (args: MigrateUpArgs) => Promise<void>
+  }[]
   sessions: Record<number | string, ClientSession>
   versions: {
     [slug: string]: CollectionModel
@@ -107,8 +118,14 @@ declare module 'payload' {
     connection: Connection
     globals: GlobalModel
     mongoMemoryServer: MongoMemoryReplSet
+    prodMigrations?: {
+      down: (args: MigrateDownArgs) => Promise<void>
+      name: string
+      up: (args: MigrateUpArgs) => Promise<void>
+    }[]
     sessions: Record<number | string, ClientSession>
     transactionOptions: TransactionOptions
+    updateOne: (args: { options?: QueryOptions } & UpdateOneArgs) => Promise<Document>
     versions: {
       [slug: string]: CollectionModel
     }
@@ -121,6 +138,7 @@ export function mongooseAdapter({
   disableIndexHints = false,
   migrationDir: migrationDirArg,
   mongoMemoryServer,
+  prodMigrations,
   transactionOptions = {},
   url,
 }: Args): DatabaseAdapterObj {
@@ -134,8 +152,8 @@ export function mongooseAdapter({
       // Mongoose-specific
       autoPluralization,
       collections: {},
-      connectOptions: connectOptions || {},
       connection: undefined,
+      connectOptions: connectOptions || {},
       count,
       disableIndexHints,
       globals: undefined,
@@ -166,13 +184,16 @@ export function mongooseAdapter({
       init,
       migrateFresh,
       migrationDir,
+      packageName: '@payloadcms/db-mongodb',
       payload,
+      prodMigrations,
       queryDrafts,
       rollbackTransaction,
       updateGlobal,
       updateGlobalVersion,
       updateOne,
       updateVersion,
+      upsert,
     })
   }
 
@@ -203,7 +224,9 @@ function findMigrationDir(migrationDir?: string): string {
   const relativeMigrations = path.resolve(cwd, 'migrations')
 
   // Use arg if provided
-  if (migrationDir) return migrationDir
+  if (migrationDir) {
+    return migrationDir
+  }
 
   // Check other common locations
   if (fs.existsSync(srcDir)) {

@@ -1,7 +1,5 @@
 import type { GlobalConfig } from 'payload'
 
-import GlobalVersionButton from '../elements/GlobalVersionButton/index.js'
-import GlobalVersionsButton from '../elements/GlobalVersionsButton/index.js'
 import { draftWithMaxGlobalSlug } from '../slugs.js'
 
 const DraftWithMaxGlobal: GlobalConfig = {
@@ -11,12 +9,12 @@ const DraftWithMaxGlobal: GlobalConfig = {
     preview: () => 'https://payloadcms.com',
     components: {
       views: {
-        Edit: {
-          Version: {
-            actions: [GlobalVersionButton],
+        edit: {
+          version: {
+            actions: ['/elements/GlobalVersionButton/index.js'],
           },
-          Versions: {
-            actions: [GlobalVersionsButton],
+          versions: {
+            actions: ['/elements/GlobalVersionsButton/index.js'],
           },
         },
       },

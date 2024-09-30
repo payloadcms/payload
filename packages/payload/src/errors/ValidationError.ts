@@ -8,13 +8,25 @@ import { APIError } from './APIError.js'
 // This gets dynamically reassigned during compilation
 export let ValidationErrorName = 'ValidationError'
 
+export type ValidationFieldError = {
+  // The field path, i.e. "textField", "groupField.subTextField", etc.
+  field: string
+  // The error message to display for this field
+  message: string
+}
+
 export class ValidationError extends APIError<{
   collection?: string
-  errors: { field: string; message: string }[]
+  errors: ValidationFieldError[]
   global?: string
 }> {
   constructor(
-    results: { collection?: string; errors: { field: string; message: string }[]; global?: string },
+    results: {
+      collection?: string
+      errors: ValidationFieldError[]
+      global?: string
+      id?: number | string
+    },
     t?: TFunction,
   ) {
     const message = t

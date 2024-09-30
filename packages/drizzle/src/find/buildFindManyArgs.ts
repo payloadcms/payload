@@ -1,7 +1,7 @@
 import type { DBQueryConfig } from 'drizzle-orm'
-import type { Field } from 'payload'
+import type { Field, JoinQuery } from 'payload'
 
-import type { DrizzleAdapter } from '../types.js'
+import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
 
 import { traverseFields } from './traverseFields.js'
 
@@ -9,14 +9,20 @@ type BuildFindQueryArgs = {
   adapter: DrizzleAdapter
   depth: number
   fields: Field[]
+  joinQuery?: JoinQuery
+  /**
+   * The joins array will be mutated by pushing any joins needed for the where queries of join field joins
+   */
+  joins?: BuildQueryJoinAliases
+  locale?: string
   tableName: string
 }
 
-export type Result = DBQueryConfig<'many', true, any, any> & {
-  with?: DBQueryConfig<'many', true, any, any> & {
+export type Result = {
+  with?: {
     _locales?: DBQueryConfig<'many', true, any, any>
-  }
-}
+  } & DBQueryConfig<'many', true, any, any>
+} & DBQueryConfig<'many', true, any, any>
 
 // Generate the Drizzle query for findMany based on
 // a collection field structure
@@ -24,6 +30,9 @@ export const buildFindManyArgs = ({
   adapter,
   depth,
   fields,
+  joinQuery,
+  joins = [],
+  locale,
   tableName,
 }: BuildFindQueryArgs): Record<string, unknown> => {
   const result: Result = {
@@ -79,7 +88,11 @@ export const buildFindManyArgs = ({
     currentTableName: tableName,
     depth,
     fields,
+    joinQuery,
+    joins,
+    locale,
     path: '',
+    tablePath: '',
     topLevelArgs: result,
     topLevelTableName: tableName,
   })

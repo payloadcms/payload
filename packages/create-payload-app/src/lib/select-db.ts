@@ -5,6 +5,7 @@ import type { CliArgs, DbDetails, DbType } from '../types.js'
 
 type DbChoice = {
   dbConnectionPrefix: `${string}/`
+  dbConnectionSuffix?: string
   title: string
   value: DbType
 }
@@ -19,6 +20,17 @@ const dbChoiceRecord: Record<DbType, DbChoice> = {
     dbConnectionPrefix: 'postgres://postgres:<password>@127.0.0.1:5432/',
     title: 'PostgreSQL (beta)',
     value: 'postgres',
+  },
+  sqlite: {
+    dbConnectionPrefix: 'file:./',
+    dbConnectionSuffix: '.db',
+    title: 'SQLite (beta)',
+    value: 'sqlite',
+  },
+  'vercel-postgres': {
+    dbConnectionPrefix: 'postgres://postgres:<password>@127.0.0.1:5432/',
+    title: 'Vercel Postgres (beta)',
+    value: 'vercel-postgres',
   },
 }
 
@@ -37,12 +49,14 @@ export async function selectDb(args: CliArgs, projectName: string): Promise<DbDe
     dbType = await p.select<{ label: string; value: DbType }[], DbType>({
       initialValue: 'mongodb',
       message: `Select a database`,
-      options: [
-        { label: 'MongoDB', value: 'mongodb' },
-        { label: 'Postgres', value: 'postgres' },
-      ],
+      options: Object.values(dbChoiceRecord).map((dbChoice) => ({
+        label: dbChoice.title,
+        value: dbChoice.value,
+      })),
     })
-    if (p.isCancel(dbType)) process.exit(0)
+    if (p.isCancel(dbType)) {
+      process.exit(0)
+    }
   }
 
   const dbChoice = dbChoiceRecord[dbType]
@@ -50,7 +64,7 @@ export async function selectDb(args: CliArgs, projectName: string): Promise<DbDe
   let dbUri: string | symbol | undefined = undefined
   const initialDbUri = `${dbChoice.dbConnectionPrefix}${
     projectName === '.' ? `payload-${getRandomDigitSuffix()}` : slugify(projectName)
-  }`
+  }${dbChoice.dbConnectionSuffix || ''}`
 
   if (args['--db-accept-recommended']) {
     dbUri = initialDbUri
@@ -61,7 +75,9 @@ export async function selectDb(args: CliArgs, projectName: string): Promise<DbDe
       initialValue: initialDbUri,
       message: `Enter ${dbChoice.title.split(' ')[0]} connection string`, // strip beta from title
     })
-    if (p.isCancel(dbUri)) process.exit(0)
+    if (p.isCancel(dbUri)) {
+      process.exit(0)
+    }
   }
 
   return {

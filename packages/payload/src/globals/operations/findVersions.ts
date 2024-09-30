@@ -7,8 +7,6 @@ import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
-import { commitTransaction } from '../../utilities/commitTransaction.js'
-import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
@@ -19,6 +17,7 @@ export type Arguments = {
   limit?: number
   overrideAccess?: boolean
   page?: number
+  pagination?: boolean
   req?: PayloadRequest
   showHiddenFields?: boolean
   sort?: string
@@ -34,6 +33,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     limit,
     overrideAccess,
     page,
+    pagination = true,
     req: { fallbackLocale, locale, payload },
     req,
     showHiddenFields,
@@ -41,11 +41,9 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     where,
   } = args
 
-  const versionFields = buildVersionGlobalFields(globalConfig)
+  const versionFields = buildVersionGlobalFields(payload.config, globalConfig)
 
   try {
-    const shouldCommit = await initTransaction(req)
-
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
@@ -73,6 +71,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
       limit: limit ?? 10,
       locale,
       page: page || 1,
+      pagination,
       req,
       sort,
       where: fullWhere,
@@ -146,8 +145,6 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
       ...result,
       docs: result.docs.map((doc) => sanitizeInternalFields<T>(doc)),
     }
-
-    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

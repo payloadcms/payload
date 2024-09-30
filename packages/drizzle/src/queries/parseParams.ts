@@ -1,8 +1,8 @@
-/* eslint-disable no-await-in-loop */
 import type { SQL } from 'drizzle-orm'
 import type { Field, Operator, Where } from 'payload'
 
 import { and, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
+import { PgUUID } from 'drizzle-orm/pg-core'
 import { QueryError } from 'payload'
 import { validOperators } from 'payload/shared'
 
@@ -23,7 +23,7 @@ type Args = {
   where: Where
 }
 
-export async function parseParams({
+export function parseParams({
   adapter,
   fields,
   joins,
@@ -31,7 +31,7 @@ export async function parseParams({
   selectFields,
   tableName,
   where,
-}: Args): Promise<SQL> {
+}: Args): SQL {
   let result: SQL
   const constraints: SQL[] = []
 
@@ -47,7 +47,7 @@ export async function parseParams({
           conditionOperator = or
         }
         if (Array.isArray(condition)) {
-          const builtConditions = await buildAndOrConditions({
+          const builtConditions = buildAndOrConditions({
             adapter,
             fields,
             joins,
@@ -68,8 +68,10 @@ export async function parseParams({
             for (let operator of Object.keys(pathOperators)) {
               if (validOperators.includes(operator as Operator)) {
                 const val = where[relationOrPath][operator]
+
                 const {
                   columnName,
+                  columns,
                   constraints: queryConstraints,
                   field,
                   getNotNullColumnByValue,
@@ -126,17 +128,25 @@ export async function parseParams({
                   }
 
                   const jsonQuery = adapter.convertPathToJSONTraversal(pathSegments)
-                  const operatorKeys = {
+                  const operatorKeys: Record<string, { operator: string; wildcard: string }> = {
                     contains: { operator: 'like', wildcard: '%' },
                     equals: { operator: '=', wildcard: '' },
-                    exists: { operator: val === true ? 'is not null' : 'is null' },
+                    exists: { operator: val === true ? 'is not null' : 'is null', wildcard: '' },
+                    in: { operator: 'in', wildcard: '' },
                     like: { operator: 'like', wildcard: '%' },
                     not_equals: { operator: '<>', wildcard: '' },
+                    not_in: { operator: 'not in', wildcard: '' },
                   }
 
                   let formattedValue = val
                   if (adapter.name === 'sqlite' && operator === 'equals' && !isNaN(val)) {
                     formattedValue = val
+                  } else if (['in', 'not_in'].includes(operator) && Array.isArray(val)) {
+                    if (adapter.name === 'sqlite') {
+                      formattedValue = `(${val.map((v) => `${v}`).join(',')})`
+                    } else {
+                      formattedValue = `(${val.map((v) => `'${v}'`).join(', ')})`
+                    }
                   } else {
                     formattedValue = `'${operatorKeys[operator].wildcard}${val}${operatorKeys[operator].wildcard}'`
                   }
@@ -183,7 +193,9 @@ export async function parseParams({
 
                 const sanitizedQueryValue = sanitizeQueryValue({
                   adapter,
+                  columns,
                   field,
+                  isUUID: table?.[columnName] instanceof PgUUID,
                   operator,
                   relationOrPath,
                   val,
@@ -193,7 +205,49 @@ export async function parseParams({
                   break
                 }
 
-                const { operator: queryOperator, value: queryValue } = sanitizedQueryValue
+                const {
+                  columns: queryColumns,
+                  operator: queryOperator,
+                  value: queryValue,
+                } = sanitizedQueryValue
+
+                // Handle polymorphic relationships by value
+                if (queryColumns) {
+                  if (!queryColumns.length) {
+                    break
+                  }
+
+                  let wrapOperator = or
+
+                  if (queryValue === null && ['equals', 'not_equals'].includes(operator)) {
+                    if (operator === 'equals') {
+                      wrapOperator = and
+                    }
+
+                    constraints.push(
+                      wrapOperator(
+                        ...queryColumns.map(({ rawColumn }) =>
+                          operator === 'equals' ? isNull(rawColumn) : isNotNull(rawColumn),
+                        ),
+                      ),
+                    )
+                    break
+                  }
+
+                  if (['not_equals', 'not_in'].includes(operator)) {
+                    wrapOperator = and
+                  }
+
+                  constraints.push(
+                    wrapOperator(
+                      ...queryColumns.map(({ rawColumn, value }) =>
+                        adapter.operators[queryOperator](rawColumn, value),
+                      ),
+                    ),
+                  )
+
+                  break
+                }
 
                 if (queryOperator === 'not_equals' && queryValue !== null) {
                   constraints.push(

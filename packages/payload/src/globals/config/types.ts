@@ -15,7 +15,7 @@ import type {
   EntityDescriptionComponent,
   GeneratePreviewURL,
   LivePreviewConfig,
-  OpenGraphConfig,
+  MetaConfig,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'
@@ -100,10 +100,10 @@ export type GlobalAdminOptions = {
     }
     views?: {
       /**
-       * Set to a React component to replace the entire "Edit" view, including all nested routes.
+       * Set to a React component to replace the entire Edit View, including all nested routes.
        * Set to an object to replace or modify individual nested routes, or to add new ones.
        */
-      Edit?: EditConfig
+      edit?: EditConfig
     }
   }
   /** Extension point to add your custom data. Available in server and client. */
@@ -121,17 +121,14 @@ export type GlobalAdminOptions = {
    */
   hidden?: ((args: { user: PayloadRequest['user'] }) => boolean) | boolean
   /**
-   * Hide the API URL within the Edit view
+   * Hide the API URL within the Edit View
    */
   hideAPIURL?: boolean
   /**
    * Live preview options
    */
   livePreview?: LivePreviewConfig
-  meta?: {
-    description?: string
-    openGraph?: OpenGraphConfig
-  }
+  meta?: MetaConfig
   /**
    * Function to generate custom preview URL
    */
@@ -152,7 +149,7 @@ export type GlobalConfig = {
    * Customize the SQL table name
    */
   dbName?: DBIdentifierName
-  endpoints?: Omit<Endpoint, 'root'>[] | false
+  endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
   graphQL?:
     | {
@@ -167,6 +164,15 @@ export type GlobalConfig = {
     beforeValidate?: BeforeValidateHook[]
   }
   label?: Record<string, string> | string
+  /**
+   * Enables / Disables the ability to lock documents while editing
+   * @default true
+   */
+  lockDocuments?:
+    | {
+        duration: number
+      }
+    | false
   slug: string
   /**
    * Options used in typescript generation
@@ -177,7 +183,7 @@ export type GlobalConfig = {
      */
     interface?: string
   }
-  versions?: IncomingGlobalVersions | boolean
+  versions?: boolean | IncomingGlobalVersions
 }
 
 export interface SanitizedGlobalConfig

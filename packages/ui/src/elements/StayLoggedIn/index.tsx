@@ -19,7 +19,7 @@ export const StayLoggedInModal: React.FC = () => {
   const { refreshCookie } = useAuth()
 
   const router = useRouter()
-  const config = useConfig()
+  const { config } = useConfig()
 
   const {
     admin: {
@@ -50,6 +50,7 @@ export const StayLoggedInModal: React.FC = () => {
                 }),
               )
             }}
+            size="large"
           >
             {t('authentication:logOut')}
           </Button>
@@ -58,6 +59,7 @@ export const StayLoggedInModal: React.FC = () => {
               refreshCookie()
               toggleModal(stayLoggedInModalSlug)
             }}
+            size="large"
           >
             {t('authentication:stayLoggedIn')}
           </Button>

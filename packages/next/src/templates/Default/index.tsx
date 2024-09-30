@@ -1,13 +1,13 @@
-import type { ServerProps, VisibleEntities } from 'payload'
+import type { MappedComponent, ServerProps, VisibleEntities } from 'payload'
 
-import { AppHeader, EntityVisibilityProvider, NavToggler } from '@payloadcms/ui'
-import { RenderCustomComponent } from '@payloadcms/ui/shared'
+import { AppHeader, BulkUploadProvider, EntityVisibilityProvider, NavToggler } from '@payloadcms/ui'
+import { getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
 import React from 'react'
 
-import { DefaultNav, type NavProps } from '../../elements/Nav/index.js'
+import { DefaultNav } from '../../elements/Nav/index.js'
+import './index.scss'
 import { NavHamburger } from './NavHamburger/index.js'
 import { Wrapper } from './Wrapper/index.js'
-import './index.scss'
 
 const baseClass = 'template-default'
 
@@ -31,51 +31,62 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
 }) => {
   const {
     admin: {
-      components: { Nav: CustomNav } = {
+      components: { header: CustomHeader, Nav: CustomNav } = {
+        header: undefined,
         Nav: undefined,
       },
     } = {},
   } = payload.config || {}
 
-  const navProps: NavProps = {
-    i18n,
-    locale,
-    params,
-    payload,
-    permissions,
-    searchParams,
-    user,
-  }
+  const createMappedComponent = getCreateMappedComponent({
+    importMap: payload.importMap,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
+  })
+
+  const MappedDefaultNav: MappedComponent = createMappedComponent(
+    CustomNav,
+    undefined,
+    DefaultNav,
+    'CustomNav',
+  )
+
+  const MappedCustomHeader = createMappedComponent(
+    CustomHeader,
+    undefined,
+    undefined,
+    'CustomHeader',
+  )
 
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
-      <div>
-        <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
-          <NavToggler className={`${baseClass}__nav-toggler`}>
-            <NavHamburger />
-          </NavToggler>
-        </div>
-        <Wrapper baseClass={baseClass} className={className}>
-          <RenderCustomComponent
-            CustomComponent={CustomNav}
-            DefaultComponent={DefaultNav}
-            componentProps={navProps}
-            serverOnlyProps={{
-              i18n,
-              locale,
-              params,
-              payload,
-              permissions,
-              searchParams,
-              user,
-            }}
-          />
-          <div className={`${baseClass}__wrap`}>
-            <AppHeader />
-            {children}
+      <BulkUploadProvider>
+        <RenderComponent mappedComponent={MappedCustomHeader} />
+        <div style={{ position: 'relative' }}>
+          <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
+            <div className={`${baseClass}__nav-toggler-container`} id="nav-toggler">
+              <NavToggler className={`${baseClass}__nav-toggler`}>
+                <NavHamburger />
+              </NavToggler>
+            </div>
           </div>
-        </Wrapper>
-      </div>
+          <Wrapper baseClass={baseClass} className={className}>
+            <RenderComponent mappedComponent={MappedDefaultNav} />
+
+            <div className={`${baseClass}__wrap`}>
+              <AppHeader />
+              {children}
+            </div>
+          </Wrapper>
+        </div>
+      </BulkUploadProvider>
     </EntityVisibilityProvider>
   )
 }

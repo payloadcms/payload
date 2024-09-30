@@ -5,8 +5,8 @@ import type { LexicalPluginNodeConverter } from '../../types.js'
 
 import { convertLexicalPluginNodesToLexical } from '../../index.js'
 
-export const _ListConverter: LexicalPluginNodeConverter = {
-  converter({ converters, lexicalPluginNode }) {
+export const ListConverter: LexicalPluginNodeConverter = {
+  converter({ converters, lexicalPluginNode, quiet }) {
     return {
       ...lexicalPluginNode,
       type: 'list',
@@ -14,6 +14,7 @@ export const _ListConverter: LexicalPluginNodeConverter = {
         converters,
         lexicalPluginNodes: lexicalPluginNode.children,
         parentNodeType: 'list',
+        quiet,
       }),
       listType: (lexicalPluginNode as any)?.listType || 'number',
       tag: (lexicalPluginNode as any)?.tag || 'ol',

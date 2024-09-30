@@ -14,6 +14,7 @@ export const restoreVersion: CollectionRouteHandlerWithID = async ({
 }) => {
   const { searchParams } = req
   const depth = searchParams.get('depth')
+  const draft = searchParams.get('draft')
 
   const id = sanitizeCollectionID({
     id: incomingID,
@@ -25,6 +26,7 @@ export const restoreVersion: CollectionRouteHandlerWithID = async ({
     id,
     collection,
     depth: isNumber(depth) ? Number(depth) : undefined,
+    draft: draft === 'true' ? true : undefined,
     req,
   })
 

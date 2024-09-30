@@ -1,3 +1,4 @@
+'use client'
 /**
  * Calculate distance between scrollerElem and target if target is not in scrollerElem
  */

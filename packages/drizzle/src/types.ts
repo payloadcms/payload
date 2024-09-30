@@ -120,6 +120,7 @@ export type RequireDrizzleKit = () => {
   pushSchema: (
     schema: Record<string, unknown>,
     drizzle: DrizzleAdapter['drizzle'],
+    filterSchema?: string[],
   ) => Promise<{ apply; hasDataLoss; warnings }>
 }
 
@@ -132,7 +133,7 @@ export type Migration = {
     db?: DrizzleTransaction | LibSQLDatabase<Record<string, never>> | PostgresDB
     payload: Payload
     req: PayloadRequest
-  }) => Promise<boolean>
+  }) => Promise<void>
   up: ({
     db,
     payload,
@@ -141,7 +142,7 @@ export type Migration = {
     db?: DrizzleTransaction | LibSQLDatabase | PostgresDB
     payload: Payload
     req: PayloadRequest
-  }) => Promise<boolean>
+  }) => Promise<void>
 } & MigrationData
 
 export type CreateJSONQueryArgs = {
@@ -161,7 +162,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   deleteWhere: DeleteWhere
   drizzle: LibSQLDatabase | PostgresDB
   dropDatabase: DropDatabase
-  enums?: Record<string, unknown> | never
+  enums?: never | Record<string, unknown>
   execute: Execute<unknown>
   features: {
     json?: boolean

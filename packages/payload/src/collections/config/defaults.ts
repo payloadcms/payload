@@ -66,4 +66,5 @@ export const authDefaults: IncomingAuthType = {
 export const loginWithUsernameDefaults: LoginWithUsernameOptions = {
   allowEmailLogin: false,
   requireEmail: false,
+  requireUsername: true,
 }

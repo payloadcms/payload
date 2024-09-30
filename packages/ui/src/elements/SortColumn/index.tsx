@@ -1,52 +1,49 @@
 'use client'
 import type { FieldBase } from 'payload'
 
-// TODO: abstract the `next/navigation` dependency out from this component
-import React, { useCallback } from 'react'
+import React from 'react'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
-import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
 export type SortColumnProps = {
-  Label: React.ReactNode
-  disable?: boolean
-  label?: FieldBase['label']
-  name: string
+  readonly appearance?: 'condensed' | 'default'
+  readonly disable?: boolean
+  readonly Label: React.ReactNode
+  readonly label?: FieldBase['label']
+  readonly name: string
 }
 
 const baseClass = 'sort-column'
 
 export const SortColumn: React.FC<SortColumnProps> = (props) => {
-  const { name, Label, disable = false, label } = props
-  const { searchParams } = useSearchParams()
-  const { refineListData } = useListQuery()
+  const { name, appearance, disable = false, Label, label } = props
+  const { handleSortChange, params } = useListQuery()
   const { t } = useTranslation()
 
-  const { sort } = searchParams
+  const { sort } = params
 
   const desc = `-${name}`
   const asc = name
 
   const ascClasses = [`${baseClass}__asc`]
-  if (sort === asc) ascClasses.push(`${baseClass}--active`)
+  if (sort === asc) {
+    ascClasses.push(`${baseClass}--active`)
+  }
 
   const descClasses = [`${baseClass}__desc`]
-  if (sort === desc) descClasses.push(`${baseClass}--active`)
-
-  const setSort = useCallback(
-    (newSort) => {
-      refineListData({
-        sort: newSort,
-      })
-    },
-    [refineListData],
-  )
+  if (sort === desc) {
+    descClasses.push(`${baseClass}--active`)
+  }
 
   return (
-    <div className={baseClass}>
+    <div
+      className={[baseClass, appearance && `${baseClass}--appearance-${appearance}`]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <span className={`${baseClass}__label`}>{Label}</span>
       {!disable && (
         <div className={`${baseClass}__buttons`}>
@@ -56,7 +53,7 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
               label,
             })}
             className={[...ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
-            onClick={() => setSort(asc)}
+            onClick={() => void handleSortChange(asc)}
             type="button"
           >
             <ChevronIcon direction="up" />
@@ -67,7 +64,7 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
               label,
             })}
             className={[...descClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
-            onClick={() => setSort(desc)}
+            onClick={() => void handleSortChange(desc)}
             type="button"
           >
             <ChevronIcon />

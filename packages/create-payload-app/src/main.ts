@@ -23,8 +23,8 @@ import {
   feedbackOutro,
   helpMessage,
   moveMessage,
-  successMessage,
   successfulNextInit,
+  successMessage,
 } from './utils/messages.js'
 
 export class Main {
@@ -49,6 +49,7 @@ export class Main {
 
         // Package manager
         '--no-deps': Boolean,
+        '--use-bun': Boolean,
         '--use-npm': Boolean,
         '--use-pnpm': Boolean,
         '--use-yarn': Boolean,
@@ -85,7 +86,22 @@ export class Main {
 
       // Detect if inside Next.js project
       const nextAppDetails = await getNextAppDetails(process.cwd())
-      const { hasTopLevelLayout, isPayloadInstalled, nextAppDir, nextConfigPath } = nextAppDetails
+      const {
+        hasTopLevelLayout,
+        isPayloadInstalled,
+        isSupportedNextVersion,
+        nextAppDir,
+        nextConfigPath,
+        nextVersion,
+      } = nextAppDetails
+
+      if (nextConfigPath && !isSupportedNextVersion) {
+        p.log.warn(
+          `Next.js v${nextVersion} is unsupported. Next.js >= 15 is required to use Payload.`,
+        )
+        p.outro(feedbackOutro())
+        process.exit(0)
+      }
 
       // Upgrade Payload in existing project
       if (isPayloadInstalled && nextConfigPath) {

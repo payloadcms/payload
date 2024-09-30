@@ -12,13 +12,20 @@ export interface Config {
   };
   collections: {
     posts: Post;
+    'default-values': DefaultValue;
     'relation-a': RelationA;
     'relation-b': RelationB;
     'pg-migrations': PgMigration;
     'custom-schema': CustomSchema;
+    places: Place;
+    'fields-persistance': FieldsPersistance;
     users: User;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+  };
+  db: {
+    defaultIDType: string;
   };
   globals: {
     global: Global;
@@ -31,12 +38,17 @@ export interface Config {
 export interface UserAuthOperations {
   forgotPassword: {
     email: string;
+    password: string;
   };
   login: {
-    password: string;
     email: string;
+    password: string;
   };
   registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
     email: string;
     password: string;
   };
@@ -54,12 +66,32 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "default-values".
+ */
+export interface DefaultValue {
+  id: string;
+  title?: string | null;
+  defaultValue?: string | null;
+  array?:
+    | {
+        defaultValue?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  group?: {
+    defaultValue?: string | null;
+  };
+  select?: ('option0' | 'option1' | 'default') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relation-a".
  */
 export interface RelationA {
   id: string;
   title?: string | null;
-  relationship?: (string | null) | RelationB;
   richText?: {
     root: {
       type: string;
@@ -171,6 +203,33 @@ export interface CustomSchema {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "places".
+ */
+export interface Place {
+  id: string;
+  country?: string | null;
+  city?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fields-persistance".
+ */
+export interface FieldsPersistance {
+  id: string;
+  text?: string | null;
+  textHooked?: string | null;
+  array?:
+    | {
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -185,6 +244,61 @@ export interface User {
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'default-values';
+        value: string | DefaultValue;
+      } | null)
+    | ({
+        relationTo: 'relation-a';
+        value: string | RelationA;
+      } | null)
+    | ({
+        relationTo: 'relation-b';
+        value: string | RelationB;
+      } | null)
+    | ({
+        relationTo: 'pg-migrations';
+        value: string | PgMigration;
+      } | null)
+    | ({
+        relationTo: 'custom-schema';
+        value: string | CustomSchema;
+      } | null)
+    | ({
+        relationTo: 'places';
+        value: string | Place;
+      } | null)
+    | ({
+        relationTo: 'fields-persistance';
+        value: string | FieldsPersistance;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  globalSlug?: string | null;
+  _lastEdited: {
+    user: {
+      relationTo: 'users';
+      value: string | User;
+    };
+    editedAt?: string | null;
+  };
+  isLocked?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

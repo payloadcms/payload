@@ -39,6 +39,9 @@ export const RefreshRouteOnSave: React.FC<{
       ready({
         serverURL,
       })
+
+      // refresh after the ready message is sent to get the latest data
+      refresh()
     }
 
     return () => {
@@ -46,7 +49,7 @@ export const RefreshRouteOnSave: React.FC<{
         window.removeEventListener('message', onMessage)
       }
     }
-  }, [serverURL, onMessage, depth, apiRoute])
+  }, [serverURL, onMessage, depth, apiRoute, refresh])
 
   return null
 }

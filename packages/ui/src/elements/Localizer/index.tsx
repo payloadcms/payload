@@ -7,8 +7,8 @@ import { useLocale } from '../../providers/Locale/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
-import { LocalizerLabel } from './LocalizerLabel/index.js'
 import './index.scss'
+import { LocalizerLabel } from './LocalizerLabel/index.js'
 
 const baseClass = 'localizer'
 
@@ -16,7 +16,7 @@ export const Localizer: React.FC<{
   className?: string
 }> = (props) => {
   const { className } = props
-  const config = useConfig()
+  const { config } = useConfig()
   const { localization } = config
 
   const { i18n } = useTranslation()

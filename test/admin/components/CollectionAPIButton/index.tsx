@@ -1,10 +1,10 @@
-import type { CustomComponent } from 'payload'
+import type { CustomComponent, PayloadServerReactComponent } from 'payload'
 
 import React from 'react'
 
 const baseClass = 'collection-api-button'
 
-export const CollectionAPIButton: CustomComponent = () => {
+export const CollectionAPIButton: PayloadServerReactComponent<CustomComponent> = () => {
   return (
     <div
       className={baseClass}

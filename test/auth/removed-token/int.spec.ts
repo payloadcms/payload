@@ -1,17 +1,23 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import type { NextRESTClient } from '../../helpers/NextRESTClient.js'
 
 import { devUser } from '../../credentials.js'
 import { initPayloadInt } from '../../helpers/initPayloadInt.js'
-import config, { collectionSlug } from './config.js'
+import { collectionSlug } from './config.js'
 
 let restClient: NextRESTClient
 let payload: Payload
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 describe('Remove token from auth responses', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(config))
+    ;({ payload, restClient } = await initPayloadInt(dirname, 'auth/removed-token'))
 
     await restClient.POST(`/${collectionSlug}/first-register`, {
       body: JSON.stringify({ ...devUser, 'confirm-password': devUser.password }),

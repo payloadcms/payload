@@ -15,14 +15,16 @@
 
 .checkbox-input {
   display: inline-flex;
+  &:hover:not(&--read-only) {
+    label,
+    input {
+      cursor: pointer;
+    }
+  }
 
   label {
     padding-bottom: 0;
     padding-left: base(0.5);
-
-    &[for] {
-      cursor: pointer;
-    }
   }
 
   [dir='rtl'] &__input {
@@ -51,7 +53,6 @@
       opacity: 0;
       border-radius: 0;
       z-index: 1;
-      cursor: pointer;
     }
   }
 
@@ -69,8 +70,6 @@
     &:focus {
       .checkbox-input__input,
       & input[type='checkbox'] {
-        @include inputShadowActive;
-
         outline: 0;
         box-shadow: 0 0 3px 3px var(--theme-success-400) !important;
         border: 1px solid var(--theme-elevation-150);
@@ -103,9 +102,22 @@
     }
   }
 
+  .checkbox-input__icon {
+    .icon--line {
+      width: 1.4rem;
+      height: 1.4rem;
+    }
+
+    &.partial {
+      svg {
+        opacity: 1;
+      }
+    }
+  }
+
   &--read-only {
     .checkbox-input__input {
-      background-color: var(--theme-elevation-100);
+      @include readOnly;
     }
 
     label {

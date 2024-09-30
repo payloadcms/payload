@@ -8,10 +8,11 @@ import path from 'path'
 type StaticHandlerArgs = {
   baseUrl: string
   token: string
+  cacheControlMaxAge?: number
 }
 
 export const getStaticHandler = (
-  { baseUrl, token }: StaticHandlerArgs,
+  { baseUrl, token, cacheControlMaxAge = 0 }: StaticHandlerArgs,
   collection: CollectionConfig,
 ): StaticHandler => {
   return async (req, { params: { filename } }) => {
@@ -40,6 +41,7 @@ export const getStaticHandler = (
           'Content-Disposition': contentDisposition,
           'Content-Length': String(size),
           'Content-Type': contentType,
+          'Cache-Control': `public, max-age=${cacheControlMaxAge}`
         }),
         status: 200,
       })

@@ -1,27 +1,52 @@
-import { APIError, type Field, type TabAsField, createArrayFromCommaDelineated } from 'payload'
+import type { SQL } from 'drizzle-orm'
+
+import { APIError, createArrayFromCommaDelineated, type Field, type TabAsField } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
+import { validate as uuidValidate } from 'uuid'
 
 import type { DrizzleAdapter } from '../types.js'
 
+import { getCollectionIdType } from '../utilities/getCollectionIdType.js'
+import { isPolymorphicRelationship } from '../utilities/isPolymorphicRelationship.js'
+
 type SanitizeQueryValueArgs = {
   adapter: DrizzleAdapter
+  columns?: {
+    idType: 'number' | 'text' | 'uuid'
+    rawColumn: SQL<unknown>
+  }[]
   field: Field | TabAsField
+  isUUID: boolean
   operator: string
   relationOrPath: string
   val: any
 }
 
+type SanitizedColumn = {
+  rawColumn: SQL<unknown>
+  value: unknown
+}
+
 export const sanitizeQueryValue = ({
   adapter,
+  columns,
   field,
+  isUUID,
   operator: operatorArg,
   relationOrPath,
   val,
-}: SanitizeQueryValueArgs): { operator: string; value: unknown } => {
+}: SanitizeQueryValueArgs): {
+  columns?: SanitizedColumn[]
+  operator: string
+  value: unknown
+} => {
   let operator = operatorArg
   let formattedValue = val
+  let formattedColumns: SanitizedColumn[]
 
-  if (!fieldAffectsData(field)) return { operator, value: formattedValue }
+  if (!fieldAffectsData(field)) {
+    return { operator, value: formattedValue }
+  }
 
   if (
     (field.type === 'relationship' || field.type === 'upload') &&
@@ -43,8 +68,12 @@ export const sanitizeQueryValue = ({
 
   // Cast incoming values as proper searchable types
   if (field.type === 'checkbox' && typeof val === 'string') {
-    if (val.toLowerCase() === 'true') formattedValue = true
-    if (val.toLowerCase() === 'false') formattedValue = false
+    if (val.toLowerCase() === 'true') {
+      formattedValue = true
+    }
+    if (val.toLowerCase() === 'false') {
+      formattedValue = false
+    }
   }
 
   if (['all', 'in', 'not_in'].includes(operator)) {
@@ -63,6 +92,16 @@ export const sanitizeQueryValue = ({
 
   if (field.type === 'number' && typeof formattedValue === 'string') {
     formattedValue = Number(val)
+
+    if (Number.isNaN(formattedValue)) {
+      formattedValue = null
+    }
+  }
+
+  if (isUUID && typeof formattedValue === 'string') {
+    if (!uuidValidate(val)) {
+      formattedValue = null
+    }
   }
 
   if (field.type === 'date' && operator !== 'exists') {
@@ -71,7 +110,9 @@ export const sanitizeQueryValue = ({
       if (Number.isNaN(Date.parse(formattedValue))) {
         return { operator, value: undefined }
       }
-    } else if (typeof val === 'number') formattedValue = new Date(val).toISOString()
+    } else if (typeof val === 'number') {
+      formattedValue = new Date(val).toISOString()
+    }
   }
 
   if (field.type === 'relationship' || field.type === 'upload') {
@@ -81,21 +122,70 @@ export const sanitizeQueryValue = ({
       // convert the value to the idType of the relationship
       let idType: 'number' | 'text'
       if (typeof field.relationTo === 'string') {
-        const collection = adapter.payload.collections[field.relationTo]
-        const mixedType: 'number' | 'serial' | 'text' | 'uuid' =
-          collection.customIDType || adapter.idType
-        const typeMap: Record<string, 'number' | 'text'> = {
-          number: 'number',
-          serial: 'number',
-          text: 'text',
-          uuid: 'text',
-        }
-        idType = typeMap[mixedType]
+        idType = getCollectionIdType({
+          adapter,
+          collection: adapter.payload.collections[field.relationTo],
+        })
       } else {
-        // LIMITATION: Only cast to the first relationTo id type,
-        // otherwise we need to make the db cast which is inefficient
-        const collection = adapter.payload.collections[field.relationTo[0]]
-        idType = collection.customIDType || adapter.idType === 'uuid' ? 'text' : 'number'
+        if (isPolymorphicRelationship(val)) {
+          if (operator !== 'equals') {
+            throw new APIError(
+              `Only 'equals' operator is supported for polymorphic relationship object notation. Given - ${operator}`,
+            )
+          }
+          idType = getCollectionIdType({
+            adapter,
+            collection: adapter.payload.collections[val.relationTo],
+          })
+
+          return {
+            operator,
+            value: idType === 'number' ? Number(val.value) : String(val.value),
+          }
+        }
+
+        formattedColumns = columns
+          .map(({ idType, rawColumn }) => {
+            let formattedValue: number | number[] | string | string[]
+
+            if (Array.isArray(val)) {
+              formattedValue = val
+                .map((eachVal) => {
+                  let formattedValue: number | string
+
+                  if (idType === 'number') {
+                    formattedValue = Number(eachVal)
+
+                    if (Number.isNaN(formattedValue)) {
+                      return null
+                    }
+                  } else {
+                    if (idType === 'uuid' && !uuidValidate(eachVal)) {
+                      return null
+                    }
+
+                    formattedValue = String(eachVal)
+                  }
+
+                  return formattedValue
+                })
+                .filter(Boolean) as number[] | string[]
+            } else if (idType === 'number') {
+              formattedValue = Number(val)
+
+              if (Number.isNaN(formattedValue)) {
+                return null
+              }
+            } else {
+              formattedValue = String(val)
+            }
+
+            return {
+              rawColumn,
+              value: formattedValue,
+            }
+          })
+          .filter(Boolean)
       }
       if (Array.isArray(formattedValue)) {
         formattedValue = formattedValue.map((value) => {
@@ -139,5 +229,9 @@ export const sanitizeQueryValue = ({
     }
   }
 
-  return { operator, value: formattedValue }
+  return {
+    columns: formattedColumns,
+    operator,
+    value: formattedValue,
+  }
 }

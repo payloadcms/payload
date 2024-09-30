@@ -8,8 +8,8 @@
   }
 
   &__auth {
-    margin-bottom: calc(var(--base) * 2);
-    margin-top: calc(var(--base) * 0.5);
+    margin-bottom: base(1.6);
+    border-radius: var(--style-radius-s);
   }
 
   @include small-break {

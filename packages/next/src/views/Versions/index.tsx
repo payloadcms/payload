@@ -1,4 +1,4 @@
-import type { EditViewComponent, PaginatedDocs } from 'payload'
+import type { EditViewComponent, PaginatedDocs, PayloadServerReactComponent } from 'payload'
 
 import { Gutter, ListQueryProvider } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
@@ -13,7 +13,7 @@ import './index.scss'
 
 export const baseClass = 'versions'
 
-export const VersionsView: EditViewComponent = async (props) => {
+export const VersionsView: PayloadServerReactComponent<EditViewComponent> = async (props) => {
   const { initPageResult, searchParams } = props
 
   const {
@@ -25,6 +25,7 @@ export const VersionsView: EditViewComponent = async (props) => {
       i18n,
       payload,
       payload: { config },
+      t,
       user,
     },
   } = initPageResult
@@ -34,6 +35,7 @@ export const VersionsView: EditViewComponent = async (props) => {
   const { limit, page, sort } = searchParams
 
   const {
+    localization,
     routes: { api: apiRoute },
     serverURL,
   } = config
@@ -45,6 +47,26 @@ export const VersionsView: EditViewComponent = async (props) => {
 
   if (collectionSlug) {
     limitToUse = limitToUse || collectionConfig.admin.pagination.defaultLimit
+    const whereQuery: {
+      and: Array<{ parent?: { equals: string }; snapshot?: { not_equals: boolean } }>
+    } = {
+      and: [
+        {
+          parent: {
+            equals: id,
+          },
+        },
+      ],
+    }
+
+    if (localization && collectionConfig?.versions?.drafts) {
+      whereQuery.and.push({
+        snapshot: {
+          not_equals: true,
+        },
+      })
+    }
+
     try {
       versionsData = await payload.findVersions({
         collection: collectionSlug,
@@ -55,20 +77,21 @@ export const VersionsView: EditViewComponent = async (props) => {
         req,
         sort: sort as string,
         user,
-        where: {
-          parent: {
-            equals: id,
-          },
-        },
+        where: whereQuery,
       })
       if (collectionConfig?.versions?.drafts) {
-        latestDraftVersion = await getLatestVersion(payload, collectionSlug, 'draft', 'collection')
-        latestPublishedVersion = await getLatestVersion(
+        latestDraftVersion = await getLatestVersion({
+          slug: collectionSlug,
+          type: 'collection',
           payload,
-          collectionSlug,
-          'published',
-          'collection',
-        )
+          status: 'draft',
+        })
+        latestPublishedVersion = await getLatestVersion({
+          slug: collectionSlug,
+          type: 'collection',
+          payload,
+          status: 'published',
+        })
       }
     } catch (error) {
       console.error(error) // eslint-disable-line no-console
@@ -77,6 +100,15 @@ export const VersionsView: EditViewComponent = async (props) => {
 
   if (globalSlug) {
     limitToUse = limitToUse || 10
+    const whereQuery =
+      localization && globalConfig?.versions?.drafts
+        ? {
+            snapshot: {
+              not_equals: true,
+            },
+          }
+        : {}
+
     try {
       versionsData = await payload.findGlobalVersions({
         slug: globalSlug,
@@ -87,11 +119,22 @@ export const VersionsView: EditViewComponent = async (props) => {
         req,
         sort: sort as string,
         user,
+        where: whereQuery,
       })
 
       if (globalConfig?.versions?.drafts) {
-        latestDraftVersion = await getLatestVersion(payload, globalSlug, 'draft', 'global')
-        latestPublishedVersion = await getLatestVersion(payload, globalSlug, 'published', 'global')
+        latestDraftVersion = await getLatestVersion({
+          slug: globalSlug,
+          type: 'global',
+          payload,
+          status: 'draft',
+        })
+        latestPublishedVersion = await getLatestVersion({
+          slug: globalSlug,
+          type: 'global',
+          payload,
+          status: 'published',
+        })
       }
     } catch (error) {
       console.error(error) // eslint-disable-line no-console
@@ -126,13 +169,19 @@ export const VersionsView: EditViewComponent = async (props) => {
     latestPublishedVersion: latestPublishedVersion?.id,
   })
 
+  const pluralLabel = collectionConfig?.labels?.plural
+    ? typeof collectionConfig.labels.plural === 'function'
+      ? collectionConfig.labels.plural({ t })
+      : collectionConfig.labels.plural
+    : globalConfig?.label
+
   return (
     <React.Fragment>
       <SetDocumentStepNav
         collectionSlug={collectionConfig?.slug}
         globalSlug={globalConfig?.slug}
         id={id}
-        pluralLabel={collectionConfig?.labels?.plural || globalConfig?.label}
+        pluralLabel={pluralLabel}
         useAsTitle={collectionConfig?.admin?.useAsTitle || globalConfig?.slug}
         view={i18n.t('version:versions')}
       />

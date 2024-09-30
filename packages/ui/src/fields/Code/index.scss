@@ -15,4 +15,10 @@
       background-color: var(--theme-error-50);
     }
   }
+
+  .read-only {
+    .code-editor {
+      @include readOnly;
+    }
+  }
 }

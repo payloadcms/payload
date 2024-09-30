@@ -1,11 +1,14 @@
 'use client'
 
+import type { MappedComponent } from 'payload'
+
 import React, { useCallback, useRef } from 'react'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { useHotkey } from '../../hooks/useHotkey.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -16,8 +19,10 @@ const baseClass = 'save-draft'
 
 export const DefaultSaveDraftButton: React.FC = () => {
   const {
-    routes: { api },
-    serverURL,
+    config: {
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const modified = useFormModified()
@@ -31,7 +36,9 @@ export const DefaultSaveDraftButton: React.FC = () => {
   const forceDisable = operation === 'update' && !modified
 
   const saveDraft = useCallback(async () => {
-    if (forceDisable) return
+    if (forceDisable) {
+      return
+    }
 
     const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`
     let action
@@ -39,7 +46,9 @@ export const DefaultSaveDraftButton: React.FC = () => {
 
     if (collectionSlug) {
       action = `${serverURL}${api}/${collectionSlug}${id ? `/${id}` : ''}${search}`
-      if (id) method = 'PATCH'
+      if (id) {
+        method = 'PATCH'
+      }
     }
 
     if (globalSlug) {
@@ -74,9 +83,11 @@ export const DefaultSaveDraftButton: React.FC = () => {
       buttonStyle="secondary"
       className={baseClass}
       disabled={forceDisable}
-      onClick={saveDraft}
+      onClick={() => {
+        return void saveDraft()
+      }}
       ref={ref}
-      size="small"
+      size="medium"
       type="button"
     >
       {t('version:saveDraft')}
@@ -85,10 +96,12 @@ export const DefaultSaveDraftButton: React.FC = () => {
 }
 
 type Props = {
-  CustomComponent?: React.ReactNode
+  CustomComponent?: MappedComponent
 }
 
 export const SaveDraftButton: React.FC<Props> = ({ CustomComponent }) => {
-  if (CustomComponent) return CustomComponent
+  if (CustomComponent) {
+    return <RenderComponent mappedComponent={CustomComponent} />
+  }
   return <DefaultSaveDraftButton />
 }

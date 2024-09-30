@@ -79,6 +79,8 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
 
     return createDatabaseAdapter<SQLiteAdapter>({
       name: 'sqlite',
+      afterSchemaInit: args.afterSchemaInit ?? [],
+      beforeSchemaInit: args.beforeSchemaInit ?? [],
       client: undefined,
       clientConfig: args.client,
       defaultDrizzleSnapshot,
@@ -93,6 +95,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
       operators,
+      prodMigrations: args.prodMigrations,
       push: args.push,
       relations: {},
       relationshipsSuffix: args.relationshipsSuffix || '_rels',
@@ -105,7 +108,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       versionsSuffix: args.versionsSuffix || '_v',
 
       // DatabaseAdapter
-      beginTransaction: args.transactionOptions === false ? undefined : beginTransaction,
+      beginTransaction: args.transactionOptions ? beginTransaction : undefined,
       commitTransaction,
       connect,
       convertPathToJSONTraversal,
@@ -139,6 +142,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       migrateReset,
       migrateStatus,
       migrationDir,
+      packageName: '@payloadcms/db-sqlite',
       payload,
       queryDrafts,
       rejectInitializing,
@@ -149,6 +153,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       updateGlobalVersion,
       updateOne,
       updateVersion,
+      upsert: updateOne,
     })
   }
 

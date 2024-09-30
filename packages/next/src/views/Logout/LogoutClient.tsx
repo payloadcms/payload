@@ -4,6 +4,10 @@ import { formatAdminURL } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React, { Fragment, useEffect } from 'react'
 
+import './index.scss'
+
+const baseClass = 'logout'
+
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const LogoutClient: React.FC<{
@@ -20,19 +24,20 @@ export const LogoutClient: React.FC<{
   useEffect(() => {
     if (!isLoggingOut) {
       setIsLoggingOut(true)
-      logOut()
+      void logOut()
     }
   }, [isLoggingOut, logOut])
 
   if (isLoggingOut) {
     return (
-      <Fragment>
+      <div className={`${baseClass}__wrap`}>
         {inactivity && <h2>{t('authentication:loggedOutInactivity')}</h2>}
         {!inactivity && <h2>{t('authentication:loggedOutSuccessfully')}</h2>}
         <Button
-          Link={Link}
           buttonStyle="secondary"
           el="link"
+          Link={Link}
+          size="large"
           url={formatAdminURL({
             adminRoute,
             path: `/login${
@@ -42,7 +47,7 @@ export const LogoutClient: React.FC<{
         >
           {t('authentication:logBackIn')}
         </Button>
-      </Fragment>
+      </div>
     )
   }
 

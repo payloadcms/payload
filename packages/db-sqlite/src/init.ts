@@ -1,17 +1,20 @@
-/* eslint-disable no-param-reassign */
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { Init, SanitizedCollectionConfig } from 'payload'
 
-import { createTableName } from '@payloadcms/drizzle'
+import { createTableName, executeSchemaHooks } from '@payloadcms/drizzle'
+import { uniqueIndex } from 'drizzle-orm/sqlite-core'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
+import type { BaseExtraConfig } from './schema/build.js'
 import type { SQLiteAdapter } from './types.js'
 
 import { buildTable } from './schema/build.js'
 
-export const init: Init = function init(this: SQLiteAdapter) {
+export const init: Init = async function init(this: SQLiteAdapter) {
   let locales: [string, ...string[]] | undefined
+  await executeSchemaHooks({ type: 'beforeSchemaInit', adapter: this })
+
   if (this.payload.config.localization) {
     locales = this.payload.config.localization.locales.map(({ code }) => code) as [
       string,
@@ -36,6 +39,31 @@ export const init: Init = function init(this: SQLiteAdapter) {
   })
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
     const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
+    const config = this.payload.config
+
+    const baseExtraConfig: BaseExtraConfig = {}
+
+    if (collection.upload.filenameCompoundIndex) {
+      const indexName = `${tableName}_filename_compound_idx`
+
+      baseExtraConfig.filename_compound_index = (cols) => {
+        const colsConstraint = collection.upload.filenameCompoundIndex.map((f) => {
+          return cols[f]
+        })
+        return uniqueIndex(indexName).on(colsConstraint[0], ...colsConstraint.slice(1))
+      }
+    }
+
+    if (collection.upload.filenameCompoundIndex) {
+      const indexName = `${tableName}_filename_compound_idx`
+
+      baseExtraConfig.filename_compound_index = (cols) => {
+        const colsConstraint = collection.upload.filenameCompoundIndex.map((f) => {
+          return cols[f]
+        })
+        return uniqueIndex(indexName).on(colsConstraint[0], ...colsConstraint.slice(1))
+      }
+    }
 
     buildTable({
       adapter: this,
@@ -52,7 +80,7 @@ export const init: Init = function init(this: SQLiteAdapter) {
       const versionsTableName = this.tableNameMap.get(
         `_${toSnakeCase(collection.slug)}${this.versionsSuffix}`,
       )
-      const versionFields = buildVersionCollectionFields(collection)
+      const versionFields = buildVersionCollectionFields(config, collection)
 
       buildTable({
         adapter: this,
@@ -91,7 +119,8 @@ export const init: Init = function init(this: SQLiteAdapter) {
         versions: true,
         versionsCustomName: true,
       })
-      const versionFields = buildVersionGlobalFields(global)
+      const config = this.payload.config
+      const versionFields = buildVersionGlobalFields(config, global)
 
       buildTable({
         adapter: this,
@@ -105,4 +134,6 @@ export const init: Init = function init(this: SQLiteAdapter) {
       })
     }
   })
+
+  await executeSchemaHooks({ type: 'afterSchemaInit', adapter: this })
 }

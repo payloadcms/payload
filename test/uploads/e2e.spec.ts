@@ -10,6 +10,7 @@ import type { Config, Media } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
+  exactText,
   initPageConsoleErrorCatch,
   openDocDrawer,
   saveDocAndAssert,
@@ -23,8 +24,10 @@ import {
   adminThumbnailSizeSlug,
   animatedTypeMedia,
   audioSlug,
+  customFileNameMediaSlug,
   focalOnlySlug,
   mediaSlug,
+  relationPreviewSlug,
   relationSlug,
   withMetadataSlug,
   withOnlyJPEGMetadataSlug,
@@ -48,6 +51,8 @@ let focalOnlyURL: AdminUrlUtil
 let withMetadataURL: AdminUrlUtil
 let withoutMetadataURL: AdminUrlUtil
 let withOnlyJPEGMetadataURL: AdminUrlUtil
+let relationPreviewURL: AdminUrlUtil
+let customFileNameURL: AdminUrlUtil
 
 describe('uploads', () => {
   let page: Page
@@ -70,6 +75,8 @@ describe('uploads', () => {
     withMetadataURL = new AdminUrlUtil(serverURL, withMetadataSlug)
     withoutMetadataURL = new AdminUrlUtil(serverURL, withoutMetadataSlug)
     withOnlyJPEGMetadataURL = new AdminUrlUtil(serverURL, withOnlyJPEGMetadataSlug)
+    relationPreviewURL = new AdminUrlUtil(serverURL, relationPreviewSlug)
+    customFileNameURL = new AdminUrlUtil(serverURL, customFileNameMediaSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -239,6 +246,25 @@ describe('uploads', () => {
     await expect(page.locator('.file-details img')).toBeVisible()
   })
 
+  test('should have custom file name for image size', async () => {
+    await page.goto(customFileNameURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+
+    await expect(page.locator('.file-field__upload .thumbnail img')).toBeVisible()
+
+    await saveDocAndAssert(page)
+
+    await expect(page.locator('.file-details img')).toBeVisible()
+
+    await page.locator('.file-field__previewSizes').click()
+
+    const renamedImageSizeFile = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(1)
+
+    await expect(renamedImageSizeFile).toContainText('custom-500x500.png')
+  })
+
   test('should show draft uploads in the relation list', async () => {
     await page.goto(relationURL.list)
     // from the list edit the first document
@@ -260,7 +286,7 @@ describe('uploads', () => {
     await page.locator('.field-type:nth-of-type(2) .icon--x').click()
 
     // choose from existing
-    await openDocDrawer(page, '.list-drawer__toggler')
+    await openDocDrawer(page, '.upload__listToggler')
 
     await expect(page.locator('.row-3 .cell-title')).toContainText('draft')
   })
@@ -271,9 +297,9 @@ describe('uploads', () => {
 
     // remove the selection and open the list drawer
     await wait(500) // flake workaround
-    await page.locator('.file-details__remove').click()
+    await page.locator('#field-audio .upload-relationship-details__remove').click()
 
-    await openDocDrawer(page, '.upload__toggler.list-drawer__toggler')
+    await openDocDrawer(page, '#field-audio  .upload__listToggler')
 
     const listDrawer = page.locator('[id^=list-drawer_1_]')
     await expect(listDrawer).toBeVisible()
@@ -306,9 +332,9 @@ describe('uploads', () => {
 
     // remove the selection and open the list drawer
     await wait(500) // flake workaround
-    await page.locator('.file-details__remove').click()
+    await page.locator('#field-audio .upload-relationship-details__remove').click()
 
-    await openDocDrawer(page, '.upload__toggler.list-drawer__toggler')
+    await openDocDrawer(page, '.upload__listToggler')
 
     const listDrawer = page.locator('[id^=list-drawer_1_]')
     await expect(listDrawer).toBeVisible()
@@ -593,5 +619,49 @@ describe('uploads', () => {
       // without focal point update this generated size was equal to 1736
       expect(redDoc.sizes.focalTest.filesize).toEqual(1598)
     })
+  })
+
+  test('should see upload previews in relation list if allowed in config', async () => {
+    await page.goto(relationPreviewURL.list)
+
+    await wait(110)
+
+    // Show all columns with relations
+    await page.locator('.list-controls__toggle-columns').click()
+    await expect(page.locator('.column-selector')).toBeVisible()
+    const imageWithoutPreview2Button = page.locator(`.column-selector .column-selector__column`, {
+      hasText: exactText('Image Without Preview2'),
+    })
+    const imageWithPreview3Button = page.locator(`.column-selector .column-selector__column`, {
+      hasText: exactText('Image With Preview3'),
+    })
+    const imageWithoutPreview3Button = page.locator(`.column-selector .column-selector__column`, {
+      hasText: exactText('Image Without Preview3'),
+    })
+    await imageWithoutPreview2Button.click()
+    await imageWithPreview3Button.click()
+    await imageWithoutPreview3Button.click()
+
+    // Wait for the columns to be displayed
+    await expect(page.locator('.cell-imageWithoutPreview3')).toBeVisible()
+
+    // collection's displayPreview: true, field's displayPreview: unset
+    const relationPreview1 = page.locator('.cell-imageWithPreview1 img')
+    await expect(relationPreview1).toBeVisible()
+    // collection's displayPreview: true, field's displayPreview: true
+    const relationPreview2 = page.locator('.cell-imageWithPreview2 img')
+    await expect(relationPreview2).toBeVisible()
+    // collection's displayPreview: true, field's displayPreview: false
+    const relationPreview3 = page.locator('.cell-imageWithoutPreview1 img')
+    await expect(relationPreview3).toBeHidden()
+    // collection's displayPreview: false, field's displayPreview: unset
+    const relationPreview4 = page.locator('.cell-imageWithoutPreview2 img')
+    await expect(relationPreview4).toBeHidden()
+    // collection's displayPreview: false, field's displayPreview: true
+    const relationPreview5 = page.locator('.cell-imageWithPreview3 img')
+    await expect(relationPreview5).toBeVisible()
+    // collection's displayPreview: false, field's displayPreview: false
+    const relationPreview6 = page.locator('.cell-imageWithoutPreview3 img')
+    await expect(relationPreview6).toBeHidden()
   })
 })

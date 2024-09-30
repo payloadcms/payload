@@ -1,7 +1,6 @@
-/* eslint-disable no-param-reassign */
-import { index, uniqueIndex } from 'drizzle-orm/sqlite-core'
+import type { AnySQLiteColumn } from 'drizzle-orm/sqlite-core'
 
-import type { GenericColumn } from '../types.js'
+import { index, uniqueIndex } from 'drizzle-orm/sqlite-core'
 
 type CreateIndexArgs = {
   columnName: string
@@ -11,7 +10,7 @@ type CreateIndexArgs = {
 }
 
 export const createIndex = ({ name, columnName, tableName, unique }: CreateIndexArgs) => {
-  return (table: { [x: string]: GenericColumn }) => {
+  return (table: { [x: string]: AnySQLiteColumn }) => {
     let columns
     if (Array.isArray(name)) {
       columns = name
@@ -21,8 +20,9 @@ export const createIndex = ({ name, columnName, tableName, unique }: CreateIndex
     } else {
       columns = [table[name]]
     }
-    if (unique)
+    if (unique) {
       return uniqueIndex(`${tableName}_${columnName}_idx`).on(columns[0], ...columns.slice(1))
+    }
     return index(`${tableName}_${columnName}_idx`).on(columns[0], ...columns.slice(1))
   }
 }

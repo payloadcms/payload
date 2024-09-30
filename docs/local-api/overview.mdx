@@ -62,19 +62,16 @@ If you are accessing Payload via function arguments or `req.payload`, HMR is aut
 
 **Option 2 - outside of Next.js**
 
-If you are using Payload outside of Next.js, for example in standalone scripts or in other frameworks, you can import Payload with no HMR functionality.
+If you are using Payload outside of Next.js, for example in standalone scripts or in other frameworks, you can import Payload with no HMR functionality. Instead of using `getPayloadHMR`, you can use `getPayload`.
 
 ```ts
 import { getPayload } from 'payload'
-import { importConfig } from 'payload/node'
+import config from '@payload-config'
 
-const config = await importConfig('./payload.config.ts')
 const payload = await getPayload({ config })
 ```
 
-Both options function in exactly the same way outside of one having HMR support and the other not. However, when you import your Payload Config, you need to make sure that you can import it safely.
-
-For more information about using Payload outside of Next.js, [click here](/docs/beta/local-api/outside-nextjs).
+Both options function in exactly the same way outside of one having HMR support and the other not. For more information about using Payload outside of Next.js, [click here](/docs/beta/local-api/outside-nextjs).
 
 ## Local options available
 
@@ -88,10 +85,12 @@ You can specify more options within the Local API vs. REST or GraphQL due to the
 | `locale`           | Specify [locale](/docs/configuration/localization) for any returned documents. |
 | `fallbackLocale`   | Specify a [fallback locale](/docs/configuration/localization) to use for any returned documents. |
 | `overrideAccess`   | Skip access control. By default, this property is set to true within all Local API operations. |
+| `overrideLock`     | By default, document locks are ignored (`true`). Set to `false` to enforce locks and prevent operations when a document is locked by another user. [More details](../admin/locked-documents).|
 | `user`             | If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks. |
 | `showHiddenFields` | Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config. |
 | `pagination`       | Set to false to return all documents and avoid querying for document counts. |
 | `context`          | [Context](/docs/hooks/context), which will then be passed to `context` and `req.context`, which can be read by hooks. Useful if you want to pass additional information to the hooks which shouldn't be necessarily part of the document, for example a `triggerBeforeChange` option which can be read by the BeforeChange hook to determine if it should run or not. |
+| `disableErrors`    | When set to `true`, errors will not be thrown. Instead, the `findByID` operation will return `null`, and the `find` operation will return an empty documents array.                                                                                                                                                                                                     |
 
 _There are more options available on an operation by operation basis outlined below._
 
@@ -208,6 +207,7 @@ const result = await payload.update({
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
+  overrideLock: false, // By default, document locks are ignored. Set to false to enforce locks.
   showHiddenFields: true,
 
   // If your collection supports uploads, you can upload
@@ -246,6 +246,7 @@ const result = await payload.update({
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
+  overrideLock: false, // By default, document locks are ignored. Set to false to enforce locks.
   showHiddenFields: true,
 
   // If your collection supports uploads, you can upload
@@ -272,6 +273,7 @@ const result = await payload.delete({
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
+  overrideLock: false, // By default, document locks are ignored. Set to false to enforce locks.
   showHiddenFields: true,
 })
 ```
@@ -295,6 +297,7 @@ const result = await payload.delete({
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
+  overrideLock: false, // By default, document locks are ignored. Set to false to enforce locks.
   showHiddenFields: true,
 })
 ```
@@ -431,6 +434,7 @@ const result = await payload.updateGlobal({
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
+  overrideLock: false, // By default, document locks are ignored. Set to false to enforce locks.
   showHiddenFields: true,
 })
 ```

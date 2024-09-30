@@ -4,7 +4,7 @@ import { generatePayloadCookie, isolateObjectProperty, refreshOperation } from '
 
 import type { Context } from '../types.js'
 
-function refreshResolver(collection: Collection): any {
+export function refresh(collection: Collection): any {
   async function resolver(_, __, context: Context) {
     const options = {
       collection,
@@ -29,5 +29,3 @@ function refreshResolver(collection: Collection): any {
 
   return resolver
 }
-
-export default refreshResolver

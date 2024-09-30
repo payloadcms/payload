@@ -1,5 +1,13 @@
-import type { ClientFieldConfig } from '../fields/config/client.js'
-import type { Field, FieldAffectingData, FieldPresentationalOnly } from '../fields/config/types.js'
+import type { ClientTab } from '../admin/fields/Tabs.js'
+import type { ClientField } from '../fields/config/client.js'
+import type {
+  Field,
+  FieldAffectingData,
+  FieldAffectingDataClient,
+  FieldPresentationalOnly,
+  FieldPresentationalOnlyClient,
+  Tab,
+} from '../fields/config/types.js'
 
 import {
   fieldAffectsData,
@@ -8,6 +16,12 @@ import {
   tabHasName,
 } from '../fields/config/types.js'
 
+type FlattenedField<TField> = TField extends ClientField
+  ? FieldAffectingDataClient | FieldPresentationalOnlyClient
+  : FieldAffectingData | FieldPresentationalOnly
+
+type TabType<TField> = TField extends ClientField ? ClientTab : Tab
+
 /**
  * Flattens a collection's fields into a single array of fields, as long
  * as the fields do not affect data.
@@ -15,29 +29,31 @@ import {
  * @param fields
  * @param keepPresentationalFields if true, will skip flattening fields that are presentational only
  */
-const flattenFields = (
-  fields: (ClientFieldConfig | Field)[],
+function flattenFields<TField extends ClientField | Field>(
+  fields: TField[],
   keepPresentationalFields?: boolean,
-): (FieldAffectingData | FieldPresentationalOnly)[] => {
-  return fields.reduce((fieldsToUse, field) => {
+): FlattenedField<TField>[] {
+  return fields.reduce<FlattenedField<TField>[]>((fieldsToUse, field) => {
     if (fieldAffectsData(field) || (keepPresentationalFields && fieldIsPresentationalOnly(field))) {
-      return [...fieldsToUse, field]
+      return [...fieldsToUse, field as FlattenedField<TField>]
     }
 
     if (fieldHasSubFields(field)) {
-      return [...fieldsToUse, ...flattenFields(field.fields, keepPresentationalFields)]
+      return [...fieldsToUse, ...flattenFields(field.fields as TField[], keepPresentationalFields)]
     }
 
     if (field.type === 'tabs' && 'tabs' in field) {
       return [
         ...fieldsToUse,
-        ...field.tabs.reduce((tabFields, tab) => {
-          return [
-            ...tabFields,
-            ...(tabHasName(tab)
-              ? [{ ...tab, type: 'tab' }]
-              : flattenFields(tab.fields, keepPresentationalFields)),
-          ]
+        ...field.tabs.reduce<FlattenedField<TField>[]>((tabFields, tab: TabType<TField>) => {
+          if (tabHasName(tab)) {
+            return [...tabFields, { ...tab, type: 'tab' } as unknown as FlattenedField<TField>]
+          } else {
+            return [
+              ...tabFields,
+              ...flattenFields(tab.fields as TField[], keepPresentationalFields),
+            ]
+          }
         }, []),
       ]
     }

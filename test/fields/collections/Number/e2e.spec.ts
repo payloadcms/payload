@@ -60,7 +60,9 @@ describe('Number', () => {
       snapshotKey: 'fieldsNumberTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
-    if (client) await client.logout()
+    if (client) {
+      await client.logout()
+    }
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
     await ensureCompilationIsDone({ page, serverURL })
@@ -135,5 +137,17 @@ describe('Number', () => {
     await expect(page.locator('.payload-toast-container')).toContainText(
       'The following field is invalid: withMinRows',
     )
+  })
+
+  test('should keep data removed on save if deleted', async () => {
+    const input = 1
+    await page.goto(url.create)
+    const field = page.locator('#field-number')
+    await field.fill(String(input))
+    await saveDocAndAssert(page)
+    await expect(field).toHaveValue(String(input))
+    await field.fill('')
+    await saveDocAndAssert(page)
+    await expect(field).toHaveValue('')
   })
 })

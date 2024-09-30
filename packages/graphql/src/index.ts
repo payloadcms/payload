@@ -8,12 +8,12 @@ import {
   fieldExtensionsEstimator,
   simpleEstimator,
 } from './packages/graphql-query-complexity/index.js'
-import accessResolver from './resolvers/auth/access.js'
-import buildFallbackLocaleInputType from './schema/buildFallbackLocaleInputType.js'
-import buildLocaleInputType from './schema/buildLocaleInputType.js'
-import buildPoliciesType from './schema/buildPoliciesType.js'
-import initCollections from './schema/initCollections.js'
-import initGlobals from './schema/initGlobals.js'
+import { accessResolver } from './resolvers/auth/access.js'
+import { buildFallbackLocaleInputType } from './schema/buildFallbackLocaleInputType.js'
+import { buildLocaleInputType } from './schema/buildLocaleInputType.js'
+import { buildPoliciesType } from './schema/buildPoliciesType.js'
+import { initCollections } from './schema/initCollections.js'
+import { initGlobals } from './schema/initGlobals.js'
 import { wrapCustomFields } from './utilities/wrapCustomResolver.js'
 
 export function configToSchema(config: SanitizedConfig): {
@@ -33,6 +33,8 @@ export function configToSchema(config: SanitizedConfig): {
   }
 
   const graphqlResult: GraphQLInfo = {
+    collections,
+    globals,
     Mutation: {
       name: 'Mutation',
       fields: {},
@@ -41,8 +43,6 @@ export function configToSchema(config: SanitizedConfig): {
       name: 'Query',
       fields: {},
     },
-    collections,
-    globals,
     types: {
       arrayTypes: {},
       blockInputTypes: {},

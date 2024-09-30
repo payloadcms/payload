@@ -57,9 +57,9 @@ export const sanitizeClientFeatures = (
     }
     if (feature.plugins?.length) {
       feature.plugins.forEach((plugin, i) => {
-        sanitized.plugins.push({
-          Component: plugin.Component,
+        sanitized.plugins?.push({
           clientProps: feature.sanitizedClientFeatureProps,
+          Component: plugin.Component,
           key: feature.key + i,
           position: plugin.position,
         })
@@ -212,14 +212,14 @@ export const sanitizeClientFeatures = (
 }
 
 export function sanitizeClientEditorConfig(
-  lexical: LexicalEditorConfig,
   resolvedClientFeatureMap: ResolvedClientFeatureMap,
+  lexical?: LexicalEditorConfig,
   admin?: LexicalFieldAdminProps,
 ): SanitizedClientEditorConfig {
   return {
     admin,
     features: sanitizeClientFeatures(resolvedClientFeatureMap),
-    lexical,
+    lexical: lexical!,
     resolvedFeatureMap: resolvedClientFeatureMap,
   }
 }

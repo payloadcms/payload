@@ -6,5 +6,5 @@ payload-vercel-postgres-template
 
 ## Attributes
 
-- **Database**: postgres
+- **Database**: vercel-postgres
 - **Storage Adapter**: vercelBlobStorage

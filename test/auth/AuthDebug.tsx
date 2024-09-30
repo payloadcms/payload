@@ -15,7 +15,9 @@ export const AuthDebug: React.FC<UIField> = () => {
       setState(userRes)
     }
 
-    void fetchUser()
+    if (user?.id) {
+      void fetchUser()
+    }
   }, [user])
 
   return (

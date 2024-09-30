@@ -1,5 +1,6 @@
 import type {
   Data,
+  FormState,
   Locale,
   PayloadRequest,
   SanitizedCollectionConfig,
@@ -15,11 +16,17 @@ export const getDocumentData = async (args: {
   id?: number | string
   locale: Locale
   req: PayloadRequest
-}): Promise<Data> => {
-  const { id, collectionConfig, globalConfig, locale, req } = args
+  schemaPath?: string
+}): Promise<{
+  data: Data
+  formState: FormState
+}> => {
+  const { id, collectionConfig, globalConfig, locale, req, schemaPath: schemaPathFromProps } = args
+
+  const schemaPath = schemaPathFromProps || collectionConfig?.slug || globalConfig?.slug
 
   try {
-    const formState = await buildFormState({
+    const { state: formState } = await buildFormState({
       req: {
         ...req,
         data: {
@@ -28,7 +35,7 @@ export const getDocumentData = async (args: {
           globalSlug: globalConfig?.slug,
           locale: locale?.code,
           operation: (collectionConfig && id) || globalConfig ? 'update' : 'create',
-          schemaPath: collectionConfig?.slug || globalConfig?.slug,
+          schemaPath,
         },
       },
     })
@@ -41,6 +48,15 @@ export const getDocumentData = async (args: {
     }
   } catch (error) {
     console.error('Error getting document data', error) // eslint-disable-line no-console
-    return {}
+    return {
+      data: null,
+      formState: {
+        fields: {
+          initialValue: undefined,
+          valid: false,
+          value: undefined,
+        },
+      },
+    }
   }
 }

@@ -1,13 +1,12 @@
 'use client'
+import type { MappedComponent } from 'payload'
 import type React from 'react'
 
 import { useEffect } from 'react'
 
-import type { ActionMap } from '../../ComponentMap/buildComponentMap/types.js'
-
 import { useActions } from '../index.js'
 
-export const SetViewActions: React.FC<{ actions: ActionMap['Edit'][string] }> = ({ actions }) => {
+export const SetViewActions: React.FC<{ actions: MappedComponent[] }> = ({ actions }) => {
   const { setViewActions } = useActions()
 
   useEffect(() => {

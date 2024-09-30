@@ -22,6 +22,7 @@ export const packagePublishList = [
   'db-mongodb',
   'db-postgres',
   'db-sqlite',
+  'db-vercel-postgres',
 
   // Adapters
   'email-nodemailer',
@@ -43,7 +44,6 @@ export const packagePublishList = [
   'plugin-search',
   'plugin-seo',
   'plugin-stripe',
-  'plugin-relationship-object-ids',
 
   // Unpublished
   // 'plugin-sentry'

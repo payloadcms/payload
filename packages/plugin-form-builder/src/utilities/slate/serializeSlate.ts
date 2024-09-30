@@ -20,7 +20,9 @@ export const serializeSlate = (children?: Node[], submissionData?: any): string 
   children
     ?.map((node: Node) => {
       if (isTextNode(node)) {
-        let text = `<span>${escapeHTML(replaceDoubleCurlys(node.text, submissionData))}</span>`
+        let text = node.text.includes('{{*')
+          ? replaceDoubleCurlys(node.text, submissionData)
+          : `<span>${escapeHTML(replaceDoubleCurlys(node.text, submissionData))}</span>`
 
         if (node.bold) {
           text = `

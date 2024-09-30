@@ -1,7 +1,5 @@
-import type { Config, Field, GroupField, TabsField, TextField } from 'payload'
+import type { Config, GroupField, TabsField, TextField } from 'payload'
 
-import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
-import { withMergedProps } from '@payloadcms/ui/shared'
 import { deepMergeSimple } from 'payload/shared'
 
 import type {
@@ -12,11 +10,11 @@ import type {
   SEOPluginConfig,
 } from './types.js'
 
-import { MetaDescriptionComponent } from './fields/MetaDescription/MetaDescriptionComponent.js'
-import { MetaImageComponent } from './fields/MetaImage/MetaImageComponent.js'
-import { MetaTitleComponent } from './fields/MetaTitle/MetaTitleComponent.js'
-import { OverviewComponent } from './fields/Overview/OverviewComponent.js'
-import { PreviewComponent } from './fields/Preview/PreviewComponent.js'
+import { MetaDescriptionField } from './fields/MetaDescription/index.js'
+import { MetaImageField } from './fields/MetaImage/index.js'
+import { MetaTitleField } from './fields/MetaTitle/index.js'
+import { OverviewField } from './fields/Overview/index.js'
+import { PreviewField } from './fields/Preview/index.js'
 import { translations } from './translations/index.js'
 
 export const seoPlugin =
@@ -27,93 +25,28 @@ export const seoPlugin =
         name: 'meta',
         type: 'group',
         fields: [
-          {
-            name: 'overview',
-            type: 'ui',
-            admin: {
-              components: {
-                Field: OverviewComponent,
-              },
-            },
-            label: 'Overview',
-          },
-          {
-            name: 'title',
-            type: 'text',
-            admin: {
-              components: {
-                Field: withMergedProps({
-                  Component: MetaTitleComponent,
-                  sanitizeServerOnlyProps: true,
-                  toMergeIntoProps: {
-                    hasGenerateTitleFn: typeof pluginConfig?.generateTitle === 'function',
-                  },
-                }),
-              },
-            },
-            localized: true,
-            ...((pluginConfig?.fieldOverrides?.title as unknown as TextField) ?? {}),
-          },
-          {
-            name: 'description',
-            type: 'textarea',
-            admin: {
-              components: {
-                Field: withMergedProps({
-                  Component: MetaDescriptionComponent,
-                  sanitizeServerOnlyProps: true,
-                  toMergeIntoProps: {
-                    hasGenerateDescriptionFn:
-                      typeof pluginConfig?.generateDescription === 'function',
-                  },
-                }),
-              },
-            },
-            localized: true,
-            ...(pluginConfig?.fieldOverrides?.description ?? {}),
-          },
+          OverviewField({}),
+          MetaTitleField({
+            hasGenerateFn: typeof pluginConfig?.generateTitle === 'function',
+            overrides: pluginConfig?.fieldOverrides?.title,
+          }),
+          MetaDescriptionField({
+            hasGenerateFn: typeof pluginConfig?.generateDescription === 'function',
+            overrides: pluginConfig?.fieldOverrides?.description,
+          }),
           ...(pluginConfig?.uploadsCollection
             ? [
-                {
-                  name: 'image',
-                  type: 'upload',
-                  admin: {
-                    components: {
-                      Field: withMergedProps({
-                        Component: MetaImageComponent,
-                        sanitizeServerOnlyProps: true,
-                        toMergeIntoProps: {
-                          hasGenerateImageFn: typeof pluginConfig?.generateImage === 'function',
-                        },
-                      }),
-                    },
-                    description:
-                      'Maximum upload file size: 12MB. Recommended file size for images is <500KB.',
-                  },
-                  label: 'Meta Image',
-                  localized: true,
-                  relationTo: pluginConfig?.uploadsCollection,
-                  ...(pluginConfig?.fieldOverrides?.image ?? {}),
-                } as Field,
+                MetaImageField({
+                  hasGenerateFn: typeof pluginConfig?.generateImage === 'function',
+                  overrides: pluginConfig?.fieldOverrides?.image,
+                  relationTo: pluginConfig.uploadsCollection,
+                }),
               ]
             : []),
           ...(pluginConfig?.fields || []),
-          {
-            name: 'preview',
-            type: 'ui',
-            admin: {
-              components: {
-                Field: withMergedProps({
-                  Component: PreviewComponent,
-                  sanitizeServerOnlyProps: true,
-                  toMergeIntoProps: {
-                    hasGenerateURLFn: typeof pluginConfig?.generateURL === 'function',
-                  },
-                }),
-              },
-            },
-            label: 'Preview',
-          },
+          PreviewField({
+            hasGenerateFn: typeof pluginConfig?.generateURL === 'function',
+          }),
         ],
         interfaceName: pluginConfig.interfaceName,
         label: 'SEO',
@@ -199,12 +132,26 @@ export const seoPlugin =
         ...(config.endpoints ?? []),
         {
           handler: async (req) => {
-            await addDataAndFileToRequest(req)
-            req.t
+            const data: Omit<
+              Parameters<GenerateTitle>[0],
+              'collectionConfig' | 'globalConfig' | 'req'
+            > = await req.json()
+
+            if (data) {
+              req.data = data
+            }
+
             const result = pluginConfig.generateTitle
-              ? await pluginConfig.generateTitle(
-                  req.data as unknown as Parameters<GenerateTitle>[0],
-                )
+              ? await pluginConfig.generateTitle({
+                  ...data,
+                  collectionConfig: req.data.collectionSlug
+                    ? config.collections?.find((c) => c.slug === req.data.collectionSlug)
+                    : null,
+                  globalConfig: req.data.globalSlug
+                    ? config.globals?.find((g) => g.slug === req.data.globalSlug)
+                    : null,
+                  req,
+                } satisfies Parameters<GenerateTitle>[0])
               : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
@@ -213,11 +160,26 @@ export const seoPlugin =
         },
         {
           handler: async (req) => {
-            await addDataAndFileToRequest(req)
+            const data: Omit<
+              Parameters<GenerateTitle>[0],
+              'collectionConfig' | 'globalConfig' | 'req'
+            > = await req.json()
+
+            if (data) {
+              req.data = data
+            }
+
             const result = pluginConfig.generateDescription
-              ? await pluginConfig.generateDescription(
-                  req.data as unknown as Parameters<GenerateDescription>[0],
-                )
+              ? await pluginConfig.generateDescription({
+                  ...data,
+                  collectionConfig: req.data.collectionSlug
+                    ? config.collections?.find((c) => c.slug === req.data.collectionSlug)
+                    : null,
+                  globalConfig: req.data.globalSlug
+                    ? config.globals?.find((g) => g.slug === req.data.globalSlug)
+                    : null,
+                  req,
+                } satisfies Parameters<GenerateDescription>[0])
               : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
@@ -226,9 +188,26 @@ export const seoPlugin =
         },
         {
           handler: async (req) => {
-            await addDataAndFileToRequest(req)
+            const data: Omit<
+              Parameters<GenerateTitle>[0],
+              'collectionConfig' | 'globalConfig' | 'req'
+            > = await req.json()
+
+            if (data) {
+              req.data = data
+            }
+
             const result = pluginConfig.generateURL
-              ? await pluginConfig.generateURL(req.data as unknown as Parameters<GenerateURL>[0])
+              ? await pluginConfig.generateURL({
+                  ...data,
+                  collectionConfig: req.data.collectionSlug
+                    ? config.collections?.find((c) => c.slug === req.data.collectionSlug)
+                    : null,
+                  globalConfig: req.data.globalSlug
+                    ? config.globals?.find((g) => g.slug === req.data.globalSlug)
+                    : null,
+                  req,
+                } satisfies Parameters<GenerateURL>[0])
               : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
@@ -237,11 +216,26 @@ export const seoPlugin =
         },
         {
           handler: async (req) => {
-            await addDataAndFileToRequest(req)
+            const data: Omit<
+              Parameters<GenerateTitle>[0],
+              'collectionConfig' | 'globalConfig' | 'req'
+            > = await req.json()
+
+            if (data) {
+              req.data = data
+            }
+
             const result = pluginConfig.generateImage
-              ? await pluginConfig.generateImage(
-                  req.data as unknown as Parameters<GenerateImage>[0],
-                )
+              ? await pluginConfig.generateImage({
+                  ...data,
+                  collectionConfig: req.data.collectionSlug
+                    ? config.collections?.find((c) => c.slug === req.data.collectionSlug)
+                    : null,
+                  globalConfig: req.data.globalSlug
+                    ? config.globals?.find((g) => g.slug === req.data.globalSlug)
+                    : null,
+                  req,
+                } as Parameters<GenerateImage>[0])
               : ''
             return new Response(result, { status: 200 })
           },
@@ -297,9 +291,7 @@ export const seoPlugin =
         }) || [],
       i18n: {
         ...config.i18n,
-        translations: {
-          ...deepMergeSimple(translations, config.i18n?.translations),
-        },
+        translations: deepMergeSimple(translations, config.i18n?.translations),
       },
     }
   }

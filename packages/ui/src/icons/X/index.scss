@@ -1,8 +1,8 @@
 @import '../../scss/styles';
 
 .icon--x {
-  line {
-    stroke: var(--theme-elevation-800);
-    stroke-width: $style-stroke-width;
+  .stroke {
+    stroke: currentColor;
+    stroke-width: $style-stroke-width-s;
   }
 }

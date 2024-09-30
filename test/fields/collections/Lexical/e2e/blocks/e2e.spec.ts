@@ -534,7 +534,7 @@ describe('lexicalBlocks', () => {
       // Upload something
       await expect(async () => {
         const chooseExistingUploadButton = newSubLexicalAndUploadBlock
-          .locator('.upload__toggler.list-drawer__toggler')
+          .locator('.upload__listToggler')
           .first()
         await wait(300)
         await expect(chooseExistingUploadButton).toBeVisible()
@@ -554,7 +554,9 @@ describe('lexicalBlocks', () => {
         await expect(uploadListDrawer).toBeHidden()
         // Check if the upload is there
         await expect(
-          newSubLexicalAndUploadBlock.locator('.field-type.upload .file-meta__url a'),
+          newSubLexicalAndUploadBlock.locator(
+            '.field-type.upload .upload-relationship-details__filename a',
+          ),
         ).toHaveText('payload.jpg')
       }).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
@@ -567,7 +569,9 @@ describe('lexicalBlocks', () => {
       await wait(300)
 
       await expect(
-        newSubLexicalAndUploadBlock.locator('.field-type.upload .file-meta__url a'),
+        newSubLexicalAndUploadBlock.locator(
+          '.field-type.upload .upload-relationship-details__filename a',
+        ),
       ).toHaveText('payload.jpg')
       await expect(paragraphInSubEditor).toHaveText('Some subText')
       await wait(300)
@@ -578,14 +582,18 @@ describe('lexicalBlocks', () => {
       await newSubLexicalAndUploadBlock.scrollIntoViewIfNeeded()
       await expect(newSubLexicalAndUploadBlock).toBeVisible()
       await newSubLexicalAndUploadBlock
-        .locator('.field-type.upload .file-meta__url a')
+        .locator('.field-type.upload .upload-relationship-details__filename a')
         .scrollIntoViewIfNeeded()
       await expect(
-        newSubLexicalAndUploadBlock.locator('.field-type.upload .file-meta__url a'),
+        newSubLexicalAndUploadBlock.locator(
+          '.field-type.upload .upload-relationship-details__filename a',
+        ),
       ).toBeVisible()
 
       await expect(
-        newSubLexicalAndUploadBlock.locator('.field-type.upload .file-meta__url a'),
+        newSubLexicalAndUploadBlock.locator(
+          '.field-type.upload .upload-relationship-details__filename a',
+        ),
       ).toHaveText('payload.jpg')
       await expect(paragraphInSubEditor).toHaveText('Some subText')
 
@@ -1007,6 +1015,28 @@ describe('lexicalBlocks', () => {
       }).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
+    })
+
+    test('dynamic height of code editor is correctly calculated', async () => {
+      await navigateToLexicalFields()
+
+      const codeEditor = page.locator('.code-editor')
+
+      await codeEditor.scrollIntoViewIfNeeded()
+      await expect(codeEditor).toBeVisible()
+
+      const height = (await codeEditor.boundingBox()).height
+
+      await expect(() => {
+        expect(height).toBe(56)
+      }).toPass()
+      await codeEditor.click()
+      await page.keyboard.press('Enter')
+
+      const height2 = (await codeEditor.boundingBox()).height
+      await expect(() => {
+        expect(height2).toBe(74)
+      }).toPass()
     })
   })
 })

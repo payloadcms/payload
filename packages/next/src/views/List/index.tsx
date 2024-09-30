@@ -1,19 +1,21 @@
-import type { AdminViewProps, Where } from 'payload'
+import type { AdminViewProps, ClientCollectionConfig, Where } from 'payload'
 
 import {
-  HydrateClientUser,
+  HydrateAuthProvider,
   ListInfoProvider,
   ListQueryProvider,
   TableColumnsProvider,
 } from '@payloadcms/ui'
-import { RenderCustomComponent, formatAdminURL } from '@payloadcms/ui/shared'
+import { formatAdminURL, getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
+import { createClientCollectionConfig } from '@payloadcms/ui/utilities/createClientConfig'
 import { notFound } from 'next/navigation.js'
-import { createClientCollectionConfig, mergeListSearchAndWhere } from 'payload'
-import { isNumber, isReactComponentOrFunction } from 'payload/shared'
+import { deepCopyObjectSimple, mergeListSearchAndWhere } from 'payload'
+import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
 
-import type { DefaultListViewProps, ListPreferences } from './Default/types.js'
+import type { ListPreferences } from './Default/types.js'
 
+import { DefaultEditView } from '../Edit/Default/index.js'
 import { DefaultListView } from './Default/index.js'
 
 export { generateListMetadata } from './meta.js'
@@ -57,9 +59,23 @@ export const ListView: React.FC<AdminViewProps> = async ({
         req,
         user,
         where: {
-          key: {
-            equals: preferenceKey,
-          },
+          and: [
+            {
+              key: {
+                equals: preferenceKey,
+              },
+            },
+            {
+              'user.relationTo': {
+                equals: user.collection,
+              },
+            },
+            {
+              'user.value': {
+                equals: user?.id,
+              },
+            },
+          ],
         },
       })
       ?.then((res) => res?.docs?.[0]?.value)) as ListPreferences
@@ -70,20 +86,8 @@ export const ListView: React.FC<AdminViewProps> = async ({
   } = config
 
   if (collectionConfig) {
-    const {
-      admin: { components: { views: { List: CustomList } = {} } = {} },
-    } = collectionConfig
-
     if (!visibleEntities.collections.includes(collectionSlug)) {
       return notFound()
-    }
-
-    let CustomListView = null
-
-    if (CustomList && typeof CustomList === 'function') {
-      CustomListView = CustomList
-    } else if (typeof CustomList === 'object' && isReactComponentOrFunction(CustomList.Component)) {
-      CustomListView = CustomList.Component
     }
 
     const page = isNumber(query?.page) ? Number(query.page) : 0
@@ -107,6 +111,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
       depth: 0,
       draft: true,
       fallbackLocale: null,
+      includeLockStatus: true,
       limit,
       locale,
       overrideAccess: false,
@@ -117,19 +122,56 @@ export const ListView: React.FC<AdminViewProps> = async ({
       where: whereQuery || {},
     })
 
-    const viewComponentProps: DefaultListViewProps = {
-      collectionSlug,
-      listSearchableFields: collectionConfig.admin.listSearchableFields,
-    }
+    const createMappedComponent = getCreateMappedComponent({
+      importMap: payload.importMap,
+      serverProps: {
+        collectionConfig,
+        collectionSlug,
+        data,
+        hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
+        i18n,
+        limit,
+        listPreferences,
+        listSearchableFields: collectionConfig.admin.listSearchableFields,
+        locale: fullLocale,
+        newDocumentURL: formatAdminURL({
+          adminRoute,
+          path: `/collections/${collectionSlug}/create`,
+        }),
+        params,
+        payload,
+        permissions,
+        searchParams,
+        user,
+      },
+    })
+
+    const ListComponent = createMappedComponent(
+      collectionConfig?.admin?.components?.views?.list?.Component,
+      undefined,
+      DefaultListView,
+      'collectionConfig?.admin?.components?.views?.list?.Component',
+    )
+
+    let clientCollectionConfig = deepCopyObjectSimple(
+      collectionConfig,
+    ) as unknown as ClientCollectionConfig
+    clientCollectionConfig = createClientCollectionConfig({
+      clientCollection: clientCollectionConfig,
+      collection: collectionConfig,
+      createMappedComponent,
+      DefaultEditView,
+      DefaultListView,
+      i18n,
+      importMap: payload.importMap,
+      payload,
+    })
 
     return (
       <Fragment>
-        <HydrateClientUser permissions={permissions} user={user} />
+        <HydrateAuthProvider permissions={permissions} />
         <ListInfoProvider
-          collectionConfig={createClientCollectionConfig({
-            collection: collectionConfig,
-            t: initPageResult.req.i18n.t,
-          })}
+          collectionConfig={clientCollectionConfig}
           collectionSlug={collectionSlug}
           hasCreatePermission={permissions?.collections?.[collectionSlug]?.create?.permission}
           newDocumentURL={formatAdminURL({
@@ -150,29 +192,12 @@ export const ListView: React.FC<AdminViewProps> = async ({
               listPreferences={listPreferences}
               preferenceKey={preferenceKey}
             >
-              <RenderCustomComponent
-                CustomComponent={CustomListView}
-                DefaultComponent={DefaultListView}
-                componentProps={viewComponentProps}
-                serverOnlyProps={{
-                  collectionConfig,
-                  data,
-                  hasCreatePermission:
-                    permissions?.collections?.[collectionSlug]?.create?.permission,
-                  i18n,
-                  limit,
-                  listPreferences,
-                  locale: fullLocale,
-                  newDocumentURL: formatAdminURL({
-                    adminRoute,
-                    path: `/collections/${collectionSlug}/create`,
-                  }),
-                  params,
-                  payload,
-                  permissions,
-                  searchParams,
-                  user,
+              <RenderComponent
+                clientProps={{
+                  collectionSlug,
+                  listSearchableFields: collectionConfig?.admin?.listSearchableFields,
                 }}
+                mappedComponent={ListComponent}
               />
             </TableColumnsProvider>
           </ListQueryProvider>

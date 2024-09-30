@@ -20,6 +20,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   db,
   fields,
   ignoreResult,
+  joinQuery,
   operation,
   path = '',
   req,
@@ -116,7 +117,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
           if (typeof row.parent === 'undefined') {
             row.parent = insertedRow.id
           }
-          if (!selectsToInsert[selectTableName]) selectsToInsert[selectTableName] = []
+          if (!selectsToInsert[selectTableName]) {
+            selectsToInsert[selectTableName] = []
+          }
           selectsToInsert[selectTableName].push(row)
         })
       })
@@ -127,7 +130,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     Object.keys(rowToInsert.blocks).forEach((blockName) => {
       rowToInsert.blocks[blockName].forEach((blockRow) => {
         blockRow.row._parentID = insertedRow.id
-        if (!blocksToInsert[blockName]) blocksToInsert[blockName] = []
+        if (!blocksToInsert[blockName]) {
+          blocksToInsert[blockName] = []
+        }
         if (blockRow.row.uuid) {
           delete blockRow.row.uuid
         }
@@ -348,22 +353,58 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // Error Handling
     // //////////////////////////////////
   } catch (error) {
-    throw error.code === '23505'
-      ? new ValidationError(
-          {
-            errors: [
-              {
-                field: adapter.fieldConstraints[tableName][error.constraint],
-                message: req.t('error:valueMustBeUnique'),
-              },
-            ],
-          },
-          req.t,
-        )
-      : error
+    if (error.code === '23505') {
+      let fieldName: null | string = null
+      // We need to try and find the right constraint for the field but if we can't we fallback to a generic message
+      if (adapter.fieldConstraints?.[tableName]) {
+        if (adapter.fieldConstraints[tableName]?.[error.constraint]) {
+          fieldName = adapter.fieldConstraints[tableName]?.[error.constraint]
+        } else {
+          const replacement = `${tableName}_`
+
+          if (error.constraint.includes(replacement)) {
+            const replacedConstraint = error.constraint.replace(replacement, '')
+
+            if (replacedConstraint && adapter.fieldConstraints[tableName]?.[replacedConstraint]) {
+              fieldName = adapter.fieldConstraints[tableName][replacedConstraint]
+            }
+          }
+        }
+      }
+
+      if (!fieldName) {
+        // Last case scenario we extract the key and value from the detail on the error
+        const detail = error.detail
+        const regex = /Key \(([^)]+)\)=\(([^)]+)\)/
+        const match = detail.match(regex)
+
+        if (match) {
+          const key = match[1]
+
+          fieldName = key
+        }
+      }
+
+      throw new ValidationError(
+        {
+          id,
+          errors: [
+            {
+              field: fieldName,
+              message: req.t('error:valueMustBeUnique'),
+            },
+          ],
+        },
+        req.t,
+      )
+    } else {
+      throw error
+    }
   }
 
-  if (ignoreResult) return data as T
+  if (ignoreResult) {
+    return data as T
+  }
 
   // //////////////////////////////////
   // RETRIEVE NEWLY UPDATED ROW
@@ -373,6 +414,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     adapter,
     depth: 0,
     fields,
+    joinQuery,
     tableName,
   })
 
@@ -389,6 +431,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     config: adapter.payload.config,
     data: doc,
     fields,
+    joinQuery,
   })
 
   return result
