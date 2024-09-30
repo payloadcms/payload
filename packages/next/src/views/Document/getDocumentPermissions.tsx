@@ -37,7 +37,10 @@ export const getDocumentPermissions = async (args: {
         },
         req: {
           ...req,
-          data,
+          data: {
+            ...data,
+            _status: 'draft',
+          },
         },
       })
 
