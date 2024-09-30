@@ -68,6 +68,7 @@ describe('Joins Field', () => {
         upload: uploadedImage,
         group: {
           category: category.id,
+          camelCaseCategory: category.id,
         },
       })
     }
@@ -105,6 +106,17 @@ describe('Joins Field', () => {
     expect(docs[0].category.id).toBeDefined()
     expect(docs[0].category.name).toBeDefined()
     expect(docs[0].category.relatedPosts.docs).toHaveLength(10)
+  })
+
+  it('should populate relationships in joins with camelCase names', async () => {
+    const { docs } = await payload.find({
+      limit: 1,
+      collection: 'posts',
+    })
+
+    expect(docs[0].group.camelCaseCategory.id).toBeDefined()
+    expect(docs[0].group.camelCaseCategory.name).toBeDefined()
+    expect(docs[0].group.camelCaseCategory.group.camelCasePosts.docs).toHaveLength(10)
   })
 
   it('should populate uploads in joins', async () => {

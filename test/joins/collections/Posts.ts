@@ -32,6 +32,11 @@ export const Posts: CollectionConfig = {
           type: 'relationship',
           relationTo: categoriesSlug,
         },
+        {
+          name: 'camelCaseCategory',
+          type: 'relationship',
+          relationTo: categoriesSlug,
+        },
       ],
     },
   ],
