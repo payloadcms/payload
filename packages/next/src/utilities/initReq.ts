@@ -1,4 +1,4 @@
-import type { I18nClient } from '@payloadcms/translations'
+import type { I18n, I18nClient } from '@payloadcms/translations'
 import type { PayloadRequest, Permissions, SanitizedConfig, User } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
@@ -40,9 +40,9 @@ export const initReq = cache(async function (config: SanitizedConfig): Promise<R
       req: {
         headers,
         host: headers.get('host'),
-        i18n,
+        i18n: i18n as I18n,
         url: `${payload.config.serverURL}`,
-      } as PayloadRequest,
+      },
     },
     payload,
   )

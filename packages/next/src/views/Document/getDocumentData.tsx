@@ -48,7 +48,6 @@ export const getDocumentData = async (args: {
       operation: (collectionConfig && id) || globalConfig ? 'update' : 'create',
       payload: req.payload,
       schemaPath,
-      user: req.user,
     })
 
     const data = reduceFieldsToValues(formState, true)

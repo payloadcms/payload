@@ -1,17 +1,21 @@
-import type {
-  ClientUser,
-  Data,
-  DocumentPreferences,
-  Field,
-  FormState,
-  Payload,
-  PayloadRequest,
-  SanitizedConfig,
-  TypeWithID,
-} from 'payload'
-
-import { type I18nClient, initI18n, type SupportedLanguages } from '@payloadcms/translations'
+import {
+  type I18n,
+  type I18nClient,
+  initI18n,
+  type SupportedLanguages,
+} from '@payloadcms/translations'
 import { headers as getHeaders } from 'next/headers.js'
+import {
+  type ClientUser,
+  createLocalReq,
+  type Data,
+  type DocumentPreferences,
+  type Field,
+  type FormState,
+  type Payload,
+  type SanitizedConfig,
+  type TypeWithID,
+} from 'payload'
 import { reduceFieldsToValues } from 'payload/shared'
 
 import type { FieldSchemaMap } from './buildFieldSchemaMap/types.js'
@@ -104,7 +108,7 @@ export const buildFormState = async (
     throw new Error('No user provided')
   }
 
-  let i18n = i18nFromArgs
+  let i18n = i18nFromArgs as I18n // TODO: fix this type
 
   if (!i18n) {
     i18n = await initI18n({
@@ -114,10 +118,7 @@ export const buildFormState = async (
     })
   }
 
-  const req = {
-    i18n,
-    payload,
-  } as PayloadRequest
+  const req = await createLocalReq({ req: { i18n }, user }, payload)
 
   const incomingUserSlug = user?.collection
 
