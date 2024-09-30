@@ -10,6 +10,7 @@ import { getDocs } from '../../../_api/getDocs.js'
 import { Blocks } from '../../../_components/Blocks/index.js'
 import { Hero } from '../../../_components/Hero/index.js'
 import { RefreshRouteOnSave } from './RefreshRouteOnSave.js'
+
 type Args = {
   params: Promise<{
     slug?: string
