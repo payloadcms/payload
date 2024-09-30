@@ -915,7 +915,7 @@ export const traverseFields = ({
           type: 'many',
           // joins are not localized on the parent table
           localized: false,
-          relationName: toSnakeCase(field.on),
+          relationName: field.on.replaceAll('.', '_'),
           target,
         })
         break
