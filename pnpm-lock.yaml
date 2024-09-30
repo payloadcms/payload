@@ -28,8 +28,8 @@ importers:
         specifier: 0.6.2
         version: 0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4)
       '@next/bundle-analyzer':
-        specifier: 15.0.0-canary.160
-        version: 15.0.0-canary.160(bufferutil@4.0.8)
+        specifier: 15.0.0-canary.173
+        version: 15.0.0-canary.173(bufferutil@4.0.8)
       '@payloadcms/db-postgres':
         specifier: workspace:*
         version: link:packages/db-postgres
@@ -756,8 +756,8 @@ importers:
         specifier: ^7.24.1
         version: 7.24.7(@babel/core@7.25.2)
       '@next/eslint-plugin-next':
-        specifier: 15.0.0-canary.160
-        version: 15.0.0-canary.160
+        specifier: 15.0.0-canary.173
+        version: 15.0.0-canary.173
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
@@ -801,7 +801,7 @@ importers:
         specifier: 4.6.0
         version: 4.6.0(monaco-editor@0.38.0)(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)
       '@next/env':
-        specifier: ^15.0.0-canary.160
+        specifier: ^15.0.0-canary.173
         version: 15.0.0-rc.0
       '@payloadcms/translations':
         specifier: workspace:*
@@ -1570,8 +1570,8 @@ importers:
         specifier: 5.8.0
         version: 5.8.0(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)(types-react@19.0.0-rc.1)
       scheduler:
-        specifier: 0.0.0-experimental-5dcb0097-20240918
-        version: 0.0.0-experimental-5dcb0097-20240918
+        specifier: 0.0.0-experimental-3edc000d-20240926
+        version: 0.0.0-experimental-3edc000d-20240926
       sonner:
         specifier: ^1.5.0
         version: 1.5.0(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
@@ -1580,7 +1580,7 @@ importers:
         version: 10.0.2(typescript@5.6.2)
       use-context-selector:
         specifier: 2.0.0
-        version: 2.0.0(react@19.0.0-rc-3edc000d-20240926)(scheduler@0.0.0-experimental-5dcb0097-20240918)
+        version: 2.0.0(react@19.0.0-rc-3edc000d-20240926)(scheduler@0.0.0-experimental-3edc000d-20240926)
       uuid:
         specifier: 10.0.0
         version: 10.0.0
@@ -3752,8 +3752,8 @@ packages:
   '@neondatabase/serverless@0.9.4':
     resolution: {integrity: sha512-D0AXgJh6xkf+XTlsO7iwE2Q1w8981E1cLCPAALMU2YKtkF/1SF6BiAzYARZFYo175ON+b1RNIy9TdSFHm5nteg==}
 
-  '@next/bundle-analyzer@15.0.0-canary.160':
-    resolution: {integrity: sha512-J/ezuft9WlSqtBF1sQ+9EGx2KMcNd3bNFDDVJhrFFbMjqrWBipElj/y1CfI6zHsIyp6LBYzldyqIuXOMqziM3g==}
+  '@next/bundle-analyzer@15.0.0-canary.173':
+    resolution: {integrity: sha512-HQjr1RBygRcdVT1nlE1QkRED/dOCeXZdsDwr46Z9ko9xvFOC9+gaXs59EfgTZTLCyjqd6Qm5wttdS5GIYcMsMA==}
 
   '@next/env@15.0.0-canary.173':
     resolution: {integrity: sha512-ly6s88DqV1BSu4dthaU9/eTjyZDUeEC7KpXwnH0u4w2hu10ickyEFv52s7MXItoiiurtUorpg8h5nlK98UNQiQ==}
@@ -3761,8 +3761,8 @@ packages:
   '@next/env@15.0.0-rc.0':
     resolution: {integrity: sha512-6W0ndQvHR9sXcqcKeR/inD2UTRCs9+VkSK3lfaGmEuZs7EjwwXMO2BPYjz9oBrtfPL3xuTjtXsHKSsalYQ5l1Q==}
 
-  '@next/eslint-plugin-next@15.0.0-canary.160':
-    resolution: {integrity: sha512-m6IAc1X40J9NsvtBVUomT/2yS8lgXIsov3Wqu1i/cHZvkmfrIPWomTN0i5OmbtUjh1wOLAxaIlN7ucFUqdtmIw==}
+  '@next/eslint-plugin-next@15.0.0-canary.173':
+    resolution: {integrity: sha512-4nYoVrqN1HwXH3k+r79jxRWNyqBNYioarBwyY9RkFIJkduGAP0us0y9C4DFY+3SdZql4WtyRZMgn6WfwHeE7sA==}
 
   '@next/swc-darwin-arm64@15.0.0-canary.173':
     resolution: {integrity: sha512-peEFAtJDrSpnVL0VKqmbvBzbgxuOdwT+Y86PGMNkh6zEctodQ0Ka5YBlsu5Tjzkzkbn1xMpIpxurbqnsMwHeOQ==}
@@ -8491,8 +8491,8 @@ packages:
     resolution: {integrity: sha512-xAg7SOnEhrm5zI3puOOKyy1OMcMlIJZYNJY7xLBwSze0UjhPLnWfj2GF2EpT0jmzaJKIWKHLsaSSajf35bcYnA==}
     engines: {node: '>=v12.22.7'}
 
-  scheduler@0.0.0-experimental-5dcb0097-20240918:
-    resolution: {integrity: sha512-DQOQQIv61EhqH8n5MqmteGQgTuQNoyodKqEavr1J4wKNfFQoaCpNc0QDLtwK7SpIwUVRf/aREtXROSbzzURb+A==}
+  scheduler@0.0.0-experimental-3edc000d-20240926:
+    resolution: {integrity: sha512-360BMNajOhMyrirau0pzWVgeakvrfjbfdqHnX2K+tSGTmn6tBN+6K5NhhaebqeXXWyCU3rl5FApjgF2GN0W5JA==}
 
   scheduler@0.25.0-rc-3edc000d-20240926:
     resolution: {integrity: sha512-qAWyPrLLFM96Py4gnrFQLhYDrHkVXGw3P/hPrR3E6b5rriPeAA1a8YZBWlqH8Eehbc9waTih/WyDSyuwkxWWMw==}
@@ -12301,7 +12301,7 @@ snapshots:
     dependencies:
       '@types/pg': 8.11.6
 
-  '@next/bundle-analyzer@15.0.0-canary.160(bufferutil@4.0.8)':
+  '@next/bundle-analyzer@15.0.0-canary.173(bufferutil@4.0.8)':
     dependencies:
       webpack-bundle-analyzer: 4.10.1(bufferutil@4.0.8)
     transitivePeerDependencies:
@@ -12312,7 +12312,7 @@ snapshots:
 
   '@next/env@15.0.0-rc.0': {}
 
-  '@next/eslint-plugin-next@15.0.0-canary.160':
+  '@next/eslint-plugin-next@15.0.0-canary.173':
     dependencies:
       fast-glob: 3.3.1
 
@@ -17883,7 +17883,7 @@ snapshots:
     dependencies:
       xmlchars: 2.2.0
 
-  scheduler@0.0.0-experimental-5dcb0097-20240918: {}
+  scheduler@0.0.0-experimental-3edc000d-20240926: {}
 
   scheduler@0.25.0-rc-3edc000d-20240926: {}
 
@@ -18741,10 +18741,10 @@ snapshots:
       querystringify: 2.2.0
       requires-port: 1.0.0
 
-  use-context-selector@2.0.0(react@19.0.0-rc-3edc000d-20240926)(scheduler@0.0.0-experimental-5dcb0097-20240918):
+  use-context-selector@2.0.0(react@19.0.0-rc-3edc000d-20240926)(scheduler@0.0.0-experimental-3edc000d-20240926):
     dependencies:
       react: 19.0.0-rc-3edc000d-20240926
-      scheduler: 0.0.0-experimental-5dcb0097-20240918
+      scheduler: 0.0.0-experimental-3edc000d-20240926
 
   use-isomorphic-layout-effect@1.1.2(react@19.0.0-rc-3edc000d-20240926)(types-react@19.0.0-rc.1):
     dependencies:

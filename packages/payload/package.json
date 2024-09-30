@@ -85,7 +85,7 @@
   },
   "dependencies": {
     "@monaco-editor/react": "4.6.0",
-    "@next/env": "^15.0.0-canary.160",
+    "@next/env": "^15.0.0-canary.173",
     "@payloadcms/translations": "workspace:*",
     "@types/busboy": "1.5.4",
     "ajv": "8.17.1",
