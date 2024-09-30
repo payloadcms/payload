@@ -971,6 +971,23 @@ export interface GroupField {
   localizedGroupRel?: {
     email?: (string | null) | EmailField;
   };
+  localizedGroupManyRel?: {
+    email?: (string | EmailField)[] | null;
+  };
+  localizedGroupPolyRel?: {
+    email?: {
+      relationTo: 'email-fields';
+      value: string | EmailField;
+    } | null;
+  };
+  localizedGroupPolyHasManyRel?: {
+    email?:
+      | {
+          relationTo: 'email-fields';
+          value: string | EmailField;
+        }[]
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
 }

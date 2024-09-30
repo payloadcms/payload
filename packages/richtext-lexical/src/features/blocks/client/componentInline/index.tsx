@@ -56,17 +56,20 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   const $onDelete = useCallback(
     (event: KeyboardEvent) => {
-      if (isSelected && $isNodeSelection($getSelection())) {
+      const deleteSelection = $getSelection()
+      if (isSelected && $isNodeSelection(deleteSelection)) {
         event.preventDefault()
-        const node = $getNodeByKey(nodeKey)
-        if ($isInlineBlockNode(node)) {
-          node.remove()
-          return true
-        }
+        editor.update(() => {
+          deleteSelection.getNodes().forEach((node) => {
+            if ($isInlineBlockNode(node)) {
+              node.remove()
+            }
+          })
+        })
       }
       return false
     },
-    [isSelected, nodeKey],
+    [editor, isSelected],
   )
   const onClick = useCallback(
     (payload: MouseEvent) => {
