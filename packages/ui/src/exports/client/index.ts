@@ -190,6 +190,7 @@ export { SwapIcon } from '../../icons/Swap/index.js'
 export { XIcon } from '../../icons/X/index.js'
 
 // providers
+export { ServerActionsProvider, useServerActions } from '../../providers/ServerActions/index.js'
 export { ActionsProvider, SetViewActions, useActions } from '../../providers/Actions/index.js'
 export { AuthProvider, useAuth } from '../../providers/Auth/index.js'
 export { ClientFunctionProvider, useClientFunctions } from '../../providers/ClientFunction/index.js'

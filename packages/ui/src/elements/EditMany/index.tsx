@@ -20,8 +20,8 @@ import { OperationContext } from '../../providers/Operation/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
+import { useServerActions } from '../../providers/ServerActions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { getFormState } from '../../utilities/getFormState.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { FieldSelect } from '../FieldSelect/index.js'
 import './index.scss'
@@ -101,14 +101,19 @@ const SaveDraftButton: React.FC<{ action: string; disabled: boolean }> = ({ acti
 export const EditMany: React.FC<EditManyProps> = (props) => {
   const { collection: { slug, labels: { plural } } = {}, collection, fields } = props
 
-  const { permissions } = useAuth()
+  const { permissions, user } = useAuth()
+
   const { closeModal } = useModal()
+
   const {
     config: {
       routes: { api: apiRoute },
       serverURL,
     },
   } = useConfig()
+
+  const { payloadServerAction } = useServerActions()
+
   const { count, getQueryParams, selectAll } = useSelection()
   const { i18n, t } = useTranslation()
   const [selected, setSelected] = useState([])
@@ -126,16 +131,17 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   React.useEffect(() => {
     if (!hasInitializedState.current) {
       const getInitialState = async () => {
-        const { state: result } = await getFormState({
-          apiRoute,
-          body: {
+        const { state: result } = (await payloadServerAction({
+          action: 'form-state',
+          args: {
             collectionSlug: slug,
             data: {},
+            language: i18n.language,
             operation: 'update',
             schemaPath: slug,
+            user,
           },
-          serverURL,
-        })
+        })) as { state: FormState } // TODO: infer the return type
 
         setInitialState(result)
         hasInitializedState.current = true
@@ -143,24 +149,25 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
       void getInitialState()
     }
-  }, [apiRoute, hasInitializedState, serverURL, slug])
+  }, [apiRoute, hasInitializedState, serverURL, slug, payloadServerAction, user, i18n])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = await getFormState({
-        apiRoute,
-        body: {
+      const { state } = (await payloadServerAction({
+        action: 'form-state',
+        args: {
           collectionSlug: slug,
           formState: prevFormState,
+          language: i18n.language,
           operation: 'update',
           schemaPath: slug,
+          user,
         },
-        serverURL,
-      })
+      })) as { state: FormState } // TODO: infer the return type
 
       return state
     },
-    [serverURL, apiRoute, slug],
+    [slug, payloadServerAction, user, i18n],
   )
 
   if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {

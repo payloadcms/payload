@@ -70,7 +70,9 @@ export const Document: React.FC<AdminViewProps> = async ({
   const { data, formState } = await getDocumentData({
     id,
     collectionConfig,
+    config,
     globalConfig,
+    importMap,
     locale,
     req,
   })

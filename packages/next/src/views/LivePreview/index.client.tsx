@@ -7,6 +7,7 @@ import type {
   ClientGlobalConfig,
   ClientUser,
   Data,
+  FormState,
   LivePreviewConfig,
 } from 'payload'
 
@@ -20,14 +21,10 @@ import {
   useConfig,
   useDocumentEvents,
   useDocumentInfo,
+  useServerActions,
   useTranslation,
 } from '@payloadcms/ui'
-import {
-  getFormState,
-  handleBackToDashboard,
-  handleGoBack,
-  handleTakeOver,
-} from '@payloadcms/ui/shared'
+import { handleBackToDashboard, handleGoBack, handleTakeOver } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
@@ -55,13 +52,11 @@ type Props = {
 }
 
 const PreviewView: React.FC<Props> = ({
-  apiRoute,
   collectionConfig,
   config,
   fields,
   globalConfig,
   schemaPath,
-  serverURL,
 }) => {
   const {
     id,
@@ -92,6 +87,8 @@ const PreviewView: React.FC<Props> = ({
     updateDocumentEditor,
   } = useDocumentInfo()
 
+  const { payloadServerAction } = useServerActions()
+
   const operation = id ? 'update' : 'create'
 
   const {
@@ -101,7 +98,7 @@ const PreviewView: React.FC<Props> = ({
     },
   } = useConfig()
   const router = useRouter()
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const { previewWindowType } = useLivePreviewContext()
   const { refreshCookieAsync, user } = useAuth()
   const { reportUpdate } = useDocumentEvents()
@@ -180,21 +177,26 @@ const PreviewView: React.FC<Props> = ({
 
       const docPreferences = await getDocPreferences()
 
-      const { lockedState, state } = await getFormState({
-        apiRoute,
-        body: {
+      const { lockedState, state } = (await payloadServerAction({
+        action: 'form-state',
+        args: {
           id,
           collectionSlug,
           docPreferences,
           formState: prevFormState,
           globalSlug,
+          language: i18n.language,
           operation,
           returnLockStatus: isLockingEnabled ? true : false,
           schemaPath,
           updateLastEdited,
         },
-        serverURL,
-      })
+      })) as {
+        lockedState: {
+          user: ClientUser
+        }
+        state: FormState
+      } // TODO: infer the return type
 
       setDocumentIsLocked(true)
 
@@ -223,8 +225,6 @@ const PreviewView: React.FC<Props> = ({
     [
       collectionSlug,
       globalSlug,
-      serverURL,
-      apiRoute,
       id,
       isLockingEnabled,
       lastUpdateTime,
@@ -234,6 +234,8 @@ const PreviewView: React.FC<Props> = ({
       setCurrentEditor,
       setDocumentIsLocked,
       user,
+      payloadServerAction,
+      i18n,
     ],
   )
 

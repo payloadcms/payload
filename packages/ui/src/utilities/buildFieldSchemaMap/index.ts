@@ -1,4 +1,4 @@
-import type { I18n } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type { Field, SanitizedConfig } from 'payload'
 
 import { confirmPassword, password } from 'payload/shared'
@@ -9,7 +9,7 @@ import { traverseFields } from './traverseFields.js'
 
 export const buildFieldSchemaMap = (args: {
   config: SanitizedConfig
-  i18n: I18n
+  i18n: I18nClient
 }): FieldSchemaMap => {
   const { config, i18n } = args
 

@@ -1,15 +1,19 @@
 import type {
   ClientUser,
+  Data,
   DocumentPreferences,
   Field,
   FormState,
+  Payload,
   PayloadRequest,
+  SanitizedConfig,
   TypeWithID,
+  User,
 } from 'payload'
 
+import { type I18nClient, initI18n, type SupportedLanguages } from '@payloadcms/translations'
 import { reduceFieldsToValues } from 'payload/shared'
 
-import type { BuildFormStateArgs } from '../forms/buildStateFromSchema/index.js'
 import type { FieldSchemaMap } from './buildFieldSchemaMap/types.js'
 
 import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
@@ -21,45 +25,105 @@ if (!cached) {
   cached = global._payload_fieldSchemaMap = null
 }
 
-export const getFieldSchemaMap = (req: PayloadRequest): FieldSchemaMap => {
+export const getFieldSchemaMap = (args: {
+  config: SanitizedConfig
+  i18n: I18nClient
+}): FieldSchemaMap => {
+  const { config, i18n } = args
+
   if (cached && process.env.NODE_ENV !== 'development') {
     return cached
   }
 
   cached = buildFieldSchemaMap({
-    config: req.payload.config,
-    i18n: req.i18n,
+    config,
+    i18n,
   })
 
   return cached
 }
 
-export const buildFormState = async ({
-  req,
-}: {
-  req: PayloadRequest
-}): Promise<{
+export type BuildFormStateArgs = {
+  collectionSlug?: string
+  config: SanitizedConfig
+  data?: Data
+  docPreferences?: DocumentPreferences
+  formState?: FormState
+  globalSlug?: string
+  i18n?: I18nClient
+  id?: number | string
+  /*
+    If not i18n was passed, the language can be passed to init i18n
+  */
+  language?: keyof SupportedLanguages
+  locale?: string
+  operation?: 'create' | 'update'
+  payload: Payload
+  returnLockStatus?: boolean
+  schemaPath: string
+  updateLastEdited?: boolean
+  user: User
+}
+
+export const buildFormState = async (
+  args: BuildFormStateArgs,
+): Promise<{
   lockedState?: { isLocked: boolean; user: ClientUser | number | string }
   state: FormState
 }> => {
-  const reqData: BuildFormStateArgs = (req.data || {}) as BuildFormStateArgs
   const {
+    id: idFromArgs,
     collectionSlug,
+    config,
+    data: dataFromArgs,
+    docPreferences: docPreferencesFromArgs,
     formState,
     globalSlug,
+    i18n: i18nFromArgs,
+    language,
     locale,
     operation,
+    payload,
     returnLockStatus,
     schemaPath,
     updateLastEdited,
-  } = reqData
+    user,
+  } = args
 
-  const incomingUserSlug = req.user?.collection
-  const adminUserSlug = req.payload.config.admin.user
+  if (!config) {
+    throw new Error('No config provided')
+  }
+
+  if (!payload) {
+    throw new Error('No Payload instance provided')
+  }
+
+  if (!user) {
+    throw new Error('No user provided')
+  }
+
+  let i18n = i18nFromArgs
+
+  if (!i18n) {
+    i18n = await initI18n({
+      config: config.i18n,
+      context: 'client',
+      language: language || config.i18n.fallbackLanguage,
+    })
+  }
+
+  const req = {
+    i18n,
+    payload,
+  } as PayloadRequest
+
+  const incomingUserSlug = user?.collection
+
+  const adminUserSlug = config.admin.user
 
   // If we have a user slug, test it against the functions
   if (incomingUserSlug) {
-    const adminAccessFunction = req.payload.collections[incomingUserSlug].config.access?.admin
+    const adminAccessFunction = payload.collections[incomingUserSlug].config.access?.admin
 
     // Run the admin access function from the config if it exists
     if (adminAccessFunction) {
@@ -73,7 +137,7 @@ export const buildFormState = async ({
       throw new Error('Unauthorized')
     }
   } else {
-    const hasUsers = await req.payload.find({
+    const hasUsers = await payload.find({
       collection: adminUserSlug,
       depth: 0,
       limit: 1,
@@ -85,18 +149,21 @@ export const buildFormState = async ({
     }
   }
 
-  const fieldSchemaMap = getFieldSchemaMap(req)
+  const fieldSchemaMap = getFieldSchemaMap({
+    config,
+    i18n,
+  })
 
-  const id = collectionSlug ? reqData.id : undefined
+  const id = collectionSlug ? idFromArgs : undefined
   const schemaPathSegments = schemaPath && schemaPath.split('.')
 
   let fieldSchema: Field[]
 
   if (schemaPathSegments && schemaPathSegments.length === 1) {
-    if (req.payload.collections[schemaPath]) {
-      fieldSchema = req.payload.collections[schemaPath].config.fields
+    if (payload.collections[schemaPath]) {
+      fieldSchema = payload.collections[schemaPath].config.fields
     } else {
-      fieldSchema = req.payload.config.globals.find((global) => global.slug === schemaPath)?.fields
+      fieldSchema = payload.config.globals.find((global) => global.slug === schemaPath)?.fields
     }
   } else if (fieldSchemaMap.has(schemaPath)) {
     fieldSchema = fieldSchemaMap.get(schemaPath)
@@ -106,8 +173,8 @@ export const buildFormState = async ({
     throw new Error(`Could not find field schema for given path "${schemaPath}"`)
   }
 
-  let docPreferences = reqData.docPreferences
-  let data = reqData.data
+  let docPreferences = docPreferencesFromArgs
+  let data = dataFromArgs
 
   const promises: {
     data?: Promise<void>
@@ -131,7 +198,7 @@ export const buildFormState = async ({
 
     if (preferencesKey) {
       const fetchPreferences = async () => {
-        const preferencesResult = (await req.payload.find({
+        const preferencesResult = (await payload.find({
           collection: 'payload-preferences',
           depth: 0,
           limit: 1,
@@ -144,12 +211,12 @@ export const buildFormState = async ({
               },
               {
                 'user.relationTo': {
-                  equals: req.user.collection,
+                  equals: user.collection,
                 },
               },
               {
                 'user.value': {
-                  equals: req.user.id,
+                  equals: user.id,
                 },
               },
             ],
@@ -179,7 +246,7 @@ export const buildFormState = async ({
       let resolvedData: Record<string, unknown> | TypeWithID
 
       if (collectionSlug && id) {
-        resolvedData = await req.payload.findByID({
+        resolvedData = await payload.findByID({
           id,
           collection: collectionSlug,
           depth: 0,
@@ -187,19 +254,19 @@ export const buildFormState = async ({
           fallbackLocale: null,
           locale,
           overrideAccess: false,
-          user: req.user,
+          user,
         })
       }
 
       if (globalSlug && schemaPath === globalSlug) {
-        resolvedData = await req.payload.findGlobal({
+        resolvedData = await payload.findGlobal({
           slug: globalSlug,
           depth: 0,
           draft: true,
           fallbackLocale: null,
           locale,
           overrideAccess: false,
-          user: req.user,
+          user,
         })
       }
 
@@ -225,12 +292,12 @@ export const buildFormState = async ({
 
   // Maintain form state of auth / upload fields
   if (collectionSlug && formState) {
-    if (req.payload.collections[collectionSlug]?.config?.upload && formState.file) {
+    if (payload.collections[collectionSlug]?.config?.upload && formState.file) {
       result.file = formState.file
     }
   }
 
-  if (returnLockStatus && req.user && (id || globalSlug)) {
+  if (returnLockStatus && user && (id || globalSlug)) {
     let lockedDocumentQuery
 
     if (collectionSlug) {
@@ -247,7 +314,7 @@ export const buildFormState = async ({
     }
 
     if (lockedDocumentQuery) {
-      const lockedDocument = await req.payload.find({
+      const lockedDocument = await payload.find({
         collection: 'payload-locked-documents',
         depth: 1,
         limit: 1,
@@ -262,7 +329,7 @@ export const buildFormState = async ({
         }
 
         if (updateLastEdited) {
-          await req.payload.db.updateOne({
+          await payload.db.updateOne({
             id: lockedDocument.docs[0].id,
             collection: 'payload-locked-documents',
             data: {},
@@ -273,7 +340,7 @@ export const buildFormState = async ({
         return { lockedState, state: result }
       } else {
         // If no lock document exists, create it
-        await req.payload.db.create({
+        await payload.db.create({
           collection: 'payload-locked-documents',
           data: {
             document: collectionSlug
@@ -284,8 +351,8 @@ export const buildFormState = async ({
               : undefined,
             globalSlug: globalSlug ? globalSlug : undefined,
             user: {
-              relationTo: [req.user.collection],
-              value: req.user.id,
+              relationTo: [user.collection],
+              value: user.id,
             },
           },
           req,
@@ -293,7 +360,7 @@ export const buildFormState = async ({
 
         const lockedState = {
           isLocked: true,
-          user: req.user,
+          user,
         }
 
         return { lockedState, state: result }

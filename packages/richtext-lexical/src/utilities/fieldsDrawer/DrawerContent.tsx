@@ -5,12 +5,12 @@ import {
   Form,
   FormSubmit,
   RenderFields,
-  useConfig,
+  useAuth,
   useDocumentInfo,
   useFieldProps,
+  useServerActions,
   useTranslation,
 } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
@@ -26,14 +26,18 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   schemaFieldsPathOverride,
   schemaPathSuffix,
 }) => {
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const { id } = useDocumentInfo()
   const { schemaPath } = useFieldProps()
-  const { config } = useConfig()
+  const { user } = useAuth()
+
   const [initialState, setInitialState] = useState<false | FormState>(false)
+
   const {
     field: { richTextComponentMap },
   } = useEditorConfigContext()
+
+  const { payloadServerAction } = useServerActions()
 
   const componentMapRenderedFieldsPath = `lexical_internal_feature.${featureKey}.fields${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
   const schemaFieldsPath =
@@ -45,40 +49,42 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
+      const { state } = (await payloadServerAction({
+        action: 'form-state',
+        args: {
           id: id!,
           data: data ?? {},
+          language: i18n.language,
           operation: 'update',
           schemaPath: schemaFieldsPath,
+          user,
         },
-        serverURL: config.serverURL,
-      }) // Form State
+      })) as { state: FormState } // TODO: infer the return type
 
       setInitialState(state)
     }
 
     void awaitInitialState()
-  }, [config.routes.api, config.serverURL, schemaFieldsPath, id, data])
+  }, [schemaFieldsPath, id, data, payloadServerAction, user, i18n])
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
+      const { state } = (await payloadServerAction({
+        action: 'form-state',
+        args: {
           id: id!,
           formState: prevFormState,
+          language: i18n.language,
           operation: 'update',
           schemaPath: schemaFieldsPath,
+          user,
         },
-        serverURL: config.serverURL,
-      })
+      })) as { state: FormState } // TODO: infer the return type
 
       return state
     },
 
-    [config.routes.api, config.serverURL, schemaFieldsPath, id],
+    [schemaFieldsPath, id, payloadServerAction, user, i18n],
   )
 
   if (initialState === false) {

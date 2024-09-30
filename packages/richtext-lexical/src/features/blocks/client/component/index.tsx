@@ -7,10 +7,11 @@ import {
   RenderComponent,
   SectionTitle,
   ShimmerEffect,
-  useConfig,
+  useAuth,
   useDocumentInfo,
   useFieldProps,
   useFormSubmitted,
+  useServerActions,
   useTranslation,
 } from '@payloadcms/ui'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
@@ -19,7 +20,6 @@ const baseClass = 'lexical-block'
 import type { BlocksFieldClient, FormState } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { getFormState } from '@payloadcms/ui/shared'
 import { v4 as uuid } from 'uuid'
 
 import type { BlockFields } from '../../server/nodes/BlocksNode.js'
@@ -36,13 +36,16 @@ type Props = {
 
 export const BlockComponent: React.FC<Props> = (props) => {
   const { formData, nodeKey } = props
-  const { config } = useConfig()
   const submitted = useFormSubmitted()
   const { id } = useDocumentInfo()
+  const { user } = useAuth()
   const { path, schemaPath } = useFieldProps()
   const { field: parentLexicalRichTextField } = useEditorConfigContext()
 
+  const { payloadServerAction } = useServerActions()
+
   const [initialState, setInitialState] = useState<false | FormState>(false)
+
   const {
     field: { richTextComponentMap },
   } = useEditorConfigContext()
@@ -54,19 +57,22 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const clientBlock = blocksField.blocks.find((block) => block.slug === formData.blockType)
 
+  const { i18n } = useTranslation()
+
   // Field Schema
   useEffect(() => {
     const awaitInitialState = async () => {
-      const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
+      const { state } = (await payloadServerAction({
+        action: 'form-state',
+        args: {
           id,
           data: formData,
+          language: i18n.language,
           operation: 'update',
           schemaPath: schemaFieldsPath,
+          user,
         },
-        serverURL: config.serverURL,
-      })
+      })) as { state: FormState } // TODO: infer the return type
 
       if (state) {
         state.blockName = {
@@ -83,20 +89,21 @@ export const BlockComponent: React.FC<Props> = (props) => {
     if (formData) {
       void awaitInitialState()
     }
-  }, [config.routes.api, config.serverURL, schemaFieldsPath, id]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
+  }, [payloadServerAction, schemaFieldsPath, id, user, i18n]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state: formState } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
+      const { state: formState } = (await payloadServerAction({
+        action: 'form-state',
+        args: {
           id,
           formState: prevFormState,
+          language: i18n.language,
           operation: 'update',
           schemaPath: schemaFieldsPath,
+          user,
         },
-        serverURL: config.serverURL,
-      })
+      })) as { state: FormState } // TODO: infer the return type
 
       formState.blockName = {
         initialValue: '',
@@ -108,9 +115,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
       return formState
     },
 
-    [config.routes.api, config.serverURL, id, schemaFieldsPath, formData.blockName],
+    [id, schemaFieldsPath, formData.blockName, payloadServerAction, user, i18n],
   )
-  const { i18n } = useTranslation()
 
   const classNames = [`${baseClass}__row`, `${baseClass}__row--no-errors`].filter(Boolean).join(' ')
 

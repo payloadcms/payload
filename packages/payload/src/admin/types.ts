@@ -3,6 +3,7 @@ import type React from 'react'
 import type { PayloadComponent } from '../config/types.js'
 import type { JsonObject } from '../types/index.js'
 
+export type { PayloadServerAction } from './actions/index.js'
 export type { CellComponentProps, DefaultCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
 export type { DayPickerProps, SharedProps, TimePickerProps } from './elements/DatePicker.js'
@@ -16,6 +17,7 @@ export type {
   DocumentTabConfig,
   DocumentTabProps,
 } from './elements/Tab.js'
+
 export type { CustomUpload } from './elements/Upload.js'
 
 export type {
@@ -342,16 +344,6 @@ export type {
   RichTextHooks,
 } from './RichText.js'
 
-export type {
-  AdminViewComponent,
-  AdminViewConfig,
-  AdminViewProps,
-  EditViewProps,
-  InitPageResult,
-  ServerSideEditViewProps,
-  VisibleEntities,
-} from './views/types.js'
-
 export type MappedServerComponent<TComponentClientProps extends JsonObject = JsonObject> = {
   Component: React.ComponentType<TComponentClientProps>
   props?: Partial<any>
@@ -397,3 +389,13 @@ export type CreateMappedComponent = {
     identifier: string,
   ): MappedComponent<T>[]
 }
+
+export type {
+  AdminViewComponent,
+  AdminViewConfig,
+  AdminViewProps,
+  EditViewProps,
+  InitPageResult,
+  ServerSideEditViewProps,
+  VisibleEntities,
+} from './views/types.js'

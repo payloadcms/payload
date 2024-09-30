@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, DocumentPermissions } from 'payload'
+import type { ClientCollectionConfig, DocumentPermissions, FormState } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { useCallback } from 'react'
@@ -10,15 +10,17 @@ import type { EditFormProps } from './types.js'
 import { Form, useForm } from '../../../forms/Form/index.js'
 import { type FormProps } from '../../../forms/Form/types.js'
 import { WatchChildErrors } from '../../../forms/WatchChildErrors/index.js'
+import { useAuth } from '../../../providers/Auth/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { RenderComponent } from '../../../providers/Config/RenderComponent.js'
 import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../../providers/Operation/index.js'
+import { useServerActions } from '../../../providers/ServerActions/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 import { useUploadEdits } from '../../../providers/UploadEdits/index.js'
 import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
-import { getFormState } from '../../../utilities/getFormState.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
 import { Upload } from '../../Upload/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
@@ -49,10 +51,15 @@ export function EditForm({ submitted }: EditFormProps) {
     onSave: onSaveFromContext,
   } = useDocumentInfo()
 
+  const { i18n } = useTranslation()
+
+  const { payloadServerAction } = useServerActions()
+
+  const { user } = useAuth()
+
   const {
     config: {
-      routes: { admin: adminRoute, api: apiRoute },
-      serverURL,
+      routes: { admin: adminRoute },
     },
     getEntityConfig,
   } = useConfig()
@@ -114,21 +121,22 @@ export function EditForm({ submitted }: EditFormProps) {
   const onChange: NonNullable<FormProps['onChange']>[0] = useCallback(
     async ({ formState: prevFormState }) => {
       const docPreferences = await getDocPreferences()
-      const { state: newFormState } = await getFormState({
-        apiRoute,
-        body: {
+      const { state: newFormState } = (await payloadServerAction({
+        action: 'form-state',
+        args: {
           collectionSlug,
           docPreferences,
           formState: prevFormState,
+          language: i18n.language,
           operation: 'create',
           schemaPath,
+          user,
         },
-        serverURL,
-      })
+      })) as { state: FormState } // TODO: infer the return type
 
       return newFormState
     },
-    [apiRoute, collectionSlug, schemaPath, getDocPreferences, serverURL],
+    [collectionSlug, schemaPath, getDocPreferences, payloadServerAction, user, i18n],
   )
 
   return (

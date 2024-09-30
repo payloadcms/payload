@@ -1,20 +1,21 @@
 'use client'
 
 import type { FormProps } from '@payloadcms/ui'
+import type { FormState } from 'payload'
 
 import {
   Drawer,
   Form,
   FormSubmit,
   RenderFields,
-  useConfig,
+  useAuth,
   useDocumentInfo,
   useEditDepth,
   useFieldProps,
   useHotkey,
+  useServerActions,
   useTranslation,
 } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
 import React, { useCallback, useRef } from 'react'
 
 import type { Props } from './types.js'
@@ -30,29 +31,33 @@ export const LinkDrawer: React.FC<Props> = ({
   handleModalSubmit,
   initialState,
 }) => {
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const { schemaPath } = useFieldProps()
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
   const { id } = useDocumentInfo()
-  const { config } = useConfig()
+
+  const { user } = useAuth()
+
+  const { payloadServerAction } = useServerActions()
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
+      const { state } = (await payloadServerAction({
+        action: 'form-state',
+        args: {
           id,
           formState: prevFormState,
+          language: i18n.language,
           operation: 'update',
           schemaPath: fieldMapPath,
+          user,
         },
-        serverURL: config.serverURL,
-      })
+      })) as { state: FormState } // TODO: infer the return type
 
       return state
     },
 
-    [config.routes.api, config.serverURL, fieldMapPath, id],
+    [fieldMapPath, id, payloadServerAction, user, i18n],
   )
 
   return (

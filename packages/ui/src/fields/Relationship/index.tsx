@@ -418,7 +418,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   useIgnoredEffect(
     () => {
       // If the menu is open while filterOptions changes
-      // due to latency of getFormState and fast clicking into this field,
+      // due to latency of form state and fast clicking into this field,
       // re-fetch options
       if (hasLoadedFirstPageRef.current && menuIsOpen) {
         setIsLoading(true)

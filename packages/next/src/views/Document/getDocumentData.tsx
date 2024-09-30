@@ -1,9 +1,11 @@
 import type {
   Data,
   FormState,
+  ImportMap,
   Locale,
   PayloadRequest,
   SanitizedCollectionConfig,
+  SanitizedConfig,
   SanitizedGlobalConfig,
 } from 'payload'
 
@@ -12,8 +14,10 @@ import { reduceFieldsToValues } from 'payload/shared'
 
 export const getDocumentData = async (args: {
   collectionConfig?: SanitizedCollectionConfig
+  config: SanitizedConfig
   globalConfig?: SanitizedGlobalConfig
   id?: number | string
+  importMap: ImportMap
   locale: Locale
   req: PayloadRequest
   schemaPath?: string
@@ -21,23 +25,30 @@ export const getDocumentData = async (args: {
   data: Data
   formState: FormState
 }> => {
-  const { id, collectionConfig, globalConfig, locale, req, schemaPath: schemaPathFromProps } = args
+  const {
+    id,
+    collectionConfig,
+    config,
+    globalConfig,
+    locale,
+    req,
+    schemaPath: schemaPathFromProps,
+  } = args
 
   const schemaPath = schemaPathFromProps || collectionConfig?.slug || globalConfig?.slug
 
   try {
     const { state: formState } = await buildFormState({
-      req: {
-        ...req,
-        data: {
-          id,
-          collectionSlug: collectionConfig?.slug,
-          globalSlug: globalConfig?.slug,
-          locale: locale?.code,
-          operation: (collectionConfig && id) || globalConfig ? 'update' : 'create',
-          schemaPath,
-        },
-      },
+      id,
+      collectionSlug: collectionConfig?.slug,
+      config,
+      globalSlug: globalConfig?.slug,
+      i18n: req.i18n,
+      locale: locale?.code,
+      operation: (collectionConfig && id) || globalConfig ? 'update' : 'create',
+      payload: req.payload,
+      schemaPath,
+      user: req.user,
     })
 
     const data = reduceFieldsToValues(formState, true)

@@ -1,7 +1,7 @@
 'use client'
 
 import type { FormProps } from '@payloadcms/ui'
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, FormState } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -14,9 +14,9 @@ import {
   useDocumentInfo,
   useLocale,
   useModal,
+  useServerActions,
   useTranslation,
 } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
 import { deepCopyObject } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Transforms } from 'slate'
@@ -43,6 +43,9 @@ export const UploadDrawer: React.FC<{
   const { user } = useAuth()
   const { closeModal } = useModal()
   const { id, collectionSlug } = useDocumentInfo()
+
+  const { payloadServerAction } = useServerActions()
+
   const [initialState, setInitialState] = useState({})
   const {
     field: { richTextComponentMap },
@@ -71,17 +74,18 @@ export const UploadDrawer: React.FC<{
     const data = deepCopyObject(element?.fields || {})
 
     const awaitInitialState = async () => {
-      const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
+      const { state } = (await payloadServerAction({
+        action: 'form-state',
+        args: {
           id,
           collectionSlug,
           data,
+          language: i18n.language,
           operation: 'update',
           schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
+          user,
         },
-        serverURL: config.serverURL,
-      })
+      })) as { state: FormState } // TODO: infer the return type
 
       setInitialState(state)
     }
@@ -97,25 +101,28 @@ export const UploadDrawer: React.FC<{
     id,
     schemaPath,
     relatedCollection.slug,
+    payloadServerAction,
+    i18n,
   ])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
+      const { state } = (await payloadServerAction({
+        action: 'form-state',
+        args: {
           id,
           formState: prevFormState,
+          language: i18n.language,
           operation: 'update',
           schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
+          user,
         },
-        serverURL: config.serverURL,
-      })
+      })) as { state: FormState } // TODO: infer the return type
 
       return state
     },
 
-    [config.routes.api, config.serverURL, relatedCollection.slug, schemaPath, id],
+    [relatedCollection.slug, schemaPath, id, payloadServerAction, user, i18n],
   )
 
   return (

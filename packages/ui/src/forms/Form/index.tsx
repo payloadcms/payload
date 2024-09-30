@@ -27,9 +27,9 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
+import { useServerActions } from '../../providers/ServerActions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
-import { getFormState } from '../../utilities/getFormState.js'
 import {
   FormContext,
   FormFieldsContext,
@@ -70,6 +70,8 @@ export const Form: React.FC<FormProps> = (props) => {
     waitForAutocomplete,
   } = props
 
+  const { payloadServerAction } = useServerActions()
+
   const method = 'method' in props ? props?.method : undefined
 
   const router = useRouter()
@@ -80,10 +82,6 @@ export const Form: React.FC<FormProps> = (props) => {
   const operation = useOperation()
 
   const { config } = useConfig()
-  const {
-    routes: { api: apiRoute },
-    serverURL,
-  } = config
 
   const [disabled, setDisabled] = useState(disabledFromProps || false)
   const [isMounted, setIsMounted] = useState(false)
@@ -451,24 +449,25 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const reset = useCallback(
     async (data: unknown) => {
-      const { state: newState } = await getFormState({
-        apiRoute,
-        body: {
+      const { state: newState } = (await payloadServerAction({
+        action: 'form-state',
+        args: {
           id,
           collectionSlug,
           data,
           globalSlug,
+          language: i18n.language,
           operation,
           schemaPath: collectionSlug || globalSlug,
+          user,
         },
-        serverURL,
-      })
+      })) as { state: FormState } // TODO: infer the return type
 
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state: newState })
     },
-    [apiRoute, collectionSlug, dispatchFields, globalSlug, id, operation, serverURL],
+    [collectionSlug, dispatchFields, globalSlug, id, operation, user, payloadServerAction, i18n],
   )
 
   const replaceState = useCallback(
@@ -482,19 +481,21 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const getFieldStateBySchemaPath = useCallback(
     async ({ data, schemaPath }) => {
-      const { state: fieldSchema } = await getFormState({
-        apiRoute,
-        body: {
+      const { state: fieldSchema } = (await payloadServerAction({
+        action: 'form-state',
+        args: {
           collectionSlug,
           data,
           globalSlug,
+          language: i18n.language,
           schemaPath,
+          user,
         },
-        serverURL,
-      })
+      })) as { state: FormState } // TODO: infer the return type
+
       return fieldSchema
     },
-    [apiRoute, collectionSlug, globalSlug, serverURL],
+    [collectionSlug, globalSlug, payloadServerAction, user, i18n],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(

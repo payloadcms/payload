@@ -19,9 +19,9 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
+import { useServerActions } from '../../providers/ServerActions/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
-import { getFormState } from '../../utilities/getFormState.js'
 import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
 import { isEditing as getIsEditing } from '../../utilities/isEditing.js'
 import { useAuth } from '../Auth/index.js'
@@ -55,6 +55,8 @@ const DocumentInfo: React.FC<
     onSave: onSaveFromProps,
   } = props
 
+  const { payloadServerAction } = useServerActions()
+
   const {
     config: {
       admin: { dateFormat },
@@ -64,6 +66,8 @@ const DocumentInfo: React.FC<
       serverURL,
     },
   } = useConfig()
+
+  const { user } = useAuth()
 
   const collectionConfig = collections.find((c) => c.slug === collectionSlug)
   const globalConfig = globals.find((g) => g.slug === globalSlug)
@@ -488,20 +492,21 @@ const DocumentInfo: React.FC<
 
       const newData = collectionSlug ? json.doc : json.result
 
-      const { state: newState } = await getFormState({
-        apiRoute: api,
-        body: {
+      const { state: newState } = (await payloadServerAction({
+        action: 'form-state',
+        args: {
           id,
           collectionSlug,
           data: newData,
           docPreferences,
           globalSlug,
+          language: i18n.language,
           locale,
           operation,
           schemaPath: collectionSlug || globalSlug,
+          user,
         },
-        serverURL,
-      })
+      })) as { state: FormState }
 
       setInitialState(newState)
       setData(newData)
@@ -509,7 +514,6 @@ const DocumentInfo: React.FC<
       await getDocPermissions(newData)
     },
     [
-      api,
       collectionSlug,
       getDocPreferences,
       globalSlug,
@@ -517,8 +521,10 @@ const DocumentInfo: React.FC<
       operation,
       locale,
       onSaveFromProps,
-      serverURL,
       getDocPermissions,
+      user,
+      payloadServerAction,
+      i18n,
     ],
   )
 
@@ -540,20 +546,20 @@ const DocumentInfo: React.FC<
         setIsLoading(true)
 
         try {
-          const { state: result } = await getFormState({
-            apiRoute: api,
-            body: {
+          const { state: result } = (await payloadServerAction({
+            action: 'form-state',
+            args: {
               id,
               collectionSlug,
               globalSlug,
+              language: i18n.language,
               locale,
               operation,
               schemaPath: collectionSlug || globalSlug,
+              user,
             },
-            onError: onLoadError,
-            serverURL,
-            signal: abortController.signal,
-          })
+          })) as { state: FormState }
+
           const data = reduceFieldsToValues(result, true)
           setData(data)
 
@@ -585,6 +591,7 @@ const DocumentInfo: React.FC<
       }
     }
   }, [
+    i18n,
     api,
     operation,
     collectionSlug,
@@ -596,6 +603,8 @@ const DocumentInfo: React.FC<
     initialDataFromProps,
     initialStateFromProps,
     getDocPermissions,
+    payloadServerAction,
+    user,
   ])
 
   useEffect(() => {

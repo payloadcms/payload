@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, ClientGlobalConfig, ClientUser } from 'payload'
+import type { ClientCollectionConfig, ClientGlobalConfig, ClientUser, FormState } from 'payload'
 
 import {
   DocumentControls,
@@ -15,11 +15,11 @@ import {
   useDocumentEvents,
   useDocumentInfo,
   useEditDepth,
+  useServerActions,
   useUploadEdits,
 } from '@payloadcms/ui'
 import {
   formatAdminURL,
-  getFormState,
   handleBackToDashboard,
   handleGoBack,
   handleTakeOver,
@@ -78,12 +78,14 @@ export const DefaultEditView: React.FC = () => {
   } = useDocumentInfo()
 
   const { refreshCookieAsync, user } = useAuth()
+
+  const { payloadServerAction } = useServerActions()
+
   const {
     config,
     config: {
       admin: { user: userSlug },
-      routes: { admin: adminRoute, api: apiRoute },
-      serverURL,
+      routes: { admin: adminRoute },
     },
     getEntityConfig,
   } = useConfig()
@@ -240,9 +242,9 @@ export const DefaultEditView: React.FC = () => {
 
       const docPreferences = await getDocPreferences()
 
-      const { lockedState, state } = await getFormState({
-        apiRoute,
-        body: {
+      const { lockedState, state } = (await payloadServerAction({
+        action: 'form-state',
+        args: {
           id,
           collectionSlug,
           docPreferences,
@@ -252,9 +254,9 @@ export const DefaultEditView: React.FC = () => {
           returnLockStatus: isLockingEnabled ? true : false,
           schemaPath,
           updateLastEdited,
+          user,
         },
-        serverURL,
-      })
+      })) as { lockedState: any; state: FormState } // TODO: infer the return type
 
       setDocumentIsLocked(true)
 
@@ -281,20 +283,19 @@ export const DefaultEditView: React.FC = () => {
       return state
     },
     [
-      apiRoute,
       collectionSlug,
       schemaPath,
       getDocPreferences,
       globalSlug,
       id,
       operation,
-      serverURL,
       user,
       documentLockStateRef,
       setCurrentEditor,
       isLockingEnabled,
       setDocumentIsLocked,
       lastUpdateTime,
+      payloadServerAction,
     ],
   )
 
