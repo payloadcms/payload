@@ -20,18 +20,23 @@ export const Tenants: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    {
-      name: 'domains',
-      type: 'array',
-      fields: [
-        {
-          name: 'domain',
-          type: 'text',
-          required: true,
-        },
-      ],
-      index: true,
-    },
+    // The domains field allows you to associate one or more domains with a tenant.
+    // This is used to determine which tenant is associated with a specific domain,
+    // for example, 'abc.localhost.com' would match to 'Tenant 1'.
+
+    // Uncomment this field if you want to enable domain-based tenant handling.
+    // {
+    //   name: 'domains',
+    //   type: 'array',
+    //   fields: [
+    //     {
+    //       name: 'domain',
+    //       type: 'text',
+    //       required: true,
+    //     },
+    //   ],
+    //   index: true,
+    // },
     {
       name: 'slug',
       type: 'text',

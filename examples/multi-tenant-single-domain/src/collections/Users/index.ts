@@ -5,7 +5,7 @@ import { readAccess } from './access/read'
 import { updateAndDeleteAccess } from './access/updateAndDelete'
 import { externalUsersLogin } from './endpoints/externalUsersLogin'
 import { ensureUniqueUsername } from './hooks/ensureUniqueUsername'
-import { setCookieBasedOnDomain } from './hooks/setCookieBasedOnDomain'
+// import { setCookieBasedOnDomain } from './hooks/setCookieBasedOnDomain'
 
 const Users: CollectionConfig = {
   slug: 'users',
@@ -60,9 +60,14 @@ const Users: CollectionConfig = {
       index: true,
     },
   ],
-  hooks: {
-    afterLogin: [setCookieBasedOnDomain],
-  },
+  // The following hook sets a cookie based on the domain a user logs in from.
+  // It checks the domain and matches it to a tenant in the system, then sets
+  // a 'payload-tenant' cookie for that tenant.
+
+  // Uncomment this if you want to enable tenant-based cookie handling by domain.
+  // hooks: {
+  //   afterLogin: [setCookieBasedOnDomain],
+  // },
 }
 
 export default Users
