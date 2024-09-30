@@ -48,6 +48,10 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
           roles: ['tenant-admin'],
           tenant: tenant1.id,
         },
+        {
+          roles: ['tenant-admin'],
+          tenant: tenant2.id,
+        },
       ],
       username: 'tenant1',
     },
