@@ -10,8 +10,14 @@ import { getDocs } from '../../../_api/getDocs.js'
 import { Blocks } from '../../../_components/Blocks/index.js'
 import { Hero } from '../../../_components/Hero/index.js'
 import { RefreshRouteOnSave } from './RefreshRouteOnSave.js'
+type Args = {
+  params: Promise<{
+    slug?: string
+  }>
+}
 
-export default async function SSRPage({ params: { slug = '' } }) {
+export default async function SSRPage({ params: paramsPromise }: Args) {
+  const { slug = ' ' } = await paramsPromise
   const data = await getDoc<Page>({
     slug,
     collection: ssrPagesSlug,
