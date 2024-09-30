@@ -57,7 +57,6 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
           language: i18n.language,
           operation: 'update',
           schemaPath: schemaFieldsPath,
-          user,
         },
       })) as { state: FormState } // TODO: infer the return type
 
@@ -77,14 +76,13 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
           language: i18n.language,
           operation: 'update',
           schemaPath: schemaFieldsPath,
-          user,
         },
       })) as { state: FormState } // TODO: infer the return type
 
       return state
     },
 
-    [schemaFieldsPath, id, payloadServerAction, user, i18n],
+    [schemaFieldsPath, id, payloadServerAction, i18n],
   )
 
   if (initialState === false) {

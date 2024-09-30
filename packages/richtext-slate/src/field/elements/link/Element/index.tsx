@@ -109,7 +109,6 @@ export const LinkElement = () => {
           language: i18n.language,
           operation: 'update',
           schemaPath: fieldMapPath,
-          user,
         },
       })) as { state: FormState } // TODO: infer the return type
 

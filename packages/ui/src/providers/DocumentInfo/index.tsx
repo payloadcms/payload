@@ -504,7 +504,6 @@ const DocumentInfo: React.FC<
           locale,
           operation,
           schemaPath: collectionSlug || globalSlug,
-          user,
         },
       })) as { state: FormState }
 
@@ -522,7 +521,6 @@ const DocumentInfo: React.FC<
       locale,
       onSaveFromProps,
       getDocPermissions,
-      user,
       payloadServerAction,
       i18n,
     ],
@@ -556,7 +554,6 @@ const DocumentInfo: React.FC<
               locale,
               operation,
               schemaPath: collectionSlug || globalSlug,
-              user,
             },
           })) as { state: FormState }
 

@@ -459,7 +459,6 @@ export const Form: React.FC<FormProps> = (props) => {
           language: i18n.language,
           operation,
           schemaPath: collectionSlug || globalSlug,
-          user,
         },
       })) as { state: FormState } // TODO: infer the return type
 
@@ -467,7 +466,7 @@ export const Form: React.FC<FormProps> = (props) => {
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state: newState })
     },
-    [collectionSlug, dispatchFields, globalSlug, id, operation, user, payloadServerAction, i18n],
+    [collectionSlug, dispatchFields, globalSlug, id, operation, payloadServerAction, i18n],
   )
 
   const replaceState = useCallback(
@@ -489,13 +488,12 @@ export const Form: React.FC<FormProps> = (props) => {
           globalSlug,
           language: i18n.language,
           schemaPath,
-          user,
         },
       })) as { state: FormState } // TODO: infer the return type
 
       return fieldSchema
     },
-    [collectionSlug, globalSlug, payloadServerAction, user, i18n],
+    [collectionSlug, globalSlug, payloadServerAction, i18n],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(

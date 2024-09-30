@@ -52,13 +52,12 @@ export const CreateFirstUserClient: React.FC<{
           language: i18n.language,
           operation: 'create',
           schemaPath: `_${userSlug}.auth`,
-          user,
         },
       })) as { state: FormState } // TODO: infer the return type
 
       return state
     },
-    [userSlug, payloadServerAction, user, i18n],
+    [userSlug, payloadServerAction, i18n],
   )
 
   const handleFirstRegister = (data: { user: ClientUser }) => {

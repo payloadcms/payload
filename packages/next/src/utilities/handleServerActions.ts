@@ -17,9 +17,13 @@ type Args = {
   | { action: 'form-state'; args: BuildFormStateArgs }
 )
 
+const actions = {
+  'form-state': buildFormState,
+}
+
 export const handleServerActions = async (args: Args): Promise<unknown> => {
   const {
-    action,
+    action: actionKey,
     args: fnArgs,
     defaultArgs: { config: configPromise, importMap },
   } = args
@@ -37,14 +41,11 @@ export const handleServerActions = async (args: Args): Promise<unknown> => {
     payload,
   }
 
-  switch (action) {
-    case 'form-state': {
-      // @ts-expect-error TODO: enable ts `strictNullChecks` for this to properly infer the type
-      return buildFormState(augmentedArgs)
-    }
+  const action = actions[actionKey]
 
-    default: {
-      console.error(`Unknown Server Action: ${action}`) // eslint-disable-line no-console
-    }
+  if (!action) {
+    throw new Error(`Unknown Server Action: ${actionKey}`)
   }
+
+  return action(augmentedArgs)
 }

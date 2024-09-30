@@ -70,7 +70,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
           language: i18n.language,
           operation: 'update',
           schemaPath: schemaFieldsPath,
-          user,
         },
       })) as { state: FormState } // TODO: infer the return type
 
@@ -101,7 +100,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
           language: i18n.language,
           operation: 'update',
           schemaPath: schemaFieldsPath,
-          user,
         },
       })) as { state: FormState } // TODO: infer the return type
 
@@ -115,7 +113,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       return formState
     },
 
-    [id, schemaFieldsPath, formData.blockName, payloadServerAction, user, i18n],
+    [id, schemaFieldsPath, formData.blockName, payloadServerAction, i18n],
   )
 
   const classNames = [`${baseClass}__row`, `${baseClass}__row--no-errors`].filter(Boolean).join(' ')

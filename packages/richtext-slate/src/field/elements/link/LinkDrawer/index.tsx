@@ -8,7 +8,6 @@ import {
   Form,
   FormSubmit,
   RenderFields,
-  useAuth,
   useDocumentInfo,
   useEditDepth,
   useFieldProps,
@@ -36,8 +35,6 @@ export const LinkDrawer: React.FC<Props> = ({
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
   const { id } = useDocumentInfo()
 
-  const { user } = useAuth()
-
   const { payloadServerAction } = useServerActions()
 
   const onChange: FormProps['onChange'][0] = useCallback(
@@ -50,14 +47,13 @@ export const LinkDrawer: React.FC<Props> = ({
           language: i18n.language,
           operation: 'update',
           schemaPath: fieldMapPath,
-          user,
         },
       })) as { state: FormState } // TODO: infer the return type
 
       return state
     },
 
-    [fieldMapPath, id, payloadServerAction, user, i18n],
+    [fieldMapPath, id, payloadServerAction, i18n],
   )
 
   return (

@@ -83,7 +83,6 @@ export const UploadDrawer: React.FC<{
           language: i18n.language,
           operation: 'update',
           schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
-          user,
         },
       })) as { state: FormState } // TODO: infer the return type
 
@@ -115,14 +114,13 @@ export const UploadDrawer: React.FC<{
           language: i18n.language,
           operation: 'update',
           schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
-          user,
         },
       })) as { state: FormState } // TODO: infer the return type
 
       return state
     },
 
-    [relatedCollection.slug, schemaPath, id, payloadServerAction, user, i18n],
+    [relatedCollection.slug, schemaPath, id, payloadServerAction, i18n],
   )
 
   return (

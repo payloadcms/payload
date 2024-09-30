@@ -139,7 +139,6 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
             language: i18n.language,
             operation: 'update',
             schemaPath: slug,
-            user,
           },
         })) as { state: FormState } // TODO: infer the return type
 
@@ -161,13 +160,12 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
           language: i18n.language,
           operation: 'update',
           schemaPath: slug,
-          user,
         },
       })) as { state: FormState } // TODO: infer the return type
 
       return state
     },
-    [slug, payloadServerAction, user, i18n],
+    [slug, payloadServerAction, i18n],
   )
 
   if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {

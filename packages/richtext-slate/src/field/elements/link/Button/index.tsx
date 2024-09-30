@@ -3,7 +3,6 @@
 import type { FormState } from 'payload'
 
 import {
-  useAuth,
   useDrawerSlug,
   useFieldProps,
   useModal,
@@ -73,8 +72,6 @@ export const LinkButton: React.FC = () => {
   const drawerSlug = useDrawerSlug('rich-text-link')
   const { schemaPath } = useFieldProps()
 
-  const { user } = useAuth()
-
   const {
     field: { richTextComponentMap },
   } = fieldProps
@@ -105,7 +102,6 @@ export const LinkButton: React.FC = () => {
                   language: i18n.language,
                   operation: 'update',
                   schemaPath: `${schemaPath}.${linkFieldsSchemaPath}`,
-                  user,
                 },
               })) as { state: FormState } // TODO: infer the return type
 

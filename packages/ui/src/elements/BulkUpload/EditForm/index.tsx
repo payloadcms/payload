@@ -10,7 +10,6 @@ import type { EditFormProps } from './types.js'
 import { Form, useForm } from '../../../forms/Form/index.js'
 import { type FormProps } from '../../../forms/Form/types.js'
 import { WatchChildErrors } from '../../../forms/WatchChildErrors/index.js'
-import { useAuth } from '../../../providers/Auth/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { RenderComponent } from '../../../providers/Config/RenderComponent.js'
 import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
@@ -54,8 +53,6 @@ export function EditForm({ submitted }: EditFormProps) {
   const { i18n } = useTranslation()
 
   const { payloadServerAction } = useServerActions()
-
-  const { user } = useAuth()
 
   const {
     config: {
@@ -130,13 +127,12 @@ export function EditForm({ submitted }: EditFormProps) {
           language: i18n.language,
           operation: 'create',
           schemaPath,
-          user,
         },
       })) as { state: FormState } // TODO: infer the return type
 
       return newFormState
     },
-    [collectionSlug, schemaPath, getDocPreferences, payloadServerAction, user, i18n],
+    [collectionSlug, schemaPath, getDocPreferences, payloadServerAction, i18n],
   )
 
   return (

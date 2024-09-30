@@ -10,7 +10,6 @@ import { toast } from 'sonner'
 import type { State } from './reducer.js'
 
 import { fieldReducer } from '../../../forms/Form/fieldReducer.js'
-import { useAuth } from '../../../providers/Auth/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 import { useServerActions } from '../../../providers/ServerActions/index.js'
@@ -83,8 +82,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const { i18n, t } = useTranslation()
 
   const { payloadServerAction } = useServerActions()
-
-  const { user } = useAuth()
 
   const [hasSubmitted, setHasSubmitted] = React.useState(false)
   const [docPermissions, setDocPermissions] = React.useState<DocumentPermissions>()
@@ -166,7 +163,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             locale: code,
             operation: 'create',
             schemaPath: collectionSlug,
-            user,
           },
         })) as { state: FormState } // TODO: infer the return type
         initialStateRef.current = formStateWithoutFiles
@@ -175,7 +171,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         // swallow error
       }
     },
-    [code, collectionSlug, payloadServerAction, user, i18n],
+    [code, collectionSlug, payloadServerAction, i18n],
   )
 
   const setActiveIndex: FormsManagerContext['setActiveIndex'] = React.useCallback(

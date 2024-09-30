@@ -8,10 +8,10 @@ import type {
   PayloadRequest,
   SanitizedConfig,
   TypeWithID,
-  User,
 } from 'payload'
 
 import { type I18nClient, initI18n, type SupportedLanguages } from '@payloadcms/translations'
+import { headers as getHeaders } from 'next/headers.js'
 import { reduceFieldsToValues } from 'payload/shared'
 
 import type { FieldSchemaMap } from './buildFieldSchemaMap/types.js'
@@ -62,7 +62,6 @@ export type BuildFormStateArgs = {
   returnLockStatus?: boolean
   schemaPath: string
   updateLastEdited?: boolean
-  user: User
 }
 
 export const buildFormState = async (
@@ -87,16 +86,19 @@ export const buildFormState = async (
     returnLockStatus,
     schemaPath,
     updateLastEdited,
-    user,
   } = args
+
+  if (!payload) {
+    throw new Error('No Payload instance provided')
+  }
 
   if (!config) {
     throw new Error('No config provided')
   }
 
-  if (!payload) {
-    throw new Error('No Payload instance provided')
-  }
+  const headers = getHeaders()
+
+  const { user } = await payload.auth({ headers })
 
   if (!user) {
     throw new Error('No user provided')

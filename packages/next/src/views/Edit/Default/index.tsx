@@ -254,7 +254,6 @@ export const DefaultEditView: React.FC = () => {
           returnLockStatus: isLockingEnabled ? true : false,
           schemaPath,
           updateLastEdited,
-          user,
         },
       })) as { lockedState: any; state: FormState } // TODO: infer the return type
 
