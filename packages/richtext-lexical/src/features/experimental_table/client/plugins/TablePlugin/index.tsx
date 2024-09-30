@@ -118,7 +118,7 @@ export const TablePlugin: PluginComponent = () => {
         COMMAND_PRIORITY_EDITOR,
       ),
     )
-  }, [cellContext, editor, toggleModal])
+  }, [cellContext, drawerSlug, editor, toggleModal])
 
   return (
     <React.Fragment>
