@@ -48,7 +48,6 @@ export type UploadInputProps = {
   /**
    * Controls the visibility of the "Create new collection" button
    */
-  readonly allowNewUpload?: boolean
   readonly api?: string
   readonly className?: string
   readonly collection?: ClientCollectionConfig
@@ -80,7 +79,6 @@ export type UploadInputProps = {
 
 export function UploadInput(props: UploadInputProps) {
   const {
-    allowNewUpload,
     api,
     className,
     Description,
@@ -107,6 +105,7 @@ export function UploadInput(props: UploadInputProps) {
     value,
     width,
   } = props
+  const allowCreate = field?.admin?.allowCreate !== false
 
   const [populatedDocs, setPopulatedDocs] = React.useState<
     {
@@ -485,27 +484,33 @@ export function UploadInput(props: UploadInputProps) {
         ) : null}
 
         {showDropzone ? (
-          <Dropzone multipleFiles={hasMany} onChange={onLocalFileSelection}>
+          <Dropzone disabled={!allowCreate} multipleFiles={hasMany} onChange={onLocalFileSelection}>
             <div className={`${baseClass}__dropzoneContent`}>
               <div className={`${baseClass}__dropzoneContent__buttons`}>
-                <Button
-                  buttonStyle="pill"
-                  className={`${baseClass}__createNewToggler`}
-                  disabled={readOnly || !canCreate}
-                  onClick={() => {
-                    if (!readOnly) {
-                      if (hasMany) {
-                        onLocalFileSelection()
-                      } else {
-                        openCreateDocDrawer()
-                      }
-                    }
-                  }}
-                  size="small"
-                >
-                  {t('general:createNew')}
-                </Button>
-                <span className={`${baseClass}__dropzoneContent__orText`}>{t('general:or')}</span>
+                {allowCreate && (
+                  <>
+                    <Button
+                      buttonStyle="pill"
+                      className={`${baseClass}__createNewToggler`}
+                      disabled={readOnly || !canCreate}
+                      onClick={() => {
+                        if (!readOnly) {
+                          if (hasMany) {
+                            onLocalFileSelection()
+                          } else {
+                            openCreateDocDrawer()
+                          }
+                        }
+                      }}
+                      size="small"
+                    >
+                      {t('general:createNew')}
+                    </Button>
+                    <span className={`${baseClass}__dropzoneContent__orText`}>
+                      {t('general:or')}
+                    </span>
+                  </>
+                )}
                 <Button
                   buttonStyle="pill"
                   className={`${baseClass}__listToggler`}
@@ -518,15 +523,18 @@ export function UploadInput(props: UploadInputProps) {
 
                 <CreateDocDrawer onSave={onDocCreate} />
                 <ListDrawer
+                  allowCreate={allowCreate}
                   enableRowSelections={hasMany}
                   onBulkSelect={onListBulkSelect}
                   onSelect={onListSelect}
                 />
               </div>
 
-              <p className={`${baseClass}__dragAndDropText`}>
-                {t('general:or')} {t('upload:dragAndDrop')}
-              </p>
+              {allowCreate && (
+                <p className={`${baseClass}__dragAndDropText`}>
+                  {t('general:or')} {t('upload:dragAndDrop')}
+                </p>
+              )}
             </div>
           </Dropzone>
         ) : (
