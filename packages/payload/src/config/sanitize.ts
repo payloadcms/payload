@@ -67,13 +67,15 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       ...defaults.graphQL,
       ...incomingConfig?.graphQL,
     },
-    queues: {
-      ...defaults.queues,
-      ...incomingConfig?.queues,
+    jobs: {
+      ...defaults.jobs,
+      ...incomingConfig?.jobs,
       access: {
-        ...defaults.queues.access,
-        ...incomingConfig?.queues?.access,
+        ...defaults.jobs.access,
+        ...incomingConfig?.jobs?.access,
       },
+      tasks: incomingConfig?.jobs?.tasks || [],
+      workflows: incomingConfig?.jobs?.workflows || [],
     },
     routes: {
       ...defaults.routes,
@@ -160,11 +162,11 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   configWithDefaults.collections.push(getPreferencesCollection(config as unknown as Config))
   configWithDefaults.collections.push(migrationsCollection)
 
-  if (Array.isArray(configWithDefaults.queues?.jobs) && configWithDefaults.queues.jobs.length > 0) {
+  if (Array.isArray(configWithDefaults.jobs?.tasks) && configWithDefaults.jobs.tasks.length > 0) {
     let defaultJobsCollection = getDefaultJobsCollection(config as unknown as Config)
 
-    if (typeof configWithDefaults.queues.jobsCollectionOverrides === 'function') {
-      defaultJobsCollection = configWithDefaults.queues.jobsCollectionOverrides({
+    if (typeof configWithDefaults.jobs.jobsCollectionOverrides === 'function') {
+      defaultJobsCollection = configWithDefaults.jobs.jobsCollectionOverrides({
         defaultJobsCollection,
       })
     }

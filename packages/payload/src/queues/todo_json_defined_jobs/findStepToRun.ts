@@ -1,4 +1,4 @@
-import type { StepStatus } from './config/types.js'
+/*import type { StepStatus } from '../config/types.js'
 
 export const findStepToRun = (
   stepStatus: StepStatus,
@@ -14,3 +14,4 @@ export const findStepToRun = (
 
   return undefined // Return undefined if no step matches the criteria
 }
+*/

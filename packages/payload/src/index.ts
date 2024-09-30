@@ -97,6 +97,19 @@ export interface GeneratedTypes {
   globalsUntyped: {
     [slug: string]: JsonObject
   }
+  jobsUntyped: {
+    tasks: {
+      [slug: string]: {
+        input?: JsonObject
+        output?: JsonObject
+      }
+    }
+    workflows: {
+      [slug: string]: {
+        input: JsonObject
+      }
+    }
+  }
   localeUntyped: null | string
   userUntyped: User
 }
@@ -140,6 +153,10 @@ export type TypedUser = ResolveUserType<GeneratedTypes>
 // @ts-expect-error
 type ResolveAuthOperationsType<T> = 'auth' extends keyof T ? T['auth'] : T['authUntyped']
 export type TypedAuthOperations = ResolveAuthOperationsType<GeneratedTypes>
+
+// @ts-expect-error
+type ResolveJobOperationsType<T> = 'jobs' extends keyof T ? T['jobs'] : T['jobsUntyped']
+export type TypedJobs = ResolveJobOperationsType<GeneratedTypes>
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -1020,14 +1037,20 @@ export type {
 } from './preferences/types.js'
 export type {
   BaseJob,
-  JobConfig,
-  JobRunner,
-  JobRunnerArgs,
-  JobRunnerResult,
-  QueueConfig,
+  JobsConfig,
   RunJobAccess,
   RunJobAccessArgs,
-  StepConfig,
+  RunningJob,
+  RunTaskFunction,
+  TaskConfig,
+  TaskRunner,
+  TaskRunnerArgs,
+  TaskRunnerResult,
+  TaskType,
+  WorkflowConfig,
+  WorkflowControlFlow,
+  WorkflowTasksStatus,
+  WorkflowTypes,
 } from './queues/config/types.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'

@@ -13,6 +13,7 @@ export interface Config {
   collections: {
     posts: Post;
     users: User;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
     'payload-jobs': PayloadJob;
@@ -24,6 +25,22 @@ export interface Config {
   locale: null;
   user: User & {
     collection: 'users';
+  };
+  jobs?: {
+    tasks: {
+      UpdatePost: {
+        input: TaskUpdatePostInput;
+        output: TaskUpdatePostOutput;
+      };
+      UpdatePostStep2: {
+        input: TaskUpdatePostStep2Input;
+      };
+    };
+    workflows?: {
+      updatePost?: {
+        input: WorkflowupdatePostInput;
+      };
+    };
   };
 }
 export interface UserAuthOperations {
@@ -90,6 +107,29 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
@@ -128,7 +168,15 @@ export interface PayloadMigration {
  */
 export interface PayloadJob {
   id: string;
-  steps?: (UpdatePostStep1 | UpdatePostStep2)[] | null;
+  input?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   completedAt?: string | null;
   hasError?: boolean | null;
   error?:
@@ -143,7 +191,27 @@ export interface PayloadJob {
   log?:
     | {
         executedAt: string;
-        stepIndex: number;
+        completedAt: string;
+        taskSlug: 'UpdatePost' | 'UpdatePostStep2';
+        taskID: string;
+        input?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        output?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
         state: 'failed' | 'succeeded';
         error?:
           | {
@@ -157,7 +225,7 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  type: 'updatePost';
+  workflowSlug: 'updatePost';
   queue?: 'default' | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -167,25 +235,34 @@ export interface PayloadJob {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "UpdatePostStep1".
+ * via the `definition` "TaskUpdatePostInput".
  */
-export interface UpdatePostStep1 {
+export interface TaskUpdatePostInput {
   post: string | Post;
   message: string;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'step1';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "UpdatePostStep2".
+ * via the `definition` "TaskUpdatePostOutput".
  */
-export interface UpdatePostStep2 {
+export interface TaskUpdatePostOutput {
+  messageTwice: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskUpdatePostStep2Input".
+ */
+export interface TaskUpdatePostStep2Input {
+  post: string | Post;
+  messageTwice: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowupdatePostInput".
+ */
+export interface WorkflowupdatePostInput {
   post: string | Post;
   message: string;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'step2';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

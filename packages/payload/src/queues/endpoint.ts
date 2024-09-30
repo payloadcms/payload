@@ -1,13 +1,12 @@
 import type { Endpoint } from '../config/types.js'
-import type { RunJobsArgs } from './run.js'
 
-import { runJobs } from './run.js'
+import { runAllWorkflowsAndJobs, type RunJobsArgs } from './runAllWorkflowsAndJobs.js'
 
-export const runJobsEndpoint: Endpoint = {
+export const runWorkflowEndpoint: Endpoint = {
   handler: async (req) => {
     if (
-      !Array.isArray(req.payload.config.queues?.jobs) ||
-      !(req.payload.config.queues?.jobs?.length > 0)
+      !Array.isArray(req.payload.config.jobs.workflows?.length) ||
+      !(req.payload.config.jobs?.workflows?.length > 0)
     ) {
       return Response.json(
         {
@@ -17,7 +16,7 @@ export const runJobsEndpoint: Endpoint = {
       )
     }
 
-    const hasAccess = await req.payload.config.queues.access.run({ req })
+    const hasAccess = await req.payload.config.jobs.access.run({ req })
 
     if (!hasAccess) {
       return Response.json(
@@ -44,7 +43,7 @@ export const runJobsEndpoint: Endpoint = {
     }
 
     try {
-      await runJobs(runJobsArgs)
+      await runAllWorkflowsAndJobs(runJobsArgs)
     } catch (err) {
       req.payload.logger.error({
         err,

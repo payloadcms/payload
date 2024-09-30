@@ -23,19 +23,11 @@ export default buildConfigWithDefaults({
               collection: 'payload-jobs',
               req,
               data: {
-                type: 'updatePost',
-                steps: [
-                  {
-                    blockType: 'step1',
-                    post: doc.id,
-                    message: 'hello',
-                  },
-                  {
-                    blockType: 'step2',
-                    post: doc.id,
-                    message: 'goodbye',
-                  },
-                ],
+                input: {
+                  post: doc.id,
+                  message: 'hello',
+                },
+                workflowSlug: 'updatePost',
               },
             })
           },
@@ -68,65 +60,99 @@ export default buildConfigWithDefaults({
     },
     autoLogin: false,
   },
-  queues: {
+  jobs: {
     jobsCollectionOverrides: ({ defaultJobsCollection }) => {
       return {
         ...defaultJobsCollection,
         admin: {
-          ...defaultJobsCollection.admin,
+          ...(defaultJobsCollection?.admin || {}),
           hidden: false,
         },
       }
     },
-    jobs: [
+    tasks: [
       {
-        slug: 'updatePost',
-        steps: [
+        retries: 2,
+        slug: 'UpdatePost',
+        inputSchema: [
           {
-            retries: 2,
-            schema: {
-              slug: 'step1',
-              interfaceName: 'UpdatePostStep1',
-              fields: [
-                {
-                  name: 'post',
-                  type: 'relationship',
-                  relationTo: 'posts',
-                  maxDepth: 0,
-                  required: true,
-                },
-                {
-                  name: 'message',
-                  type: 'text',
-                  required: true,
-                },
-              ],
-            },
-            run: updatePostStep1,
+            name: 'post',
+            type: 'relationship',
+            relationTo: 'posts',
+            maxDepth: 0,
+            required: true,
           },
           {
-            retries: 2,
-            schema: {
-              slug: 'step2',
-              interfaceName: 'UpdatePostStep2',
-              fields: [
-                {
-                  name: 'post',
-                  type: 'relationship',
-                  relationTo: 'posts',
-                  maxDepth: 0,
-                  required: true,
-                },
-                {
-                  name: 'message',
-                  type: 'text',
-                  required: true,
-                },
-              ],
-            },
-            run: updatePostStep2,
+            name: 'message',
+            type: 'text',
+            required: true,
           },
         ],
+        outputSchema: [
+          {
+            name: 'messageTwice',
+            type: 'text',
+            required: true,
+          },
+        ],
+        run: updatePostStep1,
+      },
+      {
+        retries: 2,
+        slug: 'UpdatePostStep2',
+        inputSchema: [
+          {
+            name: 'post',
+            type: 'relationship',
+            relationTo: 'posts',
+            maxDepth: 0,
+            required: true,
+          },
+          {
+            name: 'messageTwice',
+            type: 'text',
+            required: true,
+          },
+        ],
+        run: updatePostStep2,
+      },
+    ],
+    workflows: [
+      {
+        slug: 'updatePost',
+        inputSchema: [
+          {
+            name: 'post',
+            type: 'relationship',
+            relationTo: 'posts',
+            maxDepth: 0,
+            required: true,
+          },
+          {
+            name: 'message',
+            type: 'text',
+            required: true,
+          },
+        ],
+        controlFlowInJS: async ({ job, runTask }) => {
+          const output = await runTask({
+            task: 'UpdatePost',
+            id: '1',
+            input: {
+              post: job.input.post,
+              message: job.input.message,
+            },
+          })
+
+          await runTask({
+            task: 'UpdatePostStep2',
+            id: '2',
+            input: {
+              post: job.tasks.UpdatePost['1'].output.messageTwice,
+              messageTwice: output.messageTwice,
+            },
+          })
+        },
       },
     ],
   },

@@ -1,13 +1,13 @@
-import type { JobRunner } from 'payload'
-import type { UpdatePostStep1, UpdatePostStep2 } from 'queues/payload-types.js'
+import type { TaskRunner } from 'payload'
 
-export const updatePostStep1: JobRunner<UpdatePostStep1> = async ({ req, step }) => {
+export const updatePostStep1: TaskRunner<'UpdatePost'> = async ({ req, input, job }) => {
   const postID =
-    typeof step.post === 'string' || typeof step.post === 'number' ? step.post : step.post.id
+    typeof input.post === 'string' || typeof input.post === 'number' ? input.post : input.post.id
 
   if (!postID) {
     return {
       state: 'failed',
+      output: null,
     }
   }
 
@@ -16,22 +16,26 @@ export const updatePostStep1: JobRunner<UpdatePostStep1> = async ({ req, step })
     id: postID,
     req,
     data: {
-      jobStep1Ran: step.message,
+      jobStep1Ran: input.message,
     },
   })
 
   return {
     state: 'succeeded',
+    output: {
+      messageTwice: input.message + input.message,
+    },
   }
 }
 
-export const updatePostStep2: JobRunner<UpdatePostStep2> = async ({ req, step }) => {
+export const updatePostStep2: TaskRunner<'UpdatePostStep2'> = async ({ req, input, job }) => {
   const postID =
-    typeof step.post === 'string' || typeof step.post === 'number' ? step.post : step.post.id
+    typeof input.post === 'string' || typeof input.post === 'number' ? input.post : input.post.id
 
   if (!postID) {
     return {
       state: 'failed',
+      output: null,
     }
   }
 
@@ -40,11 +44,12 @@ export const updatePostStep2: JobRunner<UpdatePostStep2> = async ({ req, step })
     id: postID,
     req,
     data: {
-      jobStep2Ran: step.message,
+      jobStep2Ran: input.messageTwice + job.tasks.UpdatePost['1'].output.messageTwice,
     },
   })
 
   return {
     state: 'succeeded',
+    output: null,
   }
 }

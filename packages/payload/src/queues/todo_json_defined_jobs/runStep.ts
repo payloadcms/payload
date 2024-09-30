@@ -1,19 +1,24 @@
-import { pathToFileURL } from 'url'
+/*import { pathToFileURL } from 'url'
 
-import type { PayloadRequest } from '../types/index.js'
-import type { BaseJob, JobConfig, JobRunner, StepStatus } from './config/types.js'
+import type { PayloadRequest } from '../../types/index.js'
+import type {
+  BaseJob,
+  WorkflowConfig,
+  WorkflowTasksStatus,
+  WorkflowTypes,
+} from '../config/types.js'
 
 import { findStepToRun } from './findStepToRun.js'
 
 type Args = {
   job: BaseJob
-  jobConfig: JobConfig
   req: PayloadRequest
-  stepStatus: StepStatus
+  workflowConfig: WorkflowConfig<WorkflowTypes>
+  workflowTasksStatus: WorkflowTasksStatus
 }
 
-export const runStep = async ({ job, jobConfig, req, stepStatus }: Args) => {
-  const stepToRun = findStepToRun(stepStatus)
+export const runJsonTask = async ({ job, req, workflowConfig, workflowTasksStatus }: Args) => {
+  const stepToRun = findStepToRun(workflowTasksStatus)
 
   if (!stepToRun) {
     return
@@ -219,3 +224,4 @@ export const runStep = async ({ job, jobConfig, req, stepStatus }: Args) => {
     })
   }
 }
+*/

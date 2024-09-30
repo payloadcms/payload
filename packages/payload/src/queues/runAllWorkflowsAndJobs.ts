@@ -1,9 +1,9 @@
 import type { PaginatedDocs } from '../database/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
-import type { BaseJob, JobConfig } from './config/types.js'
+import type { BaseJob } from './config/types.js'
 
-import { createStepStatus } from './createStepStatus.js'
-import { runStep } from './runStep.js'
+import { getWorkflowStatus } from './getWorkflowStatus.js'
+import { runWorkflow } from './runWorkflow.js'
 
 export type RunJobsArgs = {
   limit?: number
@@ -11,7 +11,11 @@ export type RunJobsArgs = {
   req: PayloadRequest
 }
 
-export const runJobs = async ({ limit = 10, queue, req }: RunJobsArgs): Promise<boolean> => {
+export const runAllWorkflowsAndJobs = async ({
+  limit = 10,
+  queue,
+  req,
+}: RunJobsArgs): Promise<boolean> => {
   const where: Where = {
     and: [
       {
@@ -60,7 +64,7 @@ export const runJobs = async ({ limit = 10, queue, req }: RunJobsArgs): Promise<
 
   const jobsQuery = (await req.payload.find({
     collection: 'payload-jobs',
-    depth: req.payload.config.queues.depth,
+    depth: req.payload.config.jobs.depth,
     limit,
     showHiddenFields: true,
     where,
@@ -92,16 +96,19 @@ export const runJobs = async ({ limit = 10, queue, req }: RunJobsArgs): Promise<
 
   await Promise.all(
     jobsQuery.docs.map(async (job) => {
-      const jobConfig = req.payload.config.queues.jobs.find(
-        ({ slug }) => slug === job.type,
-      ) as JobConfig
-
-      if (!jobConfig) {
+      const workflowConfig = req.payload.config.jobs.workflows.find(
+        ({ slug }) => slug === job.workflowSlug,
+      )
+      if (!workflowConfig) {
         return
       }
 
-      const stepStatus = createStepStatus({ job, jobConfig })
-      await runStep({ job, jobConfig, req, stepStatus })
+      const workflowTasksStatus = getWorkflowStatus({
+        job,
+        tasksConfig: req.payload.config.jobs.tasks,
+        workflowConfig,
+      })
+      await runWorkflow({ job, req, workflowConfig, workflowTasksStatus })
     }),
   )
 

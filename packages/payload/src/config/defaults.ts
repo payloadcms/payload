@@ -46,16 +46,15 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   },
   hooks: {},
   i18n: {},
-  localization: false,
-  maxDepth: 10,
-  queues: {
+  jobs: {
     access: {
       run: defaultAccess,
     },
     deleteJobOnComplete: true,
     depth: 0,
-    jobs: [],
   },
+  localization: false,
+  maxDepth: 10,
   routes: {
     admin: '/admin',
     api: '/api',

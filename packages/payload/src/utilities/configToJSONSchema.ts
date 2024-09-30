@@ -8,6 +8,7 @@ import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Field, FieldAffectingData, Option } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
+import type { JobsConfig } from '../queues/config/types.js'
 
 import { MissingEditorProp } from '../errors/MissingEditorProp.js'
 import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
@@ -585,7 +586,11 @@ export function entityToJSONSchema(
   incomingEntity: SanitizedCollectionConfig | SanitizedGlobalConfig,
   interfaceNameDefinitions: Map<string, JSONSchema4>,
   defaultIDType: 'number' | 'text',
+  collectionIDFieldTypes?: { [key: string]: 'number' | 'string' },
 ): JSONSchema4 {
+  if (!collectionIDFieldTypes) {
+    collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
+  }
   const entity: SanitizedCollectionConfig | SanitizedGlobalConfig = deepCopyObject(incomingEntity)
   const title = entity.typescript?.interface
     ? entity.typescript.interface
@@ -621,9 +626,6 @@ export function entityToJSONSchema(
       type: 'text',
     })
   }
-
-  //  Used for relationship fields, to determine whether to use a string or number type for the ID.
-  const collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
 
   return {
     type: 'object',
@@ -791,6 +793,152 @@ function generateAuthOperationSchemas(collections: SanitizedCollectionConfig[]):
   }
 }
 
+function generateJobsSchemas(
+  config: SanitizedConfig,
+  jobsConfig: JobsConfig,
+  interfaceNameDefinitions: Map<string, JSONSchema4>,
+  /**
+   * Used for relationship fields, to determine whether to use a string or number type for the ID.
+   * While there is a default ID field type set by the db adapter, they can differ on a collection-level
+   * if they have custom ID fields.
+   */
+  collectionIDFieldTypes: { [key: string]: 'number' | 'string' },
+): {
+  definitions?: Map<string, JSONSchema4>
+  properties?: { tasks: JSONSchema4 }
+} {
+  const properties: { tasks: JSONSchema4; workflows: JSONSchema4 } = {
+    tasks: {},
+    workflows: {},
+  }
+  const definitions: Map<string, JSONSchema4> = new Map()
+
+  if (jobsConfig?.tasks?.length) {
+    for (const task of jobsConfig.tasks) {
+      if (task?.inputSchema?.length) {
+        const inputJsonSchema = fieldsToJSONSchema(
+          collectionIDFieldTypes,
+          task.inputSchema,
+          interfaceNameDefinitions,
+          config,
+        )
+
+        const fullInputJsonSchema: JSONSchema4 = {
+          type: 'object',
+          additionalProperties: false,
+          properties: inputJsonSchema.properties,
+          required: inputJsonSchema.required,
+        }
+
+        definitions.set(`Task${task.slug}Input`, fullInputJsonSchema)
+      }
+      if (task?.outputSchema?.length) {
+        const outputJsonSchema = fieldsToJSONSchema(
+          collectionIDFieldTypes,
+          task.outputSchema,
+          interfaceNameDefinitions,
+          config,
+        )
+
+        const fullOutputJsonSchema: JSONSchema4 = {
+          type: 'object',
+          additionalProperties: false,
+          properties: outputJsonSchema.properties,
+          required: outputJsonSchema.required,
+        }
+
+        definitions.set(`Task${task.slug}Output`, fullOutputJsonSchema)
+      }
+    }
+    // Now add properties.tasks definition that references the types in definitions keyed by task slug:
+    properties.tasks = {
+      type: 'object',
+      additionalProperties: false,
+      properties: Object.fromEntries(
+        jobsConfig.tasks.map((task) => {
+          const toReturn: JSONSchema4 = {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              input: {},
+            },
+            required: ['input', 'output'],
+          }
+
+          if (task.inputSchema?.length) {
+            ;(toReturn.required as string[]).push('input')
+            toReturn.properties.input = {
+              $ref: `#/definitions/Task${task.slug}Input`,
+            }
+          }
+          if (task.outputSchema?.length) {
+            ;(toReturn.required as string[]).push('output')
+            toReturn.properties.output = {
+              $ref: `#/definitions/Task${task.slug}Output`,
+            }
+          }
+          return [task.slug, toReturn]
+        }),
+      ),
+      required: jobsConfig.tasks.map((task) => task.slug),
+    }
+  }
+
+  if (jobsConfig?.workflows?.length) {
+    for (const workflow of jobsConfig.workflows) {
+      if (workflow?.inputSchema?.length) {
+        const inputJsonSchema = fieldsToJSONSchema(
+          collectionIDFieldTypes,
+          workflow.inputSchema,
+          interfaceNameDefinitions,
+          config,
+        )
+
+        const fullInputJsonSchema: JSONSchema4 = {
+          type: 'object',
+          additionalProperties: false,
+          properties: inputJsonSchema.properties,
+          required: inputJsonSchema.required,
+        }
+
+        definitions.set(`Workflow${workflow.slug}Input`, fullInputJsonSchema)
+      }
+
+      properties.workflows = {
+        type: 'object',
+        additionalProperties: false,
+        properties: Object.fromEntries(
+          jobsConfig.workflows.map((workflow) => {
+            const toReturn: JSONSchema4 = {
+              type: 'object',
+              additionalProperties: false,
+              properties: {
+                input: {},
+              },
+              required: ['input'],
+            }
+
+            if (workflow.inputSchema?.length) {
+              ;(toReturn.required as string[]).push('input')
+              toReturn.properties.input = {
+                $ref: `#/definitions/Workflow${workflow.slug}Input`,
+              }
+            }
+
+            return [workflow.slug, toReturn]
+          }),
+        ),
+        required: jobsConfig.tasks.map((task) => task.slug),
+      }
+    }
+  }
+
+  return {
+    definitions,
+    properties,
+  }
+}
+
 /**
  * This is used for generating the TypeScript types (payload-types.ts) with the payload generate:types command.
  */
@@ -801,13 +949,22 @@ export function configToJSONSchema(
   // a mutable Map to store custom top-level `interfaceName` types. Fields with an `interfaceName` property will be moved to the top-level definitions here
   const interfaceNameDefinitions: Map<string, JSONSchema4> = new Map()
 
+  //  Used for relationship fields, to determine whether to use a string or number type for the ID.
+  const collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
+
   // Collections and Globals have to be moved to the top-level definitions as well. Reason: The top-level type will be the `Config` type - we don't want all collection and global
   // types to be inlined inside the `Config` type
   const entityDefinitions: { [k: string]: JSONSchema4 } = [
     ...config.globals,
     ...config.collections,
   ].reduce((acc, entity) => {
-    acc[entity.slug] = entityToJSONSchema(config, entity, interfaceNameDefinitions, defaultIDType)
+    acc[entity.slug] = entityToJSONSchema(
+      config,
+      entity,
+      interfaceNameDefinitions,
+      defaultIDType,
+      collectionIDFieldTypes,
+    )
     return acc
   }, {})
 
@@ -820,6 +977,10 @@ export function configToJSONSchema(
       },
       { auth: {} },
     )
+
+  const jobsSchemas = config.jobs
+    ? generateJobsSchemas(config, config.jobs, interfaceNameDefinitions, collectionIDFieldTypes)
+    : {}
 
   let jsonSchema: JSONSchema4 = {
     additionalProperties: false,
@@ -840,6 +1001,19 @@ export function configToJSONSchema(
     },
     required: ['user', 'locale', 'collections', 'globals', 'auth', 'db'],
     title: 'Config',
+  }
+  if (jobsSchemas.definitions?.size) {
+    for (const [key, value] of jobsSchemas.definitions) {
+      jsonSchema.definitions[key] = value
+    }
+  }
+  if (jobsSchemas.properties) {
+    jsonSchema.properties.jobs = {
+      type: 'object',
+      additionalProperties: false,
+      properties: jobsSchemas.properties,
+      required: ['tasks'],
+    }
   }
 
   if (config?.typescript?.schema?.length) {
