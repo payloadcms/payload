@@ -26,8 +26,8 @@ export default buildConfig({
   plugins: [
     s3Storage({
       collections: {
-        [mediaSlug]: true,
-        [mediaWithPrefixSlug]: {
+        media: true,
+        'media-with-prefix': {
           prefix,
         },
       },

@@ -1117,7 +1117,7 @@ import { s3Adapter } from '@payloadcms/plugin-cloud-storage/s3'
 plugins: [
     cloudStorage({
       collections: {
-        [mediaSlug]: {
+        media: {
           adapter: s3Adapter({
             bucket: process.env.S3_BUCKET,
             config: {
@@ -1140,7 +1140,7 @@ plugins: [
  plugins: [
     s3Storage({
       collections: {
-        [mediaSlug]: true,
+        media: true,
       },
       bucket: process.env.S3_BUCKET,
       config: {

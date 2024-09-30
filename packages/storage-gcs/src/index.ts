@@ -5,7 +5,7 @@ import type {
   CollectionOptions,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Plugin } from 'payload'
+import type { CollectionSlug, Config, Plugin } from 'payload'
 
 import { Storage } from '@google-cloud/storage'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
@@ -25,7 +25,7 @@ export interface GcsStorageOptions {
   /**
    * Collection options to apply the S3 adapter to.
    */
-  collections: Record<string, Omit<CollectionOptions, 'adapter'> | true>
+  collections: Partial<Record<CollectionSlug, Omit<CollectionOptions, 'adapter'> | true>>
   /**
    * Whether or not to enable the plugin
    *

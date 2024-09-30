@@ -494,11 +494,12 @@ export type SanitizedJoins = {
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'auth' | 'endpoints' | 'fields' | 'upload' | 'versions'
+    'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
   > {
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
+  slug: CollectionSlug
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */

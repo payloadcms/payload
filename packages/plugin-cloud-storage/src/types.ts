@@ -1,5 +1,6 @@
 import type {
   CollectionConfig,
+  CollectionSlug,
   Field,
   FileData,
   ImageSize,
@@ -79,7 +80,7 @@ export interface CollectionOptions {
 }
 
 export interface PluginOptions {
-  collections: Record<string, CollectionOptions>
+  collections: Partial<Record<CollectionSlug, CollectionOptions>>
   /**
    * Whether or not to enable the plugin
    *

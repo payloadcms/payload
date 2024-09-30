@@ -4,7 +4,7 @@ import type {
   CollectionOptions,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Plugin } from 'payload'
+import type { CollectionSlug, Config, Plugin } from 'payload'
 
 import * as AWS from '@aws-sdk/client-s3'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
@@ -31,7 +31,7 @@ export type S3StorageOptions = {
   /**
    * Collection options to apply the S3 adapter to.
    */
-  collections: Record<string, Omit<CollectionOptions, 'adapter'> | true>
+  collections: Partial<Record<CollectionSlug, Omit<CollectionOptions, 'adapter'> | true>>
   /**
    * AWS S3 client configuration. Highly dependent on your AWS setup.
    *

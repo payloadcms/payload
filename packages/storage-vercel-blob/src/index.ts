@@ -4,7 +4,7 @@ import type {
   CollectionOptions,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Plugin } from 'payload'
+import type { CollectionSlug, Config, Plugin } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 
@@ -39,7 +39,7 @@ export type VercelBlobStorageOptions = {
   /**
    * Collections to apply the Vercel Blob adapter to
    */
-  collections: Record<string, Omit<CollectionOptions, 'adapter'> | true>
+  collections: Partial<Record<CollectionSlug, Omit<CollectionOptions, 'adapter'> | true>>
 
   /**
    * Whether or not to enable the plugin
@@ -148,7 +148,7 @@ function vercelBlobStorageInternal(
         prefix,
         token,
       }),
-      staticHandler: getStaticHandler({ baseUrl, token, cacheControlMaxAge }, collection),
+      staticHandler: getStaticHandler({ baseUrl, cacheControlMaxAge, token }, collection),
     }
   }
 }

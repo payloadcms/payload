@@ -1,4 +1,11 @@
-import type { CollectionConfig, Config, FileData, PayloadRequest, TypeWithID } from 'payload'
+import type {
+  CollectionConfig,
+  CollectionSlug,
+  Config,
+  FileData,
+  PayloadRequest,
+  TypeWithID,
+} from 'payload'
 
 export interface File {
   buffer: Buffer
@@ -94,7 +101,7 @@ export interface PluginOptions {
         /**
          * Caching configuration per-collection
          */
-        collections?: Record<string, CollectionCachingConfig>
+        collections?: Partial<Record<CollectionSlug, CollectionCachingConfig>>
         /** Caching in seconds override for all collections
          * @default 86400 (24 hours)
          */

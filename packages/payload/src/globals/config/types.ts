@@ -187,9 +187,10 @@ export type GlobalConfig = {
 }
 
 export interface SanitizedGlobalConfig
-  extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'versions'> {
+  extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'slug' | 'versions'> {
   endpoints: Endpoint[] | false
   fields: Field[]
+  slug: GlobalSlug
   versions: SanitizedGlobalVersions
 }
 
