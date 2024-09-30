@@ -25,10 +25,8 @@ const payloadServerAction: PayloadServerAction = async function (args) {
   'use server'
   return handleServerActions({
     ...args,
-    defaultArgs: {
-      config,
-      importMap,
-    },
+    config,
+    importMap,
   })
 }
 

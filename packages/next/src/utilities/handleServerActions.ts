@@ -1,15 +1,12 @@
-import type { ImportMap, Payload, SanitizedConfig, User } from 'payload'
+import type { ImportMap, Payload, SanitizedConfig } from 'payload'
 
 import { buildFormState, type BuildFormStateArgs } from '@payloadcms/ui/utilities/buildFormState'
-import { headers } from 'next/headers.js'
 
 import { getPayloadHMR } from './getPayloadHMR.js'
 
 type Args = {
-  defaultArgs: {
-    config: Promise<SanitizedConfig> | SanitizedConfig
-    importMap: ImportMap
-  }
+  config: Promise<SanitizedConfig> | SanitizedConfig
+  importMap: ImportMap
 } & (
   | {
       action: string
@@ -23,29 +20,21 @@ const actions = {
 }
 
 export const handleServerActions = async (args: Args): Promise<unknown> => {
-  const {
-    action: actionKey,
-    args: fnArgs,
-    defaultArgs: { config: configPromise, importMap },
-  } = args
+  const { action: actionKey, args: fnArgs, config: configPromise, importMap } = args
 
   const config = await configPromise
 
   const payload = await getPayloadHMR({ config })
 
-  const { user } = await payload.auth({ headers: headers() })
-
-  // const req = createPayloadRequest({ config })
-
   const augmentedArgs: {
+    config: SanitizedConfig
+    importMap: ImportMap
     payload: Payload
-    user: User
-  } & Args['defaultArgs'] = {
+  } & Args['args'] = {
     ...fnArgs,
     config,
     importMap,
     payload,
-    user,
   }
 
   const action = actions[actionKey]
