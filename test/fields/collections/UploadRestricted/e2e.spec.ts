@@ -1,8 +1,11 @@
 import type { Page } from '@playwright/test'
+import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
+
+import type { Config } from '../../payload-types.js'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
@@ -18,6 +21,8 @@ const dirname = path.resolve(currentFolder, '../../')
 
 const { beforeAll, beforeEach, describe } = test
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+let payload: PayloadTestSDK<Config>
 let client: RESTClient
 let page: Page
 let serverURL: string
@@ -60,7 +65,7 @@ describe('Upload with restrictions', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  test('allowCreate = true should hide create new button and drag and drop text', async () => {
+  test('allowCreate = false should hide create new button and drag and drop text', async () => {
     await page.goto(url.create)
     const fieldWithoutRestriction = page.locator('#field-uploadWithoutRestriction')
     await expect(fieldWithoutRestriction).toBeVisible()
@@ -69,6 +74,8 @@ describe('Upload with restrictions', () => {
     const fieldWithAllowCreateFalse = page.locator('#field-uploadWithAllowCreateFalse')
     await expect(fieldWithAllowCreateFalse).toBeVisible()
     await expect(fieldWithAllowCreateFalse.getByRole('button', { name: 'Create New' })).toBeHidden()
+    // We could also test that the D&D functionality is disabled. But I think seeing the label
+    // disappear is enough. Maybe if there is some regression...
     await expect(fieldWithAllowCreateFalse.getByText('or drag and drop a file')).toBeHidden()
     const fieldMultipleWithAllow = page.locator('#field-uploadMultipleWithAllowCreateFalse')
     await expect(fieldMultipleWithAllow).toBeVisible()
@@ -76,5 +83,26 @@ describe('Upload with restrictions', () => {
     await expect(fieldMultipleWithAllow.getByText('or drag and drop a file')).toBeHidden()
   })
 
-  test("list drawer should show 'Create new Uploads Restricted' button", async () => {})
+  test('allowCreate = false should hide create new button in the list drawer', async () => {
+    await page.goto(url.create)
+    const fieldWithoutRestriction = page.locator('#field-uploadWithoutRestriction')
+    await expect(fieldWithoutRestriction).toBeVisible()
+    await fieldWithoutRestriction.getByRole('button', { name: 'Choose from existing' }).click()
+    const drawer = page.locator('.drawer__content')
+    await expect(drawer).toBeVisible()
+    const createNewHeader = page
+      .locator('.list-drawer__header')
+      .getByRole('button', { name: 'Create New' })
+    await expect(createNewHeader).toBeVisible()
+    await page.getByLabel('Close').click()
+    await expect(drawer).toBeHidden()
+    await page.getByText('UploadsCreate New').click({
+      button: 'right',
+    })
+    const fieldWithAllowCreateFalse = page.locator('#field-uploadWithAllowCreateFalse')
+    await expect(fieldWithAllowCreateFalse).toBeVisible()
+    await fieldWithAllowCreateFalse.getByRole('button', { name: 'Choose from existing' }).click()
+    await expect(drawer).toBeVisible()
+    await expect(createNewHeader).toBeHidden()
+  })
 })
