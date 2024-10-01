@@ -554,6 +554,8 @@ const DocumentInfo: React.FC<
             },
           })) as { state: FormState }
 
+          abortController.signal.throwIfAborted()
+
           const data = reduceFieldsToValues(result, true)
           setData(data)
 
