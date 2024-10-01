@@ -40,13 +40,10 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
     },
   })
 
-  // The email can be changed to reflect the tenant's domain.
-  // Uncomment below to use a domain-specific email (e.g., 'tenant1@abc.com').
   await payload.create({
     collection: 'users',
     data: {
       email: 'tenant1@payloadcms.com',
-      // email: 'tenant1@abc.com',
       password: 'test',
       tenants: [
         {
@@ -66,7 +63,6 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
     collection: 'users',
     data: {
       email: 'tenant2@payloadcms.com',
-      // email: 'tenant2@bbc.com',
       password: 'test',
       tenants: [
         {
@@ -82,7 +78,6 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
     collection: 'users',
     data: {
       email: 'tenant3@payloadcms.com',
-      // email: 'tenant3@cbc.com',
       password: 'test',
       tenants: [
         {

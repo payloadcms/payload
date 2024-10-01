@@ -39,9 +39,15 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
   For more details on how to extend this functionality, see the [Payload Access Control](https://payloadcms.com/docs/access-control/overview) docs.
 
+  **Domain-based Tenant Setting**:
+
+  This example also supports domain-based tenant selection, where tenants can be associated with specific domains. If a tenant is associated with a domain (e.g., `abc.localhost.com:3000`), when a user logs in from that domain, they will be automatically scoped to the matching tenant. This is accomplished through an optional `afterLogin` hook that sets a `payload-tenant` cookie based on the domain.
+
+  By default, this functionality is commented out in the code but can be enabled easily. See the `setCookieBasedOnDomain` hook in the `Users` collection for more details.
+
 - #### Pages
 
-  Each page is assigned a `tenant` which is used to control access and scope API requests. Pages that are created by tenants are automatically assigned that tenant based on that user's `lastLoggedInTenant` field.
+  Each page is assigned a `tenant`, which is used to control access and scope API requests. Only users with the `super-admin` role can create pages, and pages are assigned to specific tenants. Other users can view only the pages assigned to the tenant they are associated with.
 
 ## Access control
 
@@ -55,8 +61,6 @@ This applies to each collection in the following ways:
 - `users`: Only super-admins, tenant-admins, and the user themselves can access their profile. Anyone can create a user, but only these admins can delete users. See [Users](#users) for more details.
 - `tenants`: Only super-admins and tenant-admins can read, create, update, or delete tenants. See [Tenants](#tenants) for more details.
 - `pages`: Everyone can access pages, but only super-admins and tenant-admins can create, update, or delete them.
-
-When a user logs in, a `lastLoggedInTenant` field is saved to their profile. This is done by reading the value of `req.headers.host`, querying for a tenant with a matching `domain`, and verifying that the user is a member of that tenant. This field is then used to automatically assign the tenant to any documents that the user creates, such as pages. Super-admins can also use this field to browse the admin panel as a specific tenant.
 
 > If you have versions and drafts enabled on your pages, you will need to add additional read access control condition to check the user's tenants that prevents them from accessing draft documents of other tenants.
 

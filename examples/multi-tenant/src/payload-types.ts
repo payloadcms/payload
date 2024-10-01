@@ -64,12 +64,6 @@ export interface Page {
 export interface Tenant {
   id: string;
   name: string;
-  domains?:
-    | {
-        domain: string;
-        id?: string | null;
-      }[]
-    | null;
   slug: string;
   public?: boolean | null;
   updatedAt: string;
