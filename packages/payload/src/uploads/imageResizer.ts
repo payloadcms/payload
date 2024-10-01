@@ -192,31 +192,6 @@ const getImageResizeAction = ({
 }
 
 /**
- * Check if the image should be passed directly to sharp without payload adjusting properties.
- *
- * @param resizeConfig - object containing the requested dimensions and resize options
- * @param original - the original image size
- * @returns true if the image should passed directly to sharp
- */
-const applyPayloadAdjustments = (
-  { fit, height, width, withoutEnlargement, withoutReduction }: ImageSize,
-  original: ProbedImageSize,
-) => {
-  if (fit === 'contain' || fit === 'inside') return false
-  if (!isNumber(height) && !isNumber(width)) return false
-
-  const targetAspectRatio = width / height
-  const originalAspectRatio = original.width / original.height
-  if (originalAspectRatio === targetAspectRatio) return false
-
-  const skipEnlargement = withoutEnlargement && (original.height < height || original.width < width)
-  const skipReduction = withoutReduction && (original.height > height || original.width > width)
-  if (skipEnlargement || skipReduction) return false
-
-  return true
-}
-
-/**
  * Sanitize the resize config. If the resize config has the `withoutReduction`
  * property set to true, the `fit` and `position` properties will be set to `contain`
  * and `top left` respectively.
@@ -302,6 +277,16 @@ export default async function resizeAndTransformImageSizes({
   const sharpBase: Sharp | undefined = sharp(file.tempFilePath || file.data, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
   const originalImageMeta = await sharpBase.metadata()
 
+  let adjustedDimensions = { ...dimensions }
+
+  if ([5, 6, 7, 8].includes(originalImageMeta.orientation)) {
+    adjustedDimensions = {
+      ...dimensions,
+      width: dimensions.height,
+      height: dimensions.width,
+    }
+  }
+
   const resizeImageMeta = {
     height: extractHeightFromImage(originalImageMeta),
     width: originalImageMeta.width,
@@ -324,7 +309,7 @@ export default async function resizeAndTransformImageSizes({
       if (resizeAction === 'resizeWithFocalPoint') {
         let { height: resizeHeight, width: resizeWidth } = imageResizeConfig
 
-        const originalAspectRatio = dimensions.width / dimensions.height
+        const originalAspectRatio = adjustedDimensions.width / adjustedDimensions.height
 
         // Calculate resizeWidth based on original aspect ratio if it's undefined
         if (resizeHeight && !resizeWidth) {
