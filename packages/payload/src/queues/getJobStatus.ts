@@ -1,19 +1,13 @@
 import type { TaskConfig } from './config/taskTypes.js'
-import type {
-  BaseJob,
-  WorkflowConfig,
-  WorkflowTasksStatus,
-  WorkflowTypes,
-} from './config/workflowTypes.js'
+import type { BaseJob, JobTasksStatus } from './config/workflowTypes.js'
 
 type Args = {
   job: BaseJob
   tasksConfig: TaskConfig[]
-  workflowConfig: WorkflowConfig<WorkflowTypes>
 }
 
-export const getJobStatus = ({ job, tasksConfig, workflowConfig }: Args): WorkflowTasksStatus => {
-  const tasksStatus: WorkflowTasksStatus = {}
+export const getJobStatus = ({ job, tasksConfig }: Args): JobTasksStatus => {
+  const tasksStatus: JobTasksStatus = {}
 
   // First, add (in order) the steps from the config to
   // our status map

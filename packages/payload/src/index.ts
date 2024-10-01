@@ -1050,10 +1050,10 @@ export type {
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types.js'
 export type {
   BaseJob,
+  JobTasksStatus as WorkflowTasksStatus,
   RunningJob,
   WorkflowConfig,
   WorkflowControlFlow,
-  WorkflowTasksStatus,
   WorkflowTypes,
 } from './queues/config/workflowTypes.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'

@@ -4,21 +4,21 @@ import type { PayloadRequest } from '../types/index.js'
 import type { RunTaskFunction, TaskRunner, TaskType } from './config/taskTypes.js'
 import type {
   BaseJob,
+  JobTasksStatus,
   RunningJob,
   WorkflowConfig,
   WorkflowControlFlow,
-  WorkflowTasksStatus,
   WorkflowTypes,
 } from './config/workflowTypes.js'
 
 type Args = {
   job: BaseJob
+  jobTasksStatus: JobTasksStatus
   req: PayloadRequest
   workflowConfig: WorkflowConfig<WorkflowTypes>
-  workflowTasksStatus: WorkflowTasksStatus
 }
 
-export const runJob = async ({ job, req, workflowConfig, workflowTasksStatus }: Args) => {
+export const runJob = async ({ job, jobTasksStatus, req, workflowConfig }: Args) => {
   if (!workflowConfig.controlFlowInJS) {
     throw new Error('Currently, only workflows with controlFlowInJS are supported')
   }
@@ -109,7 +109,7 @@ export const runJob = async ({ job, req, workflowConfig, workflowTasksStatus }: 
       throw new Error(`Task ${task} not found in workflow ${job.workflowSlug}`)
     }
 
-    const taskStatus = workflowTasksStatus[id]
+    const taskStatus = jobTasksStatus[id]
 
     if (taskStatus && taskStatus.complete === true) {
       return taskStatus.output
@@ -250,7 +250,7 @@ export const runJob = async ({ job, req, workflowConfig, workflowTasksStatus }: 
       throw err
     }
 
-    workflowTasksStatus[id] = {
+    jobTasksStatus[id] = {
       complete: true,
       input,
       output,

@@ -99,12 +99,11 @@ export const runAllJobs = async ({ limit = 10, queue, req }: RunJobsArgs): Promi
         return
       }
 
-      const workflowTasksStatus = getJobStatus({
+      const jobTasksStatus = getJobStatus({
         job,
         tasksConfig: req.payload.config.jobs.tasks,
-        workflowConfig,
       })
-      await runJob({ job, req, workflowConfig, workflowTasksStatus })
+      await runJob({ job, jobTasksStatus, req, workflowConfig })
     }),
   )
 

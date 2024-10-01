@@ -56,7 +56,7 @@ export type WorkflowControlFlow<TWorkflowSlug extends keyof TypedJobs['workflows
 /**
  * Task IDs mapped to their status
  */
-export type WorkflowTasksStatus = {
+export type JobTasksStatus = {
   [taskID: string]: {
     complete: boolean
     input: TaskInput<TaskType>
