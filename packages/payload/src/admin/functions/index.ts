@@ -15,7 +15,7 @@ export type ClientServerFunction = (args: Record<string, unknown>) => Promise<un
 export type ServerFunction = (args: ServerFunctionArgs) => Promise<unknown> | unknown
 
 export type ServerFunctionConfig = {
-  function: ServerFunction
+  fn: ServerFunction
   name: string
 }
 

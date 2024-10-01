@@ -1,11 +1,11 @@
-import type { BaseServerFunctionArgs } from 'payload'
+import type { BaseServerFunctionArgs, ServerFunction } from 'payload'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 
 import { getPayloadHMR } from './getPayloadHMR.js'
 
 const defaultFunctions = {
-  'form-state': buildFormState,
+  'form-state': buildFormState as any as ServerFunction,
 }
 
 export const handleServerFunctions = async (
@@ -27,15 +27,17 @@ export const handleServerFunctions = async (
     payload,
   }
 
-  const functions = {
+  const serverFunctions: {
+    [key: string]: ServerFunction
+  } = {
     ...defaultFunctions,
     ...config?.admin?.serverFunctions?.reduce((acc, fnConfig) => {
-      acc[fnConfig.name] = fnConfig.function
+      acc[fnConfig.name] = fnConfig.fn
       return acc
     }, {}),
   }
 
-  const fn = functions[fnKey]
+  const fn = serverFunctions[fnKey]
 
   if (!fn) {
     throw new Error(`Unknown Server Function: ${fnKey}`)
