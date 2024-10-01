@@ -21,7 +21,7 @@
     "prepublishOnly": "pnpm clean && pnpm build"
   },
   "dependencies": {
-    "@faceless-ui/modal": "2.0.1",
+    "@faceless-ui/modal": "2.0.2",
     "i18next": "22.5.1",
     "is-hotkey": "0.2.0",
     "react-i18next": "11.18.6",
