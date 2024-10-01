@@ -50,8 +50,7 @@ export const MyRelationshipField: Field = {
 ```
 
 In this example, the field is defined to show the related `posts` when added to a `category` collection. The `on`
-property is used to
-specify the relationship field name of the field that relates to the collection document.
+property is used to specify the relationship field name of the field that relates to the collection document.
 
 With this example, if you navigate to a Category in the Admin UI or an API response, you'll now see that the Posts which
 are related to the Category are populated for you. This is extremely powerful and can be used to define a wide variety
@@ -112,10 +111,9 @@ related docs from a new pseudo-junction collection called `categories_posts`. No
 third junction collection, and can be surfaced on both Posts and Categories. But, importantly, you could add
 additional "context" fields to this shared junction collection.
 
-For example, on this `categories_posts` collection, in addition to having the `category` and
-post` fields, we could add custom "context" fields like `featured` or `
-spotlight`, which would allow you to store additional information directly on relationships. The `join` field gives you
-complete control over any type of relational architecture in Payload, all wrapped up in a powerful Admin UI.
+For example, on this `categories_posts` collection, in addition to having the `category` and `post` fields, we could add custom "context" fields like `featured` or `spotlight`,
+which would allow you to store additional information directly on relationships.
+The `join` field gives you complete control over any type of relational architecture in Payload, all wrapped up in a powerful Admin UI.
 
 ## Config Options
 
