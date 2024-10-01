@@ -6,7 +6,6 @@ import {
   Button,
   Popup,
   Translation,
-  useAuth,
   useConfig,
   useDocumentInfo,
   useDrawerSlug,

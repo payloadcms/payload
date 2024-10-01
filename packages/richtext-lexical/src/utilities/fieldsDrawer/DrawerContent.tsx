@@ -5,7 +5,6 @@ import {
   Form,
   FormSubmit,
   RenderFields,
-  useAuth,
   useDocumentInfo,
   useFieldProps,
   useServerFunctions,

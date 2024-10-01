@@ -5,7 +5,6 @@ import type {
   ClientServerFunction,
   LanguageOptions,
   Permissions,
-  ServerFunction,
   User,
 } from 'payload'
 

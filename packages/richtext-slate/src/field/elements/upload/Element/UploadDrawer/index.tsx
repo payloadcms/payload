@@ -9,7 +9,6 @@ import {
   Form,
   FormSubmit,
   RenderFields,
-  useAuth,
   useConfig,
   useDocumentInfo,
   useLocale,
