@@ -58,6 +58,11 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    autoLogin: {
+      prefillOnly: true,
+      email: devUser.email,
+      password: devUser.password,
+    },
   },
   jobs: {
     jobsCollectionOverrides: ({ defaultJobsCollection }) => {
