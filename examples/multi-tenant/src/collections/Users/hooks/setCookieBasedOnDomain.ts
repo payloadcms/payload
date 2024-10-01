@@ -16,13 +16,13 @@ export const setCookieBasedOnDomain: CollectionAfterLoginHook = async ({ req, us
   })
 
   // If a matching tenant is found, set the 'payload-tenant' cookie
-  if (relatedOrg) {
+  if (relatedOrg && relatedOrg.docs.length > 0) {
     const tenantCookie = generateCookie({
       name: 'payload-tenant',
       expires: getCookieExpiration({ seconds: 7200 }),
       path: '/',
       returnCookieAsObject: false,
-      value: relatedOrg.id,
+      value: relatedOrg.docs[0].id,
     })
 
     // Merge existing responseHeaders with the new Set-Cookie header
