@@ -946,14 +946,7 @@ export function jsonSchemaExternalImport({
   from: string
   specifier: 'default' | ({} & string)
 }): JSONSchema4 {
-  let importString = ''
-  if (specifier === 'default') {
-    importString = `externalImport:${from}#default`
-  } else {
-    importString = `externalImport:${from}#${specifier}`
-  }
-
-  return { type: 'string', const: importString }
+  return { type: 'string', const: `externalImport:${from}#${specifier}` }
 }
 
 /**
