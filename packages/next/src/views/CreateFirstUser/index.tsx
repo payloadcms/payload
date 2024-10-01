@@ -31,7 +31,6 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({
 
   const { formState } = await getDocumentData({
     collectionConfig,
-    config,
     importMap,
     locale,
     req,
