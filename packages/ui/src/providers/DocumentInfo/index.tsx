@@ -55,7 +55,7 @@ const DocumentInfo: React.FC<
     onSave: onSaveFromProps,
   } = props
 
-  const { serverFunction } = useServerFunctions()
+  const { serverFunctions } = useServerFunctions()
 
   const {
     config: {
@@ -492,7 +492,7 @@ const DocumentInfo: React.FC<
 
       const newData = collectionSlug ? json.doc : json.result
 
-      const { state: newState } = (await serverFunction({
+      const { state: newState } = (await serverFunctions({
         name: 'form-state',
         args: {
           id,
@@ -520,7 +520,7 @@ const DocumentInfo: React.FC<
       locale,
       onSaveFromProps,
       getDocPermissions,
-      serverFunction,
+      serverFunctions,
     ],
   )
 
@@ -542,7 +542,7 @@ const DocumentInfo: React.FC<
         setIsLoading(true)
 
         try {
-          const { state: result } = (await serverFunction({
+          const { state: result } = (await serverFunctions({
             name: 'form-state',
             args: {
               id,
@@ -596,7 +596,7 @@ const DocumentInfo: React.FC<
     initialDataFromProps,
     initialStateFromProps,
     getDocPermissions,
-    serverFunction,
+    serverFunctions,
     user,
   ])
 

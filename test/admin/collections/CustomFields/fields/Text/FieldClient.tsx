@@ -5,13 +5,13 @@ import { TextField, useServerFunctions } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
 
 export const CustomClientField: TextFieldClientComponent = ({ field }) => {
-  const { serverFunction } = useServerFunctions()
+  const { serverFunctions } = useServerFunctions()
 
   const [result, setResult] = useState<null | string>(null)
 
   useEffect(() => {
     const doServerFn = async () => {
-      const res = (await serverFunction({
+      const res = (await serverFunctions({
         name: 'my-server-function',
         args: {
           value: 'world!',
@@ -22,7 +22,7 @@ export const CustomClientField: TextFieldClientComponent = ({ field }) => {
     }
 
     void doServerFn()
-  }, [serverFunction])
+  }, [serverFunctions])
 
   return (
     <div>

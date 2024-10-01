@@ -3,7 +3,7 @@ import type { ClientServerFunction } from 'payload'
 import React, { createContext } from 'react'
 
 type ServerFunctionsContextType = {
-  serverFunction: ClientServerFunction
+  serverFunctions: ClientServerFunction
 }
 
 export const ServerFunctionsContext = createContext<ServerFunctionsContextType | undefined>(
@@ -20,10 +20,10 @@ export const useServerFunctions = () => {
 
 export const ServerFunctionsProvider: React.FC<{
   children: React.ReactNode
-  serverFunction: ClientServerFunction
-}> = ({ children, serverFunction }) => {
+  serverFunctions: ClientServerFunction
+}> = ({ children, serverFunctions }) => {
   return (
-    <ServerFunctionsContext.Provider value={{ serverFunction }}>
+    <ServerFunctionsContext.Provider value={{ serverFunctions }}>
       {children}
     </ServerFunctionsContext.Provider>
   )

@@ -79,7 +79,7 @@ export const DefaultEditView: React.FC = () => {
 
   const { refreshCookieAsync, user } = useAuth()
 
-  const { serverFunction } = useServerFunctions()
+  const { serverFunctions } = useServerFunctions()
 
   const {
     config,
@@ -242,7 +242,7 @@ export const DefaultEditView: React.FC = () => {
 
       const docPreferences = await getDocPreferences()
 
-      const { lockedState, state } = (await serverFunction({
+      const { lockedState, state } = (await serverFunctions({
         name: 'form-state',
         args: {
           id,
@@ -294,7 +294,7 @@ export const DefaultEditView: React.FC = () => {
       isLockingEnabled,
       setDocumentIsLocked,
       lastUpdateTime,
-      serverFunction,
+      serverFunctions,
     ],
   )
 

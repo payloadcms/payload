@@ -112,7 +112,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
     },
   } = useConfig()
 
-  const { serverFunction } = useServerFunctions()
+  const { serverFunctions } = useServerFunctions()
 
   const { count, getQueryParams, selectAll } = useSelection()
   const { i18n, t } = useTranslation()
@@ -131,7 +131,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   React.useEffect(() => {
     if (!hasInitializedState.current) {
       const getInitialState = async () => {
-        const { state: result } = (await serverFunction({
+        const { state: result } = (await serverFunctions({
           name: 'form-state',
           args: {
             collectionSlug: slug,
@@ -147,11 +147,11 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
       void getInitialState()
     }
-  }, [apiRoute, hasInitializedState, serverURL, slug, serverFunction, user])
+  }, [apiRoute, hasInitializedState, serverURL, slug, serverFunctions, user])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = (await serverFunction({
+      const { state } = (await serverFunctions({
         name: 'form-state',
         args: {
           collectionSlug: slug,
@@ -163,7 +163,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
       return state
     },
-    [slug, serverFunction],
+    [slug, serverFunctions],
   )
 
   if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {

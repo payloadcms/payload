@@ -87,7 +87,7 @@ const PreviewView: React.FC<Props> = ({
     updateDocumentEditor,
   } = useDocumentInfo()
 
-  const { serverFunction } = useServerFunctions()
+  const { serverFunctions } = useServerFunctions()
 
   const operation = id ? 'update' : 'create'
 
@@ -177,7 +177,7 @@ const PreviewView: React.FC<Props> = ({
 
       const docPreferences = await getDocPreferences()
 
-      const { lockedState, state } = (await serverFunction({
+      const { lockedState, state } = (await serverFunctions({
         name: 'form-state',
         args: {
           id,
@@ -233,7 +233,7 @@ const PreviewView: React.FC<Props> = ({
       setCurrentEditor,
       setDocumentIsLocked,
       user,
-      serverFunction,
+      serverFunctions,
     ],
   )
 

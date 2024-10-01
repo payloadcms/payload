@@ -70,7 +70,7 @@ export const Form: React.FC<FormProps> = (props) => {
     waitForAutocomplete,
   } = props
 
-  const { serverFunction } = useServerFunctions()
+  const { serverFunctions } = useServerFunctions()
 
   const method = 'method' in props ? props?.method : undefined
 
@@ -448,7 +448,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const reset = useCallback(
     async (data: unknown) => {
-      const { state: newState } = (await serverFunction({
+      const { state: newState } = (await serverFunctions({
         name: 'form-state',
         args: {
           id,
@@ -464,7 +464,7 @@ export const Form: React.FC<FormProps> = (props) => {
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state: newState })
     },
-    [collectionSlug, dispatchFields, globalSlug, id, operation, serverFunction],
+    [collectionSlug, dispatchFields, globalSlug, id, operation, serverFunctions],
   )
 
   const replaceState = useCallback(
@@ -478,7 +478,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const getFieldStateBySchemaPath = useCallback(
     async ({ data, schemaPath }) => {
-      const { state: fieldSchema } = (await serverFunction({
+      const { state: fieldSchema } = (await serverFunctions({
         name: 'form-state',
         args: {
           collectionSlug,
@@ -490,7 +490,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       return fieldSchema
     },
-    [collectionSlug, globalSlug, serverFunction],
+    [collectionSlug, globalSlug, serverFunctions],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(

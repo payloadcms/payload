@@ -49,7 +49,7 @@ export function EditForm({ submitted }: EditFormProps) {
     onSave: onSaveFromContext,
   } = useDocumentInfo()
 
-  const { serverFunction } = useServerFunctions()
+  const { serverFunctions } = useServerFunctions()
 
   const {
     config: {
@@ -115,7 +115,7 @@ export function EditForm({ submitted }: EditFormProps) {
   const onChange: NonNullable<FormProps['onChange']>[0] = useCallback(
     async ({ formState: prevFormState }) => {
       const docPreferences = await getDocPreferences()
-      const { state: newFormState } = (await serverFunction({
+      const { state: newFormState } = (await serverFunctions({
         name: 'form-state',
         args: {
           collectionSlug,
@@ -128,7 +128,7 @@ export function EditForm({ submitted }: EditFormProps) {
 
       return newFormState
     },
-    [collectionSlug, schemaPath, getDocPreferences, serverFunction],
+    [collectionSlug, schemaPath, getDocPreferences, serverFunctions],
   )
 
   return (

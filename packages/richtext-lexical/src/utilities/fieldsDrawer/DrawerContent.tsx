@@ -36,7 +36,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     field: { richTextComponentMap },
   } = useEditorConfigContext()
 
-  const { serverFunction } = useServerFunctions()
+  const { serverFunctions } = useServerFunctions()
 
   const componentMapRenderedFieldsPath = `lexical_internal_feature.${featureKey}.fields${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
   const schemaFieldsPath =
@@ -48,7 +48,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const { state } = (await serverFunction({
+      const { state } = (await serverFunctions({
         name: 'form-state',
         args: {
           id: id!,
@@ -62,11 +62,11 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     }
 
     void awaitInitialState()
-  }, [schemaFieldsPath, id, data, serverFunction])
+  }, [schemaFieldsPath, id, data, serverFunctions])
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = (await serverFunction({
+      const { state } = (await serverFunctions({
         name: 'form-state',
         args: {
           id: id!,
@@ -79,7 +79,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
       return state
     },
 
-    [schemaFieldsPath, id, serverFunction],
+    [schemaFieldsPath, id, serverFunctions],
   )
 
   if (initialState === false) {

@@ -66,7 +66,7 @@ export const LinkButton: React.FC = () => {
 
   const { t } = useTranslation()
   const editor = useSlate()
-  const { serverFunction } = useServerFunctions()
+  const { serverFunctions } = useServerFunctions()
 
   const { closeModal, openModal } = useModal()
   const drawerSlug = useDrawerSlug('rich-text-link')
@@ -95,7 +95,7 @@ export const LinkButton: React.FC = () => {
                 text: editor.selection ? Editor.string(editor, editor.selection) : '',
               }
 
-              const { state } = (await serverFunction({
+              const { state } = (await serverFunctions({
                 name: 'form-state',
                 args: {
                   data,
