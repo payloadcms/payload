@@ -59,6 +59,7 @@ export interface Post {
   category?: (string | null) | Category;
   group?: {
     category?: (string | null) | Category;
+    camelCaseCategory?: (string | null) | Category;
   };
   updatedAt: string;
   createdAt: string;
@@ -98,6 +99,10 @@ export interface Category {
   } | null;
   group?: {
     relatedPosts?: {
+      docs?: (string | Post)[] | null;
+      hasNextPage?: boolean | null;
+    } | null;
+    camelCasePosts?: {
       docs?: (string | Post)[] | null;
       hasNextPage?: boolean | null;
     } | null;
