@@ -8,7 +8,7 @@ import {
   useAuth,
   useDocumentInfo,
   useFieldProps,
-  useServerActions,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -37,7 +37,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     field: { richTextComponentMap },
   } = useEditorConfigContext()
 
-  const { payloadServerAction } = useServerActions()
+  const { payloadServerFunction } = useServerFunctions()
 
   const componentMapRenderedFieldsPath = `lexical_internal_feature.${featureKey}.fields${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
   const schemaFieldsPath =
@@ -49,8 +49,8 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const { state } = (await payloadServerAction({
-        action: 'form-state',
+      const { state } = (await payloadServerFunction({
+        name: 'form-state',
         args: {
           id: id!,
           data: data ?? {},
@@ -64,12 +64,12 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     }
 
     void awaitInitialState()
-  }, [schemaFieldsPath, id, data, payloadServerAction, user, i18n])
+  }, [schemaFieldsPath, id, data, payloadServerFunction, user, i18n])
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = (await payloadServerAction({
-        action: 'form-state',
+      const { state } = (await payloadServerFunction({
+        name: 'form-state',
         args: {
           id: id!,
           formState: prevFormState,
@@ -82,7 +82,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
       return state
     },
 
-    [schemaFieldsPath, id, payloadServerAction, i18n],
+    [schemaFieldsPath, id, payloadServerFunction, i18n],
   )
 
   if (initialState === false) {

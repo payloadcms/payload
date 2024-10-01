@@ -1,9 +1,7 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */
 import type { Metadata } from 'next'
-import type { PayloadServerAction } from 'payload'
 
 import config from '@payload-config'
-import { handleServerActions } from '@payloadcms/next/utilities'
 /* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
 import { generatePageMetadata, RootPage } from '@payloadcms/next/views'
 
@@ -21,16 +19,7 @@ type Args = {
 export const generateMetadata = ({ params, searchParams }: Args): Promise<Metadata> =>
   generatePageMetadata({ config, params, searchParams })
 
-const payloadServerAction: PayloadServerAction = async function (args) {
-  'use server'
-  return handleServerActions({
-    ...args,
-    config,
-    importMap,
-  })
-}
-
 const Page = ({ params, searchParams }: Args) =>
-  RootPage({ config, importMap, params, payloadServerAction, searchParams })
+  RootPage({ config, importMap, params, searchParams })
 
 export default Page

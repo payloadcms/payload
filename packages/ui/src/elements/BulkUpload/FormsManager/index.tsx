@@ -12,7 +12,7 @@ import type { State } from './reducer.js'
 import { fieldReducer } from '../../../forms/Form/fieldReducer.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
-import { useServerActions } from '../../../providers/ServerActions/index.js'
+import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { hasSavePermission as getHasSavePermission } from '../../../utilities/hasSavePermission.js'
 import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
@@ -81,7 +81,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const { code } = useLocale()
   const { i18n, t } = useTranslation()
 
-  const { payloadServerAction } = useServerActions()
+  const { payloadServerFunction } = useServerFunctions()
 
   const [hasSubmitted, setHasSubmitted] = React.useState(false)
   const [docPermissions, setDocPermissions] = React.useState<DocumentPermissions>()
@@ -155,8 +155,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       }
 
       try {
-        const { state: formStateWithoutFiles } = (await payloadServerAction({
-          action: 'form-state',
+        const { state: formStateWithoutFiles } = (await payloadServerFunction({
+          name: 'form-state',
           args: {
             collectionSlug,
             language: i18n.language,
@@ -171,7 +171,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         // swallow error
       }
     },
-    [code, collectionSlug, payloadServerAction, i18n],
+    [code, collectionSlug, payloadServerFunction, i18n],
   )
 
   const setActiveIndex: FormsManagerContext['setActiveIndex'] = React.useCallback(

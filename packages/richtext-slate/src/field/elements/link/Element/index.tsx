@@ -12,7 +12,7 @@ import {
   useDrawerSlug,
   useLocale,
   useModal,
-  useServerActions,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
 import { deepCopyObject, reduceFieldsToValues } from 'payload/shared'
@@ -81,7 +81,7 @@ export const LinkElement = () => {
   const [initialState, setInitialState] = useState<FormState>({})
   const { id, collectionSlug } = useDocumentInfo()
 
-  const { payloadServerAction } = useServerActions()
+  const { payloadServerFunction } = useServerFunctions()
 
   const drawerSlug = useDrawerSlug('rich-text-link')
 
@@ -102,8 +102,8 @@ export const LinkElement = () => {
         url: element.url,
       }
 
-      const { state } = (await payloadServerAction({
-        action: 'form-state',
+      const { state } = (await payloadServerFunction({
+        name: 'form-state',
         args: {
           data,
           language: i18n.language,
@@ -128,7 +128,7 @@ export const LinkElement = () => {
     config,
     id,
     fieldMapPath,
-    payloadServerAction,
+    payloadServerFunction,
     i18n,
   ])
 

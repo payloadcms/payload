@@ -15,7 +15,7 @@ import {
   useDocumentEvents,
   useDocumentInfo,
   useEditDepth,
-  useServerActions,
+  useServerFunctions,
   useUploadEdits,
 } from '@payloadcms/ui'
 import {
@@ -79,7 +79,7 @@ export const DefaultEditView: React.FC = () => {
 
   const { refreshCookieAsync, user } = useAuth()
 
-  const { payloadServerAction } = useServerActions()
+  const { payloadServerFunction } = useServerFunctions()
 
   const {
     config,
@@ -242,8 +242,8 @@ export const DefaultEditView: React.FC = () => {
 
       const docPreferences = await getDocPreferences()
 
-      const { lockedState, state } = (await payloadServerAction({
-        action: 'form-state',
+      const { lockedState, state } = (await payloadServerFunction({
+        name: 'form-state',
         args: {
           id,
           collectionSlug,
@@ -294,7 +294,7 @@ export const DefaultEditView: React.FC = () => {
       isLockingEnabled,
       setDocumentIsLocked,
       lastUpdateTime,
-      payloadServerAction,
+      payloadServerFunction,
     ],
   )
 

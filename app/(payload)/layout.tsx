@@ -1,10 +1,10 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */
 // import '@payloadcms/ui/styles.css' // Uncomment this line if `@payloadcms/ui` in `tsconfig.json` points to `/ui/dist` instead of `/ui/src`
-import type { PayloadServerAction } from 'payload'
+import type { RootServerFunction } from 'payload'
 
 import config from '@payload-config'
 import { RootLayout } from '@payloadcms/next/layouts'
-import { handleServerActions } from '@payloadcms/next/utilities'
+import { handleServerFunctions } from '@payloadcms/next/utilities'
 /* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
 import React from 'react'
 
@@ -15,9 +15,9 @@ type Args = {
   children: React.ReactNode
 }
 
-const payloadServerAction: PayloadServerAction = async function (args) {
+const payloadServerFunction: RootServerFunction = async function (args) {
   'use server'
-  return handleServerActions({
+  return handleServerFunctions({
     ...args,
     config,
     importMap,
@@ -25,7 +25,7 @@ const payloadServerAction: PayloadServerAction = async function (args) {
 }
 
 const Layout = ({ children }: Args) => (
-  <RootLayout config={config} importMap={importMap} payloadServerAction={payloadServerAction}>
+  <RootLayout config={config} importMap={importMap} serverFunction={payloadServerFunction}>
     {children}
   </RootLayout>
 )

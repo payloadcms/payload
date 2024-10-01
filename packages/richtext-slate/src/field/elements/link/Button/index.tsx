@@ -6,7 +6,7 @@ import {
   useDrawerSlug,
   useFieldProps,
   useModal,
-  useServerActions,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
 import { reduceFieldsToValues } from 'payload/shared'
@@ -66,7 +66,7 @@ export const LinkButton: React.FC = () => {
 
   const { i18n, t } = useTranslation()
   const editor = useSlate()
-  const { payloadServerAction } = useServerActions()
+  const { payloadServerFunction } = useServerFunctions()
 
   const { closeModal, openModal } = useModal()
   const drawerSlug = useDrawerSlug('rich-text-link')
@@ -95,8 +95,8 @@ export const LinkButton: React.FC = () => {
                 text: editor.selection ? Editor.string(editor, editor.selection) : '',
               }
 
-              const { state } = (await payloadServerAction({
-                action: 'form-state',
+              const { state } = (await payloadServerFunction({
+                name: 'form-state',
                 args: {
                   data,
                   language: i18n.language,

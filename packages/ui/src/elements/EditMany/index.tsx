@@ -20,7 +20,7 @@ import { OperationContext } from '../../providers/Operation/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
-import { useServerActions } from '../../providers/ServerActions/index.js'
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { FieldSelect } from '../FieldSelect/index.js'
@@ -112,7 +112,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
     },
   } = useConfig()
 
-  const { payloadServerAction } = useServerActions()
+  const { payloadServerFunction } = useServerFunctions()
 
   const { count, getQueryParams, selectAll } = useSelection()
   const { i18n, t } = useTranslation()
@@ -131,8 +131,8 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   React.useEffect(() => {
     if (!hasInitializedState.current) {
       const getInitialState = async () => {
-        const { state: result } = (await payloadServerAction({
-          action: 'form-state',
+        const { state: result } = (await payloadServerFunction({
+          name: 'form-state',
           args: {
             collectionSlug: slug,
             data: {},
@@ -148,12 +148,12 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
       void getInitialState()
     }
-  }, [apiRoute, hasInitializedState, serverURL, slug, payloadServerAction, user, i18n])
+  }, [apiRoute, hasInitializedState, serverURL, slug, payloadServerFunction, user, i18n])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = (await payloadServerAction({
-        action: 'form-state',
+      const { state } = (await payloadServerFunction({
+        name: 'form-state',
         args: {
           collectionSlug: slug,
           formState: prevFormState,
@@ -165,7 +165,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
       return state
     },
-    [slug, payloadServerAction, i18n],
+    [slug, payloadServerFunction, i18n],
   )
 
   if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {

@@ -11,7 +11,7 @@ import {
   useDocumentInfo,
   useFieldProps,
   useFormSubmitted,
-  useServerActions,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
@@ -42,7 +42,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const { path, schemaPath } = useFieldProps()
   const { field: parentLexicalRichTextField } = useEditorConfigContext()
 
-  const { payloadServerAction } = useServerActions()
+  const { payloadServerFunction } = useServerFunctions()
 
   const [initialState, setInitialState] = useState<false | FormState>(false)
 
@@ -62,8 +62,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
   // Field Schema
   useEffect(() => {
     const awaitInitialState = async () => {
-      const { state } = (await payloadServerAction({
-        action: 'form-state',
+      const { state } = (await payloadServerFunction({
+        name: 'form-state',
         args: {
           id,
           data: formData,
@@ -88,12 +88,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
     if (formData) {
       void awaitInitialState()
     }
-  }, [payloadServerAction, schemaFieldsPath, id, user, i18n]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
+  }, [payloadServerFunction, schemaFieldsPath, id, user, i18n]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state: formState } = (await payloadServerAction({
-        action: 'form-state',
+      const { state: formState } = (await payloadServerFunction({
+        name: 'form-state',
         args: {
           id,
           formState: prevFormState,
@@ -113,7 +113,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       return formState
     },
 
-    [id, schemaFieldsPath, formData.blockName, payloadServerAction, i18n],
+    [id, schemaFieldsPath, formData.blockName, payloadServerFunction, i18n],
   )
 
   const classNames = [`${baseClass}__row`, `${baseClass}__row--no-errors`].filter(Boolean).join(' ')

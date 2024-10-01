@@ -12,7 +12,7 @@ import {
   useEditDepth,
   useFieldProps,
   useHotkey,
-  useServerActions,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
 import React, { useCallback, useRef } from 'react'
@@ -35,12 +35,12 @@ export const LinkDrawer: React.FC<Props> = ({
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
   const { id } = useDocumentInfo()
 
-  const { payloadServerAction } = useServerActions()
+  const { payloadServerFunction } = useServerFunctions()
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = (await payloadServerAction({
-        action: 'form-state',
+      const { state } = (await payloadServerFunction({
+        name: 'form-state',
         args: {
           id,
           formState: prevFormState,
@@ -53,7 +53,7 @@ export const LinkDrawer: React.FC<Props> = ({
       return state
     },
 
-    [fieldMapPath, id, payloadServerAction, i18n],
+    [fieldMapPath, id, payloadServerFunction, i18n],
   )
 
   return (

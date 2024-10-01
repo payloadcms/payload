@@ -19,7 +19,6 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
-import { useServerActions } from '../../providers/ServerActions/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
 import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
@@ -28,6 +27,7 @@ import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
 import { useLocale } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
+import { useServerFunctions } from '../ServerFunctions/index.js'
 import { useTranslation } from '../Translation/index.js'
 import { UploadEditsProvider, useUploadEdits } from '../UploadEdits/index.js'
 
@@ -55,7 +55,7 @@ const DocumentInfo: React.FC<
     onSave: onSaveFromProps,
   } = props
 
-  const { payloadServerAction } = useServerActions()
+  const { payloadServerFunction } = useServerFunctions()
 
   const {
     config: {
@@ -492,8 +492,8 @@ const DocumentInfo: React.FC<
 
       const newData = collectionSlug ? json.doc : json.result
 
-      const { state: newState } = (await payloadServerAction({
-        action: 'form-state',
+      const { state: newState } = (await payloadServerFunction({
+        name: 'form-state',
         args: {
           id,
           collectionSlug,
@@ -521,7 +521,7 @@ const DocumentInfo: React.FC<
       locale,
       onSaveFromProps,
       getDocPermissions,
-      payloadServerAction,
+      payloadServerFunction,
       i18n,
     ],
   )
@@ -544,8 +544,8 @@ const DocumentInfo: React.FC<
         setIsLoading(true)
 
         try {
-          const { state: result } = (await payloadServerAction({
-            action: 'form-state',
+          const { state: result } = (await payloadServerFunction({
+            name: 'form-state',
             args: {
               id,
               collectionSlug,
@@ -600,7 +600,7 @@ const DocumentInfo: React.FC<
     initialDataFromProps,
     initialStateFromProps,
     getDocPermissions,
-    payloadServerAction,
+    payloadServerFunction,
     user,
   ])
 

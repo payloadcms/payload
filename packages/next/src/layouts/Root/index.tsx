@@ -1,5 +1,5 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { CustomVersionParser, ImportMap, PayloadServerAction, SanitizedConfig } from 'payload'
+import type { CustomVersionParser, ImportMap, SanitizedConfig, ServerFunction } from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui'
@@ -42,12 +42,12 @@ export const RootLayout = async ({
   children,
   config: configPromise,
   importMap,
-  payloadServerAction,
+  serverFunction,
 }: {
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
   readonly importMap: ImportMap
-  readonly payloadServerAction: PayloadServerAction
+  readonly serverFunction: ServerFunction
 }) => {
   if (
     process.env.NODE_ENV !== 'production' &&
@@ -186,8 +186,8 @@ export const RootLayout = async ({
           isNavOpen={isNavOpen}
           languageCode={languageCode}
           languageOptions={languageOptions}
-          payloadServerAction={payloadServerAction}
           permissions={permissions}
+          serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}
           translations={i18n.translations}

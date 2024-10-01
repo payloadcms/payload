@@ -16,7 +16,7 @@ import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../../providers/Operation/index.js'
-import { useServerActions } from '../../../providers/ServerActions/index.js'
+import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { useUploadEdits } from '../../../providers/UploadEdits/index.js'
 import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
@@ -52,7 +52,7 @@ export function EditForm({ submitted }: EditFormProps) {
 
   const { i18n } = useTranslation()
 
-  const { payloadServerAction } = useServerActions()
+  const { payloadServerFunction } = useServerFunctions()
 
   const {
     config: {
@@ -118,8 +118,8 @@ export function EditForm({ submitted }: EditFormProps) {
   const onChange: NonNullable<FormProps['onChange']>[0] = useCallback(
     async ({ formState: prevFormState }) => {
       const docPreferences = await getDocPreferences()
-      const { state: newFormState } = (await payloadServerAction({
-        action: 'form-state',
+      const { state: newFormState } = (await payloadServerFunction({
+        name: 'form-state',
         args: {
           collectionSlug,
           docPreferences,
@@ -132,7 +132,7 @@ export function EditForm({ submitted }: EditFormProps) {
 
       return newFormState
     },
-    [collectionSlug, schemaPath, getDocPreferences, payloadServerAction, i18n],
+    [collectionSlug, schemaPath, getDocPreferences, payloadServerFunction, i18n],
   )
 
   return (

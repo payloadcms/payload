@@ -3,7 +3,6 @@ import type React from 'react'
 import type { PayloadComponent } from '../config/types.js'
 import type { JsonObject } from '../types/index.js'
 
-export type { PayloadServerAction } from './actions/index.js'
 export type { CellComponentProps, DefaultCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
 export type { DayPickerProps, SharedProps, TimePickerProps } from './elements/DatePicker.js'
@@ -17,7 +16,6 @@ export type {
   DocumentTabConfig,
   DocumentTabProps,
 } from './elements/Tab.js'
-
 export type { CustomUpload } from './elements/Upload.js'
 
 export type {
@@ -334,6 +332,14 @@ export type {
 } from './forms/Label.js'
 
 export type { RowLabel, RowLabelComponent } from './forms/RowLabel.js'
+
+export type {
+  BaseServerFunctionArgs,
+  RootServerFunction,
+  RootServerFunctionArgs,
+  ServerFunction,
+  ServerFunctionConfig,
+} from './functions/index.js'
 
 export type { LanguageOptions } from './LanguageOptions.js'
 

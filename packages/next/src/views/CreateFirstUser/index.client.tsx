@@ -15,7 +15,7 @@ import {
   RenderFields,
   useAuth,
   useConfig,
-  useServerActions,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
 import React from 'react'
@@ -35,7 +35,7 @@ export const CreateFirstUserClient: React.FC<{
     getEntityConfig,
   } = useConfig()
 
-  const { payloadServerAction } = useServerActions()
+  const { payloadServerFunction } = useServerFunctions()
 
   const { i18n, t } = useTranslation()
   const { setUser } = useAuth()
@@ -44,8 +44,8 @@ export const CreateFirstUserClient: React.FC<{
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = (await payloadServerAction({
-        action: 'form-state',
+      const { state } = (await payloadServerFunction({
+        name: 'form-state',
         args: {
           collectionSlug: userSlug,
           formState: prevFormState,
@@ -57,7 +57,7 @@ export const CreateFirstUserClient: React.FC<{
 
       return state
     },
-    [userSlug, payloadServerAction, i18n],
+    [userSlug, payloadServerFunction, i18n],
   )
 
   const handleFirstRegister = (data: { user: ClientUser }) => {

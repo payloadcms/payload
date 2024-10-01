@@ -14,7 +14,7 @@ import {
   useDocumentInfo,
   useLocale,
   useModal,
-  useServerActions,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
 import { deepCopyObject } from 'payload/shared'
@@ -44,7 +44,7 @@ export const UploadDrawer: React.FC<{
   const { closeModal } = useModal()
   const { id, collectionSlug } = useDocumentInfo()
 
-  const { payloadServerAction } = useServerActions()
+  const { payloadServerFunction } = useServerFunctions()
 
   const [initialState, setInitialState] = useState({})
   const {
@@ -74,8 +74,8 @@ export const UploadDrawer: React.FC<{
     const data = deepCopyObject(element?.fields || {})
 
     const awaitInitialState = async () => {
-      const { state } = (await payloadServerAction({
-        action: 'form-state',
+      const { state } = (await payloadServerFunction({
+        name: 'form-state',
         args: {
           id,
           collectionSlug,
@@ -100,14 +100,14 @@ export const UploadDrawer: React.FC<{
     id,
     schemaPath,
     relatedCollection.slug,
-    payloadServerAction,
+    payloadServerFunction,
     i18n,
   ])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = (await payloadServerAction({
-        action: 'form-state',
+      const { state } = (await payloadServerFunction({
+        name: 'form-state',
         args: {
           id,
           formState: prevFormState,
@@ -120,7 +120,7 @@ export const UploadDrawer: React.FC<{
       return state
     },
 
-    [relatedCollection.slug, schemaPath, id, payloadServerAction, i18n],
+    [relatedCollection.slug, schemaPath, id, payloadServerFunction, i18n],
   )
 
   return (

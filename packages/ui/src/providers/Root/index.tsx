@@ -1,6 +1,6 @@
 'use client'
 import type { I18nClient, Language } from '@payloadcms/translations'
-import type { ClientConfig, LanguageOptions, PayloadServerAction, Permissions, User } from 'payload'
+import type { ClientConfig, LanguageOptions, Permissions, ServerFunction, User } from 'payload'
 
 import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
@@ -25,7 +25,7 @@ import { ParamsProvider } from '../Params/index.js'
 import { PreferencesProvider } from '../Preferences/index.js'
 import { RouteCache } from '../RouteCache/index.js'
 import { SearchParamsProvider } from '../SearchParams/index.js'
-import { ServerActionsProvider } from '../ServerActions/index.js'
+import { ServerFunctionsProvider } from '../ServerFunctions/index.js'
 import { ThemeProvider } from '../Theme/index.js'
 import { ToastContainer } from '../ToastContainer/index.js'
 import { TranslationProvider } from '../Translation/index.js'
@@ -38,8 +38,8 @@ type Props = {
   readonly isNavOpen?: boolean
   readonly languageCode: string
   readonly languageOptions: LanguageOptions
-  readonly payloadServerAction: PayloadServerAction
   readonly permissions: Permissions
+  readonly serverFunction: ServerFunction
   readonly switchLanguageServerAction?: (lang: string) => Promise<void>
   readonly theme: Theme
   readonly translations: I18nClient['translations']
@@ -54,8 +54,8 @@ export const RootProvider: React.FC<Props> = ({
   isNavOpen,
   languageCode,
   languageOptions,
-  payloadServerAction,
   permissions,
+  serverFunction,
   switchLanguageServerAction,
   theme,
   translations,
@@ -66,7 +66,7 @@ export const RootProvider: React.FC<Props> = ({
 
   return (
     <Fragment>
-      <ServerActionsProvider payloadServerAction={payloadServerAction}>
+      <ServerFunctionsProvider serverFunction={serverFunction}>
         <RouteCacheComponent>
           <ConfigProvider config={config}>
             <FieldComponentsProvider fieldComponents={fieldComponents}>
@@ -122,7 +122,7 @@ export const RootProvider: React.FC<Props> = ({
             </FieldComponentsProvider>
           </ConfigProvider>
         </RouteCacheComponent>
-      </ServerActionsProvider>
+      </ServerFunctionsProvider>
       <ToastContainer />
     </Fragment>
   )

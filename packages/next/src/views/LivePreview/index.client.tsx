@@ -21,7 +21,7 @@ import {
   useConfig,
   useDocumentEvents,
   useDocumentInfo,
-  useServerActions,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
 import { handleBackToDashboard, handleGoBack, handleTakeOver } from '@payloadcms/ui/shared'
@@ -87,7 +87,7 @@ const PreviewView: React.FC<Props> = ({
     updateDocumentEditor,
   } = useDocumentInfo()
 
-  const { payloadServerAction } = useServerActions()
+  const { payloadServerFunction } = useServerFunctions()
 
   const operation = id ? 'update' : 'create'
 
@@ -177,8 +177,8 @@ const PreviewView: React.FC<Props> = ({
 
       const docPreferences = await getDocPreferences()
 
-      const { lockedState, state } = (await payloadServerAction({
-        action: 'form-state',
+      const { lockedState, state } = (await payloadServerFunction({
+        name: 'form-state',
         args: {
           id,
           collectionSlug,
@@ -234,7 +234,7 @@ const PreviewView: React.FC<Props> = ({
       setCurrentEditor,
       setDocumentIsLocked,
       user,
-      payloadServerAction,
+      payloadServerFunction,
       i18n,
     ],
   )
