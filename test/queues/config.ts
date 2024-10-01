@@ -58,7 +58,6 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
-    autoLogin: false,
   },
   jobs: {
     jobsCollectionOverrides: ({ defaultJobsCollection }) => {

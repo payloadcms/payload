@@ -1,17 +1,15 @@
 import { pathToFileURL } from 'url'
 
 import type { PayloadRequest } from '../types/index.js'
+import type { RunTaskFunction, TaskRunner, TaskType } from './config/taskTypes.js'
 import type {
   BaseJob,
   RunningJob,
-  RunTaskFunction,
-  TaskRunner,
-  TaskType,
   WorkflowConfig,
   WorkflowControlFlow,
   WorkflowTasksStatus,
   WorkflowTypes,
-} from './config/types.js'
+} from './config/workflowTypes.js'
 
 type Args = {
   job: BaseJob

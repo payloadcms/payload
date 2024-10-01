@@ -1,10 +1,10 @@
+import type { TaskConfig } from './config/taskTypes.js'
 import type {
   BaseJob,
-  TaskConfig,
   WorkflowConfig,
   WorkflowTasksStatus,
   WorkflowTypes,
-} from './config/types.js'
+} from './config/workflowTypes.js'
 
 type Args = {
   job: BaseJob

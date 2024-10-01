@@ -1,6 +1,6 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Config } from '../config/types.js'
-import type { BaseJob } from './config/types.js'
+import type { BaseJob } from './config/workflowTypes.js'
 
 import { runWorkflowEndpoint } from './endpoint.js'
 

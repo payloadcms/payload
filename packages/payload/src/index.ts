@@ -1037,22 +1037,25 @@ export type {
   TabsPreferences,
 } from './preferences/types.js'
 export type {
-  BaseJob,
-  JobsConfig,
-  RunJobAccess,
-  RunJobAccessArgs,
-  RunningJob,
   RunTaskFunction,
   TaskConfig,
+  TaskInput,
+  TaskOutput,
   TaskRunner,
   TaskRunnerArgs,
   TaskRunnerResult,
+  TaskRunnerResults,
   TaskType,
+} from './queues/config/taskTypes.js'
+export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types.js'
+export type {
+  BaseJob,
+  RunningJob,
   WorkflowConfig,
   WorkflowControlFlow,
   WorkflowTasksStatus,
   WorkflowTypes,
-} from './queues/config/types.js'
+} from './queues/config/workflowTypes.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'

@@ -1,6 +1,6 @@
 import type { PaginatedDocs } from '../database/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
-import type { BaseJob } from './config/types.js'
+import type { BaseJob } from './config/workflowTypes.js'
 
 import { getWorkflowStatus } from './getWorkflowStatus.js'
 import { runWorkflow } from './runWorkflow.js'
