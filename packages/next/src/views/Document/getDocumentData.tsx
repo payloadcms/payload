@@ -5,7 +5,6 @@ import type {
   Locale,
   PayloadRequest,
   SanitizedCollectionConfig,
-  SanitizedConfig,
   SanitizedGlobalConfig,
 } from 'payload'
 
@@ -14,7 +13,6 @@ import { reduceFieldsToValues } from 'payload/shared'
 
 export const getDocumentData = async (args: {
   collectionConfig?: SanitizedCollectionConfig
-  config: SanitizedConfig
   globalConfig?: SanitizedGlobalConfig
   id?: number | string
   importMap: ImportMap
@@ -25,15 +23,7 @@ export const getDocumentData = async (args: {
   data: Data
   formState: FormState
 }> => {
-  const {
-    id,
-    collectionConfig,
-    config,
-    globalConfig,
-    locale,
-    req,
-    schemaPath: schemaPathFromProps,
-  } = args
+  const { id, collectionConfig, globalConfig, locale, req, schemaPath: schemaPathFromProps } = args
 
   const schemaPath = schemaPathFromProps || collectionConfig?.slug || globalConfig?.slug
 

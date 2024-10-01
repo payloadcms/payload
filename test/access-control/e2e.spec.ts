@@ -530,8 +530,6 @@ describe('access control', () => {
       await page.waitForURL(adminURL)
 
       await expect(page.locator('.next-error-h1')).toBeVisible()
-
-      await page.goto(logoutURL)
     })
   })
 

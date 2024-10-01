@@ -62,7 +62,6 @@ export const Account: React.FC<AdminViewProps> = async ({
     const { data, formState } = await getDocumentData({
       id: user.id,
       collectionConfig,
-      config,
       importMap,
       locale,
       req,
