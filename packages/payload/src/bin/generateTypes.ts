@@ -7,6 +7,7 @@ import { configToJSONSchema } from '../utilities/configToJSONSchema.js'
 import { getLogger } from '../utilities/logger.js'
 
 type TransformFunction = (input: string) => {
+  generics?: string[]
   specifier: string
 }
 
@@ -21,7 +22,10 @@ function processExternalImports(
   const regex = /'externalImport:([^']+)'/g
 
   const processedContent = fileContent.replace(regex, (match: string, captureGroup: string) => {
-    const { specifier } = transformFunction(captureGroup)
+    const { generics, specifier } = transformFunction(captureGroup)
+    if (generics && generics.length > 0) {
+      return specifier + '<' + generics.join(',') + '>'
+    }
     return specifier
   })
 
@@ -70,6 +74,11 @@ export async function generateTypes(
 
   const { processedContent } = processExternalImports(_compiled, (captureGroup) => {
     const importString = captureGroup.split(':')[0]
+    let generics: string[] = []
+    if (captureGroup.includes(':')) {
+      // Defines generics
+      generics = captureGroup.split(':')[1].split(',')
+    }
 
     const importStringSplit = importString.split('#')
 
@@ -79,6 +88,7 @@ export async function generateTypes(
     if (rawImportStrings.includes(importString)) {
       const safeSpecifier = specifier + '_' + importsFound
       return {
+        generics,
         specifier: safeSpecifier,
       }
     }
@@ -90,6 +100,7 @@ export async function generateTypes(
 
     importStrings.push(fullImportString)
     return {
+      generics,
       specifier: safeSpecifier,
     }
   })
