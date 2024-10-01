@@ -1,4 +1,4 @@
-import type { ClientServerFunction, ServerFunction } from 'payload'
+import type { ClientServerFunction } from 'payload'
 
 import React, { createContext } from 'react'
 
@@ -20,7 +20,7 @@ export const useServerFunctions = () => {
 
 export const ServerFunctionsProvider: React.FC<{
   children: React.ReactNode
-  serverFunction: ServerFunction
+  serverFunction: ClientServerFunction
 }> = ({ children, serverFunction }) => {
   return (
     <ServerFunctionsContext.Provider value={{ serverFunction }}>

@@ -1,6 +1,13 @@
 'use client'
 import type { I18nClient, Language } from '@payloadcms/translations'
-import type { ClientConfig, LanguageOptions, Permissions, ServerFunction, User } from 'payload'
+import type {
+  ClientConfig,
+  ClientServerFunction,
+  LanguageOptions,
+  Permissions,
+  ServerFunction,
+  User,
+} from 'payload'
 
 import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
@@ -39,7 +46,7 @@ type Props = {
   readonly languageCode: string
   readonly languageOptions: LanguageOptions
   readonly permissions: Permissions
-  readonly serverFunction: ServerFunction
+  readonly serverFunction: ClientServerFunction
   readonly switchLanguageServerAction?: (lang: string) => Promise<void>
   readonly theme: Theme
   readonly translations: I18nClient['translations']

@@ -16,7 +16,10 @@ type Result = {
   user: User
 }
 
-export const initReq = cache(async function (config: SanitizedConfig): Promise<Result> {
+export const initReq = cache(async function (
+  configPromise: Promise<SanitizedConfig> | SanitizedConfig,
+): Promise<Result> {
+  const config = await configPromise
   const payload = await getPayloadHMR({ config })
 
   const headers = getHeaders()

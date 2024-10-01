@@ -41,14 +41,11 @@ export const getDocumentData = async (args: {
     const { state: formState } = await buildFormState({
       id,
       collectionSlug: collectionConfig?.slug,
-      config,
       globalSlug: globalConfig?.slug,
-      i18n: req.i18n,
       locale: locale?.code,
       operation: (collectionConfig && id) || globalConfig ? 'update' : 'create',
-      payload: req.payload,
+      req,
       schemaPath,
-      user: req.user,
     })
 
     const data = reduceFieldsToValues(formState, true)

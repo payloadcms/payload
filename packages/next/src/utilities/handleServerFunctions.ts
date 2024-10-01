@@ -1,37 +1,29 @@
-import type { BaseServerFunctionArgs, ServerFunction } from 'payload'
+import type { RootServerFunction, ServerFunction } from 'payload'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 
-import { getPayloadHMR } from './getPayloadHMR.js'
+import { initReq } from './initReq.js'
 
 const defaultFunctions = {
   'form-state': buildFormState as any as ServerFunction,
 }
 
-export const handleServerFunctions = async (
-  args: {
-    args: Parameters<typeof buildFormState>[0]
-    name: 'form-state'
-  } & BaseServerFunctionArgs,
-): Promise<unknown> => {
+export const handleServerFunctions: RootServerFunction = async (args) => {
   const { name: fnKey, args: fnArgs, config: configPromise, importMap } = args
 
-  const config = await configPromise
+  const { req } = await initReq(configPromise)
 
-  const payload = await getPayloadHMR({ config })
-
-  const augmentedArgs = {
+  const augmentedArgs: Parameters<ServerFunction>[0] = {
     ...fnArgs,
-    config,
     importMap,
-    payload,
+    req,
   }
 
   const serverFunctions: {
     [key: string]: ServerFunction
   } = {
     ...defaultFunctions,
-    ...config?.admin?.serverFunctions?.reduce((acc, fnConfig) => {
+    ...req.payload?.config?.admin?.serverFunctions?.reduce((acc, fnConfig) => {
       acc[fnConfig.name] = fnConfig.fn
       return acc
     }, {}),

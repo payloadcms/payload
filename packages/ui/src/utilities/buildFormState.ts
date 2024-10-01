@@ -1,29 +1,21 @@
-import {
-  type I18n,
-  type I18nClient,
-  initI18n,
-  type SupportedLanguages,
-} from '@payloadcms/translations'
-import { cookies, headers as getHeaders } from 'next/headers.js'
-import {
-  type ClientUser,
-  createLocalReq,
-  type Data,
-  type DocumentPreferences,
-  type Field,
-  type FormState,
-  type Payload,
-  type SanitizedConfig,
-  type TypeWithID,
-  type User,
+import type {
+  ClientUser,
+  Data,
+  DocumentPreferences,
+  Field,
+  FormState,
+  PayloadRequest,
+  SanitizedConfig,
+  TypeWithID,
 } from 'payload'
+
+import { type I18nClient, type SupportedLanguages } from '@payloadcms/translations'
 import { reduceFieldsToValues } from 'payload/shared'
 
 import type { FieldSchemaMap } from './buildFieldSchemaMap/types.js'
 
 import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
-import { getRequestLanguage } from './getRequestLanguage.js'
 
 let cached = global._payload_fieldSchemaMap
 
@@ -51,12 +43,10 @@ export const getFieldSchemaMap = (args: {
 
 export type BuildFormStateArgs = {
   collectionSlug?: string
-  config: SanitizedConfig
   data?: Data
   docPreferences?: DocumentPreferences
   formState?: FormState
   globalSlug?: string
-  i18n?: I18nClient
   id?: number | string
   /*
     If not i18n was passed, the language can be passed to init i18n
@@ -64,11 +54,10 @@ export type BuildFormStateArgs = {
   language?: keyof SupportedLanguages
   locale?: string
   operation?: 'create' | 'update'
-  payload: Payload
+  req: PayloadRequest
   returnLockStatus?: boolean
   schemaPath: string
   updateLastEdited?: boolean
-  user?: User
 }
 
 export const buildFormState = async (
@@ -80,60 +69,32 @@ export const buildFormState = async (
   const {
     id: idFromArgs,
     collectionSlug,
-    config,
     data: dataFromArgs,
     docPreferences: docPreferencesFromArgs,
     formState,
     globalSlug,
-    i18n: i18nFromArgs,
-    language,
     locale,
     operation,
-    payload,
+    req,
     returnLockStatus,
     schemaPath,
     updateLastEdited,
-    user: userFromArgs,
   } = args
 
-  if (!payload) {
+  if (!req.payload) {
     throw new Error('No Payload instance provided')
   }
 
-  if (!config) {
+  if (!req.payload.config) {
     throw new Error('No config provided')
   }
 
-  const headers = getHeaders()
-
-  let languageCode = language
-
-  if (!languageCode) {
-    languageCode = getRequestLanguage({
-      cookies: cookies(),
-      defaultLanguage: config.i18n.fallbackLanguage,
-      headers,
-    }) as keyof SupportedLanguages
-  }
-
-  let i18n = i18nFromArgs as I18n // TODO: fix this type
-
-  if (!i18n) {
-    i18n = await initI18n({
-      config: config.i18n,
-      context: 'client',
-      language: languageCode,
-    })
-  }
-
-  let user = userFromArgs
-
-  if (user === undefined) {
-    const userResult = await payload.auth({ headers })
-    user = userResult.user
-  }
-
-  const req = await createLocalReq({ req: { headers, i18n, user } }, payload)
+  const {
+    i18n,
+    payload,
+    payload: { config },
+    user,
+  } = req
 
   const incomingUserSlug = user?.collection
 

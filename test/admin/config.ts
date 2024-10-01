@@ -89,7 +89,7 @@ export default buildConfigWithDefaults({
     serverFunctions: [
       {
         name: 'my-server-function',
-        fn: ({ config, payload, importMap, value }) => {
+        fn: ({ req, importMap, value }) => {
           return `Hello, ${value as string}`
         },
       },

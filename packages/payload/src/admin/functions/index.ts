@@ -1,22 +1,36 @@
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { SanitizedConfig } from '../../config/types.js'
-import type { Payload } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 
 export type BaseServerFunctionArgs = {
-  config: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
-  payload: Payload
+  req: PayloadRequest
 }
 
-export type ServerFunctionArgs = BaseServerFunctionArgs & Record<string, unknown>
+export type ServerFunctionArgs = {
+  args: Record<string, unknown>
+  name: string
+}
 
-export type ClientServerFunction = (args: Record<string, unknown>) => Promise<unknown> | unknown
+export type ClientServerFunctionArgs = {
+  args: Record<string, unknown>
+  name: string
+}
 
-export type ServerFunction = (args: ServerFunctionArgs) => Promise<unknown> | unknown
+export type ClientServerFunction = (args: ClientServerFunctionArgs) => Promise<unknown> | unknown
+
+export type ServerFunction = (
+  args: BaseServerFunctionArgs & ClientServerFunctionArgs['args'],
+) => Promise<unknown> | unknown
 
 export type ServerFunctionConfig = {
   fn: ServerFunction
   name: string
 }
 
-export type RootServerFunction = (args: ServerFunctionArgs) => Promise<unknown>
+export type RootServerFunction = (
+  args: {
+    config: Promise<SanitizedConfig> | SanitizedConfig
+    importMap: ImportMap
+  } & ClientServerFunctionArgs,
+) => Promise<unknown>
