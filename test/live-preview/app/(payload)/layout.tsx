@@ -16,7 +16,7 @@ type Args = {
 
 const serverFunctions: ClientServerFunction = async function (args) {
   'use server'
-  return await handleServerFunctions({
+  return handleServerFunctions({
     ...args,
     config,
     importMap,
