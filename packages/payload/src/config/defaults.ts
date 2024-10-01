@@ -19,6 +19,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
       account: '/account',
       createFirstUser: '/create-first-user',
       forgot: '/forgot',
+      graphqlPlayground: '/graphql-playground',
       inactivity: '/logout-inactivity',
       login: '/login',
       logout: '/logout',

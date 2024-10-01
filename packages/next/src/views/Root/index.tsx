@@ -39,7 +39,10 @@ export const RootPage = async ({
 
   const {
     admin: {
-      routes: { createFirstUser: _createFirstUserRoute },
+      routes: {
+        createFirstUser: _createFirstUserRoute,
+        graphqlPlayground: _graphqlPlaygroundRoute,
+      },
       user: userSlug,
     },
     routes: { admin: adminRoute },
@@ -78,6 +81,7 @@ export const RootPage = async ({
       ?.then((doc) => !!doc)
 
     const createFirstUserRoute = formatAdminURL({ adminRoute, path: _createFirstUserRoute })
+    const graphqlPlaygroundRoute = formatAdminURL({ adminRoute, path: _graphqlPlaygroundRoute })
 
     const collectionConfig = config.collections.find(({ slug }) => slug === userSlug)
     const disableLocalStrategy = collectionConfig?.auth?.disableLocalStrategy
@@ -90,7 +94,11 @@ export const RootPage = async ({
       redirect(createFirstUserRoute)
     }
 
-    if (dbHasUser && currentRoute === createFirstUserRoute) {
+    if (
+      dbHasUser &&
+      currentRoute === createFirstUserRoute &&
+      currentRoute !== graphqlPlaygroundRoute
+    ) {
       redirect(adminRoute)
     }
   }

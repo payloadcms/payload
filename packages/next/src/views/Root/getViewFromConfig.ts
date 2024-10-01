@@ -10,6 +10,7 @@ import { CreateFirstUserView } from '../CreateFirstUser/index.js'
 import { Dashboard } from '../Dashboard/index.js'
 import { Document as DocumentView } from '../Document/index.js'
 import { forgotPasswordBaseClass, ForgotPasswordView } from '../ForgotPassword/index.js'
+import { GraphQLPlayground } from '../GraphQLPlayground/index.js'
 import { ListView } from '../List/index.js'
 import { loginBaseClass, LoginView } from '../Login/index.js'
 import { LogoutInactivity, LogoutView } from '../Logout/index.js'
@@ -40,6 +41,7 @@ const oneSegmentViews: OneSegmentViews = {
   account: Account,
   createFirstUser: CreateFirstUserView,
   forgot: ForgotPasswordView,
+  graphqlPlayground: GraphQLPlayground,
   inactivity: LogoutInactivity,
   login: LoginView,
   logout: LogoutView,
@@ -134,6 +136,10 @@ export const getViewFromConfig = ({
         if (viewKey === 'account') {
           initPageOptions.redirectUnauthenticatedUser = true
           templateType = 'default'
+        }
+
+        if (viewKey === 'graphqlPlayground') {
+          templateType = undefined
         }
       }
       break

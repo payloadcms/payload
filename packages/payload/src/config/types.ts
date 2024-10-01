@@ -807,6 +807,8 @@ export type Config = {
       createFirstUser?: string
       /** The route for the forgot password page. */
       forgot?: string
+      /** The route for the GraphQL playground if enabled. */
+      graphqlPlayground?: string
       /** The route the user will be redirected to after being inactive for too long. */
       inactivity?: string
       /** The route for the login page. */
