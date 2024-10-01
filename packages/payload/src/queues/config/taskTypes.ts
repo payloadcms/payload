@@ -1,5 +1,5 @@
 import type { Field, PayloadRequest, TypedJobs } from '../../index.js'
-import type { RunningJob } from './workflowTypes.js'
+import type { JobLog, RunningJob } from './workflowTypes.js'
 
 export type TaskRunnerArgs<
   TTaskSlug extends keyof TypedJobs['tasks'],
@@ -13,6 +13,17 @@ export type TaskRunnerArgs<
 export type TaskRunnerResult<TTaskSlug extends keyof TypedJobs['tasks']> = {
   output: TypedJobs['tasks'][TTaskSlug]['output']
   state: 'failed' | 'succeeded'
+}
+
+export type SavedTaskResult<TTaskSlug extends keyof TypedJobs['tasks']> = {
+  input: TypedJobs['tasks'][TTaskSlug]['input']
+  output: TypedJobs['tasks'][TTaskSlug]['output']
+} & Omit<JobLog, 'input' | 'output'>
+
+export type SavedTaskResults = {
+  [TTaskSlug in keyof TypedJobs['tasks']]: {
+    [id: string]: SavedTaskResult<TTaskSlug>
+  }
 }
 
 export type TaskRunner<TTaskSlug extends keyof TypedJobs['tasks']> = (

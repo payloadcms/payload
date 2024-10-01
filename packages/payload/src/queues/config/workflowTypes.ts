@@ -2,6 +2,7 @@ import type { Field } from '../../fields/config/types.js'
 import type { TypedCollection, TypedJobs } from '../../index.js'
 import type {
   RunTaskFunction,
+  SavedTaskResults,
   TaskConfig,
   TaskInput,
   TaskOutput,
@@ -9,25 +10,33 @@ import type {
   TaskType,
 } from './taskTypes.js'
 
+export type JobLog = {
+  completedAt: string
+  error?: unknown
+  executedAt: string
+  input?: any
+  output?: any
+  state: 'failed' | 'succeeded'
+  taskID: string
+  taskSlug: string
+}
+
 export type BaseJob = {
   completedAt?: string
   error?: unknown
   hasError?: boolean
   id: number | string
   input?: any
-  log: {
-    completedAt: string
-    error?: unknown
-    executedAt: string
-    input?: any
-    output?: any
-    state: 'failed' | 'succeeded'
-    taskID: string
-    taskSlug: string
-  }[]
+  log: JobLog[]
   processing?: boolean
   queue: string
   seenByWorker?: boolean
+  tasks?: {
+    // Added by afterRead hook
+    [taskSlug: string]: {
+      [taskID: string]: BaseJob['log'][0]
+    }
+  }
   waitUntil?: string
   workflowSlug: string
 }
@@ -36,7 +45,7 @@ export type WorkflowTypes = keyof TypedJobs['workflows']
 
 export type RunningJob<TWorkflowSlug extends keyof TypedJobs['workflows']> = {
   input: TypedJobs['workflows'][TWorkflowSlug]['input']
-  tasks: TaskRunnerResults
+  tasks: SavedTaskResults
 } & TypedCollection['payload-jobs']
 
 export type WorkflowControlFlow<TWorkflowSlug extends keyof TypedJobs['workflows']> = (args: {

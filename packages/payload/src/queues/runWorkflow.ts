@@ -27,10 +27,10 @@ export const runWorkflow = async ({ job, req, workflowConfig, workflowTasksStatu
   // OR it will be a path, which we will need to import via eval to avoid
   // Next.js compiler dynamic import expression errors
 
-  let runner: WorkflowControlFlow<WorkflowTypes>
+  let controlFlowRunner: WorkflowControlFlow<WorkflowTypes>
 
   if (typeof workflowConfig.controlFlowInJS === 'function') {
-    runner = workflowConfig.controlFlowInJS
+    controlFlowRunner = workflowConfig.controlFlowInJS
   } else {
     const [runnerPath, runnerImportName] = workflowConfig.controlFlowInJS.split('#')
 
@@ -41,24 +41,24 @@ export const runWorkflow = async ({ job, req, workflowConfig, workflowTasksStatu
 
     // If the path has indicated an #exportName, try to get it
     if (runnerImportName && runnerModule[runnerImportName]) {
-      runner = runnerModule[runnerImportName]
+      controlFlowRunner = runnerModule[runnerImportName]
     }
 
     // If there is a default export, use it
-    if (!runner && runnerModule.default) {
-      runner = runnerModule.default
+    if (!controlFlowRunner && runnerModule.default) {
+      controlFlowRunner = runnerModule.default
     }
 
     // Finally, use whatever was imported
-    if (!runner) {
-      runner = runnerModule
+    if (!controlFlowRunner) {
+      controlFlowRunner = runnerModule
     }
 
-    if (!runner) {
+    if (!controlFlowRunner) {
       const errorMessage = `Can't find runner while importing with the path ${workflowConfig.controlFlowInJS} in job type ${job.workflowSlug}.`
       req.payload.logger.error(errorMessage)
 
-      await req.payload.update({
+      const updatedJob = (await req.payload.update({
         id: job.id,
         collection: 'payload-jobs',
         data: {
@@ -77,13 +77,19 @@ export const runWorkflow = async ({ job, req, workflowConfig, workflowTasksStatu
           processing: false,
         },
         req,
-      })
+      })) as BaseJob
+      // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
+      job.error = updatedJob.error
+      job.hasError = updatedJob.hasError
+      job.log = updatedJob.log
+      job.tasks = updatedJob.tasks
+      job.processing = updatedJob.processing
 
       return
     }
   }
 
-  await req.payload.update({
+  const updatedJob = (await req.payload.update({
     id: job.id,
     collection: 'payload-jobs',
     data: {
@@ -91,7 +97,10 @@ export const runWorkflow = async ({ job, req, workflowConfig, workflowTasksStatu
       seenByWorker: true,
     },
     req,
-  })
+  })) as BaseJob
+  // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
+  job.seenByWorker = updatedJob.seenByWorker
+  job.processing = updatedJob.processing
 
   const runTask: RunTaskFunction = async ({ id, input, retries, task }) => {
     const taskConfig = req.payload.config.jobs.tasks.find((t) => t.slug === task)
@@ -143,7 +152,7 @@ export const runWorkflow = async ({ job, req, workflowConfig, workflowTasksStatu
         const errorMessage = `Can't find runner while importing with the path ${workflowConfig.controlFlowInJS} in job type ${job.workflowSlug} for task ${taskConfig.slug}.`
         req.payload.logger.error(errorMessage)
 
-        await req.payload.update({
+        const updatedJob = (await req.payload.update({
           id: job.id,
           collection: 'payload-jobs',
           data: {
@@ -162,23 +171,58 @@ export const runWorkflow = async ({ job, req, workflowConfig, workflowTasksStatu
             processing: false,
           },
           req,
-        })
+        })) as BaseJob
+        // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
+        job.error = updatedJob.error
+        job.hasError = updatedJob.hasError
+        job.log = updatedJob.log
+        job.processing = updatedJob.processing
+        job.tasks = updatedJob.tasks
 
         return
       }
     }
 
     const executedAt = new Date()
-    let output
+    let output: object
     try {
-      output = await runner({
+      const runnerOutput = await runner({
         input,
         job: job as unknown as RunningJob<WorkflowTypes>, // TODO: Type this better
         req,
       })
+      if (runnerOutput.state === 'failed') {
+        const updatedJob = (await req.payload.update({
+          id: job.id,
+          collection: 'payload-jobs',
+          data: {
+            log: [
+              ...job.log,
+              {
+                completedAt: new Date(),
+                error: runnerOutput.state,
+                executedAt,
+                input,
+                output,
+                state: 'failed',
+                taskID: id,
+                taskSlug: task,
+              },
+            ],
+          } as BaseJob,
+          req,
+        })) as BaseJob
+
+        // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
+        job.log = updatedJob.log
+        job.tasks = updatedJob.tasks
+        throw new Error('Task failed')
+      } else {
+        output = runnerOutput.output
+      }
     } catch (err) {
       console.error('Error in task', err)
-      await req.payload.update({
+      const updatedJob = (await req.payload.update({
         id: job.id,
         collection: 'payload-jobs',
         data: {
@@ -197,7 +241,12 @@ export const runWorkflow = async ({ job, req, workflowConfig, workflowTasksStatu
           ],
         } as BaseJob,
         req,
-      })
+      })) as BaseJob
+
+      // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
+      job.log = updatedJob.log
+      job.tasks = updatedJob.tasks
+
       throw err
     }
 
@@ -210,7 +259,7 @@ export const runWorkflow = async ({ job, req, workflowConfig, workflowTasksStatu
       totalTried: 0,
     }
 
-    await req.payload.update({
+    const updatedJob = (await req.payload.update({
       id: job.id,
       collection: 'payload-jobs',
       data: {
@@ -228,18 +277,22 @@ export const runWorkflow = async ({ job, req, workflowConfig, workflowTasksStatu
         ],
       } as BaseJob,
       req,
-    })
+    })) as BaseJob
+    // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
+    job.log = updatedJob.log
+    job.tasks = updatedJob.tasks
 
     return output
   }
 
   // Run the job
   try {
-    await runner({
+    await controlFlowRunner({
       job: job as unknown as RunningJob<WorkflowTypes>, //TODO: Type this better
       runTask,
     })
   } catch (err) {
+    req.payload.logger.error({ err, job, msg: 'Error running workflow' })
     return
   }
 

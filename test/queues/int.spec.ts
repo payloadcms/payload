@@ -87,6 +87,6 @@ describe('Queues', () => {
     })
 
     expect(postAfterJobs.jobStep1Ran).toStrictEqual('hello')
-    expect(postAfterJobs.jobStep2Ran).toStrictEqual('goodbye')
+    expect(postAfterJobs.jobStep2Ran).toStrictEqual('hellohellohellohello')
   })
 })

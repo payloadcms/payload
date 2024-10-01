@@ -147,8 +147,8 @@ export default buildConfigWithDefaults({
             task: 'UpdatePostStep2',
             id: '2',
             input: {
-              post: job.tasks.UpdatePost['1'].output.messageTwice,
-              messageTwice: output.messageTwice,
+              post: job.tasks.UpdatePost['1'].input.post,
+              messageTwice: job.tasks.UpdatePost['1'].output.messageTwice,
             },
           })
         },

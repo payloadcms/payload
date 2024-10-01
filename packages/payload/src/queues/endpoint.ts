@@ -5,7 +5,7 @@ import { runAllWorkflowsAndJobs, type RunJobsArgs } from './runAllWorkflowsAndJo
 export const runWorkflowEndpoint: Endpoint = {
   handler: async (req) => {
     if (
-      !Array.isArray(req.payload.config.jobs.workflows?.length) ||
+      !Array.isArray(req.payload.config.jobs.workflows) ||
       !(req.payload.config.jobs?.workflows?.length > 0)
     ) {
       return Response.json(
