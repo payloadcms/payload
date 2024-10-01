@@ -15,5 +15,9 @@ export const getQueryDraftsSort = (sort: string): string => {
     orderBy = sort.substring(1)
   }
 
+  if (orderBy === 'id') {
+    return `${direction}parent`
+  }
+
   return `${direction}version.${orderBy}`
 }
