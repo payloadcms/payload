@@ -55,6 +55,30 @@ const handleNonHasManyValues = (formattedValue, operator, path) => {
   }
 }
 
+const buildExistsQuery = (formattedValue, path) => {
+  if (formattedValue) {
+    return {
+      rawQuery: {
+        $and: [
+          { [path]: { $exists: true } },
+          { [path]: { $ne: null } },
+          { [path]: { $ne: '' } }, // Exclude null and empty string
+        ],
+      },
+    }
+  } else {
+    return {
+      rawQuery: {
+        $or: [
+          { [path]: { $exists: false } },
+          { [path]: { $eq: null } },
+          { [path]: { $eq: '' } }, // Treat empty string as null / undefined
+        ],
+      },
+    }
+  }
+}
+
 export const sanitizeQueryValue = ({
   field,
   hasCustomID,
@@ -102,8 +126,16 @@ export const sanitizeQueryValue = ({
     }
   }
 
-  if (field.type === 'number' && typeof formattedValue === 'string') {
-    formattedValue = Number(val)
+  if (field.type === 'number') {
+    if (typeof formattedValue === 'string' && operator !== 'exists') {
+      formattedValue = Number(val)
+    }
+
+    if (operator === 'exists') {
+      formattedValue = val === 'true' ? true : val === 'false' ? false : Boolean(val)
+
+      return buildExistsQuery(formattedValue, path)
+    }
   }
 
   if (field.type === 'date' && typeof val === 'string' && operator !== 'exists') {
@@ -193,27 +225,7 @@ export const sanitizeQueryValue = ({
     if (operator === 'exists') {
       formattedValue = formattedValue === 'true' || formattedValue === true
 
-      if (formattedValue) {
-        return {
-          rawQuery: {
-            $and: [
-              { [path]: { $exists: true } },
-              { [path]: { $ne: null } },
-              { [path]: { $ne: '' } },
-            ],
-          },
-        }
-      } else {
-        return {
-          rawQuery: {
-            $or: [
-              { [path]: { $exists: false } },
-              { [path]: { $eq: null } },
-              { [path]: { $eq: '' } }, // Treat empty string as null / undefined
-            ],
-          },
-        }
-      }
+      return buildExistsQuery(formattedValue, path)
     }
   }
 
