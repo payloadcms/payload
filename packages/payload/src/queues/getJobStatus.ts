@@ -12,11 +12,7 @@ type Args = {
   workflowConfig: WorkflowConfig<WorkflowTypes>
 }
 
-export const getWorkflowStatus = ({
-  job,
-  tasksConfig,
-  workflowConfig,
-}: Args): WorkflowTasksStatus => {
+export const getJobStatus = ({ job, tasksConfig, workflowConfig }: Args): WorkflowTasksStatus => {
   const tasksStatus: WorkflowTasksStatus = {}
 
   // First, add (in order) the steps from the config to

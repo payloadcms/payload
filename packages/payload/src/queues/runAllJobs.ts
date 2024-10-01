@@ -2,8 +2,8 @@ import type { PaginatedDocs } from '../database/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { BaseJob } from './config/workflowTypes.js'
 
-import { getWorkflowStatus } from './getWorkflowStatus.js'
-import { runWorkflow } from './runWorkflow.js'
+import { getJobStatus } from './getJobStatus.js'
+import { runJob } from './runJob.js'
 
 export type RunJobsArgs = {
   limit?: number
@@ -11,11 +11,7 @@ export type RunJobsArgs = {
   req: PayloadRequest
 }
 
-export const runAllWorkflowsAndJobs = async ({
-  limit = 10,
-  queue,
-  req,
-}: RunJobsArgs): Promise<boolean> => {
+export const runAllJobs = async ({ limit = 10, queue, req }: RunJobsArgs): Promise<boolean> => {
   const where: Where = {
     and: [
       {
@@ -103,12 +99,12 @@ export const runAllWorkflowsAndJobs = async ({
         return
       }
 
-      const workflowTasksStatus = getWorkflowStatus({
+      const workflowTasksStatus = getJobStatus({
         job,
         tasksConfig: req.payload.config.jobs.tasks,
         workflowConfig,
       })
-      await runWorkflow({ job, req, workflowConfig, workflowTasksStatus })
+      await runJob({ job, req, workflowConfig, workflowTasksStatus })
     }),
   )
 

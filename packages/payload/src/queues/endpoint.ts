@@ -1,6 +1,6 @@
 import type { Endpoint } from '../config/types.js'
 
-import { runAllWorkflowsAndJobs, type RunJobsArgs } from './runAllWorkflowsAndJobs.js'
+import { runAllJobs, type RunJobsArgs } from './runAllJobs.js'
 
 export const runWorkflowEndpoint: Endpoint = {
   handler: async (req) => {
@@ -43,7 +43,7 @@ export const runWorkflowEndpoint: Endpoint = {
     }
 
     try {
-      await runAllWorkflowsAndJobs(runJobsArgs)
+      await runAllJobs(runJobsArgs)
     } catch (err) {
       req.payload.logger.error({
         err,

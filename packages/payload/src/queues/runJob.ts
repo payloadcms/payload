@@ -18,7 +18,7 @@ type Args = {
   workflowTasksStatus: WorkflowTasksStatus
 }
 
-export const runWorkflow = async ({ job, req, workflowConfig, workflowTasksStatus }: Args) => {
+export const runJob = async ({ job, req, workflowConfig, workflowTasksStatus }: Args) => {
   if (!workflowConfig.controlFlowInJS) {
     throw new Error('Currently, only workflows with controlFlowInJS are supported')
   }
