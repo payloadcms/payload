@@ -1065,6 +1065,7 @@ export {
   configToJSONSchema,
   entityToJSONSchema,
   fieldsToJSONSchema,
+  jsonSchemaExternalImport,
   withNullableJSONSchemaType,
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'

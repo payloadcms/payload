@@ -939,6 +939,23 @@ function generateJobsSchemas(
   }
 }
 
+export function jsonSchemaExternalImport({
+  from,
+  specifier,
+}: {
+  from: string
+  specifier: 'default' | ({} & string)
+}): JSONSchema4 {
+  let importString = ''
+  if (specifier === 'default') {
+    importString = `externalImport:${from}#default`
+  } else {
+    importString = `externalImport:${from}#${specifier}`
+  }
+
+  return { type: 'string', const: importString }
+}
+
 /**
  * This is used for generating the TypeScript types (payload-types.ts) with the payload generate:types command.
  */
