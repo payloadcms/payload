@@ -8,8 +8,15 @@ import { getDoc } from '../../../_api/getDoc.js'
 import { getDocs } from '../../../_api/getDocs.js'
 import { PostClient } from './page.client.js'
 
-export default async function Post({ params: { slug = '' } }) {
-  let post: Post | null = null
+type Args = {
+  params: Promise<{
+    slug?: string
+  }>
+}
+
+export default async function Post({ params: paramsPromise }: Args) {
+  const { slug = '' } = await paramsPromise
+  let post: null | Post = null
 
   try {
     post = await getDoc<Post>({
