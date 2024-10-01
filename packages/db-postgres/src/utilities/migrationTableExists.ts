@@ -1,11 +1,18 @@
 import { sql } from 'drizzle-orm'
 
-import type { DrizzleDB } from '../types'
+import type { PostgresAdapter } from '../types.js'
 
-export const migrationTableExists = async (db: DrizzleDB): Promise<boolean> => {
-  const queryRes = await db.execute(sql`SELECT to_regclass('public.payload_migrations');`)
+export const migrationTableExists = async (adapter: PostgresAdapter): Promise<boolean> => {
+  let statement
 
-  // Returns table name 'payload_migrations' or null
-  const exists = queryRes.rows?.[0]?.to_regclass === 'payload_migrations'
-  return exists
+  if (adapter.name === 'postgres') {
+    const prependSchema = adapter.schemaName ? `"${adapter.schemaName}".` : ''
+    statement = `SELECT to_regclass('${prependSchema}"payload_migrations"') AS exists;`
+  }
+
+  const result = await adapter.drizzle.execute(sql.raw(statement))
+
+  const [row] = result.rows
+
+  return row && typeof row === 'object' && 'exists' in row && !!row.exists
 }

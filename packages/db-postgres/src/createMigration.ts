@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
+import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
 import type { CreateMigration } from 'payload/database'
 
 import fs from 'fs'
@@ -43,12 +43,13 @@ const getDefaultDrizzleSnapshot = (): DrizzleSnapshotJSON => ({
     schemas: {},
     tables: {},
   },
-  dialect: 'pg',
+  dialect: 'postgresql',
   enums: {},
   prevId: '00000000-0000-0000-0000-00000000000',
   schemas: {},
+  sequences: {},
   tables: {},
-  version: '5',
+  version: '7',
 })
 
 export const createMigration: CreateMigration = async function createMigration(
@@ -60,7 +61,7 @@ export const createMigration: CreateMigration = async function createMigration(
     fs.mkdirSync(dir)
   }
 
-  const { generateDrizzleJson, generateMigration } = require('drizzle-kit/payload')
+  const { generateDrizzleJson, generateMigration } = require('drizzle-kit/api')
 
   const [yyymmdd, hhmmss] = new Date().toISOString().split('T')
   const formattedDate = yyymmdd.replace(/\D/g, '')
@@ -75,6 +76,12 @@ export const createMigration: CreateMigration = async function createMigration(
   const filePath = `${dir}/${fileName}`
 
   let drizzleJsonBefore = getDefaultDrizzleSnapshot()
+
+  if (this.schemaName) {
+    drizzleJsonBefore.schemas = {
+      [this.schemaName]: this.schemaName,
+    }
+  }
 
   // Get latest migration snapshot
   const latestSnapshot = fs

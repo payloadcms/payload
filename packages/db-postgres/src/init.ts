@@ -14,11 +14,11 @@ export const init: Init = async function init(this: PostgresAdapter) {
   if (this.schemaName) {
     this.pgSchema = pgSchema(this.schemaName)
   } else {
-    this.pgSchema = { table: pgTable }
+    this.pgSchema = { enum: pgEnum, table: pgTable }
   }
 
   if (this.payload.config.localization) {
-    this.enums.enum__locales = pgEnum(
+    this.enums.enum__locales = this.pgSchema.enum(
       '_locales',
       this.payload.config.localization.locales.map(({ code }) => code) as [string, ...string[]],
     )
