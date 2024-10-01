@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@payloadcms/plugin-cloud-storage": "workspace:*",
-    "uploadthing": "^6.10.1"
+    "uploadthing": "^7.0.0"
   },
   "devDependencies": {
     "payload": "workspace:*"
