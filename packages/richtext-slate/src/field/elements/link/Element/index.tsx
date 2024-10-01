@@ -81,7 +81,7 @@ export const LinkElement = () => {
   const [initialState, setInitialState] = useState<FormState>({})
   const { id, collectionSlug } = useDocumentInfo()
 
-  const { payloadServerFunction } = useServerFunctions()
+  const { serverFunction } = useServerFunctions()
 
   const drawerSlug = useDrawerSlug('rich-text-link')
 
@@ -102,7 +102,7 @@ export const LinkElement = () => {
         url: element.url,
       }
 
-      const { state } = (await payloadServerFunction({
+      const { state } = (await serverFunction({
         name: 'form-state',
         args: {
           data,
@@ -128,7 +128,7 @@ export const LinkElement = () => {
     config,
     id,
     fieldMapPath,
-    payloadServerFunction,
+    serverFunction,
     i18n,
   ])
 

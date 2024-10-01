@@ -52,7 +52,7 @@ export function EditForm({ submitted }: EditFormProps) {
 
   const { i18n } = useTranslation()
 
-  const { payloadServerFunction } = useServerFunctions()
+  const { serverFunction } = useServerFunctions()
 
   const {
     config: {
@@ -118,7 +118,7 @@ export function EditForm({ submitted }: EditFormProps) {
   const onChange: NonNullable<FormProps['onChange']>[0] = useCallback(
     async ({ formState: prevFormState }) => {
       const docPreferences = await getDocPreferences()
-      const { state: newFormState } = (await payloadServerFunction({
+      const { state: newFormState } = (await serverFunction({
         name: 'form-state',
         args: {
           collectionSlug,
@@ -132,7 +132,7 @@ export function EditForm({ submitted }: EditFormProps) {
 
       return newFormState
     },
-    [collectionSlug, schemaPath, getDocPreferences, payloadServerFunction, i18n],
+    [collectionSlug, schemaPath, getDocPreferences, serverFunction, i18n],
   )
 
   return (

@@ -85,6 +85,16 @@ export default buildConfigWithDefaults({
           path: customParamViewPath,
         },
       },
+      serverFunctions: [
+        {
+          name: 'my-server-function',
+          function: ({ config, payload, importMap }) => {
+            return {
+              message: 'Hello from my server function',
+            }
+          },
+        },
+      ],
     },
     meta: {
       description: 'This is a custom meta description',

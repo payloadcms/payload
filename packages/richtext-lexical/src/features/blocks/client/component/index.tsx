@@ -42,7 +42,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const { path, schemaPath } = useFieldProps()
   const { field: parentLexicalRichTextField } = useEditorConfigContext()
 
-  const { payloadServerFunction } = useServerFunctions()
+  const { serverFunction } = useServerFunctions()
 
   const [initialState, setInitialState] = useState<false | FormState>(false)
 
@@ -62,7 +62,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   // Field Schema
   useEffect(() => {
     const awaitInitialState = async () => {
-      const { state } = (await payloadServerFunction({
+      const { state } = (await serverFunction({
         name: 'form-state',
         args: {
           id,
@@ -88,11 +88,11 @@ export const BlockComponent: React.FC<Props> = (props) => {
     if (formData) {
       void awaitInitialState()
     }
-  }, [payloadServerFunction, schemaFieldsPath, id, user, i18n]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
+  }, [serverFunction, schemaFieldsPath, id, user, i18n]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state: formState } = (await payloadServerFunction({
+      const { state: formState } = (await serverFunction({
         name: 'form-state',
         args: {
           id,
@@ -113,7 +113,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       return formState
     },
 
-    [id, schemaFieldsPath, formData.blockName, payloadServerFunction, i18n],
+    [id, schemaFieldsPath, formData.blockName, serverFunction, i18n],
   )
 
   const classNames = [`${baseClass}__row`, `${baseClass}__row--no-errors`].filter(Boolean).join(' ')

@@ -35,7 +35,7 @@ export const CreateFirstUserClient: React.FC<{
     getEntityConfig,
   } = useConfig()
 
-  const { payloadServerFunction } = useServerFunctions()
+  const { serverFunction } = useServerFunctions()
 
   const { i18n, t } = useTranslation()
   const { setUser } = useAuth()
@@ -44,7 +44,7 @@ export const CreateFirstUserClient: React.FC<{
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = (await payloadServerFunction({
+      const { state } = (await serverFunction({
         name: 'form-state',
         args: {
           collectionSlug: userSlug,
@@ -57,7 +57,7 @@ export const CreateFirstUserClient: React.FC<{
 
       return state
     },
-    [userSlug, payloadServerFunction, i18n],
+    [userSlug, serverFunction, i18n],
   )
 
   const handleFirstRegister = (data: { user: ClientUser }) => {

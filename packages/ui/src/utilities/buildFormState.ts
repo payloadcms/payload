@@ -103,13 +103,6 @@ export const buildFormState = async (
     throw new Error('No config provided')
   }
 
-  let user = userFromArgs
-
-  if (user === undefined) {
-    const userResult = await payload.auth({ headers: headers() })
-    user = userResult.user
-  }
-
   let i18n = i18nFromArgs as I18n // TODO: fix this type
 
   if (!i18n) {
@@ -120,7 +113,14 @@ export const buildFormState = async (
     })
   }
 
+  let user = userFromArgs
+
   const req = await createLocalReq({ req: { i18n }, user }, payload)
+
+  if (user === undefined) {
+    const userResult = await payload.auth({ headers: headers(), req })
+    user = userResult.user
+  }
 
   const incomingUserSlug = user?.collection
 

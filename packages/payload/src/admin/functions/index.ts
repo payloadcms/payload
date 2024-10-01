@@ -8,18 +8,15 @@ export type BaseServerFunctionArgs = {
   payload: Payload
 }
 
-export type ServerFunctionArgs = {
-  args: Record<string, unknown>
-  name: string
-}
+export type ServerFunctionArgs = BaseServerFunctionArgs & Record<string, unknown>
 
-export type ServerFunction = (args: ServerFunctionArgs) => Promise<unknown>
+export type ClientServerFunction = (args: Record<string, unknown>) => Promise<unknown> | unknown
+
+export type ServerFunction = (args: ServerFunctionArgs) => Promise<unknown> | unknown
 
 export type ServerFunctionConfig = {
   function: ServerFunction
   name: string
 }
 
-export type RootServerFunctionArgs = BaseServerFunctionArgs & ServerFunctionArgs
-
-export type RootServerFunction = (args: RootServerFunctionArgs) => Promise<unknown>
+export type RootServerFunction = (args: ServerFunctionArgs) => Promise<unknown>
