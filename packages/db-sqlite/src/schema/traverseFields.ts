@@ -902,12 +902,22 @@ export const traverseFields = ({
         // fieldName could be 'posts' or 'group_posts'
         // using on as the key for the relation
         const localized = adapter.payload.config.localization && field.localized
-        const target = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${localized ? adapter.localesSuffix : ''}`
+        let target = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${localized ? adapter.localesSuffix : ''}`
+        let relationName = field.on.replaceAll('.', '_')
+
+        // TODO: wip this needs to be dynamic based on the relationship field used for the join
+        if (!adapter.tables[target][relationName]) {
+          target = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${adapter.relationshipsSuffix}`
+        }
+        if (field.on === 'categories') {
+          console.log('hit')
+          relationName = 'categories'
+        }
         relationsToBuild.set(fieldName, {
           type: 'many',
           // joins are not localized on the parent table
           localized: false,
-          relationName: field.on.replaceAll('.', '_'),
+          relationName,
           target,
         })
         break

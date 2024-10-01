@@ -242,9 +242,12 @@ export const traverseFields = ({
             limit += 1
           }
           const fields = adapter.payload.collections[field.collection].config.fields
-          const joinTableName = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${
+          let joinTableName = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${
             field.localized && adapter.payload.config.localization ? adapter.localesSuffix : ''
           }`
+          if (!adapter.tables[joinTableName][field.on]) {
+            joinTableName = `${joinTableName}${adapter.relationshipsSuffix}`
+          }
           const selectFields = {}
 
           const orderBy = buildOrderBy({
