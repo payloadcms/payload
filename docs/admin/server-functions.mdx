@@ -6,7 +6,16 @@ desc: Execute custom server-side logic from client-side code using Server Functi
 keywords: server functions, server-side functions, server-side logic, server-side code, server-side, functions, Payload, headless, Content Management System, cms, javascript, react, node, nextjs
 ---
 
-The Payload [Admin Panel] fully supports [React Server Functions](https://react.dev/reference/rsc/server-actions) (formerly known as Server Actions). These are functions that are defined on the server, using server-only modules, and executed from client.
+The Payload [Admin Panel] fully supports [React Server Functions](https://react.dev/reference/rsc/server-actions) (formerly known as Server Actions). These are functions that are defined on the server and can use server-only modules, and are executed on the server when called from the client.
+
+Server Functions are a good alternative to traditional [REST API Endpoints](../rest-api#custom-endpoints), with a few key benefits. While they behave similarly, Server Functions are simpler to define, not requiring a specified path or method. They are also easier to consume, not requiring any client-side fetch.
+
+Server Functions are also able to return rendered React components, which can be useful for server-side rendering of components that require server-only data. Requests made through a Server Function also do not propagate though the browser's network panel in the same way as fetch requests, making it harder for others to inspect, tamper with, or replay requests directly through the browser.
+
+<Banner type="info">
+  <strong>Note:</strong>
+  Server Functions are only available in the Payload Admin Panel, not your public-facing application. For public-facing server-side logic, consider using [Custom Endpoints](../rest-api#custom-endpoints).
+</Banner>
 
 ## Admin Options
 
@@ -52,29 +61,29 @@ To execute a Server Function from the client, use the `useServerFunctions` hook:
 
 ```tsx
 'use client'
-import React from 'react'
+import React, { useCallback } from 'react'
 import { useServerFunctions } from '@payloadcms/ui'
 
 const MyComponent = () => {
   const { serverFunctions } = useServerFunctions()
   const [result, setResult] = React.useState<string | null>(null)
 
-  useEffect(() => {
-    const doSomething = async () => {
-      const result = await serverFunctions({
-        name: 'my-server-action',
-        args: {
-          value: 'Hello, world!'
-        }
-      }) as string
+  const callServerAction = useCallback(async () => {
+    const result = await serverFunctions({
+      name: 'my-server-action',
+      args: {
+        value: 'Hello, world!'
+      }
+    }) as string
 
-      setResult(result)
-    }
+    setResult(result)
+  }, [serverFunctions])
 
-    void doSomething()
-  }, [])
-
-  return <p>{result}</p>
+  return (
+    <button onClick={callServerAction} type="button">
+      {result || 'Call Server Action'}
+    </button>
+  )
 }
 ```
 
@@ -122,5 +131,19 @@ const Layout = ({ children }: Args) => (
 )
 
 export default Layout
+```
 
+## TypeScript
+
+You can import the Payload `ServerFunction` type as well as other common types from the `payload` package. [More details](../typescript/overview).
+
+```ts
+import type {
+  ServerFunction,
+  ServerFunctionArgs,
+  ServerFunctionClient,
+  ServerFunctionClientArgs,
+  ServerFunctionConfig,
+  DefaultServerFunctionArgs,
+} from 'payload'
 ```
