@@ -242,6 +242,11 @@ export type AfterForgotPasswordHook = (args: {
   context: RequestContext
 }) => any
 
+export type EnableFoldersOptions = {
+  // Displays the folder collection and parentFolder field in the document view
+  debug?: boolean
+}
+
 export type CollectionAdminOptions = {
   /**
    * Custom admin components
@@ -304,6 +309,10 @@ export type CollectionAdminOptions = {
    * Custom description for collection
    */
   description?: EntityDescription
+  /**
+   * Changes the list view and adds parentFolder field to collection
+   */
+  enableFolders?: boolean | EnableFoldersOptions
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
@@ -494,8 +503,11 @@ export type SanitizedJoins = {
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'auth' | 'endpoints' | 'fields' | 'upload' | 'versions'
+    'admin' | 'auth' | 'endpoints' | 'fields' | 'upload' | 'versions'
   > {
+  admin: {
+    enableFolders?: EnableFoldersOptions
+  } & CollectionAdminOptions
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]

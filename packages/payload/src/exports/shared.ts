@@ -22,17 +22,25 @@ export {
 } from '../fields/config/types.js'
 
 export * from '../fields/validations.js'
+export type {
+  Breadcrumb,
+  FolderAndDocumentsResult,
+  FolderEnabledColection,
+  FolderInterface,
+  Subfolder,
+} from '../folders/types.js'
+
 export { validOperators } from '../types/constants.js'
 
 export { formatFilesize } from '../uploads/formatFilesize.js'
 
 export { isImage } from '../uploads/isImage.js'
-
 export {
   deepCopyObject,
   deepCopyObjectComplex,
   deepCopyObjectSimple,
 } from '../utilities/deepCopyObject.js'
+
 export {
   deepMerge,
   deepMergeWithCombinedArrays,
@@ -41,8 +49,8 @@ export {
 } from '../utilities/deepMerge.js'
 
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
-
 export { getDataByPath } from '../utilities/getDataByPath.js'
+
 export { getSiblingData } from '../utilities/getSiblingData.js'
 
 export { getUniqueListBy } from '../utilities/getUniqueListBy.js'
@@ -66,6 +74,6 @@ export { unflatten } from '../utilities/unflatten.js'
 export { wait } from '../utilities/wait.js'
 
 export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
-
 export { versionDefaults } from '../versions/defaults.js'
+
 export { deepMergeSimple } from '@payloadcms/translations/utilities'
