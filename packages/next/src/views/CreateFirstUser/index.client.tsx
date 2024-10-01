@@ -18,7 +18,7 @@ import {
   useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import { RenderEmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
 
@@ -39,6 +39,10 @@ export const CreateFirstUserClient: React.FC<{
 
   const { t } = useTranslation()
   const { setUser } = useAuth()
+
+  useEffect(() => {
+    console.log(typeof serverFunctions) // eslint-disable-line no-console
+  }, [serverFunctions])
 
   const collectionConfig = getEntityConfig({ collectionSlug: userSlug }) as ClientCollectionConfig
 
