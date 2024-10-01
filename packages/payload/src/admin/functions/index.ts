@@ -28,7 +28,7 @@ export type ServerFunctionConfig = {
   name: string
 }
 
-export type RootServerFunction = (
+export type ServerFunctionHandler = (
   args: {
     config: Promise<SanitizedConfig> | SanitizedConfig
     importMap: ImportMap

@@ -337,10 +337,10 @@ export type {
   BaseServerFunctionArgs,
   ClientServerFunction,
   ClientServerFunctionArgs,
-  RootServerFunction,
   ServerFunction,
   ServerFunctionArgs,
   ServerFunctionConfig,
+  ServerFunctionHandler,
 } from './functions/index.js'
 
 export type { LanguageOptions } from './LanguageOptions.js'

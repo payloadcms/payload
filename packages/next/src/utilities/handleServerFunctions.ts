@@ -1,4 +1,4 @@
-import type { RootServerFunction, ServerFunction } from 'payload'
+import type { ServerFunction, ServerFunctionHandler } from 'payload'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 
@@ -8,7 +8,7 @@ const defaultFunctions = {
   'form-state': buildFormState as any as ServerFunction,
 }
 
-export const handleServerFunctions: RootServerFunction = async (args) => {
+export const handleServerFunctions: ServerFunctionHandler = async (args) => {
   const { name: fnKey, args: fnArgs, config: configPromise, importMap } = args
 
   const { req } = await initReq(configPromise)
