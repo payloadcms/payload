@@ -745,7 +745,7 @@ export { updateByIDOperation } from './collections/operations/updateByID.js'
 export { buildConfig } from './config/build.js'
 export type { ClientConfig } from './config/client.js'
 
-export { serverOnlyConfigProperties } from './config/client.js'
+export { serverOnlyAdminConfigProperties, serverOnlyConfigProperties } from './config/client.js'
 export { defaults } from './config/defaults.js'
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'

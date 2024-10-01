@@ -741,7 +741,6 @@ export type Config = {
        * Wrap the admin dashboard in custom context providers
        */
       providers?: PayloadComponent<{ children?: React.ReactNode }, { children?: React.ReactNode }>[]
-      serverFunctions?: ServerFunctionConfig[]
       /**
        * Replace or modify top-level admin routes, or add new ones:
        * + `Account` - `/admin/account`
@@ -819,6 +818,7 @@ export type Config = {
       /** The route for the unauthorized page. */
       unauthorized?: string
     }
+    serverFunctions?: ServerFunctionConfig[]
     /**
      * Restrict the Admin Panel theme to use only one of your choice
      *
