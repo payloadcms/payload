@@ -64,7 +64,7 @@ export const LinkButton: React.FC = () => {
   const { fieldProps } = useElementButton()
   const [initialState, setInitialState] = useState<FormState>({})
 
-  const { i18n, t } = useTranslation()
+  const { t } = useTranslation()
   const editor = useSlate()
   const { serverFunction } = useServerFunctions()
 
@@ -99,7 +99,6 @@ export const LinkButton: React.FC = () => {
                 name: 'form-state',
                 args: {
                   data,
-                  language: i18n.language,
                   operation: 'update',
                   schemaPath: `${schemaPath}.${linkFieldsSchemaPath}`,
                 },

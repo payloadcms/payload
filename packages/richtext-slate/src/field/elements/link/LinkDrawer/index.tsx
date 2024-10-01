@@ -30,7 +30,7 @@ export const LinkDrawer: React.FC<Props> = ({
   handleModalSubmit,
   initialState,
 }) => {
-  const { i18n, t } = useTranslation()
+  const { t } = useTranslation()
   const { schemaPath } = useFieldProps()
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
   const { id } = useDocumentInfo()
@@ -44,7 +44,6 @@ export const LinkDrawer: React.FC<Props> = ({
         args: {
           id,
           formState: prevFormState,
-          language: i18n.language,
           operation: 'update',
           schemaPath: fieldMapPath,
         },
@@ -53,7 +52,7 @@ export const LinkDrawer: React.FC<Props> = ({
       return state
     },
 
-    [fieldMapPath, id, serverFunction, i18n],
+    [fieldMapPath, id, serverFunction],
   )
 
   return (

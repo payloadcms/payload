@@ -98,7 +98,7 @@ const PreviewView: React.FC<Props> = ({
     },
   } = useConfig()
   const router = useRouter()
-  const { i18n, t } = useTranslation()
+  const { t } = useTranslation()
   const { previewWindowType } = useLivePreviewContext()
   const { refreshCookieAsync, user } = useAuth()
   const { reportUpdate } = useDocumentEvents()
@@ -185,7 +185,6 @@ const PreviewView: React.FC<Props> = ({
           docPreferences,
           formState: prevFormState,
           globalSlug,
-          language: i18n.language,
           operation,
           returnLockStatus: isLockingEnabled ? true : false,
           schemaPath,
@@ -235,7 +234,6 @@ const PreviewView: React.FC<Props> = ({
       setDocumentIsLocked,
       user,
       serverFunction,
-      i18n,
     ],
   )
 

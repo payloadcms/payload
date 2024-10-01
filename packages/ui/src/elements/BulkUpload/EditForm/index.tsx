@@ -17,7 +17,6 @@ import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../../providers/Operation/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
-import { useTranslation } from '../../../providers/Translation/index.js'
 import { useUploadEdits } from '../../../providers/UploadEdits/index.js'
 import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
@@ -49,8 +48,6 @@ export function EditForm({ submitted }: EditFormProps) {
     isInitializing,
     onSave: onSaveFromContext,
   } = useDocumentInfo()
-
-  const { i18n } = useTranslation()
 
   const { serverFunction } = useServerFunctions()
 
@@ -124,7 +121,6 @@ export function EditForm({ submitted }: EditFormProps) {
           collectionSlug,
           docPreferences,
           formState: prevFormState,
-          language: i18n.language,
           operation: 'create',
           schemaPath,
         },
@@ -132,7 +128,7 @@ export function EditForm({ submitted }: EditFormProps) {
 
       return newFormState
     },
-    [collectionSlug, schemaPath, getDocPreferences, serverFunction, i18n],
+    [collectionSlug, schemaPath, getDocPreferences, serverFunction],
   )
 
   return (

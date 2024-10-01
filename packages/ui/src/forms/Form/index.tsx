@@ -382,7 +382,6 @@ export const Form: React.FC<FormProps> = (props) => {
         setProcessing(false)
         setSubmitted(true)
         setDisabled(false)
-
         errorToast(err.message)
       }
     },
@@ -456,7 +455,6 @@ export const Form: React.FC<FormProps> = (props) => {
           collectionSlug,
           data,
           globalSlug,
-          language: i18n.language,
           operation,
           schemaPath: collectionSlug || globalSlug,
         },
@@ -466,7 +464,7 @@ export const Form: React.FC<FormProps> = (props) => {
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state: newState })
     },
-    [collectionSlug, dispatchFields, globalSlug, id, operation, serverFunction, i18n],
+    [collectionSlug, dispatchFields, globalSlug, id, operation, serverFunction],
   )
 
   const replaceState = useCallback(
@@ -486,14 +484,13 @@ export const Form: React.FC<FormProps> = (props) => {
           collectionSlug,
           data,
           globalSlug,
-          language: i18n.language,
           schemaPath,
         },
       })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       return fieldSchema
     },
-    [collectionSlug, globalSlug, serverFunction, i18n],
+    [collectionSlug, globalSlug, serverFunction],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(

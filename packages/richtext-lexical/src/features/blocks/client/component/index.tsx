@@ -7,7 +7,6 @@ import {
   RenderComponent,
   SectionTitle,
   ShimmerEffect,
-  useAuth,
   useDocumentInfo,
   useFieldProps,
   useFormSubmitted,
@@ -66,7 +65,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
         args: {
           id,
           data: formData,
-          language: i18n.language,
           operation: 'update',
           schemaPath: schemaFieldsPath,
         },
@@ -87,7 +85,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     if (formData) {
       void awaitInitialState()
     }
-  }, [serverFunction, schemaFieldsPath, id, i18n]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
+  }, [serverFunction, schemaFieldsPath, id]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
@@ -96,7 +94,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
         args: {
           id,
           formState: prevFormState,
-          language: i18n.language,
           operation: 'update',
           schemaPath: schemaFieldsPath,
         },
@@ -112,7 +109,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       return formState
     },
 
-    [id, schemaFieldsPath, formData.blockName, serverFunction, i18n],
+    [id, schemaFieldsPath, formData.blockName, serverFunction],
   )
 
   const classNames = [`${baseClass}__row`, `${baseClass}__row--no-errors`].filter(Boolean).join(' ')

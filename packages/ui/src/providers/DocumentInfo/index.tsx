@@ -500,7 +500,6 @@ const DocumentInfo: React.FC<
           data: newData,
           docPreferences,
           globalSlug,
-          language: i18n.language,
           locale,
           operation,
           schemaPath: collectionSlug || globalSlug,
@@ -522,7 +521,6 @@ const DocumentInfo: React.FC<
       onSaveFromProps,
       getDocPermissions,
       serverFunction,
-      i18n,
     ],
   )
 
@@ -550,7 +548,6 @@ const DocumentInfo: React.FC<
               id,
               collectionSlug,
               globalSlug,
-              language: i18n.language,
               locale,
               operation,
               schemaPath: collectionSlug || globalSlug,
@@ -588,7 +585,6 @@ const DocumentInfo: React.FC<
       }
     }
   }, [
-    i18n,
     api,
     operation,
     collectionSlug,

@@ -136,7 +136,6 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
           args: {
             collectionSlug: slug,
             data: {},
-            language: i18n.language,
             operation: 'update',
             schemaPath: slug,
           },
@@ -148,7 +147,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
       void getInitialState()
     }
-  }, [apiRoute, hasInitializedState, serverURL, slug, serverFunction, user, i18n])
+  }, [apiRoute, hasInitializedState, serverURL, slug, serverFunction, user])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
@@ -157,7 +156,6 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
         args: {
           collectionSlug: slug,
           formState: prevFormState,
-          language: i18n.language,
           operation: 'update',
           schemaPath: slug,
         },
@@ -165,7 +163,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
       return state
     },
-    [slug, serverFunction, i18n],
+    [slug, serverFunction],
   )
 
   if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {

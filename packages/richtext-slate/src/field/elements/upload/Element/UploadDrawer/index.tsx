@@ -79,7 +79,6 @@ export const UploadDrawer: React.FC<{
           id,
           collectionSlug,
           data,
-          language: i18n.language,
           operation: 'update',
           schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
         },
@@ -99,7 +98,6 @@ export const UploadDrawer: React.FC<{
     schemaPath,
     relatedCollection.slug,
     serverFunction,
-    i18n,
   ])
 
   const onChange: FormProps['onChange'][0] = useCallback(
@@ -109,7 +107,6 @@ export const UploadDrawer: React.FC<{
         args: {
           id,
           formState: prevFormState,
-          language: i18n.language,
           operation: 'update',
           schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
         },
@@ -118,7 +115,7 @@ export const UploadDrawer: React.FC<{
       return state
     },
 
-    [relatedCollection.slug, schemaPath, id, serverFunction, i18n],
+    [relatedCollection.slug, schemaPath, id, serverFunction],
   )
 
   return (

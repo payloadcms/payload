@@ -4,7 +4,7 @@ import {
   initI18n,
   type SupportedLanguages,
 } from '@payloadcms/translations'
-import { headers } from 'next/headers.js'
+import { cookies, headers as getHeaders } from 'next/headers.js'
 import {
   type ClientUser,
   createLocalReq,
@@ -23,6 +23,7 @@ import type { FieldSchemaMap } from './buildFieldSchemaMap/types.js'
 
 import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
+import { getRequestLanguage } from './getRequestLanguage.js'
 
 let cached = global._payload_fieldSchemaMap
 
@@ -103,24 +104,36 @@ export const buildFormState = async (
     throw new Error('No config provided')
   }
 
+  const headers = getHeaders()
+
+  let languageCode = language
+
+  if (!languageCode) {
+    languageCode = getRequestLanguage({
+      cookies: cookies(),
+      defaultLanguage: config.i18n.fallbackLanguage,
+      headers,
+    }) as keyof SupportedLanguages
+  }
+
   let i18n = i18nFromArgs as I18n // TODO: fix this type
 
   if (!i18n) {
     i18n = await initI18n({
       config: config.i18n,
       context: 'client',
-      language: language || config.i18n.fallbackLanguage,
+      language: languageCode,
     })
   }
 
   let user = userFromArgs
 
-  const req = await createLocalReq({ req: { i18n }, user }, payload)
-
   if (user === undefined) {
-    const userResult = await payload.auth({ headers: headers(), req })
+    const userResult = await payload.auth({ headers })
     user = userResult.user
   }
+
+  const req = await createLocalReq({ req: { headers, i18n, user } }, payload)
 
   const incomingUserSlug = user?.collection
 

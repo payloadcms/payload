@@ -105,7 +105,6 @@ export const LinkElement = () => {
         name: 'form-state',
         args: {
           data,
-          language: i18n.language,
           operation: 'update',
           schemaPath: fieldMapPath,
         },
@@ -117,18 +116,7 @@ export const LinkElement = () => {
     if (renderModal) {
       void awaitInitialState()
     }
-  }, [
-    renderModal,
-    element,
-    locale,
-    t,
-    collectionSlug,
-    config,
-    id,
-    fieldMapPath,
-    serverFunction,
-    i18n,
-  ])
+  }, [renderModal, element, locale, t, collectionSlug, config, id, fieldMapPath, serverFunction])
 
   return (
     <span className={baseClass} {...attributes}>

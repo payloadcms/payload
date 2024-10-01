@@ -37,7 +37,7 @@ export const CreateFirstUserClient: React.FC<{
 
   const { serverFunction } = useServerFunctions()
 
-  const { i18n, t } = useTranslation()
+  const { t } = useTranslation()
   const { setUser } = useAuth()
 
   const collectionConfig = getEntityConfig({ collectionSlug: userSlug }) as ClientCollectionConfig
@@ -49,7 +49,6 @@ export const CreateFirstUserClient: React.FC<{
         args: {
           collectionSlug: userSlug,
           formState: prevFormState,
-          language: i18n.language,
           operation: 'create',
           schemaPath: `_${userSlug}.auth`,
         },
@@ -57,7 +56,7 @@ export const CreateFirstUserClient: React.FC<{
 
       return state
     },
-    [userSlug, serverFunction, i18n],
+    [userSlug, serverFunction],
   )
 
   const handleFirstRegister = (data: { user: ClientUser }) => {

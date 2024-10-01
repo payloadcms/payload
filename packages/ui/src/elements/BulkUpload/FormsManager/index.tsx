@@ -159,7 +159,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           name: 'form-state',
           args: {
             collectionSlug,
-            language: i18n.language,
             locale: code,
             operation: 'create',
             schemaPath: collectionSlug,
@@ -171,7 +170,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         // swallow error
       }
     },
-    [code, collectionSlug, serverFunction, i18n],
+    [code, collectionSlug, serverFunction],
   )
 
   const setActiveIndex: FormsManagerContext['setActiveIndex'] = React.useCallback(

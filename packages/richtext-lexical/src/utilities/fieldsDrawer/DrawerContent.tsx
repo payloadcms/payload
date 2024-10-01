@@ -26,7 +26,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   schemaFieldsPathOverride,
   schemaPathSuffix,
 }) => {
-  const { i18n, t } = useTranslation()
+  const { t } = useTranslation()
   const { id } = useDocumentInfo()
   const { schemaPath } = useFieldProps()
 
@@ -53,7 +53,6 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         args: {
           id: id!,
           data: data ?? {},
-          language: i18n.language,
           operation: 'update',
           schemaPath: schemaFieldsPath,
         },
@@ -63,7 +62,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     }
 
     void awaitInitialState()
-  }, [schemaFieldsPath, id, data, serverFunction, i18n])
+  }, [schemaFieldsPath, id, data, serverFunction])
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
@@ -72,7 +71,6 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         args: {
           id: id!,
           formState: prevFormState,
-          language: i18n.language,
           operation: 'update',
           schemaPath: schemaFieldsPath,
         },
@@ -81,7 +79,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
       return state
     },
 
-    [schemaFieldsPath, id, serverFunction, i18n],
+    [schemaFieldsPath, id, serverFunction],
   )
 
   if (initialState === false) {
