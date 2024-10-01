@@ -4,7 +4,7 @@ import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 
 import { getPayloadHMR } from './getPayloadHMR.js'
 
-const functions = {
+const defaultFunctions = {
   'form-state': buildFormState,
 }
 
@@ -25,6 +25,14 @@ export const handleServerFunctions = async (
     config,
     importMap,
     payload,
+  }
+
+  const functions = {
+    ...defaultFunctions,
+    ...config?.admin?.serverFunctions?.reduce((acc, fnConfig) => {
+      acc[fnConfig.name] = fnConfig.function
+      return acc
+    }, {}),
   }
 
   const fn = functions[fnKey]
