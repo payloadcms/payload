@@ -38,7 +38,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const { formData, nodeKey } = props
   const submitted = useFormSubmitted()
   const { id } = useDocumentInfo()
-  const { user } = useAuth()
   const { path, schemaPath } = useFieldProps()
   const { field: parentLexicalRichTextField } = useEditorConfigContext()
 
@@ -88,7 +87,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     if (formData) {
       void awaitInitialState()
     }
-  }, [serverFunction, schemaFieldsPath, id, user, i18n]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
+  }, [serverFunction, schemaFieldsPath, id, i18n]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {

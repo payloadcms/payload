@@ -40,7 +40,6 @@ export const UploadDrawer: React.FC<{
 
   const { i18n, t } = useTranslation()
   const { code: locale } = useLocale()
-  const { user } = useAuth()
   const { closeModal } = useModal()
   const { id, collectionSlug } = useDocumentInfo()
 
@@ -93,7 +92,6 @@ export const UploadDrawer: React.FC<{
   }, [
     config,
     element?.fields,
-    user,
     locale,
     t,
     collectionSlug,

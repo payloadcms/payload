@@ -29,7 +29,6 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   const { i18n, t } = useTranslation()
   const { id } = useDocumentInfo()
   const { schemaPath } = useFieldProps()
-  const { user } = useAuth()
 
   const [initialState, setInitialState] = useState<false | FormState>(false)
 
@@ -64,7 +63,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     }
 
     void awaitInitialState()
-  }, [schemaFieldsPath, id, data, serverFunction, user, i18n])
+  }, [schemaFieldsPath, id, data, serverFunction, i18n])
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {

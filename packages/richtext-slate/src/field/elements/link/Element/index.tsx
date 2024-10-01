@@ -72,7 +72,6 @@ export const LinkElement = () => {
 
   const editor = useSlate()
   const { config } = useConfig()
-  const { user } = useAuth()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
   const { closeModal, openModal, toggleModal } = useModal()
@@ -121,7 +120,6 @@ export const LinkElement = () => {
   }, [
     renderModal,
     element,
-    user,
     locale,
     t,
     collectionSlug,
