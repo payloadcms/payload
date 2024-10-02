@@ -498,6 +498,7 @@ const DocumentInfo: React.FC<
       const { state: newState } = (await serverFunction({
         name: 'form-state',
         args: {
+          id,
           collectionSlug,
           data: newData,
           docPreferences,
@@ -547,10 +548,11 @@ const DocumentInfo: React.FC<
           const { state: result } = (await serverFunction({
             name: 'form-state',
             args: {
+              id,
               collectionSlug,
               globalSlug,
               locale,
-              // onError: onLoadError,
+              onError: onLoadError,
               operation,
               schemaPath: collectionSlug || globalSlug,
             },
