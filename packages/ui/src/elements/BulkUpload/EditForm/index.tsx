@@ -117,13 +117,15 @@ export function EditForm({ submitted }: EditFormProps) {
       const docPreferences = await getDocPreferences()
       const { state: newFormState } = (await serverFunction({
         name: 'form-state',
-        args: {
-          collectionSlug,
-          docPreferences,
-          formState: prevFormState,
-          operation: 'create',
-          schemaPath,
-        },
+        args: Object.fromEntries(
+          Object.entries({
+            collectionSlug,
+            docPreferences,
+            formState: prevFormState,
+            operation: 'create',
+            schemaPath,
+          }).filter(([_, value]) => value !== undefined),
+        ),
       })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       return newFormState

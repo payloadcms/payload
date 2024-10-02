@@ -157,12 +157,14 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       try {
         const { state: formStateWithoutFiles } = (await serverFunction({
           name: 'form-state',
-          args: {
-            collectionSlug,
-            locale: code,
-            operation: 'create',
-            schemaPath: collectionSlug,
-          },
+          args: Object.fromEntries(
+            Object.entries({
+              collectionSlug,
+              locale: code,
+              operation: 'create',
+              schemaPath: collectionSlug,
+            }).filter(([_, value]) => value !== undefined),
+          ),
         })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
         initialStateRef.current = formStateWithoutFiles
         setHasInitializedState(true)
