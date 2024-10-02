@@ -23,7 +23,11 @@ export async function generateStaticParams() {
     overrideAccess: false,
   })
 
-  return posts.docs?.map(({ slug }) => slug)
+  const params = posts.docs.map(({ slug }) => {
+    return { slug }
+  })
+
+  return params
 }
 
 export default async function Post({ params: { slug = '' } }) {
@@ -80,7 +84,7 @@ const queryPostBySlug = cache(async ({ slug }: { slug: string }) => {
     collection: 'posts',
     draft,
     limit: 1,
-    overrideAccess: true,
+    overrideAccess: draft,
     where: {
       slug: {
         equals: slug,
