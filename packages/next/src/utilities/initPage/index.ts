@@ -19,7 +19,7 @@ export const initPage = async ({
   route,
   searchParams,
 }: Args): Promise<InitPageResult> => {
-  const headers = getHeaders()
+  const headers = await getHeaders()
   const payload = await getPayloadHMR({ config: configPromise, importMap })
   const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
 
