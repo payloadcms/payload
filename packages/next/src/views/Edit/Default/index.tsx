@@ -244,17 +244,19 @@ export const DefaultEditView: React.FC = () => {
 
       const { lockedState, state } = (await serverFunction({
         name: 'form-state',
-        args: {
-          id,
-          collectionSlug,
-          docPreferences,
-          formState: prevFormState,
-          globalSlug,
-          operation,
-          returnLockStatus: isLockingEnabled ? true : false,
-          schemaPath,
-          updateLastEdited,
-        },
+        args: Object.fromEntries(
+          Object.entries({
+            id,
+            collectionSlug,
+            docPreferences,
+            formState: prevFormState,
+            globalSlug,
+            operation,
+            returnLockStatus: isLockingEnabled ? true : false,
+            schemaPath,
+            updateLastEdited,
+          }).filter(([_, v]) => v !== undefined),
+        ),
       })) as { lockedState: any; state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       setDocumentIsLocked(true)

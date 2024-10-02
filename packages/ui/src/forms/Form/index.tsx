@@ -450,14 +450,15 @@ export const Form: React.FC<FormProps> = (props) => {
     async (data: unknown) => {
       const { state: newState } = (await serverFunction({
         name: 'form-state',
-        args: {
-          id,
-          collectionSlug,
-          data,
-          globalSlug,
-          operation,
-          schemaPath: collectionSlug || globalSlug,
-        },
+        args: Object.fromEntries([
+          Object.entries({
+            collectionSlug,
+            data,
+            globalSlug,
+            operation,
+            schemaPath: collectionSlug || globalSlug,
+          }).filter(([_, value]) => value !== undefined),
+        ]),
       })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       contextRef.current = { ...initContextState } as FormContextType
@@ -480,12 +481,14 @@ export const Form: React.FC<FormProps> = (props) => {
     async ({ data, schemaPath }) => {
       const { state: fieldSchema } = (await serverFunction({
         name: 'form-state',
-        args: {
-          collectionSlug,
-          data,
-          globalSlug,
-          schemaPath,
-        },
+        args: Object.fromEntries([
+          Object.entries({
+            collectionSlug,
+            data,
+            globalSlug,
+            schemaPath,
+          }).filter(([_, value]) => value !== undefined),
+        ]),
       })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       return fieldSchema
