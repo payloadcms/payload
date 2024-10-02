@@ -87,7 +87,10 @@ export const createClientField = ({
     clientField._isPresentational = true
   }
 
-  const isHidden = 'hidden' in incomingField && incomingField?.hidden
+  const isHidden =
+    'hidden' in incomingField.admin
+      ? incomingField.admin.hidden
+      : 'hidden' in incomingField && incomingField?.hidden
   const disabledFromAdmin =
     incomingField?.admin && 'disabled' in incomingField.admin && incomingField.admin.disabled
 
