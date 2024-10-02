@@ -126,7 +126,7 @@
       },
       "./withPayload": {
         "import": "./dist/withPayload.js",
-        "require": "./dist/cjs/withPayload.cjs",
+        "require": "./dist/cjs/withPayload.js",
         "default": "./dist/withPayload.js"
       },
       "./layouts": {
