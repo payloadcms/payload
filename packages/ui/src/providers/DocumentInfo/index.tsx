@@ -550,13 +550,11 @@ const DocumentInfo: React.FC<
               collectionSlug,
               globalSlug,
               locale,
-              onError: onLoadError,
+              // onError: onLoadError,
               operation,
               schemaPath: collectionSlug || globalSlug,
             },
           })) as { state: FormState }
-
-          abortController.signal.throwIfAborted()
 
           const data = reduceFieldsToValues(result, true)
           setData(data)

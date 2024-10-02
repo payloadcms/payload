@@ -1,15 +1,15 @@
-import type {
-  ClientUser,
-  Data,
-  DocumentPreferences,
-  Field,
-  FormState,
-  PayloadRequest,
-  SanitizedConfig,
-  TypeWithID,
-} from 'payload'
-
 import { type I18nClient, type SupportedLanguages } from '@payloadcms/translations'
+import {
+  type ClientUser,
+  type Data,
+  type DocumentPreferences,
+  type Field,
+  formatErrors,
+  type FormState,
+  type PayloadRequest,
+  type SanitizedConfig,
+  type TypeWithID,
+} from 'payload'
 import { reduceFieldsToValues } from 'payload/shared'
 
 import type { FieldSchemaMap } from './buildFieldSchemaMap/types.js'
@@ -53,7 +53,7 @@ export type BuildFormStateArgs = {
   */
   language?: keyof SupportedLanguages
   locale?: string
-  onError?: (err: Error) => void
+  onError?: (data?: any) => Promise<void> | void
   operation?: 'create' | 'update'
   req: PayloadRequest
   returnLockStatus?: boolean
@@ -75,12 +75,14 @@ export const buildFormState = async (
   } catch (err) {
     req.payload.logger.error({ err, msg: `There was an error building form state` })
 
-    if (typeof onError === 'function') {
-      onError(err)
-    }
+    const formattedErrors = formatErrors(err)
 
-    return { state: formState }
+    if (typeof onError === 'function') {
+      await onError(formattedErrors)
+    }
   }
+
+  return { state: formState }
 }
 
 const buildFormStateFn = async (
