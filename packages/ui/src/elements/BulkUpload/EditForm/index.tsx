@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, DocumentPermissions } from 'payload'
+import type { ClientCollectionConfig, DocumentPermissions, FormState } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { useCallback } from 'react'
@@ -15,9 +15,9 @@ import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../../providers/Operation/index.js'
+import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useUploadEdits } from '../../../providers/UploadEdits/index.js'
 import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
-import { getFormState } from '../../../utilities/getFormState.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
 import { RenderComponent } from '../../RenderComponent/index.js'
 import { Upload } from '../../Upload/index.js'
@@ -49,10 +49,11 @@ export function EditForm({ submitted }: EditFormProps) {
     onSave: onSaveFromContext,
   } = useDocumentInfo()
 
+  const { serverFunction } = useServerFunctions()
+
   const {
     config: {
-      routes: { admin: adminRoute, api: apiRoute },
-      serverURL,
+      routes: { admin: adminRoute },
     },
     getEntityConfig,
   } = useConfig()
@@ -115,21 +116,20 @@ export function EditForm({ submitted }: EditFormProps) {
   const onChange: NonNullable<FormProps['onChange']>[0] = useCallback(
     async ({ formState: prevFormState }) => {
       const docPreferences = await getDocPreferences()
-      const { state: newFormState } = await getFormState({
-        apiRoute,
-        body: {
+      const { state: newFormState } = (await serverFunction({
+        name: 'form-state',
+        args: {
           collectionSlug,
           docPreferences,
           formState: prevFormState,
           operation: 'create',
           schemaPath,
         },
-        serverURL,
-      })
+      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       return newFormState
     },
-    [apiRoute, collectionSlug, schemaPath, getDocPreferences, serverURL],
+    [collectionSlug, schemaPath, getDocPreferences, serverFunction],
   )
 
   return (

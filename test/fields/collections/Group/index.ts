@@ -251,18 +251,56 @@ const GroupFields: CollectionConfig = {
         },
       ],
     },
-    // {
-    //   name: 'localizedGroupRel',
-    //   type: 'group',
-    //   localized: true,
-    //   fields: [
-    //     {
-    //       type: 'relationship',
-    //       relationTo: 'email-fields',
-    //       name: 'email',
-    //     },
-    //   ],
-    // },
+    {
+      name: 'localizedGroupRel',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'email-fields',
+          name: 'email',
+        },
+      ],
+    },
+    {
+      name: 'localizedGroupManyRel',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'email-fields',
+          name: 'email',
+          hasMany: true,
+        },
+      ],
+    },
+    {
+      name: 'localizedGroupPolyRel',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: ['email-fields'],
+          name: 'email',
+        },
+      ],
+    },
+    {
+      name: 'localizedGroupPolyHasManyRel',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: ['email-fields'],
+          name: 'email',
+          hasMany: true,
+        },
+      ],
+    },
   ],
 }
 

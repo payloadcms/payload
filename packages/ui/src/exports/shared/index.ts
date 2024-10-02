@@ -9,7 +9,6 @@ export { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
 export { formatAdminURL } from '../../utilities/formatAdminURL.js'
 export { formatDate } from '../../utilities/formatDate.js'
 export { formatDocTitle } from '../../utilities/formatDocTitle.js'
-export { getFormState } from '../../utilities/getFormState.js'
 export {
   type EntityToGroup,
   EntityType,

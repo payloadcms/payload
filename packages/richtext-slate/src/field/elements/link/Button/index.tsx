@@ -2,8 +2,7 @@
 
 import type { FormState } from 'payload'
 
-import { useConfig, useDrawerSlug, useModal, useTranslation } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
+import { useDrawerSlug, useModal, useServerFunctions, useTranslation } from '@payloadcms/ui'
 import { reduceFieldsToValues } from 'payload/shared'
 import React, { Fragment, useState } from 'react'
 import { Editor, Range, Transforms } from 'slate'
@@ -63,7 +62,7 @@ export const LinkButton: React.FC<{
 
   const { t } = useTranslation()
   const editor = useSlate()
-  const { config } = useConfig()
+  const { serverFunction } = useServerFunctions()
 
   const { closeModal, openModal } = useModal()
   const drawerSlug = useDrawerSlug('rich-text-link')
@@ -91,15 +90,14 @@ export const LinkButton: React.FC<{
                 text: editor.selection ? Editor.string(editor, editor.selection) : '',
               }
 
-              const { state } = await getFormState({
-                apiRoute: config.routes.api,
-                body: {
+              const { state } = (await serverFunction({
+                name: 'form-state',
+                args: {
                   data,
                   operation: 'update',
                   schemaPath: `${schemaPath}.${linkFieldsSchemaPath}`,
                 },
-                serverURL: config.serverURL,
-              })
+              })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
               setInitialState(state)
             }

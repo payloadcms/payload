@@ -566,6 +566,12 @@ describe('admin1', () => {
   })
 
   describe('custom fields', () => {
+    test('should render custom field component', async () => {
+      await page.goto(customFieldsURL.create)
+      await page.waitForURL(customFieldsURL.create)
+      await expect(page.locator('#field-customTextClientField')).toBeVisible()
+    })
+
     test('renders custom label component', async () => {
       await page.goto(customFieldsURL.create)
       await page.waitForURL(customFieldsURL.create)
@@ -685,6 +691,27 @@ describe('admin1', () => {
       await page.goto(`${serverURL}/admin`)
       const header = page.locator('.custom-header')
       await expect(header).toContainText('Here is a custom header')
+    })
+  })
+
+  describe('server functions', () => {
+    // go to field with server function
+    test('should execute custom server function', async () => {
+      await page.goto(customFieldsURL.create)
+      await page.waitForURL(customFieldsURL.create)
+      await expect(page.locator('#field-customTextClientField')).toBeVisible()
+
+      await expect
+        .poll(
+          () =>
+            page
+              .locator('#server-function-result', {
+                hasText: exactText('Server Function result: Hello, world!'),
+              })
+              .innerText(),
+          { timeout: POLL_TOPASS_TIMEOUT },
+        )
+        .toBeTruthy()
     })
   })
 

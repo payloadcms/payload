@@ -32,10 +32,14 @@ import SelectFields from './collections/Select/index.js'
 import TabsFields from './collections/Tabs/index.js'
 import { TabsFields2 } from './collections/Tabs2/index.js'
 import UIFields from './collections/UI/index.js'
-// import Uploads from './collections/Uploads/index.js'
-
-// import Uploads3 from './collections/Uploads3/index.js'
-// import TabsWithRichText from './globals/TabsWithRichText.js'
+import Uploads from './collections/Upload/index.js'
+import Uploads2 from './collections/Upload2/index.js'
+import UploadsMulti from './collections/UploadMulti/index.js'
+import UploadsMultiPoly from './collections/UploadMultiPoly/index.js'
+import UploadsPoly from './collections/UploadPoly/index.js'
+import UploadRestricted from './collections/UploadRestricted/index.js'
+import Uploads3 from './collections/Uploads3/index.js'
+import TabsWithRichText from './globals/TabsWithRichText.js'
 import { clearAndSeedEverything } from './seed.js'
 
 export const collectionSlugs: CollectionConfig[] = [
@@ -78,12 +82,13 @@ export const collectionSlugs: CollectionConfig[] = [
   TabsFields2,
   TabsFields,
   TextFields,
-  // Uploads,
-  // Uploads2,
-  // Uploads3,
-  // UploadsMulti,
-  // UploadsPoly,
-  // UploadsMultiPoly,
+  Uploads,
+  Uploads2,
+  Uploads3,
+  UploadsMulti,
+  UploadsPoly,
+  UploadsMultiPoly,
+  UploadRestricted,
   UIFields,
 ]
 

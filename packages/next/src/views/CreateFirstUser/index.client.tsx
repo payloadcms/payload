@@ -15,9 +15,9 @@ import {
   PasswordField,
   useAuth,
   useConfig,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
 import React from 'react'
 
 export const CreateFirstUserClient: React.FC<{
@@ -33,6 +33,8 @@ export const CreateFirstUserClient: React.FC<{
     getEntityConfig,
   } = useConfig()
 
+  const { serverFunction } = useServerFunctions()
+
   const { t } = useTranslation()
   const { setUser } = useAuth()
 
@@ -40,19 +42,19 @@ export const CreateFirstUserClient: React.FC<{
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = await getFormState({
-        apiRoute,
-        body: {
+      const { state } = (await serverFunction({
+        name: 'form-state',
+        args: {
           collectionSlug: userSlug,
           formState: prevFormState,
           operation: 'create',
           schemaPath: `_${userSlug}.auth`,
         },
-        serverURL,
-      })
+      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+
       return state
     },
-    [apiRoute, userSlug, serverURL],
+    [userSlug, serverFunction],
   )
 
   const handleFirstRegister = (data: { user: ClientUser }) => {

@@ -6,7 +6,8 @@ desc: Upload fields will allow a file to be uploaded, only from a collection sup
 keywords: upload, images media, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-The Upload Field allows for the selection of a Document from a Collection supporting [Uploads](../upload/overview), and formats the selection as a thumbnail in the Admin Panel.
+The Upload Field allows for the selection of a Document from a Collection supporting [Uploads](../upload/overview), and
+formats the selection as a thumbnail in the Admin Panel.
 
 Upload fields are useful for a variety of use cases, such as:
 
@@ -15,10 +16,10 @@ Upload fields are useful for a variety of use cases, such as:
 - To give a layout building block the ability to feature a background image
 
 <LightDarkImage
-  srcLight="https://payloadcms.com/images/docs/fields/upload.png"
-  srcDark="https://payloadcms.com/images/docs/fields/upload-dark.png"
-  alt="Shows an upload field in the Payload Admin Panel"
-  caption="Admin Panel screenshot of an Upload field"
+srcLight="https://payloadcms.com/images/docs/fields/upload.png"
+srcDark="https://payloadcms.com/images/docs/fields/upload-dark.png"
+alt="Shows an upload field in the Payload Admin Panel"
+caption="Admin Panel screenshot of an Upload field"
 />
 
 To create an Upload Field, set the `type` to `upload` in your [Field Config](./overview):
@@ -43,7 +44,7 @@ export const MyUploadField: Field = {
 ## Config Options
 
 | Option                 | Description                                                                                                                                                                 |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`name`** \*          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                      |
 | **`*relationTo`** \*   | Provide a single collection `slug` to allow this field to accept a relation to. <strong>Note: the related collection must be configured to support Uploads.</strong>        |
 | **`filterOptions`**    | A query to filter which options appear in the UI and validate against. [More](#filtering-upload-options).                                                                   |
@@ -97,7 +98,7 @@ prevent all, or a `Where` query. When using a function, it will be
 called with an argument object with the following properties:
 
 | Property      | Description                                                                                           |
-| ------------- | ----------------------------------------------------------------------------------------------------- |
+|---------------|-------------------------------------------------------------------------------------------------------|
 | `relationTo`  | The collection `slug` to filter against, limited to this field's `relationTo` property                |
 | `data`        | An object containing the full collection or global document currently being edited                    |
 | `siblingData` | An object containing document data that is scoped to only fields within the same parent of this field |
@@ -127,3 +128,10 @@ You can learn more about writing queries [here](/docs/queries/overview).
   unless you call the default upload field validation function imported from{' '}
   <strong>payload/shared</strong> in your validate function.
 </Banner>
+
+## Bi-directional relationships
+
+The `upload` field on its own is used to reference documents in an upload collection. This can be considered a "one-way"
+relationship. If you wish to allow an editor to visit the upload document and see where it is being used, you may use
+the `join` field in the upload enabled collection. Read more about bi-directional relationships using
+the [Join field](./join)

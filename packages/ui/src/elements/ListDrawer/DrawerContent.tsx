@@ -18,13 +18,12 @@ import { ListInfoProvider } from '../../providers/ListInfo/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { ListView as ListViewHandler } from '../../views/List/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { LoadingOverlay } from '../Loading/index.js'
 import { Pill } from '../Pill/index.js'
 import { type Option, ReactSelect } from '../ReactSelect/index.js'
 import { TableColumnsProvider } from '../TableColumns/index.js'
-import { ViewDescription } from '../ViewDescription/index.js'
+// import { ViewDescription } from '../ViewDescription/index.js'
 import { baseClass } from './index.js'
 
 export const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
@@ -44,6 +43,7 @@ export const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
 }
 
 export const ListDrawerContent: React.FC<ListDrawerProps> = ({
+  allowCreate = true,
   collectionSlugs,
   customHeader,
   drawerSlug,
@@ -118,7 +118,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     })
 
   const collectionPermissions = permissions?.collections?.[selectedOption.value]
-  const hasCreatePermission = collectionPermissions?.create?.permission
+  const hasCreatePermission = collectionPermissions?.create?.permission && allowCreate
 
   // If modal is open, get active page of upload gallery
   const isOpen = isModalOpen(drawerSlug)
@@ -353,7 +353,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
             )} */}
             {moreThanOneAvailableCollection && (
               <div className={`${baseClass}__select-collection-wrap`}>
-                <FieldLabel field={null} label={t('upload:selectCollectionToBrowse')} />
+                <FieldLabel label={t('upload:selectCollectionToBrowse')} />
                 <ReactSelect
                   className={`${baseClass}__select-collection`}
                   onChange={setSelectedOption as (option: Option<string>) => void}

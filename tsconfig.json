@@ -169,7 +169,6 @@
   ],
   "include": [
     "app",
-    "next-env.d.ts",
     ".next/types/**/*.ts",
     "scripts/**/*.ts"
   ]

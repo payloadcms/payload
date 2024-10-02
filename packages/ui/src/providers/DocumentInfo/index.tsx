@@ -23,14 +23,13 @@ import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
 import { requests } from '../../utilities/api.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
-import { getFormState } from '../../utilities/getFormState.js'
 import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
 import { isEditing as getIsEditing } from '../../utilities/isEditing.js'
 import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
 import { useLocale } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
-import { useServerActions } from '../ServerActions/index.js'
+import { useServerFunctions } from '../ServerFunctions/index.js'
 import { useTranslation } from '../Translation/index.js'
 import { UploadEditsProvider, useUploadEdits } from '../UploadEdits/index.js'
 
@@ -57,6 +56,8 @@ const DocumentInfo: React.FC<
     onLoadError,
     onSave: onSaveFromProps,
   } = props
+
+  const { serverFunction } = useServerFunctions()
 
   const {
     config: {
@@ -121,8 +122,6 @@ const DocumentInfo: React.FC<
   const prevLocale = useRef(locale)
   const hasInitializedDocPermissions = useRef(false)
 
-  const payloadServerAction = useServerActions()
-
   const versionsConfig = docConfig?.versions
 
   const baseURL = `${serverURL}${api}`
@@ -153,7 +152,7 @@ const DocumentInfo: React.FC<
     if (!collectionConfig && !globalConfig && initialState) {
       const getNewConfig = async () => {
         // @ts-expect-error eslint-disable-next-line
-        const res = (await payloadServerAction('render-config', {
+        const res = (await serverFunction('render-config', {
           collectionSlug,
           formState: initialState,
           globalSlug,
@@ -163,7 +162,7 @@ const DocumentInfo: React.FC<
       void getNewConfig()
     }
   }, [
-    payloadServerAction,
+    serverFunction,
     collectionSlug,
     initialState,
     i18n.language,
@@ -264,7 +263,7 @@ const DocumentInfo: React.FC<
           } else {
             setDocumentIsLocked(false)
           }
-        } catch (error) {
+        } catch (_err) {
           // swallow error
         }
       }
@@ -418,7 +417,10 @@ const DocumentInfo: React.FC<
 
         if (docAccessURL) {
           const res = await fetch(`${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`, {
-            body: JSON.stringify(data),
+            body: JSON.stringify({
+              ...(data || {}),
+              _status: 'draft',
+            }),
             credentials: 'include',
             headers: {
               'Accept-Language': i18n.language,
@@ -517,9 +519,9 @@ const DocumentInfo: React.FC<
 
       const newData = collectionSlug ? json.doc : json.result
 
-      const { state: newState } = await getFormState({
-        apiRoute: api,
-        body: {
+      const { state: newState } = (await serverFunction({
+        name: 'form-state',
+        args: {
           id,
           collectionSlug,
           data: newData,
@@ -529,8 +531,7 @@ const DocumentInfo: React.FC<
           operation,
           schemaPath: collectionSlug || globalSlug,
         },
-        serverURL,
-      })
+      })) as { state: FormState }
 
       setInitialState(newState)
       setData(newData)
@@ -538,7 +539,6 @@ const DocumentInfo: React.FC<
       await getDocPermissions(newData)
     },
     [
-      api,
       collectionSlug,
       getDocPreferences,
       globalSlug,
@@ -546,8 +546,8 @@ const DocumentInfo: React.FC<
       operation,
       locale,
       onSaveFromProps,
-      serverURL,
       getDocPermissions,
+      serverFunction,
     ],
   )
 
@@ -565,9 +565,9 @@ const DocumentInfo: React.FC<
         setIsLoading(true)
 
         try {
-          const { state: result } = await getFormState({
-            apiRoute: api,
-            body: {
+          const { state: result } = (await serverFunction({
+            name: 'form-state',
+            args: {
               id,
               collectionSlug,
               globalSlug,
@@ -575,10 +575,7 @@ const DocumentInfo: React.FC<
               operation,
               schemaPath: collectionSlug || globalSlug,
             },
-            onError: onLoadError,
-            serverURL,
-            signal: abortController.signal,
-          })
+          })) as { state: FormState }
 
           const data = reduceFieldsToValues(result, true)
           setData(data)
@@ -591,7 +588,7 @@ const DocumentInfo: React.FC<
         } catch (err) {
           if (!abortController.signal.aborted) {
             if (typeof onLoadError === 'function') {
-              void onLoadError()
+              void onLoadError(err)
             }
             setIsError(true)
             setIsLoading(false)
@@ -622,6 +619,7 @@ const DocumentInfo: React.FC<
     initialDataFromProps,
     initialStateFromProps,
     getDocPermissions,
+    serverFunction,
   ])
 
   useEffect(() => {

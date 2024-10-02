@@ -149,7 +149,7 @@ export const getViewFromConfig = ({
       break
     }
     case 2: {
-      if (segmentOne === 'reset') {
+      if (`/${segmentOne}` === config.admin.routes.reset) {
         // --> /reset/:token
         ViewToRender = {
           Component: ResetPassword,

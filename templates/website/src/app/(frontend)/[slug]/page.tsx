@@ -39,7 +39,7 @@ export default async function Page({ params: { slug = 'home' } }) {
   })
 
   // Remove this code once your website is seeded
-  if (!page) {
+  if (!page && slug === 'home') {
     page = homeStatic
   }
 
@@ -77,7 +77,7 @@ const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
     collection: 'pages',
     draft,
     limit: 1,
-    overrideAccess: true,
+    overrideAccess: draft,
     where: {
       slug: {
         equals: slug,

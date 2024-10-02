@@ -1,19 +1,19 @@
 'use client'
 
 import type { FormProps } from '@payloadcms/ui'
+import type { FormState } from 'payload'
 
 import {
   Drawer,
   Form,
   FormSubmit,
   RenderFields,
-  useConfig,
   useDocumentInfo,
   useEditDepth,
   useHotkey,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
 import React, { useCallback, useRef } from 'react'
 
 import type { Props } from './types.js'
@@ -33,25 +33,25 @@ export const LinkDrawer: React.FC<Props> = ({
   const { t } = useTranslation()
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
   const { id } = useDocumentInfo()
-  const { config } = useConfig()
+
+  const { serverFunction } = useServerFunctions()
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
+      const { state } = (await serverFunction({
+        name: 'form-state',
+        args: {
           id,
           formState: prevFormState,
           operation: 'update',
           schemaPath: fieldMapPath,
         },
-        serverURL: config.serverURL,
-      })
+      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       return state
     },
 
-    [config.routes.api, config.serverURL, fieldMapPath, id],
+    [fieldMapPath, id, serverFunction],
   )
 
   return (

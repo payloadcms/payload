@@ -25,8 +25,7 @@ export async function initTransaction(req: PayloadRequest): Promise<boolean> {
 
       return transactionID
     })
-    await req.transactionID
-    return !!req.transactionID
+    return !!(await req.transactionID)
   }
   return false
 }

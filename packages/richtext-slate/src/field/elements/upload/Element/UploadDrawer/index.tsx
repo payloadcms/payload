@@ -1,7 +1,7 @@
 'use client'
 
 import type { FormProps } from '@payloadcms/ui'
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, FormState } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -9,14 +9,13 @@ import {
   Form,
   FormSubmit,
   RenderFields,
-  useAuth,
   useConfig,
   useDocumentInfo,
   useLocale,
   useModal,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
 import { deepCopyObject } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Transforms } from 'slate'
@@ -40,9 +39,11 @@ export const UploadDrawer: React.FC<{
 
   const { i18n, t } = useTranslation()
   const { code: locale } = useLocale()
-  const { user } = useAuth()
   const { closeModal } = useModal()
   const { id, collectionSlug } = useDocumentInfo()
+
+  const { serverFunction } = useServerFunctions()
+
   const [initialState, setInitialState] = useState({})
   const {
     field: { richTextComponentMap },
@@ -71,17 +72,16 @@ export const UploadDrawer: React.FC<{
     const data = deepCopyObject(element?.fields || {})
 
     const awaitInitialState = async () => {
-      const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
+      const { state } = (await serverFunction({
+        name: 'form-state',
+        args: {
           id,
           collectionSlug,
           data,
           operation: 'update',
           schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
         },
-        serverURL: config.serverURL,
-      })
+      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       setInitialState(state)
     }
@@ -90,32 +90,31 @@ export const UploadDrawer: React.FC<{
   }, [
     config,
     element?.fields,
-    user,
     locale,
     t,
     collectionSlug,
     id,
     schemaPath,
     relatedCollection.slug,
+    serverFunction,
   ])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
+      const { state } = (await serverFunction({
+        name: 'form-state',
+        args: {
           id,
           formState: prevFormState,
           operation: 'update',
           schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
         },
-        serverURL: config.serverURL,
-      })
+      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       return state
     },
 
-    [config.routes.api, config.serverURL, relatedCollection.slug, schemaPath, id],
+    [relatedCollection.slug, schemaPath, id, serverFunction],
   )
 
   return (

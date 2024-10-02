@@ -7,6 +7,7 @@ import type {
   ClientGlobalConfig,
   ClientUser,
   Data,
+  FormState,
   LivePreviewConfig,
 } from 'payload'
 
@@ -22,14 +23,10 @@ import {
   useConfig,
   useDocumentEvents,
   useDocumentInfo,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import {
-  getFormState,
-  handleBackToDashboard,
-  handleGoBack,
-  handleTakeOver,
-} from '@payloadcms/ui/shared'
+import { handleBackToDashboard, handleGoBack, handleTakeOver } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
@@ -55,13 +52,11 @@ type Props = {
 }
 
 const PreviewView: React.FC<Props> = ({
-  apiRoute,
   collectionConfig,
   config,
   fields,
   globalConfig,
   schemaPath,
-  serverURL,
 }) => {
   const {
     id,
@@ -91,6 +86,8 @@ const PreviewView: React.FC<Props> = ({
     unlockDocument,
     updateDocumentEditor,
   } = useDocumentInfo()
+
+  const { serverFunction } = useServerFunctions()
 
   const operation = id ? 'update' : 'create'
 
@@ -180,9 +177,9 @@ const PreviewView: React.FC<Props> = ({
 
       const docPreferences = await getDocPreferences()
 
-      const { lockedState, state } = await getFormState({
-        apiRoute,
-        body: {
+      const { lockedState, state } = (await serverFunction({
+        name: 'form-state',
+        args: {
           id,
           collectionSlug,
           docPreferences,
@@ -193,8 +190,12 @@ const PreviewView: React.FC<Props> = ({
           schemaPath,
           updateLastEdited,
         },
-        serverURL,
-      })
+      })) as {
+        lockedState: {
+          user: ClientUser
+        }
+        state: FormState
+      } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       setDocumentIsLocked(true)
 
@@ -223,8 +224,6 @@ const PreviewView: React.FC<Props> = ({
     [
       collectionSlug,
       globalSlug,
-      serverURL,
-      apiRoute,
       id,
       isLockingEnabled,
       lastUpdateTime,
@@ -234,6 +233,7 @@ const PreviewView: React.FC<Props> = ({
       setCurrentEditor,
       setDocumentIsLocked,
       user,
+      serverFunction,
     ],
   )
 
@@ -272,7 +272,7 @@ const PreviewView: React.FC<Props> = ({
     globalSlug,
     id,
     unlockDocument,
-    user.id,
+    user,
     setCurrentEditor,
     isLockingEnabled,
     documentIsLocked,

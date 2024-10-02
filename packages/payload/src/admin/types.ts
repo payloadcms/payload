@@ -2,7 +2,7 @@ import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
 import type React from 'react'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
-import type { PayloadComponent, SanitizedConfig } from '../config/types.js'
+import type { SanitizedConfig } from '../config/types.js'
 import type { JsonObject } from '../types/index.js'
 import type { Data, FormState } from './types.js'
 
@@ -336,6 +336,16 @@ export type {
 
 export type { RowLabel, RowLabelComponent } from './forms/RowLabel.js'
 
+export type {
+  DefaultServerFunctionArgs,
+  ServerFunction,
+  ServerFunctionArgs,
+  ServerFunctionClient,
+  ServerFunctionClientArgs,
+  ServerFunctionConfig,
+  ServerFunctionHandler,
+} from './functions/index.js'
+
 export type { LanguageOptions } from './LanguageOptions.js'
 
 export type {
@@ -344,17 +354,6 @@ export type {
   RichTextGenerateComponentMap,
   RichTextHooks,
 } from './RichText.js'
-
-export type {
-  AdminViewComponent,
-  AdminViewConfig,
-  AdminViewProps,
-  ClientSideEditViewProps,
-  EditViewProps,
-  InitPageResult,
-  ServerSideEditViewProps,
-  VisibleEntities,
-} from './views/types.js'
 
 export type MappedServerComponent<TComponentClientProps extends JsonObject = JsonObject> = {
   Component: React.ComponentType<TComponentClientProps>
@@ -434,3 +433,13 @@ export type EntitySlots = {
   SaveDraftButton?: React.ReactNode
   SidebarFields: React.ReactNode
 }
+
+export type {
+  AdminViewComponent,
+  AdminViewConfig,
+  AdminViewProps,
+  EditViewProps,
+  InitPageResult,
+  ServerSideEditViewProps,
+  VisibleEntities,
+} from './views/types.js'

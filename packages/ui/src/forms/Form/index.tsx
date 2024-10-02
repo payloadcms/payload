@@ -1,7 +1,6 @@
 'use client'
-import type { FormState, PayloadRequest } from 'payload'
-
-import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
+import { dequal } from 'dequal/lite'
+import { type FormState, type PayloadRequest } from 'payload' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
 import {
@@ -27,9 +26,9 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
-import { getFormState } from '../../utilities/getFormState.js'
 import {
   FormContext,
   FormFieldsContext,
@@ -43,6 +42,7 @@ import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
+import { prepareFields } from './prepareFields.js'
 
 const baseClass = 'form'
 
@@ -70,6 +70,8 @@ export const Form: React.FC<FormProps> = (props) => {
     waitForAutocomplete,
   } = props
 
+  const { serverFunction } = useServerFunctions()
+
   const method = 'method' in props ? props?.method : undefined
 
   const router = useRouter()
@@ -80,10 +82,6 @@ export const Form: React.FC<FormProps> = (props) => {
   const operation = useOperation()
 
   const { config } = useConfig()
-  const {
-    routes: { api: apiRoute },
-    serverURL,
-  } = config
 
   const [disabled, setDisabled] = useState(disabledFromProps || false)
   const [isMounted, setIsMounted] = useState(false)
@@ -232,7 +230,7 @@ export const Form: React.FC<FormProps> = (props) => {
           await priorOnChange
 
           const result = await beforeSubmitFn({
-            formState: fields,
+            formState: prepareFields(fields),
           })
 
           revalidatedFormState = result
@@ -384,7 +382,6 @@ export const Form: React.FC<FormProps> = (props) => {
         setProcessing(false)
         setSubmitted(true)
         setDisabled(false)
-
         errorToast(err.message)
       }
     },
@@ -451,9 +448,9 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const reset = useCallback(
     async (data: unknown) => {
-      const { state: newState } = await getFormState({
-        apiRoute,
-        body: {
+      const { state: newState } = (await serverFunction({
+        name: 'form-state',
+        args: {
           id,
           collectionSlug,
           data,
@@ -461,14 +458,13 @@ export const Form: React.FC<FormProps> = (props) => {
           operation,
           schemaPath: collectionSlug || globalSlug,
         },
-        serverURL,
-      })
+      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state: newState })
     },
-    [apiRoute, collectionSlug, dispatchFields, globalSlug, id, operation, serverURL],
+    [collectionSlug, dispatchFields, globalSlug, id, operation, serverFunction],
   )
 
   const replaceState = useCallback(
@@ -482,19 +478,19 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const getFieldStateBySchemaPath = useCallback(
     async ({ data, schemaPath }) => {
-      const { state: fieldSchema } = await getFormState({
-        apiRoute,
-        body: {
+      const { state: fieldSchema } = (await serverFunction({
+        name: 'form-state',
+        args: {
           collectionSlug,
           data,
           globalSlug,
           schemaPath,
         },
-        serverURL,
-      })
+      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+
       return fieldSchema
     },
-    [apiRoute, collectionSlug, globalSlug, serverURL],
+    [collectionSlug, globalSlug, serverFunction],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
@@ -609,7 +605,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
           for (const onChangeFn of onChange) {
             revalidatedFormState = await onChangeFn({
-              formState: revalidatedFormState,
+              formState: prepareFields(revalidatedFormState),
             })
           }
 

@@ -1,5 +1,4 @@
-import ObjectIdImport from 'bson-objectid'
-import { isValidObjectId } from 'mongoose'
+import mongoose from 'mongoose'
 import {
   buildVersionCollectionFields,
   type CreateVersion,
@@ -12,8 +11,6 @@ import type { MongooseAdapter } from './index.js'
 import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
 import { withSession } from './withSession.js'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
 export const createVersion: CreateVersion = async function createVersion(
   this: MongooseAdapter,
   {
@@ -60,10 +57,10 @@ export const createVersion: CreateVersion = async function createVersion(
       },
     ],
   }
-  if (typeof data.parent === 'string' && isValidObjectId(data.parent)) {
+  if (data.parent instanceof mongoose.Types.ObjectId) {
     parentQuery.$or.push({
       parent: {
-        $eq: ObjectId(data.parent),
+        $eq: data.parent.toString(),
       },
     })
   }

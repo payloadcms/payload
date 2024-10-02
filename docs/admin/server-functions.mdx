@@ -1,0 +1,151 @@
+---
+title: Server Functions
+label: Server Functions
+order: 100
+desc: Execute custom server-side logic from client-side code using Server Functions in Payload.
+keywords: server functions, server-side functions, server-side logic, server-side code, server-side, functions, Payload, headless, Content Management System, cms, javascript, react, node, nextjs
+---
+
+The Payload [Admin Panel] fully supports [React Server Functions](https://react.dev/reference/rsc/server-actions) (formerly grouped under the "Server Actions" umbrella). These are functions that are defined on the server, using server-only modules, and called from the client. This is a way to execute custom server-side logic from client-side code.
+
+Server Functions are a good alternative to traditional [REST API Endpoints](../rest-api#custom-endpoints), with a few key differences. While they behave similarly, Server Functions are simpler to define, not requiring a specified path or method. They are also easier to consume, not requiring any client-side fetch. Server Functions are also able to return rendered React components.
+
+Requests made through a Server Function also do not propagate though the browser's network panel in the same way as fetch requests, making it harder for others to inspect, tamper with, or replay requests directly through the browser.
+
+<Banner type="info">
+  <strong>Note:</strong>
+  Server Functions are only available in the Payload Admin Panel, not your public-facing application. For public-facing server-side logic, consider using [Custom Endpoints](../rest-api#custom-endpoints).
+</Banner>
+
+## Admin Options
+
+To add a new Server Function, use the `admin.serverFunctions` property in your Payload config:
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    serverFunctions: [
+      {
+        name: 'my-server-action',
+        fn: ({ req, value }) => `The value is: "${value}"`
+      }
+    ]
+    // highlight-end
+  }
+})
+```
+
+The following options are available:
+
+| Option | Type | Description |
+| --- | --- | --- |
+| **name** | `string` | The name of the Server Function. |
+| **fn** | `Function` | The function to execute. [More details](#function-arguments) |
+
+### Function Arguments
+
+The function receives an object with the following properties:
+
+| Property | Type | Description |
+| --- | --- | --- |
+| **req** | `PayloadRequest` | The request object, containing `payload`, `user`, and `config` properties. |
+| **importMap** | `Record<string, any>` | The import map object. |
+
+## Client-side Usage
+
+To execute a Server Function from the client, use the `useServerFunctions` hook:
+
+```tsx
+'use client'
+import React, { useCallback } from 'react'
+import { useServerFunctions } from '@payloadcms/ui'
+
+const MyComponent = () => {
+  const { serverFunction } = useServerFunctions()
+  const [result, setResult] = React.useState<string | null>(null)
+
+  const callServerAction = useCallback(async () => {
+    const result = await serverFunction({
+      name: 'my-server-action',
+      args: {
+        value: 'Hello, world!'
+      }
+    }) as string
+
+    setResult(result)
+  }, [serverFunction])
+
+  return (
+    <button onClick={callServerAction} type="button">
+      {result || 'Call Server Action'}
+    </button>
+  )
+}
+```
+
+## How it works
+
+In order for Payload to support dynamic Sever Functions, a single handler is placed at the root of the application:
+
+```ts
+/* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+import type { ServerFunctionClient } from 'payload'
+
+import config from '@payload-config'
+import { RootLayout } from '@payloadcms/next/layouts'
+import { handleServerFunctions } from '@payloadcms/next/utilities' // highlight-line
+import React from 'react'
+
+import { importMap } from './admin/importMap.js'
+
+import './custom.scss'
+
+type Args = {
+  children: React.ReactNode
+}
+
+// highlight-start
+const serverFunction: ServerFunctionClient = async function (args) {
+  'use server'
+  return handleServerFunctions({
+    ...args,
+    config,
+    importMap,
+  })
+}
+// highlight-end
+
+const Layout = ({ children }: Args) => (
+  <RootLayout
+    config={config}
+    importMap={importMap}
+    serverFunction={serverFunction} // highlight-line
+  >
+    {children}
+  </RootLayout>
+)
+
+export default Layout
+```
+
+This pattern allows us to thread server-only modules, such as the Payload Config, through to the Server Function handler to be consumed within your function's logic.
+
+## TypeScript
+
+You can import the Payload `ServerFunction` type as well as other common types from the `payload` package. [More details](../typescript/overview).
+
+```ts
+import type {
+  ServerFunction,
+  ServerFunctionArgs,
+  ServerFunctionClient,
+  ServerFunctionClientArgs,
+  ServerFunctionConfig,
+  DefaultServerFunctionArgs,
+} from 'payload'
+```

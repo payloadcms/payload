@@ -60,6 +60,7 @@ export interface Config {
     'uploads-multi': UploadsMulti;
     'uploads-poly': UploadsPoly;
     'uploads-multi-poly': UploadsMultiPoly;
+    'uploads-restricted': UploadsRestricted;
     'ui-fields': UiField;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -971,6 +972,23 @@ export interface GroupField {
   localizedGroupRel?: {
     email?: (string | null) | EmailField;
   };
+  localizedGroupManyRel?: {
+    email?: (string | EmailField)[] | null;
+  };
+  localizedGroupPolyRel?: {
+    email?: {
+      relationTo: 'email-fields';
+      value: string | EmailField;
+    } | null;
+  };
+  localizedGroupPolyHasManyRel?: {
+    email?:
+      | {
+          relationTo: 'email-fields';
+          value: string | EmailField;
+        }[]
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -1140,6 +1158,8 @@ export interface RelationshipField {
     | null;
   relationToSelf?: (string | null) | RelationshipField;
   relationToSelfSelectOnly?: (string | null) | RelationshipField;
+  relationWithAllowCreateToFalse?: (string | null) | User;
+  relationWithAllowEditToFalse?: (string | null) | User;
   relationWithDynamicDefault?: (string | null) | User;
   relationHasManyWithDynamicDefault?: {
     relationTo: 'users';
@@ -1579,6 +1599,19 @@ export interface UploadsMultiPoly {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-restricted".
+ */
+export interface UploadsRestricted {
+  id: string;
+  text?: string | null;
+  uploadWithoutRestriction?: (string | null) | Upload;
+  uploadWithAllowCreateFalse?: (string | null) | Upload;
+  uploadMultipleWithAllowCreateFalse?: (string | Upload)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ui-fields".
  */
 export interface UiField {
@@ -1721,6 +1754,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'uploads-multi-poly';
         value: string | UploadsMultiPoly;
+      } | null)
+    | ({
+        relationTo: 'uploads-restricted';
+        value: string | UploadsRestricted;
       } | null)
     | ({
         relationTo: 'ui-fields';

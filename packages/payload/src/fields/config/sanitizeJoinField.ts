@@ -1,6 +1,6 @@
 import type { SanitizedJoins } from '../../collections/config/types.js'
 import type { Config } from '../../config/types.js'
-import type { JoinField, RelationshipField } from './types.js'
+import type { JoinField, RelationshipField, UploadField } from './types.js'
 
 import { APIError } from '../../errors/index.js'
 import { InvalidFieldJoin } from '../../errors/InvalidFieldJoin.js'
@@ -33,7 +33,7 @@ export const sanitizeJoinField = ({
   if (!joinCollection) {
     throw new InvalidFieldJoin(field)
   }
-  let joinRelationship: RelationshipField | undefined
+  let joinRelationship: RelationshipField | UploadField
 
   const pathSegments = field.on.split('.') // Split the schema path into segments
   let currentSegmentIndex = 0
@@ -49,9 +49,10 @@ export const sanitizeJoinField = ({
       if ('name' in field && field.name === currentSegment) {
         // Check if this is the last segment in the path
         if (
-          currentSegmentIndex === pathSegments.length - 1 &&
-          'type' in field &&
-          field.type === 'relationship'
+          (currentSegmentIndex === pathSegments.length - 1 &&
+            'type' in field &&
+            field.type === 'relationship') ||
+          field.type === 'upload'
         ) {
           joinRelationship = field // Return the matched field
           next()

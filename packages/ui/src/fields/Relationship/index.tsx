@@ -42,6 +42,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       _path: pathFromProps,
       admin: {
         allowCreate = true,
+        allowEdit = true,
         className,
         isSortable = true,
         readOnly: readOnlyFromAdmin,
@@ -413,7 +414,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   useIgnoredEffect(
     () => {
       // If the menu is open while filterOptions changes
-      // due to latency of getFormState and fast clicking into this field,
+      // due to latency of form state and fast clicking into this field,
       // re-fetch options
       if (hasLoadedFirstPageRef.current && menuIsOpen) {
         setIsLoading(true)
@@ -572,7 +573,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     }
   }, [openDrawer, currentlyOpenRelationship])
 
-  const valueToRender = findOptionsByValue({ options, value })
+  const valueToRender = findOptionsByValue({ allowEdit, options, value })
 
   if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') {
     valueToRender.value = null

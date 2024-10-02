@@ -1,11 +1,11 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { CustomVersionParser, ImportMap, PayloadServerAction, SanitizedConfig } from 'payload'
+import type { CustomVersionParser, ImportMap, SanitizedConfig, ServerFunctionClient } from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui'
 import '@payloadcms/ui/scss/app.scss'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
-import { checkDependencies, createClientConfig, parseCookies } from 'payload'
+import { checkDependencies, parseCookies } from 'payload'
 import React from 'react'
 
 import { getClientConfig } from '../../utilities/getClientConfig.js'
@@ -39,12 +39,13 @@ let checkedDependencies = false
 export const RootLayout = async ({
   children,
   config: configPromise,
-  payloadServerAction,
+  importMap,
+  serverFunction,
 }: {
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
   readonly importMap: ImportMap
-  readonly payloadServerAction: PayloadServerAction
+  readonly serverFunction: ServerFunctionClient
 }) => {
   if (
     process.env.NODE_ENV !== 'production' &&
@@ -65,17 +66,17 @@ export const RootLayout = async ({
       dependencyVersions: {
         next: {
           required: false,
-          version: '>=15.0.0-canary.160',
+          version: '>=15.0.0-canary.173',
         },
         react: {
           customVersionParser: customReactVersionParser,
           required: false,
-          version: '>=19.0.0-rc-5dcb0097-20240918',
+          version: '>=19.0.0-rc-3edc000d-20240926',
         },
         'react-dom': {
           customVersionParser: customReactVersionParser,
           required: false,
-          version: '>=19.0.0-rc-5dcb0097-20240918',
+          version: '>=19.0.0-rc-3edc000d-20240926',
         },
       },
     })
@@ -83,7 +84,7 @@ export const RootLayout = async ({
 
   const config = await configPromise
 
-  const headers = getHeaders()
+  const headers = await getHeaders()
   const cookies = parseCookies(headers)
 
   const languageCode = getRequestLanguage({
@@ -120,10 +121,10 @@ export const RootLayout = async ({
     [],
   )
 
-  // eslint-disable-next-line @typescript-eslint/require-await
   async function switchLanguageServerAction(lang: string): Promise<void> {
     'use server'
-    nextCookies().set({
+    const cookies = await nextCookies()
+    cookies.set({
       name: `${config.cookiePrefix || 'payload'}-lng`,
       path: '/',
       value: lang,
@@ -178,8 +179,8 @@ export const RootLayout = async ({
           isNavOpen={isNavOpen}
           languageCode={languageCode}
           languageOptions={languageOptions}
-          payloadServerAction={payloadServerAction}
           permissions={permissions}
+          serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}
           translations={i18n.translations}

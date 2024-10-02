@@ -26,7 +26,6 @@ import { registerFirstUser } from './auth/registerFirstUser.js'
 import { resetPassword } from './auth/resetPassword.js'
 import { unlock } from './auth/unlock.js'
 import { verifyEmail } from './auth/verifyEmail.js'
-import { buildFormState } from './buildFormState.js'
 import { endpointsAreDisabled } from './checkEndpoints.js'
 import { count } from './collections/count.js'
 import { create } from './collections/create.js'
@@ -109,9 +108,6 @@ const endpoints = {
     GET: {
       access,
       og: generateOGImage,
-    },
-    POST: {
-      'form-state': buildFormState,
     },
   },
 }
@@ -229,7 +225,8 @@ export const OPTIONS =
 
 export const GET =
   (config: Promise<SanitizedConfig> | SanitizedConfig) =>
-  async (request: Request, { params: { slug } }: { params: { slug: string[] } }) => {
+  async (request: Request, { params: paramsPromise }: { params: Promise<{ slug: string[] }> }) => {
+    const { slug } = await paramsPromise
     const [slug1, slug2, slug3, slug4] = slug
     let req: PayloadRequest
     let res: Response
@@ -429,7 +426,8 @@ export const GET =
 
 export const POST =
   (config: Promise<SanitizedConfig> | SanitizedConfig) =>
-  async (request: Request, { params: { slug } }: { params: { slug: string[] } }) => {
+  async (request: Request, { params: paramsPromise }: { params: Promise<{ slug: string[] }> }) => {
+    const { slug } = await paramsPromise
     const [slug1, slug2, slug3, slug4] = slug
     let req: PayloadRequest
     let res: Response
@@ -437,7 +435,7 @@ export const POST =
 
     const overrideHttpMethod = request.headers.get('X-HTTP-Method-Override')
     if (overrideHttpMethod === 'GET') {
-      return await GET(config)(request, { params: { slug } })
+      return await GET(config)(request, { params: paramsPromise })
     }
 
     try {
@@ -573,10 +571,6 @@ export const POST =
               res = new Response('Route Not Found', { status: 404 })
           }
         }
-      } else if (slug.length === 1 && slug1 in endpoints.root.POST) {
-        await addDataAndFileToRequest(req)
-        addLocalesToRequestFromData(req)
-        res = await endpoints.root.POST[slug1]({ req })
       }
 
       if (res instanceof Response) {
@@ -619,7 +613,8 @@ export const POST =
 
 export const DELETE =
   (config: Promise<SanitizedConfig> | SanitizedConfig) =>
-  async (request: Request, { params: { slug } }: { params: { slug: string[] } }) => {
+  async (request: Request, { params: paramsPromise }: { params: Promise<{ slug: string[] }> }) => {
+    const { slug } = await paramsPromise
     const [slug1, slug2] = slug
     let req: PayloadRequest
     let res: Response
@@ -719,7 +714,8 @@ export const DELETE =
 
 export const PATCH =
   (config: Promise<SanitizedConfig> | SanitizedConfig) =>
-  async (request: Request, { params: { slug } }: { params: { slug: string[] } }) => {
+  async (request: Request, { params: paramsPromise }: { params: Promise<{ slug: string[] }> }) => {
+    const { slug } = await paramsPromise
     const [slug1, slug2] = slug
     let req: PayloadRequest
     let res: Response

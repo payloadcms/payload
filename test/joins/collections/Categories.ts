@@ -60,6 +60,12 @@ export const Categories: CollectionConfig = {
           collection: postsSlug,
           on: 'group.category',
         },
+        {
+          name: 'camelCasePosts',
+          type: 'join',
+          collection: postsSlug,
+          on: 'group.camelCaseCategory',
+        },
       ],
     },
   ],

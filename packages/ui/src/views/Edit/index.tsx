@@ -5,6 +5,7 @@ import type {
   ClientGlobalConfig,
   ClientSideEditViewProps,
   ClientUser,
+  FormState,
 } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
@@ -26,9 +27,9 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 // import { DocumentTakeOver } from '../../../elements/DocumentTakeOver/index.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
-import { getFormState } from '../../utilities/getFormState.js'
 import { handleTakeOver } from '../../utilities/handleTakeOver.js'
 // import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving/index.js'
 import { Auth } from './Auth/index.js'
@@ -85,12 +86,15 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     updateDocumentEditor,
   } = useDocumentInfo()
 
+  const { refreshCookieAsync, user } = useAuth()
+
+  const { serverFunction } = useServerFunctions()
+
   const {
     config,
     config: {
       admin: { user: userSlug },
-      routes: { admin: adminRoute, api: apiRoute },
-      serverURL,
+      routes: { admin: adminRoute },
     },
     getEntityConfig,
   } = useConfig()
@@ -99,8 +103,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
 
   const depth = useEditDepth()
-
-  const { refreshCookieAsync, user } = useAuth()
 
   const router = useRouter()
   const params = useSearchParams()
@@ -251,9 +253,9 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
 
       const docPreferences = await getDocPreferences()
 
-      const { lockedState, state } = await getFormState({
-        apiRoute,
-        body: {
+      const { lockedState, state } = (await serverFunction({
+        name: 'form-state',
+        args: {
           id,
           collectionSlug,
           docPreferences,
@@ -264,8 +266,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
           schemaPath,
           updateLastEdited,
         },
-        serverURL,
-      })
+      })) as { lockedState: any; state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       setDocumentIsLocked(true)
 
@@ -292,20 +293,19 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       return state
     },
     [
-      apiRoute,
       collectionSlug,
       schemaPath,
       getDocPreferences,
       globalSlug,
       id,
       operation,
-      serverURL,
       user,
       documentLockStateRef,
       setCurrentEditor,
       isLockingEnabled,
       setDocumentIsLocked,
       lastUpdateTime,
+      serverFunction,
     ],
   )
 
@@ -344,7 +344,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     globalSlug,
     id,
     unlockDocument,
-    user.id,
+    user,
     setCurrentEditor,
     isLockingEnabled,
     documentIsLocked,

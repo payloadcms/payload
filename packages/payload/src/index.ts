@@ -750,6 +750,7 @@ export { buildConfig } from './config/build.js'
 export {
   type ClientConfig,
   createClientConfig,
+  serverOnlyAdminConfigProperties,
   serverOnlyConfigProperties,
 } from './config/client.js'
 
@@ -758,6 +759,7 @@ export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
+export { defaultBeginTransaction } from './database/defaultBeginTransaction.js'
 export { default as flattenWhereToOperators } from './database/flattenWhereToOperators.js'
 export { getLocalizedPaths } from './database/getLocalizedPaths.js'
 export { createMigration } from './database/migrations/createMigration.js'
@@ -1071,6 +1073,7 @@ export {
   pathExistsAndIsAccessibleSync,
 } from './utilities/findUp.js'
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
+export { formatErrors } from './utilities/formatErrors.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
 export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes.js'
 export { getObjectDotNotation } from './utilities/getObjectDotNotation.js'

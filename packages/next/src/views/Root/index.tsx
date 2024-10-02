@@ -1,6 +1,6 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { ImportMap, PayloadServerAction, SanitizedConfig } from 'payload'
+import type { ImportMap, SanitizedConfig } from 'payload'
 
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
@@ -25,19 +25,17 @@ export type GenerateViewMetadata = (args: {
 export const RootPage = async ({
   config: configPromise,
   importMap,
-  params,
-  payloadServerAction,
-  searchParams,
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
 }: {
   readonly config: Promise<SanitizedConfig>
   readonly importMap: ImportMap
-  readonly params: {
+  readonly params: Promise<{
     segments: string[]
-  }
-  payloadServerAction: PayloadServerAction
-  readonly searchParams: {
+  }>
+  readonly searchParams: Promise<{
     [key: string]: string | string[]
-  }
+  }>
 }) => {
   const config = await configPromise
 
@@ -49,12 +47,15 @@ export const RootPage = async ({
     routes: { admin: adminRoute },
   } = config
 
+  const params = await paramsPromise
   const currentRoute = formatAdminURL({
     adminRoute,
     path: `${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`,
   })
 
   const segments = Array.isArray(params.segments) ? params.segments : []
+
+  const searchParams = await searchParamsPromise
 
   const { DefaultView, initPageOptions, serverProps, templateClassName, templateType } =
     getViewFromConfig({
@@ -118,7 +119,6 @@ export const RootPage = async ({
         initPageResult,
         params,
         payload: initPageResult?.req.payload,
-        payloadServerAction,
         searchParams,
       }}
     />

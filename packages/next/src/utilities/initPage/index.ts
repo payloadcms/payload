@@ -1,4 +1,5 @@
-import type { InitPageResult, Locale, PayloadRequest, VisibleEntities } from 'payload'
+import type { I18n } from '@payloadcms/translations'
+import type { InitPageResult, Locale, VisibleEntities } from 'payload'
 
 import { findLocaleFromCode } from '@payloadcms/ui/shared'
 import { headers as getHeaders } from 'next/headers.js'
@@ -19,7 +20,7 @@ export const initPage = async ({
   route,
   searchParams,
 }: Args): Promise<InitPageResult> => {
-  const headers = getHeaders()
+  const headers = await getHeaders()
   const payload = await getPayloadHMR({ config: configPromise, importMap })
   const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
 
@@ -45,13 +46,13 @@ export const initPage = async ({
       req: {
         headers,
         host: headers.get('host'),
-        i18n,
+        i18n: i18n as I18n,
         query: qs.parse(queryString, {
           depth: 10,
           ignoreQueryPrefix: true,
         }),
         url: `${payload.config.serverURL}${route}${searchParams ? queryString : ''}`,
-      } as PayloadRequest,
+      },
     },
     payload,
   )

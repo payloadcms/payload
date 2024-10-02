@@ -1,8 +1,13 @@
 'use client'
 import type { ClientField, FormState } from 'payload'
 
-import { Form, FormSubmit, useConfig, useDocumentInfo, useTranslation } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
+import {
+  Form,
+  FormSubmit,
+  useDocumentInfo,
+  useServerFunctions,
+  useTranslation,
+} from '@payloadcms/ui'
 import React, { useCallback, useEffect, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
@@ -21,11 +26,14 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 }) => {
   const { t } = useTranslation()
   const { id } = useDocumentInfo()
-  const { config } = useConfig()
+
   const [initialState, setInitialState] = useState<false | FormState>(false)
+
   const {
     field: { richTextComponentMap },
   } = useEditorConfigContext()
+
+  const { serverFunction } = useServerFunctions()
 
   const componentMapRenderedFieldsPath = `lexical_internal_feature.${featureKey}.fields${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
   const schemaFieldsPath =
@@ -37,40 +45,38 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
-          id: id!,
+      const { state } = (await serverFunction({
+        name: 'form-state',
+        args: {
+          id,
           data: data ?? {},
           operation: 'update',
           schemaPath: schemaFieldsPath,
         },
-        serverURL: config.serverURL,
-      }) // Form State
+      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       setInitialState(state)
     }
 
     void awaitInitialState()
-  }, [config.routes.api, config.serverURL, schemaFieldsPath, id, data])
+  }, [schemaFieldsPath, id, data, serverFunction])
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
-          id: id!,
+      const { state } = (await serverFunction({
+        name: 'form-state',
+        args: {
+          id,
           formState: prevFormState,
           operation: 'update',
           schemaPath: schemaFieldsPath,
         },
-        serverURL: config.serverURL,
-      })
+      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       return state
     },
 
-    [config.routes.api, config.serverURL, schemaFieldsPath, id],
+    [schemaFieldsPath, id, serverFunction],
   )
 
   if (initialState === false) {

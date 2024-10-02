@@ -341,7 +341,6 @@ export interface PayloadLockedDocument {
         relationTo: 'disable-duplicate';
         value: string | DisableDuplicate;
       } | null);
-  editedAt?: string | null;
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
