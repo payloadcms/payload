@@ -250,18 +250,8 @@ export const traverseFields = ({
           }
           const selectFields = {}
 
-          const orderBy = buildOrderBy({
-            adapter,
-            fields,
-            joins: [],
-            locale,
-            selectFields,
-            sort,
-            tableName: joinTableName,
-          })
           const withJoin: DBQueryConfig<'many', true, any, any> = {
             columns: selectFields,
-            orderBy: () => [orderBy.order(orderBy.column)],
           }
           if (limit) {
             withJoin.limit = limit
@@ -274,19 +264,19 @@ export const traverseFields = ({
             withJoin.columns.id = true
             withJoin.columns.parent = true
           }
-
-          if (where) {
-            const { where: joinWhere } = buildQuery({
-              adapter,
-              fields,
-              joins,
-              locale,
-              sort,
-              tableName: joinTableName,
-              where,
-            })
+          const { orderBy, where: joinWhere } = buildQuery({
+            adapter,
+            fields,
+            joins,
+            locale,
+            sort,
+            tableName: joinTableName,
+            where,
+          })
+          if (joinWhere) {
             withJoin.where = () => joinWhere
           }
+          withJoin.orderBy = [orderBy.order(orderBy.column)]
           currentArgs.with[`${path.replaceAll('.', '_')}${field.name}`] = withJoin
           break
         }
