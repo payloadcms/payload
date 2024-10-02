@@ -28,7 +28,7 @@ export const getDocumentData = async (args: {
   const schemaPath = schemaPathFromProps || collectionConfig?.slug || globalConfig?.slug
 
   try {
-    const { state: formState } = await buildFormState({
+    const result = await buildFormState({
       id,
       collectionSlug: collectionConfig?.slug,
       globalSlug: globalConfig?.slug,
@@ -38,11 +38,14 @@ export const getDocumentData = async (args: {
       schemaPath,
     })
 
-    const data = reduceFieldsToValues(formState, true)
-
-    return {
-      data,
-      formState,
+    if (result.errors) {
+      throw new Error('Error building form state')
+    } else {
+      const data = reduceFieldsToValues(result.state, true)
+      return {
+        data,
+        formState: result.state,
+      }
     }
   } catch (error) {
     console.error('Error getting document data', error) // eslint-disable-line no-console

@@ -37,7 +37,7 @@
     ],
     "paths": {
       "@payload-config": [
-        "./test/_community/config.ts"
+        "./test/fields-relationship/config.ts"
       ],
       "@payloadcms/live-preview": [
         "./packages/live-preview/src"
@@ -169,7 +169,6 @@
   ],
   "include": [
     "app",
-    "next-env.d.ts",
     ".next/types/**/*.ts",
     "scripts/**/*.ts"
   ]

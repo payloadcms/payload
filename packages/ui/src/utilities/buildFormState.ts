@@ -65,12 +65,11 @@ export const buildFormState = async (
   args: BuildFormStateArgs,
 ): Promise<
   | {
+      errors?: never
       lockedState?: { isLocked: boolean; user: ClientUser | number | string }
       state: FormState
     }
-  | ({
-      state?: never
-    } & ErrorResult)
+  | ({ state?: never } & ErrorResult)
 > => {
   const { req } = args
 
