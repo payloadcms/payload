@@ -37,6 +37,7 @@ import type {
   JsonObject,
   TypedAuthOperations,
   TypedCollection,
+  TypedCollectionSelect,
 } from '../../index.js'
 import type { PayloadRequest, RequestContext } from '../../types/index.js'
 import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
@@ -47,6 +48,9 @@ import type {
 import type { AfterOperationArg, AfterOperationMap } from '../operations/utils.js'
 
 export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollection[TSlug]
+
+export type SelectFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollectionSelect[TSlug]
+
 export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
   TypedAuthOperations[TSlug]
 

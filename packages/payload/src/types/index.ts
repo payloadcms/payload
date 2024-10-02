@@ -2,9 +2,13 @@ import type { I18n, TFunction } from '@payloadcms/translations'
 import type DataLoader from 'dataloader'
 import type { URL } from 'url'
 
-import type { TypeWithID, TypeWithTimestamps } from '../collections/config/types.js'
+import type {
+  DataFromCollectionSlug,
+  TypeWithID,
+  TypeWithTimestamps,
+} from '../collections/config/types.js'
 import type payload from '../index.js'
-import type { TypedLocale, TypedUser } from '../index.js'
+import type { CollectionSlug, TypedLocale, TypedUser } from '../index.js'
 import type { validOperators } from './constants.js'
 export type { Payload as Payload } from '../index.js'
 
@@ -138,3 +142,62 @@ export function docHasTimestamps(doc: any): doc is TypeWithTimestamps {
 export type IfAny<T, Y, N> = 0 extends 1 & T ? Y : N // This is a commonly used trick to detect 'any'
 export type IsAny<T> = IfAny<T, true, false>
 export type ReplaceAny<T, DefaultType> = IsAny<T> extends true ? DefaultType : T
+
+export type SelectIncludeType = {
+  [k: string]: SelectIncludeType | true
+}
+
+export type SelectExcludeType = {
+  [k: string]: false | SelectExcludeType
+}
+
+export type SelectType = SelectExcludeType | SelectIncludeType
+
+export type ApplyDisableErrors<T, DisableErrors extends boolean> = DisableErrors extends true
+  ? null | T
+  : T
+
+export type TransformDataWithSelect<
+  Data extends Record<string, any>,
+  Select extends SelectType,
+> = Select extends never
+  ? Data
+  : string extends keyof Select
+    ? Data
+    : // START Handle types when they aren't generated
+      // For example in any package in this repository outside of tests / plugins
+      // This stil gives us autocomplete when using include select mode, i.e select: {title :true} returns type {title: any, id: string | number}
+      JsonObject extends Omit<Data, 'id'>
+      ? Select extends SelectIncludeType
+        ? {
+            [K in Data extends TypeWithID ? 'id' | keyof Select : keyof Select]: K extends 'id'
+              ? number | string
+              : unknown
+          }
+        : Data
+      : // END Handle types when they aren't generated
+        // Handle include mode
+        Select extends SelectIncludeType
+        ? {
+            [K in keyof Data as K extends keyof Select
+              ? Select[K] extends object | true
+                ? K
+                : never
+              : // select 'id' always
+                K extends 'id'
+                ? K
+                : never]: Data[K]
+          }
+        : // Handle exclude mode
+          {
+            [K in keyof Data as K extends keyof Select
+              ? Select[K] extends object | undefined
+                ? K
+                : never
+              : K]: Data[K]
+          }
+
+export type TransformCollectionWithSelect<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+> = TransformDataWithSelect<DataFromCollectionSlug<TSlug>, TSelect>

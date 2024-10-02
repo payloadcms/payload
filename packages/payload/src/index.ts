@@ -22,6 +22,7 @@ import type {
   BulkOperationResult,
   Collection,
   DataFromCollectionSlug,
+  SelectFromCollectionSlug,
   TypeWithID,
 } from './collections/config/types.js'
 export type * from './admin/types.js'
@@ -33,6 +34,7 @@ import type {
   Options as DeleteOptions,
 } from './collections/operations/local/delete.js'
 export type { MappedView } from './admin/views/types.js'
+
 import type { Options as DuplicateOptions } from './collections/operations/local/duplicate.js'
 import type { Options as FindOptions } from './collections/operations/local/find.js'
 import type { Options as FindByIDOptions } from './collections/operations/local/findByID.js'
@@ -53,7 +55,12 @@ import type { Options as FindGlobalVersionByIDOptions } from './globals/operatio
 import type { Options as FindGlobalVersionsOptions } from './globals/operations/local/findVersions.js'
 import type { Options as RestoreGlobalVersionOptions } from './globals/operations/local/restoreVersion.js'
 import type { Options as UpdateGlobalOptions } from './globals/operations/local/update.js'
-import type { JsonObject } from './types/index.js'
+import type {
+  ApplyDisableErrors,
+  JsonObject,
+  SelectType,
+  TransformCollectionWithSelect,
+} from './types/index.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 import type { TypeWithVersion } from './versions/types.js'
 
@@ -88,12 +95,20 @@ export interface GeneratedTypes {
       }
     }
   }
+  collectionsSelectUntyped: {
+    [slug: string]: SelectType
+  }
+
   collectionsUntyped: {
     [slug: string]: JsonObject & TypeWithID
   }
   dbUntyped: {
     defaultIDType: number | string
   }
+  globalsSelectUntyped: {
+    [slug: string]: SelectType
+  }
+
   globalsUntyped: {
     [slug: string]: JsonObject
   }
@@ -106,12 +121,28 @@ type ResolveCollectionType<T> = 'collections' extends keyof T
   ? T['collections']
   : // @ts-expect-error
     T['collectionsUntyped']
-// @ts-expect-error
-type ResolveGlobalType<T> = 'globals' extends keyof T ? T['globals'] : T['globalsUntyped']
+
+type ResolveCollectionSelectType<T> = 'collectionsSelect' extends keyof T
+  ? T['collectionsSelect']
+  : // @ts-expect-error
+    T['collectionsSelectUntyped']
+type ResolveGlobalType<T> = 'globals' extends keyof T
+  ? T['globals']
+  : // @ts-expect-error
+    T['globalsUntyped']
+
+type ResolveGlobalSelectType<T> = 'globalsSelect' extends keyof T
+  ? T['globalsSelect']
+  : // @ts-expect-error
+    T['globalsSelectUntyped']
 
 // Applying helper types to GeneratedTypes
 export type TypedCollection = ResolveCollectionType<GeneratedTypes>
+
+export type TypedCollectionSelect = ResolveCollectionSelectType<GeneratedTypes>
 export type TypedGlobal = ResolveGlobalType<GeneratedTypes>
+
+export type TypedGlobalSelect = ResolveGlobalSelectType<GeneratedTypes>
 
 // Extract string keys from the type
 type StringKeyOf<T> = Extract<keyof T, string>
@@ -219,11 +250,11 @@ export class BasePayload {
    * @param options
    * @returns documents satisfying query
    */
-  find = async <TSlug extends CollectionSlug>(
-    options: FindOptions<TSlug>,
-  ): Promise<PaginatedDocs<DataFromCollectionSlug<TSlug>>> => {
+  find = async <TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
+    options: FindOptions<TSlug, TSelect>,
+  ): Promise<PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>> => {
     const { find } = localOperations
-    return find<TSlug>(this, options)
+    return find<TSlug, TSelect>(this, options)
   }
 
   /**
@@ -231,15 +262,15 @@ export class BasePayload {
    * @param options
    * @returns document with specified ID
    */
-  findByID = async <TOptions extends FindByIDOptions>(
-    options: TOptions,
-  ): Promise<
-    TOptions['disableErrors'] extends true
-      ? DataFromCollectionSlug<TOptions['collection']> | null
-      : DataFromCollectionSlug<TOptions['collection']>
-  > => {
+  findByID = async <
+    TSlug extends CollectionSlug,
+    TDisableErrors extends boolean,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+  >(
+    options: FindByIDOptions<TSlug, TDisableErrors, TSelect>,
+  ): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> => {
     const { findByID } = localOperations
-    return findByID<TOptions>(this, options)
+    return findByID<TSlug, TDisableErrors, TSelect>(this, options)
   }
 
   findGlobal = async <TSlug extends GlobalSlug>(

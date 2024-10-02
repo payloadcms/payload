@@ -1,7 +1,15 @@
 import type { FindOneArgs } from '../../database/types.js'
 import type { CollectionSlug, JoinQuery } from '../../index.js'
-import type { PayloadRequest } from '../../types/index.js'
-import type { Collection, DataFromCollectionSlug } from '../config/types.js'
+import type {
+  ApplyDisableErrors,
+  PayloadRequest,
+  TransformCollectionWithSelect,
+} from '../../types/index.js'
+import type {
+  Collection,
+  DataFromCollectionSlug,
+  SelectFromCollectionSlug,
+} from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
@@ -25,9 +33,13 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-export const findByIDOperation = async <TSlug extends CollectionSlug>(
+export const findByIDOperation = async <
+  TSlug extends CollectionSlug,
+  TDisableErrors extends boolean,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   incomingArgs: Arguments,
-): Promise<DataFromCollectionSlug<TSlug>> => {
+): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> => {
   let args = incomingArgs
 
   try {
@@ -228,7 +240,10 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
     // Return results
     // /////////////////////////////////////
 
-    return result
+    return result as ApplyDisableErrors<
+      TransformCollectionWithSelect<TSlug, TSelect>,
+      TDisableErrors
+    >
   } catch (error: unknown) {
     await killTransaction(args.req)
     throw error

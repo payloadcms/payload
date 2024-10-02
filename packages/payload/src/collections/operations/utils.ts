@@ -2,7 +2,7 @@ import type { forgotPasswordOperation } from '../../auth/operations/forgotPasswo
 import type { loginOperation } from '../../auth/operations/login.js'
 import type { refreshOperation } from '../../auth/operations/refresh.js'
 import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequest, SelectType } from '../../types/index.js'
 import type { AfterOperationHook, SanitizedCollectionConfig } from '../config/types.js'
 import type { countOperation } from './count.js'
 import type { createOperation } from './create.js'
@@ -18,8 +18,8 @@ export type AfterOperationMap<TOperationGeneric extends CollectionSlug> = {
   create: typeof createOperation<TOperationGeneric>
   delete: typeof deleteOperation<TOperationGeneric>
   deleteByID: typeof deleteByIDOperation<TOperationGeneric>
-  find: typeof findOperation<TOperationGeneric>
-  findByID: typeof findByIDOperation<TOperationGeneric>
+  find: typeof findOperation<TOperationGeneric, SelectType>
+  findByID: typeof findByIDOperation<TOperationGeneric, boolean, SelectType>
   forgotPassword: typeof forgotPasswordOperation
   login: typeof loginOperation<TOperationGeneric>
   refresh: typeof refreshOperation
