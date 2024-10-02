@@ -451,6 +451,7 @@ export const Form: React.FC<FormProps> = (props) => {
       const { state: newState } = (await serverFunction({
         name: 'form-state',
         args: {
+          id,
           collectionSlug,
           data,
           globalSlug,
