@@ -97,13 +97,11 @@ export const LinkButton: React.FC = () => {
 
               const { state } = (await serverFunction({
                 name: 'form-state',
-                args: Object.fromEntries(
-                  Object.entries({
-                    data,
-                    operation: 'update',
-                    schemaPath: `${schemaPath}.${linkFieldsSchemaPath}`,
-                  }).filter(([_, value]) => value !== undefined),
-                ),
+                args: {
+                  data,
+                  operation: 'update',
+                  schemaPath: `${schemaPath}.${linkFieldsSchemaPath}`,
+                },
               })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
               setInitialState(state)

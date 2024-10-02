@@ -179,19 +179,17 @@ const PreviewView: React.FC<Props> = ({
 
       const { lockedState, state } = (await serverFunction({
         name: 'form-state',
-        args: Object.fromEntries(
-          Object.entries({
-            id,
-            collectionSlug,
-            docPreferences,
-            formState: prevFormState,
-            globalSlug,
-            operation,
-            returnLockStatus: isLockingEnabled ? true : false,
-            schemaPath,
-            updateLastEdited,
-          }).filter(([, value]) => value !== undefined),
-        ),
+        args: {
+          id,
+          collectionSlug,
+          docPreferences,
+          formState: prevFormState,
+          globalSlug,
+          operation,
+          returnLockStatus: isLockingEnabled ? true : false,
+          schemaPath,
+          updateLastEdited,
+        },
       })) as {
         lockedState: {
           user: ClientUser

@@ -133,14 +133,12 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
       const getInitialState = async () => {
         const { state: result } = (await serverFunction({
           name: 'form-state',
-          args: Object.fromEntries(
-            Object.entries({
-              collectionSlug: slug,
-              data: {},
-              operation: 'update',
-              schemaPath: slug,
-            }).filter(([_, value]) => value !== undefined),
-          ),
+          args: {
+            collectionSlug: slug,
+            data: {},
+            operation: 'update',
+            schemaPath: slug,
+          },
         })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
         setInitialState(result)
@@ -155,14 +153,12 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
     async ({ formState: prevFormState }) => {
       const { state } = (await serverFunction({
         name: 'form-state',
-        args: Object.fromEntries(
-          Object.entries({
-            collectionSlug: slug,
-            formState: prevFormState,
-            operation: 'update',
-            schemaPath: slug,
-          }).filter(([_, value]) => value !== undefined),
-        ),
+        args: {
+          collectionSlug: slug,
+          formState: prevFormState,
+          operation: 'update',
+          schemaPath: slug,
+        },
       })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       return state

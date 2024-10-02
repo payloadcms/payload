@@ -3,6 +3,7 @@ import {
   type ClientUser,
   type Data,
   type DocumentPreferences,
+  type ErrorResult,
   type Field,
   formatErrors,
   type FormState,
@@ -53,7 +54,6 @@ export type BuildFormStateArgs = {
   */
   language?: keyof SupportedLanguages
   locale?: string
-  onError?: (data?: any) => Promise<void> | void
   operation?: 'create' | 'update'
   req: PayloadRequest
   returnLockStatus?: boolean
@@ -63,11 +63,16 @@ export type BuildFormStateArgs = {
 
 export const buildFormState = async (
   args: BuildFormStateArgs,
-): Promise<{
-  lockedState?: { isLocked: boolean; user: ClientUser | number | string }
-  state: FormState
-}> => {
-  const { formState, onError, req } = args
+): Promise<
+  | {
+      lockedState?: { isLocked: boolean; user: ClientUser | number | string }
+      state: FormState
+    }
+  | ({
+      state?: never
+    } & ErrorResult)
+> => {
+  const { req } = args
 
   try {
     const res = await buildFormStateFn(args)
@@ -75,14 +80,16 @@ export const buildFormState = async (
   } catch (err) {
     req.payload.logger.error({ err, msg: `There was an error building form state` })
 
-    const formattedErrors = formatErrors(err)
-
-    if (typeof onError === 'function') {
-      await onError(formattedErrors)
+    if (err.message === 'Could not find field schema for given path') {
+      throw new Error(err.message)
     }
-  }
 
-  return { state: formState }
+    if (err.message === 'Unauthorized') {
+      throw new Error()
+    }
+
+    return formatErrors(err)
+  }
 }
 
 const buildFormStateFn = async (

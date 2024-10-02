@@ -239,7 +239,7 @@ const DocumentInfo: React.FC<
           } else {
             setDocumentIsLocked(false)
           }
-        } catch (error) {
+        } catch (_err) {
           // swallow error
         }
       }
@@ -552,7 +552,6 @@ const DocumentInfo: React.FC<
               collectionSlug,
               globalSlug,
               locale,
-              onError: onLoadError,
               operation,
               schemaPath: collectionSlug || globalSlug,
             },
@@ -569,7 +568,7 @@ const DocumentInfo: React.FC<
         } catch (err) {
           if (!abortController.signal.aborted) {
             if (typeof onLoadError === 'function') {
-              void onLoadError()
+              void onLoadError(err)
             }
             setIsError(true)
             setIsLoading(false)

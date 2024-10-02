@@ -62,7 +62,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
     (data) => {
       if (isOpen) {
         closeModal(drawerSlug)
-        toast.error(data.errors?.[0].message || t('error:unspecific'))
+        toast.error(data?.errors?.[0].message || t('error:unspecific'))
       }
     },
     [closeModal, drawerSlug, isOpen, t],
