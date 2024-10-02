@@ -26,6 +26,11 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
   })
 
   config.jobs.tasks.forEach((task) => {
+    if (workflowSlugs.has(task.slug)) {
+      throw new Error(
+        `Task slug "${task.slug}" is already used by a workflow. No tasks are allowed to have the same slug as a workflow.`,
+      )
+    }
     taskSlugs.add(task.slug)
   })
 

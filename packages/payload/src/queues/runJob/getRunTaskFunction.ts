@@ -210,7 +210,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
       complete: true,
       input,
       output,
-      taskSlug: task,
+      taskSlug: String(task),
       totalTried: 0,
     }
 

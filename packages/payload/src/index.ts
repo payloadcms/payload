@@ -130,7 +130,7 @@ export type TypedCollection = ResolveCollectionType<GeneratedTypes>
 export type TypedGlobal = ResolveGlobalType<GeneratedTypes>
 
 // Extract string keys from the type
-type StringKeyOf<T> = Extract<keyof T, string>
+export type StringKeyOf<T> = Extract<keyof T, string>
 
 // Define the types for slugs using the appropriate collections and globals
 export type CollectionSlug = StringKeyOf<TypedCollection>

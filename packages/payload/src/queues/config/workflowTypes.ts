@@ -1,5 +1,5 @@
 import type { Field } from '../../fields/config/types.js'
-import type { PayloadRequest, TypedCollection, TypedJobs } from '../../index.js'
+import type { PayloadRequest, StringKeyOf, TypedCollection, TypedJobs } from '../../index.js'
 import type {
   RunInlineTaskFunction,
   RunTaskFunction,
@@ -39,7 +39,7 @@ export type BaseJob = {
   workflowSlug: string
 }
 
-export type WorkflowTypes = keyof TypedJobs['workflows']
+export type WorkflowTypes = StringKeyOf<TypedJobs['workflows']>
 
 export type RunningJob<TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object> = {
   input: TWorkflowSlugOrInput extends keyof TypedJobs['workflows']
@@ -104,3 +104,7 @@ export type WorkflowConfig<TWorkflowSlugOrInput extends keyof TypedJobs['workflo
    */
   slug: TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] ? TWorkflowSlugOrInput : string
 }
+
+type AllWorkflowConfigs = {
+  [TWorkflowSlug in keyof TypedJobs['workflows']]: WorkflowConfig<TWorkflowSlug>
+}[keyof TypedJobs['workflows']]

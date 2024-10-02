@@ -1,4 +1,4 @@
-import type { Field, PayloadRequest, TypedJobs } from '../../index.js'
+import type { Field, PayloadRequest, StringKeyOf, TypedJobs } from '../../index.js'
 import type { JobLog, RunningJob } from './workflowTypes.js'
 
 export type TaskInputOutput = {
@@ -46,7 +46,7 @@ export type TaskRunner<TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] |
     args: TaskRunnerArgs<TTaskSlugOrInputOutput>,
   ) => Promise<TaskRunnerResult<TTaskSlugOrInputOutput>> | TaskRunnerResult<TTaskSlugOrInputOutput>
 
-export type TaskType = keyof TypedJobs['tasks']
+export type TaskType = StringKeyOf<TypedJobs['tasks']>
 
 // Extracts the type of `input` corresponding to each task
 export type TaskInput<T extends keyof TypedJobs['tasks']> = TypedJobs['tasks'][T]['input']
@@ -78,36 +78,37 @@ export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput exte
     | Promise<{ output: TTaskOutput; state?: 'failed' | 'succeeded' }>
 }) => Promise<TTaskOutput>
 
-export type TaskConfig<TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput> =
-  {
-    /**
-     * Define the input field schema
-     */
-    inputSchema?: Field[]
-    /**
-     * Define a human-friendly label for this task.
-     */
-    label?: string
-    onFail?: () => void
-    onSuccess?: () => void
-    /**
-     * Define the output field schema
-     */
-    outputSchema?: Field[]
-    /**
-     * Specify the number of times that this step should be retried if it fails.
-     */
-    retries?: number
-    run: string | TaskRunner<TTaskSlugOrInputOutput>
-    /**
-     * The function that should be responsible for running the job.
-     * You can either pass a string-based path to the job function file, or the job function itself.
-     *
-     * If you are using large dependencies within your job, you might prefer to pass the string path
-     * because that will avoid bundling large dependencies in your Next.js app.
-     */
-    slug: TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] ? TTaskSlugOrInputOutput : string
-    /**
-     * Define a slug-based name for this job.
-     */
-  }
+export type TaskConfig<
+  TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput = TaskType,
+> = {
+  /**
+   * Define the input field schema
+   */
+  inputSchema?: Field[]
+  /**
+   * Define a human-friendly label for this task.
+   */
+  label?: string
+  onFail?: () => void
+  onSuccess?: () => void
+  /**
+   * Define the output field schema
+   */
+  outputSchema?: Field[]
+  /**
+   * Specify the number of times that this step should be retried if it fails.
+   */
+  retries?: number
+  run: string | TaskRunner<TTaskSlugOrInputOutput>
+  /**
+   * The function that should be responsible for running the job.
+   * You can either pass a string-based path to the job function file, or the job function itself.
+   *
+   * If you are using large dependencies within your job, you might prefer to pass the string path
+   * because that will avoid bundling large dependencies in your Next.js app.
+   */
+  slug: TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] ? TTaskSlugOrInputOutput : string
+  /**
+   * Define a slug-based name for this job.
+   */
+}
