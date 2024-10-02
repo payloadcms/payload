@@ -4,7 +4,6 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { WorkflowretriesTestInput } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -51,8 +50,7 @@ describe('Queues', () => {
       headers: {
         // Authorization: `JWT ${token}`,
       },
-    })
-
+    }) // Needs to be a rest call to test auth
     expect(response.status).toStrictEqual(401)
   })
 
@@ -61,7 +59,7 @@ describe('Queues', () => {
       headers: {
         Authorization: `JWT ${token}`,
       },
-    })
+    }) // Needs to be a rest call to test auth
 
     expect(response.status).toStrictEqual(200)
   })
@@ -82,11 +80,7 @@ describe('Queues', () => {
     expect(retrievedPost.jobStep1Ran).toBeFalsy()
     expect(retrievedPost.jobStep2Ran).toBeFalsy()
 
-    await restClient.GET('/payload-jobs/run', {
-      headers: {
-        Authorization: `JWT ${token}`,
-      },
-    })
+    await payload.jobs.run()
 
     const postAfterJobs = await payload.findByID({
       collection: 'posts',
@@ -108,15 +102,9 @@ describe('Queues', () => {
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await restClient.GET('/payload-jobs/run', {
-        headers: {
-          Authorization: `JWT ${token}`,
-        },
-      })
+      const response = await payload.jobs.run()
 
-      const responseJson = await response.json()
-      console.log({ responseJson })
-      if (responseJson.noJobsRemaining) {
+      if (response.noJobsRemaining) {
         hasJobsRemaining = false
       }
     }
@@ -145,11 +133,7 @@ describe('Queues', () => {
       },
     })
 
-    await restClient.GET('/payload-jobs/run', {
-      headers: {
-        Authorization: `JWT ${token}`,
-      },
-    })
+    await payload.jobs.run()
 
     const allSimples = await payload.find({
       collection: 'simple',

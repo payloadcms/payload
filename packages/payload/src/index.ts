@@ -54,7 +54,7 @@ import type { Options as FindGlobalVersionsOptions } from './globals/operations/
 import type { Options as RestoreGlobalVersionOptions } from './globals/operations/local/restoreVersion.js'
 import type { Options as UpdateGlobalOptions } from './globals/operations/local/update.js'
 import type { RunningJob, RunningJobFromTask } from './queues/config/workflowTypes.js'
-import type { JsonObject } from './types/index.js'
+import type { JsonObject, PayloadRequest } from './types/index.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 import type { TypeWithVersion } from './versions/types.js'
 
@@ -66,8 +66,8 @@ import localOperations from './collections/operations/local/index.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
-import { TaskType } from './queues/config/taskTypes.js'
-import { WorkflowTypes } from './queues/config/workflowTypes.js'
+import { runAllJobs } from './queues/runAllJobs.js'
+import { createLocalReq } from './utilities/createLocalReq.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
@@ -366,6 +366,14 @@ export class BasePayload {
       })) as TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
         ? RunningJob<TTaskOrWorkflowSlug>
         : RunningJobFromTask<TTaskOrWorkflowSlug> // Type assertion is still needed here
+    },
+
+    run: async (args?: { req?: PayloadRequest }): Promise<ReturnType<typeof runAllJobs>> => {
+      const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, this))
+      const result = await runAllJobs({
+        req: newReq,
+      })
+      return result
     },
   }
 
