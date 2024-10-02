@@ -12,20 +12,12 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "preserve",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": false,
-    "types": [
-      "jest",
-      "node",
-      "@types/jest"
-    ],
+    "types": ["jest", "node", "@types/jest"],
     "incremental": true,
     "isolatedModules": true,
     "plugins": [
@@ -35,9 +27,7 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@payload-config": [
-        "./fields/config.ts"
-      ]
+      "@payload-config": ["./fields/config.ts"]
     }
   },
   "exclude": [
@@ -48,11 +38,6 @@
     "dist/**/*.js",
     "**/dist/**/*.js"
   ],
-  "include": [
-    "./**/*.ts",
-    "./**/*.tsx",
-    ".next/types/**/*.ts",
-    "setup.js"
-  ],
+  "include": ["./**/*.ts", "./**/*.tsx", "next-env.d.ts", ".next/types/**/*.ts", "setup.js"],
   "references": []
 }
