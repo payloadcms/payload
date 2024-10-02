@@ -77,7 +77,7 @@ const MyComponent = () => {
     }) as string
 
     setResult(result)
-  }, [serverFunctions])
+  }, [serverFunction])
 
   return (
     <button onClick={callServerAction} type="button">
@@ -124,7 +124,7 @@ const Layout = ({ children }: Args) => (
   <RootLayout
     config={config}
     importMap={importMap}
-    serverFunctions={serverFunctions} // highlight-line
+    serverFunction={serverFunction} // highlight-line
   >
     {children}
   </RootLayout>
