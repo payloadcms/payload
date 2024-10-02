@@ -12,15 +12,15 @@ export type ServerFunctionArgs = {
   name: string
 }
 
-export type ClientServerFunctionArgs = {
+export type ServerFunctionClientArgs = {
   args: Record<string, unknown>
   name: string
 }
 
-export type ClientServerFunction = (args: ClientServerFunctionArgs) => Promise<unknown> | unknown
+export type ServerFunctionClient = (args: ServerFunctionClientArgs) => Promise<unknown> | unknown
 
 export type ServerFunction = (
-  args: ClientServerFunctionArgs['args'] & DefaultServerFunctionArgs,
+  args: ServerFunctionClientArgs['args'] & DefaultServerFunctionArgs,
 ) => Promise<unknown> | unknown
 
 export type ServerFunctionConfig = {
@@ -32,5 +32,5 @@ export type ServerFunctionHandler = (
   args: {
     config: Promise<SanitizedConfig> | SanitizedConfig
     importMap: ImportMap
-  } & ClientServerFunctionArgs,
+  } & ServerFunctionClientArgs,
 ) => Promise<unknown>

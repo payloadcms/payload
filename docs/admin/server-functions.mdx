@@ -6,11 +6,11 @@ desc: Execute custom server-side logic from client-side code using Server Functi
 keywords: server functions, server-side functions, server-side logic, server-side code, server-side, functions, Payload, headless, Content Management System, cms, javascript, react, node, nextjs
 ---
 
-The Payload [Admin Panel] fully supports [React Server Functions](https://react.dev/reference/rsc/server-actions) (formerly known as Server Actions). These are functions that are defined on the server and can use server-only modules, and are executed on the server when called from the client.
+The Payload [Admin Panel] fully supports [React Server Functions](https://react.dev/reference/rsc/server-actions) (formerly grouped under the "Server Actions" umbrella). These are functions that are defined on the server, using server-only modules, and called from the client. This is a way to execute custom server-side logic from client-side code.
 
-Server Functions are a good alternative to traditional [REST API Endpoints](../rest-api#custom-endpoints), with a few key benefits. While they behave similarly, Server Functions are simpler to define, not requiring a specified path or method. They are also easier to consume, not requiring any client-side fetch.
+Server Functions are a good alternative to traditional [REST API Endpoints](../rest-api#custom-endpoints), with a few key differences. While they behave similarly, Server Functions are simpler to define, not requiring a specified path or method. They are also easier to consume, not requiring any client-side fetch. Server Functions are also able to return rendered React components.
 
-Server Functions are also able to return rendered React components, which can be useful for server-side rendering of components that require server-only data. Requests made through a Server Function also do not propagate though the browser's network panel in the same way as fetch requests, making it harder for others to inspect, tamper with, or replay requests directly through the browser.
+Requests made through a Server Function also do not propagate though the browser's network panel in the same way as fetch requests, making it harder for others to inspect, tamper with, or replay requests directly through the browser.
 
 <Banner type="info">
   <strong>Note:</strong>
