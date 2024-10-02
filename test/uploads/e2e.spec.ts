@@ -26,6 +26,7 @@ import {
   audioSlug,
   customFileNameMediaSlug,
   focalOnlySlug,
+  gifResizeSlug,
   mediaSlug,
   relationPreviewSlug,
   relationSlug,
@@ -53,6 +54,7 @@ let withoutMetadataURL: AdminUrlUtil
 let withOnlyJPEGMetadataURL: AdminUrlUtil
 let relationPreviewURL: AdminUrlUtil
 let customFileNameURL: AdminUrlUtil
+let gifResizeURL: AdminUrlUtil
 
 describe('uploads', () => {
   let page: Page
@@ -77,6 +79,7 @@ describe('uploads', () => {
     withOnlyJPEGMetadataURL = new AdminUrlUtil(serverURL, withOnlyJPEGMetadataSlug)
     relationPreviewURL = new AdminUrlUtil(serverURL, relationPreviewSlug)
     customFileNameURL = new AdminUrlUtil(serverURL, customFileNameMediaSlug)
+    gifResizeURL = new AdminUrlUtil(serverURL, gifResizeSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -618,6 +621,35 @@ describe('uploads', () => {
 
       // without focal point update this generated size was equal to 1736
       expect(redDoc.sizes.focalTest.filesize).toEqual(1598)
+    })
+
+    test('should resize image after crop if resizeOptions defined', async () => {
+      await page.goto(gifResizeURL.create)
+      await page.waitForURL(gifResizeURL.create)
+
+      const fileChooserPromise = page.waitForEvent('filechooser')
+      await page.getByText('Select a file').click()
+      const fileChooser = await fileChooserPromise
+      await wait(1000)
+      await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+
+      await page.locator('.file-field__edit').click()
+
+      // set crop
+      await page.locator('.edit-upload__input input[name="Width (px)"]').fill('400')
+      await page.locator('.edit-upload__input input[name="Height (px)"]').fill('800')
+      // set focal point
+      await page.locator('.edit-upload__input input[name="X %"]').fill('75') // init left focal point
+      await page.locator('.edit-upload__input input[name="Y %"]').fill('50') // init top focal point
+
+      await page.locator('button:has-text("Apply Changes")').click()
+      await page.waitForSelector('button#action-save')
+      await page.locator('button#action-save').click()
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      await wait(1000) // Wait for the save
+
+      const resizeOptionMedia = page.locator('.file-meta .file-meta__size-type')
+      await expect(resizeOptionMedia).toContainText('200x200')
     })
   })
 

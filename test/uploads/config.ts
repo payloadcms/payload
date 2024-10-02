@@ -16,9 +16,10 @@ import {
   customFileNameMediaSlug,
   enlargeSlug,
   focalNoSizesSlug,
+  gifResizeSlug,
   mediaSlug,
-  mediaWithRelationPreviewSlug,
   mediaWithoutRelationPreviewSlug,
+  mediaWithRelationPreviewSlug,
   reduceSlug,
   relationPreviewSlug,
   relationSlug,
@@ -66,7 +67,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug: 'gif-resize',
+      slug: gifResizeSlug,
       fields: [],
       upload: {
         formatOptions: {
