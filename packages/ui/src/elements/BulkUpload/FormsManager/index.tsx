@@ -81,7 +81,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const { code } = useLocale()
   const { i18n, t } = useTranslation()
 
-  const { serverFunctions } = useServerFunctions()
+  const { serverFunction } = useServerFunctions()
 
   const [hasSubmitted, setHasSubmitted] = React.useState(false)
   const [docPermissions, setDocPermissions] = React.useState<DocumentPermissions>()
@@ -155,7 +155,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       }
 
       try {
-        const { state: formStateWithoutFiles } = (await serverFunctions({
+        const { state: formStateWithoutFiles } = (await serverFunction({
           name: 'form-state',
           args: {
             collectionSlug,
@@ -170,7 +170,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         // swallow error
       }
     },
-    [code, collectionSlug, serverFunctions],
+    [code, collectionSlug, serverFunction],
   )
 
   const setActiveIndex: FormsManagerContext['setActiveIndex'] = React.useCallback(

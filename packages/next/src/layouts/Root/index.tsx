@@ -42,12 +42,12 @@ export const RootLayout = async ({
   children,
   config: configPromise,
   importMap,
-  serverFunctions,
+  serverFunction,
 }: {
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
   readonly importMap: ImportMap
-  readonly serverFunctions: ClientServerFunction
+  readonly serverFunction: ClientServerFunction
 }) => {
   if (
     process.env.NODE_ENV !== 'production' &&
@@ -187,7 +187,7 @@ export const RootLayout = async ({
           languageCode={languageCode}
           languageOptions={languageOptions}
           permissions={permissions}
-          serverFunctions={serverFunctions}
+          serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}
           translations={i18n.translations}

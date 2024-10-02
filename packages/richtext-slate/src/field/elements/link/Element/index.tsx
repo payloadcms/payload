@@ -79,7 +79,7 @@ export const LinkElement = () => {
   const [initialState, setInitialState] = useState<FormState>({})
   const { id, collectionSlug } = useDocumentInfo()
 
-  const { serverFunctions } = useServerFunctions()
+  const { serverFunction } = useServerFunctions()
 
   const drawerSlug = useDrawerSlug('rich-text-link')
 
@@ -100,7 +100,7 @@ export const LinkElement = () => {
         url: element.url,
       }
 
-      const { state } = (await serverFunctions({
+      const { state } = (await serverFunction({
         name: 'form-state',
         args: {
           data,
@@ -115,7 +115,7 @@ export const LinkElement = () => {
     if (renderModal) {
       void awaitInitialState()
     }
-  }, [renderModal, element, locale, t, collectionSlug, config, id, fieldMapPath, serverFunctions])
+  }, [renderModal, element, locale, t, collectionSlug, config, id, fieldMapPath, serverFunction])
 
   return (
     <span className={baseClass} {...attributes}>

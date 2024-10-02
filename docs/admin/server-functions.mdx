@@ -65,11 +65,11 @@ import React, { useCallback } from 'react'
 import { useServerFunctions } from '@payloadcms/ui'
 
 const MyComponent = () => {
-  const { serverFunctions } = useServerFunctions()
+  const { serverFunction } = useServerFunctions()
   const [result, setResult] = React.useState<string | null>(null)
 
   const callServerAction = useCallback(async () => {
-    const result = await serverFunctions({
+    const result = await serverFunction({
       name: 'my-server-action',
       args: {
         value: 'Hello, world!'
@@ -110,7 +110,7 @@ type Args = {
 }
 
 // highlight-start
-const serverFunctions: ClientServerFunction = async function (args) {
+const serverFunction: ClientServerFunction = async function (args) {
   'use server'
   return handleServerFunctions({
     ...args,

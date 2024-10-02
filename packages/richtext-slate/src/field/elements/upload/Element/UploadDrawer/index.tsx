@@ -42,7 +42,7 @@ export const UploadDrawer: React.FC<{
   const { closeModal } = useModal()
   const { id, collectionSlug } = useDocumentInfo()
 
-  const { serverFunctions } = useServerFunctions()
+  const { serverFunction } = useServerFunctions()
 
   const [initialState, setInitialState] = useState({})
   const {
@@ -72,7 +72,7 @@ export const UploadDrawer: React.FC<{
     const data = deepCopyObject(element?.fields || {})
 
     const awaitInitialState = async () => {
-      const { state } = (await serverFunctions({
+      const { state } = (await serverFunction({
         name: 'form-state',
         args: {
           id,
@@ -96,12 +96,12 @@ export const UploadDrawer: React.FC<{
     id,
     schemaPath,
     relatedCollection.slug,
-    serverFunctions,
+    serverFunction,
   ])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = (await serverFunctions({
+      const { state } = (await serverFunction({
         name: 'form-state',
         args: {
           id,
@@ -114,7 +114,7 @@ export const UploadDrawer: React.FC<{
       return state
     },
 
-    [relatedCollection.slug, schemaPath, id, serverFunctions],
+    [relatedCollection.slug, schemaPath, id, serverFunction],
   )
 
   return (

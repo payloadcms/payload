@@ -35,11 +35,11 @@ export const LinkDrawer: React.FC<Props> = ({
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
   const { id } = useDocumentInfo()
 
-  const { serverFunctions } = useServerFunctions()
+  const { serverFunction } = useServerFunctions()
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = (await serverFunctions({
+      const { state } = (await serverFunction({
         name: 'form-state',
         args: {
           id,
@@ -52,7 +52,7 @@ export const LinkDrawer: React.FC<Props> = ({
       return state
     },
 
-    [fieldMapPath, id, serverFunctions],
+    [fieldMapPath, id, serverFunction],
   )
 
   return (

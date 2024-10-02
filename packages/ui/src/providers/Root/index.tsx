@@ -45,7 +45,7 @@ type Props = {
   readonly languageCode: string
   readonly languageOptions: LanguageOptions
   readonly permissions: Permissions
-  readonly serverFunctions: ClientServerFunction
+  readonly serverFunction: ClientServerFunction
   readonly switchLanguageServerAction?: (lang: string) => Promise<void>
   readonly theme: Theme
   readonly translations: I18nClient['translations']
@@ -61,7 +61,7 @@ export const RootProvider: React.FC<Props> = ({
   languageCode,
   languageOptions,
   permissions,
-  serverFunctions,
+  serverFunction,
   switchLanguageServerAction,
   theme,
   translations,
@@ -72,7 +72,7 @@ export const RootProvider: React.FC<Props> = ({
 
   return (
     <Fragment>
-      <ServerFunctionsProvider serverFunctions={serverFunctions}>
+      <ServerFunctionsProvider serverFunction={serverFunction}>
         <RouteCacheComponent>
           <ConfigProvider config={config}>
             <FieldComponentsProvider fieldComponents={fieldComponents}>
