@@ -133,6 +133,8 @@ const Layout = ({ children }: Args) => (
 export default Layout
 ```
 
+This pattern allows us to thread server-only modules, such as the Payload Config, through to the Server Function handler to be consumed within your function's logic.
+
 ## TypeScript
 
 You can import the Payload `ServerFunction` type as well as other common types from the `payload` package. [More details](../typescript/overview).
