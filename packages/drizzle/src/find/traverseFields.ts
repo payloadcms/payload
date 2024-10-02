@@ -272,6 +272,7 @@ export const traverseFields = ({
             withJoin.columns._parentID = true
           } else {
             withJoin.columns.id = true
+            withJoin.columns.parent = true
           }
 
           if (where) {

@@ -1,4 +1,4 @@
-import type { SanitizedJoins } from '../../collections/config/types.js'
+import type { SanitizedJoin, SanitizedJoins } from '../../collections/config/types.js'
 import type { Config } from '../../config/types.js'
 import type { JoinField, RelationshipField, UploadField } from './types.js'
 
@@ -23,9 +23,10 @@ export const sanitizeJoinField = ({
   if (!field.maxDepth) {
     field.maxDepth = 1
   }
-  const join = {
+  const join: SanitizedJoin = {
     field,
     schemaPath: `${schemaPath || ''}${schemaPath ? '.' : ''}${field.name}`,
+    targetField: undefined,
   }
   const joinCollection = config.collections.find(
     (collection) => collection.slug === field.collection,
@@ -73,6 +74,11 @@ export const sanitizeJoinField = ({
   if (!joinRelationship) {
     throw new InvalidFieldJoin(join.field)
   }
+  if (Array.isArray(joinRelationship.relationTo)) {
+    throw new APIError('Join fields cannot be used with polymorphic relationships.')
+  }
+
+  join.targetField = joinRelationship
 
   // override the join field localized property to use whatever the relationship field has
   field.localized = joinRelationship.localized
