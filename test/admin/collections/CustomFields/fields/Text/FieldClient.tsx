@@ -22,7 +22,7 @@ export const CustomClientField: TextFieldClientComponent = ({ field }) => {
     }
 
     void doServerFn()
-  }, [serverFunctions])
+  }, [serverFunction])
 
   return (
     <div>
