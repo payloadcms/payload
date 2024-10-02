@@ -46,6 +46,10 @@ export interface Config {
         input: TaskCreateSimpleWithDuplicateMessageInput;
         output: TaskCreateSimpleWithDuplicateMessageOutput;
       };
+      ExternalTask: {
+        input: TaskExternalTaskInput;
+        output: TaskExternalTaskOutput;
+      };
     };
     workflows?: {
       updatePost?: {
@@ -237,6 +241,13 @@ export interface PayloadJob {
        */
       [k: string]: JobTaskStatus_1<"CreateSimpleWithDuplicateMessage">;
     };
+    ExternalTask?: {
+      /**
+       * This interface was referenced by `undefined`'s JSON-Schema definition
+       * via the `patternProperty` "^.*$".
+       */
+      [k: string]: JobTaskStatus_1<"ExternalTask">;
+    };
   };
   completedAt?: string | null;
   hasError?: boolean | null;
@@ -253,7 +264,13 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'UpdatePost' | 'UpdatePostStep2' | 'CreateSimple' | 'CreateSimpleWithDuplicateMessage';
+        taskSlug:
+          | 'inline'
+          | 'UpdatePost'
+          | 'UpdatePostStep2'
+          | 'CreateSimple'
+          | 'CreateSimpleWithDuplicateMessage'
+          | 'ExternalTask';
         taskID: string;
         input?:
           | {
@@ -287,7 +304,16 @@ export interface PayloadJob {
       }[]
     | null;
   workflowSlug?: ('updatePost' | 'retriesTest' | 'inlineTaskTest') | null;
-  taskSlug?: ('inline' | 'UpdatePost' | 'UpdatePostStep2' | 'CreateSimple' | 'CreateSimpleWithDuplicateMessage') | null;
+  taskSlug?:
+    | (
+        | 'inline'
+        | 'UpdatePost'
+        | 'UpdatePostStep2'
+        | 'CreateSimple'
+        | 'CreateSimpleWithDuplicateMessage'
+        | 'ExternalTask'
+      )
+    | null;
   queue?: 'default' | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -346,6 +372,20 @@ export interface TaskCreateSimpleWithDuplicateMessageInput {
  * via the `definition` "TaskCreateSimpleWithDuplicateMessageOutput".
  */
 export interface TaskCreateSimpleWithDuplicateMessageOutput {
+  simpleID: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskExternalTaskInput".
+ */
+export interface TaskExternalTaskInput {
+  message: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskExternalTaskOutput".
+ */
+export interface TaskExternalTaskOutput {
   simpleID: string;
 }
 /**

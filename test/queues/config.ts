@@ -210,6 +210,25 @@ export default buildConfigWithDefaults({
           }
         },
       } as TaskConfig<'CreateSimpleWithDuplicateMessage'>,
+      {
+        retries: 2,
+        slug: 'ExternalTask',
+        inputSchema: [
+          {
+            name: 'message',
+            type: 'text',
+            required: true,
+          },
+        ],
+        outputSchema: [
+          {
+            name: 'simpleID',
+            type: 'text',
+            required: true,
+          },
+        ],
+        run: path.resolve(dirname, 'runners/externalTask.ts') + '#externalTaskRunner',
+      } as TaskConfig<'ExternalTask'>,
     ],
     workflows: [
       {

@@ -230,4 +230,23 @@ describe('Queues', () => {
     expect(amountOfCreateSimple).toBe(3)
     expect(amountOfCreateSimpleWithDuplicateMessage).toBe(6)
   })
+
+  it('can queue external tasks', async () => {
+    await payload.jobs.queue({
+      task: 'ExternalTask',
+      input: {
+        message: 'external',
+      },
+    })
+
+    await payload.jobs.run()
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples.docs[0].title).toBe('external')
+  })
 })
