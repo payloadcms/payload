@@ -42,6 +42,10 @@ export interface Config {
         input: TaskCreateSimpleInput;
         output: TaskCreateSimpleOutput;
       };
+      CreateSimpleWithDuplicateMessage: {
+        input: TaskCreateSimpleWithDuplicateMessageInput;
+        output: TaskCreateSimpleWithDuplicateMessageOutput;
+      };
     };
     workflows?: {
       updatePost?: {
@@ -226,6 +230,13 @@ export interface PayloadJob {
        */
       [k: string]: JobTaskStatus_1<"CreateSimple">;
     };
+    CreateSimpleWithDuplicateMessage?: {
+      /**
+       * This interface was referenced by `undefined`'s JSON-Schema definition
+       * via the `patternProperty` "^.*$".
+       */
+      [k: string]: JobTaskStatus_1<"CreateSimpleWithDuplicateMessage">;
+    };
   };
   completedAt?: string | null;
   hasError?: boolean | null;
@@ -242,7 +253,7 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'UpdatePost' | 'UpdatePostStep2' | 'CreateSimple';
+        taskSlug: 'inline' | 'UpdatePost' | 'UpdatePostStep2' | 'CreateSimple' | 'CreateSimpleWithDuplicateMessage';
         taskID: string;
         input?:
           | {
@@ -275,7 +286,8 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  workflowSlug: 'updatePost' | 'retriesTest' | 'inlineTaskTest';
+  workflowSlug?: ('updatePost' | 'retriesTest' | 'inlineTaskTest') | null;
+  taskSlug?: ('inline' | 'UpdatePost' | 'UpdatePostStep2' | 'CreateSimple' | 'CreateSimpleWithDuplicateMessage') | null;
   queue?: 'default' | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -319,6 +331,21 @@ export interface TaskCreateSimpleInput {
  * via the `definition` "TaskCreateSimpleOutput".
  */
 export interface TaskCreateSimpleOutput {
+  simpleID: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskCreateSimpleWithDuplicateMessageInput".
+ */
+export interface TaskCreateSimpleWithDuplicateMessageInput {
+  message: string;
+  shouldFail?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskCreateSimpleWithDuplicateMessageOutput".
+ */
+export interface TaskCreateSimpleWithDuplicateMessageOutput {
   simpleID: string;
 }
 /**

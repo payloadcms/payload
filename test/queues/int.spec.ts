@@ -51,7 +51,7 @@ describe('Queues', () => {
         // Authorization: `JWT ${token}`,
       },
     }) // Needs to be a rest call to test auth
-    expect(response.status).toStrictEqual(401)
+    expect(response.status).toBe(401)
   })
 
   it('will return 200 from jobs runner', async () => {
@@ -61,7 +61,7 @@ describe('Queues', () => {
       },
     }) // Needs to be a rest call to test auth
 
-    expect(response.status).toStrictEqual(200)
+    expect(response.status).toBe(200)
   })
 
   it('can create new jobs', async () => {
@@ -87,8 +87,8 @@ describe('Queues', () => {
       id: newPost.id,
     })
 
-    expect(postAfterJobs.jobStep1Ran).toStrictEqual('hello')
-    expect(postAfterJobs.jobStep2Ran).toStrictEqual('hellohellohellohello')
+    expect(postAfterJobs.jobStep1Ran).toBe('hello')
+    expect(postAfterJobs.jobStep2Ran).toBe('hellohellohellohello')
   })
 
   it('ensure job retrying works', async () => {
@@ -114,7 +114,7 @@ describe('Queues', () => {
       limit: 100,
     })
 
-    expect(allSimples.totalDocs).toStrictEqual(1)
+    expect(allSimples.totalDocs).toBe(1)
 
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
@@ -122,7 +122,7 @@ describe('Queues', () => {
     })
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
-    expect(jobAfterRun.input.amountRetried).toStrictEqual(2)
+    expect(jobAfterRun.input.amountRetried).toBe(2)
   })
 
   it('can create new inline jobs', async () => {
@@ -140,7 +140,94 @@ describe('Queues', () => {
       limit: 100,
     })
 
-    expect(allSimples.totalDocs).toStrictEqual(1)
-    expect(allSimples.docs[0].title).toStrictEqual('hello!')
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples.docs[0].title).toBe('hello!')
+  })
+
+  it('can queue single tasks', async () => {
+    await payload.jobs.queue({
+      task: 'CreateSimple',
+      input: {
+        message: 'from single task',
+      },
+    })
+
+    await payload.jobs.run()
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples.docs[0].title).toBe('from single task')
+  })
+
+  it('can queue single tasks multiple times', async () => {
+    for (let i = 0; i < 10; i++) {
+      await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'from single task',
+        },
+      })
+    }
+
+    await payload.jobs.run()
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(10)
+    expect(allSimples.docs[0].title).toBe('from single task')
+    expect(allSimples.docs[9].title).toBe('from single task')
+  })
+
+  it('can queue different kinds of single tasks multiple times', async () => {
+    for (let i = 0; i < 3; i++) {
+      await payload.jobs.queue({
+        task: 'CreateSimpleWithDuplicateMessage',
+        input: {
+          message: 'hello',
+        },
+      })
+      await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'from single task',
+        },
+      })
+      await payload.jobs.queue({
+        task: 'CreateSimpleWithDuplicateMessage',
+        input: {
+          message: 'hello',
+        },
+      })
+    }
+
+    await payload.jobs.run()
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(9)
+
+    let amountOfCreateSimple = 0
+    let amountOfCreateSimpleWithDuplicateMessage = 0
+
+    for (const simple of allSimples.docs) {
+      if (simple.title === 'from single task') {
+        amountOfCreateSimple++
+      } else if (simple.title === 'hellohello') {
+        amountOfCreateSimpleWithDuplicateMessage++
+      }
+    }
+
+    expect(amountOfCreateSimple).toBe(3)
+    expect(amountOfCreateSimpleWithDuplicateMessage).toBe(6)
   })
 })

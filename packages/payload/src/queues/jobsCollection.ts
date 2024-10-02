@@ -173,7 +173,17 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
         },
         index: true,
         options: [...workflowSlugs],
-        required: true,
+        required: false,
+      },
+      {
+        name: 'taskSlug',
+        type: 'select',
+        admin: {
+          position: 'sidebar',
+        },
+        index: true,
+        options: [...taskSlugs],
+        required: false,
       },
       {
         name: 'queue',

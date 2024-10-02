@@ -29,6 +29,7 @@ export type BaseJob = {
   processing?: boolean
   queue: string
   seenByWorker?: boolean
+  taskSlug?: string
   taskStatus?: {
     // Added by afterRead hook
     [taskSlug: string]: {
@@ -36,7 +37,7 @@ export type BaseJob = {
     }
   }
   waitUntil?: string
-  workflowSlug: string
+  workflowSlug?: string
 }
 
 export type WorkflowTypes = StringKeyOf<TypedJobs['workflows']>

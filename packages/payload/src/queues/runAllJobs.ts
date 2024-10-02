@@ -1,6 +1,6 @@
 import type { PaginatedDocs } from '../database/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
-import type { BaseJob } from './config/workflowTypes.js'
+import type { BaseJob, WorkflowConfig, WorkflowTypes } from './config/workflowTypes.js'
 import type { RunJobResult } from './runJob/index.js'
 
 import { Forbidden } from '../errors/Forbidden.js'
@@ -115,9 +115,23 @@ export const runAllJobs = async ({
   }
 
   const jobPromises = jobsQuery.docs.map(async (job) => {
-    const workflowConfig = req.payload.config.jobs.workflows.find(
-      ({ slug }) => slug === job.workflowSlug,
-    )
+    if (!job.workflowSlug && !job.taskSlug) {
+      throw new Error('Job must have either a workflowSlug or a taskSlug')
+    }
+
+    const workflowConfig: WorkflowConfig<WorkflowTypes> = job.workflowSlug
+      ? req.payload.config.jobs.workflows.find(({ slug }) => slug === job.workflowSlug)
+      : {
+          slug: 'singleTask',
+          controlFlowInJS: async ({ job, runTask }) => {
+            await runTask({
+              id: '1',
+              input: job.input,
+              task: job.taskSlug as string,
+            })
+          }, // TODO: Convert this to controlFlowInJSON once available
+        }
+
     if (!workflowConfig) {
       return null // Skip jobs with no workflow configuration
     }
