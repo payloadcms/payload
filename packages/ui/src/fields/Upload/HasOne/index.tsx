@@ -24,7 +24,7 @@ type Props = {
 export function UploadComponentHasOne(props: Props) {
   const { className, fileDoc, onRemove, readonly, serverURL } = props
   const { relationTo, value } = fileDoc
-  const id = String(value.id)
+  const id = String(value?.id)
 
   const url: string = value.thumbnailURL || value.url
   let src: string
