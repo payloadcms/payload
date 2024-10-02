@@ -54,7 +54,11 @@ export default async function Page({ searchParams }: { searchParams: { q: string
         </div>
       </div>
 
-      <CollectionArchive posts={posts.docs as unknown as Post[]} />
+      {posts.totalDocs > 0 ? (
+        <CollectionArchive posts={posts.docs as unknown as Post[]} />
+      ) : (
+        <div className="container">No results found.</div>
+      )}
     </div>
   )
 }
