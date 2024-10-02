@@ -250,6 +250,38 @@ export default buildConfigWithDefaults({
           // This will never be reached
         },
       } as WorkflowConfig<'retriesTest'>,
+      {
+        slug: 'inlineTaskTest',
+        inputSchema: [
+          {
+            name: 'message',
+            type: 'text',
+            required: true,
+          },
+        ],
+        controlFlowInJS: async ({ job, runTaskInline }) => {
+          await runTaskInline({
+            task: async ({ input, req }) => {
+              const newSimple = await req.payload.create({
+                collection: 'simple',
+                req,
+                data: {
+                  title: input.message,
+                },
+              })
+              return {
+                output: {
+                  simpleID: newSimple.id,
+                },
+              }
+            },
+            id: '1',
+            input: {
+              message: job.input.message,
+            },
+          })
+        },
+      } as WorkflowConfig<'inlineTaskTest'>,
     ],
   },
   editor: lexicalEditor(),

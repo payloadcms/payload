@@ -1,13 +1,13 @@
 import type { PaginatedDocs } from '../database/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { BaseJob } from './config/workflowTypes.js'
-import type { RunJobResult } from './runJob.js'
+import type { RunJobResult } from './runJob/index.js'
 
 import { commitTransaction } from '../utilities/commitTransaction.js'
 import { initTransaction } from '../utilities/initTransaction.js'
 import isolateObjectProperty from '../utilities/isolateObjectProperty.js'
 import { getJobStatus } from './getJobStatus.js'
-import { runJob } from './runJob.js'
+import { runJob } from './runJob/index.js'
 
 export type RunAllJobsArgs = {
   limit?: number
@@ -113,17 +113,15 @@ export const runAllJobs = async ({
       return null // Skip jobs with no workflow configuration
     }
 
-    const jobTasksStatus = getJobStatus({
-      job,
-      tasksConfig: req.payload.config.jobs.tasks,
-    })
-
     const newReq = isolateObjectProperty(req, 'transactionID')
     // Create a transaction so that all seeding happens in one transaction
     await initTransaction(newReq)
     const result = await runJob({
       job,
-      jobTasksStatus,
+      jobTasksStatus: getJobStatus({
+        job,
+        tasksConfig: req.payload.config.jobs.tasks,
+      }),
       // Each job should have its own transaction. Can't have multiple running jobs in parallel on same transaction
       req: newReq,
       workflowConfig,

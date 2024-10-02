@@ -118,7 +118,9 @@ describe('Queues', () => {
         },
       })
 
-      if ((await response.json()).noJobsRemaining) {
+      const responseJson = await response.json()
+      console.log({ responseJson })
+      if (responseJson.noJobsRemaining) {
         hasJobsRemaining = false
       }
     }
@@ -137,5 +139,32 @@ describe('Queues', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toStrictEqual(2)
+  })
+
+  it('can create new inline jobs', async () => {
+    const job = await payload.create({
+      collection: 'payload-jobs',
+      data: {
+        // @ts-expect-error // TODO: Fix this type
+        input: {
+          message: 'hello!',
+        } as WorkflowretriesTestInput,
+        workflowSlug: 'inlineTaskTest',
+      },
+    })
+
+    await restClient.GET('/payload-jobs/run', {
+      headers: {
+        Authorization: `JWT ${token}`,
+      },
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toStrictEqual(1)
+    expect(allSimples.docs[0].title).toStrictEqual('hello!')
   })
 })

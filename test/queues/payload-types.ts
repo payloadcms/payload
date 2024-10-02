@@ -50,6 +50,9 @@ export interface Config {
       retriesTest?: {
         input: WorkflowretriesTestInput;
       };
+      inlineTaskTest?: {
+        input: WorkflowinlineTaskTestInput;
+      };
     };
   };
 }
@@ -239,7 +242,7 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'UpdatePost' | 'UpdatePostStep2' | 'CreateSimple';
+        taskSlug: 'inline' | 'UpdatePost' | 'UpdatePostStep2' | 'CreateSimple';
         taskID: string;
         input?:
           | {
@@ -272,7 +275,7 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  workflowSlug: 'updatePost' | 'retriesTest';
+  workflowSlug: 'updatePost' | 'retriesTest' | 'inlineTaskTest';
   queue?: 'default' | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -331,6 +334,13 @@ export interface WorkflowupdatePostInput {
  * via the `definition` "WorkflowretriesTestInput".
  */
 export interface WorkflowretriesTestInput {
+  message: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowinlineTaskTestInput".
+ */
+export interface WorkflowinlineTaskTestInput {
   message: string;
 }
 /**

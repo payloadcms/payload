@@ -66,6 +66,18 @@ export type RunTaskFunction = <TTaskSlug extends keyof TypedJobs['tasks']>(args:
   task: TTaskSlug
 }) => Promise<TaskOutput<TTaskSlug>>
 
+export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput extends object>(args: {
+  id: string
+  input?: TTaskInput
+  retries?: number
+  task: (args: { input: TTaskInput; job: RunningJob<any>; req: PayloadRequest }) =>
+    | {
+        output: TTaskOutput
+        state?: 'failed' | 'succeeded'
+      }
+    | Promise<{ output: TTaskOutput; state?: 'failed' | 'succeeded' }>
+}) => Promise<TTaskOutput>
+
 export type TaskConfig<TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput> =
   {
     /**

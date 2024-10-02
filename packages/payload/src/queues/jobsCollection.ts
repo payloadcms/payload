@@ -13,7 +13,7 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
   }
 
   const workflowSlugs: Set<string> = new Set()
-  const taskSlugs: Set<string> = new Set()
+  const taskSlugs: Set<string> = new Set(['inline'])
 
   const queueNames: Set<string> = new Set(['default'])
 
