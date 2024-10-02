@@ -3,6 +3,7 @@
 import type { ServerFunctionClient } from 'payload'
 
 import config from '@payload-config'
+import '@payloadcms/next/css'
 import { RootLayout } from '@payloadcms/next/layouts'
 import { handleServerFunctions } from '@payloadcms/next/utilities'
 import React from 'react'
