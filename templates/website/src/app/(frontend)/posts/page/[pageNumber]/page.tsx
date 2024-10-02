@@ -18,6 +18,7 @@ export default async function Page({ params: { pageNumber = 2 } }) {
     depth: 1,
     limit: 12,
     page: pageNumber,
+    overrideAccess: false,
   })
 
   return (
@@ -60,6 +61,8 @@ export async function generateStaticParams() {
     collection: 'posts',
     depth: 0,
     limit: 10,
+    draft: false,
+    overrideAccess: false,
   })
 
   const pages: number[] = []
