@@ -368,9 +368,13 @@ export class BasePayload {
         : RunningJobFromTask<TTaskOrWorkflowSlug> // Type assertion is still needed here
     },
 
-    run: async (args?: { req?: PayloadRequest }): Promise<ReturnType<typeof runAllJobs>> => {
+    run: async (args?: {
+      overrideAccess?: boolean
+      req?: PayloadRequest
+    }): Promise<ReturnType<typeof runAllJobs>> => {
       const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, this))
       const result = await runAllJobs({
+        overrideAccess: args?.overrideAccess !== false,
         req: newReq,
       })
       return result

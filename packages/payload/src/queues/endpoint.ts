@@ -32,6 +32,8 @@ export const runWorkflowEndpoint: Endpoint = {
     const runJobsArgs: RunAllJobsArgs = {
       queue: 'default',
       req,
+      // We are checking access above, so we can override it here
+      overrideAccess: true,
     }
 
     if (typeof queue === 'string') {

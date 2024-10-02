@@ -3,6 +3,7 @@ import type { PayloadRequest, Where } from '../types/index.js'
 import type { BaseJob } from './config/workflowTypes.js'
 import type { RunJobResult } from './runJob/index.js'
 
+import { Forbidden } from '../errors/Forbidden.js'
 import { commitTransaction } from '../utilities/commitTransaction.js'
 import { initTransaction } from '../utilities/initTransaction.js'
 import isolateObjectProperty from '../utilities/isolateObjectProperty.js'
@@ -11,6 +12,7 @@ import { runJob } from './runJob/index.js'
 
 export type RunAllJobsArgs = {
   limit?: number
+  overrideAccess?: boolean
   queue?: string
   req: PayloadRequest
 }
@@ -22,9 +24,16 @@ export type RunAllJobsResult = {
 
 export const runAllJobs = async ({
   limit = 10,
+  overrideAccess,
   queue,
   req,
 }: RunAllJobsArgs): Promise<RunAllJobsResult> => {
+  if (!overrideAccess) {
+    const hasAccess = await req.payload.config.jobs.access.run({ req })
+    if (!hasAccess) {
+      throw new Forbidden(req.t)
+    }
+  }
   const where: Where = {
     and: [
       {
