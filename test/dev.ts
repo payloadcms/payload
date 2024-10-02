@@ -44,7 +44,7 @@ await beforeTest()
 
 const { rootDir, adminRoute } = getNextRootDir(testSuiteArg)
 
-await safelyRunScriptFunction(runInit, 4000, testSuiteArg)
+await safelyRunScriptFunction(runInit, 4000, testSuiteArg, true)
 
 // Open the admin if the -o flag is passed
 if (args.o) {
