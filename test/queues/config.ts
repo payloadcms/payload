@@ -1,3 +1,5 @@
+import type { WorkflowConfig } from 'payload'
+
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -152,12 +154,12 @@ export default buildConfigWithDefaults({
             task: 'UpdatePostStep2',
             id: '2',
             input: {
-              post: job.tasks.UpdatePost['1'].input.post,
-              messageTwice: job.tasks.UpdatePost['1'].output.messageTwice,
+              post: job.taskStatus.UpdatePost['1'].input.post,
+              messageTwice: job.taskStatus.UpdatePost['1'].output.messageTwice,
             },
           })
         },
-      },
+      } as WorkflowConfig<'updatePost'>,
     ],
   },
   editor: lexicalEditor(),

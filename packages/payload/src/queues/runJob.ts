@@ -82,7 +82,7 @@ export const runJob = async ({ job, jobTasksStatus, req, workflowConfig }: Args)
       job.error = updatedJob.error
       job.hasError = updatedJob.hasError
       job.log = updatedJob.log
-      job.tasks = updatedJob.tasks
+      job.taskStatus = updatedJob.taskStatus
       job.processing = updatedJob.processing
 
       return
@@ -177,7 +177,7 @@ export const runJob = async ({ job, jobTasksStatus, req, workflowConfig }: Args)
         job.hasError = updatedJob.hasError
         job.log = updatedJob.log
         job.processing = updatedJob.processing
-        job.tasks = updatedJob.tasks
+        job.taskStatus = updatedJob.taskStatus
 
         return
       }
@@ -215,7 +215,7 @@ export const runJob = async ({ job, jobTasksStatus, req, workflowConfig }: Args)
 
         // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
         job.log = updatedJob.log
-        job.tasks = updatedJob.tasks
+        job.taskStatus = updatedJob.taskStatus
         throw new Error('Task failed')
       } else {
         output = runnerOutput.output
@@ -245,7 +245,7 @@ export const runJob = async ({ job, jobTasksStatus, req, workflowConfig }: Args)
 
       // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
       job.log = updatedJob.log
-      job.tasks = updatedJob.tasks
+      job.taskStatus = updatedJob.taskStatus
 
       throw err
     }
@@ -280,7 +280,7 @@ export const runJob = async ({ job, jobTasksStatus, req, workflowConfig }: Args)
     })) as BaseJob
     // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
     job.log = updatedJob.log
-    job.tasks = updatedJob.tasks
+    job.taskStatus = updatedJob.taskStatus
 
     return output
   }

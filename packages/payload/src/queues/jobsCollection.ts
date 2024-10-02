@@ -1,7 +1,10 @@
+import type { JSONSchema4 } from 'json-schema'
+
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Config } from '../config/types.js'
 import type { BaseJob } from './config/workflowTypes.js'
 
+import { jsonSchemaExternalImport } from '../utilities/configToJSONSchema.js'
 import { runWorkflowEndpoint } from './endpoint.js'
 
 export const getDefaultJobsCollection: (config: Config) => CollectionConfig | null = (config) => {
@@ -26,6 +29,33 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
     taskSlugs.add(task.slug)
   })
 
+  // This should basically be
+  /*{
+    [TTaskSlug in keyof TypedJobs['tasks']]: {
+      [id: string]: SavedTaskResult<TTaskSlug>
+    }
+  }*/
+  const taskStatusJsonSchema: JSONSchema4 = {
+    type: 'object',
+    additionalProperties: false,
+    properties: Object.fromEntries(
+      config.jobs.tasks.map((task) => [
+        task.slug,
+        {
+          type: 'object',
+          additionalProperties: false,
+          patternProperties: {
+            '^.*$': jsonSchemaExternalImport({
+              from: 'payload',
+              generics: [`"${task.slug}"`],
+              specifier: 'JobTaskStatus',
+            }),
+          },
+        },
+      ]),
+    ),
+  }
+
   const jobsCollection: CollectionConfig = {
     slug: 'payload-jobs',
     admin: {
@@ -40,6 +70,16 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
         admin: {
           description: 'Input data provided to the job',
         },
+      },
+      {
+        name: 'taskStatus',
+        type: 'json',
+        typescriptSchema: [
+          () => {
+            return taskStatusJsonSchema
+          },
+        ],
+        virtual: true,
       },
       {
         type: 'tabs',
@@ -168,7 +208,7 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
         ({ doc }) => {
           // This hook is used to add the virtual `tasks` field to the document, that is computed from the `log` field
 
-          const latestTasksAndIDs: {
+          const taskStatus: {
             [taskSlug: string]: {
               [taskID: string]: BaseJob['log'][0]
             }
@@ -180,23 +220,23 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
               continue
             }
 
-            if (!latestTasksAndIDs[loggedTask.taskSlug]) {
-              latestTasksAndIDs[loggedTask.taskSlug] = {
+            if (!taskStatus[loggedTask.taskSlug]) {
+              taskStatus[loggedTask.taskSlug] = {
                 [loggedTask.taskID]: loggedTask,
               }
             } else {
-              const idsForTask = latestTasksAndIDs[loggedTask.taskSlug]
+              const idsForTask = taskStatus[loggedTask.taskSlug]
               if (
                 !idsForTask[loggedTask.taskID] ||
                 new Date(loggedTask.completedAt) >
                   new Date(idsForTask[loggedTask.taskID].completedAt)
               ) {
-                latestTasksAndIDs[loggedTask.taskSlug][loggedTask.taskID] = loggedTask
+                taskStatus[loggedTask.taskSlug][loggedTask.taskID] = loggedTask
               }
             }
           }
 
-          doc.tasks = latestTasksAndIDs
+          doc.taskStatus = taskStatus
 
           return doc
         },

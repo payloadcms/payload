@@ -1,3 +1,5 @@
+import { JobTaskStatus as JobTaskStatus_1 } from 'payload'
+
 /* tslint:disable */
 /* eslint-disable */
 /**
@@ -177,6 +179,22 @@ export interface PayloadJob {
     | number
     | boolean
     | null;
+  taskStatus?: {
+    UpdatePost?: {
+      /**
+       * This interface was referenced by `undefined`'s JSON-Schema definition
+       * via the `patternProperty` "^.*$".
+       */
+      [k: string]: JobTaskStatus_1<"UpdatePost">;
+    };
+    UpdatePostStep2?: {
+      /**
+       * This interface was referenced by `undefined`'s JSON-Schema definition
+       * via the `patternProperty` "^.*$".
+       */
+      [k: string]: JobTaskStatus_1<"UpdatePostStep2">;
+    };
+  };
   completedAt?: string | null;
   hasError?: boolean | null;
   error?:

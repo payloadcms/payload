@@ -44,7 +44,7 @@ export const updatePostStep2: TaskRunner<'UpdatePostStep2'> = async ({ req, inpu
     id: postID,
     req,
     data: {
-      jobStep2Ran: input.messageTwice + job.tasks.UpdatePost['1'].output.messageTwice,
+      jobStep2Ran: input.messageTwice + job.taskStatus.UpdatePost['1'].output.messageTwice,
     },
   })
 

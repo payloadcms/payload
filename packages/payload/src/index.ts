@@ -1050,7 +1050,8 @@ export type {
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types.js'
 export type {
   BaseJob,
-  JobTasksStatus as WorkflowTasksStatus,
+  JobTasksStatus,
+  JobTaskStatus,
   RunningJob,
   WorkflowConfig,
   WorkflowControlFlow,

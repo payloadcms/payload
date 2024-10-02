@@ -6,7 +6,6 @@ import type {
   TaskConfig,
   TaskInput,
   TaskOutput,
-  TaskRunnerResults,
   TaskType,
 } from './taskTypes.js'
 
@@ -31,7 +30,7 @@ export type BaseJob = {
   processing?: boolean
   queue: string
   seenByWorker?: boolean
-  tasks?: {
+  taskStatus?: {
     // Added by afterRead hook
     [taskSlug: string]: {
       [taskID: string]: BaseJob['log'][0]
@@ -43,38 +42,40 @@ export type BaseJob = {
 
 export type WorkflowTypes = keyof TypedJobs['workflows']
 
-export type RunningJob<TWorkflowSlug extends keyof TypedJobs['workflows']> = {
-  input: TypedJobs['workflows'][TWorkflowSlug]['input']
-  tasks: SavedTaskResults
+export type RunningJob<TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object> = {
+  input: TWorkflowSlugOrInput extends keyof TypedJobs['workflows']
+    ? TypedJobs['workflows'][TWorkflowSlugOrInput]['input']
+    : TWorkflowSlugOrInput
 } & TypedCollection['payload-jobs']
 
-export type WorkflowControlFlow<TWorkflowSlug extends keyof TypedJobs['workflows']> = (args: {
-  job: RunningJob<TWorkflowSlug>
-  runTask: RunTaskFunction
-}) => Promise<void>
+export type WorkflowControlFlow<
+  TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object,
+> = (args: { job: RunningJob<TWorkflowSlugOrInput>; runTask: RunTaskFunction }) => Promise<void>
+
+export type JobTaskStatus<T extends keyof TypedJobs['tasks']> = {
+  complete: boolean
+  input: TaskInput<T>
+  output: TaskOutput<T>
+  retries: number
+  taskConfig: TaskConfig
+  totalTried: number
+}
 
 /**
  * Task IDs mapped to their status
  */
 export type JobTasksStatus = {
-  [taskID: string]: {
-    complete: boolean
-    input: TaskInput<TaskType>
-    output: TaskOutput<TaskType>
-    retries: number
-    taskConfig: TaskConfig
-    totalTried: number
-  }
+  [taskID: string]: JobTaskStatus<TaskType>
 }
 
-export type WorkflowConfig<TWorkflowSlug extends keyof TypedJobs['workflows']> = {
+export type WorkflowConfig<TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object> = {
   /**
    * You can either pass a string-based path to the workflow function file, or the workflow function itself.
    *
    * If you are using large dependencies within your workflow control flow, you might prefer to pass the string path
    * because that will avoid bundling large dependencies in your Next.js app.
    */
-  controlFlowInJS: string | WorkflowControlFlow<TWorkflowSlug>
+  controlFlowInJS: string | WorkflowControlFlow<TWorkflowSlugOrInput>
   //TODO: Implement this. This will be an alternative to controlFlowInJS that has
   // all tasks and their order defined in JSON
   controlFlowInJSON?: never
@@ -94,5 +95,5 @@ export type WorkflowConfig<TWorkflowSlug extends keyof TypedJobs['workflows']> =
   /**
    * Define a slug-based name for this job.
    */
-  slug: TWorkflowSlug // message "({} & string) |"  is ts black magic that is used to allow any string as slug, while still providing type narrowing & type suggestions
+  slug: TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] ? TWorkflowSlugOrInput : string
 }
