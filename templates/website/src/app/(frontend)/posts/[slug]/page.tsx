@@ -14,8 +14,6 @@ import { PostHero } from '@/heros/PostHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 
-export const dynamic = 'force-static'
-
 export async function generateStaticParams() {
   const payload = await getPayloadHMR({ config: configPromise })
   const posts = await payload.find({
@@ -25,7 +23,11 @@ export async function generateStaticParams() {
     overrideAccess: false,
   })
 
-  return posts.docs?.map(({ slug }) => slug)
+  const params = posts.docs.map(({ slug }) => {
+    return { slug }
+  })
+
+  return params
 }
 
 export default async function Post({ params: { slug = '' } }) {
