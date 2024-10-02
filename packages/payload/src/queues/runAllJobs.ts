@@ -1,17 +1,30 @@
 import type { PaginatedDocs } from '../database/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { BaseJob } from './config/workflowTypes.js'
+import type { RunJobResult } from './runJob.js'
 
+import { commitTransaction } from '../utilities/commitTransaction.js'
+import { initTransaction } from '../utilities/initTransaction.js'
+import isolateObjectProperty from '../utilities/isolateObjectProperty.js'
 import { getJobStatus } from './getJobStatus.js'
 import { runJob } from './runJob.js'
 
-export type RunJobsArgs = {
+export type RunAllJobsArgs = {
   limit?: number
   queue?: string
   req: PayloadRequest
 }
 
-export const runAllJobs = async ({ limit = 10, queue, req }: RunJobsArgs): Promise<boolean> => {
+export type RunAllJobsResult = {
+  jobStatus?: Record<string, RunJobResult>
+  noJobsRemaining?: boolean
+}
+
+export const runAllJobs = async ({
+  limit = 10,
+  queue,
+  req,
+}: RunAllJobsArgs): Promise<RunAllJobsResult> => {
   const where: Where = {
     and: [
       {
@@ -81,7 +94,9 @@ export const runAllJobs = async ({ limit = 10, queue, req }: RunJobsArgs): Promi
   const numJobs = jobsQuery.totalDocs
 
   if (!numJobs) {
-    return true
+    return {
+      noJobsRemaining: true,
+    }
   }
 
   if (jobs.newJobs.length) {
@@ -90,22 +105,53 @@ export const runAllJobs = async ({ limit = 10, queue, req }: RunJobsArgs): Promi
     )
   }
 
-  await Promise.all(
-    jobsQuery.docs.map(async (job) => {
-      const workflowConfig = req.payload.config.jobs.workflows.find(
-        ({ slug }) => slug === job.workflowSlug,
-      )
-      if (!workflowConfig) {
-        return
-      }
+  const jobPromises = jobsQuery.docs.map(async (job) => {
+    const workflowConfig = req.payload.config.jobs.workflows.find(
+      ({ slug }) => slug === job.workflowSlug,
+    )
+    if (!workflowConfig) {
+      return null // Skip jobs with no workflow configuration
+    }
 
-      const jobTasksStatus = getJobStatus({
-        job,
-        tasksConfig: req.payload.config.jobs.tasks,
-      })
-      await runJob({ job, jobTasksStatus, req, workflowConfig })
-    }),
-  )
+    const jobTasksStatus = getJobStatus({
+      job,
+      tasksConfig: req.payload.config.jobs.tasks,
+    })
 
-  return true
+    const newReq = isolateObjectProperty(req, 'transactionID')
+    // Create a transaction so that all seeding happens in one transaction
+    await initTransaction(newReq)
+    const result = await runJob({
+      job,
+      jobTasksStatus,
+      // Each job should have its own transaction. Can't have multiple running jobs in parallel on same transaction
+      req: newReq,
+      workflowConfig,
+    })
+    // Finalise transactiojn
+    await commitTransaction(newReq)
+    return { id: job.id, result }
+  })
+
+  const resultsArray = await Promise.all(jobPromises)
+  const resultsObject: RunAllJobsResult['jobStatus'] = resultsArray.reduce((acc, cur) => {
+    if (cur !== null) {
+      // Check if there's a valid result to include
+      acc[cur.id] = cur.result
+    }
+    return acc
+  }, {})
+
+  let noJobsRemaining = true
+  for (const jobID in resultsObject) {
+    const jobResult = resultsObject[jobID]
+    if (jobResult.status === 'error') {
+      noJobsRemaining = false // Can be retried
+    }
+  }
+
+  return {
+    jobStatus: resultsObject,
+    noJobsRemaining,
+  }
 }

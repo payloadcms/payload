@@ -1,6 +1,6 @@
 import type { Endpoint } from '../config/types.js'
 
-import { runAllJobs, type RunJobsArgs } from './runAllJobs.js'
+import { runAllJobs, type RunAllJobsArgs } from './runAllJobs.js'
 
 export const runWorkflowEndpoint: Endpoint = {
   handler: async (req) => {
@@ -29,7 +29,7 @@ export const runWorkflowEndpoint: Endpoint = {
 
     const { limit, queue } = req.query
 
-    const runJobsArgs: RunJobsArgs = {
+    const runJobsArgs: RunAllJobsArgs = {
       queue: 'default',
       req,
     }
@@ -42,8 +42,10 @@ export const runWorkflowEndpoint: Endpoint = {
       runJobsArgs.limit = Number(limit)
     }
 
+    let noJobsRemaining = false
     try {
-      await runAllJobs(runJobsArgs)
+      const result = await runAllJobs(runJobsArgs)
+      noJobsRemaining = result.noJobsRemaining
     } catch (err) {
       req.payload.logger.error({
         err,
@@ -54,6 +56,7 @@ export const runWorkflowEndpoint: Endpoint = {
       return Response.json(
         {
           message: req.i18n.t('error:unknown'),
+          noJobsRemaining: true,
         },
         { status: 500 },
       )
@@ -62,6 +65,7 @@ export const runWorkflowEndpoint: Endpoint = {
     return Response.json(
       {
         message: req.i18n.t('general:success'),
+        noJobsRemaining,
       },
       { status: 200 },
     )

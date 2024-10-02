@@ -18,7 +18,18 @@ type Args = {
   workflowConfig: WorkflowConfig<WorkflowTypes>
 }
 
-export const runJob = async ({ job, jobTasksStatus, req, workflowConfig }: Args) => {
+export type JobRunStatus = 'error' | 'error-reached-max-retries' | 'success'
+
+export type RunJobResult = {
+  status: JobRunStatus
+}
+
+export const runJob = async ({
+  job,
+  jobTasksStatus,
+  req,
+  workflowConfig,
+}: Args): Promise<RunJobResult> => {
   if (!workflowConfig.controlFlowInJS) {
     throw new Error('Currently, only workflows with controlFlowInJS are supported')
   }
@@ -70,7 +81,7 @@ export const runJob = async ({ job, jobTasksStatus, req, workflowConfig }: Args)
             ...job.log,
             {
               error: errorMessage,
-              executedAt: new Date(),
+              executedAt: new Date().toISOString(),
               state: 'failed',
             },
           ],
@@ -79,11 +90,9 @@ export const runJob = async ({ job, jobTasksStatus, req, workflowConfig }: Args)
         req,
       })) as BaseJob
       // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
-      job.error = updatedJob.error
-      job.hasError = updatedJob.hasError
-      job.log = updatedJob.log
-      job.taskStatus = updatedJob.taskStatus
-      job.processing = updatedJob.processing
+      for (const key in updatedJob) {
+        job[key] = updatedJob[key]
+      }
 
       return
     }
@@ -99,8 +108,11 @@ export const runJob = async ({ job, jobTasksStatus, req, workflowConfig }: Args)
     req,
   })) as BaseJob
   // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
-  job.seenByWorker = updatedJob.seenByWorker
-  job.processing = updatedJob.processing
+  for (const key in updatedJob) {
+    job[key] = updatedJob[key]
+  }
+
+  let reachedMaxRetries = false
 
   const runTask: RunTaskFunction = async ({ id, input, retries, task }) => {
     const taskConfig = req.payload.config.jobs.tasks.find((t) => t.slug === task)
@@ -115,7 +127,9 @@ export const runJob = async ({ job, jobTasksStatus, req, workflowConfig }: Args)
       return taskStatus.output
     }
 
-    if (taskStatus && !taskStatus.complete && taskStatus.totalTried >= taskStatus.retries) {
+    const maxRetries = retries ?? taskConfig.retries
+    if (taskStatus && !taskStatus.complete && taskStatus.totalTried >= maxRetries) {
+      reachedMaxRetries = true
       throw new Error(
         `Task ${task} has failed more than the allowed retries in workflow ${job.workflowSlug}`,
       )
@@ -173,11 +187,9 @@ export const runJob = async ({ job, jobTasksStatus, req, workflowConfig }: Args)
           req,
         })) as BaseJob
         // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
-        job.error = updatedJob.error
-        job.hasError = updatedJob.hasError
-        job.log = updatedJob.log
-        job.processing = updatedJob.processing
-        job.taskStatus = updatedJob.taskStatus
+        for (const key in updatedJob) {
+          job[key] = updatedJob[key]
+        }
 
         return
       }
@@ -191,61 +203,62 @@ export const runJob = async ({ job, jobTasksStatus, req, workflowConfig }: Args)
         job: job as unknown as RunningJob<WorkflowTypes>, // TODO: Type this better
         req,
       })
+
       if (runnerOutput.state === 'failed') {
+        if (!job.log) {
+          job.log = []
+        }
+        job.log.push({
+          completedAt: new Date().toISOString(),
+          error: runnerOutput.state,
+          executedAt: executedAt.toISOString(),
+          input,
+          output,
+          state: 'failed',
+          taskID: id,
+          taskSlug: String(task),
+        })
         const updatedJob = (await req.payload.update({
           id: job.id,
           collection: 'payload-jobs',
-          data: {
-            log: [
-              ...job.log,
-              {
-                completedAt: new Date(),
-                error: runnerOutput.state,
-                executedAt,
-                input,
-                output,
-                state: 'failed',
-                taskID: id,
-                taskSlug: task,
-              },
-            ],
-          } as BaseJob,
+          data: job,
           req,
         })) as BaseJob
 
         // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
-        job.log = updatedJob.log
-        job.taskStatus = updatedJob.taskStatus
+        for (const key in updatedJob) {
+          job[key] = updatedJob[key]
+        }
         throw new Error('Task failed')
       } else {
         output = runnerOutput.output
       }
     } catch (err) {
       console.error('Error in task', err)
+      if (!job.log) {
+        job.log = []
+      }
+      job.log.push({
+        completedAt: new Date().toISOString(),
+        error: err,
+        executedAt: executedAt.toISOString(),
+        input,
+        output,
+        state: 'failed',
+        taskID: id,
+        taskSlug: String(task),
+      })
       const updatedJob = (await req.payload.update({
         id: job.id,
         collection: 'payload-jobs',
-        data: {
-          log: [
-            ...job.log,
-            {
-              completedAt: new Date(),
-              error: err,
-              executedAt,
-              input,
-              output,
-              state: 'failed',
-              taskID: id,
-              taskSlug: task,
-            },
-          ],
-        } as BaseJob,
+        data: job,
         req,
       })) as BaseJob
 
       // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
-      job.log = updatedJob.log
-      job.taskStatus = updatedJob.taskStatus
+      for (const key in updatedJob) {
+        job[key] = updatedJob[key]
+      }
 
       throw err
     }
@@ -259,28 +272,30 @@ export const runJob = async ({ job, jobTasksStatus, req, workflowConfig }: Args)
       totalTried: 0,
     }
 
+    if (!job.log) {
+      job.log = []
+    }
+    job.log.push({
+      completedAt: new Date().toISOString(),
+      executedAt: executedAt.toISOString(),
+      input,
+      output,
+      state: 'succeeded',
+      taskID: id,
+      taskSlug: String(task),
+    })
+
     const updatedJob = (await req.payload.update({
       id: job.id,
       collection: 'payload-jobs',
-      data: {
-        log: [
-          ...job.log,
-          {
-            completedAt: new Date(),
-            executedAt,
-            input,
-            output,
-            state: 'succeeded',
-            taskID: id,
-            taskSlug: task,
-          },
-        ],
-      } as BaseJob,
+      data: job,
       req,
     })) as BaseJob
+
     // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
-    job.log = updatedJob.log
-    job.taskStatus = updatedJob.taskStatus
+    for (const key in updatedJob) {
+      job[key] = updatedJob[key]
+    }
 
     return output
   }
@@ -289,11 +304,25 @@ export const runJob = async ({ job, jobTasksStatus, req, workflowConfig }: Args)
   try {
     await controlFlowRunner({
       job: job as unknown as RunningJob<WorkflowTypes>, //TODO: Type this better
+      req,
       runTask,
     })
   } catch (err) {
+    await req.payload.update({
+      id: job.id,
+      collection: 'payload-jobs',
+      data: {
+        ...job,
+        processing: false,
+        // TODO: Eventually et waitUntil here if backoff strategy is implemented
+      } as BaseJob,
+      req,
+    })
+
     req.payload.logger.error({ err, job, msg: 'Error running workflow' })
-    return
+    return {
+      status: reachedMaxRetries ? 'error-reached-max-retries' : 'error',
+    }
   }
 
   // Workflow has completed
@@ -301,9 +330,14 @@ export const runJob = async ({ job, jobTasksStatus, req, workflowConfig }: Args)
     id: job.id,
     collection: 'payload-jobs',
     data: {
+      ...job, // Ensure any data that has changed during the workflow (e.g. through the user manually mutating the job arg) is saved
       completedAt: new Date(),
       processing: false,
     },
     req,
   })
+
+  return {
+    status: 'success',
+  }
 }

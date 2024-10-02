@@ -1,13 +1,6 @@
 import type { Field } from '../../fields/config/types.js'
-import type { TypedCollection, TypedJobs } from '../../index.js'
-import type {
-  RunTaskFunction,
-  SavedTaskResults,
-  TaskConfig,
-  TaskInput,
-  TaskOutput,
-  TaskType,
-} from './taskTypes.js'
+import type { PayloadRequest, TypedCollection, TypedJobs } from '../../index.js'
+import type { RunTaskFunction, TaskConfig, TaskInput, TaskOutput, TaskType } from './taskTypes.js'
 
 export type JobLog = {
   completedAt: string
@@ -50,14 +43,18 @@ export type RunningJob<TWorkflowSlugOrInput extends keyof TypedJobs['workflows']
 
 export type WorkflowControlFlow<
   TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object,
-> = (args: { job: RunningJob<TWorkflowSlugOrInput>; runTask: RunTaskFunction }) => Promise<void>
+> = (args: {
+  job: RunningJob<TWorkflowSlugOrInput>
+  req: PayloadRequest
+  runTask: RunTaskFunction
+}) => Promise<void>
 
 export type JobTaskStatus<T extends keyof TypedJobs['tasks']> = {
   complete: boolean
   input: TaskInput<T>
   output: TaskOutput<T>
   retries: number
-  taskConfig: TaskConfig
+  taskConfig: TaskConfig<T>
   totalTried: number
 }
 

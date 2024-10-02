@@ -14,6 +14,7 @@ export interface Config {
   };
   collections: {
     posts: Post;
+    simple: Simple;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -37,10 +38,17 @@ export interface Config {
       UpdatePostStep2: {
         input: TaskUpdatePostStep2Input;
       };
+      CreateSimple: {
+        input: TaskCreateSimpleInput;
+        output: TaskCreateSimpleOutput;
+      };
     };
     workflows?: {
       updatePost?: {
         input: WorkflowupdatePostInput;
+      };
+      retriesTest?: {
+        input: WorkflowretriesTestInput;
       };
     };
   };
@@ -92,6 +100,16 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple".
+ */
+export interface Simple {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -117,6 +135,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'simple';
+        value: string | Simple;
       } | null)
     | ({
         relationTo: 'users';
@@ -194,6 +216,13 @@ export interface PayloadJob {
        */
       [k: string]: JobTaskStatus_1<"UpdatePostStep2">;
     };
+    CreateSimple?: {
+      /**
+       * This interface was referenced by `undefined`'s JSON-Schema definition
+       * via the `patternProperty` "^.*$".
+       */
+      [k: string]: JobTaskStatus_1<"CreateSimple">;
+    };
   };
   completedAt?: string | null;
   hasError?: boolean | null;
@@ -210,7 +239,7 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'UpdatePost' | 'UpdatePostStep2';
+        taskSlug: 'UpdatePost' | 'UpdatePostStep2' | 'CreateSimple';
         taskID: string;
         input?:
           | {
@@ -243,7 +272,7 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  workflowSlug: 'updatePost';
+  workflowSlug: 'updatePost' | 'retriesTest';
   queue?: 'default' | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -276,10 +305,32 @@ export interface TaskUpdatePostStep2Input {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskCreateSimpleInput".
+ */
+export interface TaskCreateSimpleInput {
+  message: string;
+  shouldFail?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskCreateSimpleOutput".
+ */
+export interface TaskCreateSimpleOutput {
+  simpleID: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "WorkflowupdatePostInput".
  */
 export interface WorkflowupdatePostInput {
   post: string | Post;
+  message: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowretriesTestInput".
+ */
+export interface WorkflowretriesTestInput {
   message: string;
 }
 /**

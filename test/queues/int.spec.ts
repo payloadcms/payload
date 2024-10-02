@@ -4,9 +4,11 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { WorkflowretriesTestInput } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { clearAndSeedEverything } from './seed.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -18,9 +20,18 @@ const dirname = path.dirname(filename)
 
 describe('Queues', () => {
   beforeAll(async () => {
-    const initialized = await initPayloadInt(dirname)
-    ;({ payload, restClient } = initialized)
+    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
+    ;({ payload, restClient } = await initPayloadInt(dirname))
+  })
 
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
+  })
+
+  beforeEach(async () => {
+    await clearAndSeedEverything(payload)
     const data = await restClient
       .POST('/users/login', {
         body: JSON.stringify({
@@ -30,12 +41,8 @@ describe('Queues', () => {
       })
       .then((res) => res.json())
 
-    token = data.token
-  })
-
-  afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
+    if (data.token) {
+      token = data.token
     }
   })
 
@@ -88,5 +95,47 @@ describe('Queues', () => {
 
     expect(postAfterJobs.jobStep1Ran).toStrictEqual('hello')
     expect(postAfterJobs.jobStep2Ran).toStrictEqual('hellohellohellohello')
+  })
+
+  it('ensure job retrying works', async () => {
+    const job = await payload.create({
+      collection: 'payload-jobs',
+      data: {
+        // @ts-expect-error // TODO: Fix this type
+        input: {
+          message: 'hello',
+        } as WorkflowretriesTestInput,
+        workflowSlug: 'retriesTest',
+      },
+    })
+
+    let hasJobsRemaining = true
+
+    while (hasJobsRemaining) {
+      const response = await restClient.GET('/payload-jobs/run', {
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+      })
+
+      if ((await response.json()).noJobsRemaining) {
+        hasJobsRemaining = false
+      }
+    }
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toStrictEqual(1)
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    // @ts-expect-error amountRetried is new arbitrary data and not in the type
+    expect(jobAfterRun.input.amountRetried).toStrictEqual(2)
   })
 })

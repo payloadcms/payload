@@ -1,9 +1,9 @@
-import type { TaskConfig } from './config/taskTypes.js'
+import type { TaskConfig, TaskType } from './config/taskTypes.js'
 import type { BaseJob, JobTasksStatus } from './config/workflowTypes.js'
 
 type Args = {
   job: BaseJob
-  tasksConfig: TaskConfig[]
+  tasksConfig: TaskConfig<TaskType>[]
 }
 
 export const getJobStatus = ({ job, tasksConfig }: Args): JobTasksStatus => {
@@ -11,7 +11,7 @@ export const getJobStatus = ({ job, tasksConfig }: Args): JobTasksStatus => {
 
   // First, add (in order) the steps from the config to
   // our status map
-  job.log.forEach((loggedJob) => {
+  for (const loggedJob of job.log) {
     const taskConfig = tasksConfig.find((task) => task.slug === loggedJob.taskSlug)
     if (!tasksStatus[loggedJob.taskID]) {
       tasksStatus[loggedJob.taskID] = {
@@ -31,7 +31,7 @@ export const getJobStatus = ({ job, tasksConfig }: Args): JobTasksStatus => {
       }
       tasksStatus[loggedJob.taskID] = taskStatus
     }
-  })
+  }
 
   return tasksStatus
 }
