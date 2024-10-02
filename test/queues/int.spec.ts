@@ -249,4 +249,23 @@ describe('Queues', () => {
     expect(allSimples.totalDocs).toBe(1)
     expect(allSimples.docs[0].title).toBe('external')
   })
+
+  it('can queue external workflow that is running external task', async () => {
+    await payload.jobs.queue({
+      workflow: 'externalWorkflow',
+      input: {
+        message: 'externalWorkflow',
+      },
+    })
+
+    await payload.jobs.run()
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples.docs[0].title).toBe('externalWorkflow')
+  })
 })

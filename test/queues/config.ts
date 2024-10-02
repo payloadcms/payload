@@ -335,6 +335,18 @@ export default buildConfigWithDefaults({
           })
         },
       } as WorkflowConfig<'inlineTaskTest'>,
+      {
+        slug: 'externalWorkflow',
+        inputSchema: [
+          {
+            name: 'message',
+            type: 'text',
+            required: true,
+          },
+        ],
+        controlFlowInJS:
+          path.resolve(dirname, 'runners/externalWorkflow.ts') + '#externalWorkflowControlFlow',
+      } as WorkflowConfig<'externalWorkflow'>,
     ],
   },
   editor: lexicalEditor(),

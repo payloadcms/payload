@@ -61,6 +61,9 @@ export interface Config {
       inlineTaskTest?: {
         input: WorkflowinlineTaskTestInput;
       };
+      externalWorkflow?: {
+        input: WorkflowexternalWorkflowInput;
+      };
     };
   };
 }
@@ -303,7 +306,7 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  workflowSlug?: ('updatePost' | 'retriesTest' | 'inlineTaskTest') | null;
+  workflowSlug?: ('updatePost' | 'retriesTest' | 'inlineTaskTest' | 'externalWorkflow') | null;
   taskSlug?:
     | (
         | 'inline'
@@ -408,6 +411,13 @@ export interface WorkflowretriesTestInput {
  * via the `definition` "WorkflowinlineTaskTestInput".
  */
 export interface WorkflowinlineTaskTestInput {
+  message: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowexternalWorkflowInput".
+ */
+export interface WorkflowexternalWorkflowInput {
   message: string;
 }
 /**
