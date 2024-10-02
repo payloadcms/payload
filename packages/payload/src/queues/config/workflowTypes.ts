@@ -47,6 +47,10 @@ export type RunningJob<TWorkflowSlugOrInput extends keyof TypedJobs['workflows']
     : TWorkflowSlugOrInput
 } & TypedCollection['payload-jobs']
 
+export type RunningJobFromTask<TTaskSlug extends keyof TypedJobs['tasks']> = {
+  input: TypedJobs['tasks'][TTaskSlug]['input']
+} & TypedCollection['payload-jobs']
+
 export type WorkflowControlFlow<
   TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object,
 > = (args: {

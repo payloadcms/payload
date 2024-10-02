@@ -98,14 +98,10 @@ describe('Queues', () => {
   })
 
   it('ensure job retrying works', async () => {
-    const job = await payload.create({
-      collection: 'payload-jobs',
-      data: {
-        // @ts-expect-error // TODO: Fix this type
-        input: {
-          message: 'hello',
-        } as WorkflowretriesTestInput,
-        workflowSlug: 'retriesTest',
+    const job = await payload.jobs.queue({
+      workflow: 'retriesTest',
+      input: {
+        message: 'hello',
       },
     })
 
@@ -142,14 +138,10 @@ describe('Queues', () => {
   })
 
   it('can create new inline jobs', async () => {
-    const job = await payload.create({
-      collection: 'payload-jobs',
-      data: {
-        // @ts-expect-error // TODO: Fix this type
-        input: {
-          message: 'hello!',
-        } as WorkflowretriesTestInput,
-        workflowSlug: 'inlineTaskTest',
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTest',
+      input: {
+        message: 'hello!',
       },
     })
 

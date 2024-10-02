@@ -22,15 +22,11 @@ export default buildConfigWithDefaults({
       hooks: {
         afterChange: [
           async ({ req, doc }) => {
-            await req.payload.create({
-              collection: 'payload-jobs',
-              req,
-              data: {
-                input: {
-                  post: doc.id,
-                  message: 'hello',
-                },
-                workflowSlug: 'updatePost',
+            await req.payload.jobs.queue({
+              workflow: 'updatePost',
+              input: {
+                post: doc.id,
+                message: 'hello',
               },
             })
           },

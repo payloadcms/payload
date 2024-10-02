@@ -53,6 +53,7 @@ import type { Options as FindGlobalVersionByIDOptions } from './globals/operatio
 import type { Options as FindGlobalVersionsOptions } from './globals/operations/local/findVersions.js'
 import type { Options as RestoreGlobalVersionOptions } from './globals/operations/local/restoreVersion.js'
 import type { Options as UpdateGlobalOptions } from './globals/operations/local/update.js'
+import type { RunningJob, RunningJobFromTask } from './queues/config/workflowTypes.js'
 import type { JsonObject } from './types/index.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 import type { TypeWithVersion } from './versions/types.js'
@@ -65,6 +66,8 @@ import localOperations from './collections/operations/local/index.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
+import { TaskType } from './queues/config/taskTypes.js'
+import { WorkflowTypes } from './queues/config/workflowTypes.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
@@ -328,6 +331,43 @@ export class BasePayload {
   globals: Globals
 
   importMap: ImportMap
+
+  jobs = {
+    queue: async <
+      // eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
+      TTaskOrWorkflowSlug extends keyof TypedJobs['tasks'] | keyof TypedJobs['workflows'],
+    >(
+      args:
+        | {
+            input: TypedJobs['tasks'][TTaskOrWorkflowSlug]['input']
+            // TTaskOrWorkflowlug with keyof TypedJobs['workflows'] removed:
+            task: TTaskOrWorkflowSlug extends keyof TypedJobs['tasks'] ? TTaskOrWorkflowSlug : never
+            workflow?: never
+          }
+        | {
+            input: TypedJobs['workflows'][TTaskOrWorkflowSlug]['input']
+            task?: never
+            workflow: TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
+              ? TTaskOrWorkflowSlug
+              : never
+          },
+    ): Promise<
+      TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
+        ? RunningJob<TTaskOrWorkflowSlug>
+        : RunningJobFromTask<TTaskOrWorkflowSlug>
+    > => {
+      return (await this.create({
+        collection: 'payload-jobs',
+        data: {
+          input: args.input,
+          taskSlug: 'task' in args ? args.task : undefined,
+          workflowSlug: 'workflow' in args ? args.workflow : undefined,
+        },
+      })) as TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
+        ? RunningJob<TTaskOrWorkflowSlug>
+        : RunningJobFromTask<TTaskOrWorkflowSlug> // Type assertion is still needed here
+    },
+  }
 
   logger: Logger
 
