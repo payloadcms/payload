@@ -27,7 +27,7 @@ export type TaskRunnerResult<
     : TTaskSlugOrInputOutput extends TaskInputOutput // Check if it's actually TaskInputOutput type
       ? TTaskSlugOrInputOutput['output']
       : never
-  state: 'failed' | 'succeeded'
+  state?: 'failed' | 'succeeded'
 }
 
 export type SavedTaskResult<TTaskSlug extends keyof TypedJobs['tasks']> = {

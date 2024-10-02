@@ -136,7 +136,6 @@ export default buildConfigWithDefaults({
         retries: 2,
         slug: 'CreateSimple',
         inputSchema: [
-          ,
           {
             name: 'message',
             type: 'text',
@@ -176,7 +175,6 @@ export default buildConfigWithDefaults({
         retries: 2,
         slug: 'CreateSimpleWithDuplicateMessage',
         inputSchema: [
-          ,
           {
             name: 'message',
             type: 'text',
