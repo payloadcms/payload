@@ -53,6 +53,7 @@ export type BuildFormStateArgs = {
   */
   language?: keyof SupportedLanguages
   locale?: string
+  onError?: (err: Error) => void
   operation?: 'create' | 'update'
   req: PayloadRequest
   returnLockStatus?: boolean
@@ -61,6 +62,28 @@ export type BuildFormStateArgs = {
 }
 
 export const buildFormState = async (
+  args: BuildFormStateArgs,
+): Promise<{
+  lockedState?: { isLocked: boolean; user: ClientUser | number | string }
+  state: FormState
+}> => {
+  const { formState, onError, req } = args
+
+  try {
+    const res = await buildFormStateFn(args)
+    return res
+  } catch (err) {
+    req.payload.logger.error({ err, msg: `There was an error building form state` })
+
+    if (typeof onError === 'function') {
+      onError(err)
+    }
+
+    return { state: formState }
+  }
+}
+
+const buildFormStateFn = async (
   args: BuildFormStateArgs,
 ): Promise<{
   lockedState?: { isLocked: boolean; user: ClientUser | number | string }

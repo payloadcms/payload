@@ -41,14 +41,12 @@ export const LinkDrawer: React.FC<Props> = ({
     async ({ formState: prevFormState }) => {
       const { state } = (await serverFunction({
         name: 'form-state',
-        args: Object.fromEntries([
-          Object.entries({
-            id,
-            formState: prevFormState,
-            operation: 'update',
-            schemaPath: fieldMapPath,
-          }).filter(([_, value]) => value !== undefined),
-        ]),
+        args: {
+          id,
+          formState: prevFormState,
+          operation: 'update',
+          schemaPath: fieldMapPath,
+        },
       })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       return state

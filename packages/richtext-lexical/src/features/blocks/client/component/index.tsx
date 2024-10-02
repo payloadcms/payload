@@ -62,14 +62,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
     const awaitInitialState = async () => {
       const { state } = (await serverFunction({
         name: 'form-state',
-        args: Object.fromEntries([
-          Object.entries({
-            id,
-            data: formData,
-            operation: 'update',
-            schemaPath: schemaFieldsPath,
-          }).filter(([_, value]) => value !== undefined),
-        ]),
+        args: {
+          id,
+          data: formData,
+          operation: 'update',
+          schemaPath: schemaFieldsPath,
+        },
       })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       if (state) {
@@ -93,14 +91,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
     async ({ formState: prevFormState }) => {
       const { state: formState } = (await serverFunction({
         name: 'form-state',
-        args: Object.fromEntries([
-          Object.entries({
-            id,
-            formState: prevFormState,
-            operation: 'update',
-            schemaPath: schemaFieldsPath,
-          }).filter(([_, value]) => value !== undefined),
-        ]),
+        args: {
+          id,
+          formState: prevFormState,
+          operation: 'update',
+          schemaPath: schemaFieldsPath,
+        },
       })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       formState.blockName = {

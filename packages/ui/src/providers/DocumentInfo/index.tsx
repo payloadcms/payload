@@ -497,17 +497,15 @@ const DocumentInfo: React.FC<
 
       const { state: newState } = (await serverFunction({
         name: 'form-state',
-        args: Object.fromEntries([
-          Object.entries({
-            collectionSlug,
-            data: newData,
-            docPreferences,
-            globalSlug,
-            locale,
-            operation,
-            schemaPath: collectionSlug || globalSlug,
-          }).filter(([_, value]) => value !== undefined),
-        ]),
+        args: {
+          collectionSlug,
+          data: newData,
+          docPreferences,
+          globalSlug,
+          locale,
+          operation,
+          schemaPath: collectionSlug || globalSlug,
+        },
       })) as { state: FormState }
 
       setInitialState(newState)
@@ -548,15 +546,14 @@ const DocumentInfo: React.FC<
         try {
           const { state: result } = (await serverFunction({
             name: 'form-state',
-            args: Object.fromEntries([
-              Object.entries({
-                collectionSlug,
-                globalSlug,
-                locale,
-                operation,
-                schemaPath: collectionSlug || globalSlug,
-              }).filter(([_, value]) => value !== undefined),
-            ]),
+            args: {
+              collectionSlug,
+              globalSlug,
+              locale,
+              onError: onLoadError,
+              operation,
+              schemaPath: collectionSlug || globalSlug,
+            },
           })) as { state: FormState }
 
           abortController.signal.throwIfAborted()

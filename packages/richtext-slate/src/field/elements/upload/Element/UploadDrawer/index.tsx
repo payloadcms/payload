@@ -74,15 +74,13 @@ export const UploadDrawer: React.FC<{
     const awaitInitialState = async () => {
       const { state } = (await serverFunction({
         name: 'form-state',
-        args: Object.fromEntries([
-          Object.entries({
-            id,
-            collectionSlug,
-            data,
-            operation: 'update',
-            schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
-          }).filter(([_, value]) => value !== undefined),
-        ]),
+        args: {
+          id,
+          collectionSlug,
+          data,
+          operation: 'update',
+          schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
+        },
       })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       setInitialState(state)
@@ -105,14 +103,12 @@ export const UploadDrawer: React.FC<{
     async ({ formState: prevFormState }) => {
       const { state } = (await serverFunction({
         name: 'form-state',
-        args: Object.fromEntries([
-          Object.entries({
-            id,
-            formState: prevFormState,
-            operation: 'update',
-            schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
-          }).filter(([_, value]) => value !== undefined),
-        ]),
+        args: {
+          id,
+          formState: prevFormState,
+          operation: 'update',
+          schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
+        },
       })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       return state

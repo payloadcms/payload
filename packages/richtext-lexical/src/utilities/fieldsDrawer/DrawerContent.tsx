@@ -49,14 +49,12 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     const awaitInitialState = async () => {
       const { state } = (await serverFunction({
         name: 'form-state',
-        args: Object.fromEntries([
-          Object.entries({
-            id,
-            data: data ?? {},
-            operation: 'update',
-            schemaPath: schemaFieldsPath,
-          }).filter(([_, value]) => value !== undefined),
-        ]),
+        args: {
+          id,
+          data: data ?? {},
+          operation: 'update',
+          schemaPath: schemaFieldsPath,
+        },
       })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       setInitialState(state)
@@ -69,14 +67,12 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     async ({ formState: prevFormState }) => {
       const { state } = (await serverFunction({
         name: 'form-state',
-        args: Object.fromEntries([
-          Object.entries({
-            id,
-            formState: prevFormState,
-            operation: 'update',
-            schemaPath: schemaFieldsPath,
-          }).filter(([_, value]) => value !== undefined),
-        ]),
+        args: {
+          id,
+          formState: prevFormState,
+          operation: 'update',
+          schemaPath: schemaFieldsPath,
+        },
       })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
 
       return state
