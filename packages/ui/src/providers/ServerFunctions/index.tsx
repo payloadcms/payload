@@ -1,10 +1,14 @@
-import type { ServerFunctionClient } from 'payload'
+import type { BuildFormStateArgs, ServerFunctionClient } from 'payload'
 
 import React, { createContext, useCallback } from 'react'
 
-import type { buildFormState, BuildFormStateArgs } from '../../utilities/buildFormState.js'
+import type { buildFormState } from '../../utilities/buildFormState.js'
 
-type GetFormState = (args: Omit<BuildFormStateArgs, 'req'>) => ReturnType<typeof buildFormState>
+type GetFormState = (
+  args: {
+    signal?: AbortSignal
+  } & Omit<BuildFormStateArgs, 'req'>,
+) => ReturnType<typeof buildFormState>
 
 type ServerFunctionsContextType = {
   getFormState: GetFormState
@@ -38,6 +42,10 @@ export const ServerFunctionsProvider: React.FC<{
           name: 'form-state',
           args,
         })) as ReturnType<typeof buildFormState> // TODO: infer this type when `strictNullChecks` is enabled
+
+        if (args.signal?.aborted) {
+          return { state: args.formState }
+        }
 
         return result
       } catch (error) {

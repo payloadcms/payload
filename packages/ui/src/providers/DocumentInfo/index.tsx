@@ -72,7 +72,7 @@ const DocumentInfo: React.FC<
   const collectionConfig = collections.find((c) => c.slug === collectionSlug)
   const globalConfig = globals.find((g) => g.slug === globalSlug)
   const docConfig = collectionConfig || globalConfig
-  const isUnmounting = useRef(false)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   const lockDocumentsProp = docConfig?.lockDocuments !== undefined ? docConfig?.lockDocuments : true
 
@@ -528,11 +528,17 @@ const DocumentInfo: React.FC<
   useEffect(() => {
     const localeChanged = locale !== prevLocale.current
 
+    if (abortControllerRef?.current) {
+      abortControllerRef.current.abort()
+    }
+
+    const abortController = new AbortController()
+    abortControllerRef.current = abortController
+
     if (
-      (initialStateFromProps === undefined ||
-        initialDataFromProps === undefined ||
-        localeChanged) &&
-      !isUnmounting.current
+      initialStateFromProps === undefined ||
+      initialDataFromProps === undefined ||
+      localeChanged
     ) {
       if (localeChanged) {
         prevLocale.current = locale
@@ -550,6 +556,7 @@ const DocumentInfo: React.FC<
             locale,
             operation,
             schemaPath: collectionSlug || globalSlug,
+            signal: abortController.signal,
           })
 
           const data = reduceFieldsToValues(result, true)
@@ -563,14 +570,12 @@ const DocumentInfo: React.FC<
         } catch (_err) {
           console.error(_err) // eslint-disable-line no-console
 
-          if (!isUnmounting.current) {
-            if (typeof onLoadError === 'function') {
-              void onLoadError()
-            }
-
-            setIsError(true)
-            setIsLoading(false)
+          if (typeof onLoadError === 'function') {
+            void onLoadError()
           }
+
+          setIsError(true)
+          setIsLoading(false)
         }
         setIsLoading(false)
       }
@@ -579,7 +584,7 @@ const DocumentInfo: React.FC<
     }
 
     return () => {
-      isUnmounting.current = true
+      abortController.abort()
     }
   }, [
     api,

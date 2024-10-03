@@ -48,6 +48,7 @@ const baseClass = 'form'
 
 export const Form: React.FC<FormProps> = (props) => {
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
+  const abortController = useRef<AbortController>(new AbortController())
 
   const {
     action,
@@ -169,6 +170,8 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const submit = useCallback(
     async (options: SubmitOptions = {}, e): Promise<void> => {
+      abortController.current = new AbortController()
+
       const {
         action: actionArg = action,
         method: methodToUse = method,
@@ -288,6 +291,7 @@ export const Form: React.FC<FormProps> = (props) => {
             headers: {
               'Accept-Language': i18n.language,
             },
+            signal: abortController.current.signal,
           })
         } else if (typeof action === 'function') {
           res = await action(formData)
@@ -378,7 +382,7 @@ export const Form: React.FC<FormProps> = (props) => {
           errorToast(message)
         }
       } catch (err) {
-        console.error('Error submitting form', err)
+        console.error('Error submitting form', err) // eslint-disable-line no-console
         setProcessing(false)
         setSubmitted(true)
         setDisabled(false)
@@ -404,6 +408,15 @@ export const Form: React.FC<FormProps> = (props) => {
       waitForAutocomplete,
     ],
   )
+
+  // Cleanup on component unmount or when a new request is made
+  useEffect(() => {
+    return () => {
+      if (abortController.current) {
+        abortController.current.abort() // Aborts the previous fetch request
+      }
+    }
+  }, [abortController])
 
   const getFields = useCallback(() => contextRef.current.fields, [])
 

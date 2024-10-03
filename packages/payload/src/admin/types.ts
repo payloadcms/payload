@@ -320,7 +320,14 @@ export type {
 
 export type { FormFieldBase, ServerFieldBase } from './forms/Field.js'
 
-export type { Data, FilterOptionsResult, FormField, FormState, Row } from './forms/Form.js'
+export type {
+  BuildFormStateArgs,
+  Data,
+  FilterOptionsResult,
+  FormField,
+  FormState,
+  Row,
+} from './forms/Form.js'
 
 export type {
   FieldLabelClientComponent,

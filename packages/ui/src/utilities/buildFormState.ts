@@ -1,13 +1,12 @@
-import { type I18nClient, type SupportedLanguages } from '@payloadcms/translations'
+import { type I18nClient } from '@payloadcms/translations'
 import {
+  type BuildFormStateArgs,
   type ClientUser,
-  type Data,
   type DocumentPreferences,
   type ErrorResult,
   type Field,
   formatErrors,
   type FormState,
-  type PayloadRequest,
   type SanitizedConfig,
   type TypeWithID,
 } from 'payload'
@@ -40,25 +39,6 @@ export const getFieldSchemaMap = (args: {
   })
 
   return cached
-}
-
-export type BuildFormStateArgs = {
-  collectionSlug?: string
-  data?: Data
-  docPreferences?: DocumentPreferences
-  formState?: FormState
-  globalSlug?: string
-  id?: number | string
-  /*
-    If not i18n was passed, the language can be passed to init i18n
-  */
-  language?: keyof SupportedLanguages
-  locale?: string
-  operation?: 'create' | 'update'
-  req: PayloadRequest
-  returnLockStatus?: boolean
-  schemaPath: string
-  updateLastEdited?: boolean
 }
 
 export type BuildFormStateResult =
@@ -100,7 +80,7 @@ export const buildFormState = async (args: BuildFormStateArgs): Promise<BuildFor
   }
 }
 
-const buildFormStateFn = async (
+export const buildFormStateFn = async (
   args: BuildFormStateArgs,
 ): Promise<{
   lockedState?: { isLocked: boolean; user: ClientUser | number | string }

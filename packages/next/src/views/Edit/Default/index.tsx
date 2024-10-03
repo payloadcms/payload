@@ -81,6 +81,8 @@ export const DefaultEditView: React.FC = () => {
 
   const { getFormState } = useServerFunctions()
 
+  const abortControllerRef = useRef<AbortController | null>(null)
+
   const {
     config,
     config: {
@@ -160,6 +162,7 @@ export const DefaultEditView: React.FC = () => {
 
     return entitySlug
   })
+
   const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(() => {
     if (operation === 'create' && auth && !auth.disableLocalStrategy) {
       return true
@@ -231,6 +234,13 @@ export const DefaultEditView: React.FC = () => {
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
+      if (abortControllerRef?.current) {
+        abortControllerRef.current.abort()
+      }
+
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+
       const currentTime = Date.now()
       const timeSinceLastUpdate = currentTime - lastUpdateTime
 
@@ -251,6 +261,7 @@ export const DefaultEditView: React.FC = () => {
         operation,
         returnLockStatus: isLockingEnabled ? true : false,
         schemaPath,
+        signal: abortController.signal,
         updateLastEdited,
       })
 
@@ -280,7 +291,6 @@ export const DefaultEditView: React.FC = () => {
           }
         }
       }
-
       return state
     },
     [
@@ -299,6 +309,16 @@ export const DefaultEditView: React.FC = () => {
       getFormState,
     ],
   )
+
+  useEffect(() => {
+    const currentAbortController = abortControllerRef.current
+
+    return () => {
+      if (currentAbortController) {
+        currentAbortController.abort()
+      }
+    }
+  }, [])
 
   // Clean up when the component unmounts or when the document is unlocked
   useEffect(() => {
