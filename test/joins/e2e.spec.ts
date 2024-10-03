@@ -216,7 +216,7 @@ test.describe('Admin Panel', () => {
     ).toBeVisible()
   })
 
-  test('should update relationship table when new upload is created', async () => {
+  test('should update relationship table when new upload is edited', async () => {
     await navigateToDoc(page, uploadsURL)
     const joinField = page.locator('.field-type.join').first()
     await expect(joinField).toBeVisible()
