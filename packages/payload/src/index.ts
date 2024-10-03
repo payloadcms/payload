@@ -369,12 +369,16 @@ export class BasePayload {
     },
 
     run: async (args?: {
+      limit?: number
       overrideAccess?: boolean
+      queue?: string
       req?: PayloadRequest
     }): Promise<ReturnType<typeof runAllJobs>> => {
       const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, this))
       const result = await runAllJobs({
+        limit: args?.limit,
         overrideAccess: args?.overrideAccess !== false,
+        queue: args?.queue,
         req: newReq,
       })
       return result
