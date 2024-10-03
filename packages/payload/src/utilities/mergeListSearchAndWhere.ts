@@ -49,11 +49,8 @@ export const mergeListSearchAndWhere = ({ collectionConfig, query }: Args): Wher
     let copyOfWhere = { ...(where || {}) }
 
     const titleField = getTitleField(collectionConfig)
-    let titleFieldName = titleField.name
 
-    if (fieldIsVirtual(titleField)) {
-      titleFieldName = 'id'
-    }
+    const titleFieldName = !titleField || fieldIsVirtual(titleField) ? 'id' : titleField.name
 
     const searchAsConditions = (
       collectionConfig.admin.listSearchableFields || [titleFieldName]
