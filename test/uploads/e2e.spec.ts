@@ -26,7 +26,6 @@ import {
   audioSlug,
   customFileNameMediaSlug,
   focalOnlySlug,
-  gifResizeSlug,
   mediaSlug,
   relationPreviewSlug,
   relationSlug,
@@ -54,7 +53,6 @@ let withoutMetadataURL: AdminUrlUtil
 let withOnlyJPEGMetadataURL: AdminUrlUtil
 let relationPreviewURL: AdminUrlUtil
 let customFileNameURL: AdminUrlUtil
-let gifResizeURL: AdminUrlUtil
 
 describe('uploads', () => {
   let page: Page
@@ -79,7 +77,6 @@ describe('uploads', () => {
     withOnlyJPEGMetadataURL = new AdminUrlUtil(serverURL, withOnlyJPEGMetadataSlug)
     relationPreviewURL = new AdminUrlUtil(serverURL, relationPreviewSlug)
     customFileNameURL = new AdminUrlUtil(serverURL, customFileNameMediaSlug)
-    gifResizeURL = new AdminUrlUtil(serverURL, gifResizeSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -624,8 +621,8 @@ describe('uploads', () => {
     })
 
     test('should resize image after crop if resizeOptions defined', async () => {
-      await page.goto(gifResizeURL.create)
-      await page.waitForURL(gifResizeURL.create)
+      await page.goto(animatedTypeMediaURL.create)
+      await page.waitForURL(animatedTypeMediaURL.create)
 
       const fileChooserPromise = page.waitForEvent('filechooser')
       await page.getByText('Select a file').click()
