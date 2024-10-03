@@ -6,17 +6,6 @@ export const Group: CollectionConfig = {
   slug: groupSlug,
   fields: [
     {
-      name: 'groupLocalized',
-      type: 'group',
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-      localized: true,
-    },
-    {
       name: 'groupLocalizedRow',
       type: 'group',
       localized: true,
@@ -32,6 +21,18 @@ export const Group: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'groupLocalized',
+      type: 'group',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+      localized: true,
+    },
+
     {
       name: 'group',
       type: 'group',
