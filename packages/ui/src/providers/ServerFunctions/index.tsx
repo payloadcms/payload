@@ -1,8 +1,13 @@
 import type { ServerFunctionClient } from 'payload'
 
-import React, { createContext } from 'react'
+import React, { createContext, useCallback } from 'react'
+
+import type { buildFormState, BuildFormStateArgs } from '../../utilities/buildFormState.js'
+
+type GetFormState = (args: Omit<BuildFormStateArgs, 'req'>) => ReturnType<typeof buildFormState>
 
 type ServerFunctionsContextType = {
+  getFormState: GetFormState
   serverFunction: ServerFunctionClient
 }
 
@@ -26,8 +31,25 @@ export const ServerFunctionsProvider: React.FC<{
     throw new Error('ServerFunctionsProvider requires a serverFunction prop')
   }
 
+  const getFormState = useCallback<GetFormState>(
+    async (args) => {
+      try {
+        const result = (await serverFunction({
+          name: 'form-state',
+          args,
+        })) as ReturnType<typeof buildFormState> // TODO: infer this type when `strictNullChecks` is enabled
+
+        return result
+      } catch (error) {
+        console.error(error) // eslint-disable-line no-console
+        return { state: args.formState }
+      }
+    },
+    [serverFunction],
+  )
+
   return (
-    <ServerFunctionsContext.Provider value={{ serverFunction }}>
+    <ServerFunctionsContext.Provider value={{ getFormState, serverFunction }}>
       {children}
     </ServerFunctionsContext.Provider>
   )

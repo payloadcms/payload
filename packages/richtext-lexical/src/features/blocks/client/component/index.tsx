@@ -40,7 +40,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const { path, schemaPath } = useFieldProps()
   const { field: parentLexicalRichTextField } = useEditorConfigContext()
 
-  const { serverFunction } = useServerFunctions()
+  const { getFormState } = useServerFunctions()
 
   const [initialState, setInitialState] = useState<false | FormState>(false)
 
@@ -60,15 +60,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
   // Field Schema
   useEffect(() => {
     const awaitInitialState = async () => {
-      const { state } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          id,
-          data: formData,
-          operation: 'update',
-          schemaPath: schemaFieldsPath,
-        },
-      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+      const { state } = await getFormState({
+        id,
+        data: formData,
+        operation: 'update',
+        schemaPath: schemaFieldsPath,
+      })
 
       if (state) {
         state.blockName = {
@@ -85,19 +82,16 @@ export const BlockComponent: React.FC<Props> = (props) => {
     if (formData) {
       void awaitInitialState()
     }
-  }, [serverFunction, schemaFieldsPath, id]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
+  }, [getFormState, schemaFieldsPath, id]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state: formState } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          id,
-          formState: prevFormState,
-          operation: 'update',
-          schemaPath: schemaFieldsPath,
-        },
-      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+      const { state: formState } = await getFormState({
+        id,
+        formState: prevFormState,
+        operation: 'update',
+        schemaPath: schemaFieldsPath,
+      })
 
       formState.blockName = {
         initialValue: '',
@@ -109,7 +103,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       return formState
     },
 
-    [id, schemaFieldsPath, formData.blockName, serverFunction],
+    [id, schemaFieldsPath, formData.blockName, getFormState],
   )
 
   const classNames = [`${baseClass}__row`, `${baseClass}__row--no-errors`].filter(Boolean).join(' ')
@@ -181,7 +175,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     schemaFieldsPath,
     classNames,
     i18n,
-  ])
+  ]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
 
   return <div className={baseClass + ' ' + baseClass + '-' + formData.blockType}>{formContent}</div>
 }

@@ -81,7 +81,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const { code } = useLocale()
   const { i18n, t } = useTranslation()
 
-  const { serverFunction } = useServerFunctions()
+  const { getFormState } = useServerFunctions()
 
   const [hasSubmitted, setHasSubmitted] = React.useState(false)
   const [docPermissions, setDocPermissions] = React.useState<DocumentPermissions>()
@@ -154,23 +154,16 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         abortController.abort('aborting previous fetch for initial form state without files')
       }
 
-      try {
-        const { state: formStateWithoutFiles } = (await serverFunction({
-          name: 'form-state',
-          args: {
-            collectionSlug,
-            locale: code,
-            operation: 'create',
-            schemaPath: collectionSlug,
-          },
-        })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
-        initialStateRef.current = formStateWithoutFiles
-        setHasInitializedState(true)
-      } catch (error) {
-        // swallow error
-      }
+      const { state: formStateWithoutFiles } = await getFormState({
+        collectionSlug,
+        locale: code,
+        operation: 'create',
+        schemaPath: collectionSlug,
+      })
+      initialStateRef.current = formStateWithoutFiles
+      setHasInitializedState(true)
     },
-    [code, collectionSlug, serverFunction],
+    [code, collectionSlug, getFormState],
   )
 
   const setActiveIndex: FormsManagerContext['setActiveIndex'] = React.useCallback(

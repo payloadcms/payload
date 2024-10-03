@@ -35,7 +35,7 @@ export const CreateFirstUserClient: React.FC<{
     getEntityConfig,
   } = useConfig()
 
-  const { serverFunction } = useServerFunctions()
+  const { getFormState } = useServerFunctions()
 
   const { t } = useTranslation()
   const { setUser } = useAuth()
@@ -44,19 +44,16 @@ export const CreateFirstUserClient: React.FC<{
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          collectionSlug: userSlug,
-          formState: prevFormState,
-          operation: 'create',
-          schemaPath: `_${userSlug}.auth`,
-        },
-      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+      const { state } = await getFormState({
+        collectionSlug: userSlug,
+        formState: prevFormState,
+        operation: 'create',
+        schemaPath: `_${userSlug}.auth`,
+      })
 
       return state
     },
-    [userSlug, serverFunction],
+    [userSlug, getFormState],
   )
 
   const handleFirstRegister = (data: { user: ClientUser }) => {

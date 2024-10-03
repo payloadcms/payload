@@ -55,7 +55,7 @@ const DocumentInfo: React.FC<
     onSave: onSaveFromProps,
   } = props
 
-  const { serverFunction } = useServerFunctions()
+  const { getFormState } = useServerFunctions()
 
   const {
     config: {
@@ -72,6 +72,7 @@ const DocumentInfo: React.FC<
   const collectionConfig = collections.find((c) => c.slug === collectionSlug)
   const globalConfig = globals.find((g) => g.slug === globalSlug)
   const docConfig = collectionConfig || globalConfig
+  const isUnmounting = useRef(false)
 
   const lockDocumentsProp = docConfig?.lockDocuments !== undefined ? docConfig?.lockDocuments : true
 
@@ -495,19 +496,16 @@ const DocumentInfo: React.FC<
 
       const newData = collectionSlug ? json.doc : json.result
 
-      const { state: newState } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          id,
-          collectionSlug,
-          data: newData,
-          docPreferences,
-          globalSlug,
-          locale,
-          operation,
-          schemaPath: collectionSlug || globalSlug,
-        },
-      })) as { state: FormState }
+      const { state: newState } = await getFormState({
+        id,
+        collectionSlug,
+        data: newData,
+        docPreferences,
+        globalSlug,
+        locale,
+        operation,
+        schemaPath: collectionSlug || globalSlug,
+      })
 
       setInitialState(newState)
       setData(newData)
@@ -523,18 +521,18 @@ const DocumentInfo: React.FC<
       locale,
       onSaveFromProps,
       getDocPermissions,
-      serverFunction,
+      getFormState,
     ],
   )
 
   useEffect(() => {
-    const abortController = new AbortController()
     const localeChanged = locale !== prevLocale.current
 
     if (
-      initialStateFromProps === undefined ||
-      initialDataFromProps === undefined ||
-      localeChanged
+      (initialStateFromProps === undefined ||
+        initialDataFromProps === undefined ||
+        localeChanged) &&
+      !isUnmounting.current
     ) {
       if (localeChanged) {
         prevLocale.current = locale
@@ -545,31 +543,33 @@ const DocumentInfo: React.FC<
         setIsLoading(true)
 
         try {
-          const { state: result } = (await serverFunction({
-            name: 'form-state',
-            args: {
-              id,
-              collectionSlug,
-              globalSlug,
-              locale,
-              operation,
-              schemaPath: collectionSlug || globalSlug,
-            },
-          })) as { state: FormState }
+          const { state: result } = await getFormState({
+            id,
+            collectionSlug,
+            globalSlug,
+            locale,
+            operation,
+            schemaPath: collectionSlug || globalSlug,
+          })
 
-          const data = reduceFieldsToValues(result, true)
-          setData(data)
+          if (!isUnmounting.current) {
+            const data = reduceFieldsToValues(result, true)
+            setData(data)
 
-          if (localeChanged) {
-            void getDocPermissions(data)
-          }
-
-          setInitialState(result)
-        } catch (err) {
-          if (!abortController.signal.aborted) {
-            if (typeof onLoadError === 'function') {
-              void onLoadError(err)
+            if (localeChanged) {
+              void getDocPermissions(data)
             }
+
+            setInitialState(result)
+          }
+        } catch (_err) {
+          console.error(_err) // eslint-disable-line no-console
+
+          if (!isUnmounting.current) {
+            if (typeof onLoadError === 'function') {
+              void onLoadError()
+            }
+
             setIsError(true)
             setIsLoading(false)
           }
@@ -581,11 +581,7 @@ const DocumentInfo: React.FC<
     }
 
     return () => {
-      try {
-        abortController.abort()
-      } catch (error) {
-        // swallow error
-      }
+      isUnmounting.current = true
     }
   }, [
     api,
@@ -599,7 +595,7 @@ const DocumentInfo: React.FC<
     initialDataFromProps,
     initialStateFromProps,
     getDocPermissions,
-    serverFunction,
+    getFormState,
     user,
   ])
 

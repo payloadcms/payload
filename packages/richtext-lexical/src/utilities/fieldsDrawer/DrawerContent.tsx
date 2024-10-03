@@ -35,7 +35,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     field: { richTextComponentMap },
   } = useEditorConfigContext()
 
-  const { serverFunction } = useServerFunctions()
+  const { getFormState } = useServerFunctions()
 
   const componentMapRenderedFieldsPath = `lexical_internal_feature.${featureKey}.fields${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
   const schemaFieldsPath =
@@ -47,38 +47,31 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const { state } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          id,
-          data: data ?? {},
-          operation: 'update',
-          schemaPath: schemaFieldsPath,
-        },
-      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+      const { state } = await getFormState({
+        id,
+        data: data ?? {},
+        operation: 'update',
+        schemaPath: schemaFieldsPath,
+      })
 
       setInitialState(state)
     }
 
     void awaitInitialState()
-  }, [schemaFieldsPath, id, data, serverFunction])
+  }, [schemaFieldsPath, id, data, getFormState])
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          id,
-          formState: prevFormState,
-          operation: 'update',
-          schemaPath: schemaFieldsPath,
-        },
-      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+      const { state } = await getFormState({
+        id,
+        formState: prevFormState,
+        operation: 'update',
+        schemaPath: schemaFieldsPath,
+      })
 
       return state
     },
-
-    [schemaFieldsPath, id, serverFunction],
+    [schemaFieldsPath, id, getFormState],
   )
 
   if (initialState === false) {

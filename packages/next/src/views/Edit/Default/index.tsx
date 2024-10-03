@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, ClientGlobalConfig, ClientUser, FormState } from 'payload'
+import type { ClientCollectionConfig, ClientGlobalConfig, ClientUser } from 'payload'
 
 import {
   DocumentControls,
@@ -79,7 +79,7 @@ export const DefaultEditView: React.FC = () => {
 
   const { refreshCookieAsync, user } = useAuth()
 
-  const { serverFunction } = useServerFunctions()
+  const { getFormState } = useServerFunctions()
 
   const {
     config,
@@ -242,20 +242,17 @@ export const DefaultEditView: React.FC = () => {
 
       const docPreferences = await getDocPreferences()
 
-      const { lockedState, state } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          id,
-          collectionSlug,
-          docPreferences,
-          formState: prevFormState,
-          globalSlug,
-          operation,
-          returnLockStatus: isLockingEnabled ? true : false,
-          schemaPath,
-          updateLastEdited,
-        },
-      })) as { lockedState: any; state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+      const { lockedState, state } = await getFormState({
+        id,
+        collectionSlug,
+        docPreferences,
+        formState: prevFormState,
+        globalSlug,
+        operation,
+        returnLockStatus: isLockingEnabled ? true : false,
+        schemaPath,
+        updateLastEdited,
+      })
 
       setDocumentIsLocked(true)
 
@@ -263,8 +260,13 @@ export const DefaultEditView: React.FC = () => {
         const previousOwnerId = documentLockStateRef.current?.user?.id
 
         if (lockedState) {
-          if (!documentLockStateRef.current || lockedState.user.id !== previousOwnerId) {
-            if (previousOwnerId === user.id && lockedState.user.id !== user.id) {
+          const lockedUserID =
+            typeof lockedState.user === 'string' || typeof lockedState.user === 'number'
+              ? lockedState.user
+              : lockedState.user.id
+
+          if (!documentLockStateRef.current || lockedUserID !== previousOwnerId) {
+            if (previousOwnerId === user.id && lockedUserID !== user.id) {
               setShowTakeOverModal(true)
               documentLockStateRef.current.hasShownLockedModal = true
             }
@@ -272,9 +274,9 @@ export const DefaultEditView: React.FC = () => {
             documentLockStateRef.current = documentLockStateRef.current = {
               hasShownLockedModal: documentLockStateRef.current?.hasShownLockedModal || false,
               isLocked: true,
-              user: lockedState.user,
+              user: lockedState.user as ClientUser,
             }
-            setCurrentEditor(lockedState.user)
+            setCurrentEditor(lockedState.user as ClientUser)
           }
         }
       }
@@ -294,7 +296,7 @@ export const DefaultEditView: React.FC = () => {
       isLockingEnabled,
       setDocumentIsLocked,
       lastUpdateTime,
-      serverFunction,
+      getFormState,
     ],
   )
 

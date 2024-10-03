@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, DocumentPermissions, FormState } from 'payload'
+import type { ClientCollectionConfig, DocumentPermissions } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { useCallback } from 'react'
@@ -49,7 +49,7 @@ export function EditForm({ submitted }: EditFormProps) {
     onSave: onSaveFromContext,
   } = useDocumentInfo()
 
-  const { serverFunction } = useServerFunctions()
+  const { getFormState } = useServerFunctions()
 
   const {
     config: {
@@ -115,20 +115,17 @@ export function EditForm({ submitted }: EditFormProps) {
   const onChange: NonNullable<FormProps['onChange']>[0] = useCallback(
     async ({ formState: prevFormState }) => {
       const docPreferences = await getDocPreferences()
-      const { state: newFormState } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          collectionSlug,
-          docPreferences,
-          formState: prevFormState,
-          operation: 'create',
-          schemaPath,
-        },
-      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+      const { state: newFormState } = await getFormState({
+        collectionSlug,
+        docPreferences,
+        formState: prevFormState,
+        operation: 'create',
+        schemaPath,
+      })
 
       return newFormState
     },
-    [collectionSlug, schemaPath, getDocPreferences, serverFunction],
+    [collectionSlug, schemaPath, getDocPreferences, getFormState],
   )
 
   return (

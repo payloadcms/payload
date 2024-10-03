@@ -1,7 +1,7 @@
 'use client'
 
 import type { FormProps } from '@payloadcms/ui'
-import type { ClientCollectionConfig, FormState } from 'payload'
+import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -42,7 +42,7 @@ export const UploadDrawer: React.FC<{
   const { closeModal } = useModal()
   const { id, collectionSlug } = useDocumentInfo()
 
-  const { serverFunction } = useServerFunctions()
+  const { getFormState } = useServerFunctions()
 
   const [initialState, setInitialState] = useState({})
   const {
@@ -72,16 +72,13 @@ export const UploadDrawer: React.FC<{
     const data = deepCopyObject(element?.fields || {})
 
     const awaitInitialState = async () => {
-      const { state } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          id,
-          collectionSlug,
-          data,
-          operation: 'update',
-          schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
-        },
-      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+      const { state } = await getFormState({
+        id,
+        collectionSlug,
+        data,
+        operation: 'update',
+        schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
+      })
 
       setInitialState(state)
     }
@@ -96,25 +93,22 @@ export const UploadDrawer: React.FC<{
     id,
     schemaPath,
     relatedCollection.slug,
-    serverFunction,
+    getFormState,
   ])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          id,
-          formState: prevFormState,
-          operation: 'update',
-          schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
-        },
-      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+      const { state } = await getFormState({
+        id,
+        formState: prevFormState,
+        operation: 'update',
+        schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
+      })
 
       return state
     },
 
-    [relatedCollection.slug, schemaPath, id, serverFunction],
+    [relatedCollection.slug, schemaPath, id, getFormState],
   )
 
   return (

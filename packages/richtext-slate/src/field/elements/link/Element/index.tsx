@@ -79,7 +79,7 @@ export const LinkElement = () => {
   const [initialState, setInitialState] = useState<FormState>({})
   const { id, collectionSlug } = useDocumentInfo()
 
-  const { serverFunction } = useServerFunctions()
+  const { getFormState } = useServerFunctions()
 
   const drawerSlug = useDrawerSlug('rich-text-link')
 
@@ -100,14 +100,11 @@ export const LinkElement = () => {
         url: element.url,
       }
 
-      const { state } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          data,
-          operation: 'update',
-          schemaPath: fieldMapPath,
-        },
-      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+      const { state } = await getFormState({
+        data,
+        operation: 'update',
+        schemaPath: fieldMapPath,
+      })
 
       setInitialState(state)
     }
@@ -115,7 +112,7 @@ export const LinkElement = () => {
     if (renderModal) {
       void awaitInitialState()
     }
-  }, [renderModal, element, locale, t, collectionSlug, config, id, fieldMapPath, serverFunction])
+  }, [renderModal, element, locale, t, collectionSlug, config, id, fieldMapPath, getFormState])
 
   return (
     <span className={baseClass} {...attributes}>

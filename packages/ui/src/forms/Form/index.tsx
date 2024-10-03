@@ -70,7 +70,7 @@ export const Form: React.FC<FormProps> = (props) => {
     waitForAutocomplete,
   } = props
 
-  const { serverFunction } = useServerFunctions()
+  const { getFormState } = useServerFunctions()
 
   const method = 'method' in props ? props?.method : undefined
 
@@ -448,23 +448,20 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const reset = useCallback(
     async (data: unknown) => {
-      const { state: newState } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          id,
-          collectionSlug,
-          data,
-          globalSlug,
-          operation,
-          schemaPath: collectionSlug || globalSlug,
-        },
-      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+      const { state: newState } = await getFormState({
+        id,
+        collectionSlug,
+        data,
+        globalSlug,
+        operation,
+        schemaPath: collectionSlug || globalSlug,
+      })
 
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state: newState })
     },
-    [collectionSlug, dispatchFields, globalSlug, id, operation, serverFunction],
+    [collectionSlug, dispatchFields, globalSlug, id, operation, getFormState],
   )
 
   const replaceState = useCallback(
@@ -478,19 +475,16 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const getFieldStateBySchemaPath = useCallback(
     async ({ data, schemaPath }) => {
-      const { state: fieldSchema } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          collectionSlug,
-          data,
-          globalSlug,
-          schemaPath,
-        },
-      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+      const { state: fieldSchema } = await getFormState({
+        collectionSlug,
+        data,
+        globalSlug,
+        schemaPath,
+      })
 
       return fieldSchema
     },
-    [collectionSlug, globalSlug, serverFunction],
+    [collectionSlug, globalSlug, getFormState],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(

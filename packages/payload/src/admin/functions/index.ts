@@ -20,7 +20,7 @@ export type ServerFunctionClientArgs = {
 export type ServerFunctionClient = (args: ServerFunctionClientArgs) => Promise<unknown> | unknown
 
 export type ServerFunction = (
-  args: ServerFunctionClientArgs['args'] & DefaultServerFunctionArgs,
+  args: DefaultServerFunctionArgs & ServerFunctionClientArgs['args'],
 ) => Promise<unknown> | unknown
 
 export type ServerFunctionConfig = {
