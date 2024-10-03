@@ -6,15 +6,15 @@ desc: Execute custom server-side logic from client-side code using Server Functi
 keywords: server functions, server-side functions, server-side logic, server-side code, server-side, functions, Payload, headless, Content Management System, cms, javascript, react, node, nextjs
 ---
 
-The Payload [Admin Panel] fully supports [React Server Functions](https://react.dev/reference/rsc/server-actions) (formerly grouped under the "Server Actions" umbrella). These are functions that are defined on the server, using server-only modules, and called from the client. This is a way to execute custom server-side logic from client-side code.
+The Payload [Admin Panel] supports [React Server Functions](https://react.dev/reference/rsc/server-actions) directly through the Payload Config. Server Functions are functions that are defined on the server, which may use server-only modules, but are called by the client. This is a way to execute server-side logic through a client-side action.
 
-Server Functions are a good alternative to traditional [REST API Endpoints](../rest-api#custom-endpoints), with a few key differences. While they behave similarly, Server Functions are simpler to define, not requiring a specified path or method. They are also easier to consume, not requiring any client-side fetch. Server Functions are also able to return rendered React components.
+Server Functions are a good alternative to traditional [REST API Endpoints](../rest-api#custom-endpoints), with a few key differences. While they behave similarly, Server Functions are simpler to define, not requiring a specified route or method. They are also easier to consume, not requiring the Fetch API, and are able to return React Server Components.
 
 Requests made through a Server Function also do not propagate though the browser's network panel in the same way as fetch requests, making it harder for others to inspect, tamper with, or replay requests directly through the browser.
 
 <Banner type="info">
   <strong>Note:</strong>
-  Server Functions are only available in the Payload Admin Panel, not your public-facing application. For public-facing server-side logic, consider using [Custom Endpoints](../rest-api#custom-endpoints).
+  Server Functions defined through the Payload Config are only available within the Admin Panel, not your public-facing application. For public-facing server-side logic, you can write your own Server Functions directly into your application.
 </Banner>
 
 ## Admin Options
@@ -57,7 +57,7 @@ The function receives an object with the following properties:
 
 ## Client-side Usage
 
-To execute a Server Function from the client, use the `useServerFunctions` hook:
+To execute a Server Function from the client, use the `useServerFunctions` hook, passing the `name` of your Server Function:
 
 ```tsx
 'use client'
@@ -89,7 +89,7 @@ const MyComponent = () => {
 
 ## How it works
 
-In order for Payload to support dynamic Sever Functions, a single handler is placed at the root of the application:
+In order for Payload to support Sever Functions through the Payload Config, a single handler is placed at the root of the application:
 
 ```ts
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */
@@ -133,7 +133,12 @@ const Layout = ({ children }: Args) => (
 export default Layout
 ```
 
-This pattern allows us to thread server-only modules, such as the Payload Config, through to the Server Function handler to be consumed within your function's logic.
+This is a necessary pattern for Server Functions to have access to the Payload Config, as well as any other server-only modules that may be required. This is because all server-only modules _must_ be imported in the closure as the Server Function, wherever the `use server` directive is used. [More details](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#closures-and-encryption).
+
+<Banner type="info">
+  <strong>Note:</strong>
+  Server Functions do not necessarily need to be define in the Payload Config. It is possible to write Server Functions within your own server-side code, and thread them through to your client-side components manually.
+</Banner>
 
 ## TypeScript
 
