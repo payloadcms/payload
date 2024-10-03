@@ -4,7 +4,7 @@ import { RelatedPosts } from '@/blocks/RelatedPosts/Component'
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
 import { getPayloadHMR } from '@payloadcms/next/utilities'
-import { draftMode, headers } from 'next/headers'
+import { draftMode } from 'next/headers'
 import React, { cache } from 'react'
 import RichText from '@/components/RichText'
 
@@ -13,8 +13,6 @@ import type { Post } from '@/payload-types'
 import { PostHero } from '@/heros/PostHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
-
-export const dynamic = 'force-static'
 
 export async function generateStaticParams() {
   const payload = await getPayloadHMR({ config: configPromise })
@@ -25,7 +23,11 @@ export async function generateStaticParams() {
     overrideAccess: false,
   })
 
-  return posts.docs?.map(({ slug }) => slug)
+  const params = posts.docs.map(({ slug }) => {
+    return { slug }
+  })
+
+  return params
 }
 
 export default async function Post({ params: { slug = '' } }) {
