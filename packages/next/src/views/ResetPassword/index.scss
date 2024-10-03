@@ -1,31 +1,33 @@
 @import '../../scss/styles.scss';
 
-.reset-password {
-  &__wrap {
-    z-index: 1;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: base(0.8);
-    max-width: base(36);
+@layer payload-default {
+  .reset-password {
+    &__wrap {
+      z-index: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: base(0.8);
+      max-width: base(36);
 
-    & > form {
-      width: 100%;
+      & > form {
+        width: 100%;
 
-      & > .inputWrap {
-        display: flex;
-        flex-direction: column;
-        gap: base(0.8);
+        & > .inputWrap {
+          display: flex;
+          flex-direction: column;
+          gap: base(0.8);
 
-        > * {
-          margin: 0;
+          > * {
+            margin: 0;
+          }
         }
       }
-    }
 
-    & > .btn {
-      margin: 0;
+      & > .btn {
+        margin: 0;
+      }
     }
   }
 }
