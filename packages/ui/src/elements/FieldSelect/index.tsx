@@ -92,7 +92,7 @@ const reduceFields = ({
   return fields?.reduce((fieldsToUse, field) => {
     // escape for a variety of reasons
     if (
-      fieldAffectsData(field) &&
+      (fieldAffectsData(field) || field.type === 'ui') &&
       (field.admin.disableBulkEdit ||
         field.unique ||
         field.admin.hidden ||
