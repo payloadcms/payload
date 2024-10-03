@@ -1,20 +1,22 @@
 @import '../../../../scss/styles';
 
-.LexicalEditorTheme__hr {
-  padding: 2px 2px;
-  border: none;
-  margin: 1rem 0;
-  cursor: pointer;
-}
+@layer payload-default {
+  .LexicalEditorTheme__hr {
+    padding: 2px 2px;
+    border: none;
+    margin: 1rem 0;
+    cursor: pointer;
+  }
 
-.LexicalEditorTheme__hr:after {
-  content: '';
-  display: block;
-  height: 2px;
-  background-color: var(--theme-elevation-250);
-}
+  .LexicalEditorTheme__hr:after {
+    content: '';
+    display: block;
+    height: 2px;
+    background-color: var(--theme-elevation-250);
+  }
 
-.LexicalEditorTheme__hr.selected {
-  outline: 2px solid var(--theme-success-250);
-  user-select: none;
+  .LexicalEditorTheme__hr.selected {
+    outline: 2px solid var(--theme-success-250);
+    user-select: none;
+  }
 }

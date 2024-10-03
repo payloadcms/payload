@@ -1,5 +1,7 @@
-.plugin-seo__field {
-  .field-label {
-    display: inline !important;
+@layer payload-default {
+  .plugin-seo__field {
+    .field-label {
+      display: inline !important;
+    }
   }
 }
