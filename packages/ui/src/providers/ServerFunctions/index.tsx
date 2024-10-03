@@ -37,13 +37,14 @@ export const ServerFunctionsProvider: React.FC<{
 
   const getFormState = useCallback<GetFormState>(
     async (args) => {
+      const { signal, ...rest } = args
       try {
         const result = (await serverFunction({
           name: 'form-state',
-          args,
+          args: rest,
         })) as ReturnType<typeof buildFormState> // TODO: infer this type when `strictNullChecks` is enabled
 
-        if (args.signal?.aborted) {
+        if (signal?.aborted) {
           return { state: args.formState }
         }
 
