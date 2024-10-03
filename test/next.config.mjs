@@ -21,7 +21,7 @@ export default withBundleAnalyzer(
     },
     experimental: {
       serverActions: {
-        bodySizeLimit: '2mb',
+        bodySizeLimit: '3mb',
       },
     },
     env: {

@@ -142,15 +142,15 @@ The Server Function Handler is a necessary pattern for Server Functions to have 
 
 ## Troubleshooting
 
-**Unknown Server Function: "my-server-function"**
+#### "Unknown Server Function: 'my-server-function'"
 
     Ensure the `name` property of your Server Function matches the name you are passing through the `serverFunction` args.
 
-**Error: Client Functions cannot be passed directly to Server Functions. Only Functions passed from the Server can be passed back again.**
+#### "Error: Client Functions cannot be passed directly to Server Functions. Only Functions passed from the Server can be passed back again"
 
     Non-serializable values cannot cross the server / client boundary. Ensure that the args your sending through your Server Function are serializable, i.e. not containing any functions, classes, etc.
 
-**Error: Payload Server Function exceeded body size limit**
+#### "Body exceeded _n_ limit"
 
     By default, Next.js places a 1mb limit on the body size of incoming requests. However, this can be increased by setting the `bodySizeLimit` option in your `next.config.ts` file. [More details](https://nextjs.org/docs/app/api-reference/next-config-js/serverActions#bodysizelimit).
 
