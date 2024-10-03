@@ -111,7 +111,7 @@ export default buildConfigWithDefaults({
             required: true,
           },
         ],
-        run: updatePostStep1,
+        handler: updatePostStep1,
       } as TaskConfig<'UpdatePost'>,
       {
         retries: 2,
@@ -130,7 +130,7 @@ export default buildConfigWithDefaults({
             required: true,
           },
         ],
-        run: updatePostStep2,
+        handler: updatePostStep2,
       } as TaskConfig<'UpdatePostStep2'>,
       {
         retries: 2,
@@ -153,7 +153,7 @@ export default buildConfigWithDefaults({
             required: true,
           },
         ],
-        run: async ({ input, job, req }) => {
+        handler: async ({ input, job, req }) => {
           if (input.shouldFail) {
             throw new Error('Failed on purpose')
           }
@@ -192,7 +192,7 @@ export default buildConfigWithDefaults({
             required: true,
           },
         ],
-        run: async ({ input, job, req }) => {
+        handler: async ({ input, job, req }) => {
           if (input.shouldFail) {
             throw new Error('Failed on purpose')
           }
@@ -227,7 +227,7 @@ export default buildConfigWithDefaults({
             required: true,
           },
         ],
-        run: path.resolve(dirname, 'runners/externalTask.ts') + '#externalTaskRunner',
+        handler: path.resolve(dirname, 'runners/externalTask.ts') + '#externalTaskHandler',
       } as TaskConfig<'ExternalTask'>,
     ],
     workflows: [

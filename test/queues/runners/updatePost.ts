@@ -1,6 +1,6 @@
-import type { TaskRunner } from 'payload'
+import type { TaskHandler } from 'payload'
 
-export const updatePostStep1: TaskRunner<'UpdatePost'> = async ({ req, input, job }) => {
+export const updatePostStep1: TaskHandler<'UpdatePost'> = async ({ req, input, job }) => {
   const postID =
     typeof input.post === 'string' || typeof input.post === 'number' ? input.post : input.post.id
 
@@ -28,7 +28,7 @@ export const updatePostStep1: TaskRunner<'UpdatePost'> = async ({ req, input, jo
   }
 }
 
-export const updatePostStep2: TaskRunner<'UpdatePostStep2'> = async ({ req, input, job }) => {
+export const updatePostStep2: TaskHandler<'UpdatePostStep2'> = async ({ req, input, job }) => {
   const postID =
     typeof input.post === 'string' || typeof input.post === 'number' ? input.post : input.post.id
 

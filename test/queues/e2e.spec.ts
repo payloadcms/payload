@@ -4,13 +4,21 @@ import { expect, test } from '@playwright/test'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
+import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { Config } from './payload-types.js'
+
 import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
+import { RESTClient } from '../helpers/rest.js'
 import { TEST_TIMEOUT } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+let serverURL: string
+let payload: PayloadTestSDK<Config>
+let client: RESTClient
 
 test.describe('Queues', () => {
   let page: Page
@@ -18,13 +26,33 @@ test.describe('Queues', () => {
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT)
-
-    const { payload, serverURL } = await initPayloadE2ENoConfig({ dirname })
+    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
     url = new AdminUrlUtil(serverURL, 'payload-jobs')
 
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'queuesTest',
+    })
+    await ensureCompilationIsDone({ page, serverURL })
+  })
+
+  test.beforeEach(async () => {
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'fieldsTest',
+      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
+    })
+
+    if (client) {
+      await client.logout()
+    }
+    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    await client.login()
+
     await ensureCompilationIsDone({ page, serverURL })
   })
 

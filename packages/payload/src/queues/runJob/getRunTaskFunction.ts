@@ -5,7 +5,7 @@ import type {
   RunInlineTaskFunction,
   RunTaskFunction,
   TaskConfig,
-  TaskRunner,
+  TaskHandler,
   TaskType,
 } from '../config/taskTypes.js'
 import type {
@@ -22,13 +22,13 @@ export type RunTaskFunctionState = {
   reachedMaxRetries: boolean
 }
 
-async function getTaskRunnerFromConfig(taskConfig: TaskConfig<any>) {
-  let runner: TaskRunner<TaskType>
+async function getTaskHandlerFromConfig(taskConfig: TaskConfig<any>) {
+  let runner: TaskHandler<TaskType>
 
-  if (typeof taskConfig.run === 'function') {
-    runner = taskConfig.run
+  if (typeof taskConfig.handler === 'function') {
+    runner = taskConfig.handler
   } else {
-    const [runnerPath, runnerImportName] = taskConfig.run.split('#')
+    const [runnerPath, runnerImportName] = taskConfig.handler.split('#')
 
     const runnerModule =
       typeof require === 'function'
@@ -61,9 +61,9 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
   isInline: TIsInline,
 ): TIsInline extends true ? RunInlineTaskFunction : RunTaskFunction => {
   const runTask: RunTaskFunction = async ({ id, input, retries, task }) => {
-    let inlineRunner: TaskRunner<TaskType> = null
+    let inlineRunner: TaskHandler<TaskType> = null
     if (isInline) {
-      inlineRunner = task as unknown as TaskRunner<TaskType>
+      inlineRunner = task as unknown as TaskHandler<TaskType>
       // @ts-expect-error
       task = 'inline'
     }
@@ -94,14 +94,14 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
       )
     }
 
-    let runner: TaskRunner<TaskType>
+    let runner: TaskHandler<TaskType>
     if (isInline) {
       runner = inlineRunner
     } else {
       if (!taskConfig) {
         throw new Error(`Task ${task} not found in workflow ${job.workflowSlug}`)
       }
-      runner = await getTaskRunnerFromConfig(taskConfig)
+      runner = await getTaskHandlerFromConfig(taskConfig)
     }
 
     if (!runner || typeof runner !== 'function') {

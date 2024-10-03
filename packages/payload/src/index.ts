@@ -1095,12 +1095,12 @@ export type {
 export type {
   RunTaskFunction,
   TaskConfig,
+  TaskHandler,
+  TaskHandlerArgs,
+  TaskHandlerResult,
+  TaskHandlerResults,
   TaskInput,
   TaskOutput,
-  TaskRunner,
-  TaskRunnerArgs,
-  TaskRunnerResult,
-  TaskRunnerResults,
   TaskType,
 } from './queues/config/taskTypes.js'
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types.js'

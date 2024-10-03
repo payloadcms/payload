@@ -6,7 +6,7 @@ export type TaskInputOutput = {
   output: object
 }
 
-export type TaskRunnerArgs<
+export type TaskHandlerArgs<
   TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput,
   TWorkflowSlug extends keyof TypedJobs['workflows'] = string,
 > = {
@@ -19,7 +19,7 @@ export type TaskRunnerArgs<
   req: PayloadRequest
 }
 
-export type TaskRunnerResult<
+export type TaskHandlerResult<
   TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput,
 > = {
   output: TTaskSlugOrInputOutput extends keyof TypedJobs['tasks']
@@ -41,10 +41,12 @@ export type SavedTaskResults = {
   }
 }
 
-export type TaskRunner<TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput> =
+export type TaskHandler<TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput> =
   (
-    args: TaskRunnerArgs<TTaskSlugOrInputOutput>,
-  ) => Promise<TaskRunnerResult<TTaskSlugOrInputOutput>> | TaskRunnerResult<TTaskSlugOrInputOutput>
+    args: TaskHandlerArgs<TTaskSlugOrInputOutput>,
+  ) =>
+    | Promise<TaskHandlerResult<TTaskSlugOrInputOutput>>
+    | TaskHandlerResult<TTaskSlugOrInputOutput>
 
 export type TaskType = StringKeyOf<TypedJobs['tasks']>
 
@@ -53,9 +55,9 @@ export type TaskInput<T extends keyof TypedJobs['tasks']> = TypedJobs['tasks'][T
 
 export type TaskOutput<T extends keyof TypedJobs['tasks']> = TypedJobs['tasks'][T]['output']
 
-export type TaskRunnerResults = {
+export type TaskHandlerResults = {
   [TTaskSlug in keyof TypedJobs['tasks']]: {
-    [id: string]: TaskRunnerResult<TTaskSlug>
+    [id: string]: TaskHandlerResult<TTaskSlug>
   }
 }
 
@@ -82,6 +84,14 @@ export type TaskConfig<
   TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput = TaskType,
 > = {
   /**
+   * The function that should be responsible for running the job.
+   * You can either pass a string-based path to the job function file, or the job function itself.
+   *
+   * If you are using large dependencies within your job, you might prefer to pass the string path
+   * because that will avoid bundling large dependencies in your Next.js app.
+   */
+  handler: string | TaskHandler<TTaskSlugOrInputOutput> // TODO: Rename to handler
+  /**
    * Define the input field schema
    */
   inputSchema?: Field[]
@@ -99,16 +109,8 @@ export type TaskConfig<
    * Specify the number of times that this step should be retried if it fails.
    */
   retries?: number
-  run: string | TaskRunner<TTaskSlugOrInputOutput>
-  /**
-   * The function that should be responsible for running the job.
-   * You can either pass a string-based path to the job function file, or the job function itself.
-   *
-   * If you are using large dependencies within your job, you might prefer to pass the string path
-   * because that will avoid bundling large dependencies in your Next.js app.
-   */
-  slug: TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] ? TTaskSlugOrInputOutput : string
   /**
    * Define a slug-based name for this job.
    */
+  slug: TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] ? TTaskSlugOrInputOutput : string
 }

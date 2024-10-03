@@ -1,6 +1,6 @@
-import type { TaskRunner } from 'payload'
+import type { TaskHandler } from 'payload'
 
-export const externalTaskRunner: TaskRunner<'ExternalTask'> = async ({ input, job, req }) => {
+export const externalTaskHandler: TaskHandler<'ExternalTask'> = async ({ input, job, req }) => {
   const newSimple = await req.payload.create({
     collection: 'simple',
     req,
