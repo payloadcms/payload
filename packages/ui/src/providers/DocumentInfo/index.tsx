@@ -582,10 +582,6 @@ const DocumentInfo: React.FC<
 
       void getInitialState()
     }
-
-    return () => {
-      abortController.abort()
-    }
   }, [
     api,
     operation,
@@ -601,6 +597,16 @@ const DocumentInfo: React.FC<
     getFormState,
     user,
   ])
+
+  useEffect(() => {
+    const currentAbortController = abortControllerRef.current
+
+    return () => {
+      if (currentAbortController) {
+        currentAbortController.abort()
+      }
+    }
+  }, [])
 
   useEffect(() => {
     void getVersions()
