@@ -33,10 +33,6 @@ export const withPayload = (nextConfig = {}) => {
     },
     experimental: {
       ...(nextConfig?.experimental || {}),
-      serverActions: {
-        bodySizeLimit: '2mb',
-        ...(nextConfig?.experimental?.serverActions || {}),
-      },
       turbo: {
         ...(nextConfig?.experimental?.turbo || {}),
         resolveAlias: {
