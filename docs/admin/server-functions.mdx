@@ -13,7 +13,6 @@ Server Functions are a good alternative to traditional [REST API Endpoints](../r
 1. are simpler to define, not requiring a specified route or method
 2. are easier to consume, not requiring the Fetch API
 3. are able to return React and/or JSX
-4. hide request details from the browser's network panel
 
 Server Functions do not necessarily need to be defined in the Payload Config. It is possible to write your own Server Functions and thread them to your client accordingly. You will, however, be responsible for authenticating those requests yourself. All Server Functions defined through the Payload Config will automatically receive a `req` argument, containing the `user`, `payload`, and more.
 

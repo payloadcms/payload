@@ -42,7 +42,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const { getFormState } = useServerFunctions()
 
-  const [initialState, setInitialState] = useState<false | FormState>(false)
+  const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
 
   const {
     field: { richTextComponentMap },
@@ -74,9 +74,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
           valid: true,
           value: formData.blockName,
         }
-
-        setInitialState(state)
       }
+
+      setInitialState(state)
     }
 
     if (formData) {

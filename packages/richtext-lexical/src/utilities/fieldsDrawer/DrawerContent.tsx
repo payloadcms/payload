@@ -29,7 +29,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   const { id } = useDocumentInfo()
   const { schemaPath } = useFieldProps()
 
-  const [initialState, setInitialState] = useState<false | FormState>(false)
+  const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
 
   const {
     field: { richTextComponentMap },
@@ -54,9 +54,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         schemaPath: schemaFieldsPath,
       })
 
-      if (state) {
-        setInitialState(state)
-      }
+      setInitialState(state)
     }
 
     void awaitInitialState()

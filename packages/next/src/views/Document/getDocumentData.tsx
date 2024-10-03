@@ -38,10 +38,11 @@ export const getDocumentData = async (args: {
       schemaPath,
     })
 
-    if ('errors' in result && result.errors) {
+    if (!('state' in result)) {
       throw new Error('Error building form state')
     } else {
       const data = reduceFieldsToValues(result.state, true)
+
       return {
         data,
         formState: result.state,
@@ -49,6 +50,7 @@ export const getDocumentData = async (args: {
     }
   } catch (error) {
     console.error('Error getting document data', error) // eslint-disable-line no-console
+
     return {
       data: null,
       formState: {
