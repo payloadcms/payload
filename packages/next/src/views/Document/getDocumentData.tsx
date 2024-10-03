@@ -38,7 +38,7 @@ export const getDocumentData = async (args: {
       schemaPath,
     })
 
-    if (result.errors) {
+    if ('errors' in result && result.errors) {
       throw new Error('Error building form state')
     } else {
       const data = reduceFieldsToValues(result.state, true)

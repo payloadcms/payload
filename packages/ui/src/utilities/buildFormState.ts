@@ -61,19 +61,23 @@ export type BuildFormStateArgs = {
   updateLastEdited?: boolean
 }
 
-export const buildFormState = async (
-  args: BuildFormStateArgs,
-): Promise<
+export type BuildFormStateResult =
   | {
       errors?: never
       lockedState?: { isLocked: boolean; user: ClientUser | number | string }
       state: FormState
     }
+  | {
+      lockedState?: never
+      message: string
+      state?: never
+    }
   | ({
       lockedState?: never
-      state?: FormState
+      state?: never
     } & ErrorResult)
-> => {
+
+export const buildFormState = async (args: BuildFormStateArgs): Promise<BuildFormStateResult> => {
   const { req } = args
 
   try {
@@ -83,11 +87,13 @@ export const buildFormState = async (
     req.payload.logger.error({ err, msg: `There was an error building form state` })
 
     if (err.message === 'Could not find field schema for given path') {
-      throw new Error(err.message)
+      return {
+        message: err.message,
+      }
     }
 
     if (err.message === 'Unauthorized') {
-      throw new Error()
+      return null
     }
 
     return formatErrors(err)
