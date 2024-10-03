@@ -1212,7 +1212,7 @@ Some text 1
     {
       input: `
 <Banner>
-  Some line [ Start of link
+  Some line [ Start of link<br>
   line2] (/some/link) .
 </Banner>
 `,
@@ -1267,6 +1267,81 @@ Some text 1
                       indent: 0,
                       type: 'link',
                       version: 3,
+                    },
+                  ],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  textFormat: 0,
+                  textStyle: '',
+                  type: 'paragraph',
+                  version: 1,
+                },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              type: 'root',
+              version: 1,
+            },
+          },
+        },
+      },
+    },
+    {
+      input: `
+<Banner>
+  Text text [ Link
+  ](/some/link) .
+</Banner>
+`,
+      blockNode: {
+        fields: {
+          blockType: 'Banner',
+          content: {
+            root: {
+              children: [
+                {
+                  children: [
+                    {
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: 'Text text ',
+                      type: 'text',
+                      version: 1,
+                    },
+                    {
+                      children: [
+                        {
+                          detail: 0,
+                          format: 0,
+                          mode: 'normal',
+                          style: '',
+                          text: 'Link ',
+                          type: 'text',
+                          version: 1,
+                        },
+                      ],
+                      fields: {
+                        linkType: 'custom',
+                        newTab: false,
+                        url: '/some/link',
+                      },
+                      format: '',
+                      indent: 0,
+                      type: 'link',
+                      version: 3,
+                    },
+                    {
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: '.',
+                      type: 'text',
+                      version: 1,
                     },
                   ],
                   direction: null,
