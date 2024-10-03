@@ -402,6 +402,9 @@ export interface Group {
   groupLocalized?: {
     title?: string | null;
   };
+  groupLocalizedRow?: {
+    text?: string | null;
+  };
   group?: {
     title?: string | null;
   };
