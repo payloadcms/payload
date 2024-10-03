@@ -93,14 +93,18 @@ export const BlockComponent: React.FC<Props> = (props) => {
         schemaPath: schemaFieldsPath,
       })
 
-      formState.blockName = {
-        initialValue: '',
-        passesCondition: true,
-        valid: true,
-        value: formData.blockName,
+      if (formState) {
+        formState.blockName = {
+          initialValue: '',
+          passesCondition: true,
+          valid: true,
+          value: formData.blockName,
+        }
+
+        return formState
       }
 
-      return formState
+      return prevFormState
     },
 
     [id, schemaFieldsPath, formData.blockName, getFormState],

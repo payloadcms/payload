@@ -552,16 +552,14 @@ const DocumentInfo: React.FC<
             schemaPath: collectionSlug || globalSlug,
           })
 
-          if (!isUnmounting.current) {
-            const data = reduceFieldsToValues(result, true)
-            setData(data)
+          const data = reduceFieldsToValues(result, true)
+          setData(data)
 
-            if (localeChanged) {
-              void getDocPermissions(data)
-            }
-
-            setInitialState(result)
+          if (localeChanged) {
+            void getDocPermissions(data)
           }
+
+          setInitialState(result)
         } catch (_err) {
           console.error(_err) // eslint-disable-line no-console
 

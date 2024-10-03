@@ -54,7 +54,9 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         schemaPath: schemaFieldsPath,
       })
 
-      setInitialState(state)
+      if (state) {
+        setInitialState(state)
+      }
     }
 
     void awaitInitialState()
@@ -69,7 +71,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         schemaPath: schemaFieldsPath,
       })
 
-      return state
+      return state || prevFormState
     },
     [schemaFieldsPath, id, getFormState],
   )

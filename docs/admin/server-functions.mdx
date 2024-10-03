@@ -8,9 +8,14 @@ keywords: server functions, server-side functions, server-side logic, server-sid
 
 The Payload [Admin Panel] supports [React Server Functions](https://react.dev/reference/rsc/server-actions) directly through the Payload Config. Server Functions are functions that are defined on the server, which may use server-only modules, but are called by the client. This is a way to execute server-side logic through a client-side action.
 
-Server Functions are a good alternative to traditional [REST API Endpoints](../rest-api#custom-endpoints), with a few key differences. While they behave similarly, Server Functions are simpler to define, not requiring a specified route or method. They are also easier to consume, not requiring the Fetch API, and are able to return React Server Components.
+Server Functions are a good alternative to traditional [REST API Endpoints](../rest-api#custom-endpoints), but with a few key differences. While they behave similarly, Server Functions:
 
-Requests made through a Server Function also do not propagate though the browser's network panel in the same way as fetch requests, making it harder for others to inspect, tamper with, or replay requests directly through the browser.
+1. are simpler to define, not requiring a specified route or method
+2. are easier to consume, not requiring the Fetch API
+3. are able to return React and/or JSX
+4. hide request details from the browser's network panel
+
+Server Functions do not necessarily need to be defined in the Payload Config. It is possible to write your own Server Functions and thread them to your client accordingly. You will, however, be responsible for authenticating those requests yourself. All Server Functions defined through the Payload Config will automatically receive a `req` argument, containing the `user`, `payload`, and more.
 
 <Banner type="info">
   <strong>Note:</strong>
@@ -133,12 +138,32 @@ const Layout = ({ children }: Args) => (
 export default Layout
 ```
 
-This is a necessary pattern for Server Functions to have access to the Payload Config, as well as any other server-only modules that may be required. This is because all server-only modules _must_ be imported in the closure as the Server Function, wherever the `use server` directive is used. [More details](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#closures-and-encryption).
+The Server Function Handler is a necessary pattern for Server Functions to have access to the Payload Config, as well as any other server-only modules that may be required. This is because all server-only modules _must_ be imported in the closure as the Server Function, wherever the `use server` directive is used. [More details](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#closures-and-encryption).
 
-<Banner type="info">
-  <strong>Note:</strong>
-  Server Functions do not necessarily need to be define in the Payload Config. It is possible to write Server Functions within your own server-side code, and thread them through to your client-side components manually.
-</Banner>
+## Troubleshooting
+
+**Unknown Server Function: "my-server-function"**
+
+    Ensure the `name` property of your Server Function matches the name you are passing through the `serverFunction` args.
+
+**Error: Client Functions cannot be passed directly to Server Functions. Only Functions passed from the Server can be passed back again.**
+
+    Non-serializable values cannot cross the server / client boundary. Ensure that the args your sending through your Server Function are serializable, i.e. not containing any functions, classes, etc.
+
+**Error: Payload Server Function exceeded body size limit**
+
+    By default, Next.js places a 1mb limit on the body size of incoming requests. However, this can be increased by setting the `bodySizeLimit` option in your `next.config.ts` file. [More details](https://nextjs.org/docs/app/api-reference/next-config-js/serverActions#bodysizelimit).
+
+    ```ts
+      {
+        // ...
+        experimental: {
+          serverActions: {
+            bodySizeLimit: '2mb',
+          }
+        }
+      }
+    ```
 
 ## TypeScript
 

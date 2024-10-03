@@ -154,14 +154,18 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         abortController.abort('aborting previous fetch for initial form state without files')
       }
 
-      const { state: formStateWithoutFiles } = await getFormState({
-        collectionSlug,
-        locale: code,
-        operation: 'create',
-        schemaPath: collectionSlug,
-      })
-      initialStateRef.current = formStateWithoutFiles
-      setHasInitializedState(true)
+      try {
+        const { state: formStateWithoutFiles } = await getFormState({
+          collectionSlug,
+          locale: code,
+          operation: 'create',
+          schemaPath: collectionSlug,
+        })
+        initialStateRef.current = formStateWithoutFiles
+        setHasInitializedState(true)
+      } catch (_err) {
+        // swallow error
+      }
     },
     [code, collectionSlug, getFormState],
   )

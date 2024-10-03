@@ -1,5 +1,3 @@
-import type { MarkOptional } from 'ts-essentials'
-
 import { type I18nClient, type SupportedLanguages } from '@payloadcms/translations'
 import {
   type ClientUser,
@@ -66,12 +64,17 @@ export type BuildFormStateArgs = {
 export const buildFormState = async (
   args: BuildFormStateArgs,
 ): Promise<
-  {
-    lockedState?: { isLocked: boolean; user: ClientUser | number | string }
-    state: FormState
-  } & MarkOptional<ErrorResult, 'errors'>
+  | {
+      errors?: never
+      lockedState?: { isLocked: boolean; user: ClientUser | number | string }
+      state: FormState
+    }
+  | ({
+      lockedState?: never
+      state?: FormState
+    } & ErrorResult)
 > => {
-  const { formState, req } = args
+  const { req } = args
 
   try {
     const res = await buildFormStateFn(args)
@@ -87,10 +90,7 @@ export const buildFormState = async (
       throw new Error()
     }
 
-    return {
-      state: formState,
-      ...formatErrors(err),
-    }
+    return formatErrors(err)
   }
 }
 
