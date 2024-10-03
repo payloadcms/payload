@@ -2,7 +2,7 @@ import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { FieldAffectingData } from '../fields/config/types.js'
 import type { Where } from '../types/index.js'
 
-import { fieldAffectsData } from '../fields/config/types.js'
+import { fieldAffectsData, fieldIsVirtual } from '../fields/config/types.js'
 import { default as flattenTopLevelFields } from './flattenTopLevelFields.js'
 
 const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
@@ -48,8 +48,15 @@ export const mergeListSearchAndWhere = ({ collectionConfig, query }: Args): Wher
   if (search) {
     let copyOfWhere = { ...(where || {}) }
 
+    const titleField = getTitleField(collectionConfig)
+    let titleFieldName = titleField.name
+
+    if (fieldIsVirtual(titleField)) {
+      titleFieldName = 'id'
+    }
+
     const searchAsConditions = (
-      collectionConfig.admin.listSearchableFields || [getTitleField(collectionConfig)?.name || 'id']
+      collectionConfig.admin.listSearchableFields || [titleFieldName]
     ).map((fieldName) => {
       return {
         [fieldName]: {
