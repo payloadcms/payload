@@ -352,12 +352,33 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       this.config = await loadConfig(this.logger)
     }
 
+    const globalDbConnections = {}
+    const globalDbInitializations = {}
+    const collectionDbConnections = {}
+    const collectionDbInitializations = {}
     this.globals = {
       config: this.config.globals,
     }
+
+    this.config.globals.forEach((global) => {
+      if ('function' === typeof global.db?.connect) {
+        globalDbConnections[global.slug] = global.db.connect
+      }
+      if ('function' === typeof global.db?.init) {
+        globalDbInitializations[global.slug] = global.db.init
+      }
+    })
+
     this.config.collections.forEach((collection) => {
       this.collections[collection.slug] = {
         config: collection,
+      }
+
+      if ('function' === typeof collection.db?.connect) {
+        collectionDbConnections[collection.slug] = collection.db.connect
+      }
+      if ('function' === typeof collection.db?.init) {
+        collectionDbInitializations[collection.slug] = collection.db.init
       }
     })
 
@@ -368,8 +389,22 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       await this.db.init(this)
     }
 
+    Object.keys(globalDbInitializations).forEach(async (slug) => {
+      await globalDbInitializations[slug](this)
+    })
+    Object.keys(collectionDbInitializations).forEach(async (slug) => {
+      await collectionDbInitializations[slug](this)
+    })
+
     if (!options.disableDBConnect && this.db.connect) {
       await this.db.connect(this)
+
+      Object.keys(globalDbConnections).forEach(async (slug) => {
+        await globalDbConnections[slug](this)
+      })
+      Object.keys(collectionDbConnections).forEach(async (slug) => {
+        await collectionDbConnections[slug](this)
+      })
     }
 
     this.logger.info('Starting Payload...')

@@ -1,6 +1,7 @@
 import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired } from 'ts-essentials'
 
+import type { DatabaseAdapter } from '../../'
 import type {
   CustomPreviewButtonProps,
   CustomPublishButtonType,
@@ -170,6 +171,34 @@ export type GlobalConfig = {
   admin?: GlobalAdminOptions
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
+  /**
+   * Add a custom database adapter to this global.
+   */
+  db?:
+    | DatabaseAdapter
+    | Pick<
+        DatabaseAdapter,
+        | 'connect'
+        | 'count'
+        | 'create'
+        | 'createGlobal'
+        | 'createGlobalVersion'
+        | 'createVersion'
+        | 'deleteMany'
+        | 'deleteOne'
+        | 'deleteVersions'
+        | 'find'
+        | 'findGlobal'
+        | 'findGlobalVersions'
+        | 'findOne'
+        | 'findVersions'
+        | 'init'
+        | 'queryDrafts'
+        | 'updateGlobal'
+        | 'updateGlobalVersion'
+        | 'updateOne'
+        | 'updateVersion'
+      >
   /**
    * Customize the SQL table name
    */

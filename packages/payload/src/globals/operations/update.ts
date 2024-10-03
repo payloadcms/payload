@@ -44,7 +44,11 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   } = args
 
   try {
-    const shouldCommit = await initTransaction(req)
+    const isCustomGlobalDb = Boolean(
+      globalConfig?.db?.updateGlobal || globalConfig?.db?.createGlobal,
+    )
+
+    const shouldCommit = !isCustomGlobalDb && (await initTransaction(req))
 
     let { data } = args
 
@@ -177,18 +181,23 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     // /////////////////////////////////////
 
     if (!shouldSaveDraft) {
+      const globalDbArgs = {
+        slug,
+        data: result,
+        req,
+      }
       if (globalExists) {
-        result = await payload.db.updateGlobal({
-          slug,
-          data: result,
-          req,
-        })
+        if (globalConfig?.db?.updateGlobal) {
+          result = await globalConfig.db.updateGlobal(globalDbArgs)
+        } else {
+          result = await payload.db.updateGlobal(globalDbArgs)
+        }
       } else {
-        result = await payload.db.createGlobal({
-          slug,
-          data: result,
-          req,
-        })
+        if (globalConfig?.db?.createGlobal) {
+          result = await globalConfig.db.createGlobal(globalDbArgs)
+        } else {
+          result = await payload.db.createGlobal(globalDbArgs)
+        }
       }
     }
 

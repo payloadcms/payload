@@ -95,11 +95,18 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
     const email = unsanitizedEmail ? unsanitizedEmail.toLowerCase().trim() : null
 
-    let user = await payload.db.findOne<any>({
+    const userDbArgs = {
       collection: collectionConfig.slug,
       req,
       where: { email: { equals: email.toLowerCase() } },
-    })
+    }
+
+    let user: any
+    if (collectionConfig?.db?.findOne) {
+      user = await collectionConfig.db.findOne(userDbArgs)
+    } else {
+      user = await req.payload.db.findOne<any>(userDbArgs)
+    }
 
     if (!user || (args.collection.config.auth.verify && user._verified === false)) {
       throw new AuthenticationError(req.t)

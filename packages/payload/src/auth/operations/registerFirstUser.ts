@@ -32,8 +32,8 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
     collection: {
       config,
       config: {
-        auth: { verify },
         slug,
+        auth: { verify },
       },
     },
     data,
@@ -44,10 +44,18 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
   try {
     const shouldCommit = await initTransaction(req)
 
-    const doc = await payload.db.findOne({
-      collection: config.slug,
-      req,
-    })
+    let doc
+    if (config?.db?.findOne) {
+      doc = await config.db.findOne({
+        collection: config.slug,
+        req,
+      })
+    } else {
+      doc = await payload.db.findOne({
+        collection: config.slug,
+        req,
+      })
+    }
 
     if (doc) throw new Forbidden(req.t)
 

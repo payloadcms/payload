@@ -13,7 +13,7 @@ type Args = {
 }
 export const deleteUserPreferences = async ({ collectionConfig, ids, payload, req }: Args) => {
   if (collectionConfig.auth) {
-    await payload.db.deleteMany({
+    const deleteManyAuthDbArgs = {
       collection: 'payload-preferences',
       req,
       where: {
@@ -26,13 +26,24 @@ export const deleteUserPreferences = async ({ collectionConfig, ids, payload, re
           },
         ],
       },
-    })
+    }
+    if (collectionConfig?.db?.deleteMany) {
+      await collectionConfig.db.deleteMany(deleteManyAuthDbArgs)
+    } else {
+      await payload.db.deleteMany(deleteManyAuthDbArgs)
+    }
   }
-  await payload.db.deleteMany({
+
+  const deleteManyDbArgs = {
     collection: 'payload-preferences',
     req,
     where: {
       key: { in: ids.map((id) => `collection-${collectionConfig.slug}-${id}`) },
     },
-  })
+  }
+  if (collectionConfig?.db?.deleteMany) {
+    await collectionConfig.db.deleteMany(deleteManyDbArgs)
+  } else {
+    await payload.db.deleteMany(deleteManyDbArgs)
+  }
 }

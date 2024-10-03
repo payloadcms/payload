@@ -1,7 +1,7 @@
 import payload from '../../packages/payload/src'
 import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
-import { collectionSlug } from './config'
+import { collectionSlug, isConnected, isInit } from './config'
 import { doc } from './config'
 
 require('isomorphic-fetch')
@@ -42,8 +42,16 @@ describe('Collection Database Operations', () => {
   })
 
   // --__--__--__--__--__--__--__--__--__
-  // Local API
+  // Custom Collection DB Operations
   // --__--__--__--__--__--__--__--__--__
+
+  it('collection DB Init', () => {
+    expect(isInit).toEqual(true)
+  })
+
+  it('collection DB Connect', () => {
+    expect(isConnected).toEqual(true)
+  })
 
   it('collection DB Create', async () => {
     const result = await payload.create({
@@ -106,5 +114,22 @@ describe('Collection Database Operations', () => {
     expect(result.docs[0].id).toEqual(doc.id)
     expect(result.docs[0].customData).toEqual(doc.customData)
     expect(result.errors).toHaveLength(0)
+  })
+
+  it.todo('support Relationships in Collection DB Operations')
+  it.skip('collection Relationship', async () => {
+    const result = await payload.create({
+      collection: collectionSlug,
+      data: {
+        id: doc.id,
+        otherCollection: {
+          id: doc.id,
+        },
+      },
+    })
+
+    expect(result.id).toEqual(doc.id)
+    expect(result.customData).toEqual(doc.customData)
+    expect(result.related.id).toEqual(doc.id)
   })
 })

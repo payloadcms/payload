@@ -128,12 +128,22 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         where: versionsWhere,
       })
 
-      const query = await payload.db.queryDrafts<GeneratedTypes['collections'][TSlug]>({
+      const queryDraftsDbArgs = {
         collection: collectionConfig.slug,
         locale,
         req,
         where: versionsWhere,
-      })
+      }
+      let query: any
+      if (collection.config?.db?.queryDrafts) {
+        query =
+          await collection.config.db.queryDrafts<GeneratedTypes['collections'][TSlug]>(
+            queryDraftsDbArgs,
+          )
+      } else {
+        query =
+          await payload.db.queryDrafts<GeneratedTypes['collections'][TSlug]>(queryDraftsDbArgs)
+      }
 
       docs = query.docs
     } else {

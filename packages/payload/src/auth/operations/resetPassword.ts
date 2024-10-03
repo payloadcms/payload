@@ -58,14 +58,21 @@ async function resetPassword(args: Arguments): Promise<Result> {
     // Reset Password
     // /////////////////////////////////////
 
-    const user = await payload.db.findOne<any>({
+    const userDbArgs = {
       collection: collectionConfig.slug,
       req,
       where: {
         resetPasswordExpiration: { greater_than: new Date() },
         resetPasswordToken: { equals: data.token },
       },
-    })
+    }
+
+    let user: any
+    if (collectionConfig?.db?.findOne) {
+      user = await collectionConfig.db.findOne<any>(userDbArgs)
+    } else {
+      user = await payload.db.findOne<any>(userDbArgs)
+    }
 
     if (!user) throw new APIError('Token is either invalid or has expired.')
 
@@ -81,12 +88,18 @@ async function resetPassword(args: Arguments): Promise<Result> {
       user._verified = true
     }
 
-    const doc = await payload.db.updateOne({
+    const updateDbArgs = {
       id: user.id,
       collection: collectionConfig.slug,
       data: user,
       req,
-    })
+    }
+    let doc: any
+    if (collectionConfig?.db?.updateOne) {
+      doc = await collectionConfig.db.updateOne(updateDbArgs)
+    } else {
+      doc = await payload.db.updateOne(updateDbArgs)
+    }
 
     await authenticateLocalStrategy({ doc, password: data.password })
 

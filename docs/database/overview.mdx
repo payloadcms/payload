@@ -78,6 +78,8 @@ To configure Collection database operations in your Payload application, your Co
 
 The override methods receive arguments useful for augmenting operations such as Field data, the collection slug, and the req.
 
+Relations and Migrations are not supported at this time on collections with custom database operations.
+
 Here is an example:
 ```ts
 import type { CollectionConfig } from 'payload/types'
@@ -166,6 +168,50 @@ export const Collection: CollectionConfig => {
       {
         name: 'name',
         type: 'text',
+      },
+    ],
+  }
+}
+
+```
+
+## Global Operations
+
+You can also configure database operations on globals.
+
+Like collection operations, the override methods receive arguments useful for augmenting operations such as the global slug, and the req.
+
+Relations and Migrations are not supported at this time on globals with custom database operations.
+
+Here is an example:
+```ts
+import type { CollectionConfig } from 'payload/types'
+
+export const Collection: CollectionConfig => {
+  return {
+    globals: [
+      {
+        slug: 'global-db-operations',
+        db: {
+          createGlobal: () => {
+            // ...
+          },
+          updateGlobal: () => {
+            // ...
+          },
+          findGlobal: () => {
+            // ...
+          },
+          findGlobalVersions: () => {
+            // ...
+          },
+        },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
       },
     ],
   }

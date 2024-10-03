@@ -66,7 +66,13 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
 
     if (!findGlobalVersionsArgs.where.and[0].id) throw new NotFound(t)
 
-    const { docs: results } = await payload.db.findGlobalVersions(findGlobalVersionsArgs)
+    let globalVersions: any
+    if (globalConfig?.db?.findGlobalVersions) {
+      globalVersions = await globalConfig.db.findGlobalVersions(findGlobalVersionsArgs)
+    } else {
+      globalVersions = await payload.db.findGlobalVersions(findGlobalVersionsArgs)
+    }
+    const results = globalVersions.docs
     if (!results || results?.length === 0) {
       if (!disableErrors) {
         if (!hasWhereAccess) throw new NotFound(t)

@@ -79,11 +79,18 @@ async function forgotPassword(incomingArgs: Arguments): Promise<null | string> {
       throw new APIError('Missing email.')
     }
 
-    let user = await payload.db.findOne<UserDoc>({
+    const userDbArgs = {
       collection: collectionConfig.slug,
       req,
       where: { email: { equals: data.email.toLowerCase() } },
-    })
+    }
+
+    let user: UserDoc
+    if (collectionConfig?.db?.findOne) {
+      user = await collectionConfig.db.findOne<UserDoc>(userDbArgs)
+    } else {
+      user = await payload.db.findOne<UserDoc>(userDbArgs)
+    }
 
     if (!user) return null
 

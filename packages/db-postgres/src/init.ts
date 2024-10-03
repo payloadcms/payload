@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { Init } from 'payload/database'
 import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedGlobalConfig } from 'payload/types'
 
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/versions'
@@ -25,6 +26,9 @@ export const init: Init = async function init(this: PostgresAdapter) {
   }
 
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
+    // Skip collections that have an .init() method
+    if ('function' === typeof collection?.db?.init) return
+
     const tableName = createTableName({
       adapter: this,
       config: collection,
@@ -67,7 +71,10 @@ export const init: Init = async function init(this: PostgresAdapter) {
     }
   })
 
-  this.payload.config.globals.forEach((global) => {
+  this.payload.config.globals.forEach((global: SanitizedGlobalConfig) => {
+    // Skip globals that have an .init() method
+    if ('function' === typeof global?.db?.init) return
+
     const tableName = createTableName({ adapter: this, config: global })
 
     buildTable({

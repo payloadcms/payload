@@ -80,11 +80,16 @@ async function count<T extends TypeWithID & Record<string, unknown>>(
       where,
     })
 
-    result = await payload.db.count({
+    const countDbArgs = {
       collection: collectionConfig.slug,
       req,
       where: fullWhere,
-    })
+    }
+    if (collectionConfig?.db?.count) {
+      result = await collectionConfig.db.count(countDbArgs)
+    } else {
+      result = await payload.db.count(countDbArgs)
+    }
 
     // /////////////////////////////////////
     // afterOperation - Collection

@@ -14,34 +14,45 @@ type Args = {
 }
 
 export const getLatestGlobalVersion = async ({
+  slug,
   config,
   locale,
   payload,
   req,
-  slug,
   where,
 }: Args): Promise<{ global: Document; globalExists: boolean }> => {
   let latestVersion
 
+  const globalConfig = payload.config.globals?.find((cfg) => cfg.slug === slug)
+
   if (config.versions?.drafts) {
-    // eslint-disable-next-line prefer-destructuring
-    latestVersion = (
-      await payload.db.findGlobalVersions({
-        global: slug,
-        limit: 1,
-        locale,
-        req,
-        sort: '-updatedAt',
-      })
-    ).docs[0]
+    const findVersionsDbArgs = {
+      global: slug,
+      limit: 1,
+      locale,
+      req,
+      sort: '-updatedAt',
+    }
+
+    if (globalConfig?.db?.findGlobalVersions) {
+      latestVersion = (await globalConfig.db.findGlobalVersions(findVersionsDbArgs)).docs[0]
+    } else {
+      latestVersion = (await payload.db.findGlobalVersions(findVersionsDbArgs)).docs[0]
+    }
   }
 
-  const global = await payload.db.findGlobal({
+  const findGlobalArgs = {
+    slug,
     locale,
     req,
-    slug,
     where,
-  })
+  }
+  let global
+  if (globalConfig?.db?.findGlobal) {
+    global = await globalConfig.db.findGlobal(findGlobalArgs)
+  } else {
+    global = await payload.db.findGlobal(findGlobalArgs)
+  }
   const globalExists = Boolean(global)
 
   if (!latestVersion || (docHasTimestamps(global) && latestVersion.updatedAt < global.updatedAt)) {

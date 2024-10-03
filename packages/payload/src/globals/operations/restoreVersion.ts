@@ -45,12 +45,19 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     // Retrieve original raw version
     // /////////////////////////////////////
 
-    const { docs: versionDocs } = await payload.db.findGlobalVersions<any>({
+    const findGlobalDbArgs = {
       global: globalConfig.slug,
       limit: 1,
       req,
       where: { id: { equals: id } },
-    })
+    }
+    let findGlobalResult: any
+    if (globalConfig?.db?.findGlobalVersions) {
+      findGlobalResult = await globalConfig.db.findGlobalVersions<any>(findGlobalDbArgs)
+    } else {
+      findGlobalResult = await payload.db.findGlobalVersions<any>(findGlobalDbArgs)
+    }
+    const versionDocs = findGlobalResult.docs
 
     if (!versionDocs || versionDocs.length === 0) {
       throw new NotFound(t)
@@ -75,25 +82,38 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     // Update global
     // /////////////////////////////////////
 
-    const global = await payload.db.findGlobal({
-      slug: globalConfig.slug,
-      req,
-    })
-
-    let result = rawVersion.version
-
-    if (global) {
-      result = await payload.db.updateGlobal({
+    let global: any
+    if (globalConfig?.db?.findGlobal) {
+      global = await globalConfig.db.findGlobal({
         slug: globalConfig.slug,
-        data: result,
         req,
       })
     } else {
-      result = await payload.db.createGlobal({
+      global = await payload.db.findGlobal({
         slug: globalConfig.slug,
-        data: result,
         req,
       })
+    }
+
+    let result = rawVersion.version
+
+    const globalDbArgs = {
+      slug: globalConfig.slug,
+      data: result,
+      req,
+    }
+    if (global) {
+      if (globalConfig?.db?.updateGlobal) {
+        result = await globalConfig.db.updateGlobal(globalDbArgs)
+      } else {
+        result = await payload.db.updateGlobal(globalDbArgs)
+      }
+    } else {
+      if (globalConfig?.db?.createGlobal) {
+        result = await globalConfig.db.createGlobal(globalDbArgs)
+      } else {
+        result = await payload.db.createGlobal(globalDbArgs)
+      }
     }
 
     // /////////////////////////////////////

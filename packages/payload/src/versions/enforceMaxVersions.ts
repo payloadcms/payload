@@ -33,24 +33,36 @@ export const enforceMaxVersions = async ({
         equals: id,
       }
 
-      const query = await payload.db.findVersions({
+      const findVersionsDbArgs = {
         collection: collection.slug,
         pagination: false,
         req,
         skip: max,
         sort: '-updatedAt',
         where,
-      })
+      }
+      let query: any
+      if (collection?.db?.findVersions) {
+        query = await collection.db.findVersions(findVersionsDbArgs)
+      } else {
+        query = await payload.db.findVersions(findVersionsDbArgs)
+      }
 
       ;[oldestAllowedDoc] = query.docs
     } else if (global) {
-      const query = await payload.db.findGlobalVersions({
+      const findGlobalVersionsDbArgs = {
         global: global.slug,
         req,
         skip: max,
         sort: '-updatedAt',
         where,
-      })
+      }
+      let query: any
+      if (global?.db?.findGlobalVersions) {
+        query = await global.db.findGlobalVersions(findGlobalVersionsDbArgs)
+      } else {
+        query = await payload.db.findGlobalVersions(findGlobalVersionsDbArgs)
+      }
 
       ;[oldestAllowedDoc] = query.docs
     }
@@ -68,11 +80,17 @@ export const enforceMaxVersions = async ({
         }
       }
 
-      await payload.db.deleteVersions({
+      const deleteDbArgs = {
         collection: collection?.slug,
         req,
         where: deleteQuery,
-      })
+      }
+
+      if (collection?.db?.deleteVersions) {
+        await collection.db.deleteVersions(deleteDbArgs)
+      } else {
+        await payload.db.deleteVersions(deleteDbArgs)
+      }
     }
   } catch (err) {
     payload.logger.error(
