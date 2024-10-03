@@ -1,3 +1,11 @@
+## [2.30.1](https://github.com/payloadcms/payload/compare/v2.30.0...v2.30.1) (2024-10-02)
+
+
+### Bug Fixes
+
+* **db-mongodb:** properly filters out `number` field values with the `exists` operator filter ([#8415](https://github.com/payloadcms/payload/issues/8415)) ([0586f23](https://github.com/payloadcms/payload/commit/0586f236bbf04163a0d9b226772849cb3d977864)), closes [#8181](https://github.com/payloadcms/payload/issues/8181)
+* sorting by id incorrectly orders by version.id ([#8450](https://github.com/payloadcms/payload/issues/8450)) ([1d38e6d](https://github.com/payloadcms/payload/commit/1d38e6d5d5b56a91aa8f59a461d40f28b1750f8c))
+
 ## [2.30.0](https://github.com/payloadcms/payload/compare/v2.29.0...v2.30.0) (2024-09-27)
 
 * export toast from react toastify in payload ([#8438](https://github.com/payloadcms/payload/issues/8438)) ([17fc2d1](https://github.com/payloadcms/payload/commit/17fc2d13d06b6de01f839c27fd706bc0d6a185eb))
