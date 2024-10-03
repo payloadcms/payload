@@ -123,14 +123,14 @@ describe('uploads', () => {
     await saveDocAndAssert(page)
   })
 
-  test('should properly create landscape IOS file upload', async () => {
+  test('should properly create IOS file upload', async () => {
     await page.goto(mediaURL.create)
 
-    await page.setInputFiles('input[type="file"]', path.resolve(__dirname, './landscape-ios.jpeg'))
+    await page.setInputFiles('input[type="file"]', path.resolve(__dirname, './ios-image.jpeg'))
 
     const filename = page.locator('.file-field__filename')
 
-    await expect(filename).toHaveValue('landscape-ios.jpeg')
+    await expect(filename).toHaveValue('ios-image.jpeg')
 
     await saveDocAndAssert(page)
   })
