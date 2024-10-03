@@ -247,7 +247,7 @@ export default buildConfigWithDefaults({
             required: true,
           },
         ],
-        controlFlowInJS: async ({ job, runTask }) => {
+        handler: async ({ job, runTask }) => {
           const output = await runTask({
             task: 'UpdatePost',
             id: '1',
@@ -276,7 +276,7 @@ export default buildConfigWithDefaults({
             required: true,
           },
         ],
-        controlFlowInJS: async ({ job, runTask }) => {
+        handler: async ({ job, runTask }) => {
           // @ts-expect-error amountRetried is new arbitrary data and not in the type
           job.input.amountRetried =
             // @ts-expect-error amountRetried is new arbitrary data and not in the type
@@ -312,7 +312,7 @@ export default buildConfigWithDefaults({
             required: true,
           },
         ],
-        controlFlowInJS: async ({ job, runTaskInline }) => {
+        handler: async ({ job, runTaskInline }) => {
           await runTaskInline({
             task: async ({ input, req }) => {
               const newSimple = await req.payload.create({
@@ -344,8 +344,7 @@ export default buildConfigWithDefaults({
             required: true,
           },
         ],
-        controlFlowInJS:
-          path.resolve(dirname, 'runners/externalWorkflow.ts') + '#externalWorkflowControlFlow',
+        handler: path.resolve(dirname, 'runners/externalWorkflow.ts') + '#externalWorkflowHandler',
       } as WorkflowConfig<'externalWorkflow'>,
     ],
   },

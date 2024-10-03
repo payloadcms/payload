@@ -52,14 +52,13 @@ export type RunningJobFromTask<TTaskSlug extends keyof TypedJobs['tasks']> = {
   input: TypedJobs['tasks'][TTaskSlug]['input']
 } & TypedCollection['payload-jobs']
 
-export type WorkflowControlFlow<
-  TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object,
-> = (args: {
-  job: RunningJob<TWorkflowSlugOrInput>
-  req: PayloadRequest
-  runTask: RunTaskFunction
-  runTaskInline: RunInlineTaskFunction
-}) => Promise<void>
+export type WorkflowHandler<TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object> =
+  (args: {
+    job: RunningJob<TWorkflowSlugOrInput>
+    req: PayloadRequest
+    runTask: RunTaskFunction
+    runTaskInline: RunInlineTaskFunction
+  }) => Promise<void>
 
 export type JobTaskStatus<T extends keyof TypedJobs['tasks']> = {
   complete: boolean
@@ -82,11 +81,11 @@ export type WorkflowConfig<TWorkflowSlugOrInput extends keyof TypedJobs['workflo
    *
    * If you are using large dependencies within your workflow control flow, you might prefer to pass the string path
    * because that will avoid bundling large dependencies in your Next.js app.
+   *
+   *
    */
-  controlFlowInJS: string | WorkflowControlFlow<TWorkflowSlugOrInput>
-  //TODO: Implement this. This will be an alternative to controlFlowInJS that has
-  // all tasks and their order defined in JSON
-  controlFlowInJSON?: never
+  handler: string | WorkflowHandler<TWorkflowSlugOrInput>
+  //TODO: Add JSON-based control flow to handler later. This will add | array.  All tasks and their order defined in JSON
   /**
    * Define the input field schema
    */

@@ -6,7 +6,7 @@ import type {
   JobTasksStatus,
   RunningJob,
   WorkflowConfig,
-  WorkflowControlFlow,
+  WorkflowHandler,
   WorkflowTypes,
 } from '../config/workflowTypes.js'
 
@@ -31,20 +31,20 @@ export const runJob = async ({
   req,
   workflowConfig,
 }: Args): Promise<RunJobResult> => {
-  if (!workflowConfig.controlFlowInJS) {
-    throw new Error('Currently, only workflows with controlFlowInJS are supported')
+  if (!workflowConfig.handler) {
+    throw new Error('Currently, only JS-based workflows are supported')
   }
 
   // the runner will either be passed to the config
   // OR it will be a path, which we will need to import via eval to avoid
   // Next.js compiler dynamic import expression errors
 
-  let controlFlowRunner: WorkflowControlFlow<WorkflowTypes>
+  let workflowHandler: WorkflowHandler<WorkflowTypes>
 
-  if (typeof workflowConfig.controlFlowInJS === 'function') {
-    controlFlowRunner = workflowConfig.controlFlowInJS
+  if (typeof workflowConfig.handler === 'function') {
+    workflowHandler = workflowConfig.handler
   } else {
-    const [runnerPath, runnerImportName] = workflowConfig.controlFlowInJS.split('#')
+    const [runnerPath, runnerImportName] = workflowConfig.handler.split('#')
 
     const runnerModule =
       typeof require === 'function'
@@ -53,21 +53,21 @@ export const runJob = async ({
 
     // If the path has indicated an #exportName, try to get it
     if (runnerImportName && runnerModule[runnerImportName]) {
-      controlFlowRunner = runnerModule[runnerImportName]
+      workflowHandler = runnerModule[runnerImportName]
     }
 
     // If there is a default export, use it
-    if (!controlFlowRunner && runnerModule.default) {
-      controlFlowRunner = runnerModule.default
+    if (!workflowHandler && runnerModule.default) {
+      workflowHandler = runnerModule.default
     }
 
     // Finally, use whatever was imported
-    if (!controlFlowRunner) {
-      controlFlowRunner = runnerModule
+    if (!workflowHandler) {
+      workflowHandler = runnerModule
     }
 
-    if (!controlFlowRunner) {
-      const errorMessage = `Can't find runner while importing with the path ${workflowConfig.controlFlowInJS} in job type ${job.workflowSlug}.`
+    if (!workflowHandler) {
+      const errorMessage = `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${job.workflowSlug}.`
       req.payload.logger.error(errorMessage)
 
       const updatedJob = (await req.payload.update({
@@ -120,7 +120,7 @@ export const runJob = async ({
 
   // Run the job
   try {
-    await controlFlowRunner({
+    await workflowHandler({
       job: job as unknown as RunningJob<WorkflowTypes>, //TODO: Type this better
       req,
       runTask: getRunTaskFunction(state, job, workflowConfig, req, false),

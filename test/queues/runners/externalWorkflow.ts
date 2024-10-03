@@ -1,6 +1,6 @@
-import type { WorkflowControlFlow } from 'payload'
+import type { WorkflowHandler } from 'payload'
 
-export const externalWorkflowControlFlow: WorkflowControlFlow<'externalWorkflow'> = async ({
+export const externalWorkflowHandler: WorkflowHandler<'externalWorkflow'> = async ({
   job,
   runTask,
 }) => {

@@ -107,7 +107,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
     if (!runner || typeof runner !== 'function') {
       const errorMessage = isInline
         ? `Can't find runner for inline task with ID ${id}`
-        : `Can't find runner while importing with the path ${workflowConfig.controlFlowInJS} in job type ${job.workflowSlug} for task ${task}.`
+        : `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${job.workflowSlug} for task ${task}.`
       req.payload.logger.error(errorMessage)
 
       const updatedJob = (await req.payload.update({

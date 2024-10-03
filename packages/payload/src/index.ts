@@ -1110,7 +1110,7 @@ export type {
   JobTaskStatus,
   RunningJob,
   WorkflowConfig,
-  WorkflowControlFlow,
+  WorkflowHandler,
   WorkflowTypes,
 } from './queues/config/workflowTypes.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
