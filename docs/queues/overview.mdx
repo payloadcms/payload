@@ -270,6 +270,51 @@ npx payload jobs:run --queue default --limit 10
 You can pass the --cron flag to the jobs:run script to run the jobs in a cronjob:
 
 ```sh
-npx payload jobs:run --cron '*/5 * * * *'
+npx payload jobs:run --cron "*/5 * * * *"
 ```
 
+### Vercel Cron
+
+Vercel Cron allows scheduled tasks to be executed automatically by triggering specific endpoints. Below is a step-by-step guide to configuring Vercel Cron for running queued jobs on apps hosted on Vercel:
+
+1. Add Vercel Cron Configuration: Place a vercel.json file at the root of your project with the following content:
+
+```json
+{
+  "crons": [
+    {
+      "path": "/api/payload-jobs/run",
+      "schedule": "*/5 * * * *"
+    }
+  ]
+}
+```
+
+This configuration schedules the endpoint `/api/payload-jobs/run` to be triggered every 5 minutes. This endpoint is added automatically by payload and is responsible for running the queued jobs.
+
+2. Environment Variable Setup: By default, the endpoint may require a JWT token for authorization. However, Vercel Cron jobs cannot pass JWT tokens. Instead, you can use an environment variable to secure the endpoint:
+
+Add a new environment variable named `CRON_SECRET` to your Vercel project settings. This should be a random string, ideally 16 characters or longer.
+
+2. Modify Authentication for Job Running: Adjust the job running authorization logic in your project to accept the `CRON_SECRET` as a valid token. Modify your `payload.config.ts` file as follows:
+
+ts
+Copy code
+export default buildConfig({
+  // Other configurations...
+  jobs: {
+    access: {
+      run: ({ req }: { req: PayloadRequest }): boolean => {
+        const authHeader = req.headers.get('authorization');
+        return authHeader === `Bearer ${process.env.CRON_SECRET}`;
+      },
+    },
+    // Other job configurations...
+  }
+})
+
+This code snippet ensures that the jobs can only be triggered if the correct `CRON_SECRET` is provided in the authorization header.
+
+Vercel will automatically make the `CRON_SECRET` environment variable available to the endpoint when triggered by the Vercel Cron, ensuring that the jobs can be run securely.
+
+After the project is deployed to Vercel, the Vercel Cron job will automatically trigger the `/api/payload-jobs/run` endpoint in the specified schedule, running the queued jobs in the background.
