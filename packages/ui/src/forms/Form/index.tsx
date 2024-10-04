@@ -26,7 +26,6 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
-import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { getFormStateFetch } from '../../utilities/getFormStateFetch.js'
@@ -70,8 +69,6 @@ export const Form: React.FC<FormProps> = (props) => {
     uuid,
     waitForAutocomplete,
   } = props
-
-  const { getFormState } = useServerFunctions()
 
   const method = 'method' in props ? props?.method : undefined
 
@@ -455,20 +452,24 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const reset = useCallback(
     async (data: unknown) => {
-      const { state: newState } = await getFormState({
-        id,
-        collectionSlug,
-        data,
-        globalSlug,
-        operation,
-        schemaPath: collectionSlug || globalSlug,
+      const { state: newState } = await getFormStateFetch({
+        apiRoute: api,
+        body: {
+          id,
+          collectionSlug,
+          data,
+          globalSlug,
+          operation,
+          schemaPath: collectionSlug || globalSlug,
+        },
+        serverURL,
       })
 
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state: newState })
     },
-    [collectionSlug, dispatchFields, globalSlug, id, operation, getFormState],
+    [collectionSlug, dispatchFields, globalSlug, id, operation, api, serverURL],
   )
 
   const replaceState = useCallback(
