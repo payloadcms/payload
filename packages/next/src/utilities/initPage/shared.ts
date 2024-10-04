@@ -17,14 +17,13 @@ const publicAdminRoutes: (keyof Pick<
 
 export const isAdminRoute = ({
   adminRoute,
-  config,
   route,
 }: {
   adminRoute: string
   config: SanitizedConfig
   route: string
 }): boolean => {
-  return route.startsWith(adminRoute) && !isPublicAdminRoute({ adminRoute, config, route })
+  return route.startsWith(adminRoute)
 }
 
 export const isPublicAdminRoute = ({

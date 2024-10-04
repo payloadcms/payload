@@ -1,3 +1,5 @@
+import type { User } from 'payload'
+
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
 import * as qs from 'qs-esm'
@@ -6,11 +8,12 @@ type Args = {
   config
   route: string
   searchParams: { [key: string]: string | string[] }
+  user?: User
 }
-export const handleAuthRedirect = ({ config, route, searchParams }: Args) => {
+export const handleAuthRedirect = ({ config, route, searchParams, user }: Args) => {
   const {
     admin: {
-      routes: { login: loginRouteFromConfig },
+      routes: { login: loginRouteFromConfig, unauthorized: unauthorizedRoute },
     },
     routes: { admin: adminRoute },
   } = config
@@ -25,9 +28,12 @@ export const handleAuthRedirect = ({ config, route, searchParams }: Args) => {
       : undefined,
   )
 
-  const loginRoute = formatAdminURL({ adminRoute, path: loginRouteFromConfig })
+  const redirectTo = formatAdminURL({
+    adminRoute,
+    path: user ? unauthorizedRoute : loginRouteFromConfig,
+  })
 
-  const parsedLoginRouteSearchParams = qs.parse(loginRoute.split('?')[1] ?? '')
+  const parsedLoginRouteSearchParams = qs.parse(redirectTo.split('?')[1] ?? '')
 
   const searchParamsWithRedirect = `${qs.stringify(
     {
@@ -37,5 +43,5 @@ export const handleAuthRedirect = ({ config, route, searchParams }: Args) => {
     { addQueryPrefix: true },
   )}`
 
-  redirect(`${loginRoute.split('?')[0]}${searchParamsWithRedirect}`)
+  redirect(`${redirectTo.split('?')[0]}${searchParamsWithRedirect}`)
 }

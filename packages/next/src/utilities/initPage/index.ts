@@ -137,6 +137,7 @@ export const initPage = async ({
       config: payload.config,
       route,
       searchParams,
+      user,
     })
   }
 
