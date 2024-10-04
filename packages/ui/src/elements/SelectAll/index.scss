@@ -1,5 +1,7 @@
-.select-all {
-  &__checkbox {
-    display: block;
+@layer payload-default {
+  .select-all {
+    &__checkbox {
+      display: block;
+    }
   }
 }
