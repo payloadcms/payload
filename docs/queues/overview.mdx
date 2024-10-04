@@ -265,5 +265,11 @@ You can run the jobs:run script from the command line:
 npx payload jobs:run --queue default --limit 10
 ```
 
-## Triggering workflows and task runs via node-cron
+#### Triggering jobs as cronjob
+
+You can pass the --cron flag to the jobs:run script to run the jobs in a cronjob:
+
+```sh
+npx payload jobs:run --cron '*/5 * * * *'
+```
 

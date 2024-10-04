@@ -1,3 +1,4 @@
+import { Cron } from 'croner'
 import minimist from 'minimist'
 import { pathToFileURL } from 'node:url'
 import path from 'path'
@@ -89,10 +90,19 @@ export const bin = async () => {
     const limit = args.limit ? parseInt(args.limit, 10) : undefined
     const queue = args.queue ? args.queue : undefined
 
-    return await payload.jobs.run({
-      limit,
-      queue,
-    })
+    if (args.cron) {
+      Cron(args.cron, async () => {
+        await payload.jobs.run({
+          limit,
+          queue,
+        })
+      })
+    } else {
+      return await payload.jobs.run({
+        limit,
+        queue,
+      })
+    }
   }
 
   console.error(`Unknown script: "${script}".`)
