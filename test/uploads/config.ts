@@ -291,7 +291,6 @@ export default buildConfigWithDefaults({
     {
       slug: mediaSlug,
       fields: [],
-      disableDuplicate: false,
       upload: {
         staticDir: path.resolve(dirname, './media'),
         // crop: false,
