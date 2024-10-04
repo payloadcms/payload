@@ -935,6 +935,9 @@ export type Config = {
   /** i18n config settings */
   /** Automatically index all sortable top-level fields in the database to improve sort performance and add database compatibility for Azure Cosmos and similar. */
   indexSortableFields?: boolean
+  /**
+   * @experimental There may be frequent breaking changes to this API
+   */
   jobs?: JobsConfig
   /**
    * Translate your content to different languages/locales.
