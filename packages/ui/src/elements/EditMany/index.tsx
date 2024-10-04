@@ -22,7 +22,6 @@ import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { getFormStateFetch } from '../../utilities/getFormStateFetch.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { FieldSelect } from '../FieldSelect/index.js'
 import './index.scss'
@@ -132,15 +131,11 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   React.useEffect(() => {
     if (!hasInitializedState.current) {
       const getInitialState = async () => {
-        const { state: result } = await getFormStateFetch({
-          apiRoute,
-          body: {
-            collectionSlug: slug,
-            data: {},
-            operation: 'update',
-            schemaPath: slug,
-          },
-          serverURL,
+        const { state: result } = await getFormState({
+          collectionSlug: slug,
+          data: {},
+          operation: 'update',
+          schemaPath: slug,
         })
 
         setInitialState(result)
@@ -153,20 +148,16 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = await getFormStateFetch({
-        apiRoute,
-        body: {
-          collectionSlug: slug,
-          formState: prevFormState,
-          operation: 'update',
-          schemaPath: slug,
-        },
-        serverURL,
+      const { state } = await getFormState({
+        collectionSlug: slug,
+        formState: prevFormState,
+        operation: 'update',
+        schemaPath: slug,
       })
 
       return state
     },
-    [slug, serverURL, apiRoute],
+    [slug, getFormState],
   )
 
   if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {

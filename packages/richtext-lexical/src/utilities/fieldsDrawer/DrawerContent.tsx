@@ -9,7 +9,7 @@ import {
   useConfig,
   useDocumentInfo,
   useFieldProps,
-  useServerFunctions,
+  // useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -44,7 +44,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     },
   } = useConfig()
 
-  const { getFormState } = useServerFunctions()
+  // const { getFormState } = useServerFunctions()
 
   const componentMapRenderedFieldsPath = `lexical_internal_feature.${featureKey}.fields${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
   const schemaFieldsPath =

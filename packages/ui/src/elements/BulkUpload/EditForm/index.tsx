@@ -16,10 +16,9 @@ import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../../providers/Operation/index.js'
-// import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
+import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useUploadEdits } from '../../../providers/UploadEdits/index.js'
 import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
-import { getFormStateFetch } from '../../../utilities/getFormStateFetch.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
 import { Upload } from '../../Upload/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
@@ -50,12 +49,11 @@ export function EditForm({ submitted }: EditFormProps) {
     onSave: onSaveFromContext,
   } = useDocumentInfo()
 
-  // const { getFormState } = useServerFunctions()
+  const { getFormState } = useServerFunctions()
 
   const {
     config: {
-      routes: { admin: adminRoute, api },
-      serverURL,
+      routes: { admin: adminRoute },
     },
     getEntityConfig,
   } = useConfig()
@@ -117,21 +115,17 @@ export function EditForm({ submitted }: EditFormProps) {
   const onChange: NonNullable<FormProps['onChange']>[0] = useCallback(
     async ({ formState: prevFormState }) => {
       const docPreferences = await getDocPreferences()
-      const { state: newFormState } = await getFormStateFetch({
-        apiRoute: api,
-        body: {
-          collectionSlug,
-          docPreferences,
-          formState: prevFormState,
-          operation: 'create',
-          schemaPath,
-        },
-        serverURL,
+      const { state: newFormState } = await getFormState({
+        collectionSlug,
+        docPreferences,
+        formState: prevFormState,
+        operation: 'create',
+        schemaPath,
       })
 
       return newFormState
     },
-    [collectionSlug, schemaPath, getDocPreferences, api, serverURL],
+    [collectionSlug, schemaPath, getDocPreferences, getFormState],
   )
 
   return (
