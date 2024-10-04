@@ -1199,6 +1199,42 @@ describe('Localization', () => {
       expect(docEs.deep.blocks[0].title).toBe('hello es')
     })
 
+    it('should create/updated/read localized group with row field', async () => {
+      const doc = await payload.create({
+        collection: 'groups',
+        data: {
+          groupLocalizedRow: {
+            text: 'hello world',
+          },
+        },
+        locale: 'en',
+      })
+
+      expect(doc.groupLocalizedRow.text).toBe('hello world')
+
+      const docES = await payload.update({
+        collection: 'groups',
+        data: {
+          groupLocalizedRow: {
+            text: 'hola world or something',
+          },
+        },
+        locale: 'es',
+        id: doc.id,
+      })
+
+      expect(docES.groupLocalizedRow.text).toBe('hola world or something')
+
+      // check if docES didnt break EN
+      const docEN = await payload.findByID({ collection: 'groups', id: doc.id, locale: 'en' })
+      expect(docEN.groupLocalizedRow.text).toBe('hello world')
+
+      const all = await payload.findByID({ collection: 'groups', id: doc.id, locale: 'all' })
+
+      expect(all.groupLocalizedRow.en.text).toBe('hello world')
+      expect(all.groupLocalizedRow.es.text).toBe('hola world or something')
+    })
+
     it('should properly create/update/read localized tab field', async () => {
       const result = await payload.create({
         collection: tabSlug,

@@ -125,6 +125,33 @@ export interface NestedFieldTable {
         id?: string | null
       }[]
     | null
+  blocks?:
+    | {
+        nestedBlocks?:
+          | {
+              relation?: {
+                relationTo: 'localized-posts'
+                value: string | LocalizedPost
+              } | null
+              id?: string | null
+              blockName?: string | null
+              blockType: 'content'
+            }[]
+          | null
+        array?:
+          | {
+              relation?: {
+                relationTo: 'localized-posts'
+                value: string | LocalizedPost
+              } | null
+              id?: string | null
+            }[]
+          | null
+        id?: string | null
+        blockName?: string | null
+        blockType: 'block'
+      }[]
+    | null
   updatedAt: string
   createdAt: string
 }
@@ -314,6 +341,9 @@ export interface NestedToArrayAndBlock {
  */
 export interface Group {
   id: string
+  groupLocalizedRow?: {
+    text?: string | null
+  }
   groupLocalized?: {
     title?: string | null
   }
