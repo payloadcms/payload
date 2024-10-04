@@ -1,5 +1,3 @@
-import { pathToFileURL } from 'url'
-
 import type { PayloadRequest } from '../../types/index.js'
 import type {
   BaseJob,
@@ -11,6 +9,8 @@ import type {
 } from '../config/workflowTypes.js'
 
 import { getRunTaskFunction } from './getRunTaskFunction.js'
+import { getUpdateJobFunction } from './getUpdateJobFunction.js'
+import { importHandlerPath } from './importHandlerPath.js'
 
 type Args = {
   job: BaseJob
@@ -35,6 +35,8 @@ export const runJob = async ({
     throw new Error('Currently, only JS-based workflows are supported')
   }
 
+  const updateJob = getUpdateJobFunction(job, req)
+
   // the runner will either be passed to the config
   // OR it will be a path, which we will need to import via eval to avoid
   // Next.js compiler dynamic import expression errors
@@ -44,74 +46,30 @@ export const runJob = async ({
   if (typeof workflowConfig.handler === 'function') {
     workflowHandler = workflowConfig.handler
   } else {
-    const [runnerPath, runnerImportName] = workflowConfig.handler.split('#')
-
-    const runnerModule =
-      typeof require === 'function'
-        ? await eval(`require('${runnerPath.replaceAll('\\', '/')}')`)
-        : await eval(`import('${pathToFileURL(runnerPath).href}')`)
-
-    // If the path has indicated an #exportName, try to get it
-    if (runnerImportName && runnerModule[runnerImportName]) {
-      workflowHandler = runnerModule[runnerImportName]
-    }
-
-    // If there is a default export, use it
-    if (!workflowHandler && runnerModule.default) {
-      workflowHandler = runnerModule.default
-    }
-
-    // Finally, use whatever was imported
-    if (!workflowHandler) {
-      workflowHandler = runnerModule
-    }
+    workflowHandler = await importHandlerPath<WorkflowHandler<WorkflowTypes>>(
+      workflowConfig.handler,
+    )
 
     if (!workflowHandler) {
       const errorMessage = `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${job.workflowSlug}.`
       req.payload.logger.error(errorMessage)
 
-      const updatedJob = (await req.payload.update({
-        id: job.id,
-        collection: 'payload-jobs',
-        data: {
-          error: {
-            error: errorMessage,
-          },
-          hasError: true,
-          log: [
-            ...job.log,
-            {
-              error: errorMessage,
-              executedAt: new Date().toISOString(),
-              state: 'failed',
-            },
-          ],
-          processing: false,
+      await updateJob({
+        error: {
+          error: errorMessage,
         },
-        req,
-      })) as BaseJob
-      // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
-      for (const key in updatedJob) {
-        job[key] = updatedJob[key]
-      }
+        hasError: true,
+        processing: false,
+      })
 
       return
     }
   }
 
-  const updatedJob = (await req.payload.update({
-    id: job.id,
-    collection: 'payload-jobs',
-    data: {
-      processing: true,
-      seenByWorker: true,
-    },
-    req,
-  })) as BaseJob
-  // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
-  for (const key in updatedJob) {
-    job[key] = updatedJob[key]
-  }
+  await updateJob({
+    processing: true,
+    seenByWorker: true,
+  })
 
   const state = {
     jobTasksStatus,
@@ -123,19 +81,14 @@ export const runJob = async ({
     await workflowHandler({
       job: job as unknown as RunningJob<WorkflowTypes>, //TODO: Type this better
       req,
-      runTask: getRunTaskFunction(state, job, workflowConfig, req, false),
-      runTaskInline: getRunTaskFunction(state, job, workflowConfig, req, true),
+      runTask: getRunTaskFunction(state, job, workflowConfig, req, false, updateJob),
+      runTaskInline: getRunTaskFunction(state, job, workflowConfig, req, true, updateJob),
     })
   } catch (err) {
-    await req.payload.update({
-      id: job.id,
-      collection: 'payload-jobs',
-      data: {
-        ...job,
-        processing: false,
-        // TODO: Eventually et waitUntil here if backoff strategy is implemented
-      } as BaseJob,
-      req,
+    await updateJob({
+      ...job, // ensure locally modified job data is saved
+      hasError: state.reachedMaxRetries, // If reached max retries => final error. If hasError is true this job will not be retried
+      processing: false,
     })
 
     req.payload.logger.error({ err, job, msg: 'Error running workflow' })
@@ -145,15 +98,10 @@ export const runJob = async ({
   }
 
   // Workflow has completed
-  await req.payload.update({
-    id: job.id,
-    collection: 'payload-jobs',
-    data: {
-      ...job, // Ensure any data that has changed during the workflow (e.g. through the user manually mutating the job arg) is saved
-      completedAt: new Date(),
-      processing: false,
-    },
-    req,
+  await updateJob({
+    ...job, // ensure locally modified job data is saved
+    completedAt: new Date().toISOString(),
+    processing: false,
   })
 
   return {

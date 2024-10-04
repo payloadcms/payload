@@ -1,5 +1,3 @@
-import { pathToFileURL } from 'url'
-
 import type { PayloadRequest } from '../../types/index.js'
 import type {
   RunInlineTaskFunction,
@@ -15,6 +13,9 @@ import type {
   WorkflowConfig,
   WorkflowTypes,
 } from '../config/workflowTypes.js'
+import type { UpdateJobFunction } from './getUpdateJobFunction.js'
+
+import { importHandlerPath } from './importHandlerPath.js'
 
 // Helper object type to force being passed by reference
 export type RunTaskFunctionState = {
@@ -23,34 +24,14 @@ export type RunTaskFunctionState = {
 }
 
 async function getTaskHandlerFromConfig(taskConfig: TaskConfig<any>) {
-  let runner: TaskHandler<TaskType>
+  let handler: TaskHandler<TaskType>
 
   if (typeof taskConfig.handler === 'function') {
-    runner = taskConfig.handler
+    handler = taskConfig.handler
   } else {
-    const [runnerPath, runnerImportName] = taskConfig.handler.split('#')
-
-    const runnerModule =
-      typeof require === 'function'
-        ? await eval(`require('${runnerPath.replaceAll('\\', '/')}')`)
-        : await eval(`import('${pathToFileURL(runnerPath).href}')`)
-
-    // If the path has indicated an #exportName, try to get it
-    if (runnerImportName && runnerModule[runnerImportName]) {
-      runner = runnerModule[runnerImportName]
-    }
-
-    // If there is a default export, use it
-    if (!runner && runnerModule.default) {
-      runner = runnerModule.default
-    }
-
-    // Finally, use whatever was imported
-    if (!runner) {
-      runner = runnerModule
-    }
+    handler = await importHandlerPath<TaskHandler<TaskType>>(taskConfig.handler)
   }
-  return runner
+  return handler
 }
 
 export const getRunTaskFunction = <TIsInline extends boolean>(
@@ -59,12 +40,19 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
   workflowConfig: WorkflowConfig<any>,
   req: PayloadRequest,
   isInline: TIsInline,
+  updateJob: UpdateJobFunction,
 ): TIsInline extends true ? RunInlineTaskFunction : RunTaskFunction => {
-  const runTask: RunTaskFunction = async ({ id, input, retries, task }) => {
+  const runTask = async ({
+    id,
+    input,
+    retries,
+    task,
+  }: Parameters<RunInlineTaskFunction>[0] | Parameters<RunTaskFunction>[0]) => {
+    const executedAt = new Date()
+
     let inlineRunner: TaskHandler<TaskType> = null
     if (isInline) {
       inlineRunner = task as unknown as TaskHandler<TaskType>
-      // @ts-expect-error
       task = 'inline'
     }
 
@@ -110,35 +98,28 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         : `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${job.workflowSlug} for task ${task}.`
       req.payload.logger.error(errorMessage)
 
-      const updatedJob = (await req.payload.update({
-        id: job.id,
-        collection: 'payload-jobs',
-        data: {
-          error: {
-            error: errorMessage,
-          },
-          hasError: true,
-          log: [
-            ...job.log,
-            {
-              error: errorMessage,
-              executedAt: new Date(),
-              state: 'failed',
-            },
-          ],
-          processing: false,
+      await updateJob({
+        error: {
+          error: errorMessage,
         },
-        req,
-      })) as BaseJob
-      // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
-      for (const key in updatedJob) {
-        job[key] = updatedJob[key]
-      }
+        hasError: true,
+        log: [
+          ...job.log,
+          {
+            completedAt: new Date().toISOString(),
+            error: errorMessage,
+            executedAt: executedAt.toISOString(),
+            state: 'failed',
+            taskID: id,
+            taskSlug: String(task),
+          },
+        ],
+        processing: false,
+      })
 
       return
     }
 
-    const executedAt = new Date()
     let output: object
     try {
       const runnerOutput = await runner({
@@ -161,23 +142,15 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           taskID: id,
           taskSlug: String(task),
         })
-        const updatedJob = (await req.payload.update({
-          id: job.id,
-          collection: 'payload-jobs',
-          data: job,
-          req,
-        })) as BaseJob
 
-        // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
-        for (const key in updatedJob) {
-          job[key] = updatedJob[key]
-        }
+        await updateJob(job)
+
         throw new Error('Task failed')
       } else {
         output = runnerOutput.output
       }
     } catch (err) {
-      console.error('Error in task', err)
+      req.payload.logger.error({ err, job, msg: 'Error running task', task })
       if (!job.log) {
         job.log = []
       }
@@ -191,17 +164,8 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         taskID: id,
         taskSlug: String(task),
       })
-      const updatedJob = (await req.payload.update({
-        id: job.id,
-        collection: 'payload-jobs',
-        data: job,
-        req,
-      })) as BaseJob
 
-      // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
-      for (const key in updatedJob) {
-        job[key] = updatedJob[key]
-      }
+      await updateJob(job)
 
       throw err
     }
@@ -227,17 +191,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
       taskSlug: String(task),
     })
 
-    const updatedJob = (await req.payload.update({
-      id: job.id,
-      collection: 'payload-jobs',
-      data: job,
-      req,
-    })) as BaseJob
-
-    // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
-    for (const key in updatedJob) {
-      job[key] = updatedJob[key]
-    }
+    await updateJob(job)
 
     return output
   }

@@ -99,6 +99,9 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
               {
                 name: 'hasError',
                 type: 'checkbox',
+                admin: {
+                  description: 'If hasError is true this job will not be retried',
+                },
                 index: true,
               },
               {
@@ -106,6 +109,7 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
                 type: 'json',
                 admin: {
                   condition: (data) => data.hasError,
+                  description: 'If hasError is true, this is the error that caused it',
                 },
               },
               {
