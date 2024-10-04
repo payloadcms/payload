@@ -17,7 +17,7 @@ import { InvalidConfiguration } from '../errors/index.js'
 import { sanitizeGlobals } from '../globals/config/sanitize.js'
 import { getLockedDocumentsCollection } from '../lockedDocuments/lockedDocumentsCollection.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
-import { getDefaultJobsCollection } from '../queues/jobsCollection.js'
+import { getDefaultJobsCollection } from '../queues/config/jobsCollection.js'
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections.js'
 import { defaults } from './defaults.js'
 

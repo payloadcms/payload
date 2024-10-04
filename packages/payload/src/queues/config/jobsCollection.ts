@@ -1,11 +1,11 @@
 import type { JSONSchema4 } from 'json-schema'
 
-import type { CollectionConfig } from '../collections/config/types.js'
-import type { Config } from '../config/types.js'
-import type { BaseJob } from './config/workflowTypes.js'
+import type { CollectionConfig } from '../../collections/config/types.js'
+import type { Config } from '../../config/types.js'
+import type { BaseJob } from './types/workflowTypes.js'
 
-import { jsonSchemaExternalImport } from '../utilities/configToJSONSchema.js'
-import { runWorkflowEndpoint } from './endpoint.js'
+import { jsonSchemaExternalImport } from '../../utilities/configToJSONSchema.js'
+import { runAllJobsEndpoint } from '../operations/rest/run.js'
 
 export const getDefaultJobsCollection: (config: Config) => CollectionConfig | null = (config) => {
   if (!Array.isArray(config?.jobs?.workflows)) {
@@ -67,7 +67,7 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
       group: 'System',
       hidden: true,
     },
-    endpoints: [runWorkflowEndpoint],
+    endpoints: [runAllJobsEndpoint],
     fields: [
       {
         name: 'input',

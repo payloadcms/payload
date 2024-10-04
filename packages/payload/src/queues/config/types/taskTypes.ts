@@ -1,4 +1,4 @@
-import type { Field, PayloadRequest, StringKeyOf, TypedJobs } from '../../index.js'
+import type { Field, PayloadRequest, StringKeyOf, TypedJobs } from '../../../index.js'
 import type { JobLog, RunningJob } from './workflowTypes.js'
 
 export type TaskInputOutput = {

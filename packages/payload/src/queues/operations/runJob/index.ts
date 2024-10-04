@@ -1,4 +1,4 @@
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequest } from '../../../types/index.js'
 import type {
   BaseJob,
   JobTasksStatus,
@@ -6,7 +6,7 @@ import type {
   WorkflowConfig,
   WorkflowHandler,
   WorkflowTypes,
-} from '../config/workflowTypes.js'
+} from '../../config/types/workflowTypes.js'
 
 import { getRunTaskFunction } from './getRunTaskFunction.js'
 import { getUpdateJobFunction } from './getUpdateJobFunction.js'

@@ -1,5 +1,5 @@
-import type { CollectionConfig } from '../../index.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { CollectionConfig } from '../../../index.js'
+import type { PayloadRequest } from '../../../types/index.js'
 import type { TaskConfig } from './taskTypes.js'
 import type { WorkflowConfig } from './workflowTypes.js'
 

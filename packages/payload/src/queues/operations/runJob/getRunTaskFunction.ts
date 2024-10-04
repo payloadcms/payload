@@ -1,18 +1,18 @@
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequest } from '../../../types/index.js'
 import type {
   RunInlineTaskFunction,
   RunTaskFunction,
   TaskConfig,
   TaskHandler,
   TaskType,
-} from '../config/taskTypes.js'
+} from '../../config/types/taskTypes.js'
 import type {
   BaseJob,
   JobTasksStatus,
   RunningJob,
   WorkflowConfig,
   WorkflowTypes,
-} from '../config/workflowTypes.js'
+} from '../../config/types/workflowTypes.js'
 import type { UpdateJobFunction } from './getUpdateJobFunction.js'
 
 import { importHandlerPath } from './importHandlerPath.js'
@@ -65,7 +65,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
       }
 
       if (!taskConfig) {
-        throw new Error(`Task ${task} not found in workflow ${job.workflowSlug}`)
+        throw new Error(`Task ${String(task)} not found in workflow ${job.workflowSlug}`)
       }
     }
 
@@ -78,7 +78,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
     if (taskStatus && !taskStatus.complete && taskStatus.totalTried >= maxRetries) {
       state.reachedMaxRetries = true
       throw new Error(
-        `Task ${task} has failed more than the allowed retries in workflow ${job.workflowSlug}`,
+        `Task ${String(task)} has failed more than the allowed retries in workflow ${job.workflowSlug}`,
       )
     }
 
@@ -87,7 +87,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
       runner = inlineRunner
     } else {
       if (!taskConfig) {
-        throw new Error(`Task ${task} not found in workflow ${job.workflowSlug}`)
+        throw new Error(`Task ${String(task)} not found in workflow ${job.workflowSlug}`)
       }
       runner = await getTaskHandlerFromConfig(taskConfig)
     }
@@ -95,7 +95,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
     if (!runner || typeof runner !== 'function') {
       const errorMessage = isInline
         ? `Can't find runner for inline task with ID ${id}`
-        : `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${job.workflowSlug} for task ${task}.`
+        : `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${job.workflowSlug} for task ${String(task)}.`
       req.payload.logger.error(errorMessage)
 
       await updateJob({

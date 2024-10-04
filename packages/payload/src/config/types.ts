@@ -31,8 +31,7 @@ import type {
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { Payload, RequestContext, TypedUser } from '../index.js'
-import type { JobsConfig } from '../queues/config/types.js'
+import type { JobsConfig, Payload, RequestContext, TypedUser } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 

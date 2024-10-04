@@ -1,8 +1,8 @@
-import type { Endpoint } from '../config/types.js'
+import type { Endpoint } from '../../../config/types.js'
 
-import { runAllJobs, type RunAllJobsArgs } from './runAllJobs.js'
+import { runAllJobs, type RunAllJobsArgs } from '../runAllJobs/index.js'
 
-export const runWorkflowEndpoint: Endpoint = {
+export const runAllJobsEndpoint: Endpoint = {
   handler: async (req) => {
     if (
       !Array.isArray(req.payload.config.jobs.workflows) ||

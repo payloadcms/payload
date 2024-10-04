@@ -1,5 +1,5 @@
-import type { TaskConfig, TaskType } from './config/taskTypes.js'
-import type { BaseJob, JobTasksStatus } from './config/workflowTypes.js'
+import type { TaskConfig, TaskType } from '../config/types/taskTypes.js'
+import type { BaseJob, JobTasksStatus } from '../config/types/workflowTypes.js'
 
 type Args = {
   job: BaseJob

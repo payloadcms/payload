@@ -1,5 +1,5 @@
-import type { Field } from '../../fields/config/types.js'
-import type { PayloadRequest, StringKeyOf, TypedCollection, TypedJobs } from '../../index.js'
+import type { Field } from '../../../fields/config/types.js'
+import type { PayloadRequest, StringKeyOf, TypedCollection, TypedJobs } from '../../../index.js'
 import type {
   RunInlineTaskFunction,
   RunTaskFunction,

@@ -53,8 +53,7 @@ import type { Options as FindGlobalVersionByIDOptions } from './globals/operatio
 import type { Options as FindGlobalVersionsOptions } from './globals/operations/local/findVersions.js'
 import type { Options as RestoreGlobalVersionOptions } from './globals/operations/local/restoreVersion.js'
 import type { Options as UpdateGlobalOptions } from './globals/operations/local/update.js'
-import type { RunningJob, RunningJobFromTask } from './queues/config/workflowTypes.js'
-import type { JsonObject, PayloadRequest } from './types/index.js'
+import type { JsonObject } from './types/index.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 import type { TypeWithVersion } from './versions/types.js'
 
@@ -66,8 +65,7 @@ import localOperations from './collections/operations/local/index.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
-import { runAllJobs } from './queues/runAllJobs.js'
-import { createLocalReq } from './utilities/createLocalReq.js'
+import { getJobsLocalAPI } from './queues/operations/local/index.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
@@ -332,58 +330,7 @@ export class BasePayload {
 
   importMap: ImportMap
 
-  jobs = {
-    queue: async <
-      // eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
-      TTaskOrWorkflowSlug extends keyof TypedJobs['tasks'] | keyof TypedJobs['workflows'],
-    >(
-      args:
-        | {
-            input: TypedJobs['tasks'][TTaskOrWorkflowSlug]['input']
-            // TTaskOrWorkflowlug with keyof TypedJobs['workflows'] removed:
-            task: TTaskOrWorkflowSlug extends keyof TypedJobs['tasks'] ? TTaskOrWorkflowSlug : never
-            workflow?: never
-          }
-        | {
-            input: TypedJobs['workflows'][TTaskOrWorkflowSlug]['input']
-            task?: never
-            workflow: TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
-              ? TTaskOrWorkflowSlug
-              : never
-          },
-    ): Promise<
-      TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
-        ? RunningJob<TTaskOrWorkflowSlug>
-        : RunningJobFromTask<TTaskOrWorkflowSlug>
-    > => {
-      return (await this.create({
-        collection: 'payload-jobs',
-        data: {
-          input: args.input,
-          taskSlug: 'task' in args ? args.task : undefined,
-          workflowSlug: 'workflow' in args ? args.workflow : undefined,
-        },
-      })) as TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
-        ? RunningJob<TTaskOrWorkflowSlug>
-        : RunningJobFromTask<TTaskOrWorkflowSlug> // Type assertion is still needed here
-    },
-
-    run: async (args?: {
-      limit?: number
-      overrideAccess?: boolean
-      queue?: string
-      req?: PayloadRequest
-    }): Promise<ReturnType<typeof runAllJobs>> => {
-      const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, this))
-      const result = await runAllJobs({
-        limit: args?.limit,
-        overrideAccess: args?.overrideAccess !== false,
-        queue: args?.queue,
-        req: newReq,
-      })
-      return result
-    },
-  }
+  jobs = getJobsLocalAPI(this)
 
   logger: Logger
 
@@ -1092,6 +1039,7 @@ export type {
   PreferenceUpdateRequest,
   TabsPreferences,
 } from './preferences/types.js'
+export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
 export type {
   RunTaskFunction,
   TaskConfig,
@@ -1102,8 +1050,7 @@ export type {
   TaskInput,
   TaskOutput,
   TaskType,
-} from './queues/config/taskTypes.js'
-export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types.js'
+} from './queues/config/types/taskTypes.js'
 export type {
   BaseJob,
   JobTasksStatus,
@@ -1112,7 +1059,7 @@ export type {
   WorkflowConfig,
   WorkflowHandler,
   WorkflowTypes,
-} from './queues/config/workflowTypes.js'
+} from './queues/config/types/workflowTypes.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
