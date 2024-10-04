@@ -397,7 +397,10 @@ export function UploadInput(props: UploadInputProps) {
   const showDropzone =
     !readOnly &&
     (!value ||
-      (hasMany && Array.isArray(value) && (typeof maxRows !== 'number' || value.length < maxRows)))
+      (hasMany &&
+        Array.isArray(value) &&
+        (typeof maxRows !== 'number' || value.length < maxRows)) ||
+      (!hasMany && populatedDocs?.[0] && typeof populatedDocs[0].value === 'undefined'))
 
   return (
     <div
@@ -442,13 +445,17 @@ export function UploadInput(props: UploadInputProps) {
 
         {!hasMany && value ? (
           <>
-            {populatedDocs && populatedDocs?.length > 0 ? (
+            {populatedDocs && populatedDocs?.length > 0 && populatedDocs[0].value ? (
               <UploadComponentHasOne
                 fileDoc={populatedDocs[0]}
                 onRemove={onRemove}
                 readonly={readOnly}
                 serverURL={serverURL}
               />
+            ) : populatedDocs && value && !populatedDocs?.[0]?.value ? (
+              <>
+                {t('general:untitled')} - ID: {value}
+              </>
             ) : (
               <ShimmerEffect height="62px" />
             )}

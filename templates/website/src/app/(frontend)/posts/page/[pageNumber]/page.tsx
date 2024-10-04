@@ -6,11 +6,11 @@ import { Pagination } from '@/components/Pagination'
 import configPromise from '@payload-config'
 import { getPayloadHMR } from '@payloadcms/next/utilities'
 import React from 'react'
+import PageClient from './page.client'
 
-export const dynamic = 'force-static'
 export const revalidate = 600
 
-export default async function Page({ params: { pageNumber = 2 } }) {
+export default async function Page({ params: { pageNumber } }) {
   const payload = await getPayloadHMR({ config: configPromise })
 
   const posts = await payload.find({
@@ -23,6 +23,7 @@ export default async function Page({ params: { pageNumber = 2 } }) {
 
   return (
     <div className="pt-24 pb-24">
+      <PageClient />
       <div className="container mb-16">
         <div className="prose dark:prose-invert max-w-none">
           <h1>Posts</h1>
@@ -49,9 +50,9 @@ export default async function Page({ params: { pageNumber = 2 } }) {
   )
 }
 
-export function generateMetadata({ params: { pageNumber = 2 } }): Metadata {
+export function generateMetadata({ params: { pageNumber } }): Metadata {
   return {
-    title: `Payload Website Template Posts Page ${pageNumber}`,
+    title: `Payload Website Template Posts Page ${pageNumber || ''}`,
   }
 }
 
@@ -65,10 +66,10 @@ export async function generateStaticParams() {
     overrideAccess: false,
   })
 
-  const pages: number[] = []
+  const pages: { pageNumber: string }[] = []
 
   for (let i = 1; i <= posts.totalPages; i++) {
-    pages.push(i)
+    pages.push({ pageNumber: String(i) })
   }
 
   return pages

@@ -12,6 +12,7 @@ import type { Page as PageType } from '@/payload-types'
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
+import PageClient from './page.client'
 
 export async function generateStaticParams() {
   const payload = await getPayloadHMR({ config: configPromise })
@@ -22,11 +23,15 @@ export async function generateStaticParams() {
     overrideAccess: false,
   })
 
-  return pages.docs
+  const params = pages.docs
     ?.filter((doc) => {
       return doc.slug !== 'home'
     })
-    .map(({ slug }) => slug)
+    .map(({ slug }) => {
+      return { slug }
+    })
+
+  return params
 }
 
 export default async function Page({ params: { slug = 'home' } }) {
@@ -51,6 +56,7 @@ export default async function Page({ params: { slug = 'home' } }) {
 
   return (
     <article className="pt-16 pb-24">
+      <PageClient />
       {/* Allows redirects for valid pages too */}
       <PayloadRedirects disableNotFound url={url} />
 
