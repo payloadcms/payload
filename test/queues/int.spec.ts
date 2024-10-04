@@ -64,6 +64,29 @@ describe('Queues', () => {
     expect(response.status).toBe(200)
   })
 
+  // There used to be a bug in payload where updating the job threw the following error - only in
+  // postgres:
+  // QueryError: The following path cannot be queried: document.relationTo
+  // This test is to ensure that the bug is fixed
+  it('can create and update new jobs', async () => {
+    const job = await payload.create({
+      collection: 'payload-jobs',
+      data: {
+        input: '1',
+      },
+    })
+    expect(job.input).toBe('1')
+
+    const updatedJob = await payload.update({
+      collection: 'payload-jobs',
+      id: job.id,
+      data: {
+        input: '2',
+      },
+    })
+    expect(updatedJob.input as any).toBe('2')
+  })
+
   it('can create new jobs', async () => {
     const newPost = await payload.create({
       collection: 'posts',

@@ -158,10 +158,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   config.i18n = i18nConfig
 
-  configWithDefaults.collections.push(getLockedDocumentsCollection(config as unknown as Config))
-  configWithDefaults.collections.push(getPreferencesCollection(config as unknown as Config))
-  configWithDefaults.collections.push(migrationsCollection)
-
+  // Need to add default jobs collection before locked documents collections
   if (Array.isArray(configWithDefaults.jobs?.tasks) && configWithDefaults.jobs.tasks.length > 0) {
     let defaultJobsCollection = getDefaultJobsCollection(config as unknown as Config)
 
@@ -173,6 +170,10 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
     configWithDefaults.collections.push(defaultJobsCollection)
   }
+
+  configWithDefaults.collections.push(getLockedDocumentsCollection(config as unknown as Config))
+  configWithDefaults.collections.push(getPreferencesCollection(config as unknown as Config))
+  configWithDefaults.collections.push(migrationsCollection)
 
   const richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>> = []
   for (let i = 0; i < config.collections.length; i++) {
