@@ -205,10 +205,58 @@ This functionality is not available yet, but it will be available in the future.
 
 ## Queueing workflows and tasks
 
+In order to queue a workflow or a task (= create them and add them to the queue), you can use the `payload.jobs.queue` function.
+
+Example: queueing workflows:
+
+```ts
+const createdJob = await payload.jobs.queue({
+  workflows: 'createPostAndUpdate',
+  input: {
+    title: 'my title',
+  },
+})
+```
+
+Example: queueing tasks:
+
+```ts
+const createdJob = await payload.jobs.queue({
+  task: 'createPost',
+  input: {
+    title: 'my title',
+  },
+})
+```
+
 ## Running workflows and tasks
 
-### Endpoints
+Workflows and tasks added to the queue will not run unless a worker picks it up and runs it. This can be done in two ways:
+
+### Endpoint
+
+Make a fetch request to the `api/payload-jobs/run` endpoint:
+
+```ts
+await fetch('/api/payload-jobs/run', {
+  method: 'GET',
+  headers: {
+    'Authorization': `JWT ${token}`,
+  },
+});
+```
 
 ### Local API
+
+Run the payload.jobs.run function:
+
+```ts
+const results = await payload.jobs.run()
+
+// You can customize the queue name by passing it as an argument
+
+await payload.jobs.run({ queue: 'posts' })
+
+```
 
 ## Triggering workflows and task runs via node-cron
