@@ -149,8 +149,8 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
       collection: args.collection,
       config: req.payload.config,
       data: originalDoc,
-      operation: 'duplicate',
-      overwriteExistingFiles: false,
+      operation: 'create',
+      overwriteExistingFiles: 'forceDisable',
       req,
       throwOnMissingFile: true,
     })
