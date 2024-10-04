@@ -270,13 +270,17 @@ export function fieldsToJSONSchema(
                 type: withNullableJSONSchemaType('array', isRequired),
                 items: {
                   type: 'string',
-                  enum: optionEnums,
                 },
+              }
+              if (optionEnums?.length) {
+                ;(fieldSchema.items as JSONSchema4).enum = optionEnums
               }
             } else {
               fieldSchema = {
                 type: withNullableJSONSchemaType('string', isRequired),
-                enum: optionEnums,
+              }
+              if (optionEnums?.length) {
+                fieldSchema.enum = optionEnums
               }
             }
 
