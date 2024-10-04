@@ -21,13 +21,13 @@ import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
 import { requests } from '../../utilities/api.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
+import { getFormStateFetch } from '../../utilities/getFormStateFetch.js'
 import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
 import { isEditing as getIsEditing } from '../../utilities/isEditing.js'
 import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
 import { useLocale } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
-import { useServerFunctions } from '../ServerFunctions/index.js'
 import { useTranslation } from '../Translation/index.js'
 import { UploadEditsProvider, useUploadEdits } from '../UploadEdits/index.js'
 
@@ -54,8 +54,6 @@ const DocumentInfo: React.FC<
     onLoadError,
     onSave: onSaveFromProps,
   } = props
-
-  const { getFormState } = useServerFunctions()
 
   const {
     config: {
@@ -495,15 +493,19 @@ const DocumentInfo: React.FC<
 
       const newData = collectionSlug ? json.doc : json.result
 
-      const { state: newState } = await getFormState({
-        id,
-        collectionSlug,
-        data: newData,
-        docPreferences,
-        globalSlug,
-        locale,
-        operation,
-        schemaPath: collectionSlug || globalSlug,
+      const { state: newState } = await getFormStateFetch({
+        apiRoute: api,
+        body: {
+          id,
+          collectionSlug,
+          data: newData,
+          docPreferences,
+          globalSlug,
+          locale,
+          operation,
+          schemaPath: collectionSlug || globalSlug,
+        },
+        serverURL,
       })
 
       setInitialState(newState)
@@ -520,7 +522,8 @@ const DocumentInfo: React.FC<
       locale,
       onSaveFromProps,
       getDocPermissions,
-      getFormState,
+      api,
+      serverURL,
     ],
   )
 
@@ -542,13 +545,17 @@ const DocumentInfo: React.FC<
         setIsLoading(true)
 
         try {
-          const result = await getFormState({
-            id,
-            collectionSlug,
-            globalSlug,
-            locale,
-            operation,
-            schemaPath: collectionSlug || globalSlug,
+          const result = await getFormStateFetch({
+            apiRoute: api,
+            body: {
+              id,
+              collectionSlug,
+              globalSlug,
+              locale,
+              operation,
+              schemaPath: collectionSlug || globalSlug,
+            },
+            serverURL,
           })
 
           if ('errors' in result) {
@@ -599,7 +606,6 @@ const DocumentInfo: React.FC<
     initialStateFromProps,
     getDocPermissions,
     user,
-    getFormState,
   ])
 
   useEffect(() => {
