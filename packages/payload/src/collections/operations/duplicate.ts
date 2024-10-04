@@ -16,6 +16,8 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeDuplicate } from '../../fields/hooks/beforeDuplicate/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
+import { generateFileData } from '../../uploads/generateFileData.js'
+import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -129,7 +131,7 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
 
     let result
 
-    const originalDoc = await afterRead({
+    let originalDoc = await afterRead({
       collection: collectionConfig,
       context: req.context,
       depth: 0,
@@ -142,6 +144,18 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
       req,
       showHiddenFields: true,
     })
+
+    const { data: newFileData, files: filesToUpload } = await generateFileData({
+      collection: args.collection,
+      config: req.payload.config,
+      data: originalDoc,
+      operation: 'duplicate',
+      overwriteExistingFiles: false,
+      req,
+      throwOnMissingFile: true,
+    })
+
+    originalDoc = newFileData
 
     // /////////////////////////////////////
     // Create Access
@@ -230,6 +244,14 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
     // /////////////////////////////////////
     // Create / Update
     // /////////////////////////////////////
+
+    // /////////////////////////////////////
+    // Write files to local storage
+    // /////////////////////////////////////
+
+    if (!collectionConfig.upload.disableLocalStorage) {
+      await uploadFiles(payload, filesToUpload, req)
+    }
 
     const versionDoc = await payload.db.create({
       collection: collectionConfig.slug,

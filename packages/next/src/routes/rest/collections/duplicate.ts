@@ -24,6 +24,8 @@ export const duplicate: CollectionRouteHandlerWithID = async ({
     payload: req.payload,
   })
 
+  console.log(id)
+
   const doc = await duplicateOperation({
     id,
     collection,

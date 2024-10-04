@@ -17,8 +17,8 @@ import {
   enlargeSlug,
   focalNoSizesSlug,
   mediaSlug,
-  mediaWithRelationPreviewSlug,
   mediaWithoutRelationPreviewSlug,
+  mediaWithRelationPreviewSlug,
   reduceSlug,
   relationPreviewSlug,
   relationSlug,
@@ -291,6 +291,7 @@ export default buildConfigWithDefaults({
     {
       slug: mediaSlug,
       fields: [],
+      disableDuplicate: false,
       upload: {
         staticDir: path.resolve(dirname, './media'),
         // crop: false,

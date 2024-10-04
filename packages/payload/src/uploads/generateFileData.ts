@@ -25,7 +25,7 @@ type Args<T> = {
   collection: Collection
   config: SanitizedConfig
   data: T
-  operation: 'create' | 'update'
+  operation: 'create' | 'duplicate' | 'update'
   originalDoc?: T
   overwriteExistingFiles?: boolean
   req: PayloadRequest
@@ -85,14 +85,18 @@ export const generateFileData = async <T>({
         const filePath = `${staticPath}/${filename}`
         const response = await getFileByPath(filePath)
         file = response
-        overwriteExistingFiles = true
+        if (operation !== 'duplicate') {
+          overwriteExistingFiles = true
+        }
       } else if (filename && url) {
         file = await getExternalFile({
           data: data as FileData,
           req,
           uploadConfig: collectionConfig.upload,
         })
-        overwriteExistingFiles = true
+        if (operation !== 'duplicate') {
+          overwriteExistingFiles = true
+        }
       }
     } catch (err: unknown) {
       throw new FileRetrievalError(req.t, err instanceof Error ? err.message : undefined)
@@ -318,7 +322,7 @@ export const generateFileData = async <T>({
  */
 function parseUploadEditsFromReqOrIncomingData(args: {
   data: unknown
-  operation: 'create' | 'update'
+  operation: 'create' | 'duplicate' | 'update'
   originalDoc: unknown
   req: PayloadRequest
 }): UploadEdits {

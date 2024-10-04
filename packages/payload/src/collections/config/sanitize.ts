@@ -130,9 +130,6 @@ export const sanitizeCollection = async (
     // sanitize fields for reserved names
     sanitizeUploadFields(sanitized.fields, sanitized)
 
-    // disable duplicate for uploads by default
-    sanitized.disableDuplicate = sanitized.disableDuplicate ?? true
-
     sanitized.upload.bulkUpload = sanitized.upload?.bulkUpload ?? true
     sanitized.upload.staticDir = sanitized.upload.staticDir || sanitized.slug
     sanitized.admin.useAsTitle =
