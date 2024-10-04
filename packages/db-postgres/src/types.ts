@@ -85,7 +85,7 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
   push: boolean
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
-  schema: Record<string, unknown>
+  schema: Record<string, GenericEnum | GenericRelation | GenericTable>
   schemaName?: Args['schemaName']
   sessions: {
     [id: string]: {
