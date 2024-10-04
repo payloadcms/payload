@@ -246,7 +246,7 @@ export const DefaultEditView: React.FC = () => {
       const docPreferences = await getDocPreferences()
 
       const { lockedState, state } = await getFormStateFetch({
-        api,
+        apiRoute: api,
         body: {
           id,
           collectionSlug,
