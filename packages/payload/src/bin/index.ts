@@ -5,6 +5,7 @@ import path from 'path'
 import type { BinScript } from '../config/types.js'
 
 import { findConfig } from '../config/find.js'
+import { getPayload } from '../index.js'
 import { generateImportMap } from './generateImportMap/index.js'
 import { generateTypes } from './generateTypes.js'
 import { info } from './info.js'
@@ -81,6 +82,17 @@ export const bin = async () => {
 
   if (script === 'generate:importmap') {
     return generateImportMap(config)
+  }
+
+  if (script === 'jobs:run') {
+    const payload = await getPayload(config)
+    const limit = args.limit ? parseInt(args.limit, 10) : undefined
+    const queue = args.queue ? args.queue : undefined
+
+    return await payload.jobs.run({
+      limit,
+      queue,
+    })
   }
 
   console.error(`Unknown script: "${script}".`)

@@ -254,9 +254,16 @@ Run the payload.jobs.run function:
 const results = await payload.jobs.run()
 
 // You can customize the queue name by passing it as an argument
-
 await payload.jobs.run({ queue: 'posts' })
+```
 
+### Script
+
+You can run the jobs:run script from the command line:
+
+```sh
+npx payload jobs:run --queue default --limit 10
 ```
 
 ## Triggering workflows and task runs via node-cron
+
