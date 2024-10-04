@@ -51,7 +51,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     queue?: string
     req?: PayloadRequest
   }): Promise<ReturnType<typeof runAllJobs>> => {
-    const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, this))
+    const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
     const result = await runAllJobs({
       limit: args?.limit,
       overrideAccess: args?.overrideAccess !== false,
