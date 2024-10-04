@@ -363,6 +363,7 @@ export const traverseFields = ({
         existingLocales,
         fieldPrefix,
         fields: field.fields,
+        forcedLocale,
         locales,
         numbers,
         parentTableName,
