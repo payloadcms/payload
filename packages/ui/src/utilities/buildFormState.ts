@@ -96,17 +96,16 @@ export const buildFormStateFn = async (
     locale,
     operation,
     req,
+    req: {
+      i18n,
+      payload,
+      payload: { config },
+      user,
+    },
     returnLockStatus,
     schemaPath,
     updateLastEdited,
   } = args
-
-  const {
-    i18n,
-    payload,
-    payload: { config },
-    user,
-  } = req
 
   const incomingUserSlug = user?.collection
 

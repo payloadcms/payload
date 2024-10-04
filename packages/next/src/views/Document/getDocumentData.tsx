@@ -8,7 +8,7 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
-import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
+import { buildFormStateFn as buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { reduceFieldsToValues } from 'payload/shared'
 
 export const getDocumentData = async (args: {

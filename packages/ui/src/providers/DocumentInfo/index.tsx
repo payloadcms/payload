@@ -558,6 +558,7 @@ const DocumentInfo: React.FC<
               operation,
               schemaPath: collectionSlug || globalSlug,
             },
+            onError: onLoadError,
             serverURL,
             signal: abortController.signal,
           })
