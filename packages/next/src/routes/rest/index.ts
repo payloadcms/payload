@@ -111,7 +111,7 @@ const endpoints = {
       og: generateOGImage,
     },
     POST: {
-      buildFormState,
+      'form-state': buildFormState,
     },
   },
 }

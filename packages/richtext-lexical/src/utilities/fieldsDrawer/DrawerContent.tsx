@@ -4,7 +4,9 @@ import type { ClientField, FormState } from 'payload'
 import {
   Form,
   FormSubmit,
+  getFormStateFetch,
   RenderFields,
+  useConfig,
   useDocumentInfo,
   useFieldProps,
   useServerFunctions,
@@ -35,6 +37,13 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     field: { richTextComponentMap },
   } = useEditorConfigContext()
 
+  const {
+    config: {
+      routes: { api: apiRoute },
+      serverURL,
+    },
+  } = useConfig()
+
   const { getFormState } = useServerFunctions()
 
   const componentMapRenderedFieldsPath = `lexical_internal_feature.${featureKey}.fields${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
@@ -47,31 +56,39 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const { state } = await getFormState({
-        id,
-        data: data ?? {},
-        operation: 'update',
-        schemaPath: schemaFieldsPath,
+      const { state } = await getFormStateFetch({
+        apiRoute: 'api',
+        body: {
+          id,
+          data: data ?? {},
+          operation: 'update',
+          schemaPath: schemaFieldsPath,
+        },
+        serverURL,
       })
 
       setInitialState(state)
     }
 
     void awaitInitialState()
-  }, [schemaFieldsPath, id, data, getFormState])
+  }, [schemaFieldsPath, id, data, apiRoute, serverURL])
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = await getFormState({
-        id,
-        formState: prevFormState,
-        operation: 'update',
-        schemaPath: schemaFieldsPath,
+      const { state } = await getFormStateFetch({
+        apiRoute,
+        body: {
+          id,
+          formState: prevFormState,
+          operation: 'update',
+          schemaPath: schemaFieldsPath,
+        },
+        serverURL,
       })
 
       return state || prevFormState
     },
-    [schemaFieldsPath, id, getFormState],
+    [schemaFieldsPath, id, apiRoute, serverURL],
   )
 
   if (initialState === false) {

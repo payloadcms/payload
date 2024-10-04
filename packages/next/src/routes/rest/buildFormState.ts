@@ -1,4 +1,4 @@
-import type { PayloadRequest } from 'payload'
+import type { BuildFormStateArgs, PayloadRequest } from 'payload'
 
 import { buildFormStateFn } from '@payloadcms/ui/utilities/buildFormState'
 import httpStatus from 'http-status'
@@ -11,10 +11,9 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
     headers: new Headers(),
     req,
   })
-
+  const reqData: BuildFormStateArgs = (req.data || {}) as BuildFormStateArgs
   try {
-    const body = await req.json()
-    const result = await buildFormStateFn({ req, ...body })
+    const result = await buildFormStateFn({ req, ...reqData })
 
     return Response.json(result, {
       headers,

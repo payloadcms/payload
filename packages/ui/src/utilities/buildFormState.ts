@@ -101,14 +101,6 @@ export const buildFormStateFn = async (
     updateLastEdited,
   } = args
 
-  if (!req.payload) {
-    throw new Error('No Payload instance provided')
-  }
-
-  if (!req.payload.config) {
-    throw new Error('No config provided')
-  }
-
   const {
     i18n,
     payload,

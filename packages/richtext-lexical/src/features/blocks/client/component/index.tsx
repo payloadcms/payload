@@ -3,10 +3,12 @@
 import {
   Collapsible,
   Form,
+  getFormStateFetch,
   Pill,
   RenderComponent,
   SectionTitle,
   ShimmerEffect,
+  useConfig,
   useDocumentInfo,
   useFieldProps,
   useFormSubmitted,
@@ -42,6 +44,13 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const { getFormState } = useServerFunctions()
 
+  const {
+    config: {
+      routes: { api: apiRoute },
+      serverURL,
+    },
+  } = useConfig()
+
   const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
 
   const {
@@ -60,11 +69,15 @@ export const BlockComponent: React.FC<Props> = (props) => {
   // Field Schema
   useEffect(() => {
     const awaitInitialState = async () => {
-      const { state } = await getFormState({
-        id,
-        data: formData,
-        operation: 'update',
-        schemaPath: schemaFieldsPath,
+      const { state } = await getFormStateFetch({
+        apiRoute,
+        body: {
+          id,
+          data: formData,
+          operation: 'update',
+          schemaPath: schemaFieldsPath,
+        },
+        serverURL,
       })
 
       if (state) {
@@ -82,15 +95,19 @@ export const BlockComponent: React.FC<Props> = (props) => {
     if (formData) {
       void awaitInitialState()
     }
-  }, [getFormState, schemaFieldsPath, id]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
+  }, [getFormState, schemaFieldsPath, id, apiRoute, serverURL]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state: formState } = await getFormState({
-        id,
-        formState: prevFormState,
-        operation: 'update',
-        schemaPath: schemaFieldsPath,
+      const { state: formState } = await getFormStateFetch({
+        apiRoute,
+        body: {
+          id,
+          data: formData,
+          operation: 'update',
+          schemaPath: schemaFieldsPath,
+        },
+        serverURL,
       })
 
       if (formState) {
@@ -107,7 +124,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       return prevFormState
     },
 
-    [id, schemaFieldsPath, formData.blockName, getFormState],
+    [id, schemaFieldsPath, formData.blockName, serverURL, apiRoute],
   )
 
   const classNames = [`${baseClass}__row`, `${baseClass}__row--no-errors`].filter(Boolean).join(' ')

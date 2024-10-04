@@ -28,7 +28,7 @@ import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
 import { useLocale } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
-import { useServerFunctions } from '../ServerFunctions/index.js'
+// import { useServerFunctions } from '../ServerFunctions/index.js'
 import { useTranslation } from '../Translation/index.js'
 import { UploadEditsProvider, useUploadEdits } from '../UploadEdits/index.js'
 
@@ -56,7 +56,7 @@ const DocumentInfo: React.FC<
     onSave: onSaveFromProps,
   } = props
 
-  const { getFormState } = useServerFunctions()
+  // const { getFormState } = useServerFunctions()
 
   const {
     config: {
@@ -497,15 +497,19 @@ const DocumentInfo: React.FC<
 
       const newData = collectionSlug ? json.doc : json.result
 
-      const { state: newState } = await getFormState({
-        id,
-        collectionSlug,
-        data: newData,
-        docPreferences,
-        globalSlug,
-        locale,
-        operation,
-        schemaPath: collectionSlug || globalSlug,
+      const { state: newState } = await getFormStateFetch({
+        apiRoute: api,
+        body: {
+          id,
+          collectionSlug,
+          data: newData,
+          docPreferences,
+          globalSlug,
+          locale,
+          operation,
+          schemaPath: collectionSlug || globalSlug,
+        },
+        serverURL,
       })
 
       setInitialState(newState)
@@ -522,7 +526,8 @@ const DocumentInfo: React.FC<
       locale,
       onSaveFromProps,
       getDocPermissions,
-      getFormState,
+      serverURL,
+      api,
     ],
   )
 
@@ -588,7 +593,11 @@ const DocumentInfo: React.FC<
       void getInitialState()
 
       return () => {
-        abortController.abort()
+        try {
+          abortController.abort()
+        } catch (_err) {
+          // swallow error
+        }
       }
     }
   }, [
