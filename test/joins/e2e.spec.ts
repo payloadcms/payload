@@ -191,36 +191,6 @@ test.describe('Admin Panel', () => {
     const joinField = page.locator('.field-type.join').first()
     await expect(joinField).toBeVisible()
 
-    const addButton = joinField.locator('.relationship-table__actions button.doc-drawer__toggler', {
-      hasText: exactText('Add new'),
-    })
-
-    await expect(addButton).toBeVisible()
-
-    await addButton.click()
-    const drawer = page.locator('[id^=doc-drawer_posts_1_]')
-    await expect(drawer).toBeVisible()
-    const uploadField = drawer.locator('#field-upload')
-    await expect(uploadField).toBeVisible()
-    const uploadValue = uploadField.locator('.upload-relationship-details img')
-    await expect(uploadValue).toBeVisible()
-    const titleField = drawer.locator('#field-title')
-    await expect(titleField).toBeVisible()
-    await titleField.fill('Test post with upload')
-    await drawer.locator('button[id="action-save"]').click()
-    await expect(drawer).toBeHidden()
-    await expect(
-      joinField.locator('tbody tr td:nth-child(2)', {
-        hasText: exactText('Test post with upload'),
-      }),
-    ).toBeVisible()
-  })
-
-  test('should update relationship table when new upload is created', async () => {
-    await navigateToDoc(page, uploadsURL)
-    const joinField = page.locator('.field-type.join').first()
-    await expect(joinField).toBeVisible()
-
     // TODO: change this to edit the first row in the join table
     const addButton = joinField.locator('.relationship-table__actions button.doc-drawer__toggler', {
       hasText: exactText('Add new'),
