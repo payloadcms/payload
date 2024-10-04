@@ -1,9 +1,11 @@
-import type { PostgresAdapter } from '../types'
+import type { GenericEnum, GenericRelation, GenericTable, PostgresAdapter } from '../types'
 
 type RequireDrizzleKit = () => {
-  generateDrizzleJson: (args: { schema: Record<string, unknown> }) => unknown
+  generateDrizzleJson: (args: {
+    schema: Record<string, GenericEnum | GenericRelation | GenericTable>
+  }) => unknown
   pushSchema: (
-    schema: Record<string, unknown>,
+    schema: Record<string, GenericEnum | GenericRelation | GenericTable>,
     drizzle: PostgresAdapter['drizzle'],
     filterSchema?: string[],
   ) => Promise<{ apply; hasDataLoss; warnings }>
