@@ -26,6 +26,7 @@ import { registerFirstUser } from './auth/registerFirstUser.js'
 import { resetPassword } from './auth/resetPassword.js'
 import { unlock } from './auth/unlock.js'
 import { verifyEmail } from './auth/verifyEmail.js'
+import { buildFormState } from './buildFormState.js'
 import { endpointsAreDisabled } from './checkEndpoints.js'
 import { count } from './collections/count.js'
 import { create } from './collections/create.js'
@@ -108,6 +109,9 @@ const endpoints = {
     GET: {
       access,
       og: generateOGImage,
+    },
+    POST: {
+      buildFormState,
     },
   },
 }
@@ -571,6 +575,10 @@ export const POST =
               res = new Response('Route Not Found', { status: 404 })
           }
         }
+      } else if (slug.length === 1 && slug1 in endpoints.root.POST) {
+        await addDataAndFileToRequest(req)
+        addLocalesToRequestFromData(req)
+        res = await endpoints.root.POST[slug1]({ req })
       }
 
       if (res instanceof Response) {

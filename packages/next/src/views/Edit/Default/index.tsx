@@ -15,9 +15,10 @@ import {
   useDocumentEvents,
   useDocumentInfo,
   useEditDepth,
-  useServerFunctions,
+  // useServerFunctions,
   useUploadEdits,
 } from '@payloadcms/ui'
+import { getFormStateFetch } from '@payloadcms/ui'
 import {
   formatAdminURL,
   handleBackToDashboard,
@@ -79,7 +80,7 @@ export const DefaultEditView: React.FC = () => {
 
   const { refreshCookieAsync, user } = useAuth()
 
-  const { getFormState } = useServerFunctions()
+  // const { getFormState } = useServerFunctions()
 
   const abortControllerRef = useRef<AbortController | null>(null)
 
@@ -87,7 +88,8 @@ export const DefaultEditView: React.FC = () => {
     config,
     config: {
       admin: { user: userSlug },
-      routes: { admin: adminRoute },
+      routes: { admin: adminRoute, api: apiRoute },
+      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -252,17 +254,21 @@ export const DefaultEditView: React.FC = () => {
 
       const docPreferences = await getDocPreferences()
 
-      const { lockedState, state } = await getFormState({
-        id,
-        collectionSlug,
-        docPreferences,
-        formState: prevFormState,
-        globalSlug,
-        operation,
-        returnLockStatus: isLockingEnabled ? true : false,
-        schemaPath,
+      const { lockedState, state } = await getFormStateFetch({
+        apiRoute,
+        body: {
+          id,
+          collectionSlug,
+          docPreferences,
+          formState: prevFormState,
+          globalSlug,
+          operation,
+          returnLockStatus: isLockingEnabled ? true : false,
+          schemaPath,
+          updateLastEdited,
+        },
+        serverURL,
         signal: abortController.signal,
-        updateLastEdited,
       })
 
       setDocumentIsLocked(true)
@@ -285,9 +291,9 @@ export const DefaultEditView: React.FC = () => {
             documentLockStateRef.current = documentLockStateRef.current = {
               hasShownLockedModal: documentLockStateRef.current?.hasShownLockedModal || false,
               isLocked: true,
-              user: lockedState.user as ClientUser,
+              user: lockedState.user,
             }
-            setCurrentEditor(lockedState.user as ClientUser)
+            setCurrentEditor(lockedState.user)
           }
         }
       }
@@ -306,7 +312,8 @@ export const DefaultEditView: React.FC = () => {
       isLockingEnabled,
       setDocumentIsLocked,
       lastUpdateTime,
-      getFormState,
+      apiRoute,
+      serverURL,
     ],
   )
 

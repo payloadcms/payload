@@ -21,6 +21,7 @@ import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
 import { requests } from '../../utilities/api.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
+import { getFormStateFetch } from '../../utilities/getFormStateFetch.js'
 import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
 import { isEditing as getIsEditing } from '../../utilities/isEditing.js'
 import { useAuth } from '../Auth/index.js'
@@ -549,13 +550,17 @@ const DocumentInfo: React.FC<
         setIsLoading(true)
 
         try {
-          const { state: result } = await getFormState({
-            id,
-            collectionSlug,
-            globalSlug,
-            locale,
-            operation,
-            schemaPath: collectionSlug || globalSlug,
+          const { state: result } = await getFormStateFetch({
+            apiRoute: api,
+            body: {
+              id,
+              collectionSlug,
+              globalSlug,
+              locale,
+              operation,
+              schemaPath: collectionSlug || globalSlug,
+            },
+            serverURL,
             signal: abortController.signal,
           })
 
@@ -581,6 +586,10 @@ const DocumentInfo: React.FC<
       }
 
       void getInitialState()
+
+      return () => {
+        abortController.abort()
+      }
     }
   }, [
     api,
@@ -594,19 +603,8 @@ const DocumentInfo: React.FC<
     initialDataFromProps,
     initialStateFromProps,
     getDocPermissions,
-    getFormState,
     user,
   ])
-
-  useEffect(() => {
-    const currentAbortController = abortControllerRef.current
-
-    return () => {
-      if (currentAbortController) {
-        currentAbortController.abort()
-      }
-    }
-  }, [])
 
   useEffect(() => {
     void getVersions()
