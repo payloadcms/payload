@@ -330,7 +330,7 @@ export const traverseFields = ({
           )
         } else {
           targetTable[fieldName] = withDefault(
-            text(adapter.disableConvertRadioAndGroupFieldsToSnakeCase ? fieldName : columnName, {
+            text(columnName, {
               enum: options,
             }),
             field,

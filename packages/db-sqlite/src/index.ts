@@ -84,8 +84,6 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       client: undefined,
       clientConfig: args.client,
       defaultDrizzleSnapshot,
-      disableConvertRadioAndGroupFieldsToSnakeCase:
-        args.disableConvertRadioAndGroupFieldsToSnakeCase ?? false,
       drizzle: undefined,
       features: {
         json: true,
