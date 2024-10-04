@@ -197,6 +197,66 @@ export default buildConfig({
 })
 ```
 
+#### Running tasks inline
+
+In order to run tasks inline without predefining them, you can use the `runTaskInline` function.
+
+The drawbacks of this approach are that tasks cannot be re-used as easily, and the **task data stored in the job** will not be typed. In the following example, the inline task data will be stored on the job under `job.taskStatus.inline['2']` but completely untyped, as types for dynamic tasks like these cannot be generated beforehand.
+
+Example:
+
+```ts
+export default buildConfig({
+  // ...
+  jobs: {
+    tasks: [
+      // ...
+    ]
+    workflows: [
+      {
+        slug: 'createPostAndUpdate',
+        inputSchema: [
+          {
+            name: 'title',
+            type: 'text',
+            required: true,
+          },
+        ],
+        handler: async ({ job, runTask }) => {
+          const output = await runTask({
+            task: 'createPost',
+            id: '1',
+            input: {
+              title: job.input.title,
+            },
+          })
+
+          const { newPost } = await runTaskInline({
+            task: async ({ req }) => {
+              const newPost = await req.payload.update({
+                collection: 'post',
+                id: output.postID,
+                req,
+                retries: 3,
+                data: {
+                  title: 'updated!',
+                },
+              })
+              return {
+                output: {
+                  newPost
+                },
+              }
+            },
+            id: '2',
+          })
+        },
+      } as WorkflowConfig<'updatePost'>
+    ]
+  }
+})
+```
+
 ### Defining JSON-based workflows
 
 JSON-based workflows are a way to define the tasks the workflow should run in an array. The relationships between the tasks, their run order and their conditions are defined in the JSON object, which allows payload to statically analyze the workflow and will generate more helpful graphs.
