@@ -73,7 +73,6 @@ const DocumentInfo: React.FC<
   const collectionConfig = collections.find((c) => c.slug === collectionSlug)
   const globalConfig = globals.find((g) => g.slug === globalSlug)
   const docConfig = collectionConfig || globalConfig
-  const abortControllerRef = useRef<AbortController | null>(null)
 
   const lockDocumentsProp = docConfig?.lockDocuments !== undefined ? docConfig?.lockDocuments : true
 
@@ -532,14 +531,8 @@ const DocumentInfo: React.FC<
   )
 
   useEffect(() => {
-    const localeChanged = locale !== prevLocale.current
-
-    if (abortControllerRef?.current) {
-      abortControllerRef.current.abort()
-    }
-
     const abortController = new AbortController()
-    abortControllerRef.current = abortController
+    const localeChanged = locale !== prevLocale.current
 
     if (
       initialStateFromProps === undefined ||
@@ -578,14 +571,13 @@ const DocumentInfo: React.FC<
 
           setInitialState(result)
         } catch (_err) {
-          console.error(_err) // eslint-disable-line no-console
-
-          if (typeof onLoadError === 'function') {
-            void onLoadError()
+          if (!abortController.signal.aborted) {
+            if (typeof onLoadError === 'function') {
+              void onLoadError()
+            }
+            setIsError(true)
+            setIsLoading(false)
           }
-
-          setIsError(true)
-          setIsLoading(false)
         }
         setIsLoading(false)
       }
