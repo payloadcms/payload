@@ -72,19 +72,25 @@ describe('Queues', () => {
     const job = await payload.create({
       collection: 'payload-jobs',
       data: {
-        input: '1',
+        input: {
+          message: '1',
+        },
       },
     })
-    expect(job.input).toBe('1')
+    // @ts-expect-error
+    expect(job.input.message).toBe('1')
 
     const updatedJob = await payload.update({
       collection: 'payload-jobs',
       id: job.id,
       data: {
-        input: '2',
+        input: {
+          message: '2',
+        },
       },
     })
-    expect(updatedJob.input as any).toBe('2')
+    // @ts-expect-error
+    expect(updatedJob.input.message).toBe('2')
   })
 
   it('can create new jobs', async () => {
