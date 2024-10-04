@@ -13,7 +13,6 @@ import { formatAdminURL } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import { type FormState } from 'payload'
 import React from 'react'
-import { toast } from 'sonner'
 
 type Args = {
   readonly token: string
@@ -52,7 +51,6 @@ export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
     const user = await fetchFullUser()
     if (user) {
       history.push(adminRoute)
-      toast.success(i18n.t('general:updatedSuccessfully'))
     } else {
       history.push(
         formatAdminURL({
@@ -60,9 +58,8 @@ export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
           path: loginRoute,
         }),
       )
-      toast.success(i18n.t('authentication:checkYourEmailForVerification'))
     }
-  }, [adminRoute, fetchFullUser, history, loginRoute, i18n])
+  }, [adminRoute, fetchFullUser, history, loginRoute])
 
   return (
     <Form
