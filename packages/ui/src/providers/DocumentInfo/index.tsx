@@ -583,13 +583,13 @@ const DocumentInfo: React.FC<
       }
 
       void getInitialState()
+    }
 
-      return () => {
-        try {
-          abortController.abort()
-        } catch (_err) {
-          // swallow error
-        }
+    return () => {
+      try {
+        abortController.abort()
+      } catch (_err) {
+        // swallow error
       }
     }
   }, [
