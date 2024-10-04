@@ -86,7 +86,7 @@ export const bin = async () => {
   }
 
   if (script === 'jobs:run') {
-    const payload = await getPayload(config)
+    const payload = await getPayload({ config })
     const limit = args.limit ? parseInt(args.limit, 10) : undefined
     const queue = args.queue ? args.queue : undefined
 
@@ -97,6 +97,10 @@ export const bin = async () => {
           queue,
         })
       })
+
+      process.stdin.resume() // Keep the process alive
+
+      return
     } else {
       return await payload.jobs.run({
         limit,
