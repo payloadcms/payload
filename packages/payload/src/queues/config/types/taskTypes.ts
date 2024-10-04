@@ -92,17 +92,23 @@ export type TaskConfig<
    */
   handler: string | TaskHandler<TTaskSlugOrInputOutput> // TODO: Rename to handler
   /**
-   * Define the input field schema
+   * Define the input field schema - payload will generate a type for this schema.
    */
   inputSchema?: Field[]
   /**
    * Define a human-friendly label for this task.
    */
   label?: string
+  /**
+   * Function to be executed if the task fails.
+   */
   onFail?: () => void
+  /**
+   * Function to be executed if the task succeeds.
+   */
   onSuccess?: () => void
   /**
-   * Define the output field schema
+   * Define the output field schema - payload will generate a type for this schema.
    */
   outputSchema?: Field[]
   /**
@@ -110,7 +116,7 @@ export type TaskConfig<
    */
   retries?: number
   /**
-   * Define a slug-based name for this job.
+   * Define a slug-based name for this job. This slug needs to be unique among both tasks and workflows.
    */
   slug: TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] ? TTaskSlugOrInputOutput : string
 }

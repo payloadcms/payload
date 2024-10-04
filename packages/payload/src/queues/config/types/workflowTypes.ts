@@ -87,11 +87,11 @@ export type WorkflowConfig<TWorkflowSlugOrInput extends keyof TypedJobs['workflo
   handler: string | WorkflowHandler<TWorkflowSlugOrInput>
   //TODO: Add JSON-based control flow to handler later. This will add | array.  All tasks and their order defined in JSON
   /**
-   * Define the input field schema
+   * Define the input field schema  - payload will generate a type for this schema.
    */
   inputSchema?: Field[]
   /**
-   * Define a human-friendly label for this job.
+   * Define a human-friendly label for this workflow.
    */
   label?: string
   /**
