@@ -870,7 +870,8 @@ describe('lexicalBlocks', () => {
 
       // navigate to list view
       await page.locator('.step-nav a').nth(1).click()
-      await page.waitForURL('**/lexical-fields?limit=10')
+
+      await page.waitForURL(/^.*\/lexical-fields(\?.*)?$/)
 
       // Click on lexical document in list view (navigateToLexicalFields is client-side navigation which is what we need to reproduce the issue here)
       await navigateToLexicalFields(false)
