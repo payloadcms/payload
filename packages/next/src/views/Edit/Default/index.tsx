@@ -7,6 +7,7 @@ import {
   DocumentFields,
   Form,
   type FormProps,
+  getFormStateFetch,
   OperationProvider,
   RenderComponent,
   Upload,
@@ -15,7 +16,7 @@ import {
   useDocumentEvents,
   useDocumentInfo,
   useEditDepth,
-  useServerFunctions,
+  // useServerFunctions,
   useUploadEdits,
 } from '@payloadcms/ui'
 import {
@@ -79,13 +80,14 @@ export const DefaultEditView: React.FC = () => {
 
   const { refreshCookieAsync, user } = useAuth()
 
-  const { getFormState } = useServerFunctions()
+  // const { getFormState } = useServerFunctions()
 
   const {
     config,
     config: {
       admin: { user: userSlug },
-      routes: { admin: adminRoute },
+      routes: { admin: adminRoute, api },
+      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -243,16 +245,20 @@ export const DefaultEditView: React.FC = () => {
 
       const docPreferences = await getDocPreferences()
 
-      const { lockedState, state } = await getFormState({
-        id,
-        collectionSlug,
-        docPreferences,
-        formState: prevFormState,
-        globalSlug,
-        operation,
-        returnLockStatus: isLockingEnabled ? true : false,
-        schemaPath,
-        updateLastEdited,
+      const { lockedState, state } = await getFormStateFetch({
+        api,
+        body: {
+          id,
+          collectionSlug,
+          docPreferences,
+          formState: prevFormState,
+          globalSlug,
+          operation,
+          returnLockStatus: isLockingEnabled ? true : false,
+          schemaPath,
+          updateLastEdited,
+        },
+        serverURL,
       })
 
       setDocumentIsLocked(true)
@@ -275,9 +281,9 @@ export const DefaultEditView: React.FC = () => {
             documentLockStateRef.current = documentLockStateRef.current = {
               hasShownLockedModal: documentLockStateRef.current?.hasShownLockedModal || false,
               isLocked: true,
-              user: lockedState.user as ClientUser,
+              user: lockedState.user,
             }
-            setCurrentEditor(lockedState.user as ClientUser)
+            setCurrentEditor(lockedState.user)
           }
         }
       }
@@ -296,7 +302,8 @@ export const DefaultEditView: React.FC = () => {
       isLockingEnabled,
       setDocumentIsLocked,
       lastUpdateTime,
-      getFormState,
+      serverURL,
+      api,
     ],
   )
 
