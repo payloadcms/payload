@@ -48,14 +48,24 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     // Retrieve original raw version
     // /////////////////////////////////////
 
-    const { docs: versionDocs } = await req.payload.db.findVersions({
+    const findVersionDbArgs = {
       collection: collectionConfig.slug,
       limit: 1,
       locale,
       pagination: false,
       req,
       where: { id: { equals: id } },
-    })
+    }
+
+    let queryResult: any
+    // @ts-expect-error exists
+    if (collectionConfig?.db?.findVersions) {
+      // @ts-expect-error exists
+      queryResult = await collectionConfig.db.findVersions(findVersionDbArgs)
+    } else {
+      queryResult = await req.payload.db.findVersions(findVersionDbArgs)
+    }
+    const versionDocs = queryResult.docs
 
     const [rawVersion] = versionDocs
 
@@ -85,7 +95,14 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       where: combineQueries({ id: { equals: parentDocID } }, accessResults),
     }
 
-    const doc = await req.payload.db.findOne(findOneArgs)
+    let doc
+    // @ts-expect-error exists
+    if (collectionConfig?.db?.findOne) {
+      // @ts-expect-error exists
+      doc = await collectionConfig.db.findOne(findOneArgs)
+    } else {
+      doc = await req.payload.db.findOne(findOneArgs)
+    }
 
     if (!doc && !hasWherePolicy) {
       throw new NotFound(req.t)
@@ -110,12 +127,20 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     // Update
     // /////////////////////////////////////
 
-    let result = await req.payload.db.updateOne({
+    const restoreVersionArgs = {
       id: parentDocID,
       collection: collectionConfig.slug,
       data: rawVersion.version,
       req,
-    })
+    }
+    let result
+    // @ts-expect-error exists
+    if (collectionConfig?.db?.updateOne) {
+      // @ts-expect-error exists
+      result = await collectionConfig.db.updateOne(restoreVersionArgs)
+    } else {
+      result = await req.payload.db.updateOne(restoreVersionArgs)
+    }
 
     // /////////////////////////////////////
     // Save `previousDoc` as a version after restoring
@@ -125,7 +150,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
 
     delete prevVersion.id
 
-    await payload.db.createVersion({
+    const createVersionDbArgs = {
       autosave: false,
       collectionSlug: collectionConfig.slug,
       createdAt: prevVersion.createdAt,
@@ -133,7 +158,14 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       req,
       updatedAt: new Date().toISOString(),
       versionData: draft ? { ...rawVersion.version, _status: 'draft' } : rawVersion.version,
-    })
+    }
+    // @ts-expect-error exists
+    if (collectionConfig?.db?.createVersion) {
+      // @ts-expect-error exists
+      await collectionConfig.db.createVersion(createVersionDbArgs)
+    } else {
+      await payload.db.createVersion(createVersionDbArgs)
+    }
 
     // /////////////////////////////////////
     // afterRead - Fields

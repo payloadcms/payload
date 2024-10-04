@@ -27,21 +27,36 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
     : { and: [{ parent: { equals: id } }, { latest: { equals: true } }] }
 
   if (config.versions?.drafts) {
-    const { docs } = await payload.db.findVersions<T>({
+    const findVersionsDbArgs = {
       collection: config.slug,
       limit: 1,
       pagination: false,
       req,
       sort: '-updatedAt',
       where: whereQuery,
-    })
+    }
+    let result: any
+    // @ts-expect-error exists
+    if (config?.db?.findVersions) {
+      // @ts-expect-error exists
+      result = await config.db.findVersions<T>(findVersionsDbArgs)
+    } else {
+      result = await payload.db.findVersions<T>(findVersionsDbArgs)
+    }
+    const docs = result.docs
     ;[latestVersion] = docs
   }
 
   if (!latestVersion) {
     if (!published) {
-      const doc = await payload.db.findOne<T>({ ...query, req })
-
+      let doc
+      // @ts-expect-error exists
+      if (config?.db?.findOne) {
+        // @ts-expect-error exists
+        doc = await config.db.findOne<T>({ ...query, req })
+      } else {
+        doc = await payload.db.findOne<T>({ ...query, req })
+      }
       return doc
     }
 

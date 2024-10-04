@@ -77,11 +77,18 @@ export const countOperation = async <TSlug extends CollectionSlug>(
       where,
     })
 
-    result = await payload.db.count({
+    const countDbArgs = {
       collection: collectionConfig.slug,
       req,
       where: fullWhere,
-    })
+    }
+    // @ts-expect-error exists
+    if (collectionConfig?.db?.count) {
+      // @ts-expect-error exists
+      result = await collectionConfig.db.count(countDbArgs)
+    } else {
+      result = await payload.db.count(countDbArgs)
+    }
 
     // /////////////////////////////////////
     // afterOperation - Collection

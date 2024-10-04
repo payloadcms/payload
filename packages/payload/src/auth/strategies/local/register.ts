@@ -82,7 +82,7 @@ export const registerLocalStrategy = async ({
     delete sanitizedDoc.password
   }
 
-  return payload.db.create({
+  const dbArgs = {
     collection: collection.slug,
     data: {
       ...sanitizedDoc,
@@ -90,5 +90,12 @@ export const registerLocalStrategy = async ({
       salt,
     },
     req,
-  })
+  }
+  // @ts-expect-error exists
+  if (collection?.db?.create) {
+    // @ts-expect-error exists
+    return collection.db.create(dbArgs)
+  } else {
+    return payload.db.create(dbArgs)
+  }
 }

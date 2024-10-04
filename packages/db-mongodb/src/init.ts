@@ -1,5 +1,5 @@
 import type { PaginateOptions } from 'mongoose'
-import type { Init, SanitizedCollectionConfig } from 'payload'
+import type { Init, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 import mongoose from 'mongoose'
 import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2'
@@ -17,6 +17,11 @@ import { getDBName } from './utilities/getDBName.js'
 
 export const init: Init = function init(this: MongooseAdapter) {
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
+    // Skip collections that have an .init() method
+    if ('function' === typeof collection?.db?.init) {
+      return
+    }
+
     const schema = buildCollectionSchema(collection, this.payload.config)
 
     if (collection.versions) {
@@ -65,7 +70,12 @@ export const init: Init = function init(this: MongooseAdapter) {
   const model = buildGlobalModel(this.payload.config)
   this.globals = model
 
-  this.payload.config.globals.forEach((global) => {
+  this.payload.config.globals.forEach((global: SanitizedGlobalConfig) => {
+    // Skip globals that have an .init() method
+    if ('function' === typeof global?.db?.init) {
+      return
+    }
+
     if (global.versions) {
       const versionModelName = getDBName({ config: global, versions: true })
 

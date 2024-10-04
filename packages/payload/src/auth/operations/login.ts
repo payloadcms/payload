@@ -168,11 +168,19 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       whereConstraint = usernameConstraint
     }
 
-    user = await payload.db.findOne<any>({
+    const userDbArgs = {
       collection: collectionConfig.slug,
       req,
       where: whereConstraint,
-    })
+    }
+
+    // @ts-expect-error exists
+    if (collectionConfig?.db?.findOne) {
+      // @ts-expect-error exists
+      user = await collectionConfig.db.findOne(userDbArgs)
+    } else {
+      user = await req.payload.db.findOne<any>(userDbArgs)
+    }
 
     if (!user || (args.collection.config.auth.verify && user._verified === false)) {
       throw new AuthenticationError(req.t, Boolean(canLoginWithUsername && sanitizedUsername))

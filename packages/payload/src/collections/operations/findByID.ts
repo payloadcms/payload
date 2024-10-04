@@ -94,7 +94,14 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
       throw new NotFound(t)
     }
 
-    let result: DataFromCollectionSlug<TSlug> = await req.payload.db.findOne(findOneArgs)
+    let result: DataFromCollectionSlug<TSlug>
+    // @ts-expect-error exists
+    if (collectionConfig?.db?.findOne) {
+      // @ts-expect-error exists
+      result = await collectionConfig.db.findOne(findOneArgs)
+    } else {
+      result = await req.payload.db.findOne(findOneArgs)
+    }
 
     if (!result) {
       if (!disableErrors) {

@@ -68,7 +68,15 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
       throw new NotFound(req.t)
     }
 
-    const { docs: results } = await payload.db.findGlobalVersions(findGlobalVersionsArgs)
+    let globalVersions: any
+    // @ts-expect-error exists
+    if (globalConfig?.db?.findGlobalVersions) {
+      // @ts-expect-error exists
+      globalVersions = await globalConfig.db.findGlobalVersions(findGlobalVersionsArgs)
+    } else {
+      globalVersions = await payload.db.findGlobalVersions(findGlobalVersionsArgs)
+    }
+    const results = globalVersions.docs
     if (!results || results?.length === 0) {
       if (!disableErrors) {
         if (!hasWhereAccess) {

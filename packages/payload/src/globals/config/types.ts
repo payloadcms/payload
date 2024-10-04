@@ -17,9 +17,9 @@ import type {
   LivePreviewConfig,
   MetaConfig,
 } from '../../config/types.js'
-import type { DBIdentifierName } from '../../database/types.js'
+import type { BaseDatabaseAdapter, DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'
-import type { GlobalSlug, TypedGlobal } from '../../index.js'
+import type { DatabaseAdapterObj, GlobalSlug, TypedGlobal } from '../../index.js'
 import type { PayloadRequest, RequestContext, Where } from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
@@ -145,6 +145,34 @@ export type GlobalConfig = {
   admin?: GlobalAdminOptions
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
+  /**
+   * Add a custom database adapter to this global.
+   */
+  db?:
+    | DatabaseAdapterObj
+    | Pick<
+        BaseDatabaseAdapter,
+        | 'connect'
+        | 'count'
+        | 'create'
+        | 'createGlobal'
+        | 'createGlobalVersion'
+        | 'createVersion'
+        | 'deleteMany'
+        | 'deleteOne'
+        | 'deleteVersions'
+        | 'find'
+        | 'findGlobal'
+        | 'findGlobalVersions'
+        | 'findOne'
+        | 'findVersions'
+        | 'init'
+        | 'queryDrafts'
+        | 'updateGlobal'
+        | 'updateGlobalVersion'
+        | 'updateOne'
+        | 'updateVersion'
+      >
   /**
    * Customize the SQL table name
    */

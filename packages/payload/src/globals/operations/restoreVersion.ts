@@ -49,12 +49,21 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     // Retrieve original raw version
     // /////////////////////////////////////
 
-    const { docs: versionDocs } = await payload.db.findGlobalVersions<any>({
+    const findGlobalDbArgs = {
       global: globalConfig.slug,
       limit: 1,
       req,
       where: { id: { equals: id } },
-    })
+    }
+    let findGlobalResult: any
+    // @ts-expect-error exists
+    if (globalConfig?.db?.findGlobalVersions) {
+      // @ts-expect-error exists
+      findGlobalResult = await globalConfig.db.findGlobalVersions<any>(findGlobalDbArgs)
+    } else {
+      findGlobalResult = await payload.db.findGlobalVersions<any>(findGlobalDbArgs)
+    }
+    const versionDocs = findGlobalResult.docs
 
     if (!versionDocs || versionDocs.length === 0) {
       throw new NotFound(req.t)
@@ -84,37 +93,70 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     // Update global
     // /////////////////////////////////////
 
-    const global = await payload.db.findGlobal({
-      slug: globalConfig.slug,
-      req,
-    })
+    let global: any
+    // @ts-expect-error exists
+    if (globalConfig?.db?.findGlobal) {
+      // @ts-expect-error exists
+      global = await globalConfig.db.findGlobal({
+        slug: globalConfig.slug,
+        req,
+      })
+    } else {
+      global = await payload.db.findGlobal({
+        slug: globalConfig.slug,
+        req,
+      })
+    }
 
     let result = rawVersion.version
 
+    const globalDbArgs = {
+      slug: globalConfig.slug,
+      data: result,
+      req,
+    }
     if (global) {
-      result = await payload.db.updateGlobal({
-        slug: globalConfig.slug,
-        data: result,
-        req,
-      })
+      // @ts-expect-error exists
+      if (globalConfig?.db?.updateGlobal) {
+        // @ts-expect-error exists
+        result = await globalConfig.db.updateGlobal(globalDbArgs)
+      } else {
+        result = await payload.db.updateGlobal(globalDbArgs)
+      }
 
       const now = new Date().toISOString()
 
-      result = await payload.db.createGlobalVersion({
-        autosave: false,
-        createdAt: result.createdAt ? new Date(result.createdAt).toISOString() : now,
-        globalSlug: globalConfig.slug,
-        parent: id,
-        req,
-        updatedAt: draft ? now : new Date(result.updatedAt).toISOString(),
-        versionData: result,
-      })
+      // @ts-expect-error exists
+      if (globalConfig?.db?.createGlobalVersion) {
+        // @ts-expect-error exists
+        result = await globalConfig.db.createGlobalVersion({
+          autosave: false,
+          createdAt: result.createdAt ? new Date(result.createdAt).toISOString() : now,
+          globalSlug: globalConfig.slug,
+          parent: id,
+          req,
+          updatedAt: draft ? now : new Date(result.updatedAt).toISOString(),
+          versionData: result,
+        })
+      } else {
+        result = await payload.db.createGlobalVersion({
+          autosave: false,
+          createdAt: result.createdAt ? new Date(result.createdAt).toISOString() : now,
+          globalSlug: globalConfig.slug,
+          parent: id,
+          req,
+          updatedAt: draft ? now : new Date(result.updatedAt).toISOString(),
+          versionData: result,
+        })
+      }
     } else {
-      result = await payload.db.createGlobal({
-        slug: globalConfig.slug,
-        data: result,
-        req,
-      })
+      // @ts-expect-error exists
+      if (globalConfig?.db?.createGlobal) {
+        // @ts-expect-error exists
+        result = await globalConfig.db.createGlobal(globalDbArgs)
+      } else {
+        result = await payload.db.createGlobal(globalDbArgs)
+      }
     }
 
     // /////////////////////////////////////

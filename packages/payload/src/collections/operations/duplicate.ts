@@ -231,11 +231,20 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
     // Create / Update
     // /////////////////////////////////////
 
-    const versionDoc = await payload.db.create({
+    const dbArgs = {
       collection: collectionConfig.slug,
       data: result,
       req,
-    })
+    }
+
+    let versionDoc: DataFromCollectionSlug<TSlug>
+    // @ts-expect-error exists
+    if (collectionConfig?.db?.create) {
+      // @ts-expect-error exists
+      versionDoc = await collectionConfig.db.create(dbArgs)
+    } else {
+      versionDoc = await payload.db.create(dbArgs)
+    }
 
     // /////////////////////////////////////
     // Create version

@@ -124,7 +124,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
         where: fullWhere,
       })
 
-      result = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>({
+      const queryDraftArgs = {
         collection: collectionConfig.slug,
         limit: sanitizedLimit,
         locale,
@@ -133,7 +133,15 @@ export const findOperation = async <TSlug extends CollectionSlug>(
         req,
         sort: getQueryDraftsSort(sort),
         where: fullWhere,
-      })
+      }
+      // @ts-expect-error exists
+      if (collectionConfig?.db?.queryDrafts) {
+        result =
+          // @ts-expect-error exists
+          await collectionConfig.db.queryDrafts<DataFromCollectionSlug<TSlug>>(queryDraftArgs)
+      } else {
+        result = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>(queryDraftArgs)
+      }
     } else {
       await validateQueryPaths({
         collectionConfig,
@@ -142,7 +150,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
         where,
       })
 
-      result = await payload.db.find<DataFromCollectionSlug<TSlug>>({
+      const dbArgs = {
         collection: collectionConfig.slug,
         joins: req.payloadAPI === 'GraphQL' ? false : joins,
         limit: sanitizedLimit,
@@ -152,7 +160,15 @@ export const findOperation = async <TSlug extends CollectionSlug>(
         req,
         sort,
         where: fullWhere,
-      })
+      }
+
+      // @ts-expect-error exists
+      if (collectionConfig?.db?.find) {
+        // @ts-expect-error exists
+        result = await collectionConfig.db.find<DataFromCollectionSlug<TSlug>>(dbArgs)
+      } else {
+        result = await payload.db.find<DataFromCollectionSlug<TSlug>>(dbArgs)
+      }
     }
 
     if (includeLockStatus) {

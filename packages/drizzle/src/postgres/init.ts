@@ -1,4 +1,4 @@
-import type { Init, SanitizedCollectionConfig } from 'payload'
+import type { Init, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 import { uniqueIndex } from 'drizzle-orm/pg-core'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
@@ -21,6 +21,11 @@ export const init: Init = async function init(this: BasePostgresAdapter) {
   }
 
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
+    // Skip collections that have an .init() method
+    if ('function' === typeof collection?.db?.init) {
+      return
+    }
+
     createTableName({
       adapter: this,
       config: collection,
@@ -80,7 +85,12 @@ export const init: Init = async function init(this: BasePostgresAdapter) {
     }
   })
 
-  this.payload.config.globals.forEach((global) => {
+  this.payload.config.globals.forEach((global: SanitizedGlobalConfig) => {
+    // Skip globals that have an .init() method
+    if ('function' === typeof global?.db?.init) {
+      return
+    }
+
     const tableName = createTableName({ adapter: this, config: global })
 
     buildTable({

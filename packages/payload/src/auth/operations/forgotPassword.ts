@@ -119,11 +119,19 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
       }
     }
 
-    let user = await payload.db.findOne<UserDoc>({
+    const userDbArgs = {
       collection: collectionConfig.slug,
       req,
       where: whereConstraint,
-    })
+    }
+    let user: UserDoc
+    // @ts-expect-error exists
+    if (collectionConfig?.db?.findOne) {
+      // @ts-expect-error exists
+      user = await collectionConfig.db.findOne<UserDoc>(userDbArgs)
+    } else {
+      user = await payload.db.findOne<UserDoc>(userDbArgs)
+    }
 
     // We don't want to indicate specifically that an email was not found,
     // as doing so could lead to the exposure of registered emails.

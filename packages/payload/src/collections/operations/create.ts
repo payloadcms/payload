@@ -236,11 +236,18 @@ export const createOperation = async <TSlug extends CollectionSlug>(
         req,
       })
     } else {
-      doc = await payload.db.create({
+      const dbArgs = {
         collection: collectionConfig.slug,
         data: resultWithLocales,
         req,
-      })
+      }
+      // @ts-expect-error exists
+      if (collectionConfig?.db?.create) {
+        // @ts-expect-error exists
+        doc = await collectionConfig.db.create(dbArgs)
+      } else {
+        doc = await payload.db.create(dbArgs)
+      }
     }
 
     const verificationToken = doc._verificationToken

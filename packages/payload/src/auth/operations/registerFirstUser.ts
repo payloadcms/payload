@@ -53,10 +53,20 @@ export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
       req,
     })
 
-    const doc = await payload.db.findOne({
-      collection: config.slug,
-      req,
-    })
+    let doc
+    // @ts-expect-error exists
+    if (config?.db?.findOne) {
+      // @ts-expect-error exists
+      doc = await config.db.findOne({
+        collection: config.slug,
+        req,
+      })
+    } else {
+      doc = await payload.db.findOne({
+        collection: config.slug,
+        req,
+      })
+    }
 
     if (doc) {
       throw new Forbidden(req.t)

@@ -6,7 +6,7 @@ import type { SanitizedGlobalConfig } from './types.js'
 
 export type ServerOnlyGlobalProperties = keyof Pick<
   SanitizedGlobalConfig,
-  'access' | 'admin' | 'custom' | 'endpoints' | 'fields' | 'hooks'
+  'access' | 'admin' | 'custom' | 'db' | 'endpoints' | 'fields' | 'hooks'
 >
 export type ServerOnlyGlobalAdminProperties = keyof Pick<
   SanitizedGlobalConfig['admin'],

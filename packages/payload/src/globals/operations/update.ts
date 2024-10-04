@@ -223,18 +223,27 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
     // /////////////////////////////////////
 
     if (!shouldSaveDraft) {
+      const globalDbArgs = {
+        slug,
+        data: result,
+        req,
+      }
       if (globalExists) {
-        result = await payload.db.updateGlobal({
-          slug,
-          data: result,
-          req,
-        })
+        // @ts-expect-error exists
+        if (globalConfig?.db?.updateGlobal) {
+          // @ts-expect-error exists
+          result = await globalConfig.db.updateGlobal(globalDbArgs)
+        } else {
+          result = await payload.db.updateGlobal(globalDbArgs)
+        }
       } else {
-        result = await payload.db.createGlobal({
-          slug,
-          data: result,
-          req,
-        })
+        // @ts-expect-error exists
+        if (globalConfig?.db?.createGlobal) {
+          // @ts-expect-error exists
+          result = await globalConfig.db.createGlobal(globalDbArgs)
+        } else {
+          result = await payload.db.createGlobal(globalDbArgs)
+        }
       }
     }
 

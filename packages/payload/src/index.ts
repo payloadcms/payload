@@ -469,9 +469,24 @@ export class BasePayload {
 
     this.secret = crypto.createHash('sha256').update(this.config.secret).digest('hex').slice(0, 32)
 
+    const globalDbConnections = {}
+    const globalDbInitializations = {}
+    const collectionDbConnections = {}
+    const collectionDbInitializations = {}
     this.globals = {
       config: this.config.globals,
     }
+
+    this.config.globals.forEach((global) => {
+      // @ts-expect-error property exists
+      if ('function' === typeof global.db?.connect) {
+        // @ts-expect-error property exists
+        globalDbConnections[global.slug] = global.db.connect
+      }
+      if ('function' === typeof global.db?.init) {
+        globalDbInitializations[global.slug] = global.db.init
+      }
+    })
 
     this.config.collections.forEach((collection) => {
       let customIDType = undefined
@@ -495,6 +510,15 @@ export class BasePayload {
         config: collection,
         customIDType,
       }
+
+      // @ts-expect-error property exists
+      if ('function' === typeof collection.db?.connect) {
+        // @ts-expect-error property exists
+        collectionDbConnections[collection.slug] = collection.db.connect
+      }
+      if ('function' === typeof collection.db?.init) {
+        collectionDbInitializations[collection.slug] = collection.db.init
+      }
     })
 
     // Generate types on startup
@@ -514,8 +538,22 @@ export class BasePayload {
       await this.db.init()
     }
 
+    Object.keys(globalDbInitializations).forEach(async (slug) => {
+      await globalDbInitializations[slug](this)
+    })
+    Object.keys(collectionDbInitializations).forEach(async (slug) => {
+      await collectionDbInitializations[slug](this)
+    })
+
     if (!options.disableDBConnect && this.db.connect) {
       await this.db.connect()
+
+      Object.keys(globalDbConnections).forEach(async (slug) => {
+        await globalDbConnections[slug](this)
+      })
+      Object.keys(collectionDbConnections).forEach(async (slug) => {
+        await collectionDbConnections[slug](this)
+      })
     }
 
     // Load email adapter

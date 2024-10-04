@@ -62,7 +62,9 @@ export class NextRESTClient {
 
   constructor(config: SanitizedConfig) {
     this.config = config
-    if (config?.serverURL) {this.serverURL = config.serverURL}
+    if (config?.serverURL) {
+      this.serverURL = config.serverURL
+    }
     this._GET = createGET(config)
     this._POST = createPOST(config)
     this._DELETE = createDELETE(config)

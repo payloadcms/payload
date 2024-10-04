@@ -134,24 +134,41 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
         where: versionsWhere,
       })
 
-      const query = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>({
+      const queryDraftsDbArgs = {
         collection: collectionConfig.slug,
         locale,
-        pagination: false,
         req,
         where: versionsWhere,
-      })
+      }
+      let query: any
+      // @ts-expect-error exists
+      if (collection.config?.db?.queryDrafts) {
+        query =
+          // @ts-expect-error exists
+          await collection.config.db.queryDrafts<DataFromCollectionSlug<TSlug>>(queryDraftsDbArgs)
+      } else {
+        query = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>(queryDraftsDbArgs)
+      }
 
       docs = query.docs
     } else {
-      const query = await payload.db.find({
+      const dbArgs = {
         collection: collectionConfig.slug,
         limit: 0,
         locale,
         pagination: false,
         req,
         where: fullWhere,
-      })
+      }
+
+      let query
+      // @ts-expect-error exists
+      if (collectionConfig?.db?.find) {
+        // @ts-expect-error exists
+        query = await collectionConfig.db.find(dbArgs)
+      } else {
+        query = await payload.db.find(dbArgs)
+      }
 
       docs = query.docs
     }
@@ -312,13 +329,20 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
         // /////////////////////////////////////
 
         if (!shouldSaveDraft || data._status === 'published') {
-          result = await req.payload.db.updateOne({
+          const dbArgs = {
             id,
             collection: collectionConfig.slug,
             data: result,
             locale,
             req,
-          })
+          }
+          // @ts-expect-error exists
+          if (collectionConfig?.db?.updateOne) {
+            // @ts-expect-error exists
+            result = await collectionConfig.db.updateOne(dbArgs)
+          } else {
+            result = await req.payload.db.updateOne(dbArgs)
+          }
         }
 
         // /////////////////////////////////////

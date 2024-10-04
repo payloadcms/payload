@@ -23,13 +23,21 @@ export const verifyEmailOperation = async (args: Args): Promise<boolean> => {
   try {
     const shouldCommit = await initTransaction(req)
 
-    const user = await req.payload.db.findOne<any>({
+    const userDbArgs = {
       collection: collection.config.slug,
       req,
       where: {
         _verificationToken: { equals: token },
       },
-    })
+    }
+    let user: any
+    // @ts-expect-error exists
+    if (collection.config?.db?.findOne) {
+      // @ts-expect-error exists
+      user = await collection.config.db.findOne<any>(userDbArgs)
+    } else {
+      user = await req.payload.db.findOne<any>(userDbArgs)
+    }
 
     if (!user) {
       throw new APIError('Verification token is invalid.', httpStatus.FORBIDDEN)
@@ -38,7 +46,7 @@ export const verifyEmailOperation = async (args: Args): Promise<boolean> => {
       throw new APIError('This account has already been activated.', httpStatus.ACCEPTED)
     }
 
-    await req.payload.db.updateOne({
+    const updateDbArgs = {
       id: user.id,
       collection: collection.config.slug,
       data: {
@@ -47,7 +55,15 @@ export const verifyEmailOperation = async (args: Args): Promise<boolean> => {
         _verified: true,
       },
       req,
-    })
+    }
+
+    // @ts-expect-error exists
+    if (collection.config?.db?.updateOne) {
+      // @ts-expect-error exists
+      await collection.config.db.updateOne(updateDbArgs)
+    } else {
+      await req.payload.db.updateOne(updateDbArgs)
+    }
 
     if (shouldCommit) {
       await commitTransaction(req)

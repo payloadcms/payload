@@ -53,7 +53,7 @@ export const saveVersion = async ({
         sort: '-updatedAt',
       }
       if (collection) {
-        ;({ docs } = await payload.db.findVersions({
+        const findVersionsDbArgs = {
           ...findVersionArgs,
           collection: collection.slug,
           limit: 1,
@@ -64,15 +64,31 @@ export const saveVersion = async ({
               equals: id,
             },
           },
-        }))
+        }
+
+        // @ts-expect-error exists
+        if (collection?.db?.findVersions) {
+          // @ts-expect-error exists
+          ;({ docs } = await collection.db.findVersions(findVersionsDbArgs))
+        } else {
+          ;({ docs } = await payload.db.findVersions(findVersionsDbArgs))
+        }
       } else {
-        ;({ docs } = await payload.db.findGlobalVersions({
+        const findGlobalVersionsDbArgs = {
           ...findVersionArgs,
           global: global.slug,
           limit: 1,
           pagination: false,
           req,
-        }))
+        }
+
+        // @ts-expect-error exists
+        if (global?.db?.findGlobalVersions) {
+          // @ts-expect-error exists
+          ;({ docs } = await global.db.findGlobalVersions(findGlobalVersionsDbArgs))
+        } else {
+          ;({ docs } = await payload.db.findGlobalVersions(findGlobalVersionsDbArgs))
+        }
       }
       const [latestVersion] = docs
 
@@ -95,17 +111,31 @@ export const saveVersion = async ({
         }
 
         if (collection) {
-          result = await payload.db.updateVersion({
+          const updateVersionDbArgs = {
             ...updateVersionArgs,
             collection: collection.slug,
             req,
-          })
+          }
+          // @ts-expect-error exists
+          if (collection?.db?.updateVersion) {
+            // @ts-expect-error exists
+            result = await collection.db.updateVersion(updateVersionDbArgs)
+          } else {
+            result = await payload.db.updateVersion(updateVersionDbArgs)
+          }
         } else {
-          result = await payload.db.updateGlobalVersion({
+          const updateGlobalVersionDbArgs = {
             ...updateVersionArgs,
             global: global.slug,
             req,
-          })
+          }
+          // @ts-expect-error exists
+          if (global?.db?.updateGlobalVersion) {
+            // @ts-expect-error exists
+            result = await global.db.updateGlobalVersion(updateGlobalVersionDbArgs)
+          } else {
+            result = await payload.db.updateGlobalVersion(updateGlobalVersionDbArgs)
+          }
         }
       }
     }
@@ -125,12 +155,26 @@ export const saveVersion = async ({
 
       if (collection) {
         createVersionArgs.collectionSlug = collection.slug
-        result = await payload.db.createVersion(createVersionArgs)
+
+        // @ts-expect-error exists
+        if (collection?.db?.createVersion) {
+          // @ts-expect-error exists
+          result = await collection.db.createVersion(createVersionArgs)
+        } else {
+          result = await payload.db.createVersion(createVersionArgs)
+        }
       }
 
       if (global) {
         createVersionArgs.globalSlug = global.slug
-        result = await payload.db.createGlobalVersion(createVersionArgs)
+
+        // @ts-expect-error exists
+        if (global?.db?.createGlobalVersion) {
+          // @ts-expect-error exists
+          result = await global.db.createGlobalVersion(createVersionArgs)
+        } else {
+          result = await payload.db.createGlobalVersion(createVersionArgs)
+        }
       }
 
       if (publishSpecificLocale && snapshot) {
@@ -152,10 +196,22 @@ export const saveVersion = async ({
         } as any
 
         if (collection) {
-          await payload.db.createVersion(updatedArgs)
+          // @ts-expect-error exists
+          if (collection?.db?.createVersion) {
+            // @ts-expect-error exists
+            await collection.db.createVersion(updatedArgs)
+          } else {
+            await payload.db.createVersion(updatedArgs)
+          }
         }
         if (global) {
-          await payload.db.createGlobalVersion(updatedArgs)
+          // @ts-expect-error exists
+          if (global?.db?.createGlobalVersion) {
+            // @ts-expect-error exists
+            await global.db.createGlobalVersion(updatedArgs)
+          } else {
+            await payload.db.createGlobalVersion(updatedArgs)
+          }
         }
       }
     }
