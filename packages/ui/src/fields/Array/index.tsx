@@ -3,10 +3,11 @@ import type {
   ArrayFieldClientComponent,
   ArrayFieldClientProps,
   ArrayField as ArrayFieldType,
+  Row,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -21,7 +22,7 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
-// import { useServerActions } from '../../providers/ServerActions/index.js'
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -52,9 +53,11 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     forceRender = false,
     Label,
     readOnly: readOnlyFromTopLevelProps,
-    rows,
+    rows: rowsFromProps,
     validate,
   } = props
+
+  const [rows, setRows] = useState<typeof rowsFromProps>(rowsFromProps)
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
@@ -65,7 +68,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const submitted = useFormSubmitted()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
-  // const payloadServerAction = useServerActions()
+  const { renderFieldBySchemaPath } = useServerFunctions()
 
   const {
     config: { localization },
@@ -129,15 +132,19 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
-  // const loadNewFields = useCallback(async () => {
-  //   // @ts-expect-error eslint-disable-next-line
-  //   const NewFields = (await payloadServerAction('render-fields', {
-  //     language: i18n.language,
-  //     schemaPath: _schemaPath,
-  //   })) as any as React.ReactNode[][]
+  const loadNewFields = useCallback(
+    async (rowIndex: number) => {
+      const NewFields = await renderFieldBySchemaPath({
+        schemaPath: _schemaPath,
+      })
 
-  //   setFields(NewFields)
-  // }, [i18n.language, payloadServerAction, _schemaPath])
+      console.log('NewFields', NewFields)
+
+      // Map over rows, and inject the new Fields where necessary
+      // setRows(rows.
+    },
+    [renderFieldBySchemaPath, _schemaPath],
+  )
 
   const disabled = readOnlyFromProps || formProcessing || formInitializing
 

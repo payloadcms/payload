@@ -1,24 +1,19 @@
 import type {
-  ClientCollectionConfig,
-  ClientConfig,
   ClientField,
-  ClientGlobalConfig,
-  Field,
   FieldPermissions,
   FieldSlots,
   FieldTypes,
   FormField,
-  FormState,
-  ImportMap,
-  Operation,
-  Payload,
-  SanitizedConfig,
+  RenderFieldBySchemaPath,
+  RenderFieldFn,
+  RenderFieldsFn,
 } from 'payload'
 
-import { getTranslation, type I18nClient } from '@payloadcms/translations'
+import { getTranslation } from '@payloadcms/translations'
 import {
   ArrayField,
   BlocksField,
+  buildFieldSchemaMap,
   CheckboxField,
   CodeField,
   CollapsibleField,
@@ -27,6 +22,8 @@ import {
   EmailField,
   FieldDescription,
   FieldLabel,
+  getFieldBySchemaPath,
+  getFieldSchemaMap,
   GroupField,
   HiddenField,
   JoinField,
@@ -84,39 +81,7 @@ const fieldComponents: FieldTypesComponents = {
 import { fieldAffectsData } from 'payload/shared'
 import React from 'react'
 
-export type Props = {
-  readonly Blocks?: React.ReactNode[]
-  readonly className?: string
-  readonly clientCollectionConfig?: ClientCollectionConfig
-  readonly clientConfig: ClientConfig
-  readonly clientFields: ClientField[]
-  readonly clientGlobalConfig?: ClientGlobalConfig
-  readonly config: SanitizedConfig
-  readonly fields: Field[]
-  /**
-   * Controls the rendering behavior of the fields, i.e. defers rendering until they intersect with the viewport using the Intersection Observer API.
-   *
-   * If true, the fields will be rendered immediately, rather than waiting for them to intersect with the viewport.
-   *
-   * If a number is provided, will immediately render fields _up to that index_.
-   */
-  readonly forceRender?: boolean | number
-  readonly formState?: FormState
-  readonly i18n: I18nClient
-  readonly importMap: ImportMap
-  readonly indexPath?: string
-  readonly margins?: 'small' | false
-  readonly operation?: Operation
-  readonly path?: string
-  readonly payload: Payload
-  readonly permissions?: {
-    [fieldName: string]: FieldPermissions
-  }
-  readonly readOnly?: boolean
-  readonly schemaPath?: string
-}
-
-export const renderFields = (props: Props): React.ReactNode[] => {
+export const renderFields: RenderFieldsFn = (args) => {
   const {
     className,
     clientConfig,
@@ -133,7 +98,7 @@ export const renderFields = (props: Props): React.ReactNode[] => {
     payload,
     permissions,
     schemaPath,
-  } = props
+  } = args
 
   if (!fields || (Array.isArray(fields) && fields.length === 0)) {
     return null
@@ -198,29 +163,7 @@ export const renderFields = (props: Props): React.ReactNode[] => {
   return null
 }
 
-export const renderField = (props: {
-  readonly className: string
-  readonly clientConfig: ClientConfig
-  readonly clientField: ClientField
-  readonly config: SanitizedConfig
-  readonly field: Field
-  readonly fieldPath: string
-  readonly fieldPermissions: FieldPermissions
-  readonly forceRender?: boolean
-  readonly formState: FormState
-  readonly i18n: I18nClient
-  readonly importMap: ImportMap
-  readonly indexPath: string
-  readonly margins?: 'small' | false
-  readonly path: string
-  readonly payload: Payload
-  readonly permissions?: {
-    [fieldName: string]: FieldPermissions
-  }
-  readonly readOnly?: boolean
-  readonly renderFields: (props: Props) => React.ReactNode[]
-  readonly schemaPath: string
-}): React.ReactNode => {
+export const renderField: RenderFieldFn = (args) => {
   const {
     className,
     clientConfig,
@@ -241,7 +184,7 @@ export const renderField = (props: {
     readOnly,
     renderFields,
     schemaPath,
-  } = props
+  } = args
 
   const isHidden = 'admin' in field && 'hidden' in field.admin && field.admin.hidden
 
@@ -511,4 +454,32 @@ export const renderField = (props: {
       serverProps={serverProps}
     />
   )
+}
+
+export const renderFieldByPath: RenderFieldBySchemaPath = (args) => {
+  const {
+    req: {
+      i18n,
+      payload,
+      payload: { config },
+    },
+    schemaPath,
+  } = args
+
+  const fieldSchema = getFieldBySchemaPath({
+    config,
+    i18n,
+    payload,
+    schemaPath,
+  })
+
+  console.log('fieldSchema', fieldSchema)
+
+  return null
+  // return renderField({
+  //   config,
+  //   i18n,
+  //   payload,
+  //   schemaPath,
+  // })
 }

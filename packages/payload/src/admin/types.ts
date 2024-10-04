@@ -346,14 +346,18 @@ export type {
   ServerFunctionHandler,
 } from './functions/index.js'
 
-export type { LanguageOptions } from './LanguageOptions.js'
-
 export type {
-  RichTextAdapter,
-  RichTextAdapterProvider,
-  RichTextGenerateComponentMap,
-  RichTextHooks,
-} from './RichText.js'
+  RenderFieldArgs,
+  RenderFieldBySchemaPath,
+  RenderFieldBySchemaPathClient,
+  RenderFieldClient,
+  RenderFieldFn,
+  RenderFieldsArgs,
+  RenderFieldsClient,
+  RenderFieldsFn,
+} from './functions/renderFields.js'
+
+export type { LanguageOptions } from './LanguageOptions.js'
 
 export type MappedServerComponent<TComponentClientProps extends JsonObject = JsonObject> = {
   Component: React.ComponentType<TComponentClientProps>
@@ -433,6 +437,13 @@ export type EntitySlots = {
   SaveDraftButton?: React.ReactNode
   SidebarFields: React.ReactNode
 }
+
+export type {
+  RichTextAdapter,
+  RichTextAdapterProvider,
+  RichTextGenerateComponentMap,
+  RichTextHooks,
+} from './RichText.js'
 
 export type {
   AdminViewComponent,

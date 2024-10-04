@@ -1,8 +1,9 @@
-import type { ServerFunctionClient } from 'payload'
+import type { RenderFieldBySchemaPathClient, ServerFunctionClient } from 'payload'
 
-import React, { createContext } from 'react'
+import React, { createContext, useCallback } from 'react'
 
 type ServerFunctionsContextType = {
+  renderFieldBySchemaPath: RenderFieldBySchemaPathClient
   serverFunction: ServerFunctionClient
 }
 
@@ -26,8 +27,22 @@ export const ServerFunctionsProvider: React.FC<{
     throw new Error('ServerFunctionsProvider requires a serverFunction prop')
   }
 
+  const renderFieldBySchemaPath = useCallback<RenderFieldBySchemaPathClient>(
+    async (args) => {
+      const { schemaPath } = args
+
+      return (await serverFunction({
+        name: 'render-field',
+        args: {
+          schemaPath,
+        },
+      })) as React.ReactNode[]
+    },
+    [serverFunction],
+  )
+
   return (
-    <ServerFunctionsContext.Provider value={{ serverFunction }}>
+    <ServerFunctionsContext.Provider value={{ renderFieldBySchemaPath, serverFunction }}>
       {children}
     </ServerFunctionsContext.Provider>
   )

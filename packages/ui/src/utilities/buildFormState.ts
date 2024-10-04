@@ -7,6 +7,7 @@ import {
   type Field,
   formatErrors,
   type FormState,
+  type Payload,
   type PayloadRequest,
   type SanitizedConfig,
   type TypeWithID,
@@ -40,6 +41,40 @@ export const getFieldSchemaMap = (args: {
   })
 
   return cached
+}
+
+export const getFieldBySchemaPath = (args: {
+  config: SanitizedConfig
+  i18n: I18nClient
+  payload: Payload
+  schemaPath: string
+}): Field[] => {
+  const { config, i18n, payload, schemaPath } = args
+
+  const fieldSchemaMap = getFieldSchemaMap({
+    config,
+    i18n,
+  })
+
+  const schemaPathSegments = schemaPath && schemaPath.split('.')
+
+  let fieldSchema: Field[]
+
+  if (schemaPathSegments && schemaPathSegments.length === 1) {
+    if (payload.collections[schemaPath]) {
+      fieldSchema = payload.collections[schemaPath].config.fields
+    } else {
+      fieldSchema = payload.config.globals.find((global) => global.slug === schemaPath)?.fields
+    }
+  } else if (fieldSchemaMap.has(schemaPath)) {
+    fieldSchema = fieldSchemaMap.get(schemaPath)
+  }
+
+  if (!fieldSchema) {
+    throw new Error(`Could not find field schema for given path "${schemaPath}"`)
+  }
+
+  return fieldSchema
 }
 
 export type BuildFormStateArgs = {
@@ -159,29 +194,14 @@ const buildFormStateFn = async (
     }
   }
 
-  const fieldSchemaMap = getFieldSchemaMap({
+  const id = collectionSlug ? idFromArgs : undefined
+
+  const fieldSchema = getFieldBySchemaPath({
     config,
     i18n,
+    payload,
+    schemaPath,
   })
-
-  const id = collectionSlug ? idFromArgs : undefined
-  const schemaPathSegments = schemaPath && schemaPath.split('.')
-
-  let fieldSchema: Field[]
-
-  if (schemaPathSegments && schemaPathSegments.length === 1) {
-    if (payload.collections[schemaPath]) {
-      fieldSchema = payload.collections[schemaPath].config.fields
-    } else {
-      fieldSchema = payload.config.globals.find((global) => global.slug === schemaPath)?.fields
-    }
-  } else if (fieldSchemaMap.has(schemaPath)) {
-    fieldSchema = fieldSchemaMap.get(schemaPath)
-  }
-
-  if (!fieldSchema) {
-    throw new Error(`Could not find field schema for given path "${schemaPath}"`)
-  }
 
   let docPreferences = docPreferencesFromArgs
   let data = dataFromArgs
