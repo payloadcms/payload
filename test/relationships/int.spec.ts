@@ -397,6 +397,45 @@ describe('Relationships', () => {
           expect(query2.totalDocs).toStrictEqual(2)
         })
 
+        it('should sort by a property of a hasMany relationship', async () => {
+          const movie1 = await payload.create({
+            collection: 'movies',
+            data: {
+              name: 'Pulp Fiction',
+            },
+          })
+
+          const movie2 = await payload.create({
+            collection: 'movies',
+            data: {
+              name: 'Inception',
+            },
+          })
+
+          const director1 = await payload.create({
+            collection: 'directors',
+            data: {
+              name: 'Quentin Tarantino',
+              movies: [movie1.id],
+            },
+          })
+          const director2 = await payload.create({
+            collection: 'directors',
+            data: {
+              name: 'Christopher Nolan',
+              movies: [movie2.id],
+            },
+          })
+
+          const result = await payload.find({
+            collection: 'directors',
+            depth: 0,
+            sort: '-movies.name',
+          })
+
+          expect(result.docs[0].id).toStrictEqual(director1.id)
+        })
+
         it('should query using "in" by hasMany relationship field', async () => {
           const tree1 = await payload.create({
             collection: treeSlug,

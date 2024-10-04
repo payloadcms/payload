@@ -242,6 +242,7 @@ export const traverseFields = ({
             limit += 1
           }
           const fields = adapter.payload.collections[field.collection].config.fields
+          const joinCollectionTableName = adapter.tableNameMap.get(toSnakeCase(field.collection))
           let joinTableName = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${
             field.localized && adapter.payload.config.localization ? adapter.localesSuffix : ''
           }`
@@ -270,13 +271,13 @@ export const traverseFields = ({
             joins,
             locale,
             sort,
-            tableName: joinTableName,
+            tableName: joinCollectionTableName,
             where,
           })
           if (joinWhere) {
             withJoin.where = () => joinWhere
           }
-          withJoin.orderBy = [orderBy.order(orderBy.column)]
+          withJoin.orderBy = orderBy.order(orderBy.column)
           currentArgs.with[`${path.replaceAll('.', '_')}${field.name}`] = withJoin
           break
         }

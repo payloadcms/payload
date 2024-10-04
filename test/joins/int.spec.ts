@@ -104,6 +104,15 @@ describe('Joins Field', () => {
       },
       collection: 'categories',
     })
+    // const sortCategoryWithPosts = await payload.findByID({
+    //   id: category.id,
+    //   joins: {
+    //     'group.relatedPosts': {
+    //       sort: 'title',
+    //     },
+    //   },
+    //   collection: 'categories',
+    // })
 
     expect(categoryWithPosts.group.relatedPosts.docs).toHaveLength(10)
     expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('id')
