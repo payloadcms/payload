@@ -14,6 +14,8 @@ export const arTranslations: DefaultTranslationsObject = {
     changePassword: 'تغيير كلمة المرور',
     checkYourEmailForPasswordReset:
       'تحقّق من بريدك الإلكتروني بحثًا عن رابط يسمح لك بإعادة تعيين كلمة المرور الخاصّة بك بشكل آمن.',
+    checkYourEmailForVerification:
+      'تحقق من بريدك الإلكتروني للحصول على رابط للتحقق من بريدك الإلكتروني.',
     confirmGeneration: 'تأكيد التّوليد',
     confirmPassword: 'تأكيد كلمة المرور',
     createFirstUser: 'إنشاء المستخدم الأوّل',
@@ -184,7 +186,7 @@ export const arTranslations: DefaultTranslationsObject = {
     backToDashboard: 'العودة للوحة التّحكّم',
     cancel: 'إلغاء',
     changesNotSaved: 'لم يتمّ حفظ التّغييرات. إن غادرت الآن ، ستفقد تغييراتك.',
-    clearAll: undefined,
+    clearAll: 'امسح الكل',
     close: 'إغلاق',
     collapse: 'طيّ',
     collections: 'المجموعات',
@@ -407,7 +409,7 @@ export const arTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'تم الحفظ آخر مرة قبل {{distance}}',
     noFurtherVersionsFound: 'لم يتمّ العثور على نسخات أخرى',
     noRowsFound: 'لم يتمّ العثور على {{label}}',
-    noRowsSelected: undefined,
+    noRowsSelected: 'لم يتم اختيار {{label}}',
     preview: 'معاينة',
     previouslyPublished: 'نشر سابقا',
     problemRestoringVersion: 'حدث خطأ في استعادة هذه النّسخة',

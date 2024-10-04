@@ -14,6 +14,8 @@ export const roTranslations: DefaultTranslationsObject = {
     changePassword: 'Schimbați parola',
     checkYourEmailForPasswordReset:
       'Verificați emailul pentru un link care vă va permite să vă resetați parola în siguranță.',
+    checkYourEmailForVerification:
+      'Verificați-vă e-mailul pentru un link de verificare a adresei dvs. de e-mail.',
     confirmGeneration: 'Confirmați generarea',
     confirmPassword: 'Confirmați parola',
     createFirstUser: 'Creați primul utilizator',
@@ -190,7 +192,7 @@ export const roTranslations: DefaultTranslationsObject = {
     cancel: 'Anulați',
     changesNotSaved:
       'Modificările dvs. nu au fost salvate. Dacă plecați acum, vă veți pierde modificările.',
-    clearAll: undefined,
+    clearAll: 'Șterge tot',
     close: 'Închide',
     collapse: 'Colaps',
     collections: 'Colecții',
@@ -422,7 +424,7 @@ export const roTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Ultima salvare acum {{distance}}',
     noFurtherVersionsFound: 'Nu s-au găsit alte versiuni',
     noRowsFound: 'Nu s-a găsit niciun {{label}}',
-    noRowsSelected: undefined,
+    noRowsSelected: 'Niciun {{etichetă}} selectat',
     preview: 'Previzualizare',
     previouslyPublished: 'Publicat anterior',
     problemRestoringVersion: 'A existat o problemă la restaurarea acestei versiuni',

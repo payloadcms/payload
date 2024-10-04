@@ -14,6 +14,8 @@ export const csTranslations: DefaultTranslationsObject = {
     changePassword: 'Změnit heslo',
     checkYourEmailForPasswordReset:
       'Zkontrolujte svůj email a najděte v něm odkaz, který vám umožní bezpečně resetovat vaše heslo.',
+    checkYourEmailForVerification:
+      'Zkontrolujte svůj email, zda tam naleznete odkaz pro ověření vaší emailové adresy.',
     confirmGeneration: 'Potvrdit generaci',
     confirmPassword: 'Potvrdit heslo',
     createFirstUser: 'Vytvořit prvního uživatele',
@@ -185,7 +187,7 @@ export const csTranslations: DefaultTranslationsObject = {
     backToDashboard: 'Zpět na nástěnku',
     cancel: 'Zrušit',
     changesNotSaved: 'Vaše změny nebyly uloženy. Pokud teď odejdete, ztratíte své změny.',
-    clearAll: undefined,
+    clearAll: 'Vymazat vše',
     close: 'Zavřít',
     collapse: 'Sbalit',
     collections: 'Kolekce',
@@ -412,7 +414,7 @@ export const csTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Naposledy uloženo před {{distance}}',
     noFurtherVersionsFound: 'Nenalezeny další verze',
     noRowsFound: 'Nenalezen {{label}}',
-    noRowsSelected: undefined,
+    noRowsSelected: 'Nebyl vybrán žádný {{label}}',
     preview: 'Náhled',
     previouslyPublished: 'Dříve publikováno',
     problemRestoringVersion: 'Při obnovování této verze došlo k problému',

@@ -68,6 +68,7 @@ export const enTranslations = {
     tokenRefreshSuccessful: 'Token refresh successful.',
     username: 'Username',
 
+    checkYourEmailForVerification: 'Check your email for a link to verify your email.',
     unableToVerify: 'Unable to Verify',
     verified: 'Verified',
     verifiedSuccessfully: 'Verified Successfully',

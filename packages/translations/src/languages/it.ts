@@ -14,6 +14,8 @@ export const itTranslations: DefaultTranslationsObject = {
     changePassword: 'Cambia Password',
     checkYourEmailForPasswordReset:
       'Controlla la tua email e clicca sul link che ti permetterà di cambiare in sicurezza la tua password.',
+    checkYourEmailForVerification:
+      'Controlla la tua email per un link per verificare il tuo indirizzo email.',
     confirmGeneration: 'Conferma Generazione',
     confirmPassword: 'Conferma Password',
     createFirstUser: 'Crea il primo utente',
@@ -189,7 +191,7 @@ export const itTranslations: DefaultTranslationsObject = {
     backToDashboard: 'Torna alla Dashboard',
     cancel: 'Cancella',
     changesNotSaved: 'Le tue modifiche non sono state salvate. Se esci ora, verranno perse.',
-    clearAll: undefined,
+    clearAll: 'Cancella Tutto',
     close: 'Chiudere',
     collapse: 'Comprimi',
     collections: 'Collezioni',
@@ -418,7 +420,7 @@ export const itTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Ultimo salvataggio {{distance}} fa',
     noFurtherVersionsFound: 'Non sono state trovate ulteriori versioni',
     noRowsFound: 'Nessun {{label}} trovato',
-    noRowsSelected: undefined,
+    noRowsSelected: 'Nessuna {{etichetta}} selezionata',
     preview: 'Anteprima',
     previouslyPublished: 'Precedentemente Pubblicato',
     problemRestoringVersion: 'Si è verificato un problema durante il ripristino di questa versione',

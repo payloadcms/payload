@@ -14,6 +14,7 @@ export const faTranslations: DefaultTranslationsObject = {
     changePassword: 'تغییر گذرواژه',
     checkYourEmailForPasswordReset:
       'برای بازیابی ایمن گذرواژه خود، پیامی که به رایانامه شما فرستادیم و دارای پیوند بازنشانی گذرواژه است را بررسی نمایید.',
+    checkYourEmailForVerification: 'برای دریافت لینک تأیید ایمیل خود ایمیل خود را بررسی کنید.',
     confirmGeneration: 'تأیید ساخت',
     confirmPassword: 'تأیید گذرواژه',
     createFirstUser: 'ایجاد کاربر نخست',
@@ -185,7 +186,7 @@ export const faTranslations: DefaultTranslationsObject = {
     cancel: 'لغو',
     changesNotSaved:
       'تغییرات شما ذخیره نشده، اگر این برگه را ترک کنید. تمام تغییرات از دست خواهد رفت.',
-    clearAll: undefined,
+    clearAll: 'همه را پاک کنید',
     close: 'بستن',
     collapse: 'بستن',
     collections: 'مجموعه‌ها',
@@ -411,7 +412,7 @@ export const faTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'آخرین بار {{distance}} پیش ذخیره شد',
     noFurtherVersionsFound: 'نگارش دیگری یافت نشد',
     noRowsFound: 'هیچ {{label}} یافت نشد',
-    noRowsSelected: undefined,
+    noRowsSelected: 'هیچ {{label}} ای انتخاب نشده است',
     preview: 'پیش‌نمایش',
     previouslyPublished: 'قبلا منتشر شده',
     problemRestoringVersion: 'مشکلی در بازیابی این نگارش وجود دارد',

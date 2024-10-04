@@ -14,6 +14,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     changePassword: 'パスワードを変更',
     checkYourEmailForPasswordReset:
       'パスワードを安全に再設定するためのリンクがメールで送られてくるので、確認してください。',
+    checkYourEmailForVerification:
+      'あなたのメールを確認し、メールを確認するためのリンクを探してください。',
     confirmGeneration: '生成の確認',
     confirmPassword: 'パスワードの確認',
     createFirstUser: '最初のユーザーを作成',
@@ -186,7 +188,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     backToDashboard: 'ダッシュボードに戻る',
     cancel: 'キャンセル',
     changesNotSaved: '未保存の変更があります。このまま画面を離れると内容が失われます。',
-    clearAll: undefined,
+    clearAll: 'すべてクリア',
     close: '閉じる',
     collapse: '閉じる',
     collections: 'コレクション',
@@ -412,7 +414,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     lastSavedAgo: '{{distance}}前に最後に保存されました',
     noFurtherVersionsFound: 'その他のバージョンは見つかりませんでした。',
     noRowsFound: '{{label}} は未設定です',
-    noRowsSelected: undefined,
+    noRowsSelected: '選択された{{label}}はありません',
     preview: 'プレビュー',
     previouslyPublished: '以前に公開された',
     problemRestoringVersion: 'このバージョンの復元に問題がありました。',

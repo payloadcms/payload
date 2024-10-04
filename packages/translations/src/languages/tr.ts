@@ -14,6 +14,8 @@ export const trTranslations: DefaultTranslationsObject = {
     changePassword: 'Parolayı Değiştir',
     checkYourEmailForPasswordReset:
       'Parolanızı güvenli bir şekilde güncelleyebilmeniz için e-posta adresinize bir bağlantı gönderilmiştir.',
+    checkYourEmailForVerification:
+      'E-postanızı kontrol edin ve e-postanızı doğrulamak için bir bağlantı arayın.',
     confirmGeneration: 'Oluştumayı Onayla',
     confirmPassword: 'Parolayı Onayla',
     createFirstUser: 'İlk kullanıcı oluştur',
@@ -189,7 +191,7 @@ export const trTranslations: DefaultTranslationsObject = {
     cancel: 'İptal',
     changesNotSaved:
       'Değişiklikleriniz henüz kaydedilmedi. Eğer bu sayfayı terk ederseniz değişiklikleri kaybedeceksiniz.',
-    clearAll: undefined,
+    clearAll: 'Hepsini Temizle',
     close: 'Kapat',
     collapse: 'Daralt',
     collections: 'Koleksiyonlar',
@@ -415,7 +417,7 @@ export const trTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Son kaydedildi {{distance}} önce',
     noFurtherVersionsFound: 'Başka sürüm bulunamadı.',
     noRowsFound: '{{label}} bulunamadı',
-    noRowsSelected: undefined,
+    noRowsSelected: 'Seçilen {{label}} yok',
     preview: 'Önizleme',
     previouslyPublished: 'Daha Önce Yayınlanmış',
     problemRestoringVersion: 'Bu sürüme geri döndürürken bir hatayla karşılaşıldı.',

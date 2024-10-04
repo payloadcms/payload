@@ -14,6 +14,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     changePassword: 'Сменить пароль',
     checkYourEmailForPasswordReset:
       'На ваш email отправлена ссылка, с помощью которой можно будет сбросить пароль.',
+    checkYourEmailForVerification:
+      'Проверьте свою электронную почту, чтобы найти ссылку для подтверждения вашего адреса электронной почты.',
     confirmGeneration: 'Подтвердить генерацию',
     confirmPassword: 'Подтверждение пароля',
     createFirstUser: 'Создание первого пользователя',
@@ -188,7 +190,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     cancel: 'Отмена',
     changesNotSaved:
       'Ваши изменения не были сохранены. Если вы сейчас уйдете, то потеряете свои изменения.',
-    clearAll: undefined,
+    clearAll: 'Очистить все',
     close: 'Закрыть',
     collapse: 'Свернуть',
     collections: 'Коллекции',
@@ -416,7 +418,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Последний раз сохранено {{distance}} назад',
     noFurtherVersionsFound: 'Другие версии не найдены',
     noRowsFound: 'Не найдено {{label}}',
-    noRowsSelected: undefined,
+    noRowsSelected: 'Не выбран {{label}}',
     preview: 'Предпросмотр',
     previouslyPublished: 'Ранее опубликовано',
     problemRestoringVersion: 'Возникла проблема с восстановлением этой версии',

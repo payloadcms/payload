@@ -1,6 +1,4 @@
 'use client'
-import type { FormState } from 'payload'
-
 import {
   ConfirmPasswordField,
   Form,
@@ -13,6 +11,7 @@ import {
 } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
+import { type FormState } from 'payload'
 import React from 'react'
 import { toast } from 'sonner'
 
@@ -47,26 +46,23 @@ export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
   } = useConfig()
 
   const history = useRouter()
-
   const { fetchFullUser } = useAuth()
 
-  const onSuccess = React.useCallback(
-    async (data) => {
-      if (data.token) {
-        await fetchFullUser()
-        history.push(adminRoute)
-      } else {
-        history.push(
-          formatAdminURL({
-            adminRoute,
-            path: loginRoute,
-          }),
-        )
-        toast.success(i18n.t('general:updatedSuccessfully'))
-      }
-    },
-    [adminRoute, fetchFullUser, history, i18n, loginRoute],
-  )
+  const onSuccess = React.useCallback(async () => {
+    const user = await fetchFullUser()
+    if (user) {
+      history.push(adminRoute)
+      toast.success(i18n.t('general:updatedSuccessfully'))
+    } else {
+      history.push(
+        formatAdminURL({
+          adminRoute,
+          path: loginRoute,
+        }),
+      )
+      toast.success(i18n.t('authentication:checkYourEmailForVerification'))
+    }
+  }, [adminRoute, fetchFullUser, history, loginRoute, i18n])
 
   return (
     <Form

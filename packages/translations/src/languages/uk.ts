@@ -14,6 +14,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     changePassword: 'Змінити пароль',
     checkYourEmailForPasswordReset:
       'Перевірте вашу електронну пошту на наявність посилання, що дозволить вам безпечно скинути пароль',
+    checkYourEmailForVerification:
+      'Перевірте свою електронну пошту для посилання, щоб підтвердити свою електронну адресу.',
     confirmGeneration: 'Підтвердити генерацію',
     confirmPassword: 'Підтвердження паролю',
     createFirstUser: 'Створення першого користувача',
@@ -186,7 +188,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     backToDashboard: 'Повернутись до головної сторінки',
     cancel: 'Скасувати',
     changesNotSaved: 'Ваши зміни не були збережені. Якщо ви вийдете зараз, то втратите свої зміни.',
-    clearAll: undefined,
+    clearAll: 'Очистити все',
     close: 'Закрити',
     collapse: 'Згорнути',
     collections: 'Колекції',
@@ -413,7 +415,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Востаннє збережено {{distance}} тому',
     noFurtherVersionsFound: 'Інших версій не знайдено',
     noRowsFound: 'Не знайдено {{label}}',
-    noRowsSelected: undefined,
+    noRowsSelected: 'Не вибрано {{label}}',
     preview: 'Попередній перегляд',
     previouslyPublished: 'Раніше опубліковано',
     problemRestoringVersion: 'Виникла проблема з відновленням цієї версії',

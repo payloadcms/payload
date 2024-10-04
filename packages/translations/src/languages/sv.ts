@@ -14,6 +14,8 @@ export const svTranslations: DefaultTranslationsObject = {
     changePassword: 'Byt Lösenord',
     checkYourEmailForPasswordReset:
       'Kontrollera din e-post efter en länk som gör att du säkert kan återställa ditt lösenord.',
+    checkYourEmailForVerification:
+      'Kontrollera din e-post för en länk för att verifiera din e-postadress.',
     confirmGeneration: 'Bekräfta Generering',
     confirmPassword: 'Bekräfta Lösenord',
     createFirstUser: 'Skapa första användaren',
@@ -186,7 +188,7 @@ export const svTranslations: DefaultTranslationsObject = {
     cancel: 'Avbryt',
     changesNotSaved:
       'Dina ändringar har inte sparats. Om du lämnar nu kommer du att förlora dina ändringar.',
-    clearAll: undefined,
+    clearAll: 'Rensa alla',
     close: 'Stänga',
     collapse: 'Kollapsa',
     collections: 'Samlingar',
@@ -413,7 +415,7 @@ export const svTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Senast sparad för {{distance}} sedan',
     noFurtherVersionsFound: 'Inga fler versioner hittades',
     noRowsFound: 'Inga {{label}} hittades',
-    noRowsSelected: undefined,
+    noRowsSelected: 'Inget {{etikett}} valt',
     preview: 'Förhandsvisa',
     previouslyPublished: 'Tidigare publicerad',
     problemRestoringVersion: 'Det uppstod ett problem när den här versionen skulle återställas',

@@ -14,6 +14,8 @@ export const huTranslations: DefaultTranslationsObject = {
     changePassword: 'Jelszó módosítása',
     checkYourEmailForPasswordReset:
       'Ellenőrizze az e-mailjét, a linkért, amellyel biztonságosan visszaállíthatja jelszavát.',
+    checkYourEmailForVerification:
+      'Ellenőrizze az emailjét egy hivatkozásért, amellyel ellenőrizheti az email-címét.',
     confirmGeneration: 'Generálás megerősítése',
     confirmPassword: 'Jelszó megerősítése',
     createFirstUser: 'Első felhasználó létrehozása',
@@ -188,7 +190,7 @@ export const huTranslations: DefaultTranslationsObject = {
     cancel: 'Mégsem',
     changesNotSaved:
       'A módosítások nem lettek mentve. Ha most távozik, elveszíti a változtatásokat.',
-    clearAll: undefined,
+    clearAll: 'Törölj mindent',
     close: 'Bezárás',
     collapse: 'Összecsukás',
     collections: 'Gyűjtemények',
@@ -418,7 +420,7 @@ export const huTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Utoljára mentve {{distance}} órája',
     noFurtherVersionsFound: 'További verziók nem találhatók',
     noRowsFound: 'Nem található {{label}}',
-    noRowsSelected: undefined,
+    noRowsSelected: 'Nincs {{címke}} kiválasztva',
     preview: 'Előnézet',
     previouslyPublished: 'Korábban Közzétéve',
     problemRestoringVersion: 'Hiba történt a verzió visszaállításakor',
