@@ -29,6 +29,7 @@ import { useOperation } from '../../providers/Operation/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
+import { getFormStateFetch } from '../../utilities/getFormStateFetch.js'
 import {
   FormContext,
   FormFieldsContext,
@@ -81,7 +82,13 @@ export const Form: React.FC<FormProps> = (props) => {
   const { refreshCookie, user } = useAuth()
   const operation = useOperation()
 
-  const { config } = useConfig()
+  const {
+    config,
+    config: {
+      routes: { api },
+      serverURL,
+    },
+  } = useConfig()
 
   const [disabled, setDisabled] = useState(disabledFromProps || false)
   const [isMounted, setIsMounted] = useState(false)
@@ -475,16 +482,20 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const getFieldStateBySchemaPath = useCallback(
     async ({ data, schemaPath }) => {
-      const { state: fieldSchema } = await getFormState({
-        collectionSlug,
-        data,
-        globalSlug,
-        schemaPath,
+      const { state: fieldSchema } = await getFormStateFetch({
+        apiRoute: api,
+        body: {
+          collectionSlug,
+          data,
+          globalSlug,
+          schemaPath,
+        },
+        serverURL,
       })
 
       return fieldSchema
     },
-    [collectionSlug, globalSlug, getFormState],
+    [collectionSlug, globalSlug, serverURL, api],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
