@@ -14,7 +14,6 @@ export const bgTranslations: DefaultTranslationsObject = {
     changePassword: 'Промяна на паролата',
     checkYourEmailForPasswordReset:
       'Провери имейла си за връзка, която ще ти позволи да промениш паролата си',
-    checkYourEmailForVerification: 'Проверете имейла си за връзка за потвърждение на имейла ви.',
     confirmGeneration: 'Потвърди генерация',
     confirmPassword: 'Потвърди парола',
     createFirstUser: 'Създай първи потребител',

@@ -14,7 +14,6 @@ export const myTranslations: DefaultTranslationsObject = {
     changePassword: 'စကားဝှက် ပြောင်းလဲမည်။',
     checkYourEmailForPasswordReset:
       'သင့်စကားဝှက်ကို ပြန်လည်သတ်မှတ်နိုင်ရန်အတွက် မေးလ်ပို့ထားပါသည်။',
-    checkYourEmailForVerification: 'Semak emel anda untuk pautan untuk mengesahkan emel anda.',
     confirmGeneration: 'Generation အတည်ပြု',
     confirmPassword: 'စကားဝှက်အား ထပ်မံ ရိုက်ထည့်ပါ။',
     createFirstUser: 'ပထမဆုံး အသုံးပြုသူကို ဖန်တီးပါ။',

@@ -14,8 +14,6 @@ export const skTranslations: DefaultTranslationsObject = {
     changePassword: 'Zmeniť heslo',
     checkYourEmailForPasswordReset:
       'Skontrolujte svoj e-mail a nájdite odkaz, ktorý vám umožní bezpečne obnoviť heslo.',
-    checkYourEmailForVerification:
-      'Skontrolujte svoj e-mail na odkaz na overenie vašej e-mailovej adresy.',
     confirmGeneration: 'Potvrdiť generovanie',
     confirmPassword: 'Potvrdiť heslo',
     createFirstUser: 'Vytvorenie prvého používateľa',

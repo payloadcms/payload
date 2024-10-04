@@ -14,7 +14,6 @@ export const nlTranslations: DefaultTranslationsObject = {
     changePassword: 'Wachtwoord wijzigen',
     checkYourEmailForPasswordReset:
       'Controleer uw e-mail voor een link waarmee u uw wachtwoord veilig opnieuw kunt instellen.',
-    checkYourEmailForVerification: 'Controleer uw e-mail voor een link om uw e-mail te verifiëren.',
     confirmGeneration: 'Bevestigen',
     confirmPassword: 'Wachtwoord bevestigen',
     createFirstUser: 'Eerste gebruiker aanmaken',

@@ -14,8 +14,6 @@ export const csTranslations: DefaultTranslationsObject = {
     changePassword: 'Změnit heslo',
     checkYourEmailForPasswordReset:
       'Zkontrolujte svůj email a najděte v něm odkaz, který vám umožní bezpečně resetovat vaše heslo.',
-    checkYourEmailForVerification:
-      'Zkontrolujte svůj email, zda tam naleznete odkaz pro ověření vaší emailové adresy.',
     confirmGeneration: 'Potvrdit generaci',
     confirmPassword: 'Potvrdit heslo',
     createFirstUser: 'Vytvořit prvního uživatele',

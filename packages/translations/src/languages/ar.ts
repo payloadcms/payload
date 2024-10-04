@@ -14,8 +14,6 @@ export const arTranslations: DefaultTranslationsObject = {
     changePassword: 'تغيير كلمة المرور',
     checkYourEmailForPasswordReset:
       'تحقّق من بريدك الإلكتروني بحثًا عن رابط يسمح لك بإعادة تعيين كلمة المرور الخاصّة بك بشكل آمن.',
-    checkYourEmailForVerification:
-      'تحقق من بريدك الإلكتروني للحصول على رابط للتحقق من بريدك الإلكتروني.',
     confirmGeneration: 'تأكيد التّوليد',
     confirmPassword: 'تأكيد كلمة المرور',
     createFirstUser: 'إنشاء المستخدم الأوّل',

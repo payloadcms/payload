@@ -14,8 +14,6 @@ export const itTranslations: DefaultTranslationsObject = {
     changePassword: 'Cambia Password',
     checkYourEmailForPasswordReset:
       'Controlla la tua email e clicca sul link che ti permetterà di cambiare in sicurezza la tua password.',
-    checkYourEmailForVerification:
-      'Controlla la tua email per un link per verificare il tuo indirizzo email.',
     confirmGeneration: 'Conferma Generazione',
     confirmPassword: 'Conferma Password',
     createFirstUser: 'Crea il primo utente',

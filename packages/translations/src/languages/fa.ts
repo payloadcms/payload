@@ -14,7 +14,6 @@ export const faTranslations: DefaultTranslationsObject = {
     changePassword: 'تغییر گذرواژه',
     checkYourEmailForPasswordReset:
       'برای بازیابی ایمن گذرواژه خود، پیامی که به رایانامه شما فرستادیم و دارای پیوند بازنشانی گذرواژه است را بررسی نمایید.',
-    checkYourEmailForVerification: 'برای دریافت لینک تأیید ایمیل خود ایمیل خود را بررسی کنید.',
     confirmGeneration: 'تأیید ساخت',
     confirmPassword: 'تأیید گذرواژه',
     createFirstUser: 'ایجاد کاربر نخست',

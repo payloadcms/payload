@@ -14,8 +14,6 @@ export const ruTranslations: DefaultTranslationsObject = {
     changePassword: 'Сменить пароль',
     checkYourEmailForPasswordReset:
       'На ваш email отправлена ссылка, с помощью которой можно будет сбросить пароль.',
-    checkYourEmailForVerification:
-      'Проверьте свою электронную почту, чтобы найти ссылку для подтверждения вашего адреса электронной почты.',
     confirmGeneration: 'Подтвердить генерацию',
     confirmPassword: 'Подтверждение пароля',
     createFirstUser: 'Создание первого пользователя',

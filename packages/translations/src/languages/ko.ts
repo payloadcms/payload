@@ -14,8 +14,6 @@ export const koTranslations: DefaultTranslationsObject = {
     changePassword: '비밀번호 변경',
     checkYourEmailForPasswordReset:
       '비밀번호 재설정을 안전하게 수행할 수 있는 링크가 포함된 이메일을 확인하세요.',
-    checkYourEmailForVerification:
-      '귀하의 이메일을 확인하여 이메일을 검증하는 링크를 확인하십시오.',
     confirmGeneration: '생성 확인',
     confirmPassword: '비밀번호 확인',
     createFirstUser: '첫 번째 사용자 생성',

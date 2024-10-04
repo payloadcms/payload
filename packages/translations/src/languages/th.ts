@@ -14,7 +14,6 @@ export const thTranslations: DefaultTranslationsObject = {
     changePassword: 'เปลี่ยนรหัสผ่าน',
     checkYourEmailForPasswordReset:
       'ระบบได้ส่งอีเมลสำหรับรีเซ็ตรหัสผ่านไปที่อีเมลของคุณแล้ว โปรดเช็กอีเมลของคุณ',
-    checkYourEmailForVerification: 'ตรวจสอบอีเมลของคุณสำหรับลิงก์เพื่อยืนยันอีเมลของคุณ',
     confirmGeneration: 'ยืนยันการสร้าง',
     confirmPassword: 'ยืนยันรหัสผ่าน',
     createFirstUser: 'สร้างผู้ใช้แรก',

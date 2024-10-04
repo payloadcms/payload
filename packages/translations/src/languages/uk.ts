@@ -14,8 +14,6 @@ export const ukTranslations: DefaultTranslationsObject = {
     changePassword: 'Змінити пароль',
     checkYourEmailForPasswordReset:
       'Перевірте вашу електронну пошту на наявність посилання, що дозволить вам безпечно скинути пароль',
-    checkYourEmailForVerification:
-      'Перевірте свою електронну пошту для посилання, щоб підтвердити свою електронну адресу.',
     confirmGeneration: 'Підтвердити генерацію',
     confirmPassword: 'Підтвердження паролю',
     createFirstUser: 'Створення першого користувача',

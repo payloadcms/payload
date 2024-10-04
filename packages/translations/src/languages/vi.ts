@@ -13,7 +13,6 @@ export const viTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Để bắt đầu, hãy tạo người dùng đầu tiên.',
     changePassword: 'Đổi mật khẩu',
     checkYourEmailForPasswordReset: 'Hãy kiểm tra email của bạn để lấy đường dẫn tạo lại mật khẩu.',
-    checkYourEmailForVerification: 'Kiểm tra email của bạn để nhận đường link xác minh email.',
     confirmGeneration: 'Xác nhận, tạo API Key',
     confirmPassword: 'Xác nhận mật khẩu',
     createFirstUser: 'Tạo người dùng đầu tiên',

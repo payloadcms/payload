@@ -14,8 +14,6 @@ export const jaTranslations: DefaultTranslationsObject = {
     changePassword: 'パスワードを変更',
     checkYourEmailForPasswordReset:
       'パスワードを安全に再設定するためのリンクがメールで送られてくるので、確認してください。',
-    checkYourEmailForVerification:
-      'あなたのメールを確認し、メールを確認するためのリンクを探してください。',
     confirmGeneration: '生成の確認',
     confirmPassword: 'パスワードの確認',
     createFirstUser: '最初のユーザーを作成',

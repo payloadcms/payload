@@ -14,8 +14,6 @@ export const trTranslations: DefaultTranslationsObject = {
     changePassword: 'Parolayı Değiştir',
     checkYourEmailForPasswordReset:
       'Parolanızı güvenli bir şekilde güncelleyebilmeniz için e-posta adresinize bir bağlantı gönderilmiştir.',
-    checkYourEmailForVerification:
-      'E-postanızı kontrol edin ve e-postanızı doğrulamak için bir bağlantı arayın.',
     confirmGeneration: 'Oluştumayı Onayla',
     confirmPassword: 'Parolayı Onayla',
     createFirstUser: 'İlk kullanıcı oluştur',

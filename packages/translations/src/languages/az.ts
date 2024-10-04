@@ -14,8 +14,6 @@ export const azTranslations: DefaultTranslationsObject = {
     changePassword: 'Parolu dəyişdir',
     checkYourEmailForPasswordReset:
       'Parolunuzu təhlükəsiz şəkildə sıfırlamağa imkan verəcək link üçün e-poçt ünvanınızı yoxlayın.',
-    checkYourEmailForVerification:
-      'E-poçtunuzu təsdiq etmək üçün keçidə baxımınız üçün e-poçtunuzu yoxlayın.',
     confirmGeneration: 'Generasiyani təsdiqlə',
     confirmPassword: 'Şifrəni təsdiq et',
     createFirstUser: 'İlk istifadəçini yaradın',

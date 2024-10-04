@@ -13,7 +13,6 @@ export const heTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'כדי להתחיל, יש ליצור את המשתמש הראשון שלך.',
     changePassword: 'שינוי סיסמה',
     checkYourEmailForPasswordReset: 'בדוק את תיבת הדוא"ל לאיתור קישור איפוס הסיסמה בצורה מאובטחת.',
-    checkYourEmailForVerification: 'בדוק בדוא"ל שלך את הקישור לאימות הדוא"ל שלך.',
     confirmGeneration: 'אישור יצירה',
     confirmPassword: 'אישור סיסמה',
     createFirstUser: 'יצירת משתמש ראשון',

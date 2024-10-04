@@ -13,7 +13,6 @@ export const zhTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: '首先，请创建您的第一个用户。',
     changePassword: '更改密码',
     checkYourEmailForPasswordReset: '请查看您的电子邮件，以取得安全重置密码的链接。',
-    checkYourEmailForVerification: '请检查您的电子邮件，里面有一个用于验证您的电子邮件的链接。',
     confirmGeneration: '确认生成',
     confirmPassword: '确认密码',
     createFirstUser: '创建第一个用户',

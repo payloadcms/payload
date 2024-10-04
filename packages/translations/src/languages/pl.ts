@@ -14,8 +14,6 @@ export const plTranslations: DefaultTranslationsObject = {
     changePassword: 'Zmień hasło',
     checkYourEmailForPasswordReset:
       'Sprawdź email, na który wysłano link, który pozwoli Ci bezpiecznie zresetować hasło.',
-    checkYourEmailForVerification:
-      'Sprawdź swój e-mail w poszukiwaniu linku do weryfikacji swojego adresu e-mail.',
     confirmGeneration: 'Potwierdź wygenerowanie',
     confirmPassword: 'Potwierdź hasło',
     createFirstUser: 'Utwórz pierwszego użytkownika',

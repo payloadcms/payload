@@ -14,8 +14,6 @@ export const deTranslations: DefaultTranslationsObject = {
     changePassword: 'Passwort ändern',
     checkYourEmailForPasswordReset:
       'Du solltest eine E-Mail mit einem Link zum sicheren Zurücksetzen deines Passworts erhalten haben.',
-    checkYourEmailForVerification:
-      'Überprüfen Sie Ihre E-Mail auf einen Link zur Bestätigung Ihrer E-Mail-Adresse.',
     confirmGeneration: 'Generierung bestätigen',
     confirmPassword: 'Passwort bestätigen',
     createFirstUser: 'Ersten Benutzer erstellen',

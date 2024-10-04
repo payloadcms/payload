@@ -14,8 +14,6 @@ export const huTranslations: DefaultTranslationsObject = {
     changePassword: 'Jelszó módosítása',
     checkYourEmailForPasswordReset:
       'Ellenőrizze az e-mailjét, a linkért, amellyel biztonságosan visszaállíthatja jelszavát.',
-    checkYourEmailForVerification:
-      'Ellenőrizze az emailjét egy hivatkozásért, amellyel ellenőrizheti az email-címét.',
     confirmGeneration: 'Generálás megerősítése',
     confirmPassword: 'Jelszó megerősítése',
     createFirstUser: 'Első felhasználó létrehozása',

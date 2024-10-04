@@ -14,7 +14,6 @@ export const ptTranslations: DefaultTranslationsObject = {
     changePassword: 'Mudar senha',
     checkYourEmailForPasswordReset:
       'Verifique seu email para um link que permitirá que você redefina sua senha com segurança.',
-    checkYourEmailForVerification: 'Verifique o seu email para um link para validar o seu email.',
     confirmGeneration: 'Confirmar Geração',
     confirmPassword: 'Confirmar Senha',
     createFirstUser: 'Criar primeiro usuário',

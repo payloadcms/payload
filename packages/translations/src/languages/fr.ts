@@ -14,8 +14,6 @@ export const frTranslations: DefaultTranslationsObject = {
     changePassword: 'Changer le mot de passe',
     checkYourEmailForPasswordReset:
       'Vérifiez votre e-mail, nous vous avons envoyé un lien qui vous permettra de réinitialiser votre mot de passe en toute sécurité.',
-    checkYourEmailForVerification:
-      'Vérifiez votre email pour obtenir un lien pour vérifier votre email.',
     confirmGeneration: 'Confirmer la génération',
     confirmPassword: 'Confirmez le mot de passe',
     createFirstUser: 'Créer le premier utilisateur',

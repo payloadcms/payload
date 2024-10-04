@@ -14,7 +14,6 @@ export const hrTranslations: DefaultTranslationsObject = {
     changePassword: 'Promijeni lozinku',
     checkYourEmailForPasswordReset:
       'Provjerite e-mail s poveznicom koja će Vam omogućiti sigurnu promjenu lozinke.',
-    checkYourEmailForVerification: 'Provjerite svoju e-poštu za poveznicu za potvrdu vaše e-pošte.',
     confirmGeneration: 'Potvrdi generiranje',
     confirmPassword: 'Potvrdi lozinku',
     createFirstUser: 'Izradi prvog korisnika',

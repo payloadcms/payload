@@ -14,7 +14,6 @@ export const daTranslations: DefaultTranslationsObject = {
     changePassword: 'Skift adgangskode',
     checkYourEmailForPasswordReset:
       'Tjek din email for at finde linket der vil give adgang til at ændre din adgangskode',
-    checkYourEmailForVerification: 'Tjek din e-mail for et link til at bekræfte din e-mail.',
     confirmGeneration: 'Bekræft generering',
     confirmPassword: 'Bekræft adgangskode',
     createFirstUser: 'Opret bruger',

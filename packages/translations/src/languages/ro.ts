@@ -14,8 +14,6 @@ export const roTranslations: DefaultTranslationsObject = {
     changePassword: 'Schimbați parola',
     checkYourEmailForPasswordReset:
       'Verificați emailul pentru un link care vă va permite să vă resetați parola în siguranță.',
-    checkYourEmailForVerification:
-      'Verificați-vă e-mailul pentru un link de verificare a adresei dvs. de e-mail.',
     confirmGeneration: 'Confirmați generarea',
     confirmPassword: 'Confirmați parola',
     createFirstUser: 'Creați primul utilizator',

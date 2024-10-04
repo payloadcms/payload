@@ -14,7 +14,6 @@ export const nbTranslations: DefaultTranslationsObject = {
     changePassword: 'Endre passord',
     checkYourEmailForPasswordReset:
       'Sjekk e-posten din for en lenke som lar deg tilbakestille passordet ditt.',
-    checkYourEmailForVerification: 'Sjekk e-posten din for en lenke for å verifisere e-posten din.',
     confirmGeneration: 'Bekreft generering',
     confirmPassword: 'Bekreft passord',
     createFirstUser: 'Opprett første bruker',
