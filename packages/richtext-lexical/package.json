@@ -28,6 +28,16 @@
       "types": "./src/exports/server/migrate.ts",
       "default": "./src/exports/server/migrate.ts"
     },
+    "./jsx": {
+      "import": "./src/exports/server/jsx.ts",
+      "types": "./src/exports/server/jsx.ts",
+      "default": "./src/exports/server/jsx.ts"
+    },
+    "./shared": {
+      "import": "./src/exports/shared.ts",
+      "types": "./src/exports/shared.ts",
+      "default": "./src/exports/shared.ts"
+    },
     "./generateComponentMap": "./src/utilities/generateComponentMap.tsx"
   },
   "main": "./src/index.ts",
@@ -51,6 +61,14 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build",
     "translateNewKeys": "node --no-deprecation --import @swc-node/register/esm-register scripts/translateNewKeys.ts"
   },
+  "lint-staged": {
+    "**/package.json": "sort-package-json",
+    "*.{md,mdx,yml,json}": "prettier --write",
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --cache --fix"
+    ]
+  },
   "dependencies": {
     "@lexical/headless": "0.18.0",
     "@lexical/link": "0.18.0",
@@ -64,10 +82,14 @@
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "@types/uuid": "10.0.0",
+    "acorn": "8.12.1",
     "bson-objectid": "2.0.4",
     "dequal": "2.0.3",
     "escape-html": "1.0.3",
     "lexical": "0.18.0",
+    "mdast-util-from-markdown": "2.0.1",
+    "mdast-util-mdx-jsx": "3.1.3",
+    "micromark-extension-mdx-jsx": "3.0.1",
     "react-error-boundary": "4.0.13",
     "uuid": "10.0.0"
   },
@@ -130,6 +152,16 @@
         "import": "./dist/exports/server/migrate.js",
         "types": "./dist/exports/server/migrate.d.ts",
         "default": "./dist/exports/server/migrate.js"
+      },
+      "./jsx": {
+        "import": "./dist/exports/server/jsx.js",
+        "types": "./dist/exports/server/jsx.d.ts",
+        "default": "./dist/exports/server/jsx.js"
+      },
+      "./shared": {
+        "import": "./dist/exports/shared.js",
+        "types": "./dist/exports/shared.d.ts",
+        "default": "./dist/exports/shared.js"
       },
       "./generateComponentMap": {
         "import": "./dist/utilities/generateComponentMap.js",

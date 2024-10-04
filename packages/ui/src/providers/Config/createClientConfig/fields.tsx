@@ -2,6 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 import type {
   AdminClient,
   ArrayFieldClient,
+  BlockJSX,
   BlocksFieldClient,
   ClientBlock,
   ClientField,
@@ -184,6 +185,15 @@ export const createClientField = ({
             fields: field.blocks[i].fields,
             imageAltText: block.imageAltText,
             imageURL: block.imageURL,
+          }
+          if (block?.admin?.jsx) {
+            const jsxResolved = getComponent({
+              identifier: 'block jsx',
+              importMap,
+              payloadComponent: block.admin.jsx,
+            })
+
+            clientBlock.jsx = jsxResolved.Component as unknown as BlockJSX
           }
 
           if (block.labels) {

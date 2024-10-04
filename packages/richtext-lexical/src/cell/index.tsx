@@ -29,6 +29,7 @@ export const RichTextCell: React.FC<
   const {
     admin,
     field: { richTextComponentMap },
+    field,
     lexicalEditorConfig,
   } = props
 
@@ -79,6 +80,7 @@ export const RichTextCell: React.FC<
       : defaultEditorLexicalConfig
 
     const resolvedClientFeatures = loadClientFeatures({
+      field,
       unSanitizedEditorConfig: {
         features: featureProvidersLocal,
         lexical: finalLexicalEditorConfig,
@@ -86,7 +88,7 @@ export const RichTextCell: React.FC<
     })
 
     return sanitizeClientEditorConfig(resolvedClientFeatures, finalLexicalEditorConfig)
-  }, [richTextComponentMap, lexicalEditorConfig])
+  }, [richTextComponentMap, lexicalEditorConfig, field])
 
   finalSanitizedEditorConfig.admin = admin
 

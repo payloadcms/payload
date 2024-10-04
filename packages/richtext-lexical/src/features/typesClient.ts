@@ -6,6 +6,7 @@ import type {
   LexicalNodeReplacement,
   SerializedEditorState,
 } from 'lexical'
+import type { RichTextFieldClient } from 'payload'
 import type React from 'react'
 
 import type { ClientEditorConfig } from '../lexical/config/types.js'
@@ -32,6 +33,7 @@ export type FeatureProviderClient<
     | ((props: {
         /** unSanitizedEditorConfig.features, but mapped */
         featureProviderMap: ClientFeatureProviderMap
+        field?: RichTextFieldClient
         // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
         resolvedFeatures: ResolvedClientFeatureMap
         // unSanitized EditorConfig,
@@ -61,7 +63,13 @@ export type ClientFeature<ClientFeatureProps> = {
       incomingEditorState: SerializedEditorState
     }) => SerializedEditorState
   }
-  markdownTransformers?: Transformer[]
+  markdownTransformers?: (
+    | ((props: {
+        allNodes: Array<Klass<LexicalNode> | LexicalNodeReplacement>
+        allTransformers: Transformer[]
+      }) => Transformer)
+    | Transformer
+  )[]
   nodes?: Array<Klass<LexicalNode> | LexicalNodeReplacement>
   /**
    * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
@@ -226,6 +234,7 @@ export type SanitizedClientFeatures = {
       }) => SerializedEditorState
     >
   }
+  markdownTransformers: Transformer[]
   /**
    * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
    */
@@ -247,8 +256,5 @@ export type SanitizedClientFeatures = {
     groups: SlashMenuGroup[]
   }
 } & Required<
-  Pick<
-    ResolvedClientFeature<unknown>,
-    'markdownTransformers' | 'nodes' | 'providers' | 'toolbarFixed' | 'toolbarInline'
-  >
+  Pick<ResolvedClientFeature<unknown>, 'nodes' | 'providers' | 'toolbarFixed' | 'toolbarInline'>
 >

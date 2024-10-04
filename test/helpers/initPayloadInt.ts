@@ -12,11 +12,17 @@ import { NextRESTClient } from './NextRESTClient.js'
 export async function initPayloadInt(
   dirname: string,
   testSuiteNameOverride?: string,
-): Promise<{ config: SanitizedConfig; payload: Payload; restClient: NextRESTClient }> {
+  initializePayload = true,
+): Promise<{ config: SanitizedConfig; payload?: Payload; restClient?: NextRESTClient }> {
   const testSuiteName = testSuiteNameOverride ?? path.basename(dirname)
   await runInit(testSuiteName, false, true)
   console.log('importing config', path.resolve(dirname, 'config.ts'))
   const { default: config } = await import(path.resolve(dirname, 'config.ts'))
+
+  if (!initializePayload) {
+    return { config: await config }
+  }
+
   console.log('starting payload')
 
   // need to use getPayloadHMR and not getPayload, as getPayloadHMR will be used in next handlers. If we use getPayload

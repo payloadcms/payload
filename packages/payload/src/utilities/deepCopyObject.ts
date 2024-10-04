@@ -32,6 +32,8 @@ const constructorHandlers = new Map()
 constructorHandlers.set(Date, (o) => new Date(o))
 constructorHandlers.set(Map, (o, fn) => new Map(cloneArray<any>(Array.from(o), fn)))
 constructorHandlers.set(Set, (o, fn) => new Set(cloneArray(Array.from(o), fn)))
+constructorHandlers.set(RegExp, (regex: RegExp) => new RegExp(regex.source, regex.flags))
+
 let handler = null
 
 function cloneArray<T>(a: T, fn): T {
@@ -42,6 +44,8 @@ function cloneArray<T>(a: T, fn): T {
     const cur = a[k]
     if (typeof cur !== 'object' || cur === null) {
       a2[k] = cur
+    } else if (cur instanceof RegExp) {
+      a2[k] = new RegExp(cur.source, cur.flags)
     } else if (cur.constructor !== Object && (handler = constructorHandlers.get(cur.constructor))) {
       a2[k] = handler(cur, fn)
     } else if (ArrayBuffer.isView(cur)) {
@@ -60,6 +64,10 @@ export const deepCopyObject = <T>(o: T): T => {
   if (Array.isArray(o)) {
     return cloneArray(o, deepCopyObject)
   }
+  if (o instanceof RegExp) {
+    return new RegExp(o.source, o.flags) as T
+  }
+
   if (o.constructor !== Object && (handler = constructorHandlers.get(o.constructor))) {
     return handler(o, deepCopyObject)
   }
@@ -71,6 +79,8 @@ export const deepCopyObject = <T>(o: T): T => {
     const cur = o[k]
     if (typeof cur !== 'object' || cur === null) {
       o2[k as string] = cur
+    } else if (cur instanceof RegExp) {
+      o2[k as string] = new RegExp(cur.source, cur.flags)
     } else if (cur.constructor !== Object && (handler = constructorHandlers.get(cur.constructor))) {
       o2[k as string] = handler(cur, deepCopyObject)
     } else if (ArrayBuffer.isView(cur)) {
