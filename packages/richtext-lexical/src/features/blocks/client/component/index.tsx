@@ -87,9 +87,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
           valid: true,
           value: formData.blockName,
         }
-      }
 
-      setInitialState(state)
+        setInitialState(state)
+      }
     }
 
     if (formData) {
@@ -103,25 +103,21 @@ export const BlockComponent: React.FC<Props> = (props) => {
         apiRoute,
         body: {
           id,
-          data: formData,
+          formState: prevFormState,
           operation: 'update',
           schemaPath: schemaFieldsPath,
         },
         serverURL,
       })
 
-      if (formState) {
-        formState.blockName = {
-          initialValue: '',
-          passesCondition: true,
-          valid: true,
-          value: formData.blockName,
-        }
-
-        return formState
+      formState.blockName = {
+        initialValue: '',
+        passesCondition: true,
+        valid: true,
+        value: formData.blockName,
       }
 
-      return prevFormState
+      return formState
     },
 
     [id, schemaFieldsPath, formData.blockName, serverURL, apiRoute],

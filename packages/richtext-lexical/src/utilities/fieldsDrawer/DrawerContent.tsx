@@ -86,7 +86,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         serverURL,
       })
 
-      return state || prevFormState
+      return state
     },
     [schemaFieldsPath, id, apiRoute, serverURL],
   )
