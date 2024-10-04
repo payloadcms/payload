@@ -57,7 +57,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   useEffect(() => {
     const awaitInitialState = async () => {
       const { state } = await getFormStateFetch({
-        apiRoute: 'api',
+        apiRoute,
         body: {
           id,
           data: data ?? {},
