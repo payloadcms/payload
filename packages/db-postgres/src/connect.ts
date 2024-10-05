@@ -53,7 +53,6 @@ export const connect: Connect = async function connect(
   const { hotReload } = options
 
   this.schema = {
-    pgSchema: this.pgSchema,
     ...this.tables,
     ...this.relations,
     ...this.enums,
