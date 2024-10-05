@@ -44,7 +44,7 @@ export async function duplicate<TSlug extends CollectionSlug>(
     )
   }
 
-  if (collection.config.disableDuplicate === false) {
+  if (collection.config.disableDuplicate === true) {
     throw new APIError(
       `The collection with slug ${String(collectionSlug)} cannot be duplicated.`,
       400,

@@ -302,6 +302,9 @@ importers:
       '@payloadcms/drizzle':
         specifier: workspace:*
         version: link:../drizzle
+      '@types/pg':
+        specifier: 8.10.2
+        version: 8.10.2
       console-table-printer:
         specifier: 2.11.2
         version: 2.11.2
@@ -330,9 +333,6 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@types/pg':
-        specifier: 8.10.2
-        version: 8.10.2
       '@types/to-snake-case':
         specifier: 1.0.0
         version: 1.0.0
