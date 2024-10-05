@@ -48,6 +48,7 @@ const connectWithReconnect = async function ({
 
 export const connect: Connect = async function connect(this: PostgresAdapter, payload) {
   this.schema = {
+    pgSchema: this.pgSchema,
     ...this.tables,
     ...this.relations,
     ...this.enums,

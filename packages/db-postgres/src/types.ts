@@ -85,7 +85,7 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
   push: boolean
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
-  schema: Record<string, GenericEnum | GenericRelation | GenericTable>
+  schema: Record<string, unknown>
   schemaName?: Args['schemaName']
   sessions: {
     [id: string]: {
@@ -124,7 +124,7 @@ declare module 'payload' {
     push: boolean
     relations: Record<string, GenericRelation>
     relationshipsSuffix?: string
-    schema: Record<string, GenericEnum | GenericRelation | GenericTable>
+    schema: Record<string, unknown>
     sessions: {
       [id: string]: {
         db: DrizzleTransaction
