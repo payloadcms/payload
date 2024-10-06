@@ -7,6 +7,8 @@ export const rule = {
     },
     messages: {
       improperUsage: 'Improper logger usage. Pass { msg, err } so full error stack is logged.',
+      wrongErrorField: 'Improper usage. Use { err } instead of { error }.',
+      wrongMessageField: 'Improper usage. Use { msg } instead of { message }.',
     },
     schema: [],
   },
@@ -32,8 +34,47 @@ export const rule = {
         if (isPayloadLoggerError(callee)) {
           const args = node.arguments
 
-          // Check if the first argument is not an object
-          if (args.length > 0 && args[0].type !== 'ObjectExpression') {
+          // Case 1: Single string is passed as the argument
+          if (
+            args.length === 1 &&
+            args[0].type === 'Literal' &&
+            typeof args[0].value === 'string'
+          ) {
+            return // Valid: single string argument
+          }
+
+          // Case 2: Object is passed as the first argument
+          if (args.length > 0 && args[0].type === 'ObjectExpression') {
+            const properties = args[0].properties
+
+            // Ensure no { error } key, only { err } is allowed
+            properties.forEach((prop) => {
+              if (prop.key.type === 'Identifier' && prop.key.name === 'error') {
+                context.report({
+                  node: prop,
+                  messageId: 'wrongErrorField',
+                })
+              }
+
+              // Ensure no { message } key, only { msg } is allowed
+              if (prop.key.type === 'Identifier' && prop.key.name === 'message') {
+                context.report({
+                  node: prop,
+                  messageId: 'wrongMessageField',
+                })
+              }
+            })
+            return // Valid object, checked for 'err'/'error' keys
+          }
+
+          // Case 3: Improper usage (string + error or additional err/error)
+          if (
+            args.length > 1 &&
+            args[0].type === 'Literal' &&
+            typeof args[0].value === 'string' &&
+            args[1].type === 'Identifier' &&
+            (args[1].name === 'err' || args[1].name === 'error')
+          ) {
             context.report({
               node,
               messageId: 'improperUsage',
