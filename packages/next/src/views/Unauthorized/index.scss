@@ -1,7 +1,9 @@
 @import '../../scss/styles.scss';
 
-.unauthorized {
-  &__button {
-    margin: 0;
+@layer payload-default {
+  .unauthorized {
+    &__button {
+      margin: 0;
+    }
   }
 }

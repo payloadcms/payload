@@ -34,7 +34,14 @@ export async function generateStaticParams() {
   return params
 }
 
-export default async function Page({ params: { slug = 'home' } }) {
+type Args = {
+  params: Promise<{
+    slug?: string
+  }>
+}
+
+export default async function Page({ params: paramsPromise }: Args) {
+  const { slug = 'home' } = await paramsPromise
   const url = '/' + slug
 
   let page: PageType | null
@@ -66,7 +73,8 @@ export default async function Page({ params: { slug = 'home' } }) {
   )
 }
 
-export async function generateMetadata({ params: { slug = 'home' } }): Promise<Metadata> {
+export async function generateMetadata({ params: paramsPromise }): Promise<Metadata> {
+  const { slug = 'home' } = await paramsPromise
   const page = await queryPageBySlug({
     slug,
   })
@@ -75,7 +83,7 @@ export async function generateMetadata({ params: { slug = 'home' } }): Promise<M
 }
 
 const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
-  const { isEnabled: draft } = draftMode()
+  const { isEnabled: draft } = await draftMode()
 
   const payload = await getPayloadHMR({ config: configPromise })
 

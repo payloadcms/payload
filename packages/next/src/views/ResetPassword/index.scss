@@ -1,9 +1,11 @@
 @import '../../scss/styles.scss';
 
-.reset-password__wrap {
-  .inputWrap {
-    display: flex;
-    flex-direction: column;
-    gap: base(0.8);
+@layer payload-default {
+  .reset-password__wrap {
+    .inputWrap {
+      display: flex;
+      flex-direction: column;
+      gap: base(0.8);
+    }
   }
 }
