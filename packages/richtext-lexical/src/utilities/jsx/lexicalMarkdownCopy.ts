@@ -1,10 +1,4 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
+/* eslint-disable regexp/no-unused-capturing-group */
 
 import type { ListItemNode } from '@lexical/list'
 import type {
@@ -568,9 +562,15 @@ export function normalizeMarkdown(input: string, shouldMergeAdjacentLines = fals
       continue
     }
 
+    if (
+      (CODE_START_REGEX.test(line) && !inCodeBlock) ||
+      (CODE_END_REGEX.test(line) && inCodeBlock)
+    ) {
+      inCodeBlock = !inCodeBlock
+    }
+
     // Detect the start or end of a code block
     if (CODE_START_REGEX.test(line) || CODE_END_REGEX.test(line)) {
-      inCodeBlock = !inCodeBlock
       sanitizedLines.push(line)
       continue
     }
@@ -599,7 +599,7 @@ export function normalizeMarkdown(input: string, shouldMergeAdjacentLines = fals
     ) {
       sanitizedLines.push(line)
     } else {
-      sanitizedLines[sanitizedLines.length - 1] = lastLine + line
+      sanitizedLines[sanitizedLines.length - 1] = lastLine + ' ' + line.trim()
     }
   }
 
