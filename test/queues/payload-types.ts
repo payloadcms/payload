@@ -1,4 +1,4 @@
-import { JobTaskStatus as JobTaskStatus_1 } from 'payload'
+import { SingleTaskStatus as SingleTaskStatus_1 } from 'payload'
 
 /* tslint:disable */
 /* eslint-disable */
@@ -169,42 +169,42 @@ export interface PayloadJob {
        * This interface was referenced by `undefined`'s JSON-Schema definition
        * via the `patternProperty` "^.*$".
        */
-      [k: string]: JobTaskStatus_1<"UpdatePost">;
+      [k: string]: SingleTaskStatus_1<"UpdatePost">;
     };
     UpdatePostStep2?: {
       /**
        * This interface was referenced by `undefined`'s JSON-Schema definition
        * via the `patternProperty` "^.*$".
        */
-      [k: string]: JobTaskStatus_1<"UpdatePostStep2">;
+      [k: string]: SingleTaskStatus_1<"UpdatePostStep2">;
     };
     CreateSimple?: {
       /**
        * This interface was referenced by `undefined`'s JSON-Schema definition
        * via the `patternProperty` "^.*$".
        */
-      [k: string]: JobTaskStatus_1<"CreateSimple">;
+      [k: string]: SingleTaskStatus_1<"CreateSimple">;
     };
     CreateSimpleWithDuplicateMessage?: {
       /**
        * This interface was referenced by `undefined`'s JSON-Schema definition
        * via the `patternProperty` "^.*$".
        */
-      [k: string]: JobTaskStatus_1<"CreateSimpleWithDuplicateMessage">;
+      [k: string]: SingleTaskStatus_1<"CreateSimpleWithDuplicateMessage">;
     };
     ExternalTask?: {
       /**
        * This interface was referenced by `undefined`'s JSON-Schema definition
        * via the `patternProperty` "^.*$".
        */
-      [k: string]: JobTaskStatus_1<"ExternalTask">;
+      [k: string]: SingleTaskStatus_1<"ExternalTask">;
     };
     inline?: {
       /**
        * This interface was referenced by `undefined`'s JSON-Schema definition
        * via the `patternProperty` "^.*$".
        */
-      [k: string]: JobTaskStatus_1<any>;
+      [k: string]: SingleTaskStatus_1<any>;
     };
   };
   completedAt?: string | null;

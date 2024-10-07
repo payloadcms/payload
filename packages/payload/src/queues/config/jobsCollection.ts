@@ -54,7 +54,7 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
               '^.*$': jsonSchemaExternalImport({
                 from: 'payload',
                 generics: [`"${task.slug}"`],
-                specifier: 'JobTaskStatus',
+                specifier: 'SingleTaskStatus',
               }),
             },
           },
@@ -67,7 +67,7 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
           '^.*$': jsonSchemaExternalImport({
             from: 'payload',
             generics: [`any`],
-            specifier: 'JobTaskStatus',
+            specifier: 'SingleTaskStatus',
           }),
         },
       },
