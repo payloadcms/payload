@@ -31,12 +31,7 @@ export type BaseJob = {
   queue: string
   seenByWorker?: boolean
   taskSlug?: string
-  taskStatus?: {
-    // Added by afterRead hook
-    [taskSlug: string]: {
-      [taskID: string]: BaseJob['log'][0]
-    }
-  }
+  taskStatus?: JobTaskStatus
   totalTried: number
   waitUntil?: string
   workflowSlug?: string
@@ -62,7 +57,7 @@ export type WorkflowHandler<TWorkflowSlugOrInput extends keyof TypedJobs['workfl
     runTaskInline: RunInlineTaskFunction
   }) => Promise<void>
 
-export type JobTaskStatus<T extends keyof TypedJobs['tasks']> = {
+export type SingleTaskStatus<T extends keyof TypedJobs['tasks']> = {
   complete: boolean
   input: TaskInput<T>
   output: TaskOutput<T>
@@ -73,8 +68,11 @@ export type JobTaskStatus<T extends keyof TypedJobs['tasks']> = {
 /**
  * Task IDs mapped to their status
  */
-export type JobTasksStatus = {
-  [taskID: string]: JobTaskStatus<TaskType>
+export type JobTaskStatus = {
+  // Wrap in taskSlug to improve typing
+  [taskSlug: 'inline' | TaskType]: {
+    [taskID: string]: SingleTaskStatus<TaskType>
+  }
 }
 
 export type WorkflowConfig<TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object> = {

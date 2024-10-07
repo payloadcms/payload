@@ -1053,9 +1053,9 @@ export type {
 } from './queues/config/types/taskTypes.js'
 export type {
   BaseJob,
-  JobTasksStatus,
   JobTaskStatus,
   RunningJob,
+  SingleTaskStatus,
   WorkflowConfig,
   WorkflowHandler,
   WorkflowTypes,

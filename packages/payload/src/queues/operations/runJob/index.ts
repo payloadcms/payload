@@ -1,7 +1,6 @@
 import type { PayloadRequest } from '../../../types/index.js'
 import type {
   BaseJob,
-  JobTasksStatus,
   RunningJob,
   WorkflowConfig,
   WorkflowHandler,
@@ -16,7 +15,6 @@ import { importHandlerPath } from './importHandlerPath.js'
 
 type Args = {
   job: BaseJob
-  jobTasksStatus: JobTasksStatus
   req: PayloadRequest
   workflowConfig: WorkflowConfig<WorkflowTypes>
 }
@@ -27,12 +25,7 @@ export type RunJobResult = {
   status: JobRunStatus
 }
 
-export const runJob = async ({
-  job,
-  jobTasksStatus,
-  req,
-  workflowConfig,
-}: Args): Promise<RunJobResult> => {
+export const runJob = async ({ job, req, workflowConfig }: Args): Promise<RunJobResult> => {
   if (!workflowConfig.handler) {
     throw new Error('Currently, only JS-based workflows are supported')
   }
@@ -73,8 +66,9 @@ export const runJob = async ({
     seenByWorker: true,
   })
 
+  // Object so that we can pass contents by reference, not value.
+  // We want any mutations to be reflected in here.
   const state: RunTaskFunctionState = {
-    jobTasksStatus,
     reachedMaxRetries: false,
   }
 

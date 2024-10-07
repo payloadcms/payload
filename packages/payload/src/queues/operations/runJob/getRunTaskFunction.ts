@@ -10,9 +10,8 @@ import type {
 } from '../../config/types/taskTypes.js'
 import type {
   BaseJob,
-  JobTasksStatus,
-  JobTaskStatus,
   RunningJob,
+  SingleTaskStatus,
   WorkflowConfig,
   WorkflowTypes,
 } from '../../config/types/workflowTypes.js'
@@ -27,7 +26,6 @@ import { importHandlerPath } from './importHandlerPath.js'
 
 // Helper object type to force being passed by reference
 export type RunTaskFunctionState = {
-  jobTasksStatus: JobTasksStatus
   reachedMaxRetries: boolean
 }
 
@@ -70,7 +68,7 @@ export async function handleTaskFailed({
   state: RunTaskFunctionState
   taskID: string
   taskSlug: string
-  taskStatus: JobTaskStatus<string>
+  taskStatus: null | SingleTaskStatus<string>
   updateJob: UpdateJobFunction
 }): Promise<never> {
   req.payload.logger.error({ err: error, job, msg: 'Error running task', taskSlug })
@@ -97,6 +95,7 @@ export async function handleTaskFailed({
       delete job.waitUntil
     }
   }
+
   if (taskStatus && !taskStatus.complete && taskStatus.totalTried >= maxRetries) {
     state.reachedMaxRetries = true
     job.hasError = true
@@ -112,7 +111,7 @@ export async function handleTaskFailed({
     // Job will retry. Let's determine when!
     const waitUntil: Date = calculateBackoffWaitUntil({
       retriesConfig,
-      totalTried: taskStatus.totalTried,
+      totalTried: taskStatus?.totalTried ?? 0,
     })
 
     // Update job's waitUntil only if this waitUntil is later than the current one
@@ -161,7 +160,9 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
       }
     }
 
-    const taskStatus = state.jobTasksStatus[id]
+    const taskStatus: null | SingleTaskStatus<string> = job?.taskStatus?.[String(task)]
+      ? job.taskStatus[String(task)][id]
+      : null
 
     if (taskStatus && taskStatus.complete === true) {
       return taskStatus.output
@@ -267,14 +268,6 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         updateJob,
       })
       throw new Error('Task failed')
-    }
-
-    state.jobTasksStatus[id] = {
-      complete: true,
-      input,
-      output,
-      taskSlug: String(task),
-      totalTried: 0,
     }
 
     if (!job.log) {

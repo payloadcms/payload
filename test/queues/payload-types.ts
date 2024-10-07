@@ -58,6 +58,9 @@ export interface Config {
       retriesTest?: {
         input: WorkflowretriesTestInput;
       };
+      retriesRollbackTest?: {
+        input: WorkflowretriesRollbackTestInput;
+      };
       retriesWorkflowLevelTest?: {
         input: WorkflowretriesWorkflowLevelTestInput;
       };
@@ -67,8 +70,8 @@ export interface Config {
       externalWorkflow?: {
         input: WorkflowexternalWorkflowInput;
       };
-      retriesRollbackTest?: {
-        input: WorkflowretriesRollbackTestInput;
+      retriesBackoffTest?: {
+        input: WorkflowretriesBackoffTestInput;
       };
     };
   };
@@ -263,10 +266,11 @@ export interface PayloadJob {
     | (
         | 'updatePost'
         | 'retriesTest'
+        | 'retriesRollbackTest'
         | 'retriesWorkflowLevelTest'
         | 'inlineTaskTest'
         | 'externalWorkflow'
-        | 'retriesRollbackTest'
+        | 'retriesBackoffTest'
       )
     | null;
   taskSlug?:
@@ -435,6 +439,13 @@ export interface WorkflowretriesTestInput {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowretriesRollbackTestInput".
+ */
+export interface WorkflowretriesRollbackTestInput {
+  message: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "WorkflowretriesWorkflowLevelTestInput".
  */
 export interface WorkflowretriesWorkflowLevelTestInput {
@@ -456,9 +467,9 @@ export interface WorkflowexternalWorkflowInput {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "WorkflowretriesRollbackTestInput".
+ * via the `definition` "WorkflowretriesBackoffTestInput".
  */
-export interface WorkflowretriesRollbackTestInput {
+export interface WorkflowretriesBackoffTestInput {
   message: string;
 }
 /**

@@ -304,6 +304,59 @@ export default buildConfigWithDefaults({
         },
       } as WorkflowConfig<'retriesTest'>,
       {
+        slug: 'retriesRollbackTest',
+        inputSchema: [
+          {
+            name: 'message',
+            type: 'text',
+            required: true,
+          },
+        ],
+        handler: async ({ job, runTaskInline }) => {
+          // @ts-expect-error amountRetried is new arbitrary data and not in the type
+          job.input.amountRetried =
+            // @ts-expect-error amountRetried is new arbitrary data and not in the type
+            job.input.amountRetried !== undefined ? job.input.amountRetried + 1 : 0
+
+          await runTaskInline({
+            task: async ({ req }) => {
+              const newSimple = await req.payload.create({
+                collection: 'simple',
+                req,
+                data: {
+                  title: job.input.message,
+                },
+              })
+              return {
+                output: {
+                  simpleID: newSimple.id,
+                },
+              }
+            },
+            id: '1',
+          })
+
+          await runTaskInline({
+            task: async ({ req }) => {
+              await req.payload.create({
+                collection: 'simple',
+                req,
+                data: {
+                  title: 'should not exist',
+                },
+              })
+              // Fail afterwards, so that we can also test that transactions work (i.e. the job is rolled back)
+
+              throw new Error('Failed on purpose')
+            },
+            id: '2',
+            retries: {
+              attempts: 4,
+            },
+          })
+        },
+      } as WorkflowConfig<'retriesRollbackTest'>,
+      {
         slug: 'retriesWorkflowLevelTest',
         inputSchema: [
           {
@@ -383,59 +436,6 @@ export default buildConfigWithDefaults({
         ],
         handler: path.resolve(dirname, 'runners/externalWorkflow.ts') + '#externalWorkflowHandler',
       } as WorkflowConfig<'externalWorkflow'>,
-      {
-        slug: 'retriesRollbackTest',
-        inputSchema: [
-          {
-            name: 'message',
-            type: 'text',
-            required: true,
-          },
-        ],
-        handler: async ({ job, runTaskInline }) => {
-          // @ts-expect-error amountRetried is new arbitrary data and not in the type
-          job.input.amountRetried =
-            // @ts-expect-error amountRetried is new arbitrary data and not in the type
-            job.input.amountRetried !== undefined ? job.input.amountRetried + 1 : 0
-
-          await runTaskInline({
-            task: async ({ req }) => {
-              const newSimple = await req.payload.create({
-                collection: 'simple',
-                req,
-                data: {
-                  title: job.input.message,
-                },
-              })
-              return {
-                output: {
-                  simpleID: newSimple.id,
-                },
-              }
-            },
-            id: '1',
-          })
-
-          await runTaskInline({
-            task: async ({ req }) => {
-              await req.payload.create({
-                collection: 'simple',
-                req,
-                data: {
-                  title: 'should not exist',
-                },
-              })
-              // Fail afterwards, so that we can also test that transactions work (i.e. the job is rolled back)
-
-              throw new Error('Failed on purpose')
-            },
-            id: '2',
-            retries: {
-              attempts: 4,
-            },
-          })
-        },
-      } as WorkflowConfig<'retriesRollbackTest'>,
     ],
   },
   editor: lexicalEditor(),

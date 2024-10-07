@@ -2,10 +2,10 @@ import type { JSONSchema4 } from 'json-schema'
 
 import type { CollectionConfig } from '../../collections/config/types.js'
 import type { Config } from '../../config/types.js'
-import type { BaseJob } from './types/workflowTypes.js'
 
 import { jsonSchemaExternalImport } from '../../utilities/configToJSONSchema.js'
 import { runAllJobsEndpoint } from '../operations/rest/run.js'
+import { getJobTaskStatus } from '../utilities/getJobTaskStatus.js'
 
 export const getDefaultJobsCollection: (config: Config) => CollectionConfig | null = (config) => {
   if (!Array.isArray(config?.jobs?.workflows)) {
@@ -244,38 +244,13 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
     ],
     hooks: {
       afterRead: [
-        ({ doc }) => {
+        ({ doc, req }) => {
           // This hook is used to add the virtual `tasks` field to the document, that is computed from the `log` field
 
-          const taskStatus: {
-            [taskSlug: string]: {
-              [taskID: string]: BaseJob['log'][0]
-            }
-          } = {}
-
-          for (const _loggedTask of doc.log) {
-            const loggedTask = _loggedTask as BaseJob['log'][0]
-            if (loggedTask.state !== 'succeeded') {
-              continue
-            }
-
-            if (!taskStatus[loggedTask.taskSlug]) {
-              taskStatus[loggedTask.taskSlug] = {
-                [loggedTask.taskID]: loggedTask,
-              }
-            } else {
-              const idsForTask = taskStatus[loggedTask.taskSlug]
-              if (
-                !idsForTask[loggedTask.taskID] ||
-                new Date(loggedTask.completedAt) >
-                  new Date(idsForTask[loggedTask.taskID].completedAt)
-              ) {
-                taskStatus[loggedTask.taskSlug][loggedTask.taskID] = loggedTask
-              }
-            }
-          }
-
-          doc.taskStatus = taskStatus
+          doc.taskStatus = getJobTaskStatus({
+            jobLog: doc.log,
+            tasksConfig: req.payload.config.jobs.tasks,
+          })
 
           return doc
         },

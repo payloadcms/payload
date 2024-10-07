@@ -7,7 +7,6 @@ import { Forbidden } from '../../../errors/Forbidden.js'
 import { commitTransaction } from '../../../utilities/commitTransaction.js'
 import { initTransaction } from '../../../utilities/initTransaction.js'
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty.js'
-import { getJobStatus } from '../../utilities/getJobStatus.js'
 import { runJob } from '../runJob/index.js'
 
 export type RunAllJobsArgs = {
@@ -143,10 +142,6 @@ export const runAllJobs = async ({
     await initTransaction(newReq)
     const result = await runJob({
       job,
-      jobTasksStatus: getJobStatus({
-        job,
-        tasksConfig: req.payload.config.jobs.tasks,
-      }),
       // Each job should have its own transaction. Can't have multiple running jobs in parallel on same transaction
       req: newReq,
       workflowConfig,
