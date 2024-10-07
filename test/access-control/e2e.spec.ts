@@ -482,7 +482,7 @@ describe('access control', () => {
         serverURL,
       })
 
-      await expect(page.locator('.next-error-h1')).toBeVisible()
+      await expect(page.locator('.unauthorized')).toBeVisible()
 
       await page.goto(logoutURL)
       await page.waitForURL(logoutURL)
