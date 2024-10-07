@@ -4,7 +4,7 @@ import type {
   ServerFunctionClient,
 } from 'payload'
 
-import React, { createContext, useCallback } from 'react'
+import React, { createContext, useCallback, useEffect, useRef } from 'react'
 
 import type { buildFormState } from '../../utilities/buildFormState.js'
 
@@ -40,6 +40,42 @@ export const ServerFunctionsProvider: React.FC<{
     throw new Error('ServerFunctionsProvider requires a serverFunction prop')
   }
 
+  // This is the local abort controller, to abort requests when the _provider_ itself unmounts, etc.
+  // Each callback also accept a remote signal, to abort requests when each _component_ unmounts, etc.
+  const abortControllerRef = useRef(new AbortController())
+
+  const getFormState = useCallback<GetFormState>(
+    async (args) => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+      const localSignal = abortController.signal
+
+      const { signal: remoteSignal, ...rest } = args
+
+      try {
+        if (!remoteSignal?.aborted && !localSignal?.aborted) {
+          const result = (await serverFunction({
+            name: 'form-state',
+            args: rest,
+          })) as ReturnType<typeof buildFormState> // TODO: infer this type when `strictNullChecks` is enabled
+
+          if (!remoteSignal?.aborted && !localSignal?.aborted) {
+            return result
+          }
+        }
+      } catch (_err) {
+        // swallow error
+      }
+
+      return { state: args.formState }
+    },
+    [serverFunction],
+  )
+
   const renderFieldBySchemaPath = useCallback<RenderFieldBySchemaPathClient>(
     async (args) => {
       const { schemaPath } = args
@@ -54,31 +90,19 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
-  const getFormState = useCallback<GetFormState>(
-    async (args) => {
-      const { signal, ...rest } = args
+  useEffect(() => {
+    const controller = abortControllerRef.current
 
-      try {
-        if (!signal?.aborted) {
-          const result = (await serverFunction({
-            name: 'form-state',
-            args: rest,
-          })) as ReturnType<typeof buildFormState> // TODO: infer this type when `strictNullChecks` is enabled
-
-          if (signal?.aborted) {
-            throw new Error('Request was aborted, ignoring result')
-          }
-
-          return result
+    return () => {
+      if (controller) {
+        try {
+          controller.abort()
+        } catch (_err) {
+          // swallow error
         }
-      } catch (error) {
-        console.error(error) // eslint-disable-line no-console
       }
-
-      return { state: args.formState }
-    },
-    [serverFunction],
-  )
+    }
+  }, [])
 
   return (
     <ServerFunctionsContext.Provider
