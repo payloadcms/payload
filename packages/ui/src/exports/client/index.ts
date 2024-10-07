@@ -129,7 +129,6 @@ export type { TextInputProps } from '../../fields/Text/index.js'
 export { TextareaField, TextareaInput } from '../../fields/Textarea/index.js'
 export type { TextAreaInputProps } from '../../fields/Textarea/index.js'
 
-export { getFormStateFetch } from '../../utilities/getFormStateFetch.js'
 export { UIField } from '../../fields/UI/index.js'
 export { UploadField, UploadInput } from '../../fields/Upload/index.js'
 export type { UploadInputProps } from '../../fields/Upload/index.js'
