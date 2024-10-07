@@ -1,6 +1,6 @@
 import type { BuildFormStateArgs, ServerFunctionClient } from 'payload'
 
-import React, { createContext, useCallback } from 'react'
+import React, { createContext, useCallback, useEffect, useRef } from 'react'
 
 import type { buildFormState } from '../../utilities/buildFormState.js'
 
@@ -35,18 +35,30 @@ export const ServerFunctionsProvider: React.FC<{
     throw new Error('ServerFunctionsProvider requires a serverFunction prop')
   }
 
+  // This is the local abort controller, to abort requests when the _provider_ itself unmounts, etc.
+  // Each callback also accept a remote signal, to abort requests when each _component_ unmounts, etc.
+  const abortControllerRef = useRef(new AbortController())
+
   const getFormState = useCallback<GetFormState>(
     async (args) => {
-      const { signal, ...rest } = args
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+      const localSignal = abortController.signal
+
+      const { signal: remoteSignal, ...rest } = args
 
       try {
-        if (!signal?.aborted) {
+        if (!remoteSignal?.aborted && !localSignal?.aborted) {
           const result = (await serverFunction({
             name: 'form-state',
             args: rest,
           })) as ReturnType<typeof buildFormState> // TODO: infer this type when `strictNullChecks` is enabled
 
-          if (!signal?.aborted) {
+          if (!remoteSignal?.aborted && !localSignal?.aborted) {
             return result
           }
         }
@@ -58,6 +70,20 @@ export const ServerFunctionsProvider: React.FC<{
     },
     [serverFunction],
   )
+
+  useEffect(() => {
+    const controller = abortControllerRef.current
+
+    return () => {
+      if (controller) {
+        try {
+          controller.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+    }
+  }, [])
 
   return (
     <ServerFunctionsContext.Provider value={{ getFormState, serverFunction }}>
