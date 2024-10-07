@@ -6,7 +6,7 @@ import React, { createContext, useContext } from 'react'
 import type { Column } from '../../elements/Table/index.js'
 
 import { useConfig } from '../Config/index.js'
-// import { useServerActions } from '../ServerActions/index.js'
+// import { useServerFunctions } from '../ServerActions/index.js'
 // import { useTranslation } from '../Translation/index.js'
 
 export type ColumnPreferences = Pick<Column, 'accessor' | 'active'>[]
@@ -48,7 +48,7 @@ export const ListInfoProvider: React.FC<
 
   const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
-  // const payloadServerAction = useServerActions()
+  // const payloadServeFunctions = useServerFunctions()
 
   // const { i18n } = useTranslation()
 

@@ -36,7 +36,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useListInfo } from '../../providers/ListInfo/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
-import { useServerActions } from '../../providers/ServerActions/index.js'
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import './index.scss'
@@ -51,7 +51,7 @@ export const DefaultListView: React.FC<{
 }> = (props) => {
   const { collectionConfig: collectionConfigFromProps, listPreferences, preferenceKey } = props
 
-  const payloadServerAction = useServerActions()
+  const payloadServerAction = useServerFunctions()
 
   const { user } = useAuth()
 

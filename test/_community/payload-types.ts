@@ -13,7 +13,6 @@ export interface Config {
   collections: {
     posts: Post;
     simple: Simple;
-    media: Media;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -56,24 +55,8 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   text?: string | null;
-  relationToSelf?: (string | null) | Post;
   serverTextField?: string | null;
-  myBlocks?:
-    | (
-        | {
-            test?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'test';
-          }
-        | {
-            test2?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'someBlock2';
-          }
-      )[]
-    | null;
+  relationToSelf?: (string | null) | Post;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -87,50 +70,6 @@ export interface Simple {
   text?: string | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    medium?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    large?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -163,10 +102,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'simple';
         value: string | Simple;
-      } | null)
-    | ({
-        relationTo: 'media';
-        value: string | Media;
       } | null)
     | ({
         relationTo: 'users';

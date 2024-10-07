@@ -13,7 +13,6 @@ import { getTranslation } from '@payloadcms/translations'
 import {
   ArrayField,
   BlocksField,
-  buildFieldSchemaMap,
   CheckboxField,
   CodeField,
   CollapsibleField,
@@ -22,8 +21,6 @@ import {
   EmailField,
   FieldDescription,
   FieldLabel,
-  getFieldBySchemaPath,
-  getFieldSchemaMap,
   GroupField,
   HiddenField,
   JoinField,
@@ -43,6 +40,7 @@ import {
   UIField,
   UploadField,
 } from '@payloadcms/ui'
+import { getFieldBySchemaPath } from '@payloadcms/ui/utilities/buildFormState'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 
@@ -472,8 +470,6 @@ export const renderFieldByPath: RenderFieldBySchemaPath = (args) => {
     payload,
     schemaPath,
   })
-
-  console.log('fieldSchema', fieldSchema)
 
   return null
   // return renderField({
