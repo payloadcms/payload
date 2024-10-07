@@ -1,6 +1,7 @@
 import type { AdminViewComponent, PayloadServerReactComponent } from 'payload'
 
 import { Button } from '@payloadcms/ui'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React from 'react'
 
@@ -24,6 +25,7 @@ export const UnauthorizedView: PayloadServerReactComponent<AdminViewComponent> =
           admin: {
             routes: { logout: logoutRoute },
           },
+          routes: { admin: adminRoute },
         },
       },
     },
@@ -41,7 +43,10 @@ export const UnauthorizedView: PayloadServerReactComponent<AdminViewComponent> =
         el="link"
         Link={Link}
         size="large"
-        to={logoutRoute}
+        to={formatAdminURL({
+          adminRoute,
+          path: logoutRoute,
+        })}
       >
         {i18n.t('authentication:logOut')}
       </Button>

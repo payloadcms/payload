@@ -129,11 +129,13 @@ export const initPage = async ({
       .filter(Boolean),
   }
 
+  let redirectTo = null
+
   if (
     !permissions.canAccessAdmin &&
     !isPublicAdminRoute({ adminRoute, config: payload.config, route })
   ) {
-    handleAuthRedirect({
+    redirectTo = handleAuthRedirect({
       config: payload.config,
       route,
       searchParams,
@@ -159,6 +161,7 @@ export const initPage = async ({
     languageOptions,
     locale,
     permissions,
+    redirectTo,
     req,
     translations: i18n.translations,
     visibleEntities,

@@ -1,7 +1,6 @@
 import type { User } from 'payload'
 
 import { formatAdminURL } from '@payloadcms/ui/shared'
-import { redirect } from 'next/navigation.js'
 import * as qs from 'qs-esm'
 
 type Args = {
@@ -10,7 +9,7 @@ type Args = {
   searchParams: { [key: string]: string | string[] }
   user?: User
 }
-export const handleAuthRedirect = ({ config, route, searchParams, user }: Args) => {
+export const handleAuthRedirect = ({ config, route, searchParams, user }: Args): string => {
   const {
     admin: {
       routes: { login: loginRouteFromConfig, unauthorized: unauthorizedRoute },
@@ -43,5 +42,5 @@ export const handleAuthRedirect = ({ config, route, searchParams, user }: Args) 
     { addQueryPrefix: true },
   )}`
 
-  redirect(`${redirectTo.split('?')[0]}${searchParamsWithRedirect}`)
+  return `${redirectTo.split('?')[0]}${searchParamsWithRedirect}`
 }
