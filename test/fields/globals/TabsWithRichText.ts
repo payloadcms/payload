@@ -24,11 +24,11 @@ const TabsWithRichText: GlobalConfig = {
             es: 'es tab1',
           },
           fields: [
-            {
-              name: 'rt1',
-              type: 'richText',
-              editor: initializedEditor,
-            },
+            // {
+            //   name: 'rt1',
+            //   type: 'richText',
+            //   editor: initializedEditor,
+            // },
           ],
         },
         {
@@ -38,11 +38,11 @@ const TabsWithRichText: GlobalConfig = {
             es: 'es tab2',
           },
           fields: [
-            {
-              name: 'rt2',
-              type: 'richText',
-              editor: initializedEditor,
-            },
+            // {
+            //   name: 'rt2',
+            //   type: 'richText',
+            //   editor: initializedEditor,
+            // },
           ],
         },
       ],

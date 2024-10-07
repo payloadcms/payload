@@ -6,41 +6,29 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 const baseClass = 'json-field'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-
 const JSONFieldComponent: JSONFieldClientComponent = (props) => {
   const {
-    descriptionProps,
-    errorProps,
-    field,
+    AfterInput,
+    BeforeInput,
+    Description,
+    Error,
     field: {
       name,
-      _path: pathFromProps,
-      admin: {
-        className,
-        description,
-        editorOptions,
-        readOnly: readOnlyFromAdmin,
-        style,
-        width,
-      } = {},
+      _path: path,
+      admin: { className, editorOptions, readOnly: readOnlyFromAdmin, style, width } = {},
       jsonSchema,
-      label,
       required,
     },
-    labelProps,
+    Label,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const [stringValue, setStringValue] = useState<string>()
@@ -56,15 +44,13 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     [validate, required, jsonError],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-
-  const { formInitializing, formProcessing, initialValue, path, setValue, showError, value } =
+  const { formInitializing, formProcessing, initialValue, setValue, showError, value } =
     useField<string>({
-      path: pathFromContext ?? pathFromProps ?? name,
+      path: path ?? name,
       validate: memoizedValidate,
     })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const handleMount = useCallback(
     (editor, monaco) => {
@@ -133,15 +119,10 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         width,
       }}
     >
-      <FieldLabel field={field} Label={field?.admin?.components?.Label} {...(labelProps || {})} />
+      {Label}
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError
-          CustomError={field?.admin?.components?.Error}
-          field={field}
-          path={path}
-          {...(errorProps || {})}
-        />
-        <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
+        {Error}
+        {BeforeInput}
         <CodeEditor
           defaultLanguage="json"
           onChange={handleChange}
@@ -150,14 +131,9 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
           readOnly={disabled}
           value={stringValue}
         />
-        <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
+        {AfterInput}
       </div>
-      <FieldDescription
-        Description={field?.admin?.components?.Description}
-        description={description}
-        field={field}
-        {...(descriptionProps || {})}
-      />
+      {Description}
     </div>
   )
 }

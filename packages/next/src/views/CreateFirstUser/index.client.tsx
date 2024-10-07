@@ -8,19 +8,17 @@ import type {
 
 import {
   ConfirmPasswordField,
+  EmailAndUsernameFields,
   Form,
   type FormProps,
   FormSubmit,
   PasswordField,
-  RenderFields,
   useAuth,
   useConfig,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
 import React from 'react'
-
-import { RenderEmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
 
 export const CreateFirstUserClient: React.FC<{
   initialState: FormState
@@ -35,6 +33,8 @@ export const CreateFirstUserClient: React.FC<{
     getEntityConfig,
   } = useConfig()
 
+  const { getFormState } = useServerFunctions()
+
   const { t } = useTranslation()
   const { setUser } = useAuth()
 
@@ -43,18 +43,15 @@ export const CreateFirstUserClient: React.FC<{
   const onChange: FormProps['onChange'][0] = React.useCallback(
     async ({ formState: prevFormState }) => {
       const { state } = await getFormState({
-        apiRoute,
-        body: {
-          collectionSlug: userSlug,
-          formState: prevFormState,
-          operation: 'create',
-          schemaPath: `_${userSlug}.auth`,
-        },
-        serverURL,
+        collectionSlug: userSlug,
+        formState: prevFormState,
+        operation: 'create',
+        schemaPath: `_${userSlug}.auth`,
       })
+
       return state
     },
-    [apiRoute, userSlug, serverURL],
+    [userSlug, getFormState],
   )
 
   const handleFirstRegister = (data: { user: ClientUser }) => {
@@ -71,11 +68,12 @@ export const CreateFirstUserClient: React.FC<{
       redirect={admin}
       validationOperation="create"
     >
-      <RenderEmailAndUsernameFields
+      <EmailAndUsernameFields
         className="emailAndUsername"
         loginWithUsername={loginWithUsername}
         operation="create"
         readOnly={false}
+        t={t}
       />
       <PasswordField
         autoComplete={'off'}
@@ -86,14 +84,7 @@ export const CreateFirstUserClient: React.FC<{
         }}
       />
       <ConfirmPasswordField />
-      <RenderFields
-        fields={collectionConfig.fields}
-        forceRender
-        operation="create"
-        path=""
-        readOnly={false}
-        schemaPath={userSlug}
-      />
+      {/* Fields Here */}
       <FormSubmit size="large">{t('general:create')}</FormSubmit>
     </Form>
   )

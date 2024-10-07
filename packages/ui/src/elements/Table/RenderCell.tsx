@@ -4,8 +4,8 @@ import React, { useMemo } from 'react'
 
 import type { Column } from './index.js'
 
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { deepMergeSimple } from '../../utilities/deepMerge.js'
+import { RenderComponent } from '../RenderComponent/index.js'
 import { TableCellProvider } from './TableCellProvider/index.js'
 
 export const RenderCell: React.FC<{

@@ -1,7 +1,7 @@
 import type { DocumentTabConfig, DocumentTabProps } from 'payload'
+import type React from 'react'
 
-import { getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
-import React, { Fragment } from 'react'
+import { Fragment } from 'react'
 
 import './index.scss'
 import { DocumentTabLink } from './TabLink.js'
@@ -59,17 +59,6 @@ export const DocumentTab: React.FC<
           })
         : label
 
-    const createMappedComponent = getCreateMappedComponent({
-      importMap: payload.importMap,
-      serverProps: {
-        i18n,
-        payload,
-        permissions,
-      },
-    })
-
-    const mappedPin = createMappedComponent(Pill, undefined, Pill_Component, 'Pill')
-
     return (
       <DocumentTabLink
         adminRoute={routes.admin}
@@ -82,12 +71,19 @@ export const DocumentTab: React.FC<
       >
         <span className={`${baseClass}__label`}>
           {labelToRender}
-          {mappedPin && (
-            <Fragment>
-              &nbsp;
-              <RenderComponent mappedComponent={mappedPin} />
-            </Fragment>
-          )}
+          <Fragment>
+            &nbsp;
+            {/* <RenderServerComponent
+              Component={Pill}
+              Fallback={Pill_Component}
+              importMap={payload.importMap}
+              serverProps={{
+                i18n,
+                payload,
+                permissions,
+              }}
+            /> */}
+          </Fragment>
         </span>
       </DocumentTabLink>
     )

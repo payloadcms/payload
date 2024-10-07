@@ -5,8 +5,6 @@ import type { JoinFieldClient, JoinFieldClientComponent, PaginatedDocs, Where } 
 import React, { useMemo } from 'react'
 
 import { RelationshipTable } from '../../elements/RelationshipTable/index.js'
-import { FieldLabel } from '../../fields/FieldLabel/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -15,24 +13,14 @@ import { fieldBaseClass } from '../index.js'
 const JoinFieldComponent: JoinFieldClientComponent = (props) => {
   const {
     field,
-    field: {
-      name,
-      _path: pathFromProps,
-      admin: {
-        components: { Label },
-      },
-      collection,
-      label,
-      on,
-    },
+    field: { name, _path: path, collection, on },
+    Label,
   } = props
 
   const { id: docID } = useDocumentInfo()
 
-  const { path: pathFromContext } = useFieldProps()
-
   const { value } = useField<PaginatedDocs>({
-    path: pathFromContext ?? pathFromProps ?? name,
+    path: path ?? name,
   })
 
   const filterOptions: Where = useMemo(
@@ -57,11 +45,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
             value: docID,
           },
         }}
-        Label={
-          <h4 style={{ margin: 0 }}>
-            <FieldLabel as="span" field={field} Label={Label} label={label} />
-          </h4>
-        }
+        Label={<h4 style={{ margin: 0 }}>{Label}</h4>}
         relationTo={collection}
       />
     </div>

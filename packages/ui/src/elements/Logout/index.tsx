@@ -3,9 +3,9 @@ import React from 'react'
 
 import { LogOutIcon } from '../../icons/LogOut/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
+import { RenderComponent } from '../RenderComponent/index.js'
 
 const baseClass = 'nav'
 
@@ -46,17 +46,17 @@ export const Logout: React.FC<{
   Link?: React.ComponentType
   tabIndex?: number
 }> = ({ Link, tabIndex = 0 }) => {
-  const {
-    config: {
-      admin: {
-        components: { LogoutButton: CustomLogout },
-      },
-    },
-  } = useConfig()
+  // const {
+  //   config: {
+  //     admin: {
+  //       components: { LogoutButton: CustomLogout },
+  //     },
+  //   },
+  // } = useConfig()
 
-  if (CustomLogout) {
-    return <RenderComponent mappedComponent={CustomLogout} />
-  }
+  // if (CustomLogout) {
+  //   return <RenderComponent mappedComponent={CustomLogout} />
+  // }
 
   return <DefaultLogout Link={Link} tabIndex={tabIndex} />
 }

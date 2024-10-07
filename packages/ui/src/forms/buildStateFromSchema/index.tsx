@@ -20,20 +20,6 @@ type Args = {
   siblingData?: Data
 }
 
-export type BuildFormStateArgs = {
-  collectionSlug?: string
-  data?: Data
-  docPreferences?: DocumentPreferences
-  formState?: FormState
-  globalSlug?: string
-  id?: number | string
-  locale?: string
-  operation?: 'create' | 'update'
-  returnLockStatus?: boolean
-  schemaPath: string
-  updateLastEdited?: boolean
-}
-
 export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
   const { id, collectionSlug, data: fullData = {}, fieldSchema, operation, preferences, req } = args
 

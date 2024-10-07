@@ -28,33 +28,38 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
-      name: 'richText',
-      type: 'richText',
+      name: 'relationToSelf',
+      type: 'relationship',
+      relationTo: postsSlug,
     },
-    {
-      name: 'myBlocks',
-      type: 'blocks',
-      blocks: [
-        {
-          slug: 'test',
-          fields: [
-            {
-              name: 'test',
-              type: 'text',
-            },
-          ],
-        },
-        {
-          slug: 'someBlock2',
-          fields: [
-            {
-              name: 'test2',
-              type: 'text',
-            },
-          ],
-        },
-      ],
-    },
+    // {
+    //   name: 'richText',
+    //   type: 'richText',
+    // },
+    // {
+    //   name: 'myBlocks',
+    //   type: 'blocks',
+    //   blocks: [
+    //     {
+    //       slug: 'test',
+    //       fields: [
+    //         {
+    //           name: 'test',
+    //           type: 'text',
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       slug: 'someBlock2',
+    //       fields: [
+    //         {
+    //           name: 'test2',
+    //           type: 'text',
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
     // {
     //   type: 'row',
     //   fields: [],

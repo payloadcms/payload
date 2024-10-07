@@ -1,5 +1,7 @@
 'use client'
 
+import type { ClientCollectionConfig } from 'payload'
+
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { reduceFieldsToValues } from 'payload/shared'
@@ -29,11 +31,11 @@ export function AddingFilesView() {
     hasSubmitted,
   } = useFormsManager()
   const activeForm = forms[activeIndex]
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
   const { i18n } = useTranslation()
   const { openModal } = useModal()
 
-  const collection = config.collections.find((c) => c.slug === collectionSlug)
+  const collection = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
   return (
     <div className={baseClass}>

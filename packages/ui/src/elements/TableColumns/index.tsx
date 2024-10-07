@@ -1,7 +1,7 @@
 'use client'
-import type { CellComponentProps, SanitizedCollectionConfig } from 'payload'
+import type { CellComponentProps, ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
 
-import React, { createContext, useCallback, useContext, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
 import type { SortColumnProps } from '../SortColumn/index.js'
@@ -51,23 +51,26 @@ export const TableColumnsProvider: React.FC<Props> = ({
   preferenceKey,
   sortColumnProps,
 }) => {
-  const {
-    config: { collections },
-  } = useConfig()
+  const { getEntityConfig } = useConfig()
 
-  const collectionConfig = collections.find((c) => c.slug === collectionSlug)
-
-  const {
-    admin: { defaultColumns, useAsTitle },
-    fields,
-  } = collectionConfig
+  const { admin: { defaultColumns, useAsTitle } = {}, fields } = getEntityConfig({
+    collectionSlug,
+  }) as ClientCollectionConfig
 
   const prevCollection = React.useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
   const { getPreference, setPreference } = usePreferences()
 
-  const [initialColumns] = useState<ColumnPreferences>(() =>
-    getInitialColumns(filterFields(fields), useAsTitle, defaultColumns),
-  )
+  const [initialColumns, setInitialColumns] = useState<ColumnPreferences>(() => {
+    if (fields) {
+      return getInitialColumns(filterFields(fields), useAsTitle, defaultColumns)
+    }
+  })
+
+  useEffect(() => {
+    if (fields) {
+      setInitialColumns(getInitialColumns(filterFields(fields), useAsTitle, defaultColumns))
+    }
+  }, [defaultColumns, fields, useAsTitle])
 
   const [tableColumns, setTableColumns] = React.useState(() =>
     buildColumnState({

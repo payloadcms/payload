@@ -8,11 +8,10 @@ import type { DocumentDrawerProps } from './types.js'
 
 import { XIcon } from '../../icons/X/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { useRelatedCollections } from '../AddNewRelation/useRelatedCollections.js'
+import { DefaultEditView } from '../../views/Edit/index.js'
 import { Gutter } from '../Gutter/index.js'
 import { IDLabel } from '../IDLabel/index.js'
 import { RenderTitle } from '../RenderTitle/index.js'
@@ -45,9 +44,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const { t } = useTranslation()
   const [docID, setDocID] = useState(existingDocID)
   const [isOpen, setIsOpen] = useState(false)
-  const [collectionConfig] = useRelatedCollections(collectionSlug)
-
-  const Edit = collectionConfig.admin.components.views.edit.default.Component
 
   const isEditing = Boolean(docID)
   const apiURL = docID
@@ -62,7 +58,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
     (data) => {
       if (isOpen) {
         closeModal(drawerSlug)
-        toast.error(data.errors?.[0].message || t('error:unspecific'))
+        toast.error(data?.errors?.[0].message || t('error:unspecific'))
       }
     },
     [closeModal, drawerSlug, isOpen, t],
@@ -74,11 +70,11 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       if (typeof onSaveFromProps === 'function') {
         void onSaveFromProps({
           ...args,
-          collectionConfig,
+          // collectionConfig,
         })
       }
     },
-    [onSaveFromProps, collectionConfig],
+    [onSaveFromProps],
   )
 
   const onDuplicate = useCallback<DocumentDrawerProps['onSave']>(
@@ -88,11 +84,11 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       if (typeof onDuplicateFromProps === 'function') {
         void onDuplicateFromProps({
           ...args,
-          collectionConfig,
+          // collectionConfig,
         })
       }
     },
-    [onDuplicateFromProps, collectionConfig],
+    [onDuplicateFromProps],
   )
 
   const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
@@ -100,13 +96,13 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       if (typeof onDeleteFromProps === 'function') {
         void onDeleteFromProps({
           ...args,
-          collectionConfig,
+          // collectionConfig,
         })
       }
 
       closeModal(drawerSlug)
     },
-    [onDeleteFromProps, collectionConfig, closeModal, drawerSlug],
+    [onDeleteFromProps, closeModal, drawerSlug],
   )
 
   return (
@@ -134,7 +130,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
           <DocumentTitle />
         </Gutter>
       }
-      collectionSlug={collectionConfig.slug}
+      collectionSlug={collectionSlug}
       disableActions={disableActions}
       disableLeaveWithoutSaving
       id={docID}
@@ -151,7 +147,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       redirectAfterDelete={redirectAfterDelete !== undefined ? redirectAfterDelete : false}
       redirectAfterDuplicate={redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false}
     >
-      <RenderComponent mappedComponent={Edit} />
+      <DefaultEditView />
     </DocumentInfoProvider>
   )
 }

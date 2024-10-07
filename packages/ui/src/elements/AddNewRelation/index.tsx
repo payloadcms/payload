@@ -1,5 +1,4 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
@@ -33,18 +32,20 @@ export const AddNewRelation: React.FC<Props> = ({
   const relatedCollections = useRelatedCollections(relationTo)
   const { permissions } = useAuth()
   const [show, setShow] = useState(false)
-  const [selectedCollection, setSelectedCollection] = useState<string>()
-  const relatedToMany = relatedCollections.length > 1
-  const [collectionConfig, setCollectionConfig] = useState<ClientCollectionConfig>(() =>
-    !relatedToMany ? relatedCollections[0] : undefined,
+
+  const [selectedCollection, setSelectedCollection] = useState<string>(
+    typeof relationTo === 'string' ? relationTo : '',
   )
+
+  const relatedToMany = relatedCollections.length > 1
+
   const [popupOpen, setPopupOpen] = useState(false)
   const { i18n, t } = useTranslation()
   const [showTooltip, setShowTooltip] = useState(false)
 
   const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen, toggleDrawer }] = useDocumentDrawer(
     {
-      collectionSlug: collectionConfig?.slug,
+      collectionSlug: selectedCollection,
     },
   )
 
@@ -53,7 +54,7 @@ export const AddNewRelation: React.FC<Props> = ({
       if (operation === 'create') {
         const newValue: Value = Array.isArray(relationTo)
           ? {
-              relationTo: collectionConfig?.slug,
+              relationTo: selectedCollection,
               value: doc.id,
             }
           : doc.id
@@ -86,7 +87,7 @@ export const AddNewRelation: React.FC<Props> = ({
         setSelectedCollection(undefined)
       }
     },
-    [relationTo, collectionConfig, hasMany, setValue, value],
+    [relationTo, selectedCollection, hasMany, setValue, value],
   )
 
   const onPopupToggle = useCallback((state) => {
@@ -109,30 +110,15 @@ export const AddNewRelation: React.FC<Props> = ({
 
   useEffect(() => {
     if (relatedToMany && selectedCollection) {
-      setCollectionConfig(
-        relatedCollections.find((collection) => collection?.slug === selectedCollection),
-      )
-    }
-  }, [selectedCollection, relatedToMany, relatedCollections])
-
-  useEffect(() => {
-    if (relatedToMany && collectionConfig) {
-      // the drawer must be rendered on the page before before opening it
-      // this is why 'selectedCollection' is different from 'collectionConfig'
       toggleDrawer()
-      setSelectedCollection(undefined)
     }
-  }, [toggleDrawer, relatedToMany, collectionConfig])
+  }, [toggleDrawer, relatedToMany, selectedCollection])
 
   useEffect(() => {
     if (relatedToMany && !isDrawerOpen) {
-      setCollectionConfig(undefined)
+      setSelectedCollection(undefined)
     }
   }, [isDrawerOpen, relatedToMany])
-
-  const label = t('fields:addNewLabel', {
-    label: getTranslation(relatedCollections[0].labels.singular, i18n),
-  })
 
   if (show) {
     return (
@@ -155,7 +141,9 @@ export const AddNewRelation: React.FC<Props> = ({
               ) : (
                 <Fragment>
                   <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
-                    {label}
+                    {t('fields:addNewLabel', {
+                      label: relatedCollections[0]?.labels.singular,
+                    })}
                   </Tooltip>
                   <PlusIcon />
                 </Fragment>
@@ -196,7 +184,7 @@ export const AddNewRelation: React.FC<Props> = ({
                             setSelectedCollection(relatedCollection?.slug)
                           }}
                         >
-                          {getTranslation(relatedCollection?.labels?.singular, i18n)}
+                          {getTranslation(relatedCollection?.labels.singular, i18n)}
                         </PopupList.Button>
                       )
                     }
@@ -207,8 +195,8 @@ export const AddNewRelation: React.FC<Props> = ({
               )}
               size="medium"
             />
-            {collectionConfig &&
-              permissions.collections[collectionConfig?.slug]?.create?.permission && (
+            {selectedCollection &&
+              permissions.collections[selectedCollection]?.create?.permission && (
                 <DocumentDrawer onSave={onSave} />
               )}
           </Fragment>

@@ -15,6 +15,7 @@ export type FieldsDrawerProps = {
   readonly fieldMapOverride?: ClientField[]
   readonly handleDrawerSubmit: (fields: FormState, data: JsonObject) => void
   readonly schemaFieldsPathOverride?: string
+  readonly schemaPath: string
   readonly schemaPathSuffix?: string
 }
 
@@ -32,6 +33,7 @@ export const FieldsDrawer: React.FC<FieldsDrawerProps> = ({
   fieldMapOverride,
   handleDrawerSubmit,
   schemaFieldsPathOverride,
+  schemaPath,
   schemaPathSuffix,
 }) => {
   // The Drawer only renders its children (and itself) if it's open. Thus, by extracting the main content
@@ -44,6 +46,7 @@ export const FieldsDrawer: React.FC<FieldsDrawerProps> = ({
         fieldMapOverride={fieldMapOverride}
         handleDrawerSubmit={handleDrawerSubmit}
         schemaFieldsPathOverride={schemaFieldsPathOverride}
+        schemaPath={schemaPath}
         schemaPathSuffix={schemaPathSuffix}
       />
     </Drawer>

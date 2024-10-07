@@ -4,20 +4,20 @@ import type { User } from '../../auth/types.js'
 import type { Locale, ServerProps } from '../../config/types.js'
 import type { ClientField, Field, Validate } from '../../fields/config/types.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { FieldDescriptionClientProps, FieldDescriptionServerProps } from './Description.js'
-import type { FieldErrorClientProps, FieldErrorServerProps } from './Error.js'
-import type { FieldLabelClientProps, FieldLabelServerProps } from './Label.js'
+import type { FieldSlots } from '../types.js'
+import type { FieldDescriptionServerProps } from './Description.js'
+import type { FieldErrorServerProps } from './Error.js'
+import type { FormField } from './Form.js'
+import type { FieldLabelServerProps } from './Label.js'
 
 export type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
 
 export type ClientFieldBase<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
 > = {
-  readonly descriptionProps?: FieldDescriptionClientProps<TFieldClient>
-  readonly errorProps?: FieldErrorClientProps<TFieldClient>
   readonly field: TFieldClient
-  readonly labelProps?: FieldLabelClientProps<TFieldClient>
-} & FormFieldBase
+} & FieldSlots &
+  FormFieldBase
 
 export type ServerFieldBase<
   TFieldServer extends Field = Field,
@@ -27,16 +27,19 @@ export type ServerFieldBase<
   readonly descriptionProps?: FieldDescriptionServerProps<TFieldServer, TFieldClient>
   readonly errorProps?: FieldErrorServerProps<TFieldServer, TFieldClient>
   readonly field: TFieldServer
+  readonly fieldState?: FormField
   readonly labelProps?: FieldLabelServerProps<TFieldServer, TFieldClient>
 } & FormFieldBase &
   Partial<ServerProps>
 
 export type FormFieldBase = {
+  readonly Blocks?: React.ReactNode[]
   readonly docPreferences?: DocumentPreferences
   /**
    * `forceRender` is added by RenderField automatically.
    */
   readonly forceRender?: boolean
+  readonly indexPath?: string
   readonly locale?: Locale
   /**
    * `readOnly` is added by RenderField automatically. This should be used instead of `field.admin.readOnly`.

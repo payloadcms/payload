@@ -6,13 +6,10 @@ import { tabHasName, toKebabCase } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-import { RenderFields } from '../../forms/RenderFields/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 import { TabsProvider } from './provider.js'
@@ -24,27 +21,16 @@ export { TabsProvider }
 
 const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const {
-    field,
-    field: {
-      _path: pathFromProps,
-      admin: { className, readOnly: readOnlyFromAdmin } = {},
-      tabs = [],
-    },
+    Description,
+    field: { _path: path, admin: { className, readOnly: readOnlyFromAdmin } = {}, tabs = [] },
+    Fields,
     forceRender = false,
+    indexPath,
     readOnly: readOnlyFromTopLevelProps,
   } = props
 
-  const {
-    indexPath,
-    path: pathFromContext,
-    readOnly: readOnlyFromContext,
-    schemaPath,
-    siblingPermissions,
-  } = useFieldProps()
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
+  const readOnly = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
-  const readOnly = readOnlyFromProps || readOnlyFromContext
-  const path = pathFromContext ?? pathFromProps
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
   const { i18n } = useTranslation()
@@ -154,25 +140,8 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
                 .filter(Boolean)
                 .join(' ')}
             >
-              <FieldDescription Description={field?.admin?.components?.Description} field={field} />
-              <RenderFields
-                fields={activeTabConfig.fields}
-                forceRender={forceRender}
-                key={
-                  activeTabConfig.label
-                    ? getTranslation(activeTabConfig.label, i18n)
-                    : activeTabConfig['name']
-                }
-                margins="small"
-                path={generateTabPath()}
-                permissions={
-                  'name' in activeTabConfig && siblingPermissions?.[activeTabConfig.name]?.fields
-                    ? siblingPermissions[activeTabConfig.name]?.fields
-                    : siblingPermissions
-                }
-                readOnly={readOnly}
-                schemaPath={`${schemaPath ? `${schemaPath}` : ''}${tabHasName(activeTabConfig) && activeTabConfig.name ? `.${activeTabConfig.name}` : ''}`}
-              />
+              {Description}
+              {Fields}
             </div>
           )}
         </div>

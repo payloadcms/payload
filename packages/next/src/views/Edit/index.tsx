@@ -1,9 +1,21 @@
-import type { EditViewComponent, PayloadServerReactComponent } from 'payload'
+'use client'
 
-import React from 'react'
+import type { ClientSideEditViewProps } from 'payload'
 
-import { EditViewClient } from './index.client.js'
+import { DefaultEditView } from '@payloadcms/ui'
+import React, { Fragment } from 'react'
 
-export const EditView: PayloadServerReactComponent<EditViewComponent> = () => {
-  return <EditViewClient />
+export const EditView: React.FC<ClientSideEditViewProps> = (props) => {
+  // const { collectionConfig, globalConfig } = useEntityConfig()
+
+  return (
+    <Fragment>
+      {/* <SetViewActions
+        actions={
+          (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.default?.actions
+        }
+      /> */}
+      <DefaultEditView {...props} />
+    </Fragment>
+  )
 }

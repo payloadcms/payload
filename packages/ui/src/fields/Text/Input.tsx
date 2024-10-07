@@ -7,30 +7,22 @@ import React from 'react'
 import type { TextInputProps } from './types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 export const TextInput: React.FC<TextInputProps> = (props) => {
   const {
-    afterInput,
-    beforeInput,
+    AfterInput,
+    BeforeInput,
     className,
     Description,
-    description,
-    descriptionProps,
     Error,
-    errorProps,
-    field,
     hasMany,
     inputRef,
     Label,
     label,
-    labelProps,
     maxRows,
     onChange,
     onKeyDown,
@@ -65,16 +57,10 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        field={field}
-        Label={Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      {Label || <FieldLabel label={label} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={Error} field={field} path={path} {...(errorProps || {})} />
-        <RenderComponent mappedComponent={beforeInput} />
+        {Error}
+        {BeforeInput}
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
@@ -114,13 +100,8 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
             value={value || ''}
           />
         )}
-        <RenderComponent mappedComponent={afterInput} />
-        <FieldDescription
-          Description={Description}
-          description={description}
-          field={field}
-          {...(descriptionProps || {})}
-        />
+        {AfterInput}
+        {Description}
       </div>
     </div>
   )

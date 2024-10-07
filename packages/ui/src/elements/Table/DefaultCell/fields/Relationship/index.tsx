@@ -1,5 +1,6 @@
 'use client'
 import type {
+  ClientCollectionConfig,
   DefaultCellComponentProps,
   JoinFieldClient,
   RelationshipFieldClient,
@@ -42,7 +43,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
     return 'collection' in field ? cellDataFromProps?.docs : cellDataFromProps
   }, [cellDataFromProps, field])
 
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
   const { collections, routes } = config
   const [intersectionRef, entry] = useIntersect()
   const [values, setValues] = useState<Value[]>([])
@@ -96,7 +97,9 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
     <div className={baseClass} ref={intersectionRef}>
       {values.map(({ relationTo, value }, i) => {
         const document = documents[relationTo][value]
-        const relatedCollection = collections.find(({ slug }) => slug === relationTo)
+        const relatedCollection = getEntityConfig({
+          collectionSlug: relationTo,
+        }) as ClientCollectionConfig
 
         const label = formatDocTitle({
           collectionConfig: relatedCollection,

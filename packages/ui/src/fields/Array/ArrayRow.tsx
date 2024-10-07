@@ -1,5 +1,5 @@
 'use client'
-import type { ArrayField, ClientField, FieldPermissions, MappedComponent, Row } from 'payload'
+import type { ArrayField, Row } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -10,8 +10,6 @@ import { ArrayAction } from '../../elements/ArrayAction/index.js'
 import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
-import { RenderFields } from '../../forms/RenderFields/index.js'
-import { RowLabel } from '../../forms/RowLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
@@ -21,22 +19,19 @@ type ArrayRowProps = {
   readonly addRow: (rowIndex: number) => Promise<void> | void
   readonly duplicateRow: (rowIndex: number) => void
   readonly errorCount: number
-  readonly fields: ClientField[]
+  readonly Fields: React.ReactNode[]
   readonly forceRender?: boolean
   readonly hasMaxRows?: boolean
-  readonly indexPath: string
   readonly isSortable?: boolean
   readonly labels: Partial<ArrayField['labels']>
   readonly moveRow: (fromIndex: number, toIndex: number) => void
   readonly path: string
-  readonly permissions: FieldPermissions
   readonly readOnly?: boolean
   readonly removeRow: (rowIndex: number) => void
   readonly row: Row
   readonly rowCount: number
   readonly rowIndex: number
-  readonly RowLabel?: MappedComponent
-  readonly schemaPath: string
+  readonly RowLabel?: React.ReactNode
   readonly setCollapse: (rowID: string, collapsed: boolean) => void
 } & UseDraggableSortableReturn
 
@@ -45,24 +40,21 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   attributes,
   duplicateRow,
   errorCount,
-  fields,
+  Fields,
   forceRender = false,
   hasMaxRows,
-  indexPath,
   isDragging,
   isSortable,
   labels,
   listeners,
   moveRow,
   path: parentPath,
-  permissions,
   readOnly,
   removeRow,
   row,
   rowCount,
   rowIndex,
-  RowLabel: CustomRowLabel,
-  schemaPath,
+  RowLabel,
   setCollapse,
   setNodeRef,
   transform,
@@ -125,30 +117,14 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         }
         header={
           <div className={`${baseClass}__row-header`}>
-            <RowLabel
-              i18n={i18n}
-              path={path}
-              RowLabel={CustomRowLabel}
-              rowLabel={fallbackLabel}
-              rowNumber={rowIndex + 1}
-            />
+            {RowLabel}
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
         }
         isCollapsed={row.collapsed}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        <RenderFields
-          className={`${baseClass}__fields`}
-          fields={fields}
-          forceRender={forceRender}
-          indexPath={indexPath}
-          margins="small"
-          path={path}
-          permissions={permissions?.fields}
-          readOnly={readOnly}
-          schemaPath={schemaPath}
-        />
+        {Array.isArray(Fields) && Fields?.map((Field) => Field)}
       </Collapsible>
     </div>
   )

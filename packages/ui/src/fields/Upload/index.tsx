@@ -17,15 +17,18 @@ export const baseClass = 'upload'
 
 export function UploadComponent(props: UploadFieldClientProps) {
   const {
+    Description,
+    Error,
     field: {
-      _path,
+      _path: path,
       admin: { className, isSortable, readOnly: readOnlyFromAdmin, style, width } = {},
       hasMany,
+      label,
       maxRows,
       relationTo,
       required,
     },
-    field,
+    Label,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
@@ -41,17 +44,17 @@ export function UploadComponent(props: UploadFieldClientProps) {
     },
     [validate, required],
   )
+
   const {
     filterOptions,
     formInitializing,
     formProcessing,
-    path,
     readOnly: readOnlyFromField,
     setValue,
     showError,
     value,
   } = useField<string | string[]>({
-    path: _path,
+    path,
     validate: memoizedValidate,
   })
 
@@ -61,14 +64,13 @@ export function UploadComponent(props: UploadFieldClientProps) {
     <UploadInput
       api={config.routes.api}
       className={className}
-      Description={field?.admin?.components?.Description}
-      description={field?.admin?.description}
-      Error={field?.admin?.components?.Error}
-      field={field}
+      Description={Description}
+      Error={Error}
       filterOptions={filterOptions}
       hasMany={hasMany}
       isSortable={isSortable}
-      Label={field?.admin?.components?.Label}
+      label={label}
+      Label={Label}
       maxRows={maxRows}
       onChange={setValue}
       path={path}

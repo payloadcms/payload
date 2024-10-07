@@ -11,7 +11,6 @@ import React, { useCallback } from 'react'
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 import type { SelectInputProps } from './Input.js'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { SelectInput } from './Input.js'
@@ -30,13 +29,15 @@ const formatOptions = (options: Option[]): OptionObject[] =>
 
 const SelectFieldComponent: SelectFieldClientComponent = (props) => {
   const {
-    field,
+    AfterInput,
+    BeforeInput,
+    Description,
+    Error,
     field: {
       name,
       _path: pathFromProps,
       admin: {
         className,
-        description,
         isClearable = true,
         isSortable = true,
         readOnly: readOnlyFromAdmin,
@@ -44,13 +45,16 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
         width,
       } = {} as SelectFieldClientProps['field']['admin'],
       hasMany = false,
+      label,
       options: optionsFromProps = [],
       required,
     },
+    Label,
     onChange: onChangeFromProps,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const options = React.useMemo(() => formatOptions(optionsFromProps), [optionsFromProps])
@@ -64,14 +68,14 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
     [validate, required, hasMany, options],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const path = pathFromProps ?? name
 
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
-    path: pathFromContext ?? pathFromProps ?? name,
+  const { formInitializing, formProcessing, setValue, showError, value } = useField({
+    path,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const onChange: ReactSelectAdapterProps['onChange'] = useCallback(
     (selectedOption: OptionObject | OptionObject[]) => {
@@ -99,23 +103,21 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
 
   return (
     <SelectInput
-      afterInput={field?.admin?.components?.afterInput}
-      beforeInput={field?.admin?.components?.beforeInput}
+      AfterInput={AfterInput}
+      BeforeInput={BeforeInput}
       className={className}
-      Description={field?.admin?.components?.Description}
-      description={description}
-      Error={field?.admin?.components?.Error}
-      field={field}
+      Description={Description}
+      Error={Error}
       hasMany={hasMany}
       isClearable={isClearable}
       isSortable={isSortable}
-      Label={field?.admin?.components?.Label}
+      Label={Label}
+      label={label}
       name={name}
       onChange={onChange}
       options={options}
       path={path}
       readOnly={disabled}
-      required={required}
       showError={showError}
       style={style}
       value={value as string | string[]}

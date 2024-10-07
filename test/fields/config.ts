@@ -15,22 +15,22 @@ import ConditionalLogic from './collections/ConditionalLogic/index.js'
 import DateFields from './collections/Date/index.js'
 import EmailFields from './collections/Email/index.js'
 import GroupFields from './collections/Group/index.js'
-import IndexedFields from './collections/Indexed/index.js'
+// import IndexedFields from './collections/Indexed/index.js'
 import JSONFields from './collections/JSON/index.js'
-import { LexicalFields } from './collections/Lexical/index.js'
-import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
-import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
-import { LexicalRelationshipsFields } from './collections/LexicalRelationships/index.js'
 import NumberFields from './collections/Number/index.js'
 import PointFields from './collections/Point/index.js'
 import RadioFields from './collections/Radio/index.js'
 import RelationshipFields from './collections/Relationship/index.js'
-import RichTextFields from './collections/RichText/index.js'
 import RowFields from './collections/Row/index.js'
+import TextFields from './collections/Text/index.js'
+// import LexicalFields from './collections/Lexical/index.js'
+// import LexicalMigrateFields from './collections/LexicalMigrate/index.js'
+// import LexicalLocalizedFields from './collections/LexicalLocalized/index.js'
+// import LexicalRelationshipsFields from './collections/LexicalRelationships/index.js'
+// import RichTextFields from './collections/RichText/index.js'
 import SelectFields from './collections/Select/index.js'
 import TabsFields from './collections/Tabs/index.js'
 import { TabsFields2 } from './collections/Tabs2/index.js'
-import TextFields from './collections/Text/index.js'
 import UIFields from './collections/UI/index.js'
 import Uploads from './collections/Upload/index.js'
 import Uploads2 from './collections/Upload2/index.js'
@@ -43,9 +43,9 @@ import TabsWithRichText from './globals/TabsWithRichText.js'
 import { clearAndSeedEverything } from './seed.js'
 
 export const collectionSlugs: CollectionConfig[] = [
-  LexicalFields,
-  LexicalMigrateFields,
-  LexicalLocalizedFields,
+  // LexicalFields,
+  // LexicalMigrateFields,
+  // LexicalLocalizedFields,
   {
     slug: 'users',
     admin: {
@@ -71,13 +71,13 @@ export const collectionSlugs: CollectionConfig[] = [
   RadioFields,
   GroupFields,
   RowFields,
-  IndexedFields,
+  // IndexedFields,
   JSONFields,
   NumberFields,
   PointFields,
   RelationshipFields,
-  LexicalRelationshipsFields,
-  RichTextFields,
+  // // LexicalRelationshipsFields,
+  // // RichTextFields,
   SelectFields,
   TabsFields2,
   TabsFields,
@@ -94,7 +94,7 @@ export const collectionSlugs: CollectionConfig[] = [
 
 export default buildConfigWithDefaults({
   collections: collectionSlugs,
-  globals: [TabsWithRichText],
+  // globals: [TabsWithRichText],
   custom: {
     client: {
       'new-value': 'client available',
@@ -103,12 +103,13 @@ export default buildConfigWithDefaults({
       'new-server-value': 'only available on server',
     },
   },
+  editor: null,
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
     },
     components: {
-      afterNavLinks: ['/components/AfterNavLinks.js#AfterNavLinks'],
+      // afterNavLinks: ['/components/AfterNavLinks.js#AfterNavLinks'],
     },
     custom: {
       client: {

@@ -1,15 +1,26 @@
-import type { MappedComponent } from 'payload'
+import type { ImportMap, PayloadComponent } from 'payload'
 
-import { RenderComponent } from '@payloadcms/ui/shared'
 import React from 'react'
+
+import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
 
 export const OGImage: React.FC<{
   description?: string
+  Fallback: React.ComponentType
   fontFamily?: string
-  Icon: MappedComponent
+  Icon: PayloadComponent
+  importMap: ImportMap
   leader?: string
   title?: string
-}> = ({ description, fontFamily = 'Arial, sans-serif', Icon, leader, title }) => {
+}> = ({
+  description,
+  Fallback,
+  fontFamily = 'Arial, sans-serif',
+  Icon,
+  importMap,
+  leader,
+  title,
+}) => {
   return (
     <div
       style={{
@@ -85,11 +96,13 @@ export const OGImage: React.FC<{
           width: '38px',
         }}
       >
-        <RenderComponent
+        <RenderServerComponent
           clientProps={{
             fill: 'white',
           }}
-          mappedComponent={Icon}
+          Component={Icon}
+          Fallback={Fallback}
+          importMap={importMap}
         />
       </div>
     </div>

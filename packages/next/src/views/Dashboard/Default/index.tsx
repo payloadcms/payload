@@ -3,14 +3,10 @@ import type { ClientUser, Permissions, ServerProps, VisibleEntities } from 'payl
 
 import { getTranslation } from '@payloadcms/translations'
 import { Button, Card, Gutter, Locked, SetStepNav, SetViewActions } from '@payloadcms/ui'
-import {
-  EntityType,
-  formatAdminURL,
-  getCreateMappedComponent,
-  RenderComponent,
-} from '@payloadcms/ui/shared'
+import { EntityType, formatAdminURL } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
+import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
 import './index.scss'
 
 const baseClass = 'dashboard'
@@ -46,41 +42,27 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
     user,
   } = props
 
-  const createMappedComponent = getCreateMappedComponent({
-    importMap: payload.importMap,
-    serverProps: {
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-    },
-  })
-
-  const mappedBeforeDashboards = createMappedComponent(
-    beforeDashboard,
-    undefined,
-    undefined,
-    'beforeDashboard',
-  )
-
-  const mappedAfterDashboards = createMappedComponent(
-    afterDashboard,
-    undefined,
-    undefined,
-    'afterDashboard',
-  )
-
   return (
     <div className={baseClass}>
       <SetStepNav nav={[]} />
       <SetViewActions actions={[]} />
       <Gutter className={`${baseClass}__wrap`}>
-        <RenderComponent mappedComponent={mappedBeforeDashboards} />
+        {beforeDashboard && (
+          <RenderServerComponent
+            Component={beforeDashboard}
+            importMap={payload.importMap}
+            serverProps={{
+              i18n,
+              locale,
+              params,
+              payload,
+              permissions,
+              searchParams,
+              user,
+            }}
+          />
+        )}
         <Fragment>
-          <SetViewActions actions={[]} />
           {!navGroups || navGroups?.length === 0 ? (
             <p>no nav groups....</p>
           ) : (
@@ -89,8 +71,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                 <div className={`${baseClass}__group`} key={groupIndex}>
                   <h2 className={`${baseClass}__label`}>{label}</h2>
                   <ul className={`${baseClass}__card-list`}>
-                    {entities.map(({ type, entity }, entityIndex) => {
-                      let title: string
+                    {entities.map(({ slug, type, label }, entityIndex) => {
                       let buttonAriaLabel: string
                       let createHREF: string
                       let href: string
@@ -99,37 +80,30 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                       let userEditing = null
 
                       if (type === EntityType.collection) {
-                        title = getTranslation(entity.labels.plural, i18n)
+                        buttonAriaLabel = t('general:showAllLabel', { label })
 
-                        buttonAriaLabel = t('general:showAllLabel', { label: title })
-
-                        href = formatAdminURL({ adminRoute, path: `/collections/${entity.slug}` })
+                        href = formatAdminURL({ adminRoute, path: `/collections/${slug}` })
 
                         createHREF = formatAdminURL({
                           adminRoute,
-                          path: `/collections/${entity.slug}/create`,
+                          path: `/collections/${slug}/create`,
                         })
 
-                        hasCreatePermission =
-                          permissions?.collections?.[entity.slug]?.create?.permission
+                        hasCreatePermission = permissions?.collections?.[slug]?.create?.permission
                       }
 
                       if (type === EntityType.global) {
-                        title = getTranslation(entity.label, i18n)
-
                         buttonAriaLabel = t('general:editLabel', {
-                          label: getTranslation(entity.label, i18n),
+                          label: getTranslation(label, i18n),
                         })
 
                         href = formatAdminURL({
                           adminRoute,
-                          path: `/globals/${entity.slug}`,
+                          path: `/globals/${slug}`,
                         })
 
                         // Find the lock status for the global
-                        const globalLockData = globalData.find(
-                          (global) => global.slug === entity.slug,
-                        )
+                        const globalLockData = globalData.find((global) => global.slug === slug)
                         if (globalLockData) {
                           lockStatus = globalLockData.data._isLocked
                           userEditing = globalLockData.data._userEditing
@@ -145,7 +119,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                               ) : hasCreatePermission && type === EntityType.collection ? (
                                 <Button
                                   aria-label={t('general:createNewLabel', {
-                                    label: getTranslation(entity.labels.singular, i18n),
+                                    label,
                                   })}
                                   buttonStyle="icon-label"
                                   el="link"
@@ -159,9 +133,9 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                             }
                             buttonAriaLabel={buttonAriaLabel}
                             href={href}
-                            id={`card-${entity.slug}`}
+                            id={`card-${slug}`}
                             Link={Link}
-                            title={title}
+                            title={getTranslation(label, i18n)}
                             titleAs="h3"
                           />
                         </li>
@@ -173,7 +147,21 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
             })
           )}
         </Fragment>
-        <RenderComponent mappedComponent={mappedAfterDashboards} />
+        {afterDashboard && (
+          <RenderServerComponent
+            Component={afterDashboard}
+            importMap={payload.importMap}
+            serverProps={{
+              i18n,
+              locale,
+              params,
+              payload,
+              permissions,
+              searchParams,
+              user,
+            }}
+          />
+        )}
       </Gutter>
     </div>
   )

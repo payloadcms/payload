@@ -7,18 +7,14 @@ import React from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import {
   useFormInitializing,
   useFormProcessing,
   useFormSubmitted,
 } from '../../forms/Form/context.js'
-import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
 import { useRow } from '../Row/provider.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { useTabs } from '../Tabs/provider.js'
@@ -29,18 +25,20 @@ const baseClass = 'group-field'
 
 export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const {
-    descriptionProps,
-    field,
+    Description,
     field: {
-      admin: { className, description, hideGutter, readOnly: readOnlyFromAdmin, style, width } = {},
-      fields,
+      _path: path,
+      _schemaPath,
+      admin: { className, hideGutter, readOnly: readOnlyFromAdmin, style, width } = {},
       label,
     },
+    Fields,
+    Label,
     readOnly: readOnlyFromTopLevelProps,
   } = props
+
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
-  const { path, permissions, readOnly: readOnlyFromContext, schemaPath } = useFieldProps()
   const { i18n } = useTranslation()
   const { isWithinCollapsible } = useCollapsible()
   const isWithinGroup = useGroup()
@@ -52,7 +50,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const submitted = useFormSubmitted()
   const errorCount = errorPaths.length
   const fieldHasErrors = submitted && errorCount > 0
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const isTopLevel = !(isWithinCollapsible || isWithinGroup || isWithinRow)
 
@@ -81,36 +79,19 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
       <GroupProvider>
         <div className={`${baseClass}__wrap`}>
           <div className={`${baseClass}__header`}>
-            {(field?.admin?.components?.Label ||
-              field?.admin?.components?.Description ||
-              label) && (
+            {Boolean(Label || Description || label) && (
               <header>
-                {field?.admin?.components?.Label !== undefined ? (
-                  <RenderComponent
-                    clientProps={{ label }}
-                    mappedComponent={field?.admin?.components?.Label}
-                  />
+                {Label ? (
+                  Label
                 ) : label ? (
                   <h3 className={`${baseClass}__title`}>{getTranslation(label, i18n)}</h3>
                 ) : null}
-                <FieldDescription
-                  Description={field?.admin?.components?.Description}
-                  description={description}
-                  field={field}
-                  {...(descriptionProps || {})}
-                />
+                {Description}
               </header>
             )}
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
-          <RenderFields
-            fields={fields}
-            margins="small"
-            path={path}
-            permissions={permissions?.fields}
-            readOnly={disabled}
-            schemaPath={schemaPath}
-          />
+          {Fields ? Fields.map((Field) => Field) : null}
         </div>
       </GroupProvider>
     </div>

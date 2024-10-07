@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, ClientField, Where } from 'payload'
+import type { ClientCollectionConfig, Where } from 'payload'
 
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
@@ -33,7 +33,6 @@ export type ListControlsProps = {
   readonly collectionConfig: ClientCollectionConfig
   readonly enableColumns?: boolean
   readonly enableSort?: boolean
-  readonly fields: ClientField[]
   readonly handleSearchChange?: (search: string) => void
   readonly handleSortChange?: (sort: string) => void
   readonly handleWhereChange?: (where: Where) => void
@@ -45,11 +44,11 @@ export type ListControlsProps = {
  * the collection's documents.
  */
 export const ListControls: React.FC<ListControlsProps> = (props) => {
-  const { collectionConfig, enableColumns = true, enableSort = false, fields } = props
+  const { collectionConfig, enableColumns = true, enableSort = false } = props
 
   const { handleSearchChange, params } = useListQuery()
   const { beforeActions, collectionSlug, disableBulkDelete, disableBulkEdit } = useListInfo()
-  const titleField = useUseTitleField(collectionConfig, fields)
+  const titleField = useUseTitleField(collectionConfig)
   const { i18n, t } = useTranslation()
   const {
     breakpoints: { s: smallBreak },
@@ -69,7 +68,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
 
   const listSearchableFields = getTextFieldsToBeSearched(
     collectionConfig.admin.listSearchableFields,
-    fields,
+    collectionConfig.fields,
   )
 
   const searchLabelTranslated = useRef(
@@ -141,7 +140,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 {beforeActions && beforeActions}
                 {!disableBulkEdit && (
                   <Fragment>
-                    <EditMany collection={collectionConfig} fields={fields} />
+                    <EditMany collection={collectionConfig} />
                     <PublishMany collection={collectionConfig} />
                     <UnpublishMany collection={collectionConfig} />
                   </Fragment>
@@ -205,7 +204,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
         <WhereBuilder
           collectionPluralLabel={collectionConfig?.labels?.plural}
           collectionSlug={collectionConfig.slug}
-          fields={fields}
+          fields={collectionConfig?.fields}
           key={String(hasWhereParam.current && !params?.where)}
         />
       </AnimateHeight>

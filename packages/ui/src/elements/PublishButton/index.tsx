@@ -1,7 +1,5 @@
 'use client'
 
-import type { MappedComponent } from 'payload'
-
 import * as qs from 'qs-esm'
 import React, { useCallback } from 'react'
 
@@ -9,14 +7,14 @@ import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { useHotkey } from '../../hooks/useHotkey.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { PopupList } from '../Popup/index.js'
-export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
+
+export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
   const {
     id,
     collectionSlug,
@@ -153,15 +151,4 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
       {label}
     </FormSubmit>
   )
-}
-
-type Props = {
-  CustomComponent?: MappedComponent
-}
-
-export const PublishButton: React.FC<Props> = ({ CustomComponent }) => {
-  if (CustomComponent) {
-    return <RenderComponent mappedComponent={CustomComponent} />
-  }
-  return <DefaultPublishButton />
 }

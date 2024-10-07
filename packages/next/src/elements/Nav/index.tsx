@@ -1,9 +1,11 @@
+import type { EntityToGroup } from '@payloadcms/ui/shared'
 import type { ServerProps } from 'payload'
 
 import { Logout } from '@payloadcms/ui'
-import { getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
+import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import React from 'react'
 
+import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import './index.scss'
 import { NavHamburger } from './NavHamburger/index.js'
 import { NavWrapper } from './NavWrapper/index.js'
@@ -15,7 +17,7 @@ import { DefaultNavClient } from './index.client.js'
 export type NavProps = ServerProps
 
 export const DefaultNav: React.FC<NavProps> = (props) => {
-  const { i18n, locale, params, payload, permissions, searchParams, user } = props
+  const { i18n, locale, params, payload, permissions, searchParams, user, visibleEntities } = props
 
   if (!payload?.config) {
     return null
@@ -25,40 +27,65 @@ export const DefaultNav: React.FC<NavProps> = (props) => {
     admin: {
       components: { afterNavLinks, beforeNavLinks },
     },
+    collections,
+    globals,
   } = payload.config
 
-  const createMappedComponent = getCreateMappedComponent({
-    importMap: payload.importMap,
-    serverProps: {
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-    },
-  })
-
-  const mappedBeforeNavLinks = createMappedComponent(
-    beforeNavLinks,
-    undefined,
-    undefined,
-    'beforeNavLinks',
-  )
-  const mappedAfterNavLinks = createMappedComponent(
-    afterNavLinks,
-    undefined,
-    undefined,
-    'afterNavLinks',
+  const groups = groupNavItems(
+    [
+      ...collections
+        .filter(({ slug }) => visibleEntities.collections.includes(slug))
+        .map(
+          (collection) =>
+            ({
+              type: EntityType.collection,
+              entity: collection,
+            }) satisfies EntityToGroup,
+        ),
+      ...globals
+        .filter(({ slug }) => visibleEntities.globals.includes(slug))
+        .map(
+          (global) =>
+            ({
+              type: EntityType.global,
+              entity: global,
+            }) satisfies EntityToGroup,
+        ),
+    ],
+    permissions,
+    i18n,
   )
 
   return (
     <NavWrapper baseClass={baseClass}>
       <nav className={`${baseClass}__wrap`}>
-        <RenderComponent mappedComponent={mappedBeforeNavLinks} />
-        <DefaultNavClient />
-        <RenderComponent mappedComponent={mappedAfterNavLinks} />
+        <RenderServerComponent
+          Component={beforeNavLinks}
+          importMap={payload.importMap}
+          serverProps={{
+            i18n,
+            locale,
+            params,
+            payload,
+            permissions,
+            searchParams,
+            user,
+          }}
+        />
+        <DefaultNavClient groups={groups} />
+        <RenderServerComponent
+          Component={afterNavLinks}
+          importMap={payload.importMap}
+          serverProps={{
+            i18n,
+            locale,
+            params,
+            payload,
+            permissions,
+            searchParams,
+            user,
+          }}
+        />
         <div className={`${baseClass}__controls`}>
           <Logout />
         </div>

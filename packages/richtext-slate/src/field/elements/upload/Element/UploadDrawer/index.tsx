@@ -9,14 +9,13 @@ import {
   Form,
   FormSubmit,
   RenderFields,
-  useAuth,
   useConfig,
   useDocumentInfo,
   useLocale,
   useModal,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
 import { deepCopyObject } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Transforms } from 'slate'
@@ -40,9 +39,11 @@ export const UploadDrawer: React.FC<{
 
   const { i18n, t } = useTranslation()
   const { code: locale } = useLocale()
-  const { user } = useAuth()
   const { closeModal } = useModal()
   const { id, collectionSlug } = useDocumentInfo()
+
+  const { getFormState } = useServerFunctions()
+
   const [initialState, setInitialState] = useState({})
   const {
     field: { richTextComponentMap },
@@ -72,15 +73,11 @@ export const UploadDrawer: React.FC<{
 
     const awaitInitialState = async () => {
       const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
-          id,
-          collectionSlug,
-          data,
-          operation: 'update',
-          schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
-        },
-        serverURL: config.serverURL,
+        id,
+        collectionSlug,
+        data,
+        operation: 'update',
+        schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
       })
 
       setInitialState(state)
@@ -90,32 +87,28 @@ export const UploadDrawer: React.FC<{
   }, [
     config,
     element?.fields,
-    user,
     locale,
     t,
     collectionSlug,
     id,
     schemaPath,
     relatedCollection.slug,
+    getFormState,
   ])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
       const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
-          id,
-          formState: prevFormState,
-          operation: 'update',
-          schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
-        },
-        serverURL: config.serverURL,
+        id,
+        formState: prevFormState,
+        operation: 'update',
+        schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
       })
 
       return state
     },
 
-    [config.routes.api, config.serverURL, relatedCollection.slug, schemaPath, id],
+    [relatedCollection.slug, schemaPath, id, getFormState],
   )
 
   return (
@@ -132,12 +125,7 @@ export const UploadDrawer: React.FC<{
         onChange={[onChange]}
         onSubmit={handleUpdateEditData}
       >
-        <RenderFields
-          fields={Array.isArray(fields) ? fields : []}
-          path=""
-          readOnly={false}
-          schemaPath=""
-        />
+        {/* Fields Here */}
         <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
       </Form>
     </Drawer>

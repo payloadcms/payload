@@ -20,8 +20,8 @@ import { OperationContext } from '../../providers/Operation/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { getFormState } from '../../utilities/getFormState.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { FieldSelect } from '../FieldSelect/index.js'
 import './index.scss'
@@ -30,7 +30,6 @@ const baseClass = 'edit-many'
 
 export type EditManyProps = {
   readonly collection: ClientCollectionConfig
-  readonly fields: ClientField[]
 }
 
 const Submit: React.FC<{
@@ -99,16 +98,21 @@ const SaveDraftButton: React.FC<{ action: string; disabled: boolean }> = ({ acti
   )
 }
 export const EditMany: React.FC<EditManyProps> = (props) => {
-  const { collection: { slug, labels: { plural } } = {}, collection, fields } = props
+  const { collection: { slug, fields, labels: { plural } } = {}, collection } = props
 
-  const { permissions } = useAuth()
+  const { permissions, user } = useAuth()
+
   const { closeModal } = useModal()
+
   const {
     config: {
       routes: { api: apiRoute },
       serverURL,
     },
   } = useConfig()
+
+  const { getFormState } = useServerFunctions()
+
   const { count, getQueryParams, selectAll } = useSelection()
   const { i18n, t } = useTranslation()
   const [selected, setSelected] = useState([])
@@ -127,14 +131,10 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
     if (!hasInitializedState.current) {
       const getInitialState = async () => {
         const { state: result } = await getFormState({
-          apiRoute,
-          body: {
-            collectionSlug: slug,
-            data: {},
-            operation: 'update',
-            schemaPath: slug,
-          },
-          serverURL,
+          collectionSlug: slug,
+          data: {},
+          operation: 'update',
+          schemaPath: slug,
         })
 
         setInitialState(result)
@@ -143,24 +143,20 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
       void getInitialState()
     }
-  }, [apiRoute, hasInitializedState, serverURL, slug])
+  }, [apiRoute, hasInitializedState, serverURL, slug, getFormState, user])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
       const { state } = await getFormState({
-        apiRoute,
-        body: {
-          collectionSlug: slug,
-          formState: prevFormState,
-          operation: 'update',
-          schemaPath: slug,
-        },
-        serverURL,
+        collectionSlug: slug,
+        formState: prevFormState,
+        operation: 'update',
+        schemaPath: slug,
       })
 
       return state
     },
-    [serverURL, apiRoute, slug],
+    [slug, getFormState],
   )
 
   if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {

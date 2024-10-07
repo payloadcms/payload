@@ -1,5 +1,7 @@
 'use client'
 import type {
+  ClientCollectionConfig,
+  ClientGlobalConfig,
   ClientUser,
   Data,
   DocumentPermissions,
@@ -19,9 +21,9 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
-import { getFormState } from '../../utilities/getFormState.js'
 import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
 import { isEditing as getIsEditing } from '../../utilities/isEditing.js'
 import { useAuth } from '../Auth/index.js'
@@ -58,15 +60,19 @@ const DocumentInfo: React.FC<
   const {
     config: {
       admin: { dateFormat },
-      collections,
-      globals,
       routes: { api },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
 
-  const collectionConfig = collections.find((c) => c.slug === collectionSlug)
-  const globalConfig = globals.find((g) => g.slug === globalSlug)
+  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+
+  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
+
+  const { getFormState } = useServerFunctions()
+
+  const abortControllerRef = useRef(new AbortController())
   const docConfig = collectionConfig || globalConfig
 
   const lockDocumentsProp = docConfig?.lockDocuments !== undefined ? docConfig?.lockDocuments : true
@@ -142,6 +148,21 @@ const DocumentInfo: React.FC<
   const isEditing = getIsEditing({ id, collectionSlug, globalSlug })
   const operation = isEditing ? 'update' : 'create'
   const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions?.permission)
+
+  useEffect(() => {
+    if (!collectionConfig && !globalConfig && initialState) {
+      const getNewConfig = async () => {
+        // @ts-expect-error eslint-disable-next-line
+        const res = (await serverFunction('render-config', {
+          collectionSlug,
+          formState: initialState,
+          globalSlug,
+          languageCode: i18n.language,
+        })) as any as ClientCollectionConfig | ClientGlobalConfig
+      }
+      void getNewConfig()
+    }
+  }, [collectionSlug, initialState, i18n.language, globalSlug, collectionConfig, globalConfig])
 
   const unlockDocument = useCallback(
     async (docId: number | string, slug: string) => {
@@ -235,7 +256,7 @@ const DocumentInfo: React.FC<
           } else {
             setDocumentIsLocked(false)
           }
-        } catch (error) {
+        } catch (_err) {
           // swallow error
         }
       }
@@ -483,6 +504,17 @@ const DocumentInfo: React.FC<
 
   const onSave = React.useCallback<DocumentInfoContext['onSave']>(
     async (json) => {
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+
       if (typeof onSaveFromProps === 'function') {
         void onSaveFromProps(json)
       }
@@ -492,18 +524,15 @@ const DocumentInfo: React.FC<
       const newData = collectionSlug ? json.doc : json.result
 
       const { state: newState } = await getFormState({
-        apiRoute: api,
-        body: {
-          id,
-          collectionSlug,
-          data: newData,
-          docPreferences,
-          globalSlug,
-          locale,
-          operation,
-          schemaPath: collectionSlug || globalSlug,
-        },
-        serverURL,
+        id,
+        collectionSlug,
+        data: newData,
+        docPreferences,
+        globalSlug,
+        locale,
+        operation,
+        schemaPath: collectionSlug || globalSlug,
+        signal: abortController.signal,
       })
 
       setInitialState(newState)
@@ -512,7 +541,6 @@ const DocumentInfo: React.FC<
       await getDocPermissions(newData)
     },
     [
-      api,
       collectionSlug,
       getDocPreferences,
       globalSlug,
@@ -520,8 +548,8 @@ const DocumentInfo: React.FC<
       operation,
       locale,
       onSaveFromProps,
-      serverURL,
       getDocPermissions,
+      getFormState,
     ],
   )
 
@@ -529,11 +557,7 @@ const DocumentInfo: React.FC<
     const abortController = new AbortController()
     const localeChanged = locale !== prevLocale.current
 
-    if (
-      initialStateFromProps === undefined ||
-      initialDataFromProps === undefined ||
-      localeChanged
-    ) {
+    if ((collectionSlug || globalSlug) && (!initialStateFromProps || localeChanged)) {
       if (localeChanged) {
         prevLocale.current = locale
       }
@@ -543,29 +567,30 @@ const DocumentInfo: React.FC<
         setIsLoading(true)
 
         try {
-          const { state: result } = await getFormState({
-            apiRoute: api,
-            body: {
-              id,
-              collectionSlug,
-              globalSlug,
-              locale,
-              operation,
-              schemaPath: collectionSlug || globalSlug,
-            },
-            onError: onLoadError,
-            serverURL,
+          const result = await getFormState({
+            id,
+            collectionSlug,
+            globalSlug,
+            locale,
+            operation,
+            schemaPath: collectionSlug || globalSlug,
             signal: abortController.signal,
           })
-          const data = reduceFieldsToValues(result, true)
+
+          if ('errors' in result) {
+            await onLoadError(result.errors)
+            return
+          }
+
+          const data = reduceFieldsToValues(result.state, true)
           setData(data)
 
           if (localeChanged) {
             void getDocPermissions(data)
           }
 
-          setInitialState(result)
-        } catch (err) {
+          setInitialState(result.state)
+        } catch (_err) {
           if (!abortController.signal.aborted) {
             if (typeof onLoadError === 'function') {
               void onLoadError()
@@ -583,7 +608,7 @@ const DocumentInfo: React.FC<
     return () => {
       try {
         abortController.abort()
-      } catch (error) {
+      } catch (_err) {
         // swallow error
       }
     }
@@ -599,6 +624,7 @@ const DocumentInfo: React.FC<
     initialDataFromProps,
     initialStateFromProps,
     getDocPermissions,
+    getFormState,
   ])
 
   useEffect(() => {
@@ -616,7 +642,7 @@ const DocumentInfo: React.FC<
         i18n,
       }),
     )
-  }, [collectionConfig, data, dateFormat, i18n, id, globalConfig])
+  }, [collectionConfig, globalConfig, data, dateFormat, i18n, id])
 
   useEffect(() => {
     if (data && (collectionSlug || globalSlug)) {
@@ -645,6 +671,21 @@ const DocumentInfo: React.FC<
     hasSavePermission,
     hasPublishPermission,
   ])
+
+  // clean on unmount
+  useEffect(() => {
+    const re1 = abortControllerRef.current
+
+    return () => {
+      if (re1) {
+        try {
+          re1.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+    }
+  }, [])
 
   const action: string = React.useMemo(() => {
     const docURL = `${baseURL}${pluralType === 'globals' ? `/globals` : ''}/${slug}${id ? `/${id}` : ''}`

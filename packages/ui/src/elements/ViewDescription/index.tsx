@@ -4,8 +4,8 @@ import type { DescriptionFunction, MappedComponent, StaticDescription } from 'pa
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { RenderComponent } from '../RenderComponent/index.js'
 import './index.scss'
 
 export type ViewDescriptionComponent = React.ComponentType<any>

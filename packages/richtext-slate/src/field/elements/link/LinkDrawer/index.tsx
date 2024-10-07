@@ -7,14 +7,12 @@ import {
   Form,
   FormSubmit,
   RenderFields,
-  useConfig,
   useDocumentInfo,
   useEditDepth,
-  useFieldProps,
   useHotkey,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
 import React, { useCallback, useRef } from 'react'
 
 import type { Props } from './types.js'
@@ -29,30 +27,27 @@ export const LinkDrawer: React.FC<Props> = ({
   fields,
   handleModalSubmit,
   initialState,
+  schemaPath,
 }) => {
   const { t } = useTranslation()
-  const { schemaPath } = useFieldProps()
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
   const { id } = useDocumentInfo()
-  const { config } = useConfig()
+
+  const { getFormState } = useServerFunctions()
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
       const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
-          id,
-          formState: prevFormState,
-          operation: 'update',
-          schemaPath: fieldMapPath,
-        },
-        serverURL: config.serverURL,
+        id,
+        formState: prevFormState,
+        operation: 'update',
+        schemaPath: fieldMapPath,
       })
 
       return state
     },
 
-    [config.routes.api, config.serverURL, fieldMapPath, id],
+    [fieldMapPath, id, getFormState],
   )
 
   return (

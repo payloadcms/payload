@@ -12,8 +12,8 @@ import type { State } from './reducer.js'
 import { fieldReducer } from '../../../forms/Form/fieldReducer.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
+import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { getFormState } from '../../../utilities/getFormState.js'
 import { hasSavePermission as getHasSavePermission } from '../../../utilities/hasSavePermission.js'
 import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
 import { useBulkUpload } from '../index.js'
@@ -71,6 +71,7 @@ const initialState: State = {
 type FormsManagerProps = {
   readonly children: React.ReactNode
 }
+
 export function FormsManagerProvider({ children }: FormsManagerProps) {
   const { config } = useConfig()
   const {
@@ -79,6 +80,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   } = config
   const { code } = useLocale()
   const { i18n, t } = useTranslation()
+
+  const { getFormState } = useServerFunctions()
 
   const [hasSubmitted, setHasSubmitted] = React.useState(false)
   const [docPermissions, setDocPermissions] = React.useState<DocumentPermissions>()
@@ -153,24 +156,18 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
       try {
         const { state: formStateWithoutFiles } = await getFormState({
-          apiRoute: config.routes.api,
-          body: {
-            collectionSlug,
-            locale: code,
-            operation: 'create',
-            schemaPath: collectionSlug,
-          },
-          // onError: onLoadError,
-          serverURL: config.serverURL,
-          signal: abortController?.signal,
+          collectionSlug,
+          locale: code,
+          operation: 'create',
+          schemaPath: collectionSlug,
         })
         initialStateRef.current = formStateWithoutFiles
         setHasInitializedState(true)
-      } catch (error) {
+      } catch (_err) {
         // swallow error
       }
     },
-    [code, collectionSlug, config.routes.api, config.serverURL],
+    [code, collectionSlug, getFormState],
   )
 
   const setActiveIndex: FormsManagerContext['setActiveIndex'] = React.useCallback(

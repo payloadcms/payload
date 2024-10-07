@@ -56,17 +56,17 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
         const {
           accessor,
           active,
-          cellProps: {
-            field: {
-              admin: {
-                // @ts-expect-error // TODO: `Label` does not exist on the UI field
-                components: { Label } = {},
-              } = {},
-            } = {},
-          },
+          // cellProps: {
+          // field: {
+          // admin: {
+          //   // @ts-expect-error // TODO: `Label` does not exist on the UI field
+          //   components: { Label } = {},
+          // } = {},
+          // } = {},
+          // },
         } = col
 
-        if (col.accessor === '_select' || Label === null) {
+        if (col.accessor === '_select') {
           return null
         }
 
@@ -85,7 +85,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
               toggleColumn(accessor)
             }}
           >
-            {Label}
+            TODO: Label
           </Pill>
         )
       })}

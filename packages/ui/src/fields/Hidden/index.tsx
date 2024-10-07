@@ -4,7 +4,6 @@ import type { HiddenFieldProps } from 'payload'
 
 import React, { useEffect } from 'react'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 
@@ -15,15 +14,13 @@ import { withCondition } from '../../forms/withCondition/index.js'
 const HiddenFieldComponent: React.FC<HiddenFieldProps> = (props) => {
   const {
     disableModifyingForm = true,
-    field: { name, _path: pathFromProps },
+    field: { name, _path: path },
     forceUsePathFromProps,
     value: valueFromProps,
   } = props
 
-  const { path: pathFromContext } = useFieldProps()
-
-  const { path, setValue, value } = useField({
-    path: (!forceUsePathFromProps ? pathFromContext : null) || pathFromProps || name,
+  const { setValue, value } = useField({
+    path: (!forceUsePathFromProps ? path : null) || name,
   })
 
   useEffect(() => {

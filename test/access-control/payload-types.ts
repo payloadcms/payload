@@ -28,6 +28,7 @@ export interface Config {
     'hidden-access': HiddenAccess;
     'hidden-access-count': HiddenAccessCount;
     disabled: Disabled;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -300,6 +301,90 @@ export interface Disabled {
         id?: string | null;
       }[]
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'non-admin-user';
+        value: string | NonAdminUser;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'unrestricted';
+        value: string | Unrestricted;
+      } | null)
+    | ({
+        relationTo: 'fully-restricted';
+        value: string | FullyRestricted;
+      } | null)
+    | ({
+        relationTo: 'read-only-collection';
+        value: string | ReadOnlyCollection;
+      } | null)
+    | ({
+        relationTo: 'user-restricted-collection';
+        value: string | UserRestrictedCollection;
+      } | null)
+    | ({
+        relationTo: 'create-not-update-collection';
+        value: string | CreateNotUpdateCollection;
+      } | null)
+    | ({
+        relationTo: 'restricted-versions';
+        value: string | RestrictedVersion;
+      } | null)
+    | ({
+        relationTo: 'sibling-data';
+        value: string | SiblingDatum;
+      } | null)
+    | ({
+        relationTo: 'rely-on-request-headers';
+        value: string | RelyOnRequestHeader;
+      } | null)
+    | ({
+        relationTo: 'doc-level-access';
+        value: string | DocLevelAccess;
+      } | null)
+    | ({
+        relationTo: 'hidden-fields';
+        value: string | HiddenField;
+      } | null)
+    | ({
+        relationTo: 'hidden-access';
+        value: string | HiddenAccess;
+      } | null)
+    | ({
+        relationTo: 'hidden-access-count';
+        value: string | HiddenAccessCount;
+      } | null)
+    | ({
+        relationTo: 'disabled';
+        value: string | Disabled;
+      } | null);
+  globalSlug?: string | null;
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'non-admin-user';
+        value: string | NonAdminUser;
+      };
   updatedAt: string;
   createdAt: string;
 }

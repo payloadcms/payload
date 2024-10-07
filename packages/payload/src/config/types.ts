@@ -14,8 +14,12 @@ import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
-import type { DocumentTabConfig, RichTextAdapter } from '../admin/types.js'
-import type { AdminViewConfig, ServerSideEditViewProps } from '../admin/views/types.js'
+import type { DocumentTabConfig, RichTextAdapter, ServerFunctionConfig } from '../admin/types.js'
+import type {
+  AdminViewConfig,
+  ServerSideEditViewProps,
+  VisibleEntities,
+} from '../admin/views/types.js'
 import type { Permissions } from '../auth/index.js'
 import type {
   AddToImportMap,
@@ -384,16 +388,20 @@ export type EditViewConfig = {
     }
 )
 
+type ClientProps = {
+  readonly [key: string]: unknown
+}
+
 export type ServerProps = {
   readonly i18n: I18nClient
   readonly locale?: Locale
   readonly params?: { [key: string]: string | string[] | undefined }
   readonly payload: Payload
   readonly permissions?: Permissions
-  readonly [key: string]: unknown
   readonly searchParams?: { [key: string]: string | string[] | undefined }
   readonly user?: TypedUser
-}
+  readonly visibleEntities?: VisibleEntities
+} & ClientProps
 
 export const serverProps: (keyof ServerProps)[] = [
   'payload',
@@ -818,6 +826,7 @@ export type Config = {
       /** The route for the unauthorized page. */
       unauthorized?: string
     }
+    serverFunctions?: ServerFunctionConfig[]
     /**
      * Restrict the Admin Panel theme to use only one of your choice
      *

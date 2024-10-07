@@ -57,6 +57,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const {
     config: {
+      collections,
       routes: { api },
       serverURL,
     },

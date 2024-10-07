@@ -2,8 +2,7 @@
 
 import type { FormState } from 'payload'
 
-import { useConfig, useDrawerSlug, useFieldProps, useModal, useTranslation } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
+import { useDrawerSlug, useModal, useServerFunctions, useTranslation } from '@payloadcms/ui'
 import { reduceFieldsToValues } from 'payload/shared'
 import React, { Fragment, useState } from 'react'
 import { Editor, Range, Transforms } from 'slate'
@@ -55,17 +54,18 @@ const insertLink = (editor, fields) => {
   ReactEditor.focus(editor)
 }
 
-export const LinkButton: React.FC = () => {
+export const LinkButton: React.FC<{
+  schemaPath: string
+}> = ({ schemaPath }) => {
   const { fieldProps } = useElementButton()
   const [initialState, setInitialState] = useState<FormState>({})
 
   const { t } = useTranslation()
   const editor = useSlate()
-  const { config } = useConfig()
+  const { getFormState } = useServerFunctions()
 
   const { closeModal, openModal } = useModal()
   const drawerSlug = useDrawerSlug('rich-text-link')
-  const { schemaPath } = useFieldProps()
 
   const {
     field: { richTextComponentMap },
@@ -91,13 +91,9 @@ export const LinkButton: React.FC = () => {
               }
 
               const { state } = await getFormState({
-                apiRoute: config.routes.api,
-                body: {
-                  data,
-                  operation: 'update',
-                  schemaPath: `${schemaPath}.${linkFieldsSchemaPath}`,
-                },
-                serverURL: config.serverURL,
+                data,
+                operation: 'update',
+                schemaPath: `${schemaPath}.${linkFieldsSchemaPath}`,
               })
 
               setInitialState(state)

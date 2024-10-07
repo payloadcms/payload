@@ -11,7 +11,6 @@ import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { DrawerToggler } from '../../elements/Drawer/index.js'
 import { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
@@ -22,9 +21,6 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { BlockRow } from './BlockRow.js'
 import { BlocksDrawer } from './BlocksDrawer/index.js'
@@ -36,15 +32,15 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
-    descriptionProps,
-    errorProps,
-    field,
+    Blocks,
+    Description,
+    Error,
     field: {
       name,
-      _path: pathFromProps,
-      admin: { className, description, isSortable = true, readOnly: readOnlyFromAdmin } = {},
+      _path: path,
+      _schemaPath,
+      admin: { className, isSortable = true, readOnly: readOnlyFromAdmin } = {},
       blocks,
-      label,
       labels: labelsFromProps,
       localized,
       maxRows,
@@ -52,14 +48,13 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       required,
     },
     forceRender = false,
-    labelProps,
+    Label,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
-  const { indexPath, readOnly: readOnlyFromContext } = useFieldProps()
   const minRows = (minRowsProp ?? required) ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
@@ -99,26 +94,21 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     [maxRows, minRows, required, validate, editingDefaultLocale],
   )
 
-  const { path: pathFromContext } = useFieldProps()
-
   const {
     errorPaths,
     formInitializing,
     formProcessing,
-    path,
-    permissions,
     rows = [],
-    schemaPath,
     showError,
     valid,
     value,
   } = useField<number>({
     hasRows: true,
-    path: pathFromContext ?? pathFromProps ?? name,
+    path: path ?? name,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const addRow = useCallback(
     async (rowIndex: number, blockType: string): Promise<void> => {
@@ -126,7 +116,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         data: { blockType },
         path,
         rowIndex,
-        schemaPath: `${schemaPath}.${blockType}`,
+        schemaPath: `${_schemaPath}.${blockType}`,
       })
       setModified(true)
 
@@ -134,7 +124,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, setModified, schemaPath],
+    [addFieldRow, path, setModified, _schemaPath],
   )
 
   const duplicateRow = useCallback(
@@ -213,28 +203,13 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      id={`field-${path.replace(/\./g, '__')}`}
+      id={`field-${path?.replace(/\./g, '__')}`}
     >
-      {showError && (
-        <FieldError
-          CustomError={field?.admin?.components?.Error}
-          field={field}
-          path={path}
-          {...(errorProps || {})}
-        />
-      )}
+      {showError && Error}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__heading-with-error`}>
-            <h3>
-              <FieldLabel
-                as="span"
-                field={field}
-                Label={field?.admin?.components?.Description}
-                unstyled
-                {...(labelProps || {})}
-              />
-            </h3>
+            <h3>{Label}</h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
             )}
@@ -262,12 +237,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
             </ul>
           )}
         </div>
-        <FieldDescription
-          Description={field?.admin?.components?.Description}
-          description={description}
-          field={field}
-          {...(descriptionProps || {})}
-        />
+        {Description}
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
@@ -278,9 +248,9 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         >
           {rows.map((row, i) => {
             const { blockType } = row
-            const blockToRender = blocks.find((block) => block.slug === blockType)
+            const blockConfig = blocks.find((block) => block.slug === blockType)
 
-            if (blockToRender) {
+            if (blockConfig) {
               const rowErrorCount = errorPaths.filter((errorPath) =>
                 errorPath.startsWith(`${path}.${i}.`),
               ).length
@@ -290,24 +260,23 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                     <BlockRow
                       {...draggableSortableItemProps}
                       addRow={addRow}
-                      block={blockToRender}
+                      block={blockConfig}
                       blocks={blocks}
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}
+                      Fields={Blocks}
                       forceRender={forceRender}
                       hasMaxRows={hasMaxRows}
-                      indexPath={indexPath}
                       isSortable={isSortable}
+                      Label={Label}
                       labels={labels}
                       moveRow={moveRow}
                       path={path}
-                      permissions={permissions}
                       readOnly={disabled}
                       removeRow={removeRow}
                       row={row}
                       rowCount={rows.length}
                       rowIndex={i}
-                      schemaPath={schemaPath}
                       setCollapse={setCollapse}
                     />
                   )}

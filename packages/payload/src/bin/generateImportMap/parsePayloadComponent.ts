@@ -1,14 +1,14 @@
 import type { PayloadComponent } from '../../config/types.js'
 
-export function parsePayloadComponent(payloadComponent: PayloadComponent): {
+export function parsePayloadComponent(PayloadComponent: PayloadComponent): {
   exportName: string
   path: string
 } {
-  if (!payloadComponent) {
+  if (!PayloadComponent) {
     return null
   }
   const pathAndMaybeExport =
-    typeof payloadComponent === 'string' ? payloadComponent : payloadComponent.path
+    typeof PayloadComponent === 'string' ? PayloadComponent : PayloadComponent.path
 
   let path = ''
   let exportName = 'default'
@@ -19,8 +19,8 @@ export function parsePayloadComponent(payloadComponent: PayloadComponent): {
     path = pathAndMaybeExport
   }
 
-  if (typeof payloadComponent === 'object' && payloadComponent.exportName) {
-    exportName = payloadComponent.exportName
+  if (typeof PayloadComponent === 'object' && PayloadComponent.exportName) {
+    exportName = PayloadComponent.exportName
   }
 
   return { exportName, path }

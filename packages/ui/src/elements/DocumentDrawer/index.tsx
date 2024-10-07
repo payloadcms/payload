@@ -1,6 +1,5 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
-import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
 
 import type { DocumentDrawerProps, DocumentTogglerProps, UseDocumentDrawer } from './types.js'
@@ -35,13 +34,13 @@ export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
   drawerSlug,
   ...rest
 }) => {
-  const { i18n, t } = useTranslation()
+  const { t } = useTranslation()
   const [collectionConfig] = useRelatedCollections(collectionSlug)
 
   return (
     <DrawerToggler
       aria-label={t(!id ? 'fields:addNewLabel' : 'general:editLabel', {
-        label: getTranslation(collectionConfig.labels.singular, i18n),
+        label: collectionConfig?.labels.singular,
       })}
       className={[className, `${baseClass}__toggler`].filter(Boolean).join(' ')}
       disabled={disabled}

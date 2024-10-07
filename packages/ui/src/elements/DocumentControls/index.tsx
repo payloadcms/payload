@@ -25,10 +25,6 @@ import { DuplicateDocument } from '../DuplicateDocument/index.js'
 import { Gutter } from '../Gutter/index.js'
 import { Locked } from '../Locked/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
-import { PreviewButton } from '../PreviewButton/index.js'
-import { PublishButton } from '../PublishButton/index.js'
-import { SaveButton } from '../SaveButton/index.js'
-import { SaveDraftButton } from '../SaveDraftButton/index.js'
 import { Status } from '../Status/index.js'
 import './index.scss'
 
@@ -51,15 +47,18 @@ export const DocumentControls: React.FC<{
   readonly onSave?: DocumentInfoContext['onSave']
   readonly onTakeOver?: () => void
   readonly permissions: CollectionPermission | GlobalPermission | null
+  readonly PreviewButton?: React.ReactNode
+  readonly PublishButton?: React.ReactNode
   readonly readOnlyForIncomingUser?: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
+  readonly SaveButton?: React.ReactNode
+  readonly SaveDraftButton?: React.ReactNode
   readonly slug: SanitizedCollectionConfig['slug']
   readonly user?: ClientUser
 }> = (props) => {
   const {
     id,
-    slug,
     data,
     disableActions,
     disableCreate,
@@ -71,9 +70,13 @@ export const DocumentControls: React.FC<{
     onDuplicate,
     onTakeOver,
     permissions,
+    PreviewButton,
+    PublishButton,
     readOnlyForIncomingUser,
     redirectAfterDelete,
     redirectAfterDuplicate,
+    SaveButton,
+    SaveDraftButton,
     user,
   } = props
 
@@ -83,8 +86,13 @@ export const DocumentControls: React.FC<{
 
   const { config, getEntityConfig } = useConfig()
 
-  const collectionConfig = getEntityConfig({ collectionSlug: slug }) as ClientCollectionConfig
-  const globalConfig = getEntityConfig({ globalSlug: slug }) as ClientGlobalConfig
+  const collectionConfig = getEntityConfig({
+    collectionSlug: props.slug,
+  }) as ClientCollectionConfig
+
+  const globalConfig = getEntityConfig({
+    collectionSlug: 'global',
+  }) as ClientGlobalConfig
 
   const {
     admin: { dateFormat },
@@ -190,47 +198,10 @@ export const DocumentControls: React.FC<{
         </div>
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
-            {(collectionConfig?._isPreviewEnabled || globalConfig?._isPreviewEnabled) && (
-              <PreviewButton
-                CustomComponent={
-                  collectionConfig?.admin?.components?.edit?.PreviewButton ||
-                  globalConfig?.admin?.components?.elements?.PreviewButton
-                }
-              />
-            )}
-            {hasSavePermission && (
-              <React.Fragment>
-                {collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts ? (
-                  <React.Fragment>
-                    {((collectionConfig?.versions?.drafts &&
-                      !collectionConfig?.versions?.drafts?.autosave) ||
-                      unsavedDraftWithValidations ||
-                      (globalConfig?.versions?.drafts &&
-                        !globalConfig?.versions?.drafts?.autosave)) && (
-                      <SaveDraftButton
-                        CustomComponent={
-                          collectionConfig?.admin?.components?.edit?.SaveDraftButton ||
-                          globalConfig?.admin?.components?.elements?.SaveDraftButton
-                        }
-                      />
-                    )}
-                    <PublishButton
-                      CustomComponent={
-                        collectionConfig?.admin?.components?.edit?.PublishButton ||
-                        globalConfig?.admin?.components?.elements?.PublishButton
-                      }
-                    />
-                  </React.Fragment>
-                ) : (
-                  <SaveButton
-                    CustomComponent={
-                      collectionConfig?.admin?.components?.edit?.SaveButton ||
-                      globalConfig?.admin?.components?.elements?.SaveButton
-                    }
-                  />
-                )}
-              </React.Fragment>
-            )}
+            {PreviewButton}
+            {SaveDraftButton}
+            {PublishButton}
+            {SaveButton}
             {user && readOnlyForIncomingUser && (
               <Button
                 buttonStyle="secondary"

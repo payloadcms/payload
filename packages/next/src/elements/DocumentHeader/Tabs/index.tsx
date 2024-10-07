@@ -6,9 +6,9 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
-import { getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
 import React from 'react'
 
+import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
 import { getCustomViews } from './getCustomViews.js'
 import { getViewConfig } from './getViewConfig.js'
 import './index.scss'
@@ -80,33 +80,24 @@ export const DocumentTabs: React.FC<{
                 const { path, tab } = CustomView
 
                 if (tab.Component) {
-                  const createMappedComponent = getCreateMappedComponent({
-                    importMap: payload.importMap,
-                    serverProps: {
-                      i18n,
-                      payload,
-                      permissions,
-                      ...props,
-                      key: `tab-custom-${index}`,
-                      path,
-                    },
-                  })
-
-                  const mappedTab = createMappedComponent(
-                    tab.Component,
-                    undefined,
-                    undefined,
-                    'tab.Component',
-                  )
-
                   return (
-                    <RenderComponent
+                    <RenderServerComponent
                       clientProps={{
                         key: `tab-custom-${index}`,
                         path,
                       }}
+                      Component={tab.Component}
+                      importMap={payload.importMap}
                       key={`tab-custom-${index}`}
-                      mappedComponent={mappedTab}
+                      serverProps={{
+                        collectionConfig,
+                        globalConfig,
+                        i18n,
+                        key: `tab-custom-${index}`,
+                        path,
+                        payload,
+                        permissions,
+                      }}
                     />
                   )
                 }
@@ -121,6 +112,7 @@ export const DocumentTabs: React.FC<{
                   />
                 )
               }
+
               return null
             })}
           </ul>

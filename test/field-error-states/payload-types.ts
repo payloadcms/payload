@@ -19,6 +19,7 @@ export interface Config {
     'prev-value': PrevValue;
     'prev-value-relation': PrevValueRelation;
     users: User;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -340,6 +341,53 @@ export interface PrevValue {
 export interface PrevValueRelation {
   id: string;
   previousValueRelation?: (string | null) | PrevValue;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'error-fields';
+        value: string | ErrorField;
+      } | null)
+    | ({
+        relationTo: 'uploads';
+        value: string | Upload;
+      } | null)
+    | ({
+        relationTo: 'validate-drafts-on';
+        value: string | ValidateDraftsOn;
+      } | null)
+    | ({
+        relationTo: 'validate-drafts-off';
+        value: string | ValidateDraftsOff;
+      } | null)
+    | ({
+        relationTo: 'validate-drafts-on-autosave';
+        value: string | ValidateDraftsOnAutosave;
+      } | null)
+    | ({
+        relationTo: 'prev-value';
+        value: string | PrevValue;
+      } | null)
+    | ({
+        relationTo: 'prev-value-relation';
+        value: string | PrevValueRelation;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
   updatedAt: string;
   createdAt: string;
 }

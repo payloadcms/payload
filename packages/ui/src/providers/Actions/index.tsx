@@ -3,7 +3,7 @@ import type { MappedComponent } from 'payload'
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
-import { useConfig } from '../../providers/Config/index.js'
+// import { useConfig } from '../../providers/Config/index.js'
 
 export { SetViewActions } from './SetViewActions/index.js'
 
@@ -25,17 +25,17 @@ export const ActionsProvider: React.FC<{
   const [viewActions, setViewActions] = useState([])
   const [adminActions, setAdminActions] = useState([])
 
-  const {
-    config: {
-      admin: {
-        components: { actions },
-      },
-    },
-  } = useConfig()
+  // const {
+  //   config: {
+  //     admin: {
+  //       components: { actions },
+  //     },
+  //   },
+  // } = useConfig()
 
   useEffect(() => {
-    setAdminActions(actions || [])
-  }, [actions])
+    setAdminActions([])
+  }, [])
 
   const combinedActions = [...(viewActions || []), ...(adminActions || [])]
 

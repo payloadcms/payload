@@ -1,18 +1,15 @@
 'use client'
 
-import type { MappedComponent } from 'payload'
-
 import React, { useRef } from 'react'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { useHotkey } from '../../hooks/useHotkey.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
-export const DefaultSaveButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
+export const SaveButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
   const { t } = useTranslation()
   const { submit } = useForm()
   const modified = useFormModified()
@@ -49,15 +46,4 @@ export const DefaultSaveButton: React.FC<{ label?: string }> = ({ label: labelPr
       {label}
     </FormSubmit>
   )
-}
-
-type Props = {
-  CustomComponent?: MappedComponent
-}
-
-export const SaveButton: React.FC<Props> = ({ CustomComponent }) => {
-  if (CustomComponent) {
-    return <RenderComponent mappedComponent={CustomComponent} />
-  }
-  return <DefaultSaveButton />
 }

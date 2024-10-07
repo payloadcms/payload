@@ -5,9 +5,6 @@ import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import { Collapsible as CollapsibleElement } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-import { RenderFields } from '../../forms/RenderFields/index.js'
-import { RowLabel } from '../../forms/RowLabel/index.js'
 import { WatchChildErrors } from '../../forms/WatchChildErrors/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -19,41 +16,33 @@ import './index.scss'
 const baseClass = 'collapsible-field'
 
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
-import { FieldDescription } from '../FieldDescription/index.js'
 
 const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
   const {
-    descriptionProps,
+    Description,
     field,
     field: {
-      _path: pathFromProps,
-      admin: { className, description, initCollapsed = false, readOnly: readOnlyFromAdmin } = {},
+      _path: path,
+      _schemaPath,
+      admin: { className, initCollapsed = false, readOnly: readOnlyFromAdmin } = {},
       fields,
-      label,
     },
+    Fields,
+    indexPath,
     readOnly: readOnlyFromTopLevelProps,
+    RowLabel,
   } = props
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
-  const {
-    indexPath,
-    path: pathFromContext,
-    readOnly: readOnlyFromContext,
-    schemaPath,
-    siblingPermissions,
-  } = useFieldProps()
-
   const formInitializing = useFormInitializing()
   const formProcessing = useFormProcessing()
-
-  const path = pathFromContext ?? pathFromProps
 
   const { i18n } = useTranslation()
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
   const [collapsedOnMount, setCollapsedOnMount] = useState<boolean>()
-  const fieldPreferencesKey = `collapsible-${indexPath.replace(/\./g, '__')}`
+  const fieldPreferencesKey = `collapsible-${indexPath?.replace(/\./g, '__')}`
   const [errorCount, setErrorCount] = useState(0)
   const fieldHasErrors = errorCount > 0
 
@@ -114,7 +103,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
     return null
   }
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const style: AdminClient['style'] = {
     ...field.admin?.style,
@@ -141,39 +130,16 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
           collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
           header={
             <div className={`${baseClass}__row-label-wrap`}>
-              <RowLabel
-                i18n={i18n}
-                path={path}
-                RowLabel={
-                  field?.admin?.components && 'RowLabel' in field.admin.components
-                    ? field.admin.components.RowLabel
-                    : undefined
-                }
-                rowLabel={label}
-              />
+              {RowLabel}
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
           }
           initCollapsed={collapsedOnMount}
           onToggle={onToggle}
         >
-          <RenderFields
-            fields={fields}
-            forceRender
-            indexPath={indexPath}
-            margins="small"
-            path={path}
-            permissions={siblingPermissions}
-            readOnly={disabled}
-            schemaPath={schemaPath}
-          />
+          {Fields ? Fields?.map((Field) => Field) : null}
         </CollapsibleElement>
-        <FieldDescription
-          Description={field?.admin?.components?.Description}
-          description={description}
-          field={field}
-          {...(descriptionProps || {})}
-        />
+        {Description}
       </div>
     </Fragment>
   )

@@ -1,6 +1,6 @@
 'use client'
 
-import { RenderComponent, ShimmerEffect, useClientFunctions, useFieldProps } from '@payloadcms/ui'
+import { ShimmerEffect, useClientFunctions } from '@payloadcms/ui'
 import React, { lazy, Suspense, useEffect, useState } from 'react'
 
 import type { RichTextPlugin, SlateFieldProps } from '../types.js'
@@ -16,10 +16,9 @@ const RichTextEditor = lazy(() =>
 
 export const RichTextField: React.FC<SlateFieldProps> = (props) => {
   const {
-    field: { richTextComponentMap },
+    field: { _schemaPath, richTextComponentMap },
   } = props
 
-  const { schemaPath } = useFieldProps()
   const clientFunctions = useClientFunctions()
   const [hasLoadedPlugins, setHasLoadedPlugins] = useState(false)
 
@@ -34,7 +33,7 @@ export const RichTextField: React.FC<SlateFieldProps> = (props) => {
       const plugins: RichTextPlugin[] = []
 
       Object.entries(clientFunctions).forEach(([key, plugin]) => {
-        if (key.startsWith(`slatePlugin.${schemaPath}.`)) {
+        if (key.startsWith(`slatePlugin.${_schemaPath}.`)) {
           plugins.push(plugin)
         }
       })
@@ -44,18 +43,14 @@ export const RichTextField: React.FC<SlateFieldProps> = (props) => {
         setHasLoadedPlugins(true)
       }
     }
-  }, [hasLoadedPlugins, clientFunctions, schemaPath, features.plugins.length])
+  }, [hasLoadedPlugins, clientFunctions, _schemaPath, features.plugins.length])
 
   if (!hasLoadedPlugins) {
     return (
       <React.Fragment>
         {Array.isArray(features.plugins) &&
           features.plugins.map((Plugin, i) => {
-            return (
-              <React.Fragment key={i}>
-                <RenderComponent mappedComponent={Plugin} />
-              </React.Fragment>
-            )
+            return <React.Fragment key={i}>{/* Render Field Here */}</React.Fragment>
           })}
       </React.Fragment>
     )

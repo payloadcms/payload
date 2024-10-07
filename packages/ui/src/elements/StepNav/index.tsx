@@ -11,7 +11,7 @@ export { SetStepNav } from './SetStepNav.js'
 import type { StepNavItem } from './types.js'
 
 import { PayloadIcon } from '../../graphics/Icon/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
+import { RenderComponent } from '../RenderComponent/index.js'
 
 const baseClass = 'step-nav'
 
