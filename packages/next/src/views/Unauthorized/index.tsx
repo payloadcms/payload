@@ -30,7 +30,7 @@ export const UnauthorizedView: PayloadServerReactComponent<AdminViewComponent> =
   } = initPageResult
 
   return (
-    <React.Fragment>
+    <div className={baseClass}>
       <FormHeader
         description={i18n.t('error:notAllowedToAccessPage')}
         heading={i18n.t('error:unauthorized')}
@@ -45,6 +45,6 @@ export const UnauthorizedView: PayloadServerReactComponent<AdminViewComponent> =
       >
         {i18n.t('authentication:logOut')}
       </Button>
-    </React.Fragment>
+    </div>
   )
 }
