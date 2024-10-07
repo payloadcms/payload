@@ -40,20 +40,23 @@ export const ServerFunctionsProvider: React.FC<{
       const { signal, ...rest } = args
 
       try {
-        const result = (await serverFunction({
-          name: 'form-state',
-          args: rest,
-        })) as ReturnType<typeof buildFormState> // TODO: infer this type when `strictNullChecks` is enabled
+        if (!signal.aborted) {
+          const result = (await serverFunction({
+            name: 'form-state',
+            args: rest,
+          })) as ReturnType<typeof buildFormState> // TODO: infer this type when `strictNullChecks` is enabled
 
-        if (signal?.aborted) {
-          return { state: args.formState }
+          if (signal?.aborted) {
+            throw new Error('Request was aborted, ignoring result')
+          }
+
+          return result
         }
-
-        return result
       } catch (error) {
         console.error(error) // eslint-disable-line no-console
-        return { state: args.formState }
       }
+
+      return { state: args.formState }
     },
     [serverFunction],
   )
