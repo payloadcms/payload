@@ -88,7 +88,32 @@ export type RetryConfig = {
    * If this is set on a single task, the longest backoff time of a task will determine the time until the entire workflow is retried.
    */
   backoff?: {
+    /**
+     * Base delay between running jobs in ms
+     */
     delay?: number
+    /**
+     * @default fixed
+     *
+     * The backoff strategy to use when retrying the task. This determines how long to wait before retrying the task.
+     * If fixed (default) is used, the delay will be the same between each retry.
+     *
+     * If exponential is used, the delay will increase exponentially with each retry.
+     *
+     * @example
+     * delay = 1000
+     * attempts = 3
+     * type = 'fixed'
+     *
+     * The task will be retried 3 times with a delay of 1000ms between each retry.
+     *
+     * @example
+     * delay = 1000
+     * attempts = 3
+     * type = 'exponential'
+     *
+     * The task will be retried 3 times with a delay of 1000ms, 2000ms, and 4000ms between each retry.
+     */
     type: 'exponential' | 'fixed'
   }
 }

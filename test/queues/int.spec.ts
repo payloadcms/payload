@@ -221,6 +221,91 @@ describe('Queues', () => {
     expect(jobAfterRun.input.amountRetried).toBe(4)
   })
 
+  it('ensure backoff strategy of task is respected', async () => {
+    const job = await payload.jobs.queue({
+      workflow: 'retriesBackoffTest',
+      input: {
+        message: 'hello',
+      },
+    })
+
+    let hasJobsRemaining = true
+    let firstGotNoJobs = null
+
+    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+    // Keep running until no jobs found. If no jobs found, wait for 1.6 seconds to see if any new jobs are added
+    // (Specifically here we want to see if the backoff strategy is respected and thus need to wait for `waitUntil`)
+    while (
+      hasJobsRemaining ||
+      !firstGotNoJobs ||
+      new Date().getTime() - firstGotNoJobs.getTime() < 3000
+    ) {
+      const response = await payload.jobs.run()
+
+      if (response.noJobsRemaining) {
+        if (hasJobsRemaining) {
+          firstGotNoJobs = new Date()
+          hasJobsRemaining = false
+        }
+      } else {
+        firstGotNoJobs = null
+        hasJobsRemaining = true
+      }
+
+      // Add a 100ms delay before the next iteration
+      await delay(100)
+    }
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+    expect(jobAfterRun.totalTried).toBe(5)
+    expect(jobAfterRun.taskStatus.inline['1'].totalTried).toBe(5)
+
+    // @ts-expect-error amountRetried is new arbitrary data and not in the type
+    expect(jobAfterRun.input.amountRetried).toBe(4)
+
+    /*
+    Job.input.timeTried may look something like this:
+    timeTried: {
+            '0': '2024-10-07T16:05:49.300Z',
+            '1': '2024-10-07T16:05:49.469Z',
+            '2': '2024-10-07T16:05:49.779Z',
+            '3': '2024-10-07T16:05:50.388Z',
+            '4': '2024-10-07T16:05:51.597Z'
+          }
+     Convert this into an array, each item is the duration between the fails. So this should have 4 items
+    */
+    const timeTried: {
+      [key: string]: string
+      // @ts-expect-error timeTried is new arbitrary data and not in the type
+    } = jobAfterRun.input.timeTried
+
+    const durations = Object.values(timeTried)
+      .map((time, index, arr) => {
+        if (index === arr.length - 1) {
+          return null
+        }
+        return new Date(arr[index + 1]).getTime() - new Date(time).getTime()
+      })
+      .filter((p) => p !== null)
+
+    expect(durations).toHaveLength(4)
+    expect(durations[0]).toBeGreaterThan(300)
+    expect(durations[1]).toBeGreaterThan(600)
+    expect(durations[2]).toBeGreaterThan(1200)
+    expect(durations[3]).toBeGreaterThan(2400)
+  })
+
   it('can create new inline jobs', async () => {
     await payload.jobs.queue({
       workflow: 'inlineTaskTest',

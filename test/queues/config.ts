@@ -436,6 +436,62 @@ export default buildConfigWithDefaults({
         ],
         handler: path.resolve(dirname, 'runners/externalWorkflow.ts') + '#externalWorkflowHandler',
       } as WorkflowConfig<'externalWorkflow'>,
+      {
+        slug: 'retriesBackoffTest',
+        inputSchema: [
+          {
+            name: 'message',
+            type: 'text',
+            required: true,
+          },
+        ],
+        handler: async ({ job, runTaskInline }) => {
+          // @ts-expect-error amountRetried is new arbitrary data and not in the type
+          job.input.amountRetried =
+            // @ts-expect-error amountRetried is new arbitrary data and not in the type
+            job.input.amountRetried !== undefined ? job.input.amountRetried + 1 : 0
+
+          await runTaskInline({
+            task: async ({ req }) => {
+              const totalTried = job?.taskStatus?.inline?.['1']?.totalTried || 0
+
+              await req.payload.create({
+                collection: 'simple',
+                req,
+                data: {
+                  title: 'should not exist',
+                },
+              })
+
+              // @ts-expect-error timeTried is new arbitrary data and not in the type
+              if (!job.input.timeTried) {
+                // @ts-expect-error timeTried is new arbitrary data and not in the type
+                job.input.timeTried = {}
+              }
+
+              // @ts-expect-error timeTried is new arbitrary data and not in the type
+              job.input.timeTried[totalTried] = new Date().toISOString()
+
+              if (totalTried < 4) {
+                // Last try it should succeed
+                throw new Error('Failed on purpose')
+              }
+              return {
+                output: {},
+              }
+            },
+            id: '1',
+            retries: {
+              attempts: 4,
+              backoff: {
+                type: 'exponential',
+                // Should retry in 300ms, then 600, then 1200, then 2400, then succeed
+                delay: 300,
+              },
+            },
+          })
+        },
+      } as WorkflowConfig<'retriesBackoffTest'>,
     ],
   },
   editor: lexicalEditor(),

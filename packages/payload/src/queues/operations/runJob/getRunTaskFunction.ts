@@ -146,19 +146,20 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
       task = 'inline'
     }
 
-    let maxRetries: number = typeof retries === 'object' ? retries?.attempts : retries
+    let retriesConfig: number | RetryConfig = retries
     let taskConfig: TaskConfig<any>
     if (!isInline) {
       taskConfig = req.payload.config.jobs.tasks.find((t) => t.slug === task)
-      if (!retries) {
-        maxRetries =
-          typeof taskConfig.retries === 'object' ? taskConfig.retries.attempts : taskConfig.retries
+      if (!retriesConfig) {
+        retriesConfig = taskConfig.retries
       }
 
       if (!taskConfig) {
         throw new Error(`Task ${String(task)} not found in workflow ${job.workflowSlug}`)
       }
     }
+    const maxRetries: number =
+      typeof retriesConfig === 'object' ? retriesConfig?.attempts : retriesConfig
 
     const taskStatus: null | SingleTaskStatus<string> = job?.taskStatus?.[String(task)]
       ? job.taskStatus[String(task)][id]
@@ -234,7 +235,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           maxRetries,
           output,
           req,
-          retriesConfig: taskConfig?.retries,
+          retriesConfig,
           runnerOutput,
           state,
           taskID: id,
@@ -260,7 +261,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         maxRetries,
         output,
         req,
-        retriesConfig: taskConfig?.retries,
+        retriesConfig,
         state,
         taskID: id,
         taskSlug: String(task),
