@@ -127,23 +127,25 @@ export const runJob = async ({
     // we need to ensure the job is updated to reflect the error
     await updateJob({
       ...job, // ensure locally modified job data is saved
-      error: state.reachedMaxRetries ? err : undefined,
-      hasError: state.reachedMaxRetries, // If reached max retries => final error. If hasError is true this job will not be retried
+      error: hasError ? err : undefined,
+      hasError, // If reached max retries => final error. If hasError is true this job will not be retried
       processing: false,
       totalTried: (job.totalTried ?? 0) + 1,
     })
 
     req.payload.logger.error({ err, job, msg: 'Error running job' })
     return {
-      status: state.reachedMaxRetries ? 'error-reached-max-retries' : 'error',
+      status: hasError ? 'error-reached-max-retries' : 'error',
     }
   }
+  job.totalTried = (job.totalTried ?? 0) + 1
 
   // Workflow has completed
   await updateJob({
     ...job, // ensure locally modified job data is saved
     completedAt: new Date().toISOString(),
     processing: false,
+    totalTried: (job.totalTried ?? 0) + 1,
   })
 
   return {
