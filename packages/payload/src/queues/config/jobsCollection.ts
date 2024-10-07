@@ -110,11 +110,18 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
                 index: true,
               },
               {
+                name: 'totalTried',
+                type: 'number',
+                defaultValue: 0,
+                index: true,
+              },
+              {
                 name: 'hasError',
                 type: 'checkbox',
                 admin: {
                   description: 'If hasError is true this job will not be retried',
                 },
+                defaultValue: false,
                 index: true,
               },
               {

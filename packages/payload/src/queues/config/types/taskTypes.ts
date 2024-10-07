@@ -65,13 +65,13 @@ export type RunTaskFunction = <TTaskSlug extends keyof TypedJobs['tasks']>(args:
   id: string
   input?: TaskInput<TTaskSlug>
   retries?: number
-  task: TTaskSlug
+  task: RetryConfig | TTaskSlug
 }) => Promise<TaskOutput<TTaskSlug>>
 
 export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput extends object>(args: {
   id: string
   input?: TTaskInput
-  retries?: number
+  retries?: number | RetryConfig
   task: (args: { input: TTaskInput; job: RunningJob<any>; req: PayloadRequest }) =>
     | {
         output: TTaskOutput
@@ -79,6 +79,19 @@ export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput exte
       }
     | Promise<{ output: TTaskOutput; state?: 'failed' | 'succeeded' }>
 }) => Promise<TTaskOutput>
+
+export type RetryConfig = {
+  attempts: number
+  /**
+   * The backoff strategy to use when retrying the task. This determines how long to wait before retrying the task.
+   *
+   * If this is set on a single task, the longest backoff time of a task will determine the time until the entire workflow is retried.
+   */
+  backoff?: {
+    delay?: number
+    type: 'exponential' | 'fixed'
+  }
+}
 
 export type TaskConfig<
   TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput = TaskType,
@@ -114,7 +127,7 @@ export type TaskConfig<
   /**
    * Specify the number of times that this step should be retried if it fails.
    */
-  retries?: number
+  retries?: number | RetryConfig
   /**
    * Define a slug-based name for this job. This slug needs to be unique among both tasks and workflows.
    */

@@ -1,6 +1,7 @@
 import type { Field } from '../../../fields/config/types.js'
 import type { PayloadRequest, StringKeyOf, TypedCollection, TypedJobs } from '../../../index.js'
 import type {
+  RetryConfig,
   RunInlineTaskFunction,
   RunTaskFunction,
   TaskInput,
@@ -36,6 +37,7 @@ export type BaseJob = {
       [taskID: string]: BaseJob['log'][0]
     }
   }
+  totalTried: number
   waitUntil?: string
   workflowSlug?: string
 }
@@ -99,6 +101,10 @@ export type WorkflowConfig<TWorkflowSlugOrInput extends keyof TypedJobs['workflo
    * Defaults to "default".
    */
   queue?: string
+  /**
+   * Specify the number of times that this workflow should be retried if it fails for any reason.
+   */
+  retries?: number | RetryConfig
   /**
    * Define a slug-based name for this job.
    */
