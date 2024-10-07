@@ -133,7 +133,7 @@ export default buildConfigWithDefaults({
         handler: updatePostStep2,
       } as TaskConfig<'UpdatePostStep2'>,
       {
-        retries: 2,
+        retries: 3,
         slug: 'CreateSimple',
         inputSchema: [
           {
@@ -303,6 +303,43 @@ export default buildConfigWithDefaults({
           // This will never be reached
         },
       } as WorkflowConfig<'retriesTest'>,
+      {
+        slug: 'retriesWorkflowLevelTest',
+        inputSchema: [
+          {
+            name: 'message',
+            type: 'text',
+            required: true,
+          },
+        ],
+        retries: 2, // Even though CreateSimple has 3 retries, this workflow only has 2. Thus, it will only retry once
+        handler: async ({ job, runTask }) => {
+          // @ts-expect-error amountRetried is new arbitrary data and not in the type
+          job.input.amountRetried =
+            // @ts-expect-error amountRetried is new arbitrary data and not in the type
+            job.input.amountRetried !== undefined ? job.input.amountRetried + 1 : 0
+
+          await runTask({
+            task: 'CreateSimple',
+            id: '1',
+            input: {
+              message: job.input.message,
+            },
+          })
+
+          // At this point there should always be one post created.
+          // job.input.amountRetried will go up to 2 as CreatePost has 2 retries
+          await runTask({
+            task: 'CreateSimple',
+            id: '2',
+            input: {
+              message: job.input.message,
+              shouldFail: true,
+            },
+          })
+          // This will never be reached
+        },
+      } as WorkflowConfig<'retriesWorkflowLevelTest'>,
       {
         slug: 'inlineTaskTest',
         inputSchema: [

@@ -151,6 +151,40 @@ describe('Queues', () => {
     })
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
+    expect(jobAfterRun.input.amountRetried).toBe(3)
+  })
+
+  it('ensure workflow-level retries are respected', async () => {
+    const job = await payload.jobs.queue({
+      workflow: 'retriesWorkflowLevelTest',
+      input: {
+        message: 'hello',
+      },
+    })
+
+    let hasJobsRemaining = true
+
+    while (hasJobsRemaining) {
+      const response = await payload.jobs.run()
+
+      if (response.noJobsRemaining) {
+        hasJobsRemaining = false
+      }
+    }
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(2)
   })
 

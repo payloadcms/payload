@@ -106,9 +106,9 @@ export const runJob = async ({
         state.reachedMaxRetries = true
         hasError = true
 
-        throw new Error(
-          `Job has reached the maximum amount of retries determined by the workflow configuration.`,
-        )
+        req.payload.logger.error({
+          msg: 'Job has reached the maximum amount of retries determined by the workflow configuration.',
+        })
       } else {
         // Job will retry. Let's determine when!
         const waitUntil: Date = calculateBackoffWaitUntil({
@@ -133,7 +133,7 @@ export const runJob = async ({
       totalTried: (job.totalTried ?? 0) + 1,
     })
 
-    req.payload.logger.error({ err, job, msg: 'Error running workflow' })
+    req.payload.logger.error({ err, job, msg: 'Error running job' })
     return {
       status: state.reachedMaxRetries ? 'error-reached-max-retries' : 'error',
     }
