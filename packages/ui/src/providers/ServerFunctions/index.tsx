@@ -38,6 +38,7 @@ export const ServerFunctionsProvider: React.FC<{
   const getFormState = useCallback<GetFormState>(
     async (args) => {
       const { signal, ...rest } = args
+
       try {
         const result = (await serverFunction({
           name: 'form-state',

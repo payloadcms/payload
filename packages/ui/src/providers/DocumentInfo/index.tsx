@@ -19,9 +19,9 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
-import { getFormStateFetch } from '../../utilities/getFormStateFetch.js'
 import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
 import { isEditing as getIsEditing } from '../../utilities/isEditing.js'
 import { useAuth } from '../Auth/index.js'
@@ -66,6 +66,8 @@ const DocumentInfo: React.FC<
   } = useConfig()
 
   const { user } = useAuth()
+
+  const { getFormState } = useServerFunctions()
 
   const collectionConfig = collections.find((c) => c.slug === collectionSlug)
   const globalConfig = globals.find((g) => g.slug === globalSlug)
@@ -493,19 +495,15 @@ const DocumentInfo: React.FC<
 
       const newData = collectionSlug ? json.doc : json.result
 
-      const { state: newState } = await getFormStateFetch({
-        apiRoute: api,
-        body: {
-          id,
-          collectionSlug,
-          data: newData,
-          docPreferences,
-          globalSlug,
-          locale,
-          operation,
-          schemaPath: collectionSlug || globalSlug,
-        },
-        serverURL,
+      const { state: newState } = await getFormState({
+        id,
+        collectionSlug,
+        data: newData,
+        docPreferences,
+        globalSlug,
+        locale,
+        operation,
+        schemaPath: collectionSlug || globalSlug,
       })
 
       setInitialState(newState)
@@ -522,8 +520,7 @@ const DocumentInfo: React.FC<
       locale,
       onSaveFromProps,
       getDocPermissions,
-      api,
-      serverURL,
+      getFormState,
     ],
   )
 
@@ -545,17 +542,13 @@ const DocumentInfo: React.FC<
         setIsLoading(true)
 
         try {
-          const result = await getFormStateFetch({
-            apiRoute: api,
-            body: {
-              id,
-              collectionSlug,
-              globalSlug,
-              locale,
-              operation,
-              schemaPath: collectionSlug || globalSlug,
-            },
-            serverURL,
+          const result = await getFormState({
+            id,
+            collectionSlug,
+            globalSlug,
+            locale,
+            operation,
+            schemaPath: collectionSlug || globalSlug,
           })
 
           if ('errors' in result) {
@@ -606,6 +599,7 @@ const DocumentInfo: React.FC<
     initialStateFromProps,
     getDocPermissions,
     user,
+    getFormState,
   ])
 
   useEffect(() => {
