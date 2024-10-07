@@ -46,14 +46,12 @@ export const ServerFunctionsProvider: React.FC<{
             args: rest,
           })) as ReturnType<typeof buildFormState> // TODO: infer this type when `strictNullChecks` is enabled
 
-          if (signal?.aborted) {
-            throw new Error('Request was aborted, ignoring result')
+          if (!signal?.aborted) {
+            return result
           }
-
-          return result
         }
-      } catch (error) {
-        console.error(error) // eslint-disable-line no-console
+      } catch (_err) {
+        // swallow error
       }
 
       return { state: args.formState }
