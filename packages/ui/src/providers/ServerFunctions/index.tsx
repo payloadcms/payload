@@ -41,13 +41,8 @@ export const ServerFunctionsProvider: React.FC<{
 
   const getFormState = useCallback<GetFormState>(
     async (args) => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort()
-      }
-
-      const abortController = new AbortController()
-      abortControllerRef.current = abortController
-      const localSignal = abortController.signal
+      abortControllerRef.current = new AbortController()
+      const localSignal = abortControllerRef.current.signal
 
       const { signal: remoteSignal, ...rest } = args
 
@@ -63,7 +58,7 @@ export const ServerFunctionsProvider: React.FC<{
           }
         }
       } catch (_err) {
-        // swallow error
+        console.error('Error fetching form state', _err) // eslint-disable-line no-console
       }
 
       return { state: args.formState }
@@ -75,12 +70,10 @@ export const ServerFunctionsProvider: React.FC<{
     const controller = abortControllerRef.current
 
     return () => {
-      if (controller) {
-        try {
-          controller.abort()
-        } catch (_err) {
-          // swallow error
-        }
+      try {
+        controller.abort()
+      } catch (_err) {
+        // swallow error
       }
     }
   }, [])
