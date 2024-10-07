@@ -21,34 +21,6 @@ export default buildConfigWithDefaults({
           name: 'text',
           type: 'text',
         },
-        {
-          name: 'someNumber',
-          type: 'number',
-        },
-        {
-          name: 'group',
-          type: 'group',
-          fields: [
-            {
-              name: 'text',
-              type: 'text',
-            },
-          ],
-        },
-        {
-          name: 'array',
-          type: 'array',
-          fields: [
-            {
-              name: 'text',
-              type: 'text',
-            },
-            {
-              name: 'textAdditional',
-              type: 'text',
-            },
-          ],
-        },
       ],
     },
     MediaCollection,

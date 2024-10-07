@@ -12,20 +12,23 @@ export interface Config {
   };
   collections: {
     posts: Post;
-    simple: Simple;
-    media: Media;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
+  collectionsSelect?: {
+    posts: PostsSelect<false> | PostsSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+  };
   db: {
     defaultIDType: string;
   };
-  globals: {
-    menu: Menu;
-    'custom-ts': CustomT;
-  };
+  globals: {};
+  globalsSelect?: {};
   locale: null;
   user: User & {
     collection: 'users';
@@ -56,95 +59,38 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   text?: string | null;
-  serverTextField?: string | null;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  myBlocks?:
+  number?: number | null;
+  group?: {
+    text?: string | null;
+    number?: number | null;
+  };
+  array?:
+    | {
+        text?: string | null;
+        number?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
     | (
         | {
-            test?: string | null;
+            text?: string | null;
+            introText?: string | null;
             id?: string | null;
             blockName?: string | null;
-            blockType: 'test';
+            blockType: 'intro';
           }
         | {
-            test2?: string | null;
+            text?: string | null;
+            ctaText?: string | null;
             id?: string | null;
             blockName?: string | null;
-            blockType: 'someBlock2';
+            blockType: 'cta';
           }
       )[]
     | null;
   updatedAt: string;
   createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "simple".
- */
-export interface Simple {
-  id: string;
-  text?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    medium?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    large?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -173,14 +119,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: string | Post;
-      } | null)
-    | ({
-        relationTo: 'simple';
-        value: string | Simple;
-      } | null)
-    | ({
-        relationTo: 'media';
-        value: string | Media;
       } | null)
     | ({
         relationTo: 'users';
@@ -230,36 +168,93 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "menu".
+ * via the `definition` "posts_select".
  */
-export interface Menu {
-  id: string;
-  globalText?: string | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
+export interface PostsSelect<T extends boolean = true> {
+  text?: T;
+  number?: T;
+  group?:
+    | T
+    | {
+        text?: T;
+        number?: T;
+      };
+  array?:
+    | T
+    | {
+        text?: T;
+        number?: T;
+        id?: T;
+      };
+  blocks?:
+    | T
+    | {
+        intro?:
+          | T
+          | {
+              text?: T;
+              introText?: T;
+              id?: T;
+              blockName?: T;
+            };
+        cta?:
+          | T
+          | {
+              text?: T;
+              ctaText?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-ts".
+ * via the `definition` "users_select".
  */
-export interface CustomT {
-  id: string;
-  custom?: 'hello' | 'world';
-  withDefinitionsUsage?: ObjectWithNumber[];
-  json: {
-    id: string;
-    name: string;
-    age?: number;
-  }[];
-  updatedAt?: string | null;
-  createdAt?: string | null;
+export interface UsersSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "objectWithNumber".
+ * via the `definition` "payload-locked-documents_select".
  */
-export interface ObjectWithNumber {
-  id?: number;
+export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_select".
+ */
+export interface PayloadPreferencesSelect<T extends boolean = true> {
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select".
+ */
+export interface PayloadMigrationsSelect<T extends boolean = true> {
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
