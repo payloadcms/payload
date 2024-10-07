@@ -118,13 +118,14 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
                   })
 
                   const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
+                  const target: string = node.fields.newTab ? ' target="_blank"' : ''
 
                   const href: string =
                     node.fields.linkType === 'custom'
                       ? node.fields.url
                       : (node.fields.doc?.value as string)
 
-                  return `<a href="${href}"${rel}>${childrenText}</a>`
+                  return `<a href="${href}"${target}${rel}>${childrenText}</a>`
                 },
                 nodeTypes: [LinkNode.getType()],
               } as HTMLConverter<SerializedLinkNode>,
