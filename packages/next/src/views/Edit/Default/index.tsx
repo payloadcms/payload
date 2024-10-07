@@ -79,8 +79,6 @@ export const DefaultEditView: React.FC = () => {
 
   const { refreshCookieAsync, user } = useAuth()
 
-  // const { getFormState } = useServerFunctions()
-
   const {
     config,
     config: {
@@ -96,6 +94,8 @@ export const DefaultEditView: React.FC = () => {
   const { reportUpdate } = useDocumentEvents()
   const { resetUploadEdits } = useUploadEdits()
   const { getFormState } = useServerFunctions()
+
+  const abortControllerRef = useRef(new AbortController())
 
   const locale = params.get('locale')
 
@@ -233,6 +233,17 @@ export const DefaultEditView: React.FC = () => {
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (e) {
+          // swallow error
+        }
+      }
+
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+
       const currentTime = Date.now()
       const timeSinceLastUpdate = currentTime - lastUpdateTime
 
@@ -253,6 +264,7 @@ export const DefaultEditView: React.FC = () => {
         operation,
         returnLockStatus: isLockingEnabled ? true : false,
         schemaPath,
+        signal: abortController.signal,
         updateLastEdited,
       })
 
@@ -282,6 +294,7 @@ export const DefaultEditView: React.FC = () => {
           }
         }
       }
+
       return state
     },
     [
@@ -304,6 +317,14 @@ export const DefaultEditView: React.FC = () => {
   // Clean up when the component unmounts or when the document is unlocked
   useEffect(() => {
     return () => {
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (e) {
+          // swallow error
+        }
+      }
+
       if (!isLockingEnabled) {
         return
       }
