@@ -65,6 +65,22 @@ const Duplicate: React.FC<Props> = ({ id, slug, collection }) => {
         })
         let data = await response.json()
 
+        const localizedRequiredFieldMissing = collection.fields.some((field) => {
+          if ('localized' in field && 'required' in field && 'name' in field) {
+            const isLocalized = field.localized ?? false
+            const isRequired = field.required ?? false
+            const fieldName = field.name ?? ''
+
+            return isLocalized && isRequired && !data[fieldName]
+          }
+
+          return false
+        })
+
+        if (localizedRequiredFieldMissing) {
+          return 'skip'
+        }
+
         if (typeof collection.admin.hooks?.beforeDuplicate === 'function') {
           data = await collection.admin.hooks.beforeDuplicate({
             collection,
@@ -109,12 +125,19 @@ const Duplicate: React.FC<Props> = ({ id, slug, collection }) => {
         await localization.localeCodes.reduce(async (priorLocalePatch, locale) => {
           await priorLocalePatch
           if (abort) return
+
           const localeResult = await saveDocument({
             id,
             duplicateID,
             locale,
           })
+
+          if (localeResult === 'skip') {
+            return
+          }
+
           duplicateID = localeResult || duplicateID
+
           if (duplicateID && !localeResult) {
             localeErrors.push(locale)
           }
