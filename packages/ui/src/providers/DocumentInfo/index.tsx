@@ -547,11 +547,13 @@ const DocumentInfo: React.FC<
       initialDataFromProps === undefined ||
       localeChanged
     ) {
-      if (localeChanged) {
-        prevLocale.current = locale
-      }
-
       const getInitialState = async () => {
+        if (localeChanged) {
+          prevLocale.current = locale
+        }
+
+        setData(undefined)
+        setInitialState(undefined)
         setIsError(false)
         setIsLoading(true)
 
