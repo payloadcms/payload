@@ -40,7 +40,7 @@ export const ServerFunctionsProvider: React.FC<{
       const { signal, ...rest } = args
 
       try {
-        if (!signal.aborted) {
+        if (!signal?.aborted) {
           const result = (await serverFunction({
             name: 'form-state',
             args: rest,
