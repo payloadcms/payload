@@ -1,6 +1,4 @@
 'use client'
-import type { FormState } from 'payload'
-
 import {
   ConfirmPasswordField,
   Form,
@@ -13,8 +11,8 @@ import {
 } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
+import { type FormState } from 'payload'
 import React from 'react'
-import { toast } from 'sonner'
 
 type Args = {
   readonly token: string
@@ -33,7 +31,7 @@ const initialState: FormState = {
   },
 }
 
-export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
+export const ResetPasswordForm: React.FC<Args> = ({ token }) => {
   const i18n = useTranslation()
   const {
     config: {
@@ -47,26 +45,21 @@ export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
   } = useConfig()
 
   const history = useRouter()
-
   const { fetchFullUser } = useAuth()
 
-  const onSuccess = React.useCallback(
-    async (data) => {
-      if (data.token) {
-        await fetchFullUser()
-        history.push(adminRoute)
-      } else {
-        history.push(
-          formatAdminURL({
-            adminRoute,
-            path: loginRoute,
-          }),
-        )
-        toast.success(i18n.t('general:updatedSuccessfully'))
-      }
-    },
-    [adminRoute, fetchFullUser, history, i18n, loginRoute],
-  )
+  const onSuccess = React.useCallback(async () => {
+    const user = await fetchFullUser()
+    if (user) {
+      history.push(adminRoute)
+    } else {
+      history.push(
+        formatAdminURL({
+          adminRoute,
+          path: loginRoute,
+        }),
+      )
+    }
+  }, [adminRoute, fetchFullUser, history, loginRoute])
 
   return (
     <Form
@@ -75,7 +68,7 @@ export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
       method="POST"
       onSuccess={onSuccess}
     >
-      <div className={'inputWrap'}>
+      <div className="inputWrap">
         <PasswordField
           field={{
             name: 'password',
