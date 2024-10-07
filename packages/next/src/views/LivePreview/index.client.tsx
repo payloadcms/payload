@@ -111,6 +111,8 @@ const PreviewView: React.FC<Props> = ({
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
 
+  const abortControllerRef = useRef(new AbortController())
+
   const documentLockStateRef = useRef<{
     hasShownLockedModal: boolean
     isLocked: boolean
@@ -165,6 +167,17 @@ const PreviewView: React.FC<Props> = ({
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+
       const currentTime = Date.now()
       const timeSinceLastUpdate = currentTime - lastUpdateTime
 
@@ -185,6 +198,7 @@ const PreviewView: React.FC<Props> = ({
         operation,
         returnLockStatus: isLockingEnabled ? true : false,
         schemaPath,
+        signal: abortController.signal,
         updateLastEdited,
       })
 
@@ -237,6 +251,14 @@ const PreviewView: React.FC<Props> = ({
   // Clean up when the component unmounts or when the document is unlocked
   useEffect(() => {
     return () => {
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+
       if (!isLockingEnabled) {
         return
       }

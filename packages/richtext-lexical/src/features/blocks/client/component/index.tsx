@@ -13,7 +13,7 @@ import {
   useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 const baseClass = 'lexical-block'
 import type { BlocksFieldClient, FormState } from 'payload'
@@ -39,6 +39,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const { id } = useDocumentInfo()
   const { path, schemaPath } = useFieldProps()
   const { field: parentLexicalRichTextField } = useEditorConfigContext()
+  const abortControllerRef = useRef(new AbortController())
 
   const { getFormState } = useServerFunctions()
 
@@ -59,12 +60,15 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   // Field Schema
   useEffect(() => {
+    const abortController = new AbortController()
+
     const awaitInitialState = async () => {
       const { state } = await getFormState({
         id,
         data: formData,
         operation: 'update',
         schemaPath: schemaFieldsPath,
+        signal: abortController.signal,
       })
 
       if (state) {
@@ -82,15 +86,35 @@ export const BlockComponent: React.FC<Props> = (props) => {
     if (formData) {
       void awaitInitialState()
     }
+
+    return () => {
+      try {
+        abortController.abort()
+      } catch (_err) {
+        // swallow error
+      }
+    }
   }, [getFormState, schemaFieldsPath, id]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+
       const { state: formState } = await getFormState({
         id,
         formState: prevFormState,
         operation: 'update',
         schemaPath: schemaFieldsPath,
+        signal: abortController.signal,
       })
 
       if (!formState) {
@@ -109,6 +133,19 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
     [id, schemaFieldsPath, formData.blockName, getFormState],
   )
+
+  // cleanup effect
+  useEffect(() => {
+    const abortController = abortControllerRef.current
+
+    return () => {
+      try {
+        abortController.abort()
+      } catch (_err) {
+        // swallow error
+      }
+    }
+  }, [])
 
   const classNames = [`${baseClass}__row`, `${baseClass}__row--no-errors`].filter(Boolean).join(' ')
 
