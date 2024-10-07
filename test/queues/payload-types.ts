@@ -190,6 +190,13 @@ export interface PayloadJob {
        */
       [k: string]: JobTaskStatus_1<"ExternalTask">;
     };
+    inline?: {
+      /**
+       * This interface was referenced by `undefined`'s JSON-Schema definition
+       * via the `patternProperty` "^.*$".
+       */
+      [k: string]: JobTaskStatus_1<any>;
+    };
   };
   completedAt?: string | null;
   hasError?: boolean | null;

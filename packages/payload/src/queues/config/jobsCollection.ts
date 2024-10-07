@@ -43,22 +43,35 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
   const taskStatusJsonSchema: JSONSchema4 = {
     type: 'object',
     additionalProperties: false,
-    properties: Object.fromEntries(
-      config.jobs.tasks.map((task) => [
-        task.slug,
-        {
-          type: 'object',
-          additionalProperties: false,
-          patternProperties: {
-            '^.*$': jsonSchemaExternalImport({
-              from: 'payload',
-              generics: [`"${task.slug}"`],
-              specifier: 'JobTaskStatus',
-            }),
+    properties: {
+      ...Object.fromEntries(
+        config.jobs.tasks.map((task) => [
+          task.slug,
+          {
+            type: 'object',
+            additionalProperties: false,
+            patternProperties: {
+              '^.*$': jsonSchemaExternalImport({
+                from: 'payload',
+                generics: [`"${task.slug}"`],
+                specifier: 'JobTaskStatus',
+              }),
+            },
           },
+        ]),
+      ),
+      inline: {
+        type: 'object',
+        additionalProperties: false,
+        patternProperties: {
+          '^.*$': jsonSchemaExternalImport({
+            from: 'payload',
+            generics: [`any`],
+            specifier: 'JobTaskStatus',
+          }),
         },
-      ]),
-    ),
+      },
+    },
   }
 
   const jobsCollection: CollectionConfig = {
