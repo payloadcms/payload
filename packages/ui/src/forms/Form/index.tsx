@@ -26,9 +26,9 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
-import { getFormStateFetch } from '../../utilities/getFormStateFetch.js'
 import {
   FormContext,
   FormFieldsContext,
@@ -78,6 +78,8 @@ export const Form: React.FC<FormProps> = (props) => {
   const { i18n, t } = useTranslation()
   const { refreshCookie, user } = useAuth()
   const operation = useOperation()
+
+  const { getFormState } = useServerFunctions()
 
   const {
     config,
@@ -452,24 +454,20 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const reset = useCallback(
     async (data: unknown) => {
-      const { state: newState } = await getFormStateFetch({
-        apiRoute: api,
-        body: {
-          id,
-          collectionSlug,
-          data,
-          globalSlug,
-          operation,
-          schemaPath: collectionSlug || globalSlug,
-        },
-        serverURL,
+      const { state: newState } = await getFormState({
+        id,
+        collectionSlug,
+        data,
+        globalSlug,
+        operation,
+        schemaPath: collectionSlug || globalSlug,
       })
 
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state: newState })
     },
-    [collectionSlug, dispatchFields, globalSlug, id, operation, api, serverURL],
+    [collectionSlug, dispatchFields, globalSlug, id, operation, getFormState],
   )
 
   const replaceState = useCallback(
@@ -483,20 +481,16 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const getFieldStateBySchemaPath = useCallback(
     async ({ data, schemaPath }) => {
-      const { state: fieldSchema } = await getFormStateFetch({
-        apiRoute: api,
-        body: {
-          collectionSlug,
-          data,
-          globalSlug,
-          schemaPath,
-        },
-        serverURL,
+      const { state: fieldSchema } = await getFormState({
+        collectionSlug,
+        data,
+        globalSlug,
+        schemaPath,
       })
 
       return fieldSchema
     },
-    [collectionSlug, globalSlug, serverURL, api],
+    [collectionSlug, globalSlug, getFormState],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(

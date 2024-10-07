@@ -4,12 +4,10 @@ import type { ClientField, FormState } from 'payload'
 import {
   Form,
   FormSubmit,
-  getFormStateFetch,
   RenderFields,
-  useConfig,
   useDocumentInfo,
   useFieldProps,
-  // useServerFunctions,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -37,14 +35,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     field: { richTextComponentMap },
   } = useEditorConfigContext()
 
-  const {
-    config: {
-      routes: { api: apiRoute },
-      serverURL,
-    },
-  } = useConfig()
-
-  // const { getFormState } = useServerFunctions()
+  const { getFormState } = useServerFunctions()
 
   const componentMapRenderedFieldsPath = `lexical_internal_feature.${featureKey}.fields${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
   const schemaFieldsPath =
@@ -56,39 +47,35 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const { state } = await getFormStateFetch({
-        apiRoute,
-        body: {
-          id,
-          data: data ?? {},
-          operation: 'update',
-          schemaPath: schemaFieldsPath,
-        },
-        serverURL,
+      const { state } = await getFormState({
+        id,
+        data: data ?? {},
+        operation: 'update',
+        schemaPath: schemaFieldsPath,
       })
 
       setInitialState(state)
     }
 
     void awaitInitialState()
-  }, [schemaFieldsPath, id, data, apiRoute, serverURL])
+  }, [schemaFieldsPath, id, data, getFormState])
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = await getFormStateFetch({
-        apiRoute,
-        body: {
-          id,
-          formState: prevFormState,
-          operation: 'update',
-          schemaPath: schemaFieldsPath,
-        },
-        serverURL,
+      const { state } = await getFormState({
+        id,
+        formState: prevFormState,
+        operation: 'update',
+        schemaPath: schemaFieldsPath,
       })
+
+      if (!state) {
+        return prevFormState
+      }
 
       return state
     },
-    [schemaFieldsPath, id, apiRoute, serverURL],
+    [schemaFieldsPath, id, getFormState],
   )
 
   if (initialState === false) {
