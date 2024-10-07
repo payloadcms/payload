@@ -75,6 +75,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
+      // only allow a single onChange event to process at a time
       if (abortControllerRef.current) {
         try {
           abortControllerRef.current.abort()

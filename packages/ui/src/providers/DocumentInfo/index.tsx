@@ -488,6 +488,7 @@ const DocumentInfo: React.FC<
 
   const onSave = React.useCallback<DocumentInfoContext['onSave']>(
     async (json) => {
+      // only allow a single onSave event to process at a time
       if (abortControllerRef.current) {
         try {
           abortControllerRef.current.abort()
@@ -660,21 +661,6 @@ const DocumentInfo: React.FC<
     hasSavePermission,
     hasPublishPermission,
   ])
-
-  // clean on unmount
-  useEffect(() => {
-    const re1 = abortControllerRef.current
-
-    return () => {
-      if (re1) {
-        try {
-          re1.abort()
-        } catch (_err) {
-          // swallow error
-        }
-      }
-    }
-  }, [])
 
   const action: string = React.useMemo(() => {
     const docURL = `${baseURL}${pluralType === 'globals' ? `/globals` : ''}/${slug}${id ? `/${id}` : ''}`

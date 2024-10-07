@@ -98,6 +98,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
+      // only allow a single onChange event to process at a time
       if (abortControllerRef.current) {
         try {
           abortControllerRef.current.abort()
