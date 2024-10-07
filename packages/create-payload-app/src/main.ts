@@ -133,7 +133,7 @@ export class Main {
         ? path.dirname(nextConfigPath)
         : path.resolve(process.cwd(), slugify(projectName))
 
-      const packageManager = getPackageManager({ cliArgs: this.args, projectDir })
+      const packageManager = await getPackageManager({ cliArgs: this.args, projectDir })
 
       if (nextConfigPath) {
         p.log.step(

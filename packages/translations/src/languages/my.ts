@@ -188,7 +188,7 @@ export const myTranslations: DefaultTranslationsObject = {
     cancel: 'မလုပ်တော့ပါ။',
     changesNotSaved:
       'သင်၏ပြောင်းလဲမှုများကို မသိမ်းဆည်းရသေးပါ။ ယခု စာမျက်နှာက ထွက်လိုက်ပါက သင်၏ပြောင်းလဲမှုများ အကုန် ဆုံးရှုံးသွားပါမည်။ အကုန်နော်။',
-    clearAll: 'အားလုံးကို ရှင်းလင်းပါ',
+    clearAll: 'အားလုံးကိုရှင်းလင်းပါ',
     close: 'ပိတ်',
     collapse: 'ခေါက်သိမ်းပါ။',
     collections: 'စုစည်းမှူများ',
@@ -428,8 +428,8 @@ export const myTranslations: DefaultTranslationsObject = {
     problemRestoringVersion: 'ဤဗားရှင်းကို ပြန်လည်ရယူရာတွင် ပြဿနာရှိနေသည်။',
     publish: 'ထုတ်ဝေသည်။',
     publishChanges: 'အပြောင်းအလဲများကို တင်ခဲ့သည်။',
-    publishIn: 'Terbitkan di {{locale}}',
     published: 'တင်ပြီးပြီ။',
+    publishIn: 'Terbitkan di {{locale}}',
     publishing: 'ထုတ်ဝေခြင်း',
     restoreAsDraft: 'Pulihkan sebagai draf',
     restoredSuccessfully: 'အောင်မြင်စွာ ပြန်လည်ရယူခဲ့သည်။',

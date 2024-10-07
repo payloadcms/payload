@@ -21,6 +21,7 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    theme: 'dark',
   },
   cors: ['http://localhost:3000', 'http://localhost:3001'],
   globals: [MenuGlobal],

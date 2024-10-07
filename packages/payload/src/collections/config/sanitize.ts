@@ -1,6 +1,6 @@
 import type { LoginWithUsernameOptions } from '../../auth/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
-import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
+import type { CollectionConfig, SanitizedCollectionConfig, SanitizedJoins } from './types.js'
 
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
@@ -36,12 +36,15 @@ export const sanitizeCollection = async (
   // /////////////////////////////////
 
   const validRelationships = config.collections.map((c) => c.slug) || []
+  const joins: SanitizedJoins = {}
   sanitized.fields = await sanitizeFields({
     collectionConfig: sanitized,
     config,
     fields: sanitized.fields,
+    joins,
     parentIsLocalized: false,
     richTextSanitizationPromises,
+    schemaPath: '',
     validRelationships,
   })
 
@@ -127,9 +130,6 @@ export const sanitizeCollection = async (
     // sanitize fields for reserved names
     sanitizeUploadFields(sanitized.fields, sanitized)
 
-    // disable duplicate for uploads by default
-    sanitized.disableDuplicate = sanitized.disableDuplicate || true
-
     sanitized.upload.bulkUpload = sanitized.upload?.bulkUpload ?? true
     sanitized.upload.staticDir = sanitized.upload.staticDir || sanitized.slug
     sanitized.admin.useAsTitle =
@@ -159,7 +159,7 @@ export const sanitizeCollection = async (
     }
 
     // disable duplicate for auth enabled collections by default
-    sanitized.disableDuplicate = sanitized.disableDuplicate || true
+    sanitized.disableDuplicate = sanitized.disableDuplicate ?? true
 
     if (!sanitized.auth.strategies) {
       sanitized.auth.strategies = []
@@ -193,5 +193,9 @@ export const sanitizeCollection = async (
 
   validateUseAsTitle(sanitized)
 
-  return sanitized as SanitizedCollectionConfig
+  const sanitizedConfig = sanitized as SanitizedCollectionConfig
+
+  sanitizedConfig.joins = joins
+
+  return sanitizedConfig
 }

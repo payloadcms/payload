@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-postgres",
-  "version": "3.0.0-beta.107",
+  "version": "3.0.0-beta.111",
   "description": "The officially supported Postgres database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -48,6 +48,7 @@
   },
   "dependencies": {
     "@payloadcms/drizzle": "workspace:*",
+    "@types/pg": "8.10.2",
     "console-table-printer": "2.11.2",
     "drizzle-kit": "0.23.2-df9e596",
     "drizzle-orm": "0.32.1",
@@ -59,7 +60,6 @@
   "devDependencies": {
     "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/pg": "8.10.2",
     "@types/to-snake-case": "1.0.0",
     "esbuild": "0.23.1",
     "payload": "workspace:*"

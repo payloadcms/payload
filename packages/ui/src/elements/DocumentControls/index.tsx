@@ -245,7 +245,7 @@ export const DocumentControls: React.FC<{
               <Button
                 buttonStyle="secondary"
                 id="take-over"
-                onClick={() => void onTakeOver()}
+                onClick={onTakeOver}
                 size="medium"
                 type="button"
               >
@@ -253,7 +253,7 @@ export const DocumentControls: React.FC<{
               </Button>
             )}
           </div>
-          {showDotMenu && (
+          {showDotMenu && !readOnlyForIncomingUser && (
             <Popup
               button={
                 <div className={`${baseClass}__dots`}>
@@ -289,7 +289,7 @@ export const DocumentControls: React.FC<{
                         )}
                       </Fragment>
                     )}
-                    {!collectionConfig.disableDuplicate && isEditing && (
+                    {collectionConfig.disableDuplicate !== true && isEditing && (
                       <DuplicateDocument
                         id={id.toString()}
                         onDuplicate={onDuplicate}

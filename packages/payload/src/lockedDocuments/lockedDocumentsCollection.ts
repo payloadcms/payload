@@ -15,16 +15,14 @@ export const getLockedDocumentsCollection = (config: Config): CollectionConfig =
       relationTo: [...config.collections.map((collectionConfig) => collectionConfig.slug)],
     },
     {
-      name: 'editedAt',
-      type: 'date',
-    },
-    {
       name: 'globalSlug',
       type: 'text',
+      index: true,
     },
     {
       name: 'user',
       type: 'relationship',
+      maxDepth: 1,
       relationTo: config.collections
         .filter((collectionConfig) => collectionConfig.auth)
         .map((collectionConfig) => collectionConfig.slug),

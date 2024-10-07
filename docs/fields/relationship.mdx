@@ -90,6 +90,7 @@ The Relationship Field inherits all of the default options from the base [Field 
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | **`isSortable`**               | Set to `true` if you'd like this field to be sortable within the Admin UI using drag and drop (only works when `hasMany` is set to `true`). |
 | **`allowCreate`**              | Set to `false` if you'd like to disable the ability to create new documents from within the relationship field.                             |
+| **`allowEdit`**              | Set to `false` if you'd like to disable the ability to edit documents from within the relationship field.                             |
 | **`sortOptions`**              | Define a default sorting order for the options within a Relationship field's dropdown. [More](#sortOptions)                                |
 
 ### Sort Options
@@ -196,6 +197,12 @@ You can learn more about writing queries [here](/docs/queries/overview).
   unless you call the default relationship field validation function imported from{' '}
   <strong>payload/shared</strong> in your validate function.
 </Banner>
+
+## Bi-directional relationships
+
+The `relationship` field on its own is used to define relationships for the document that contains the relationship field, and this can be considered as a "one-way" relationship. For example, if you have a Post that has a `category` relationship field on it, the related `category` itself will not surface any information about the posts that have the category set.
+
+However, the `relationship` field can be used in conjunction with the `Join` field to produce powerful bi-directional relationship authoring capabilities. If you're interested in bi-directional relationships, check out the [documentation for the Join field](./join).
 
 ## How the data is saved
 

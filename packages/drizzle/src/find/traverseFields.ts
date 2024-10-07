@@ -1,10 +1,14 @@
-import type { Field } from 'payload'
+import type { DBQueryConfig } from 'drizzle-orm'
+import type { Field, JoinQuery } from 'payload'
 
 import { fieldAffectsData, fieldIsVirtual, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
-import type { DrizzleAdapter } from '../types.js'
+import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
+
+import { buildOrderBy } from '../queries/buildOrderBy.js'
+import buildQuery from '../queries/buildQuery.js'
 
 type TraverseFieldArgs = {
   _locales: Result
@@ -13,6 +17,9 @@ type TraverseFieldArgs = {
   currentTableName: string
   depth?: number
   fields: Field[]
+  joinQuery: JoinQuery
+  joins?: BuildQueryJoinAliases
+  locale?: string
   path: string
   tablePath: string
   topLevelArgs: Record<string, unknown>
@@ -26,6 +33,9 @@ export const traverseFields = ({
   currentTableName,
   depth,
   fields,
+  joinQuery = {},
+  joins,
+  locale,
   path,
   tablePath,
   topLevelArgs,
@@ -58,6 +68,8 @@ export const traverseFields = ({
         currentTableName,
         depth,
         fields: field.fields,
+        joinQuery,
+        joins,
         path,
         tablePath,
         topLevelArgs,
@@ -79,6 +91,8 @@ export const traverseFields = ({
           currentTableName,
           depth,
           fields: tab.fields,
+          joinQuery,
+          joins,
           path: tabPath,
           tablePath: tabTablePath,
           topLevelArgs,
@@ -124,6 +138,7 @@ export const traverseFields = ({
             currentTableName: arrayTableName,
             depth,
             fields: field.fields,
+            joinQuery,
             path: '',
             tablePath: '',
             topLevelArgs,
@@ -181,6 +196,7 @@ export const traverseFields = ({
                 currentTableName: tableName,
                 depth,
                 fields: block.fields,
+                joinQuery,
                 path: '',
                 tablePath: '',
                 topLevelArgs,
@@ -199,12 +215,75 @@ export const traverseFields = ({
             currentTableName,
             depth,
             fields: field.fields,
+            joinQuery,
+            joins,
             path: `${path}${field.name}_`,
             tablePath: `${tablePath}${toSnakeCase(field.name)}_`,
             topLevelArgs,
             topLevelTableName,
           })
 
+          break
+        }
+
+        case 'join': {
+          // when `joinsQuery` is false, do not join
+          if (joinQuery === false) {
+            break
+          }
+          const {
+            limit: limitArg = 10,
+            sort,
+            where,
+          } = joinQuery[`${path.replaceAll('_', '.')}${field.name}`] || {}
+          let limit = limitArg
+          if (limit !== 0) {
+            // get an additional document and slice it later to determine if there is a next page
+            limit += 1
+          }
+          const fields = adapter.payload.collections[field.collection].config.fields
+          const joinTableName = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${
+            field.localized && adapter.payload.config.localization ? adapter.localesSuffix : ''
+          }`
+          const selectFields = {}
+
+          const orderBy = buildOrderBy({
+            adapter,
+            fields,
+            joins: [],
+            locale,
+            selectFields,
+            sort,
+            tableName: joinTableName,
+          })
+          const withJoin: DBQueryConfig<'many', true, any, any> = {
+            columns: selectFields,
+            orderBy: () => [orderBy.order(orderBy.column)],
+          }
+          if (limit) {
+            withJoin.limit = limit
+          }
+
+          if (field.localized) {
+            withJoin.columns._locale = true
+            withJoin.columns._parentID = true
+          } else {
+            withJoin.columns.id = true
+          }
+
+          if (where) {
+            const { where: joinWhere } = buildQuery({
+              adapter,
+              fields,
+              joins,
+              locale,
+              sort,
+              tableName: joinTableName,
+              where,
+            })
+            withJoin.where = () => joinWhere
+          }
+          currentArgs.with[`${path.replaceAll('.', '_')}${field.name}`] = withJoin
           break
         }
 

@@ -27,7 +27,7 @@ import { TableColumnsProvider } from '../TableColumns/index.js'
 import { ViewDescription } from '../ViewDescription/index.js'
 import { baseClass } from './index.js'
 
-const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
+export const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
   if ('and' in where) {
     where.and.push(queryParams)
   } else if ('or' in where) {
@@ -44,6 +44,7 @@ const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
 }
 
 export const ListDrawerContent: React.FC<ListDrawerProps> = ({
+  allowCreate = true,
   collectionSlugs,
   customHeader,
   drawerSlug,
@@ -135,7 +136,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   }, [selectedOption, enabledCollectionConfigs])
 
   const collectionPermissions = permissions?.collections?.[selectedCollectionConfig?.slug]
-  const hasCreatePermission = collectionPermissions?.create?.permission
+  const hasCreatePermission = collectionPermissions?.create?.permission && allowCreate
 
   // If modal is open, get active page of upload gallery
   const isOpen = isModalOpen(drawerSlug)

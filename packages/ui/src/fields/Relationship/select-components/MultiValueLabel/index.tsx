@@ -24,7 +24,7 @@ export const MultiValueLabel: React.FC<
   } & MultiValueProps<Option>
 > = (props) => {
   const {
-    data: { label, relationTo, value },
+    data: { allowEdit, label, relationTo, value },
     selectProps: { customProps: { draggableProps, onDocumentDrawerOpen } = {} } = {},
   } = props
 
@@ -44,7 +44,7 @@ export const MultiValueLabel: React.FC<
           }}
         />
       </div>
-      {relationTo && hasReadPermission && (
+      {relationTo && hasReadPermission && allowEdit !== false && (
         <Fragment>
           <button
             aria-label={`Edit ${label}`}

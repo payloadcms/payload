@@ -10,6 +10,7 @@ import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { isFieldRTL } from '../shared/index.js'
 import './index.scss'
@@ -42,7 +43,6 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
       required,
     },
     labelProps,
-    locale,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
@@ -50,6 +50,7 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n } = useTranslation()
+  const locale = useLocale()
 
   const {
     config: { localization },

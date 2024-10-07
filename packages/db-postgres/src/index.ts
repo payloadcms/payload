@@ -47,7 +47,7 @@ import {
   requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
-import { createDatabaseAdapter } from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
 
 import type { Args, PostgresAdapter } from './types.js'
 
@@ -76,6 +76,8 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
 
     return createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
+      afterSchemaInit: args.afterSchemaInit ?? [],
+      beforeSchemaInit: args.beforeSchemaInit ?? [],
       defaultDrizzleSnapshot,
       drizzle: undefined,
       enums: {},
@@ -105,7 +107,8 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       versionsSuffix: args.versionsSuffix || '_v',
 
       // DatabaseAdapter
-      beginTransaction: args.transactionOptions === false ? undefined : beginTransaction,
+      beginTransaction:
+        args.transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
       commitTransaction,
       connect,
       convertPathToJSONTraversal,
@@ -150,6 +153,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       updateGlobalVersion,
       updateOne,
       updateVersion,
+      upsert: updateOne,
     })
   }
 

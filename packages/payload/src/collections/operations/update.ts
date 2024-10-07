@@ -41,6 +41,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   disableVerificationEmail?: boolean
   draft?: boolean
   overrideAccess?: boolean
+  overrideLock?: boolean
   overwriteExistingFiles?: boolean
   req: PayloadRequest
   showHiddenFields?: boolean
@@ -78,6 +79,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
       depth,
       draft: draftArg = false,
       overrideAccess,
+      overrideLock,
       overwriteExistingFiles = false,
       req: {
         fallbackLocale,
@@ -186,6 +188,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
           id,
           collectionSlug: collectionConfig.slug,
           lockErrorMessage: `Document with ID ${id} is currently locked by another user and cannot be updated.`,
+          overrideLock,
           req,
         })
 

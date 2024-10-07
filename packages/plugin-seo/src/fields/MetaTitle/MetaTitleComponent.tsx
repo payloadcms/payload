@@ -6,6 +6,7 @@ import type { TextFieldClientProps } from 'payload'
 import {
   FieldLabel,
   TextInput,
+  useConfig,
   useDocumentInfo,
   useField,
   useFieldProps,
@@ -37,12 +38,19 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
       label,
       required,
     },
+    field: fieldFromProps,
     hasGenerateTitleFn,
     labelProps,
   } = props || {}
   const { path: pathFromContext } = useFieldProps()
-
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
+
+  const {
+    config: {
+      routes: { api },
+      serverURL,
+    },
+  } = useConfig()
 
   const field: FieldType<string> = useField({
     path: pathFromContext,
@@ -59,7 +67,9 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
       return
     }
 
-    const genTitleResponse = await fetch('/api/plugin-seo/generate-title', {
+    const endpoint = `${serverURL}${api}/plugin-seo/generate-title`
+
+    const genTitleResponse = await fetch(endpoint, {
       body: JSON.stringify({
         id: docInfo.id,
         collectionSlug: docInfo.collectionSlug,
@@ -83,7 +93,23 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
     const { result: generatedTitle } = await genTitleResponse.json()
 
     setValue(generatedTitle || '')
-  }, [hasGenerateTitleFn, docInfo, getData, locale, setValue])
+  }, [
+    hasGenerateTitleFn,
+    serverURL,
+    api,
+    docInfo.id,
+    docInfo.collectionSlug,
+    docInfo.docPermissions,
+    docInfo.globalSlug,
+    docInfo.hasPublishPermission,
+    docInfo.hasSavePermission,
+    docInfo.initialData,
+    docInfo.initialState,
+    docInfo.title,
+    getData,
+    locale,
+    setValue,
+  ])
 
   return (
     <div
@@ -98,7 +124,13 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel field={null} Label={Label} label={label} {...(labelProps || {})} />
+          <FieldLabel
+            field={fieldFromProps}
+            Label={Label}
+            label={label}
+            required={required}
+            {...(labelProps || {})}
+          />
           {hasGenerateTitleFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
@@ -150,7 +182,6 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
             Component: null,
             RenderedComponent: errorMessage,
           }}
-          label={label}
           onChange={setValue}
           path={pathFromContext}
           required={required}

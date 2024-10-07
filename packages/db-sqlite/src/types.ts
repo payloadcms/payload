@@ -1,5 +1,5 @@
 import type { Client, Config, ResultSet } from '@libsql/client'
-import type { Operators } from '@payloadcms/drizzle'
+import type { extendDrizzleTable, Operators } from '@payloadcms/drizzle'
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { DrizzleConfig, Relation, Relations, SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
@@ -12,7 +12,31 @@ import type {
 import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 import type { Payload, PayloadRequest } from 'payload'
 
+type SQLiteSchema = {
+  relations: Record<string, GenericRelation>
+  tables: Record<string, SQLiteTableWithColumns<any>>
+}
+
+type SQLiteSchemaHookArgs = {
+  extendTable: typeof extendDrizzleTable
+  schema: SQLiteSchema
+}
+
+export type SQLiteSchemaHook = (args: SQLiteSchemaHookArgs) => Promise<SQLiteSchema> | SQLiteSchema
+
 export type Args = {
+  /**
+   * Transform the schema after it's built.
+   * You can use it to customize the schema with features that aren't supported by Payload.
+   * Examples may include: composite indices, generated columns, vectors
+   */
+  afterSchemaInit?: SQLiteSchemaHook[]
+  /**
+   * Transform the schema before it's built.
+   * You can use it to preserve an existing database schema and if there are any collissions Payload will override them.
+   * To generate Drizzle schema from the database, see [Drizzle Kit introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
+   */
+  beforeSchemaInit?: SQLiteSchemaHook[]
   client: Config
   idType?: 'serial' | 'uuid'
   localesSuffix?: string
@@ -86,6 +110,8 @@ type SQLiteDrizzleAdapter = Omit<
 >
 
 export type SQLiteAdapter = {
+  afterSchemaInit: SQLiteSchemaHook[]
+  beforeSchemaInit: SQLiteSchemaHook[]
   client: Client
   clientConfig: Args['client']
   countDistinct: CountDistinct
@@ -127,11 +153,11 @@ export type IDType = 'integer' | 'numeric' | 'text'
 
 export type MigrateUpArgs = {
   payload: Payload
-  req?: Partial<PayloadRequest>
+  req: PayloadRequest
 }
 export type MigrateDownArgs = {
   payload: Payload
-  req?: Partial<PayloadRequest>
+  req: PayloadRequest
 }
 
 declare module 'payload' {

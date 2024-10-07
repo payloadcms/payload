@@ -39,7 +39,7 @@ export const useDocumentInfo = (): DocumentInfoContext => useContext(Context)
 
 const DocumentInfo: React.FC<
   {
-    children: React.ReactNode
+    readonly children: React.ReactNode
   } & DocumentInfoProps
 > = ({ children, ...props }) => {
   const {
@@ -193,7 +193,6 @@ const DocumentInfo: React.FC<
           // Send a patch request to update the _lastEdited info
           await requests.patch(`${serverURL}${api}/payload-locked-documents/${lockId}`, {
             body: JSON.stringify({
-              editedAt: new Date(),
               user: { relationTo: user?.collection, value: user?.id },
             }),
             headers: {
@@ -341,18 +340,9 @@ const DocumentInfo: React.FC<
               and: [
                 ...versionParams.where.and,
                 {
-                  or: [
-                    {
-                      updatedAt: {
-                        greater_than: publishedJSON.updatedAt,
-                      },
-                    },
-                    {
-                      latest: {
-                        equals: true,
-                      },
-                    },
-                  ],
+                  updatedAt: {
+                    greater_than: publishedJSON.updatedAt,
+                  },
                 },
               ],
             },
@@ -399,7 +389,10 @@ const DocumentInfo: React.FC<
 
         if (docAccessURL) {
           const res = await fetch(`${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`, {
-            body: JSON.stringify(data),
+            body: JSON.stringify({
+              ...(data || {}),
+              _status: 'draft',
+            }),
             credentials: 'include',
             headers: {
               'Accept-Language': i18n.language,

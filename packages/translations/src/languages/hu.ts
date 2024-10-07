@@ -188,7 +188,7 @@ export const huTranslations: DefaultTranslationsObject = {
     cancel: 'Mégsem',
     changesNotSaved:
       'A módosítások nem lettek mentve. Ha most távozik, elveszíti a változtatásokat.',
-    clearAll: 'Töröl Mindent',
+    clearAll: 'Törölj mindent',
     close: 'Bezárás',
     collapse: 'Összecsukás',
     collections: 'Gyűjtemények',
@@ -425,8 +425,8 @@ export const huTranslations: DefaultTranslationsObject = {
     problemRestoringVersion: 'Hiba történt a verzió visszaállításakor',
     publish: 'Közzététel',
     publishChanges: 'Módosítások közzététele',
-    publishIn: 'Közzététel ebben a {{locale}} területkódban',
     published: 'Közzétett',
+    publishIn: 'Közzététel ebben a {{locale}} területkódban',
     publishing: 'Közzététel',
     restoreAsDraft: 'Visszaállítás piszkozatként',
     restoredSuccessfully: 'Sikeresen visszaállítva.',

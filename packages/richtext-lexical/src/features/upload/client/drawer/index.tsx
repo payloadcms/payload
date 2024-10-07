@@ -24,6 +24,7 @@ const insertUpload = ({
 }) => {
   if (!replaceNodeKey) {
     editor.dispatchCommand(INSERT_UPLOAD_COMMAND, {
+      // @ts-expect-error - TODO: fix this
       fields: null,
       relationTo,
       value,
@@ -35,6 +36,7 @@ const insertUpload = ({
         node.replace(
           $createUploadNode({
             data: {
+              // @ts-expect-error - TODO: fix this
               fields: null,
               relationTo,
               value,

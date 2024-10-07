@@ -17,7 +17,13 @@ import {
   useEditDepth,
   useUploadEdits,
 } from '@payloadcms/ui'
-import { formatAdminURL, getFormState } from '@payloadcms/ui/shared'
+import {
+  formatAdminURL,
+  getFormState,
+  handleBackToDashboard,
+  handleGoBack,
+  handleTakeOver,
+} from '@payloadcms/ui/shared'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
@@ -107,10 +113,19 @@ export const DefaultEditView: React.FC = () => {
 
   const isLockingEnabled = lockDocumentsProp !== false
 
-  const preventLeaveWithoutSaving =
-    (!(collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
-      !(globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)) &&
-    !disableLeaveWithoutSaving
+  let preventLeaveWithoutSaving = true
+
+  if (collectionConfig) {
+    preventLeaveWithoutSaving = !(
+      collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave
+    )
+  } else if (globalConfig) {
+    preventLeaveWithoutSaving = !(
+      globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave
+    )
+  } else if (typeof disableLeaveWithoutSaving !== 'undefined') {
+    preventLeaveWithoutSaving = !disableLeaveWithoutSaving
+  }
 
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
@@ -150,89 +165,6 @@ export const DefaultEditView: React.FC = () => {
 
     return false
   })
-
-  const handleTakeOver = useCallback(() => {
-    if (!isLockingEnabled) {
-      return
-    }
-
-    try {
-      // Call updateDocumentEditor to update the document's owner to the current user
-      void updateDocumentEditor(id, collectionSlug ?? globalSlug, user)
-
-      documentLockStateRef.current.hasShownLockedModal = true
-
-      // Update the locked state to reflect the current user as the owner
-      documentLockStateRef.current = {
-        hasShownLockedModal: documentLockStateRef.current?.hasShownLockedModal,
-        isLocked: true,
-        user,
-      }
-      setCurrentEditor(user)
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error during document takeover:', error)
-    }
-  }, [
-    updateDocumentEditor,
-    id,
-    collectionSlug,
-    globalSlug,
-    user,
-    setCurrentEditor,
-    isLockingEnabled,
-  ])
-
-  const handleTakeOverWithinDoc = useCallback(() => {
-    if (!isLockingEnabled) {
-      return
-    }
-
-    try {
-      // Call updateDocumentEditor to update the document's owner to the current user
-      void updateDocumentEditor(id, collectionSlug ?? globalSlug, user)
-
-      // Update the locked state to reflect the current user as the owner
-      documentLockStateRef.current = {
-        hasShownLockedModal: documentLockStateRef.current?.hasShownLockedModal,
-        isLocked: true,
-        user,
-      }
-      setCurrentEditor(user)
-
-      // Ensure the document is editable for the incoming user
-      setIsReadOnlyForIncomingUser(false)
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error during document takeover:', error)
-    }
-  }, [
-    updateDocumentEditor,
-    id,
-    collectionSlug,
-    globalSlug,
-    user,
-    setCurrentEditor,
-    isLockingEnabled,
-  ])
-
-  const handleGoBack = useCallback(() => {
-    const redirectRoute = formatAdminURL({
-      adminRoute,
-      path: collectionSlug ? `/collections/${collectionSlug}` : '/',
-    })
-    router.push(redirectRoute)
-  }, [adminRoute, collectionSlug, router])
-
-  const handleBackToDashboard = useCallback(() => {
-    setShowTakeOverModal(false)
-    const redirectRoute = formatAdminURL({
-      adminRoute,
-      path: '/',
-    })
-
-    router.push(redirectRoute)
-  }, [adminRoute, router])
 
   const onSave = useCallback(
     (json) => {
@@ -373,9 +305,21 @@ export const DefaultEditView: React.FC = () => {
         return
       }
 
-      if ((id || globalSlug) && documentIsLocked) {
+      const currentPath = window.location.pathname
+
+      const documentId = id || globalSlug
+
+      // Routes where we do NOT want to unlock the document
+      const stayWithinDocumentPaths = ['preview', 'api', 'versions']
+
+      const isStayingWithinDocument = stayWithinDocumentPaths.some((path) =>
+        currentPath.includes(path),
+      )
+
+      // Unlock the document only if we're actually navigating away from the document
+      if (documentId && documentIsLocked && !isStayingWithinDocument) {
         // Check if this user is still the current editor
-        if (documentLockStateRef.current?.user?.id === user.id) {
+        if (documentLockStateRef.current?.user?.id === user?.id) {
           void unlockDocument(id, collectionSlug ?? globalSlug)
           setDocumentIsLocked(false)
           setCurrentEditor(null)
@@ -389,7 +333,7 @@ export const DefaultEditView: React.FC = () => {
     globalSlug,
     id,
     unlockDocument,
-    user.id,
+    user,
     setCurrentEditor,
     isLockingEnabled,
     documentIsLocked,
@@ -421,20 +365,32 @@ export const DefaultEditView: React.FC = () => {
           {BeforeDocument}
           {isLockingEnabled && shouldShowDocumentLockedModal && !isReadOnlyForIncomingUser && (
             <DocumentLocked
-              editedAt={lastUpdateTime}
-              handleGoBack={handleGoBack}
+              handleGoBack={() => handleGoBack({ adminRoute, collectionSlug, router })}
               isActive={shouldShowDocumentLockedModal}
               onReadOnly={() => {
                 setIsReadOnlyForIncomingUser(true)
                 setShowTakeOverModal(false)
               }}
-              onTakeOver={handleTakeOver}
+              onTakeOver={() =>
+                handleTakeOver(
+                  id,
+                  collectionSlug,
+                  globalSlug,
+                  user,
+                  false,
+                  updateDocumentEditor,
+                  setCurrentEditor,
+                  documentLockStateRef,
+                  isLockingEnabled,
+                )
+              }
+              updatedAt={lastUpdateTime}
               user={currentEditor}
             />
           )}
           {isLockingEnabled && showTakeOverModal && (
             <DocumentTakeOver
-              handleBackToDashboard={handleBackToDashboard}
+              handleBackToDashboard={() => handleBackToDashboard({ adminRoute, router })}
               isActive={showTakeOverModal}
               onReadOnly={() => {
                 setIsReadOnlyForIncomingUser(true)
@@ -469,7 +425,20 @@ export const DefaultEditView: React.FC = () => {
             onDrawerCreate={onDrawerCreate}
             onDuplicate={onDuplicate}
             onSave={onSave}
-            onTakeOver={handleTakeOverWithinDoc}
+            onTakeOver={() =>
+              handleTakeOver(
+                id,
+                collectionSlug,
+                globalSlug,
+                user,
+                true,
+                updateDocumentEditor,
+                setCurrentEditor,
+                documentLockStateRef,
+                isLockingEnabled,
+                setIsReadOnlyForIncomingUser,
+              )
+            }
             permissions={docPermissions}
             readOnlyForIncomingUser={isReadOnlyForIncomingUser}
             redirectAfterDelete={redirectAfterDelete}
@@ -494,6 +463,7 @@ export const DefaultEditView: React.FC = () => {
                       requirePassword={!id}
                       setSchemaPath={setSchemaPath}
                       setValidateBeforeSubmit={setValidateBeforeSubmit}
+                      // eslint-disable-next-line react-compiler/react-compiler
                       useAPIKey={auth.useAPIKey}
                       username={data?.username}
                       verify={auth.verify}

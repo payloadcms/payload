@@ -130,6 +130,19 @@ export type {
 export type { HiddenFieldProps } from './fields/Hidden.js'
 
 export type {
+  JoinFieldClientComponent,
+  JoinFieldClientProps,
+  JoinFieldDescriptionClientComponent,
+  JoinFieldDescriptionServerComponent,
+  JoinFieldErrorClientComponent,
+  JoinFieldErrorServerComponent,
+  JoinFieldLabelClientComponent,
+  JoinFieldLabelServerComponent,
+  JoinFieldServerComponent,
+  JoinFieldServerProps,
+} from './fields/Join.js'
+
+export type {
   JSONFieldClientComponent,
   JSONFieldClientProps,
   JSONFieldDescriptionClientComponent,

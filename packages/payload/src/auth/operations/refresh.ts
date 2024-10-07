@@ -76,6 +76,10 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       req: args.req,
     })
 
+    if (user) {
+      user.collection = args.req.user.collection
+    }
+
     let result: Result
 
     // /////////////////////////////////////

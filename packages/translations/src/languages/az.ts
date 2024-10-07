@@ -186,7 +186,7 @@ export const azTranslations: DefaultTranslationsObject = {
     cancel: 'Ləğv et',
     changesNotSaved:
       'Dəyişiklikləriniz saxlanılmayıb. İndi çıxsanız, dəyişikliklərinizi itirəcəksiniz.',
-    clearAll: 'Hamısını Təmizlə',
+    clearAll: 'Hamısını təmizlə',
     close: 'Bağla',
     collapse: 'Bağla',
     collections: 'Kolleksiyalar',
@@ -422,8 +422,8 @@ export const azTranslations: DefaultTranslationsObject = {
     problemRestoringVersion: 'Bu versiyanın bərpasında problem yaşandı',
     publish: 'Dərc et',
     publishChanges: 'Dəyişiklikləri dərc et',
-    publishIn: '{{locale}} dili ilə nəşr edin',
     published: 'Dərc edilmiş',
+    publishIn: '{{locale}} dili ilə nəşr edin',
     publishing: 'Nəşr',
     restoreAsDraft: 'Qaralamalar kimi bərpa et',
     restoredSuccessfully: 'Uğurla bərpa edildi.',

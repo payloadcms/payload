@@ -5,8 +5,9 @@ import { formatAdminURL, Translation } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React from 'react'
 
-import { ResetPasswordClient } from './index.client.js'
+import { FormHeader } from '../../elements/FormHeader/index.js'
 import './index.scss'
+import { ResetPasswordForm } from './ResetPasswordForm/index.js'
 
 export const resetPasswordBaseClass = 'reset-password'
 
@@ -29,7 +30,7 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
 
   const {
     admin: {
-      routes: { account: accountRoute },
+      routes: { account: accountRoute, login: loginRoute },
     },
     routes: { admin: adminRoute },
   } = config
@@ -37,25 +38,27 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
   if (user) {
     return (
       <div className={`${resetPasswordBaseClass}__wrap`}>
-        <h1>{i18n.t('authentication:alreadyLoggedIn')}</h1>
-        <p>
-          <Translation
-            elements={{
-              '0': ({ children }) => (
-                <Link
-                  href={formatAdminURL({
-                    adminRoute,
-                    path: accountRoute,
-                  })}
-                >
-                  {children}
-                </Link>
-              ),
-            }}
-            i18nKey="authentication:loggedInChangePassword"
-            t={i18n.t}
-          />
-        </p>
+        <FormHeader
+          description={
+            <Translation
+              elements={{
+                '0': ({ children }) => (
+                  <Link
+                    href={formatAdminURL({
+                      adminRoute,
+                      path: accountRoute,
+                    })}
+                  >
+                    {children}
+                  </Link>
+                ),
+              }}
+              i18nKey="authentication:loggedInChangePassword"
+              t={i18n.t}
+            />
+          }
+          heading={i18n.t('authentication:alreadyLoggedIn')}
+        />
         <Button buttonStyle="secondary" el="link" Link={Link} size="large" to={adminRoute}>
           {i18n.t('general:backToDashboard')}
         </Button>
@@ -65,8 +68,16 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
 
   return (
     <div className={`${resetPasswordBaseClass}__wrap`}>
-      <h1>{i18n.t('authentication:resetPassword')}</h1>
-      <ResetPasswordClient token={token} />
+      <FormHeader heading={i18n.t('authentication:resetPassword')} />
+      <ResetPasswordForm token={token} />
+      <Link
+        href={formatAdminURL({
+          adminRoute,
+          path: loginRoute,
+        })}
+      >
+        {i18n.t('authentication:backToLogin')}
+      </Link>
     </div>
   )
 }

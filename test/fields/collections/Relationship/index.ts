@@ -38,10 +38,25 @@ const RelationshipFields: CollectionConfig = {
     },
     {
       name: 'relationToSelfSelectOnly',
+      relationTo: relationshipFieldsSlug,
+      type: 'relationship',
+    },
+    {
+      name: 'relationWithAllowCreateToFalse',
       admin: {
         allowCreate: false,
       },
-      relationTo: relationshipFieldsSlug,
+      defaultValue: ({ user }) => user?.id,
+      relationTo: 'users',
+      type: 'relationship',
+    },
+    {
+      name: 'relationWithAllowEditToFalse',
+      admin: {
+        allowEdit: false,
+      },
+      defaultValue: ({ user }) => user?.id,
+      relationTo: 'users',
       type: 'relationship',
     },
     {
