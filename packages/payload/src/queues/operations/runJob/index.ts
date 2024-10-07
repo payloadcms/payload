@@ -132,7 +132,6 @@ export const runJob = async ({ job, req, workflowConfig }: Args): Promise<RunJob
       status: hasError ? 'error-reached-max-retries' : 'error',
     }
   }
-  job.totalTried = (job.totalTried ?? 0) + 1
 
   // Workflow has completed
   await updateJob({
