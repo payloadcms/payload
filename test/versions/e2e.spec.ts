@@ -116,6 +116,11 @@ describe('versions', () => {
   })
 
   beforeEach(async () => {
+    /* await throttleTest({
+      page,
+      context,
+      delay: 'Slow 4G',
+    }) */
     await reInitializeDB({
       serverURL,
       snapshotKey: 'versionsTest',

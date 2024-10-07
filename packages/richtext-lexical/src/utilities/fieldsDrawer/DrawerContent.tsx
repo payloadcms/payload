@@ -8,7 +8,7 @@ import {
   useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
 import type { FieldsDrawerProps } from './Drawer.js'
@@ -27,13 +27,15 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   const { t } = useTranslation()
   const { id } = useDocumentInfo()
 
-  const [initialState, setInitialState] = useState<false | FormState>(false)
+  const abortControllerRef = useRef(new AbortController())
+
+  const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
 
   const {
     field: { richTextComponentMap },
   } = useEditorConfigContext()
 
-  const { serverFunction } = useServerFunctions()
+  const { getFormState } = useServerFunctions()
 
   const componentMapRenderedFieldsPath = `lexical_internal_feature.${featureKey}.fields${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
   const schemaFieldsPath =
@@ -44,40 +46,73 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     fieldMapOverride ?? (richTextComponentMap?.get(componentMapRenderedFieldsPath) as ClientField[]) // Field Schema
 
   useEffect(() => {
+    const abortController = new AbortController()
+
     const awaitInitialState = async () => {
-      const { state } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          id,
-          data: data ?? {},
-          operation: 'update',
-          schemaPath: schemaFieldsPath,
-        },
-      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+      const { state } = await getFormState({
+        id,
+        data: data ?? {},
+        operation: 'update',
+        schemaPath: schemaFieldsPath,
+        signal: abortController.signal,
+      })
 
       setInitialState(state)
     }
 
     void awaitInitialState()
-  }, [schemaFieldsPath, id, data, serverFunction])
+
+    return () => {
+      try {
+        abortController.abort()
+      } catch (_err) {
+        // swallow error
+      }
+    }
+  }, [schemaFieldsPath, id, data, getFormState])
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          id,
-          formState: prevFormState,
-          operation: 'update',
-          schemaPath: schemaFieldsPath,
-        },
-      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+
+      const { state } = await getFormState({
+        id,
+        formState: prevFormState,
+        operation: 'update',
+        schemaPath: schemaFieldsPath,
+        signal: abortController.signal,
+      })
+
+      if (!state) {
+        return prevFormState
+      }
 
       return state
     },
-
-    [schemaFieldsPath, id, serverFunction],
+    [schemaFieldsPath, id, getFormState],
   )
+
+  // cleanup effect
+  useEffect(() => {
+    const abortController = abortControllerRef.current
+
+    return () => {
+      try {
+        abortController.abort()
+      } catch (_err) {
+        // swallow error
+      }
+    }
+  }, [])
 
   if (initialState === false) {
     return null

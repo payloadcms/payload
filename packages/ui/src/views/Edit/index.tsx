@@ -5,7 +5,6 @@ import type {
   ClientGlobalConfig,
   ClientSideEditViewProps,
   ClientUser,
-  FormState,
 } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
@@ -88,8 +87,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
 
   const { refreshCookieAsync, user } = useAuth()
 
-  const { serverFunction } = useServerFunctions()
-
   const {
     config,
     config: {
@@ -108,6 +105,9 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
   const { resetUploadEdits } = useUploadEdits()
+  const { getFormState } = useServerFunctions()
+
+  const abortControllerRef = useRef(new AbortController())
 
   const locale = params.get('locale')
 
@@ -242,6 +242,17 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (e) {
+          // swallow error
+        }
+      }
+
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+
       const currentTime = Date.now()
       const timeSinceLastUpdate = currentTime - lastUpdateTime
 
@@ -253,20 +264,18 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
 
       const docPreferences = await getDocPreferences()
 
-      const { lockedState, state } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          id,
-          collectionSlug,
-          docPreferences,
-          formState: prevFormState,
-          globalSlug,
-          operation,
-          returnLockStatus: isLockingEnabled ? true : false,
-          schemaPath,
-          updateLastEdited,
-        },
-      })) as { lockedState: any; state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+      const { lockedState, state } = await getFormState({
+        id,
+        collectionSlug,
+        docPreferences,
+        formState: prevFormState,
+        globalSlug,
+        operation,
+        returnLockStatus: isLockingEnabled ? true : false,
+        schemaPath,
+        signal: abortController.signal,
+        updateLastEdited,
+      })
 
       setDocumentIsLocked(true)
 
@@ -274,8 +283,13 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
         const previousOwnerId = documentLockStateRef.current?.user?.id
 
         if (lockedState) {
-          if (!documentLockStateRef.current || lockedState.user.id !== previousOwnerId) {
-            if (previousOwnerId === user.id && lockedState.user.id !== user.id) {
+          const lockedUserID =
+            typeof lockedState.user === 'string' || typeof lockedState.user === 'number'
+              ? lockedState.user
+              : lockedState.user.id
+
+          if (!documentLockStateRef.current || lockedUserID !== previousOwnerId) {
+            if (previousOwnerId === user.id && lockedUserID !== user.id) {
               setShowTakeOverModal(true)
               documentLockStateRef.current.hasShownLockedModal = true
             }
@@ -283,9 +297,9 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
             documentLockStateRef.current = documentLockStateRef.current = {
               hasShownLockedModal: documentLockStateRef.current?.hasShownLockedModal || false,
               isLocked: true,
-              user: lockedState.user,
+              user: lockedState.user as ClientUser,
             }
-            setCurrentEditor(lockedState.user)
+            setCurrentEditor(lockedState.user as ClientUser)
           }
         }
       }
@@ -305,13 +319,21 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       isLockingEnabled,
       setDocumentIsLocked,
       lastUpdateTime,
-      serverFunction,
+      getFormState,
     ],
   )
 
   // Clean up when the component unmounts or when the document is unlocked
   useEffect(() => {
     return () => {
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (e) {
+          // swallow error
+        }
+      }
+
       if (!isLockingEnabled) {
         return
       }

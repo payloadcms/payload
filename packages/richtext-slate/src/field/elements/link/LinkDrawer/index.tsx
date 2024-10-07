@@ -1,7 +1,6 @@
 'use client'
 
 import type { FormProps } from '@payloadcms/ui'
-import type { FormState } from 'payload'
 
 import {
   Drawer,
@@ -34,24 +33,21 @@ export const LinkDrawer: React.FC<Props> = ({
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
   const { id } = useDocumentInfo()
 
-  const { serverFunction } = useServerFunctions()
+  const { getFormState } = useServerFunctions()
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          id,
-          formState: prevFormState,
-          operation: 'update',
-          schemaPath: fieldMapPath,
-        },
-      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+      const { state } = await getFormState({
+        id,
+        formState: prevFormState,
+        operation: 'update',
+        schemaPath: fieldMapPath,
+      })
 
       return state
     },
 
-    [fieldMapPath, id, serverFunction],
+    [fieldMapPath, id, getFormState],
   )
 
   return (

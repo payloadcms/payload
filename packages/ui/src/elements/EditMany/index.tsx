@@ -111,7 +111,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
     },
   } = useConfig()
 
-  const { serverFunction } = useServerFunctions()
+  const { getFormState } = useServerFunctions()
 
   const { count, getQueryParams, selectAll } = useSelection()
   const { i18n, t } = useTranslation()
@@ -130,15 +130,12 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   React.useEffect(() => {
     if (!hasInitializedState.current) {
       const getInitialState = async () => {
-        const { state: result } = (await serverFunction({
-          name: 'form-state',
-          args: {
-            collectionSlug: slug,
-            data: {},
-            operation: 'update',
-            schemaPath: slug,
-          },
-        })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+        const { state: result } = await getFormState({
+          collectionSlug: slug,
+          data: {},
+          operation: 'update',
+          schemaPath: slug,
+        })
 
         setInitialState(result)
         hasInitializedState.current = true
@@ -146,23 +143,20 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
       void getInitialState()
     }
-  }, [apiRoute, hasInitializedState, serverURL, slug, serverFunction, user])
+  }, [apiRoute, hasInitializedState, serverURL, slug, getFormState, user])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          collectionSlug: slug,
-          formState: prevFormState,
-          operation: 'update',
-          schemaPath: slug,
-        },
-      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+      const { state } = await getFormState({
+        collectionSlug: slug,
+        formState: prevFormState,
+        operation: 'update',
+        schemaPath: slug,
+      })
 
       return state
     },
-    [slug, serverFunction],
+    [slug, getFormState],
   )
 
   if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {

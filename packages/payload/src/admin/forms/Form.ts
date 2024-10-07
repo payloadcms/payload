@@ -1,5 +1,8 @@
+import { type SupportedLanguages } from '@payloadcms/translations'
+
 import type { Field, Validate } from '../../fields/config/types.js'
-import type { Where } from '../../types/index.js'
+import type { DocumentPreferences } from '../../preferences/types.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
 
 export type Data = {
   [key: string]: any
@@ -31,4 +34,23 @@ export type FormField = {
 
 export type FormState = {
   [path: string]: FormField
+}
+
+export type BuildFormStateArgs = {
+  collectionSlug?: string
+  data?: Data
+  docPreferences?: DocumentPreferences
+  formState?: FormState
+  globalSlug?: string
+  id?: number | string
+  /*
+    If not i18n was passed, the language can be passed to init i18n
+  */
+  language?: keyof SupportedLanguages
+  locale?: string
+  operation?: 'create' | 'update'
+  req: PayloadRequest
+  returnLockStatus?: boolean
+  schemaPath: string
+  updateLastEdited?: boolean
 }

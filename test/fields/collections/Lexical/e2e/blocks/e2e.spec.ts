@@ -272,7 +272,8 @@ describe('lexicalBlocks', () => {
 
       const urlField = drawerContent.locator('input#field-url').first()
       await expect(urlField).toBeVisible()
-      // Fill with https://www.payloadcms.com
+      await expect(urlField).toHaveValue('https://')
+      await wait(1000)
       await urlField.fill('https://www.payloadcms.com')
       await expect(urlField).toHaveValue('https://www.payloadcms.com')
       await drawerContent.locator('.form-submit button').click({ delay: 100 })
@@ -870,7 +871,8 @@ describe('lexicalBlocks', () => {
 
       // navigate to list view
       await page.locator('.step-nav a').nth(1).click()
-      await page.waitForURL('**/lexical-fields?limit=10')
+
+      await page.waitForURL(/^.*\/lexical-fields(\?.*)?$/)
 
       // Click on lexical document in list view (navigateToLexicalFields is client-side navigation which is what we need to reproduce the issue here)
       await navigateToLexicalFields(false)

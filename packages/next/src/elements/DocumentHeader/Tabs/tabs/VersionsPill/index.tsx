@@ -8,7 +8,7 @@ export const VersionsPill: React.FC = () => {
   const { versions } = useDocumentInfo()
 
   // don't count snapshots
-  const totalVersions = versions?.docs.filter((version) => !version.snapshot).length || 0
+  const totalVersions = versions?.docs?.filter((version) => !version.snapshot).length || 0
 
   if (!versions?.totalDocs) {
     return null

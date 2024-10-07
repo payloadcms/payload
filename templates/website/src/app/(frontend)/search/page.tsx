@@ -7,8 +7,14 @@ import React from 'react'
 import { Post } from '@/payload-types'
 import { Search } from '@/search/Component'
 import PageClient from './page.client'
-export default async function Page({ searchParams }: { searchParams: { q: string } }) {
-  const query = searchParams.q
+
+type Args = {
+  searchParams: Promise<{
+    q: string
+  }>
+}
+export default async function Page({ searchParams: searchParamsPromise }: Args) {
+  const { q: query } = await searchParamsPromise
   const payload = await getPayloadHMR({ config: configPromise })
 
   const posts = await payload.find({

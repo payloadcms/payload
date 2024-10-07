@@ -1,14 +1,13 @@
-import { type I18nClient, type SupportedLanguages } from '@payloadcms/translations'
+import { type I18nClient } from '@payloadcms/translations'
 import {
+  type BuildFormStateArgs,
   type ClientUser,
-  type Data,
   type DocumentPreferences,
   type ErrorResult,
   type Field,
   formatErrors,
   type FormState,
   type Payload,
-  type PayloadRequest,
   type SanitizedConfig,
   type TypeWithID,
 } from 'payload'
@@ -77,35 +76,23 @@ export const getFieldBySchemaPath = (args: {
   return fieldSchema
 }
 
-export type BuildFormStateArgs = {
-  collectionSlug?: string
-  data?: Data
-  docPreferences?: DocumentPreferences
-  formState?: FormState
-  globalSlug?: string
-  id?: number | string
-  /*
-    If not i18n was passed, the language can be passed to init i18n
-  */
-  language?: keyof SupportedLanguages
-  locale?: string
-  operation?: 'create' | 'update'
-  req: PayloadRequest
-  returnLockStatus?: boolean
-  schemaPath: string
-  updateLastEdited?: boolean
-}
-
-export const buildFormState = async (
-  args: BuildFormStateArgs,
-): Promise<
+export type BuildFormStateResult =
   | {
       errors?: never
       lockedState?: { isLocked: boolean; user: ClientUser | number | string }
       state: FormState
     }
-  | ({ state?: never } & ErrorResult)
-> => {
+  | {
+      lockedState?: never
+      message: string
+      state?: never
+    }
+  | ({
+      lockedState?: never
+      state?: never
+    } & ErrorResult)
+
+export const buildFormState = async (args: BuildFormStateArgs): Promise<BuildFormStateResult> => {
   const { req } = args
 
   try {
@@ -115,18 +102,20 @@ export const buildFormState = async (
     req.payload.logger.error({ err, msg: `There was an error building form state` })
 
     if (err.message === 'Could not find field schema for given path') {
-      throw new Error(err.message)
+      return {
+        message: err.message,
+      }
     }
 
     if (err.message === 'Unauthorized') {
-      throw new Error()
+      return null
     }
 
     return formatErrors(err)
   }
 }
 
-const buildFormStateFn = async (
+export const buildFormStateFn = async (
   args: BuildFormStateArgs,
 ): Promise<{
   lockedState?: { isLocked: boolean; user: ClientUser | number | string }
@@ -142,25 +131,16 @@ const buildFormStateFn = async (
     locale,
     operation,
     req,
+    req: {
+      i18n,
+      payload,
+      payload: { config },
+      user,
+    },
     returnLockStatus,
     schemaPath,
     updateLastEdited,
   } = args
-
-  if (!req.payload) {
-    throw new Error('No Payload instance provided')
-  }
-
-  if (!req.payload.config) {
-    throw new Error('No config provided')
-  }
-
-  const {
-    i18n,
-    payload,
-    payload: { config },
-    user,
-  } = req
 
   const incomingUserSlug = user?.collection
 

@@ -13,7 +13,7 @@ import {
   useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 const baseClass = 'lexical-block'
 import type { BlocksFieldClient, FormState } from 'payload'
@@ -39,10 +39,11 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const { id } = useDocumentInfo()
   const { path, schemaPath } = useFieldProps()
   const { field: parentLexicalRichTextField } = useEditorConfigContext()
+  const abortControllerRef = useRef(new AbortController())
 
-  const { serverFunction } = useServerFunctions()
+  const { getFormState } = useServerFunctions()
 
-  const [initialState, setInitialState] = useState<false | FormState>(false)
+  const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
 
   const {
     field: { richTextComponentMap },
@@ -59,16 +60,16 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   // Field Schema
   useEffect(() => {
+    const abortController = new AbortController()
+
     const awaitInitialState = async () => {
-      const { state } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          id,
-          data: formData,
-          operation: 'update',
-          schemaPath: schemaFieldsPath,
-        },
-      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+      const { state } = await getFormState({
+        id,
+        data: formData,
+        operation: 'update',
+        schemaPath: schemaFieldsPath,
+        signal: abortController.signal,
+      })
 
       if (state) {
         state.blockName = {
@@ -85,19 +86,40 @@ export const BlockComponent: React.FC<Props> = (props) => {
     if (formData) {
       void awaitInitialState()
     }
-  }, [serverFunction, schemaFieldsPath, id]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
+
+    return () => {
+      try {
+        abortController.abort()
+      } catch (_err) {
+        // swallow error
+      }
+    }
+  }, [getFormState, schemaFieldsPath, id]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state: formState } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          id,
-          formState: prevFormState,
-          operation: 'update',
-          schemaPath: schemaFieldsPath,
-        },
-      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+
+      const { state: formState } = await getFormState({
+        id,
+        formState: prevFormState,
+        operation: 'update',
+        schemaPath: schemaFieldsPath,
+        signal: abortController.signal,
+      })
+
+      if (!formState) {
+        return prevFormState
+      }
 
       formState.blockName = {
         initialValue: '',
@@ -109,8 +131,21 @@ export const BlockComponent: React.FC<Props> = (props) => {
       return formState
     },
 
-    [id, schemaFieldsPath, formData.blockName, serverFunction],
+    [id, schemaFieldsPath, formData.blockName, getFormState],
   )
+
+  // cleanup effect
+  useEffect(() => {
+    const abortController = abortControllerRef.current
+
+    return () => {
+      try {
+        abortController.abort()
+      } catch (_err) {
+        // swallow error
+      }
+    }
+  }, [])
 
   const classNames = [`${baseClass}__row`, `${baseClass}__row--no-errors`].filter(Boolean).join(' ')
 
@@ -181,7 +216,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     schemaFieldsPath,
     classNames,
     i18n,
-  ])
+  ]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
 
   return <div className={baseClass + ' ' + baseClass + '-' + formData.blockType}>{formContent}</div>
 }

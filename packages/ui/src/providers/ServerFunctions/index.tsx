@@ -1,8 +1,21 @@
-import type { RenderFieldBySchemaPathClient, ServerFunctionClient } from 'payload'
+import type {
+  BuildFormStateArgs,
+  RenderFieldBySchemaPathClient,
+  ServerFunctionClient,
+} from 'payload'
 
 import React, { createContext, useCallback } from 'react'
 
+import type { buildFormState } from '../../utilities/buildFormState.js'
+
+type GetFormState = (
+  args: {
+    signal?: AbortSignal
+  } & Omit<BuildFormStateArgs, 'req'>,
+) => ReturnType<typeof buildFormState>
+
 type ServerFunctionsContextType = {
+  getFormState: GetFormState
   renderFieldBySchemaPath: RenderFieldBySchemaPathClient
   serverFunction: ServerFunctionClient
 }
@@ -41,8 +54,36 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
+  const getFormState = useCallback<GetFormState>(
+    async (args) => {
+      const { signal, ...rest } = args
+
+      try {
+        if (!signal?.aborted) {
+          const result = (await serverFunction({
+            name: 'form-state',
+            args: rest,
+          })) as ReturnType<typeof buildFormState> // TODO: infer this type when `strictNullChecks` is enabled
+
+          if (signal?.aborted) {
+            throw new Error('Request was aborted, ignoring result')
+          }
+
+          return result
+        }
+      } catch (error) {
+        console.error(error) // eslint-disable-line no-console
+      }
+
+      return { state: args.formState }
+    },
+    [serverFunction],
+  )
+
   return (
-    <ServerFunctionsContext.Provider value={{ renderFieldBySchemaPath, serverFunction }}>
+    <ServerFunctionsContext.Provider
+      value={{ getFormState, renderFieldBySchemaPath, serverFunction }}
+    >
       {children}
     </ServerFunctionsContext.Provider>
   )

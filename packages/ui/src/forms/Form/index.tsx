@@ -70,8 +70,6 @@ export const Form: React.FC<FormProps> = (props) => {
     waitForAutocomplete,
   } = props
 
-  const { serverFunction } = useServerFunctions()
-
   const method = 'method' in props ? props?.method : undefined
 
   const router = useRouter()
@@ -80,6 +78,8 @@ export const Form: React.FC<FormProps> = (props) => {
   const { i18n, t } = useTranslation()
   const { refreshCookie, user } = useAuth()
   const operation = useOperation()
+
+  const { getFormState } = useServerFunctions()
 
   const { config } = useConfig()
 
@@ -91,6 +91,8 @@ export const Form: React.FC<FormProps> = (props) => {
   const [submitted, setSubmitted] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
+  const abortControllerRef = useRef(new AbortController())
+  const abortControllerRef2 = useRef(new AbortController())
 
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
 
@@ -378,7 +380,7 @@ export const Form: React.FC<FormProps> = (props) => {
           errorToast(message)
         }
       } catch (err) {
-        console.error('Error submitting form', err)
+        console.error('Error submitting form', err) // eslint-disable-line no-console
         setProcessing(false)
         setSubmitted(true)
         setDisabled(false)
@@ -448,23 +450,32 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const reset = useCallback(
     async (data: unknown) => {
-      const { state: newState } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          id,
-          collectionSlug,
-          data,
-          globalSlug,
-          operation,
-          schemaPath: collectionSlug || globalSlug,
-        },
-      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (error) {
+          // swallow error
+        }
+      }
+
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+
+      const { state: newState } = await getFormState({
+        id,
+        collectionSlug,
+        data,
+        globalSlug,
+        operation,
+        schemaPath: collectionSlug || globalSlug,
+        signal: abortController.signal,
+      })
 
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state: newState })
     },
-    [collectionSlug, dispatchFields, globalSlug, id, operation, serverFunction],
+    [collectionSlug, dispatchFields, globalSlug, id, operation, getFormState],
   )
 
   const replaceState = useCallback(
@@ -478,19 +489,28 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const getFieldStateBySchemaPath = useCallback(
     async ({ data, schemaPath }) => {
-      const { state: fieldSchema } = (await serverFunction({
-        name: 'form-state',
-        args: {
-          collectionSlug,
-          data,
-          globalSlug,
-          schemaPath,
-        },
-      })) as { state: FormState } // TODO: remove this when strictNullChecks is enabled and the return type can be inferred
+      if (abortControllerRef2.current) {
+        try {
+          abortControllerRef2.current.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+
+      const abortController = new AbortController()
+      abortControllerRef2.current = abortController
+
+      const { state: fieldSchema } = await getFormState({
+        collectionSlug,
+        data,
+        globalSlug,
+        schemaPath,
+        signal: abortController.signal,
+      })
 
       return fieldSchema
     },
-    [collectionSlug, globalSlug, serverFunction],
+    [collectionSlug, globalSlug, getFormState],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
@@ -529,6 +549,30 @@ export const Form: React.FC<FormProps> = (props) => {
     },
     [getFieldStateBySchemaPath, dispatchFields],
   )
+
+  // clean on unmount
+  useEffect(() => {
+    const re1 = abortControllerRef.current
+    const re2 = abortControllerRef2.current
+
+    return () => {
+      if (re1) {
+        try {
+          re1.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+
+      if (re2) {
+        try {
+          re2.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (initializingFromProps !== undefined) {

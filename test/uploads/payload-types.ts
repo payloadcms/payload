@@ -43,6 +43,7 @@ export interface Config {
     'media-without-relation-preview': MediaWithoutRelationPreview;
     'relation-preview': RelationPreview;
     users: User;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -1091,6 +1092,149 @@ export interface User {
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'relation';
+        value: string | Relation;
+      } | null)
+    | ({
+        relationTo: 'audio';
+        value: string | Audio;
+      } | null)
+    | ({
+        relationTo: 'gif-resize';
+        value: string | GifResize;
+      } | null)
+    | ({
+        relationTo: 'filename-compound-index';
+        value: string | FilenameCompoundIndex;
+      } | null)
+    | ({
+        relationTo: 'no-image-sizes';
+        value: string | NoImageSize;
+      } | null)
+    | ({
+        relationTo: 'object-fit';
+        value: string | ObjectFit;
+      } | null)
+    | ({
+        relationTo: 'with-meta-data';
+        value: string | WithMetaDatum;
+      } | null)
+    | ({
+        relationTo: 'without-meta-data';
+        value: string | WithoutMetaDatum;
+      } | null)
+    | ({
+        relationTo: 'with-only-jpeg-meta-data';
+        value: string | WithOnlyJpegMetaDatum;
+      } | null)
+    | ({
+        relationTo: 'crop-only';
+        value: string | CropOnly;
+      } | null)
+    | ({
+        relationTo: 'focal-only';
+        value: string | FocalOnly;
+      } | null)
+    | ({
+        relationTo: 'focal-no-sizes';
+        value: string | FocalNoSize;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'animated-type-media';
+        value: string | AnimatedTypeMedia;
+      } | null)
+    | ({
+        relationTo: 'enlarge';
+        value: string | Enlarge;
+      } | null)
+    | ({
+        relationTo: 'reduce';
+        value: string | Reduce;
+      } | null)
+    | ({
+        relationTo: 'media-trim';
+        value: string | MediaTrim;
+      } | null)
+    | ({
+        relationTo: 'custom-file-name-media';
+        value: string | CustomFileNameMedia;
+      } | null)
+    | ({
+        relationTo: 'unstored-media';
+        value: string | UnstoredMedia;
+      } | null)
+    | ({
+        relationTo: 'externally-served-media';
+        value: string | ExternallyServedMedia;
+      } | null)
+    | ({
+        relationTo: 'uploads-1';
+        value: string | Uploads1;
+      } | null)
+    | ({
+        relationTo: 'uploads-2';
+        value: string | Uploads2;
+      } | null)
+    | ({
+        relationTo: 'admin-thumbnail-function';
+        value: string | AdminThumbnailFunction;
+      } | null)
+    | ({
+        relationTo: 'admin-thumbnail-size';
+        value: string | AdminThumbnailSize;
+      } | null)
+    | ({
+        relationTo: 'optional-file';
+        value: string | OptionalFile;
+      } | null)
+    | ({
+        relationTo: 'required-file';
+        value: string | RequiredFile;
+      } | null)
+    | ({
+        relationTo: 'versions';
+        value: string | Version;
+      } | null)
+    | ({
+        relationTo: 'custom-upload-field';
+        value: string | CustomUploadField;
+      } | null)
+    | ({
+        relationTo: 'media-with-relation-preview';
+        value: string | MediaWithRelationPreview;
+      } | null)
+    | ({
+        relationTo: 'media-without-relation-preview';
+        value: string | MediaWithoutRelationPreview;
+      } | null)
+    | ({
+        relationTo: 'relation-preview';
+        value: string | RelationPreview;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
