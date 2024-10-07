@@ -67,6 +67,9 @@ export interface Config {
       externalWorkflow?: {
         input: WorkflowexternalWorkflowInput;
       };
+      retriesRollbackTest?: {
+        input: WorkflowretriesRollbackTestInput;
+      };
     };
   };
 }
@@ -257,7 +260,14 @@ export interface PayloadJob {
       }[]
     | null;
   workflowSlug?:
-    | ('updatePost' | 'retriesTest' | 'retriesWorkflowLevelTest' | 'inlineTaskTest' | 'externalWorkflow')
+    | (
+        | 'updatePost'
+        | 'retriesTest'
+        | 'retriesWorkflowLevelTest'
+        | 'inlineTaskTest'
+        | 'externalWorkflow'
+        | 'retriesRollbackTest'
+      )
     | null;
   taskSlug?:
     | (
@@ -442,6 +452,13 @@ export interface WorkflowinlineTaskTestInput {
  * via the `definition` "WorkflowexternalWorkflowInput".
  */
 export interface WorkflowexternalWorkflowInput {
+  message: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowretriesRollbackTestInput".
+ */
+export interface WorkflowretriesRollbackTestInput {
   message: string;
 }
 /**

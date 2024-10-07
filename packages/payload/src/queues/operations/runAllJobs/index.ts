@@ -137,7 +137,9 @@ export const runAllJobs = async ({
     }
 
     const newReq = isolateObjectProperty(req, 'transactionID')
-    // Create a transaction so that all seeding happens in one transaction
+    delete newReq.transactionID
+    // Create a transaction. While every tasks will initialize its own transaction later on, anything that
+    // runs in between tasks within a JS workflow should be part of the same transaction
     await initTransaction(newReq)
     const result = await runJob({
       job,
@@ -149,7 +151,7 @@ export const runAllJobs = async ({
       req: newReq,
       workflowConfig,
     })
-    // Finalise transactiojn
+    // Commit transaction
     await commitTransaction(newReq)
     return { id: job.id, result }
   })

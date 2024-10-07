@@ -187,6 +187,39 @@ describe('Queues', () => {
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(2)
   })
+  it('ensure failed tasks are rolled back via transactions', async () => {
+    const job = await payload.jobs.queue({
+      workflow: 'retriesRollbackTest',
+      input: {
+        message: 'hello',
+      },
+    })
+
+    let hasJobsRemaining = true
+
+    while (hasJobsRemaining) {
+      const response = await payload.jobs.run()
+
+      if (response.noJobsRemaining) {
+        hasJobsRemaining = false
+      }
+    }
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1) // Failure happens after task creates a simple document, but still within the task => any document creation should be rolled back
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    // @ts-expect-error amountRetried is new arbitrary data and not in the type
+    expect(jobAfterRun.input.amountRetried).toBe(4)
+  })
 
   it('can create new inline jobs', async () => {
     await payload.jobs.queue({

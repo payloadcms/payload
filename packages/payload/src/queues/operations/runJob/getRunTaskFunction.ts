@@ -18,6 +18,10 @@ import type {
 } from '../../config/types/workflowTypes.js'
 import type { UpdateJobFunction } from './getUpdateJobFunction.js'
 
+import { commitTransaction } from '../../../utilities/commitTransaction.js'
+import { initTransaction } from '../../../utilities/initTransaction.js'
+import isolateObjectProperty from '../../../utilities/isolateObjectProperty.js'
+import { killTransaction } from '../../../utilities/killTransaction.js'
 import { calculateBackoffWaitUntil } from './calculateBackoffWaitUntil.js'
 import { importHandlerPath } from './importHandlerPath.js'
 
@@ -202,14 +206,26 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
     }
 
     let output: object
+    // Create a transaction so that all seeding happens in one transaction.
+    // Each workflow gets an own transaction, and also each task.
+    // That's because within one job run, some tasks can pass (thus their transaction should be committed) and
+    // Some tasks can fail (thus their transaction should be rolled back). Thus, we need different transactions for each task.
+    const newReq = isolateObjectProperty(req, 'transactionID')
+    delete newReq.transactionID
+
+    await initTransaction(newReq)
+
     try {
       const runnerOutput = await runner({
         input,
         job: job as unknown as RunningJob<WorkflowTypes>, // TODO: Type this better
-        req,
+        req: newReq,
       })
 
       if (runnerOutput.state === 'failed') {
+        // Rollback everything the job did
+        await killTransaction(newReq)
+
         await handleTaskFailed({
           executedAt,
           input,
@@ -227,9 +243,14 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         })
         throw new Error('Task failed')
       } else {
+        // Commit Success => commit transaction
+        await commitTransaction(newReq)
         output = runnerOutput.output
       }
     } catch (err) {
+      // Rollback everything the job did
+      await killTransaction(newReq)
+
       await handleTaskFailed({
         error: err,
         executedAt,
