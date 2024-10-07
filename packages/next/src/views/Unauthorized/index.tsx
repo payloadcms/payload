@@ -1,9 +1,10 @@
 import type { AdminViewComponent, PayloadServerReactComponent } from 'payload'
 
-import { Button, Gutter } from '@payloadcms/ui'
+import { Button } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import React from 'react'
 
+import { FormHeader } from '../../elements/FormHeader/index.js'
 import './index.scss'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
@@ -29,9 +30,12 @@ export const UnauthorizedView: PayloadServerReactComponent<AdminViewComponent> =
   } = initPageResult
 
   return (
-    <Gutter className={baseClass}>
-      <h2>{i18n.t('error:unauthorized')}</h2>
-      <p>{i18n.t('error:notAllowedToAccessPage')}</p>
+    <React.Fragment>
+      <FormHeader
+        description={i18n.t('error:notAllowedToAccessPage')}
+        heading={i18n.t('error:unauthorized')}
+      />
+
       <Button
         className={`${baseClass}__button`}
         el="link"
@@ -41,6 +45,6 @@ export const UnauthorizedView: PayloadServerReactComponent<AdminViewComponent> =
       >
         {i18n.t('authentication:logOut')}
       </Button>
-    </Gutter>
+    </React.Fragment>
   )
 }

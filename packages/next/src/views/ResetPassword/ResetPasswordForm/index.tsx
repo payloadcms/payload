@@ -31,7 +31,7 @@ const initialState: FormState = {
   },
 }
 
-export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
+export const ResetPasswordForm: React.FC<Args> = ({ token }) => {
   const i18n = useTranslation()
   const {
     config: {
@@ -68,7 +68,7 @@ export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
       method="POST"
       onSuccess={onSuccess}
     >
-      <div className={'inputWrap'}>
+      <div className="inputWrap">
         <PasswordField
           field={{
             name: 'password',
