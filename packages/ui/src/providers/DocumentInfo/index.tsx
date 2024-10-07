@@ -68,6 +68,7 @@ const DocumentInfo: React.FC<
   const { user } = useAuth()
 
   const { getFormState } = useServerFunctions()
+  const abortControllerRef = useRef(new AbortController())
 
   const collectionConfig = collections.find((c) => c.slug === collectionSlug)
   const globalConfig = globals.find((g) => g.slug === globalSlug)
@@ -487,6 +488,17 @@ const DocumentInfo: React.FC<
 
   const onSave = React.useCallback<DocumentInfoContext['onSave']>(
     async (json) => {
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+
       if (typeof onSaveFromProps === 'function') {
         void onSaveFromProps(json)
       }
@@ -504,6 +516,7 @@ const DocumentInfo: React.FC<
         locale,
         operation,
         schemaPath: collectionSlug || globalSlug,
+        signal: abortController.signal,
       })
 
       setInitialState(newState)
@@ -549,6 +562,7 @@ const DocumentInfo: React.FC<
             locale,
             operation,
             schemaPath: collectionSlug || globalSlug,
+            signal: abortController.signal,
           })
 
           if ('errors' in result) {
@@ -646,6 +660,21 @@ const DocumentInfo: React.FC<
     hasSavePermission,
     hasPublishPermission,
   ])
+
+  // clean on unmount
+  useEffect(() => {
+    const re1 = abortControllerRef.current
+
+    return () => {
+      if (re1) {
+        try {
+          re1.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+    }
+  }, [])
 
   const action: string = React.useMemo(() => {
     const docURL = `${baseURL}${pluralType === 'globals' ? `/globals` : ''}/${slug}${id ? `/${id}` : ''}`
