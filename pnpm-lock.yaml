@@ -1134,6 +1134,9 @@ importers:
       '@aws-sdk/lib-storage':
         specifier: ^3.267.0
         version: 3.563.0(@aws-sdk/client-s3@3.563.0)
+      '@azure/core-http':
+        specifier: ^3.0.0
+        version: 3.0.4
       '@azure/storage-blob':
         specifier: ^12.11.0
         version: 12.17.0

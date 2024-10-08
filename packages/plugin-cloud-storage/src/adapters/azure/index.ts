@@ -1,4 +1,9 @@
-import type { ContainerClient } from '@azure/storage-blob'
+import type { TokenCredential } from '@azure/core-http'
+import type {
+  AnonymousCredential,
+  ContainerClient,
+  StorageSharedKeyCredential,
+} from '@azure/storage-blob'
 
 import { BlobServiceClient } from '@azure/storage-blob'
 
@@ -15,6 +20,7 @@ export interface Args {
   baseURL: string
   connectionString: string
   containerName: string
+  credential?: AnonymousCredential | StorageSharedKeyCredential | TokenCredential
 }
 
 export const azureBlobStorageAdapter = ({
@@ -22,11 +28,14 @@ export const azureBlobStorageAdapter = ({
   baseURL,
   connectionString,
   containerName,
+  credential,
 }: Args): Adapter => {
   let storageClient: ContainerClient | null = null
   const getStorageClient = () => {
     if (storageClient) return storageClient
-    const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString)
+    const blobServiceClient = credential
+      ? new BlobServiceClient(connectionString, credential)
+      : BlobServiceClient.fromConnectionString(connectionString)
     return (storageClient = blobServiceClient.getContainerClient(containerName))
   }
 
