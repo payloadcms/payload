@@ -27,7 +27,8 @@ type Args<T> = {
   data: T
   operation: 'create' | 'update'
   originalDoc?: T
-  overwriteExistingFiles?: boolean
+  /** pass forceDisable to not overwrite existing files even if they already exist in `data` */
+  overwriteExistingFiles?: 'forceDisable' | boolean
   req: PayloadRequest
   throwOnMissingFile?: boolean
 }
@@ -85,18 +86,26 @@ export const generateFileData = async <T>({
         const filePath = `${staticPath}/${filename}`
         const response = await getFileByPath(filePath)
         file = response
-        overwriteExistingFiles = true
+        if (overwriteExistingFiles !== 'forceDisable') {
+          overwriteExistingFiles = true
+        }
       } else if (filename && url) {
         file = await getExternalFile({
           data: data as FileData,
           req,
           uploadConfig: collectionConfig.upload,
         })
-        overwriteExistingFiles = true
+        if (overwriteExistingFiles !== 'forceDisable') {
+          overwriteExistingFiles = true
+        }
       }
     } catch (err: unknown) {
       throw new FileRetrievalError(req.t, err instanceof Error ? err.message : undefined)
     }
+  }
+
+  if (overwriteExistingFiles === 'forceDisable') {
+    overwriteExistingFiles = false
   }
 
   if (!file) {

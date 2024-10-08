@@ -832,6 +832,10 @@ export type UIField = {
     condition?: Condition
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
+    /**
+     * Set `false` make the UI field appear in the list view column selector. `true` by default for UI fields.
+     * @default true
+     */
     disableBulkEdit?: boolean
     /**
      * Shows / hides fields from appearing in the list view column selector.

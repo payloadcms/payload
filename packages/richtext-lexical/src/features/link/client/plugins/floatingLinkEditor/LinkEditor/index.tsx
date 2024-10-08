@@ -124,7 +124,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     } else {
       // internal link
       setLinkUrl(
-        `/admin/collections/${focusLinkParent.getFields()?.doc?.relationTo}/${
+        `${config.routes.admin === '/' ? '' : config.routes.admin}/collections/${focusLinkParent.getFields()?.doc?.relationTo}/${
           focusLinkParent.getFields()?.doc?.value
         }`,
       )

@@ -1,5 +1,5 @@
 'use client'
-import type { ClientUser, MeOperationResult, Permissions } from 'payload'
+import type { ClientUser, MeOperationResult, Permissions, User } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { usePathname, useRouter } from 'next/navigation.js'
@@ -15,7 +15,7 @@ import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { useConfig } from '../Config/index.js'
 
 export type AuthContext<T = ClientUser> = {
-  fetchFullUser: () => Promise<void>
+  fetchFullUser: () => Promise<null | User>
   logOut: () => Promise<void>
   permissions?: Permissions
   refreshCookie: (forceRefresh?: boolean) => void
@@ -227,6 +227,7 @@ export function AuthProvider({
   const fetchFullUser = React.useCallback(async () => {
     try {
       const request = await requests.get(`${serverURL}${apiRoute}/${userSlug}/me`, {
+        credentials: 'include',
         headers: {
           'Accept-Language': i18n.language,
         },
@@ -234,9 +235,11 @@ export function AuthProvider({
 
       if (request.status === 200) {
         const json: MeOperationResult = await request.json()
+        let user = null
 
         if (json?.user) {
           setUser(json.user)
+          user = json.user
 
           if (json?.token) {
             setTokenAndExpiration(json)
@@ -245,10 +248,14 @@ export function AuthProvider({
           setUser(null)
           revokeTokenAndExpire()
         }
+
+        return user
       }
     } catch (e) {
       toast.error(`Fetching user failed: ${e.message}`)
     }
+
+    return null
   }, [serverURL, apiRoute, userSlug, i18n.language, setTokenAndExpiration, revokeTokenAndExpire])
 
   // On mount, get user and set
