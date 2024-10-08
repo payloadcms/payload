@@ -20,14 +20,10 @@ import {
   useConfig,
   useDocumentEvents,
   useDocumentInfo,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import {
-  getFormState,
-  handleBackToDashboard,
-  handleGoBack,
-  handleTakeOver,
-} from '@payloadcms/ui/shared'
+import { handleBackToDashboard, handleGoBack, handleTakeOver } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
@@ -55,13 +51,11 @@ type Props = {
 }
 
 const PreviewView: React.FC<Props> = ({
-  apiRoute,
   collectionConfig,
   config,
   fields,
   globalConfig,
   schemaPath,
-  serverURL,
 }) => {
   const {
     id,
@@ -92,6 +86,8 @@ const PreviewView: React.FC<Props> = ({
     updateDocumentEditor,
   } = useDocumentInfo()
 
+  const { getFormState } = useServerFunctions()
+
   const operation = id ? 'update' : 'create'
 
   const {
@@ -114,6 +110,8 @@ const PreviewView: React.FC<Props> = ({
 
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
+
+  const abortControllerRef = useRef(new AbortController())
 
   const documentLockStateRef = useRef<{
     hasShownLockedModal: boolean
@@ -169,6 +167,18 @@ const PreviewView: React.FC<Props> = ({
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
+      // only allow a single onChange event to process at a time
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+
       const currentTime = Date.now()
       const timeSinceLastUpdate = currentTime - lastUpdateTime
 
@@ -181,19 +191,16 @@ const PreviewView: React.FC<Props> = ({
       const docPreferences = await getDocPreferences()
 
       const { lockedState, state } = await getFormState({
-        apiRoute,
-        body: {
-          id,
-          collectionSlug,
-          docPreferences,
-          formState: prevFormState,
-          globalSlug,
-          operation,
-          returnLockStatus: isLockingEnabled ? true : false,
-          schemaPath,
-          updateLastEdited,
-        },
-        serverURL,
+        id,
+        collectionSlug,
+        docPreferences,
+        formState: prevFormState,
+        globalSlug,
+        operation,
+        returnLockStatus: isLockingEnabled ? true : false,
+        schemaPath,
+        signal: abortController.signal,
+        updateLastEdited,
       })
 
       setDocumentIsLocked(true)
@@ -202,8 +209,13 @@ const PreviewView: React.FC<Props> = ({
         const previousOwnerId = documentLockStateRef.current?.user?.id
 
         if (lockedState) {
-          if (!documentLockStateRef.current || lockedState.user.id !== previousOwnerId) {
-            if (previousOwnerId === user.id && lockedState.user.id !== user.id) {
+          const lockedUserID =
+            typeof lockedState.user === 'string' || typeof lockedState.user === 'number'
+              ? lockedState.user
+              : lockedState.user.id
+
+          if (!documentLockStateRef.current || lockedUserID !== previousOwnerId) {
+            if (previousOwnerId === user.id && lockedUserID !== user.id) {
               setShowTakeOverModal(true)
               documentLockStateRef.current.hasShownLockedModal = true
             }
@@ -211,9 +223,10 @@ const PreviewView: React.FC<Props> = ({
             documentLockStateRef.current = documentLockStateRef.current = {
               hasShownLockedModal: documentLockStateRef.current?.hasShownLockedModal || false,
               isLocked: true,
-              user: lockedState.user,
+              user: lockedState.user as ClientUser,
             }
-            setCurrentEditor(lockedState.user)
+
+            setCurrentEditor(lockedState.user as ClientUser)
           }
         }
       }
@@ -223,8 +236,6 @@ const PreviewView: React.FC<Props> = ({
     [
       collectionSlug,
       globalSlug,
-      serverURL,
-      apiRoute,
       id,
       isLockingEnabled,
       lastUpdateTime,
@@ -234,12 +245,21 @@ const PreviewView: React.FC<Props> = ({
       setCurrentEditor,
       setDocumentIsLocked,
       user,
+      getFormState,
     ],
   )
 
   // Clean up when the component unmounts or when the document is unlocked
   useEffect(() => {
     return () => {
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+
       if (!isLockingEnabled) {
         return
       }

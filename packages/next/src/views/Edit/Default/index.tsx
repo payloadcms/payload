@@ -15,11 +15,11 @@ import {
   useDocumentEvents,
   useDocumentInfo,
   useEditDepth,
+  useServerFunctions,
   useUploadEdits,
 } from '@payloadcms/ui'
 import {
   formatAdminURL,
-  getFormState,
   handleBackToDashboard,
   handleGoBack,
   handleTakeOver,
@@ -78,12 +78,12 @@ export const DefaultEditView: React.FC = () => {
   } = useDocumentInfo()
 
   const { refreshCookieAsync, user } = useAuth()
+
   const {
     config,
     config: {
       admin: { user: userSlug },
-      routes: { admin: adminRoute, api: apiRoute },
-      serverURL,
+      routes: { admin: adminRoute },
     },
     getEntityConfig,
   } = useConfig()
@@ -93,6 +93,9 @@ export const DefaultEditView: React.FC = () => {
   const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
   const { resetUploadEdits } = useUploadEdits()
+  const { getFormState } = useServerFunctions()
+
+  const abortControllerRef = useRef(new AbortController())
 
   const locale = params.get('locale')
 
@@ -158,6 +161,7 @@ export const DefaultEditView: React.FC = () => {
 
     return entitySlug
   })
+
   const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(() => {
     if (operation === 'create' && auth && !auth.disableLocalStrategy) {
       return true
@@ -229,6 +233,18 @@ export const DefaultEditView: React.FC = () => {
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
+      // only allow a single onChange event to process at a time
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+
       const currentTime = Date.now()
       const timeSinceLastUpdate = currentTime - lastUpdateTime
 
@@ -241,19 +257,16 @@ export const DefaultEditView: React.FC = () => {
       const docPreferences = await getDocPreferences()
 
       const { lockedState, state } = await getFormState({
-        apiRoute,
-        body: {
-          id,
-          collectionSlug,
-          docPreferences,
-          formState: prevFormState,
-          globalSlug,
-          operation,
-          returnLockStatus: isLockingEnabled ? true : false,
-          schemaPath,
-          updateLastEdited,
-        },
-        serverURL,
+        id,
+        collectionSlug,
+        docPreferences,
+        formState: prevFormState,
+        globalSlug,
+        operation,
+        returnLockStatus: isLockingEnabled ? true : false,
+        schemaPath,
+        signal: abortController.signal,
+        updateLastEdited,
       })
 
       setDocumentIsLocked(true)
@@ -262,8 +275,13 @@ export const DefaultEditView: React.FC = () => {
         const previousOwnerId = documentLockStateRef.current?.user?.id
 
         if (lockedState) {
-          if (!documentLockStateRef.current || lockedState.user.id !== previousOwnerId) {
-            if (previousOwnerId === user.id && lockedState.user.id !== user.id) {
+          const lockedUserID =
+            typeof lockedState.user === 'string' || typeof lockedState.user === 'number'
+              ? lockedState.user
+              : lockedState.user.id
+
+          if (!documentLockStateRef.current || lockedUserID !== previousOwnerId) {
+            if (previousOwnerId === user.id && lockedUserID !== user.id) {
               setShowTakeOverModal(true)
               documentLockStateRef.current.hasShownLockedModal = true
             }
@@ -271,9 +289,9 @@ export const DefaultEditView: React.FC = () => {
             documentLockStateRef.current = documentLockStateRef.current = {
               hasShownLockedModal: documentLockStateRef.current?.hasShownLockedModal || false,
               isLocked: true,
-              user: lockedState.user,
+              user: lockedState.user as ClientUser,
             }
-            setCurrentEditor(lockedState.user)
+            setCurrentEditor(lockedState.user as ClientUser)
           }
         }
       }
@@ -281,26 +299,33 @@ export const DefaultEditView: React.FC = () => {
       return state
     },
     [
-      apiRoute,
       collectionSlug,
       schemaPath,
       getDocPreferences,
       globalSlug,
       id,
       operation,
-      serverURL,
       user,
       documentLockStateRef,
       setCurrentEditor,
       isLockingEnabled,
       setDocumentIsLocked,
       lastUpdateTime,
+      getFormState,
     ],
   )
 
   // Clean up when the component unmounts or when the document is unlocked
   useEffect(() => {
     return () => {
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+
       if (!isLockingEnabled) {
         return
       }

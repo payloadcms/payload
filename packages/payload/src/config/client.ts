@@ -27,7 +27,10 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'typescript'
 >
 
-export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'], 'components'>
+export type ServerOnlyRootAdminProperties = keyof Pick<
+  SanitizedConfig['admin'],
+  'components' | 'serverFunctions'
+>
 
 export type ClientConfig = {
   admin: {
@@ -48,6 +51,10 @@ export type ClientConfig = {
   globals: ClientGlobalConfig[]
 } & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | ServerOnlyRootProperties>
 
+export const serverOnlyAdminConfigProperties: readonly Partial<ServerOnlyRootAdminProperties>[] = [
+  'serverFunctions',
+]
+
 export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperties>[] = [
   'endpoints',
   'db',
@@ -64,6 +71,6 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'email',
   'custom',
   'graphQL',
-  'logger'
+  'logger',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]

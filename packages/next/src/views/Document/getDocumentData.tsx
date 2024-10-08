@@ -1,19 +1,21 @@
 import type {
   Data,
   FormState,
+  ImportMap,
   Locale,
   PayloadRequest,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
 } from 'payload'
 
-import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
+import { buildFormStateFn as buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { reduceFieldsToValues } from 'payload/shared'
 
 export const getDocumentData = async (args: {
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
   id?: number | string
+  importMap: ImportMap
   locale: Locale
   req: PayloadRequest
   schemaPath?: string
@@ -26,28 +28,25 @@ export const getDocumentData = async (args: {
   const schemaPath = schemaPathFromProps || collectionConfig?.slug || globalConfig?.slug
 
   try {
-    const { state: formState } = await buildFormState({
-      req: {
-        ...req,
-        data: {
-          id,
-          collectionSlug: collectionConfig?.slug,
-          globalSlug: globalConfig?.slug,
-          locale: locale?.code,
-          operation: (collectionConfig && id) || globalConfig ? 'update' : 'create',
-          schemaPath,
-        },
-      },
+    const result = await buildFormState({
+      id,
+      collectionSlug: collectionConfig?.slug,
+      globalSlug: globalConfig?.slug,
+      locale: locale?.code,
+      operation: (collectionConfig && id) || globalConfig ? 'update' : 'create',
+      req,
+      schemaPath,
     })
 
-    const data = reduceFieldsToValues(formState, true)
+    const data = reduceFieldsToValues(result.state, true)
 
     return {
       data,
-      formState,
+      formState: result.state,
     }
   } catch (error) {
     console.error('Error getting document data', error) // eslint-disable-line no-console
+
     return {
       data: null,
       formState: {

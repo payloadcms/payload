@@ -498,6 +498,7 @@ describe('lexicalMain', () => {
     await expect(uploadExtraFieldsDrawer).toBeHidden()
     await wait(500)
     await saveDocAndAssert(page)
+    await wait(500)
     // Reload page, open the extra fields drawer again and check if the text is still there
     await page.reload()
     await wait(300)

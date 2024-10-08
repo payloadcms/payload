@@ -15,9 +15,9 @@ import {
   RenderFields,
   useAuth,
   useConfig,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
 import React from 'react'
 
 import { RenderEmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
@@ -35,6 +35,8 @@ export const CreateFirstUserClient: React.FC<{
     getEntityConfig,
   } = useConfig()
 
+  const { getFormState } = useServerFunctions()
+
   const { t } = useTranslation()
   const { setUser } = useAuth()
 
@@ -43,18 +45,15 @@ export const CreateFirstUserClient: React.FC<{
   const onChange: FormProps['onChange'][0] = React.useCallback(
     async ({ formState: prevFormState }) => {
       const { state } = await getFormState({
-        apiRoute,
-        body: {
-          collectionSlug: userSlug,
-          formState: prevFormState,
-          operation: 'create',
-          schemaPath: `_${userSlug}.auth`,
-        },
-        serverURL,
+        collectionSlug: userSlug,
+        formState: prevFormState,
+        operation: 'create',
+        schemaPath: `_${userSlug}.auth`,
       })
+
       return state
     },
-    [apiRoute, userSlug, serverURL],
+    [userSlug, getFormState],
   )
 
   const handleFirstRegister = (data: { user: ClientUser }) => {

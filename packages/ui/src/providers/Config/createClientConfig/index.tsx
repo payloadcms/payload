@@ -1,5 +1,6 @@
 import type { I18nClient } from '@payloadcms/translations'
 
+import { serverOnlyAdminConfigProperties } from 'payload'
 import {
   type AdminViewProps,
   type ClientConfig,
@@ -68,6 +69,12 @@ export const createClientConfig = async ({
   }
 
   if ('admin' in clientConfig) {
+    for (const key of serverOnlyAdminConfigProperties) {
+      if (key in clientConfig.admin) {
+        delete clientConfig.admin[key]
+      }
+    }
+
     if (
       config.admin?.avatar &&
       typeof config.admin?.avatar === 'object' &&

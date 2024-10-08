@@ -320,7 +320,14 @@ export type {
 
 export type { FormFieldBase, ServerFieldBase } from './forms/Field.js'
 
-export type { Data, FilterOptionsResult, FormField, FormState, Row } from './forms/Form.js'
+export type {
+  BuildFormStateArgs,
+  Data,
+  FilterOptionsResult,
+  FormField,
+  FormState,
+  Row,
+} from './forms/Form.js'
 
 export type {
   FieldLabelClientComponent,
@@ -333,6 +340,16 @@ export type {
 
 export type { RowLabel, RowLabelComponent } from './forms/RowLabel.js'
 
+export type {
+  DefaultServerFunctionArgs,
+  ServerFunction,
+  ServerFunctionArgs,
+  ServerFunctionClient,
+  ServerFunctionClientArgs,
+  ServerFunctionConfig,
+  ServerFunctionHandler,
+} from './functions/index.js'
+
 export type { LanguageOptions } from './LanguageOptions.js'
 
 export type {
@@ -341,16 +358,6 @@ export type {
   RichTextGenerateComponentMap,
   RichTextHooks,
 } from './RichText.js'
-
-export type {
-  AdminViewComponent,
-  AdminViewConfig,
-  AdminViewProps,
-  EditViewProps,
-  InitPageResult,
-  ServerSideEditViewProps,
-  VisibleEntities,
-} from './views/types.js'
 
 export type MappedServerComponent<TComponentClientProps extends JsonObject = JsonObject> = {
   Component: React.ComponentType<TComponentClientProps>
@@ -397,3 +404,13 @@ export type CreateMappedComponent = {
     identifier: string,
   ): MappedComponent<T>[]
 }
+
+export type {
+  AdminViewComponent,
+  AdminViewConfig,
+  AdminViewProps,
+  EditViewProps,
+  InitPageResult,
+  ServerSideEditViewProps,
+  VisibleEntities,
+} from './views/types.js'

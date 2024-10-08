@@ -19,9 +19,9 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
-import { getFormState } from '../../utilities/getFormState.js'
 import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
 import { isEditing as getIsEditing } from '../../utilities/isEditing.js'
 import { useAuth } from '../Auth/index.js'
@@ -65,6 +65,11 @@ const DocumentInfo: React.FC<
     },
   } = useConfig()
 
+  const { user } = useAuth()
+
+  const { getFormState } = useServerFunctions()
+  const abortControllerRef = useRef(new AbortController())
+
   const collectionConfig = collections.find((c) => c.slug === collectionSlug)
   const globalConfig = globals.find((g) => g.slug === globalSlug)
   const docConfig = collectionConfig || globalConfig
@@ -107,7 +112,10 @@ const DocumentInfo: React.FC<
   const [documentIsLocked, setDocumentIsLocked] = useState<boolean | undefined>(false)
   const [currentEditor, setCurrentEditor] = useState<ClientUser | null>(null)
 
-  const isInitializing = initialState === undefined || data === undefined
+  const [isInitializing, setIsInitializing] = useState(
+    initialState === undefined || data === undefined,
+  )
+
   const [unpublishedVersions, setUnpublishedVersions] =
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
 
@@ -209,6 +217,12 @@ const DocumentInfo: React.FC<
   )
 
   useEffect(() => {
+    if (initialState !== undefined && data !== undefined) {
+      setIsInitializing(false)
+    }
+  }, [initialState, data])
+
+  useEffect(() => {
     if (!isLockingEnabled || (!id && !globalSlug)) {
       return
     }
@@ -235,7 +249,7 @@ const DocumentInfo: React.FC<
           } else {
             setDocumentIsLocked(false)
           }
-        } catch (error) {
+        } catch (_err) {
           // swallow error
         }
       }
@@ -483,6 +497,18 @@ const DocumentInfo: React.FC<
 
   const onSave = React.useCallback<DocumentInfoContext['onSave']>(
     async (json) => {
+      // only allow a single onSave event to process at a time
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+
       if (typeof onSaveFromProps === 'function') {
         void onSaveFromProps(json)
       }
@@ -492,18 +518,15 @@ const DocumentInfo: React.FC<
       const newData = collectionSlug ? json.doc : json.result
 
       const { state: newState } = await getFormState({
-        apiRoute: api,
-        body: {
-          id,
-          collectionSlug,
-          data: newData,
-          docPreferences,
-          globalSlug,
-          locale,
-          operation,
-          schemaPath: collectionSlug || globalSlug,
-        },
-        serverURL,
+        id,
+        collectionSlug,
+        data: newData,
+        docPreferences,
+        globalSlug,
+        locale,
+        operation,
+        schemaPath: collectionSlug || globalSlug,
+        signal: abortController.signal,
       })
 
       setInitialState(newState)
@@ -512,7 +535,6 @@ const DocumentInfo: React.FC<
       await getDocPermissions(newData)
     },
     [
-      api,
       collectionSlug,
       getDocPreferences,
       globalSlug,
@@ -520,8 +542,8 @@ const DocumentInfo: React.FC<
       operation,
       locale,
       onSaveFromProps,
-      serverURL,
       getDocPermissions,
+      getFormState,
     ],
   )
 
@@ -534,38 +556,40 @@ const DocumentInfo: React.FC<
       initialDataFromProps === undefined ||
       localeChanged
     ) {
-      if (localeChanged) {
-        prevLocale.current = locale
-      }
-
       const getInitialState = async () => {
+        if (localeChanged) {
+          prevLocale.current = locale
+        }
+
+        setIsInitializing(true)
         setIsError(false)
         setIsLoading(true)
 
         try {
-          const { state: result } = await getFormState({
-            apiRoute: api,
-            body: {
-              id,
-              collectionSlug,
-              globalSlug,
-              locale,
-              operation,
-              schemaPath: collectionSlug || globalSlug,
-            },
-            onError: onLoadError,
-            serverURL,
+          const result = await getFormState({
+            id,
+            collectionSlug,
+            globalSlug,
+            locale,
+            operation,
+            schemaPath: collectionSlug || globalSlug,
             signal: abortController.signal,
           })
-          const data = reduceFieldsToValues(result, true)
+
+          if ('errors' in result) {
+            await onLoadError(result.errors)
+            return
+          }
+
+          const data = reduceFieldsToValues(result.state, true)
           setData(data)
 
           if (localeChanged) {
             void getDocPermissions(data)
           }
 
-          setInitialState(result)
-        } catch (err) {
+          setInitialState(result.state)
+        } catch (_err) {
           if (!abortController.signal.aborted) {
             if (typeof onLoadError === 'function') {
               void onLoadError()
@@ -583,7 +607,7 @@ const DocumentInfo: React.FC<
     return () => {
       try {
         abortController.abort()
-      } catch (error) {
+      } catch (_err) {
         // swallow error
       }
     }
@@ -599,6 +623,8 @@ const DocumentInfo: React.FC<
     initialDataFromProps,
     initialStateFromProps,
     getDocPermissions,
+    user,
+    getFormState,
   ])
 
   useEffect(() => {

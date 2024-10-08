@@ -6,17 +6,16 @@ import {
   Button,
   Popup,
   Translation,
-  useAuth,
   useConfig,
   useDocumentInfo,
   useDrawerSlug,
   useLocale,
   useModal,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
 import { deepCopyObject, reduceFieldsToValues } from 'payload/shared'
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Editor, Node, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
 
@@ -72,7 +71,6 @@ export const LinkElement = () => {
 
   const editor = useSlate()
   const { config } = useConfig()
-  const { user } = useAuth()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
   const { closeModal, openModal, toggleModal } = useModal()
@@ -80,6 +78,8 @@ export const LinkElement = () => {
   const [renderPopup, setRenderPopup] = useState(false)
   const [initialState, setInitialState] = useState<FormState>({})
   const { id, collectionSlug } = useDocumentInfo()
+
+  const { getFormState } = useServerFunctions()
 
   const drawerSlug = useDrawerSlug('rich-text-link')
 
@@ -101,13 +101,9 @@ export const LinkElement = () => {
       }
 
       const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
-          data,
-          operation: 'update',
-          schemaPath: fieldMapPath,
-        },
-        serverURL: config.serverURL,
+        data,
+        operation: 'update',
+        schemaPath: fieldMapPath,
       })
 
       setInitialState(state)
@@ -116,7 +112,7 @@ export const LinkElement = () => {
     if (renderModal) {
       void awaitInitialState()
     }
-  }, [renderModal, element, user, locale, t, collectionSlug, config, id, fieldMapPath])
+  }, [renderModal, element, locale, t, collectionSlug, config, id, fieldMapPath, getFormState])
 
   return (
     <span className={baseClass} {...attributes}>
