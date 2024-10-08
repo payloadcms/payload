@@ -53,6 +53,7 @@ export type InitPageResult = {
   languageOptions: LanguageOptions
   locale?: Locale
   permissions: Permissions
+  redirectTo?: string
   req: PayloadRequest
   translations: ClientTranslationsObject
   visibleEntities: VisibleEntities

@@ -4,6 +4,7 @@ import type { FormField, UIField } from 'payload'
 
 import {
   useAllFormFields,
+  useConfig,
   useDocumentInfo,
   useForm,
   useLocale,
@@ -29,6 +30,13 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
 
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
+  const {
+    config: {
+      routes: { api },
+      serverURL,
+    },
+  } = useConfig()
+
   const locale = useLocale()
   const [fields] = useAllFormFields()
   const { getData } = useForm()
@@ -45,8 +53,10 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
   const [href, setHref] = useState<string>()
 
   useEffect(() => {
+    const endpoint = `${serverURL}${api}/plugin-seo/generate-url`
+
     const getHref = async () => {
-      const genURLResponse = await fetch('/api/plugin-seo/generate-url', {
+      const genURLResponse = await fetch(endpoint, {
         body: JSON.stringify({
           id: docInfo.id,
           collectionSlug: docInfo.collectionSlug,
@@ -75,7 +85,7 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
     if (hasGenerateURLFn && !href) {
       void getHref()
     }
-  }, [fields, href, locale, docInfo, hasGenerateURLFn, getData])
+  }, [fields, href, locale, docInfo, hasGenerateURLFn, getData, serverURL, api])
 
   return (
     <div

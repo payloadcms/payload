@@ -1,4 +1,10 @@
-export { generateCookie, getCookieExpiration } from '../auth/cookies.js'
+export {
+  generateCookie,
+  generateExpiredPayloadCookie,
+  generatePayloadCookie,
+  getCookieExpiration,
+  parseCookies,
+} from '../auth/cookies.js'
 export { parsePayloadComponent } from '../bin/generateImportMap/parsePayloadComponent.js'
 export { defaults as collectionDefaults } from '../collections/config/defaults.js'
 

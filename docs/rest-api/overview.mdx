@@ -605,7 +605,7 @@ export const Orders: CollectionConfig = {
       path: '/:id/tracking',
       method: 'get',
       handler: async (req) => {
-        const tracking = await getTrackingInfo(req.params.id)
+        const tracking = await getTrackingInfo(req.routeParams.id)
 
         if (!tracking) {
           return Response.json({ error: 'not found' }, { status: 404})

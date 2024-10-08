@@ -1,30 +1,32 @@
 @import '../scss/styles.scss';
 
-.rich-text-lexical {
-  & > .field-error.tooltip {
-    right: auto;
-    position: static;
-    margin-bottom: 0.2em;
-    max-width: fit-content;
-  }
-
-  .errorBoundary {
-    pre {
-      text-wrap: unset;
+@layer payload-default {
+  .rich-text-lexical {
+    & > .field-error.tooltip {
+      right: auto;
+      position: static;
+      margin-bottom: 0.2em;
+      max-width: fit-content;
     }
-  }
 
-  &__wrap {
-    width: 100%;
-    position: relative;
-  }
+    .errorBoundary {
+      pre {
+        text-wrap: unset;
+      }
+    }
 
-  &--read-only {
-    .editor-container {
-      .editor {
-        background: var(--theme-elevation-200);
-        color: var(--theme-elevation-450);
-        padding: calc(var(--base) * 0.5);
+    &__wrap {
+      width: 100%;
+      position: relative;
+    }
+
+    &--read-only {
+      .editor-container {
+        .editor {
+          background: var(--theme-elevation-200);
+          color: var(--theme-elevation-450);
+          padding: calc(var(--base) * 0.5);
+        }
       }
     }
   }
