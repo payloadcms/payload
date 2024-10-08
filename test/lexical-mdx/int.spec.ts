@@ -30,6 +30,7 @@ type Tests = Array<{
     MarkOptional<SerializedBlockNode, 'children' | 'fields' | 'format' | 'type' | 'version'>,
     'fields'
   >
+  debugFlag?: boolean
   description?: string
   ignoreSpacesAndNewlines?: boolean
   input: string
@@ -700,11 +701,13 @@ there4
       input: `
 <Banner>
   Some text 1 <InlineCode>code 1</InlineCode> some
+
   text 2 <InlineCode>code 2</InlineCode> some text
+
   3 <InlineCode>code 3</InlineCode> some text 4<InlineCode>code 4</InlineCode>
 </Banner>
 `,
-      description: 'Banner with inline codes, each line a linebreak, one paragraph',
+      description: 'Banner with inline codes, three paragraphs',
 
       blockNode: {
         fields: {
@@ -740,10 +743,16 @@ there4
                       type: 'text',
                       version: 1,
                     },
-                    {
-                      type: 'linebreak',
-                      version: 1,
-                    },
+                  ],
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+                {
+                  children: [
                     {
                       detail: 0,
                       format: 0,
@@ -770,10 +779,16 @@ there4
                       type: 'text',
                       version: 1,
                     },
-                    {
-                      type: 'linebreak',
-                      version: 1,
-                    },
+                  ],
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+                {
+                  children: [
                     {
                       detail: 0,
                       format: 0,
@@ -898,8 +913,11 @@ Text before banner
       input: `
 <TextContainerNoTrim>
 no indent
+
   indent 2
+
     indent 4
+
 no indent
 </TextContainerNoTrim>
 `,
@@ -907,8 +925,11 @@ no indent
         fields: {
           blockType: 'TextContainerNoTrim',
           text: `no indent
+
   indent 2
+
     indent 4
+
 no indent`,
         },
       },
@@ -919,16 +940,22 @@ no indent`,
       input: `
 <TextContainer>
 no indent
+
   indent 2
+
     indent 4
+
 no indent
 </TextContainer>
 `,
       inputAfterConvertFromEditorJSON: `
 <TextContainer>
   no indent
+
     indent 2
+
       indent 4
+
   no indent
 </TextContainer>
 `,
@@ -936,20 +963,25 @@ no indent
         fields: {
           blockType: 'TextContainer',
           text: `no indent
+
   indent 2
+
     indent 4
+
 no indent`,
         },
       },
     },
     {
       description: 'TextContainerNoTrim with nested, leftpad content',
-
       input: `
 <TextContainerNoTrim>
   indent 2
+
     indent 4
+
       indent 6
+
   indent 2
 </TextContainerNoTrim>
 `,
@@ -957,8 +989,11 @@ no indent`,
         fields: {
           blockType: 'TextContainerNoTrim',
           text: `  indent 2
+
     indent 4
+
       indent 6
+
   indent 2`,
         },
       },
@@ -968,8 +1003,11 @@ no indent`,
       input: `
 <TextContainer>
   indent 2
+
     indent 4
+
       indent 6
+
   indent 2
 </TextContainer>
 `,
@@ -977,8 +1015,11 @@ no indent`,
         fields: {
           blockType: 'TextContainer',
           text: `indent 2
+
   indent 4
+
     indent 6
+
 indent 2`,
         },
       },
@@ -1210,10 +1251,15 @@ Some text 1
       },
     },
     {
+      inputAfterConvertFromEditorJSON: `
+<Banner>
+  Some line [Start of link line2](/some/link)
+</Banner>
+`,
       input: `
 <Banner>
-  Some line [ Start of link<br>
-  line2] (/some/link) .
+Some line [Start of link
+  line2](/some/link)
 </Banner>
 `,
       blockNode: {
@@ -1240,20 +1286,7 @@ Some text 1
                           format: 0,
                           mode: 'normal',
                           style: '',
-                          text: ' Start of link',
-                          type: 'text',
-                          version: 1,
-                        },
-                        {
-                          type: 'linebreak',
-                          version: 1,
-                        },
-                        {
-                          detail: 0,
-                          format: 0,
-                          mode: 'normal',
-                          style: '',
-                          text: 'line2 ',
+                          text: 'Start of link line2',
                           type: 'text',
                           version: 1,
                         },
@@ -1289,6 +1322,11 @@ Some text 1
       },
     },
     {
+      inputAfterConvertFromEditorJSON: `
+<Banner>
+  Text text [ Link ](/some/link) .
+</Banner>
+`,
       input: `
 <Banner>
   Text text [ Link
@@ -1319,7 +1357,7 @@ Some text 1
                           format: 0,
                           mode: 'normal',
                           style: '',
-                          text: 'Link ',
+                          text: ' Link ',
                           type: 'text',
                           version: 1,
                         },
@@ -1339,7 +1377,7 @@ Some text 1
                       format: 0,
                       mode: 'normal',
                       style: '',
-                      text: '.',
+                      text: ' .',
                       type: 'text',
                       version: 1,
                     },
@@ -1365,7 +1403,7 @@ Some text 1
     },
   ]
 
-  const INPUT_AND_OUTPUT: Tests = INPUT_AND_OUTPUTBase
+  const INPUT_AND_OUTPUT: Tests = INPUT_AND_OUTPUTBase //.filter((test) => test.debugFlag)
 
   for (const {
     input,
@@ -1417,15 +1455,11 @@ Some text 1
         removeUndefinedAndIDRecursively(receivedBlockNodeToTest)
         removeUndefinedAndIDRecursively(blockNode)
 
-        console.log({ receivedBlockNodeToTest, blockNode })
-
         expect(receivedBlockNodeToTest).toStrictEqual(blockNode)
       } else if (rootChildren) {
         const receivedRootChildren = result.editorState.root.children
         removeUndefinedAndIDRecursively(receivedRootChildren)
         removeUndefinedAndIDRecursively(rootChildren)
-
-        console.log({ receivedRootChildren, rootChildren })
 
         expect(receivedRootChildren).toStrictEqual(rootChildren)
       } else {
@@ -1462,8 +1496,8 @@ Some text 1
         ? (sanitizedInputAfterConvertFromEditorJSON ?? sanitizedInput).replace(/\s/g, '')
         : (sanitizedInputAfterConvertFromEditorJSON ?? sanitizedInput)
 
-      console.log({ result: resultNoSpace, expected: inputNoSpace })
-
+      console.log('resultNoSpace', resultNoSpace)
+      console.log('inputNoSpace', inputNoSpace)
       expect(resultNoSpace).toBe(inputNoSpace)
     })
   }
