@@ -1,7 +1,6 @@
 'use client'
 import type {
   ClientCollectionConfig,
-  ClientUser,
   FormState,
   LoginWithUsernameOptions,
   MeOperationResult,
