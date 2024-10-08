@@ -236,23 +236,58 @@ export const generateFileData = async <T>({
         withMetadata,
       })
 
-      filesToSave.push({
-        buffer: croppedImage,
-        path: `${staticPath}/${fsSafeName}`,
-      })
+      // Apply resize after cropping to ensure it conforms to resizeOptions
+      if (resizeOptions) {
+        const resizedAfterCrop = await sharp(croppedImage)
+          .resize({
+            fit: resizeOptions?.fit || 'cover',
+            height: resizeOptions?.height,
+            position: resizeOptions?.position || 'center',
+            width: resizeOptions?.width,
+          })
+          .toBuffer({ resolveWithObject: true })
 
-      fileForResize = {
-        ...file,
-        data: croppedImage,
-        size: info.size,
+        filesToSave.push({
+          buffer: resizedAfterCrop.data,
+          path: `${staticPath}/${fsSafeName}`,
+        })
+
+        fileForResize = {
+          ...fileForResize,
+          data: resizedAfterCrop.data,
+          size: resizedAfterCrop.info.size,
+        }
+
+        fileData.width = resizedAfterCrop.info.width
+        fileData.height = resizedAfterCrop.info.height
+        if (fileIsAnimatedType) {
+          const metadata = await sharpFile.metadata()
+          fileData.height = metadata.pages
+            ? resizedAfterCrop.info.height / metadata.pages
+            : resizedAfterCrop.info.height
+        }
+        fileData.filesize = resizedAfterCrop.info.size
+      } else {
+        // If resizeOptions is not present, just save the cropped image
+        filesToSave.push({
+          buffer: croppedImage,
+          path: `${staticPath}/${fsSafeName}`,
+        })
+
+        fileForResize = {
+          ...file,
+          data: croppedImage,
+          size: info.size,
+        }
+
+        fileData.width = info.width
+        fileData.height = info.height
+        if (fileIsAnimatedType) {
+          const metadata = await sharpFile.metadata()
+          fileData.height = metadata.pages ? info.height / metadata.pages : info.height
+        }
+        fileData.filesize = info.size
       }
-      fileData.width = info.width
-      fileData.height = info.height
-      if (fileIsAnimatedType) {
-        const metadata = await sharpFile.metadata()
-        fileData.height = metadata.pages ? info.height / metadata.pages : info.height
-      }
-      fileData.filesize = info.size
 
       if (file.tempFilePath) {
         await fs.promises.writeFile(file.tempFilePath, croppedImage) // write fileBuffer to the temp path
