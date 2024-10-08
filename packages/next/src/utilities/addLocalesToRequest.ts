@@ -17,12 +17,14 @@ export function addLocalesToRequestFromData(req: PayloadRequest): void {
       localeOnReq = data.locale
     }
 
-    if (
-      !fallbackLocaleOnReq &&
-      data?.['fallback-locale'] &&
-      typeof data?.['fallback-locale'] === 'string'
-    ) {
-      fallbackLocaleOnReq = data['fallback-locale']
+    if (!fallbackLocaleOnReq) {
+      if (data?.['fallback-locale'] && typeof data?.['fallback-locale'] === 'string') {
+        fallbackLocaleOnReq = data['fallback-locale']
+      }
+
+      if (data?.['fallbackLocale'] && typeof data?.['fallbackLocale'] === 'string') {
+        fallbackLocaleOnReq = data['fallbackLocale']
+      }
     }
 
     const { fallbackLocale, locale } = sanitizeLocales({
@@ -54,15 +56,37 @@ export const sanitizeLocales = ({
   locale,
   localization,
 }: SanitizeLocalesArgs): SanitizeLocalesReturn => {
-  if (['none', 'null'].includes(fallbackLocale)) {
+  // Check if localization has fallback enabled or if a fallback locale is provided
+  const shouldFallback = Boolean(
+    (localization && localization.fallback) ||
+      (fallbackLocale && !['false', 'none', 'null'].includes(fallbackLocale)),
+  )
+
+  if (shouldFallback) {
+    if (!fallbackLocale) {
+      // Check for locale specific fallback
+      const localeHasFallback =
+        localization && localization?.locales?.length
+          ? localization.locales.find((localeConfig) => localeConfig.code === locale)
+              ?.fallbackLocale
+          : false
+
+      if (localeHasFallback) {
+        fallbackLocale = localeHasFallback
+      } else {
+        // Use defaultLocale as fallback otherwise
+        if (localization && 'fallback' in localization && localization.fallback) {
+          fallbackLocale = localization.defaultLocale
+        }
+      }
+    }
+  } else {
     fallbackLocale = 'null'
-  } else if (localization && !localization.localeCodes.includes(fallbackLocale)) {
-    fallbackLocale = localization.defaultLocale
   }
 
   if (locale === '*') {
     locale = 'all'
-  } else if (localization && !localization.localeCodes.includes(locale)) {
+  } else if (localization && !localization.localeCodes.includes(locale) && localization.fallback) {
     locale = localization.defaultLocale
   }
 

@@ -82,19 +82,41 @@ export const createLocalReq: CreateLocalReq = async (
   { context, fallbackLocale, locale: localeArg, req = {} as PayloadRequest, user },
   payload,
 ) => {
-  if (payload.config?.localization) {
+  const localization = payload.config?.localization
+  if (localization) {
     const locale = localeArg === '*' ? 'all' : localeArg
-    const defaultLocale = payload.config.localization.defaultLocale
+    const defaultLocale = localization.defaultLocale
     const localeCandidate = locale || req?.locale || req?.query?.locale
     req.locale =
       localeCandidate && typeof localeCandidate === 'string' ? localeCandidate : defaultLocale
-    const fallbackLocaleFromConfig = payload.config.localization.locales.find(
-      ({ code }) => req.locale === code,
-    )?.fallbackLocale
-    if (typeof fallbackLocale !== 'undefined') {
-      req.fallbackLocale = fallbackLocale
-    } else if (typeof req?.fallbackLocale === 'undefined') {
-      req.fallbackLocale = fallbackLocaleFromConfig || defaultLocale
+
+    const shouldFallback = Boolean(
+      (localization && localization.fallback) ||
+        (fallbackLocale && !['false', 'none', 'null'].includes(fallbackLocale)),
+    )
+
+    if (shouldFallback) {
+      if (!fallbackLocale) {
+        // Check for locale specific fallback
+        const localeHasFallback =
+          localization && localization?.locales?.length
+            ? localization.locales.find((localeConfig) => localeConfig.code === locale)
+                ?.fallbackLocale
+            : false
+
+        if (localeHasFallback) {
+          req.fallbackLocale = localeHasFallback
+        } else {
+          // Use defaultLocale as fallback otherwise
+          if (localization && 'fallback' in localization && localization.fallback) {
+            req.fallbackLocale = localization.defaultLocale
+          }
+        }
+      } else {
+        req.fallbackLocale = fallbackLocale
+      }
+    } else {
+      req.fallbackLocale = 'null'
     }
   }
 

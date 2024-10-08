@@ -26,6 +26,7 @@ export const createPayloadRequest = async ({
   const payload = await getPayloadHMR({ config: configPromise })
 
   const { config } = payload
+  const localization = config.localization
 
   const urlProperties = new URL(request.url)
   const { pathname, searchParams } = urlProperties
@@ -45,8 +46,10 @@ export const createPayloadRequest = async ({
     language,
   })
 
-  let locale
-  let fallbackLocale
+  const fallbackFromRequest =
+    searchParams.get('fallback-locale') || searchParams.get('fallbackLocale')
+  let locale = searchParams.get('locale')
+  let fallbackLocale = fallbackFromRequest
 
   const overrideHttpMethod = request.headers.get('X-HTTP-Method-Override')
   const queryToParse = overrideHttpMethod === 'GET' ? await request.text() : urlProperties.search
@@ -59,21 +62,51 @@ export const createPayloadRequest = async ({
       })
     : {}
 
-  if (config.localization) {
+  if (localization) {
+    const shouldFallback = Boolean(
+      localization.fallback ||
+        (fallbackLocale && !['false', 'none', 'null'].includes(fallbackLocale)),
+    )
+
+    if (shouldFallback) {
+      if (!fallbackLocale) {
+        // Check for locale specific fallback
+        const localeHasFallback = localization?.locales?.length
+          ? localization.locales.find((localeConfig) => localeConfig.code === locale)
+              ?.fallbackLocale
+          : false
+
+        if (localeHasFallback) {
+          fallbackLocale = localeHasFallback
+        } else {
+          // Use defaultLocale as fallback otherwise
+          if ('fallback' in localization && localization.fallback) {
+            fallbackLocale = localization.defaultLocale
+          }
+        }
+      }
+    } else {
+      fallbackLocale = 'null'
+    }
+
     const locales = sanitizeLocales({
-      fallbackLocale: searchParams.get('fallback-locale'),
-      locale: searchParams.get('locale'),
-      localization: payload.config.localization,
+      fallbackLocale,
+      locale,
+      localization,
     })
+
     locale = locales.locale
-    fallbackLocale = locales.fallbackLocale
+    fallbackLocale = shouldFallback ? locales.fallbackLocale : 'none'
 
     // Override if query params are present, in order to respect HTTP method override
     if (query.locale) {
-      locale = query.locale
+      locale = query.locale as string
     }
     if (query?.['fallback-locale']) {
-      fallbackLocale = query['fallback-locale']
+      fallbackLocale = query['fallback-locale'] as string
+    }
+    if (query?.['fallbackLocale']) {
+      fallbackLocale = query['fallbackLocale'] as string
     }
   }
 
