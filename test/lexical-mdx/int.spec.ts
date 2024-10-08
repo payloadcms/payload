@@ -13,7 +13,7 @@ import { fileURLToPath } from 'url'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { postsSlug } from './collections/Posts/index.js'
-import { mdxToEditorJSON } from './mdx/hooks.js'
+import { editorJSONToMDX, mdxToEditorJSON } from './mdx/hooks.js'
 import { tableJson } from './tableJson.js'
 import { textToRichText } from './textToRichText.js'
 
@@ -974,10 +974,8 @@ no indent`,
     },
     {
       description: 'TextContainerNoTrim with nested, leftpad content',
-
       input: `
 <TextContainerNoTrim>
-
   indent 2
 
     indent 4
@@ -1411,7 +1409,7 @@ Some line [Start of link
     input,
     inputAfterConvertFromEditorJSON,
     blockNode,
-    // ignoreSpacesAndNewlines,
+    ignoreSpacesAndNewlines,
     rootChildren,
     description,
   } of INPUT_AND_OUTPUT) {
@@ -1469,37 +1467,39 @@ Some line [Start of link
       }
     })
 
-    // it(`can convert from editor JSON: ${description ?? sanitizedInput}"`, () => {
-    //   const editorState = {
-    //     root: {
-    //       children: blockNode
-    //         ? [
-    //             {
-    //               format: '',
-    //               type: 'block',
-    //               version: 2,
-    //               ...blockNode,
-    //             },
-    //           ]
-    //         : rootChildren,
-    //       format: '',
-    //       indent: 0,
-    //       type: 'root',
-    //       version: 1,
-    //     },
-    //   }
-    //   const result = editorJSONToMDX({
-    //     editorConfig,
-    //     editorState,
-    //   })
-    //   // Remove all spaces and newlines
-    //   const resultNoSpace = ignoreSpacesAndNewlines ? result.replace(/\s/g, '') : result
-    //   const inputNoSpace = ignoreSpacesAndNewlines
-    //     ? (sanitizedInputAfterConvertFromEditorJSON ?? sanitizedInput).replace(/\s/g, '')
-    //     : (sanitizedInputAfterConvertFromEditorJSON ?? sanitizedInput)
+    it(`can convert from editor JSON: ${description ?? sanitizedInput}"`, () => {
+      const editorState = {
+        root: {
+          children: blockNode
+            ? [
+                {
+                  format: '',
+                  type: 'block',
+                  version: 2,
+                  ...blockNode,
+                },
+              ]
+            : rootChildren,
+          format: '',
+          indent: 0,
+          type: 'root',
+          version: 1,
+        },
+      }
+      const result = editorJSONToMDX({
+        editorConfig,
+        editorState,
+      })
+      // Remove all spaces and newlines
+      const resultNoSpace = ignoreSpacesAndNewlines ? result.replace(/\s/g, '') : result
+      const inputNoSpace = ignoreSpacesAndNewlines
+        ? (sanitizedInputAfterConvertFromEditorJSON ?? sanitizedInput).replace(/\s/g, '')
+        : (sanitizedInputAfterConvertFromEditorJSON ?? sanitizedInput)
 
-    //   expect(resultNoSpace).toBe(inputNoSpace)
-    // })
+      console.log('resultNoSpace', resultNoSpace)
+      console.log('inputNoSpace', inputNoSpace)
+      expect(resultNoSpace).toBe(inputNoSpace)
+    })
   }
 })
 
