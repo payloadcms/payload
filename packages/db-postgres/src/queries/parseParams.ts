@@ -3,6 +3,7 @@ import type { SQL } from 'drizzle-orm'
 import type { Field, Operator, Where } from 'payload/types'
 
 import { and, ilike, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
+import { PgUUID } from 'drizzle-orm/pg-core'
 import { QueryError } from 'payload/errors'
 import { validOperators } from 'payload/types'
 
@@ -174,6 +175,7 @@ export async function parseParams({
                 const sanitizedQueryValue = sanitizeQueryValue({
                   adapter,
                   field,
+                  isUUID: table?.[columnName] instanceof PgUUID,
                   operator,
                   relationOrPath,
                   val,

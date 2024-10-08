@@ -26,6 +26,11 @@ type Args = {
     [tableName: string]: Record<string, unknown>[]
   }
   texts: Record<string, unknown>[]
+  /**
+   * Set to a locale code if this set of fields is traversed within a
+   * localized array or block field
+   */
+  withinArrayOrBlockLocale?: string
 }
 
 export const transformArray = ({
@@ -43,6 +48,7 @@ export const transformArray = ({
   relationshipsToDelete,
   selects,
   texts,
+  withinArrayOrBlockLocale,
 }: Args) => {
   const newRows: ArrayRowToInsert[] = []
 
@@ -78,6 +84,10 @@ export const transformArray = ({
         newRow.row._locale = locale
       }
 
+      if (withinArrayOrBlockLocale) {
+        newRow.row._locale = withinArrayOrBlockLocale
+      }
+
       traverseFields({
         adapter,
         arrays: newRow.arrays,
@@ -97,6 +107,7 @@ export const transformArray = ({
         row: newRow.row,
         selects,
         texts,
+        withinArrayOrBlockLocale,
       })
 
       newRows.push(newRow)
