@@ -134,6 +134,27 @@ describe('Localization', () => {
       expect(localizedFallback.title.es).toEqual('')
     })
 
+    it('should fallback to spanish translation when empty and locale-specific fallback is provided', async () => {
+      const localizedFallback: any = await payload.findByID({
+        id: postWithLocalizedData.id,
+        collection,
+        locale: portugueseLocale,
+      })
+
+      expect(localizedFallback.title).toEqual(spanishTitle)
+    })
+
+    it('should respect fallback none', async () => {
+      const localizedFallback: any = await payload.findByID({
+        id: postWithLocalizedData.id,
+        collection,
+        locale: portugueseLocale,
+        fallbackLocale: 'none',
+      })
+
+      expect(localizedFallback.title).not.toBeDefined()
+    })
+
     describe('fallback locales', () => {
       let englishData
       let spanishData
