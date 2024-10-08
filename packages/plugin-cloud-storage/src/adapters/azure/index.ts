@@ -1,10 +1,10 @@
 import type { TokenCredential } from '@azure/core-http'
-
-import {
+import type {
   AnonymousCredential,
   ContainerClient,
   StorageSharedKeyCredential,
 } from '@azure/storage-blob'
+
 import { BlobServiceClient } from '@azure/storage-blob'
 
 import type { Adapter, GeneratedAdapter } from '../../types'
