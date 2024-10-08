@@ -1,6 +1,11 @@
-import type { Payload } from 'payload'
-
 import path from 'path'
+import {
+  commitTransaction,
+  createLocalReq,
+  initTransaction,
+  isolateObjectProperty,
+  type Payload,
+} from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -342,6 +347,116 @@ describe('Queues', () => {
 
     expect(allSimples.totalDocs).toBe(1)
     expect(allSimples.docs[0].title).toBe('from single task')
+  })
+
+  it('transaction test against payload-jobs collection', async () => {
+    // This kinds of emulates what happens when multiple jobs are queued and then run in parallel.
+    const runWorkflowFN = async (i: number) => {
+      const { id } = await payload.create({
+        collection: 'payload-jobs',
+        data: {
+          input: {
+            message: 'Number ' + i,
+          },
+          taskSlug: 'CreateSimple',
+        },
+      })
+
+      const _req = await createLocalReq({}, payload)
+      const t1Req = isolateObjectProperty(_req, 'transactionID')
+      delete t1Req.transactionID
+
+      await initTransaction(t1Req)
+
+      await payload.update({
+        collection: 'payload-jobs',
+        id,
+        req: t1Req,
+        data: {
+          input: {
+            message: 'Number ' + i + ' Update 1',
+          },
+          processing: true,
+          taskSlug: 'CreateSimple',
+        },
+      })
+
+      /**
+       * T1 start
+       */
+
+      const t2Req = isolateObjectProperty(t1Req, 'transactionID')
+      delete t2Req.transactionID
+      //
+      await initTransaction(t2Req)
+
+      await payload.update({
+        collection: 'payload-jobs',
+        id,
+        req: t1Req,
+        data: {
+          input: {
+            message: 'Number ' + i + ' Update 2',
+          },
+          processing: true,
+          taskSlug: 'CreateSimple',
+        },
+      })
+
+      await payload.create({
+        collection: 'simple',
+        req: t2Req,
+        data: {
+          title: 'from single task',
+        },
+      })
+
+      await payload.update({
+        collection: 'payload-jobs',
+        id,
+        req: t1Req,
+        data: {
+          input: {
+            message: 'Number ' + i + ' Update 3',
+          },
+          processing: true,
+          taskSlug: 'CreateSimple',
+        },
+      })
+
+      await commitTransaction(t2Req)
+
+      /**
+       * T1 end
+       */
+
+      await payload.update({
+        collection: 'payload-jobs',
+        id,
+        req: t1Req,
+        data: {
+          input: {
+            message: 'Number ' + i + ' Update 4',
+          },
+          processing: true,
+          taskSlug: 'CreateSimple',
+        },
+      })
+      await commitTransaction(t1Req)
+    }
+
+    await Promise.all(
+      new Array(30).fill(0).map(async (_, i) => {
+        await runWorkflowFN(i)
+      }),
+    )
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(30)
   })
 
   it('can queue single tasks multiple times', async () => {
