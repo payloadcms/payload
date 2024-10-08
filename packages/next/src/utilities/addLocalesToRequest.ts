@@ -1,5 +1,6 @@
 import type { PayloadRequest, SanitizedConfig } from 'payload'
 
+import { sanitizeFallbackLocale } from 'payload'
 /**
  * Mutates the Request to contain 'locale' and 'fallbackLocale' based on data or searchParams
  */
@@ -57,31 +58,15 @@ export const sanitizeLocales = ({
   localization,
 }: SanitizeLocalesArgs): SanitizeLocalesReturn => {
   // Check if localization has fallback enabled or if a fallback locale is provided
-  const shouldFallback = Boolean(
-    (localization && localization.fallback) ||
-      (fallbackLocale && !['false', 'none', 'null'].includes(fallbackLocale)),
-  )
 
-  if (shouldFallback) {
-    if (!fallbackLocale) {
-      // Check for locale specific fallback
-      const localeHasFallback =
-        localization && localization?.locales?.length
-          ? localization.locales.find((localeConfig) => localeConfig.code === locale)
-              ?.fallbackLocale
-          : false
+  if (localization) {
+    const sanitizedFallback = sanitizeFallbackLocale({
+      fallbackLocale,
+      locale,
+      localization,
+    })
 
-      if (localeHasFallback) {
-        fallbackLocale = localeHasFallback
-      } else {
-        // Use defaultLocale as fallback otherwise
-        if (localization && 'fallback' in localization && localization.fallback) {
-          fallbackLocale = localization.defaultLocale
-        }
-      }
-    }
-  } else {
-    fallbackLocale = 'null'
+    fallbackLocale = sanitizedFallback.fallbackLocale
   }
 
   if (locale === '*') {

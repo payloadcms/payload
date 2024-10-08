@@ -1,5 +1,7 @@
 import type { Payload } from 'payload'
 
+import { sanitizeFallbackLocale } from 'payload'
+
 type GetRequestLocalesArgs = {
   data?: Record<string, any>
   localization: Exclude<Payload['config']['localization'], false>
@@ -24,32 +26,13 @@ export function getRequestLocales({ data, localization, searchParams }: GetReque
     }
   }
 
-  const shouldFallback = Boolean(
-    (localization && localization.fallback) ||
-      (fallbackLocale && !['false', 'none', 'null'].includes(fallbackLocale)),
-  )
+  const sanitizedFallback = sanitizeFallbackLocale({
+    fallbackLocale,
+    locale,
+    localization,
+  })
 
-  if (shouldFallback) {
-    if (!fallbackLocale) {
-      // Check for locale specific fallback
-      const localeHasFallback =
-        localization && localization?.locales?.length
-          ? localization.locales.find((localeConfig) => localeConfig.code === locale)
-              ?.fallbackLocale
-          : false
-
-      if (localeHasFallback) {
-        fallbackLocale = localeHasFallback
-      } else {
-        // Use defaultLocale as fallback otherwise
-        if (localization && 'fallback' in localization && localization.fallback) {
-          fallbackLocale = localization.defaultLocale
-        }
-      }
-    }
-  } else {
-    fallbackLocale = 'null'
-  }
+  fallbackLocale = sanitizedFallback.fallbackLocale
 
   if (locale === '*') {
     locale = 'all'

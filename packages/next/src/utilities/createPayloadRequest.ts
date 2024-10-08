@@ -1,7 +1,7 @@
 import type { CustomPayloadRequestProperties, PayloadRequest, SanitizedConfig } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
-import { executeAuthStrategies, getDataLoader, parseCookies } from 'payload'
+import { executeAuthStrategies, getDataLoader, parseCookies, sanitizeFallbackLocale } from 'payload'
 import * as qs from 'qs-esm'
 import { URL } from 'url'
 
@@ -63,31 +63,13 @@ export const createPayloadRequest = async ({
     : {}
 
   if (localization) {
-    const shouldFallback = Boolean(
-      localization.fallback ||
-        (fallbackLocale && !['false', 'none', 'null'].includes(fallbackLocale)),
-    )
+    const sanitizedFallback = sanitizeFallbackLocale({
+      fallbackLocale,
+      locale,
+      localization,
+    })
 
-    if (shouldFallback) {
-      if (!fallbackLocale) {
-        // Check for locale specific fallback
-        const localeHasFallback = localization?.locales?.length
-          ? localization.locales.find((localeConfig) => localeConfig.code === locale)
-              ?.fallbackLocale
-          : false
-
-        if (localeHasFallback) {
-          fallbackLocale = localeHasFallback
-        } else {
-          // Use defaultLocale as fallback otherwise
-          if ('fallback' in localization && localization.fallback) {
-            fallbackLocale = localization.defaultLocale
-          }
-        }
-      }
-    } else {
-      fallbackLocale = 'null'
-    }
+    fallbackLocale = sanitizedFallback.fallbackLocale
 
     const locales = sanitizeLocales({
       fallbackLocale,
@@ -96,7 +78,6 @@ export const createPayloadRequest = async ({
     })
 
     locale = locales.locale
-    fallbackLocale = shouldFallback ? locales.fallbackLocale : 'none'
 
     // Override if query params are present, in order to respect HTTP method override
     if (query.locale) {
