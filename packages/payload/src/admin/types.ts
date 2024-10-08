@@ -356,7 +356,6 @@ export type {
 
 export type {
   ClientSlotProps,
-  GetSlotsArgs,
   RenderFieldArgs,
   RenderFieldBySchemaPath,
   RenderFieldBySchemaPathClient,

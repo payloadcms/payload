@@ -17,8 +17,26 @@ export type RenderFieldsClient = (
 ) => Promise<React.ReactNode[]>
 
 export type RenderFieldFn = (
-  args: Omit<GetSlotsArgs, 'clientConfig' | 'clientProps' | 'fieldState' | 'serverProps'> &
-    RenderFieldArgs,
+  args: {
+    readonly className?: string
+    readonly clientField: ClientField
+    readonly config: SanitizedConfig
+    readonly field: Field
+    readonly fieldPath: string
+    readonly forceRender?: boolean
+    readonly formState: FormState
+    readonly i18n: I18nClient
+    readonly importMap: ImportMap
+    readonly indexPath: string
+    readonly margins?: 'small' | false
+    readonly path: string
+    readonly payload: Payload
+    readonly permissions?: {
+      [fieldName: string]: FieldPermissions
+    }
+    readonly renderFields: RenderFieldsFn
+    readonly schemaPath: string
+  } & RenderFieldArgs,
 ) => React.ReactNode
 
 export type RenderFieldClient = (
@@ -75,31 +93,6 @@ export type ServerSlotProps = {
   i18n: I18nClient
   indexPath: string
   payload: Payload
-}
-
-export type GetSlotsArgs = {
-  readonly className?: string
-  readonly clientConfig: ClientConfig
-  readonly clientField: ClientField
-  readonly clientProps?: ClientSlotProps
-  readonly config: SanitizedConfig
-  readonly field: Field
-  readonly fieldPath: string
-  readonly fieldState: FormField
-  readonly forceRender?: boolean
-  readonly formState: FormState
-  readonly i18n: I18nClient
-  readonly importMap: ImportMap
-  readonly indexPath: string
-  readonly margins?: 'small' | false
-  readonly path: string
-  readonly payload: Payload
-  readonly permissions?: {
-    [fieldName: string]: FieldPermissions
-  }
-  readonly renderFields: RenderFieldsFn
-  readonly schemaPath: string
-  readonly serverProps?: ServerSlotProps
 }
 
 export type RenderFieldArgs = {

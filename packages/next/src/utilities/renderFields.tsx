@@ -10,7 +10,6 @@ import type {
   FieldTypes,
   FormField,
   FormState,
-  GetSlotsArgs,
   ImportMap,
   Payload,
   RenderFieldFn,
@@ -250,16 +249,15 @@ export const renderFieldRows = ({
     ),
   }))
 
-const getFieldSlots = (args: GetSlotsArgs): FieldSlots => {
+export const renderField: RenderFieldFn = (args) => {
   const {
     className,
     clientConfig,
     clientField,
-    clientProps,
     config,
     field,
     fieldPath,
-    fieldState,
+    fieldPermissions,
     forceRender,
     formState,
     i18n,
@@ -269,9 +267,31 @@ const getFieldSlots = (args: GetSlotsArgs): FieldSlots => {
     path,
     payload,
     permissions,
+    readOnly,
     schemaPath,
-    serverProps,
   } = args
+
+  const isHidden = 'admin' in field && 'hidden' in field.admin && field.admin.hidden
+
+  const fieldState = formState[fieldPath]
+
+  let clientProps: ClientSlotProps = {
+    field: clientField,
+    fieldState,
+    path: fieldPath,
+    permissions: fieldPermissions,
+    readOnly,
+    schemaPath,
+  }
+
+  const serverProps: ServerSlotProps = {
+    clientField,
+    config,
+    field,
+    i18n,
+    indexPath,
+    payload,
+  }
 
   const fieldSlots: FieldSlots = {}
 
@@ -295,6 +315,7 @@ const getFieldSlots = (args: GetSlotsArgs): FieldSlots => {
       fieldSlots.rows = renderFieldRows({
         ...args,
         field,
+        fieldState,
         rows: fieldState?.rows,
       })
       break
@@ -463,49 +484,6 @@ const getFieldSlots = (args: GetSlotsArgs): FieldSlots => {
       }
     }
   }
-
-  return fieldSlots
-}
-
-export const renderField: RenderFieldFn = (args) => {
-  const {
-    clientField,
-    config,
-    field,
-    fieldPath,
-    fieldPermissions,
-    formState,
-    i18n,
-    importMap,
-    indexPath,
-    payload,
-    readOnly,
-    schemaPath,
-  } = args
-
-  const isHidden = 'admin' in field && 'hidden' in field.admin && field.admin.hidden
-
-  const fieldState = formState[fieldPath]
-
-  let clientProps: ClientSlotProps = {
-    field: clientField,
-    fieldState,
-    path: fieldPath,
-    permissions: fieldPermissions,
-    readOnly,
-    schemaPath,
-  }
-
-  const serverProps: ServerSlotProps = {
-    clientField,
-    config,
-    field,
-    i18n,
-    indexPath,
-    payload,
-  }
-
-  const fieldSlots = getFieldSlots({ ...args, clientProps, fieldState, serverProps })
 
   clientProps = {
     ...clientProps,
