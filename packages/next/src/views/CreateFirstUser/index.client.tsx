@@ -1,9 +1,9 @@
 'use client'
 import type {
   ClientCollectionConfig,
-  ClientUser,
   FormState,
   LoginWithUsernameOptions,
+  MeOperationResult,
 } from 'payload'
 
 import {
@@ -57,8 +57,8 @@ export const CreateFirstUserClient: React.FC<{
     [apiRoute, userSlug, serverURL],
   )
 
-  const handleFirstRegister = (data: { user: ClientUser }) => {
-    setUser(data.user)
+  const handleFirstRegister = (data: MeOperationResult) => {
+    setUser(data)
   }
 
   return (
