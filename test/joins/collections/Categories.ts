@@ -50,6 +50,12 @@ export const Categories: CollectionConfig = {
       on: 'category',
     },
     {
+      name: 'hasManyPosts',
+      type: 'join',
+      collection: postsSlug,
+      on: 'categories',
+    },
+    {
       name: 'group',
       type: 'group',
       fields: [

@@ -5,7 +5,7 @@ import type {
   PgColumnBuilder,
   PgTableWithColumns,
 } from 'drizzle-orm/pg-core'
-import type { Field } from 'payload'
+import type { Field, SanitizedJoins } from 'payload'
 
 import { relations } from 'drizzle-orm'
 import {
@@ -47,6 +47,7 @@ type Args = {
   disableNotNull: boolean
   disableUnique: boolean
   fields: Field[]
+  joins?: SanitizedJoins
   rootRelationships?: Set<string>
   rootRelationsToBuild?: RelationMap
   rootTableIDColType?: string
@@ -77,6 +78,7 @@ export const buildTable = ({
   disableNotNull,
   disableUnique = false,
   fields,
+  joins,
   rootRelationships,
   rootRelationsToBuild,
   rootTableIDColType,
@@ -121,6 +123,7 @@ export const buildTable = ({
     disableUnique,
     fields,
     indexes,
+    joins,
     localesColumns,
     localesIndexes,
     newTableName: tableName,
