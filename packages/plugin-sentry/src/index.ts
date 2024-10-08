@@ -7,6 +7,8 @@ export { PluginOptions }
 /**
  * @example
  * ```ts
+ * import * as Sentry from '@sentry/nextjs'
+ *
  * sentryPlugin({
  *   options: {
  *     captureErrors: [400, 403],
@@ -37,6 +39,16 @@ export const sentryPlugin =
 
     return {
       ...config,
+      admin: {
+        ...config.admin,
+        components: {
+          ...config.admin?.components,
+          providers: [
+            ...(config.admin?.components?.providers ?? []),
+            '@payloadcms/plugin-sentry/client#AdminErrorBoundary',
+          ],
+        },
+      },
       hooks: {
         afterError: [
           ...(config.hooks?.afterError ?? []),

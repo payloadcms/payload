@@ -14,7 +14,6 @@ import { Users } from './collections/Users.js'
 export default buildConfigWithDefaults({
   admin: {
     components: {
-      providers: ['/AdminErrorBoundary.js#AdminErrorBoundary'],
       beforeDashboard: ['/TestErrors.js#TestErrors'],
     },
     importMap: {

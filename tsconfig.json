@@ -78,6 +78,9 @@
       "@payloadcms/plugin-seo/client": [
         "./packages/plugin-seo/src/exports/client.ts"
       ],
+      "@payloadcms/plugin-sentry/client": [
+        "./packages/plugin-sentry/src/exports/client.ts"
+      ],
       "@payloadcms/plugin-stripe/client": [
         "./packages/plugin-stripe/src/exports/client.ts"
       ],
