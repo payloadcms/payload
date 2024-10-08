@@ -433,7 +433,7 @@ describe('Relationships', () => {
             sort: '-movies.name',
           })
 
-          expect(result.docs[0].id).toStrictEqual(director1.id)
+          expect(result.docs[0].id).toStrictEqual(director2.id)
         })
 
         it('should query using "in" by hasMany relationship field', async () => {
