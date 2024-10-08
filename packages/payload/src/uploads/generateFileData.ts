@@ -139,7 +139,7 @@ export const generateFileData = async <T>({
       fileSupportsResize &&
       Boolean(resizeOptions || formatOptions || imageSizes || trimOptions || file.tempFilePath)
 
-    const sharpOptions: SharpOptions = {}
+    const sharpOptions: SharpOptions = { failOn: 'none' }
 
     if (fileIsAnimatedType) sharpOptions.animated = true
 
