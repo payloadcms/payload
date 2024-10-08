@@ -7,7 +7,9 @@ import { useEffect } from 'react'
 
 export default function GlobalError({ error }: { error: { digest?: string } & Error }) {
   useEffect(() => {
-    Sentry.captureException(error)
+    if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+      Sentry.captureException(error)
+    }
   }, [error])
 
   return (
