@@ -10,7 +10,7 @@ export type Options<TSlug extends GlobalSlug> = {
   context?: RequestContext
   depth?: number
   draft?: boolean
-  fallbackLocale?: TypedLocale
+  fallbackLocale?: 'none' | TypedLocale
   includeLockStatus?: boolean
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean

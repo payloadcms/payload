@@ -17,7 +17,7 @@ export type Options<TSlug extends CollectionSlug> = {
   depth?: number
   disableErrors?: boolean
   draft?: boolean
-  fallbackLocale?: TypedLocale
+  fallbackLocale?: 'none' | TypedLocale
   includeLockStatus?: boolean
   joins?: JoinQuery
   limit?: number

@@ -25,7 +25,7 @@ export type BaseOptions<TSlug extends CollectionSlug> = {
   data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
   depth?: number
   draft?: boolean
-  fallbackLocale?: TypedLocale
+  fallbackLocale?: 'none' | TypedLocale
   file?: File
   filePath?: string
   locale?: TypedLocale

@@ -9,7 +9,7 @@ import { restoreVersionOperation } from '../restoreVersion.js'
 export type Options<TSlug extends GlobalSlug> = {
   context?: RequestContext
   depth?: number
-  fallbackLocale?: TypedLocale
+  fallbackLocale?: 'none' | TypedLocale
   id: string
   locale?: TypedLocale
   overrideAccess?: boolean
