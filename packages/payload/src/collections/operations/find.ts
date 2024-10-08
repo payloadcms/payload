@@ -142,7 +142,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
         where,
       })
 
-      result = await payload.db.find<T>({
+      const dbArgs = {
         collection: collectionConfig.slug,
         limit: sanitizedLimit,
         locale,
@@ -151,7 +151,13 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
         req,
         sort,
         where: fullWhere,
-      })
+      }
+
+      if (collectionConfig?.db?.find) {
+        result = await collectionConfig.db.find<T>(dbArgs)
+      } else {
+        result = await payload.db.find<T>(dbArgs)
+      }
     }
 
     // /////////////////////////////////////

@@ -242,11 +242,16 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
         req,
       })
     } else {
-      doc = await payload.db.create({
+      const dbArgs = {
         collection: collectionConfig.slug,
         data: resultWithLocales,
         req,
-      })
+      }
+      if (collectionConfig?.db?.create) {
+        doc = await collectionConfig.db.create(dbArgs)
+      } else {
+        doc = await payload.db.create(dbArgs)
+      }
     }
 
     const verificationToken = doc._verificationToken

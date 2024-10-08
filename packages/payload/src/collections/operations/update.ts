@@ -137,14 +137,21 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
       docs = query.docs
     } else {
-      const query = await payload.db.find({
+      const dbArgs = {
         collection: collectionConfig.slug,
         limit: 0,
         locale,
         pagination: false,
         req,
         where: fullWhere,
-      })
+      }
+
+      let query
+      if (collectionConfig?.db?.find) {
+        query = await collectionConfig.db.find(dbArgs)
+      } else {
+        query = await payload.db.find(dbArgs)
+      }
 
       docs = query.docs
     }
@@ -282,13 +289,18 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         // /////////////////////////////////////
 
         if (!shouldSaveDraft || data._status === 'published') {
-          result = await req.payload.db.updateOne({
+          const dbArgs = {
             id,
             collection: collectionConfig.slug,
             data: result,
             locale,
             req,
-          })
+          }
+          if (collectionConfig?.db?.updateOne) {
+            result = await collectionConfig.db.updateOne(dbArgs)
+          } else {
+            result = await req.payload.db.updateOne(dbArgs)
+          }
         }
 
         // /////////////////////////////////////

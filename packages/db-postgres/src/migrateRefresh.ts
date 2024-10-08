@@ -98,6 +98,7 @@ export async function migrateRefresh(this: PostgresAdapter) {
         err,
         msg: parseError(err, `Error running migration ${migration.name}. Rolling back.`),
       })
+      process.exit(1)
     }
   }
 }

@@ -85,7 +85,12 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
       where: combineQueries({ id: { equals: parentDocID } }, accessResults),
     }
 
-    const doc = await req.payload.db.findOne(findOneArgs)
+    let doc: T
+    if (collectionConfig?.db?.findOne) {
+      doc = await collectionConfig.db.findOne(findOneArgs)
+    } else {
+      doc = await req.payload.db.findOne(findOneArgs)
+    }
 
     if (!doc && !hasWherePolicy) throw new NotFound(t)
     if (!doc && hasWherePolicy) throw new Forbidden(t)
@@ -106,12 +111,18 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     // Update
     // /////////////////////////////////////
 
-    let result = await req.payload.db.updateOne({
+    const restoreVersionArgs = {
       id: parentDocID,
       collection: collectionConfig.slug,
       data: rawVersion.version,
       req,
-    })
+    }
+    let result
+    if (collectionConfig?.db?.updateOne) {
+      result = await collectionConfig.db.updateOne(restoreVersionArgs)
+    } else {
+      result = await req.payload.db.updateOne(restoreVersionArgs)
+    }
 
     // /////////////////////////////////////
     // Save `previousDoc` as a version after restoring

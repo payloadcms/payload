@@ -29,18 +29,27 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
     collCacheConfig?.enabled !== false
 
   return async (req, res, next) => {
+    const filename = req.params.filename
+    let fileKeyWithPrefix = ''
+
+    if (!filename) {
+      req.payload.logger.warn({
+        msg: `No filename provided for static file against collection: ${collection.slug}`,
+      })
+    }
+
     try {
       const { identityID, storageClient } = await getStorageClient()
 
-      const Key = createKey({
+      fileKeyWithPrefix = createKey({
         collection: collection.slug,
-        filename: req.params.filename,
+        filename,
         identityID,
       })
 
       const object = await storageClient.getObject({
         Bucket: process.env.PAYLOAD_CLOUD_BUCKET,
-        Key,
+        Key: fileKeyWithPrefix,
       })
 
       res.set({
@@ -56,7 +65,10 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
 
       return next()
     } catch (err: unknown) {
-      req.payload.logger.error({ err, msg: 'Error getting file from cloud storage' })
+      req.payload.logger.error({
+        err,
+        msg: `Error getting file from cloud storage: '${fileKeyWithPrefix}'`,
+      })
       return next()
     }
   }

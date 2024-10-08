@@ -399,6 +399,180 @@ describe('Fields', () => {
       expect(hitResult).toBeDefined()
       expect(missResult).toBeFalsy()
     })
+
+    it('should query hasMany within an array', async () => {
+      const docFirst = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          array: [
+            {
+              texts: ['text_1', 'text_2'],
+            },
+          ],
+        },
+      })
+
+      const docSecond = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          array: [
+            {
+              texts: ['text_other', 'text_2'],
+            },
+          ],
+        },
+      })
+
+      const resEqualsFull = await payload.find({
+        collection: 'text-fields',
+        where: {
+          'array.texts': {
+            equals: 'text_2',
+          },
+        },
+        sort: '-createdAt',
+      })
+
+      expect(resEqualsFull.docs.find((res) => res.id === docFirst.id)).toBeDefined()
+      expect(resEqualsFull.docs.find((res) => res.id === docSecond.id)).toBeDefined()
+
+      expect(resEqualsFull.totalDocs).toBe(2)
+
+      const resEqualsFirst = await payload.find({
+        collection: 'text-fields',
+        where: {
+          'array.texts': {
+            equals: 'text_1',
+          },
+        },
+        sort: '-createdAt',
+      })
+
+      expect(resEqualsFirst.docs.find((res) => res.id === docFirst.id)).toBeDefined()
+      expect(resEqualsFirst.docs.find((res) => res.id === docSecond.id)).toBeUndefined()
+
+      expect(resEqualsFirst.totalDocs).toBe(1)
+
+      const resContainsSecond = await payload.find({
+        collection: 'text-fields',
+        where: {
+          'array.texts': {
+            contains: 'text_other',
+          },
+        },
+        sort: '-createdAt',
+      })
+
+      expect(resContainsSecond.docs.find((res) => res.id === docFirst.id)).toBeUndefined()
+      expect(resContainsSecond.docs.find((res) => res.id === docSecond.id)).toBeDefined()
+
+      expect(resContainsSecond.totalDocs).toBe(1)
+
+      const resInSecond = await payload.find({
+        collection: 'text-fields',
+        where: {
+          'array.texts': {
+            in: ['text_other'],
+          },
+        },
+        sort: '-createdAt',
+      })
+
+      expect(resInSecond.docs.find((res) => res.id === docFirst.id)).toBeUndefined()
+      expect(resInSecond.docs.find((res) => res.id === docSecond.id)).toBeDefined()
+
+      expect(resInSecond.totalDocs).toBe(1)
+    })
+
+    it('should query hasMany within blocks', async () => {
+      const docFirst = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          blocks: [
+            {
+              blockType: 'block',
+              texts: ['text_1', 'text_2'],
+            },
+          ],
+        },
+      })
+
+      const docSecond = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          blocks: [
+            {
+              blockType: 'block',
+              texts: ['text_other', 'text_2'],
+            },
+          ],
+        },
+      })
+
+      const resEqualsFull = await payload.find({
+        collection: 'text-fields',
+        where: {
+          'blocks.texts': {
+            equals: 'text_2',
+          },
+        },
+        sort: '-createdAt',
+      })
+
+      expect(resEqualsFull.docs.find((res) => res.id === docFirst.id)).toBeDefined()
+      expect(resEqualsFull.docs.find((res) => res.id === docSecond.id)).toBeDefined()
+
+      expect(resEqualsFull.totalDocs).toBe(2)
+
+      const resEqualsFirst = await payload.find({
+        collection: 'text-fields',
+        where: {
+          'blocks.texts': {
+            equals: 'text_1',
+          },
+        },
+        sort: '-createdAt',
+      })
+
+      expect(resEqualsFirst.docs.find((res) => res.id === docFirst.id)).toBeDefined()
+      expect(resEqualsFirst.docs.find((res) => res.id === docSecond.id)).toBeUndefined()
+
+      expect(resEqualsFirst.totalDocs).toBe(1)
+
+      const resContainsSecond = await payload.find({
+        collection: 'text-fields',
+        where: {
+          'blocks.texts': {
+            contains: 'text_other',
+          },
+        },
+        sort: '-createdAt',
+      })
+
+      expect(resContainsSecond.docs.find((res) => res.id === docFirst.id)).toBeUndefined()
+      expect(resContainsSecond.docs.find((res) => res.id === docSecond.id)).toBeDefined()
+
+      expect(resContainsSecond.totalDocs).toBe(1)
+
+      const resInSecond = await payload.find({
+        collection: 'text-fields',
+        where: {
+          'blocks.texts': {
+            in: ['text_other'],
+          },
+        },
+        sort: '-createdAt',
+      })
+
+      expect(resInSecond.docs.find((res) => res.id === docFirst.id)).toBeUndefined()
+      expect(resInSecond.docs.find((res) => res.id === docSecond.id)).toBeDefined()
+
+      expect(resInSecond.totalDocs).toBe(1)
+    })
   })
 
   describe('number', () => {
@@ -533,6 +707,171 @@ describe('Fields', () => {
 
       expect(hitResult).toBeDefined()
       expect(missResult).toBeFalsy()
+    })
+
+    it('should query hasMany within an array', async () => {
+      const docFirst = await payload.create({
+        collection: 'number-fields',
+        data: {
+          array: [
+            {
+              numbers: [10, 30],
+            },
+          ],
+        },
+      })
+
+      const docSecond = await payload.create({
+        collection: 'number-fields',
+        data: {
+          array: [
+            {
+              numbers: [10, 40],
+            },
+          ],
+        },
+      })
+
+      const resEqualsFull = await payload.find({
+        collection: 'number-fields',
+        where: {
+          'array.numbers': {
+            equals: 10,
+          },
+        },
+      })
+
+      expect(resEqualsFull.docs.find((res) => res.id === docFirst.id)).toBeDefined()
+      expect(resEqualsFull.docs.find((res) => res.id === docSecond.id)).toBeDefined()
+
+      expect(resEqualsFull.totalDocs).toBe(2)
+
+      const resEqualsFirst = await payload.find({
+        collection: 'number-fields',
+        where: {
+          'array.numbers': {
+            equals: 30,
+          },
+        },
+      })
+
+      expect(resEqualsFirst.docs.find((res) => res.id === docFirst.id)).toBeDefined()
+      expect(resEqualsFirst.docs.find((res) => res.id === docSecond.id)).toBeUndefined()
+
+      expect(resEqualsFirst.totalDocs).toBe(1)
+
+      const resInSecond = await payload.find({
+        collection: 'number-fields',
+        where: {
+          'array.numbers': {
+            in: [40],
+          },
+        },
+      })
+
+      expect(resInSecond.docs.find((res) => res.id === docFirst.id)).toBeUndefined()
+      expect(resInSecond.docs.find((res) => res.id === docSecond.id)).toBeDefined()
+
+      expect(resInSecond.totalDocs).toBe(1)
+    })
+
+    it('should query hasMany within blocks', async () => {
+      const docFirst = await payload.create({
+        collection: 'number-fields',
+        data: {
+          blocks: [
+            {
+              blockType: 'block',
+              numbers: [10, 30],
+            },
+          ],
+        },
+      })
+
+      const docSecond = await payload.create({
+        collection: 'number-fields',
+        data: {
+          blocks: [
+            {
+              blockType: 'block',
+              numbers: [10, 40],
+            },
+          ],
+        },
+      })
+
+      const resEqualsFull = await payload.find({
+        collection: 'number-fields',
+        where: {
+          'blocks.numbers': {
+            equals: 10,
+          },
+        },
+      })
+
+      expect(resEqualsFull.docs.find((res) => res.id === docFirst.id)).toBeDefined()
+      expect(resEqualsFull.docs.find((res) => res.id === docSecond.id)).toBeDefined()
+
+      expect(resEqualsFull.totalDocs).toBe(2)
+
+      const resEqualsFirst = await payload.find({
+        collection: 'number-fields',
+        where: {
+          'blocks.numbers': {
+            equals: 30,
+          },
+        },
+      })
+
+      expect(resEqualsFirst.docs.find((res) => res.id === docFirst.id)).toBeDefined()
+      expect(resEqualsFirst.docs.find((res) => res.id === docSecond.id)).toBeUndefined()
+
+      expect(resEqualsFirst.totalDocs).toBe(1)
+
+      const resInSecond = await payload.find({
+        collection: 'number-fields',
+        where: {
+          'blocks.numbers': {
+            in: [40],
+          },
+        },
+      })
+
+      expect(resInSecond.docs.find((res) => res.id === docFirst.id)).toBeUndefined()
+      expect(resInSecond.docs.find((res) => res.id === docSecond.id)).toBeDefined()
+
+      expect(resInSecond.totalDocs).toBe(1)
+    })
+
+    it('should properly query numbers with exists operator', async () => {
+      await payload.create({
+        collection: 'number-fields',
+        data: {
+          number: null,
+        },
+      })
+
+      const numbersExist = await payload.find({
+        collection: 'number-fields',
+        where: {
+          number: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(numbersExist.totalDocs).toBe(4)
+
+      const numbersNotExists = await payload.find({
+        collection: 'number-fields',
+        where: {
+          number: {
+            exists: false,
+          },
+        },
+      })
+
+      expect(numbersNotExists.docs).toHaveLength(1)
     })
   })
 
@@ -807,6 +1146,61 @@ describe('Fields', () => {
       expect(result.items[0].localizedText.es).toStrictEqual('spanish')
     })
 
+    it('should create and append localized items to nested array with versions', async () => {
+      const doc = await payload.create({
+        collection,
+        data: {
+          items: [{ text: 'req' }],
+          localized: [{ text: 'req' }],
+          nestedArrayLocalized: [
+            {
+              array: [
+                {
+                  text: 'marcelo',
+                },
+              ],
+            },
+          ],
+        },
+      })
+
+      const res = await payload.update({
+        id: doc.id,
+        collection,
+        data: {
+          nestedArrayLocalized: [
+            ...doc.nestedArrayLocalized,
+            {
+              array: [
+                {
+                  text: 'alejandro',
+                },
+                {
+                  text: 'raul',
+                },
+              ],
+            },
+            {
+              array: [
+                {
+                  text: 'amigo',
+                },
+              ],
+            },
+          ],
+        },
+      })
+
+      expect(res.nestedArrayLocalized).toHaveLength(3)
+
+      expect(res.nestedArrayLocalized[0].array[0].text).toBe('marcelo')
+
+      expect(res.nestedArrayLocalized[1].array[0].text).toBe('alejandro')
+      expect(res.nestedArrayLocalized[1].array[1].text).toBe('raul')
+
+      expect(res.nestedArrayLocalized[2].array[0].text).toBe('amigo')
+    })
+
     it('should create with nested array', async () => {
       const subArrayText = 'something expected'
       const doc = await payload.create({
@@ -911,6 +1305,31 @@ describe('Fields', () => {
         },
       })
     })
+
+    it('should insert/read camelCase group with nested arrays + localized', async () => {
+      const res = await payload.create({
+        collection: 'group-fields',
+        data: {
+          camelCaseGroup: {
+            nesGroup: { arr: [{ text: 'nestedCamel' }] },
+            array: [
+              {
+                text: 'text',
+                array: [
+                  {
+                    text: 'nested',
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      })
+
+      expect(res.camelCaseGroup.array[0].text).toBe('text')
+      expect(res.camelCaseGroup.array[0].array[0].text).toBe('nested')
+      expect(res.camelCaseGroup.nesGroup.arr[0].text).toBe('nestedCamel')
+    })
   })
 
   describe('tabs', () => {
@@ -971,6 +1390,37 @@ describe('Fields', () => {
       })
 
       expect(doc.potentiallyEmptyGroup).toBeDefined()
+    })
+
+    it('should insert/read camelCase tab with nested arrays + localized', async () => {
+      const res = await payload.create({
+        collection: tabsFieldsSlug,
+        data: {
+          anotherText: 'req',
+          array: [{ text: 'req' }],
+          blocks: [{ blockType: 'content', text: 'req' }],
+          group: { number: 1 },
+          numberInRow: 1,
+          textInRow: 'req',
+          tab: { array: [{ text: 'req' }] },
+
+          camelCaseTab: {
+            array: [
+              {
+                text: 'text',
+                array: [
+                  {
+                    text: 'nested',
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      })
+
+      expect(res.camelCaseTab.array[0].text).toBe('text')
+      expect(res.camelCaseTab.array[0].array[0].text).toBe('nested')
     })
   })
 

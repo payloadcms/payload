@@ -149,6 +149,11 @@ export type InitOptions = {
    */
   local?: boolean
 
+  /**
+   * A previously instantiated logger instance. Must conform to the PayloadLogger interface which uses Pino
+   * This allows you to bring your own logger instance and let payload use it
+   */
+  logger?: PayloadLogger
   loggerDestination?: DestinationStream
   /**
    * Specify options for the built-in Pino logger that Payload uses for internal logging.
@@ -156,11 +161,6 @@ export type InitOptions = {
    * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
    */
   loggerOptions?: LoggerOptions
-  /**
-   * A previously instantiated logger instance. Must conform to the PayloadLogger interface which uses Pino
-   * This allows you to bring your own logger instance and let payload use it
-   */
-  logger?: PayloadLogger
 
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
@@ -635,6 +635,12 @@ export type Config = {
   i18n?: i18nInitOptions
   /** Automatically index all sortable top-level fields in the database to improve sort performance and add database compatibility for Azure Cosmos and similar. */
   indexSortableFields?: boolean
+  /**
+   * Disable JOI validation
+   *
+   * @default true // enabled by default
+   */
+  joiValidation?: boolean
   /**
    * Translate your content to different languages/locales.
    *

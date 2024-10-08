@@ -1,3 +1,57 @@
+## [2.30.1](https://github.com/payloadcms/payload/compare/v2.30.0...v2.30.1) (2024-10-02)
+
+
+### Bug Fixes
+
+* **db-mongodb:** properly filters out `number` field values with the `exists` operator filter ([#8415](https://github.com/payloadcms/payload/issues/8415)) ([0586f23](https://github.com/payloadcms/payload/commit/0586f236bbf04163a0d9b226772849cb3d977864)), closes [#8181](https://github.com/payloadcms/payload/issues/8181)
+* sorting by id incorrectly orders by version.id ([#8450](https://github.com/payloadcms/payload/issues/8450)) ([1d38e6d](https://github.com/payloadcms/payload/commit/1d38e6d5d5b56a91aa8f59a461d40f28b1750f8c))
+
+## [2.30.0](https://github.com/payloadcms/payload/compare/v2.29.0...v2.30.0) (2024-09-27)
+
+* export toast from react toastify in payload ([#8438](https://github.com/payloadcms/payload/issues/8438)) ([17fc2d1](https://github.com/payloadcms/payload/commit/17fc2d13d06b6de01f839c27fd706bc0d6a185eb))
+
+## [2.29.0](https://github.com/payloadcms/payload/compare/v2.28.0...v2.29.0) (2024-09-25)
+
+
+### Features
+
+* add new option to disable JOI validation ([#8067](https://github.com/payloadcms/payload/issues/8067)) ([28a0650](https://github.com/payloadcms/payload/commit/28a065072fcad2dc768e44d79609eb5ab8a3fdfd))
+
+
+### Bug Fixes
+
+* **db-postgres:** localized items in arrays with versions ([#8334](https://github.com/payloadcms/payload/issues/8334)) ([c86526b](https://github.com/payloadcms/payload/commit/c86526b5c81ff484e66fbe6e7c727fdcc1f93c77))
+* **db-postgres:** querying on array within a relationship field ([#8153](https://github.com/payloadcms/payload/issues/8153)) ([170ea5b](https://github.com/payloadcms/payload/commit/170ea5badcff154514b8166ac92177d89a3fa5f8))
+* **db-postgres:** sanitize tab/group path for table name ([#8010](https://github.com/payloadcms/payload/issues/8010)) ([ba7a043](https://github.com/payloadcms/payload/commit/ba7a043a99f58fad39a62ac471eeb7309a39bba0))
+* treat empty strings as null / undefined for `exists` queries ([#8336](https://github.com/payloadcms/payload/issues/8336)) ([31d0b30](https://github.com/payloadcms/payload/commit/31d0b309fe5df1e37ed2a938959c1ef87834d987)), closes [#7714](https://github.com/payloadcms/payload/issues/7714)
+
+## [2.28.0](https://github.com/payloadcms/payload/compare/v2.27.0...v2.28.0) (2024-09-04)
+
+
+### Features
+
+* collections can use custom database operations ([#7675](https://github.com/payloadcms/payload/issues/7675)) ([6ba293c](https://github.com/payloadcms/payload/commit/6ba293c0f84f91bf89cf089a20e47de130013ebb))
+
+
+### Bug Fixes
+
+* **db-postgres:** migration exit codes ([#7873](https://github.com/payloadcms/payload/issues/7873)) ([25e9bc6](https://github.com/payloadcms/payload/commit/25e9bc62dbcbabcb3619cf83e3dc0110e0a4cabf)), closes [#7031](https://github.com/payloadcms/payload/issues/7031)
+* **db-postgres:** query hasMany text/number in array/blocks ([#8033](https://github.com/payloadcms/payload/issues/8033)) ([96a624a](https://github.com/payloadcms/payload/commit/96a624ad5c5259b197b4ca793d8419d1e827de9c))
+* **plugin-cloud:** better logging on static handler ([#7924](https://github.com/payloadcms/payload/issues/7924)) ([1f09348](https://github.com/payloadcms/payload/commit/1f0934877ce5aabb771c936c3677a26d2ef006ec))
+
+## [2.27.0](https://github.com/payloadcms/payload/compare/v2.26.0...v2.27.0) (2024-08-26)
+
+
+### Features
+
+* add support for custom image size file names ([#7637](https://github.com/payloadcms/payload/issues/7637)) ([f976270](https://github.com/payloadcms/payload/commit/f97627092cabe4eabbebefa75afc53579188386b))
+* upgrade react-toastify dependency, and upgrade to pnpm v9 in our monorepo ([#7667](https://github.com/payloadcms/payload/issues/7667)) ([94d18e8](https://github.com/payloadcms/payload/commit/94d18e8d747588efce225cde0b621db9b513e7c1))
+
+
+### Bug Fixes
+
+* update state of field if either `valid` status or `errorMessage` changes ([#7632](https://github.com/payloadcms/payload/issues/7632)) ([c624eea](https://github.com/payloadcms/payload/commit/c624eea0d868938f4603860fa25be3df580ba7fe)), closes [#6413](https://github.com/payloadcms/payload/issues/6413)
+
 ## [2.26.0](https://github.com/payloadcms/payload/compare/v2.25.0...v2.26.0) (2024-08-09)
 
 

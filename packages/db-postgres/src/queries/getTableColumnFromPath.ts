@@ -261,10 +261,10 @@ export const getTableColumnFromPath = ({
             tableType = 'numbers'
             columnName = 'number'
           }
-          newTableName = `${tableName}_${tableType}`
+          newTableName = `${rootTableName}_${tableType}`
           const joinConstraints = [
-            eq(adapter.tables[tableName].id, adapter.tables[newTableName].parent),
-            eq(adapter.tables[newTableName].path, `${constraintPath}${field.name}`),
+            eq(adapter.tables[rootTableName].id, adapter.tables[newTableName].parent),
+            like(adapter.tables[newTableName].path, `${constraintPath}${field.name}`),
           ]
 
           if (locale && field.localized && adapter.payload.config.localization) {
@@ -298,10 +298,12 @@ export const getTableColumnFromPath = ({
           `${tableName}_${tableNameSuffix}${toSnakeCase(field.name)}`,
         )
 
+        const arrayParentTable = aliasTable || adapter.tables[tableName]
+
         constraintPath = `${constraintPath}${field.name}.%.`
         if (locale && field.localized && adapter.payload.config.localization) {
           joins[newTableName] = and(
-            eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
+            eq(arrayParentTable.id, adapter.tables[newTableName]._parentID),
             eq(adapter.tables[newTableName]._locale, locale),
           )
           if (locale !== 'all') {
@@ -312,10 +314,7 @@ export const getTableColumnFromPath = ({
             })
           }
         } else {
-          joins[newTableName] = eq(
-            adapter.tables[tableName].id,
-            adapter.tables[newTableName]._parentID,
-          )
+          joins[newTableName] = eq(arrayParentTable.id, adapter.tables[newTableName]._parentID)
         }
         return getTableColumnFromPath({
           adapter,

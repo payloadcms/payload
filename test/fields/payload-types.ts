@@ -641,6 +641,20 @@ export interface TextField {
   withMaxRows?: string[] | null
   disableListColumnText?: string | null
   disableListFilterText?: string | null
+  array?:
+    | {
+        texts?: string[] | null
+        id?: string | null
+      }[]
+    | null
+  blocks?:
+    | {
+        texts?: string[] | null
+        id?: string | null
+        blockName?: string | null
+        blockType: 'block'
+      }[]
+    | null
   updatedAt: string
   createdAt: string
 }
@@ -805,6 +819,28 @@ export interface GroupField {
       }
     }
   }
+  camelCaseGroup?: {
+    array?:
+      | {
+          text?: string | null
+          array?:
+            | {
+                text?: string | null
+                id?: string | null
+              }[]
+            | null
+          id?: string | null
+        }[]
+      | null
+    nesGroup?: {
+      arr?:
+        | {
+            text?: string | null
+            id?: string | null
+          }[]
+        | null
+    }
+  }
   updatedAt: string
   createdAt: string
 }
@@ -898,6 +934,20 @@ export interface NumberField {
   validatesHasMany?: number[] | null
   localizedHasMany?: number[] | null
   withMinRows?: number[] | null
+  array?:
+    | {
+        numbers?: number[] | null
+        id?: string | null
+      }[]
+    | null
+  blocks?:
+    | {
+        numbers?: number[] | null
+        id?: string | null
+        blockName?: string | null
+        blockType: 'block'
+      }[]
+    | null
   updatedAt: string
   createdAt: string
 }
@@ -1175,6 +1225,20 @@ export interface TabsField {
     beforeChange?: boolean | null
     afterChange?: boolean | null
     afterRead?: boolean | null
+  }
+  camelCaseTab: {
+    array?:
+      | {
+          text?: string | null
+          array?:
+            | {
+                text?: string | null
+                id?: string | null
+              }[]
+            | null
+          id?: string | null
+        }[]
+      | null
   }
   textarea?: string | null
   anotherText: string
