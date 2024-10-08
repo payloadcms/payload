@@ -2,7 +2,7 @@ import React from 'react'
 
 const baseClass = 'collection-live-preview-button'
 
-const CollectionLivePreviewButton: React.FC = () => {
+const CollectionLivePreviewButton = () => {
   return (
     <div
       className={baseClass}

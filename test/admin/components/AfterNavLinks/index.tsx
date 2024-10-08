@@ -9,7 +9,7 @@ import { useConfig } from '../../../../packages/payload/src/admin/components/uti
 
 const baseClass = 'after-nav-links'
 
-const AfterNavLinks: React.FC = () => {
+const AfterNavLinks = () => {
   const {
     routes: { admin: adminRoute },
   } = useConfig()

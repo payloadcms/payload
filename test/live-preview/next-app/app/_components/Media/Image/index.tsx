@@ -11,7 +11,7 @@ import { PAYLOAD_SERVER_URL } from '@/app/_api/serverURL'
 
 const { breakpoints } = cssVariables
 
-export const Image: React.FC<MediaProps> = (props) => {
+export const Image = (props: MediaProps) => {
   const {
     imgClassName,
     onClick,

@@ -4,12 +4,12 @@ import type { ArchiveBlockProps } from '../../_blocks/ArchiveBlock/types'
 import { CollectionArchiveBySelection } from './PopulateBySelection'
 import { CollectionArchiveByCollection } from './PopulateByCollection'
 
-export type Props = Omit<ArchiveBlockProps, 'blockType'> & {
+export type CollectionArchiveProps = Omit<ArchiveBlockProps, 'blockType'> & {
   className?: string
   sort?: string
 }
 
-export const CollectionArchive: React.FC<Props> = (props) => {
+export const CollectionArchive = (props: CollectionArchiveProps) => {
   const { className, populateBy, selectedDocs } = props
 
   if (populateBy === 'selection') {

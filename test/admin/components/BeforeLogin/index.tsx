@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
-const BeforeLogin: React.FC<{ i18n }> = () => {
+const BeforeLogin = () => {
   const { t } = useTranslation()
   return (
     <div>

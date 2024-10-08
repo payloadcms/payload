@@ -7,7 +7,9 @@ import { VerticalPadding } from '../../_components/VerticalPadding'
 
 import classes from './index.module.scss'
 
-export const LowImpactHero: React.FC<Page['hero']> = ({ richText }) => {
+export type LowImpactHeroProps = Page['hero']
+
+export const LowImpactHero = ({ richText }: LowImpactHeroProps) => {
   return (
     <Gutter className={classes.lowImpactHero}>
       <div className={classes.content}>

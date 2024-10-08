@@ -4,7 +4,7 @@ import { Image } from './Image'
 import { Props } from './types'
 import { Video } from './Video'
 
-export const Media: React.FC<Props> = (props) => {
+export const Media = (props: Props) => {
   const { className, resource, htmlElement = 'div' } = props
 
   const isVideo = typeof resource !== 'string' && resource?.mimeType?.includes('video')

@@ -7,9 +7,11 @@ import { PAYLOAD_SERVER_URL } from '@/app/_api/serverURL'
 import { Hero } from '@/app/_components/Hero'
 import { Blocks } from '@/app/_components/Blocks'
 
-export const PageClient: React.FC<{
+export type PageClientProps = {
   page: PageType
-}> = ({ page: initialPage }) => {
+}
+
+export const PageClient = ({ page: initialPage }: PageClientProps) => {
   const { data } = useLivePreview<PageType>({
     initialData: initialPage,
     serverURL: PAYLOAD_SERVER_URL,

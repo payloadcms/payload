@@ -7,13 +7,11 @@ import RichText from '../../_components/RichText'
 
 import classes from './index.module.scss'
 
-type Props = Extract<Exclude<Page['layout'], undefined>[0], { blockType: 'content' }>
-
-export const ContentBlock: React.FC<
-  Props & {
-    id?: string
-  }
-> = (props) => {
+type ContentBlockProps = Extract<
+  Exclude<Page['layout'], undefined>[0],
+  { blockType: 'content'; id?: string }
+>
+export const ContentBlock = (props: ContentBlockProps) => {
   const { columns } = props
 
   return (

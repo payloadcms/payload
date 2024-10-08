@@ -2,7 +2,7 @@ import React from 'react'
 
 const baseClass = 'collection-api-button'
 
-const CollectionAPIButton: React.FC = () => {
+const CollectionAPIButton = () => {
   return (
     <div
       className={baseClass}

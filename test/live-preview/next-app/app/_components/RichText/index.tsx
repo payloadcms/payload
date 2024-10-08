@@ -5,12 +5,19 @@ import serializeLexical from './serializeLexical'
 
 import classes from './index.module.scss'
 
-const RichText: React.FC<{
+export type RichTextProps = {
   className?: string
   content: any
   renderUploadFilenameOnly?: boolean
   serializer?: 'lexical' | 'slate'
-}> = ({ className, content, renderUploadFilenameOnly, serializer = 'slate' }) => {
+}
+
+const RichText = ({
+  className,
+  content,
+  renderUploadFilenameOnly,
+  serializer = 'slate',
+}: RichTextProps) => {
   if (!content) {
     return null
   }

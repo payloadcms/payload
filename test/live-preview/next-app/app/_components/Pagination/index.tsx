@@ -4,12 +4,14 @@ import { Chevron } from '../Chevron'
 
 import classes from './index.module.scss'
 
-export const Pagination: React.FC<{
+export type PaginationProps = {
   page: number
   totalPages: number
   onClick: (page: number) => void
   className?: string
-}> = (props) => {
+}
+
+export const Pagination = (props: PaginationProps) => {
   const { page, totalPages, onClick, className } = props
   const hasNextPage = page < totalPages
   const hasPrevPage = page > 1

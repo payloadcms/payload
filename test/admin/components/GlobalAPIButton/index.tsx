@@ -2,7 +2,7 @@ import React from 'react'
 
 const baseClass = 'global-api-button'
 
-const GlobalAPIButton: React.FC = () => {
+const GlobalAPIButton = () => {
   return (
     <div
       className={baseClass}
