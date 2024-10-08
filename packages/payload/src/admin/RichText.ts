@@ -14,7 +14,7 @@ import type {
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { JsonObject, Payload, PayloadRequest, RequestContext } from '../types/index.js'
 import type { RichTextFieldClientProps } from './fields/RichText.js'
-import type { CreateMappedComponent } from './types.js'
+import type { CreateMappedComponent, FieldSchemaMap } from './types.js'
 
 export type AfterReadRichTextHookArgs<
   TData extends TypeWithID = any,
@@ -205,9 +205,9 @@ type RichTextAdapterBase<
     config: SanitizedConfig
     field: RichTextField
     i18n: I18n<any, any>
-    schemaMap: Map<string, Field[]>
+    schemaMap: FieldSchemaMap
     schemaPath: string
-  }) => Map<string, Field[]>
+  }) => FieldSchemaMap
   /**
    * Like an afterRead hook, but runs only for the GraphQL resolver. For populating data, this should be used, as afterRead hooks do not have a depth in graphQL.
    *

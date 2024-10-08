@@ -1,10 +1,8 @@
 import type { I18n } from '@payloadcms/translations'
-import type { Field, SanitizedConfig } from 'payload'
+import type { Field, FieldSchemaMap, SanitizedConfig } from 'payload'
 
 import { MissingEditorProp } from 'payload'
 import { tabHasName } from 'payload/shared'
-
-import type { FieldSchemaMap } from './types.js'
 
 type Args = {
   config: SanitizedConfig
@@ -19,7 +17,7 @@ export const traverseFields = ({ config, fields, i18n, schemaMap, schemaPath }: 
     switch (field.type) {
       case 'group':
       case 'array':
-        schemaMap.set(`${schemaPath}.${field.name}`, field.fields)
+        schemaMap.set(`${schemaPath}.${field.name}`, field)
 
         traverseFields({
           config,
@@ -45,7 +43,7 @@ export const traverseFields = ({ config, fields, i18n, schemaMap, schemaPath }: 
         field.blocks.map((block) => {
           const blockSchemaPath = `${schemaPath}.${field.name}.${block.slug}`
 
-          schemaMap.set(blockSchemaPath, block.fields)
+          schemaMap.set(blockSchemaPath, field)
 
           traverseFields({
             config,
@@ -61,6 +59,7 @@ export const traverseFields = ({ config, fields, i18n, schemaMap, schemaPath }: 
         if (!field?.editor) {
           throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
         }
+
         if (typeof field.editor === 'function') {
           throw new Error('Attempted to access unsanitized rich text editor.')
         }
@@ -82,7 +81,7 @@ export const traverseFields = ({ config, fields, i18n, schemaMap, schemaPath }: 
           const tabSchemaPath = tabHasName(tab) ? `${schemaPath}.${tab.name}` : schemaPath
 
           if (tabHasName(tab)) {
-            schemaMap.set(tabSchemaPath, tab.fields)
+            schemaMap.set(tabSchemaPath, field)
           }
 
           traverseFields({

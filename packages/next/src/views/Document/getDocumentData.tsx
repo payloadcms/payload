@@ -27,6 +27,7 @@ export const getDocumentData = async (args: {
 
   const schemaPath = schemaPathFromProps || collectionConfig?.slug || globalConfig?.slug
 
+  console.log('buildFormState', schemaPath)
   try {
     const result = await buildFormState({
       id,

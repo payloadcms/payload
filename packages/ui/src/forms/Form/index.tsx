@@ -500,26 +500,26 @@ export const Form: React.FC<FormProps> = (props) => {
       const abortController = new AbortController()
       abortControllerRef2.current = abortController
 
-      const { state: fieldSchema } = await getFormState({
+      const { state: fieldState } = await getFormState({
         collectionSlug,
         data,
         globalSlug,
-        schemaPath,
+        schemaPath: `${collectionSlug || globalSlug}.${schemaPath}`,
         signal: abortController.signal,
       })
 
-      return fieldSchema
+      return fieldState
     },
     [collectionSlug, globalSlug, getFormState],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
-    async ({ data, path, rowIndex, schemaPath }) => {
+    async ({ callback, data, path, rowIndex, schemaPath }) => {
       const subFieldState = await getFieldStateBySchemaPath({ data, schemaPath })
-
       dispatchFields({
         type: 'ADD_ROW',
         blockType: data?.blockType,
+        callback,
         path,
         rowIndex,
         subFieldState,

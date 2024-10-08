@@ -3,6 +3,7 @@ import type React from 'react'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { SanitizedConfig } from '../config/types.js'
+import type { Field } from '../fields/config/types.js'
 import type { JsonObject } from '../types/index.js'
 import type { Data, FormState } from './types.js'
 
@@ -354,14 +355,20 @@ export type {
 } from './functions/index.js'
 
 export type {
+  ClientSlotProps,
+  GetSlotsArgs,
   RenderFieldArgs,
   RenderFieldBySchemaPath,
   RenderFieldBySchemaPathClient,
   RenderFieldClient,
   RenderFieldFn,
   RenderFieldsArgs,
+  RenderFieldsBySchemaPath,
   RenderFieldsClient,
   RenderFieldsFn,
+  RenderRowsBySchemaPath,
+  RenderRowsBySchemaPathClient,
+  ServerSlotProps,
 } from './functions/renderFields.js'
 
 export type { LanguageOptions } from './LanguageOptions.js'
@@ -422,6 +429,11 @@ export type PayloadServerAction = (
     | RenderConfigArgs,
 ) => Promise<string>
 
+export type FieldRow = {
+  Fields: React.ReactNode[]
+  RowLabel?: React.ReactNode
+}
+
 export type FieldSlots = {
   AfterInput?: React.ReactNode
   BeforeInput?: React.ReactNode
@@ -430,10 +442,7 @@ export type FieldSlots = {
   Error?: React.ReactNode
   Fields?: React.ReactNode[]
   Label?: React.ReactNode
-  rows?: {
-    Fields: React.ReactNode[]
-    RowLabel?: React.ReactNode
-  }[]
+  rows?: FieldRow[]
 }
 
 export type EntitySlots = {
@@ -462,3 +471,5 @@ export type {
   ServerSideEditViewProps,
   VisibleEntities,
 } from './views/types.js'
+
+export type FieldSchemaMap = Map<string, Field>

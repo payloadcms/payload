@@ -17,8 +17,6 @@ export const withCondition = <P extends ClientFieldProps>(
 
     const name = 'name' in props.field ? props.field.name : undefined
 
-    console.log(_indexPath)
-
     const path = pathFromProps ?? name
 
     return (

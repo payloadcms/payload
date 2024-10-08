@@ -1,6 +1,8 @@
 import type {
   BuildFormStateArgs,
+  FieldRow,
   RenderFieldBySchemaPathClient,
+  RenderRowsBySchemaPathClient,
   ServerFunctionClient,
 } from 'payload'
 
@@ -17,6 +19,7 @@ type GetFormState = (
 type ServerFunctionsContextType = {
   getFormState: GetFormState
   renderFieldBySchemaPath: RenderFieldBySchemaPathClient
+  renderRowsBySchemaPath: RenderRowsBySchemaPathClient
   serverFunction: ServerFunctionClient
 }
 
@@ -76,15 +79,21 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
+  const renderRowsBySchemaPath = useCallback<RenderRowsBySchemaPathClient>(
+    async (args) => {
+      return (await serverFunction({
+        name: 'render-rows',
+        args,
+      })) as FieldRow[]
+    },
+    [serverFunction],
+  )
+
   const renderFieldBySchemaPath = useCallback<RenderFieldBySchemaPathClient>(
     async (args) => {
-      const { schemaPath } = args
-
       return (await serverFunction({
         name: 'render-field',
-        args: {
-          schemaPath,
-        },
+        args,
       })) as React.ReactNode[]
     },
     [serverFunction],
@@ -106,7 +115,7 @@ export const ServerFunctionsProvider: React.FC<{
 
   return (
     <ServerFunctionsContext.Provider
-      value={{ getFormState, renderFieldBySchemaPath, serverFunction }}
+      value={{ getFormState, renderFieldBySchemaPath, renderRowsBySchemaPath, serverFunction }}
     >
       {children}
     </ServerFunctionsContext.Provider>

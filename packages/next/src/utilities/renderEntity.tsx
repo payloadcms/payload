@@ -136,6 +136,7 @@ export const renderEntity: (args: {
           : globalConfig
             ? permissions?.globals?.[globalConfig.slug]?.fields
             : undefined,
+        schemaPath: collectionConfig?.slug || globalConfig?.slug,
       })?.map((F) => F)}
     </Fragment>
   )
@@ -156,6 +157,7 @@ export const renderEntity: (args: {
           : globalConfig
             ? permissions?.globals?.[globalConfig.slug]?.fields
             : undefined,
+        schemaPath: collectionConfig?.slug || globalConfig?.slug,
       })?.map((F) => F)}
     </Fragment>
   )

@@ -3,11 +3,12 @@ import type { ServerFunction, ServerFunctionHandler } from 'payload'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 
 import { initReq } from './initReq.js'
-import { renderField } from './renderFields.js'
+import { renderRowsBySchemaPath } from './renderRowsBySchemaPath.js'
 
 const defaultFunctions = {
   'form-state': buildFormState as any as ServerFunction,
-  'render-field': renderField as any as ServerFunction,
+  'render-field': () => {},
+  'render-rows': renderRowsBySchemaPath as any as ServerFunction,
 }
 
 export const handleServerFunctions: ServerFunctionHandler = async (args) => {
