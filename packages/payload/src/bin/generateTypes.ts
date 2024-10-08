@@ -9,15 +9,16 @@ import Logger from '../utilities/logger'
 
 export async function generateTypes(): Promise<void> {
   const logger = Logger()
-  const config = await loadConfig()
-  const outputFile = process.env.PAYLOAD_TS_OUTPUT_PATH || config.typescript.outputFile
-
-  await payload.init({
+  
+  const instance = await payload.init({
     disableDBConnect: true,
     disableOnInit: true,
     local: true,
     secret: '--unused--',
   })
+  
+  const config = instance.config
+  const outputFile = process.env.PAYLOAD_TS_OUTPUT_PATH || config.typescript.outputFile
 
   logger.info('Compiling TS types for Collections and Globals...')
 
