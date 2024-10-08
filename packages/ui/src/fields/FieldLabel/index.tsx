@@ -9,6 +9,7 @@ import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { generateFieldID } from '../../utilities/generateFieldID.js'
 import './index.scss'
@@ -18,6 +19,7 @@ const DefaultFieldLabel: React.FC<GenericLabelProps> = (props) => {
     as: Element = 'label',
     htmlFor: htmlForFromProps,
     label: labelFromProps,
+    localized = false,
     required = false,
     unstyled = false,
   } = props
@@ -26,14 +28,15 @@ const DefaultFieldLabel: React.FC<GenericLabelProps> = (props) => {
   const { path } = useFieldProps()
   const editDepth = useEditDepth()
   const htmlFor = htmlForFromProps || generateFieldID(path, editDepth, uuid)
-
   const { i18n } = useTranslation()
+  const { code } = useLocale()
 
   if (labelFromProps) {
     return (
       <Element className={`field-label ${unstyled ? 'unstyled' : ''}`} htmlFor={htmlFor}>
         {getTranslation(labelFromProps, i18n)}
         {required && !unstyled && <span className="required">*</span>}
+        {localized && <span className="localized">{code}</span>}
       </Element>
     )
   }
@@ -58,10 +61,11 @@ export const FieldLabel: FieldLabelClientComponent = (props) => {
           ? props.label
           : props?.field && 'label' in props.field && (props.field.label as StaticLabel) // type assertion needed for `row` fields
       }
+      localized={props?.field && 'localized' in props.field ? props.field.localized : false}
       required={
         typeof props.required !== 'undefined'
           ? props.required
-          : props?.field && 'required' in props.field && (props.field?.required as boolean) // type assertion needed for `group` fields
+          : props?.field && 'required' in props.field && (props.field?.required) // type assertion needed for `group` fields
       }
     />
   )
