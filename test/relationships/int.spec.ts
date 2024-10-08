@@ -418,6 +418,8 @@ describe('Relationships', () => {
             },
           })
 
+          await payload.delete({ collection: 'directors', where: {} })
+
           const director1 = await payload.create({
             collection: 'directors',
             data: {
