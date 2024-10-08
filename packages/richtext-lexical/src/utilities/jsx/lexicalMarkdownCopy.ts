@@ -546,6 +546,8 @@ const CODE_END_REGEX = /[ \t]*```$/
 const CODE_SINGLE_LINE_REGEX = /^[ \t]*```[^`]+(?:(?:`{1,2}|`{4,})[^`]+)*```(?:[^`]|$)/
 const TABLE_ROW_REG_EXP = /^\|(.+)\|\s?$/
 const TABLE_ROW_DIVIDER_REG_EXP = /^(\| ?:?-*:? ?)+\|\s?$/
+const TAG_START_REGEX = /^[ \t]*<[a-z_][\w-]*(?:\s[^<>]*)?\/?>/i
+const TAG_END_REGEX = /^[ \t]*<\/[a-z_][\w-]*\s*>/i
 
 export function normalizeMarkdown(input: string, shouldMergeAdjacentLines = false): string {
   const lines = input.split('\n')
@@ -595,7 +597,11 @@ export function normalizeMarkdown(input: string, shouldMergeAdjacentLines = fals
       CHECK_LIST_REGEX.test(line) ||
       TABLE_ROW_REG_EXP.test(line) ||
       TABLE_ROW_DIVIDER_REG_EXP.test(line) ||
-      !shouldMergeAdjacentLines
+      !shouldMergeAdjacentLines ||
+      TAG_START_REGEX.test(line) ||
+      TAG_END_REGEX.test(line) ||
+      TAG_START_REGEX.test(lastLine) ||
+      TAG_END_REGEX.test(lastLine)
     ) {
       sanitizedLines.push(line)
     } else {

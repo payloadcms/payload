@@ -701,11 +701,13 @@ there4
       input: `
 <Banner>
   Some text 1 <InlineCode>code 1</InlineCode> some
+
   text 2 <InlineCode>code 2</InlineCode> some text
+
   3 <InlineCode>code 3</InlineCode> some text 4<InlineCode>code 4</InlineCode>
 </Banner>
 `,
-      description: 'Banner with inline codes, each line a linebreak, one paragraph',
+      description: 'Banner with inline codes, three paragraphs',
 
       blockNode: {
         fields: {
@@ -741,10 +743,16 @@ there4
                       type: 'text',
                       version: 1,
                     },
-                    {
-                      type: 'linebreak',
-                      version: 1,
-                    },
+                  ],
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+                {
+                  children: [
                     {
                       detail: 0,
                       format: 0,
@@ -771,10 +779,16 @@ there4
                       type: 'text',
                       version: 1,
                     },
-                    {
-                      type: 'linebreak',
-                      version: 1,
-                    },
+                  ],
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+                {
+                  children: [
                     {
                       detail: 0,
                       format: 0,
@@ -899,8 +913,11 @@ Text before banner
       input: `
 <TextContainerNoTrim>
 no indent
+
   indent 2
+
     indent 4
+
 no indent
 </TextContainerNoTrim>
 `,
@@ -908,8 +925,11 @@ no indent
         fields: {
           blockType: 'TextContainerNoTrim',
           text: `no indent
+
   indent 2
+
     indent 4
+
 no indent`,
         },
       },
@@ -920,16 +940,22 @@ no indent`,
       input: `
 <TextContainer>
 no indent
+
   indent 2
+
     indent 4
+
 no indent
 </TextContainer>
 `,
       inputAfterConvertFromEditorJSON: `
 <TextContainer>
   no indent
+
     indent 2
+
       indent 4
+
   no indent
 </TextContainer>
 `,
@@ -937,8 +963,11 @@ no indent
         fields: {
           blockType: 'TextContainer',
           text: `no indent
+
   indent 2
+
     indent 4
+
 no indent`,
         },
       },
@@ -948,9 +977,13 @@ no indent`,
 
       input: `
 <TextContainerNoTrim>
+
   indent 2
+
     indent 4
+
       indent 6
+
   indent 2
 </TextContainerNoTrim>
 `,
@@ -958,8 +991,11 @@ no indent`,
         fields: {
           blockType: 'TextContainerNoTrim',
           text: `  indent 2
+
     indent 4
+
       indent 6
+
   indent 2`,
         },
       },
@@ -969,8 +1005,11 @@ no indent`,
       input: `
 <TextContainer>
   indent 2
+
     indent 4
+
       indent 6
+
   indent 2
 </TextContainer>
 `,
@@ -978,8 +1017,11 @@ no indent`,
         fields: {
           blockType: 'TextContainer',
           text: `indent 2
+
   indent 4
+
     indent 6
+
 indent 2`,
         },
       },
@@ -1211,7 +1253,6 @@ Some text 1
       },
     },
     {
-      debugFlag: true,
       inputAfterConvertFromEditorJSON: `
 <Banner>
   Some line [Start of link line2](/some/link)
@@ -1289,11 +1330,11 @@ Some line [Start of link
 </Banner>
 `,
       input: `
-    <Banner>
-      Text text [ Link
-      ](/some/link) .
-    </Banner>
-    `,
+<Banner>
+  Text text [ Link
+  ](/some/link) .
+</Banner>
+`,
       blockNode: {
         fields: {
           blockType: 'Banner',
@@ -1364,7 +1405,7 @@ Some line [Start of link
     },
   ]
 
-  const INPUT_AND_OUTPUT: Tests = INPUT_AND_OUTPUTBase.filter((test) => test.debugFlag)
+  const INPUT_AND_OUTPUT: Tests = INPUT_AND_OUTPUTBase //.filter((test) => test.debugFlag)
 
   for (const {
     input,
