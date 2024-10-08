@@ -6,7 +6,7 @@ import React from 'react'
 const baseClass = 'login__form'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-import type { ClientUser, FormState } from 'payload'
+import type { ClientUser, FormState, MeOperationResult } from 'payload'
 
 import { Form, FormSubmit, PasswordField, useAuth, useConfig, useTranslation } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
@@ -74,8 +74,8 @@ export const LoginForm: React.FC<{
     }
   }
 
-  const handleLogin = (data: { user: ClientUser }) => {
-    setUser(data.user)
+  const handleLogin = (data: MeOperationResult) => {
+    setUser(data)
   }
 
   return (

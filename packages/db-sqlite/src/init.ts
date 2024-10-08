@@ -70,6 +70,7 @@ export const init: Init = async function init(this: SQLiteAdapter) {
       disableNotNull: !!collection?.versions?.drafts,
       disableUnique: false,
       fields: collection.fields,
+      joins: collection.joins,
       locales,
       tableName,
       timestamps: collection.timestamps,
