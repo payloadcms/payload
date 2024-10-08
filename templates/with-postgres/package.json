@@ -22,10 +22,10 @@
     "@payloadcms/richtext-lexical": "beta",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
-    "next": "15.0.0-canary.160",
+    "next": "15.0.0-canary.173",
     "payload": "beta",
-    "react": "19.0.0-rc-5dcb0097-20240918",
-    "react-dom": "19.0.0-rc-5dcb0097-20240918",
+    "react": "19.0.0-rc-3edc000d-20240926",
+    "react-dom": "19.0.0-rc-3edc000d-20240926",
     "sharp": "0.32.6"
   },
   "devDependencies": {
@@ -33,7 +33,7 @@
     "@types/react": "npm:types-react@19.0.0-rc.1",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "eslint": "^8",
-    "eslint-config-next": "15.0.0-canary.160",
+    "eslint-config-next": "15.0.0-canary.173",
     "typescript": "5.6.2"
   },
   "engines": {

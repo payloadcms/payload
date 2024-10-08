@@ -302,6 +302,9 @@ importers:
       '@payloadcms/drizzle':
         specifier: workspace:*
         version: link:../drizzle
+      '@types/pg':
+        specifier: 8.10.2
+        version: 8.10.2
       console-table-printer:
         specifier: 2.11.2
         version: 2.11.2
@@ -330,9 +333,6 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@types/pg':
-        specifier: 8.10.2
-        version: 8.10.2
       '@types/to-snake-case':
         specifier: 1.0.0
         version: 1.0.0
@@ -400,6 +400,9 @@ importers:
       drizzle-orm:
         specifier: 0.32.1
         version: 0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-3edc000d-20240926)(types-react@19.0.0-rc.1)
+      pg:
+        specifier: 8.11.3
+        version: 8.11.3
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -428,9 +431,6 @@ importers:
       payload:
         specifier: workspace:*
         version: link:../payload
-      pg:
-        specifier: 8.11.3
-        version: 8.11.3
 
   packages/drizzle:
     dependencies:

@@ -289,6 +289,10 @@ export const sanitizeFields = async ({
       }
     }
 
+    if (field.type === 'ui' && typeof field.admin.disableBulkEdit === 'undefined') {
+      field.admin.disableBulkEdit = true
+    }
+
     if ('_sanitized' in field) {
       field._sanitized = true
     }

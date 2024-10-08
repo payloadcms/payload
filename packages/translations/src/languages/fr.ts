@@ -193,7 +193,7 @@ export const frTranslations: DefaultTranslationsObject = {
     cancel: 'Annuler',
     changesNotSaved:
       'Vos modifications n’ont pas été enregistrées. Vous perdrez vos modifications si vous quittez maintenant.',
-    clearAll: undefined,
+    clearAll: 'Tout effacer',
     close: 'Fermer',
     collapse: 'Réduire',
     collections: 'Collections',
@@ -425,7 +425,7 @@ export const frTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Dernière sauvegarde il y a {{distance}}',
     noFurtherVersionsFound: 'Aucune autre version trouvée',
     noRowsFound: 'Aucun(e) {{label}} trouvé(e)',
-    noRowsSelected: undefined,
+    noRowsSelected: 'Aucune {{étiquette}} sélectionnée',
     preview: 'Aperçu',
     previouslyPublished: 'Précédemment publié',
     problemRestoringVersion: 'Un problème est survenu lors de la restauration de cette version',
