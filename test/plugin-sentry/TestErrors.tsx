@@ -1,7 +1,10 @@
 'use client'
-import * as Sentry from '@sentry/react'
-import React from 'react'
-export const testErrors = () => {
+
+import { useState } from 'react'
+
+export const TestErrors = () => {
+  const [throwClientSide, setThrowClientSide] = useState(false)
+
   const notFound = async () => {
     const req = await fetch('http://localhost:3000/api/users/notFound', {
       method: 'GET',
@@ -60,8 +63,12 @@ export const testErrors = () => {
     })
   }
 
+  const ThrowClientSide = () => {
+    throw new Error('client side error')
+  }
+
   return (
-    <Sentry.ErrorBoundary>
+    <>
       <h4>Test Errors</h4>
       <div style={{ display: 'flex', gap: '10px' }}>
         <button onClick={() => notFound()} style={{ marginBottom: '20px' }} type="button">
@@ -87,7 +94,15 @@ export const testErrors = () => {
         <button onClick={() => badVerify()} style={{ marginBottom: '20px' }} type="button">
           Bad Verify
         </button>
+        <button
+          onClick={() => setThrowClientSide(true)}
+          style={{ marginBottom: '20px' }}
+          type="button"
+        >
+          Throw client side error
+        </button>
+        {throwClientSide && <ThrowClientSide />}
       </div>
-    </Sentry.ErrorBoundary>
+    </>
   )
 }

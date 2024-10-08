@@ -56,6 +56,7 @@
     "@payloadcms/storage-vercel-blob": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
+    "@sentry/nextjs": "^8.33.1",
     "@sentry/react": "^7.77.0",
     "@types/react": "npm:types-react@19.0.0-rc.1",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",

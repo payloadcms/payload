@@ -171,6 +171,9 @@
     "app",
     "next-env.d.ts",
     ".next/types/**/*.ts",
-    "scripts/**/*.ts"
+    "scripts/**/*.ts",
+    "instrumentation.ts",
+    "sentry.server.config.ts",
+    "sentry.client.config.ts"
   ]
 }
