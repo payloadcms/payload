@@ -999,7 +999,7 @@ describe('Localization', () => {
           data: {
             items: [],
           },
-          fallbackLocale: null,
+          fallbackLocale: 'none',
           locale: spanishLocale,
         })
 
