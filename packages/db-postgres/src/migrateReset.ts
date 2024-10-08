@@ -42,7 +42,7 @@ export async function migrateReset(this: PostgresAdapter): Promise<void> {
         msg: `Migrated down:  ${migrationFile.name} (${Date.now() - start}ms)`,
       })
 
-      const tableExists = await migrationTableExists(this.drizzle)
+      const tableExists = await migrationTableExists(this)
       if (tableExists) {
         await payload.delete({
           id: migration.id,
@@ -68,7 +68,7 @@ export async function migrateReset(this: PostgresAdapter): Promise<void> {
 
   // Delete dev migration
 
-  const tableExists = await migrationTableExists(this.drizzle)
+  const tableExists = await migrationTableExists(this)
   if (tableExists) {
     try {
       await payload.delete({

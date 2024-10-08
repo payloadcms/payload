@@ -4,8 +4,13 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
 import { englishLocale } from '../globals/config'
 import { ArrayCollection } from './collections/Array'
+import { BlocksCollection } from './collections/Blocks'
+import { Group } from './collections/Group'
+import { NestedArray } from './collections/NestedArray'
+import { NestedFields } from './collections/NestedFields'
 import { NestedToArrayAndBlock } from './collections/NestedToArrayAndBlock'
 import { RestrictedByLocaleCollection } from './collections/RestrictedByLocale'
+import { Tab } from './collections/Tab'
 import {
   blocksWithLocalizedSameName,
   defaultLocale,
@@ -41,6 +46,9 @@ const openAccess = {
 
 export default buildConfigWithDefaults({
   collections: [
+    BlocksCollection,
+    NestedArray,
+    NestedFields,
     {
       auth: true,
       fields: [
@@ -127,6 +135,16 @@ export default buildConfigWithDefaults({
                   name: 'text',
                   type: 'text',
                 },
+                {
+                  name: 'nestedArray',
+                  type: 'array',
+                  fields: [
+                    {
+                      name: 'text',
+                      type: 'text',
+                    },
+                  ],
+                },
               ],
               slug: 'text',
             },
@@ -143,6 +161,41 @@ export default buildConfigWithDefaults({
           localized: true,
           required: true,
           type: 'blocks',
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'myTab',
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+                {
+                  name: 'group',
+                  type: 'group',
+                  localized: true,
+                  fields: [
+                    {
+                      name: 'nestedArray2',
+                      type: 'array',
+                      fields: [
+                        {
+                          name: 'nestedText',
+                          type: 'text',
+                        },
+                      ],
+                    },
+                    {
+                      name: 'nestedText',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       ],
       slug: withRequiredLocalizedFields,
@@ -235,6 +288,8 @@ export default buildConfigWithDefaults({
       slug: 'dummy',
     },
     NestedToArrayAndBlock,
+    Group,
+    Tab,
     {
       slug: localizedSortSlug,
       access: openAccess,

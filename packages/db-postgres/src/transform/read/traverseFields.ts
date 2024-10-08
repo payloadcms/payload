@@ -55,6 +55,10 @@ type TraverseFieldsArgs = {
    * All hasMany text fields, as returned by Drizzle, keyed on an object by field path
    */
   texts: Record<string, Record<string, unknown>[]>
+  /**
+   * Set to a locale if this group of fields is within a localized array or block.
+   */
+  withinArrayOrBlockLocale?: string
 }
 
 // Traverse fields recursively, transforming data
@@ -71,6 +75,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
   relationships,
   table,
   texts,
+  withinArrayOrBlockLocale,
 }: TraverseFieldsArgs): T => {
   const sanitizedPath = path ? `${path}.` : path
 
@@ -88,6 +93,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         relationships,
         table,
         texts,
+        withinArrayOrBlockLocale,
       })
     }
 
@@ -108,6 +114,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         relationships,
         table,
         texts,
+        withinArrayOrBlockLocale,
       })
     }
 
@@ -145,6 +152,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   relationships,
                   table: row,
                   texts,
+                  withinArrayOrBlockLocale: locale,
                 })
 
                 if ('_order' in rowResult) {
@@ -157,7 +165,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
               return arrayResult
             }, {})
           } else {
-            result[field.name] = fieldData.map((row, i) => {
+            result[field.name] = fieldData.reduce((acc, row, i) => {
               if (row._uuid) {
                 row.id = row._uuid
                 delete row._uuid
@@ -167,34 +175,48 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 delete row._order
               }
 
-              return traverseFields<T>({
-                blocks,
-                config,
-                dataRef: row,
-                deletions,
-                fieldPrefix: '',
-                fields: field.fields,
-                numbers,
-                path: `${sanitizedPath}${field.name}.${i}`,
-                relationships,
-                table: row,
-                texts,
-              })
-            })
+              if (
+                !withinArrayOrBlockLocale ||
+                (withinArrayOrBlockLocale && withinArrayOrBlockLocale === row._locale)
+              ) {
+                if (row._locale) {
+                  delete row._locale
+                }
+
+                acc.push(
+                  traverseFields<T>({
+                    blocks,
+                    config,
+                    dataRef: row,
+                    deletions,
+                    fieldPrefix: '',
+                    fields: field.fields,
+                    numbers,
+                    path: `${sanitizedPath}${field.name}.${i}`,
+                    relationships,
+                    table: row,
+                    texts,
+                    withinArrayOrBlockLocale,
+                  }),
+                )
+              }
+
+              return acc
+            }, [])
           }
         }
 
         return result
       }
-
       if (field.type === 'blocks') {
         const blockFieldPath = `${sanitizedPath}${field.name}`
+        const blocksByPath = blocks[blockFieldPath]
 
-        if (Array.isArray(blocks[blockFieldPath])) {
+        if (Array.isArray(blocksByPath)) {
           if (field.localized) {
             result[field.name] = {}
 
-            blocks[blockFieldPath].forEach((row) => {
+            blocksByPath.forEach((row) => {
               if (row._uuid) {
                 row.id = row._uuid
                 delete row._uuid
@@ -223,6 +245,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                     relationships,
                     table: row,
                     texts,
+                    withinArrayOrBlockLocale: locale,
                   })
 
                   delete blockResult._order
@@ -233,7 +256,23 @@ export const traverseFields = <T extends Record<string, unknown>>({
               })
             })
           } else {
-            result[field.name] = blocks[blockFieldPath].map((row, i) => {
+            // Add locale-specific index to have a proper blockFieldPath for current locale
+            // because blocks can be in the same array for different locales!
+            if (withinArrayOrBlockLocale && config.localization) {
+              for (const locale of config.localization.localeCodes) {
+                let localeIndex = 0
+
+                for (let i = 0; i < blocksByPath.length; i++) {
+                  const row = blocksByPath[i]
+                  if (row._locale === locale) {
+                    row._index = localeIndex
+                    localeIndex++
+                  }
+                }
+              }
+            }
+
+            result[field.name] = blocksByPath.reduce((acc, row, i) => {
               delete row._order
               if (row._uuid) {
                 row.id = row._uuid
@@ -242,23 +281,43 @@ export const traverseFields = <T extends Record<string, unknown>>({
               const block = field.blocks.find(({ slug }) => slug === row.blockType)
 
               if (block) {
-                return traverseFields<T>({
-                  blocks,
-                  config,
-                  dataRef: row,
-                  deletions,
-                  fieldPrefix: '',
-                  fields: block.fields,
-                  numbers,
-                  path: `${blockFieldPath}.${i}`,
-                  relationships,
-                  table: row,
-                  texts,
-                })
+                if (
+                  !withinArrayOrBlockLocale ||
+                  (withinArrayOrBlockLocale && withinArrayOrBlockLocale === row._locale)
+                ) {
+                  if (row._locale) {
+                    delete row._locale
+                  }
+                  if (typeof row._index === 'number') {
+                    i = row._index
+                    delete row._index
+                  }
+
+                  acc.push(
+                    traverseFields<T>({
+                      blocks,
+                      config,
+                      dataRef: row,
+                      deletions,
+                      fieldPrefix: '',
+                      fields: block.fields,
+                      numbers,
+                      path: `${blockFieldPath}.${i}`,
+                      relationships,
+                      table: row,
+                      texts,
+                      withinArrayOrBlockLocale,
+                    }),
+                  )
+
+                  return acc
+                }
+              } else {
+                acc.push({})
               }
 
-              return {}
-            })
+              return acc
+            }, [])
           }
         }
 
@@ -305,6 +364,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
             field,
             ref: result,
             relations: relationPathMatch,
+            withinArrayOrBlockLocale,
           })
         }
 
@@ -339,6 +399,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
             field,
             ref: result,
             textRows: textPathMatch,
+            withinArrayOrBlockLocale,
           })
         }
 
@@ -373,6 +434,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
             field,
             numberRows: numberPathMatch,
             ref: result,
+            withinArrayOrBlockLocale,
           })
         }
 
@@ -391,7 +453,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
               return selectResult
             }, {})
           } else {
-            result[field.name] = fieldData.map(({ value }) => value)
+            let selectData = fieldData
+            if (withinArrayOrBlockLocale) {
+              selectData = selectData.filter(({ locale }) => locale === withinArrayOrBlockLocale)
+            }
+            result[field.name] = selectData.map(({ value }) => value)
           }
         }
         return result
@@ -404,8 +470,20 @@ export const traverseFields = <T extends Record<string, unknown>>({
       }[] = []
 
       if (field.localized && Array.isArray(table._locales)) {
+        if (!table._locales.length && config.localization) {
+          config.localization.localeCodes.forEach((_locale) =>
+            (table._locales as unknown[]).push({ _locale }),
+          )
+        }
+
         table._locales.forEach((localeRow) => {
-          valuesToTransform.push({ ref: localizedFieldData, table: localeRow })
+          valuesToTransform.push({
+            ref: localizedFieldData,
+            table: {
+              ...table,
+              ...localeRow,
+            },
+          })
         })
       } else {
         valuesToTransform.push({ ref: result, table })
@@ -419,50 +497,28 @@ export const traverseFields = <T extends Record<string, unknown>>({
           case 'tab':
           case 'group': {
             const groupFieldPrefix = `${fieldPrefix || ''}${field.name}_`
+            const groupData = {}
+            const locale = table._locale as string
+            const refKey = field.localized && locale ? locale : field.name
 
-            if (field.localized) {
-              if (typeof locale === 'string' && !ref[locale]) {
-                ref[locale] = {}
-                delete table._locale
-              }
+            if (field.localized && locale) delete table._locale
+            ref[refKey] = traverseFields<Record<string, unknown>>({
+              blocks,
+              config,
+              dataRef: groupData as Record<string, unknown>,
+              deletions,
+              fieldPrefix: groupFieldPrefix,
+              fields: field.fields,
+              numbers,
+              path: `${sanitizedPath}${field.name}`,
+              relationships,
+              table,
+              texts,
+              withinArrayOrBlockLocale: locale || withinArrayOrBlockLocale,
+            })
 
-              Object.entries(ref).forEach(([groupLocale, groupLocaleData]) => {
-                ref[groupLocale] = traverseFields<Record<string, unknown>>({
-                  blocks,
-                  config,
-                  dataRef: groupLocaleData as Record<string, unknown>,
-                  deletions,
-                  fieldPrefix: groupFieldPrefix,
-                  fields: field.fields,
-                  numbers,
-                  path: `${sanitizedPath}${field.name}`,
-                  relationships,
-                  table,
-                  texts,
-                })
-              })
-              if ('_order' in ref) {
-                delete ref._order
-              }
-            } else {
-              const groupData = {}
-
-              ref[field.name] = traverseFields<Record<string, unknown>>({
-                blocks,
-                config,
-                dataRef: groupData as Record<string, unknown>,
-                deletions,
-                fieldPrefix: groupFieldPrefix,
-                fields: field.fields,
-                numbers,
-                path: `${sanitizedPath}${field.name}`,
-                relationships,
-                table,
-                texts,
-              })
-              if ('_order' in ref) {
-                delete ref._order
-              }
+            if ('_order' in ref) {
+              delete ref._order
             }
 
             break

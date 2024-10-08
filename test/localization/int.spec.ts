@@ -11,7 +11,9 @@ import { initPayloadTest } from '../helpers/configHelpers'
 import { idToString } from '../helpers/idToString'
 import { RESTClient } from '../helpers/rest'
 import { arrayCollectionSlug } from './collections/Array'
+import { groupSlug } from './collections/Group'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock'
+import { tabSlug } from './collections/Tab'
 import configPromise from './config'
 import { defaultLocale, hungarianLocale, localizedSortSlug } from './shared'
 import {
@@ -52,7 +54,6 @@ describe('Localization', () => {
 
     config = await configPromise
 
-    // @ts-expect-error Force typing
     post1 = await payload.create({
       collection,
       data: {
@@ -60,7 +61,6 @@ describe('Localization', () => {
       },
     })
 
-    // @ts-expect-error Force typing
     postWithLocalizedData = await payload.create({
       collection,
       data: {
@@ -1058,6 +1058,747 @@ describe('Localization', () => {
       expect(rowDefault.textNotLocalized).toEqual('test')
       expect(rowSpanish.text).toEqual('spanish')
       expect(rowSpanish.textNotLocalized).toEqual('test')
+    })
+  })
+
+  describe('Localized group and tabs', () => {
+    it('should properly create/update/read localized group field', async () => {
+      const result = await payload.create({
+        collection: groupSlug,
+        data: {
+          groupLocalized: {
+            title: 'hello en',
+          },
+        },
+        locale: englishLocale,
+      })
+
+      expect(result.groupLocalized?.title).toBe('hello en')
+
+      await payload.update({
+        collection: groupSlug,
+        locale: spanishLocale,
+        id: result.id,
+        data: {
+          groupLocalized: {
+            title: 'hello es',
+          },
+        },
+      })
+
+      const docEn = await payload.findByID({
+        collection: groupSlug,
+        locale: englishLocale,
+        id: result.id,
+      })
+      const docEs = await payload.findByID({
+        collection: groupSlug,
+        locale: spanishLocale,
+        id: result.id,
+      })
+
+      expect(docEn.groupLocalized.title).toBe('hello en')
+      expect(docEs.groupLocalized.title).toBe('hello es')
+    })
+
+    it('should properly create/update/read localized field inside of group', async () => {
+      const result = await payload.create({
+        collection: groupSlug,
+        locale: englishLocale,
+        data: {
+          group: {
+            title: 'hello en',
+          },
+        },
+      })
+
+      expect(result.group.title).toBe('hello en')
+
+      await payload.update({
+        collection: groupSlug,
+        locale: spanishLocale,
+        id: result.id,
+        data: {
+          group: {
+            title: 'hello es',
+          },
+        },
+      })
+
+      const docEn = await payload.findByID({
+        collection: groupSlug,
+        locale: englishLocale,
+        id: result.id,
+      })
+      const docEs = await payload.findByID({
+        collection: groupSlug,
+        locale: spanishLocale,
+        id: result.id,
+      })
+
+      expect(docEn.group.title).toBe('hello en')
+      expect(docEs.group.title).toBe('hello es')
+    })
+
+    it('should properly create/update/read deep localized field inside of group', async () => {
+      const result = await payload.create({
+        collection: groupSlug,
+        locale: englishLocale,
+        data: {
+          deep: {
+            blocks: [
+              {
+                blockType: 'first',
+                title: 'hello en',
+              },
+            ],
+            array: [{ title: 'hello en' }],
+          },
+        },
+      })
+
+      expect(result.deep.array[0].title).toBe('hello en')
+
+      await payload.update({
+        collection: groupSlug,
+        locale: spanishLocale,
+        id: result.id,
+        data: {
+          deep: {
+            blocks: [
+              {
+                blockType: 'first',
+                title: 'hello es',
+                id: result.deep.blocks[0].id,
+              },
+            ],
+            array: [
+              {
+                id: result.deep.array[0].id,
+                title: 'hello es',
+              },
+            ],
+          },
+        },
+      })
+
+      const docEn = await payload.findByID({
+        collection: groupSlug,
+        locale: englishLocale,
+        id: result.id,
+      })
+      const docEs = await payload.findByID({
+        collection: groupSlug,
+        locale: spanishLocale,
+        id: result.id,
+      })
+
+      expect(docEn.deep.array[0].title).toBe('hello en')
+      expect(docEn.deep.blocks[0].title).toBe('hello en')
+      expect(docEs.deep.array[0].title).toBe('hello es')
+      expect(docEs.deep.blocks[0].title).toBe('hello es')
+    })
+
+    it('should create/updated/read localized group with row field', async () => {
+      const doc = await payload.create({
+        collection: 'groups',
+        data: {
+          groupLocalizedRow: {
+            text: 'hello world',
+          },
+        },
+        locale: 'en',
+      })
+
+      expect(doc.groupLocalizedRow.text).toBe('hello world')
+
+      const docES = await payload.update({
+        collection: 'groups',
+        data: {
+          groupLocalizedRow: {
+            text: 'hola world or something',
+          },
+        },
+        locale: 'es',
+        id: doc.id,
+      })
+
+      expect(docES.groupLocalizedRow.text).toBe('hola world or something')
+
+      // check if docES didnt break EN
+      const docEN = await payload.findByID({ collection: 'groups', id: doc.id, locale: 'en' })
+      expect(docEN.groupLocalizedRow.text).toBe('hello world')
+
+      const all = await payload.findByID({ collection: 'groups', id: doc.id, locale: 'all' })
+
+      expect(all.groupLocalizedRow.en.text).toBe('hello world')
+      expect(all.groupLocalizedRow.es.text).toBe('hola world or something')
+    })
+
+    it('should properly create/update/read localized tab field', async () => {
+      const result = await payload.create({
+        collection: tabSlug,
+        locale: englishLocale,
+        data: {
+          tabLocalized: {
+            title: 'hello en',
+          },
+        },
+      })
+
+      expect(result.tabLocalized?.title).toBe('hello en')
+
+      await payload.update({
+        collection: tabSlug,
+        locale: spanishLocale,
+        id: result.id,
+        data: {
+          tabLocalized: {
+            title: 'hello es',
+          },
+        },
+      })
+
+      const docEn = await payload.findByID({
+        collection: tabSlug,
+        locale: englishLocale,
+        id: result.id,
+      })
+      const docEs = await payload.findByID({
+        collection: tabSlug,
+        locale: spanishLocale,
+        id: result.id,
+      })
+
+      expect(docEn.tabLocalized.title).toBe('hello en')
+      expect(docEs.tabLocalized.title).toBe('hello es')
+    })
+
+    it('should properly create/update/read localized field inside of tab', async () => {
+      const result = await payload.create({
+        collection: tabSlug,
+        locale: englishLocale,
+        data: {
+          tab: {
+            title: 'hello en',
+          },
+        },
+      })
+
+      expect(result.tab.title).toBe('hello en')
+
+      await payload.update({
+        collection: tabSlug,
+        locale: spanishLocale,
+        id: result.id,
+        data: {
+          tab: {
+            title: 'hello es',
+          },
+        },
+      })
+
+      const docEn = await payload.findByID({
+        collection: tabSlug,
+        locale: englishLocale,
+        id: result.id,
+      })
+      const docEs = await payload.findByID({
+        collection: tabSlug,
+        locale: spanishLocale,
+        id: result.id,
+      })
+
+      expect(docEn.tab.title).toBe('hello en')
+      expect(docEs.tab.title).toBe('hello es')
+    })
+
+    it('should properly create/update/read deep localized field inside of tab', async () => {
+      const result = await payload.create({
+        collection: tabSlug,
+        locale: englishLocale,
+        data: {
+          deep: {
+            blocks: [
+              {
+                blockType: 'first',
+                title: 'hello en',
+              },
+            ],
+            array: [{ title: 'hello en' }],
+          },
+        },
+      })
+
+      expect(result.deep.array[0].title).toBe('hello en')
+
+      await payload.update({
+        collection: tabSlug,
+        locale: spanishLocale,
+        id: result.id,
+        data: {
+          deep: {
+            blocks: [
+              {
+                blockType: 'first',
+                title: 'hello es',
+                id: result.deep.blocks[0].id,
+              },
+            ],
+            array: [
+              {
+                id: result.deep.array[0].id,
+                title: 'hello es',
+              },
+            ],
+          },
+        },
+      })
+
+      const docEn = await payload.findByID({
+        collection: tabSlug,
+        locale: englishLocale,
+        id: result.id,
+      })
+      const docEs = await payload.findByID({
+        collection: tabSlug,
+        locale: spanishLocale,
+        id: result.id,
+      })
+
+      expect(docEn.deep.array[0].title).toBe('hello en')
+      expect(docEn.deep.blocks[0].title).toBe('hello en')
+      expect(docEs.deep.array[0].title).toBe('hello es')
+      expect(docEs.deep.blocks[0].title).toBe('hello es')
+    })
+  })
+
+  describe('nested blocks', () => {
+    let id
+    it('should allow creating nested blocks per locale', async () => {
+      const doc = await payload.create({
+        collection: 'blocks-fields',
+        data: {
+          content: [
+            {
+              blockType: 'blockInsideBlock',
+              content: [
+                {
+                  blockType: 'textBlock',
+                  text: 'hello',
+                },
+              ],
+            },
+          ],
+        },
+      })
+
+      id = doc.id
+
+      await payload.update({
+        collection: 'blocks-fields',
+        id,
+        locale: 'es',
+        data: {
+          content: [
+            {
+              blockType: 'blockInsideBlock',
+              content: [
+                {
+                  blockType: 'textBlock',
+                  text: 'hola',
+                },
+              ],
+            },
+          ],
+        },
+      })
+
+      const retrieved = await payload.findByID({
+        collection: 'blocks-fields',
+        id,
+        locale: 'all',
+      })
+
+      expect(retrieved.content.en[0].content).toHaveLength(1)
+      expect(retrieved.content.es[0].content).toHaveLength(1)
+    })
+  })
+
+  describe('nested arrays', () => {
+    it('should not duplicate block rows for blocks within localized array fields', async () => {
+      const randomDoc = (
+        await payload.find({
+          collection: 'localized-posts',
+          depth: 0,
+        })
+      ).docs[0]
+
+      const randomDoc2 = (
+        await payload.find({
+          collection: 'localized-posts',
+          depth: 0,
+        })
+      ).docs[1]
+
+      const blocksWithinArrayEN = [
+        {
+          blockName: '1',
+          blockType: 'someBlock',
+          relationWithinBlock: randomDoc.id,
+        },
+        {
+          blockName: '2',
+          blockType: 'someBlock',
+          relationWithinBlock: randomDoc.id,
+        },
+        {
+          blockName: '3',
+          blockType: 'someBlock',
+          relationWithinBlock: randomDoc.id,
+        },
+      ]
+
+      const blocksWithinArrayES = [
+        {
+          blockName: '1',
+          blockType: 'someBlock',
+          relationWithinBlock: randomDoc2.id,
+        },
+        {
+          blockName: '2',
+          blockType: 'someBlock',
+          relationWithinBlock: randomDoc2.id,
+        },
+        {
+          blockName: '3',
+          blockType: 'someBlock',
+          relationWithinBlock: randomDoc2.id,
+        },
+      ]
+
+      const createdEnDoc = await payload.create({
+        collection: 'nested-arrays',
+        locale: 'en',
+        depth: 0,
+        data: {
+          arrayWithBlocks: [
+            {
+              blocksWithinArray: blocksWithinArrayEN as any,
+            },
+          ],
+        },
+      })
+
+      const updatedEsDoc = await payload.update({
+        collection: 'nested-arrays',
+        id: createdEnDoc.id,
+        depth: 0,
+        locale: 'es',
+        data: {
+          arrayWithBlocks: [
+            {
+              blocksWithinArray: blocksWithinArrayES as any,
+            },
+          ],
+        },
+      })
+
+      const esArrayBlocks = updatedEsDoc.arrayWithBlocks[0].blocksWithinArray
+      // recursively remove any id field within esArrayRow
+      const removeId = (obj) => {
+        if (obj instanceof Object) {
+          delete obj.id
+          Object.values(obj).forEach(removeId)
+        }
+      }
+      removeId(esArrayBlocks)
+      removeId(createdEnDoc.arrayWithBlocks[0].blocksWithinArray)
+
+      expect(esArrayBlocks).toEqual(blocksWithinArrayES)
+      expect(createdEnDoc.arrayWithBlocks[0].blocksWithinArray).toEqual(blocksWithinArrayEN)
+
+      // pull enDoc again and make sure the update of esDoc did not mess with the data of enDoc
+      const enDoc2 = await payload.findByID({
+        id: createdEnDoc.id,
+        collection: 'nested-arrays',
+        locale: 'en',
+        depth: 0,
+      })
+      removeId(enDoc2.arrayWithBlocks[0].blocksWithinArray)
+      expect(enDoc2.arrayWithBlocks[0].blocksWithinArray).toEqual(blocksWithinArrayEN)
+    })
+
+    it('should update localized relation within unLocalized array', async () => {
+      const randomTextDoc = (
+        await payload.find({
+          collection: 'localized-posts',
+          depth: 0,
+        })
+      ).docs[0]
+      const randomTextDoc2 = (
+        await payload.find({
+          collection: 'localized-posts',
+          depth: 0,
+        })
+      ).docs[1]
+
+      const createdEnDoc = await payload.create({
+        collection: 'nested-arrays',
+        locale: 'en',
+        depth: 0,
+        data: {
+          arrayWithLocalizedRelation: [
+            {
+              localizedRelation: randomTextDoc.id,
+            },
+          ],
+        },
+      })
+
+      const updatedEsDoc = await payload.update({
+        collection: 'nested-arrays',
+        id: createdEnDoc.id,
+        depth: 0,
+        locale: 'es',
+        data: {
+          arrayWithLocalizedRelation: [
+            {
+              id: createdEnDoc.arrayWithLocalizedRelation[0].id,
+              localizedRelation: randomTextDoc2.id,
+            },
+          ],
+        },
+      })
+
+      expect(updatedEsDoc.arrayWithLocalizedRelation).toHaveLength(1)
+      expect(updatedEsDoc.arrayWithLocalizedRelation[0].localizedRelation).toBe(randomTextDoc2.id)
+
+      expect(createdEnDoc.arrayWithLocalizedRelation).toHaveLength(1)
+      expect(createdEnDoc.arrayWithLocalizedRelation[0].localizedRelation).toBe(randomTextDoc.id)
+
+      // pull enDoc again and make sure the update of esDoc did not mess with the data of enDoc
+      const enDoc2 = await payload.findByID({
+        id: createdEnDoc.id,
+        collection: 'nested-arrays',
+        locale: 'en',
+        depth: 0,
+      })
+      expect(enDoc2.arrayWithLocalizedRelation).toHaveLength(1)
+      expect(enDoc2.arrayWithLocalizedRelation[0].localizedRelation).toBe(randomTextDoc.id)
+    })
+  })
+
+  describe('nested fields', () => {
+    it('should allow for fields which could contain new tables within localized arrays to be stored', async () => {
+      const randomDoc = (
+        await payload.find({
+          collection: 'localized-posts',
+          depth: 0,
+        })
+      ).docs[0]
+      const randomDoc2 = (
+        await payload.find({
+          collection: 'localized-posts',
+          depth: 0,
+        })
+      ).docs[1]
+
+      const newDoc = await payload.create({
+        collection: 'nested-field-tables',
+        data: {
+          array: [
+            {
+              relation: {
+                value: randomDoc.id,
+                relationTo: 'localized-posts',
+              },
+              hasManyRelation: [randomDoc.id, randomDoc2.id],
+              hasManyPolyRelation: [
+                {
+                  relationTo: 'localized-posts',
+                  value: randomDoc.id,
+                },
+                {
+                  relationTo: 'localized-posts',
+                  value: randomDoc2.id,
+                },
+              ],
+              number: [1, 2],
+              text: ['hello', 'goodbye'],
+              select: ['one'],
+            },
+          ],
+        },
+      })
+
+      await payload.update({
+        collection: 'nested-field-tables',
+        id: newDoc.id,
+        locale: 'es',
+        data: {
+          array: [
+            {
+              relation: {
+                value: randomDoc2.id,
+                relationTo: 'localized-posts',
+              },
+              hasManyRelation: [randomDoc2.id, randomDoc.id],
+              hasManyPolyRelation: [
+                {
+                  relationTo: 'localized-posts',
+                  value: randomDoc2.id,
+                },
+                {
+                  relationTo: 'localized-posts',
+                  value: randomDoc.id,
+                },
+              ],
+              select: ['two', 'three'],
+              text: ['hola', 'adios'],
+              number: [3, 4],
+            },
+          ],
+        },
+      })
+
+      const retrieved = await payload.findByID({
+        collection: 'nested-field-tables',
+        id: newDoc.id,
+        depth: 0,
+        locale: 'all',
+      })
+
+      expect(retrieved.array.en[0].relation.value).toStrictEqual(randomDoc.id)
+      expect(retrieved.array.es[0].relation.value).toStrictEqual(randomDoc2.id)
+
+      expect(retrieved.array.en[0].hasManyRelation).toEqual([randomDoc.id, randomDoc2.id])
+      expect(retrieved.array.es[0].hasManyRelation).toEqual([randomDoc2.id, randomDoc.id])
+
+      expect(retrieved.array.en[0].hasManyPolyRelation).toEqual([
+        { value: randomDoc.id, relationTo: 'localized-posts' },
+        { value: randomDoc2.id, relationTo: 'localized-posts' },
+      ])
+      expect(retrieved.array.es[0].hasManyPolyRelation).toEqual([
+        { value: randomDoc2.id, relationTo: 'localized-posts' },
+        { value: randomDoc.id, relationTo: 'localized-posts' },
+      ])
+
+      expect(retrieved.array.en[0].number).toEqual([1, 2])
+      expect(retrieved.array.es[0].number).toEqual([3, 4])
+
+      expect(retrieved.array.en[0].select).toEqual(['one'])
+      expect(retrieved.array.es[0].select).toEqual(['two', 'three'])
+
+      expect(retrieved.array.en[0].text).toEqual(['hello', 'goodbye'])
+      expect(retrieved.array.es[0].text).toEqual(['hola', 'adios'])
+    })
+
+    it('should duplicate with localized blocks', async () => {
+      // This test covers a few things:
+      // - make sure localized arrays / blocks work inside of localized groups / tabs
+      //    - this is covered with myTab.group.nestedArray2
+
+      const englishText = 'english'
+      const spanishText = 'spanish'
+      const doc = await payload.create({
+        collection: withRequiredLocalizedFields,
+        data: {
+          layout: [
+            {
+              blockType: 'text',
+              text: englishText,
+              nestedArray: [
+                {
+                  text: 'hello',
+                },
+                {
+                  text: 'goodbye',
+                },
+              ],
+            },
+          ],
+          myTab: {
+            text: 'hello',
+            group: {
+              nestedText: 'hello',
+              nestedArray2: [
+                {
+                  nestedText: 'hello',
+                },
+                {
+                  nestedText: 'goodbye',
+                },
+              ],
+            },
+          },
+          title: 'hello',
+        },
+        locale: defaultLocale,
+      })
+
+      await payload.update({
+        id: doc.id,
+        collection: withRequiredLocalizedFields,
+        data: {
+          layout: [
+            {
+              blockType: 'text',
+              text: spanishText,
+              nestedArray: [
+                {
+                  text: 'hola',
+                },
+                {
+                  text: 'adios',
+                },
+              ],
+            },
+          ],
+          title: 'hello',
+          myTab: {
+            text: 'hola',
+            group: {
+              nestedText: 'hola',
+              nestedArray2: [
+                {
+                  nestedText: 'hola',
+                },
+                {
+                  nestedText: 'adios',
+                },
+              ],
+            },
+          },
+        },
+        locale: spanishLocale,
+      })
+
+      const result = await payload.findByID({
+        id: doc.id,
+        collection: withRequiredLocalizedFields,
+        locale: defaultLocale,
+      })
+
+      const allLocales = await payload.findByID({
+        id: result.id,
+        collection: withRequiredLocalizedFields,
+        locale: 'all',
+      })
+
+      // check fields
+      expect(result.layout[0].text).toStrictEqual(englishText)
+
+      expect(allLocales.layout.en[0].text).toStrictEqual(englishText)
+      expect(allLocales.layout.es[0].text).toStrictEqual(spanishText)
+
+      expect(allLocales.myTab.group.en.nestedText).toStrictEqual('hello')
+      expect(allLocales.myTab.group.en.nestedArray2[0].nestedText).toStrictEqual('hello')
+      expect(allLocales.myTab.group.en.nestedArray2[1].nestedText).toStrictEqual('goodbye')
+
+      expect(allLocales.myTab.group.es.nestedText).toStrictEqual('hola')
+      expect(allLocales.myTab.group.es.nestedArray2[0].nestedText).toStrictEqual('hola')
+      expect(allLocales.myTab.group.es.nestedArray2[1].nestedText).toStrictEqual('adios')
     })
   })
 })

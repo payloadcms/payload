@@ -26,6 +26,11 @@ type Args = {
     [tableName: string]: Record<string, unknown>[]
   }
   texts: Record<string, unknown>[]
+  /**
+   * Set to a locale code if this set of fields is traversed within a
+   * localized array or block field
+   */
+  withinArrayOrBlockLocale?: string
 }
 export const transformBlocks = ({
   adapter,
@@ -41,6 +46,7 @@ export const transformBlocks = ({
   relationshipsToDelete,
   selects,
   texts,
+  withinArrayOrBlockLocale,
 }: Args) => {
   data.forEach((blockRow, i) => {
     if (typeof blockRow.blockType !== 'string') return
@@ -60,6 +66,7 @@ export const transformBlocks = ({
     }
 
     if (field.localized && locale) newRow.row._locale = locale
+    if (withinArrayOrBlockLocale) newRow.row._locale = withinArrayOrBlockLocale
 
     const blockTableName = adapter.tableNameMap.get(`${baseTableName}_blocks_${blockType}`)
 
@@ -94,6 +101,7 @@ export const transformBlocks = ({
       row: newRow.row,
       selects,
       texts,
+      withinArrayOrBlockLocale,
     })
 
     blocks[blockType].push(newRow)
