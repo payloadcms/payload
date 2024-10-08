@@ -282,7 +282,7 @@ export async function resizeAndTransformImageSizes({
 
   // Determine if the file is animated
   const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
-  const sharpOptions: SharpOptions = {}
+  const sharpOptions: SharpOptions = { failOn: 'none' }
 
   if (fileIsAnimatedType) {
     sharpOptions.animated = true
