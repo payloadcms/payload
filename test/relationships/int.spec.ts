@@ -17,6 +17,7 @@ import type {
 } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { isMongoose } from '../helpers/isMongoose.js'
 import {
   chainedRelSlug,
   customIdNumberSlug,
@@ -398,6 +399,11 @@ describe('Relationships', () => {
         })
 
         it('should sort by a property of a hasMany relationship', async () => {
+          // no support for sort by relation in mongodb
+          if (isMongoose(payload)) {
+            return
+          }
+
           const movie1 = await payload.create({
             collection: 'movies',
             data: {
@@ -411,6 +417,8 @@ describe('Relationships', () => {
               name: 'Inception',
             },
           })
+
+          await payload.delete({ collection: 'directors', where: {} })
 
           const director1 = await payload.create({
             collection: 'directors',
