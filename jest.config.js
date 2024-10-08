@@ -15,6 +15,12 @@ const esModules = [
   'uint8array-extras',
 ].join('|')
 
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 /** @type {import('jest').Config}  */
 const baseJestConfig = {
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
@@ -36,10 +42,7 @@ const baseJestConfig = {
     '^.+\\.(t|j)sx?$': ['@swc/jest'],
   },
   verbose: true,
-}
-
-if (process.env.CI) {
-  baseJestConfig.reporters = [['github-actions', { silent: false }], 'summary']
+  reporters: ['jest-ci-spec-reporter', path.resolve(dirname, './test/jestreporter.cjs')],
 }
 
 export default baseJestConfig
