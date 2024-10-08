@@ -279,7 +279,7 @@ export const DocumentControls: React.FC<{
                         )}
                       </Fragment>
                     )}
-                    {!collectionConfig.disableDuplicate && isEditing && (
+                    {collectionConfig.disableDuplicate !== true && isEditing && (
                       <DuplicateDocument
                         id={id.toString()}
                         onDuplicate={onDuplicate}

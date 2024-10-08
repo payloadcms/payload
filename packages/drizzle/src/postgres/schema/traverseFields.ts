@@ -349,7 +349,7 @@ export const traverseFields = ({
             }),
           )
         } else {
-          targetTable[fieldName] = withDefault(adapter.enums[enumName](fieldName), field)
+          targetTable[fieldName] = withDefault(adapter.enums[enumName](columnName), field)
         }
         break
       }

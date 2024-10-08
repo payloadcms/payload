@@ -81,7 +81,7 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
     user.resetPasswordExpiration = new Date().toISOString()
 
     if (collectionConfig.auth.verify) {
-      user._verified = true
+      user._verified = Boolean(user._verified)
     }
 
     const doc = await payload.db.updateOne({

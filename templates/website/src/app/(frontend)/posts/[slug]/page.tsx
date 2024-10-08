@@ -30,7 +30,14 @@ export async function generateStaticParams() {
   return params
 }
 
-export default async function Post({ params: { slug = '' } }) {
+type Args = {
+  params: Promise<{
+    slug?: string
+  }>
+}
+
+export default async function Post({ params: paramsPromise }: Args) {
+  const { slug = '' } = await paramsPromise
   const url = '/posts/' + slug
   const post = await queryPostBySlug({ slug })
 
@@ -65,18 +72,15 @@ export default async function Post({ params: { slug = '' } }) {
   )
 }
 
-export async function generateMetadata({
-  params: { slug },
-}: {
-  params: { slug: string }
-}): Promise<Metadata> {
+export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
+  const { slug = '' } = await paramsPromise
   const post = await queryPostBySlug({ slug })
 
   return generateMeta({ doc: post })
 }
 
 const queryPostBySlug = cache(async ({ slug }: { slug: string }) => {
-  const { isEnabled: draft } = draftMode()
+  const { isEnabled: draft } = await draftMode()
 
   const payload = await getPayloadHMR({ config: configPromise })
 
