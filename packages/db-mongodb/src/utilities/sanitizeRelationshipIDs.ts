@@ -1,7 +1,7 @@
 import type { CollectionConfig, Field, SanitizedConfig, TraverseFieldsCallback } from 'payload'
 
 import mongoose from 'mongoose'
-import { traverseFields } from 'payload'
+import { APIError, traverseFields } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
 
 type Args = {
@@ -31,7 +31,14 @@ const convertValue = ({
   )
 
   if (!customIDField) {
-    return new mongoose.Types.ObjectId(value)
+    try {
+      return new mongoose.Types.ObjectId(value)
+    } catch (error) {
+      throw new APIError(
+        `Failed to create ObjectId from value: ${value}. Error: ${error.message}`,
+        400,
+      )
+    }
   }
 
   return value
