@@ -400,7 +400,9 @@ describe('Relationships', () => {
 
         it('should sort by a property of a hasMany relationship', async () => {
           // no support for sort by relation in mongodb
-          if (isMongoose(payload)) {return}
+          if (isMongoose(payload)) {
+            return
+          }
 
           const movie1 = await payload.create({
             collection: 'movies',
