@@ -293,6 +293,8 @@ export async function resizeAndTransformImageSizes({
 
   let adjustedDimensions = { ...dimensions }
 
+  // Images with an exif orientation of 5, 6, 7, or 8 are auto-rotated by sharp
+  // Need to adjust the dimensions to match the original image
   if ([5, 6, 7, 8].includes(originalImageMeta.orientation)) {
     adjustedDimensions = {
       ...dimensions,
