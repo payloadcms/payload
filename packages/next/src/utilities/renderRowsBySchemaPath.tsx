@@ -48,8 +48,6 @@ export const renderRowsBySchemaPath: RenderRowsBySchemaPath = (args) => {
     payload: req.payload,
   }
 
-  console.log('newState', rows)
-
   return renderFieldRows({
     // className, // TODO
     clientConfig,

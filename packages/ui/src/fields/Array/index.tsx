@@ -174,9 +174,9 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   useEffect(() => {
     // if the rowData is ever different in size than the rows, we need to reload the fields
-    if (rowsData?.length > 0 && rowsData.length !== rows.length) {
+    if (rowsData?.length > 0 && rowsData.length !== rows?.length) {
       rowsData.forEach((row, i) => {
-        if (!rows[i]) {
+        if (!rows?.[i]) {
           reloadRows(i)
         }
       })
@@ -342,7 +342,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     readOnly={disabled}
                     removeRow={removeRow}
                     row={rowData}
-                    rowCount={rows.length}
+                    rowCount={rows?.length}
                     rowIndex={i}
                     RowLabel={RowLabel}
                     setCollapse={setCollapse}
