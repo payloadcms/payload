@@ -101,7 +101,7 @@ export const renderFields: RenderFieldsFn = (args) => {
     importMap,
     indexPath,
     margins,
-    path,
+    path: parentPath,
     payload,
     permissions,
     schemaPath,
@@ -140,7 +140,7 @@ export const renderFields: RenderFieldsFn = (args) => {
       const fieldIndexPath =
         indexPath !== undefined ? `${indexPath}.${fieldIndex}` : `${fieldIndex}`
 
-      const fieldPath = [path, name].filter(Boolean).join('.')
+      const path = [parentPath, name].filter(Boolean).join('.')
 
       const fieldSchemaPath = [schemaPath, name].filter(Boolean).join('.')
 
@@ -150,7 +150,6 @@ export const renderFields: RenderFieldsFn = (args) => {
         clientField,
         config,
         field,
-        fieldPath,
         fieldPermissions,
         forceRender: forceRenderChildren,
         formState,
@@ -196,7 +195,6 @@ export const renderFieldRows = ({
   readonly clientProps?: ClientSlotProps
   readonly config: SanitizedConfig
   readonly field: ArrayFieldT
-  readonly fieldPath: string
   readonly fieldState: FormField
   readonly forceRender?: boolean
   readonly formState: FormState
@@ -226,7 +224,7 @@ export const renderFieldRows = ({
       importMap,
       indexPath: `${indexPath}.${rowIndex}`,
       margins,
-      path,
+      path: `${path}.${rowIndex}`,
       payload,
       permissions,
       schemaPath,
@@ -256,7 +254,6 @@ export const renderField: RenderFieldFn = (args) => {
     clientField,
     config,
     field,
-    fieldPath,
     fieldPermissions,
     forceRender,
     formState,
@@ -270,15 +267,14 @@ export const renderField: RenderFieldFn = (args) => {
     readOnly,
     schemaPath,
   } = args
-
   const isHidden = 'admin' in field && 'hidden' in field.admin && field.admin.hidden
 
-  const fieldState = formState[fieldPath]
+  const fieldState = formState[path]
 
   let clientProps: ClientSlotProps = {
     field: clientField,
     fieldState,
-    path: fieldPath,
+    path,
     permissions: fieldPermissions,
     readOnly,
     schemaPath,
@@ -417,7 +413,7 @@ export const renderField: RenderFieldFn = (args) => {
                 ? field.admin?.description({ t: i18n.t })
                 : ''
           }
-          path={fieldPath}
+          path={path}
         />
       )
     }

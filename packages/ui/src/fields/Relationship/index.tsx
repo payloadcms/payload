@@ -39,7 +39,6 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     Error,
     field: {
       name,
-      _path: pathFromProps,
       admin: {
         allowCreate = true,
         allowEdit = true,
@@ -56,6 +55,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       required,
     },
     Label,
+    path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props

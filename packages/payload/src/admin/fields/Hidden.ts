@@ -5,7 +5,7 @@ export type HiddenFieldProps = {
   readonly disableModifyingForm?: false
   readonly field?: {
     readonly name?: string
-  } & Pick<ClientField, '_path'>
+  } & ClientField
   readonly forceUsePathFromProps?: boolean
   readonly value?: unknown
 } & FormFieldBase

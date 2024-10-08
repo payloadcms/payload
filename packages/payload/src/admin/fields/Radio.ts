@@ -20,6 +20,7 @@ type RadioFieldClientWithoutType = MarkOptional<RadioFieldClient, 'type'>
 
 type RadioFieldBaseClientProps = {
   readonly onChange?: OnChange
+  readonly path?: string
   readonly validate?: RadioFieldValidation
   readonly value?: string
 }

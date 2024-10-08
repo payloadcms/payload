@@ -17,7 +17,9 @@ import type {
 
 type GroupFieldClientWithoutType = MarkOptional<GroupFieldClient, 'type'>
 
-export type GroupFieldClientProps = ClientFieldBase<GroupFieldClientWithoutType>
+export type GroupFieldClientProps = {
+  readonly path?: string
+} & ClientFieldBase<GroupFieldClientWithoutType>
 
 export type GroupFieldServerProps = ServerFieldBase<GroupField, GroupFieldClientWithoutType>
 

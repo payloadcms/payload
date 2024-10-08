@@ -22,7 +22,6 @@ export type RenderFieldFn = (
     readonly clientField: ClientField
     readonly config: SanitizedConfig
     readonly field: Field
-    readonly fieldPath: string
     readonly forceRender?: boolean
     readonly formState: FormState
     readonly i18n: I18nClient
@@ -101,7 +100,6 @@ export type RenderFieldArgs = {
   readonly clientField: ClientField
   readonly config: SanitizedConfig
   readonly field: Field
-  readonly fieldPath: string
   readonly fieldPermissions: FieldPermissions
   readonly forceRender?: boolean
   readonly formState: FormState

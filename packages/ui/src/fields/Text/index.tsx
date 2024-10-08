@@ -23,8 +23,6 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
     Description,
     Error,
     field: {
-      name,
-      _path: pathFromProps,
       admin: { className, placeholder, readOnly: readOnlyFromAdmin, rtl, style, width } = {},
       hasMany,
       label,
@@ -37,6 +35,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
     },
     inputRef,
     Label,
+    path,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
@@ -57,8 +56,6 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
     },
     [validate, minLength, maxLength, required],
   )
-
-  const path = pathFromProps ?? name
 
   const { formInitializing, formProcessing, setValue, showError, value } = useField({
     path,

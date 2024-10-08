@@ -92,6 +92,7 @@ import type {
   TextareaFieldErrorServerComponent,
   TextareaFieldLabelClientComponent,
   TextareaFieldLabelServerComponent,
+  TextFieldClientProps,
   TextFieldErrorClientComponent,
   TextFieldErrorServerComponent,
   TextFieldLabelClientComponent,
@@ -418,7 +419,6 @@ export interface FieldBase {
 
 export interface FieldBaseClient {
   _isPresentational?: undefined
-  _path?: string
   _schemaPath?: string
   admin?: AdminClient
   hidden?: boolean
@@ -1381,6 +1381,7 @@ export type ClientFieldProps =
   | SelectFieldClientProps
   | TabsFieldClientProps
   | TextareaFieldClientProps
+  | TextFieldClientProps
   | UploadFieldClientProps
 
 type ExtractFieldTypes<T> = T extends { type: infer U } ? U : never

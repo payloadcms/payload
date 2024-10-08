@@ -64,7 +64,6 @@ export const renderRowsBySchemaPath: RenderRowsBySchemaPath = (args) => {
     path,
     payload: req.payload,
     // permissions, // TODO
-    fieldPath: path,
     rows,
     schemaPath,
     serverProps,

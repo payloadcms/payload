@@ -23,8 +23,6 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
     Description,
     Error,
     field: {
-      name,
-      _path: pathFromProps,
       admin: { className, placeholder, readOnly: readOnlyFromAdmin, rows, rtl, style, width } = {},
       label,
       localized,
@@ -34,6 +32,7 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
     },
     Label,
     locale,
+    path,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
@@ -61,8 +60,6 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
     },
     [validate, required, maxLength, minLength],
   )
-
-  const path = pathFromProps ?? name
 
   const { formInitializing, formProcessing, setValue, showError, value } = useField<string>({
     path,

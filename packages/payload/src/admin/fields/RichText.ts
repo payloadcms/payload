@@ -23,6 +23,7 @@ type RichTextFieldBaseClientProps<
   TAdapterProps = any,
   TExtraProperties = object,
 > = {
+  readonly path?: string
   readonly validate?: RichTextFieldValidation
 }
 
