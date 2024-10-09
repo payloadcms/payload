@@ -1,6 +1,6 @@
 import type { Relation } from 'drizzle-orm'
 import type { IndexBuilder, SQLiteColumnBuilder } from 'drizzle-orm/sqlite-core'
-import type { Field, TabAsField } from 'payload'
+import type { Field, SanitizedJoins, TabAsField } from 'payload'
 
 import {
   createTableName,
@@ -41,6 +41,7 @@ type Args = {
   fields: (Field | TabAsField)[]
   forceLocalized?: boolean
   indexes: Record<string, (cols: GenericColumns) => IndexBuilder>
+  joins?: SanitizedJoins
   locales: [string, ...string[]]
   localesColumns: Record<string, SQLiteColumnBuilder>
   localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder>
@@ -78,6 +79,7 @@ export const traverseFields = ({
   fields,
   forceLocalized,
   indexes,
+  joins,
   locales,
   localesColumns,
   localesIndexes,
@@ -651,6 +653,7 @@ export const traverseFields = ({
             fields: field.fields,
             forceLocalized,
             indexes,
+            joins,
             locales,
             localesColumns,
             localesIndexes,
@@ -705,6 +708,7 @@ export const traverseFields = ({
           fields: field.fields,
           forceLocalized: field.localized,
           indexes,
+          joins,
           locales,
           localesColumns,
           localesIndexes,
@@ -760,6 +764,7 @@ export const traverseFields = ({
           fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
           forceLocalized,
           indexes,
+          joins,
           locales,
           localesColumns,
           localesIndexes,
@@ -815,6 +820,7 @@ export const traverseFields = ({
           fields: field.fields,
           forceLocalized,
           indexes,
+          joins,
           locales,
           localesColumns,
           localesIndexes,
@@ -905,9 +911,18 @@ export const traverseFields = ({
 
       case 'join': {
         // fieldName could be 'posts' or 'group_posts'
-        // using on as the key for the relation
+        // using `on` as the key for the relation
         const localized = adapter.payload.config.localization && field.localized
-        const target = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${localized ? adapter.localesSuffix : ''}`
+        const fieldSchemaPath = `${fieldPrefix || ''}${field.name}`
+        let target: string
+        const joinConfig = joins[field.collection].find(
+          ({ schemaPath }) => fieldSchemaPath === schemaPath,
+        )
+        if (joinConfig.targetField.hasMany) {
+          target = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${adapter.relationshipsSuffix}`
+        } else {
+          target = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${localized ? adapter.localesSuffix : ''}`
+        }
         relationsToBuild.set(fieldName, {
           type: 'many',
           // joins are not localized on the parent table
