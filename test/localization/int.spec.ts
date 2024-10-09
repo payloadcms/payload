@@ -1452,6 +1452,42 @@ describe('Localization', () => {
       expect(docEs.deep.blocks[0].title).toBe('hello es')
     })
 
+    it('should create/updated/read localized group with row field', async () => {
+      const doc = await payload.create({
+        collection: 'groups',
+        data: {
+          groupLocalizedRow: {
+            text: 'hello world',
+          },
+        },
+        locale: 'en',
+      })
+
+      expect(doc.groupLocalizedRow.text).toBe('hello world')
+
+      const docES = await payload.update({
+        collection: 'groups',
+        data: {
+          groupLocalizedRow: {
+            text: 'hola world or something',
+          },
+        },
+        locale: 'es',
+        id: doc.id,
+      })
+
+      expect(docES.groupLocalizedRow.text).toBe('hola world or something')
+
+      // check if docES didnt break EN
+      const docEN = await payload.findByID({ collection: 'groups', id: doc.id, locale: 'en' })
+      expect(docEN.groupLocalizedRow.text).toBe('hello world')
+
+      const all = await payload.findByID({ collection: 'groups', id: doc.id, locale: 'all' })
+
+      expect(all.groupLocalizedRow.en.text).toBe('hello world')
+      expect(all.groupLocalizedRow.es.text).toBe('hola world or something')
+    })
+
     it('should properly create/update/read localized tab field', async () => {
       const result = await payload.create({
         collection: tabSlug,
@@ -1974,6 +2010,260 @@ describe('Localization', () => {
 
       expect(retrieved.array.en[0].text).toEqual(['hello', 'goodbye'])
       expect(retrieved.array.es[0].text).toEqual(['hola', 'adios'])
+    })
+
+    it('should allow for relationship in new tables within blocks inside of localized blocks to be stored', async () => {
+      const randomDoc = (
+        await payload.find({
+          collection: 'localized-posts',
+          depth: 0,
+        })
+      ).docs[0]
+      const randomDoc2 = (
+        await payload.find({
+          collection: 'localized-posts',
+          depth: 0,
+        })
+      ).docs[1]
+
+      const docEn = await payload.create({
+        collection: 'nested-field-tables',
+        depth: 0,
+        data: {
+          blocks: [
+            {
+              blockType: 'block',
+              nestedBlocks: [
+                {
+                  blockType: 'content',
+                  relation: {
+                    relationTo: 'localized-posts',
+                    value: randomDoc.id,
+                  },
+                },
+              ],
+            },
+            {
+              blockType: 'block',
+              nestedBlocks: [
+                {
+                  blockType: 'content',
+                  relation: {
+                    relationTo: 'localized-posts',
+                    value: randomDoc.id,
+                  },
+                },
+              ],
+            },
+            {
+              blockType: 'block',
+              nestedBlocks: [
+                {
+                  blockType: 'content',
+                  relation: {
+                    relationTo: 'localized-posts',
+                    value: randomDoc.id,
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      })
+
+      expect(docEn.blocks[0].nestedBlocks[0].relation.value).toBe(randomDoc.id)
+      expect(docEn.blocks[1].nestedBlocks[0].relation.value).toBe(randomDoc.id)
+      expect(docEn.blocks[2].nestedBlocks[0].relation.value).toBe(randomDoc.id)
+
+      const docEs = await payload.update({
+        id: docEn.id,
+        depth: 0,
+        locale: 'es',
+        collection: 'nested-field-tables',
+        data: {
+          blocks: [
+            {
+              blockType: 'block',
+              nestedBlocks: [
+                {
+                  blockType: 'content',
+                  relation: {
+                    relationTo: 'localized-posts',
+                    value: randomDoc2.id,
+                  },
+                },
+              ],
+            },
+            {
+              blockType: 'block',
+              nestedBlocks: [
+                {
+                  blockType: 'content',
+                  relation: {
+                    relationTo: 'localized-posts',
+                    value: randomDoc2.id,
+                  },
+                },
+              ],
+            },
+            {
+              blockType: 'block',
+              nestedBlocks: [
+                {
+                  blockType: 'content',
+                  relation: {
+                    relationTo: 'localized-posts',
+                    value: randomDoc2.id,
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      })
+
+      expect(docEs.blocks[0].nestedBlocks[0].relation.value).toBe(randomDoc2.id)
+      expect(docEs.blocks[1].nestedBlocks[0].relation.value).toBe(randomDoc2.id)
+      expect(docEs.blocks[2].nestedBlocks[0].relation.value).toBe(randomDoc2.id)
+
+      const docAll = await payload.findByID({
+        collection: 'nested-field-tables',
+        id: docEn.id,
+        locale: 'all',
+        depth: 0,
+      })
+
+      expect(docAll.blocks.en[0].nestedBlocks[0].relation.value).toBe(randomDoc.id)
+      expect(docAll.blocks.en[1].nestedBlocks[0].relation.value).toBe(randomDoc.id)
+      expect(docAll.blocks.en[2].nestedBlocks[0].relation.value).toBe(randomDoc.id)
+
+      expect(docAll.blocks.es[0].nestedBlocks[0].relation.value).toBe(randomDoc2.id)
+      expect(docAll.blocks.es[1].nestedBlocks[0].relation.value).toBe(randomDoc2.id)
+      expect(docAll.blocks.es[2].nestedBlocks[0].relation.value).toBe(randomDoc2.id)
+    })
+
+    it('should allow for relationship in new tables within arrays inside of localized blocks to be stored', async () => {
+      const randomDoc = (
+        await payload.find({
+          collection: 'localized-posts',
+          depth: 0,
+        })
+      ).docs[0]
+      const randomDoc2 = (
+        await payload.find({
+          collection: 'localized-posts',
+          depth: 0,
+        })
+      ).docs[1]
+
+      const docEn = await payload.create({
+        collection: 'nested-field-tables',
+        depth: 0,
+        data: {
+          blocks: [
+            {
+              blockType: 'block',
+              array: [
+                {
+                  relation: {
+                    relationTo: 'localized-posts',
+                    value: randomDoc.id,
+                  },
+                },
+              ],
+            },
+            {
+              blockType: 'block',
+              array: [
+                {
+                  relation: {
+                    relationTo: 'localized-posts',
+                    value: randomDoc.id,
+                  },
+                },
+              ],
+            },
+            {
+              blockType: 'block',
+              array: [
+                {
+                  relation: {
+                    relationTo: 'localized-posts',
+                    value: randomDoc.id,
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      })
+
+      expect(docEn.blocks[0].array[0].relation.value).toBe(randomDoc.id)
+      expect(docEn.blocks[1].array[0].relation.value).toBe(randomDoc.id)
+      expect(docEn.blocks[2].array[0].relation.value).toBe(randomDoc.id)
+
+      const docEs = await payload.update({
+        id: docEn.id,
+        depth: 0,
+        locale: 'es',
+        collection: 'nested-field-tables',
+        data: {
+          blocks: [
+            {
+              blockType: 'block',
+              array: [
+                {
+                  relation: {
+                    relationTo: 'localized-posts',
+                    value: randomDoc2.id,
+                  },
+                },
+              ],
+            },
+            {
+              blockType: 'block',
+              array: [
+                {
+                  relation: {
+                    relationTo: 'localized-posts',
+                    value: randomDoc2.id,
+                  },
+                },
+              ],
+            },
+            {
+              blockType: 'block',
+              array: [
+                {
+                  relation: {
+                    relationTo: 'localized-posts',
+                    value: randomDoc2.id,
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      })
+
+      expect(docEs.blocks[0].array[0].relation.value).toBe(randomDoc2.id)
+      expect(docEs.blocks[1].array[0].relation.value).toBe(randomDoc2.id)
+      expect(docEs.blocks[2].array[0].relation.value).toBe(randomDoc2.id)
+
+      const docAll = await payload.findByID({
+        collection: 'nested-field-tables',
+        id: docEn.id,
+        locale: 'all',
+        depth: 0,
+      })
+
+      expect(docAll.blocks.en[0].array[0].relation.value).toBe(randomDoc.id)
+      expect(docAll.blocks.en[1].array[0].relation.value).toBe(randomDoc.id)
+      expect(docAll.blocks.en[2].array[0].relation.value).toBe(randomDoc.id)
+
+      expect(docAll.blocks.es[0].array[0].relation.value).toBe(randomDoc2.id)
+      expect(docAll.blocks.es[1].array[0].relation.value).toBe(randomDoc2.id)
+      expect(docAll.blocks.es[2].array[0].relation.value).toBe(randomDoc2.id)
     })
   })
 

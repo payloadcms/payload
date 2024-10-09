@@ -9,11 +9,11 @@ export interface BaseDatabaseAdapter {
    * Start a transaction, requiring commitTransaction() to be called for any changes to be made.
    * @returns an identifier for the transaction or null if one cannot be established
    */
-  beginTransaction?: BeginTransaction
+  beginTransaction: BeginTransaction
   /**
    * Persist the changes made since the start of the transaction.
    */
-  commitTransaction?: CommitTransaction
+  commitTransaction: CommitTransaction
 
   /**
    * Open the connection to the database
@@ -116,7 +116,7 @@ export interface BaseDatabaseAdapter {
   /**
    * Abort any changes since the start of the transaction.
    */
-  rollbackTransaction?: RollbackTransaction
+  rollbackTransaction: RollbackTransaction
   /**
    * A key-value store of all sessions open (used for transactions)
    */

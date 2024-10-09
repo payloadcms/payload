@@ -23,17 +23,17 @@ export type GenerateViewMetadata = (args: {
 export const RootPage = async ({
   config: configPromise,
   importMap,
-  params,
-  searchParams,
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
 }: {
   readonly config: Promise<SanitizedConfig>
   readonly importMap: ImportMap
-  readonly params: {
+  readonly params: Promise<{
     segments: string[]
-  }
-  readonly searchParams: {
+  }>
+  readonly searchParams: Promise<{
     [key: string]: string | string[]
-  }
+  }>
 }) => {
   const config = await configPromise
 
@@ -45,12 +45,15 @@ export const RootPage = async ({
     routes: { admin: adminRoute },
   } = config
 
+  const params = await paramsPromise
   const currentRoute = formatAdminURL({
     adminRoute,
     path: `${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`,
   })
 
   const segments = Array.isArray(params.segments) ? params.segments : []
+
+  const searchParams = await searchParamsPromise
 
   const { DefaultView, initPageOptions, templateClassName, templateType } = getViewFromConfig({
     adminRoute,
@@ -68,6 +71,10 @@ export const RootPage = async ({
   }
 
   const initPageResult = await initPage(initPageOptions)
+
+  if (typeof initPageResult?.redirectTo === 'string') {
+    redirect(initPageResult.redirectTo)
+  }
 
   if (initPageResult) {
     dbHasUser = await initPageResult?.req.payload.db
@@ -134,8 +141,8 @@ export const RootPage = async ({
           visibleEntities={{
             // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
             // which this caused as soon as initPageResult.visibleEntities is passed in
-            collections: initPageResult.visibleEntities?.collections,
-            globals: initPageResult.visibleEntities?.globals,
+            collections: initPageResult?.visibleEntities?.collections,
+            globals: initPageResult?.visibleEntities?.globals,
           }}
         >
           {RenderedView}

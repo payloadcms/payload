@@ -1,25 +1,21 @@
-import type {
-  Permissions,
-  SanitizedCollectionConfig,
-  SanitizedConfig,
-  SanitizedGlobalConfig,
-} from 'payload'
+import type { SanitizedCollectionConfig, SanitizedConfig, SanitizedGlobalConfig } from 'payload'
 
-import { notFound } from 'next/navigation.js'
+import { getRouteWithoutAdmin, isAdminRoute } from './shared.js'
 
-import { getRouteWithoutAdmin, isAdminAuthRoute, isAdminRoute } from './shared.js'
-
-export const handleAdminPage = ({
-  adminRoute,
-  config,
-  permissions,
-  route,
-}: {
+type Args = {
   adminRoute: string
   config: SanitizedConfig
-  permissions: Permissions
   route: string
-}) => {
+}
+type RouteInfo = {
+  collectionConfig?: SanitizedCollectionConfig
+  collectionSlug?: string
+  docID?: string
+  globalConfig?: SanitizedGlobalConfig
+  globalSlug?: string
+}
+
+export function getRouteInfo({ adminRoute, config, route }: Args): RouteInfo {
   if (isAdminRoute({ adminRoute, config, route })) {
     const routeWithoutAdmin = getRouteWithoutAdmin({ adminRoute, route })
     const routeSegments = routeWithoutAdmin.split('/').filter(Boolean)
@@ -33,28 +29,18 @@ export const handleAdminPage = ({
 
     if (collectionSlug) {
       collectionConfig = config.collections.find((collection) => collection.slug === collectionSlug)
-
-      if (!collectionConfig) {
-        notFound()
-      }
     }
 
     if (globalSlug) {
       globalConfig = config.globals.find((global) => global.slug === globalSlug)
-
-      if (!globalConfig) {
-        notFound()
-      }
-    }
-
-    if (!permissions.canAccessAdmin && !isAdminAuthRoute({ adminRoute, config, route })) {
-      notFound()
     }
 
     return {
       collectionConfig,
+      collectionSlug,
       docID,
       globalConfig,
+      globalSlug,
     }
   }
 

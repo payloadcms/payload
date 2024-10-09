@@ -310,6 +310,7 @@ export function initPageConsoleErrorCatch(page: Page) {
       !msg.text().includes('the server responded with a status of') &&
       !msg.text().includes('Failed to fetch RSC payload for') &&
       !msg.text().includes('Error: NEXT_NOT_FOUND') &&
+      !msg.text().includes('Error: NEXT_REDIRECT') &&
       !msg.text().includes('Error getting document data')
     ) {
       // "Failed to fetch RSC payload for" happens seemingly randomly. There are lots of issues in the next.js repository for this. Causes e2e tests to fail and flake. Will ignore for now

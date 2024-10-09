@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-beta.108",
+  "version": "3.0.0-beta.112",
   "private": true,
   "type": "module",
   "scripts": {
@@ -99,18 +99,20 @@
       "prettier --write",
       "eslint --cache --fix"
     ],
-    "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --ignore-workspace; pnpm run lint --fix\"",
+    "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --no-frozen-lockfile --ignore-workspace; pnpm run lint --fix\"",
     "tsconfig.json": "node scripts/reset-tsconfig.js"
   },
   "devDependencies": {
     "@jest/globals": "29.7.0",
     "@libsql/client": "0.6.2",
-    "@next/bundle-analyzer": "15.0.0-canary.160",
+    "@next/bundle-analyzer": "15.0.0-canary.173",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/eslint-plugin": "workspace:*",
     "@payloadcms/live-preview-react": "workspace:*",
     "@playwright/test": "1.46.0",
+    "@sentry/nextjs": "^8.33.1",
+    "@sentry/node": "^8.33.1",
     "@swc-node/register": "1.10.9",
     "@swc/cli": "0.4.0",
     "@swc/jest": "0.2.36",
@@ -143,15 +145,15 @@
     "lint-staged": "15.2.7",
     "minimist": "1.2.8",
     "mongodb-memory-server": "^9.0",
-    "next": "15.0.0-canary.160",
+    "next": "15.0.0-canary.173",
     "open": "^10.1.0",
     "p-limit": "^5.0.0",
     "playwright": "1.46.0",
     "playwright-core": "1.46.0",
     "prettier": "3.3.3",
     "prompts": "2.4.2",
-    "react": "19.0.0-rc-5dcb0097-20240918",
-    "react-dom": "19.0.0-rc-5dcb0097-20240918",
+    "react": "19.0.0-rc-3edc000d-20240926",
+    "react-dom": "19.0.0-rc-3edc000d-20240926",
     "rimraf": "3.0.2",
     "semver": "^7.5.4",
     "sharp": "0.32.6",
@@ -165,8 +167,8 @@
     "typescript": "5.6.2"
   },
   "peerDependencies": {
-    "react": "^19.0.0 || ^19.0.0-rc-5dcb0097-20240918",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-5dcb0097-20240918"
+    "react": "^19.0.0 || ^19.0.0-rc-3edc000d-20240926",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-3edc000d-20240926"
   },
   "packageManager": "pnpm@9.7.1",
   "engines": {

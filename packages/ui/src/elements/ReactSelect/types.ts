@@ -63,7 +63,12 @@ export type ReactSelectAdapterProps = {
   disabled?: boolean
   filterOption?:
     | ((
-        { data, label, value }: { data: Option; label: string; value: string },
+        {
+          allowEdit,
+          data,
+          label,
+          value,
+        }: { allowEdit: boolean; data: Option; label: string; value: string },
         search: string,
       ) => boolean)
     | undefined

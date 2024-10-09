@@ -62,23 +62,33 @@ export const updateChangelog = async (args: Args = {}): Promise<ChangelogResult>
 
   const conventionalCommits = await getLatestCommits(fromVersion, toVersion)
 
-  const sections: Record<'breaking' | 'feat' | 'fix' | 'perf', string[]> = {
-    feat: [],
-    fix: [],
-    perf: [],
-    breaking: [],
-  }
+  type SectionKey = 'breaking' | 'feat' | 'fix' | 'perf'
 
-  // Group commits by type
-  conventionalCommits.forEach((c) => {
-    if (c.isBreaking) {
-      sections.breaking.push(formatCommitForChangelog(c, true))
-    }
+  const sections = conventionalCommits.reduce(
+    (sections, c) => {
+      if (c.isBreaking) {
+        sections.breaking.push(c)
+      }
 
-    if (c.type === 'feat' || c.type === 'fix' || c.type === 'perf') {
-      sections[c.type].push(formatCommitForChangelog(c))
-    }
+      if (['feat', 'fix', 'perf'].includes(c.type)) {
+        sections[c.type].push(c)
+      }
+      return sections
+    },
+    { feat: [], fix: [], perf: [], breaking: [] } as Record<SectionKey, GitCommit[]>,
+  )
+
+  // Sort commits by scope, unscoped first
+  Object.values(sections).forEach((section) => {
+    section.sort((a, b) => (a.scope || '').localeCompare(b.scope || ''))
   })
+
+  const stringifiedSections = Object.fromEntries(
+    Object.entries(sections).map(([key, commits]) => [
+      key,
+      commits.map((commit) => formatCommitForChangelog(commit, key === 'breaking')),
+    ]),
+  )
 
   // Fetch commits for fromVersion to toVersion
   const contributors = await createContributorSection(conventionalCommits)
@@ -86,17 +96,19 @@ export const updateChangelog = async (args: Args = {}): Promise<ChangelogResult>
   const yyyyMMdd = new Date().toISOString().split('T')[0]
   // Might need to swap out HEAD for the new proposed version
   let changelog = `## [${proposedReleaseVersion}](https://github.com/payloadcms/payload/compare/${fromVersion}...${proposedReleaseVersion}) (${yyyyMMdd})\n\n\n`
-  if (sections.feat.length) {
-    changelog += `### 🚀 Features\n\n${sections.feat.join('\n')}\n\n`
+
+  // Add section headers
+  if (stringifiedSections.feat.length) {
+    changelog += `### 🚀 Features\n\n${stringifiedSections.feat.join('\n')}\n\n`
   }
-  if (sections.perf.length) {
-    changelog += `### ⚡ Performance\n\n${sections.perf.join('\n')}\n\n`
+  if (stringifiedSections.perf.length) {
+    changelog += `### ⚡ Performance\n\n${stringifiedSections.perf.join('\n')}\n\n`
   }
-  if (sections.fix.length) {
-    changelog += `### 🐛 Bug Fixes\n\n${sections.fix.join('\n')}\n\n`
+  if (stringifiedSections.fix.length) {
+    changelog += `### 🐛 Bug Fixes\n\n${stringifiedSections.fix.join('\n')}\n\n`
   }
-  if (sections.breaking.length) {
-    changelog += `### ⚠️ BREAKING CHANGES\n\n${sections.breaking.join('\n')}\n\n`
+  if (stringifiedSections.breaking.length) {
+    changelog += `### ⚠️ BREAKING CHANGES\n\n${stringifiedSections.breaking.join('\n')}\n\n`
   }
 
   if (writeChangelog) {
@@ -200,11 +212,13 @@ function formatCommitForChangelog(commit: GitCommit, includeBreakingNotes = fals
   if (isBreaking && includeBreakingNotes) {
     // Parse breaking change notes from commit body
     const [rawNotes, _] = commit.body.split('\n\n')
-    let notes = rawNotes
-      .split('\n')
-      .map((l) => `  ${l}`) // Indent notes
-      .join('\n')
-      .trim()
+    let notes =
+      `  ` +
+      rawNotes
+        .split('\n')
+        .map((l) => `  ${l}`) // Indent notes
+        .join('\n')
+        .trim()
 
     // Remove random trailing quotes that sometimes appear
     if (notes.endsWith('"')) {

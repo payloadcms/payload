@@ -36,6 +36,7 @@ export const buildFindManyArgs = ({
   tableName,
 }: BuildFindQueryArgs): Record<string, unknown> => {
   const result: Result = {
+    extras: {},
     with: {},
   }
 
@@ -44,6 +45,7 @@ export const buildFindManyArgs = ({
       id: false,
       _parentID: false,
     },
+    extras: {},
     with: {},
   }
 

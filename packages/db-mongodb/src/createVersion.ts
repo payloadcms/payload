@@ -1,3 +1,4 @@
+import mongoose from 'mongoose'
 import {
   buildVersionCollectionFields,
   type CreateVersion,
@@ -47,6 +48,23 @@ export const createVersion: CreateVersion = async function createVersion(
 
   const [doc] = await VersionModel.create([data], options, req)
 
+  const parentQuery = {
+    $or: [
+      {
+        parent: {
+          $eq: data.parent,
+        },
+      },
+    ],
+  }
+  if (data.parent instanceof mongoose.Types.ObjectId) {
+    parentQuery.$or.push({
+      parent: {
+        $eq: data.parent.toString(),
+      },
+    })
+  }
+
   await VersionModel.updateMany(
     {
       $and: [
@@ -55,11 +73,7 @@ export const createVersion: CreateVersion = async function createVersion(
             $ne: doc._id,
           },
         },
-        {
-          parent: {
-            $eq: data.parent,
-          },
-        },
+        parentQuery,
         {
           latest: {
             $eq: true,

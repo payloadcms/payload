@@ -6,7 +6,7 @@ import type { BaseDatabaseAdapter, DatabaseAdapterObj, Payload, UpdateOneArgs } 
 import fs from 'fs'
 import mongoose from 'mongoose'
 import path from 'path'
-import { createDatabaseAdapter } from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
 
 import type { CollectionModel, GlobalModel, MigrateDownArgs, MigrateUpArgs } from './types.js'
 
@@ -163,7 +163,7 @@ export function mongooseAdapter({
       url,
       versions: {},
       // DatabaseAdapter
-      beginTransaction: transactionOptions ? beginTransaction : undefined,
+      beginTransaction: transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
       commitTransaction,
       connect,
       create,

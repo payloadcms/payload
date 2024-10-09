@@ -122,4 +122,10 @@ export {
   BlockNode,
 } from '../../features/blocks/client/nodes/BlocksNode.js'
 
+export {
+  $createInlineBlockNode,
+  $isInlineBlockNode,
+  InlineBlockNode,
+} from '../../features/blocks/client/nodes/InlineBlocksNode.js'
+
 export { FieldsDrawer } from '../../utilities/fieldsDrawer/Drawer.js'

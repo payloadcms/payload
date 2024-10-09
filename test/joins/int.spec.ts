@@ -1,6 +1,7 @@
 import type { Payload } from 'payload'
 
 import path from 'path'
+import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -9,6 +10,7 @@ import type { Category, Post } from './payload-types.js'
 import { devUser } from '../credentials.js'
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { categoriesSlug, uploadsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -21,6 +23,7 @@ const { email, password } = devUser
 
 describe('Joins Field', () => {
   let category: Category
+  let otherCategory: Category
   let categoryID
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
@@ -40,21 +43,46 @@ describe('Joins Field', () => {
     token = data.token
 
     category = await payload.create({
-      collection: 'categories',
+      collection: categoriesSlug,
       data: {
         name: 'paginate example',
         group: {},
       },
     })
 
+    otherCategory = await payload.create({
+      collection: categoriesSlug,
+      data: {
+        name: 'otherCategory',
+        group: {},
+      },
+    })
+
+    // create an upload
+    const imageFilePath = path.resolve(dirname, './image.png')
+    const imageFile = await getFileByPath(imageFilePath)
+
+    const { id: uploadedImage } = await payload.create({
+      collection: uploadsSlug,
+      data: {},
+      file: imageFile,
+    })
+
     categoryID = idToString(category.id, payload)
 
     for (let i = 0; i < 15; i++) {
+      let categories = [category.id]
+      if (i % 2 === 0) {
+        categories = [category.id, otherCategory.id]
+      }
       await createPost({
         title: `test ${i}`,
         category: category.id,
+        upload: uploadedImage,
+        categories,
         group: {
           category: category.id,
+          camelCaseCategory: category.id,
         },
       })
     }
@@ -76,6 +104,15 @@ describe('Joins Field', () => {
       },
       collection: 'categories',
     })
+    // const sortCategoryWithPosts = await payload.findByID({
+    //   id: category.id,
+    //   joins: {
+    //     'group.relatedPosts': {
+    //       sort: 'title',
+    //     },
+    //   },
+    //   collection: 'categories',
+    // })
 
     expect(categoryWithPosts.group.relatedPosts.docs).toHaveLength(10)
     expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('id')
@@ -92,6 +129,27 @@ describe('Joins Field', () => {
     expect(docs[0].category.id).toBeDefined()
     expect(docs[0].category.name).toBeDefined()
     expect(docs[0].category.relatedPosts.docs).toHaveLength(10)
+  })
+
+  it('should populate relationships in joins with camelCase names', async () => {
+    const { docs } = await payload.find({
+      limit: 1,
+      collection: 'posts',
+    })
+
+    expect(docs[0].group.camelCaseCategory.id).toBeDefined()
+    expect(docs[0].group.camelCaseCategory.name).toBeDefined()
+    expect(docs[0].group.camelCaseCategory.group.camelCasePosts.docs).toHaveLength(10)
+  })
+
+  it('should populate uploads in joins', async () => {
+    const { docs } = await payload.find({
+      limit: 1,
+      collection: 'posts',
+    })
+
+    expect(docs[0].upload.id).toBeDefined()
+    expect(docs[0].upload.relatedPosts.docs).toHaveLength(10)
   })
 
   it('should filter joins using where query', async () => {
@@ -127,6 +185,31 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.group.relatedPosts.docs).toHaveLength(10)
     expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('title')
     expect(categoryWithPosts.group.relatedPosts.docs[0].title).toBe('test 14')
+  })
+
+  it('should populate joins using find with hasMany relationships', async () => {
+    const result = await payload.find({
+      collection: 'categories',
+      where: {
+        id: { equals: category.id },
+      },
+    })
+    const otherResult = await payload.find({
+      collection: 'categories',
+      where: {
+        id: { equals: otherCategory.id },
+      },
+    })
+
+    const [categoryWithPosts] = result.docs
+    const [otherCategoryWithPosts] = otherResult.docs
+
+    expect(categoryWithPosts.hasManyPosts.docs).toHaveLength(10)
+    expect(categoryWithPosts.hasManyPosts.docs[0]).toHaveProperty('title')
+    expect(categoryWithPosts.hasManyPosts.docs[0].title).toBe('test 14')
+    expect(otherCategoryWithPosts.hasManyPosts.docs).toHaveLength(8)
+    expect(otherCategoryWithPosts.hasManyPosts.docs[0]).toHaveProperty('title')
+    expect(otherCategoryWithPosts.hasManyPosts.docs[0].title).toBe('test 14')
   })
 
   it('should not error when deleting documents with joins', async () => {

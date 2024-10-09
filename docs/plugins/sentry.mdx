@@ -31,7 +31,7 @@ This multi-faceted software offers a range of features that will help you manage
 - **Integrations**: Connects with various tools and services for enhanced workflow and issue management
 
 <Banner type="info">
-  This plugin is completely open-source and the [source code can be found here](https://github.com/payloadcms/payload/tree/main/packages/plugin-sentry). If you need help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've found a bug, please [open a new issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20seo&template=bug_report.md&title=plugin-seo%3A) with as much detail as possible.
+  This plugin is completely open-source and the [source code can be found here](https://github.com/payloadcms/payload/tree/beta/packages/plugin-sentry). If you need help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've found a bug, please [open a new issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20seo&template=bug_report.md&title=plugin-sentry%3A) with as much detail as possible.
 </Banner>
 
 ## Installation
@@ -42,6 +42,15 @@ Install the plugin using any JavaScript package manager like [Yarn](https://yarn
   pnpm add @payloadcms/plugin-sentry
 ```
 
+## Sentry for Next.js setup
+This plugin requires to complete the [Sentry + Next.js setup](https://docs.sentry.io/platforms/javascript/guides/nextjs/) before.
+
+You can use either the [automatic setup](https://docs.sentry.io/platforms/javascript/guides/nextjs/#install) with the installation wizard:
+```sh
+npx @sentry/wizard@latest -i nextjs
+```
+Or the [Manual Setup](https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/)
+
 ## Basic Usage
 
 In the `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin and pass in your Sentry DSN as an option.
@@ -51,11 +60,13 @@ import { buildConfig } from 'payload'
 import { sentryPlugin } from '@payloadcms/plugin-sentry'
 import { Pages, Media } from './collections'
 
+import * as Sentry from '@sentry/nextjs'
+
 const config = buildConfig({
   collections: [Pages, Media],
   plugins: [
     sentryPlugin({
-      dsn: 'https://61edebas776889984d323d777@o4505289711681536.ingest.sentry.io/4505357433352176',
+      Sentry,
     }),
   ],
 })
@@ -65,31 +76,25 @@ export default config
 
 ## Options
 
-- `dsn` : string | **required**
+- `Sentry` : Sentry | **required**
 
-  Sentry automatically assigns a DSN when you create a project, the unique DSN informs Sentry where to send events so they are associated with the correct project.
+  The `Sentry` instance
 
 <Banner type="warning">
-  You can find your project DSN (Data Source Name) by visiting [sentry.io](sentry.io) and navigating to your [Project] > Settings > Client Keys (DSN).
+  Make sure to complete the [Sentry for Next.js Setup](#sentry-for-nextjs-setup) before.
 </Banner>
 
 - `enabled`: boolean | optional
 
-  Set to false to disable the plugin. Defaults to true.
+  Set to false to disable the plugin. Defaults to `true`.
 
-- `init` : ClientOptions | optional
+- `context`: `(args: ContextArgs) => Partial<ScopeContext> | Promise<Partial<ScopeContext>>`
 
-  Sentry allows a variety of options to be passed into the Sentry.init() function, see the full list of options [here](https://docs.sentry.io/platforms/node/guides/express/configuration/options).
-
-- `requestHandler` : RequestHandlerOptions | optional
-
-  Accepts options that let you decide what data should be included in the event sent to Sentry, checkout the options [here](https://docs.sentry.io/platforms/node/guides/express/configuration/options).
+  Pass additional [contextual data](https://docs.sentry.io/platforms/javascript/enriching-events/context/#passing-context-directly) to Sentry
 
 - `captureErrors`: number[] | optional
 
   By default, `Sentry.errorHandler` will capture only errors with a status code of 500 or higher. To capture additional error codes, pass the values as numbers in an array.
-
-To see all options available, visit the [Sentry Docs](https://docs.sentry.io/platforms/node/guides/express/configuration/options).
 
 ### Example
 
@@ -97,26 +102,29 @@ Configure any of these options by passing them to the plugin:
 
 ```ts
 import { buildConfig } from 'payload'
-import { sentry } from '@payloadcms/plugin-sentry'
+import { sentryPlugin } from '@payloadcms/plugin-sentry'
+
+import * as Sentry from '@sentry/nextjs'
+
 import { Pages, Media } from './collections'
 
 const config = buildConfig({
   collections: [Pages, Media],
   plugins: [
-    sentry({
-      dsn: 'https://61edebas777689984d323d777@o4505289711681536.ingest.sentry.io/4505357433352176',
+    sentryPlugin({
       options: {
-        init: {
-          debug: true,
-          environment: 'development',
-          tracesSampleRate: 1.0,
+        captureErrors: [400, 403],
+        context: ({ defaultContext, req }) => {
+          return {
+            ...defaultContext,
+            tags: {
+              locale: req.locale,
+            },
+          }
         },
-        requestHandler: {
-          serverName: false,
-          user: ['email'],
-        },
-        captureErrors: [400, 403, 404],
+        debug: true,
       },
+      Sentry,
     }),
   ],
 })

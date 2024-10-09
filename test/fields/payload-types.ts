@@ -971,6 +971,23 @@ export interface GroupField {
   localizedGroupRel?: {
     email?: (string | null) | EmailField;
   };
+  localizedGroupManyRel?: {
+    email?: (string | EmailField)[] | null;
+  };
+  localizedGroupPolyRel?: {
+    email?: {
+      relationTo: 'email-fields';
+      value: string | EmailField;
+    } | null;
+  };
+  localizedGroupPolyHasManyRel?: {
+    email?:
+      | {
+          relationTo: 'email-fields';
+          value: string | EmailField;
+        }[]
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -1163,6 +1180,8 @@ export interface RelationshipField {
     | null;
   relationToSelf?: (string | null) | RelationshipField;
   relationToSelfSelectOnly?: (string | null) | RelationshipField;
+  relationWithAllowCreateToFalse?: (string | null) | User;
+  relationWithAllowEditToFalse?: (string | null) | User;
   relationWithDynamicDefault?: (string | null) | User;
   relationHasManyWithDynamicDefault?: {
     relationTo: 'users';
