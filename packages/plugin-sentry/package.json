@@ -37,7 +37,7 @@
   ],
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc-build --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
