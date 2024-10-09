@@ -1,8 +1,10 @@
 'use client'
-import type { Description } from 'payload'
+import type { ClientField, Description, FormState } from 'payload'
 
+import { fieldIsSidebar } from 'payload/shared'
 import React from 'react'
 
+import { RenderFields } from '../../forms/RenderFields/index.js'
 import { Gutter } from '../Gutter/index.js'
 import { RenderIfInViewport } from '../RenderIfInViewport/index.js'
 import './index.scss'
@@ -15,24 +17,38 @@ type Args = {
   readonly AfterFields?: React.ReactNode
   readonly BeforeFields?: React.ReactNode
   readonly description?: Description
+  readonly fields: ClientField[]
   readonly forceSidebarWrap?: boolean
-  readonly MainFields: React.ReactNode
-  readonly SidebarFields?: React.ReactNode
+  readonly formState: FormState
 }
 
 export const DocumentFields: React.FC<Args> = ({
   AfterFields,
   BeforeFields,
   description,
+  fields,
   forceSidebarWrap,
-  MainFields,
-  SidebarFields,
+  formState,
 }) => {
+  const { mainFields, sidebarFields } = fields.reduce(
+    (acc, field) => {
+      if (fieldIsSidebar(field)) {
+        acc.sidebarFields.push(field)
+      } else {
+        acc.mainFields.push(field)
+      }
+      return acc
+    },
+    { mainFields: [] as ClientField[], sidebarFields: [] as ClientField[] },
+  )
+
+  const hasSidebarFields = sidebarFields && sidebarFields.length > 0
+
   return (
     <div
       className={[
         baseClass,
-        SidebarFields ? `${baseClass}--has-sidebar` : `${baseClass}--no-sidebar`,
+        hasSidebarFields ? `${baseClass}--has-sidebar` : `${baseClass}--no-sidebar`,
         forceSidebarWrap && `${baseClass}--force-sidebar-wrap`,
       ]
         .filter(Boolean)
@@ -58,12 +74,17 @@ export const DocumentFields: React.FC<Args> = ({
               .filter(Boolean)
               .join(' ')}
           >
-            {MainFields}
+            <RenderFields
+              className={`${baseClass}__fields`}
+              fields={mainFields}
+              forceRender
+              formState={formState}
+            />
           </RenderIfInViewport>
           {AfterFields}
         </Gutter>
       </div>
-      {SidebarFields ? (
+      {sidebarFields ? (
         <div className={`${baseClass}__sidebar-wrap`}>
           <div className={`${baseClass}__sidebar`}>
             <div className={`${baseClass}__sidebar-fields`}>
@@ -77,7 +98,7 @@ export const DocumentFields: React.FC<Args> = ({
                   .filter(Boolean)
                   .join(' ')}
               >
-                {SidebarFields}
+                <RenderFields fields={sidebarFields} forceRender formState={formState} />
               </RenderIfInViewport>
             </div>
           </div>

@@ -20,6 +20,7 @@ export const iterateFields = async <T>({
   user,
 }: Args<T>): Promise<void> => {
   const promises = []
+
   fields.forEach((field) => {
     promises.push(
       defaultValuePromise({
@@ -32,5 +33,6 @@ export const iterateFields = async <T>({
       }),
     )
   })
+
   await Promise.all(promises)
 }

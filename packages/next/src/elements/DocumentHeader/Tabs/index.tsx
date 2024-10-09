@@ -8,7 +8,7 @@ import type {
 
 import React from 'react'
 
-import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
+import { RenderServerComponent } from '../../../../../ui/src/elements/RenderServerComponent/index.js'
 import { getCustomViews } from './getCustomViews.js'
 import { getViewConfig } from './getViewConfig.js'
 import './index.scss'

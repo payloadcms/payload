@@ -6,7 +6,7 @@ import { formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+import { RenderServerComponent } from '../../../../ui/src/elements/RenderServerComponent/index.js'
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'

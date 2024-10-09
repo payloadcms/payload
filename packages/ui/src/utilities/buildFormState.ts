@@ -1,4 +1,5 @@
-import { type I18nClient } from '@payloadcms/translations'
+import type { I18n, I18nClient } from '@payloadcms/translations'
+
 import {
   type BuildFormStateArgs,
   type ClientUser,
@@ -8,14 +9,14 @@ import {
   type FieldSchemaMap,
   formatErrors,
   type FormState,
-  type Payload,
   type SanitizedConfig,
   type TypeWithID,
 } from 'payload'
-import { confirmPassword, password, reduceFieldsToValues } from 'payload/shared'
+import { reduceFieldsToValues } from 'payload/shared'
 
 import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
+export { renderField } from './renderFields.js'
 
 let cached = global._payload_fieldSchemaMap
 
@@ -35,36 +36,10 @@ export const getFieldSchemaMap = (args: {
 
   cached = buildFieldSchemaMap({
     config,
-    i18n,
+    i18n: i18n as I18n, // TODO: Fix this
   })
 
   return cached
-}
-
-export const getFieldBySchemaPath = (args: {
-  config: SanitizedConfig
-  i18n: I18nClient
-  payload: Payload
-  schemaPath: string
-}): Field => {
-  const { config, i18n, schemaPath } = args
-
-  const fieldSchemaMap = getFieldSchemaMap({
-    config,
-    i18n,
-  })
-
-  let fieldSchema: Field
-
-  if (fieldSchemaMap.has(schemaPath)) {
-    fieldSchema = fieldSchemaMap.get(schemaPath)
-  }
-
-  if (!fieldSchema) {
-    throw new Error(`Could not find field schema for given path "${schemaPath}"`)
-  }
-
-  return fieldSchema
 }
 
 export type BuildFormStateResult =
@@ -121,6 +96,7 @@ export const buildFormStateFn = async (
     globalSlug,
     locale,
     operation,
+    renderField,
     req,
     req: {
       i18n,
@@ -165,47 +141,24 @@ export const buildFormStateFn = async (
     }
   }
 
+  const fieldSchemaMap = getFieldSchemaMap({
+    config,
+    i18n,
+  })
+
   const id = collectionSlug ? idFromArgs : undefined
+  const schemaPathSegments = schemaPath && schemaPath.split('.')
 
   let fields: Field[]
 
-  const pathSegments = schemaPath.split('.')
-
-  if (pathSegments.length === 1) {
-    if (collectionSlug) {
-      const collectionConfig = payload.collections[collectionSlug].config
-      fields = payload.collections[pathSegments[0]].config.fields
-      if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
-        // register schema with auth schemaPath
-        const baseAuthFields: Field[] = [
-          {
-            name: 'password',
-            type: 'text',
-            label: i18n.t('general:password'),
-            required: true,
-            validate: password,
-          },
-          {
-            name: 'confirm-password',
-            type: 'text',
-            label: i18n.t('authentication:confirmPassword'),
-            required: true,
-            validate: confirmPassword,
-          },
-        ]
-
-        fields.push(...baseAuthFields)
-      }
+  if (schemaPathSegments && schemaPathSegments.length === 1) {
+    if (req.payload.collections[schemaPath]) {
+      fields = req.payload.collections[schemaPath].config.fields
     } else {
-      fields = payload.globals[pathSegments[0]].fields
+      fields = req.payload.config.globals.find((global) => global.slug === schemaPath)?.fields
     }
-  } else {
-    fields = getFieldBySchemaPath({
-      config,
-      i18n,
-      payload,
-      schemaPath,
-    })?.fields
+  } else if (fieldSchemaMap.has(schemaPath)) {
+    fields = fieldSchemaMap.get(schemaPath)
   }
 
   let docPreferences = docPreferencesFromArgs
@@ -322,6 +275,7 @@ export const buildFormStateFn = async (
     fieldSchema: fields,
     operation,
     preferences: docPreferences || { fields: {} },
+    renderField,
     req,
   })
 

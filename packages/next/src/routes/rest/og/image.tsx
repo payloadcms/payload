@@ -2,7 +2,7 @@ import type { ImportMap, PayloadComponent } from 'payload'
 
 import React from 'react'
 
-import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
+import { RenderServerComponent } from '../../../../../ui/src/elements/RenderServerComponent/index.js'
 
 export const OGImage: React.FC<{
   description?: string

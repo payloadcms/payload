@@ -4,8 +4,8 @@ import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@p
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 
+import { RenderServerComponent } from '../../../../ui/src/elements/RenderServerComponent/index.js'
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { getDocumentData } from '../Document/getDocumentData.js'
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { AccountClient } from './index.client.js'

@@ -6,7 +6,7 @@ import { Button, Card, Gutter, Locked, SetStepNav, SetViewActions } from '@paylo
 import { EntityType, formatAdminURL } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
-import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
+import { RenderServerComponent } from '../../../../../ui/src/elements/RenderServerComponent/index.js'
 import './index.scss'
 
 const baseClass = 'dashboard'

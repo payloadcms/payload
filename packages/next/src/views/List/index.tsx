@@ -13,7 +13,7 @@ import { mergeListSearchAndWhere } from 'payload'
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
 
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+import { RenderServerComponent } from '../../../../ui/src/elements/RenderServerComponent/index.js'
 
 export { generateListMetadata } from './meta.js'
 

@@ -11,7 +11,9 @@ export type Data = {
 export type Row = {
   blockType?: string
   collapsed?: boolean
+  fields: React.ReactNode[]
   id: string
+  RowLabel?: React.ReactNode
 }
 
 export type FilterOptionsResult = {
@@ -22,9 +24,11 @@ export type FormField = {
   disableFormData?: boolean
   errorMessage?: string
   errorPaths?: string[]
+  Field: React.ReactNode
   fieldSchema?: Field
   filterOptions?: FilterOptionsResult
   initialValue: unknown
+  isSidebar?: boolean
   passesCondition?: boolean
   rows?: Row[]
   valid: boolean
@@ -49,6 +53,10 @@ export type BuildFormStateArgs = {
   language?: keyof SupportedLanguages
   locale?: string
   operation?: 'create' | 'update'
+  /*
+    If renderField function is given, will execute this function to return a rendered field within form state.
+  */
+  renderField?: (args: any) => any // TODO: this type is currently in ui pkg
   req: PayloadRequest
   returnLockStatus?: boolean
   schemaPath: string

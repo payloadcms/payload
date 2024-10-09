@@ -163,10 +163,8 @@ export function EditForm({ submitted }: EditFormProps) {
                 </React.Fragment>
               )
             }
-            docPermissions={docPermissions || ({} as DocumentPermissions)}
             fields={collectionConfig.fields}
-            readOnly={!hasSavePermission}
-            schemaPath={schemaPath}
+            formState={initialState}
           />
           <ReportAllErrors />
           <GetFieldProxy />

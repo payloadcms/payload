@@ -354,22 +354,6 @@ export type {
   ServerFunctionHandler,
 } from './functions/index.js'
 
-export type {
-  ClientSlotProps,
-  RenderFieldArgs,
-  RenderFieldBySchemaPath,
-  RenderFieldBySchemaPathClient,
-  RenderFieldClient,
-  RenderFieldFn,
-  RenderFieldsArgs,
-  RenderFieldsBySchemaPath,
-  RenderFieldsClient,
-  RenderFieldsFn,
-  RenderRowsBySchemaPath,
-  RenderRowsBySchemaPathClient,
-  ServerSlotProps,
-} from './functions/renderFields.js'
-
 export type { LanguageOptions } from './LanguageOptions.js'
 
 export type MappedServerComponent<TComponentClientProps extends JsonObject = JsonObject> = {
@@ -441,16 +425,13 @@ export type FieldSlots = {
   Error?: React.ReactNode
   Fields?: React.ReactNode[]
   Label?: React.ReactNode
-  rows?: FieldRow[]
 }
 
 export type EntitySlots = {
-  MainFields: React.ReactNode
   PreviewButton?: React.ReactNode
   PublishButton?: React.ReactNode
   SaveButton?: React.ReactNode
   SaveDraftButton?: React.ReactNode
-  SidebarFields: React.ReactNode
 }
 
 export type {
@@ -471,4 +452,4 @@ export type {
   VisibleEntities,
 } from './views/types.js'
 
-export type FieldSchemaMap = Map<string, Field>
+export type FieldSchemaMap = Map<string, Field[]>

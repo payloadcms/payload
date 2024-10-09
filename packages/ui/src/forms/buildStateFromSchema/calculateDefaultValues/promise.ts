@@ -63,6 +63,7 @@ export const defaultValuePromise = async <T>({
 
       if (Array.isArray(rows)) {
         const promises = []
+
         rows.forEach((row) => {
           promises.push(
             iterateFields({
@@ -75,6 +76,7 @@ export const defaultValuePromise = async <T>({
             }),
           )
         })
+
         await Promise.all(promises)
       }
       break

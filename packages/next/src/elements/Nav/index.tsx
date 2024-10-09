@@ -5,7 +5,7 @@ import { Logout } from '@payloadcms/ui'
 import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import React from 'react'
 
-import { RenderServerComponent } from '../RenderServerComponent/index.js'
+import { RenderServerComponent } from '../../../../ui/src/elements/RenderServerComponent/index.js'
 import './index.scss'
 import { NavHamburger } from './NavHamburger/index.js'
 import { NavWrapper } from './NavWrapper/index.js'

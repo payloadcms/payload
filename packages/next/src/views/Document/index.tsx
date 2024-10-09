@@ -13,9 +13,9 @@ import React from 'react'
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 import type { ViewFromConfig } from './getViewsFromConfig.js'
 
+import { RenderServerComponent } from '../../../../ui/src/elements/RenderServerComponent/index.js'
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
-import { renderEntity } from '../../utilities/renderEntity.js'
+import { renderDocumentSlots } from '../../utilities/renderDocumentSlots.js'
 import { NotFoundView } from '../NotFound/index.js'
 import { getDocumentData } from './getDocumentData.js'
 import { getDocumentPermissions } from './getDocumentPermissions.js'
@@ -25,7 +25,6 @@ import { getViewsFromConfig } from './getViewsFromConfig.js'
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
 
 export const Document: React.FC<AdminViewProps> = async ({
-  clientConfig,
   importMap,
   initPageResult,
   params,
@@ -228,20 +227,16 @@ export const Document: React.FC<AdminViewProps> = async ({
     }
   }
 
-  const entitySlots = renderEntity({
-    clientConfig,
+  const documentSlots = renderDocumentSlots({
     collectionConfig,
-    config,
-    formState,
     globalConfig,
     hasSavePermission,
-    i18n,
     importMap,
     payload,
     permissions,
   })
 
-  const clientProps = { payloadServerAction, ...entitySlots }
+  const clientProps = { formState, payloadServerAction, ...documentSlots }
 
   return (
     <DocumentInfoProvider

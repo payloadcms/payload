@@ -126,6 +126,7 @@ export { TabsField } from '../../fields/Tabs/index.js'
 export { TextField, TextInput } from '../../fields/Text/index.js'
 export { JoinField } from '../../fields/Join/index.js'
 export type { TextInputProps } from '../../fields/Text/index.js'
+export { allFieldComponents } from '../../fields/index.js'
 
 export { TextareaField, TextareaInput } from '../../fields/Textarea/index.js'
 export type { TextAreaInputProps } from '../../fields/Textarea/index.js'

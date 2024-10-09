@@ -1,4 +1,6 @@
 'use client'
+import type { FormField } from 'payload'
+
 import React from 'react'
 
 import type { Props } from './types.js'
@@ -6,24 +8,15 @@ import type { Props } from './types.js'
 import { useIntersect } from '../../hooks/useIntersect.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
-import { RenderField } from './RenderField.js'
 
 const baseClass = 'render-fields'
 
 export { Props }
 
 export const RenderFields: React.FC<Props> = (props) => {
-  const {
-    className,
-    fields,
-    forceRender,
-    indexPath,
-    margins,
-    path,
-    permissions,
-    readOnly,
-    schemaPath,
-  } = props
+  const { className, fields, forceRender, formState, margins, path } = props
+
+  console.log({ fields, formState })
 
   const { i18n } = useTranslation()
   const [hasRendered, setHasRendered] = React.useState(Boolean(forceRender))
@@ -67,23 +60,15 @@ export const RenderFields: React.FC<Props> = (props) => {
       >
         {hasRendered &&
           fields?.map((field, fieldIndex) => {
-            const forceRenderChildren =
-              (typeof forceRender === 'number' && fieldIndex <= forceRender) || true
-
             const name = 'name' in field ? field.name : undefined
 
-            return (
-              <RenderField
-                fieldComponentProps={{ field, forceRender: forceRenderChildren, readOnly }}
-                indexPath={indexPath !== undefined ? `${indexPath}.${fieldIndex}` : `${fieldIndex}`}
-                key={fieldIndex}
-                name={name}
-                path={path}
-                permissions={permissions?.[name]}
-                schemaPath={schemaPath}
-                siblingPermissions={permissions}
-              />
-            )
+            const fieldPath = [path, name, path && fieldIndex]
+              .filter((v) => typeof v === 'number' || v)
+              .join('.')
+
+            const { Field } = formState?.[fieldPath] || ({} as FormField)
+
+            return Field
           })}
       </div>
     )

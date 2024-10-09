@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+import { RenderServerComponent } from '../../../../ui/src/elements/RenderServerComponent/index.js'
 import './index.scss'
 import { LoginForm } from './LoginForm/index.js'
 

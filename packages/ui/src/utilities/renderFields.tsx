@@ -1,9 +1,11 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
   ArrayField as ArrayFieldT,
+  ClientCollectionConfig,
   ClientConfig,
   ClientField,
-  ClientSlotProps,
+  ClientGlobalConfig,
+  Field,
   FieldPermissions,
   FieldRow,
   FieldSlots,
@@ -11,53 +13,52 @@ import type {
   FormField,
   FormState,
   ImportMap,
+  Operation,
   Payload,
-  RenderFieldFn,
-  RenderFieldsFn,
   Row,
   SanitizedConfig,
-  ServerSlotProps,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import {
-  ArrayField,
-  BlocksField,
-  CheckboxField,
-  CodeField,
-  CollapsibleField,
-  ConfirmPasswordField,
-  DateTimeField,
-  EmailField,
-  FieldDescription,
-  FieldLabel,
-  GroupField,
-  HiddenField,
-  JoinField,
-  JSONField,
-  NumberField,
-  PasswordField,
-  PointField,
-  RadioGroupField,
-  RelationshipField,
-  RichTextField,
-  RowField,
-  RowLabel,
-  SelectField,
-  TabsField,
-  TextareaField,
-  TextField,
-  UIField,
-  UploadField,
-} from '@payloadcms/ui'
+import { fieldAffectsData } from 'payload/shared'
+import React from 'react'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
+import { ArrayField } from '../fields/Array/index.js'
+import { BlocksField } from '../fields/Blocks/index.js'
+import { CheckboxField } from '../fields/Checkbox/index.js'
+import { CodeField } from '../fields/Code/index.js'
+import { CollapsibleField } from '../fields/Collapsible/index.js'
+import { ConfirmPasswordField } from '../fields/ConfirmPassword/index.js'
+import { DateTimeField } from '../fields/DateTime/index.js'
+import { EmailField } from '../fields/Email/index.js'
+import { FieldDescription } from '../fields/FieldDescription/index.js'
+import { FieldError } from '../fields/FieldError/index.js'
+import { FieldLabel } from '../fields/FieldLabel/index.js'
+import { GroupField } from '../fields/Group/index.js'
+import { HiddenField } from '../fields/Hidden/index.js'
+import { JoinField } from '../fields/Join/index.js'
+import { JSONField } from '../fields/JSON/index.js'
+import { NumberField } from '../fields/Number/index.js'
+import { PasswordField } from '../fields/Password/index.js'
+import { PointField } from '../fields/Point/index.js'
+import { RadioGroupField } from '../fields/RadioGroup/index.js'
+import { RelationshipField } from '../fields/Relationship/index.js'
+import { RichTextField } from '../fields/RichText/index.js'
+import { RowField } from '../fields/Row/index.js'
+import { SelectField } from '../fields/Select/index.js'
+import { TabsField } from '../fields/Tabs/index.js'
+import { TextField } from '../fields/Text/index.js'
+import { TextareaField } from '../fields/Textarea/index.js'
+import { UIField } from '../fields/UI/index.js'
+import { UploadField } from '../fields/Upload/index.js'
+import { RowLabel } from '../forms/RowLabel/index.js'
 
 export type FieldTypesComponents = {
   [K in 'confirmPassword' | 'hidden' | 'password' | FieldTypes]: React.FC
 }
 
-const fieldComponents: FieldTypesComponents = {
+export const fieldComponents: FieldTypesComponents = {
   array: ArrayField,
   blocks: BlocksField,
   checkbox: CheckboxField,
@@ -85,8 +86,110 @@ const fieldComponents: FieldTypesComponents = {
   upload: UploadField,
 }
 
-import { fieldAffectsData } from 'payload/shared'
-import React from 'react'
+export type RenderFieldsFn = (props: RenderFieldsArgs) => React.ReactNode[]
+
+export type RenderFieldsClient = (
+  args: Omit<RenderFieldsArgs, 'config' | 'importMap' | 'payload'>,
+) => Promise<React.ReactNode[]>
+
+export type RenderFieldFn = (
+  args: {
+    readonly className?: string
+    readonly clientField: ClientField
+    readonly config: SanitizedConfig
+    readonly field: Field
+    readonly forceRender?: boolean
+    readonly formState: FormState
+    readonly i18n: I18nClient
+    readonly importMap: ImportMap
+    readonly indexPath: string
+    readonly margins?: 'small' | false
+    readonly path: string
+    readonly payload: Payload
+    readonly permissions?: {
+      [fieldName: string]: FieldPermissions
+    }
+    readonly schemaPath: string
+  } & RenderFieldArgs,
+) => React.ReactNode
+
+export type RenderFieldClient = (
+  args: Omit<RenderFieldArgs, 'config' | 'importMap' | 'payload'>,
+) => Promise<React.ReactNode>
+
+export type RenderFieldsArgs = {
+  readonly Blocks?: React.ReactNode[]
+  readonly className?: string
+  readonly clientCollectionConfig?: ClientCollectionConfig
+  readonly clientConfig: ClientConfig
+  readonly clientFields: ClientField[]
+  readonly clientGlobalConfig?: ClientGlobalConfig
+  readonly config: SanitizedConfig
+  readonly fields: Field[]
+  /**
+   * Controls the rendering behavior of the fields, i.e. defers rendering until they intersect with the viewport using the Intersection Observer API.
+   *
+   * If true, the fields will be rendered immediately, rather than waiting for them to intersect with the viewport.
+   *
+   * If a number is provided, will immediately render fields _up to that index_.
+   */
+  readonly forceRender?: boolean | number
+  readonly formState?: FormState
+  readonly i18n: I18nClient
+  readonly importMap: ImportMap
+  readonly indexPath?: string
+  readonly margins?: 'small' | false
+  readonly operation?: Operation
+  readonly path?: string
+  readonly payload: Payload
+  readonly permissions?: {
+    [fieldName: string]: FieldPermissions
+  }
+  readonly readOnly?: boolean
+  readonly schemaPath?: string
+}
+
+export type RenderFieldArgs = {
+  readonly className?: string
+  readonly clientConfig: ClientConfig
+  readonly clientField: ClientField
+  readonly config: SanitizedConfig
+  readonly field: Field
+  readonly fieldPermissions: FieldPermissions
+  readonly forceRender?: boolean
+  readonly formState: FormState
+  readonly i18n: I18nClient
+  readonly importMap: ImportMap
+  readonly indexPath: string
+  readonly margins?: 'small' | false
+  readonly path: string
+  readonly payload: Payload
+  readonly permissions?: {
+    [fieldName: string]: FieldPermissions
+  }
+  readonly readOnly?: boolean
+  readonly schemaPath: string
+}
+
+export type ClientSlotProps = {
+  Blocks?: React.ReactNode[]
+  field: ClientField
+  Fields?: React.ReactNode[]
+  fieldState: FormField
+  path: string
+  permissions: FieldPermissions
+  readOnly?: boolean
+  schemaPath: string
+}
+
+export type ServerSlotProps = {
+  clientField: ClientField
+  config: SanitizedConfig
+  field: Field
+  i18n: I18nClient
+  indexPath: string
+  payload: Payload
+}
 
 export const renderFields: RenderFieldsFn = (args) => {
   const {
@@ -160,7 +263,6 @@ export const renderFields: RenderFieldsFn = (args) => {
         path,
         payload,
         permissions,
-        renderFields,
         schemaPath: fieldSchemaPath,
       })
     })
@@ -269,7 +371,7 @@ export const renderField: RenderFieldFn = (args) => {
   } = args
   const isHidden = 'admin' in field && 'hidden' in field.admin && field.admin.hidden
 
-  const fieldState = formState[path]
+  const fieldState = formState?.[path]
 
   let clientProps: ClientSlotProps = {
     field: clientField,
@@ -304,101 +406,6 @@ export const renderField: RenderFieldFn = (args) => {
         required={'required' in field && field.required}
       />
     )
-  }
-
-  switch (field.type) {
-    case 'array': {
-      fieldSlots.rows = renderFieldRows({
-        ...args,
-        field,
-        fieldState,
-        rows: fieldState?.rows,
-      })
-      break
-    }
-
-    case 'blocks': {
-      clientProps.Blocks = fieldState?.rows?.map((row, rowIndex) => {
-        const blockConfig = field.blocks.find((block) => block.slug === row.blockType)
-
-        const clientBlockConfig =
-          'blocks' in clientField &&
-          clientField.blocks.find((block) => block.slug === row.blockType)
-
-        return renderFields({
-          className,
-          clientConfig,
-          clientFields: clientBlockConfig?.fields,
-          config,
-          fields: blockConfig?.fields,
-          forceRender,
-          formState,
-          i18n,
-          importMap,
-          indexPath: `${indexPath}.${rowIndex}`,
-          margins,
-          path,
-          payload,
-          permissions,
-          schemaPath,
-        })
-      })
-
-      break
-    }
-
-    case 'group':
-    case 'collapsible': {
-      clientProps.Fields = renderFields({
-        className,
-        clientConfig,
-        clientFields: 'fields' in clientField ? clientField.fields : undefined,
-        config,
-        fields: field.fields,
-        forceRender,
-        formState,
-        i18n,
-        importMap,
-        indexPath,
-        margins,
-        path,
-        payload,
-        permissions,
-        schemaPath,
-      })
-
-      break
-    }
-
-    case 'tabs': {
-      clientProps.Fields = field.tabs.map((tab, tabIndex) => {
-        const clientTabConfig = 'tabs' in clientField && clientField.tabs[tabIndex]
-
-        return renderFields({
-          className,
-          clientConfig,
-          clientFields: 'fields' in clientTabConfig ? clientTabConfig.fields : undefined,
-          config,
-          fields: tab.fields,
-          forceRender,
-          formState,
-          i18n,
-          importMap,
-          indexPath: `${indexPath}.${tabIndex}`,
-          margins,
-          path,
-          payload,
-          permissions,
-          schemaPath,
-        })
-      })
-
-      break
-    }
-
-    default: {
-      break
-    }
   }
 
   if (field.admin) {
@@ -489,7 +496,7 @@ export const renderField: RenderFieldFn = (args) => {
   return (
     <RenderServerComponent
       clientProps={clientProps}
-      Component={isHidden ? HiddenField : field.admin?.components?.Field}
+      Component={isHidden ? fieldComponents.hidden : field.admin?.components?.Field}
       Fallback={fieldComponents?.[field?.type]}
       importMap={importMap}
       serverProps={serverProps}

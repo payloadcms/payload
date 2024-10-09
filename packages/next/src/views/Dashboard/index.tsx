@@ -6,7 +6,7 @@ import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'
 
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+import { RenderServerComponent } from '../../../../ui/src/elements/RenderServerComponent/index.js'
 import { DefaultDashboard } from './Default/index.js'
 
 export { generateDashboardMetadata } from './meta.js'

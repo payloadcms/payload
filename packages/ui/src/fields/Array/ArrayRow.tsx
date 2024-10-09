@@ -19,7 +19,7 @@ type ArrayRowProps = {
   readonly addRow: (rowIndex: number) => Promise<void> | void
   readonly duplicateRow: (rowIndex: number) => void
   readonly errorCount: number
-  readonly Fields: React.ReactNode[]
+  readonly fields: React.ReactNode[]
   readonly forceRender?: boolean
   readonly hasMaxRows?: boolean
   readonly isSortable?: boolean
@@ -40,7 +40,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   attributes,
   duplicateRow,
   errorCount,
-  Fields,
+  fields,
   forceRender = false,
   hasMaxRows,
   isDragging,
@@ -124,7 +124,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         isCollapsed={row.collapsed}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        {Array.isArray(Fields) && Fields?.map((Field) => Field)}
+        {Array.isArray(fields) && fields?.map((F) => F)}
       </Collapsible>
     </div>
   )

@@ -1,4 +1,5 @@
 import type {
+  ClientField,
   Data,
   DocumentPreferences,
   Field,
@@ -8,7 +9,9 @@ import type {
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
-import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/shared'
+import { fieldAffectsData, fieldHasSubFields, fieldIsSidebar, tabHasName } from 'payload/shared'
+
+import type { RenderFieldFn } from '../../utilities/renderFields.js'
 
 import { getFilterOptionsQuery } from './getFilterOptionsQuery.js'
 import { iterateFields } from './iterateFields.js'
@@ -47,8 +50,8 @@ export type AddFieldStatePromiseArgs = {
   operation: 'create' | 'update'
   passesCondition: boolean
   path: string
-
   preferences: DocumentPreferences
+  renderField?: RenderFieldFn
   /**
    * Req is used for validation and defaultValue calculation. If you don't need validation,
    * just create your own req and pass in the locale and the user
@@ -87,6 +90,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     passesCondition,
     path,
     preferences,
+    renderField,
     req,
     skipConditionChecks = false,
     skipValidation = false,
@@ -98,8 +102,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
     const fieldState: FormField = {
       errorPaths: [],
+      Field: renderField ? 'field tbd' : undefined, // Render field after field state is built up
       fieldSchema: includeSchema ? field : undefined,
       initialValue: undefined,
+      isSidebar: fieldIsSidebar(field),
       passesCondition,
       valid: true,
       value: undefined,
@@ -164,6 +170,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
             if (!omitParents && (!filter || filter(args))) {
               state[`${rowPath}id`] = {
+                Field: null,
                 fieldSchema: includeSchema
                   ? field.fields.find((field) => 'name' in field && field.name === 'id')
                   : undefined,
@@ -189,6 +196,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 parentPassesCondition: passesCondition,
                 path: rowPath,
                 preferences,
+                renderField,
                 req,
                 skipConditionChecks,
                 skipValidation,
@@ -204,6 +212,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 collapsedRowIDs === undefined
                   ? field.admin.initCollapsed
                   : collapsedRowIDs.includes(row.id),
+              fields: renderField ? ['field in row'] : undefined,
+              RowLabel: renderField ? 'row label' : undefined,
             })
 
             return acc
@@ -233,7 +243,26 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         // Add field to state
         if (!omitParents && (!filter || filter(args))) {
-          state[`${path}${field.name}`] = fieldState
+          const fieldPath = `${path}${field.name}`
+
+          fieldState.Field = renderField({
+            clientField: {} as ClientField, // TODO
+            config: req.payload.config,
+            field,
+            fieldPermissions: {}, // TODO
+            formState: state,
+            i18n: req.i18n,
+            importMap: req.payload.importMap,
+            indexPath: '', // TODO
+            path: fieldPath,
+            payload: req.payload,
+            // readOnly,
+            schemaPath: '', // TODO
+          })
+
+          fieldState.Field = renderField ? 'Array Field' : undefined // TODO
+
+          state[fieldPath] = fieldState
         }
 
         break
@@ -252,6 +281,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
               if (!omitParents && (!filter || filter(args))) {
                 state[`${rowPath}id`] = {
+                  Field: undefined, // TODO
                   fieldSchema: includeSchema
                     ? block.fields.find(
                         (blockField) => 'name' in blockField && blockField.name === 'id',
@@ -263,6 +293,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 }
 
                 state[`${rowPath}blockType`] = {
+                  Field: undefined, // TODO
                   fieldSchema: includeSchema
                     ? block.fields.find(
                         (blockField) => 'name' in blockField && blockField.name === 'blockType',
@@ -274,6 +305,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 }
 
                 state[`${rowPath}blockName`] = {
+                  Field: undefined, // TODO
                   fieldSchema: includeSchema
                     ? block.fields.find(
                         (blockField) => 'name' in blockField && blockField.name === 'blockName',
@@ -301,6 +333,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   parentPassesCondition: passesCondition,
                   path: rowPath,
                   preferences,
+                  renderField,
                   req,
                   skipConditionChecks,
                   skipValidation,
@@ -374,6 +407,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           parentPassesCondition: passesCondition,
           path: `${path}${field.name}.`,
           preferences,
+          renderField,
           req,
           skipConditionChecks,
           skipValidation,
@@ -471,6 +505,21 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       default: {
         fieldState.value = data[field.name]
         fieldState.initialValue = data[field.name]
+        fieldState.Field = renderField
+          ? renderField({
+              clientField: {} as ClientField, // TODO
+              config: req.payload.config,
+              field,
+              fieldPermissions: {}, // TODO
+              formState: state,
+              i18n: req.i18n,
+              importMap: req.payload.importMap,
+              indexPath: '', // TODO
+              path: `${path}${field.name}`,
+              payload: req.payload,
+              schemaPath: path,
+            })
+          : undefined
 
         // Add field to state
         if (!filter || filter(args)) {
@@ -487,6 +536,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       state[`${path}_index-${fieldIndex}`] = {
         disableFormData: true,
         errorPaths: [],
+        Field: undefined, // TODO
         initialValue: undefined,
         passesCondition,
         valid: true,
@@ -510,6 +560,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       parentPassesCondition: passesCondition,
       path,
       preferences,
+      renderField,
       req,
       skipConditionChecks,
       skipValidation,
@@ -535,6 +586,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         parentPassesCondition: passesCondition,
         path: isNamedTab ? `${path}${tab.name}.` : path,
         preferences,
+        renderField,
         req,
         skipConditionChecks,
         skipValidation,
@@ -548,6 +600,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       state[`${path}_index-${fieldIndex}`] = {
         disableFormData: true,
         errorPaths: [],
+        Field: undefined, // TODO
         initialValue: undefined,
         passesCondition,
         valid: true,

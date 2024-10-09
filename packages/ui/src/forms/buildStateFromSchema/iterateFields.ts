@@ -8,6 +8,7 @@ import type {
 
 import { fieldIsPresentationalOnly } from 'payload/shared'
 
+import type { RenderFieldFn } from '../../utilities/renderFields.js'
 import type { AddFieldStatePromiseArgs } from './addFieldStatePromise.js'
 
 import { addFieldStatePromise } from './addFieldStatePromise.js'
@@ -46,6 +47,7 @@ type Args = {
    */
   path?: string
   preferences?: DocumentPreferences
+  renderField?: RenderFieldFn
   req: PayloadRequest
   /**
    * Whether to skip checking the field's condition. @default false
@@ -77,6 +79,7 @@ export const iterateFields = async ({
   parentPassesCondition = true,
   path = '',
   preferences,
+  renderField,
   req,
   skipConditionChecks = false,
   skipValidation = false,
@@ -113,6 +116,7 @@ export const iterateFields = async ({
           passesCondition,
           path,
           preferences,
+          renderField,
           req,
           skipConditionChecks,
           skipValidation,
