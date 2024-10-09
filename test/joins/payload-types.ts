@@ -57,6 +57,7 @@ export interface Post {
   title?: string | null;
   upload?: (string | null) | Upload;
   category?: (string | null) | Category;
+  categories?: (string | Category)[] | null;
   group?: {
     category?: (string | null) | Category;
     camelCaseCategory?: (string | null) | Category;
@@ -94,6 +95,10 @@ export interface Category {
   id: string;
   name?: string | null;
   relatedPosts?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  hasManyPosts?: {
     docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
