@@ -57,9 +57,5 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     where,
   })
 
-  if ('createdAt' in result.version) {
-    result.createdAt = result.version.createdAt as string
-  }
-
   return result
 }
