@@ -95,7 +95,7 @@ export type Insert = (args: {
 type Schema =
   | {
       enum: typeof pgEnum
-      table: PgTableFn
+      table: PgTableFn<string>
     }
   | PgSchema
 
@@ -136,7 +136,7 @@ export type BasePostgresAdapter = {
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   operators: Operators
-  pgSchema?: Schema
+  pgSchema: Schema
   prodMigrations?: {
     down: (args: MigrateDownArgs) => Promise<void>
     name: string
