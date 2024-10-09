@@ -63,7 +63,9 @@ export const canMutatePage: Access = (args) => {
   const req = args.req
   const superAdmin = isSuperAdmin(args)
 
-  if (!req.user) {return false}
+  if (!req.user) {
+    return false
+  }
 
   // super admins can mutate pages for any tenant
   if (superAdmin) {
@@ -77,7 +79,9 @@ export const canMutatePage: Access = (args) => {
   // pages they have access to
   return (
     req.user?.tenants?.reduce((hasAccess: boolean, accessRow) => {
-      if (hasAccess) {return true}
+      if (hasAccess) {
+        return true
+      }
       if (
         accessRow &&
         accessRow.tenant === selectedTenant &&

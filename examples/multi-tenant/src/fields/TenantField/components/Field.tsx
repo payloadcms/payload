@@ -10,8 +10,8 @@ export const TenantFieldComponent: React.FC<{
   payload: Payload
   readOnly: boolean
 }> = async (args) => {
-  const cookies = getCookies()
-  const headers = getHeaders()
+  const cookies = await getCookies()
+  const headers = await getHeaders()
   const { user } = await args.payload.auth({ headers })
 
   if (

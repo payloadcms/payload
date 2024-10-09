@@ -3,7 +3,7 @@ import React from 'react'
 
 import { TenantSelector } from './index.client'
 
-export const TenantSelectorRSC = () => {
-  const cookies = getCookies()
+export const TenantSelectorRSC = async () => {
+  const cookies = await getCookies()
   return <TenantSelector initialCookie={cookies.get('payload-tenant')?.value} />
 }

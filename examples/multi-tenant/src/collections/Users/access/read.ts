@@ -8,7 +8,9 @@ import { getTenantAdminTenantAccessIDs } from '../../../utilities/getTenantAcces
 
 export const readAccess: Access<User> = (args) => {
   const { req } = args
-  if (!req?.user) {return false}
+  if (!req?.user) {
+    return false
+  }
 
   const cookies = parseCookies(req.headers)
   const superAdmin = isSuperAdmin(args)
@@ -39,7 +41,9 @@ export const readAccess: Access<User> = (args) => {
     }
   }
 
-  if (superAdmin) {return true}
+  if (superAdmin) {
+    return true
+  }
 
   const adminTenantAccessIDs = getTenantAdminTenantAccessIDs(req.user)
 

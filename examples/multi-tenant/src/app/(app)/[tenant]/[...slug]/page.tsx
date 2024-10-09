@@ -9,7 +9,7 @@ import React from 'react'
 import { RenderPage } from '../../../components/RenderPage'
 
 export default async function Page({ params }: { params: { slug?: string[]; tenant: string } }) {
-  const headers = getHeaders()
+  const headers = await getHeaders()
   const payload = await getPayloadHMR({ config: configPromise })
   const { user } = await payload.auth({ headers })
 
@@ -81,7 +81,9 @@ export default async function Page({ params }: { params: { slug?: string[]; tena
   const pageData = pageQuery.docs?.[0]
 
   // The page with the provided slug could not be found
-  if (!pageData) {return notFound()}
+  if (!pageData) {
+    return notFound()
+  }
 
   // The page was found, render the page with data
   return <RenderPage data={pageData} />
