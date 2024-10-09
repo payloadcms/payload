@@ -51,7 +51,6 @@ The following options are available:
 | Option                | Description                                                                                                                                                                                                                   |
 | --------------------- | --------------------------------|
 | **`fallbackLanguage`**     | The language to fall back to if the user's preferred language is not supported. Default is `'en'`.                                                                                                                           |
-| **`debug`**           | Whether to log debug information to the console. Default is `false`.                                                                                                                                                         |
 | **`translations`**    | An object containing the translations. The keys are the language codes and the values are the translations.                                                                                                                |
 | **`supportedLanguages`** | An object containing the supported languages. The keys are the language codes and the values are the translations.                                                                                                         |
 
@@ -178,22 +177,51 @@ Anywhere in your Payload app that you have access to the `req` object, you can a
 
 In order to use custom translations in your project, you need to provide the types for the translations.
 
-Here is an example of how you can define the types for the custom translations in a [Custom Component](../admin/components):
+Here we create a shareable translations object. We will import this in both our custom components and in our Payload config.
 
 ```ts
+// <rootDir>/custom-translations.ts
+
+import type { Config } from 'payload'
+
+export customTranslations: Config['i18n']['translations'] = {
+  en: {
+    general: {
+      myCustomKey: 'My custom english translation',
+    }
+  },
+}
+```
+
+We import the shared translations object into our Payload config so they are available for use:
+
+```ts
+// <rootDir>/payload.config.ts
+
+import { buildConfig } from 'payload'
+
+import { customTranslations } from './custom-translations'
+
+export default buildConfig({
+  //...
+  i18n: {
+    translations: customTranslations,
+  },
+  //...
+})
+```
+
+We import the shared translations and use it to create types to use in a [Custom Component](../admin/components):
+
+```ts
+// <rootDir>/components/MyComponent.tsx
+
 'use client'
 import type { NestedKeysStripped } from '@payloadcms/translations'
 import type React from 'react'
-
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 
-const customTranslations = {
-  en: {
-    general: {
-      test: 'Custom Translation',
-    },
-  },
-}
+import { customTranslations } from '../custom-translations'
 
 type CustomTranslationObject = typeof customTranslations.en
 type CustomTranslationKeys = NestedKeysStripped<CustomTranslationObject>
@@ -201,14 +229,15 @@ type CustomTranslationKeys = NestedKeysStripped<CustomTranslationObject>
 export const MyComponent: React.FC = () => {
   const { i18n, t } = useTranslation<CustomTranslationObject, CustomTranslationKeys>() // These generics merge your custom translations with the default client translations
 
-  return t('general:test')
+  return t('general:myCustomKey')
 }
-
 ```
 
 Additionally, Payload exposes the `t` function in various places, for example in labels. Here is how you would type those:
 
 ```ts
+// <rootDir>/fields/myField.ts
+
 import type {
   DefaultTranslationKeys,
   NestedKeysStripped,
@@ -216,13 +245,7 @@ import type {
 } from '@payloadcms/translations'
 import type { Field } from 'payload'
 
-const customTranslations = {
-  en: {
-    general: {
-      test: 'Custom Translation',
-    },
-  },
-}
+import { customTranslations } from '../custom-translations'
 
 type CustomTranslationObject = typeof customTranslations.en
 type CustomTranslationKeys = NestedKeysStripped<CustomTranslationObject>
