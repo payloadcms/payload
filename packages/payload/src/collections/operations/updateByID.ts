@@ -356,10 +356,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
         id,
         autosave,
         collection: collectionConfig,
-        docWithLocales: {
-          ...result,
-          createdAt: docWithLocales.createdAt,
-        },
+        docWithLocales: result,
         draft: shouldSaveDraft,
         payload,
         publishSpecificLocale,

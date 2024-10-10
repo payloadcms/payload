@@ -331,7 +331,6 @@ const DocumentInfo: React.FC<
             'Accept-Language': i18n.language,
           },
         }).then((res) => res.json())
-
         if (publishedJSON?.updatedAt) {
           const newerVersionParams = {
             ...versionParams,
