@@ -30,6 +30,13 @@ export const Posts: CollectionConfig = {
       hasMany: true,
     },
     {
+      name: 'categoriesLocalized',
+      type: 'relationship',
+      relationTo: categoriesSlug,
+      hasMany: true,
+      localized: true,
+    },
+    {
       name: 'group',
       type: 'group',
       fields: [
