@@ -340,7 +340,7 @@ const DocumentInfo: React.FC<
               and: [
                 ...versionParams.where.and,
                 {
-                  updatedAt: {
+                  'version.updatedAt': {
                     greater_than: publishedJSON.updatedAt,
                   },
                 },
