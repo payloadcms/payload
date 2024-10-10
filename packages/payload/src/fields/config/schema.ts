@@ -23,6 +23,7 @@ export const baseAdminFields = joi.object().keys({
   disableListFilter: joi.boolean().default(false),
   disabled: joi.boolean().default(false),
   hidden: joi.boolean().default(false),
+  hiddenInVersionView: joi.boolean().default(false),
   initCollapsed: joi.boolean().default(false),
   position: joi.string().valid('sidebar'),
   readOnly: joi.boolean().default(false),
