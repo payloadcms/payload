@@ -25,6 +25,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, GenericTable, IDType, PostgresAdapter } from '../types'
 
+import { createIndex } from './createIndex'
 import { createTableName } from './createTableName'
 import { parentIDColumnMap } from './parentIDColumnMap'
 import { setColumnID } from './setColumnID'
@@ -339,16 +340,28 @@ export const buildTable = ({
         if (relatedCollectionCustomIDType === 'number') colType = 'numeric'
         if (relatedCollectionCustomIDType === 'text') colType = 'varchar'
 
-        relationshipColumns[`${relationTo}ID`] = parentIDColumnMap[colType](
-          `${formattedRelationTo}_id`,
-        )
+        const colName = `${relationTo}ID`
+
+        relationshipColumns[colName] = parentIDColumnMap[colType](`${formattedRelationTo}_id`)
 
         relationExtraConfig[`${relationTo}IdFk`] = (cols) =>
           foreignKey({
             name: `${relationshipsTableName}_${toSnakeCase(relationTo)}_fk`,
-            columns: [cols[`${relationTo}ID`]],
+            columns: [cols[colName]],
             foreignColumns: [adapter.tables[formattedRelationTo].id],
           }).onDelete('cascade')
+
+        const indexName = [colName]
+
+        if (hasLocalizedRelationshipField) {
+          indexName.push('locale')
+        }
+
+        relationExtraConfig[`${relationTo}IdIdx`] = createIndex({
+          name: indexName,
+          columnName: `${formattedRelationTo}_id`,
+          tableName: relationshipsTableName,
+        })
       })
 
       relationshipsTable = adapter.pgSchema.table(
