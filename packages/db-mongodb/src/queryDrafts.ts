@@ -99,8 +99,6 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
         _id: doc.parent,
         id: doc.parent,
         ...doc.version,
-        createdAt: doc.createdAt,
-        updatedAt: doc.updatedAt,
       }
 
       return sanitizeInternalFields(doc)

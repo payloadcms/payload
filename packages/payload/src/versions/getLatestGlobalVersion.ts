@@ -56,12 +56,16 @@ export const getLatestGlobalVersion = async ({
     }
   }
 
+  if (!latestVersion.version.createdAt) {
+    latestVersion.version.createdAt = latestVersion.createdAt
+  }
+
+  if (!latestVersion.version.updatedAt) {
+    latestVersion.version.updatedAt = latestVersion.updatedAt
+  }
+
   return {
-    global: {
-      ...latestVersion.version,
-      createdAt: latestVersion.createdAt,
-      updatedAt: latestVersion.updatedAt,
-    },
+    global: latestVersion.version,
     globalExists,
   }
 }
