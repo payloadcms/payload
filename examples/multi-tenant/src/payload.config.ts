@@ -1,39 +1,33 @@
-import { webpackBundler } from '@payloadcms/bundler-webpack'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
-import { slateEditor } from '@payloadcms/richtext-slate'
-import dotenv from 'dotenv'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
-
-dotenv.config({
-  path: path.resolve(__dirname, '../.env'),
-})
-
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
+import { fileURLToPath } from 'url'
 
 import { Pages } from './collections/Pages'
 import { Tenants } from './collections/Tenants'
-import { Users } from './collections/Users'
+import Users from './collections/Users'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export default buildConfig({
-  collections: [Users, Tenants, Pages],
   admin: {
-    bundler: webpackBundler(),
-    webpack: (config) => ({
-      ...config,
-      resolve: {
-        ...config.resolve,
-        alias: {
-          ...config.resolve.alias,
-          dotenv: path.resolve(__dirname, './dotenv.js'),
-        },
-      },
-    }),
+    components: {
+      afterNavLinks: ['@/components/TenantSelector#TenantSelectorRSC'],
+    },
+    user: 'users',
   },
-  editor: slateEditor({}),
+  collections: [Pages, Users, Tenants],
   db: mongooseAdapter({
-    url: process.env.DATABASE_URI,
+    url: process.env.DATABASE_URI as string,
   }),
+  editor: lexicalEditor({}),
+  graphQL: {
+    schemaOutputFile: path.resolve(dirname, 'generated-schema.graphql'),
+  },
+  secret: process.env.PAYLOAD_SECRET as string,
   typescript: {
-    outputFile: path.resolve(__dirname, 'payload-types.ts'),
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
