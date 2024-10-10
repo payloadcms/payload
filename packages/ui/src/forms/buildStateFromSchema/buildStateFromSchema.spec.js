@@ -11,7 +11,7 @@ describe('Form - buildStateFromSchema', () => {
         label: 'Text',
       },
     ]
-    const state = await buildStateFromSchema({ fieldSchema })
+    const state = await buildStateFromSchema({ fields: fieldSchema })
     expect(state.text.value).toBe(defaultValue)
   })
   it('field value overrides defaultValue - normal fields', async () => {
@@ -25,7 +25,7 @@ describe('Form - buildStateFromSchema', () => {
         label: 'Text',
       },
     ]
-    const state = await buildStateFromSchema({ data, fieldSchema })
+    const state = await buildStateFromSchema({ data, fields: fieldSchema })
     expect(state.text.value).toBe(value)
   })
   it('populates default value from a function - normal fields', async () => {
@@ -47,7 +47,7 @@ describe('Form - buildStateFromSchema', () => {
         label: 'Text',
       },
     ]
-    const state = await buildStateFromSchema({ fieldSchema, locale, user })
+    const state = await buildStateFromSchema({ fields: fieldSchema, locale, user })
     expect(state.text.value).toBe(defaultValue)
   })
 })

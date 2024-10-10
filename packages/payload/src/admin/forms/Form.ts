@@ -54,9 +54,9 @@ export type BuildFormStateArgs = {
   locale?: string
   operation?: 'create' | 'update'
   /*
-    If renderField function is given, will execute this function to return a rendered field within form state.
+    If true, will render field components within their state object
   */
-  renderField?: (args: any) => any // TODO: this type is currently in ui pkg
+  renderFields?: boolean
   req: PayloadRequest
   returnLockStatus?: boolean
   schemaPath: string

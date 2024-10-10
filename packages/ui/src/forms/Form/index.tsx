@@ -232,7 +232,7 @@ export const Form: React.FC<FormProps> = (props) => {
           await priorOnChange
 
           const result = await beforeSubmitFn({
-            formState: prepareFields(fields),
+            formState: prepareFields(fields) as FormState,
           })
 
           revalidatedFormState = result
@@ -467,6 +467,7 @@ export const Form: React.FC<FormProps> = (props) => {
         data,
         globalSlug,
         operation,
+        renderFields: true,
         schemaPath: collectionSlug || globalSlug,
         signal: abortController.signal,
       })
@@ -501,10 +502,9 @@ export const Form: React.FC<FormProps> = (props) => {
       abortControllerRef2.current = abortController
 
       const { state: fieldState } = await getFormState({
-        collectionSlug,
         data,
-        globalSlug,
-        schemaPath: `${collectionSlug || globalSlug}.${schemaPath}`,
+        renderFields: true,
+        schemaPath: [collectionSlug || globalSlug, schemaPath].filter(Boolean).join('.'),
         signal: abortController.signal,
       })
 
@@ -514,12 +514,11 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
-    async ({ callback, data, path, rowIndex, schemaPath }) => {
+    async ({ data, path, rowIndex, schemaPath }) => {
       const subFieldState = await getFieldStateBySchemaPath({ data, schemaPath })
       dispatchFields({
         type: 'ADD_ROW',
         blockType: data?.blockType,
-        callback,
         path,
         rowIndex,
         subFieldState,
@@ -649,7 +648,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
           for (const onChangeFn of onChange) {
             revalidatedFormState = await onChangeFn({
-              formState: prepareFields(revalidatedFormState),
+              formState: prepareFields(revalidatedFormState) as FormState,
             })
           }
 

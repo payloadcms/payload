@@ -24,7 +24,7 @@ export const linkValidation = (
       id,
       collectionSlug,
       data: node.fields,
-      fieldSchema: sanitizedFieldsWithoutText, // Sanitized in feature.server.ts
+      fields: sanitizedFieldsWithoutText, // Sanitized in feature.server.ts
       operation: operation === 'create' || operation === 'update' ? operation : 'update',
       preferences,
       req,

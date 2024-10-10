@@ -269,9 +269,10 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
         formState: prevFormState,
         globalSlug,
         operation,
+        renderFields: true,
         returnLockStatus: isLockingEnabled ? true : false,
         schemaPath,
-        signal: abortController.signal,
+        // signal: abortController.signal,
         updateLastEdited,
       })
 

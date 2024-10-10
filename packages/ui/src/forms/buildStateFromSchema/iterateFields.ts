@@ -49,6 +49,7 @@ type Args = {
   preferences?: DocumentPreferences
   renderField?: RenderFieldFn
   req: PayloadRequest
+  schemaPath?: string
   /**
    * Whether to skip checking the field's condition. @default false
    */
@@ -81,6 +82,7 @@ export const iterateFields = async ({
   preferences,
   renderField,
   req,
+  schemaPath = '',
   skipConditionChecks = false,
   skipValidation = false,
   state = {},
@@ -97,6 +99,8 @@ export const iterateFields = async ({
             : true) && parentPassesCondition,
         )
       }
+
+      const _schemaPath = [schemaPath, 'name' in field && field.name].filter(Boolean).join('.')
 
       promises.push(
         addFieldStatePromise({
@@ -118,6 +122,7 @@ export const iterateFields = async ({
           preferences,
           renderField,
           req,
+          schemaPath: _schemaPath,
           skipConditionChecks,
           skipValidation,
           state,

@@ -5,7 +5,7 @@ import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 
 import { mergeErrorPaths } from './mergeErrorPaths.js'
 
-const serverPropsToAccept = ['passesCondition', 'valid', 'errorMessage']
+const serverPropsToAccept = ['passesCondition', 'valid', 'errorMessage', 'rows']
 
 /**
  * Merges certain properties from the server state into the client state. These do not include values,
@@ -57,7 +57,7 @@ export const mergeServerFormState = (
        * Handle the rest which is in serverPropsToAccept
        */
       serverPropsToAccept.forEach((prop) => {
-        if (incomingState[path]?.[prop] !== newFieldState[prop]) {
+        if (!dequal(incomingState[path]?.[prop], newFieldState[prop])) {
           changed = true
           if (!(prop in incomingState[path])) {
             delete newFieldState[prop]

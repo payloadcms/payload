@@ -45,6 +45,7 @@ export type FormFieldBase = {
    * `readOnly` is added by RenderField automatically. This should be used instead of `field.admin.readOnly`.
    */
   readonly readOnly?: boolean
+  readonly schemaPath?: string
   readonly user?: User
   readonly validate?: Validate
 }

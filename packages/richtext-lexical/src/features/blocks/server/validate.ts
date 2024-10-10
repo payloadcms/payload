@@ -32,7 +32,7 @@ export const blockValidationHOC = (
       id,
       collectionSlug,
       data: blockFieldData,
-      fieldSchema: block.fields,
+      fields: block.fields,
       operation: operation === 'create' || operation === 'update' ? operation : 'update',
       preferences,
       req,

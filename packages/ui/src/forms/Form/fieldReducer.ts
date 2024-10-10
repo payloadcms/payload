@@ -62,6 +62,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
             value: null,
           }),
           errorMessage: message,
+          Field: undefined,
           valid: false,
         }
 
@@ -179,12 +180,15 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         id: (subFieldState?.id?.value as string) || new ObjectId().toHexString(),
         blockType: blockType || undefined,
         collapsed: false,
+        fields: undefined,
+        RowLabel: undefined,
       }
 
       withNewRow.splice(rowIndex, 0, newRow)
 
       if (blockType) {
         subFieldState.blockType = {
+          Field: undefined,
           initialValue: blockType,
           valid: true,
           value: blockType,
@@ -220,10 +224,13 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         id: new ObjectId().toHexString(),
         blockType: blockType || undefined,
         collapsed: false,
+        fields: undefined,
+        RowLabel: undefined,
       }
 
       if (blockType) {
         subFieldState.blockType = {
+          Field: undefined,
           initialValue: blockType,
           valid: true,
           value: blockType,

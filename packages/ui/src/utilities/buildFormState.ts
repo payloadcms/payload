@@ -16,8 +16,7 @@ import { reduceFieldsToValues } from 'payload/shared'
 
 import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
-export { renderField } from './renderFields.js'
-
+import { renderField } from './renderFields.js'
 let cached = global._payload_fieldSchemaMap
 
 if (!cached) {
@@ -96,7 +95,7 @@ export const buildFormStateFn = async (
     globalSlug,
     locale,
     operation,
-    renderField,
+    renderFields,
     req,
     req: {
       i18n,
@@ -159,6 +158,10 @@ export const buildFormStateFn = async (
     }
   } else if (fieldSchemaMap.has(schemaPath)) {
     fields = fieldSchemaMap.get(schemaPath)
+  }
+
+  if (!fields || !Array.isArray(fields)) {
+    throw new Error(`Could not find field schema for given path "${schemaPath}"`)
   }
 
   let docPreferences = docPreferencesFromArgs
@@ -272,10 +275,10 @@ export const buildFormStateFn = async (
     id,
     collectionSlug,
     data,
-    fieldSchema: fields,
+    fields,
     operation,
     preferences: docPreferences || { fields: {} },
-    renderField,
+    renderField: renderFields ? renderField : undefined,
     req,
   })
 

@@ -57,6 +57,7 @@ export type AddFieldStatePromiseArgs = {
    * just create your own req and pass in the locale and the user
    */
   req: PayloadRequest
+  schemaPath: string
   /**
    * Whether to skip checking the field's condition. @default false
    */
@@ -92,6 +93,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     preferences,
     renderField,
     req,
+    schemaPath,
     skipConditionChecks = false,
     skipValidation = false,
     state,
@@ -163,7 +165,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       case 'array': {
         const arrayValue = Array.isArray(data[field.name]) ? data[field.name] : []
 
-        const { promises, rowMetadata } = arrayValue.reduce(
+        const { promises, rows } = arrayValue.reduce(
           (acc, row, i) => {
             const rowPath = `${path}${field.name}.${i}.`
             row.id = row?.id || new ObjectId().toHexString()
@@ -198,6 +200,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 preferences,
                 renderField,
                 req,
+                schemaPath,
                 skipConditionChecks,
                 skipValidation,
                 state,
@@ -206,7 +209,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
             const collapsedRowIDs = preferences?.fields?.[`${path}${field.name}`]?.collapsed
 
-            acc.rowMetadata.push({
+            acc.rows.push({
               id: row.id,
               collapsed:
                 collapsedRowIDs === undefined
@@ -220,7 +223,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           },
           {
             promises: [],
-            rowMetadata: [],
+            rows: [],
           },
         )
 
@@ -239,7 +242,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           }
         }
 
-        fieldState.rows = rowMetadata
+        fieldState.rows = rows
 
         // Add field to state
         if (!omitParents && (!filter || filter(args))) {
@@ -257,10 +260,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             path: fieldPath,
             payload: req.payload,
             // readOnly,
-            schemaPath: '', // TODO
+            schemaPath,
           })
-
-          fieldState.Field = renderField ? 'Array Field' : undefined // TODO
 
           state[fieldPath] = fieldState
         }
@@ -335,6 +336,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   preferences,
                   renderField,
                   req,
+                  schemaPath,
                   skipConditionChecks,
                   skipValidation,
                   state,
@@ -409,6 +411,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           preferences,
           renderField,
           req,
+          schemaPath,
           skipConditionChecks,
           skipValidation,
           state,
@@ -517,7 +520,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               indexPath: '', // TODO
               path: `${path}${field.name}`,
               payload: req.payload,
-              schemaPath: path,
+              schemaPath,
             })
           : undefined
 
@@ -562,6 +565,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       preferences,
       renderField,
       req,
+      schemaPath,
       skipConditionChecks,
       skipValidation,
       state,
@@ -588,6 +592,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         preferences,
         renderField,
         req,
+        schemaPath: isNamedTab ? `${schemaPath}.${tab.name}` : schemaPath,
         skipConditionChecks,
         skipValidation,
         state,

@@ -46,7 +46,7 @@ export const uploadValidation = (
       id,
       collectionSlug: node.relationTo,
       data: node?.fields ?? {},
-      fieldSchema: collection.fields,
+      fields: collection.fields,
       operation: operation === 'create' || operation === 'update' ? operation : 'update',
       preferences,
       req,

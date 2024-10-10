@@ -1,8 +1,4 @@
-import type {
-  BuildFormStateArgs,
-  RenderFieldBySchemaPathClient,
-  ServerFunctionClient,
-} from 'payload'
+import type { BuildFormStateArgs, ServerFunctionClient } from 'payload'
 
 import React, { createContext, useCallback, useEffect, useRef } from 'react'
 
@@ -16,7 +12,6 @@ type GetFormState = (
 
 type ServerFunctionsContextType = {
   getFormState: GetFormState
-  renderFieldBySchemaPath: RenderFieldBySchemaPathClient
   serverFunction: ServerFunctionClient
 }
 
@@ -54,7 +49,7 @@ export const ServerFunctionsProvider: React.FC<{
       abortControllerRef.current = abortController
       const localSignal = abortController.signal
 
-      const { signal: remoteSignal, ...rest } = args
+      const { signal: remoteSignal, ...rest } = args || {}
 
       try {
         if (!remoteSignal?.aborted && !localSignal?.aborted) {
@@ -68,20 +63,10 @@ export const ServerFunctionsProvider: React.FC<{
           }
         }
       } catch (_err) {
-        // swallow error
+        console.error(_err) // eslint-disable-line no-console
       }
 
       return { state: args.formState }
-    },
-    [serverFunction],
-  )
-
-  const renderFieldBySchemaPath = useCallback<RenderFieldBySchemaPathClient>(
-    async (args) => {
-      return (await serverFunction({
-        name: 'render-field',
-        args,
-      })) as React.ReactNode[]
     },
     [serverFunction],
   )
@@ -92,7 +77,7 @@ export const ServerFunctionsProvider: React.FC<{
     return () => {
       if (controller) {
         try {
-          controller.abort()
+          // controller.abort()
         } catch (_err) {
           // swallow error
         }
@@ -101,9 +86,7 @@ export const ServerFunctionsProvider: React.FC<{
   }, [])
 
   return (
-    <ServerFunctionsContext.Provider
-      value={{ getFormState, renderFieldBySchemaPath, serverFunction }}
-    >
+    <ServerFunctionsContext.Provider value={{ getFormState, serverFunction }}>
       {children}
     </ServerFunctionsContext.Provider>
   )

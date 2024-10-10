@@ -35,7 +35,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     Error,
     field: {
       name,
-      _schemaPath,
       admin: {
         className,
         // components: { RowLabel },
@@ -51,6 +50,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     Label,
     path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
+    schemaPath,
     validate,
   } = props
 
@@ -130,14 +130,14 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const addRow = useCallback(
     async (rowIndex: number): Promise<void> => {
-      await addFieldRow({ path, rowIndex, schemaPath: _schemaPath })
+      await addFieldRow({ path, rowIndex, schemaPath })
       setModified(true)
 
       setTimeout(() => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, setModified, _schemaPath],
+    [addFieldRow, path, setModified, schemaPath],
   )
 
   const duplicateRow = useCallback(

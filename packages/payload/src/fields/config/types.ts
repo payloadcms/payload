@@ -419,7 +419,6 @@ export interface FieldBase {
 
 export interface FieldBaseClient {
   _isPresentational?: undefined
-  _schemaPath?: string
   admin?: AdminClient
   hidden?: boolean
   index?: boolean

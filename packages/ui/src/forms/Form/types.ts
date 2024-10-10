@@ -170,13 +170,11 @@ export type FormFieldsContext = [FormState, Dispatch<FieldAction>]
 
 export type Context = {
   addFieldRow: ({
-    callback,
     data,
     path,
     rowIndex,
     schemaPath,
   }: {
-    callback?: (rowIndex: number, newState: FormState) => void
     data?: Data
     path: string
     /*

@@ -8,6 +8,7 @@ import type { Props } from './types.js'
 import { useIntersect } from '../../hooks/useIntersect.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
+import { RenderField } from './RenderField.js'
 
 const baseClass = 'render-fields'
 
@@ -15,8 +16,6 @@ export { Props }
 
 export const RenderFields: React.FC<Props> = (props) => {
   const { className, fields, forceRender, formState, margins, path } = props
-
-  console.log({ fields, formState })
 
   const { i18n } = useTranslation()
   const [hasRendered, setHasRendered] = React.useState(Boolean(forceRender))
@@ -66,9 +65,9 @@ export const RenderFields: React.FC<Props> = (props) => {
               .filter((v) => typeof v === 'number' || v)
               .join('.')
 
-            const { Field } = formState?.[fieldPath] || ({} as FormField)
+            const fieldState = formState?.[fieldPath]
 
-            return Field
+            return <RenderField fieldState={fieldState} key={fieldIndex} />
           })}
       </div>
     )

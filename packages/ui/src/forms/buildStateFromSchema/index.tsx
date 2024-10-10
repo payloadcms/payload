@@ -14,7 +14,7 @@ import { iterateFields } from './iterateFields.js'
 type Args = {
   collectionSlug?: string
   data?: Data
-  fieldSchema: FieldSchema[] | undefined
+  fields: FieldSchema[] | undefined
   id?: number | string
   operation?: 'create' | 'update'
   preferences: DocumentPreferences
@@ -28,20 +28,20 @@ export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
     id,
     collectionSlug,
     data: fullData = {},
-    fieldSchema,
+    fields,
     operation,
     preferences,
     renderField,
     req,
   } = args
 
-  if (fieldSchema) {
+  if (fields) {
     const state: FormState = {}
 
     const dataWithDefaultValues = await calculateDefaultValues({
       id,
       data: fullData,
-      fields: fieldSchema,
+      fields,
       locale: req.locale,
       siblingData: fullData,
       user: req.user,
@@ -52,7 +52,7 @@ export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
       addErrorPathToParent: null,
       collectionSlug,
       data: dataWithDefaultValues,
-      fields: fieldSchema,
+      fields,
       fullData,
       operation,
       parentPassesCondition: true,
@@ -60,6 +60,7 @@ export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
       preferences,
       renderField,
       req,
+      schemaPath: '',
       state,
     })
 
