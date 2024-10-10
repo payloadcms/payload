@@ -157,7 +157,6 @@ export const sanitizeFields = async ({
       }
 
       if (typeof field.localized === 'undefined' && parentIsLocalized) {
-        console.log('HELLO???????')
         field.localized = true
       }
 
@@ -243,7 +242,6 @@ export const sanitizeFields = async ({
         block._sanitized = true
         block.fields = block.fields.concat(baseBlockFields)
         block.labels = !block.labels ? formatLabels(block.slug) : block.labels
-        console.log(block, parentIsLocalized, field.localized)
         block.fields = await sanitizeFields({
           config,
           existingFieldNames: new Set(),
