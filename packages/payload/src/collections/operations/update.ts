@@ -194,14 +194,16 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           showHiddenFields: true,
         })
 
-        await deleteAssociatedFiles({
-          collectionConfig,
-          config,
-          doc,
-          files: filesToUpload,
-          overrideDelete: false,
-          t,
-        })
+        if(!collectionConfig.versions){
+          await deleteAssociatedFiles({
+            collectionConfig,
+            config,
+            doc,
+            files: filesToUpload,
+            overrideDelete: false,
+            t,
+          })
+        }
 
         // /////////////////////////////////////
         // beforeValidate - Fields
