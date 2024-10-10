@@ -53,6 +53,15 @@ export const FieldLabel: FieldLabelClientComponent = (props) => {
     return <RenderComponent clientProps={rest} mappedComponent={Label} />
   }
 
+  const localized =
+    typeof props.localized !== 'undefined'
+      ? props.localized
+      : props?.field && 'localized' in props.field && props.field.localized
+  const parentIsLocalized =
+    typeof props.field !== 'undefined' && 'parentIsLocalized' in props.field
+      ? Boolean(props.field.parentIsLocalized)
+      : false
+
   return (
     <DefaultFieldLabel
       {...rest}
@@ -61,11 +70,7 @@ export const FieldLabel: FieldLabelClientComponent = (props) => {
           ? props.label
           : props?.field && 'label' in props.field && (props.field.label as StaticLabel) // type assertion needed for `row` fields
       }
-      localized={
-        typeof props.localized !== 'undefined'
-          ? props.localized
-          : props?.field && 'localized' in props.field && props.field.localized
-      }
+      localized={localized || parentIsLocalized}
       required={
         typeof props.required !== 'undefined'
           ? props.required
