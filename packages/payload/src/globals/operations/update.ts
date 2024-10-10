@@ -67,6 +67,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
       ? await executeAccess(
           {
             data,
+            operation: 'update',
             req,
           },
           globalConfig.access.update,

@@ -20,6 +20,8 @@ import {
   hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
+  localizedGlobalSlug,
+  localizedSlug,
   relyOnRequestHeadersSlug,
   restrictedVersionsSlug,
   secondArrayText,
@@ -480,6 +482,170 @@ describe('Access Control', () => {
       })
 
       expect(docs).toHaveLength(1)
+    })
+  })
+
+  describe('Locale Access', () => {
+    it('collection - should respect locale create access', async () => {
+      expect(() =>
+        payload.create({
+          collection: localizedSlug,
+          data: {
+            title: 'hello',
+          },
+          locale: 'en',
+        }),
+      ).toBeTruthy()
+
+      await expect(() =>
+        payload.create({
+          collection: localizedSlug,
+          data: {
+            title: 'bonjour',
+          },
+          locale: 'fr',
+          overrideAccess: false,
+        }),
+      ).rejects.toThrow(Forbidden)
+    })
+    it('collection - should respect locale read access', async () => {
+      const { id } = await payload.create({
+        collection: localizedSlug,
+        data: {
+          title: 'hello',
+        },
+      })
+
+      await payload.update({
+        id,
+        collection: localizedSlug,
+        data: {
+          title: 'bonjour',
+        },
+        locale: 'fr',
+      })
+
+      expect(() =>
+        payload.findByID({
+          id,
+          collection: localizedSlug,
+          locale: 'en',
+        }),
+      ).toBeTruthy()
+
+      await expect(() =>
+        payload.findByID({
+          id,
+          collection: localizedSlug,
+          locale: 'fr',
+          overrideAccess: false,
+        }),
+      ).rejects.toThrow(Forbidden)
+    })
+    it('collection - should respect locale update access', async () => {
+      const { id } = await payload.create({
+        collection: localizedSlug,
+        data: {
+          title: 'hello',
+        },
+        locale: 'en',
+      })
+
+      await payload.update({
+        id,
+        collection: localizedSlug,
+        data: {
+          title: 'updated EN',
+        },
+        locale: 'en',
+        overrideAccess: false,
+      })
+
+      await expect(() =>
+        payload.update({
+          id,
+          collection: localizedSlug,
+          data: {
+            title: 'hola',
+          },
+          locale: 'es',
+          overrideAccess: false,
+        }),
+      ).rejects.toThrow(Forbidden)
+    })
+
+    it('collection - should respect locale delete access', async () => {
+      const { id } = await payload.create({
+        collection: localizedSlug,
+        data: {
+          title: 'hola',
+        },
+        locale: 'es',
+      })
+
+      await expect(() =>
+        payload.delete({
+          id,
+          collection: localizedSlug,
+          locale: 'es',
+          overrideAccess: false,
+        }),
+      ).rejects.toThrow(Forbidden)
+    })
+
+    it('global - should respect locale read access', async () => {
+      await payload.updateGlobal({
+        slug: localizedGlobalSlug,
+        data: {
+          title: 'hello',
+        },
+        locale: 'en',
+      })
+
+      await payload.updateGlobal({
+        slug: localizedGlobalSlug,
+        data: {
+          title: 'bonjour',
+        },
+        locale: 'fr',
+      })
+
+      expect(() =>
+        payload.findGlobal({
+          slug: localizedGlobalSlug,
+          locale: 'en',
+        }),
+      ).toBeTruthy()
+
+      await expect(() =>
+        payload.findGlobal({
+          slug: localizedGlobalSlug,
+          locale: 'fr',
+          overrideAccess: false,
+        }),
+      ).rejects.toThrow(Forbidden)
+    })
+    it('global - should respect locale update access', async () => {
+      expect(() =>
+        payload.updateGlobal({
+          slug: localizedGlobalSlug,
+          data: {
+            title: 'hello',
+          },
+          locale: 'en',
+        }),
+      ).toBeTruthy()
+
+      await expect(() =>
+        payload.updateGlobal({
+          slug: localizedGlobalSlug,
+          data: {
+            title: 'hola',
+          },
+          locale: 'es',
+          overrideAccess: false,
+        }),
+      ).rejects.toThrow(Forbidden)
     })
   })
 })

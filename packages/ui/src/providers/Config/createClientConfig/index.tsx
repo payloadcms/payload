@@ -64,6 +64,7 @@ export const createClientConfig = async ({
   if ('localization' in clientConfig && clientConfig.localization) {
     for (const locale of clientConfig.localization.locales) {
       delete locale.toString
+      delete locale.access
     }
   }
 

@@ -26,3 +26,7 @@ export const nonAdminUserEmail = 'non-admin-user@payloadcms.com'
 export const nonAdminUserSlug = 'non-admin-user'
 
 export const disabledSlug = 'disabled'
+
+export const localizedSlug = 'localized-posts'
+
+export const localizedGlobalSlug = 'localized-global'

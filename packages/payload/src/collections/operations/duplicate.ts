@@ -82,7 +82,7 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
     // /////////////////////////////////////
 
     const accessResults = !overrideAccess
-      ? await executeAccess({ id, req }, collectionConfig.access.read)
+      ? await executeAccess({ id, operation: 'read', req }, collectionConfig.access.read)
       : true
     const hasWherePolicy = hasWhereAccessResult(accessResults)
 
@@ -162,7 +162,10 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
     // /////////////////////////////////////
 
     if (!overrideAccess) {
-      await executeAccess({ data: originalDoc, req }, collectionConfig.access.create)
+      await executeAccess(
+        { data: originalDoc, operation: 'create', req },
+        collectionConfig.access.create,
+      )
     }
 
     // /////////////////////////////////////

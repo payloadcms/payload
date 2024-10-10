@@ -106,7 +106,7 @@ export const createOperation = async <TSlug extends CollectionSlug>(
     // /////////////////////////////////////
 
     if (!overrideAccess) {
-      await executeAccess({ data, req }, collectionConfig.access.create)
+      await executeAccess({ data, operation: 'create', req }, collectionConfig.access.create)
     }
 
     // /////////////////////////////////////

@@ -1,0 +1,110 @@
+---
+title: Locale Access Control
+label: Locales
+order: 50
+desc: Locale based access control can be defined in the Payload config, allowing you to set CRUD permissions based on the locale of the request.
+keywords: locale, access control, permissions, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+Locale Access Control is [Access Control](../access-control) used to restrict access to a specific [Locale](../configuration/localization) across all [Collections](../collections/overview) and [Globals](../globals/overview).
+
+To add Access Control to a Locale, use the `access` property in your [Payload Config](../configuration/overview):
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  localization: {
+    locales: [
+      {
+        label: 'English',
+        code: 'en',
+        access: { // highlight-line
+          // ...
+        },
+      },
+    ],
+  },
+})
+```
+
+## Config Options
+
+Access Control is specific to the operation of the request.
+
+```ts
+{
+  label: 'English',
+  code: 'en',
+  // highlight-start
+  access: {
+    create: ({ req: { user } }) => { ... },
+    read: ({ req: { user } }) => { ... },
+    update: ({ req: { user } }) => { ... },
+    delete: ({ req: { user } }) => { ... },
+  },
+  // highlight-end
+},
+```
+
+The following options are available for locale access control:
+
+| Function                | Allows/Denies Access                         |
+| ----------------------- | -------------------------------------------- |
+| **`create`** | Used in the `create` operation. [More details](#create). |
+| **`read`**     | Used in the `find` and `findByID` operations. [More details](#read). |
+| **`update`** | Used in the `update` operation. [More details](#update). |
+| **`delete`** | Used in the `delete` operation. [More details](#delete). |
+
+<Banner type="warning">
+  <strong>Note:</strong>
+  The create and delete functions will only affect collections, as globals are not created or deleted.
+</Banner>
+
+
+### Create
+
+Returns a boolean which allows/denies access to the create request. If `false` is returned, any passed values will be discarded.
+
+The following arguments are provided to the `create` function:
+
+| Option     | Description                                                                                                                  |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
+| **`data`** | The data passed to create the document with.                                                                                 |
+
+### Read
+
+Returns a boolean which allows/denies access to the `read` request. If `false` is returned, the request will be denied.
+
+The following arguments are provided to the `read` function:
+
+| Option    | Description                                                                |
+| --------- | -------------------------------------------------------------------------- |
+| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
+| **`id`**  | `id` of document requested, if within `findByID`.                           |
+
+### Update
+
+Returns a boolean which allows or denies access to the `update` request. If `false` is returned, any passed values will be discarded.
+
+The following arguments are provided to the `update` function:
+
+| Option     | Description                                                                |
+| ---------- | -------------------------------------------------------------------------- |
+| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
+| **`id`**   | `id` of document requested to update.                                       |
+| **`data`** | The data passed to update the document with.
+
+
+### Delete
+
+Similarly to the Update function, returns a boolean or a [query constraint](/docs/queries/overview) to limit which documents can be deleted by which users.
+
+The following arguments are provided to the `delete` function:
+
+| Option    | Description                                                                                         |
+| --------- | --------------------------------------------------------------------------------------------------- |
+| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object with additional `user` property, which is the currently logged in user. |
+| **`id`**  | `id` of document requested to delete.

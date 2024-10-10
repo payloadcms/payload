@@ -410,6 +410,17 @@ export type CustomComponent<TAdditionalProps extends object = Record<string, any
 
 export type Locale = {
   /**
+   * Access control for the locale
+   *
+   * @see https://payloadcms.com/docs/access-control/overview
+   **/
+  access?: {
+    create?: Access
+    delete?: Access
+    read?: Access
+    update?: Access
+  }
+  /**
    * value of supported locale
    * @example "en"
    */

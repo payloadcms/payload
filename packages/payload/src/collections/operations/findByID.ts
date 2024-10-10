@@ -68,7 +68,10 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
     // /////////////////////////////////////
 
     const accessResult = !overrideAccess
-      ? await executeAccess({ id, disableErrors, req }, collectionConfig.access.read)
+      ? await executeAccess(
+          { id, disableErrors, operation: 'read', req },
+          collectionConfig.access.read,
+        )
       : true
 
     // If errors are disabled, and access returns false, return null

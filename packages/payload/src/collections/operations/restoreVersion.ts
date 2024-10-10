@@ -70,7 +70,10 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     // /////////////////////////////////////
 
     const accessResults = !overrideAccess
-      ? await executeAccess({ id: parentDocID, req }, collectionConfig.access.update)
+      ? await executeAccess(
+          { id: parentDocID, operation: 'update', req },
+          collectionConfig.access.update,
+        )
       : true
     const hasWherePolicy = hasWhereAccessResult(accessResults)
 

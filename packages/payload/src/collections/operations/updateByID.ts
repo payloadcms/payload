@@ -114,8 +114,9 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
     // /////////////////////////////////////
 
     const accessResults = !overrideAccess
-      ? await executeAccess({ id, data, req }, collectionConfig.access.update)
+      ? await executeAccess({ id, data, operation: 'update', req }, collectionConfig.access.update)
       : true
+
     const hasWherePolicy = hasWhereAccessResult(accessResults)
 
     // /////////////////////////////////////

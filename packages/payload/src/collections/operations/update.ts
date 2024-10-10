@@ -105,7 +105,10 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
 
     let accessResult: AccessResult
     if (!overrideAccess) {
-      accessResult = await executeAccess({ req }, collectionConfig.access.update)
+      accessResult = await executeAccess(
+        { operation: 'update', req },
+        collectionConfig.access.update,
+      )
     }
 
     await validateQueryPaths({

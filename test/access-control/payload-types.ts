@@ -14,6 +14,7 @@ export interface Config {
   collections: {
     users: User;
     'non-admin-user': NonAdminUser;
+    'localized-posts': LocalizedPost;
     posts: Post;
     unrestricted: Unrestricted;
     'fully-restricted': FullyRestricted;
@@ -28,6 +29,7 @@ export interface Config {
     'hidden-access': HiddenAccess;
     'hidden-access-count': HiddenAccessCount;
     disabled: Disabled;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -40,8 +42,9 @@ export interface Config {
     'read-only-global': ReadOnlyGlobal;
     'user-restricted-global': UserRestrictedGlobal;
     'read-not-update-global': ReadNotUpdateGlobal;
+    'localized-global': LocalizedGlobal;
   };
-  locale: null;
+  locale: 'en' | 'es' | 'fr';
   user:
     | (User & {
         collection: 'users';
@@ -120,6 +123,18 @@ export interface NonAdminUser {
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-posts".
+ */
+export interface LocalizedPost {
+  id: string;
+  title?: string | null;
+  content?: string | null;
+  noAccess?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -305,6 +320,94 @@ export interface Disabled {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'non-admin-user';
+        value: string | NonAdminUser;
+      } | null)
+    | ({
+        relationTo: 'localized-posts';
+        value: string | LocalizedPost;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'unrestricted';
+        value: string | Unrestricted;
+      } | null)
+    | ({
+        relationTo: 'fully-restricted';
+        value: string | FullyRestricted;
+      } | null)
+    | ({
+        relationTo: 'read-only-collection';
+        value: string | ReadOnlyCollection;
+      } | null)
+    | ({
+        relationTo: 'user-restricted-collection';
+        value: string | UserRestrictedCollection;
+      } | null)
+    | ({
+        relationTo: 'create-not-update-collection';
+        value: string | CreateNotUpdateCollection;
+      } | null)
+    | ({
+        relationTo: 'restricted-versions';
+        value: string | RestrictedVersion;
+      } | null)
+    | ({
+        relationTo: 'sibling-data';
+        value: string | SiblingDatum;
+      } | null)
+    | ({
+        relationTo: 'rely-on-request-headers';
+        value: string | RelyOnRequestHeader;
+      } | null)
+    | ({
+        relationTo: 'doc-level-access';
+        value: string | DocLevelAccess;
+      } | null)
+    | ({
+        relationTo: 'hidden-fields';
+        value: string | HiddenField;
+      } | null)
+    | ({
+        relationTo: 'hidden-access';
+        value: string | HiddenAccess;
+      } | null)
+    | ({
+        relationTo: 'hidden-access-count';
+        value: string | HiddenAccessCount;
+      } | null)
+    | ({
+        relationTo: 'disabled';
+        value: string | Disabled;
+      } | null);
+  globalSlug?: string | null;
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'non-admin-user';
+        value: string | NonAdminUser;
+      };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
@@ -388,6 +491,16 @@ export interface UserRestrictedGlobal {
 export interface ReadNotUpdateGlobal {
   id: string;
   name?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-global".
+ */
+export interface LocalizedGlobal {
+  id: string;
+  title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
