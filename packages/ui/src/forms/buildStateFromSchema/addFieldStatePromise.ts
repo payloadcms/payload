@@ -227,7 +227,22 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           },
         )
 
+        // Wait for all promises and update fields with the results
         await Promise.all(promises)
+
+        // Once the promises have resolved, we need to place them onto the parent `fields` property
+        // Is there another way to do this that avoids this loop?
+        // Can we just set this property on the fly in the same loop as above?
+        fieldState.rows = rows.map((row, i) => ({
+          ...row,
+          fields: Object.keys(state).reduce((acc, key) => {
+            const fieldPath = `${path}${field.name}.${i}.`
+            if (key.startsWith(fieldPath)) {
+              acc.push(state[key]?.Field)
+            }
+            return acc
+          }, []),
+        }))
 
         // Add values to field state
         if (data[field.name] === null) {
@@ -241,8 +256,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             fieldState.disableFormData = true
           }
         }
-
-        fieldState.rows = rows
 
         // Add field to state
         if (!omitParents && (!filter || filter(args))) {
