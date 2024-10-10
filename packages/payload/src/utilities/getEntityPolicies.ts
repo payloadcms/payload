@@ -1,7 +1,7 @@
 import type { CollectionPermission, GlobalPermission } from '../auth/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { Access } from '../config/types.js'
-import type { Field, FieldAccess } from '../fields/config/types.js'
+import type { Field, FieldAccess, Tab } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { AllOperations, Document, PayloadRequest, Where } from '../types/index.js'
 
@@ -211,7 +211,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
           })
         } else if (field.type === 'tabs') {
           await Promise.all(
-            field.tabs.map(async (tab) => {
+            field.tabs.map(async (tab: Tab) => {
               if (tabHasName(tab)) {
                 if (!mutablePolicies[tab.name]) {
                   mutablePolicies[tab.name] = {

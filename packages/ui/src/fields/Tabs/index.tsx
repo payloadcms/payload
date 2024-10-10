@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { useFormFields } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -49,8 +50,27 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const { preferencesKey } = useDocumentInfo()
   const { i18n } = useTranslation()
   const { isWithinCollapsible } = useCollapsible()
-  const [activeTabIndex, setActiveTabIndex] = useState<number>(0)
   const tabsPrefKey = `tabs-${indexPath}`
+
+  const tabInfos = useFormFields(([fields]) => {
+    return tabs.map((tab, index) => {
+      const tabRef = 'name' in tab ? tab.name : index
+      const formStateID = `${field.id}.${tabRef}`
+
+      return {
+        index,
+        passesCondition: fields?.[formStateID]?.passesCondition ?? true,
+        tab,
+      }
+    })
+  })
+
+  const [activeTabIndex, setActiveTabIndex] = useState<number>(() => {
+    return tabInfos.filter(({ passesCondition }) => passesCondition)?.[0]?.index ?? 0
+  })
+
+  const activeTabInfo = tabInfos[activeTabIndex]
+  const activeTabConfig = activeTabInfo.tab
 
   useEffect(() => {
     if (preferencesKey) {
@@ -99,7 +119,14 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
     [preferencesKey, getPreference, setPreference, path, tabsPrefKey],
   )
 
-  const activeTabConfig = tabs[activeTabIndex]
+  useEffect(() => {
+    if (activeTabInfo.passesCondition === false) {
+      const nextTab = tabInfos.find(({ passesCondition }) => passesCondition)
+      if (nextTab) {
+        void handleTabChange(nextTab.index)
+      }
+    }
+  }, [activeTabInfo, tabInfos, handleTabChange])
 
   function generateTabPath() {
     let tabPath = path
@@ -126,23 +153,23 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
       <TabsProvider>
         <div className={`${baseClass}__tabs-wrap`}>
           <div className={`${baseClass}__tabs`}>
-            {tabs.map((tab, tabIndex) => {
-              return (
+            {tabInfos.map(({ index, passesCondition, tab }) => {
+              return passesCondition ? (
                 <TabComponent
-                  isActive={activeTabIndex === tabIndex}
-                  key={tabIndex}
+                  isActive={activeTabIndex === index}
+                  key={index}
                   parentPath={path}
                   setIsActive={() => {
-                    void handleTabChange(tabIndex)
+                    void handleTabChange(index)
                   }}
                   tab={tab}
                 />
-              )
+              ) : null
             })}
           </div>
         </div>
         <div className={`${baseClass}__content-wrap`}>
-          {activeTabConfig && (
+          {activeTabInfo?.passesCondition && activeTabConfig && (
             <div
               className={[
                 `${baseClass}__tab`,
