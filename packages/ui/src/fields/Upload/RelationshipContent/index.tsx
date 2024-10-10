@@ -76,6 +76,7 @@ export function RelationshipContent(props: Props) {
           className={`${baseClass}__thumbnail`}
           filename={filename}
           fileSrc={src}
+          mimeType={mimeType}
           size="small"
         />
         <div className={`${baseClass}__details`}>
