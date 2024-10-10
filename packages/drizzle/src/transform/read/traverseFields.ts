@@ -452,8 +452,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
           } else {
             const hasNextPage = limit !== 0 && fieldData.length > limit
             fieldResult = {
-              docs: (hasNextPage ? fieldData.slice(0, limit) : fieldData).map((objOrID) => ({
-                id: typeof objOrID === 'object' ? objOrID.id : objOrID,
+              docs: (hasNextPage ? fieldData.slice(0, limit) : fieldData).map(({ id }) => ({
+                id,
               })),
               hasNextPage,
             }

@@ -250,7 +250,7 @@ export const traverseFields = ({
             field.localized && adapter.payload.config.localization ? adapter.localesSuffix : ''
           }`
 
-          if (!adapter.tables[joinTableName]?.[field.on]) {
+          if (field.hasMany) {
             const db = adapter.drizzle as LibSQLDatabase
             if (field.localized) {
               joinTableName = adapter.tableNameMap.get(toSnakeCase(field.collection))

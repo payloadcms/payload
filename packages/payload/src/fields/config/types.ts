@@ -1452,6 +1452,10 @@ export type JoinField = {
    */
   collection: CollectionSlug
   defaultValue?: never
+  /**
+   * This does not need to be set and will be overridden by the relationship field's hasMany property.
+   */
+  hasMany?: boolean
   hidden?: false
   index?: never
   /**
