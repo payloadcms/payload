@@ -58,6 +58,7 @@ export interface Post {
   upload?: (string | null) | Upload;
   category?: (string | null) | Category;
   categories?: (string | Category)[] | null;
+  categoriesLocalized?: (string | Category)[] | null;
   group?: {
     category?: (string | null) | Category;
     camelCaseCategory?: (string | null) | Category;
@@ -99,6 +100,10 @@ export interface Category {
     hasNextPage?: boolean | null;
   } | null;
   hasManyPosts?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  hasManyPostsLocalized?: {
     docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;

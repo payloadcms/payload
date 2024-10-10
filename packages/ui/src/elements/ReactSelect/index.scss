@@ -8,7 +8,8 @@
   .react-select {
     .rs__control {
       @include formInput;
-      padding: base(0.4) base(0.6);
+      height: auto;
+      padding: base(0.35) base(0.6);
       flex-wrap: nowrap;
     }
 

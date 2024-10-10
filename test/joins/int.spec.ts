@@ -5,7 +5,7 @@ import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { Category, Post } from './payload-types.js'
+import type { Category, Config, Post } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { idToString } from '../helpers/idToString.js'
@@ -80,6 +80,7 @@ describe('Joins Field', () => {
         category: category.id,
         upload: uploadedImage,
         categories,
+        categoriesLocalized: categories,
         group: {
           category: category.id,
           camelCaseCategory: category.id,
@@ -210,6 +211,89 @@ describe('Joins Field', () => {
     expect(otherCategoryWithPosts.hasManyPosts.docs).toHaveLength(8)
     expect(otherCategoryWithPosts.hasManyPosts.docs[0]).toHaveProperty('title')
     expect(otherCategoryWithPosts.hasManyPosts.docs[0].title).toBe('test 14')
+  })
+
+  it('should populate joins using find with hasMany localized relationships', async () => {
+    const post_1 = await createPost(
+      {
+        title: `test es localized 1`,
+        categoriesLocalized: [category.id],
+        group: {
+          category: category.id,
+          camelCaseCategory: category.id,
+        },
+      },
+      'es',
+    )
+
+    const post_2 = await createPost(
+      {
+        title: `test es localized 2`,
+        categoriesLocalized: [otherCategory.id],
+        group: {
+          category: category.id,
+          camelCaseCategory: category.id,
+        },
+      },
+      'es',
+    )
+
+    const resultEn = await payload.find({
+      collection: 'categories',
+      where: {
+        id: { equals: category.id },
+      },
+    })
+    const otherResultEn = await payload.find({
+      collection: 'categories',
+      where: {
+        id: { equals: otherCategory.id },
+      },
+    })
+
+    const [categoryWithPostsEn] = resultEn.docs
+    const [otherCategoryWithPostsEn] = otherResultEn.docs
+
+    expect(categoryWithPostsEn.hasManyPostsLocalized.docs).toHaveLength(10)
+    expect(categoryWithPostsEn.hasManyPostsLocalized.docs[0]).toHaveProperty('title')
+    expect(categoryWithPostsEn.hasManyPostsLocalized.docs[0].title).toBe('test 14')
+    expect(otherCategoryWithPostsEn.hasManyPostsLocalized.docs).toHaveLength(8)
+    expect(otherCategoryWithPostsEn.hasManyPostsLocalized.docs[0]).toHaveProperty('title')
+    expect(otherCategoryWithPostsEn.hasManyPostsLocalized.docs[0].title).toBe('test 14')
+
+    const resultEs = await payload.find({
+      collection: 'categories',
+      locale: 'es',
+      where: {
+        id: { equals: category.id },
+      },
+    })
+    const otherResultEs = await payload.find({
+      collection: 'categories',
+      locale: 'es',
+      where: {
+        id: { equals: otherCategory.id },
+      },
+    })
+
+    const [categoryWithPostsEs] = resultEs.docs
+    const [otherCategoryWithPostsEs] = otherResultEs.docs
+
+    expect(categoryWithPostsEs.hasManyPostsLocalized.docs).toHaveLength(1)
+    expect(categoryWithPostsEs.hasManyPostsLocalized.docs[0].title).toBe('test es localized 1')
+
+    expect(otherCategoryWithPostsEs.hasManyPostsLocalized.docs).toHaveLength(1)
+    expect(otherCategoryWithPostsEs.hasManyPostsLocalized.docs[0].title).toBe('test es localized 2')
+
+    // clean up
+    await payload.delete({
+      collection: 'posts',
+      where: {
+        id: {
+          in: [post_1.id, post_2.id],
+        },
+      },
+    })
   })
 
   it('should not error when deleting documents with joins', async () => {
@@ -499,9 +583,10 @@ describe('Joins Field', () => {
   })
 })
 
-async function createPost(overrides?: Partial<Post>) {
+async function createPost(overrides?: Partial<Post>, locale?: Config['locale']) {
   return payload.create({
     collection: 'posts',
+    locale,
     data: {
       title: 'test',
       ...overrides,
