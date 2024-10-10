@@ -29,7 +29,7 @@ import {
  *
  * @see https://payloadcms.com/docs/admin/hooks#usefield
  */
-export const useField = <T,>(options: Options): FieldType<T> => {
+export const useField = <T,>(options: Options = {}): FieldType<T> => {
   const { disableFormData = false, hasRows, validate } = options
 
   const { path: pathFromContext, permissions, readOnly, schemaPath } = useFieldProps()
