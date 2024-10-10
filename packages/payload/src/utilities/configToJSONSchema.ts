@@ -73,6 +73,25 @@ function generateEntitySchemas(
   }
 }
 
+function generateEntitySelectSchemas(
+  entities: (SanitizedCollectionConfig | SanitizedGlobalConfig)[],
+): JSONSchema4 {
+  const properties = [...entities].reduce((acc, { slug }) => {
+    acc[slug] = {
+      $ref: `#/definitions/${slug}_select`,
+    }
+
+    return acc
+  }, {})
+
+  return {
+    type: 'object',
+    additionalProperties: false,
+    properties,
+    required: Object.keys(properties),
+  }
+}
+
 function generateLocaleEntitySchemas(localization: SanitizedConfig['localization']): JSONSchema4 {
   if (localization && 'locales' in localization && localization?.locales) {
     const localesFromConfig = localization?.locales
@@ -633,6 +652,111 @@ export function entityToJSONSchema(
   }
 }
 
+export function fieldsToSelectJSONSchema({ fields }: { fields: Field[] }): JSONSchema4 {
+  const schema: JSONSchema4 = {
+    type: 'object',
+    additionalProperties: false,
+    properties: {},
+  }
+
+  for (const field of fields) {
+    switch (field.type) {
+      case 'text':
+      case 'textarea':
+      case 'number':
+      case 'date':
+      case 'code':
+      case 'point':
+      case 'radio':
+      case 'richText':
+      case 'email':
+      case 'relationship':
+      case 'upload':
+      case 'select':
+      case 'checkbox':
+      case 'json':
+        schema.properties[field.name] = {
+          type: 'boolean',
+        }
+        break
+
+      case 'row':
+      case 'collapsible':
+        schema.properties = {
+          ...schema.properties,
+          ...fieldsToSelectJSONSchema({ fields: field.fields }).properties,
+        }
+
+        break
+
+      case 'array':
+      case 'group':
+        schema.properties[field.name] = {
+          oneOf: [
+            {
+              type: 'boolean',
+            },
+            fieldsToSelectJSONSchema({ fields: field.fields }),
+          ],
+        }
+        break
+
+      case 'tabs':
+        for (const tab of field.tabs) {
+          if (tabHasName(tab)) {
+            schema.properties[tab.name] = {
+              oneOf: [
+                {
+                  type: 'boolean',
+                },
+                fieldsToSelectJSONSchema({ fields: tab.fields }),
+              ],
+            }
+            continue
+          }
+
+          schema.properties = {
+            ...schema.properties,
+            ...fieldsToSelectJSONSchema({ fields: tab.fields }).properties,
+          }
+        }
+        break
+
+      case 'blocks': {
+        const blocksSchema: JSONSchema4 = {
+          type: 'object',
+          additionalProperties: false,
+          properties: {},
+        }
+
+        for (const block of field.blocks) {
+          blocksSchema.properties[block.slug] = {
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              fieldsToSelectJSONSchema({ fields: block.fields }),
+            ],
+          }
+        }
+
+        schema.properties[field.name] = {
+          oneOf: [
+            {
+              type: 'boolean',
+            },
+            blocksSchema,
+          ],
+        }
+
+        break
+      }
+    }
+  }
+
+  return schema
+}
+
 const fieldType: JSONSchema4 = {
   type: 'string',
   required: false,
@@ -808,6 +932,12 @@ export function configToJSONSchema(
     ...config.collections,
   ].reduce((acc, entity) => {
     acc[entity.slug] = entityToJSONSchema(config, entity, interfaceNameDefinitions, defaultIDType)
+    acc[`${entity.slug}_select`] = {
+      type: 'object',
+      additionalProperties: false,
+      ...fieldsToSelectJSONSchema({ fields: entity.fields }),
+    }
+
     return acc
   }, {})
 
@@ -833,8 +963,10 @@ export function configToJSONSchema(
     properties: {
       auth: generateAuthOperationSchemas(config.collections),
       collections: generateEntitySchemas(config.collections || []),
+      collectionsSelect: generateEntitySelectSchemas(config.collections || []),
       db: generateDbEntitySchema(config),
       globals: generateEntitySchemas(config.globals || []),
+      globalsSelect: generateEntitySelectSchemas(config.globals || []),
       locale: generateLocaleEntitySchemas(config.localization),
       user: generateAuthEntitySchemas(config.collections),
     },
