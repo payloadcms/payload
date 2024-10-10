@@ -128,12 +128,33 @@ All GraphQL `find` queries support the `where` argument, which accepts queries e
 
 **For example:**
 
-```
+```gql
 query {
   Posts(where: { color: { equals: mint } }) {
     docs {
       color
     }
+    totalDocs
+  }
+}
+```
+
+> [!WARNING]  
+> Caveat: GraphQL `where` argument is currently limited to using `id` when filtering on a `relationship` field. See the [roadmap](https://github.com/payloadcms/payload/discussions/761) for more details.
+
+**For example:**
+
+```gql
+# ✅ supported
+query Good {
+  Posts(where: { author: { equals: 123 }}) {
+    totalDocs
+  }
+}
+
+# ❌ not supported
+query Bad {
+  Posts(where: { author__slug: { equals: "Jane Doe" }}) {
     totalDocs
   }
 }
