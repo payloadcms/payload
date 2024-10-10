@@ -121,7 +121,7 @@
     "react": "^18.0.0",
     "react-animate-height": "2.1.2",
     "react-datepicker": "4.16.0",
-    "react-diff-viewer-continued": "3.2.6",
+    "react-diff-viewer-continued": "3.4.0",
     "react-dom": "^18.0.0",
     "react-helmet": "6.1.0",
     "react-i18next": "11.18.6",
