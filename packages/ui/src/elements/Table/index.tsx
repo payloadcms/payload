@@ -74,7 +74,7 @@ export const Table: React.FC<Props> = ({
                     <RenderCell
                       cellProps={{
                         link: isFirstCell,
-                        ...(isFirstCell ? cellProps?.[0] : cellProps?.[colIndex]),
+                        ...cellProps?.[colIndex],
                       }}
                       col={col}
                       colIndex={colIndex}

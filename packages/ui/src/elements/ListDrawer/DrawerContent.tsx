@@ -304,6 +304,33 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     return null
   }
 
+  /**
+   * Cell props for the table columns, we want the first item to be a clickable cell
+   */
+  const tableColumnCellProps = [
+    {
+      className: `${baseClass}__first-cell`,
+      link: false,
+      onClick: ({ collectionSlug: rowColl, rowData }) => {
+        if (typeof onSelect === 'function') {
+          onSelect({
+            collectionSlug: rowColl,
+            docID: rowData.id as string,
+          })
+        }
+      },
+    },
+  ]
+
+  /**
+   * Table column cell props are being assigned by the column index
+   * so if enableRowSelections is true, we need to add an extra cellProps object to the start of the array
+   * to account for the first cell being the checkbox for row selection.
+   */
+  if (enableRowSelections) {
+    tableColumnCellProps.unshift(undefined)
+  }
+
   return (
     <>
       {showLoadingOverlay && <LoadingOverlay />}
@@ -386,20 +413,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
           preferenceKey={preferencesKey}
         >
           <TableColumnsProvider
-            cellProps={[
-              {
-                className: `${baseClass}__first-cell`,
-                link: false,
-                onClick: ({ collectionSlug: rowColl, rowData }) => {
-                  if (typeof onSelect === 'function') {
-                    onSelect({
-                      collectionSlug: rowColl,
-                      docID: rowData.id as string,
-                    })
-                  }
-                },
-              },
-            ]}
+            cellProps={tableColumnCellProps}
             collectionSlug={selectedCollectionConfig.slug}
             enableRowSelections={enableRowSelections}
             preferenceKey={preferencesKey}
