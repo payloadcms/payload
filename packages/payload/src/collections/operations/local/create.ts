@@ -18,7 +18,7 @@ export type Options<TSlug extends CollectionSlug> = {
   depth?: number
   disableVerificationEmail?: boolean
   draft?: boolean
-  fallbackLocale?: TypedLocale
+  fallbackLocale?: 'none' | TypedLocale
   file?: File
   filePath?: string
   locale?: TypedLocale
