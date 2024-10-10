@@ -301,6 +301,7 @@ export const faTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" با موفقیت پاک شد.',
     true: 'درست',
     unauthorized: 'غیرمجاز',
+    unsavedChanges: 'تغییرات ذخیره نشده ای دارید. قبل از ادامه ذخیره کنید یا رد کنید.',
     unsavedChangesDuplicate: 'شما تغییرات ذخیره نشده دارید. مطمئنید میخواهید به رونوشت ادامه دهید؟',
     untitled: 'بدون عنوان',
     updatedAt: 'بروز شده در',

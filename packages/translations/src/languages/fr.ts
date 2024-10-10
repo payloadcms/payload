@@ -309,6 +309,8 @@ export const frTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" supprimé(e) avec succès.',
     true: 'Vrai',
     unauthorized: 'Non autorisé',
+    unsavedChanges:
+      'Vous avez des modifications non enregistrées. Enregistrez ou supprimez avant de continuer.',
     unsavedChangesDuplicate:
       'Vous avez des changements non enregistrés. Souhaitez-vous continuer la duplication ?',
     untitled: 'Sans titre',

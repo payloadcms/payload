@@ -305,6 +305,7 @@ export const trTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} {{title}} başarıyla silindi.',
     true: 'Doğru',
     unauthorized: 'Yetkisiz',
+    unsavedChanges: 'Kaydedilmemiş değişiklikleriniz var. Devam etmeden önce kaydedin veya atın.',
     unsavedChangesDuplicate:
       'Kaydedilmemiş değişiklikler var. Çoğaltma işlemine devam etmek istiyor musunuz?',
     untitled: 'Başlıksız',

@@ -302,6 +302,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" が削除されました。',
     true: '真実',
     unauthorized: '未認証',
+    unsavedChanges: '保存されていない変更があります。続行する前に保存または破棄してください。',
     unsavedChangesDuplicate: '未保存の変更があります。複製を続けますか？',
     untitled: 'Untitled',
     updatedAt: '更新日',

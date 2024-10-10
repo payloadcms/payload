@@ -301,6 +301,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" uspešno obrisano.',
     true: 'Istinito',
     unauthorized: 'Niste autorizovani',
+    unsavedChanges: 'Imate nesačuvane promene. Sačuvajte ili odbacite pre nego što nastavite.',
     unsavedChangesDuplicate: 'Imate nesačuvane promene. Da li želite nastaviti sa dupliciranjem?',
     untitled: 'Bez naslova',
     updatedAt: 'Ažurirano u',

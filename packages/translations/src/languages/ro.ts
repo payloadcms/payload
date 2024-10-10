@@ -306,6 +306,7 @@ export const roTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" șters cu succes.',
     true: 'Adevărat',
     unauthorized: 'neautorizat(ă)',
+    unsavedChanges: 'Aveți modificări nesalvate. Salvați sau renunțați înainte de a continua.',
     unsavedChangesDuplicate: 'Aveți modificări nesalvate. Doriți să continuați să duplicați?',
     untitled: 'Fără titlu',
     updatedAt: 'Actualizat la',

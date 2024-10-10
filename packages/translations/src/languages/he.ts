@@ -296,6 +296,7 @@ export const heTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" נמחק בהצלחה.',
     true: 'True',
     unauthorized: 'אין הרשאה',
+    unsavedChanges: 'יש לך שינויים שלא נשמרו. שמור או מחק לפני שתמשיך.',
     unsavedChangesDuplicate: 'יש לך שינויים שלא נשמרו. האם ברצונך להמשיך לשכפל?',
     untitled: 'ללא כותרת',
     updatedAt: 'עודכן בתאריך',

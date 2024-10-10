@@ -303,6 +303,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} {{title}} excluído com sucesso.',
     true: 'Verdadeiro',
     unauthorized: 'Não autorizado',
+    unsavedChanges: 'Você tem alterações não salvas. Salve ou descarte antes de continuar.',
     unsavedChangesDuplicate: 'Você tem mudanças não salvas. Você gostaria de continuar a duplicar?',
     untitled: 'Sem título',
     updatedAt: 'Atualizado Em',

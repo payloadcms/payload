@@ -301,6 +301,7 @@ export const koTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}"을(를) 삭제했습니다.',
     true: '참',
     unauthorized: '권한 없음',
+    unsavedChanges: '저장되지 않은 변경 사항이 있습니다. 계속하기 전에 저장하거나 무시하십시오.',
     unsavedChangesDuplicate: '저장되지 않은 변경 사항이 있습니다. 복제를 계속하시겠습니까?',
     untitled: '제목 없음',
     updatedAt: '업데이트 일시',

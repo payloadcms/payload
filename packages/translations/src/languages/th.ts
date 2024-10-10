@@ -298,6 +298,7 @@ export const thTranslations: DefaultTranslationsObject = {
     titleDeleted: 'ลบ {{label}} "{{title}}" สำเร็จ',
     true: 'จริง',
     unauthorized: 'ไม่ได้รับอนุญาต',
+    unsavedChanges: 'คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก บันทึกหรือทิ้งก่อนที่จะดำเนินการต่อ',
     unsavedChangesDuplicate: 'คุณมีการแก้ไขที่ยังไม่ถูกบันทึก คุณต้องการทำสำเนาต่อหรือไม่?',
     untitled: 'ไม่มีชื่อ',
     updatedAt: 'แก้ไขเมื่อ',

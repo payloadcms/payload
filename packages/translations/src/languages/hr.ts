@@ -302,6 +302,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" uspješno izbrisano.',
     true: 'Istinito',
     unauthorized: 'Neovlašteno',
+    unsavedChanges: 'Imate nespremljene promjene. Spremite ili odbacite prije nastavka.',
     unsavedChangesDuplicate: 'Imate nespremljene promjene. Želite li nastaviti s dupliciranjem?',
     untitled: 'Bez naslova',
     updatedAt: 'Ažurirano u',

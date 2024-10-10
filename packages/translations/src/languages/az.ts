@@ -302,6 +302,8 @@ export const azTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" uğurla silindi.',
     true: 'Doğru',
     unauthorized: 'İcazəsiz',
+    unsavedChanges:
+      'Sizin saxlanılmamış dəyişiklikləriniz var. Davam etmədən əvvəl saxlayın və ya atın.',
     unsavedChangesDuplicate:
       'Saxlanılmamış dəyişiklikləriniz var. Dublikatla davam etmək istəyirsiniz?',
     untitled: 'Başlıqsız',

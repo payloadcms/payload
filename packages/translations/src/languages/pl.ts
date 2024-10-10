@@ -302,6 +302,7 @@ export const plTranslations: DefaultTranslationsObject = {
     titleDeleted: 'Pomyślnie usunięto {{label}} {{title}}',
     true: 'Prawda',
     unauthorized: 'Brak autoryzacji',
+    unsavedChanges: 'Masz niezapisane zmiany. Zapisz lub odrzuć, zanim kontynuujesz.',
     unsavedChangesDuplicate: 'Masz niezapisane zmiany. Czy chcesz kontynuować duplikowanie?',
     untitled: 'Bez nazwy',
     updatedAt: 'Data edycji',

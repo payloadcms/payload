@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { englishLocale } from 'globals/config.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -249,6 +250,63 @@ describe('Localization', () => {
       await selectField.click()
 
       await expect(page.locator('#field-children .rs__menu')).toContainText('spanish-relation2')
+    })
+  })
+
+  describe('copy localized data', () => {
+    test('should show copy button', async () => {
+      await page.goto(url.create)
+      await expect(page.locator('.copy-locale-data')).toBeVisible()
+    })
+
+    test('should show popup', async () => {
+      await page.goto(url.create)
+      await page.locator('.copy-locale-data').click()
+      const firstButton = page.locator('.copy-locale-data button').nth(1)
+      await expect(firstButton).toBeVisible()
+      await expect(firstButton).toContainText('English to Spanish')
+    })
+
+    test('should show correct locales', async () => {
+      const firstOption = 'English to Spanish'
+      const secondOption = 'English to Portuguese'
+      const thirdOption = 'English to Arabic'
+      const fourthOption = 'English to Hungarian'
+
+      await page.goto(url.create)
+      await page.locator('.copy-locale-data').click()
+      const firstButton = page.locator('.copy-locale-data button').nth(1)
+      const secondButton = page.locator('.copy-locale-data button').nth(2)
+      const thirdButton = page.locator('.copy-locale-data button').nth(3)
+      const fourthButton = page.locator('.copy-locale-data button').nth(4)
+
+      await expect(firstButton).toContainText(firstOption)
+      await expect(secondButton).toContainText(secondOption)
+      await expect(thirdButton).toContainText(thirdOption)
+      await expect(fourthButton).toContainText(fourthOption)
+    })
+
+    test('should copy data to correct locale', async () => {
+      await page.goto(url.create)
+      await fillValues({ description, title })
+      await saveDocAndAssert(page)
+
+      await page.locator('.copy-locale-data').click()
+      const firstButton = page.locator('.copy-locale-data button').nth(1)
+      await firstButton.click()
+
+      await changeLocale(page, spanishLocale)
+      await expect(page.locator('#field-title')).toHaveValue(title)
+      await expect(page.locator('#field-description')).toHaveValue(description)
+    })
+
+    test('should throw error if unsaved data', async () => {
+      await page.goto(url.create)
+      await fillValues({ description, title })
+      await page.locator('.copy-locale-data').click()
+      const firstButton = page.locator('.copy-locale-data button').nth(1)
+      await firstButton.click()
+      await expect(page.locator('.payload-toast-container')).toContainText('unsaved')
     })
   })
 })

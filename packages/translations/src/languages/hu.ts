@@ -304,6 +304,7 @@ export const huTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" sikeresen törölve.',
     true: 'Igaz',
     unauthorized: 'Jogosulatlan',
+    unsavedChanges: 'Vannak mentetlen változtatásai. Mentsen vagy dobja el mielőtt folytatja.',
     unsavedChangesDuplicate: 'Nem mentett módosításai vannak. Szeretné folytatni a duplikációt?',
     untitled: 'Névtelen',
     updatedAt: 'Frissítve:',

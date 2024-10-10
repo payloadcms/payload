@@ -16,6 +16,8 @@ import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { PopupList } from '../Popup/index.js'
+
+const baseClass = 'publish-locale-data'
 export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
   const {
     id,
@@ -125,6 +127,7 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
       buttonId="action-save"
       disabled={!canPublish}
       onClick={publish}
+      popupClassName={baseClass}
       size="medium"
       SubMenuPopupContent={
         localization

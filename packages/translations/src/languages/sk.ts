@@ -303,6 +303,7 @@ export const skTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" úspešne zmazané.',
     true: 'Pravda',
     unauthorized: 'Neoprávnený prístup',
+    unsavedChanges: 'Máte neuložené zmeny. Uložte alebo zahoďte pred pokračovaním.',
     unsavedChangesDuplicate: 'Máte neuložené zmeny. Chceli by ste pokračovať v duplikovaní?',
     untitled: 'Bez názvu',
     updatedAt: 'Aktualizované v',

@@ -302,6 +302,7 @@ export const svTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" togs bort framgångsrikt.',
     true: 'Sann',
     unauthorized: 'Obehörig',
+    unsavedChanges: 'Du har osparade ändringar. Spara eller kassera innan du fortsätter.',
     unsavedChangesDuplicate: 'Du har osparade ändringar. Vill du fortsätta att duplicera?',
     untitled: 'Namnlös',
     updatedAt: 'Uppdaterades Vid',

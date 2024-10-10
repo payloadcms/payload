@@ -301,6 +301,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" успешно изтрит.',
     true: 'Истина',
     unauthorized: 'Неавторизиран',
+    unsavedChanges: 'Имате незапазени промени. Запазете или отхвърлете преди да продължите.',
     unsavedChangesDuplicate: 'Имаш незапазени промени. Искаш ли да продължиш да дупликираш?',
     untitled: 'Неозаглавен',
     updatedAt: 'Обновен на',

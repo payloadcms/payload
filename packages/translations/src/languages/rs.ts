@@ -301,6 +301,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" успешно обрисано.',
     true: 'Istinito',
     unauthorized: 'Нисте ауторизовани',
+    unsavedChanges: 'Imate nesačuvane izmene. Sačuvajte ili odbacite pre nego što nastavite.',
     unsavedChangesDuplicate: 'Имате несачуване промене. Да ли желите наставити са дуплицирањем?',
     untitled: 'Без наслова',
     updatedAt: 'Ажурирано у',

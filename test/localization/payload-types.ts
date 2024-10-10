@@ -36,6 +36,7 @@ export interface Config {
   };
   globals: {
     'global-array': GlobalArray;
+    'global-text': GlobalText;
   };
   locale: 'en' | 'es' | 'pt' | 'ar' | 'hu';
   user: User & {
@@ -648,6 +649,16 @@ export interface GlobalArray {
         id?: string | null;
       }[]
     | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-text".
+ */
+export interface GlobalText {
+  id: string;
+  text?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }

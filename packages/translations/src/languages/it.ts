@@ -305,6 +305,7 @@ export const itTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} {{title}} eliminato con successo.',
     true: 'Vero',
     unauthorized: 'Non autorizzato',
+    unsavedChanges: 'Hai delle modifiche non salvate. Salva o scarta prima di continuare.',
     unsavedChangesDuplicate: 'Sono presenti modifiche non salvate. Vuoi continuare a duplicare?',
     untitled: 'Senza titolo',
     updatedAt: 'Aggiornato il',

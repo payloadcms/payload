@@ -19,6 +19,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { formatDate } from '../../utilities/formatDate.js'
 import { Autosave } from '../Autosave/index.js'
+import { CopyLocaleData } from '../CopyLocaleData/index.js'
 import { Button } from '../Button/index.js'
 import { DeleteDocument } from '../DeleteDocument/index.js'
 import { DuplicateDocument } from '../DuplicateDocument/index.js'
@@ -88,6 +89,7 @@ export const DocumentControls: React.FC<{
 
   const {
     admin: { dateFormat },
+    localization,
     routes: { admin: adminRoute },
   } = config
 
@@ -190,6 +192,14 @@ export const DocumentControls: React.FC<{
         </div>
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
+            {localization && (
+              <CopyLocaleData
+                CustomComponent={
+                  collectionConfig?.admin?.components?.edit?.CopyLocaleButton ||
+                  globalConfig?.admin?.components?.elements?.CopyLocaleButton
+                }
+              />
+            )}
             {(collectionConfig?._isPreviewEnabled || globalConfig?._isPreviewEnabled) && (
               <PreviewButton
                 CustomComponent={

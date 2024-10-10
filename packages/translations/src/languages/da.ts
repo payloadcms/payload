@@ -300,6 +300,7 @@ export const daTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" slettet.',
     true: 'Sandt',
     unauthorized: 'Uautoriseret',
+    unsavedChanges: 'Du har ikke gemte ændringer. Gem eller kassér før fortsættelse.',
     unsavedChangesDuplicate: 'Du har ikke-gemte ændringer. Vil du fortsætte med at duplikere?',
     untitled: 'Uden titel',
     updatedAt: 'Opdateret ved',

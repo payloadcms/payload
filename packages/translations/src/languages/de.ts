@@ -306,6 +306,8 @@ export const deTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} {{title}} wurde erfolgreich gelöscht.',
     true: 'Wahr',
     unauthorized: 'Nicht autorisiert',
+    unsavedChanges:
+      'Sie haben ungespeicherte Änderungen. Speichern oder verwerfen Sie diese, bevor Sie fortfahren.',
     unsavedChangesDuplicate:
       'Du hast ungespeicherte Änderungen, möchtest du mit dem Duplizieren fortfahren?',
     untitled: 'ohne Titel',

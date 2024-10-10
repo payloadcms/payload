@@ -301,6 +301,7 @@ export const csTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" úspěšně smazáno.',
     true: 'Pravda',
     unauthorized: 'Neoprávněný',
+    unsavedChanges: 'Máte neuložené změny. Uložte nebo zahoďte před pokračováním.',
     unsavedChangesDuplicate: 'Máte neuložené změny. Chtěli byste pokračovat v duplikování?',
     untitled: 'Bez názvu',
     updatedAt: 'Aktualizováno v',
