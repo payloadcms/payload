@@ -267,10 +267,7 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
       result = await saveVersion({
         id: versionDoc.id,
         collection: collectionConfig,
-        docWithLocales: {
-          ...versionDoc,
-          createdAt: result.createdAt,
-        },
+        docWithLocales: versionDoc,
         draft: shouldSaveDraft,
         payload,
         req,
