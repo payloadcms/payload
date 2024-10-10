@@ -114,7 +114,7 @@ export const saveVersion = async ({
       const createVersionArgs = {
         autosave: Boolean(autosave),
         collectionSlug: undefined,
-        createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
+        createdAt: now,
         globalSlug: undefined,
         parent: collection ? id : undefined,
         publishedLocale: publishSpecificLocale || undefined,
@@ -194,8 +194,6 @@ export const saveVersion = async ({
   }
 
   let createdVersion = result.version
-  createdVersion.createdAt = result.createdAt
-  createdVersion.updatedAt = result.updatedAt
 
   createdVersion = sanitizeInternalFields(createdVersion)
   createdVersion.id = result.parent

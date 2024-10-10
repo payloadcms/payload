@@ -48,10 +48,7 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
     return undefined
   }
 
-  return {
-    ...latestVersion.version,
-    id,
-    createdAt: latestVersion.createdAt,
-    updatedAt: latestVersion.updatedAt,
-  }
+  latestVersion.version.id = id
+
+  return latestVersion.version
 }

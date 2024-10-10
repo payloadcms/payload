@@ -329,10 +329,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
           result = await saveVersion({
             id,
             collection: collectionConfig,
-            docWithLocales: {
-              ...result,
-              createdAt: doc.createdAt,
-            },
+            docWithLocales: result,
             payload,
             req,
           })

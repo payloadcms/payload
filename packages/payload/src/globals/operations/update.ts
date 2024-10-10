@@ -245,11 +245,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
       const { globalType } = result
       result = await saveVersion({
         autosave,
-        docWithLocales: {
-          ...result,
-          createdAt: result.createdAt,
-          updatedAt: result.updatedAt,
-        },
+        docWithLocales: result,
         draft: shouldSaveDraft,
         global: globalConfig,
         payload,
