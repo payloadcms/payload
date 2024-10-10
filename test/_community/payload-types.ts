@@ -1,3 +1,5 @@
+
+
 /* tslint:disable */
 /* eslint-disable */
 /**
@@ -29,6 +31,10 @@ export interface Config {
   locale: null;
   user: User & {
     collection: 'users';
+  };
+  jobs?: {
+    tasks: unknown;
+    workflows?: unknown;
   };
 }
 export interface UserAuthOperations {
