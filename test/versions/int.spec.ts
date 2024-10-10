@@ -14,6 +14,7 @@ import AutosavePosts from './collections/Autosave.js'
 import AutosaveGlobal from './globals/Autosave.js'
 import {
   autosaveCollectionSlug,
+  autoSaveGlobalSlug,
   draftCollectionSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
@@ -306,21 +307,42 @@ describe('Versions', () => {
         )
       })
 
-      it('should have the same createdAt on new version create', async () => {
+      it('should have different createdAt in a new version while the same version.createdAt', async () => {
         const doc = await payload.create({
           collection: autosaveCollectionSlug,
           data: { description: 'descr', title: 'title' },
         })
 
-        await wait(30)
+        await wait(10)
 
-        const updated = await payload.update({
+        const upd = await payload.update({
           collection: autosaveCollectionSlug,
           id: doc.id,
           data: {},
         })
 
-        expect(doc.createdAt).toBe(updated.createdAt)
+        expect(upd.createdAt).toBe(doc.createdAt)
+
+        const {
+          docs: [latestVersionData],
+        } = await payload.findVersions({
+          collection: autosaveCollectionSlug,
+          where: {
+            and: [
+              {
+                parent: {
+                  equals: doc.id,
+                },
+                latest: {
+                  equals: true,
+                },
+              },
+            ],
+          },
+        })
+
+        expect(new Date(latestVersionData.createdAt) > new Date(doc.createdAt)).toBe(true)
+        expect(latestVersionData.version.createdAt).toBe(doc.createdAt)
       })
     })
 
@@ -1264,6 +1286,36 @@ describe('Versions', () => {
         expect(updatedGlobal.title).toBe(title2)
         expect(updatedGlobal._status).toStrictEqual('draft')
         expect(globalLocalVersionID).toBeDefined()
+      })
+
+      it('should have different createdAt in a new version while the same version.createdAt', async () => {
+        const doc = await payload.updateGlobal({
+          slug: autoSaveGlobalSlug,
+          data: { title: 'asd' },
+        })
+
+        await wait(10)
+
+        const upd = await payload.updateGlobal({
+          slug: autoSaveGlobalSlug,
+          data: { title: 'asd2' },
+        })
+
+        expect(upd.createdAt).toBe(doc.createdAt)
+
+        const {
+          docs: [latestVersionData],
+        } = await payload.findGlobalVersions({
+          slug: autoSaveGlobalSlug,
+          where: {
+            latest: {
+              equals: true,
+            },
+          },
+        })
+
+        expect(new Date(latestVersionData.createdAt) > new Date(doc.createdAt)).toBe(true)
+        expect(latestVersionData.version.createdAt).toBe(doc.createdAt)
       })
     })
 
