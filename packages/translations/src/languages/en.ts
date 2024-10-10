@@ -198,6 +198,7 @@ export const enTranslations = {
     confirmDuplication: 'Confirm duplication',
     copied: 'Copied',
     copy: 'Copy',
+    copying: 'Copying',
     create: 'Create',
     created: 'Created',
     createdAt: 'Created At',
