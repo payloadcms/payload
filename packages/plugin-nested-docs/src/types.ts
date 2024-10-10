@@ -4,14 +4,14 @@ export interface Breadcrumb {
   url?: string
 }
 
-export type GenerateURL = (
-  docs: Array<Record<string, unknown>>,
-  currentDoc: Record<string, unknown>,
+export type GenerateURL<T = Record<string, unknown>> = (
+  docs: Array<T>,
+  currentDoc: T,
 ) => string
 
-export type GenerateLabel = (
-  docs: Array<Record<string, unknown>>,
-  currentDoc: Record<string, unknown>,
+export type GenerateLabel<T = Record<string, unknown>> = (
+  docs: Array<T>,
+  currentDoc: T,
 ) => string
 
 export interface PluginConfig {
