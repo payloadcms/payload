@@ -57,11 +57,7 @@ export const getLatestGlobalVersion = async ({
   }
 
   return {
-    global: {
-      ...latestVersion.version,
-      createdAt: latestVersion.createdAt,
-      updatedAt: latestVersion.updatedAt,
-    },
+    global: latestVersion.version,
     globalExists,
   }
 }

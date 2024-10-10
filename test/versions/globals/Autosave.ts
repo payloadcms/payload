@@ -3,7 +3,7 @@ import type { GlobalConfig } from 'payload'
 import { autoSaveGlobalSlug } from '../slugs.js'
 
 const AutosaveGlobal: GlobalConfig = {
-  slug: autoSaveGlobalSlug,
+  slug: autoSaveGlobalSlug as const,
   access: {
     read: ({ req: { user } }) => {
       if (user) {
