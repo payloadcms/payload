@@ -6,7 +6,6 @@ import type { EntityPolicies } from './types.js'
 
 import { QueryError } from '../../errors/QueryError.js'
 import { validOperators } from '../../types/constants.js'
-import { deepCopyObject } from '../../utilities/deepCopyObject.js'
 import flattenFields from '../../utilities/flattenTopLevelFields.js'
 import { validateSearchParam } from './validateSearchParams.js'
 
@@ -67,10 +66,10 @@ export async function validateQueryPaths({
           if (validOperators.includes(operator as Operator)) {
             promises.push(
               validateSearchParam({
-                collectionConfig: deepCopyObject(collectionConfig),
+                collectionConfig,
                 errors,
                 fields: fields as Field[],
-                globalConfig: deepCopyObject(globalConfig),
+                globalConfig,
                 operator,
                 overrideAccess,
                 path,
