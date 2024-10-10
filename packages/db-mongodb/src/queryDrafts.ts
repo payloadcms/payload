@@ -30,7 +30,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
       config: this.payload.config,
       fields: collectionConfig.fields,
       locale,
-      sort: sortArg || collectionConfig.defaultSort,
+      sort: sortArg,
       timestamps: true,
     })
   }
