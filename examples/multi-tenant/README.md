@@ -10,7 +10,7 @@ To spin up this example locally, follow these steps:
 1. Then `cd YOUR_PROJECT_REPO && cp .env.example .env`
 1. Next `yarn && yarn dev`
 1. Now `open http://localhost:3000/admin` to access the admin panel
-1. Login with email `dev@payloadcms.com` and password `test`
+1. Login with email `demo@payloadcms.com` and password `test`
 
 That's it! Changes made in `./src` will be reflected in your app. See the [Development](#development) section for more details on how to log in as a tenant.
 
