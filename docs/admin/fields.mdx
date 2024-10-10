@@ -569,3 +569,20 @@ The `condition` function should return a boolean that will control if the field 
   ]
 }
 ```
+
+<Banner type="warning">
+  <strong>Note:</strong>
+  When using [Custom Field Components](#field-components) and `condition` together, you need to wrap them with the `withCondition` HOC.
+  Example:
+  ```tsx
+    'use client'
+    import { withCondition } from '@payloadcms/ui'
+    import React from 'react'
+
+    const Component: TextFieldClientComponent = ({ field }) => {
+      return <input placeholder="custom component" name={field.name} />
+    }
+
+    export const CustomTextFieldClient = withCondition(Component)
+  ```
+</Banner>
