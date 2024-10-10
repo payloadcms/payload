@@ -1,7 +1,8 @@
+import type { DBQueryConfig } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { Field, JoinQuery } from 'payload'
 
-import { and, type DBQueryConfig, eq, sql } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import { fieldAffectsData, fieldIsVirtual, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
@@ -245,12 +246,15 @@ export const traverseFields = ({
 
           const fields = adapter.payload.collections[field.collection].config.fields
           const joinCollectionTableName = adapter.tableNameMap.get(toSnakeCase(field.collection))
-          const joinTableName = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${
+          let joinTableName = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${
             field.localized && adapter.payload.config.localization ? adapter.localesSuffix : ''
           }`
 
-          if (!adapter.tables[joinTableName][field.on]) {
+          if (!adapter.tables[joinTableName]?.[field.on]) {
             const db = adapter.drizzle as LibSQLDatabase
+            if (field.localized) {
+              joinTableName = adapter.tableNameMap.get(toSnakeCase(field.collection))
+            }
             const joinTable = `${joinTableName}${adapter.relationshipsSuffix}`
 
             const joins: BuildQueryJoinAliases = [
@@ -262,6 +266,7 @@ export const traverseFields = ({
                     sql.raw(`"${joinTable}"."${topLevelTableName}_id"`),
                     adapter.tables[currentTableName].id,
                   ),
+                  eq(adapter.tables[joinTable].path, field.on),
                 ),
                 table: adapter.tables[joinTable],
               },
@@ -291,30 +296,35 @@ export const traverseFields = ({
               query: db
                 .select({
                   id: adapter.tables[joinTableName].id,
+                  ...(field.localized && {
+                    locale: adapter.tables[joinTable].locale,
+                  }),
                 })
                 .from(adapter.tables[joinTableName])
                 .where(subQueryWhere)
                 .orderBy(orderBy.order(orderBy.column))
-                .limit(11),
+                .limit(limit),
             })
 
             const columnName = `${path.replaceAll('.', '_')}${field.name}`
 
-            const extras = field.localized ? _locales.extras : currentArgs.extras
+            const jsonObjectSelect = field.localized
+              ? sql.raw(`'_parentID', "id", '_locale', "locale"`)
+              : sql.raw(`'id', "id"`)
 
             if (adapter.name === 'sqlite') {
-              extras[columnName] = sql`
+              currentArgs.extras[columnName] = sql`
               COALESCE((
-                SELECT json_group_array("id")
+                SELECT json_group_array(json_object(${jsonObjectSelect}))
                 FROM (
                   ${subQuery}
                 ) AS ${sql.raw(`${columnName}_sub`)}
               ), '[]')
             `.as(columnName)
             } else {
-              extras[columnName] = sql`
+              currentArgs.extras[columnName] = sql`
               COALESCE((
-                SELECT json_agg("id")
+                SELECT json_agg(json_build_object(${jsonObjectSelect}))
                 FROM (
                   ${subQuery}
                 ) AS ${sql.raw(`${columnName}_sub`)}
