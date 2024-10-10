@@ -14,9 +14,7 @@ import { requests } from '../../utilities/api.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { useConfig } from '../Config/index.js'
 
-export type UserResponse = MeOperationResult | null
-
-export type AuthContext = {
+export type AuthContext<T = ClientUser> = {
   fetchFullUser: () => Promise<null | User>
   logOut: () => Promise<boolean>
   permissions?: Permissions
@@ -24,11 +22,11 @@ export type AuthContext = {
   refreshCookieAsync: () => Promise<ClientUser>
   refreshPermissions: () => Promise<void>
   setPermissions: (permissions: Permissions) => void
-  setUser: (user: UserResponse) => void
+  setUser: (user: MeOperationResult | null) => void
   strategy?: string
   token?: string
   tokenExpiration?: number
-  user?: null | UserResponse['user']
+  user?: null | T
 }
 
 const Context = createContext({} as AuthContext)
@@ -99,7 +97,7 @@ export function AuthProvider({
   }, [])
 
   const setNewUser = useCallback(
-    (userResponse: UserResponse) => {
+    (userResponse: MeOperationResult | null) => {
       if (userResponse?.user) {
         setUserInMemory(userResponse.user)
         setTokenInMemory(userResponse.token)
@@ -325,4 +323,4 @@ export function AuthProvider({
   )
 }
 
-export const useAuth = (): AuthContext => useContext(Context)
+export const useAuth = <T = ClientUser,>(): AuthContext<T> => useContext(Context) as AuthContext<T>
