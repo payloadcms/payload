@@ -42,12 +42,21 @@ const config = withBundleAnalyzer(
         '.mjs': ['.mts', '.mjs'],
       }
 
+      // Ignore sentry warnings when not wrapped with withSentryConfig
+      webpackConfig.ignoreWarnings = [
+        ...(webpackConfig.ignoreWarnings ?? []),
+        { file: /esm\/platform\/node\/instrumentation.js/ },
+        { module: /esm\/platform\/node\/instrumentation.js/ },
+      ]
+
       return webpackConfig
     },
   }),
 )
 
-export default withSentryConfig(config, {
-  telemetry: false,
-  tunnelRoute: '/monitoring-tunnel',
-})
+export default process.env.NEXT_PUBLIC_SENTRY_DSN
+  ? withSentryConfig(config, {
+      telemetry: false,
+      tunnelRoute: '/monitoring-tunnel',
+    })
+  : config
