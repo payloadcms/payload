@@ -1,23 +1,39 @@
 @import '../../scss/styles.scss';
 
 @layer payload-default {
+  .localized {
+    display: none;
+  }
+
   label.field-label:not(.unstyled) {
     @extend %body;
     display: flex;
     padding-bottom: base(0.25);
     color: var(--theme-elevation-800);
     font-family: var(--font-body);
+    [dir='ltr'] & {
+      margin-right: auto;
+    }
+    [dir='rtl'] & {
+      margin-left: auto;
+    }
 
     .required {
       color: var(--theme-error-500);
       [dir='ltr'] & {
         margin-left: base(0.25);
-        margin-right: auto;
       }
       [dir='rtl'] & {
         margin-right: base(0.25);
-        margin-left: auto;
       }
+    }
+
+    .localized {
+      display: unset;
+      background: var(--theme-elevation-100);
+      padding: 0 calc(var(--base) * 0.25);
+      margin: 0 calc(var(--base) * 0.25);
+      border-radius: $style-radius-m;
     }
   }
 }

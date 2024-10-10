@@ -412,6 +412,8 @@ export interface FieldBase {
    * @link https://payloadcms.com/docs/fields/overview#field-names
    */
   name: string
+
+  parentIsLocalized?: boolean
   required?: boolean
   saveToJWT?: boolean | string
   /**
@@ -445,6 +447,8 @@ export interface FieldBaseClient {
    * @link https://payloadcms.com/docs/fields/overview#field-names
    */
   name: string
+
+  parentIsLocalized?: boolean
   required?: boolean
   saveToJWT?: boolean | string
   /**
