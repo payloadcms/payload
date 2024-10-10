@@ -42,6 +42,12 @@ export type DocumentTabConfig = {
   readonly Pill?: PayloadComponent
 }
 
+export type ClientDocumentTabConfig = {
+  condition?: never
+  isActive?: boolean
+  label?: string
+} & DocumentTabConfig
+
 export type DocumentTabComponent = PayloadComponent<{
   path: string
 }>
