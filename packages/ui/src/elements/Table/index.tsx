@@ -66,14 +66,14 @@ export const Table: React.FC<Props> = ({
             data.map((row, rowIndex) => (
               <tr className={`row-${rowIndex + 1}`} key={rowIndex}>
                 {activeColumns.map((col, colIndex) => {
-                  const isFirstCell =
+                  const isLink =
                     (colIndex === 0 && col.accessor !== '_select') ||
                     (colIndex === 1 && activeColumns[0]?.accessor === '_select')
 
                   return (
                     <RenderCell
                       cellProps={{
-                        link: isFirstCell,
+                        link: isLink,
                         ...cellProps?.[colIndex],
                       }}
                       col={col}
