@@ -58,9 +58,7 @@ export const FieldLabel: FieldLabelClientComponent = (props) => {
       ? props.localized
       : props?.field && 'localized' in props.field && props.field.localized
   const parentIsLocalized =
-    typeof props.field !== 'undefined' && 'parentIsLocalized' in props.field
-      ? Boolean(props.field.parentIsLocalized)
-      : false
+    props.field && props.field.parentIsLocalized ? Boolean(props.field.parentIsLocalized) : false
 
   return (
     <DefaultFieldLabel
