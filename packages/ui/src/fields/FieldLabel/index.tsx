@@ -61,11 +61,15 @@ export const FieldLabel: FieldLabelClientComponent = (props) => {
           ? props.label
           : props?.field && 'label' in props.field && (props.field.label as StaticLabel) // type assertion needed for `row` fields
       }
-      localized={props?.field && 'localized' in props.field ? props.field.localized : false}
+      localized={
+        typeof props.localized !== 'undefined'
+          ? props.localized
+          : props?.field && 'localized' in props.field && props.field.localized
+      }
       required={
         typeof props.required !== 'undefined'
           ? props.required
-          : props?.field && 'required' in props.field && (props.field?.required as boolean) // type assertion needed for `group` fields
+          : props?.field && 'required' in props.field && (props.field?.required) // type assertion needed for `group` fields
       }
     />
   )
