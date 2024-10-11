@@ -35,6 +35,7 @@ import {
 import {
   convertPathToJSONTraversal,
   countDistinct,
+  createDatabase,
   createJSONQuery,
   createMigration,
   defaultDrizzleSnapshot,
@@ -78,7 +79,9 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       name: 'postgres',
       afterSchemaInit: args.afterSchemaInit ?? [],
       beforeSchemaInit: args.beforeSchemaInit ?? [],
+      createDatabase,
       defaultDrizzleSnapshot,
+      disableCreateDatabase: args.disableCreateDatabase ?? false,
       drizzle: undefined,
       enums: {},
       features: {
