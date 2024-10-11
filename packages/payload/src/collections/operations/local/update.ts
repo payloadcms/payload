@@ -45,6 +45,7 @@ export type ByIDOptions<TSlug extends CollectionSlug> = {
 
 export type ManyOptions<TSlug extends CollectionSlug> = {
   id?: never
+  limit?: number
   where: Where
 } & BaseOptions<TSlug>
 

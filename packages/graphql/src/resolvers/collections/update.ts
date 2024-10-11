@@ -12,6 +12,7 @@ export type Resolver<TSlug extends CollectionSlug> = (
     draft: boolean
     fallbackLocale?: string
     id: number | string
+    limit?: number
     locale?: string
   },
   context: {
@@ -53,6 +54,7 @@ export function updateResolver<TSlug extends CollectionSlug>(
       data: args.data as any,
       depth: 0,
       draft: args.draft,
+      limit: args.limit ?? undefined,
       req: isolateObjectProperty(req, 'transactionID'),
     }
 
