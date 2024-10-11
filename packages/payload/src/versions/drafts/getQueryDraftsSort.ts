@@ -14,10 +14,9 @@ export const getQueryDraftsSort = ({
   if (!sort) {
     if (collectionConfig.defaultSort) {
       sort = collectionConfig.defaultSort
-    } else if (collectionConfig.timestamps) {
+    } else {
       sort = '-createdAt'
     }
-    sort = '-id'
   }
 
   let direction = ''
