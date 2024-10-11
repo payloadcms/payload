@@ -49,7 +49,7 @@ const baseJestConfig = {
 }
 
 if (process.env.CI) {
-  customJestConfig.reporters.push(['github-actions', { silent: false }], 'summary')
+  baseJestConfig.reporters.push(['github-actions', { silent: false }], 'summary')
 }
 
 export default baseJestConfig
