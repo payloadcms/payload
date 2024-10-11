@@ -35,6 +35,7 @@ import {
 import {
   convertPathToJSONTraversal,
   countDistinct,
+  createDatabase,
   createJSONQuery,
   createMigration,
   defaultDrizzleSnapshot,
@@ -77,7 +78,9 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
     return createDatabaseAdapter<VercelPostgresAdapter>({
       name: 'postgres',
       afterSchemaInit: args.afterSchemaInit ?? [],
+      autoDatabaseCreation: args.autoDatabaseCreation ?? true,
       beforeSchemaInit: args.beforeSchemaInit ?? [],
+      createDatabase,
       defaultDrizzleSnapshot,
       drizzle: undefined,
       enums: {},

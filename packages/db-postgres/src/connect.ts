@@ -76,7 +76,18 @@ export const connect: Connect = async function connect(
       }
     }
   } catch (err) {
-    this.payload.logger.error({ err, msg: `Error: cannot connect to Postgres: ${err.message}` })
+    if (err.message?.match(/database .* does not exist/i) && this.autoDatabaseCreation) {
+      this.payload.logger.info(`Database does not exist, creating...`)
+      const isCreated = await this.createDatabase()
+
+      if (isCreated) {
+        await this.connect(options)
+        return
+      }
+    } else {
+      this.payload.logger.error(`Error: cannot connect to Postgres. Details: ${err.message}`, err)
+    }
+
     if (typeof this.rejectInitializing === 'function') {
       this.rejectInitializing()
     }
