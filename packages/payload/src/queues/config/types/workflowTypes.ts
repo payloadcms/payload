@@ -29,7 +29,6 @@ export type BaseJob = {
   log: JobLog[]
   processing?: boolean
   queue: string
-  seenByWorker?: boolean
   taskSlug?: string
   taskStatus?: JobTaskStatus
   totalTried: number

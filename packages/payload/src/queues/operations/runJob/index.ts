@@ -61,11 +61,6 @@ export const runJob = async ({ job, req, workflowConfig }: Args): Promise<RunJob
     }
   }
 
-  await updateJob({
-    processing: true,
-    seenByWorker: true,
-  })
-
   // Object so that we can pass contents by reference, not value.
   // We want any mutations to be reflected in here.
   const state: RunTaskFunctionState = {

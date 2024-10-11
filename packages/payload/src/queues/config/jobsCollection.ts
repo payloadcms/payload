@@ -233,14 +233,6 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
         defaultValue: false,
         index: true,
       },
-      {
-        name: 'seenByWorker',
-        type: 'checkbox',
-        admin: {
-          position: 'sidebar',
-        },
-        defaultValue: false,
-      },
     ],
     hooks: {
       afterRead: [

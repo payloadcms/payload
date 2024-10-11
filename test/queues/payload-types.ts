@@ -286,7 +286,6 @@ export interface PayloadJob {
   queue?: 'default' | null;
   waitUntil?: string | null;
   processing?: boolean | null;
-  seenByWorker?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }

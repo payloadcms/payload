@@ -79,17 +79,27 @@ export const runAllJobs = async ({
     msg: `Querying for ${limit} jobs.`,
   })
 
-  const jobsQuery = (await req.payload.find({
+  // Find all jobs and ensure we set job to processing: true as early as possible to reduce the chance of
+  // the same job being picked up by another worker
+  const jobsQuery = (await req.payload.update({
     collection: 'payload-jobs',
+    data: {
+      processing: true,
+      seenByWorker: true,
+    },
     depth: req.payload.config.jobs.depth,
-    limit,
+    //limit, // TODO: Add limit to req.payload.update call
     showHiddenFields: true,
     where,
   })) as unknown as PaginatedDocs<BaseJob>
 
-  const jobs = jobsQuery.docs.reduce(
+  /**
+   * Just for logging purposes, we want to know how many jobs are new and how many are existing (= already been tried).
+   * This is only for logs - in the end we still want to run all jobs, regardless of whether they are new or existing.
+   */
+  const { newJobs } = jobsQuery.docs.reduce(
     (acc, job) => {
-      if (job.seenByWorker) {
+      if (job.totalTried > 0) {
         acc.existingJobs.push(job)
       } else {
         acc.newJobs.push(job)
@@ -99,17 +109,15 @@ export const runAllJobs = async ({
     { existingJobs: [], newJobs: [] },
   )
 
-  const numJobs = jobsQuery.totalDocs
-
-  if (!numJobs) {
+  if (!jobsQuery.docs.length) {
     return {
       noJobsRemaining: true,
     }
   }
 
-  if (jobs.newJobs.length) {
+  if (jobsQuery?.docs?.length) {
     req.payload.logger.info(
-      `${numJobs} job(s) found, ${jobs.newJobs.length} of which are new. Running ${limit} job(s).`,
+      `${jobsQuery.docs.length} job(s) found, ${newJobs.length} of which are new. Running ${limit} job(s).`,
     )
   }
 
