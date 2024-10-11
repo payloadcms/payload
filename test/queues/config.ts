@@ -455,7 +455,7 @@ export default buildConfigWithDefaults({
             task: async ({ req }) => {
               const totalTried = job?.taskStatus?.inline?.['1']?.totalTried || 0
 
-              await req.payload.create({
+              const { id } = await req.payload.create({
                 collection: 'simple',
                 req,
                 data: {
@@ -473,6 +473,13 @@ export default buildConfigWithDefaults({
               job.input.timeTried[totalTried] = new Date().toISOString()
 
               if (totalTried < 4) {
+                // Cleanup the post
+                await req.payload.delete({
+                  collection: 'simple',
+                  id,
+                  req,
+                })
+
                 // Last try it should succeed
                 throw new Error('Failed on purpose')
               }

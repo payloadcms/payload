@@ -208,14 +208,16 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
     }
 
     let output: object
+    // TODO: The following is disabled for now due to transaction issues
     // Create a transaction so that all seeding happens in one transaction.
     // Each workflow gets an own transaction, and also each task.
     // That's because within one job run, some tasks can pass (thus their transaction should be committed) and
     // Some tasks can fail (thus their transaction should be rolled back). Thus, we need different transactions for each task.
     const newReq = isolateObjectProperty(req, 'transactionID')
+    // Still remove the workflow req, as we generally still want operations within a task to be committed after the task is done - not after the workflow is done
     delete newReq.transactionID
 
-    await initTransaction(newReq)
+    //await initTransaction(newReq)
 
     try {
       const runnerOutput = await runner({
@@ -225,8 +227,8 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
       })
 
       if (runnerOutput.state === 'failed') {
-        // Rollback everything the job did
-        await killTransaction(newReq)
+        // Rollback everything the job did.  // TODO: disabled for now due to transaction issues. Add flag for the user to enable
+        //await killTransaction(newReq)
 
         await handleTaskFailed({
           executedAt,
@@ -245,13 +247,13 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         })
         throw new Error('Task failed')
       } else {
-        // Commit Success => commit transaction
-        await commitTransaction(newReq)
+        // Commit Success => commit transaction // TODO: disabled for now due to transaction issues. Add flag for the user to enable
+        //await commitTransaction(newReq)
         output = runnerOutput.output
       }
     } catch (err) {
-      // Rollback everything the job did
-      await killTransaction(newReq)
+      // Rollback everything the job did.  // TODO: disabled for now due to transaction issues. Add flag for the user to enable
+      // await killTransaction(newReq)
 
       await handleTaskFailed({
         error: err,
