@@ -156,12 +156,6 @@ export const sanitizeFields = async ({
         existingFieldNames.add(field.name)
       }
 
-      if (parentIsLocalized) {
-        if (typeof field.localized === 'undefined') {
-          field.parentIsLocalized = true
-        }
-      }
-
       if (typeof field.localized !== 'undefined') {
         let shouldDisableLocalized = !config.localization
 
