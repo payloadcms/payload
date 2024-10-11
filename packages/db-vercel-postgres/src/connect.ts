@@ -39,7 +39,7 @@ export const connect: Connect = async function connect(
       }
     }
   } catch (err) {
-    if (err.message?.match(/database .* does not exist/i) && this.autoDatabaseCreation) {
+    if (err.message?.match(/database .* does not exist/i) && this.autoDatabaseCreate) {
       this.payload.logger.info(`Database does not exist, creating...`)
       const isCreated = await this.createDatabase()
 

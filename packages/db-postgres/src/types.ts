@@ -22,7 +22,7 @@ export type Args = {
    * Create the provided database automatically if it doesn't exist
    * @default true
    */
-  autoDatabaseCreation?: boolean
+  autoDatabaseCreate?: boolean
   /**
    * Transform the schema before it's built.
    * You can use it to preserve an existing database schema and if there are any collissions Payload will override them.

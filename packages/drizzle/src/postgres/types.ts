@@ -128,7 +128,7 @@ export type PostgresSchemaHook = (
 
 export type BasePostgresAdapter = {
   afterSchemaInit: PostgresSchemaHook[]
-  autoDatabaseCreation: boolean
+  autoDatabaseCreate: boolean
   beforeSchemaInit: PostgresSchemaHook[]
   countDistinct: CountDistinct
   createDatabase: CreateDatabase
