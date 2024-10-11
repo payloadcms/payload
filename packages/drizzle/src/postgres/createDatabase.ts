@@ -1,7 +1,5 @@
 import type { ClientConfig } from 'pg'
 
-import pg from 'pg'
-
 import type { BasePostgresAdapter } from './types.js'
 
 type Args = {
@@ -16,6 +14,7 @@ type Args = {
 }
 export const createDatabase = async function (this: BasePostgresAdapter, args: Args = {}) {
   // DATABASE_URL - default Vercel env
+
   const connectionString = this.poolOptions?.connectionString ?? process.env.DATABASE_URL
   let managementClientConfig: ClientConfig = {}
   let dbName = args.name
@@ -40,6 +39,9 @@ export const createDatabase = async function (this: BasePostgresAdapter, args: A
       database: 'postgres',
     }
   }
+
+  // import pg only when createDatabase is used
+  const pg = await import('pg')
 
   const managementClient = new pg.Client(managementClientConfig)
 
