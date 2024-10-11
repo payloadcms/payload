@@ -10,9 +10,10 @@ import type { CollectionRouteHandler } from '../types.js'
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
 
 export const update: CollectionRouteHandler = async ({ collection, req }) => {
-  const { depth, draft, where } = req.query as {
+  const { depth, draft, limit, where } = req.query as {
     depth?: string
     draft?: string
+    limit?: string
     where?: Where
   }
 
@@ -21,6 +22,7 @@ export const update: CollectionRouteHandler = async ({ collection, req }) => {
     data: req.data,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: draft === 'true',
+    limit: isNumber(limit) ? Number(limit) : undefined,
     req,
     where,
   })
