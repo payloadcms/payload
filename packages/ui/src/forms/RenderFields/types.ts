@@ -1,8 +1,8 @@
-import type { ClientField, FormState, Operation } from 'payload'
+import type { RenderedField } from 'payload'
 
 export type Props = {
   readonly className?: string
-  readonly fields: ClientField[]
+  readonly fields: RenderedField[]
   /**
    * Controls the rendering behavior of the fields, i.e. defers rendering until they intersect with the viewport using the Intersection Observer API.
    *
@@ -11,8 +11,5 @@ export type Props = {
    * If a number is provided, will immediately render fields _up to that index_.
    */
   readonly forceRender?: boolean
-  readonly formState: FormState
   readonly margins?: 'small' | false
-  readonly operation?: Operation
-  readonly path?: string
 }

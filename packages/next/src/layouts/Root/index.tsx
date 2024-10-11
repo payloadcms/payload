@@ -39,7 +39,6 @@ let checkedDependencies = false
 export const RootLayout = async ({
   children,
   config: configPromise,
-  importMap,
   serverFunction,
 }: {
   readonly children: React.ReactNode

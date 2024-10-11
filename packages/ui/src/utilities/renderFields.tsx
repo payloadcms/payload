@@ -2,7 +2,6 @@ import type { I18nClient } from '@payloadcms/translations'
 import type {
   ArrayField as ArrayFieldT,
   ClientCollectionConfig,
-  ClientConfig,
   ClientField,
   ClientGlobalConfig,
   Field,
@@ -15,12 +14,13 @@ import type {
   ImportMap,
   Operation,
   Payload,
+  RenderedField,
   Row,
   SanitizedConfig,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData, fieldIsSidebar } from 'payload/shared'
 import React from 'react'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
@@ -33,7 +33,6 @@ import { ConfirmPasswordField } from '../fields/ConfirmPassword/index.js'
 import { DateTimeField } from '../fields/DateTime/index.js'
 import { EmailField } from '../fields/Email/index.js'
 import { FieldDescription } from '../fields/FieldDescription/index.js'
-import { FieldError } from '../fields/FieldError/index.js'
 import { FieldLabel } from '../fields/FieldLabel/index.js'
 import { GroupField } from '../fields/Group/index.js'
 import { HiddenField } from '../fields/Hidden/index.js'
@@ -86,7 +85,7 @@ export const fieldComponents: FieldTypesComponents = {
   upload: UploadField,
 }
 
-export type RenderFieldsFn = (props: RenderFieldsArgs) => React.ReactNode[]
+export type RenderFieldsFn = (props: RenderFieldsArgs) => RenderedField[]
 
 export type RenderFieldsClient = (
   args: Omit<RenderFieldsArgs, 'config' | 'importMap' | 'payload'>,
@@ -111,7 +110,7 @@ export type RenderFieldFn = (
     }
     readonly schemaPath: string
   } & RenderFieldArgs,
-) => React.ReactNode
+) => RenderedField
 
 export type RenderFieldClient = (
   args: Omit<RenderFieldArgs, 'config' | 'importMap' | 'payload'>,
@@ -121,7 +120,6 @@ export type RenderFieldsArgs = {
   readonly Blocks?: React.ReactNode[]
   readonly className?: string
   readonly clientCollectionConfig?: ClientCollectionConfig
-  readonly clientConfig: ClientConfig
   readonly clientFields: ClientField[]
   readonly clientGlobalConfig?: ClientGlobalConfig
   readonly config: SanitizedConfig
@@ -136,7 +134,6 @@ export type RenderFieldsArgs = {
   readonly forceRender?: boolean | number
   readonly formState?: FormState
   readonly i18n: I18nClient
-  readonly importMap: ImportMap
   readonly indexPath?: string
   readonly margins?: 'small' | false
   readonly operation?: Operation
@@ -151,7 +148,6 @@ export type RenderFieldsArgs = {
 
 export type RenderFieldArgs = {
   readonly className?: string
-  readonly clientConfig: ClientConfig
   readonly clientField: ClientField
   readonly config: SanitizedConfig
   readonly field: Field
@@ -194,18 +190,17 @@ export type ServerSlotProps = {
 export const renderFields: RenderFieldsFn = (args) => {
   const {
     className,
-    clientConfig,
     clientFields,
     config,
     fields,
     forceRender,
     formState,
     i18n,
-    importMap,
     indexPath,
     margins,
     path: parentPath,
     payload,
+    payload: { importMap },
     permissions,
     schemaPath,
   } = args
@@ -249,7 +244,6 @@ export const renderFields: RenderFieldsFn = (args) => {
 
       return renderField({
         className,
-        clientConfig,
         clientField,
         config,
         field,
@@ -273,7 +267,6 @@ export const renderFields: RenderFieldsFn = (args) => {
 
 export const renderFieldRows = ({
   className,
-  clientConfig,
   clientField,
   clientProps,
   config,
@@ -292,7 +285,6 @@ export const renderFieldRows = ({
   serverProps,
 }: {
   readonly className?: string
-  readonly clientConfig: ClientConfig
   readonly clientField: ClientField
   readonly clientProps?: ClientSlotProps
   readonly config: SanitizedConfig
@@ -314,16 +306,14 @@ export const renderFieldRows = ({
   readonly serverProps?: ServerSlotProps
 }): FieldRow[] =>
   rows?.map((row, rowIndex) => ({
-    Fields: renderFields({
+    renderedFields: renderFields({
       className,
-      clientConfig,
       clientFields: 'fields' in clientField ? clientField.fields : undefined,
       config,
       fields: field.fields,
       forceRender,
       formState,
       i18n,
-      importMap,
       indexPath: `${indexPath}.${rowIndex}`,
       margins,
       path: `${path}.${rowIndex}`,
@@ -352,7 +342,6 @@ export const renderFieldRows = ({
 export const renderField: RenderFieldFn = (args) => {
   const {
     className,
-    clientConfig,
     clientField,
     config,
     field,
@@ -406,6 +395,24 @@ export const renderField: RenderFieldFn = (args) => {
         required={'required' in field && field.required}
       />
     )
+  }
+
+  if ('fields' in field) {
+    fieldSlots.renderedFields = renderFields({
+      className,
+      clientFields: 'fields' in clientField ? clientField.fields : undefined,
+      config,
+      fields: field.fields,
+      forceRender,
+      formState,
+      i18n,
+      indexPath,
+      margins,
+      path,
+      payload,
+      permissions,
+      schemaPath,
+    })
   }
 
   if (field.admin) {
@@ -493,13 +500,17 @@ export const renderField: RenderFieldFn = (args) => {
     ...fieldSlots,
   }
 
-  return (
-    <RenderServerComponent
-      clientProps={clientProps}
-      Component={isHidden ? fieldComponents.hidden : field.admin?.components?.Field}
-      Fallback={fieldComponents?.[field?.type]}
-      importMap={importMap}
-      serverProps={serverProps}
-    />
-  )
+  return {
+    Field: (
+      <RenderServerComponent
+        clientProps={clientProps}
+        Component={isHidden ? fieldComponents.hidden : field.admin?.components?.Field}
+        Fallback={fieldComponents?.[field?.type]}
+        importMap={importMap}
+        serverProps={serverProps}
+      />
+    ),
+    isSidebar: fieldIsSidebar(field),
+    schemaPath,
+  }
 }

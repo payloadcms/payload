@@ -3,7 +3,7 @@ import type React from 'react'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { Field } from '../fields/config/types.js'
+import type { ClientField, Field } from '../fields/config/types.js'
 import type { JsonObject } from '../types/index.js'
 import type { Data, FormState } from './types.js'
 
@@ -412,8 +412,10 @@ export type PayloadServerAction = (
     | RenderConfigArgs,
 ) => Promise<string>
 
+export type RenderedField = { Field: React.ReactNode; isSidebar: boolean; schemaPath: string }
+
 export type FieldRow = {
-  Fields: React.ReactNode[]
+  renderedFields: RenderedField[]
   RowLabel?: React.ReactNode
 }
 
@@ -423,13 +425,14 @@ export type FieldSlots = {
   Blocks?: React.ReactNode[]
   Description?: React.ReactNode
   Error?: React.ReactNode
-  Fields?: React.ReactNode[]
   Label?: React.ReactNode
+  renderedFields?: RenderedField[]
 }
 
 export type EntitySlots = {
   PreviewButton?: React.ReactNode
   PublishButton?: React.ReactNode
+  renderedFields?: RenderedField[]
   SaveButton?: React.ReactNode
   SaveDraftButton?: React.ReactNode
 }

@@ -73,14 +73,13 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
 
-export const createClientConfig = async ({
+export const createClientConfig = ({
   config,
   i18n,
 }: {
   config: SanitizedConfig
   i18n: I18nClient
-  // eslint-disable-next-line @typescript-eslint/require-await
-}): Promise<ClientConfig> => {
+}): ClientConfig => {
   // We can use deepCopySimple here, as the clientConfig should be JSON serializable anyways, since it will be sent from server => client
   const clientConfig = deepCopyObjectSimple(config) as unknown as ClientConfig
 

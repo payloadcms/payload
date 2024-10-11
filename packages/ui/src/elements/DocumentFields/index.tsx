@@ -1,5 +1,5 @@
 'use client'
-import type { ClientField, Description, FormState } from 'payload'
+import type { ClientField, Description, FormState, RenderedField } from 'payload'
 
 import { fieldIsSidebar } from 'payload/shared'
 import React from 'react'
@@ -17,29 +17,27 @@ type Args = {
   readonly AfterFields?: React.ReactNode
   readonly BeforeFields?: React.ReactNode
   readonly description?: Description
-  readonly fields: ClientField[]
   readonly forceSidebarWrap?: boolean
-  readonly formState: FormState
+  readonly renderedFields: RenderedField[]
 }
 
 export const DocumentFields: React.FC<Args> = ({
   AfterFields,
   BeforeFields,
   description,
-  fields,
   forceSidebarWrap,
-  formState,
+  renderedFields,
 }) => {
-  const { mainFields, sidebarFields } = fields.reduce(
+  const { mainFields, sidebarFields } = renderedFields.reduce(
     (acc, field) => {
-      if (fieldIsSidebar(field)) {
+      if (field.isSidebar) {
         acc.sidebarFields.push(field)
       } else {
         acc.mainFields.push(field)
       }
       return acc
     },
-    { mainFields: [] as ClientField[], sidebarFields: [] as ClientField[] },
+    { mainFields: [] as RenderedField[], sidebarFields: [] as RenderedField[] },
   )
 
   const hasSidebarFields = sidebarFields && sidebarFields.length > 0
@@ -74,12 +72,7 @@ export const DocumentFields: React.FC<Args> = ({
               .filter(Boolean)
               .join(' ')}
           >
-            <RenderFields
-              className={`${baseClass}__fields`}
-              fields={mainFields}
-              forceRender
-              formState={formState}
-            />
+            <RenderFields className={`${baseClass}__fields`} fields={mainFields} forceRender />
           </RenderIfInViewport>
           {AfterFields}
         </Gutter>
@@ -98,7 +91,7 @@ export const DocumentFields: React.FC<Args> = ({
                   .filter(Boolean)
                   .join(' ')}
               >
-                <RenderFields fields={sidebarFields} forceRender formState={formState} />
+                <RenderFields fields={sidebarFields} forceRender />
               </RenderIfInViewport>
             </div>
           </div>

@@ -4,14 +4,14 @@ import React, { createContext, useCallback, useEffect, useRef } from 'react'
 
 import type { buildFormState } from '../../utilities/buildFormState.js'
 
-type GetFormState = (
+type GetFormStateClient = (
   args: {
     signal?: AbortSignal
-  } & Omit<BuildFormStateArgs, 'req'>,
+  } & Omit<BuildFormStateArgs, 'clientConfig' | 'req'>,
 ) => ReturnType<typeof buildFormState>
 
 type ServerFunctionsContextType = {
-  getFormState: GetFormState
+  getFormState: GetFormStateClient
   serverFunction: ServerFunctionClient
 }
 
@@ -39,7 +39,7 @@ export const ServerFunctionsProvider: React.FC<{
   // Each callback also accept a remote signal, to abort requests when each _component_ unmounts, etc.
   const abortControllerRef = useRef(new AbortController())
 
-  const getFormState = useCallback<GetFormState>(
+  const getFormState = useCallback<GetFormStateClient>(
     async (args) => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort()

@@ -50,6 +50,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     Label,
     path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
+    renderedFields,
     schemaPath,
     validate,
   } = props
@@ -256,7 +257,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
         >
           {rowsData.map((rowData, i) => {
-            const { id: rowID, fields, RowLabel } = rowData
+            const { id: rowID } = rowData
 
             const rowErrorCount = errorPaths?.filter((errorPath) =>
               errorPath.startsWith(`${path}.${i}.`),
@@ -270,7 +271,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     addRow={addRow}
                     duplicateRow={duplicateRow}
                     errorCount={rowErrorCount}
-                    fields={fields}
                     forceRender={forceRender}
                     hasMaxRows={hasMaxRows}
                     isSortable={isSortable}
@@ -279,10 +279,11 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     path={path}
                     readOnly={disabled}
                     removeRow={removeRow}
+                    renderedFields={renderedFields}
                     row={rowData}
                     rowCount={rowsData?.length}
                     rowIndex={i}
-                    RowLabel={RowLabel}
+                    // RowLabel={RowLabel}
                     setCollapse={setCollapse}
                   />
                 )}

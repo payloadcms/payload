@@ -10,7 +10,8 @@ export const withCondition = <P extends ClientFieldProps>(
 ): React.FC<P> => {
   const CheckForCondition: React.FC<P> = (props) => {
     const {
-      field: { type, _indexPath },
+      field: { type },
+      indexPath,
     } = props
 
     const name = 'name' in props.field ? props.field.name : undefined
@@ -18,7 +19,7 @@ export const withCondition = <P extends ClientFieldProps>(
     const path = ('path' in props ? props.path : undefined) ?? name
 
     return (
-      <WatchCondition indexPath={_indexPath} name={name} path={path} type={type}>
+      <WatchCondition indexPath={indexPath} name={name} path={path} type={type}>
         <Field {...props} />
       </WatchCondition>
     )

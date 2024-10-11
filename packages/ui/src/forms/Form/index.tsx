@@ -503,7 +503,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       const { state: fieldState } = await getFormState({
         data,
-        renderFields: true,
+        renderFields: false,
         schemaPath: [collectionSlug || globalSlug, schemaPath].filter(Boolean).join('.'),
         signal: abortController.signal,
       })

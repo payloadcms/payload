@@ -1,5 +1,4 @@
 'use client'
-import type { FormField } from 'payload'
 
 import React from 'react'
 
@@ -8,14 +7,13 @@ import type { Props } from './types.js'
 import { useIntersect } from '../../hooks/useIntersect.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
-import { RenderField } from './RenderField.js'
 
 const baseClass = 'render-fields'
 
 export { Props }
 
 export const RenderFields: React.FC<Props> = (props) => {
-  const { className, fields, forceRender, formState, margins, path } = props
+  const { className, fields, forceRender, margins } = props
 
   const { i18n } = useTranslation()
   const [hasRendered, setHasRendered] = React.useState(Boolean(forceRender))
@@ -57,18 +55,7 @@ export const RenderFields: React.FC<Props> = (props) => {
           .join(' ')}
         ref={intersectionRef}
       >
-        {hasRendered &&
-          fields?.map((field, fieldIndex) => {
-            const name = 'name' in field ? field.name : undefined
-
-            const fieldPath = [path, name, path && fieldIndex]
-              .filter((v) => typeof v === 'number' || v)
-              .join('.')
-
-            const fieldState = formState?.[fieldPath]
-
-            return <RenderField fieldState={fieldState} key={fieldIndex} />
-          })}
+        {hasRendered && fields?.map(({ Field }) => Field)}
       </div>
     )
   }

@@ -1,26 +1,35 @@
 import type { I18n, I18nClient } from '@payloadcms/translations'
-
-import {
-  type BuildFormStateArgs,
-  type ClientUser,
-  type DocumentPreferences,
-  type ErrorResult,
-  type Field,
-  type FieldSchemaMap,
-  formatErrors,
-  type FormState,
-  type SanitizedConfig,
-  type TypeWithID,
+import type {
+  BuildFormStateArgs,
+  ClientConfig,
+  ClientField,
+  ClientUser,
+  DocumentPreferences,
+  ErrorResult,
+  Field,
+  FieldSchemaMap,
+  FormState,
+  RenderedField,
+  SanitizedConfig,
+  TypeWithID,
 } from 'payload'
+
+import { createClientConfig, formatErrors } from 'payload'
 import { reduceFieldsToValues } from 'payload/shared'
 
 import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
-import { renderField } from './renderFields.js'
-let cached = global._payload_fieldSchemaMap
+import { renderFields as renderFieldsFn } from './renderFields.js'
 
-if (!cached) {
-  cached = global._payload_fieldSchemaMap = null
+let cachedFieldSchemaMap = global._payload_fieldSchemaMap
+let cachedClientConfig = global._payload_clientConfig
+
+if (!cachedFieldSchemaMap) {
+  cachedFieldSchemaMap = global._payload_fieldSchemaMap = null
+}
+
+if (!cachedClientConfig) {
+  cachedClientConfig = global._payload_clientConfig = null
 }
 
 export const getFieldSchemaMap = (args: {
@@ -29,33 +38,55 @@ export const getFieldSchemaMap = (args: {
 }): FieldSchemaMap => {
   const { config, i18n } = args
 
-  if (cached && process.env.NODE_ENV !== 'development') {
-    return cached
+  if (cachedFieldSchemaMap && process.env.NODE_ENV !== 'development') {
+    return cachedFieldSchemaMap
   }
 
-  cached = buildFieldSchemaMap({
+  cachedFieldSchemaMap = buildFieldSchemaMap({
     config,
     i18n: i18n as I18n, // TODO: Fix this
   })
 
-  return cached
+  return cachedFieldSchemaMap
 }
 
-export type BuildFormStateResult =
+export const getClientConfig = (args: {
+  config: SanitizedConfig
+  i18n: I18nClient
+}): ClientConfig => {
+  const { config, i18n } = args
+
+  if (cachedClientConfig && process.env.NODE_ENV !== 'development') {
+    return cachedClientConfig
+  }
+
+  cachedClientConfig = createClientConfig({
+    config,
+    i18n,
+  })
+
+  return cachedClientConfig
+}
+
+type BuildFormStateSuccessResult = {
+  clientConfig?: ClientConfig
+  errors?: never
+  lockedState?: { isLocked: boolean; user: ClientUser | number | string }
+  renderedFields?: RenderedField[]
+  state: FormState
+}
+
+type BuildFormStateErrorResult = {
+  lockedState?: never
+  state?: never
+} & (
   | {
-      errors?: never
-      lockedState?: { isLocked: boolean; user: ClientUser | number | string }
-      state: FormState
-    }
-  | {
-      lockedState?: never
       message: string
-      state?: never
     }
-  | ({
-      lockedState?: never
-      state?: never
-    } & ErrorResult)
+  | ErrorResult
+)
+
+export type BuildFormStateResult = BuildFormStateErrorResult | BuildFormStateSuccessResult
 
 export const buildFormState = async (args: BuildFormStateArgs): Promise<BuildFormStateResult> => {
   const { req } = args
@@ -82,10 +113,7 @@ export const buildFormState = async (args: BuildFormStateArgs): Promise<BuildFor
 
 export const buildFormStateFn = async (
   args: BuildFormStateArgs,
-): Promise<{
-  lockedState?: { isLocked: boolean; user: ClientUser | number | string }
-  state: FormState
-}> => {
+): Promise<BuildFormStateSuccessResult> => {
   const {
     id: idFromArgs,
     collectionSlug,
@@ -145,19 +173,30 @@ export const buildFormStateFn = async (
     i18n,
   })
 
+  const clientConfig = getClientConfig({
+    config,
+    i18n,
+  })
+
   const id = collectionSlug ? idFromArgs : undefined
   const schemaPathSegments = schemaPath && schemaPath.split('.')
 
   let fields: Field[]
+  let clientFields: ClientField[]
 
   if (schemaPathSegments && schemaPathSegments.length === 1) {
     if (req.payload.collections[schemaPath]) {
       fields = req.payload.collections[schemaPath].config.fields
+      clientFields = clientConfig.collections.find(
+        (collection) => collection.slug === schemaPath,
+      )?.fields
     } else {
       fields = req.payload.config.globals.find((global) => global.slug === schemaPath)?.fields
+      clientFields = clientConfig.globals.find((global) => global.slug === schemaPath)?.fields
     }
   } else if (fieldSchemaMap.has(schemaPath)) {
     fields = fieldSchemaMap.get(schemaPath)
+    // TODO: get client fields by schemaPath, the problem is clientConfig is a deep object, unlike fieldSchemaMap
   }
 
   if (!fields || !Array.isArray(fields)) {
@@ -271,21 +310,22 @@ export const buildFormStateFn = async (
     await Promise.all(Object.values(promises))
   }
 
-  const result = await buildStateFromSchema({
+  const formStateResult = await buildStateFromSchema({
     id,
     collectionSlug,
     data,
     fields,
     operation,
     preferences: docPreferences || { fields: {} },
-    renderField: renderFields ? renderField : undefined,
     req,
   })
+
+  let lockedStateResult = undefined
 
   // Maintain form state of auth / upload fields
   if (collectionSlug && formState) {
     if (payload.collections[collectionSlug]?.config?.upload && formState.file) {
-      result.file = formState.file
+      formStateResult.file = formState.file
     }
   }
 
@@ -315,7 +355,7 @@ export const buildFormStateFn = async (
       })
 
       if (lockedDocument.docs && lockedDocument.docs.length > 0) {
-        const lockedState = {
+        lockedStateResult = {
           isLocked: true,
           user: lockedDocument.docs[0]?.user?.value,
         }
@@ -328,8 +368,6 @@ export const buildFormStateFn = async (
             req,
           })
         }
-
-        return { lockedState, state: result }
       } else {
         // If no lock document exists, create it
         await payload.db.create({
@@ -350,15 +388,28 @@ export const buildFormStateFn = async (
           req,
         })
 
-        const lockedState = {
+        lockedStateResult = {
           isLocked: true,
           user,
         }
-
-        return { lockedState, state: result }
       }
     }
   }
 
-  return { state: result }
+  return {
+    lockedState: lockedStateResult,
+    renderedFields: renderFields
+      ? renderFieldsFn({
+          clientFields,
+          config,
+          fields,
+          formState: formStateResult,
+          i18n,
+          payload,
+          permissions: {}, // TODO
+          schemaPath,
+        })
+      : undefined,
+    state: formStateResult,
+  }
 }

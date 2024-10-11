@@ -8,7 +8,7 @@ export const getClientConfig = cache(
   async (args: { config: SanitizedConfig; i18n: I18nClient }): Promise<ClientConfig> => {
     const { config, i18n } = args
 
-    const clientConfig = await createClientConfig({
+    const clientConfig = createClientConfig({
       config,
       i18n,
     })

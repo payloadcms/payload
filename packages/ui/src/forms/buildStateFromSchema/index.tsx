@@ -1,12 +1,4 @@
-import type {
-  Data,
-  DocumentPreferences,
-  Field as FieldSchema,
-  FormState,
-  PayloadRequest,
-} from 'payload'
-
-import type { RenderFieldFn } from '../../utilities/renderFields.js'
+import type { Data, DocumentPreferences, Field, FormState, PayloadRequest } from 'payload'
 
 import { calculateDefaultValues } from './calculateDefaultValues/index.js'
 import { iterateFields } from './iterateFields.js'
@@ -14,26 +6,16 @@ import { iterateFields } from './iterateFields.js'
 type Args = {
   collectionSlug?: string
   data?: Data
-  fields: FieldSchema[] | undefined
+  fields: Field[] | undefined
   id?: number | string
   operation?: 'create' | 'update'
   preferences: DocumentPreferences
-  renderField?: RenderFieldFn
   req: PayloadRequest
   siblingData?: Data
 }
 
 export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
-  const {
-    id,
-    collectionSlug,
-    data: fullData = {},
-    fields,
-    operation,
-    preferences,
-    renderField,
-    req,
-  } = args
+  const { id, collectionSlug, data: fullData = {}, fields, operation, preferences, req } = args
 
   if (fields) {
     const state: FormState = {}
@@ -58,7 +40,6 @@ export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
       parentPassesCondition: true,
       path: '',
       preferences,
-      renderField,
       req,
       schemaPath: '',
       state,

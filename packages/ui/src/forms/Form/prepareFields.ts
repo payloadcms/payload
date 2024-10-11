@@ -1,10 +1,10 @@
 import type { FormField, FormState } from 'payload'
 
-type BlacklistedKeys = 'Field' | 'fields' | 'RowLabel' | 'validate'
-const blacklistedKeys: BlacklistedKeys[] = ['validate', 'Field', 'fields', 'RowLabel']
+type BlacklistedKeys = 'validate'
+const blacklistedKeys: BlacklistedKeys[] = ['validate']
 
 // TODO: is there another way to do this within an existing loop? Need to explore.
-// The problem is that functions/components cannot be sent through the client/server boundary.
+// The problem is that functions/components cannot cross the client->server boundary
 const sanitizeField = (field: any): any => {
   Object.keys(field).forEach((key) => {
     if (typeof field[key] === 'object' && field[key] !== null) {

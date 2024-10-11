@@ -11,9 +11,7 @@ export type Data = {
 export type Row = {
   blockType?: string
   collapsed?: boolean
-  fields: React.ReactNode[]
   id: string
-  RowLabel?: React.ReactNode
 }
 
 export type FilterOptionsResult = {
@@ -24,7 +22,6 @@ export type FormField = {
   disableFormData?: boolean
   errorMessage?: string
   errorPaths?: string[]
-  Field: React.ReactNode
   fieldSchema?: Field
   filterOptions?: FilterOptionsResult
   initialValue: unknown
@@ -58,6 +55,10 @@ export type BuildFormStateArgs = {
   */
   renderFields?: boolean
   req: PayloadRequest
+  /*
+    If true, will return the client Config
+  */
+  returnClientConfig?: boolean
   returnLockStatus?: boolean
   schemaPath: string
   updateLastEdited?: boolean

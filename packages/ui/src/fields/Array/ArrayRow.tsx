@@ -1,5 +1,5 @@
 'use client'
-import type { ArrayField, Row } from 'payload'
+import type { ArrayField, RenderedField, Row } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -19,7 +19,6 @@ type ArrayRowProps = {
   readonly addRow: (rowIndex: number) => Promise<void> | void
   readonly duplicateRow: (rowIndex: number) => void
   readonly errorCount: number
-  readonly fields: React.ReactNode[]
   readonly forceRender?: boolean
   readonly hasMaxRows?: boolean
   readonly isSortable?: boolean
@@ -28,6 +27,7 @@ type ArrayRowProps = {
   readonly path: string
   readonly readOnly?: boolean
   readonly removeRow: (rowIndex: number) => void
+  readonly renderedFields: RenderedField[]
   readonly row: Row
   readonly rowCount: number
   readonly rowIndex: number
@@ -40,7 +40,6 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   attributes,
   duplicateRow,
   errorCount,
-  fields,
   forceRender = false,
   hasMaxRows,
   isDragging,
@@ -51,6 +50,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   path: parentPath,
   readOnly,
   removeRow,
+  renderedFields,
   row,
   rowCount,
   rowIndex,
@@ -124,7 +124,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         isCollapsed={row.collapsed}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        {Array.isArray(fields) && fields?.map((F) => F)}
+        {Array.isArray(renderedFields) && renderedFields?.map(({ Field }) => Field)}
       </Collapsible>
     </div>
   )
