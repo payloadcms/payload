@@ -23,7 +23,6 @@ import './index.scss'
 const baseClass = 'copy-locale-data'
 
 const modalSlug = 'confirm-copy-locale'
-
 export const DefaultComponent: React.FC = () => {
   const {
     config: {
@@ -61,16 +60,16 @@ export const DefaultComponent: React.FC = () => {
 
       try {
         if (collectionSlug) {
-          url = `${serverURL}${api}/${collectionSlug}/${id}?locale=${from}`
+          url = `${serverURL}${api}/${collectionSlug}/${id}?depth=0&locale=${from}`
           redirect = `${serverURL}/admin/collections/${collectionSlug}/${id}?locale=${to}`
         } else if (globalSlug) {
-          url = `${serverURL}${api}/globals/${globalSlug}?locale=${from}`
+          url = `${serverURL}${api}/globals/${globalSlug}?depth=0&locale=${from}`
           redirect = `${serverURL}/admin/globals/${globalSlug}?locale=${to}`
           method = 'POST'
         }
         const response = await fetch(url)
         const data = await response.json()
-        const action = url.replace(from, to)
+        const action = url.replace(`?locale=${from}`, `?locale=${to}`)
 
         await submit({
           action,
@@ -81,13 +80,17 @@ export const DefaultComponent: React.FC = () => {
           },
           skipValidation: true,
         })
+        setCopying(false)
+        toggleModal(modalSlug)
 
-        window.open(redirect, '_self')
+        if (response.ok) {
+          window.open(redirect, '_self')
+        }
       } catch (error) {
         toast.error(error.message)
       }
     },
-    [modified, collectionSlug, globalSlug, t, submit, serverURL, api, id],
+    [modified, collectionSlug, globalSlug, t, submit, serverURL, api, id, toggleModal],
   )
 
   if (!localization) {
@@ -176,7 +179,7 @@ export const DefaultComponent: React.FC = () => {
             <Button
               buttonStyle="secondary"
               id="confirm-cancel"
-              onClick={copying ? undefined : () => toggleModal(modalSlug)}
+              onClick={() => toggleModal(modalSlug)}
               size="large"
               type="button"
             >
@@ -194,7 +197,7 @@ export const DefaultComponent: React.FC = () => {
               }}
               size="large"
             >
-              {copying ? t('general:copying') : t('general:confirm')}
+              {copying ? `${t('general:copying')}...` : t('general:confirm')}
             </Button>
           </div>
         </div>
