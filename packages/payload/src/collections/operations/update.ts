@@ -40,6 +40,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   depth?: number
   disableVerificationEmail?: boolean
   draft?: boolean
+  limit?: number
   overrideAccess?: boolean
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
@@ -78,6 +79,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
       collection,
       depth,
       draft: draftArg = false,
+      limit = 0,
       overrideAccess,
       overrideLock,
       overwriteExistingFiles = false,
@@ -136,6 +138,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
 
       const query = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
+        limit,
         locale,
         pagination: false,
         req,
@@ -146,7 +149,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
     } else {
       const query = await payload.db.find({
         collection: collectionConfig.slug,
-        limit: 0,
+        limit,
         locale,
         pagination: false,
         req,
