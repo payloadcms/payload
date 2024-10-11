@@ -201,9 +201,9 @@ export const itTranslations: DefaultTranslationsObject = {
     confirmDuplication: 'Conferma la duplicazione',
     copied: 'Copiato',
     copy: 'Copia',
-    copying: 'Copiando',
+    copying: 'Copia',
     copyWarning:
-      'Stai per copiare i dati da {{from}} a {{to}}. Questo sovrascriverà qualsiasi dato esistente di {{to}} e ti reindirizzerà per continuare a modificare questo locale. Sei sicuro di voler continuare?',
+      'Stai per copiare i dati da {{from}} a {{to}}. Questo sovrascriverà eventuali dati esistenti {{to}} e ti reindirizzerà per continuare a modificare questa località. Sei sicuro di voler continuare?',
     create: 'Crea',
     created: 'Data di creazione',
     createdAt: 'Creato il',

@@ -207,7 +207,7 @@ export const frTranslations: DefaultTranslationsObject = {
     copy: 'Copie',
     copying: 'Copie',
     copyWarning:
-      'Vous êtes sur le point de copier des données de {{from}} à {{to}}. Ceci écrasera toute donnée {{to}} existante et vous redirigera pour continuer à éditer cette localité. Êtes-vous sûr de vouloir continuer?',
+      'Vous êtes sur le point de copier des données de {{from}} vers {{to}}. Cela écrasera toutes les données {{to}} existantes et vous redirigera pour continuer à éditer ce paramètre régional. Êtes-vous sûr de vouloir continuer ?',
     create: 'Créer',
     created: 'Créé(e)',
     createdAt: 'Créé(e) à',

@@ -195,7 +195,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     columns: 'Колонки',
     columnToSort: 'Колонка для сортировки',
     confirm: 'Подтвердить',
-    confirmCopy: 'Подтвердите копирование',
+    confirmCopy: 'Подтвердить копирование',
     confirmDeletion: 'Подтвердить удаление',
     confirmDuplication: 'Подтвердить копирование',
     copied: 'Скопировано',

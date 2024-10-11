@@ -200,7 +200,7 @@ export const svTranslations: DefaultTranslationsObject = {
     copy: 'Kopiera',
     copying: 'Kopiering',
     copyWarning:
-      'Du är på väg att kopiera data från {{from}} till {{to}}. Detta kommer att skriva över befintlig {{to}} data och omdirigera dig för att fortsätta redigera denna plats. Är du säker på att du vill fortsätta?',
+      'Du är på väg att kopiera data från {{from}} till {{to}}. Detta kommer att skriva över eventuella befintliga {{to}} data och omdirigera dig för att fortsätta redigera denna locale. Är du säker på att du vill fortsätta?',
     create: 'Skapa',
     created: 'Skapad',
     createdAt: 'Skapad Vid',

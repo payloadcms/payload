@@ -193,7 +193,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     copy: '複製',
     copying: '複製',
     copyWarning:
-      '您即將從{{from}}複製數據到{{to}}。這將覆蓋任何現有的{{to}}數據並將您重定向以繼續編輯此語言環境。您確定要繼續嗎？',
+      '您即將從{{from}}複製資料到{{to}}。這將覆蓋任何現有的{{to}}數據，並導向您繼續編輯此區域設置。您確定要繼續進行嗎？',
     create: '建立',
     created: '已建立',
     createdAt: '建立於',

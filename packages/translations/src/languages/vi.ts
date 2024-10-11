@@ -198,7 +198,7 @@ export const viTranslations: DefaultTranslationsObject = {
     copy: 'Sao chép',
     copying: 'Sao chép',
     copyWarning:
-      'Bạn sắp sao chép dữ liệu từ {{from}} sang {{to}}. Điều này sẽ ghi đè lên bất kỳ dữ liệu {{to}} hiện có nào và chuyển hướng bạn để tiếp tục chỉnh sửa địa điểm này. Bạn có chắc chắn muốn tiếp tục không?',
+      'Bạn sắp sao chép dữ liệu từ {{from}} sang {{to}}. Điều này sẽ ghi đè lên bất kỳ dữ liệu {{to}} hiện tại nào và chuyển hướng bạn để tiếp tục chỉnh sửa ngôn ngữ này. Bạn có chắc chắn muốn tiếp tục không?',
     create: 'Tạo',
     created: 'Đã tạo',
     createdAt: 'Ngày tạo',

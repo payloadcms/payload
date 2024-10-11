@@ -200,7 +200,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     copy: 'Kopiraj',
     copying: 'Kopiranje',
     copyWarning:
-      'Na putu ste kopirati podatke iz {{from}} u {{to}}. To će prebrisati sve postojeće podatke {{to}} i preusmjeriti vas na nastavak uređivanja ove lokalne postavke. Jeste li sigurni da želite nastaviti?',
+      'Samo što niste kopirali podatke iz {{from}} u {{to}}. Ovo će prebrisati sve postojeće podatke {{to}} i preusmjeriti vas da nastavite uređivanje ove lokacije. Jeste li sigurni da želite nastaviti?',
     create: 'Izradi',
     created: 'Kreirano',
     createdAt: 'Izrađeno u',

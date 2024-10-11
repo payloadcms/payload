@@ -200,7 +200,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     copy: 'Kopiér',
     copying: 'Kopiering',
     copyWarning:
-      'Du er i ferd med å kopiere data fra {{from}} til {{to}}. Dette vil overskrive eksisterende {{to}} data og omdirigere deg til å fortsette redigeringen av denne lokalen. Er du sikker på at du ønsker å fortsette?',
+      'Du er i ferd med å kopiere data fra {{from}} til {{to}}. Dette vil overskrive eksisterende {{to}} data og omdirigere deg til å fortsette å redigere denne lokaliteten. Er du sikker på at du vil fortsette?',
     create: 'Opprett',
     created: 'Opprettet',
     createdAt: 'Opprettet',
