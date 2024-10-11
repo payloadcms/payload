@@ -2,6 +2,20 @@ import type { ClientConfig } from 'pg'
 
 import type { BasePostgresAdapter } from './types.js'
 
+const setConnectionStringDatabase = ({
+  connectionString,
+  database,
+}: {
+  connectionString: string
+  database: string
+}): string => {
+  const connectionURL = new URL(connectionString)
+  const newConnectionURL = new URL(connectionURL)
+  newConnectionURL.pathname = `/${database}`
+
+  return newConnectionURL.toString()
+}
+
 type Args = {
   /**
    * Name of a database, defaults to the current one
@@ -20,14 +34,14 @@ export const createDatabase = async function (this: BasePostgresAdapter, args: A
   const schemaName = this.schemaName || 'public'
 
   if (connectionString) {
-    const connectionURL = new URL(connectionString)
     if (!dbName) {
-      dbName = connectionURL.pathname.slice(1)
+      dbName = new URL(connectionString).pathname.slice(1)
     }
 
-    const managementConnectionURL = new URL(connectionURL)
-    managementConnectionURL.pathname = '/postgres'
-    managementClientConfig.connectionString = managementConnectionURL.toString()
+    managementClientConfig.connectionString = setConnectionStringDatabase({
+      connectionString,
+      database: 'postgres',
+    })
   } else {
     if (!dbName) {
       dbName = this.poolOptions.database
@@ -48,22 +62,34 @@ export const createDatabase = async function (this: BasePostgresAdapter, args: A
     await managementClient.connect()
     await managementClient.query(`CREATE DATABASE ${dbName}`)
 
-    this.payload.logger.info(`Created database ${dbName}`)
+    this.payload.logger.info(`Created database "${dbName}"`)
 
     if (schemaName !== 'public') {
-      const createdDatabaseClient = new pg.Client({
-        ...managementClientConfig,
-        database: dbName,
-      })
+      let createdDatabaseConfig: ClientConfig = {}
+
+      if (connectionString) {
+        createdDatabaseConfig.connectionString = setConnectionStringDatabase({
+          connectionString,
+          database: dbName,
+        })
+      } else {
+        createdDatabaseConfig = {
+          ...this.poolOptions,
+          database: dbName,
+        }
+      }
+
+      const createdDatabaseClient = new pg.Client(createdDatabaseConfig)
+
       try {
         await createdDatabaseClient.connect()
 
         await createdDatabaseClient.query(`CREATE SCHEMA ${schemaName}`)
-        this.payload.logger.info(`Created schema ${schemaName}`)
+        this.payload.logger.info(`Created schema "${dbName}.${schemaName}"`)
       } catch (err) {
         this.payload.logger.error({
           err,
-          msg: `Error: failed to create schema ${schemaName}. Details: ${err.message}`,
+          msg: `Error: failed to create schema "${dbName}.${schemaName}". Details: ${err.message}`,
         })
       } finally {
         await createdDatabaseClient.end()
