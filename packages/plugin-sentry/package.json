@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-sentry",
-  "version": "0.0.6",
+  "version": "3.0.0-beta.113",
   "description": "Sentry plugin for Payload",
   "keywords": [
     "payload",
@@ -23,6 +23,11 @@
       "import": "./src/index.ts",
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
     }
   },
   "main": "./src/index.ts",
@@ -31,32 +36,24 @@
     "dist"
   ],
   "scripts": {
-    "build": "echo \"Build temporarily disabled.\" && exit 0",
+    "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc-build --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "@sentry/node": "^7.55.2",
-    "@sentry/types": "^7.54.0",
-    "express": "^4.18.2"
+    "@sentry/nextjs": "^8.33.1",
+    "@sentry/types": "^8.33.1"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/express": "^4.17.9",
-    "@types/jest": "29.5.12",
-    "@types/node": "22.5.4",
     "@types/react": "npm:types-react@19.0.0-rc.1",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
-    "copyfiles": "^2.4.1",
-    "cross-env": "^7.0.3",
-    "jest": "^29.7.0",
-    "nodemon": "3.0.3",
-    "payload": "workspace:*",
-    "ts-jest": "^29.1.0"
+    "payload": "workspace:*"
   },
   "peerDependencies": {
     "payload": "workspace:*",
@@ -69,6 +66,11 @@
         "import": "./dist/index.js",
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
+      },
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts",
+        "default": "./dist/exports/client.js"
       }
     },
     "main": "./dist/index.js",

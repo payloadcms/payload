@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-cloud-storage",
-  "version": "3.0.0-beta.111",
+  "version": "3.0.0-beta.113",
   "description": "The official cloud storage plugin for Payload CMS",
   "homepage": "https://payloadcms.com",
   "repository": {

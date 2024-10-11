@@ -745,6 +745,7 @@ export type {
   RequiredDataFromCollection,
   RequiredDataFromCollectionSlug,
   SanitizedCollectionConfig,
+  SanitizedJoins,
   TypeWithID,
   TypeWithTimestamps,
 } from './collections/config/types.js'

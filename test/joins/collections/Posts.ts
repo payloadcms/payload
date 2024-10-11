@@ -24,6 +24,19 @@ export const Posts: CollectionConfig = {
       relationTo: categoriesSlug,
     },
     {
+      name: 'categories',
+      type: 'relationship',
+      relationTo: categoriesSlug,
+      hasMany: true,
+    },
+    {
+      name: 'categoriesLocalized',
+      type: 'relationship',
+      relationTo: categoriesSlug,
+      hasMany: true,
+      localized: true,
+    },
+    {
       name: 'group',
       type: 'group',
       fields: [

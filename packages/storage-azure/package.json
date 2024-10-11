@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-azure",
-  "version": "3.0.0-beta.111",
+  "version": "3.0.0-beta.113",
   "description": "Payload storage adapter for Azure Blob Storage",
   "homepage": "https://payloadcms.com",
   "repository": {
