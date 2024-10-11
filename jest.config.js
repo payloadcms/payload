@@ -42,7 +42,10 @@ const baseJestConfig = {
     '^.+\\.(t|j)sx?$': ['@swc/jest'],
   },
   verbose: true,
-  reporters: ['jest-ci-spec-reporter', path.resolve(dirname, './test/jestreporter.cjs')],
+  reporters: [
+    path.resolve(dirname, './test/jest-spec-reporter.cjs'),
+    path.resolve(dirname, './test/jestreporter.cjs'),
+  ],
 }
 
 if (process.env.CI) {

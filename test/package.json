@@ -69,7 +69,6 @@
     "execa": "5.1.1",
     "file-type": "19.3.0",
     "http-status": "1.6.2",
-    "jest-ci-spec-reporter": "^1.0.4",
     "jwt-decode": "4.0.0",
     "lexical": "0.18.0",
     "next": "15.0.0-canary.173",
