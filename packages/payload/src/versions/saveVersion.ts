@@ -119,7 +119,7 @@ export const saveVersion = async ({
         parent: collection ? id : undefined,
         publishedLocale: publishSpecificLocale || undefined,
         req,
-        updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
+        updatedAt: now,
         versionData,
       }
 
