@@ -1,5 +1,5 @@
 'use client'
-import type { ClientUser, MeOperationResult, Permissions, User } from 'payload'
+import type { ClientUser, Permissions, User } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { usePathname, useRouter } from 'next/navigation.js'
@@ -14,6 +14,12 @@ import { requests } from '../../utilities/api.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { useConfig } from '../Config/index.js'
 
+export type UserWithToken<T = ClientUser> = {
+  exp: number
+  token: string
+  user: T
+}
+
 export type AuthContext<T = ClientUser> = {
   fetchFullUser: () => Promise<null | User>
   logOut: () => Promise<boolean>
@@ -22,7 +28,7 @@ export type AuthContext<T = ClientUser> = {
   refreshCookieAsync: () => Promise<ClientUser>
   refreshPermissions: () => Promise<void>
   setPermissions: (permissions: Permissions) => void
-  setUser: (user: MeOperationResult | null) => void
+  setUser: (user: null | UserWithToken<T>) => void
   strategy?: string
   token?: string
   tokenExpiration?: number
@@ -97,7 +103,7 @@ export function AuthProvider({
   }, [])
 
   const setNewUser = useCallback(
-    (userResponse: MeOperationResult | null) => {
+    (userResponse: null | UserWithToken) => {
       if (userResponse?.user) {
         setUserInMemory(userResponse.user)
         setTokenInMemory(userResponse.token)
@@ -240,7 +246,7 @@ export function AuthProvider({
       })
 
       if (request.status === 200) {
-        const json: MeOperationResult = await request.json()
+        const json: UserWithToken = await request.json()
         const user = null
 
         setNewUser(json)
