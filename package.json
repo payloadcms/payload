@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-beta.111",
+  "version": "3.0.0-beta.113",
   "private": true,
   "type": "module",
   "scripts": {
@@ -111,6 +111,8 @@
     "@payloadcms/eslint-plugin": "workspace:*",
     "@payloadcms/live-preview-react": "workspace:*",
     "@playwright/test": "1.46.0",
+    "@sentry/nextjs": "^8.33.1",
+    "@sentry/node": "^8.33.1",
     "@swc-node/register": "1.10.9",
     "@swc/cli": "0.4.0",
     "@swc/jest": "0.2.36",

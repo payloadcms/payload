@@ -28,6 +28,7 @@ type DateFNSKeys =
   | 'ro'
   | 'ru'
   | 'sk'
+  | 'sl-SI'
   | 'sv'
   | 'th'
   | 'tr'

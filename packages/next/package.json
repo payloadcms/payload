@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.0.0-beta.111",
+  "version": "3.0.0-beta.113",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -54,7 +54,7 @@
     "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
     "build:cjs": "swc ./src/withPayload.js -o ./dist/cjs/withPayload.cjs --config-file .swcrc-cjs --strip-leading-paths",
     "build:esbuild": "node bundleScss.js",
-    "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:cjs && pnpm build:babel && pnpm copyfiles && pnpm build:types && pnpm build:esbuild",
+    "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:types && pnpm build:esbuild  && pnpm build:cjs",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:cjs && pnpm build:esbuild",
@@ -126,7 +126,7 @@
       },
       "./withPayload": {
         "import": "./dist/withPayload.js",
-        "require": "./dist/cjs/withPayload.js",
+        "require": "./dist/cjs/withPayload.cjs",
         "default": "./dist/withPayload.js"
       },
       "./layouts": {

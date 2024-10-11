@@ -82,6 +82,8 @@ export const sanitizeJoinField = ({
 
   // override the join field localized property to use whatever the relationship field has
   field.localized = joinRelationship.localized
+  // override the join field hasMany property to use whatever the relationship field has
+  field.hasMany = joinRelationship.hasMany
 
   if (!joins[field.collection]) {
     joins[field.collection] = [join]
