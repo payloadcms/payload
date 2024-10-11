@@ -306,6 +306,7 @@ export const slTranslations = {
     titleDeleted: '{{label}} "{{title}}" uspešno izbrisan.',
     true: 'Da',
     unauthorized: 'Nepooblaščeno',
+    unsavedChanges: 'Neshranjene spremembe',
     unsavedChangesDuplicate: 'Imate neshranjene spremembe. Želite nadaljevati s podvajanjem?',
     untitled: 'Brez naslova',
     updatedAt: 'Posodobljeno',
