@@ -128,12 +128,12 @@ export type PostgresSchemaHook = (
 
 export type BasePostgresAdapter = {
   afterSchemaInit: PostgresSchemaHook[]
-  autoDatabaseCreate: boolean
   beforeSchemaInit: PostgresSchemaHook[]
   countDistinct: CountDistinct
   createDatabase: CreateDatabase
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
   deleteWhere: DeleteWhere
+  disableCreateDatabase: boolean
   drizzle: PostgresDB
   dropDatabase: DropDatabase
   enums: Record<string, GenericEnum>

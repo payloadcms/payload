@@ -78,10 +78,10 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
     return createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
       afterSchemaInit: args.afterSchemaInit ?? [],
-      autoDatabaseCreate: args.autoDatabaseCreate ?? true,
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       createDatabase,
       defaultDrizzleSnapshot,
+      disableCreateDatabase: args.disableCreateDatabase ?? false,
       drizzle: undefined,
       enums: {},
       features: {

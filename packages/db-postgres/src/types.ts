@@ -19,16 +19,16 @@ export type Args = {
    */
   afterSchemaInit?: PostgresSchemaHook[]
   /**
-   * Create the provided database automatically if it doesn't exist
-   * @default true
-   */
-  autoDatabaseCreate?: boolean
-  /**
    * Transform the schema before it's built.
    * You can use it to preserve an existing database schema and if there are any collissions Payload will override them.
    * To generate Drizzle schema from the database, see [Drizzle Kit introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
    */
   beforeSchemaInit?: PostgresSchemaHook[]
+  /**
+   * Pass `true` to disale auto database creation if it doesn't exist.
+   * @default false
+   */
+  disableCreateDatabase?: boolean
   idType?: 'serial' | 'uuid'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
