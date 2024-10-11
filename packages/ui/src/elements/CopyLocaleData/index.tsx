@@ -42,6 +42,7 @@ export const DefaultComponent: React.FC = () => {
   const { toggleModal } = useModal()
 
   const [copying, setCopying] = React.useState(false)
+  const [formattedDestination, setFormattedDestination] = React.useState<null | string>(null)
   const [destinationLocale, setDestinationLocale] = React.useState<null | string>(null)
   const editDepth = useEditDepth()
 
@@ -93,14 +94,16 @@ export const DefaultComponent: React.FC = () => {
     return null
   }
 
-  const formattedCurrentLocale = localization?.locales.map((locale) => {
-    const isMatchingLocale =
-      typeof locale === 'string' ? locale === currentLocale : locale.code === currentLocale
+  const formattedCurrentLocale = localization?.locales
+    .map((locale) => {
+      const isMatchingLocale =
+        typeof locale === 'string' ? locale === currentLocale : locale.code === currentLocale
 
-    if (isMatchingLocale) {
-      return typeof locale.label === 'string' ? locale.label : locale.label?.[i18n?.language]
-    }
-  })
+      if (isMatchingLocale) {
+        return typeof locale.label === 'string' ? locale.label : locale.label?.[i18n?.language]
+      }
+    })
+    .filter(Boolean)
 
   return (
     <>
@@ -142,6 +145,7 @@ export const DefaultComponent: React.FC = () => {
                 key={locale.code}
                 onClick={() => {
                   setDestinationLocale(typeof locale === 'string' ? locale : locale.code)
+                  setFormattedDestination(formattedLabel)
                   toggleModal(modalSlug)
                 }}
               >
@@ -160,8 +164,13 @@ export const DefaultComponent: React.FC = () => {
       >
         <div className={`${baseClass}__wrapper`}>
           <div className={`${baseClass}__content`}>
-            <h1>{t('general:copying')}</h1>
-            <p>WAIT WAIT WAIT</p>
+            <h1>{t('general:confirmCopy')}</h1>
+            <p>
+              {t('general:copyWarning', {
+                from: formattedCurrentLocale,
+                to: formattedDestination,
+              })}
+            </p>
           </div>
           <div className={`${baseClass}__controls`}>
             <Button
