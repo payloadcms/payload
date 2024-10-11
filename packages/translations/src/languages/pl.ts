@@ -200,7 +200,7 @@ export const plTranslations: DefaultTranslationsObject = {
     copy: 'Skopiuj',
     copying: 'Kopiowanie',
     copyWarning:
-      'Zamierzasz skopiować dane z {{from}} do {{to}}. Spowoduje to nadpisanie istniejących danych {{to}} i przekieruje Cię do kontynuacji edycji tego ustawienia regionalnego. Czy na pewno chcesz kontynuować?',
+      'Zamierzasz nadpisać {{to}} na {{from}} dla {{label}} {{title}}. Czy jesteś pewny?',
     create: 'Stwórz',
     created: 'Utworzono',
     createdAt: 'Data utworzenia',

@@ -201,7 +201,7 @@ export const enTranslations = {
     copy: 'Copy',
     copying: 'Copying',
     copyWarning:
-      'You are about to copy data from {{from}} to {{to}}. This will overwrite any existing {{to}} data and redirect you to continue editing this locale. Are you sure you want to continue?',
+      'You are about to overwrite {{to}} with {{from}} for {{label}} {{title}}. Are you sure?',
     create: 'Create',
     created: 'Created',
     createdAt: 'Created At',

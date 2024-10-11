@@ -195,7 +195,7 @@ export const heTranslations: DefaultTranslationsObject = {
     copy: 'העתק',
     copying: 'העתקה',
     copyWarning:
-      'אתה עומד להעתיק נתונים מ-{{from}} אל {{to}}. זה יחליף כל נתונים קיימים של {{to}} ויכוונך להמשיך לערוך באזור זה. האם אתה בטוח שברצונך להמשיך?',
+      'אתה עומד לדרוס את {{to}} באמצעות {{from}} עבור {{label}} {{title}}. האם אתה בטוח?',
     create: 'יצירה',
     created: 'נוצר',
     createdAt: 'נוצר בתאריך',

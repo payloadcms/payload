@@ -199,7 +199,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     copy: 'Kopiraj',
     copying: 'Kopiranje',
     copyWarning:
-      'Na putu ste da kopirate podatke iz {{from}} u {{to}}. Ovo će prebrisati sve postojeće {{to}} podatke i preusmeriti vas da nastavite sa uređivanjem ovog lokaliteta. Da li ste sigurni da želite da nastavite?',
+      'Na korak ste da prepišete {{to}} sa {{from}} za {{label}} {{title}}. Da li ste sigurni?',
     create: 'Kreiraj',
     created: 'Kreirano',
     createdAt: 'Kreirano u',

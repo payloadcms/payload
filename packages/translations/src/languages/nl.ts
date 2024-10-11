@@ -202,7 +202,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     copy: 'Kopiëren',
     copying: 'Kopiëren',
     copyWarning:
-      'U staat op het punt om gegevens te kopiëren van {{from}} naar {{to}}. Hierdoor worden alle bestaande gegevens in {{to}} overschreven en wordt u doorgestuurd om verder te gaan met het bewerken van deze locale. Weet u zeker dat u wilt doorgaan?',
+      'U staat op het punt om {{to}} te overschrijven met {{from}} voor {{label}} {{title}}. Bent u zeker?',
     create: 'Aanmaken',
     created: 'Aangemaakt',
     createdAt: 'Aangemaakt op',

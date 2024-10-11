@@ -202,8 +202,7 @@ export const itTranslations: DefaultTranslationsObject = {
     copied: 'Copiato',
     copy: 'Copia',
     copying: 'Copia',
-    copyWarning:
-      'Stai per copiare i dati da {{from}} a {{to}}. Questo sovrascriverà eventuali dati esistenti {{to}} e ti reindirizzerà per continuare a modificare questa località. Sei sicuro di voler continuare?',
+    copyWarning: 'Stai per sovrascrivere {{to}} con {{from}} per {{label}} {{title}}. Sei sicuro?',
     create: 'Crea',
     created: 'Data di creazione',
     createdAt: 'Creato il',

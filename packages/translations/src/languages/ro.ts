@@ -204,7 +204,7 @@ export const roTranslations: DefaultTranslationsObject = {
     copy: 'Copiați',
     copying: 'Copiere',
     copyWarning:
-      'Sunteți pe cale să copiați date de la {{from}} la {{to}}. Acest lucru va suprascrie orice date existente {{to}} și vă va redirecționa pentru a continua editarea acestei locații. Sunteți sigur că doriți să continuați?',
+      'Sunteți pe cale să suprascrieți {{to}} cu {{from}} pentru {{label}} {{title}}. Sunteți sigur?',
     create: 'Creează',
     created: 'Creat',
     createdAt: 'Creat la',

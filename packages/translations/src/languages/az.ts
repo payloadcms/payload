@@ -200,7 +200,7 @@ export const azTranslations: DefaultTranslationsObject = {
     copy: 'Kopyala',
     copying: 'Kopyalama',
     copyWarning:
-      'Siz {{from}}-dən {{to}}-ya məlumatları köçürməyə hazırlaşırsınız. Bu, mövcud olan {{to}} məlumatlarını siləcək və sizi bu lokallı redaktə etməyə davam etmək üçün yönləndirəcəkdir. Davam etmək istədiyinizə əminsinizmi?',
+      'Siz {{label}} {{title}} üçün {{from}} ilə {{to}} -nu üzərindən yazmaq ətrafındasınız. Eminsiniz?',
     create: 'Yarat',
     created: 'Yaradıldı',
     createdAt: 'Yaradıldığı tarix',

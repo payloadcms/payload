@@ -204,7 +204,7 @@ export const deTranslations: DefaultTranslationsObject = {
     copy: 'Kopieren',
     copying: 'Kopieren',
     copyWarning:
-      'Sie sind dabei, Daten von {{from}} nach {{to}} zu kopieren. Dies wird alle vorhandenen {{to}} Daten überschreiben und Sie dazu auffordern, mit dem Bearbeiten dieses Gebietsschemas fortzufahren. Sind Sie sicher, dass Sie fortfahren möchten?',
+      'Sie sind dabei, {{to}} mit {{from}} für {{label}} {{title}} zu überschreiben. Sind Sie sicher?',
     create: 'Erstellen',
     created: 'Erstellt',
     createdAt: 'Erstellt am',

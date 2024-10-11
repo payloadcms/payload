@@ -26,6 +26,8 @@ const modalSlug = 'confirm-copy-locale'
 export const DefaultComponent: React.FC = () => {
   const {
     config: {
+      collections,
+      globals,
       localization,
       routes: { api },
       serverURL,
@@ -45,13 +47,11 @@ export const DefaultComponent: React.FC = () => {
   const [destinationLocale, setDestinationLocale] = React.useState<null | string>(null)
   const editDepth = useEditDepth()
 
+  const collectionLabel = collections.find((c) => c.slug === collectionSlug)?.labels.singular
+  const globalLabel = globals.find((g) => g.slug === globalSlug)?.label
+
   const copyLocaleData = useCallback(
     async ({ from, to }) => {
-      if (modified) {
-        toast.error(t('general:unsavedChanges'))
-        return null
-      }
-
       let url
       let redirect
       let method = 'PATCH'
@@ -90,7 +90,7 @@ export const DefaultComponent: React.FC = () => {
         toast.error(error.message)
       }
     },
-    [modified, collectionSlug, globalSlug, t, submit, serverURL, api, id, toggleModal],
+    [collectionSlug, globalSlug, submit, serverURL, api, id, toggleModal],
   )
 
   if (!localization) {
@@ -108,8 +108,24 @@ export const DefaultComponent: React.FC = () => {
     })
     .filter(Boolean)
 
+  if (!id && !globalSlug) {
+    return null
+  }
+
   return (
-    <>
+    <div className={baseClass}>
+      {modified && (
+        <button
+          aria-label={t('general:unsavedChanges')}
+          className={`${baseClass}__overlay`}
+          onClick={() => {
+            if (modified) {
+              toast.info(t('general:unsavedChanges'))
+            }
+          }}
+          type="button"
+        />
+      )}
       <Popup
         button={
           <Pill
@@ -125,9 +141,11 @@ export const DefaultComponent: React.FC = () => {
             {t('general:copy')}
           </Pill>
         }
-        buttonType="custom"
         className={baseClass}
-        onToggleOpen={(active) => setVisibleDropdown(active)}
+        disabled={modified}
+        onToggleOpen={(active) => {
+          setVisibleDropdown(active)
+        }}
       >
         <PopupList.ButtonGroup>
           {localization.locales.map((locale) => {
@@ -171,6 +189,8 @@ export const DefaultComponent: React.FC = () => {
             <p>
               {t('general:copyWarning', {
                 from: formattedCurrentLocale,
+                label: collectionSlug ? collectionLabel : globalLabel,
+                title: collectionSlug ? id : '',
                 to: formattedDestination,
               })}
             </p>
@@ -202,7 +222,7 @@ export const DefaultComponent: React.FC = () => {
           </div>
         </div>
       </Modal>
-    </>
+    </div>
   )
 }
 

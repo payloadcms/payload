@@ -200,7 +200,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     copy: 'コピー',
     copying: 'コピーする',
     copyWarning:
-      'あなたは{{from}}から{{to}}へデータをコピーしようとしています。これにより既存の{{to}}データが上書きされ、このロケールの編集を続けるためにリダイレクトされます。本当に続行しますか？',
+      'あなたは{{label}} {{title}}の{{to}}を{{from}}で上書きしようとしています。よろしいですか？',
     create: '作成',
     created: '作成',
     createdAt: '作成日',

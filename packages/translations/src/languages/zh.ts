@@ -192,8 +192,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     copied: '已复制',
     copy: '复制',
     copying: '复制',
-    copyWarning:
-      '您即将从{{from}}复制数据到{{to}}。这将覆盖任何现有的{{to}}数据，并将您重定向以继续编辑这个区域设置。您确定要继续吗？',
+    copyWarning: '您即将用{{from}}覆盖{{to}}，用于{{label}} {{title}}。您确定吗？',
     create: '创建',
     created: '已创建',
     createdAt: '创建于',

@@ -200,8 +200,7 @@ export const skTranslations: DefaultTranslationsObject = {
     copied: 'Skopírované',
     copy: 'Kopírovať',
     copying: 'Kopírovanie',
-    copyWarning:
-      'Chystáte sa kopírovať dáta z {{from}} do {{to}}. Tým prepíšete akékoľvek existujúce dáta {{to}} a presmeruje vás na pokračovanie v úprave tohto jazyka. Ste si istý, že chcete pokračovať?',
+    copyWarning: 'Chystáte sa prepísať {{to}} na {{from}} pre {{label}} {{title}}. Ste si istý?',
     create: 'Vytvoriť',
     created: 'Vytvořeno',
     createdAt: 'Vytvorené v',

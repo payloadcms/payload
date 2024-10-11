@@ -202,7 +202,7 @@ export const myTranslations: DefaultTranslationsObject = {
     copy: 'ကူးယူမည်။',
     copying: 'ကူးယူခြင်း',
     copyWarning:
-      'Anda akan menyalin data dari {{dari}} ke {{ke}}. Ini akan menulis semula data {{ke}} yang ada dan mengarahkan anda untuk terus mengedit lokasi ini. Adakah anda pasti mahu meneruskan?',
+      'Anda akan menulis ganti {{to}} dengan {{from}} untuk {{label}} {{title}}. Adakah anda pasti?',
     create: 'ဖန်တီးမည်။',
     created: 'ဖန်တီးခဲ့သည်။',
     createdAt: 'ဖန်တီးခဲ့သည့်အချိန်',

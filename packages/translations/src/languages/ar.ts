@@ -197,8 +197,7 @@ export const arTranslations: DefaultTranslationsObject = {
     copied: 'تمّ النّسخ',
     copy: 'نسخ',
     copying: 'نسخ',
-    copyWarning:
-      'أنت على وشك نسخ البيانات من {{from}} إلى {{to}}. سيؤدي هذا إلى الكتابة فوق أي بيانات {{to}} موجودة وإعادة توجيهك لمتابعة تعديل هذا الموقع. هل أنت متأكد أنك تريد المتابعة؟',
+    copyWarning: 'أنت على وشك الكتابة فوق {{to}} بـ {{from}} لـ {{label}} {{title}}. هل أنت متأكد؟',
     create: 'إنشاء',
     created: 'تمّ الإنشاء',
     createdAt: 'تمّ الإنشاء في',

@@ -201,7 +201,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     copy: 'Copiar',
     copying: 'Copiando',
     copyWarning:
-      'Você está prestes a copiar dados de {{from}} para {{to}}. Isso substituirá quaisquer dados existentes em {{to}} e o redirecionará para continuar editando este local. Tem certeza de que deseja continuar?',
+      'Você está prestes a sobrescrever {{to}} com {{from}} para {{label}} {{title}}. Tem certeza?',
     create: 'Criar',
     created: 'Criado',
     createdAt: 'Criado Em',

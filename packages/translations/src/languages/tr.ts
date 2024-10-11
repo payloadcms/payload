@@ -203,7 +203,7 @@ export const trTranslations: DefaultTranslationsObject = {
     copy: 'Kopyala',
     copying: 'Kopyalama',
     copyWarning:
-      "{{from}}'dan {{to}}'ya veri kopyalamak üzeresiniz. Bu, mevcut {{to}} verilerinin üzerine yazacak ve sizi bu yerel ayarı düzenlemeye devam etmek için yönlendirecektir. Devam etmek istediğinizden emin misiniz?",
+      "{{to}}'yu {{from}} ile {{label}} {{title}} için üstüne yazmak üzeresiniz. Emin misiniz?",
     create: 'Oluştur',
     created: 'Oluşturma tarihi',
     createdAt: 'Oluşturma tarihi',

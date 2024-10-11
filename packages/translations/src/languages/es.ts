@@ -204,7 +204,7 @@ export const esTranslations: DefaultTranslationsObject = {
     copy: 'Copiar',
     copying: 'Copiando',
     copyWarning:
-      'Está a punto de copiar datos de {{from}} a {{to}}. Esto sobrescribirá cualquier dato existente de {{to}} y le redirigirá para continuar editando esta configuración regional. ¿Está seguro de que desea continuar?',
+      'Estás a punto de sobrescribir {{to}} con {{from}} para {{label}} {{title}}. ¿Estás seguro?',
     create: 'Crear',
     created: 'Creado',
     createdAt: 'Fecha de creación',

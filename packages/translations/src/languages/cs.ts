@@ -198,8 +198,7 @@ export const csTranslations: DefaultTranslationsObject = {
     copied: 'Zkopírováno',
     copy: 'Kopírovat',
     copying: 'Kopírování',
-    copyWarning:
-      'Chystáte se kopírovat data z {{from}} do {{to}}. To přepíše jakákoli existující data {{to}} a přesměruje vás na pokračování v úpravách tohoto jazyka. Opravdu chcete pokračovat?',
+    copyWarning: 'Chystáte se přepsat {{to}} s {{from}} pro {{label}} {{title}}. Jste si jistý?',
     create: 'Vytvořit',
     created: 'Vytvořeno',
     createdAt: 'Vytvořeno v',

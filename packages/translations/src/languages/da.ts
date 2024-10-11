@@ -199,7 +199,7 @@ export const daTranslations: DefaultTranslationsObject = {
     copy: 'Kopier',
     copying: 'Kopiering',
     copyWarning:
-      'Du er ved at kopiere data fra {{from}} til {{to}}. Dette vil overskrive eventuelle eksisterende {{to}} data og omdirigere dig til at fortsætte med at redigere denne lokalitet. Er du sikker på, du vil fortsætte?',
+      'Du er lige ved at overskrive {{to}} med {{from}} for {{label}} {{title}}. Er du sikker?',
     create: 'Opret',
     created: 'Oprettet',
     createdAt: 'Oprettet til',

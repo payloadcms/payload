@@ -1,12 +1,22 @@
 @import '../../scss/styles.scss';
 
 .copy-locale-data {
+  position: relative;
+
   &__pill {
     padding: 4px 12px;
   }
 
   &__icon {
     transition: all 200ms ease-in-out;
+  }
+
+  &__overlay {
+    @include btn-reset;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    z-index: 9;
   }
 
   &__modal {

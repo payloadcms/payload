@@ -198,8 +198,7 @@ export const koTranslations: DefaultTranslationsObject = {
     copied: '복사됨',
     copy: '복사',
     copying: '복사하기',
-    copyWarning:
-      '당신은 {{from}}에서 {{to}}로 데이터를 복사하려고 합니다. 이 작업은 기존의 {{to}} 데이터를 덮어씌우고 이 로케일의 편집을 계속하도록 리디렉션합니다. 계속 진행하시겠습니까?',
+    copyWarning: '{{label}} {{title}}에 대해 {{from}}으로 {{to}}를 덮어쓰려고 합니다. 확실합니까?',
     create: '생성',
     created: '생성됨',
     createdAt: '생성 일시',

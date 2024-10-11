@@ -202,7 +202,7 @@ export const huTranslations: DefaultTranslationsObject = {
     copy: 'Másolás',
     copying: 'Másolás',
     copyWarning:
-      'Ön hamarosan adatokat másol {{from}}-ból {{to}}-ba. Ez felülírja a meglévő {{to}} adatokat és átirányítja Önt, hogy folytassa a helyi adatok szerkesztését. Biztosan folytatni szeretné?',
+      'Ön azzal készül felülírni {{to}} -t {{from}} -mal a {{label}} {{title}} számára. Biztos benne?',
     create: 'Létrehozás',
     created: 'Létrehozva',
     createdAt: 'Létrehozva:',

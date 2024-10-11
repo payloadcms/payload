@@ -199,8 +199,7 @@ export const slTranslations = {
     copied: 'Kopirano',
     copy: 'Kopiraj',
     copying: 'Kopiranje',
-    copyWarning:
-      'Kopirali boste podatke iz {{from}} v {{to}}. To bo prepisalo vse obstoječe podatke {{to}} in vas preusmerilo k nadaljnjemu urejanju tega jezika. Ali ste prepričani, da želite nadaljevati?',
+    copyWarning: 'Prepisali boste {{to}} z {{from}} za {{label}} {{title}}. Ste prepričani?',
     create: 'Ustvari',
     created: 'Ustvarjeno',
     createdAt: 'Ustvarjeno',
