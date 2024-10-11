@@ -56,9 +56,5 @@ export async function createGlobalVersion<T extends TypeWithID>(
     })
   }
 
-  if ('createdAt' in result.version) {
-    result.createdAt = result.version.createdAt as string
-  }
-
   return result
 }
