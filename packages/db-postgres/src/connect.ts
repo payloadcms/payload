@@ -77,7 +77,10 @@ export const connect: Connect = async function connect(
     }
   } catch (err) {
     if (err.message?.match(/database .* does not exist/i) && this.autoDatabaseCreate) {
-      this.payload.logger.info(`Database ${err.message}, creating...`)
+      // capitalize first char of the err msg
+      this.payload.logger.info(
+        `${err.message.charAt(0).toUpperCase() + err.message.slice(1)}, creating...`,
+      )
       const isCreated = await this.createDatabase()
 
       if (isCreated) {
