@@ -45,4 +45,8 @@ const baseJestConfig = {
   reporters: ['jest-ci-spec-reporter', path.resolve(dirname, './test/jestreporter.cjs')],
 }
 
+if (process.env.CI) {
+  customJestConfig.reporters.push(['github-actions', { silent: false }], 'summary')
+}
+
 export default baseJestConfig
