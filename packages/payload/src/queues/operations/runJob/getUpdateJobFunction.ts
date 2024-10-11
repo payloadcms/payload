@@ -10,7 +10,6 @@ export function getUpdateJobFunction(job: BaseJob, req: PayloadRequest): UpdateJ
       collection: 'payload-jobs',
       data: jobData,
       depth: 0,
-      req,
     })) as BaseJob
 
     // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function

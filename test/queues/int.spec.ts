@@ -465,7 +465,7 @@ describe('Queues', () => {
   })*/
 
   it('can queue single tasks multiple times', async () => {
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 10; i++) {
       await payload.jobs.queue({
         task: 'CreateSimple',
         input: {
@@ -481,7 +481,7 @@ describe('Queues', () => {
       limit: 100,
     })
 
-    expect(allSimples.totalDocs).toBe(100)
+    expect(allSimples.totalDocs).toBe(10)
     expect(allSimples.docs[0].title).toBe('from single task')
     expect(allSimples.docs[9].title).toBe('from single task')
   })

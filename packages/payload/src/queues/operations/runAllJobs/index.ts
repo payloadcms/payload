@@ -147,7 +147,7 @@ export const runAllJobs = async ({
     delete newReq.transactionID
     // Create a transaction. While every tasks will initialize its own transaction later on, anything that
     // runs in between tasks within a JS workflow should be part of the same transaction
-    await initTransaction(newReq)
+    //await initTransaction(newReq)
     const result = await runJob({
       job,
       // Each job should have its own transaction. Can't have multiple running jobs in parallel on same transaction
@@ -155,7 +155,7 @@ export const runAllJobs = async ({
       workflowConfig,
     })
     // Commit transaction
-    await commitTransaction(newReq)
+    //await commitTransaction(newReq)
     return { id: job.id, result }
   })
 
