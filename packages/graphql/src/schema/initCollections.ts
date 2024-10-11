@@ -242,7 +242,6 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
       args: {
         id: { type: new GraphQLNonNull(idType) },
         autosave: { type: GraphQLBoolean },
-        limit: { type: GraphQLInt },
         ...(updateMutationInputType
           ? { data: { type: collection.graphQL.updateMutationInputType } }
           : {}),
