@@ -67,7 +67,7 @@ const sendEmail = async (beforeChangeData: any, formConfig: PluginConfig): Promi
         let emailsToSend = formattedEmails
 
         if (typeof beforeEmail === 'function') {
-          emailsToSend = await beforeEmail(formattedEmails)
+          emailsToSend = await beforeEmail(formattedEmails, payload, {form, submissionData})
         }
 
         // const log = emailsToSend.map(({ html, ...rest }) => ({ ...rest }))
