@@ -98,10 +98,10 @@ export const createDatabase = async function (this: BasePostgresAdapter, args: A
 
     return true
   } catch (err) {
-    this.payload.logger.error(
-      `Error: failed to create database ${dbName}. Details: ${err.message}`,
+    this.payload.logger.error({
       err,
-    )
+      msg: `Error: failed to create database ${dbName}. Details: ${err.message}`,
+    })
 
     return false
   } finally {
