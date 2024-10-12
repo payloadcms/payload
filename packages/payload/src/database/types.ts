@@ -1,5 +1,12 @@
 import type { TypeWithID } from '../collections/config/types.js'
-import type { Document, JoinQuery, Payload, PayloadRequest, Where } from '../types/index.js'
+import type {
+  Document,
+  JoinQuery,
+  Payload,
+  PayloadRequest,
+  SelectType,
+  Where,
+} from '../types/index.js'
 import type { TypeWithVersion } from '../versions/types.js'
 
 export type { TypeWithVersion }
@@ -191,6 +198,7 @@ export type FindOneArgs = {
   joins?: JoinQuery
   locale?: string
   req: PayloadRequest
+  select?: SelectType
   where?: Where
 }
 
@@ -206,6 +214,7 @@ export type FindArgs = {
   pagination?: boolean
   projection?: Record<string, unknown>
   req: PayloadRequest
+  select?: SelectType
   skip?: number
   sort?: string
   versions?: boolean

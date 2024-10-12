@@ -45,7 +45,7 @@ describe('Select Fields', () => {
       })
     })
 
-    it('should select number', async () => {
+    it('should select only number', async () => {
       const res = await payload.findByID({
         collection: 'posts',
         id: postId,

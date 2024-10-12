@@ -98,6 +98,7 @@ export const findByIDOperation = async <
       req: {
         transactionID: req.transactionID,
       } as PayloadRequest,
+      select,
       where: combineQueries({ id: { equals: id } }, accessResult),
     }
 
