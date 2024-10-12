@@ -33,7 +33,7 @@ describe('Select Fields', () => {
   })
 
   describe('Local API - Base (Include mode)', () => {
-    it('should select id as default', async () => {
+    it('should select only id as default', async () => {
       const res = await payload.findByID({
         collection: 'posts',
         id: postId,
@@ -241,7 +241,7 @@ describe('Select Fields', () => {
   })
 
   describe('Local API - Base (Exclude mode)', () => {
-    it('should exclude text field', async () => {
+    it('should exclude only text field', async () => {
       const res = await payload.findByID({
         collection: 'posts',
         id: postId,
@@ -354,7 +354,10 @@ describe('Select Fields', () => {
 
       expect(res).toStrictEqual({
         ...post,
-        array: post.array.map((item) => ({ id: item.id })),
+        array: post.array.map((item) => ({
+          id: item.id,
+          number: item.number,
+        })),
       })
     })
 
@@ -388,6 +391,7 @@ describe('Select Fields', () => {
       expect(res).toStrictEqual({
         ...post,
         blocks: post.blocks.map((block) =>
+          // eslint-disable-next-line jest/no-conditional-in-test
           block.blockType === 'cta' ? { id: block.id, blockType: block.blockType } : block,
         ),
       })
@@ -419,6 +423,7 @@ describe('Select Fields', () => {
 function createPost() {
   return payload.create({
     collection: 'posts',
+    depth: 0,
     data: {
       number: 1,
       text: 'text',

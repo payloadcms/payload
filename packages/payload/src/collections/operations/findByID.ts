@@ -3,6 +3,7 @@ import type { CollectionSlug, JoinQuery } from '../../index.js'
 import type {
   ApplyDisableErrors,
   PayloadRequest,
+  SelectType,
   TransformCollectionWithSelect,
 } from '../../types/index.js'
 import type {
@@ -30,6 +31,7 @@ export type Arguments = {
   joins?: JoinQuery
   overrideAccess?: boolean
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
 }
 
@@ -72,6 +74,7 @@ export const findByIDOperation = async <
       overrideAccess = false,
       req: { fallbackLocale, locale, t },
       req,
+      select,
       showHiddenFields,
     } = args
 
@@ -205,6 +208,7 @@ export const findByIDOperation = async <
       locale,
       overrideAccess,
       req,
+      select,
       showHiddenFields,
     })
 

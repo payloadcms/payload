@@ -151,6 +151,8 @@ export type SelectExcludeType = {
   [k: string]: false | SelectExcludeType
 }
 
+export type SelectMode = 'exclude' | 'include'
+
 export type SelectType = SelectExcludeType | SelectIncludeType
 
 export type ApplyDisableErrors<T, DisableErrors extends boolean> = DisableErrors extends true

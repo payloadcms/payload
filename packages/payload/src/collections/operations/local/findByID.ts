@@ -57,6 +57,7 @@ export default async function findByIDLocal<
     includeLockStatus,
     joins,
     overrideAccess = true,
+    select,
     showHiddenFields,
   } = options
 
@@ -79,6 +80,7 @@ export default async function findByIDLocal<
     joins,
     overrideAccess,
     req: await createLocalReq(options, payload),
+    select,
     showHiddenFields,
   })
 }
