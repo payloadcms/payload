@@ -46,6 +46,11 @@
       margin: 0 0 0 var(--base);
     }
 
+    &__modifiedCheckBox {
+      margin-left: 2rem;
+      margin-top: 0.2rem;
+    }
+
     @include mid-break {
       &__intro,
       &__header {
@@ -57,10 +62,6 @@
         gap: calc(var(--base) / 4);
       }
 
-      &__modifiedCheckBox {
-        margin-left: 2rem;
-        margin-top: 0.2rem;
-      }
 
       &__restore {
         margin: calc(var(--base) * 0.5) 0 0 0;
