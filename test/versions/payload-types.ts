@@ -20,6 +20,7 @@ export interface Config {
     'version-posts': VersionPost;
     'custom-ids': CustomId;
     users: User;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -113,13 +114,35 @@ export interface DraftPost {
   radio?: 'test' | null;
   select?: ('test1' | 'test2')[] | null;
   blocksField?:
-    | {
-        text?: string | null;
-        localized?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block';
-      }[]
+    | (
+        | {
+            text?: string | null;
+            localized?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'block';
+          }
+        | {
+            richTextField?: {
+              root: {
+                type: string;
+                children: {
+                  type: string;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'richTextBlock';
+          }
+      )[]
     | null;
   relation?: (string | null) | DraftPost;
   updatedAt: string;
@@ -154,14 +177,10 @@ export interface DraftWithMaxPost {
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "localized-posts".
  */
-type LocalizedString = {
-  [k: string]: string;
-};
-
 export interface LocalizedPost {
   id: string;
-  text?: string | LocalizedString | null;
-  description?: string | LocalizedString | null;
+  text?: string | null;
+  description?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -192,6 +211,57 @@ export interface User {
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'disable-publish';
+        value: string | DisablePublish;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'autosave-posts';
+        value: string | AutosavePost;
+      } | null)
+    | ({
+        relationTo: 'draft-posts';
+        value: string | DraftPost;
+      } | null)
+    | ({
+        relationTo: 'draft-with-max-posts';
+        value: string | DraftWithMaxPost;
+      } | null)
+    | ({
+        relationTo: 'localized-posts';
+        value: string | LocalizedPost;
+      } | null)
+    | ({
+        relationTo: 'version-posts';
+        value: string | VersionPost;
+      } | null)
+    | ({
+        relationTo: 'custom-ids';
+        value: string | CustomId;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -293,6 +363,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

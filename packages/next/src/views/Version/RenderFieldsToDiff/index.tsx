@@ -1,7 +1,7 @@
 'use client'
 import type { DiffMethod } from 'react-diff-viewer-continued'
 
-import _ from 'lodash'
+import { dequal } from 'dequal/lite'
 import { fieldAffectsData } from 'payload/shared'
 import React from 'react'
 
@@ -52,7 +52,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
               ? JSON.stringify(comparison?.[fieldName])
               : comparison?.[fieldName]
 
-            if (modifiedOnly && (_.isEqual(versionValue, comparisonValue) || field.admin?.hidden)) {
+            if (modifiedOnly && (dequal(versionValue, comparisonValue) || field.admin?.hidden)) {
               return null
             }
 
