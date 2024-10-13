@@ -59,7 +59,7 @@ export const runAllJobs = async ({
           },
           {
             waitUntil: {
-              less_than: new Date(),
+              less_than: new Date().toISOString(),
             },
           },
         ],
