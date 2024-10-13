@@ -416,6 +416,7 @@ export const huTranslations: DefaultTranslationsObject = {
     draft: 'Piszkozat',
     draftSavedSuccessfully: 'A piszkozat sikeresen mentve.',
     lastSavedAgo: 'Utoljára mentve {{distance}} órája',
+    modifiedOnly: undefined,
     noFurtherVersionsFound: 'További verziók nem találhatók',
     noRowsFound: 'Nem található {{label}}',
     noRowsSelected: 'Nincs {{címke}} kiválasztva',

@@ -416,6 +416,7 @@ export const esTranslations: DefaultTranslationsObject = {
     draft: 'Borrador',
     draftSavedSuccessfully: 'Borrador guardado con éxito.',
     lastSavedAgo: 'Guardado por última vez hace {{distance}}',
+    modifiedOnly: undefined,
     noFurtherVersionsFound: 'No se encontraron más versiones',
     noRowsFound: 'No encontramos {{label}}',
     noRowsSelected: 'No se ha seleccionado ninguna {{etiqueta}}',

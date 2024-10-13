@@ -412,6 +412,7 @@ export const plTranslations: DefaultTranslationsObject = {
     draft: 'Szkic',
     draftSavedSuccessfully: 'Wersja robocza została pomyślnie zapisana.',
     lastSavedAgo: 'Ostatnio zapisane {{distance}} temu',
+    modifiedOnly: undefined,
     noFurtherVersionsFound: 'Nie znaleziono dalszych wersji',
     noRowsFound: 'Nie znaleziono {{label}}',
     noRowsSelected: 'Nie wybrano {{etykieta}}',

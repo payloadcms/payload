@@ -413,6 +413,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     draft: 'Rascunho',
     draftSavedSuccessfully: 'Rascunho salvo com sucesso.',
     lastSavedAgo: 'Última gravação há {{distance}}',
+    modifiedOnly: undefined,
     noFurtherVersionsFound: 'Nenhuma outra versão encontrada',
     noRowsFound: 'Nenhum(a) {{label}} encontrado(a)',
     noRowsSelected: 'Nenhum {{rótulo}} selecionado',
