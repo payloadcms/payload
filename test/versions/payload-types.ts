@@ -114,35 +114,13 @@ export interface DraftPost {
   radio?: 'test' | null;
   select?: ('test1' | 'test2')[] | null;
   blocksField?:
-    | (
-        | {
-            text?: string | null;
-            localized?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'block';
-          }
-        | {
-            richTextField?: {
-              root: {
-                type: string;
-                children: {
-                  type: string;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'richTextBlock';
-          }
-      )[]
+    | {
+        text?: string | null;
+        localized?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
     | null;
   relation?: (string | null) | DraftPost;
   updatedAt: string;

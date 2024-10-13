@@ -1,19 +1,6 @@
-import type { Block, CollectionConfig } from 'payload'
-
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import type { CollectionConfig } from 'payload'
 
 import { draftCollectionSlug } from '../slugs.js'
-
-export const RichTextBlock: Block = {
-  fields: [
-    {
-      name: 'richTextField',
-      type: 'richText',
-      editor: lexicalEditor(),
-    },
-  ],
-  slug: 'richTextBlock',
-}
 
 const DraftPosts: CollectionConfig = {
   slug: draftCollectionSlug,
@@ -118,7 +105,6 @@ const DraftPosts: CollectionConfig = {
             },
           ],
         },
-        RichTextBlock,
       ],
     },
     {
