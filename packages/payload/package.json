@@ -126,7 +126,7 @@
     "react-helmet": "6.1.0",
     "react-i18next": "11.18.6",
     "react-image-crop": "10.1.8",
-    "react-router-dom": "5.3.4",
+    "react-router-dom": "6.27.0",
     "react-router-navigation-prompt": "1.9.6",
     "react-select": "5.7.4",
     "react-toastify": "10.0.5",

@@ -841,11 +841,11 @@ importers:
         specifier: 10.1.8
         version: 10.1.8(react@18.2.0)
       react-router-dom:
-        specifier: 5.3.4
-        version: 5.3.4(react@18.2.0)
+        specifier: 6.27.0
+        version: 6.27.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-router-navigation-prompt:
         specifier: 1.9.6
-        version: 1.9.6(react-router-dom@5.3.4(react@18.2.0))(react@18.2.0)
+        version: 1.9.6(react-router-dom@6.27.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
       react-select:
         specifier: 5.7.4
         version: 5.7.4(@types/react@18.2.15)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -2252,9 +2252,11 @@ packages:
 
   '@esbuild-kit/core-utils@3.3.2':
     resolution: {integrity: sha512-sPRAnw9CdSsRmEtnsl2WXWdyquogVpB3yZ3dgwJfe8zrOzTsV7cJvmwrKVa+0ma5BoiGJ+BoqkMvawbayKUsqQ==}
+    deprecated: 'Merged into tsx: https://tsx.is'
 
   '@esbuild-kit/esm-loader@2.6.5':
     resolution: {integrity: sha512-FxEMIkJKnodyA1OaCUoEvbYRkoZlLZ4d/eXFu9Fh8CbBBgP5EmZxrfTRyN0qpXZ4vOvqnE5YdRdcrmUUXuU+dA==}
+    deprecated: 'Merged into tsx: https://tsx.is'
 
   '@esbuild/aix-ppc64@0.19.12':
     resolution: {integrity: sha512-bmoCYyWdEL3wDQIVbcyzRyeKLgk2WtWLTWz1ZIAZF/EGbNOwSA6ew3PftJ1PqMiOOGu0OyFMzG53L0zqIpPeNA==}
@@ -3033,6 +3035,10 @@ packages:
     engines: {node: '>=16'}
     peerDependencies:
       release-it: ^16.0.0
+
+  '@remix-run/router@1.20.0':
+    resolution: {integrity: sha512-mUnk8rPJBI9loFDZ+YzPGdeniYK+FTmRD1TMCz7ev2SNIozyKKpnGgsxO34u6Z4z/t0ITuu7voi/AshfsGsgFg==}
+    engines: {node: '>=14.0.0'}
 
   '@rollup/plugin-image@3.0.3':
     resolution: {integrity: sha512-qXWQwsXpvD4trSb8PeFPFajp8JLpRtqqOeNYRUKnEQNHm7e5UP7fuSRcbjQAJ7wDZBbnJvSdY5ujNBQd9B1iFg==}
@@ -5800,6 +5806,7 @@ packages:
   eslint@8.48.0:
     resolution: {integrity: sha512-sb6DLeIuRXxeM1YljSe1KEx9/YYeZFQWcV8Rq9HfigmdDEugjLEVEa1ozDjL6YDjBpQHPJxJzze+alxi4T3OLg==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
 
   esniff@2.0.1:
@@ -7286,6 +7293,7 @@ packages:
 
   libsql@0.1.34:
     resolution: {integrity: sha512-LGofp7z7gi1Td6vu2GxaA4WyvSPEkuFn0f/ePSti1TsAlBU0LWxdk+bj9D8nqswzxiqe5wpAyTLhVzTIYSyXEA==}
+    cpu: [x64, arm64]
     os: [darwin, linux, win32]
 
   lie@3.1.1:
@@ -8965,6 +8973,13 @@ packages:
     peerDependencies:
       react: '>=15'
 
+  react-router-dom@6.27.0:
+    resolution: {integrity: sha512-+bvtFWMC0DgAFrfKXKG9Fc+BcXWRUO1aJIihbB79xaeq0v5UzfvnM5houGUm1Y461WVRcgAQ+Clh5rdb1eCx4g==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      react: '>=16.8'
+      react-dom: '>=16.8'
+
   react-router-navigation-prompt@1.9.6:
     resolution: {integrity: sha512-l0sAtbroHK8i1/Eyy29XcrMpBEt0R08BaScgMUt8r5vWWbLz7G0ChOikayTCQm7QgDFsHw8gVnxDJb7TBZCAKg==}
     peerDependencies:
@@ -8975,6 +8990,12 @@ packages:
     resolution: {integrity: sha512-Ys9K+ppnJah3QuaRiLxk+jDWOR1MekYQrlytiXxC1RyfbdsZkS5pvKAzCCr031xHixZwpnsYNT5xysdFHQaYsA==}
     peerDependencies:
       react: '>=15'
+
+  react-router@6.27.0:
+    resolution: {integrity: sha512-YA+HGZXz4jaAkVoYBE98VQl+nVzI+cVI2Oj/06F5ZM+0u3TgedN9Y9kmMRo2mnkSK2nCpNQn0DVob4HCsY/WLw==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      react: '>=16.8'
 
   react-select@5.7.4:
     resolution: {integrity: sha512-NhuE56X+p9QDFh4BgeygHFIvJJszO1i1KSkg/JPcIJrbovyRtI+GuOEa4XzFCEpZRAEoEI8u/cAHK+jG/PgUzQ==}
@@ -9044,8 +9065,8 @@ packages:
     resolution: {integrity: sha512-yjavECdqeZ3GLXNgRXgeQEdz9fvDDkNKyHnbHRFtOr7/LcfgBcmct7t/ET+HaCTqfh06OzoAxrkN/IfjJBVe+g==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
-  readable-stream@https://codeload.github.com/Raynos/readable-stream/tar.gz/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f:
-    resolution: {tarball: https://codeload.github.com/Raynos/readable-stream/tar.gz/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f}
+  readable-stream@git+https://git@github.com:Raynos/readable-stream.git#b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f:
+    resolution: {commit: b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f, repo: git@github.com:Raynos/readable-stream.git, type: git}
     version: 0.3.1
 
   readable-web-to-node-stream@3.0.2:
@@ -12739,6 +12760,8 @@ snapshots:
       conventional-recommended-bump: 7.0.1
       release-it: 16.1.3
       semver: 7.5.1
+
+  '@remix-run/router@1.20.0': {}
 
   '@rollup/plugin-image@3.0.3(rollup@3.29.4)':
     dependencies:
@@ -20128,10 +20151,17 @@ snapshots:
       tiny-invariant: 1.3.3
       tiny-warning: 1.0.3
 
-  react-router-navigation-prompt@1.9.6(react-router-dom@5.3.4(react@18.2.0))(react@18.2.0):
+  react-router-dom@6.27.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      '@remix-run/router': 1.20.0
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      react-router: 6.27.0(react@18.2.0)
+
+  react-router-navigation-prompt@1.9.6(react-router-dom@6.27.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0):
     dependencies:
       react: 18.2.0
-      react-router-dom: 5.3.4(react@18.2.0)
+      react-router-dom: 6.27.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
 
   react-router@5.3.4(react@18.2.0):
     dependencies:
@@ -20145,6 +20175,11 @@ snapshots:
       react-is: 16.13.1
       tiny-invariant: 1.3.3
       tiny-warning: 1.0.3
+
+  react-router@6.27.0(react@18.2.0):
+    dependencies:
+      '@remix-run/router': 1.20.0
+      react: 18.2.0
 
   react-select@5.7.4(@types/react@18.2.15)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
@@ -20225,7 +20260,7 @@ snapshots:
   read-stream@2.1.1:
     dependencies:
       process: 0.5.2
-      readable-stream: https://codeload.github.com/Raynos/readable-stream/tar.gz/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f
+      readable-stream: git+https://git@github.com:Raynos/readable-stream.git#b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f
 
   readable-stream@1.0.34:
     dependencies:
@@ -20258,7 +20293,7 @@ snapshots:
       process: 0.11.10
       string_decoder: 1.3.0
 
-  readable-stream@https://codeload.github.com/Raynos/readable-stream/tar.gz/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f: {}
+  readable-stream@git+https://git@github.com:Raynos/readable-stream.git#b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f: {}
 
   readable-web-to-node-stream@3.0.2:
     dependencies:
