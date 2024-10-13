@@ -2,6 +2,7 @@ import { buildVersionCollectionFields, type PayloadRequest, type UpdateVersion }
 
 import type { MongooseAdapter } from './index.js'
 
+import { sanitizeDocument } from './utilities/sanitizeDocument.js'
 import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
 import { withSession } from './withSession.js'
 
@@ -34,14 +35,7 @@ export const updateVersion: UpdateVersion = async function updateVersion(
 
   const doc = await VersionModel.findOneAndUpdate(query, sanitizedData, options)
 
-  const result = JSON.parse(JSON.stringify(doc))
+  sanitizeDocument(doc)
 
-  const verificationToken = doc._verificationToken
-
-  // custom id type reset
-  result.id = result._id
-  if (verificationToken) {
-    result._verificationToken = verificationToken
-  }
-  return result
+  return doc
 }

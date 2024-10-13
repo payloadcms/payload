@@ -6,7 +6,7 @@ import { flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
+import { sanitizeDocument } from './utilities/sanitizeDocument.js'
 import { withSession } from './withSession.js'
 
 export const findVersions: FindVersions = async function findVersions(
@@ -104,13 +104,7 @@ export const findVersions: FindVersions = async function findVersions(
   }
 
   const result = await Model.paginate(query, paginationOptions)
-  const docs = JSON.parse(JSON.stringify(result.docs))
+  result.docs.forEach((doc) => sanitizeDocument(doc))
 
-  return {
-    ...result,
-    docs: docs.map((doc) => {
-      doc.id = doc._id
-      return sanitizeInternalFields(doc)
-    }),
-  }
+  return result
 }

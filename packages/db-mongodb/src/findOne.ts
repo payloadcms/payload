@@ -1,10 +1,10 @@
 import type { MongooseQueryOptions } from 'mongoose'
-import type { Document, FindOne, PayloadRequest } from 'payload'
+import type { FindOne, PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
+import { sanitizeDocument } from './utilities/sanitizeDocument.js'
 import { withSession } from './withSession.js'
 
 export const findOne: FindOne = async function findOne(
@@ -45,11 +45,7 @@ export const findOne: FindOne = async function findOne(
     return null
   }
 
-  let result: Document = JSON.parse(JSON.stringify(doc))
+  sanitizeDocument(doc)
 
-  // custom id type reset
-  result.id = result._id
-  result = sanitizeInternalFields(result)
-
-  return result
+  return doc
 }

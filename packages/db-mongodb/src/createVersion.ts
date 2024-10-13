@@ -1,13 +1,9 @@
 import mongoose from 'mongoose'
-import {
-  buildVersionCollectionFields,
-  type CreateVersion,
-  type Document,
-  type PayloadRequest,
-} from 'payload'
+import { buildVersionCollectionFields, type CreateVersion, type PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { sanitizeDocument } from './utilities/sanitizeDocument.js'
 import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
 import { withSession } from './withSession.js'
 
@@ -46,7 +42,7 @@ export const createVersion: CreateVersion = async function createVersion(
     ),
   })
 
-  const [doc] = await VersionModel.create([data], options, req)
+  let [doc] = await VersionModel.create([data], options, req)
 
   const parentQuery = {
     $or: [
@@ -85,13 +81,8 @@ export const createVersion: CreateVersion = async function createVersion(
     options,
   )
 
-  const result: Document = JSON.parse(JSON.stringify(doc))
-  const verificationToken = doc._verificationToken
+  doc = doc.toObject()
+  sanitizeDocument(doc)
 
-  // custom id type reset
-  result.id = result._id
-  if (verificationToken) {
-    result._verificationToken = verificationToken
-  }
-  return result
+  return doc
 }

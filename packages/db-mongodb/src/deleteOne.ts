@@ -1,8 +1,8 @@
-import type { DeleteOne, Document, PayloadRequest } from 'payload'
+import type { DeleteOne, PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
+import { sanitizeDocument } from './utilities/sanitizeDocument.js'
 import { withSession } from './withSession.js'
 
 export const deleteOne: DeleteOne = async function deleteOne(
@@ -19,11 +19,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
 
   const doc = await Model.findOneAndDelete(query, options).lean()
 
-  let result: Document = JSON.parse(JSON.stringify(doc))
+  sanitizeDocument(doc)
 
-  // custom id type reset
-  result.id = result._id
-  result = sanitizeInternalFields(result)
-
-  return result
+  return doc
 }

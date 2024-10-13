@@ -6,7 +6,7 @@ import { combineQueries, flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
+import { sanitizeDocument } from './utilities/sanitizeDocument.js'
 import { withSession } from './withSession.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
@@ -90,18 +90,12 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   }
 
   const result = await VersionModel.paginate(versionQuery, paginationOptions)
-  const docs = JSON.parse(JSON.stringify(result.docs))
 
-  return {
-    ...result,
-    docs: docs.map((doc) => {
-      doc = {
-        _id: doc.parent,
-        id: doc.parent,
-        ...doc.version,
-      }
+  result.docs.forEach((doc, index) => {
+    doc.version._id = doc.parent
+    sanitizeDocument(doc.version)
+    result.docs[index] = doc.version
+  })
 
-      return sanitizeInternalFields(doc)
-    }),
-  }
+  return result
 }
