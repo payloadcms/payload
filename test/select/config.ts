@@ -1,21 +1,27 @@
-import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { LocalizedPostsCollection } from './collections/LocalizedPosts/index.js'
 import { PostsCollection } from './collections/Posts/index.js'
+import { VersionedPostsCollection } from './collections/VersionedPosts/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
   // ...extend config here
-  collections: [PostsCollection],
+  collections: [PostsCollection, LocalizedPostsCollection, VersionedPostsCollection],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
     },
+  },
+  localization: {
+    locales: ['en', 'de'],
+    defaultLocale: 'en',
   },
   editor: lexicalEditor({
     features: ({ defaultFeatures }) => [...defaultFeatures],

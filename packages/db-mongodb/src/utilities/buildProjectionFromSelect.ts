@@ -1,5 +1,5 @@
 import {
-  deepCopyObject,
+  deepCopyObjectSimple,
   type Field,
   type FieldAffectingData,
   type SelectMode,
@@ -182,10 +182,6 @@ const traverseFields = ({
           if (blockSelectMode === 'include') {
             blocksSelect[block.slug]['id'] = true
             blocksSelect[block.slug]['blockType'] = true
-
-            // for (const name of field[RepetableBlocksFieldNames]) {
-            //   blocksSelect[block.slug][name] = true
-            // }
           }
 
           traverseFields({
@@ -224,7 +220,7 @@ export const buildProjectionFromSelect = ({
     fields,
     projection,
     // Clone to safely mutate it later
-    select: deepCopyObject(select),
+    select: deepCopyObjectSimple(select),
     selectMode: getSelectMode(select),
   })
 
