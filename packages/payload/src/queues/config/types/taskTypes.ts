@@ -128,7 +128,7 @@ export type TaskConfig<
    * If you are using large dependencies within your job, you might prefer to pass the string path
    * because that will avoid bundling large dependencies in your Next.js app.
    */
-  handler: string | TaskHandler<TTaskSlugOrInputOutput> // TODO: Rename to handler
+  handler: string | TaskHandler<TTaskSlugOrInputOutput>
   /**
    * Define the input field schema - payload will generate a type for this schema.
    */
