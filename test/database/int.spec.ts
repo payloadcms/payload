@@ -501,6 +501,45 @@ describe('database', () => {
     })
   })
 
+  describe('local API', () => {
+    it('should support `limit` arg in bulk updates', async () => {
+      for (let i = 0; i < 10; i++) {
+        await payload.create({
+          collection,
+          data: {
+            title: 'hello',
+          },
+        })
+      }
+
+      const updateResult = await payload.update({
+        collection,
+        data: {
+          title: 'world',
+        },
+        where: {
+          title: { equals: 'hello' },
+        },
+        limit: 5,
+      })
+
+      const findResult = await payload.find({
+        collection,
+        where: {
+          title: { exists: true },
+        },
+      })
+
+      const helloDocs = findResult.docs.filter((doc) => doc.title === 'hello')
+      const worldDocs = findResult.docs.filter((doc) => doc.title === 'world')
+
+      expect(updateResult.docs).toHaveLength(5)
+      expect(updateResult.docs[0].title).toStrictEqual('world')
+      expect(helloDocs).toHaveLength(5)
+      expect(worldDocs).toHaveLength(5)
+    })
+  })
+
   describe('defaultValue', () => {
     it('should set default value from db.create', async () => {
       // call the db adapter create directly to bypass Payload's default value assignment

@@ -41,6 +41,7 @@ export type BaseOptions<TSlug extends CollectionSlug> = {
 
 export type ByIDOptions<TSlug extends CollectionSlug> = {
   id: number | string
+  limit?: never
   where?: never
 } & BaseOptions<TSlug>
 
@@ -78,6 +79,7 @@ async function updateLocal<TSlug extends CollectionSlug>(
     draft,
     file,
     filePath,
+    limit,
     overrideAccess = true,
     overrideLock,
     overwriteExistingFiles = false,
@@ -105,6 +107,7 @@ async function updateLocal<TSlug extends CollectionSlug>(
     depth,
     disableTransaction,
     draft,
+    limit,
     overrideAccess,
     overrideLock,
     overwriteExistingFiles,
