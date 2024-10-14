@@ -14,6 +14,7 @@ export type Options<TSlug extends CollectionSlug> = {
    */
   context?: RequestContext
   depth?: number
+  disableTransaction?: boolean
   draft?: boolean
   fallbackLocale?: TypedLocale
   id: number | string
@@ -32,6 +33,7 @@ export async function duplicate<TSlug extends CollectionSlug>(
     id,
     collection: collectionSlug,
     depth,
+    disableTransaction,
     draft,
     overrideAccess = true,
     showHiddenFields,
@@ -57,6 +59,7 @@ export async function duplicate<TSlug extends CollectionSlug>(
     id,
     collection,
     depth,
+    disableTransaction,
     draft,
     overrideAccess,
     req,
