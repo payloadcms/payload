@@ -146,6 +146,7 @@ export const initPage = async ({
   const { collectionConfig, collectionSlug, docID, globalConfig, globalSlug } = getRouteInfo({
     adminRoute,
     config: payload.config,
+    defaultIDType: payload.db.defaultIDType,
     route,
   })
 
