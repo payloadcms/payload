@@ -85,6 +85,7 @@ export const runAllJobs = async ({
       seenByWorker: true,
     },
     depth: req.payload.config.jobs.depth,
+    disableTransaction: true,
     limit,
     showHiddenFields: true,
     where,
