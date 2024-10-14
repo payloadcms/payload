@@ -212,6 +212,7 @@ export {
   useFieldComponents,
 } from '../../providers/FieldComponents/index.js'
 export { UploadEditsProvider, useUploadEdits } from '../../providers/UploadEdits/index.js'
+export { useListRelationships } from '../../elements/Table/RelationshipProvider/index.js'
 export {
   type ColumnPreferences,
   ListInfoProvider,
