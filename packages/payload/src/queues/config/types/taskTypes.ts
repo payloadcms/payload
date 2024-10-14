@@ -64,8 +64,8 @@ export type TaskHandlerResults = {
 export type RunTaskFunction = <TTaskSlug extends keyof TypedJobs['tasks']>(args: {
   id: string
   input?: TaskInput<TTaskSlug>
-  retries?: number
-  task: RetryConfig | TTaskSlug
+  retries?: number | RetryConfig
+  task: TTaskSlug
 }) => Promise<TaskOutput<TTaskSlug>>
 
 export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput extends object>(args: {
