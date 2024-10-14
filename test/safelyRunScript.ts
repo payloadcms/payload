@@ -1,6 +1,8 @@
 import { spawn } from 'child_process'
 import path from 'path'
 
+export let child
+
 /**
  * Sometimes, running certain functions in certain scripts from the command line will cause the script to be terminated
  * with a "Detected unsettled top-level await" error. This often happens if that function imports the payload config.
@@ -29,7 +31,7 @@ export async function safelyRunScriptFunction(
   })
 }
 
-function restartProcess(reason: string): never {
+function restartProcess(reason: string) {
   console.warn(`Restarting process: ${reason}`)
 
   // Get the path to the current script
@@ -37,14 +39,18 @@ function restartProcess(reason: string): never {
   const absoluteScriptPath = path.resolve(scriptPath)
 
   // Spawn a new process
-  const child = spawn('tsx', [absoluteScriptPath, ...process.argv.slice(2)], {
+  child = spawn('tsx', [absoluteScriptPath, ...process.argv.slice(2)], {
     stdio: 'inherit',
-    detached: true,
+    // detached: true,
   })
 
-  // Unref the child process so the parent can exit
-  child.unref()
-
-  // Exit the current process
-  process.exit(0)
+  // Setup signal handlers to ensure child process exits correctly
+  process.on('SIGINT', () => {
+    child.kill('SIGINT') // Forward SIGINT to child process
+    process.exit(0) // Exit the parent process
+  })
+  process.on('SIGTERM', () => {
+    child.kill('SIGTERM') // Forward SIGTERM to child process
+    process.exit(0) // Exit the parent process
+  })
 }
