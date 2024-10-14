@@ -19,8 +19,8 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { formatDate } from '../../utilities/formatDate.js'
 import { Autosave } from '../Autosave/index.js'
-import { CopyLocaleData } from '../CopyLocaleData/index.js'
 import { Button } from '../Button/index.js'
+import { CopyLocaleData } from '../CopyLocaleData/index.js'
 import { DeleteDocument } from '../DeleteDocument/index.js'
 import { DuplicateDocument } from '../DuplicateDocument/index.js'
 import { Gutter } from '../Gutter/index.js'
@@ -118,6 +118,13 @@ export const DocumentControls: React.FC<{
 
   const unsavedDraftWithValidations =
     !id && collectionConfig?.versions?.drafts && collectionConfig.versions?.drafts.validate
+  const hasCollectionLocalizedFields =
+    collectionConfig?.fields?.some((field) => 'localized' in field && field.localized) || false
+
+  const hasGlobalLocalizedFields =
+    globalConfig?.fields?.some((field) => 'localized' in field && field.localized) || false
+
+  const hasLocalizedFields = hasCollectionLocalizedFields || hasGlobalLocalizedFields
 
   return (
     <Gutter className={baseClass}>
@@ -192,7 +199,7 @@ export const DocumentControls: React.FC<{
         </div>
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
-            {localization && (
+            {localization && hasLocalizedFields && (
               <CopyLocaleData
                 CustomComponent={
                   collectionConfig?.admin?.components?.edit?.CopyLocaleButton ||

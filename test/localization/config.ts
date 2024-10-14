@@ -13,6 +13,7 @@ import { LocalizedWithinLocalized } from './collections/LocalizedWithinLocalized
 import { NestedArray } from './collections/NestedArray/index.js'
 import { NestedFields } from './collections/NestedFields/index.js'
 import { NestedToArrayAndBlock } from './collections/NestedToArrayAndBlock/index.js'
+import { NoLocalizedFieldsCollection } from './collections/NoLocalizedFields/index.js'
 import { Tab } from './collections/Tab/index.js'
 import {
   blocksWithLocalizedSameName,
@@ -119,6 +120,7 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    NoLocalizedFieldsCollection,
     ArrayCollection,
     {
       fields: [

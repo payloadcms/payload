@@ -141,7 +141,6 @@ export const DefaultComponent: React.FC = () => {
             {t('general:copy')}
           </Pill>
         }
-        className={baseClass}
         disabled={modified}
         onToggleOpen={(active) => {
           setVisibleDropdown(active)
