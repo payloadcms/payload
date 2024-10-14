@@ -21,6 +21,7 @@ type Args<TSlug extends GlobalSlug> = {
   autosave?: boolean
   data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
   depth?: number
+  disableTransaction?: boolean
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
   overrideAccess?: boolean
@@ -42,6 +43,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
     slug,
     autosave,
     depth,
+    disableTransaction,
     draft: draftArg,
     globalConfig,
     overrideAccess,
@@ -53,7 +55,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
   } = args
 
   try {
-    const shouldCommit = await initTransaction(req)
+    const shouldCommit = !disableTransaction && (await initTransaction(req))
 
     let { data } = args
 
