@@ -3,9 +3,9 @@ import type React from 'react'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { ClientField, Field } from '../fields/config/types.js'
+import type { ClientBlock, ClientField, Field, FieldTypes } from '../fields/config/types.js'
 import type { JsonObject } from '../types/index.js'
-import type { Data, FormState } from './types.js'
+import type { ClientTab, Data, FormState } from './types.js'
 
 export type { CellComponentProps, DefaultCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
@@ -412,10 +412,19 @@ export type PayloadServerAction = (
     | RenderConfigArgs,
 ) => Promise<string>
 
-export type RenderedField = { Field: React.ReactNode; isSidebar: boolean; schemaPath: string }
+export type RenderedField = {
+  Field: React.ReactNode
+  isSidebar: boolean
+  path: string
+  renderedFieldMap?: RenderedFieldMap
+  schemaPath: string
+  type: FieldTypes
+}
+
+export type RenderedFieldMap = Map<string, RenderedField>
 
 export type FieldRow = {
-  renderedFields: RenderedField[]
+  renderedFieldMap: RenderedFieldMap
   RowLabel?: React.ReactNode
 }
 
@@ -426,13 +435,12 @@ export type FieldSlots = {
   Description?: React.ReactNode
   Error?: React.ReactNode
   Label?: React.ReactNode
-  renderedFields?: RenderedField[]
 }
 
-export type EntitySlots = {
+export type DocumentSlots = {
   PreviewButton?: React.ReactNode
   PublishButton?: React.ReactNode
-  renderedFields?: RenderedField[]
+  renderedFieldMap?: RenderedFieldMap
   SaveButton?: React.ReactNode
   SaveDraftButton?: React.ReactNode
 }
@@ -456,3 +464,5 @@ export type {
 } from './views/types.js'
 
 export type FieldSchemaMap = Map<string, Field[]>
+
+export type ClientConfigMap = Map<string, ClientBlock | ClientField | ClientTab>

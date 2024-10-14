@@ -44,7 +44,7 @@ const baseClass = 'collection-edit'
 export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   PreviewButton,
   PublishButton,
-  renderedFields,
+  renderedFieldMap,
   SaveButton,
   SaveDraftButton,
 }) => {
@@ -525,7 +525,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
                 </Fragment>
               )
             }
-            renderedFields={renderedFields}
+            renderedFieldMap={renderedFieldMap}
           />
           {AfterDocument}
         </Form>

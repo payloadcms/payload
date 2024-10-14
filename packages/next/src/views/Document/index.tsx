@@ -68,7 +68,7 @@ export const Document: React.FC<AdminViewProps> = async ({
 
   let apiURL: string
 
-  const { data, formState, renderedFields } = await getDocumentData({
+  const { data, formState, renderedFieldMap } = await getDocumentData({
     id,
     collectionConfig,
     globalConfig,
@@ -236,7 +236,7 @@ export const Document: React.FC<AdminViewProps> = async ({
     permissions,
   })
 
-  const clientProps = { formState, payloadServerAction, renderedFields, ...documentSlots }
+  const clientProps = { formState, payloadServerAction, renderedFieldMap, ...documentSlots }
 
   return (
     <DocumentInfoProvider

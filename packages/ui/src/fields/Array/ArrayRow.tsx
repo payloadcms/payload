@@ -10,6 +10,7 @@ import { ArrayAction } from '../../elements/ArrayAction/index.js'
 import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
+import { useRenderedFieldMap } from '../../forms/RenderFieldMap/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
@@ -27,7 +28,6 @@ type ArrayRowProps = {
   readonly path: string
   readonly readOnly?: boolean
   readonly removeRow: (rowIndex: number) => void
-  readonly renderedFields: RenderedField[]
   readonly row: Row
   readonly rowCount: number
   readonly rowIndex: number
@@ -50,7 +50,6 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   path: parentPath,
   readOnly,
   removeRow,
-  renderedFields,
   row,
   rowCount,
   rowIndex,
@@ -68,6 +67,14 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
     2,
     '0',
   )}`
+
+  const { renderedFieldMap } = useRenderedFieldMap()
+
+  const rowFieldMap = renderedFieldMap?.get(parentPath)?.renderedFieldMap
+
+  const renderedRows = Array.from(rowFieldMap || [])
+    .filter(([key]) => key.startsWith(path))
+    .map(([, value]) => value)
 
   const fieldHasErrors = errorCount > 0 && hasSubmitted
 
@@ -124,7 +131,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         isCollapsed={row.collapsed}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        {Array.isArray(renderedFields) && renderedFields?.map(({ Field }) => Field)}
+        {Array.isArray(renderedRows) && renderedRows?.map(({ Field }) => Field)}
       </Collapsible>
     </div>
   )

@@ -6,6 +6,7 @@ import type {
   Locale,
   PayloadRequest,
   RenderedField,
+  RenderedFieldMap,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
 } from 'payload'
@@ -24,7 +25,7 @@ export const getDocumentData = async (args: {
 }): Promise<{
   data: Data
   formState: FormState
-  renderedFields?: RenderedField[]
+  renderedFieldMap?: RenderedFieldMap
 }> => {
   const { id, collectionConfig, globalConfig, locale, req, schemaPath: schemaPathFromProps } = args
 
@@ -47,7 +48,7 @@ export const getDocumentData = async (args: {
     return {
       data,
       formState: result.state,
-      renderedFields: result.renderedFields,
+      renderedFieldMap: result.renderedFieldMap,
     }
   } catch (error) {
     console.error('Error getting document data', error) // eslint-disable-line no-console

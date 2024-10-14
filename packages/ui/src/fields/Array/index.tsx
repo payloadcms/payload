@@ -50,7 +50,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     Label,
     path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
-    renderedFields,
     schemaPath,
     validate,
   } = props
@@ -259,8 +258,10 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           {rowsData.map((rowData, i) => {
             const { id: rowID } = rowData
 
+            const rowPath = `${path}.${i}`
+
             const rowErrorCount = errorPaths?.filter((errorPath) =>
-              errorPath.startsWith(`${path}.${i}.`),
+              errorPath.startsWith(rowPath),
             ).length
 
             return (
@@ -279,7 +280,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     path={path}
                     readOnly={disabled}
                     removeRow={removeRow}
-                    renderedFields={renderedFields}
                     row={rowData}
                     rowCount={rowsData?.length}
                     rowIndex={i}

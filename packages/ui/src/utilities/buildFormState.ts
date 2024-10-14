@@ -2,14 +2,14 @@ import type { I18n, I18nClient } from '@payloadcms/translations'
 import type {
   BuildFormStateArgs,
   ClientConfig,
-  ClientField,
+  ClientConfigMap,
   ClientUser,
   DocumentPreferences,
   ErrorResult,
   Field,
   FieldSchemaMap,
   FormState,
-  RenderedField,
+  RenderedFieldMap,
   SanitizedConfig,
   TypeWithID,
 } from 'payload'
@@ -18,11 +18,13 @@ import { createClientConfig, formatErrors } from 'payload'
 import { reduceFieldsToValues } from 'payload/shared'
 
 import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
+import { buildClientConfigMap } from './buildClientConfigMap/index.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
-import { renderFields as renderFieldsFn } from './renderFields.js'
+import { renderFields } from './renderFields.js'
 
 let cachedFieldSchemaMap = global._payload_fieldSchemaMap
 let cachedClientConfig = global._payload_clientConfig
+const cachedClientConfigMap = global._payload_clientConfigMap
 
 if (!cachedFieldSchemaMap) {
   cachedFieldSchemaMap = global._payload_fieldSchemaMap = null
@@ -68,11 +70,36 @@ export const getClientConfig = (args: {
   return cachedClientConfig
 }
 
+export const getClientConfigMap = (args: {
+  clientConfig?: ClientConfig
+  config: SanitizedConfig
+  i18n: I18nClient
+}): ClientConfigMap => {
+  const { clientConfig: clientConfigFromArgs, config, i18n } = args
+
+  let clientConfig = clientConfigFromArgs
+
+  if (!clientConfig) {
+    clientConfig = getClientConfig({
+      config,
+      i18n,
+    })
+  }
+
+  if (cachedClientConfigMap && process.env.NODE_ENV !== 'development') {
+    return cachedClientConfigMap
+  }
+
+  return buildClientConfigMap({
+    clientConfig,
+  })
+}
+
 type BuildFormStateSuccessResult = {
   clientConfig?: ClientConfig
   errors?: never
   lockedState?: { isLocked: boolean; user: ClientUser | number | string }
-  renderedFields?: RenderedField[]
+  renderedFieldMap?: RenderedFieldMap
   state: FormState
 }
 
@@ -123,7 +150,7 @@ export const buildFormStateFn = async (
     globalSlug,
     locale,
     operation,
-    renderFields,
+    renderFields: shouldRenderFields,
     req,
     req: {
       i18n,
@@ -173,7 +200,7 @@ export const buildFormStateFn = async (
     i18n,
   })
 
-  const clientConfig = getClientConfig({
+  const clientConfigMap = getClientConfigMap({
     config,
     i18n,
   })
@@ -182,21 +209,15 @@ export const buildFormStateFn = async (
   const schemaPathSegments = schemaPath && schemaPath.split('.')
 
   let fields: Field[]
-  let clientFields: ClientField[]
 
   if (schemaPathSegments && schemaPathSegments.length === 1) {
     if (req.payload.collections[schemaPath]) {
       fields = req.payload.collections[schemaPath].config.fields
-      clientFields = clientConfig.collections.find(
-        (collection) => collection.slug === schemaPath,
-      )?.fields
     } else {
       fields = req.payload.config.globals.find((global) => global.slug === schemaPath)?.fields
-      clientFields = clientConfig.globals.find((global) => global.slug === schemaPath)?.fields
     }
   } else if (fieldSchemaMap.has(schemaPath)) {
     fields = fieldSchemaMap.get(schemaPath)
-    // TODO: get client fields by schemaPath, the problem is clientConfig is a deep object, unlike fieldSchemaMap
   }
 
   if (!fields || !Array.isArray(fields)) {
@@ -398,9 +419,9 @@ export const buildFormStateFn = async (
 
   return {
     lockedState: lockedStateResult,
-    renderedFields: renderFields
-      ? renderFieldsFn({
-          clientFields,
+    renderedFieldMap: shouldRenderFields
+      ? renderFields({
+          clientConfigMap,
           config,
           fields,
           formState: formStateResult,

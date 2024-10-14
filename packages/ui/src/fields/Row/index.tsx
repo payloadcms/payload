@@ -3,7 +3,7 @@ import type { RowFieldClientComponent } from 'payload'
 
 import React from 'react'
 
-import { RenderFields } from '../../forms/RenderFields/index.js'
+import { RenderFields } from '../../forms/RenderFieldMap/index.jsx'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'

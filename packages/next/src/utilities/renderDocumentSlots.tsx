@@ -1,5 +1,5 @@
 import type {
-  EntitySlots,
+  DocumentSlots,
   ImportMap,
   Payload,
   Permissions,
@@ -19,10 +19,10 @@ export const renderDocumentSlots: (args: {
   importMap: ImportMap
   payload: Payload
   permissions: Permissions
-}) => EntitySlots = (args) => {
+}) => DocumentSlots = (args) => {
   const { collectionConfig, globalConfig, hasSavePermission, importMap } = args
 
-  const components: EntitySlots = {} as EntitySlots
+  const components: DocumentSlots = {} as DocumentSlots
 
   const unsavedDraftWithValidations = undefined
 

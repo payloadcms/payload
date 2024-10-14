@@ -8,7 +8,7 @@ import type { Locale, MetaConfig, PayloadComponent } from '../../config/types.js
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { LanguageOptions } from '../LanguageOptions.js'
-import type { EntitySlots, PayloadServerAction } from '../types.js'
+import type { DocumentSlots, PayloadServerAction } from '../types.js'
 
 export type AdminViewConfig = {
   Component: AdminViewComponent
@@ -62,4 +62,4 @@ export type ServerSideEditViewProps = {
   readonly searchParams: { [key: string]: string | string[] | undefined }
 } & ClientSideEditViewProps
 
-export type ClientSideEditViewProps = {} & EntitySlots
+export type ClientSideEditViewProps = {} & DocumentSlots

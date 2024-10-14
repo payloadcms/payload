@@ -1,10 +1,9 @@
 'use client'
-import type { ClientField, Description, FormState, RenderedField } from 'payload'
+import type { Description, RenderedFieldMap } from 'payload'
 
-import { fieldIsSidebar } from 'payload/shared'
 import React from 'react'
 
-import { RenderFields } from '../../forms/RenderFields/index.js'
+import { RenderFieldMap } from '../../forms/RenderFieldMap/index.js'
 import { Gutter } from '../Gutter/index.js'
 import { RenderIfInViewport } from '../RenderIfInViewport/index.js'
 import './index.scss'
@@ -18,7 +17,7 @@ type Args = {
   readonly BeforeFields?: React.ReactNode
   readonly description?: Description
   readonly forceSidebarWrap?: boolean
-  readonly renderedFields: RenderedField[]
+  readonly renderedFieldMap: RenderedFieldMap
 }
 
 export const DocumentFields: React.FC<Args> = ({
@@ -26,21 +25,25 @@ export const DocumentFields: React.FC<Args> = ({
   BeforeFields,
   description,
   forceSidebarWrap,
-  renderedFields,
+  renderedFieldMap,
 }) => {
-  const { mainFields, sidebarFields } = renderedFields.reduce(
-    (acc, field) => {
+  if (!renderedFieldMap) {
+    return 'No fields to render'
+  }
+
+  const { mainFields, sidebarFields } = Array.from(renderedFieldMap).reduce(
+    (acc, [path, field]) => {
       if (field.isSidebar) {
-        acc.sidebarFields.push(field)
+        acc.sidebarFields.set(path, field)
       } else {
-        acc.mainFields.push(field)
+        acc.mainFields.set(path, field)
       }
       return acc
     },
-    { mainFields: [] as RenderedField[], sidebarFields: [] as RenderedField[] },
+    { mainFields: new Map() as RenderedFieldMap, sidebarFields: new Map() as RenderedFieldMap },
   )
 
-  const hasSidebarFields = sidebarFields && sidebarFields.length > 0
+  const hasSidebarFields = sidebarFields && sidebarFields.size > 0
 
   return (
     <div
@@ -72,7 +75,11 @@ export const DocumentFields: React.FC<Args> = ({
               .filter(Boolean)
               .join(' ')}
           >
-            <RenderFields className={`${baseClass}__fields`} fields={mainFields} forceRender />
+            <RenderFieldMap
+              className={`${baseClass}__fields`}
+              forceRender
+              renderedFieldMap={mainFields}
+            />
           </RenderIfInViewport>
           {AfterFields}
         </Gutter>
@@ -91,7 +98,7 @@ export const DocumentFields: React.FC<Args> = ({
                   .filter(Boolean)
                   .join(' ')}
               >
-                <RenderFields fields={sidebarFields} forceRender />
+                <RenderFieldMap forceRender renderedFieldMap={sidebarFields} />
               </RenderIfInViewport>
             </div>
           </div>

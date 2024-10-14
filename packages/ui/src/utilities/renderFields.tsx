@@ -1,12 +1,14 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
   ArrayField as ArrayFieldT,
+  ClientBlock,
   ClientCollectionConfig,
+  ClientConfigMap,
   ClientField,
   ClientGlobalConfig,
+  ClientTab,
   Field,
   FieldPermissions,
-  FieldRow,
   FieldSlots,
   FieldTypes,
   FormField,
@@ -15,7 +17,7 @@ import type {
   Operation,
   Payload,
   RenderedField,
-  Row,
+  RenderedFieldMap,
   SanitizedConfig,
 } from 'payload'
 
@@ -85,7 +87,7 @@ export const fieldComponents: FieldTypesComponents = {
   upload: UploadField,
 }
 
-export type RenderFieldsFn = (props: RenderFieldsArgs) => RenderedField[]
+export type RenderFieldsFn = (props: RenderFieldsArgs) => RenderedFieldMap
 
 export type RenderFieldsClient = (
   args: Omit<RenderFieldsArgs, 'config' | 'importMap' | 'payload'>,
@@ -94,7 +96,8 @@ export type RenderFieldsClient = (
 export type RenderFieldFn = (
   args: {
     readonly className?: string
-    readonly clientField: ClientField
+    readonly clientConfigMap: ClientConfigMap
+    readonly clientField: ClientBlock | ClientField | ClientTab
     readonly config: SanitizedConfig
     readonly field: Field
     readonly forceRender?: boolean
@@ -110,7 +113,7 @@ export type RenderFieldFn = (
     }
     readonly schemaPath: string
   } & RenderFieldArgs,
-) => RenderedField
+) => void
 
 export type RenderFieldClient = (
   args: Omit<RenderFieldArgs, 'config' | 'importMap' | 'payload'>,
@@ -120,7 +123,7 @@ export type RenderFieldsArgs = {
   readonly Blocks?: React.ReactNode[]
   readonly className?: string
   readonly clientCollectionConfig?: ClientCollectionConfig
-  readonly clientFields: ClientField[]
+  readonly clientConfigMap: ClientConfigMap
   readonly clientGlobalConfig?: ClientGlobalConfig
   readonly config: SanitizedConfig
   readonly fields: Field[]
@@ -148,7 +151,7 @@ export type RenderFieldsArgs = {
 
 export type RenderFieldArgs = {
   readonly className?: string
-  readonly clientField: ClientField
+  readonly clientField: ClientBlock | ClientField | ClientTab
   readonly config: SanitizedConfig
   readonly field: Field
   readonly fieldPermissions: FieldPermissions
@@ -164,22 +167,23 @@ export type RenderFieldArgs = {
     [fieldName: string]: FieldPermissions
   }
   readonly readOnly?: boolean
+  readonly result: RenderedFieldMap
   readonly schemaPath: string
 }
 
 export type ClientSlotProps = {
-  Blocks?: React.ReactNode[]
-  field: ClientField
-  Fields?: React.ReactNode[]
+  field: ClientBlock | ClientField | ClientTab
   fieldState: FormField
   path: string
   permissions: FieldPermissions
   readOnly?: boolean
+  renderedBlocks?: RenderedField[]
+  renderedFieldMap?: RenderedFieldMap
   schemaPath: string
 }
 
 export type ServerSlotProps = {
-  clientField: ClientField
+  clientField: ClientBlock | ClientField | ClientTab
   config: SanitizedConfig
   field: Field
   i18n: I18nClient
@@ -187,32 +191,30 @@ export type ServerSlotProps = {
   payload: Payload
 }
 
-export const renderFields: RenderFieldsFn = (args) => {
-  const {
-    className,
-    clientFields,
-    config,
-    fields,
-    forceRender,
-    formState,
-    i18n,
-    indexPath,
-    margins,
-    path: parentPath,
-    payload,
-    payload: { importMap },
-    permissions,
-    schemaPath,
-  } = args
-
+const traverseFields = ({
+  className,
+  clientConfigMap,
+  config,
+  fields,
+  forceRender,
+  formState,
+  i18n,
+  indexPath,
+  margins,
+  path: parentPath,
+  payload,
+  permissions,
+  result,
+  schemaPath,
+}: {
+  result: RenderedFieldMap
+} & RenderFieldsArgs) => {
   if (!fields || (Array.isArray(fields) && fields.length === 0)) {
     return null
   }
 
   if (fields) {
-    return fields?.map((field, fieldIndex) => {
-      const clientField = clientFields[fieldIndex]
-
+    fields?.forEach((field, fieldIndex) => {
       const forceRenderChildren =
         (typeof forceRender === 'number' && fieldIndex <= forceRender) || true
 
@@ -242,8 +244,11 @@ export const renderFields: RenderFieldsFn = (args) => {
 
       const fieldSchemaPath = [schemaPath, name].filter(Boolean).join('.')
 
-      return renderField({
+      const clientField = clientConfigMap.get(fieldSchemaPath)
+
+      renderField({
         className,
+        clientConfigMap,
         clientField,
         config,
         field,
@@ -251,97 +256,31 @@ export const renderFields: RenderFieldsFn = (args) => {
         forceRender: forceRenderChildren,
         formState,
         i18n,
-        importMap,
+        importMap: payload.importMap,
         indexPath: fieldIndexPath,
         margins,
         path,
         payload,
         permissions,
+        result,
         schemaPath: fieldSchemaPath,
       })
     })
   }
-
-  return null
 }
 
-export const renderFieldRows = ({
-  className,
-  clientField,
-  clientProps,
-  config,
-  field,
-  forceRender,
-  formState,
-  i18n,
-  importMap,
-  indexPath,
-  margins,
-  path,
-  payload,
-  permissions,
-  rows,
-  schemaPath,
-  serverProps,
-}: {
-  readonly className?: string
-  readonly clientField: ClientField
-  readonly clientProps?: ClientSlotProps
-  readonly config: SanitizedConfig
-  readonly field: ArrayFieldT
-  readonly fieldState: FormField
-  readonly forceRender?: boolean
-  readonly formState: FormState
-  readonly i18n: I18nClient
-  readonly importMap: ImportMap
-  readonly indexPath: string
-  readonly margins?: 'small' | false
-  readonly path: string
-  readonly payload: Payload
-  readonly permissions?: {
-    [fieldName: string]: FieldPermissions
-  }
-  readonly rows: Row[]
-  readonly schemaPath: string
-  readonly serverProps?: ServerSlotProps
-}): FieldRow[] =>
-  rows?.map((row, rowIndex) => ({
-    renderedFields: renderFields({
-      className,
-      clientFields: 'fields' in clientField ? clientField.fields : undefined,
-      config,
-      fields: field.fields,
-      forceRender,
-      formState,
-      i18n,
-      indexPath: `${indexPath}.${rowIndex}`,
-      margins,
-      path: `${path}.${rowIndex}`,
-      payload,
-      permissions,
-      schemaPath,
-    }),
-    RowLabel: (
-      <RenderServerComponent
-        clientProps={{
-          ...clientProps,
-          rowLabel: `${getTranslation(field.labels.singular, i18n)} ${String(rowIndex + 1).padStart(
-            2,
-            '0',
-          )}`,
-          rowNumber: rowIndex + 1,
-        }}
-        Component={field.admin?.components?.RowLabel}
-        Fallback={RowLabel}
-        importMap={importMap}
-        serverProps={serverProps}
-      />
-    ),
-  }))
+export const renderFields: RenderFieldsFn = (args) => {
+  const result: RenderedFieldMap = new Map()
+
+  traverseFields({ ...args, result })
+
+  return result
+}
 
 export const renderField: RenderFieldFn = (args) => {
   const {
     className,
+    clientConfigMap,
     clientField,
     config,
     field,
@@ -356,8 +295,10 @@ export const renderField: RenderFieldFn = (args) => {
     payload,
     permissions,
     readOnly,
+    result,
     schemaPath,
   } = args
+
   const isHidden = 'admin' in field && 'hidden' in field.admin && field.admin.hidden
 
   const fieldState = formState?.[path]
@@ -382,6 +323,15 @@ export const renderField: RenderFieldFn = (args) => {
 
   const fieldSlots: FieldSlots = {}
 
+  const renderedFieldResult: RenderedField = {
+    type: field.type,
+    Field: null,
+    isSidebar: fieldIsSidebar(field),
+    path,
+    renderedFieldMap: new Map(),
+    schemaPath,
+  }
+
   if ('label' in field) {
     fieldSlots.Label = (
       <FieldLabel
@@ -397,22 +347,115 @@ export const renderField: RenderFieldFn = (args) => {
     )
   }
 
-  if ('fields' in field) {
-    fieldSlots.renderedFields = renderFields({
-      className,
-      clientFields: 'fields' in clientField ? clientField.fields : undefined,
-      config,
-      fields: field.fields,
-      forceRender,
-      formState,
-      i18n,
-      indexPath,
-      margins,
-      path,
-      payload,
-      permissions,
-      schemaPath,
-    })
+  switch (field.type) {
+    case 'array': {
+      fieldState.rows?.forEach((row, rowIndex) => {
+        traverseFields({
+          className,
+          clientConfigMap,
+          config,
+          fields: field.fields,
+          forceRender,
+          formState,
+          i18n,
+          indexPath: `${indexPath}.${rowIndex}`,
+          margins,
+          path: `${path}.${rowIndex}`,
+          payload,
+          permissions,
+          result: renderedFieldResult.renderedFieldMap,
+          schemaPath,
+        })
+      })
+
+      // RowLabel: (
+      //   <RenderServerComponent
+      //     clientProps={{
+      //       ...clientProps,
+      //       rowLabel: `${getTranslation(field.labels.singular, i18n)} ${String(
+      //         rowIndex + 1,
+      //       ).padStart(2, '0')}`,
+      //       rowNumber: rowIndex + 1,
+      //     }}
+      //     Component={field.admin?.components?.RowLabel}
+      //     Fallback={RowLabel}
+      //     importMap={importMap}
+      //     serverProps={serverProps}
+      //   />
+      // )
+      break
+    }
+
+    case 'blocks': {
+      // clientProps.renderedBlocks = fieldState?.rows?.map((row, rowIndex) => {
+      //   const blockConfig = field.blocks.find((block) => block.slug === row.blockType)
+      //   return renderFields({
+      //     className,
+      //     clientConfigMap,
+      //     config,
+      //     fields: blockConfig?.fields,
+      //     forceRender,
+      //     formState,
+      //     i18n,
+      //     indexPath: `${indexPath}.${rowIndex}`,
+      //     margins,
+      //     path,
+      //     payload,
+      //     permissions,
+      //     schemaPath,
+      //   })
+      // })
+      // break
+    }
+
+    case 'group':
+    case 'collapsible': {
+      // clientProps.renderedFields = renderFields({
+      //   className,
+      //   clientConfigMap,
+      //   config,
+      //   fields: field.fields,
+      //   forceRender,
+      //   formState,
+      //   i18n,
+      //   indexPath,
+      //   margins,
+      //   path,
+      //   payload,
+      //   permissions,
+      //   schemaPath,
+      // })
+
+      break
+    }
+
+    case 'tabs': {
+      // clientProps.fields = field.tabs.map((tab, tabIndex) => {
+      //   const clientTabConfig = 'tabs' in clientField && clientField.tabs[tabIndex]
+
+      //   return renderFields({
+      //     className,
+      //     clientConfigMap,
+      //     config,
+      //     fields: tab.fields,
+      //     forceRender,
+      //     formState,
+      //     i18n,
+      //     indexPath: `${indexPath}.${tabIndex}`,
+      //     margins,
+      //     path,
+      //     payload,
+      //     permissions,
+      //     schemaPath,
+      //   })
+      // })
+
+      break
+    }
+
+    default: {
+      break
+    }
   }
 
   if (field.admin) {
@@ -500,17 +543,15 @@ export const renderField: RenderFieldFn = (args) => {
     ...fieldSlots,
   }
 
-  return {
-    Field: (
-      <RenderServerComponent
-        clientProps={clientProps}
-        Component={isHidden ? fieldComponents.hidden : field.admin?.components?.Field}
-        Fallback={fieldComponents?.[field?.type]}
-        importMap={importMap}
-        serverProps={serverProps}
-      />
-    ),
-    isSidebar: fieldIsSidebar(field),
-    schemaPath,
-  }
+  renderedFieldResult.Field = (
+    <RenderServerComponent
+      clientProps={clientProps}
+      Component={isHidden ? fieldComponents.hidden : field.admin?.components?.Field}
+      Fallback={fieldComponents?.[field?.type]}
+      importMap={importMap}
+      serverProps={serverProps}
+    />
+  )
+
+  result.set(path, renderedFieldResult)
 }
