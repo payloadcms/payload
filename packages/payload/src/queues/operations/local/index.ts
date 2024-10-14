@@ -17,12 +17,14 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     args:
       | {
           input: TypedJobs['tasks'][TTaskOrWorkflowSlug]['input']
+          req?: PayloadRequest
           // TTaskOrWorkflowlug with keyof TypedJobs['workflows'] removed:
           task: TTaskOrWorkflowSlug extends keyof TypedJobs['tasks'] ? TTaskOrWorkflowSlug : never
           workflow?: never
         }
       | {
           input: TypedJobs['workflows'][TTaskOrWorkflowSlug]['input']
+          req?: PayloadRequest
           task?: never
           workflow: TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
             ? TTaskOrWorkflowSlug
@@ -40,6 +42,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
         taskSlug: 'task' in args ? args.task : undefined,
         workflowSlug: 'workflow' in args ? args.workflow : undefined,
       },
+      req: args.req,
     })) as TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
       ? RunningJob<TTaskOrWorkflowSlug>
       : RunningJobFromTask<TTaskOrWorkflowSlug> // Type assertion is still needed here

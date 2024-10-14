@@ -28,6 +28,7 @@ export default buildConfigWithDefaults({
                 post: doc.id,
                 message: 'hello',
               },
+              req,
             })
           },
         ],
