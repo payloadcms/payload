@@ -4,8 +4,6 @@ import type { BaseJob, WorkflowConfig, WorkflowTypes } from '../../config/types/
 import type { RunJobResult } from '../runJob/index.js'
 
 import { Forbidden } from '../../../errors/Forbidden.js'
-import { commitTransaction } from '../../../utilities/commitTransaction.js'
-import { initTransaction } from '../../../utilities/initTransaction.js'
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty.js'
 import { runJob } from '../runJob/index.js'
 
@@ -88,7 +86,7 @@ export const runAllJobs = async ({
       seenByWorker: true,
     },
     depth: req.payload.config.jobs.depth,
-    //limit, // TODO: Add limit to req.payload.update call
+    limit,
     showHiddenFields: true,
     where,
   })) as unknown as PaginatedDocs<BaseJob>
