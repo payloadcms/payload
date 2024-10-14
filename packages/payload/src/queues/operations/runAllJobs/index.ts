@@ -4,7 +4,6 @@ import type { BaseJob, WorkflowConfig, WorkflowTypes } from '../../config/types/
 import type { RunJobResult } from '../runJob/index.js'
 
 import { Forbidden } from '../../../errors/Forbidden.js'
-import isolateObjectProperty from '../../../utilities/isolateObjectProperty.js'
 import { runJob } from '../runJob/index.js'
 
 export type RunAllJobsArgs = {
@@ -141,19 +140,11 @@ export const runAllJobs = async ({
       return null // Skip jobs with no workflow configuration
     }
 
-    const newReq = isolateObjectProperty(req, 'transactionID')
-    delete newReq.transactionID
-    // Create a transaction. While every tasks will initialize its own transaction later on, anything that
-    // runs in between tasks within a JS workflow should be part of the same transaction
-    //await initTransaction(newReq)
     const result = await runJob({
       job,
-      // Each job should have its own transaction. Can't have multiple running jobs in parallel on same transaction
-      req: newReq,
+      req,
       workflowConfig,
     })
-    // Commit transaction
-    //await commitTransaction(newReq)
     return { id: job.id, result }
   })
 
