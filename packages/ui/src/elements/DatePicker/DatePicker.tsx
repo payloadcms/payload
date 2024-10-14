@@ -12,7 +12,7 @@ import { CalendarIcon } from '../../icons/Calendar/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { getFormattedLocale } from './getFormattedLocale.js'
-import './library.css'
+import './library.scss'
 import './index.scss'
 
 const baseClass = 'date-time-picker'
