@@ -14,6 +14,7 @@ export type BaseOptions<TSlug extends CollectionSlug> = {
    */
   context?: RequestContext
   depth?: number
+  disableTransaction?: boolean
   fallbackLocale?: TypedLocale
   locale?: TypedLocale
   overrideAccess?: boolean
@@ -55,6 +56,7 @@ async function deleteLocal<TSlug extends CollectionSlug>(
     id,
     collection: collectionSlug,
     depth,
+    disableTransaction,
     overrideAccess = true,
     overrideLock,
     showHiddenFields,
@@ -73,6 +75,7 @@ async function deleteLocal<TSlug extends CollectionSlug>(
     id,
     collection,
     depth,
+    disableTransaction,
     overrideAccess,
     overrideLock,
     req: await createLocalReq(options, payload),

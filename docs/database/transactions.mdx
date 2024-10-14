@@ -8,7 +8,7 @@ desc: Database transactions are fully supported within Payload.
 
 Database transactions allow your application to make a series of database changes in an all-or-nothing commit. Consider an HTTP request that creates a new **Order** and has an `afterChange` hook to update the stock count of related **Items**. If an error occurs when updating an **Item** and an HTTP error is returned to the user, you would not want the new **Order** to be persisted or any other items to be changed either. This kind of interaction with the database is handled seamlessly with transactions.
 
-By default, Payload will use transactions for all operations, as long as it is supported by the configured database. Database changes are contained within all Payload operations and any errors thrown will result in all changes being rolled back without being committed. When transactions are not supported by the database, Payload will continue to operate as expected without them.
+By default, Payload will use transactions for all data changing operations, as long as it is supported by the configured database. Database changes are contained within all Payload operations and any errors thrown will result in all changes being rolled back without being committed. When transactions are not supported by the database, Payload will continue to operate as expected without them.
 
 <Banner type="info">
   <strong>Note:</strong>
@@ -114,3 +114,18 @@ standalonePayloadScript()
 ## Disabling Transactions
 
 If you wish to disable transactions entirely, you can do so by passing `false` as the `transactionOptions` in your database adapter configuration. All the official Payload database adapters support this option.
+
+In addition to allowing database transactions to be disabled at the adapter level. You can prevent Payload from using a transaction in direct calls to the local API by adding `disableTransaction: true` to the args. For example:
+
+```ts
+await payload.update({
+  collection: 'posts',
+  data: {
+    some: 'data',
+  },
+  where: {
+    slug: { equals: 'my-slug' }
+  },
+  req: { disableTransaction: true },
+})
+```

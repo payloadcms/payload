@@ -22,6 +22,7 @@ import { buildAfterOperation } from './utils.js'
 export type Arguments = {
   collection: Collection
   depth?: number
+  disableTransaction?: boolean
   overrideAccess?: boolean
   overrideLock?: boolean
   req: PayloadRequest
@@ -41,7 +42,7 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
   let args = incomingArgs
 
   try {
-    const shouldCommit = await initTransaction(args.req)
+    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
