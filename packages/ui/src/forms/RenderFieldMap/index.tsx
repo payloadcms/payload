@@ -1,6 +1,6 @@
 'use client'
 
-import type { RenderedFieldMap } from 'payload'
+import type { FieldRow } from 'payload'
 
 import React, { useCallback } from 'react'
 
@@ -14,10 +14,8 @@ const baseClass = 'render-fields'
 
 export { Props }
 
-const RenderFields: React.FC<Omit<Props, 'renderedFieldMap'>> = (props) => {
-  const { className, forceRender, margins } = props
-
-  const { renderedFieldMap } = useRenderedFieldMap()
+export const RenderFieldMap: React.FC<Props> = (props) => {
+  const { className, forceRender, margins, renderedFieldMap } = props
 
   const renderedFields = Array.from(renderedFieldMap.values())
 
@@ -63,7 +61,12 @@ const RenderFields: React.FC<Omit<Props, 'renderedFieldMap'>> = (props) => {
           .join(' ')}
         ref={intersectionRef}
       >
-        {hasRendered && renderedFields?.map(({ Field }) => Field)}
+        {hasRendered &&
+          renderedFields?.map(({ Field, renderedRows }, index) => (
+            <FieldRowsProvider key={index} renderedRows={renderedRows}>
+              {Field}
+            </FieldRowsProvider>
+          ))}
       </div>
     )
   }
@@ -71,62 +74,45 @@ const RenderFields: React.FC<Omit<Props, 'renderedFieldMap'>> = (props) => {
   return null
 }
 
-export const RenderFieldMap: React.FC<Props> = ({ renderedFieldMap, ...rest }) => {
-  return (
-    <RenderedFieldProvider renderedFieldMap={renderedFieldMap}>
-      <RenderFields {...rest} />
-    </RenderedFieldProvider>
-  )
-}
-
-const RenderedFieldContext = React.createContext<{
-  renderedFieldMap: RenderedFieldMap
-  setRenderedFieldMap: React.Dispatch<React.SetStateAction<RenderedFieldMap>> | undefined
-  setRenderedFieldMapByPath: (args: {
-    path: string
-    renderedFieldMap: RenderedFieldMap
-    rowIndex: number
-  }) => void
+const FieldRowsContext = React.createContext<{
+  renderedRows: FieldRow[]
+  setRenderedRow: (args: { renderedRow: FieldRow; rowIndex: number }) => void
 }>(undefined)
 
-export const RenderedFieldProvider: React.FC<{
+export const FieldRowsProvider: React.FC<{
   children: React.ReactNode
-  renderedFieldMap: RenderedFieldMap
-}> = ({ children, renderedFieldMap: initialFieldMap }) => {
-  const [renderedFieldMap, setRenderedFieldMap] = React.useState(initialFieldMap)
+  renderedRows: FieldRow[]
+}> = ({ children, renderedRows: initialRows }) => {
+  const [renderedRows, setRenderedRowsToState] = React.useState(initialRows)
 
-  const setRenderedFieldMapByPath = useCallback(
-    (args: { path: string; renderedFieldMap: RenderedFieldMap; rowIndex: number }) => {
-      const { path, renderedFieldMap: incomingFieldMap, rowIndex } = args
+  const setRenderedRow = useCallback(
+    (args: { renderedRow: FieldRow; rowIndex: number }) => {
+      const { renderedRow: incomingRow, rowIndex } = args
 
-      const pathWithChanges = renderedFieldMap.get(path)
+      const withUpdatedRow = [...renderedRows]
 
-      // iterate over the incomingFieldMap and set each file onto the withChanges map, prepending the path onto the key
-      incomingFieldMap.forEach((field, key) => {
-        pathWithChanges?.renderedFieldMap?.set(`${path}.${rowIndex}.${key}`, field)
-      })
+      withUpdatedRow[rowIndex] = {
+        renderedFieldMap: incomingRow,
+        RowLabel: 'TODO',
+      }
 
-      const newRenderedFieldMap = new Map(renderedFieldMap)
-
-      newRenderedFieldMap.set(path, pathWithChanges)
+      setRenderedRowsToState(withUpdatedRow)
     },
-    [renderedFieldMap],
+    [renderedRows],
   )
 
   return (
-    <RenderedFieldContext.Provider
-      value={{ renderedFieldMap, setRenderedFieldMap, setRenderedFieldMapByPath }}
-    >
+    <FieldRowsContext.Provider value={{ renderedRows, setRenderedRow }}>
       {children}
-    </RenderedFieldContext.Provider>
+    </FieldRowsContext.Provider>
   )
 }
 
-export const useRenderedFieldMap = () => {
-  const context = React.useContext(RenderedFieldContext)
+export const useFieldRows = () => {
+  const context = React.useContext(FieldRowsContext)
 
   if (context === undefined) {
-    throw new Error('useRenderedFieldMap must be used within a RenderedFieldProvider')
+    throw new Error('useFieldRows must be used within a FieldRowsProvider')
   }
 
   return context

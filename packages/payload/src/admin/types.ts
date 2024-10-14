@@ -417,6 +417,7 @@ export type RenderedField = {
   isSidebar: boolean
   path: string
   renderedFieldMap?: RenderedFieldMap
+  renderedRows?: FieldRow[]
   schemaPath: string
   type: FieldTypes
 }

@@ -1,6 +1,5 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
-  ArrayField as ArrayFieldT,
   ClientBlock,
   ClientCollectionConfig,
   ClientConfigMap,
@@ -9,6 +8,7 @@ import type {
   ClientTab,
   Field,
   FieldPermissions,
+  FieldRow,
   FieldSlots,
   FieldTypes,
   FormField,
@@ -53,7 +53,7 @@ import { TextField } from '../fields/Text/index.js'
 import { TextareaField } from '../fields/Textarea/index.js'
 import { UIField } from '../fields/UI/index.js'
 import { UploadField } from '../fields/Upload/index.js'
-import { RowLabel } from '../forms/RowLabel/index.js'
+import { RowLabel as DefaultRowLabel } from '../forms/RowLabel/index.js'
 
 export type FieldTypesComponents = {
   [K in 'confirmPassword' | 'hidden' | 'password' | FieldTypes]: React.FC
@@ -110,7 +110,6 @@ export type RenderFieldFn = (
     readonly permissions?: {
       [fieldName: string]: FieldPermissions
     }
-    readonly renderedFieldMap: RenderedFieldMap
     readonly schemaPath: string
   } & RenderFieldArgs,
 ) => void
@@ -151,6 +150,7 @@ export type RenderFieldsArgs = {
 
 export type RenderFieldArgs = {
   readonly className?: string
+  readonly clientConfigMap: ClientConfigMap
   readonly clientField: ClientBlock | ClientField | ClientTab
   readonly config: SanitizedConfig
   readonly field: Field
@@ -246,35 +246,9 @@ const traverseFields = ({
 
       const clientField = clientConfigMap.get(fieldSchemaPath)
 
-      const fieldState = formState?.[path]
-
-      const renderedFieldMap = new Map()
-
-      switch (field.type) {
-        case 'array': {
-          fieldState.rows?.forEach((row, rowIndex) => {
-            traverseFields({
-              className,
-              clientConfigMap,
-              config,
-              fields: field.fields,
-              forceRender,
-              formState,
-              i18n,
-              indexPath: `${fieldIndexPath}.${rowIndex}`,
-              margins,
-              path: `${path}.${rowIndex}`,
-              payload,
-              permissions,
-              result: renderedFieldMap,
-              schemaPath: fieldSchemaPath,
-            })
-          })
-        }
-      }
-
       renderField({
         className,
+        clientConfigMap,
         clientField,
         config,
         field,
@@ -288,7 +262,6 @@ const traverseFields = ({
         path,
         payload,
         permissions,
-        renderedFieldMap,
         result,
         schemaPath: fieldSchemaPath,
       })
@@ -307,6 +280,7 @@ export const renderFields: RenderFieldsFn = (args) => {
 export const renderField: RenderFieldFn = (args) => {
   const {
     className,
+    clientConfigMap,
     clientField,
     config,
     field,
@@ -321,7 +295,6 @@ export const renderField: RenderFieldFn = (args) => {
     payload,
     permissions,
     readOnly,
-    renderedFieldMap,
     result,
     schemaPath,
   } = args
@@ -355,7 +328,8 @@ export const renderField: RenderFieldFn = (args) => {
     Field: null,
     isSidebar: fieldIsSidebar(field),
     path,
-    renderedFieldMap,
+    renderedFieldMap: new Map() as RenderedFieldMap,
+    renderedRows: [] as FieldRow[],
     schemaPath,
   }
 
@@ -376,24 +350,45 @@ export const renderField: RenderFieldFn = (args) => {
 
   switch (field.type) {
     case 'array': {
-      // fieldState.rows?.forEach((row, rowIndex) => {
-      //   traverseFields({
-      //     className,
-      //     clientConfigMap,
-      //     config,
-      //     fields: field.fields,
-      //     forceRender,
-      //     formState,
-      //     i18n,
-      //     indexPath: `${indexPath}.${rowIndex}`,
-      //     margins,
-      //     path: `${path}.${rowIndex}`,
-      //     payload,
-      //     permissions,
-      //     result: renderedFieldResult.renderedFieldMap,
-      //     schemaPath,
-      //   })
-      // })
+      fieldState.rows?.forEach((row, rowIndex) => {
+        const RowLabel = (
+          <RenderServerComponent
+            clientProps={{
+              ...clientProps,
+              rowLabel: `${getTranslation(field.labels.singular, i18n)} ${String(
+                rowIndex + 1,
+              ).padStart(2, '0')}`,
+              rowNumber: rowIndex + 1,
+            }}
+            Component={field.admin?.components?.RowLabel}
+            Fallback={DefaultRowLabel}
+            importMap={importMap}
+            serverProps={serverProps}
+          />
+        )
+
+        renderedFieldResult.renderedRows.push({
+          renderedFieldMap: new Map() as RenderedFieldMap,
+          RowLabel,
+        })
+
+        traverseFields({
+          className,
+          clientConfigMap,
+          config,
+          fields: field.fields,
+          forceRender,
+          formState,
+          i18n,
+          indexPath: `${indexPath}.${rowIndex}`,
+          margins,
+          path: `${path}.${rowIndex}`,
+          payload,
+          permissions,
+          result: renderedFieldResult.renderedRows[rowIndex].renderedFieldMap,
+          schemaPath,
+        })
+      })
 
       // RowLabel: (
       //   <RenderServerComponent

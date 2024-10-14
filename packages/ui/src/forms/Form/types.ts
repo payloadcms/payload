@@ -1,4 +1,13 @@
-import type { ClientField, Data, FormField, FormState, RenderedFieldMap, Row, User } from 'payload'
+import type {
+  ClientField,
+  Data,
+  FieldRow,
+  FormField,
+  FormState,
+  RenderedFieldMap,
+  Row,
+  User,
+} from 'payload'
 import type React from 'react'
 import type { Dispatch } from 'react'
 
@@ -182,7 +191,7 @@ export type Context = {
      */
     rowIndex?: number
     schemaPath: string
-  }) => Promise<RenderedFieldMap>
+  }) => Promise<FieldRow>
   buildRowErrors: () => void
   createFormData: CreateFormData
   disabled: boolean

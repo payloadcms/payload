@@ -10,7 +10,7 @@ import { ArrayAction } from '../../elements/ArrayAction/index.js'
 import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
-import { useRenderedFieldMap } from '../../forms/RenderFieldMap/index.js'
+import { useFieldRows } from '../../forms/RenderFieldMap/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
@@ -31,7 +31,6 @@ type ArrayRowProps = {
   readonly row: Row
   readonly rowCount: number
   readonly rowIndex: number
-  readonly RowLabel?: React.ReactNode
   readonly setCollapse: (rowID: string, collapsed: boolean) => void
 } & UseDraggableSortableReturn
 
@@ -53,13 +52,11 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   row,
   rowCount,
   rowIndex,
-  RowLabel,
   setCollapse,
   setNodeRef,
   transform,
   transition,
 }) => {
-  const path = `${parentPath}.${rowIndex}`
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
 
@@ -68,13 +65,9 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
     '0',
   )}`
 
-  const { renderedFieldMap } = useRenderedFieldMap()
+  const { renderedRows } = useFieldRows()
 
-  const parentFieldMap = renderedFieldMap?.get(parentPath)?.renderedFieldMap
-
-  const renderedFields = Array.from(parentFieldMap || [])
-    .filter(([key]) => key.startsWith(path))
-    .map(([, value]) => value)
+  const renderedRow = renderedRows[rowIndex]
 
   const fieldHasErrors = errorCount > 0 && hasSubmitted
 
@@ -124,14 +117,14 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         }
         header={
           <div className={`${baseClass}__row-header`}>
-            {RowLabel}
+            {renderedRow?.RowLabel}
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
         }
         isCollapsed={row.collapsed}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        {renderedFields.map(({ Field }) => Field)}
+        {Array.from(renderedRow?.renderedFieldMap || [])?.map(([, { Field }]) => Field)}
       </Collapsible>
     </div>
   )

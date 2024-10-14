@@ -16,7 +16,7 @@ import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
-import { useRenderedFieldMap } from '../../forms/RenderFieldMap/index.js'
+import { useFieldRows } from '../../forms/RenderFieldMap/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -127,17 +127,16 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
-  const { setRenderedFieldMapByPath } = useRenderedFieldMap()
+  const { setRenderedRow } = useFieldRows()
 
   const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const addRow = useCallback(
     async (rowIndex: number): Promise<void> => {
-      const newRenderedFieldMap = await addFieldRow({ path, rowIndex, schemaPath })
+      const newRenderedRow = await addFieldRow({ path, rowIndex, schemaPath })
 
-      setRenderedFieldMapByPath({
-        path,
-        renderedFieldMap: newRenderedFieldMap,
+      setRenderedRow({
+        renderedRow: newRenderedRow,
         rowIndex,
       })
 
@@ -147,7 +146,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, setModified, schemaPath, setRenderedFieldMapByPath],
+    [addFieldRow, path, setModified, schemaPath, setRenderedRow],
   )
 
   const duplicateRow = useCallback(
@@ -293,7 +292,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     row={rowData}
                     rowCount={rowsData?.length}
                     rowIndex={i}
-                    // RowLabel={RowLabel}
                     setCollapse={setCollapse}
                   />
                 )}

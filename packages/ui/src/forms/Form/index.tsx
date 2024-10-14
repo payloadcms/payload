@@ -520,7 +520,7 @@ export const Form: React.FC<FormProps> = (props) => {
         schemaPath,
       })
 
-      console.log('addFieldRow', { renderedFieldMap })
+      console.log('renderedFieldMap', renderedFieldMap)
 
       dispatchFields({
         type: 'ADD_ROW',
