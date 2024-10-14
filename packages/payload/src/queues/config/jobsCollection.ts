@@ -107,13 +107,13 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
               {
                 name: 'completedAt',
                 type: 'date',
-                index: false,
+                index: true,
               },
               {
                 name: 'totalTried',
                 type: 'number',
                 defaultValue: 0,
-                index: false,
+                index: true,
               },
               {
                 name: 'hasError',
@@ -122,7 +122,7 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
                   description: 'If hasError is true this job will not be retried',
                 },
                 defaultValue: false,
-                index: false,
+                index: true,
               },
               {
                 name: 'error',
@@ -195,7 +195,7 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
         admin: {
           position: 'sidebar',
         },
-        index: false,
+        index: true,
         options: [...workflowSlugs],
         required: false,
       },
@@ -205,7 +205,7 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
         admin: {
           position: 'sidebar',
         },
-        index: false,
+        index: true,
         options: [...taskSlugs],
         required: false,
       },
@@ -216,13 +216,13 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
           position: 'sidebar',
         },
         defaultValue: 'default',
-        index: false,
+        index: true,
         options: [...queueNames],
       },
       {
         name: 'waitUntil',
         type: 'date',
-        index: false,
+        index: true,
       },
       {
         name: 'processing',
@@ -231,7 +231,7 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
           position: 'sidebar',
         },
         defaultValue: false,
-        index: false,
+        index: true,
       },
     ],
     hooks: {
