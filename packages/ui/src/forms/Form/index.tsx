@@ -501,21 +501,27 @@ export const Form: React.FC<FormProps> = (props) => {
       const abortController = new AbortController()
       abortControllerRef2.current = abortController
 
-      const { state: fieldState } = await getFormState({
+      const { renderedFieldMap, state: fieldState } = await getFormState({
         data,
-        renderFields: false,
-        schemaPath: [collectionSlug || globalSlug, schemaPath].filter(Boolean).join('.'),
+        renderFields: true,
+        schemaPath,
         signal: abortController.signal,
       })
 
-      return fieldState
+      return { fieldState, renderedFieldMap }
     },
-    [collectionSlug, globalSlug, getFormState],
+    [getFormState],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
     async ({ data, path, rowIndex, schemaPath }) => {
-      const subFieldState = await getFieldStateBySchemaPath({ data, schemaPath })
+      const { fieldState: subFieldState, renderedFieldMap } = await getFieldStateBySchemaPath({
+        data,
+        schemaPath,
+      })
+
+      console.log('addFieldRow', { renderedFieldMap })
+
       dispatchFields({
         type: 'ADD_ROW',
         blockType: data?.blockType,
@@ -523,6 +529,8 @@ export const Form: React.FC<FormProps> = (props) => {
         rowIndex,
         subFieldState,
       })
+
+      return renderedFieldMap
     },
     [getFieldStateBySchemaPath, dispatchFields],
   )
@@ -536,7 +544,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const replaceFieldRow: FormContextType['replaceFieldRow'] = useCallback(
     async ({ data, path, rowIndex, schemaPath }) => {
-      const subFieldState = await getFieldStateBySchemaPath({ data, schemaPath })
+      const { fieldState: subFieldState } = await getFieldStateBySchemaPath({ data, schemaPath })
 
       dispatchFields({
         type: 'REPLACE_ROW',

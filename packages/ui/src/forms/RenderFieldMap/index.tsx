@@ -2,7 +2,7 @@
 
 import type { RenderedFieldMap } from 'payload'
 
-import React from 'react'
+import React, { useCallback } from 'react'
 
 import type { Props } from './types.js'
 
@@ -82,6 +82,11 @@ export const RenderFieldMap: React.FC<Props> = ({ renderedFieldMap, ...rest }) =
 const RenderedFieldContext = React.createContext<{
   renderedFieldMap: RenderedFieldMap
   setRenderedFieldMap: React.Dispatch<React.SetStateAction<RenderedFieldMap>> | undefined
+  setRenderedFieldMapByPath: (args: {
+    path: string
+    renderedFieldMap: RenderedFieldMap
+    rowIndex: number
+  }) => void
 }>(undefined)
 
 export const RenderedFieldProvider: React.FC<{
@@ -90,8 +95,28 @@ export const RenderedFieldProvider: React.FC<{
 }> = ({ children, renderedFieldMap: initialFieldMap }) => {
   const [renderedFieldMap, setRenderedFieldMap] = React.useState(initialFieldMap)
 
+  const setRenderedFieldMapByPath = useCallback(
+    (args: { path: string; renderedFieldMap: RenderedFieldMap; rowIndex: number }) => {
+      const { path, renderedFieldMap: incomingFieldMap, rowIndex } = args
+
+      const pathWithChanges = renderedFieldMap.get(path)
+
+      // iterate over the incomingFieldMap and set each file onto the withChanges map, prepending the path onto the key
+      incomingFieldMap.forEach((field, key) => {
+        pathWithChanges?.renderedFieldMap?.set(`${path}.${rowIndex}.${key}`, field)
+      })
+
+      const newRenderedFieldMap = new Map(renderedFieldMap)
+
+      newRenderedFieldMap.set(path, pathWithChanges)
+    },
+    [renderedFieldMap],
+  )
+
   return (
-    <RenderedFieldContext.Provider value={{ renderedFieldMap, setRenderedFieldMap }}>
+    <RenderedFieldContext.Provider
+      value={{ renderedFieldMap, setRenderedFieldMap, setRenderedFieldMapByPath }}
+    >
       {children}
     </RenderedFieldContext.Provider>
   )

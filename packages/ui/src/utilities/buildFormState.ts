@@ -105,6 +105,7 @@ type BuildFormStateSuccessResult = {
 
 type BuildFormStateErrorResult = {
   lockedState?: never
+  renderedFieldMap?: never
   state?: never
 } & (
   | {

@@ -96,7 +96,6 @@ export type RenderFieldsClient = (
 export type RenderFieldFn = (
   args: {
     readonly className?: string
-    readonly clientConfigMap: ClientConfigMap
     readonly clientField: ClientBlock | ClientField | ClientTab
     readonly config: SanitizedConfig
     readonly field: Field
@@ -111,6 +110,7 @@ export type RenderFieldFn = (
     readonly permissions?: {
       [fieldName: string]: FieldPermissions
     }
+    readonly renderedFieldMap: RenderedFieldMap
     readonly schemaPath: string
   } & RenderFieldArgs,
 ) => void
@@ -246,9 +246,35 @@ const traverseFields = ({
 
       const clientField = clientConfigMap.get(fieldSchemaPath)
 
+      const fieldState = formState?.[path]
+
+      const renderedFieldMap = new Map()
+
+      switch (field.type) {
+        case 'array': {
+          fieldState.rows?.forEach((row, rowIndex) => {
+            traverseFields({
+              className,
+              clientConfigMap,
+              config,
+              fields: field.fields,
+              forceRender,
+              formState,
+              i18n,
+              indexPath: `${fieldIndexPath}.${rowIndex}`,
+              margins,
+              path: `${path}.${rowIndex}`,
+              payload,
+              permissions,
+              result: renderedFieldMap,
+              schemaPath: fieldSchemaPath,
+            })
+          })
+        }
+      }
+
       renderField({
         className,
-        clientConfigMap,
         clientField,
         config,
         field,
@@ -262,6 +288,7 @@ const traverseFields = ({
         path,
         payload,
         permissions,
+        renderedFieldMap,
         result,
         schemaPath: fieldSchemaPath,
       })
@@ -280,7 +307,6 @@ export const renderFields: RenderFieldsFn = (args) => {
 export const renderField: RenderFieldFn = (args) => {
   const {
     className,
-    clientConfigMap,
     clientField,
     config,
     field,
@@ -295,6 +321,7 @@ export const renderField: RenderFieldFn = (args) => {
     payload,
     permissions,
     readOnly,
+    renderedFieldMap,
     result,
     schemaPath,
   } = args
@@ -328,7 +355,7 @@ export const renderField: RenderFieldFn = (args) => {
     Field: null,
     isSidebar: fieldIsSidebar(field),
     path,
-    renderedFieldMap: new Map(),
+    renderedFieldMap,
     schemaPath,
   }
 
@@ -349,24 +376,24 @@ export const renderField: RenderFieldFn = (args) => {
 
   switch (field.type) {
     case 'array': {
-      fieldState.rows?.forEach((row, rowIndex) => {
-        traverseFields({
-          className,
-          clientConfigMap,
-          config,
-          fields: field.fields,
-          forceRender,
-          formState,
-          i18n,
-          indexPath: `${indexPath}.${rowIndex}`,
-          margins,
-          path: `${path}.${rowIndex}`,
-          payload,
-          permissions,
-          result: renderedFieldResult.renderedFieldMap,
-          schemaPath,
-        })
-      })
+      // fieldState.rows?.forEach((row, rowIndex) => {
+      //   traverseFields({
+      //     className,
+      //     clientConfigMap,
+      //     config,
+      //     fields: field.fields,
+      //     forceRender,
+      //     formState,
+      //     i18n,
+      //     indexPath: `${indexPath}.${rowIndex}`,
+      //     margins,
+      //     path: `${path}.${rowIndex}`,
+      //     payload,
+      //     permissions,
+      //     result: renderedFieldResult.renderedFieldMap,
+      //     schemaPath,
+      //   })
+      // })
 
       // RowLabel: (
       //   <RenderServerComponent
@@ -405,7 +432,7 @@ export const renderField: RenderFieldFn = (args) => {
       //     schemaPath,
       //   })
       // })
-      // break
+      break
     }
 
     case 'group':

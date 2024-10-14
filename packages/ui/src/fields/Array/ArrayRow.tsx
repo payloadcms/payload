@@ -1,5 +1,5 @@
 'use client'
-import type { ArrayField, RenderedField, Row } from 'payload'
+import type { ArrayField, Row } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -70,9 +70,9 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
 
   const { renderedFieldMap } = useRenderedFieldMap()
 
-  const rowFieldMap = renderedFieldMap?.get(parentPath)?.renderedFieldMap
+  const parentFieldMap = renderedFieldMap?.get(parentPath)?.renderedFieldMap
 
-  const renderedRows = Array.from(rowFieldMap || [])
+  const renderedFields = Array.from(parentFieldMap || [])
     .filter(([key]) => key.startsWith(path))
     .map(([, value]) => value)
 
@@ -131,7 +131,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         isCollapsed={row.collapsed}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        {Array.isArray(renderedRows) && renderedRows?.map(({ Field }) => Field)}
+        {renderedFields.map(({ Field }) => Field)}
       </Collapsible>
     </div>
   )
