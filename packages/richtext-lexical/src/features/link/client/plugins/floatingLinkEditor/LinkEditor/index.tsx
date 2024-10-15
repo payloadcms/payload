@@ -11,6 +11,7 @@ import {
   formatDrawerSlug,
   useConfig,
   useEditDepth,
+  useLocale,
   useModal,
   useTranslation,
 } from '@payloadcms/ui'
@@ -26,7 +27,6 @@ import {
 } from 'lexical'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import type { LinkNode } from '../../../../nodes/LinkNode.js'
 import type { LinkFields } from '../../../../nodes/types.js'
 import type { LinkPayload } from '../types.js'
 
@@ -59,6 +59,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
   const editDepth = useEditDepth()
   const [isLink, setIsLink] = useState(false)
   const [selectedNodes, setSelectedNodes] = useState<LexicalNode[]>([])
+  const locale = useLocale()
 
   const [isAutoLink, setIsAutoLink] = useState(false)
 
@@ -80,12 +81,12 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     setStateData(undefined)
   }, [setIsLink, setLinkUrl, setLinkLabel, setSelectedNodes])
 
-  const $updateLinkEditor = useCallback(() => {
+  const $updateLinkEditor = useCallback(async () => {
     const selection = $getSelection()
     let selectedNodeDomRect: DOMRect | undefined
 
     if (!$isRangeSelection(selection) || !selection) {
-      setNotLink()
+      void setNotLink()
       return
     }
 
@@ -108,7 +109,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       })
 
     if (focusLinkParent == null || badNode) {
-      setNotLink()
+      void setNotLink()
       return
     }
 
@@ -145,32 +146,29 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
           throw new Error(`Focus link parent is missing doc.value or doc.relationTo`)
         }
 
-        const label = t('fields:linkedTo', {
+        const loadingLabel = t('fields:linkedTo', {
           label: `${getTranslation(relatedField.labels.singular, i18n)} - loading...`,
         }).replace(/<[^>]*>?/g, '')
-        setLinkLabel(label)
+        setLinkLabel(loadingLabel)
 
-        requests
-          .get(`${config.serverURL}${config.routes.api}/${collection}/${id}`, {
+        const res = await requests.get(
+          `${config.serverURL}${config.routes.api}/${collection}/${id}${locale?.code ? `?locale=${locale.code}` : ''}`,
+          {
             headers: {
               'Accept-Language': i18n.language,
             },
             params: {
               depth: 0,
             },
-          })
-          .then(async (res) => {
-            const data = await res.json()
-            const useAsTitle = relatedField?.admin?.useAsTitle || 'id'
-            const title = data[useAsTitle]
-            const label = t('fields:linkedTo', {
-              label: `${getTranslation(relatedField.labels.singular, i18n)} - ${title}`,
-            }).replace(/<[^>]*>?/g, '')
-            setLinkLabel(label)
-          })
-          .catch((err) => {
-            throw new Error(err)
-          })
+          },
+        )
+        const data = await res.json()
+        const useAsTitle = relatedField?.admin?.useAsTitle || 'id'
+        const title = data[useAsTitle]
+        const label = t('fields:linkedTo', {
+          label: `${getTranslation(relatedField.labels.singular, i18n)} - ${title}`,
+        }).replace(/<[^>]*>?/g, '')
+        setLinkLabel(label)
       }
     }
 
@@ -218,7 +216,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     }
 
     return true
-  }, [editor, setNotLink, config.collections, t, i18n, anchorElem])
+  }, [editor, setNotLink, config, locale.code, t, i18n, anchorElem])
 
   useEffect(() => {
     return mergeRegister(
@@ -228,7 +226,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
           editor.dispatchCommand(TOGGLE_LINK_COMMAND, payload)
 
           // Now, open the modal
-          $updateLinkEditor()
+          void $updateLinkEditor()
           toggleModal(drawerSlug)
 
           return true
