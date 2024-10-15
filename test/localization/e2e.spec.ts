@@ -256,11 +256,15 @@ describe('Localization', () => {
   describe('copy localized data', () => {
     test('should show copy button', async () => {
       await page.goto(url.create)
+      await fillValues({ description, title })
+      await saveDocAndAssert(page)
       await expect(page.locator('.copy-locale-data')).toBeVisible()
     })
 
     test('should show popup', async () => {
       await page.goto(url.create)
+      await fillValues({ description, title })
+      await saveDocAndAssert(page)
       await page.locator('.copy-locale-data').click()
       const firstButton = page.locator('.copy-locale-data button').nth(1)
       await expect(firstButton).toBeVisible()
@@ -274,6 +278,8 @@ describe('Localization', () => {
       const fourthOption = 'English to Hungarian'
 
       await page.goto(url.create)
+      await fillValues({ description, title })
+      await saveDocAndAssert(page)
       await page.locator('.copy-locale-data').click()
       const firstButton = page.locator('.copy-locale-data button').nth(1)
       const secondButton = page.locator('.copy-locale-data button').nth(2)
@@ -295,7 +301,9 @@ describe('Localization', () => {
       const firstButton = page.locator('.copy-locale-data button').nth(1)
       await firstButton.click()
 
-      await changeLocale(page, spanishLocale)
+      // wait for rereoute
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+
       await expect(page.locator('#field-title')).toHaveValue(title)
       await expect(page.locator('#field-description')).toHaveValue(description)
     })
