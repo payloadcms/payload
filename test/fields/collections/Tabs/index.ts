@@ -33,7 +33,6 @@ const TabsFields: CollectionConfig = {
     },
     {
       type: 'tabs',
-      id: 'conditional-tabs',
       tabs: [
         {
           name: 'conditionalTab',
@@ -59,7 +58,7 @@ const TabsFields: CollectionConfig = {
             },
             {
               type: 'tabs',
-              id: 'nested-conditional-tabs',
+
               tabs: [
                 {
                   label: 'Nested Unconditional Tab',
