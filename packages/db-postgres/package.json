@@ -50,7 +50,7 @@
     "@payloadcms/drizzle": "workspace:*",
     "@types/pg": "8.10.2",
     "console-table-printer": "2.11.2",
-    "drizzle-kit": "0.26.0",
+    "drizzle-kit": "0.26.1",
     "drizzle-orm": "0.35.0",
     "pg": "8.11.3",
     "prompts": "2.4.2",
