@@ -50,16 +50,21 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const { preferencesKey } = useDocumentInfo()
   const { i18n } = useTranslation()
   const { isWithinCollapsible } = useCollapsible()
-  const tabsPrefKey = `tabs-${indexPath}`
 
+  const tabsPrefKey = `tabs-${indexPath}`
   const tabInfos = useFormFields(([fields]) => {
     return tabs.map((tab, index) => {
-      const tabRef = 'name' in tab ? tab.name : index
-      const formStateID = `${field.id}.${tabRef}`
+      const tabPath = tabHasName(tab)
+        ? path
+          ? `${path}.${tab.name}`
+          : tab.name
+        : path
+          ? `${path}._index-${indexPath}-${index}`
+          : `_index-${indexPath}-${index}`
 
       return {
         index,
-        passesCondition: fields?.[formStateID]?.passesCondition ?? true,
+        passesCondition: fields?.[tabPath]?.passesCondition ?? true,
         tab,
       }
     })

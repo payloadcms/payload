@@ -269,10 +269,6 @@ export const sanitizeFields = async ({
       for (let j = 0; j < field.tabs.length; j++) {
         const tab = field.tabs[j]
 
-        if ('admin' in tab && tab.admin?.condition && !field.id) {
-          throw new MissingTabsId()
-        }
-
         if (tabHasName(tab)) {
           schemaPath = `${schemaPath || ''}${schemaPath ? '.' : ''}${tab.name}`
           if (typeof tab.label === 'undefined') {

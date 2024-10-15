@@ -3,6 +3,7 @@ import type { ClientField, FieldPermissions, Operation } from 'payload'
 export type Props = {
   readonly className?: string
   readonly fields: ClientField[]
+  readonly filter?: (field: ClientField) => boolean
   /**
    * Controls the rendering behavior of the fields, i.e. defers rendering until they intersect with the viewport using the Intersection Observer API.
    *
