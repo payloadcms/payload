@@ -14,6 +14,7 @@ import {
   useModal,
   useTranslation,
 } from '@payloadcms/ui'
+import { requests } from '@payloadcms/ui/shared'
 import {
   $getSelection,
   $isLineBreakNode,
@@ -111,41 +112,65 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       return
     }
 
+    const fields = focusLinkParent.getFields()
+
     // Initial state:
     const data: { text: string } & LinkFields = {
-      ...focusLinkParent.getFields(),
+      ...fields,
       id: focusLinkParent.getID(),
       text: focusLinkParent.getTextContent(),
     }
 
-    if (focusLinkParent.getFields()?.linkType === 'custom') {
-      setLinkUrl(focusLinkParent.getFields()?.url ?? null)
+    if (fields?.linkType === 'custom') {
+      setLinkUrl(fields?.url ?? null)
       setLinkLabel(null)
     } else {
       // internal link
       setLinkUrl(
-        `${config.routes.admin === '/' ? '' : config.routes.admin}/collections/${focusLinkParent.getFields()?.doc?.relationTo}/${
-          focusLinkParent.getFields()?.doc?.value
+        `${config.routes.admin === '/' ? '' : config.routes.admin}/collections/${fields?.doc?.relationTo}/${
+          fields?.doc?.value
         }`,
       )
 
-      const relatedField = config.collections.find(
-        (coll) => coll.slug === focusLinkParent.getFields()?.doc?.relationTo,
-      )
+      const relatedField = config.collections.find((coll) => coll.slug === fields?.doc?.relationTo)
       if (!relatedField) {
         // Usually happens if the user removed all default fields. In this case, we let them specify the label or do not display the label at all.
         // label could be a virtual field the user added. This is useful if they want to use the link feature for things other than links.
-        setLinkLabel(
-          focusLinkParent.getFields()?.label ? String(focusLinkParent.getFields()?.label) : null,
-        )
-        setLinkUrl(
-          focusLinkParent.getFields()?.url ? String(focusLinkParent.getFields()?.url) : null,
-        )
+        setLinkLabel(fields?.label ? String(fields?.label) : null)
+        setLinkUrl(fields?.url ? String(fields?.url) : null)
       } else {
+        const id = typeof fields.doc?.value === 'object' ? fields.doc.value.id : fields.doc?.value
+        const collection = fields.doc?.relationTo
+        if (!id || !collection) {
+          throw new Error(`Focus link parent is missing doc.value or doc.relationTo`)
+        }
+
         const label = t('fields:linkedTo', {
-          label: getTranslation(relatedField.labels.singular, i18n),
+          label: `${getTranslation(relatedField.labels.singular, i18n)} - loading...`,
         }).replace(/<[^>]*>?/g, '')
         setLinkLabel(label)
+
+        requests
+          .get(`${config.serverURL}${config.routes.api}/${collection}/${id}`, {
+            headers: {
+              'Accept-Language': i18n.language,
+            },
+            params: {
+              depth: 0,
+            },
+          })
+          .then(async (res) => {
+            const data = await res.json()
+            const useAsTitle = relatedField?.admin?.useAsTitle || 'id'
+            const title = data[useAsTitle]
+            const label = t('fields:linkedTo', {
+              label: `${getTranslation(relatedField.labels.singular, i18n)} - ${title}`,
+            }).replace(/<[^>]*>?/g, '')
+            setLinkLabel(label)
+          })
+          .catch((err) => {
+            throw new Error(err)
+          })
       }
     }
 
