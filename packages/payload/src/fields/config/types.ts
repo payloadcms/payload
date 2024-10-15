@@ -766,6 +766,9 @@ export type CollapsibleFieldClient = {
   Pick<CollapsibleField, 'type'>
 
 type TabBase = {
+  admin?: {
+    condition?: Pick<Admin, 'condition'>
+  }
   description?: Description
   fields: Field[]
   interfaceName?: string
@@ -781,10 +784,6 @@ export type NamedTab = {
    */
   interfaceName?: string
 } & TabBase
-
-export type NamedTabWithCondition = {
-  admin?: Pick<Admin, 'condition'>
-} & NamedTab
 
 export type UnnamedTab = {
   interfaceName?: never
@@ -802,30 +801,26 @@ export type UnnamedTab = {
   localized?: never
 } & Omit<TabBase, 'name' | 'virtual'>
 
-export type UnnamedTabWithCondition = {
-  admin?: Pick<Admin, 'condition'>
-} & UnnamedTab
-
-export type TabWithoutCondition = NamedTab | UnnamedTab
-export type TabWithCondition = NamedTabWithCondition | UnnamedTabWithCondition
-export type Tab = TabWithCondition | TabWithoutCondition
+export type Tab = NamedTab | UnnamedTab
 
 export type TabsField = {
   admin?: Omit<Admin, 'description'>
   type: 'tabs'
-} & ({ id: string; tabs: TabWithCondition[] } | { id?: never; tabs: TabWithoutCondition[] }) &
-  Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT' | 'virtual'>
+} & { id: string; tabs: Tab[] } & Omit<
+    FieldBase,
+    'admin' | 'localized' | 'name' | 'saveToJWT' | 'virtual'
+  >
 
 export type TabsFieldClient = {
   admin?: Omit<AdminClient, 'description'>
   tabs: ClientTab[]
 } & Omit<FieldBaseClient, 'admin' | 'localized' | 'name' | 'saveToJWT'> &
-  Pick<TabsField, 'id' | 'type'>
+  Pick<TabsField, 'type'>
 
 export type TabAsField = {
   name?: string
   type: 'tab'
-} & TabWithCondition
+} & Tab
 
 export type TabAsFieldClient = ClientTab & Pick<TabAsField, 'name' | 'type'>
 
