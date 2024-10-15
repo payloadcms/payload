@@ -25,6 +25,12 @@ export const findOne: FindOne = async function findOne(
     where,
   })
 
+  const projection = buildProjectionFromSelect({
+    adapter: this,
+    fields: collectionConfig.fields,
+    select,
+  })
+
   const aggregate = await buildJoinAggregation({
     adapter: this,
     collection,
@@ -32,6 +38,7 @@ export const findOne: FindOne = async function findOne(
     joins,
     limit: 1,
     locale,
+    projection,
     query,
   })
 
@@ -39,13 +46,7 @@ export const findOne: FindOne = async function findOne(
   if (aggregate) {
     ;[doc] = await Model.aggregate(aggregate, options)
   } else {
-    if (select) {
-      ;(options as QueryOptions).projection = buildProjectionFromSelect({
-        adapter: this,
-        fields: collectionConfig.fields,
-        select,
-      })
-    }
+    ;(options as Record<string, unknown>).projection = projection
     doc = await Model.findOne(query, {}, options)
   }
 

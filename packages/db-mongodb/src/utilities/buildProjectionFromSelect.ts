@@ -211,8 +211,12 @@ export const buildProjectionFromSelect = ({
 }: {
   adapter: MongooseAdapter
   fields: Field[]
-  select: SelectType
-}): Record<string, true> => {
+  select?: SelectType
+}): Record<string, true> | undefined => {
+  if (!select) {
+    return
+  }
+
   const projection = {}
 
   traverseFields({

@@ -20,6 +20,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
+import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
 import { buildAfterOperation } from './utils.js'
 
@@ -146,6 +147,7 @@ export const findOperation = async <
         page: sanitizedPage,
         pagination: usePagination,
         req,
+        select: getQueryDraftsSelect({ select }),
         sort: getQueryDraftsSort({ collectionConfig, sort }),
         where: fullWhere,
       })
@@ -165,6 +167,7 @@ export const findOperation = async <
         page: sanitizedPage,
         pagination,
         req,
+        select,
         sort,
         where: fullWhere,
       })

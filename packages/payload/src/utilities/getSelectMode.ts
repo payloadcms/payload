@@ -8,8 +8,7 @@ export const getSelectMode = (select: SelectType): SelectMode => {
     }
 
     if (typeof selectValue === 'object') {
-      const nestedSelectMode = getSelectMode(selectValue)
-      return nestedSelectMode
+      return getSelectMode(selectValue)
     }
   }
 

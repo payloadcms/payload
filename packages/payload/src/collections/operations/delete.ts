@@ -2,8 +2,14 @@ import httpStatus from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
 import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
-import type { BeforeOperationHook, Collection, DataFromCollectionSlug } from '../config/types.js'
+import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
+import type {
+  BeforeOperationHook,
+  BulkOperationResult,
+  Collection,
+  DataFromCollectionSlug,
+  SelectFromCollectionSlug,
+} from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
@@ -26,19 +32,17 @@ export type Arguments = {
   overrideAccess?: boolean
   overrideLock?: boolean
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
   where: Where
 }
 
-export const deleteOperation = async <TSlug extends CollectionSlug>(
+export const deleteOperation = async <
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   incomingArgs: Arguments,
-): Promise<{
-  docs: DataFromCollectionSlug<TSlug>[]
-  errors: {
-    id: DataFromCollectionSlug<TSlug>['id']
-    message: string
-  }[]
-}> => {
+): Promise<BulkOperationResult<TSlug, TSelect>> => {
   let args = incomingArgs
 
   try {
@@ -75,6 +79,7 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
         payload,
       },
       req,
+      select,
       showHiddenFields,
       where,
     } = args
@@ -110,6 +115,7 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
       collection: collectionConfig.slug,
       locale,
       req,
+      select,
       where: fullWhere,
     })
 
@@ -198,6 +204,7 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
           locale,
           overrideAccess,
           req,
+          select,
           showHiddenFields,
         })
 

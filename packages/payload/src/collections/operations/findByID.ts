@@ -173,6 +173,7 @@ export const findByIDOperation = async <
         entityType: 'collection',
         overrideAccess,
         req,
+        select,
       })
     }
 

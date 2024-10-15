@@ -1,5 +1,9 @@
 import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type {
+  PayloadRequest,
+  SelectType,
+  TransformCollectionWithSelect,
+} from '../../types/index.js'
 import type { BeforeOperationHook, Collection, DataFromCollectionSlug } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
@@ -24,12 +28,13 @@ export type Arguments = {
   overrideAccess?: boolean
   overrideLock?: boolean
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
 }
 
-export const deleteByIDOperation = async <TSlug extends CollectionSlug>(
+export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect extends SelectType>(
   incomingArgs: Arguments,
-): Promise<DataFromCollectionSlug<TSlug>> => {
+): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
 
   try {
@@ -68,6 +73,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug>(
         payload,
       },
       req,
+      select,
       showHiddenFields,
     } = args
 
@@ -153,6 +159,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug>(
     let result: DataFromCollectionSlug<TSlug> = await req.payload.db.deleteOne({
       collection: collectionConfig.slug,
       req,
+      select,
       where: { id: { equals: id } },
     })
 
@@ -182,6 +189,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug>(
       locale,
       overrideAccess,
       req,
+      select,
       showHiddenFields,
     })
 
@@ -237,7 +245,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug>(
       await commitTransaction(req)
     }
 
-    return result
+    return result as TransformCollectionWithSelect<TSlug, TSelect>
   } catch (error: unknown) {
     await killTransaction(args.req)
     throw error

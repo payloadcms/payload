@@ -914,19 +914,39 @@ export function configToJSONSchema(
 
   // Collections and Globals have to be moved to the top-level definitions as well. Reason: The top-level type will be the `Config` type - we don't want all collection and global
   // types to be inlined inside the `Config` type
-  const entityDefinitions: { [k: string]: JSONSchema4 } = [
-    ...config.globals,
-    ...config.collections,
-  ].reduce((acc, entity) => {
-    acc[entity.slug] = entityToJSONSchema(config, entity, interfaceNameDefinitions, defaultIDType)
-    acc[`${entity.slug}_select`] = {
-      type: 'object',
-      additionalProperties: false,
-      ...fieldsToSelectJSONSchema({ fields: entity.fields }),
-    }
 
-    return acc
-  }, {})
+  const entities: {
+    entity: SanitizedCollectionConfig | SanitizedGlobalConfig
+    type: 'collection' | 'global'
+  }[] = [
+    ...config.globals.map((global) => ({ type: 'global' as const, entity: global })),
+    ...config.collections.map((collection) => ({
+      type: 'collection' as const,
+      entity: collection,
+    })),
+  ]
+
+  const entityDefinitions: { [k: string]: JSONSchema4 } = entities.reduce(
+    (acc, { type, entity }) => {
+      acc[entity.slug] = entityToJSONSchema(config, entity, interfaceNameDefinitions, defaultIDType)
+      const select = fieldsToSelectJSONSchema({ fields: entity.fields })
+
+      if (type === 'global') {
+        select.properties.globalType = {
+          type: 'boolean',
+        }
+      }
+
+      acc[`${entity.slug}_select`] = {
+        type: 'object',
+        additionalProperties: false,
+        ...select,
+      }
+
+      return acc
+    },
+    {},
+  )
 
   const authOperationDefinitions = [...config.collections]
     .filter(({ auth }) => Boolean(auth))

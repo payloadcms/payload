@@ -14,6 +14,7 @@ export interface Config {
     posts: Post;
     'localized-posts': LocalizedPost;
     'versioned-posts': VersionedPost;
+    'deep-posts': DeepPost;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -23,6 +24,7 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'versioned-posts': VersionedPostsSelect<false> | VersionedPostsSelect<true>;
+    'deep-posts': DeepPostsSelect<false> | DeepPostsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -31,8 +33,12 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  globals: {};
-  globalsSelect?: {};
+  globals: {
+    'global-post': GlobalPost;
+  };
+  globalsSelect?: {
+    'global-post': GlobalPostSelect<false> | GlobalPostSelect<true>;
+  };
   locale: 'en' | 'de';
   user: User & {
     collection: 'users';
@@ -173,9 +179,65 @@ export interface VersionedPost {
   id: string;
   text?: string | null;
   number?: number | null;
+  array?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'test';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "deep-posts".
+ */
+export interface DeepPost {
+  id: string;
+  group?: {
+    array?:
+      | {
+          group?: {
+            text?: string | null;
+            number?: number | null;
+          };
+          id?: string | null;
+        }[]
+      | null;
+    blocks?:
+      | {
+          text?: string | null;
+          number?: number | null;
+          id?: string | null;
+          blockName?: string | null;
+          blockType: 'block';
+        }[]
+      | null;
+  };
+  arrayTop?:
+    | {
+        text?: string | null;
+        arrayNested?:
+          | {
+              text?: string | null;
+              number?: number | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -212,6 +274,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'versioned-posts';
         value: string | VersionedPost;
+      } | null)
+    | ({
+        relationTo: 'deep-posts';
+        value: string | DeepPost;
       } | null)
     | ({
         relationTo: 'users';
@@ -385,9 +451,74 @@ export interface LocalizedPostsSelect<T extends boolean = true> {
 export interface VersionedPostsSelect<T extends boolean = true> {
   text?: T;
   number?: T;
+  array?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  blocks?:
+    | T
+    | {
+        test?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "deep-posts_select".
+ */
+export interface DeepPostsSelect<T extends boolean = true> {
+  group?:
+    | T
+    | {
+        array?:
+          | T
+          | {
+              group?:
+                | T
+                | {
+                    text?: T;
+                    number?: T;
+                  };
+              id?: T;
+            };
+        blocks?:
+          | T
+          | {
+              block?:
+                | T
+                | {
+                    text?: T;
+                    number?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
+      };
+  arrayTop?:
+    | T
+    | {
+        text?: T;
+        arrayNested?:
+          | T
+          | {
+              text?: T;
+              number?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -435,6 +566,28 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-post".
+ */
+export interface GlobalPost {
+  id: string;
+  text?: string | null;
+  number?: number | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-post_select".
+ */
+export interface GlobalPostSelect<T extends boolean = true> {
+  text?: T;
+  number?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -30,6 +30,11 @@ type TraverseFieldArgs = {
   topLevelTableName: string
   versions?: boolean
   withinLocalizedField?: boolean
+  withTabledFields: {
+    numbers?: boolean
+    rels?: boolean
+    texts?: boolean
+  }
 }
 
 export const traverseFields = ({
@@ -51,6 +56,7 @@ export const traverseFields = ({
   topLevelTableName,
   versions,
   withinLocalizedField = false,
+  withTabledFields,
 }: TraverseFieldArgs) => {
   fields.forEach((field) => {
     if (fieldIsVirtual(field)) {
@@ -87,6 +93,7 @@ export const traverseFields = ({
         tablePath,
         topLevelArgs,
         topLevelTableName,
+        withTabledFields,
       })
 
       return
@@ -128,6 +135,7 @@ export const traverseFields = ({
           topLevelArgs,
           topLevelTableName,
           versions,
+          withTabledFields,
         })
       })
 
@@ -166,8 +174,14 @@ export const traverseFields = ({
             `${currentTableName}_${tablePath}${toSnakeCase(field.name)}`,
           )
 
-          if (typeof arraySelect === 'object' && adapter.tables[arrayTableName]._locale) {
-            withArray.columns._locale = true
+          if (typeof arraySelect === 'object') {
+            if (adapter.tables[arrayTableName]._locale) {
+              withArray.columns._locale = true
+            }
+
+            if (adapter.tables[arrayTableName]._uuid) {
+              withArray.columns._uuid = true
+            }
           }
 
           const arrayTableNameWithLocales = `${arrayTableName}${adapter.localesSuffix}`
@@ -204,6 +218,7 @@ export const traverseFields = ({
             topLevelArgs,
             topLevelTableName,
             withinLocalizedField: withinLocalizedField || field.localized,
+            withTabledFields,
           })
 
           if (
@@ -300,8 +315,14 @@ export const traverseFields = ({
                 `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`,
               )
 
-              if (typeof blockSelect === 'object' && adapter.tables[tableName]._locale) {
-                withBlock.columns._locale = true
+              if (typeof blockSelect === 'object') {
+                if (adapter.tables[tableName]._locale) {
+                  withBlock.columns._locale = true
+                }
+
+                if (adapter.tables[tableName]._uuid) {
+                  withBlock.columns._uuid = true
+                }
               }
 
               if (adapter.tables[`${tableName}${adapter.localesSuffix}`]) {
@@ -332,6 +353,7 @@ export const traverseFields = ({
                 topLevelArgs,
                 topLevelTableName,
                 withinLocalizedField: withinLocalizedField || field.localized,
+                withTabledFields,
               })
 
               if (
@@ -375,6 +397,7 @@ export const traverseFields = ({
             topLevelTableName,
             versions,
             withinLocalizedField: withinLocalizedField || field.localized,
+            withTabledFields,
           })
 
           break
@@ -572,6 +595,22 @@ export const traverseFields = ({
               _locales.columns[fieldPath] = true
             } else if (adapter.tables[currentTableName]?.[fieldPath]) {
               currentArgs.columns[fieldPath] = true
+            }
+
+            if (
+              !withTabledFields.rels &&
+              field.type === 'relationship' &&
+              (field.hasMany || Array.isArray(field.relationTo))
+            ) {
+              withTabledFields.rels = true
+            }
+
+            if (!withTabledFields.numbers && field.type === 'number' && field.hasMany) {
+              withTabledFields.numbers = true
+            }
+
+            if (!withTabledFields.texts && field.type === 'text' && field.hasMany) {
+              withTabledFields.texts = true
             }
           }
 

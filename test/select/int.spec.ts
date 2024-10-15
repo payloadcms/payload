@@ -3,7 +3,14 @@ import { deepCopyObject, type Payload } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { LocalizedPost, Post, VersionedPost } from './payload-types.js'
+import type {
+  Config,
+  DeepPost,
+  GlobalPost,
+  LocalizedPost,
+  Post,
+  VersionedPost,
+} from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 
@@ -1008,6 +1015,92 @@ describe('Select', () => {
     })
   })
 
+  describe('Local API - Deep Fields', () => {
+    let post: DeepPost
+    let postId: number | string
+
+    beforeEach(async () => {
+      post = await createDeepPost()
+      postId = post.id
+    })
+
+    it('should select deply group.array.group.text', async () => {
+      const res = await payload.findByID({
+        id: postId,
+        collection: 'deep-posts',
+        select: { group: { array: { group: { text: true } } } },
+      })
+
+      expect(res).toStrictEqual({
+        id: postId,
+        group: {
+          array: post.group.array.map((item) => ({
+            id: item.id,
+            group: {
+              text: item.group.text,
+            },
+          })),
+        },
+      })
+    })
+
+    it('should select deply group.array.group.*', async () => {
+      const res = await payload.findByID({
+        id: postId,
+        collection: 'deep-posts',
+        select: { group: { array: { group: true } } },
+      })
+
+      expect(res).toStrictEqual({
+        id: postId,
+        group: {
+          array: post.group.array.map((item) => ({
+            id: item.id,
+            group: item.group,
+          })),
+        },
+      })
+    })
+
+    it('should select deply group.blocks.block.text', async () => {
+      const res = await payload.findByID({
+        id: postId,
+        collection: 'deep-posts',
+        select: { group: { blocks: { block: { text: true } } } },
+      })
+
+      expect(res).toStrictEqual({
+        id: postId,
+        group: {
+          blocks: post.group.blocks.map((item) => ({
+            id: item.id,
+            blockType: item.blockType,
+            text: item.text,
+          })),
+        },
+      })
+    })
+
+    it('should select deply array.array.text', async () => {
+      const res = await payload.findByID({
+        id: postId,
+        collection: 'deep-posts',
+        select: { arrayTop: { arrayNested: { text: true } } },
+      })
+
+      expect(res).toStrictEqual({
+        id: postId,
+        arrayTop: post.arrayTop.map((item) => ({
+          id: item.id,
+          arrayNested: item.arrayNested.map((item) => ({
+            id: item.id,
+            text: item.text,
+          })),
+        })),
+      })
+    })
+  })
+
   describe('Local API - Versioned Drafts Collection', () => {
     let post: VersionedPost
     let postId: number | string
@@ -1022,101 +1115,449 @@ describe('Select', () => {
       await payload.delete({ id: postId, collection: 'versioned-posts' })
     })
 
-    describe('Include mode draft: false', () => {
-      it('should select only id as default', async () => {
-        const res = await payload.findByID({
-          collection: 'versioned-posts',
-          id: postId,
-          select: {},
-          draft: false,
-        })
-
-        expect(res).toStrictEqual({
-          id: postId,
-        })
+    it('should select only id as default', async () => {
+      const res = await payload.findByID({
+        collection: 'versioned-posts',
+        id: postId,
+        select: {},
+        draft: true,
       })
 
-      it('should select only number', async () => {
-        const res = await payload.findByID({
-          collection: 'versioned-posts',
-          id: postId,
-          select: {
-            number: true,
-          },
-          draft: false,
-        })
+      expect(res).toStrictEqual({
+        id: postId,
+      })
+    })
 
-        expect(res).toStrictEqual({
+    it('should select only number', async () => {
+      const res = await payload.findByID({
+        collection: 'versioned-posts',
+        id: postId,
+        select: {
+          number: true,
+        },
+        draft: true,
+      })
+
+      expect(res).toStrictEqual({
+        id: postId,
+        number: post.number,
+      })
+    })
+
+    it('should exclude only number', async () => {
+      const res = await payload.findByID({
+        collection: 'versioned-posts',
+        id: postId,
+        select: {
+          number: false,
+        },
+        draft: true,
+      })
+
+      const expected = { ...post }
+
+      delete expected['number']
+      expect(res).toStrictEqual(expected)
+    })
+
+    it('should select number and text', async () => {
+      const res = await payload.findByID({
+        collection: 'versioned-posts',
+        id: postId,
+        select: {
+          number: true,
+          text: true,
+        },
+        draft: true,
+      })
+
+      expect(res).toStrictEqual({
+        id: postId,
+        number: post.number,
+        text: post.text,
+      })
+    })
+
+    it('payload.find should select number and text', async () => {
+      const res = await payload.find({
+        collection: 'versioned-posts',
+        where: {
+          id: {
+            equals: postId,
+          },
+        },
+        select: {
+          number: true,
+          text: true,
+        },
+        draft: true,
+      })
+
+      expect(res.docs[0]).toStrictEqual({
+        id: postId,
+        number: post.number,
+        text: post.text,
+      })
+    })
+
+    it('should select base id field inside of array', async () => {
+      const res = await payload.find({
+        collection: 'versioned-posts',
+        where: {
+          id: {
+            equals: postId,
+          },
+        },
+        select: {
+          array: {},
+        },
+        draft: true,
+      })
+
+      expect(res.docs[0]).toStrictEqual({
+        id: postId,
+        array: post.array.map((each) => ({ id: each.id })),
+      })
+    })
+
+    it('should select base id field inside of blocks', async () => {
+      const res = await payload.find({
+        collection: 'versioned-posts',
+        where: {
+          id: {
+            equals: postId,
+          },
+        },
+        select: {
+          blocks: {},
+        },
+        draft: true,
+      })
+
+      expect(res.docs[0]).toStrictEqual({
+        id: postId,
+        blocks: post.blocks.map((each) => ({ blockType: each.blockType, id: each.id })),
+      })
+    })
+
+    it('should select with payload.findVersions', async () => {
+      const res = await payload.findVersions({
+        collection: 'versioned-posts',
+        limit: 1,
+        sort: '-updatedAt',
+        where: { parent: { equals: postId } },
+        select: {
+          version: {
+            text: true,
+          },
+        },
+      })
+
+      // findVersions doesnt transform result with afterRead hook and so doesn't strip undefined values from the object
+      // undefined values are happened with drizzle adapters because of transform/read
+
+      const doc = res.docs[0]
+
+      expect(doc.createdAt).toBeUndefined()
+      expect(doc.updatedAt).toBeUndefined()
+      expect(doc.version.number).toBeUndefined()
+      expect(doc.version.createdAt).toBeUndefined()
+      expect(doc.version.text).toBe(post.text)
+    })
+  })
+
+  describe('Local API - Globals', () => {
+    let globalPost: GlobalPost
+    beforeAll(async () => {
+      globalPost = await payload.updateGlobal({
+        slug: 'global-post',
+        data: {
+          number: 2,
+          text: '3',
+        },
+      })
+    })
+
+    it('should select with find', async () => {
+      const res = await payload.findGlobal({
+        slug: 'global-post',
+        select: {
+          text: true,
+        },
+      })
+
+      expect(res).toStrictEqual({
+        id: globalPost.id,
+        text: globalPost.text,
+      })
+    })
+
+    it('should select with update', async () => {
+      const res = await payload.updateGlobal({
+        slug: 'global-post',
+        data: {},
+        select: {
+          text: true,
+        },
+      })
+
+      expect(res).toStrictEqual({
+        id: globalPost.id,
+        text: globalPost.text,
+      })
+    })
+  })
+
+  describe('Local API - operations', () => {
+    it('should apply select with create', async () => {
+      const res = await payload.create({
+        collection: 'posts',
+        data: {
+          text: 'asd',
+          number: 123,
+        },
+        select: {
+          text: true,
+        },
+      })
+
+      expect(Object.keys(res)).toStrictEqual(['id', 'text'])
+    })
+
+    it('should apply select with updateByID', async () => {
+      const post = await createPost()
+
+      const res = await payload.update({
+        collection: 'posts',
+        id: post.id,
+        data: {},
+        select: { text: true },
+      })
+
+      expect(Object.keys(res)).toStrictEqual(['id', 'text'])
+    })
+
+    it('should apply select with updateBulk', async () => {
+      const post = await createPost()
+
+      const res = await payload.update({
+        collection: 'posts',
+        where: {
+          id: {
+            equals: post.id,
+          },
+        },
+        data: {},
+        select: { text: true },
+      })
+
+      expect(Object.keys(res.docs[0])).toStrictEqual(['id', 'text'])
+    })
+
+    it('should apply select with deleteByID', async () => {
+      const post = await createPost()
+
+      const res = await payload.delete({
+        collection: 'posts',
+        id: post.id,
+        select: { text: true },
+      })
+
+      expect(Object.keys(res)).toStrictEqual(['id', 'text'])
+    })
+
+    it('should apply select with deleteBulk', async () => {
+      const post = await createPost()
+
+      const res = await payload.delete({
+        collection: 'posts',
+        where: {
+          id: {
+            equals: post.id,
+          },
+        },
+        select: { text: true },
+      })
+
+      expect(Object.keys(res.docs[0])).toStrictEqual(['id', 'text'])
+    })
+
+    it('should apply select with duplicate', async () => {
+      const post = await createPost()
+
+      const res = await payload.duplicate({
+        collection: 'posts',
+        id: post.id,
+        select: { text: true },
+      })
+
+      expect(Object.keys(res)).toStrictEqual(['id', 'text'])
+    })
+  })
+
+  describe('REST API - Base', () => {
+    let post: Post
+    let postId: number | string
+
+    beforeEach(async () => {
+      post = await createPost()
+      postId = post.id
+    })
+
+    // Clean up to safely mutate in each test
+    afterEach(async () => {
+      await payload.delete({ id: postId, collection: 'posts' })
+    })
+
+    describe('Include mode', () => {
+      it('should select only text', async () => {
+        const res = await restClient
+          .GET(`/posts/${postId}`, {
+            query: {
+              select: {
+                text: true,
+              } satisfies Config['collectionsSelect']['posts'],
+            },
+          })
+          .then((res) => res.json())
+
+        expect(res).toMatchObject({
+          text: post.text,
           id: postId,
-          number: post.number,
         })
       })
 
       it('should select number and text', async () => {
-        const res = await payload.findByID({
-          collection: 'versioned-posts',
-          id: postId,
-          select: {
-            number: true,
-            text: true,
-          },
-          draft: false,
-        })
+        const res = await restClient
+          .GET(`/posts/${postId}`, {
+            query: {
+              select: {
+                number: true,
+                text: true,
+              } satisfies Config['collectionsSelect']['posts'],
+            },
+          })
+          .then((res) => res.json())
 
-        expect(res).toStrictEqual({
+        expect(res).toMatchObject({
           id: postId,
           number: post.number,
           text: post.text,
+        })
+      })
+
+      it('should select all the fields inside of group', async () => {
+        const res = await restClient
+          .GET(`/posts/${postId}`, {
+            query: {
+              select: {
+                group: true,
+              } satisfies Config['collectionsSelect']['posts'],
+            },
+          })
+          .then((res) => res.json())
+
+        expect(res).toMatchObject({
+          id: postId,
+          group: post.group,
+        })
+      })
+
+      it('should select text field inside of group', async () => {
+        const res = await restClient
+          .GET(`/posts/${postId}`, {
+            query: {
+              select: {
+                group: { text: true },
+              } satisfies Config['collectionsSelect']['posts'],
+            },
+          })
+          .then((res) => res.json())
+
+        expect(res).toMatchObject({
+          id: postId,
+          group: {
+            text: post.group.text,
+          },
         })
       })
     })
 
-    describe('Include mode draft: true', () => {
-      it('should select only id as default', async () => {
-        const res = await payload.findByID({
-          collection: 'versioned-posts',
-          id: postId,
-          select: {},
-          draft: true,
-        })
+    describe('Exclude mode', () => {
+      it('should exclude only text field', async () => {
+        const res = await restClient
+          .GET(`/posts/${postId}`, {
+            query: {
+              select: {
+                text: false,
+              } satisfies Config['collectionsSelect']['posts'],
+            },
+          })
+          .then((res) => res.json())
 
-        expect(res).toStrictEqual({
-          id: postId,
-        })
+        const expected = { ...post }
+
+        delete expected['text']
+
+        expect(res).toMatchObject(expected)
       })
 
-      it('should select only number', async () => {
-        const res = await payload.findByID({
-          collection: 'versioned-posts',
-          id: postId,
-          select: {
-            number: true,
-          },
-          draft: true,
-        })
+      it('should exclude number', async () => {
+        const res = await restClient
+          .GET(`/posts/${postId}`, {
+            query: {
+              select: {
+                number: false,
+              } satisfies Config['collectionsSelect']['posts'],
+            },
+          })
+          .then((res) => res.json())
 
-        expect(res).toStrictEqual({
-          id: postId,
-          number: post.number,
-        })
+        const expected = { ...post }
+
+        delete expected['number']
+
+        expect(res).toMatchObject(expected)
       })
 
-      it('should select number and text', async () => {
-        const res = await payload.findByID({
-          collection: 'versioned-posts',
-          id: postId,
-          select: {
-            number: true,
-            text: true,
-          },
-          draft: true,
-        })
+      it('should exclude number and text', async () => {
+        const res = await restClient
+          .GET(`/posts/${postId}`, {
+            query: {
+              select: {
+                number: false,
+                text: false,
+              } satisfies Config['collectionsSelect']['posts'],
+            },
+          })
+          .then((res) => res.json())
 
-        expect(res).toStrictEqual({
-          id: postId,
-          number: post.number,
-          text: post.text,
-        })
+        const expected = { ...post }
+
+        delete expected['text']
+        delete expected['number']
+
+        expect(res).toMatchObject(expected)
+      })
+
+      it('should exclude text field inside of group', async () => {
+        const res = await restClient
+          .GET(`/posts/${postId}`, {
+            query: {
+              select: {
+                group: {
+                  text: false,
+                },
+              } satisfies Config['collectionsSelect']['posts'],
+            },
+          })
+          .then((res) => res.json())
+
+        const expected = deepCopyObject(post)
+
+        delete expected.group.text
+
+        expect(res).toMatchObject(expected)
       })
     })
   })
@@ -1210,12 +1651,27 @@ function createLocalizedPost() {
   })
 }
 
+function createDeepPost() {
+  return payload.create({
+    collection: 'deep-posts',
+    data: {
+      arrayTop: [{ text: 'text1', arrayNested: [{ text: 'text2', number: 34 }] }],
+      group: {
+        array: [{ group: { number: 1, text: 'text-3' } }],
+        blocks: [{ blockType: 'block', number: 3, text: 'text-4' }],
+      },
+    },
+  })
+}
+
 function createVersionedPost() {
   return payload.create({
     collection: 'versioned-posts',
     data: {
       number: 2,
       text: 'text',
+      array: [{ text: 'hello' }],
+      blocks: [{ blockType: 'test', text: 'hela' }],
     },
   })
 }

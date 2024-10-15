@@ -4,17 +4,23 @@ import { combineQueries } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
 export const findGlobal: FindGlobal = async function findGlobal(
   this: MongooseAdapter,
-  { slug, locale, req = {} as PayloadRequest, where },
+  { slug, locale, req = {} as PayloadRequest, select, where },
 ) {
   const Model = this.globals
   const options = {
     ...(await withSession(this, req)),
     lean: true,
+    select: buildProjectionFromSelect({
+      adapter: this,
+      fields: this.payload.globals.config.find((each) => each.slug === slug).fields,
+      select,
+    }),
   }
 
   const query = await Model.buildQuery({

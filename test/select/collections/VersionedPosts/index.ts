@@ -14,5 +14,30 @@ export const VersionedPostsCollection: CollectionConfig = {
       name: 'number',
       type: 'number',
     },
+    {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'test',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
   ],
 }

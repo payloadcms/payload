@@ -13,6 +13,7 @@ type BuildJoinAggregationArgs = {
   // the number of docs to get at the top collection level
   limit?: number
   locale: string
+  projection?: Record<string, true>
   // the where clause for the top collection
   query?: Where
   /** whether the query is from drafts */
@@ -26,6 +27,7 @@ export const buildJoinAggregation = async ({
   joins,
   limit,
   locale,
+  projection,
   query,
   versions,
 }: BuildJoinAggregationArgs): Promise<PipelineStage[] | undefined> => {
@@ -172,6 +174,10 @@ export const buildJoinAggregation = async ({
         }
       }
     }
+  }
+
+  if (projection) {
+    aggregate.push({ $project: projection })
   }
 
   return aggregate

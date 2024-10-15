@@ -8,7 +8,13 @@ import type {
   TypeWithTimestamps,
 } from '../collections/config/types.js'
 import type payload from '../index.js'
-import type { CollectionSlug, TypedLocale, TypedUser } from '../index.js'
+import type {
+  CollectionSlug,
+  DataFromGlobalSlug,
+  GlobalSlug,
+  TypedLocale,
+  TypedUser,
+} from '../index.js'
 import type { validOperators } from './constants.js'
 export type { Payload as Payload } from '../index.js'
 
@@ -169,7 +175,7 @@ export type TransformDataWithSelect<
     : // START Handle types when they aren't generated
       // For example in any package in this repository outside of tests / plugins
       // This stil gives us autocomplete when using include select mode, i.e select: {title :true} returns type {title: any, id: string | number}
-      JsonObject extends Omit<Data, 'id'>
+      string extends keyof Omit<Data, 'id'>
       ? Select extends SelectIncludeType
         ? {
             [K in Data extends TypeWithID ? 'id' | keyof Select : keyof Select]: K extends 'id'
@@ -202,4 +208,13 @@ export type TransformDataWithSelect<
 export type TransformCollectionWithSelect<
   TSlug extends CollectionSlug,
   TSelect extends SelectType,
-> = TransformDataWithSelect<DataFromCollectionSlug<TSlug>, TSelect>
+> = TSelect extends SelectType
+  ? TransformDataWithSelect<DataFromCollectionSlug<TSlug>, TSelect>
+  : DataFromCollectionSlug<TSlug>
+
+export type TransformGlobalWithSelect<
+  TSlug extends GlobalSlug,
+  TSelect extends SelectType,
+> = TSelect extends SelectType
+  ? TransformDataWithSelect<DataFromGlobalSlug<TSlug>, TSelect>
+  : DataFromGlobalSlug<TSlug>
