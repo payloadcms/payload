@@ -516,12 +516,14 @@ export type PolymorphicRelationshipField = SharedRelationshipProperties & {
     }
   }
   relationTo: string[]
+  idType?: string
 }
 export type SingleRelationshipField = SharedRelationshipProperties & {
   admin?: RelationshipAdmin & {
     sortOptions?: string
   }
   relationTo: string
+  idType?: string
 }
 export type RelationshipField = PolymorphicRelationshipField | SingleRelationshipField
 
