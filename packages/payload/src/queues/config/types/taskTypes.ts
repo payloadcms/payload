@@ -1,24 +1,10 @@
 import type { Field, PayloadRequest, StringKeyOf, TypedJobs } from '../../../index.js'
-import type { JobLog, RunningJob } from './workflowTypes.js'
+import type { JobLog, RunningJob, RunningJobSimple } from './workflowTypes.js'
 
 export type TaskInputOutput = {
   input: object
   output: object
 }
-
-export type TaskHandlerArgs<
-  TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput,
-  TWorkflowSlug extends keyof TypedJobs['workflows'] = string,
-> = {
-  input: TTaskSlugOrInputOutput extends keyof TypedJobs['tasks']
-    ? TypedJobs['tasks'][TTaskSlugOrInputOutput]['input']
-    : TTaskSlugOrInputOutput extends TaskInputOutput // Check if it's actually TaskInputOutput type
-      ? TTaskSlugOrInputOutput['input']
-      : never
-  job: RunningJob<TWorkflowSlug>
-  req: PayloadRequest
-}
-
 export type TaskHandlerResult<
   TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput,
 > = {
@@ -41,12 +27,33 @@ export type SavedTaskResults = {
   }
 }
 
-export type TaskHandler<TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput> =
-  (
-    args: TaskHandlerArgs<TTaskSlugOrInputOutput>,
-  ) =>
-    | Promise<TaskHandlerResult<TTaskSlugOrInputOutput>>
-    | TaskHandlerResult<TTaskSlugOrInputOutput>
+export type TaskHandlerArgs<
+  TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput,
+  TWorkflowSlug extends keyof TypedJobs['workflows'] = string,
+> = {
+  input: TTaskSlugOrInputOutput extends keyof TypedJobs['tasks']
+    ? TypedJobs['tasks'][TTaskSlugOrInputOutput]['input']
+    : TTaskSlugOrInputOutput extends TaskInputOutput // Check if it's actually TaskInputOutput type
+      ? TTaskSlugOrInputOutput['input']
+      : never
+  job: RunningJob<TWorkflowSlug>
+  req: PayloadRequest
+}
+
+/**
+ * Inline tasks in JSON workflows have no input, as they can just get the input from job.taskStatus
+ */
+export type TaskHandlerArgsNoInput<TWorkflowInput extends object> = {
+  job: RunningJobSimple<TWorkflowInput>
+  req: PayloadRequest
+}
+
+export type TaskHandler<
+  TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput,
+  TWorkflowSlug extends keyof TypedJobs['workflows'] = string,
+> = (
+  args: TaskHandlerArgs<TTaskSlugOrInputOutput, TWorkflowSlug>,
+) => Promise<TaskHandlerResult<TTaskSlugOrInputOutput>> | TaskHandlerResult<TTaskSlugOrInputOutput>
 
 export type TaskType = StringKeyOf<TypedJobs['tasks']>
 
@@ -72,6 +79,7 @@ export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput exte
   id: string
   input?: TTaskInput
   retries?: number | RetryConfig
+  // This is the same as TaskHandler, but typed out explicitly in order to improve type inference
   task: (args: { input: TTaskInput; job: RunningJob<any>; req: PayloadRequest }) =>
     | {
         output: TTaskOutput

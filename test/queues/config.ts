@@ -21,9 +21,9 @@ export default buildConfigWithDefaults({
       },
       hooks: {
         afterChange: [
-          async ({ req, doc }) => {
+          async ({ req, doc, context }) => {
             await req.payload.jobs.queue({
-              workflow: 'updatePost',
+              workflow: context.useJSONWorkflow ? 'updatePostJSONWorkflow' : 'updatePost',
               input: {
                 post: doc.id,
                 message: 'hello',
@@ -268,6 +268,45 @@ export default buildConfigWithDefaults({
           })
         },
       } as WorkflowConfig<'updatePost'>,
+      {
+        slug: 'updatePostJSONWorkflow',
+        inputSchema: [
+          {
+            name: 'post',
+            type: 'relationship',
+            relationTo: 'posts',
+            maxDepth: 0,
+            required: true,
+          },
+          {
+            name: 'message',
+            type: 'text',
+            required: true,
+          },
+        ],
+        handler: [
+          {
+            task: 'UpdatePost',
+            id: '1',
+            input: ({ job }) => ({
+              post: job.input.post,
+              message: job.input.message,
+            }),
+          },
+          {
+            task: 'UpdatePostStep2',
+            id: '2',
+            input: ({ job }) => ({
+              post: job.taskStatus.UpdatePost['1'].input.post,
+              messageTwice: job.taskStatus.UpdatePost['1'].output.messageTwice,
+            }),
+            condition({ job }) {
+              return job?.taskStatus?.UpdatePost?.['1']?.complete
+            },
+            completesJob: true,
+          },
+        ],
+      } as WorkflowConfig<'updatePostJSONWorkflow'>,
       {
         slug: 'retriesTest',
         inputSchema: [

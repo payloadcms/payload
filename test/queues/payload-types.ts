@@ -55,6 +55,9 @@ export interface Config {
       updatePost?: {
         input: WorkflowupdatePostInput;
       };
+      updatePostJSONWorkflow?: {
+        input: WorkflowupdatePostJSONWorkflowInput;
+      };
       retriesTest?: {
         input: WorkflowretriesTestInput;
       };
@@ -265,6 +268,7 @@ export interface PayloadJob {
   workflowSlug?:
     | (
         | 'updatePost'
+        | 'updatePostJSONWorkflow'
         | 'retriesTest'
         | 'retriesRollbackTest'
         | 'retriesWorkflowLevelTest'
@@ -426,6 +430,14 @@ export interface TaskExternalTaskOutput {
  * via the `definition` "WorkflowupdatePostInput".
  */
 export interface WorkflowupdatePostInput {
+  post: string | Post;
+  message: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowupdatePostJSONWorkflowInput".
+ */
+export interface WorkflowupdatePostJSONWorkflowInput {
   post: string | Post;
   message: string;
 }

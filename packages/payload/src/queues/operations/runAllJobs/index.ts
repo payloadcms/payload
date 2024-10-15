@@ -1,10 +1,19 @@
 import type { PaginatedDocs } from '../../../database/types.js'
 import type { PayloadRequest, Where } from '../../../types/index.js'
-import type { BaseJob, WorkflowConfig, WorkflowTypes } from '../../config/types/workflowTypes.js'
+import type { WorkflowJSON } from '../../config/types/workflowJSONTypes.js'
+import type {
+  BaseJob,
+  WorkflowConfig,
+  WorkflowHandler,
+  WorkflowTypes,
+} from '../../config/types/workflowTypes.js'
 import type { RunJobResult } from '../runJob/index.js'
 
 import { Forbidden } from '../../../errors/Forbidden.js'
+import { getUpdateJobFunction } from '../runJob/getUpdateJobFunction.js'
+import { importHandlerPath } from '../runJob/importHandlerPath.js'
 import { runJob } from '../runJob/index.js'
+import { runJSONJob } from '../runJSONJob/index.js'
 
 export type RunAllJobsArgs = {
   limit?: number
@@ -134,19 +143,63 @@ export const runAllJobs = async ({
               input: job.input,
               task: job.taskSlug as string,
             })
-          }, // TODO: Convert this to controlFlowInJSON once available
+          },
         }
 
     if (!workflowConfig) {
       return null // Skip jobs with no workflow configuration
     }
 
-    const result = await runJob({
-      job,
-      req,
-      workflowConfig,
-    })
-    return { id: job.id, result }
+    const updateJob = getUpdateJobFunction(job, req)
+
+    // the runner will either be passed to the config
+    // OR it will be a path, which we will need to import via eval to avoid
+    // Next.js compiler dynamic import expression errors
+    let workflowHandler: WorkflowHandler<WorkflowTypes> | WorkflowJSON<WorkflowTypes>
+
+    if (
+      typeof workflowConfig.handler === 'function' ||
+      (typeof workflowConfig.handler === 'object' && Array.isArray(workflowConfig.handler))
+    ) {
+      workflowHandler = workflowConfig.handler
+    } else {
+      workflowHandler = await importHandlerPath<typeof workflowHandler>(workflowConfig.handler)
+
+      if (!workflowHandler) {
+        const errorMessage = `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${job.workflowSlug}.`
+        req.payload.logger.error(errorMessage)
+
+        await updateJob({
+          error: {
+            error: errorMessage,
+          },
+          hasError: true,
+          processing: false,
+        })
+
+        return
+      }
+    }
+
+    if (typeof workflowHandler === 'function') {
+      const result = await runJob({
+        job,
+        req,
+        updateJob,
+        workflowConfig,
+        workflowHandler,
+      })
+      return { id: job.id, result }
+    } else {
+      const result = await runJSONJob({
+        job,
+        req,
+        updateJob,
+        workflowConfig,
+        workflowHandler,
+      })
+      return { id: job.id, result }
+    }
   })
 
   const resultsArray = await Promise.all(jobPromises)

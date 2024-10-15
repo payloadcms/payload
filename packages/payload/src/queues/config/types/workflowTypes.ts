@@ -8,6 +8,7 @@ import type {
   TaskOutput,
   TaskType,
 } from './taskTypes.js'
+import type { WorkflowJSON } from './workflowJSONTypes.js'
 
 export type JobLog = {
   completedAt: string
@@ -38,12 +39,18 @@ export type BaseJob = {
 
 export type WorkflowTypes = StringKeyOf<TypedJobs['workflows']>
 
+// TODO: Type job.taskStatus once available - for JSON-defined workflows
 export type RunningJob<TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object> = {
   input: TWorkflowSlugOrInput extends keyof TypedJobs['workflows']
     ? TypedJobs['workflows'][TWorkflowSlugOrInput]['input']
     : TWorkflowSlugOrInput
 } & TypedCollection['payload-jobs']
 
+export type RunningJobSimple<TWorkflowInput extends object> = {
+  input: TWorkflowInput
+} & TypedCollection['payload-jobs']
+
+// Simplified version of RunningJob that doesn't break TypeScript (TypeScript seems to stop evaluating RunningJob when it's too complex)
 export type RunningJobFromTask<TTaskSlug extends keyof TypedJobs['tasks']> = {
   input: TypedJobs['tasks'][TTaskSlug]['input']
 } & TypedCollection['payload-jobs']
@@ -83,8 +90,10 @@ export type WorkflowConfig<TWorkflowSlugOrInput extends keyof TypedJobs['workflo
    *
    *
    */
-  handler: string | WorkflowHandler<TWorkflowSlugOrInput>
-  //TODO: Add JSON-based control flow to handler later. This will add | array.  All tasks and their order defined in JSON
+  handler:
+    | string
+    | WorkflowHandler<TWorkflowSlugOrInput>
+    | WorkflowJSON<TWorkflowSlugOrInput extends object ? string : TWorkflowSlugOrInput>
   /**
    * Define the input field schema  - payload will generate a type for this schema.
    */

@@ -119,6 +119,36 @@ describe('Queues', () => {
     expect(postAfterJobs.jobStep2Ran).toBe('hellohellohellohello')
   })
 
+  it('can create new JSON-workflow jobs', async () => {
+    const newPost = await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'my post',
+      },
+      context: {
+        useJSONWorkflow: true,
+      },
+    })
+
+    const retrievedPost = await payload.findByID({
+      collection: 'posts',
+      id: newPost.id,
+    })
+
+    expect(retrievedPost.jobStep1Ran).toBeFalsy()
+    expect(retrievedPost.jobStep2Ran).toBeFalsy()
+
+    await payload.jobs.run()
+
+    const postAfterJobs = await payload.findByID({
+      collection: 'posts',
+      id: newPost.id,
+    })
+
+    expect(postAfterJobs.jobStep1Ran).toBe('hello')
+    expect(postAfterJobs.jobStep2Ran).toBe('hellohellohellohello')
+  })
+
   it('ensure job retrying works', async () => {
     const job = await payload.jobs.queue({
       workflow: 'retriesTest',
