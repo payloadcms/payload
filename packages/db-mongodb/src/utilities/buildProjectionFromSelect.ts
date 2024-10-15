@@ -217,7 +217,9 @@ export const buildProjectionFromSelect = ({
     return
   }
 
-  const projection = {}
+  const projection: Record<string, true> = {
+    _id: true,
+  }
 
   traverseFields({
     adapter,

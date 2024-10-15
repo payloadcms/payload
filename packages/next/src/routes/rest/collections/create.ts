@@ -1,5 +1,3 @@
-import type { SelectType } from 'payload'
-
 import { getTranslation } from '@payloadcms/translations'
 import httpStatus from 'http-status'
 import { createOperation } from 'payload'

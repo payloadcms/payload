@@ -58,6 +58,10 @@ export const buildJoinAggregation = async ({
     for (const join of joinConfig[slug]) {
       const joinModel = adapter.collections[join.field.collection]
 
+      if (projection && !projection[join.schemaPath]) {
+        continue
+      }
+
       const {
         limit: limitJoin = 10,
         sort: sortJoin,

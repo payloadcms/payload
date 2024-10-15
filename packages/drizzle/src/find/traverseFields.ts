@@ -409,6 +409,13 @@ export const traverseFields = ({
             break
           }
 
+          if (
+            (select && selectMode === 'include' && !select[field.name]) ||
+            (selectMode === 'exclude' && select[field.name] === false)
+          ) {
+            break
+          }
+
           const {
             limit: limitArg = 10,
             sort,

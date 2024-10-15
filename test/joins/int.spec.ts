@@ -105,15 +105,45 @@ describe('Joins Field', () => {
       },
       collection: 'categories',
     })
-    // const sortCategoryWithPosts = await payload.findByID({
-    //   id: category.id,
-    //   joins: {
-    //     'group.relatedPosts': {
-    //       sort: 'title',
-    //     },
-    //   },
-    //   collection: 'categories',
-    // })
+
+    expect(categoryWithPosts.group.relatedPosts.docs).toHaveLength(10)
+    expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('id')
+    expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('title')
+    expect(categoryWithPosts.group.relatedPosts.docs[0].title).toStrictEqual('test 9')
+  })
+
+  it('should not populate joins if not selected', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      joins: {
+        'group.relatedPosts': {
+          sort: '-title',
+        },
+      },
+      select: {},
+      collection: 'categories',
+    })
+
+    expect(Object.keys(categoryWithPosts)).toStrictEqual(['id'])
+  })
+
+  it('should populate joins if selected', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      joins: {
+        'group.relatedPosts': {
+          sort: '-title',
+        },
+      },
+      select: {
+        group: {
+          relatedPosts: true,
+        },
+      },
+      collection: 'categories',
+    })
+
+    expect(Object.keys(categoryWithPosts)).toStrictEqual(['id', 'group'])
 
     expect(categoryWithPosts.group.relatedPosts.docs).toHaveLength(10)
     expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('id')
