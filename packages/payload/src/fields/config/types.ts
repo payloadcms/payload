@@ -767,7 +767,7 @@ export type CollapsibleFieldClient = {
 
 type TabBase = {
   admin?: {
-    condition?: Pick<Admin, 'condition'>
+    condition?: Condition
   }
   description?: Description
   fields: Field[]
@@ -806,10 +806,7 @@ export type Tab = NamedTab | UnnamedTab
 export type TabsField = {
   admin?: Omit<Admin, 'description'>
   type: 'tabs'
-} & { id: string; tabs: Tab[] } & Omit<
-    FieldBase,
-    'admin' | 'localized' | 'name' | 'saveToJWT' | 'virtual'
-  >
+} & { tabs: Tab[] } & Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT' | 'virtual'>
 
 export type TabsFieldClient = {
   admin?: Omit<AdminClient, 'description'>
