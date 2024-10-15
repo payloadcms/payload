@@ -36,7 +36,6 @@ export const initReq = cache(async function (config: SanitizedConfig): Promise<R
 
   const req = await createLocalReq(
     {
-      fallbackLocale: 'null',
       req: {
         headers,
         host: headers.get('host'),

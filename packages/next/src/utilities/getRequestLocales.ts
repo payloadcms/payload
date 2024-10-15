@@ -26,13 +26,11 @@ export function getRequestLocales({ data, localization, searchParams }: GetReque
     }
   }
 
-  const sanitizedFallback = sanitizeFallbackLocale({
+  fallbackLocale = sanitizeFallbackLocale({
     fallbackLocale,
     locale,
     localization,
   })
-
-  fallbackLocale = sanitizedFallback.fallbackLocale
 
   if (locale === '*') {
     locale = 'all'

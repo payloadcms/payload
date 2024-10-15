@@ -110,7 +110,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
       collection: collectionSlug,
       depth: 0,
       draft: true,
-      fallbackLocale: null,
+      fallbackLocale: false,
       includeLockStatus: true,
       limit,
       locale,

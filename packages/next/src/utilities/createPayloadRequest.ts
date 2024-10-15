@@ -63,13 +63,11 @@ export const createPayloadRequest = async ({
     : {}
 
   if (localization) {
-    const sanitizedFallback = sanitizeFallbackLocale({
+    fallbackLocale = sanitizeFallbackLocale({
       fallbackLocale,
       locale,
       localization,
     })
-
-    fallbackLocale = sanitizedFallback.fallbackLocale
 
     const locales = sanitizeLocales({
       fallbackLocale,
@@ -82,12 +80,6 @@ export const createPayloadRequest = async ({
     // Override if query params are present, in order to respect HTTP method override
     if (query.locale) {
       locale = query.locale as string
-    }
-    if (query?.['fallback-locale']) {
-      fallbackLocale = query['fallback-locale'] as string
-    }
-    if (query?.['fallbackLocale']) {
-      fallbackLocale = query['fallbackLocale'] as string
     }
   }
 

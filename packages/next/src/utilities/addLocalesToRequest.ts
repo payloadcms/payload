@@ -60,13 +60,11 @@ export const sanitizeLocales = ({
   // Check if localization has fallback enabled or if a fallback locale is provided
 
   if (localization) {
-    const sanitizedFallback = sanitizeFallbackLocale({
+    fallbackLocale = sanitizeFallbackLocale({
       fallbackLocale,
       locale,
       localization,
     })
-
-    fallbackLocale = sanitizedFallback.fallbackLocale
   }
 
   if (locale === '*') {
