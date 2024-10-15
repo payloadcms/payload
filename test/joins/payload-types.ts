@@ -13,6 +13,7 @@ export interface Config {
   collections: {
     posts: Post;
     categories: Category;
+    uploads: Upload;
     'localized-posts': LocalizedPost;
     'localized-categories': LocalizedCategory;
     users: User;
@@ -54,12 +55,35 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title?: string | null;
+  upload?: (string | null) | Upload;
   category?: (string | null) | Category;
   group?: {
     category?: (string | null) | Category;
   };
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads".
+ */
+export interface Upload {
+  id: string;
+  relatedPosts?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -139,6 +163,10 @@ export interface PayloadLockedDocument {
         value: string | Category;
       } | null)
     | ({
+        relationTo: 'uploads';
+        value: string | Upload;
+      } | null)
+    | ({
         relationTo: 'localized-posts';
         value: string | LocalizedPost;
       } | null)
@@ -150,7 +178,6 @@ export interface PayloadLockedDocument {
         relationTo: 'users';
         value: string | User;
       } | null);
-  editedAt?: string | null;
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
