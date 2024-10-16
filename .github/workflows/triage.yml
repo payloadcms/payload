@@ -1,4 +1,4 @@
-name: Triage issues
+name: triage
 
 on:
   issues:
@@ -17,7 +17,9 @@ permissions:
 
 jobs:
   triage:
-    name: Nissuer
+    name: nissuer
+    if: >
+      !contains(github.event.issue.labels.*.name, 'created-by: Payload team')
     runs-on: ubuntu-latest
     steps:
       - uses: balazsorban44/nissuer@1.10.0
