@@ -4,10 +4,6 @@ on:
   issues:
     types:
       - opened
-      - labeled
-  issue_comment:
-    types:
-      - created
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -18,13 +14,8 @@ permissions:
 jobs:
   triage:
     name: nissuer
-    if: >
-      !contains(github.event.issue.labels.*.name, 'created-by: Payload team')
     runs-on: ubuntu-latest
     steps:
-      # debug, show all labels
-      - name: Show all labels
-        run: echo "${{ toJson(github.event.issue.labels.*.name) }}"
       - uses: balazsorban44/nissuer@1.10.0
         with:
           reproduction-comment: '.github/comments/invalid-reproduction.md'
