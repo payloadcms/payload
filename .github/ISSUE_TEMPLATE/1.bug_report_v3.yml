@@ -26,6 +26,33 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    attributes:
+      label: Which area(s) are affected? (Select all that apply)
+      multiple: true
+      options:
+        - 'Not sure'
+        - 'area: core'
+        - 'area: templates'
+        - 'area: ui'
+        - 'db-mongodb'
+        - 'db-postgres'
+        - 'db-sqlite'
+        - 'db-vercel-postgres'
+        - 'plugin: cloud'
+        - 'plugin: cloud-storage'
+        - 'plugin: form-builder'
+        - 'plugin: nested-docs'
+        - 'plugin: richtext-lexical'
+        - 'plugin: richtext-slate'
+        - 'plugin: search'
+        - 'plugin: sentry'
+        - 'plugin: seo'
+        - 'plugin: stripe'
+        - 'plugin: other'
+    validations:
+      required: true
+
   - type: textarea
     attributes:
       label: Environment Info
@@ -37,12 +64,6 @@ body:
         Next.js:
     validations:
       required: true
-
-  - type: input
-    id: adapters-plugins
-    attributes:
-      label: Adapters and Plugins
-      description: What adapters and plugins are you using if relevant? ie. db-mongodb, db-postgres, storage-vercel-blob, etc.
 
   - type: markdown
     attributes:
