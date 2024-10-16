@@ -91,11 +91,15 @@ export const FieldRowsProvider: React.FC<{
 
       const withUpdatedRow = [...renderedRows]
 
-      withUpdatedRow[rowIndex] = {
-        renderedFieldMap: incomingRow,
-        RowLabel: 'TODO',
+      console.log('setting into renderedRows', { incomingRow, rowIndex })
+      // splice it in, if it doesn't exist, otherwise add it
+      if (withUpdatedRow[rowIndex]) {
+        withUpdatedRow.splice(rowIndex, 1, incomingRow)
+      } else {
+        withUpdatedRow.push(incomingRow)
       }
 
+      console.log('result, ', withUpdatedRow)
       setRenderedRowsToState(withUpdatedRow)
     },
     [renderedRows],

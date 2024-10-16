@@ -464,6 +464,10 @@ export type {
   VisibleEntities,
 } from './views/types.js'
 
-export type FieldSchemaMap = Map<string, Field[]>
-
-export type ClientConfigMap = Map<string, ClientBlock | ClientField | ClientTab>
+export type FieldMap = Map<
+  string,
+  {
+    clientField?: ClientField
+    field: Field
+  }
+>

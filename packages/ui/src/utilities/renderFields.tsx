@@ -2,11 +2,11 @@ import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientBlock,
   ClientCollectionConfig,
-  ClientConfigMap,
   ClientField,
   ClientGlobalConfig,
   ClientTab,
   Field,
+  FieldMap,
   FieldPermissions,
   FieldRow,
   FieldSlots,
@@ -18,7 +18,9 @@ import type {
   Payload,
   RenderedField,
   RenderedFieldMap,
+  SanitizedCollectionConfig,
   SanitizedConfig,
+  SanitizedGlobalConfig,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -122,9 +124,11 @@ export type RenderFieldsArgs = {
   readonly Blocks?: React.ReactNode[]
   readonly className?: string
   readonly clientCollectionConfig?: ClientCollectionConfig
-  readonly clientConfigMap: ClientConfigMap
+  readonly clientFields?: ClientField[]
   readonly clientGlobalConfig?: ClientGlobalConfig
   readonly config: SanitizedConfig
+  readonly entityConfig?: SanitizedCollectionConfig | SanitizedGlobalConfig
+  readonly fieldMap?: FieldMap
   readonly fields: Field[]
   /**
    * Controls the rendering behavior of the fields, i.e. defers rendering until they intersect with the viewport using the Intersection Observer API.
@@ -150,7 +154,6 @@ export type RenderFieldsArgs = {
 
 export type RenderFieldArgs = {
   readonly className?: string
-  readonly clientConfigMap: ClientConfigMap
   readonly clientField: ClientBlock | ClientField | ClientTab
   readonly config: SanitizedConfig
   readonly field: Field
@@ -193,7 +196,7 @@ export type ServerSlotProps = {
 
 const traverseFields = ({
   className,
-  clientConfigMap,
+  clientFields,
   config,
   fields,
   forceRender,
@@ -210,11 +213,16 @@ const traverseFields = ({
   result: RenderedFieldMap
 } & RenderFieldsArgs) => {
   if (!fields || (Array.isArray(fields) && fields.length === 0)) {
+    console.warn(`No fields provided to renderFields for schemaPath: ${schemaPath}`) // eslint-disable-line no-console
     return null
   }
 
   if (fields) {
+    console.log('fields', fields)
+
     fields?.forEach((field, fieldIndex) => {
+      const clientField = clientFields?.[fieldIndex]
+
       const forceRenderChildren =
         (typeof forceRender === 'number' && fieldIndex <= forceRender) || true
 
@@ -244,11 +252,8 @@ const traverseFields = ({
 
       const fieldSchemaPath = [schemaPath, name].filter(Boolean).join('.')
 
-      const clientField = clientConfigMap.get(fieldSchemaPath)
-
       renderField({
         className,
-        clientConfigMap,
         clientField,
         config,
         field,
@@ -280,7 +285,6 @@ export const renderFields: RenderFieldsFn = (args) => {
 export const renderField: RenderFieldFn = (args) => {
   const {
     className,
-    clientConfigMap,
     clientField,
     config,
     field,
@@ -374,7 +378,7 @@ export const renderField: RenderFieldFn = (args) => {
 
         traverseFields({
           className,
-          clientConfigMap,
+          clientFields: clientField && 'fields' in clientField && clientField.fields,
           config,
           fields: field.fields,
           forceRender,

@@ -1,6 +1,6 @@
 import type { RichTextAdapter } from 'payload'
 
-import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
+import { traverseFields } from '@payloadcms/ui/utilities/buildFieldMap/traverseFields'
 
 import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
 

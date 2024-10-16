@@ -127,7 +127,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
-  const { setRenderedRow } = useFieldRows()
+  const { renderedRows, setRenderedRow } = useFieldRows()
 
   const disabled = readOnlyFromProps || formProcessing || formInitializing
 
@@ -135,10 +135,12 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     async (rowIndex: number): Promise<void> => {
       const newRenderedRow = await addFieldRow({ path, rowIndex, schemaPath })
 
-      setRenderedRow({
-        renderedRow: newRenderedRow,
-        rowIndex,
-      })
+      console.log('result', newRenderedRow, renderedRows)
+
+      // setRenderedRow({
+      //   renderedRow: newRenderedRow,
+      //   rowIndex,
+      // })
 
       setModified(true)
 
@@ -152,13 +154,20 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const duplicateRow = useCallback(
     (rowIndex: number) => {
       dispatchFields({ type: 'DUPLICATE_ROW', path, rowIndex })
+
+      console.log(renderedRows[rowIndex])
+      setRenderedRow({
+        renderedRow: renderedRows[rowIndex],
+        rowIndex: rowIndex + 1,
+      })
+
       setModified(true)
 
       setTimeout(() => {
         scrollToID(`${path}-row-${rowIndex}`)
       }, 0)
     },
-    [dispatchFields, path, setModified],
+    [dispatchFields, path, setModified, setRenderedRow, renderedRows],
   )
 
   const removeRow = useCallback(

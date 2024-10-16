@@ -501,6 +501,8 @@ export const Form: React.FC<FormProps> = (props) => {
       const abortController = new AbortController()
       abortControllerRef2.current = abortController
 
+      console.log('getting form state form: ', data)
+
       const { renderedFieldMap, state: fieldState } = await getFormState({
         data,
         renderFields: true,
@@ -515,22 +517,20 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
     async ({ data, path, rowIndex, schemaPath }) => {
-      const { fieldState: subFieldState, renderedFieldMap } = await getFieldStateBySchemaPath({
+      const { fieldState, renderedFieldMap } = await getFieldStateBySchemaPath({
         data,
         schemaPath,
       })
 
-      console.log('renderedFieldMap', renderedFieldMap)
+      // dispatchFields({
+      //   type: 'ADD_ROW',
+      //   blockType: data?.blockType,
+      //   path,
+      //   rowIndex,
+      //   subFieldState,
+      // })
 
-      dispatchFields({
-        type: 'ADD_ROW',
-        blockType: data?.blockType,
-        path,
-        rowIndex,
-        subFieldState,
-      })
-
-      return renderedFieldMap
+      return { renderedFieldMap, RowLabel: 'TODO' }
     },
     [getFieldStateBySchemaPath, dispatchFields],
   )

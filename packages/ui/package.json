@@ -34,10 +34,10 @@
       "types": "./src/utilities/buildFormState.ts",
       "default": "./src/utilities/buildFormState.ts"
     },
-    "./utilities/buildFieldSchemaMap/traverseFields": {
-      "import": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
-      "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
-      "default": "./src/utilities/buildFieldSchemaMap/traverseFields.ts"
+    "./utilities/buildFieldMap/traverseFields": {
+      "import": "./src/utilities/buildFieldMap/traverseFields.ts",
+      "types": "./src/utilities/buildFieldMap/traverseFields.ts",
+      "default": "./src/utilities/buildFieldMap/traverseFields.ts"
     },
     "./forms/buildStateFromSchema": {
       "import": "./src/forms/buildStateFromSchema/index.tsx",

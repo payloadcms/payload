@@ -1,16 +1,20 @@
 import type { I18n, I18nClient } from '@payloadcms/translations'
 import type {
   BuildFormStateArgs,
+  ClientCollectionConfig,
   ClientConfig,
-  ClientConfigMap,
+  ClientField,
+  ClientGlobalConfig,
   ClientUser,
   DocumentPreferences,
   ErrorResult,
   Field,
-  FieldSchemaMap,
+  FieldMap,
   FormState,
   RenderedFieldMap,
+  SanitizedCollectionConfig,
   SanitizedConfig,
+  SanitizedGlobalConfig,
   TypeWithID,
 } from 'payload'
 
@@ -18,38 +22,38 @@ import { createClientConfig, formatErrors } from 'payload'
 import { reduceFieldsToValues } from 'payload/shared'
 
 import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
-import { buildClientConfigMap } from './buildClientConfigMap/index.js'
-import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
+import { buildFieldMap } from './buildFieldMap/index.js'
 import { renderFields } from './renderFields.js'
 
-let cachedFieldSchemaMap = global._payload_fieldSchemaMap
+let cachedFieldMap = global._payload_fieldMap
 let cachedClientConfig = global._payload_clientConfig
-const cachedClientConfigMap = global._payload_clientConfigMap
 
-if (!cachedFieldSchemaMap) {
-  cachedFieldSchemaMap = global._payload_fieldSchemaMap = null
+if (!cachedFieldMap) {
+  cachedFieldMap = global._payload_fieldMap = null
 }
 
 if (!cachedClientConfig) {
   cachedClientConfig = global._payload_clientConfig = null
 }
 
-export const getFieldSchemaMap = (args: {
+export const getFieldMap = (args: {
+  clientConfig: ClientConfig
   config: SanitizedConfig
   i18n: I18nClient
-}): FieldSchemaMap => {
-  const { config, i18n } = args
+}): FieldMap => {
+  const { clientConfig, config, i18n } = args
 
-  if (cachedFieldSchemaMap && process.env.NODE_ENV !== 'development') {
-    return cachedFieldSchemaMap
+  if (cachedFieldMap && process.env.NODE_ENV !== 'development') {
+    return cachedFieldMap
   }
 
-  cachedFieldSchemaMap = buildFieldSchemaMap({
+  cachedFieldMap = buildFieldMap({
+    clientConfig,
     config,
     i18n: i18n as I18n, // TODO: Fix this
   })
 
-  return cachedFieldSchemaMap
+  return cachedFieldMap
 }
 
 export const getClientConfig = (args: {
@@ -68,31 +72,6 @@ export const getClientConfig = (args: {
   })
 
   return cachedClientConfig
-}
-
-export const getClientConfigMap = (args: {
-  clientConfig?: ClientConfig
-  config: SanitizedConfig
-  i18n: I18nClient
-}): ClientConfigMap => {
-  const { clientConfig: clientConfigFromArgs, config, i18n } = args
-
-  let clientConfig = clientConfigFromArgs
-
-  if (!clientConfig) {
-    clientConfig = getClientConfig({
-      config,
-      i18n,
-    })
-  }
-
-  if (cachedClientConfigMap && process.env.NODE_ENV !== 'development') {
-    return cachedClientConfigMap
-  }
-
-  return buildClientConfigMap({
-    clientConfig,
-  })
 }
 
 type BuildFormStateSuccessResult = {
@@ -196,12 +175,13 @@ export const buildFormStateFn = async (
     }
   }
 
-  const fieldSchemaMap = getFieldSchemaMap({
+  const clientConfig = getClientConfig({
     config,
     i18n,
   })
 
-  const clientConfigMap = getClientConfigMap({
+  const fieldMap = getFieldMap({
+    clientConfig,
     config,
     i18n,
   })
@@ -209,20 +189,34 @@ export const buildFormStateFn = async (
   const id = collectionSlug ? idFromArgs : undefined
   const schemaPathSegments = schemaPath && schemaPath.split('.')
 
-  let fields: Field[]
+  const entitySlug = schemaPathSegments[0]
+  let entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
+  let clientEntityConfig: ClientCollectionConfig | ClientGlobalConfig
 
-  if (schemaPathSegments && schemaPathSegments.length === 1) {
-    if (req.payload.collections[schemaPath]) {
-      fields = req.payload.collections[schemaPath].config.fields
-    } else {
-      fields = req.payload.config.globals.find((global) => global.slug === schemaPath)?.fields
-    }
-  } else if (fieldSchemaMap.has(schemaPath)) {
-    fields = fieldSchemaMap.get(schemaPath)
+  if (req.payload.collections[entitySlug]) {
+    entityConfig = req.payload.collections[entitySlug].config
+    clientEntityConfig = clientConfig.collections.find(
+      (collection) => collection.slug === entitySlug,
+    )
+  } else {
+    entityConfig = req.payload.config.globals.find((global) => global.slug === entitySlug)
+    clientEntityConfig = clientConfig.globals.find((global) => global.slug === entitySlug)
   }
 
-  if (!fields || !Array.isArray(fields)) {
-    throw new Error(`Could not find field schema for given path "${schemaPath}"`)
+  let fields: Field[]
+  let clientFields: ClientField[]
+
+  if (schemaPathSegments && schemaPathSegments.length === 1) {
+    // If the schema path is just the entity slug, then we are dealing with an entire collection or global
+    fields = entityConfig.fields
+    clientFields = clientEntityConfig?.fields || []
+  } else if (fieldMap.has(schemaPath)) {
+    fields = [fieldMap.get(schemaPath)?.field]
+    clientFields = clientEntityConfig?.fields || []
+  }
+
+  if (!fields || !Array.isArray(fields) || fields.length === 0) {
+    throw new Error(`Could not find field(s) for given schema path "${schemaPath}"`)
   }
 
   let docPreferences = docPreferencesFromArgs
@@ -422,8 +416,10 @@ export const buildFormStateFn = async (
     lockedState: lockedStateResult,
     renderedFieldMap: shouldRenderFields
       ? renderFields({
-          clientConfigMap,
+          clientFields,
           config,
+          entityConfig,
+          fieldMap,
           fields,
           formState: formStateResult,
           i18n,
