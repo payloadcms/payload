@@ -268,7 +268,7 @@ describe('Localization', () => {
       await page.locator('.copy-locale-data').click()
       const firstButton = page.locator('.copy-locale-data button').nth(1)
       await expect(firstButton).toBeVisible()
-      await expect(firstButton).toContainText('English to Spanish')
+      await expect(firstButton).toContainText('Spanish to English')
     })
 
     test('should show correct locales', async () => {
