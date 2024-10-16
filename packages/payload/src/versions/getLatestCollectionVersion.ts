@@ -4,7 +4,9 @@ import type { Payload } from '../payload'
 import type { PayloadRequest } from '../types'
 import type { TypeWithVersion } from './types'
 
+import { combineQueries } from '../database/combineQueries'
 import { docHasTimestamps } from '../types'
+import { appendVersionToQueryKey } from './drafts/appendVersionToQueryKey'
 
 type Args = {
   config: SanitizedCollectionConfig
@@ -30,7 +32,7 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
       pagination: false,
       req,
       sort: '-updatedAt',
-      where: { parent: { equals: id } },
+      where: combineQueries(appendVersionToQueryKey(query.where), { parent: { equals: id } }),
     })
     ;[latestVersion] = docs
   }
