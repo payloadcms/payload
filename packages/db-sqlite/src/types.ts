@@ -117,7 +117,9 @@ export type SQLiteAdapter = {
   countDistinct: CountDistinct
   defaultDrizzleSnapshot: any
   deleteWhere: DeleteWhere
-  drizzle: LibSQLDatabase
+  drizzle: { $client: Client } & LibSQLDatabase<
+    Record<string, GenericRelation | GenericTable> & Record<string, unknown>
+  >
   dropDatabase: DropDatabase
   execute: Execute<unknown>
   /**

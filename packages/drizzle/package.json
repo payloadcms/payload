@@ -46,13 +46,13 @@
   },
   "dependencies": {
     "console-table-printer": "2.11.2",
-    "drizzle-orm": "0.32.1",
+    "drizzle-orm": "0.34.1-1f15bfd",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
     "uuid": "9.0.0"
   },
   "devDependencies": {
-    "@libsql/client": "^0.6.2",
+    "@libsql/client": "0.14.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/pg": "8.10.2",
     "@types/to-snake-case": "1.0.0",
