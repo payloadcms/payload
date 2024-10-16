@@ -652,8 +652,6 @@ describe('Locked documents', () => {
       },
     })
 
-    console.log(docsFromLocksCollection.docs[0].user)
-
     expect(docsFromLocksCollection.docs).toHaveLength(1)
     expect(docsFromLocksCollection.docs[0].user.value?.id).toEqual(user.id)
   })
