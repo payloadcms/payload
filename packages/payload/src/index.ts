@@ -725,6 +725,7 @@ export type {
   RequiredDataFromCollection,
   RequiredDataFromCollectionSlug,
   SanitizedCollectionConfig,
+  SanitizedJoins,
   TypeWithID,
   TypeWithTimestamps,
 } from './collections/config/types.js'
@@ -751,6 +752,7 @@ export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
+export { defaultBeginTransaction } from './database/defaultBeginTransaction.js'
 export { default as flattenWhereToOperators } from './database/flattenWhereToOperators.js'
 export { getLocalizedPaths } from './database/getLocalizedPaths.js'
 export { createMigration } from './database/migrations/createMigration.js'

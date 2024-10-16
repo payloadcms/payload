@@ -13,6 +13,7 @@ export interface Config {
   collections: {
     posts: Post;
     categories: Category;
+    uploads: Upload;
     'localized-posts': LocalizedPost;
     'localized-categories': LocalizedCategory;
     users: User;
@@ -21,7 +22,7 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   globals: {};
   locale: 'en' | 'es';
@@ -52,29 +53,67 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   title?: string | null;
-  category?: (string | null) | Category;
+  upload?: (number | null) | Upload;
+  category?: (number | null) | Category;
+  categories?: (number | Category)[] | null;
+  categoriesLocalized?: (number | Category)[] | null;
   group?: {
-    category?: (string | null) | Category;
+    category?: (number | null) | Category;
+    camelCaseCategory?: (number | null) | Category;
   };
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads".
+ */
+export interface Upload {
+  id: number;
+  relatedPosts?: {
+    docs?: (number | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
  */
 export interface Category {
-  id: string;
+  id: number;
   name?: string | null;
   relatedPosts?: {
-    docs?: (string | Post)[] | null;
+    docs?: (number | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  hasManyPosts?: {
+    docs?: (number | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  hasManyPostsLocalized?: {
+    docs?: (number | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   group?: {
     relatedPosts?: {
-      docs?: (string | Post)[] | null;
+      docs?: (number | Post)[] | null;
+      hasNextPage?: boolean | null;
+    } | null;
+    camelCasePosts?: {
+      docs?: (number | Post)[] | null;
       hasNextPage?: boolean | null;
     } | null;
   };
@@ -86,9 +125,9 @@ export interface Category {
  * via the `definition` "localized-posts".
  */
 export interface LocalizedPost {
-  id: string;
+  id: number;
   title?: string | null;
-  category?: (string | null) | LocalizedCategory;
+  category?: (number | null) | LocalizedCategory;
   updatedAt: string;
   createdAt: string;
 }
@@ -97,10 +136,10 @@ export interface LocalizedPost {
  * via the `definition` "localized-categories".
  */
 export interface LocalizedCategory {
-  id: string;
+  id: number;
   name?: string | null;
   relatedPosts?: {
-    docs?: (string | LocalizedPost)[] | null;
+    docs?: (number | LocalizedPost)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   updatedAt: string;
@@ -111,7 +150,7 @@ export interface LocalizedCategory {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -128,33 +167,36 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'categories';
-        value: string | Category;
+        value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'uploads';
+        value: number | Upload;
       } | null)
     | ({
         relationTo: 'localized-posts';
-        value: string | LocalizedPost;
+        value: number | LocalizedPost;
       } | null)
     | ({
         relationTo: 'localized-categories';
-        value: string | LocalizedCategory;
+        value: number | LocalizedCategory;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null);
-  editedAt?: string | null;
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -164,10 +206,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -187,7 +229,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;

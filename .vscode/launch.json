@@ -10,14 +10,14 @@
       "cwd": "${workspaceFolder}"
     },
     {
-      "command": "node --no-deprecation test/dev.js _community",
+      "command": "pnpm tsx --no-deprecation test/dev.ts _community",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Community",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "node --no-deprecation test/dev.js storage-uploadthing",
+      "command": "pnpm tsx --no-deprecation test/dev.ts storage-uploadthing",
       "cwd": "${workspaceFolder}",
       "name": "Uploadthing",
       "request": "launch",
@@ -25,7 +25,7 @@
       "envFile": "${workspaceFolder}/test/storage-uploadthing/.env"
     },
     {
-      "command": "node --no-deprecation test/dev.js live-preview",
+      "command": "pnpm tsx --no-deprecation test/dev.ts live-preview",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Live Preview",
       "request": "launch",
@@ -43,28 +43,28 @@
       }
     },
     {
-      "command": "node --no-deprecation test/dev.js admin",
+      "command": "pnpm tsx --no-deprecation test/dev.ts admin",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Admin",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "node --no-deprecation test/dev.js auth",
+      "command": "pnpm tsx --no-deprecation test/dev.ts auth",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Auth",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "node --no-deprecation test/dev.js fields-relationship",
+      "command": "pnpm tsx --no-deprecation test/dev.ts fields-relationship",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Fields-Relationship",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "node --no-deprecation test/dev.js login-with-username",
+      "command": "pnpm tsx --no-deprecation test/dev.ts login-with-username",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Login-With-Username",
       "request": "launch",
@@ -81,21 +81,21 @@
       }
     },
     {
-      "command": "node --no-deprecation test/dev.js collections-graphql",
+      "command": "pnpm tsx --no-deprecation test/dev.ts collections-graphql",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev GraphQL",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "node --no-deprecation test/dev.js fields",
+      "command": "pnpm tsx --no-deprecation test/dev.ts fields",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Fields",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "node --no-deprecation test/dev.js versions",
+      "command": "pnpm tsx --no-deprecation test/dev.ts versions",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Postgres",
       "request": "launch",
@@ -105,35 +105,35 @@
       }
     },
     {
-      "command": "node --no-deprecation test/dev.js versions",
+      "command": "pnpm tsx --no-deprecation test/dev.ts versions",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Versions",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "node --no-deprecation test/dev.js localization",
+      "command": "pnpm tsx --no-deprecation test/dev.ts localization",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Localization",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "node --no-deprecation test/dev.js locked-documents",
+      "command": "pnpm tsx --no-deprecation test/dev.ts locked-documents",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Locked Documents",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "node --no-deprecation test/dev.js uploads",
+      "command": "pnpm tsx --no-deprecation test/dev.ts uploads",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Uploads",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "node --no-deprecation test/dev.js field-error-states",
+      "command": "pnpm tsx --no-deprecation test/dev.ts field-error-states",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Field Error States",
       "request": "launch",

@@ -48,7 +48,6 @@ export type UploadInputProps = {
   /**
    * Controls the visibility of the "Create new collection" button
    */
-  readonly allowNewUpload?: boolean
   readonly api?: string
   readonly className?: string
   readonly collection?: ClientCollectionConfig
@@ -80,7 +79,6 @@ export type UploadInputProps = {
 
 export function UploadInput(props: UploadInputProps) {
   const {
-    allowNewUpload,
     api,
     className,
     Description,
@@ -107,6 +105,7 @@ export function UploadInput(props: UploadInputProps) {
     value,
     width,
   } = props
+  const allowCreate = field?.admin?.allowCreate !== false
 
   const [populatedDocs, setPopulatedDocs] = React.useState<
     {
@@ -153,9 +152,16 @@ export function UploadInput(props: UploadInputProps) {
     collectionSlug: activeRelationTo,
   })
 
+  /**
+   * Prevent initial retrieval of documents from running more than once
+   */
   const loadedValueDocsRef = React.useRef<boolean>(false)
 
   const canCreate = useMemo(() => {
+    if (readOnly || !allowCreate) {
+      return false
+    }
+
     if (typeof activeRelationTo === 'string') {
       if (permissions?.collections && permissions.collections?.[activeRelationTo]?.create) {
         if (permissions.collections[activeRelationTo].create?.permission === true) {
@@ -165,7 +171,7 @@ export function UploadInput(props: UploadInputProps) {
     }
 
     return false
-  }, [activeRelationTo, permissions])
+  }, [activeRelationTo, permissions, readOnly, allowCreate])
 
   const onChange = React.useCallback(
     (newValue) => {
@@ -388,6 +394,7 @@ export function UploadInput(props: UploadInputProps) {
   useEffect(() => {
     async function loadInitialDocs() {
       if (value) {
+        loadedValueDocsRef.current = true
         const loadedDocs = await populateDocs(
           Array.isArray(value) ? value : [value],
           activeRelationTo,
@@ -398,8 +405,6 @@ export function UploadInput(props: UploadInputProps) {
           )
         }
       }
-
-      loadedValueDocsRef.current = true
     }
 
     if (!loadedValueDocsRef.current) {
@@ -410,7 +415,10 @@ export function UploadInput(props: UploadInputProps) {
   const showDropzone =
     !readOnly &&
     (!value ||
-      (hasMany && Array.isArray(value) && (typeof maxRows !== 'number' || value.length < maxRows)))
+      (hasMany &&
+        Array.isArray(value) &&
+        (typeof maxRows !== 'number' || value.length < maxRows)) ||
+      (!hasMany && populatedDocs?.[0] && typeof populatedDocs[0].value === 'undefined'))
 
   return (
     <div
@@ -469,13 +477,17 @@ export function UploadInput(props: UploadInputProps) {
 
         {!hasMany && value ? (
           <>
-            {populatedDocs && populatedDocs?.length > 0 ? (
+            {populatedDocs && populatedDocs?.length > 0 && populatedDocs[0].value ? (
               <UploadComponentHasOne
                 fileDoc={populatedDocs[0]}
                 onRemove={onRemove}
                 readonly={readOnly}
                 serverURL={serverURL}
               />
+            ) : populatedDocs && value && !populatedDocs?.[0]?.value ? (
+              <>
+                {t('general:untitled')} - ID: {value}
+              </>
             ) : (
               <ShimmerEffect height="62px" />
             )}
@@ -483,27 +495,37 @@ export function UploadInput(props: UploadInputProps) {
         ) : null}
 
         {showDropzone ? (
-          <Dropzone multipleFiles={hasMany} onChange={onLocalFileSelection}>
+          <Dropzone
+            disabled={readOnly || !canCreate}
+            multipleFiles={hasMany}
+            onChange={onLocalFileSelection}
+          >
             <div className={`${baseClass}__dropzoneContent`}>
               <div className={`${baseClass}__dropzoneContent__buttons`}>
-                <Button
-                  buttonStyle="pill"
-                  className={`${baseClass}__createNewToggler`}
-                  disabled={readOnly || !canCreate}
-                  onClick={() => {
-                    if (!readOnly) {
-                      if (hasMany) {
-                        onLocalFileSelection()
-                      } else {
-                        openCreateDocDrawer()
-                      }
-                    }
-                  }}
-                  size="small"
-                >
-                  {t('general:createNew')}
-                </Button>
-                <span className={`${baseClass}__dropzoneContent__orText`}>{t('general:or')}</span>
+                {canCreate && (
+                  <>
+                    <Button
+                      buttonStyle="pill"
+                      className={`${baseClass}__createNewToggler`}
+                      disabled={readOnly || !canCreate}
+                      onClick={() => {
+                        if (!readOnly) {
+                          if (hasMany) {
+                            onLocalFileSelection()
+                          } else {
+                            openCreateDocDrawer()
+                          }
+                        }
+                      }}
+                      size="small"
+                    >
+                      {t('general:createNew')}
+                    </Button>
+                    <span className={`${baseClass}__dropzoneContent__orText`}>
+                      {t('general:or')}
+                    </span>
+                  </>
+                )}
                 <Button
                   buttonStyle="pill"
                   className={`${baseClass}__listToggler`}
@@ -516,15 +538,18 @@ export function UploadInput(props: UploadInputProps) {
 
                 <CreateDocDrawer onSave={onDocCreate} />
                 <ListDrawer
+                  allowCreate={canCreate}
                   enableRowSelections={hasMany}
                   onBulkSelect={onListBulkSelect}
                   onSelect={onListSelect}
                 />
               </div>
 
-              <p className={`${baseClass}__dragAndDropText`}>
-                {t('general:or')} {t('upload:dragAndDrop')}
-              </p>
+              {canCreate && (
+                <p className={`${baseClass}__dragAndDropText`}>
+                  {t('general:or')} {t('upload:dragAndDrop')}
+                </p>
+              )}
             </div>
           </Dropzone>
         ) : (

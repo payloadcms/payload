@@ -1,107 +1,73 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
-import { anyone } from '../../access/anyone'
-import { superAdminFieldAccess } from '../../access/superAdmins'
-import { adminsAndSelf } from './access/adminsAndSelf'
-import { tenantAdmins } from './access/tenantAdmins'
-import { loginAfterCreate } from './hooks/loginAfterCreate'
-import { recordLastLoggedInTenant } from './hooks/recordLastLoggedInTenant'
-import { isSuperOrTenantAdmin } from './utilities/isSuperOrTenantAdmin'
+import { createAccess } from './access/create'
+import { readAccess } from './access/read'
+import { updateAndDeleteAccess } from './access/updateAndDelete'
+import { externalUsersLogin } from './endpoints/externalUsersLogin'
+import { ensureUniqueUsername } from './hooks/ensureUniqueUsername'
+// import { setCookieBasedOnDomain } from './hooks/setCookieBasedOnDomain'
 
-export const Users: CollectionConfig = {
+const Users: CollectionConfig = {
   slug: 'users',
-  auth: true,
+  access: {
+    create: createAccess,
+    delete: updateAndDeleteAccess,
+    read: readAccess,
+    update: updateAndDeleteAccess,
+  },
   admin: {
     useAsTitle: 'email',
   },
-  access: {
-    read: adminsAndSelf,
-    create: anyone,
-    update: adminsAndSelf,
-    delete: adminsAndSelf,
-    admin: isSuperOrTenantAdmin,
-  },
-  hooks: {
-    afterChange: [loginAfterCreate],
-    afterLogin: [recordLastLoggedInTenant],
-  },
+  auth: true,
+  endpoints: [externalUsersLogin],
   fields: [
-    {
-      name: 'firstName',
-      type: 'text',
-    },
-    {
-      name: 'lastName',
-      type: 'text',
-    },
     {
       name: 'roles',
       type: 'select',
+      defaultValue: ['user'],
       hasMany: true,
-      required: true,
-      access: {
-        create: superAdminFieldAccess,
-        update: superAdminFieldAccess,
-        read: superAdminFieldAccess,
-      },
-      options: [
-        {
-          label: 'Super Admin',
-          value: 'super-admin',
-        },
-        {
-          label: 'User',
-          value: 'user',
-        },
-      ],
+      options: ['super-admin', 'user'],
     },
     {
       name: 'tenants',
       type: 'array',
-      label: 'Tenants',
-      access: {
-        create: tenantAdmins,
-        update: tenantAdmins,
-        read: tenantAdmins,
-      },
       fields: [
         {
           name: 'tenant',
           type: 'relationship',
+          index: true,
           relationTo: 'tenants',
           required: true,
+          saveToJWT: true,
         },
         {
           name: 'roles',
           type: 'select',
+          defaultValue: ['tenant-viewer'],
           hasMany: true,
+          options: ['tenant-admin', 'tenant-viewer'],
           required: true,
-          options: [
-            {
-              label: 'Admin',
-              value: 'admin',
-            },
-            {
-              label: 'User',
-              value: 'user',
-            },
-          ],
         },
       ],
+      saveToJWT: true,
     },
     {
-      name: 'lastLoggedInTenant',
-      type: 'relationship',
-      relationTo: 'tenants',
+      name: 'username',
+      type: 'text',
+      hooks: {
+        beforeValidate: [ensureUniqueUsername],
+      },
       index: true,
-      access: {
-        create: () => false,
-        read: tenantAdmins,
-        update: superAdminFieldAccess,
-      },
-      admin: {
-        position: 'sidebar',
-      },
     },
   ],
+  // The following hook sets a cookie based on the domain a user logs in from.
+  // It checks the domain and matches it to a tenant in the system, then sets
+  // a 'payload-tenant' cookie for that tenant.
+
+  // Uncomment this if you want to enable tenant-based cookie handling by domain.
+  // hooks: {
+  //   afterLogin: [setCookieBasedOnDomain],
+  // },
 }
+
+export default Users

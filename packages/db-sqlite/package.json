@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-sqlite",
-  "version": "3.0.0-beta.109",
+  "version": "3.0.0-beta.114",
   "description": "The officially supported SQLite database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -45,11 +45,11 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "@libsql/client": "^0.6.2",
+    "@libsql/client": "0.14.0",
     "@payloadcms/drizzle": "workspace:*",
     "console-table-printer": "2.11.2",
-    "drizzle-kit": "0.23.2-df9e596",
-    "drizzle-orm": "0.32.1",
+    "drizzle-kit": "0.26.1",
+    "drizzle-orm": "0.35.0",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
     "uuid": "9.0.0"

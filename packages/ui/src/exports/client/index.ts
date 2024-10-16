@@ -85,7 +85,10 @@ export { SortColumn } from '../../elements/SortColumn/index.js'
 export { SetStepNav } from '../../elements/StepNav/SetStepNav.js'
 export { useStepNav } from '../../elements/StepNav/index.js'
 export type { StepNavItem } from '../../elements/StepNav/types.js'
-export { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
+export {
+  RelationshipProvider,
+  useListRelationships,
+} from '../../elements/Table/RelationshipProvider/index.js'
 export { TableCellProvider, useTableCell } from '../../elements/Table/TableCellProvider/index.js'
 export { type Column, Table } from '../../elements/Table/index.js'
 export { DefaultCell } from '../../elements/Table/DefaultCell/index.js'
@@ -192,6 +195,7 @@ export { XIcon } from '../../icons/X/index.js'
 // providers
 export { ActionsProvider, SetViewActions, useActions } from '../../providers/Actions/index.js'
 export { AuthProvider, useAuth } from '../../providers/Auth/index.js'
+export type { UserWithToken } from '../../providers/Auth/index.js'
 export { ClientFunctionProvider, useClientFunctions } from '../../providers/ClientFunction/index.js'
 export { useAddClientFunction } from '../../providers/ClientFunction/index.js'
 export { RenderComponent } from '../../providers/Config/RenderComponent.js'

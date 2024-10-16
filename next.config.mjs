@@ -1,6 +1,6 @@
 import bundleAnalyzer from '@next/bundle-analyzer'
-
-import withPayload from './packages/next/src/withPayload.js'
+import { withSentryConfig } from '@sentry/nextjs'
+import { withPayload } from './packages/next/src/withPayload.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -11,8 +11,7 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 })
 
-// eslint-disable-next-line no-restricted-exports
-export default withBundleAnalyzer(
+const config = withBundleAnalyzer(
   withPayload({
     eslint: {
       ignoreDuringBuilds: true,
@@ -23,7 +22,6 @@ export default withBundleAnalyzer(
     env: {
       PAYLOAD_CORE_DEV: 'true',
       ROOT_DIR: path.resolve(dirname),
-      PAYLOAD_CI_DEPENDENCY_CHECKER: 'true',
     },
     async redirects() {
       return [
@@ -44,7 +42,21 @@ export default withBundleAnalyzer(
         '.mjs': ['.mts', '.mjs'],
       }
 
+      // Ignore sentry warnings when not wrapped with withSentryConfig
+      webpackConfig.ignoreWarnings = [
+        ...(webpackConfig.ignoreWarnings ?? []),
+        { file: /esm\/platform\/node\/instrumentation.js/ },
+        { module: /esm\/platform\/node\/instrumentation.js/ },
+      ]
+
       return webpackConfig
     },
   }),
 )
+
+export default process.env.NEXT_PUBLIC_SENTRY_DSN
+  ? withSentryConfig(config, {
+      telemetry: false,
+      tunnelRoute: '/monitoring-tunnel',
+    })
+  : config

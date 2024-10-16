@@ -424,6 +424,7 @@ export interface FieldBase {
   /**
    * Pass `true` to disable field in the DB
    * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges):
+   * A virtual field cannot be used in `admin.useAsTitle`
    */
   virtual?: boolean
 }
@@ -832,6 +833,10 @@ export type UIField = {
     condition?: Condition
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
+    /**
+     * Set `false` make the UI field appear in the list view column selector. `true` by default for UI fields.
+     * @default true
+     */
     disableBulkEdit?: boolean
     /**
      * Shows / hides fields from appearing in the list view column selector.
@@ -1500,6 +1505,10 @@ export type JoinField = {
    */
   collection: CollectionSlug
   defaultValue?: never
+  /**
+   * This does not need to be set and will be overridden by the relationship field's hasMany property.
+   */
+  hasMany?: boolean
   hidden?: false
   index?: never
   /**

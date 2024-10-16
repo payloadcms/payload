@@ -1,6 +1,6 @@
-import type { SanitizedJoins } from '../../collections/config/types.js'
+import type { SanitizedJoin, SanitizedJoins } from '../../collections/config/types.js'
 import type { Config } from '../../config/types.js'
-import type { JoinField, RelationshipField } from './types.js'
+import type { JoinField, RelationshipField, UploadField } from './types.js'
 
 import { APIError } from '../../errors/index.js'
 import { InvalidFieldJoin } from '../../errors/InvalidFieldJoin.js'
@@ -23,9 +23,10 @@ export const sanitizeJoinField = ({
   if (!field.maxDepth) {
     field.maxDepth = 1
   }
-  const join = {
+  const join: SanitizedJoin = {
     field,
     schemaPath: `${schemaPath || ''}${schemaPath ? '.' : ''}${field.name}`,
+    targetField: undefined,
   }
   const joinCollection = config.collections.find(
     (collection) => collection.slug === field.collection,
@@ -33,7 +34,7 @@ export const sanitizeJoinField = ({
   if (!joinCollection) {
     throw new InvalidFieldJoin(field)
   }
-  let joinRelationship: RelationshipField | undefined
+  let joinRelationship: RelationshipField | UploadField
 
   const pathSegments = field.on.split('.') // Split the schema path into segments
   let currentSegmentIndex = 0
@@ -49,9 +50,10 @@ export const sanitizeJoinField = ({
       if ('name' in field && field.name === currentSegment) {
         // Check if this is the last segment in the path
         if (
-          currentSegmentIndex === pathSegments.length - 1 &&
-          'type' in field &&
-          field.type === 'relationship'
+          (currentSegmentIndex === pathSegments.length - 1 &&
+            'type' in field &&
+            field.type === 'relationship') ||
+          field.type === 'upload'
         ) {
           joinRelationship = field // Return the matched field
           next()
@@ -72,13 +74,16 @@ export const sanitizeJoinField = ({
   if (!joinRelationship) {
     throw new InvalidFieldJoin(join.field)
   }
-
-  if (joinRelationship.hasMany) {
-    throw new APIError('Join fields cannot be used with hasMany relationships.')
+  if (Array.isArray(joinRelationship.relationTo)) {
+    throw new APIError('Join fields cannot be used with polymorphic relationships.')
   }
+
+  join.targetField = joinRelationship
 
   // override the join field localized property to use whatever the relationship field has
   field.localized = joinRelationship.localized
+  // override the join field hasMany property to use whatever the relationship field has
+  field.hasMany = joinRelationship.hasMany
 
   if (!joins[field.collection]) {
     joins[field.collection] = [join]

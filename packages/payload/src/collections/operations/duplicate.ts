@@ -16,6 +16,8 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeDuplicate } from '../../fields/hooks/beforeDuplicate/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
+import { generateFileData } from '../../uploads/generateFileData.js'
+import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -26,6 +28,7 @@ import { buildAfterOperation } from './utils.js'
 export type Arguments = {
   collection: Collection
   depth?: number
+  disableTransaction?: boolean
   draft?: boolean
   id: number | string
   overrideAccess?: boolean
@@ -40,7 +43,7 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
   const operation = 'create'
 
   try {
-    const shouldCommit = await initTransaction(args.req)
+    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -129,7 +132,7 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
 
     let result
 
-    const originalDoc = await afterRead({
+    let originalDoc = await afterRead({
       collection: collectionConfig,
       context: req.context,
       depth: 0,
@@ -142,6 +145,18 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
       req,
       showHiddenFields: true,
     })
+
+    const { data: newFileData, files: filesToUpload } = await generateFileData({
+      collection: args.collection,
+      config: req.payload.config,
+      data: originalDoc,
+      operation: 'create',
+      overwriteExistingFiles: 'forceDisable',
+      req,
+      throwOnMissingFile: true,
+    })
+
+    originalDoc = newFileData
 
     // /////////////////////////////////////
     // Create Access
@@ -231,6 +246,14 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
     // Create / Update
     // /////////////////////////////////////
 
+    // /////////////////////////////////////
+    // Write files to local storage
+    // /////////////////////////////////////
+
+    if (!collectionConfig.upload.disableLocalStorage) {
+      await uploadFiles(payload, filesToUpload, req)
+    }
+
     const versionDoc = await payload.db.create({
       collection: collectionConfig.slug,
       data: result,
@@ -245,10 +268,7 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
       result = await saveVersion({
         id: versionDoc.id,
         collection: collectionConfig,
-        docWithLocales: {
-          ...versionDoc,
-          createdAt: result.createdAt,
-        },
+        docWithLocales: versionDoc,
         draft: shouldSaveDraft,
         payload,
         req,

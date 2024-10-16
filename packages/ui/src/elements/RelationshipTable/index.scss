@@ -1,26 +1,28 @@
-.relationship-table {
-  position: relative;
+@layer payload-default {
+  .relationship-table {
+    position: relative;
 
-  &__header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: var(--base);
-  }
+    &__header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: var(--base);
+    }
 
-  &__actions {
-    display: flex;
-    align-items: center;
-    gap: var(--base);
-  }
+    &__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--base);
+    }
 
-  &__columns-inner {
-    padding-bottom: var(--base);
-  }
+    &__columns-inner {
+      padding-bottom: var(--base);
+    }
 
-  .table {
-    th,
-    td:first-child {
-      min-width: 0;
+    .table {
+      th,
+      td:first-child {
+        min-width: 0;
+      }
     }
   }
 }

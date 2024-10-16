@@ -319,7 +319,7 @@ export const DefaultEditView: React.FC = () => {
       // Unlock the document only if we're actually navigating away from the document
       if (documentId && documentIsLocked && !isStayingWithinDocument) {
         // Check if this user is still the current editor
-        if (documentLockStateRef.current?.user?.id === user.id) {
+        if (documentLockStateRef.current?.user?.id === user?.id) {
           void unlockDocument(id, collectionSlug ?? globalSlug)
           setDocumentIsLocked(false)
           setCurrentEditor(null)
@@ -333,7 +333,7 @@ export const DefaultEditView: React.FC = () => {
     globalSlug,
     id,
     unlockDocument,
-    user.id,
+    user,
     setCurrentEditor,
     isLockingEnabled,
     documentIsLocked,

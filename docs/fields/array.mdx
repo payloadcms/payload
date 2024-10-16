@@ -66,7 +66,7 @@ _\* An asterisk denotes that a property is required._
 
 ## Admin Options
 
-The customize the appearance and behavior of the Array Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
+To customize the appearance and behavior of the Array Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
 
 ```ts
 import type { Field } from 'payload/types'
@@ -81,11 +81,11 @@ export const MyArrayField: Field = {
 
 The Array Field inherits all of the default options from the base [Field Admin Config](../admin/fields#admin-options), plus the following additional options:
 
-| Option                    | Description                                                                                                          |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| **`initCollapsed`**       | Set the initial collapsed state                                                                                      |
-| **`components.RowLabel`** | Function or React component to be rendered as the label on the array row. Receives `({ data, index, path })` as args |
-| **`isSortable`**          | Disable order sorting by setting this value to `false`                                                               |
+| Option                    | Description                                                                                                                                     |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`initCollapsed`**       | Set the initial collapsed state                                                                                                                 |
+| **`components.RowLabel`** | React component to be rendered as the label on the array row. [Example](#example-of-a-custom-rowlabel-component) |
+| **`isSortable`**          | Disable order sorting by setting this value to `false`                                                                                          |
 
 ## Example
 
@@ -127,12 +127,27 @@ export const ExampleCollection: CollectionConfig = {
       ],
       admin: {
         components: {
-          RowLabel: ({ data, index }) => {
-            return data?.title || `Slide ${String(index).padStart(2, '0')}`
-          },
+          RowLabel: '/path/to/ArrayRowLabel#ArrayRowLabel',
         },
       },
     },
   ],
+}
+```
+
+### Example of a custom RowLabel component
+
+
+```tsx
+'use client'
+
+import { useRowLabel } from '@payloadcms/ui'
+
+export const ArrayRowLabel = () => {
+  const { data, rowNumber } = useRowLabel<{ title?: string }>()
+
+  const customLabel = `${data.title || 'Slide'} ${String(rowNumber).padStart(2, '0')} `
+
+  return <div>Custom Label: {customLabel}</div>
 }
 ```

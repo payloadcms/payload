@@ -66,9 +66,8 @@ export const enTranslations = {
     successfullyRegisteredFirstUser: 'Successfully registered first user.',
     successfullyUnlocked: 'Successfully unlocked',
     tokenRefreshSuccessful: 'Token refresh successful.',
-    username: 'Username',
-
     unableToVerify: 'Unable to Verify',
+    username: 'Username',
     verified: 'Verified',
     verifiedSuccessfully: 'Verified Successfully',
     verify: 'Verify',

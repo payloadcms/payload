@@ -19,7 +19,7 @@ type Result = {
 export const initReq = cache(async function (config: SanitizedConfig): Promise<Result> {
   const payload = await getPayloadHMR({ config })
 
-  const headers = getHeaders()
+  const headers = await getHeaders()
   const cookies = parseCookies(headers)
 
   const languageCode = getRequestLanguage({

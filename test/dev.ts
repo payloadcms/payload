@@ -9,7 +9,7 @@ import { loadEnv } from 'payload/node'
 
 import { getNextRootDir } from './helpers/getNextRootDir.js'
 import { runInit } from './runInit.js'
-import { safelyRunScriptFunction } from './safelyRunScript.js'
+import { child, safelyRunScriptFunction } from './safelyRunScript.js'
 import { createTestHooks } from './testHooks.js'
 
 const prod = process.argv.includes('--prod')
@@ -44,7 +44,7 @@ await beforeTest()
 
 const { rootDir, adminRoute } = getNextRootDir(testSuiteArg)
 
-await safelyRunScriptFunction(runInit, 4000, testSuiteArg)
+await safelyRunScriptFunction(runInit, 4000, testSuiteArg, true)
 
 // Open the admin if the -o flag is passed
 if (args.o) {
@@ -59,6 +59,15 @@ await nextDev({ port }, 'default', rootDir)
 void fetch(`http://localhost:${port}${adminRoute}`)
 
 // This ensures that the next-server process is killed when this process is killed and doesn't linger around.
-process.on('SIGINT', function () {
+process.on('SIGINT', () => {
+  if (child) {
+    child.kill('SIGINT')
+  }
   process.exit(0)
+})
+process.on('SIGTERM', () => {
+  if (child) {
+    child.kill('SIGINT')
+  }
+  process.exit(0) // Exit the parent process
 })

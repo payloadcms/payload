@@ -340,6 +340,11 @@ const DocumentInfo: React.FC<
               and: [
                 ...versionParams.where.and,
                 {
+                  'version._status': {
+                    equals: 'draft',
+                  },
+                },
+                {
                   updatedAt: {
                     greater_than: publishedJSON.updatedAt,
                   },
@@ -389,7 +394,10 @@ const DocumentInfo: React.FC<
 
         if (docAccessURL) {
           const res = await fetch(`${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`, {
-            body: JSON.stringify(data),
+            body: JSON.stringify({
+              ...(data || {}),
+              _status: 'draft',
+            }),
             credentials: 'include',
             headers: {
               'Accept-Language': i18n.language,

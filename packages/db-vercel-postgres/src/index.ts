@@ -35,6 +35,7 @@ import {
 import {
   convertPathToJSONTraversal,
   countDistinct,
+  createDatabase,
   createJSONQuery,
   createMigration,
   defaultDrizzleSnapshot,
@@ -47,7 +48,7 @@ import {
   requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
-import { createDatabaseAdapter } from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
 
 import type { Args, VercelPostgresAdapter } from './types.js'
 
@@ -78,7 +79,9 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       name: 'postgres',
       afterSchemaInit: args.afterSchemaInit ?? [],
       beforeSchemaInit: args.beforeSchemaInit ?? [],
+      createDatabase,
       defaultDrizzleSnapshot,
+      disableCreateDatabase: args.disableCreateDatabase ?? false,
       drizzle: undefined,
       enums: {},
       features: {
@@ -107,7 +110,8 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       versionsSuffix: args.versionsSuffix || '_v',
 
       // DatabaseAdapter
-      beginTransaction: args.transactionOptions === false ? undefined : beginTransaction,
+      beginTransaction:
+        args.transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
       commitTransaction,
       connect,
       convertPathToJSONTraversal,

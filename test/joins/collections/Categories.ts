@@ -50,6 +50,18 @@ export const Categories: CollectionConfig = {
       on: 'category',
     },
     {
+      name: 'hasManyPosts',
+      type: 'join',
+      collection: postsSlug,
+      on: 'categories',
+    },
+    {
+      name: 'hasManyPostsLocalized',
+      type: 'join',
+      collection: postsSlug,
+      on: 'categoriesLocalized',
+    },
+    {
       name: 'group',
       type: 'group',
       fields: [
@@ -59,6 +71,12 @@ export const Categories: CollectionConfig = {
           type: 'join',
           collection: postsSlug,
           on: 'group.category',
+        },
+        {
+          name: 'camelCasePosts',
+          type: 'join',
+          collection: postsSlug,
+          on: 'group.camelCaseCategory',
         },
       ],
     },

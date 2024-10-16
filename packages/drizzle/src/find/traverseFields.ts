@@ -1,14 +1,16 @@
 import type { DBQueryConfig } from 'drizzle-orm'
+import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { Field, JoinQuery } from 'payload'
 
+import { and, eq, sql } from 'drizzle-orm'
 import { fieldAffectsData, fieldIsVirtual, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
-import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
+import type { BuildQueryJoinAliases, ChainedMethods, DrizzleAdapter } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
-import { buildOrderBy } from '../queries/buildOrderBy.js'
 import buildQuery from '../queries/buildQuery.js'
+import { chainMethods } from './chainMethods.js'
 
 type TraverseFieldArgs = {
   _locales: Result
@@ -241,24 +243,102 @@ export const traverseFields = ({
             // get an additional document and slice it later to determine if there is a next page
             limit += 1
           }
+
           const fields = adapter.payload.collections[field.collection].config.fields
-          const joinTableName = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${
+          const joinCollectionTableName = adapter.tableNameMap.get(toSnakeCase(field.collection))
+          let joinTableName = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${
             field.localized && adapter.payload.config.localization ? adapter.localesSuffix : ''
           }`
+
+          if (field.hasMany) {
+            const db = adapter.drizzle as LibSQLDatabase
+            if (field.localized) {
+              joinTableName = adapter.tableNameMap.get(toSnakeCase(field.collection))
+            }
+            const joinTable = `${joinTableName}${adapter.relationshipsSuffix}`
+
+            const joins: BuildQueryJoinAliases = [
+              {
+                type: 'innerJoin',
+                condition: and(
+                  eq(adapter.tables[joinTable].parent, adapter.tables[joinTableName].id),
+                  eq(
+                    sql.raw(`"${joinTable}"."${topLevelTableName}_id"`),
+                    adapter.tables[currentTableName].id,
+                  ),
+                  eq(adapter.tables[joinTable].path, field.on),
+                ),
+                table: adapter.tables[joinTable],
+              },
+            ]
+
+            const { orderBy, where: subQueryWhere } = buildQuery({
+              adapter,
+              fields,
+              joins,
+              locale,
+              sort,
+              tableName: joinCollectionTableName,
+              where: {},
+            })
+
+            const chainedMethods: ChainedMethods = []
+
+            joins.forEach(({ type, condition, table }) => {
+              chainedMethods.push({
+                args: [table, condition],
+                method: type ?? 'leftJoin',
+              })
+            })
+
+            const subQuery = chainMethods({
+              methods: chainedMethods,
+              query: db
+                .select({
+                  id: adapter.tables[joinTableName].id,
+                  ...(field.localized && {
+                    locale: adapter.tables[joinTable].locale,
+                  }),
+                })
+                .from(adapter.tables[joinTableName])
+                .where(subQueryWhere)
+                .orderBy(orderBy.order(orderBy.column))
+                .limit(limit),
+            })
+
+            const columnName = `${path.replaceAll('.', '_')}${field.name}`
+
+            const jsonObjectSelect = field.localized
+              ? sql.raw(`'_parentID', "id", '_locale', "locale"`)
+              : sql.raw(`'id', "id"`)
+
+            if (adapter.name === 'sqlite') {
+              currentArgs.extras[columnName] = sql`
+              COALESCE((
+                SELECT json_group_array(json_object(${jsonObjectSelect}))
+                FROM (
+                  ${subQuery}
+                ) AS ${sql.raw(`${columnName}_sub`)}
+              ), '[]')
+            `.as(columnName)
+            } else {
+              currentArgs.extras[columnName] = sql`
+              COALESCE((
+                SELECT json_agg(json_build_object(${jsonObjectSelect}))
+                FROM (
+                  ${subQuery}
+                ) AS ${sql.raw(`${columnName}_sub`)}
+              ), '[]'::json)
+            `.as(columnName)
+            }
+
+            break
+          }
+
           const selectFields = {}
 
-          const orderBy = buildOrderBy({
-            adapter,
-            fields,
-            joins: [],
-            locale,
-            selectFields,
-            sort,
-            tableName: joinTableName,
-          })
           const withJoin: DBQueryConfig<'many', true, any, any> = {
             columns: selectFields,
-            orderBy: () => [orderBy.order(orderBy.column)],
           }
           if (limit) {
             withJoin.limit = limit
@@ -269,20 +349,21 @@ export const traverseFields = ({
             withJoin.columns._parentID = true
           } else {
             withJoin.columns.id = true
+            withJoin.columns.parent = true
           }
-
-          if (where) {
-            const { where: joinWhere } = buildQuery({
-              adapter,
-              fields,
-              joins,
-              locale,
-              sort,
-              tableName: joinTableName,
-              where,
-            })
+          const { orderBy, where: joinWhere } = buildQuery({
+            adapter,
+            fields,
+            joins,
+            locale,
+            sort,
+            tableName: joinTableName,
+            where,
+          })
+          if (joinWhere) {
             withJoin.where = () => joinWhere
           }
+          withJoin.orderBy = orderBy.order(orderBy.column)
           currentArgs.with[`${path.replaceAll('.', '_')}${field.name}`] = withJoin
           break
         }

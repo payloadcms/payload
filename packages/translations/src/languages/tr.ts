@@ -189,7 +189,7 @@ export const trTranslations: DefaultTranslationsObject = {
     cancel: 'İptal',
     changesNotSaved:
       'Değişiklikleriniz henüz kaydedilmedi. Eğer bu sayfayı terk ederseniz değişiklikleri kaybedeceksiniz.',
-    clearAll: undefined,
+    clearAll: 'Hepsini Temizle',
     close: 'Kapat',
     collapse: 'Daralt',
     collections: 'Koleksiyonlar',
@@ -415,7 +415,7 @@ export const trTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Son kaydedildi {{distance}} önce',
     noFurtherVersionsFound: 'Başka sürüm bulunamadı.',
     noRowsFound: '{{label}} bulunamadı',
-    noRowsSelected: undefined,
+    noRowsSelected: 'Seçilen {{label}} yok',
     preview: 'Önizleme',
     previouslyPublished: 'Daha Önce Yayınlanmış',
     problemRestoringVersion: 'Bu sürüme geri döndürürken bir hatayla karşılaşıldı.',
