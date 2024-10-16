@@ -6,7 +6,6 @@ import React from 'react'
 import { TenantFieldComponentClient } from './Field.client'
 
 export const TenantFieldComponent: React.FC<{
-  path: string
   payload: Payload
   readOnly: boolean
 }> = async (args) => {
@@ -22,7 +21,6 @@ export const TenantFieldComponent: React.FC<{
     return (
       <TenantFieldComponentClient
         initialValue={cookies.get('payload-tenant')?.value || undefined}
-        path={args.path}
         readOnly={args.readOnly}
       />
     )
