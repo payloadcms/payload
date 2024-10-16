@@ -34,12 +34,6 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
     taskSlugs.add(task.slug)
   })
 
-  // This should basically be
-  /*{
-    [TTaskSlug in keyof TypedJobs['tasks']]: {
-      [id: string]: SavedTaskResult<TTaskSlug>
-    }
-  }*/
   const taskStatusJsonSchema: JSONSchema4 = {
     type: 'object',
     additionalProperties: false,
