@@ -147,18 +147,19 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         }
 
         const loadingLabel = t('fields:linkedTo', {
-          label: `${getTranslation(relatedField.labels.singular, i18n)} - loading...`,
+          label: `${getTranslation(relatedField.labels.singular, i18n)} - ${getTranslation('loading...', i18n)}`,
         }).replace(/<[^>]*>?/g, '')
         setLinkLabel(loadingLabel)
 
         const res = await requests.get(
-          `${config.serverURL}${config.routes.api}/${collection}/${id}${locale?.code ? `?locale=${locale.code}` : ''}`,
+          `${config.serverURL}${config.routes.api}/${collection}/${id}`,
           {
             headers: {
               'Accept-Language': i18n.language,
             },
             params: {
               depth: 0,
+              locale: locale?.code,
             },
           },
         )
