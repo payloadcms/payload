@@ -68,6 +68,8 @@ const Duplicate: React.FC<Props> = ({ id, slug, collection }) => {
 
         data = baseBeforeDuplicate({ collection, data, locale })
 
+        delete data['id']
+
         if (typeof collection.admin.hooks?.beforeDuplicate === 'function') {
           data = await collection.admin.hooks.beforeDuplicate({
             collection,
