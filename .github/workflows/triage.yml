@@ -22,11 +22,7 @@ jobs:
     steps:
       - uses: balazsorban44/nissuer@1.10.0
         with:
-          label-comments: |
-            {
-              "invalid-reproduction": ".github/comments/invalid-reproduction.md"
-            }
-          reproduction-comment: '.github/comments/invalid-link.md'
+          reproduction-comment: '.github/comments/invalid-reproduction.md'
           reproduction-blocklist: 'github.com/payloadcms/payload.*,github.com/\\w*/?$,github.com$'
           reproduction-link-section: '### Link to the code that reproduces this issue(.*)### Reproduction Steps'
           reproduction-invalid-label: 'invalid-reproduction'
