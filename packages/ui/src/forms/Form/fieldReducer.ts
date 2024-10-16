@@ -146,6 +146,16 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       return newState
     }
 
+    case 'UPDATE_MANY': {
+      const newState = { ...state }
+
+      Object.entries(action.formState).forEach(([path, field]) => {
+        newState[path] = field
+      })
+
+      return newState
+    }
+
     case 'REMOVE_ROW': {
       const { path, rowIndex } = action
       const { remainingFields, rows } = separateRows(path, state)

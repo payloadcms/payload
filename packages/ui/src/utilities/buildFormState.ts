@@ -212,7 +212,7 @@ export const buildFormStateFn = async (
     clientFields = clientEntityConfig?.fields || []
   } else if (fieldMap.has(schemaPath)) {
     fields = [fieldMap.get(schemaPath)?.field]
-    clientFields = clientEntityConfig?.fields || []
+    clientFields = [fieldMap.get(schemaPath)?.clientField]
   }
 
   if (!fields || !Array.isArray(fields) || fields.length === 0) {

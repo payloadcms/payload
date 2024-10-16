@@ -15,17 +15,19 @@ type Args = {
 }
 
 export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
-  const { id, collectionSlug, data: fullData = {}, fields, operation, preferences, req } = args
+  const { id, collectionSlug, data = {}, fields, operation, preferences, req } = args
 
   if (fields) {
     const state: FormState = {}
 
-    const dataWithDefaultValues = await calculateDefaultValues({
+    const dataWithDefaultValues = { ...data }
+
+    await calculateDefaultValues({
       id,
-      data: fullData,
+      data: dataWithDefaultValues,
       fields,
       locale: req.locale,
-      siblingData: fullData,
+      siblingData: dataWithDefaultValues,
       user: req.user,
     })
 
@@ -35,7 +37,7 @@ export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
       collectionSlug,
       data: dataWithDefaultValues,
       fields,
-      fullData,
+      fullData: data,
       operation,
       parentPassesCondition: true,
       path: '',

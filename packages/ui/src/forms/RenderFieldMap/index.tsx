@@ -77,13 +77,14 @@ export const RenderFieldMap: React.FC<Props> = (props) => {
 const FieldRowsContext = React.createContext<{
   renderedRows: FieldRow[]
   setRenderedRow: (args: { renderedRow: FieldRow; rowIndex: number }) => void
+  setRenderedRows: React.Dispatch<React.SetStateAction<FieldRow[]>>
 }>(undefined)
 
 export const FieldRowsProvider: React.FC<{
   children: React.ReactNode
   renderedRows: FieldRow[]
 }> = ({ children, renderedRows: initialRows }) => {
-  const [renderedRows, setRenderedRowsToState] = React.useState(initialRows)
+  const [renderedRows, setRenderedRows] = React.useState(initialRows)
 
   const setRenderedRow = useCallback(
     (args: { renderedRow: FieldRow; rowIndex: number }) => {
@@ -91,7 +92,6 @@ export const FieldRowsProvider: React.FC<{
 
       const withUpdatedRow = [...renderedRows]
 
-      console.log('setting into renderedRows', { incomingRow, rowIndex })
       // splice it in, if it doesn't exist, otherwise add it
       if (withUpdatedRow[rowIndex]) {
         withUpdatedRow.splice(rowIndex, 1, incomingRow)
@@ -99,14 +99,13 @@ export const FieldRowsProvider: React.FC<{
         withUpdatedRow.push(incomingRow)
       }
 
-      console.log('result, ', withUpdatedRow)
-      setRenderedRowsToState(withUpdatedRow)
+      setRenderedRows(withUpdatedRow)
     },
     [renderedRows],
   )
 
   return (
-    <FieldRowsContext.Provider value={{ renderedRows, setRenderedRow }}>
+    <FieldRowsContext.Provider value={{ renderedRows, setRenderedRow, setRenderedRows }}>
       {children}
     </FieldRowsContext.Provider>
   )

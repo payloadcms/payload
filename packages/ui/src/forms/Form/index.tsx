@@ -417,6 +417,7 @@ export const Form: React.FC<FormProps> = (props) => {
     (path: string) => getSiblingDataFunc(contextRef.current.fields, path),
     [],
   )
+
   const getDataByPath = useCallback<GetDataByPath>(
     (path: string) => getDataByPathFunc(contextRef.current.fields, path),
     [],
@@ -501,36 +502,31 @@ export const Form: React.FC<FormProps> = (props) => {
       const abortController = new AbortController()
       abortControllerRef2.current = abortController
 
-      console.log('getting form state form: ', data)
-
-      const { renderedFieldMap, state: fieldState } = await getFormState({
+      const { renderedFieldMap, state: formState } = await getFormState({
         data,
         renderFields: true,
         schemaPath,
         signal: abortController.signal,
       })
 
-      return { fieldState, renderedFieldMap }
+      return { formState, renderedFieldMap }
     },
     [getFormState],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
-    async ({ data, path, rowIndex, schemaPath }) => {
-      const { fieldState, renderedFieldMap } = await getFieldStateBySchemaPath({
+    async ({ data, schemaPath }) => {
+      const { formState, renderedFieldMap } = await getFieldStateBySchemaPath({
         data,
         schemaPath,
       })
 
-      // dispatchFields({
-      //   type: 'ADD_ROW',
-      //   blockType: data?.blockType,
-      //   path,
-      //   rowIndex,
-      //   subFieldState,
-      // })
+      dispatchFields({
+        type: 'UPDATE_MANY',
+        formState,
+      })
 
-      return { renderedFieldMap, RowLabel: 'TODO' }
+      return renderedFieldMap
     },
     [getFieldStateBySchemaPath, dispatchFields],
   )
@@ -544,7 +540,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const replaceFieldRow: FormContextType['replaceFieldRow'] = useCallback(
     async ({ data, path, rowIndex, schemaPath }) => {
-      const { fieldState: subFieldState } = await getFieldStateBySchemaPath({ data, schemaPath })
+      const { formState: subFieldState } = await getFieldStateBySchemaPath({ data, schemaPath })
 
       dispatchFields({
         type: 'REPLACE_ROW',

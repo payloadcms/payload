@@ -218,8 +218,6 @@ const traverseFields = ({
   }
 
   if (fields) {
-    console.log('fields', fields)
-
     fields?.forEach((field, fieldIndex) => {
       const clientField = clientFields?.[fieldIndex]
 

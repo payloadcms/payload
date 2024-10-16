@@ -106,6 +106,11 @@ export type UPDATE = {
   type: 'UPDATE'
 } & Partial<FormField>
 
+export type UPDATE_MANY = {
+  formState: FormState
+  type: 'UPDATE_MANY'
+}
+
 export type REMOVE_ROW = {
   path: string
   rowIndex: number
@@ -174,24 +179,18 @@ export type FieldAction =
   | SET_ALL_ROWS_COLLAPSED
   | SET_ROW_COLLAPSED
   | UPDATE
+  | UPDATE_MANY
 
 export type FormFieldsContext = [FormState, Dispatch<FieldAction>]
 
 export type Context = {
   addFieldRow: ({
     data,
-    path,
-    rowIndex,
     schemaPath,
   }: {
     data?: Data
-    path: string
-    /*
-     * by default the new row will be added to the end of the list
-     */
-    rowIndex?: number
     schemaPath: string
-  }) => Promise<FieldRow>
+  }) => Promise<RenderedFieldMap>
   buildRowErrors: () => void
   createFormData: CreateFormData
   disabled: boolean

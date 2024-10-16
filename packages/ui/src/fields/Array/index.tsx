@@ -7,6 +7,7 @@ import type {
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
+import { v4 as uuid } from 'uuid'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -127,20 +128,21 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
-  const { renderedRows, setRenderedRow } = useFieldRows()
+  const { renderedRows, setRenderedRows } = useFieldRows()
 
   const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const addRow = useCallback(
     async (rowIndex: number): Promise<void> => {
-      const newRenderedRow = await addFieldRow({ path, rowIndex, schemaPath })
+      // TODO add the new row into the rowsData array using the incoming rowIndex
+      const newRow = { id: uuid() }
 
-      console.log('result', newRenderedRow, renderedRows)
+      const renderedFieldRow = await addFieldRow({
+        data: { [name]: [...rowsData, newRow] },
+        schemaPath,
+      })
 
-      // setRenderedRow({
-      //   renderedRow: newRenderedRow,
-      //   rowIndex,
-      // })
+      setRenderedRows(renderedFieldRow?.get(path)?.renderedRows || [])
 
       setModified(true)
 
@@ -148,18 +150,12 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, setModified, schemaPath, setRenderedRow],
+    [addFieldRow, path, setModified, schemaPath, setRenderedRows, rowsData, name],
   )
 
   const duplicateRow = useCallback(
     (rowIndex: number) => {
       dispatchFields({ type: 'DUPLICATE_ROW', path, rowIndex })
-
-      console.log(renderedRows[rowIndex])
-      setRenderedRow({
-        renderedRow: renderedRows[rowIndex],
-        rowIndex: rowIndex + 1,
-      })
 
       setModified(true)
 
@@ -167,7 +163,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         scrollToID(`${path}-row-${rowIndex}`)
       }, 0)
     },
-    [dispatchFields, path, setModified, setRenderedRow, renderedRows],
+    [dispatchFields, path, setModified],
   )
 
   const removeRow = useCallback(
