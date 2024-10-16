@@ -80,15 +80,15 @@ type GenerateVerifyEmailSubject = (args: {
   user: any
 }) => Promise<string> | string
 
-type GenerateForgotPasswordEmailHTML = (args?: {
-  req?: PayloadRequest
-  token?: string
-  user?: unknown
+type GenerateForgotPasswordEmailHTML = (args: {
+  req: PayloadRequest
+  token: string
+  user: any
 }) => Promise<string> | string
-type GenerateForgotPasswordEmailSubject = (args?: {
-  req?: PayloadRequest
-  token?: string
-  user?: any
+type GenerateForgotPasswordEmailSubject = (args: {
+  req: PayloadRequest
+  token: string
+  user: any
 }) => Promise<string> | string
 
 type AuthStrategy = ((ctx: Payload) => Strategy) | Strategy
