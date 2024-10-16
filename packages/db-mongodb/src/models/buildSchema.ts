@@ -247,8 +247,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
   ): void => {
     field.fields.forEach((subField: Field) => {
       if (fieldIsVirtual(subField)) {
-        const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type]
+        return
       }
+
+      const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type]
 
       if (addFieldSchema) {
         addFieldSchema(subField, schema, config, buildSchemaOptions)
