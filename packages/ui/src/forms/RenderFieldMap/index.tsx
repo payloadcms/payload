@@ -17,7 +17,7 @@ export { Props }
 export const RenderFieldMap: React.FC<Props> = (props) => {
   const { className, forceRender, margins, renderedFieldMap } = props
 
-  const renderedFields = Array.from(renderedFieldMap.values())
+  const renderedFields = Array.from(renderedFieldMap?.values() || [])
 
   const { i18n } = useTranslation()
 
@@ -48,7 +48,7 @@ export const RenderFieldMap: React.FC<Props> = (props) => {
     console.error('Need to implement i18n when calling RenderFields') // eslint-disable-line no-console
   }
 
-  if (renderedFields) {
+  if (renderedFields && renderedFields.length > 0) {
     return (
       <div
         className={[

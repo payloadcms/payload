@@ -10,7 +10,7 @@ import { ArrayAction } from '../../elements/ArrayAction/index.js'
 import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
-import { useFieldRows } from '../../forms/RenderFieldMap/index.js'
+import { RenderFieldMap, useFieldRows } from '../../forms/RenderFieldMap/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
@@ -124,7 +124,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         isCollapsed={row.collapsed}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        {Array.from(renderedRow?.renderedFieldMap || [])?.map(([, { Field }]) => Field)}
+        <RenderFieldMap renderedFieldMap={renderedRow?.renderedFieldMap} />
       </Collapsible>
     </div>
   )

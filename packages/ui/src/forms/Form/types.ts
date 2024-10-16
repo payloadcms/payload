@@ -186,9 +186,11 @@ export type FormFieldsContext = [FormState, Dispatch<FieldAction>]
 export type Context = {
   addFieldRow: ({
     data,
+    path,
     schemaPath,
   }: {
     data?: Data
+    path: string
     schemaPath: string
   }) => Promise<RenderedFieldMap>
   buildRowErrors: () => void

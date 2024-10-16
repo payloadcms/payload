@@ -490,7 +490,7 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const getFieldStateBySchemaPath = useCallback(
-    async ({ data, schemaPath }) => {
+    async ({ data, path, schemaPath }) => {
       if (abortControllerRef2.current) {
         try {
           abortControllerRef2.current.abort()
@@ -504,6 +504,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       const { renderedFieldMap, state: formState } = await getFormState({
         data,
+        path,
         renderFields: true,
         schemaPath,
         signal: abortController.signal,
@@ -515,15 +516,16 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
-    async ({ data, schemaPath }) => {
-      const { formState, renderedFieldMap } = await getFieldStateBySchemaPath({
+    async ({ data, path, schemaPath }) => {
+      const { formState: newFormState, renderedFieldMap } = await getFieldStateBySchemaPath({
         data,
+        path,
         schemaPath,
       })
 
       dispatchFields({
         type: 'UPDATE_MANY',
-        formState,
+        formState: newFormState,
       })
 
       return renderedFieldMap
@@ -540,7 +542,11 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const replaceFieldRow: FormContextType['replaceFieldRow'] = useCallback(
     async ({ data, path, rowIndex, schemaPath }) => {
-      const { formState: subFieldState } = await getFieldStateBySchemaPath({ data, schemaPath })
+      const { formState: subFieldState } = await getFieldStateBySchemaPath({
+        data,
+        path,
+        schemaPath,
+      })
 
       dispatchFields({
         type: 'REPLACE_ROW',

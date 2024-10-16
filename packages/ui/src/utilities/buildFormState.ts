@@ -130,6 +130,7 @@ export const buildFormStateFn = async (
     globalSlug,
     locale,
     operation,
+    path,
     renderFields: shouldRenderFields,
     req,
     req: {
@@ -211,8 +212,11 @@ export const buildFormStateFn = async (
     fields = entityConfig.fields
     clientFields = clientEntityConfig?.fields || []
   } else if (fieldMap.has(schemaPath)) {
-    fields = [fieldMap.get(schemaPath)?.field]
-    clientFields = [fieldMap.get(schemaPath)?.clientField]
+    const mappedField = fieldMap.get(schemaPath)
+    fields = [mappedField?.field]
+    clientFields = [mappedField?.clientField]
+    // remove 1st and last element from schemaPathSegments
+    // basePath = `${schemaPathSegments.slice(1, schemaPathSegments.length - 1).join('.')}.`
   }
 
   if (!fields || !Array.isArray(fields) || fields.length === 0) {
@@ -332,8 +336,10 @@ export const buildFormStateFn = async (
     data,
     fields,
     operation,
+    path,
     preferences: docPreferences || { fields: {} },
     req,
+    // schemaPath,
   })
 
   let lockedStateResult = undefined

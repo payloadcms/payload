@@ -352,7 +352,7 @@ export const renderField: RenderFieldFn = (args) => {
 
   switch (field.type) {
     case 'array': {
-      fieldState.rows?.forEach((row, rowIndex) => {
+      fieldState?.rows?.forEach((row, rowIndex) => {
         const RowLabel = (
           <RenderServerComponent
             clientProps={{
