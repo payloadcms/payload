@@ -1,6 +1,6 @@
 ---
-title: Queues
-label: Queues
+title: Jobs Queue
+label: Jobs Queue
 order: 10
 desc: Payload provides all you need to run job queues, which are helpful to offload long-running processes into separate workers.
 keywords: jobs queue, application framework, typescript, node, react, nextjs
@@ -358,8 +358,7 @@ Add a new environment variable named `CRON_SECRET` to your Vercel project settin
 
 2. Modify Authentication for Job Running: Adjust the job running authorization logic in your project to accept the `CRON_SECRET` as a valid token. Modify your `payload.config.ts` file as follows:
 
-ts
-Copy code
+```ts
 export default buildConfig({
   // Other configurations...
   jobs: {
@@ -372,6 +371,7 @@ export default buildConfig({
     // Other job configurations...
   }
 })
+```
 
 This code snippet ensures that the jobs can only be triggered if the correct `CRON_SECRET` is provided in the authorization header.
 
