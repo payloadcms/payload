@@ -17,6 +17,7 @@ import {
   hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
+  localizedSlug,
   noAdminAccessEmail,
   nonAdminUserEmail,
   nonAdminUserSlug,
@@ -41,8 +42,12 @@ const openAccess = {
 }
 
 const PublicReadabilityAccess: FieldAccess = ({ req: { user }, siblingData }) => {
-  if (user) return true
-  if (siblingData?.allowPublicReadability) return true
+  if (user) {
+    return true
+  }
+  if (siblingData?.allowPublicReadability) {
+    return true
+  }
 
   return false
 }
@@ -65,6 +70,10 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+  },
+  localization: {
+    locales: ['en', 'es', 'fr'],
+    defaultLocale: 'en',
   },
   collections: [
     {
@@ -106,6 +115,32 @@ export default buildConfigWithDefaults({
       fields: [],
     },
     {
+      slug: localizedSlug,
+      access: {
+        create: ({ req }) => (console.log('create access', req), true),
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          localized: true,
+        },
+        {
+          name: 'content',
+          type: 'text',
+          localized: true,
+        },
+        {
+          name: 'noAccess',
+          type: 'text',
+          localized: true,
+          access: {
+            read: () => true,
+          },
+        },
+      ],
+    },
+    {
       slug,
       access: {
         ...openAccess,
@@ -135,6 +170,7 @@ export default buildConfigWithDefaults({
             },
           ],
         },
+
         {
           type: 'row',
           fields: [
@@ -261,7 +297,9 @@ export default buildConfigWithDefaults({
       slug: restrictedVersionsSlug,
       access: {
         read: ({ req: { user } }) => {
-          if (user) return true
+          if (user) {
+            return true
+          }
 
           return {
             hidden: {
@@ -270,7 +308,9 @@ export default buildConfigWithDefaults({
           }
         },
         readVersions: ({ req: { user } }) => {
-          if (user) return true
+          if (user) {
+            return true
+          }
 
           return {
             'version.hidden': {
@@ -428,7 +468,9 @@ export default buildConfigWithDefaults({
       slug: hiddenAccessSlug,
       access: {
         read: ({ req: { user } }) => {
-          if (user) return true
+          if (user) {
+            return true
+          }
 
           return {
             hidden: {
@@ -454,7 +496,9 @@ export default buildConfigWithDefaults({
       slug: hiddenAccessCountSlug,
       access: {
         read: ({ req: { user } }) => {
-          if (user) return true
+          if (user) {
+            return true
+          }
 
           return {
             hidden: {
