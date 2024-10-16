@@ -14,6 +14,7 @@ permissions:
 jobs:
   triage:
     name: nissuer
+    if: false # Disable after adjusting scenarios which this should be applied
     runs-on: ubuntu-latest
     steps:
       - uses: balazsorban44/nissuer@1.10.0
