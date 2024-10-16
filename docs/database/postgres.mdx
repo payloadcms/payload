@@ -60,6 +60,7 @@ export default buildConfig({
 | `schemaName` (experimental) | A string for the postgres schema to use, defaults to 'public'.                                                                                                                   |
 | `idType`                    | A string of 'serial', or 'uuid' that is used for the data type given to id columns.                                                                                              |
 | `transactionOptions`        | A PgTransactionConfig object for transactions, or set to `false` to disable using transactions. [More details](https://orm.drizzle.team/docs/transactions)                       |
+| `disableCreateDatabase`     | Pass `true` to disale auto database creation if it doesn't exist. Defaults to `false`.                                                                                           |
 | `localesSuffix`             | A string appended to the end of table names for storing localized fields. Default is '_locales'.                                                                                 |
 | `relationshipsSuffix`       | A string appended to the end of table names for storing relationships. Default is '_rels'.                                                                                       |
 | `versionsSuffix`            | A string appended to the end of table names for storing versions. Defaults to '_v'.                                                                                              |

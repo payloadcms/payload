@@ -112,6 +112,12 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
     return tabPath
   }
 
+  const activeTabDescription = activeTabConfig.description
+  const activeTabStaticDescription =
+    typeof activeTabDescription === 'function'
+      ? activeTabDescription({ t: i18n.t })
+      : activeTabDescription
+
   return (
     <div
       className={[
@@ -154,7 +160,11 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
                 .filter(Boolean)
                 .join(' ')}
             >
-              <FieldDescription Description={field?.admin?.components?.Description} field={field} />
+              <FieldDescription
+                Description={field?.admin?.components?.Description}
+                description={activeTabStaticDescription}
+                field={field}
+              />
               <RenderFields
                 fields={activeTabConfig.fields}
                 forceRender={forceRender}

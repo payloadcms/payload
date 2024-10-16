@@ -1,7 +1,7 @@
 import type { CollectionConfig } from '../../index.js'
 
 import { InvalidConfiguration } from '../../errors/InvalidConfiguration.js'
-import { fieldAffectsData } from '../../fields/config/types.js'
+import { fieldAffectsData, fieldIsVirtual } from '../../fields/config/types.js'
 import flattenFields from '../../utilities/flattenTopLevelFields.js'
 
 /**
@@ -33,6 +33,11 @@ export const validateUseAsTitle = (config: CollectionConfig) => {
         }
       }
     } else {
+      if (useAsTitleField && fieldIsVirtual(useAsTitleField)) {
+        throw new InvalidConfiguration(
+          `The field "${config.admin.useAsTitle}" specified in "admin.useAsTitle" in the collection "${config.slug}" is virtual. A virtual field cannot be used as the title.`,
+        )
+      }
       if (!useAsTitleField) {
         throw new InvalidConfiguration(
           `The field "${config.admin.useAsTitle}" specified in "admin.useAsTitle" does not exist in the collection "${config.slug}"`,

@@ -137,7 +137,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
       }
 
       const fieldName = `${fieldPrefix || ''}${field.name}`
-      const fieldData = table[fieldName]
+      let fieldData = table[fieldName]
       const localizedFieldData = {}
       const valuesToTransform: {
         ref: Record<string, unknown>
@@ -422,6 +422,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
       if (field.type === 'join') {
         const { limit = 10 } = joinQuery?.[`${fieldPrefix.replaceAll('_', '.')}${field.name}`] || {}
 
+        // raw hasMany results from SQLite
+        if (typeof fieldData === 'string') {
+          fieldData = JSON.parse(fieldData)
+        }
+
         let fieldResult:
           | { docs: unknown[]; hasNextPage: boolean }
           | Record<string, { docs: unknown[]; hasNextPage: boolean }>
@@ -447,7 +452,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
           } else {
             const hasNextPage = limit !== 0 && fieldData.length > limit
             fieldResult = {
-              docs: hasNextPage ? fieldData.slice(0, limit) : fieldData,
+              docs: (hasNextPage ? fieldData.slice(0, limit) : fieldData).map(({ id }) => ({
+                id,
+              })),
               hasNextPage,
             }
           }

@@ -38,8 +38,6 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
       doc = {
         id: doc.parent,
         ...doc.version,
-        createdAt: doc.createdAt,
-        updatedAt: doc.updatedAt,
       }
 
       return doc
