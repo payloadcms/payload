@@ -930,9 +930,9 @@ export type Config = {
   hooks?: {
     afterError?: AfterErrorHook[]
   }
+  /** i18n config settings */
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   i18n?: I18nOptions<{} | DefaultTranslationsObject> // loosen the type here to allow for custom translations
-  /** i18n config settings */
   /** Automatically index all sortable top-level fields in the database to improve sort performance and add database compatibility for Azure Cosmos and similar. */
   indexSortableFields?: boolean
   /**
