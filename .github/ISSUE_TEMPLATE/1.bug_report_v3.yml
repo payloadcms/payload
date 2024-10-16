@@ -2,25 +2,6 @@ name: Bug Report v3
 description: Create a bug report for Payload v3 (beta)
 labels: ['status: needs-triage', 'v3']
 body:
-  - type: input
-    id: reproduction-link
-    attributes:
-      label: Link to reproduction
-      description: Want us to look into your issue faster? Follow the [reproduction-guide](https://github.com/payloadcms/payload/blob/main/.github/reproduction-guide.md) for more information.
-    validations:
-      required: false
-
-  - type: textarea
-    attributes:
-      label: Environment Info
-      description: Paste output from `pnpm payload info` (>= beta.92) _or_ Payload, Node.js, and Next.js versions.
-      render: text
-      placeholder: |
-        Payload:
-        Node.js:
-        Next.js:
-    validations:
-      required: true
 
   - type: textarea
     attributes:
@@ -28,10 +9,32 @@ body:
     validations:
       required: true
 
+  - type: input
+    id: reproduction-link
+    attributes:
+      label: Link to the code that reproduces this issue
+      description: >-
+        Please provide a link to your reproduction. Note, if the URL is invalid (eg.: 404, or a private repository), we may close the issue.
+        Either use `npx create-payload-app@beta` or follow the [reproduction-guide](https://github.com/payloadcms/payload/blob/main/.github/reproduction-guide.md) for more information.
+    validations:
+      required: false
+
   - type: textarea
     attributes:
       label: Reproduction Steps
       description: Steps to reproduce the behavior, please provide a clear description of how to reproduce the issue, based on the linked minimal reproduction. Screenshots can be provided in the issue body below. If using code blocks, make sure that [syntax highlighting is correct](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks#syntax-highlighting) and double check that the rendered preview is not broken.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Environment Info
+      description: Paste output from `pnpm payload info` (>= beta.92) _or_ Payload, Node.js, and Next.js versions.
+      render: bash
+      placeholder: |
+        Payload:
+        Node.js:
+        Next.js:
     validations:
       required: true
 
