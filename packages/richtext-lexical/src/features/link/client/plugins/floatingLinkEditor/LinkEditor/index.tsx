@@ -8,6 +8,7 @@ import { getTranslation } from '@payloadcms/translations'
 import {
   CloseMenuIcon,
   EditIcon,
+  ExternalLinkIcon,
   formatDrawerSlug,
   useConfig,
   useEditDepth,
@@ -25,7 +26,6 @@ import {
 } from 'lexical'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import type { LinkNode } from '../../../../nodes/LinkNode.js'
 import type { LinkFields } from '../../../../nodes/types.js'
 import type { LinkPayload } from '../types.js'
 
@@ -280,10 +280,14 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         <div className="link-input">
           {linkUrl && linkUrl.length > 0 ? (
             <a href={linkUrl} rel="noopener noreferrer" target="_blank">
+              <ExternalLinkIcon />
               {linkLabel != null && linkLabel.length > 0 ? linkLabel : linkUrl}
             </a>
           ) : linkLabel != null && linkLabel.length > 0 ? (
-            <span className="link-input__label-pure">{linkLabel}</span>
+            <>
+              <ExternalLinkIcon />
+              <span className="link-input__label-pure">{linkLabel}</span>
+            </>
           ) : null}
 
           {editor.isEditable() && (
