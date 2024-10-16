@@ -2,29 +2,20 @@ name: Bug Report v3
 description: Create a bug report for Payload v3 (beta)
 labels: ['status: needs-triage', 'v3']
 body:
-  - type: input
-    id: reproduction-link
-    attributes:
-      label: Link to reproduction
-      description: Want us to look into your issue faster? Follow the [reproduction-guide](https://github.com/payloadcms/payload/blob/main/.github/reproduction-guide.md) for more information.
-    validations:
-      required: false
-
-  - type: textarea
-    attributes:
-      label: Environment Info
-      description: Paste output from `pnpm payload info` (>= beta.92) _or_ Payload, Node.js, and Next.js versions.
-      render: text
-      placeholder: |
-        Payload:
-        Node.js:
-        Next.js:
-    validations:
-      required: true
 
   - type: textarea
     attributes:
       label: Describe the Bug
+    validations:
+      required: true
+
+  - type: input
+    id: reproduction-link
+    attributes:
+      label: Link to the code that reproduces this issue
+      description: >-
+        Required: Please provide a link to your reproduction. Note, if the URL is invalid (404 or a private repository), we may close the issue.
+        Either use `npx create-payload-app@beta -t blank` or follow the [reproduction-guide](https://github.com/payloadcms/payload/blob/main/.github/reproduction-guide.md) for more information.
     validations:
       required: true
 
@@ -35,11 +26,44 @@ body:
     validations:
       required: true
 
-  - type: input
-    id: adapters-plugins
+  - type: dropdown
     attributes:
-      label: Adapters and Plugins
-      description: What adapters and plugins are you using if relevant? ie. db-mongodb, db-postgres, storage-vercel-blob, etc.
+      label: Which area(s) are affected? (Select all that apply)
+      multiple: true
+      options:
+        - 'Not sure'
+        - 'area: core'
+        - 'area: templates'
+        - 'area: ui'
+        - 'db-mongodb'
+        - 'db-postgres'
+        - 'db-sqlite'
+        - 'db-vercel-postgres'
+        - 'plugin: cloud'
+        - 'plugin: cloud-storage'
+        - 'plugin: form-builder'
+        - 'plugin: nested-docs'
+        - 'plugin: richtext-lexical'
+        - 'plugin: richtext-slate'
+        - 'plugin: search'
+        - 'plugin: sentry'
+        - 'plugin: seo'
+        - 'plugin: stripe'
+        - 'plugin: other'
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Environment Info
+      description: Paste output from `pnpm payload info` (>= beta.92) _or_ Payload, Node.js, and Next.js versions.
+      render: bash
+      placeholder: |
+        Payload:
+        Node.js:
+        Next.js:
+    validations:
+      required: true
 
   - type: markdown
     attributes:
