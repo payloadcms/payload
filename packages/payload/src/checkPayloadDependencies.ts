@@ -1,22 +1,5 @@
-import type { CustomVersionParser } from './utilities/dependencies/dependencyChecker.js'
-
 import { checkDependencies } from './utilities/dependencies/dependencyChecker.js'
 import { PAYLOAD_PACKAGE_LIST } from './versions/payloadPackageList.js'
-
-const customReactVersionParser: CustomVersionParser = (version) => {
-  const [mainVersion, ...preReleases] = version.split('-')
-
-  if (preReleases?.length === 3) {
-    // Needs different handling, as it's in a format like 19.0.0-rc-06d0b89e-20240801 format
-    const date = preReleases[2]
-
-    const parts = mainVersion.split('.').map(Number)
-    return { parts, preReleases: [date] }
-  }
-
-  const parts = mainVersion.split('.').map(Number)
-  return { parts, preReleases }
-}
 
 export async function checkPayloadDependencies() {
   const dependencies = [...PAYLOAD_PACKAGE_LIST]
@@ -33,27 +16,6 @@ export async function checkPayloadDependencies() {
         dependencies,
         targetVersionDependency: 'payload',
       },
-      {
-        name: 'react',
-        dependencies: ['react', 'react-dom'],
-        targetVersionDependency: 'react',
-      },
     ],
-    dependencyVersions: {
-      next: {
-        required: false,
-        version: '>=15.0.0-canary.104',
-      },
-      react: {
-        customVersionParser: customReactVersionParser,
-        required: false,
-        version: '>=19.0.0-rc-06d0b89e-20240801',
-      },
-      'react-dom': {
-        customVersionParser: customReactVersionParser,
-        required: false,
-        version: '>=19.0.0-rc-06d0b89e-20240801',
-      },
-    },
   })
 }

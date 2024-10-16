@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 const baseClass = 'inline-block'
 
-import type { BlockFieldClient } from 'payload'
+import type { BlocksFieldClient } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
@@ -29,7 +29,7 @@ import './index.scss'
 
 type Props = {
   readonly formData: InlineBlockFields
-  readonly nodeKey?: string
+  readonly nodeKey: string
 }
 
 export const InlineBlockComponent: React.FC<Props> = (props) => {
@@ -45,28 +45,31 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   } = useEditorConfigContext()
 
   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
-  const blocksField: BlockFieldClient = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
+  const blocksField: BlocksFieldClient = richTextComponentMap?.get(componentMapRenderedBlockPath)[0]
   const clientBlock = blocksField.blocks.find((block) => block.slug === formData.blockType)
 
   const removeInlineBlock = useCallback(() => {
     editor.update(() => {
-      $getNodeByKey(nodeKey).remove()
+      $getNodeByKey(nodeKey)?.remove()
     })
   }, [editor, nodeKey])
 
   const $onDelete = useCallback(
     (event: KeyboardEvent) => {
-      if (isSelected && $isNodeSelection($getSelection())) {
+      const deleteSelection = $getSelection()
+      if (isSelected && $isNodeSelection(deleteSelection)) {
         event.preventDefault()
-        const node = $getNodeByKey(nodeKey)
-        if ($isInlineBlockNode(node)) {
-          node.remove()
-          return true
-        }
+        editor.update(() => {
+          deleteSelection.getNodes().forEach((node) => {
+            if ($isInlineBlockNode(node)) {
+              node.remove()
+            }
+          })
+        })
       }
       return false
     },
-    [isSelected, nodeKey],
+    [editor, isSelected],
   )
   const onClick = useCallback(
     (payload: MouseEvent) => {
@@ -103,7 +106,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   const blockDisplayName = clientBlock?.labels?.singular
     ? getTranslation(clientBlock.labels.singular, i18n)
-    : clientBlock.slug
+    : clientBlock?.slug
 
   return (
     <div
@@ -122,7 +125,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           mappedComponent={clientBlock.admin.components.Label}
         />
       ) : (
-        <div>{getTranslation(clientBlock.labels?.singular, i18n)}</div>
+        <div>{getTranslation(clientBlock!.labels!.singular, i18n)}</div>
       )}
       {editor.isEditable() && (
         <div className={`${baseClass}__actions`}>

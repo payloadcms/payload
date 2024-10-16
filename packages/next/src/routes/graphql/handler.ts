@@ -1,5 +1,5 @@
 import type { GraphQLError, GraphQLFormattedError } from 'graphql'
-import type { CollectionAfterErrorHook, Payload, SanitizedConfig } from 'payload'
+import type { APIError, Payload, PayloadRequest, SanitizedConfig } from 'payload'
 
 import { configToSchema } from '@payloadcms/graphql'
 import { createHandler } from 'graphql-http/lib/use/fetch'
@@ -11,28 +11,30 @@ import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { mergeHeaders } from '../../utilities/mergeHeaders.js'
 
-const handleError = async (
-  payload: Payload,
-  err: any,
-  debug: boolean,
-  afterErrorHook: CollectionAfterErrorHook,
-  // eslint-disable-next-line @typescript-eslint/require-await
-): Promise<GraphQLFormattedError> => {
-  const status = err.originalError.status || httpStatus.INTERNAL_SERVER_ERROR
+const handleError = async ({
+  err,
+  payload,
+  req,
+}: {
+  err: GraphQLError
+  payload: Payload
+  req: PayloadRequest
+}): Promise<GraphQLFormattedError> => {
+  const status = (err.originalError as APIError).status || httpStatus.INTERNAL_SERVER_ERROR
   let errorMessage = err.message
   payload.logger.error(err.stack)
 
   // Internal server errors can contain anything, including potentially sensitive data.
   // Therefore, error details will be hidden from the response unless `config.debug` is `true`
-  if (!debug && status === httpStatus.INTERNAL_SERVER_ERROR) {
+  if (!payload.config.debug && status === httpStatus.INTERNAL_SERVER_ERROR) {
     errorMessage = 'Something went wrong.'
   }
 
   let response: GraphQLFormattedError = {
     extensions: {
       name: err?.originalError?.name || undefined,
-      data: (err && err.originalError && err.originalError.data) || undefined,
-      stack: debug ? err.stack : undefined,
+      data: (err && err.originalError && (err.originalError as APIError).data) || undefined,
+      stack: payload.config.debug ? err.stack : undefined,
       statusCode: status,
     },
     locations: err.locations,
@@ -40,9 +42,20 @@ const handleError = async (
     path: err.path,
   }
 
-  if (afterErrorHook) {
-    ;({ response } = afterErrorHook(err, response, null, null) || { response })
-  }
+  await payload.config.hooks.afterError?.reduce(async (promise, hook) => {
+    await promise
+
+    const result = await hook({
+      context: req.context,
+      error: err,
+      graphqlResult: response,
+      req,
+    })
+
+    if (result) {
+      response = result.graphqlResult || response
+    }
+  }, Promise.resolve())
 
   return response
 }
@@ -95,9 +108,6 @@ export const POST =
 
     const { payload } = req
 
-    const afterErrorHook =
-      typeof payload.config.hooks.afterError === 'function' ? payload.config.hooks.afterError : null
-
     const headers = {}
     const apiResponse = await createHandler({
       context: { headers, req },
@@ -113,7 +123,7 @@ export const POST =
         if (response.errors) {
           const errors = (await Promise.all(
             result.errors.map((error) => {
-              return handleError(payload, error, payload.config.debug, afterErrorHook)
+              return handleError({ err: error, payload, req })
             }),
           )) as GraphQLError[]
           // errors type should be FormattedGraphQLError[] but onOperation has a return type of ExecutionResult instead of FormattedExecutionResult

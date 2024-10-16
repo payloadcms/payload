@@ -37,6 +37,7 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
             return done
           }
           reject = () => {
+            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
             rej()
             return done
           }
@@ -57,7 +58,7 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
       resolve,
     }
   } catch (err) {
-    this.payload.logger.error(`Error: cannot begin transaction: ${err.message}`, err)
+    this.payload.logger.error({ err, msg: `Error: cannot begin transaction: ${err.message}` })
     process.exit(1)
   }
 

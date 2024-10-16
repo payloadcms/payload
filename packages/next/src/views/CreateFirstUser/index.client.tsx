@@ -1,13 +1,14 @@
 'use client'
+import type { FormProps, UserWithToken } from '@payloadcms/ui'
 import type { ClientCollectionConfig, FormState, LoginWithUsernameOptions } from 'payload'
 
 import {
   ConfirmPasswordField,
   Form,
-  type FormProps,
   FormSubmit,
   PasswordField,
   RenderFields,
+  useAuth,
   useConfig,
   useTranslation,
 } from '@payloadcms/ui'
@@ -30,12 +31,13 @@ export const CreateFirstUserClient: React.FC<{
   } = useConfig()
 
   const { t } = useTranslation()
+  const { setUser } = useAuth()
 
   const collectionConfig = getEntityConfig({ collectionSlug: userSlug }) as ClientCollectionConfig
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
-    async ({ formState: prevFormState }) =>
-      getFormState({
+    async ({ formState: prevFormState }) => {
+      const { state } = await getFormState({
         apiRoute,
         body: {
           collectionSlug: userSlug,
@@ -44,9 +46,15 @@ export const CreateFirstUserClient: React.FC<{
           schemaPath: `_${userSlug}.auth`,
         },
         serverURL,
-      }),
+      })
+      return state
+    },
     [apiRoute, userSlug, serverURL],
   )
+
+  const handleFirstRegister = (data: UserWithToken) => {
+    setUser(data)
+  }
 
   return (
     <Form
@@ -54,6 +62,7 @@ export const CreateFirstUserClient: React.FC<{
       initialState={initialState}
       method="POST"
       onChange={[onChange]}
+      onSuccess={handleFirstRegister}
       redirect={admin}
       validationOperation="create"
     >

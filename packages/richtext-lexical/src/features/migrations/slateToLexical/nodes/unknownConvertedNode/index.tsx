@@ -62,7 +62,7 @@ export class UnknownConvertedNode extends DecoratorNode<JSX.Element> {
     return element
   }
 
-  decorate(): JSX.Element | null {
+  decorate(): JSX.Element {
     return <Component data={this.__data} />
   }
 

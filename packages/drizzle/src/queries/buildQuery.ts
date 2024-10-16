@@ -1,29 +1,29 @@
-import type { SQL } from 'drizzle-orm'
+import type { asc, desc, SQL } from 'drizzle-orm'
 import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
 import type { Field, Where } from 'payload'
 
-import { asc, desc } from 'drizzle-orm'
-
 import type { DrizzleAdapter, GenericColumn, GenericTable } from '../types.js'
 
-import { getTableColumnFromPath } from './getTableColumnFromPath.js'
+import { buildOrderBy } from './buildOrderBy.js'
 import { parseParams } from './parseParams.js'
 
 export type BuildQueryJoinAliases = {
   condition: SQL
   table: GenericTable | PgTableWithColumns<any>
+  type?: 'innerJoin' | 'leftJoin' | 'rightJoin'
 }[]
 
 type BuildQueryArgs = {
   adapter: DrizzleAdapter
   fields: Field[]
+  joins?: BuildQueryJoinAliases
   locale?: string
   sort?: string
   tableName: string
   where: Where
 }
 
-type Result = {
+export type BuildQueryResult = {
   joins: BuildQueryJoinAliases
   orderBy: {
     column: GenericColumn
@@ -32,72 +32,33 @@ type Result = {
   selectFields: Record<string, GenericColumn>
   where: SQL
 }
-const buildQuery = async function buildQuery({
+const buildQuery = function buildQuery({
   adapter,
   fields,
+  joins = [],
   locale,
   sort,
   tableName,
   where: incomingWhere,
-}: BuildQueryArgs): Promise<Result> {
+}: BuildQueryArgs): BuildQueryResult {
   const selectFields: Record<string, GenericColumn> = {
     id: adapter.tables[tableName].id,
   }
-  const joins: BuildQueryJoinAliases = []
 
-  const orderBy: Result['orderBy'] = {
-    column: null,
-    order: null,
-  }
-
-  if (sort) {
-    let sortPath
-
-    if (sort[0] === '-') {
-      sortPath = sort.substring(1)
-      orderBy.order = desc
-    } else {
-      sortPath = sort
-      orderBy.order = asc
-    }
-
-    try {
-      const { columnName: sortTableColumnName, table: sortTable } = getTableColumnFromPath({
-        adapter,
-        collectionPath: sortPath,
-        fields,
-        joins,
-        locale,
-        pathSegments: sortPath.replace(/__/g, '.').split('.'),
-        selectFields,
-        tableName,
-        value: sortPath,
-      })
-      orderBy.column = sortTable?.[sortTableColumnName]
-    } catch (err) {
-      // continue
-    }
-  }
-
-  if (!orderBy?.column) {
-    orderBy.order = desc
-    const createdAt = adapter.tables[tableName]?.createdAt
-
-    if (createdAt) {
-      orderBy.column = createdAt
-    } else {
-      orderBy.column = adapter.tables[tableName].id
-    }
-  }
-
-  if (orderBy.column) {
-    selectFields.sort = orderBy.column
-  }
+  const orderBy = buildOrderBy({
+    adapter,
+    fields,
+    joins,
+    locale,
+    selectFields,
+    sort,
+    tableName,
+  })
 
   let where: SQL
 
   if (incomingWhere && Object.keys(incomingWhere).length > 0) {
-    where = await parseParams({
+    where = parseParams({
       adapter,
       fields,
       joins,

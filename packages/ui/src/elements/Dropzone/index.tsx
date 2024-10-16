@@ -13,6 +13,7 @@ const baseClass = 'dropzone'
 export type Props = {
   readonly children?: React.ReactNode
   readonly className?: string
+  readonly disabled?: boolean
   readonly dropzoneStyle?: 'default' | 'none'
   readonly multipleFiles?: boolean
   readonly onChange: (e: FileList) => void
@@ -21,6 +22,7 @@ export type Props = {
 export function Dropzone({
   children,
   className,
+  disabled = false,
   dropzoneStyle = 'default',
   multipleFiles,
   onChange,
@@ -84,7 +86,7 @@ export function Dropzone({
   React.useEffect(() => {
     const div = dropRef.current
 
-    if (div) {
+    if (div && !disabled) {
       div.addEventListener('dragenter', handleDragEnter)
       div.addEventListener('dragleave', handleDragLeave)
       div.addEventListener('dragover', handleDragOver)
@@ -101,7 +103,7 @@ export function Dropzone({
     }
 
     return () => null
-  }, [handleDragEnter, handleDragLeave, handleDrop, handlePaste])
+  }, [disabled, handleDragEnter, handleDragLeave, handleDrop, handlePaste])
 
   const classes = [
     baseClass,

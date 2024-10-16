@@ -1,5 +1,5 @@
 'use client'
-import type { RowFieldProps } from 'payload'
+import type { RowFieldClientComponent } from 'payload'
 
 import React from 'react'
 
@@ -14,7 +14,7 @@ export { RowProvider, useRow }
 
 const baseClass = 'row'
 
-const RowFieldComponent: React.FC<RowFieldProps> = (props) => {
+const RowFieldComponent: RowFieldClientComponent = (props) => {
   const {
     field: { admin: { className } = {}, fields },
     forceRender = false,

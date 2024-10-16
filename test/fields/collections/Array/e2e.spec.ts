@@ -112,6 +112,11 @@ describe('Array', () => {
     )
   })
 
+  test('should show singular label for array rows', async () => {
+    await page.goto(url.create)
+    await expect(page.locator('#field-items #items-row-0 .row-label')).toContainText('Item 01')
+  })
+
   describe('row manipulation', () => {
     test('should add, remove and duplicate rows', async () => {
       const assertText0 = 'array row 1'

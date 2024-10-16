@@ -1,7 +1,7 @@
 import type { GraphQLInputFieldConfig, GraphQLScalarType, GraphQLType } from 'graphql'
 import type {
   ArrayField,
-  BlockField,
+  BlocksField,
   CheckboxField,
   CodeField,
   CollapsibleField,
@@ -107,7 +107,7 @@ export function buildMutationInputType({
         [field.name]: { type },
       }
     },
-    blocks: (inputObjectTypeConfig: InputObjectTypeConfig, field: BlockField) => ({
+    blocks: (inputObjectTypeConfig: InputObjectTypeConfig, field: BlocksField) => ({
       ...inputObjectTypeConfig,
       [field.name]: { type: GraphQLJSON },
     }),

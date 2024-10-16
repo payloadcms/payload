@@ -104,7 +104,7 @@ export class RelationshipServerNode extends DecoratorBlockNode {
     return false
   }
 
-  decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
+  decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element | null {
     return null
   }
 

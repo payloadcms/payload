@@ -38,13 +38,15 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
       showHiddenFields: false,
     })) as User
 
+    if (user) {
+      user.collection = collection.config.slug
+    }
+
     if (req.user.collection !== collection.config.slug) {
       return {
         user: null,
       }
     }
-
-    delete user.collection
 
     // /////////////////////////////////////
     // me hook - Collection

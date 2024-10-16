@@ -90,9 +90,9 @@ const reduceFields = ({
   }
 
   return fields?.reduce((fieldsToUse, field) => {
-    // escape for a variety of reasons
+    // escape for a variety of reasons, include ui fields as they have `name`.
     if (
-      fieldAffectsData(field) &&
+      (fieldAffectsData(field) || field.type === 'ui') &&
       (field.admin.disableBulkEdit ||
         field.unique ||
         field.admin.hidden ||

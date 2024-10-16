@@ -31,7 +31,7 @@ export const RelationshipPlugin: PluginComponent<RelationshipFeatureProps> = ({ 
     config: { collections },
   } = useConfig()
 
-  let enabledRelations: string[] = null
+  let enabledRelations: null | string[] = null
 
   if (clientProps?.enabledCollections) {
     enabledRelations = clientProps?.enabledCollections
@@ -65,7 +65,7 @@ export const RelationshipPlugin: PluginComponent<RelationshipFeatureProps> = ({ 
             $isParagraphNode(focusNode) &&
             focusNode.getTextContentSize() === 0 &&
             focusNode
-              .getParent()
+              .getParentOrThrow()
               .getChildren()
               .filter((node) => $isParagraphNode(node)).length > 1
           ) {

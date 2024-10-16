@@ -120,7 +120,7 @@ export const Condition: React.FC<Props> = (props) => {
         type: 'client',
         Component: Select,
       }
-    : internalField.Filter || {
+    : internalField?.Filter || {
         type: 'client',
         Component: valueFields?.[internalField?.field?.type] || Text,
       }

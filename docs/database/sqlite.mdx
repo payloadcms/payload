@@ -35,7 +35,7 @@ export default buildConfig({
 ## Options
 
 | Option                | Description                                                                                                                                                                      |
-|-----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `client` \*           | [Client connection options](https://orm.drizzle.team/docs/get-started-sqlite#turso) that will be passed to `createClient` from `@libsql/client`.                                 |
 | `push`                | Disable Drizzle's [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push) in development mode. By default, `push` is enabled for development mode only. |
 | `migrationDir`        | Customize the directory that migrations are stored.                                                                                                                              |
@@ -44,8 +44,8 @@ export default buildConfig({
 | `localesSuffix`       | A string appended to the end of table names for storing localized fields. Default is '_locales'.                                                                                 |
 | `relationshipsSuffix` | A string appended to the end of table names for storing relationships. Default is '_rels'.                                                                                       |
 | `versionsSuffix`      | A string appended to the end of table names for storing versions. Defaults to '_v'.                                                                                              |
-
-
+| `beforeSchemaInit`    | Drizzle schema hook. Runs before the schema is built. [More Details](#beforeschemainit)                                                                                          |
+| `afterSchemaInit`     | Drizzle schema hook. Runs after the schema is built. [More Details](#afterschemainit)                                                                                            |
 
 ## Access to Drizzle
 
@@ -79,3 +79,134 @@ Alternatively, you can disable `push` and rely solely on migrations to keep your
 In SQLite, migrations are a fundamental aspect of working with Payload and you should become familiar with how they work.
 
 For more information about migrations, [click here](/docs/beta/database/migrations#when-to-run-migrations).
+
+## Drizzle schema hooks
+
+### beforeSchemaInit
+
+Runs before the schema is built. You can use this hook to extend your database structure with tables that won't be managed by Payload.
+
+```ts
+import { sqliteAdapter } from '@payloadcms/db-sqlite'
+import { integer, sqliteTable } from 'drizzle-orm/sqlite-core'
+
+sqliteAdapter({
+  beforeSchemaInit: [
+    ({ schema, adapter }) => {
+      return {
+        ...schema,
+        tables: {
+          ...schema.tables,
+          addedTable: sqliteTable('added_table', {
+            id: integer('id').primaryKey({ autoIncrement: true }),
+          }),
+        },
+      }
+    },
+  ],
+})
+```
+
+One use case is preserving your existing database structure when migrating to Payload. By default, Payload drops the current database schema, which may not be desirable in this scenario.
+To quickly generate the Drizzle schema from your database you can use [Drizzle Introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
+You should get the `schema.ts` file which may look like this:
+
+```ts
+import { sqliteTable, text, uniqueIndex, integer } from 'drizzle-orm/sqlite-core'
+
+export const users = sqliteTable('users', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  fullName: text('full_name'),
+  phone: text('phone', {length: 256}),
+})
+
+export const countries = sqliteTable(
+  'countries',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    name: text('name', { length: 256 }),
+  },
+  (countries) => {
+    return {
+      nameIndex: uniqueIndex('name_idx').on(countries.name),
+    }
+  },
+)
+
+```
+
+You can import them into your config and append to the schema with the `beforeSchemaInit` hook like this:
+
+```ts
+import { sqliteAdapter } from '@payloadcms/db-sqlite'
+import { users, countries } from '../drizzle/schema'
+
+sqliteAdapter({
+  beforeSchemaInit: [
+    ({ schema, adapter }) => {
+      return {
+        ...schema,
+        tables: {
+          ...schema.tables,
+          users,
+          countries
+        },
+      }
+    },
+  ],
+})
+```
+
+Make sure Payload doesn't overlap table names with its collections. For example, if you already have a collection with slug "users", you should either change the slug or `dbName` to change the table name for this collection. 
+
+
+### afterSchemaInit
+
+Runs after the Drizzle schema is built. You can use this hook to modify the schema with features that aren't supported by Payload, or if you want to add a column that you don't want to be in the Payload config.
+To extend a table, Payload exposes `extendTable` utillity to the args. You can refer to the [Drizzle documentation](https://orm.drizzle.team/docs/sql-schema-declaration).
+The following example adds the `extra_integer_column` column and a composite index on `country` and `city` columns.
+
+```ts
+import { sqliteAdapter } from '@payloadcms/db-sqlite'
+import { index, integer } from 'drizzle-orm/sqlite-core'
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  collections: [
+    {
+      slug: 'places',
+      fields: [
+        {
+          name: 'country',
+          type: 'text',
+        },
+        {
+          name: 'city',
+          type: 'text',
+        },
+      ],
+    },
+  ],
+  db: sqliteAdapter({
+    afterSchemaInit: [
+      ({ schema, extendTable, adapter }) => {
+        extendTable({
+          table: schema.tables.places,
+          columns: {
+            extraIntegerColumn: integer('extra_integer_column'),
+          },
+          extraConfig: (table) => ({
+            country_city_composite_index: index('country_city_composite_index').on(
+              table.country,
+              table.city,
+            ),
+          }),
+        })
+
+        return schema
+      },
+    ],
+  }),
+})
+
+```

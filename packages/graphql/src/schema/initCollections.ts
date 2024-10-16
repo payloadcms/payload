@@ -97,7 +97,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
     const whereInputFields = [...fields]
 
     if (!hasIDField) {
-      baseFields.id = { type: idType }
+      baseFields.id = { type: new GraphQLNonNull(idType) }
       whereInputFields.push({
         name: 'id',
         type: config.db.defaultIDType as 'text',
@@ -276,7 +276,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
     if (collectionConfig.versions) {
       const versionIDType = config.db.defaultIDType === 'text' ? GraphQLString : GraphQLInt
       const versionCollectionFields: Field[] = [
-        ...buildVersionCollectionFields(collectionConfig),
+        ...buildVersionCollectionFields(config, collectionConfig),
         {
           name: 'id',
           type: config.db.defaultIDType as 'text',

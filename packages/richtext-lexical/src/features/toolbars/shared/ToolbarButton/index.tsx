@@ -29,6 +29,9 @@ export const ToolbarButton = ({
   const updateStates = useCallback(() => {
     editor.getEditorState().read(() => {
       const selection = $getSelection()
+      if (!selection) {
+        return
+      }
       if (item.isActive) {
         const isActive = item.isActive({ editor, editorConfigContext, selection })
         if (active !== isActive) {
@@ -85,7 +88,7 @@ export const ToolbarButton = ({
 
           editor.focus(() => {
             // We need to wrap the onSelect in the callback, so the editor is properly focused before the onSelect is called.
-            item.onSelect({
+            item.onSelect?.({
               editor,
               isActive: active,
             })

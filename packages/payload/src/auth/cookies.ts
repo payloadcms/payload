@@ -1,4 +1,3 @@
-import type { Payload } from '../index.js'
 import type { SanitizedCollectionConfig } from './../collections/config/types.js'
 
 type CookieOptions = {
@@ -125,63 +124,63 @@ export const getCookieExpiration = ({ seconds = 7200 }: GetCookieExpirationArgs)
 
 type GeneratePayloadCookieArgs = {
   /* The auth collection config */
-  collectionConfig: SanitizedCollectionConfig
-  /* An instance of payload */
-  payload: Payload
+  collectionAuthConfig: SanitizedCollectionConfig['auth']
+  /* Prefix to scope the cookie */
+  cookiePrefix: string
   /* The returnAs value */
   returnCookieAsObject?: boolean
   /* The token to be stored in the cookie */
   token: string
 }
 export const generatePayloadCookie = <T extends GeneratePayloadCookieArgs>({
-  collectionConfig,
-  payload,
+  collectionAuthConfig,
+  cookiePrefix,
   returnCookieAsObject = false,
   token,
 }: T): T['returnCookieAsObject'] extends true ? CookieObject : string => {
   const sameSite =
-    typeof collectionConfig.auth.cookies.sameSite === 'string'
-      ? collectionConfig.auth.cookies.sameSite
-      : collectionConfig.auth.cookies.sameSite
+    typeof collectionAuthConfig.cookies.sameSite === 'string'
+      ? collectionAuthConfig.cookies.sameSite
+      : collectionAuthConfig.cookies.sameSite
         ? 'Strict'
         : undefined
 
   return generateCookie<T['returnCookieAsObject']>({
-    name: `${payload.config.cookiePrefix}-token`,
-    domain: collectionConfig.auth.cookies.domain ?? undefined,
-    expires: getCookieExpiration({ seconds: collectionConfig.auth.tokenExpiration }),
+    name: `${cookiePrefix}-token`,
+    domain: collectionAuthConfig.cookies.domain ?? undefined,
+    expires: getCookieExpiration({ seconds: collectionAuthConfig.tokenExpiration }),
     httpOnly: true,
     path: '/',
     returnCookieAsObject,
     sameSite,
-    secure: collectionConfig.auth.cookies.secure,
+    secure: collectionAuthConfig.cookies.secure,
     value: token,
   })
 }
 
 export const generateExpiredPayloadCookie = <T extends Omit<GeneratePayloadCookieArgs, 'token'>>({
-  collectionConfig,
-  payload,
+  collectionAuthConfig,
+  cookiePrefix,
   returnCookieAsObject = false,
 }: T): T['returnCookieAsObject'] extends true ? CookieObject : string => {
   const sameSite =
-    typeof collectionConfig.auth.cookies.sameSite === 'string'
-      ? collectionConfig.auth.cookies.sameSite
-      : collectionConfig.auth.cookies.sameSite
+    typeof collectionAuthConfig.cookies.sameSite === 'string'
+      ? collectionAuthConfig.cookies.sameSite
+      : collectionAuthConfig.cookies.sameSite
         ? 'Strict'
         : undefined
 
   const expires = new Date(Date.now() - 1000)
 
   return generateCookie<T['returnCookieAsObject']>({
-    name: `${payload.config.cookiePrefix}-token`,
-    domain: collectionConfig.auth.cookies.domain ?? undefined,
+    name: `${cookiePrefix}-token`,
+    domain: collectionAuthConfig.cookies.domain ?? undefined,
     expires,
     httpOnly: true,
     path: '/',
     returnCookieAsObject,
     sameSite,
-    secure: collectionConfig.auth.cookies.secure,
+    secure: collectionAuthConfig.cookies.secure,
   })
 }
 

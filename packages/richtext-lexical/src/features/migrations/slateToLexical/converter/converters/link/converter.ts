@@ -11,7 +11,7 @@ export const SlateLinkConverter: SlateNodeConverter = {
         canContainParagraphs: false,
         converters,
         parentNodeType: 'link',
-        slateNodes: slateNode.children,
+        slateNodes: slateNode.children!,
       }),
       direction: 'ltr',
       fields: {

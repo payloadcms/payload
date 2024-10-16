@@ -49,6 +49,7 @@ export class Main {
 
         // Package manager
         '--no-deps': Boolean,
+        '--use-bun': Boolean,
         '--use-npm': Boolean,
         '--use-pnpm': Boolean,
         '--use-yarn': Boolean,

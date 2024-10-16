@@ -5,11 +5,11 @@ inputs:
   node-version:
     description: 'The Node.js version to use'
     required: true
-    default: 18.20.2
+    default: 22.6.2
   pnpm-version:
     description: 'The pnpm version to use'
     required: true
-    default: 9.7.0
+    default: 9.7.1
 
 runs:
   using: composite

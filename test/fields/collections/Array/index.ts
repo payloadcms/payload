@@ -153,6 +153,23 @@ const ArrayFields: CollectionConfig = {
       ],
       type: 'array',
     },
+    {
+      name: 'nestedArrayLocalized',
+      type: 'array',
+      fields: [
+        {
+          type: 'array',
+          name: 'array',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+              localized: true,
+            },
+          ],
+        },
+      ],
+    },
   ],
   slug: arrayFieldsSlug,
   versions: true,

@@ -47,7 +47,7 @@ export const Autosave: React.FC<Props> = ({
   } = useConfig()
   const { docConfig, getVersions, versions } = useDocumentInfo()
   const { reportUpdate } = useDocumentEvents()
-  const { dispatchFields, setModified, setSubmitted } = useForm()
+  const { dispatchFields, setSubmitted } = useForm()
   const submitted = useFormSubmitted()
   const versionsConfig = docConfig?.versions
 
@@ -149,7 +149,7 @@ export const Autosave: React.FC<Props> = ({
                       entitySlug,
                       updatedAt: newDate.toISOString(),
                     })
-                    setModified(false)
+
                     void getVersions()
                   } else {
                     return res.json()
@@ -247,7 +247,6 @@ export const Autosave: React.FC<Props> = ({
     reportUpdate,
     serverURL,
     setSubmitted,
-    setModified,
     versionsConfig?.drafts,
     debouncedFields,
     submitted,

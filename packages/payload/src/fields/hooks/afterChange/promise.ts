@@ -132,7 +132,7 @@ export const promise = async ({
               req,
               schemaPath: fieldSchemaPath,
               siblingData: siblingData?.[field.name]?.[i] || {},
-              siblingDoc: ({ ...(row as JsonObject) } as JsonObject) || {},
+              siblingDoc: row ? { ...row } : {},
             }),
           )
         })
@@ -167,7 +167,7 @@ export const promise = async ({
                 req,
                 schemaPath: fieldSchemaPath,
                 siblingData: siblingData?.[field.name]?.[i] || {},
-                siblingDoc: ({ ...(row as JsonObject) } as JsonObject) || {},
+                siblingDoc: row ? { ...row } : {},
               }),
             )
           }

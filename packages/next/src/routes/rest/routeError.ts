@@ -1,14 +1,13 @@
-import type { Collection, PayloadRequest, SanitizedConfig } from 'payload'
+import type { Collection, ErrorResult, PayloadRequest, SanitizedConfig } from 'payload'
 
 import httpStatus from 'http-status'
 import { APIError, APIErrorName, ValidationErrorName } from 'payload'
 
 import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { mergeHeaders } from '../../utilities/mergeHeaders.js'
 
-export type ErrorResponse = { data?: any; errors: unknown[]; stack?: string }
-
-const formatErrors = (incoming: { [key: string]: unknown } | APIError): ErrorResponse => {
+const formatErrors = (incoming: { [key: string]: unknown } | APIError): ErrorResult => {
   if (incoming) {
     // Cannot use `instanceof` to check error type: https://github.com/microsoft/TypeScript/issues/13965
     // Instead, get the prototype of the incoming error and check its constructor name
@@ -73,14 +72,14 @@ export const routeError = async ({
   collection,
   config: configArg,
   err,
-  req,
+  req: incomingReq,
 }: {
   collection?: Collection
   config: Promise<SanitizedConfig> | SanitizedConfig
   err: APIError
-  req: Partial<PayloadRequest>
+  req: PayloadRequest | Request
 }) => {
-  let payload = req?.payload
+  let payload = 'payload' in incomingReq && incomingReq?.payload
 
   if (!payload) {
     try {
@@ -94,6 +93,8 @@ export const routeError = async ({
       )
     }
   }
+
+  const req = incomingReq as PayloadRequest
 
   req.payload = payload
   const headers = headersWithCors({
@@ -119,26 +120,44 @@ export const routeError = async ({
     response.stack = err.stack
   }
 
-  if (collection && typeof collection.config.hooks.afterError === 'function') {
-    ;({ response, status } = collection.config.hooks.afterError(
-      err,
-      response,
-      req?.context,
-      collection.config,
-    ) || { response, status })
+  if (collection) {
+    await collection.config.hooks.afterError?.reduce(async (promise, hook) => {
+      await promise
+
+      const result = await hook({
+        collection: collection.config,
+        context: req.context,
+        error: err,
+        req,
+        result: response,
+      })
+
+      if (result) {
+        response = (result.response as ErrorResult) || response
+        status = result.status || status
+      }
+    }, Promise.resolve())
   }
 
-  if (typeof config.hooks.afterError === 'function') {
-    ;({ response, status } = config.hooks.afterError(
-      err,
-      response,
-      req?.context,
-      collection?.config,
-    ) || {
-      response,
-      status,
+  await config.hooks.afterError?.reduce(async (promise, hook) => {
+    await promise
+
+    const result = await hook({
+      collection: collection?.config,
+      context: req.context,
+      error: err,
+      req,
+      result: response,
     })
-  }
 
-  return Response.json(response, { headers, status })
+    if (result) {
+      response = (result.response as ErrorResult) || response
+      status = result.status || status
+    }
+  }, Promise.resolve())
+
+  return Response.json(response, {
+    headers: req.responseHeaders ? mergeHeaders(req.responseHeaders, headers) : headers,
+    status,
+  })
 }

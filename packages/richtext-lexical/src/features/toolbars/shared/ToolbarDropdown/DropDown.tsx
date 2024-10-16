@@ -69,9 +69,9 @@ export function DropDownItem({
 
           editor.focus(() => {
             // We need to wrap the onSelect in the callback, so the editor is properly focused before the onSelect is called.
-            item.onSelect({
+            item.onSelect?.({
               editor,
-              isActive: active,
+              isActive: active!,
             })
           })
         }

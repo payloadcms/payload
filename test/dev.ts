@@ -9,6 +9,7 @@ import { loadEnv } from 'payload/node'
 
 import { getNextRootDir } from './helpers/getNextRootDir.js'
 import { runInit } from './runInit.js'
+import { child, safelyRunScriptFunction } from './safelyRunScript.js'
 import { createTestHooks } from './testHooks.js'
 
 const prod = process.argv.includes('--prod')
@@ -43,15 +44,30 @@ await beforeTest()
 
 const { rootDir, adminRoute } = getNextRootDir(testSuiteArg)
 
-await runInit(testSuiteArg, true)
+await safelyRunScriptFunction(runInit, 4000, testSuiteArg, true)
 
 // Open the admin if the -o flag is passed
 if (args.o) {
   await open(`http://localhost:3000${adminRoute}`)
 }
 
-// @ts-expect-error
-await nextDev({ port: process.env.PORT || 3000, dirname: rootDir }, 'default', rootDir)
+const port = process.env.PORT ? Number(process.env.PORT) : 3000
+
+await nextDev({ port }, 'default', rootDir)
 
 // fetch the admin url to force a render
-void fetch(`http://localhost:${process.env.PORT || 3000}${adminRoute}`)
+void fetch(`http://localhost:${port}${adminRoute}`)
+
+// This ensures that the next-server process is killed when this process is killed and doesn't linger around.
+process.on('SIGINT', () => {
+  if (child) {
+    child.kill('SIGINT')
+  }
+  process.exit(0)
+})
+process.on('SIGTERM', () => {
+  if (child) {
+    child.kill('SIGINT')
+  }
+  process.exit(0) // Exit the parent process
+})

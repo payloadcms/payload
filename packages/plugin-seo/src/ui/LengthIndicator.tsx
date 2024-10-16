@@ -27,7 +27,7 @@ export const LengthIndicator: React.FC<{
     const textLength = text?.length || 0
 
     if (textLength === 0) {
-      setLabel('Missing')
+      setLabel(t('plugin-seo:missing'))
       setLabelStyle({
         backgroundColor: 'red',
         color: 'white',

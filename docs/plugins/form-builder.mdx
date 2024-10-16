@@ -136,11 +136,27 @@ const beforeEmail: BeforeEmail<FormSubmission> = (emailsToSend, beforeChangePara
 }
 ```
 
+### `defaultToEmail`
+
+Provide a fallback for the email address to send form submissions to. If the email in form configuration does not have a to email set, this email address will be used. If this is not provided then it falls back to the `defaultFromAddress` in your [email configuration](https://payloadcms.com/docs/beta/email/overview).
+
+```ts
+// payload.config.ts
+formBuilder({
+  // ...
+  defaultToEmail: 'test@example.com',
+})
+```
+
 ### `formOverrides`
 
 Override anything on the `forms` collection by sending a [Payload Collection Config](https://payloadcms.com/docs/configuration/collections) to the `formOverrides` property.
 
 Note that the `fields` property is a function that receives the default fields and returns an array of fields. This is because the `fields` property is a special case that is merged with the default fields, rather than replacing them. This allows you to map over default fields and modify them as needed.
+
+<Banner type="warning">
+Good to know: The form collection is publicly available to read by default. The emails field is locked for authenticated users only. If you have any frontend users you should override the access permissions for both the collection and the emails field to make sure you don't leak out any private emails.
+</Banner>
 
 ```ts
 // payload.config.ts
@@ -149,7 +165,7 @@ formBuilder({
   formOverrides: {
     slug: 'contact-forms',
     access: {
-      read: () => true,
+      read: ({ req: { user } }) => !!user, // authenticated users only
       update: () => false,
     },
     fields: ({ defaultFields }) => {
@@ -174,7 +190,7 @@ Override anything on the `form-submissions` collection by sending a [Payload Col
   control](https://payloadcms.com/docs/access-control/collections) to restrict the `update` and
   `read` operations on the `form-submissions` collection. This is because _anyone_ should be able to
   create a form submission, even from a public-facing website, but _no one_ should be able to update
-  a submission one it has been created, or read a submission unless they have permission. You can
+  a submission once it has been created, or read a submission unless they have permission. You can
   override this behavior or any other property as needed.
 </Banner>
 
@@ -396,7 +412,19 @@ formBuilder({
 
 ## Email
 
-This plugin relies on the [email configuration](https://payloadcms.com/docs/email/overview) defined in your `payload.init()`. It will read from your config and attempt to send your emails using the credentials provided.
+This plugin relies on the [email configuration](https://payloadcms.com/docs/beta/email/overview) defined in your payload configuration. It will read from your config and attempt to send your emails using the credentials provided.
+
+### Email formatting
+
+The email contents supports rich text which will be serialised to HTML on the server before being sent. By default it reads the global configuration of your rich text editor.
+
+The email subject and body supports inserting dynamic fields from the form submission data using the `{{field_name}}` syntax. For example, if you have a field called `name` in your form, you can include this in the email body like so:
+
+```html
+Thank you for your submission, {{name}}!
+```
+
+You can also use `{{*}}` as a wildcard to output all the data in a key:value format and `{{*:table}}` to output all the data in a table format.
 
 ## TypeScript
 

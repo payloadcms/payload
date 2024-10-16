@@ -1,14 +1,10 @@
 'use client'
-import type {
-  CellComponentProps,
-  ClientField,
-  SanitizedCollectionConfig,
-  StaticLabel,
-} from 'payload'
+import type { ClientField, SanitizedCollectionConfig, StaticLabel } from 'payload'
 
 import React from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
+import type { SortColumnProps } from '../SortColumn/index.js'
 import type { Column } from '../Table/index.js'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
@@ -19,16 +15,26 @@ import { SortColumn } from '../SortColumn/index.js'
 import { DefaultCell } from '../Table/DefaultCell/index.js'
 
 type Args = {
-  cellProps: Partial<CellComponentProps>[]
+  beforeRows?: Column[]
   columnPreferences: ColumnPreferences
   columns?: ColumnPreferences
   enableRowSelections: boolean
+  enableRowTypes?: boolean
   fields: ClientField[]
+  sortColumnProps?: Partial<SortColumnProps>
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }
 
 export const buildColumnState = (args: Args): Column[] => {
-  const { cellProps, columnPreferences, columns, enableRowSelections, fields, useAsTitle } = args
+  const {
+    beforeRows,
+    columnPreferences,
+    columns,
+    enableRowSelections,
+    fields,
+    sortColumnProps,
+    useAsTitle,
+  } = args
 
   let sortedFieldMap = flattenFieldMap(fields)
 
@@ -101,14 +107,7 @@ export const buildColumnState = (args: Args): Column[] => {
         ? field.admin.components.Label
         : undefined
 
-    const Label = (
-      <FieldLabel
-        field={field}
-        Label={CustomLabelToRender}
-        label={'label' in field ? (field.label as StaticLabel) : undefined}
-        unstyled
-      />
-    )
+    const Label = <FieldLabel field={field} Label={CustomLabelToRender} unstyled />
 
     const fieldAffectsDataSubFields =
       field &&
@@ -121,6 +120,7 @@ export const buildColumnState = (args: Args): Column[] => {
         Label={Label}
         label={'label' in field ? (field.label as StaticLabel) : undefined}
         name={'name' in field ? field.name : undefined}
+        {...(sortColumnProps || {})}
       />
     )
 
@@ -131,19 +131,21 @@ export const buildColumnState = (args: Args): Column[] => {
         cellProps: {
           field: {
             ...(field || ({} as ClientField)),
-            ...(cellProps?.[index]?.field || ({} as ClientField)),
+            admin: {
+              ...(field.admin || {}),
+              components: {
+                ...(field.admin?.components || {}),
+                Cell: field.admin?.components?.Cell || {
+                  type: 'client',
+                  Component: DefaultCell,
+                  RenderedComponent: null,
+                },
+                Label,
+              },
+            },
           } as ClientField,
-          ...cellProps?.[index],
         },
-        components: {
-          Cell: field.admin?.components?.Cell || {
-            type: 'client',
-            Component: DefaultCell,
-            RenderedComponent: null,
-          },
-          Heading,
-        },
-        Label,
+        Heading,
       }
 
       acc.push(column)
@@ -156,16 +158,26 @@ export const buildColumnState = (args: Args): Column[] => {
     sorted.unshift({
       accessor: '_select',
       active: true,
-      components: {
-        Cell: {
-          type: 'client',
-          Component: null,
-          RenderedComponent: <SelectRow />,
-        },
-        Heading: <SelectAll />,
+      cellProps: {
+        field: {
+          admin: {
+            components: {
+              Cell: {
+                type: 'client',
+                Component: null,
+                RenderedComponent: <SelectRow />,
+              },
+              Label: null,
+            },
+          },
+        } as ClientField,
       },
-      Label: null,
+      Heading: <SelectAll />,
     })
+  }
+
+  if (beforeRows) {
+    sorted.unshift(...beforeRows)
   }
 
   return sorted

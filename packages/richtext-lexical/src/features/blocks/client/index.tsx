@@ -1,6 +1,6 @@
 'use client'
 
-import type { BlockFieldClient } from 'payload'
+import type { BlocksFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 
@@ -19,7 +19,7 @@ export type BlocksFeatureClientProps = {
   clientBlockSlugs: string[]
   clientInlineBlockSlugs: string[]
 }
-
+// @ts-expect-error - TODO: fix this
 export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>(({ props }) => ({
   nodes: [BlockNode, InlineBlockNode],
   plugins: [
@@ -39,22 +39,25 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                 key: 'block-' + blockSlug,
                 keywords: ['block', 'blocks', blockSlug],
                 label: ({ i18n, richTextComponentMap }) => {
+                  if (!richTextComponentMap) {
+                    return blockSlug
+                  }
+
                   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
-                  const blocksField: BlockFieldClient = richTextComponentMap.get(
+                  const blocksField: BlocksFieldClient = richTextComponentMap.get(
                     componentMapRenderedBlockPath,
-                  )[0]
+                  )?.[0]
 
                   const clientBlock = blocksField.blocks.find((_block) => _block.slug === blockSlug)
 
-                  const blockDisplayName = clientBlock.labels.singular
+                  const blockDisplayName = clientBlock?.labels?.singular
                     ? getTranslation(clientBlock.labels.singular, i18n)
-                    : clientBlock.slug
+                    : clientBlock?.slug
 
                   return blockDisplayName
                 },
                 onSelect: ({ editor }) => {
                   editor.dispatchCommand(INSERT_BLOCK_COMMAND, {
-                    id: null,
                     blockName: '',
                     blockType: blockSlug,
                   })
@@ -75,26 +78,29 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                 key: 'inlineBlocks-' + inlineBlockSlug,
                 keywords: ['inlineBlock', 'inline block', inlineBlockSlug],
                 label: ({ i18n, richTextComponentMap }) => {
+                  if (!richTextComponentMap) {
+                    return inlineBlockSlug
+                  }
+
                   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
 
-                  const blocksField: BlockFieldClient = richTextComponentMap.get(
+                  const blocksField: BlocksFieldClient = richTextComponentMap.get(
                     componentMapRenderedBlockPath,
-                  )[0]
+                  )?.[0]
 
                   const clientBlock = blocksField.blocks.find(
                     (_block) => _block.slug === inlineBlockSlug,
                   )
 
-                  const blockDisplayName = clientBlock.labels.singular
+                  const blockDisplayName = clientBlock?.labels?.singular
                     ? getTranslation(clientBlock.labels.singular, i18n)
-                    : clientBlock.slug
+                    : clientBlock?.slug
 
                   return blockDisplayName
                 },
                 onSelect: ({ editor }) => {
                   editor.dispatchCommand(OPEN_INLINE_BLOCK_DRAWER_COMMAND, {
                     fields: {
-                      id: null,
                       blockName: '',
                       blockType: inlineBlockSlug,
                     },
@@ -122,22 +128,24 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                 isActive: undefined, // At this point, we would be inside a sub-richtext-editor. And at this point this will be run against the focused sub-editor, not the parent editor which has the actual block. Thus, no point in running this
                 key: 'block-' + blockSlug,
                 label: ({ i18n, richTextComponentMap }) => {
+                  if (!richTextComponentMap) {
+                    return blockSlug
+                  }
                   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
-                  const blocksField: BlockFieldClient = richTextComponentMap.get(
+                  const blocksField: BlocksFieldClient = richTextComponentMap.get(
                     componentMapRenderedBlockPath,
-                  )[0]
+                  )?.[0]
 
                   const clientBlock = blocksField.blocks.find((_block) => _block.slug === blockSlug)
 
-                  const blockDisplayName = clientBlock.labels.singular
+                  const blockDisplayName = clientBlock?.labels?.singular
                     ? getTranslation(clientBlock.labels.singular, i18n)
-                    : clientBlock.slug
+                    : clientBlock?.slug
 
                   return blockDisplayName
                 },
                 onSelect: ({ editor }) => {
                   editor.dispatchCommand(INSERT_BLOCK_COMMAND, {
-                    id: null,
                     blockName: '',
                     blockType: blockSlug,
                   })
@@ -159,18 +167,22 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                 isActive: undefined,
                 key: 'inlineBlock-' + inlineBlockSlug,
                 label: ({ i18n, richTextComponentMap }) => {
+                  if (!richTextComponentMap) {
+                    return inlineBlockSlug
+                  }
+
                   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
-                  const blocksField: BlockFieldClient = richTextComponentMap.get(
+                  const blocksField: BlocksFieldClient = richTextComponentMap.get(
                     componentMapRenderedBlockPath,
-                  )[0]
+                  )?.[0]
 
                   const clientBlock = blocksField.blocks.find(
                     (_block) => _block.slug === inlineBlockSlug,
                   )
 
-                  const blockDisplayName = clientBlock.labels.singular
+                  const blockDisplayName = clientBlock?.labels?.singular
                     ? getTranslation(clientBlock.labels.singular, i18n)
-                    : clientBlock.slug
+                    : clientBlock?.slug
 
                   return blockDisplayName
                 },

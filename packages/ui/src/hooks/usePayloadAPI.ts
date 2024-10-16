@@ -73,6 +73,7 @@ export const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
         }
 
         const json = await response.json()
+
         setData(json)
         setIsLoading(false)
       } catch (error) {

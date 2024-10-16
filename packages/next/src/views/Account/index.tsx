@@ -38,7 +38,11 @@ export const Account: React.FC<AdminViewProps> = async ({
   } = initPageResult
 
   const {
-    admin: { components: { views: { Account: CustomAccountComponent } = {} } = {}, user: userSlug },
+    admin: {
+      components: { views: { Account: CustomAccountComponent } = {} } = {},
+      theme,
+      user: userSlug,
+    },
     routes: { api },
     serverURL,
   } = config
@@ -85,13 +89,13 @@ export const Account: React.FC<AdminViewProps> = async ({
 
     return (
       <DocumentInfoProvider
-        AfterFields={<Settings i18n={i18n} languageOptions={languageOptions} />}
+        AfterFields={<Settings i18n={i18n} languageOptions={languageOptions} theme={theme} />}
         apiURL={`${serverURL}${api}/${userSlug}${user?.id ? `/${user.id}` : ''}`}
         collectionSlug={userSlug}
         docPermissions={docPermissions}
         hasPublishPermission={hasPublishPermission}
         hasSavePermission={hasSavePermission}
-        id={user?.id.toString()}
+        id={user?.id}
         initialData={data}
         initialState={formState}
         isEditing

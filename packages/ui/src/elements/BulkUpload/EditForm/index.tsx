@@ -114,7 +114,7 @@ export function EditForm({ submitted }: EditFormProps) {
   const onChange: NonNullable<FormProps['onChange']>[0] = useCallback(
     async ({ formState: prevFormState }) => {
       const docPreferences = await getDocPreferences()
-      const newFormState = await getFormState({
+      const { state: newFormState } = await getFormState({
         apiRoute,
         body: {
           collectionSlug,

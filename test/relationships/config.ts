@@ -290,6 +290,41 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'pages',
+      fields: [
+        {
+          type: 'array',
+          name: 'menu',
+          fields: [
+            {
+              name: 'label',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      slug: 'rels-to-pages',
+      fields: [
+        {
+          name: 'page',
+          type: 'relationship',
+          relationTo: 'pages',
+        },
+      ],
+    },
+    {
+      slug: 'rels-to-pages-and-custom-text-ids',
+      fields: [
+        {
+          name: 'rel',
+          type: 'relationship',
+          relationTo: ['pages', 'custom-id', 'custom-id-number'],
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({

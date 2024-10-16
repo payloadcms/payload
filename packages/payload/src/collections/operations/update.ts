@@ -25,6 +25,7 @@ import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
+import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -37,9 +38,12 @@ export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
   data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
   depth?: number
+  disableTransaction?: boolean
   disableVerificationEmail?: boolean
   draft?: boolean
+  limit?: number
   overrideAccess?: boolean
+  overrideLock?: boolean
   overwriteExistingFiles?: boolean
   req: PayloadRequest
   showHiddenFields?: boolean
@@ -52,7 +56,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
   let args = incomingArgs
 
   try {
-    const shouldCommit = await initTransaction(args.req)
+    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -76,7 +80,9 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
       collection,
       depth,
       draft: draftArg = false,
+      limit = 0,
       overrideAccess,
+      overrideLock,
       overwriteExistingFiles = false,
       req: {
         fallbackLocale,
@@ -127,12 +133,13 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
         collectionConfig: collection.config,
         overrideAccess,
         req,
-        versionFields: buildVersionCollectionFields(collection.config),
+        versionFields: buildVersionCollectionFields(payload.config, collection.config),
         where: versionsWhere,
       })
 
       const query = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
+        limit,
         locale,
         pagination: false,
         req,
@@ -143,7 +150,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
     } else {
       const query = await payload.db.find({
         collection: collectionConfig.slug,
-        limit: 0,
+        limit,
         locale,
         pagination: false,
         req,
@@ -177,6 +184,18 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
       }
 
       try {
+        // /////////////////////////////////////
+        // Handle potentially locked documents
+        // /////////////////////////////////////
+
+        await checkDocumentLockStatus({
+          id,
+          collectionSlug: collectionConfig.slug,
+          lockErrorMessage: `Document with ID ${id} is currently locked by another user and cannot be updated.`,
+          overrideLock,
+          req,
+        })
+
         const originalDoc = await afterRead({
           collection: collectionConfig,
           context: req.context,
@@ -314,10 +333,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
           result = await saveVersion({
             id,
             collection: collectionConfig,
-            docWithLocales: {
-              ...result,
-              createdAt: doc.createdAt,
-            },
+            docWithLocales: result,
             payload,
             req,
           })

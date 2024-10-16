@@ -4,7 +4,7 @@ import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { EntityPolicies, PathToQuery } from './types.js'
 
-import { fieldAffectsData } from '../../fields/config/types.js'
+import { fieldAffectsData, fieldIsVirtual } from '../../fields/config/types.js'
 import { getEntityPolicies } from '../../utilities/getEntityPolicies.js'
 import isolateObjectProperty from '../../utilities/isolateObjectProperty.js'
 import { getLocalizedPaths } from '../getLocalizedPaths.js'
@@ -78,6 +78,10 @@ export async function validateSearchParam({
       if (invalid) {
         errors.push({ path })
         return
+      }
+
+      if (fieldIsVirtual(field)) {
+        errors.push({ path })
       }
 
       if (!overrideAccess && fieldAffectsData(field)) {

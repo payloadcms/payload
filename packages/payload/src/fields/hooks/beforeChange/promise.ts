@@ -8,7 +8,6 @@ import { MissingEditorProp } from '../../../errors/index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
-import { beforeDuplicate } from './beforeDuplicate.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -18,7 +17,6 @@ type Args = {
   data: JsonObject
   doc: JsonObject
   docWithLocales: JsonObject
-  duplicate: boolean
   errors: { field: string; message: string }[]
   field: Field | TabAsField
   global: null | SanitizedGlobalConfig
@@ -55,7 +53,6 @@ export const promise = async ({
   data,
   doc,
   docWithLocales,
-  duplicate,
   errors,
   field,
   global,
@@ -133,18 +130,21 @@ export const promise = async ({
         }
       }
 
-      const validationResult = await field.validate(valueToValidate, {
-        ...field,
-        id,
-        collectionSlug: collection?.slug,
-        data: deepMergeWithSourceArrays(doc, data),
-        jsonError,
-        operation,
-        preferences: { fields: {} },
-        previousValue: siblingDoc[field.name],
-        req,
-        siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
-      } as ValidateOptions<any, any, { jsonError: object }, any>)
+      const validationResult = await field.validate(
+        valueToValidate as never,
+        {
+          ...field,
+          id,
+          collectionSlug: collection?.slug,
+          data: deepMergeWithSourceArrays(doc, data),
+          jsonError,
+          operation,
+          preferences: { fields: {} },
+          previousValue: siblingDoc[field.name],
+          req,
+          siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
+        } as any,
+      )
 
       if (typeof validationResult === 'string') {
         errors.push({
@@ -176,15 +176,10 @@ export const promise = async ({
         const localeData = await localization.localeCodes.reduce(
           async (localizedValuesPromise: Promise<JsonObject>, locale) => {
             const localizedValues = await localizedValuesPromise
-            let fieldValue =
+            const fieldValue =
               locale === req.locale
                 ? siblingData[field.name]
                 : siblingDocWithLocales?.[field.name]?.[locale]
-
-            if (duplicate && field.hooks?.beforeDuplicate?.length) {
-              beforeDuplicateArgs.value = fieldValue
-              fieldValue = await beforeDuplicate(beforeDuplicateArgs)
-            }
 
             // const result = await localizedValues
             // update locale value if it's not undefined
@@ -204,10 +199,6 @@ export const promise = async ({
         if (Object.keys(localeData).length > 0) {
           siblingData[field.name] = localeData
         }
-      })
-    } else if (duplicate && field.hooks?.beforeDuplicate?.length) {
-      mergeLocaleActions.push(async () => {
-        siblingData[field.name] = await beforeDuplicate(beforeDuplicateArgs)
       })
     }
   }
@@ -250,7 +241,6 @@ export const promise = async ({
         data,
         doc,
         docWithLocales,
-        duplicate,
         errors,
         fields: field.fields,
         global,
@@ -282,7 +272,6 @@ export const promise = async ({
               data,
               doc,
               docWithLocales,
-              duplicate,
               errors,
               fields: field.fields,
               global,
@@ -310,14 +299,13 @@ export const promise = async ({
 
     case 'blocks': {
       const rows = siblingData[field.name]
-
       if (Array.isArray(rows)) {
         const promises = []
         rows.forEach((row, i) => {
           const rowSiblingDoc = getExistingRowDoc(row as JsonObject, siblingDoc[field.name])
           const rowSiblingDocWithLocales = getExistingRowDoc(
             row as JsonObject,
-            siblingDocWithLocales[field.name],
+            siblingDocWithLocales ? siblingDocWithLocales[field.name] : {},
           )
 
           const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
@@ -332,7 +320,6 @@ export const promise = async ({
                 data,
                 doc,
                 docWithLocales,
-                duplicate,
                 errors,
                 fields: block.fields,
                 global,
@@ -365,7 +352,6 @@ export const promise = async ({
         data,
         doc,
         docWithLocales,
-        duplicate,
         errors,
         fields: field.fields,
         global,
@@ -411,7 +397,6 @@ export const promise = async ({
         data,
         doc,
         docWithLocales,
-        duplicate,
         errors,
         fields: field.fields,
         global,
@@ -437,7 +422,6 @@ export const promise = async ({
         data,
         doc,
         docWithLocales,
-        duplicate,
         errors,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         global,
@@ -474,7 +458,6 @@ export const promise = async ({
             context,
             data,
             docWithLocales,
-            duplicate,
             errors,
             field,
             global,

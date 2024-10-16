@@ -1,70 +1,72 @@
 @import '../../../scss/styles.scss';
 
-.view-version {
-  width: 100%;
-  padding-bottom: var(--spacing-view-bottom);
+@layer payload-default {
+  .view-version {
+    width: 100%;
+    padding-bottom: var(--spacing-view-bottom);
 
-  &__wrap {
-    padding-top: calc(var(--base) * 1.5);
-    display: flex;
-    flex-direction: column;
-    gap: var(--base);
-  }
-
-  &__header-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: calc(var(--base) / 4);
-  }
-
-  &__header {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-
-    h2 {
-      margin: 0;
-    }
-  }
-
-  &__created-at {
-    margin: 0;
-    color: var(--theme-elevation-500);
-  }
-
-  &__controls {
-    display: flex;
-    gap: var(--base);
-
-    > * {
-      flex-basis: 100%;
-    }
-  }
-
-  &__restore {
-    margin: 0 0 0 var(--base);
-  }
-
-  @include mid-break {
-    &__intro,
-    &__header {
-      display: block;
+    &__wrap {
+      padding-top: calc(var(--base) * 1.5);
+      display: flex;
+      flex-direction: column;
+      gap: var(--base);
     }
 
-    &__controls {
+    &__header-wrap {
+      display: flex;
       flex-direction: column;
       gap: calc(var(--base) / 4);
     }
 
-    &__restore {
-      margin: calc(var(--base) * 0.5) 0 0 0;
-    }
-  }
+    &__header {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
 
-  @include small-break {
-    &__wrap {
-      padding-top: calc(var(--base) / 2);
-      gap: calc(var(--base) / 2);
+      h2 {
+        margin: 0;
+      }
+    }
+
+    &__created-at {
+      margin: 0;
+      color: var(--theme-elevation-500);
+    }
+
+    &__controls {
+      display: flex;
+      gap: var(--base);
+
+      > * {
+        flex-basis: 100%;
+      }
+    }
+
+    &__restore {
+      margin: 0 0 0 var(--base);
+    }
+
+    @include mid-break {
+      &__intro,
+      &__header {
+        display: block;
+      }
+
+      &__controls {
+        flex-direction: column;
+        gap: calc(var(--base) / 4);
+      }
+
+      &__restore {
+        margin: calc(var(--base) * 0.5) 0 0 0;
+      }
+    }
+
+    @include small-break {
+      &__wrap {
+        padding-top: calc(var(--base) / 2);
+        gap: calc(var(--base) / 2);
+      }
     }
   }
 }

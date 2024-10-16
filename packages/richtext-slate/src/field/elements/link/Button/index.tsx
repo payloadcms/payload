@@ -90,7 +90,7 @@ export const LinkButton: React.FC = () => {
                 text: editor.selection ? Editor.string(editor, editor.selection) : '',
               }
 
-              const state = await getFormState({
+              const { state } = await getFormState({
                 apiRoute: config.routes.api,
                 body: {
                   data,

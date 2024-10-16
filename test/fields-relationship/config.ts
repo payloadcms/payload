@@ -6,6 +6,7 @@ import type { CollectionConfig, FilterOptionsProps } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { VersionedRelationshipFieldCollection } from './collections/VersionedRelationshipField/index.js'
 import {
   collection1Slug,
   collection2Slug,
@@ -21,7 +22,6 @@ import {
   slug,
   videoCollectionSlug,
 } from './collectionSlugs.js'
-import { VersionedRelationshipFieldCollection } from './collections/VersionedRelationshipField/index.js'
 
 export interface FieldsRelationship {
   createdAt: Date
@@ -220,9 +220,6 @@ export default buildConfigWithDefaults({
       slug: relationWithTitleSlug,
     },
     {
-      admin: {
-        useAsTitle: 'name',
-      },
       fields: [
         {
           fields: [

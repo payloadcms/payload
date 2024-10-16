@@ -11,7 +11,7 @@ import { LinkNode } from './LinkNode.js'
 
 export class AutoLinkNode extends LinkNode {
   static clone(node: AutoLinkNode): AutoLinkNode {
-    return new AutoLinkNode({ id: undefined, fields: node.__fields, key: node.__key })
+    return new AutoLinkNode({ id: '', fields: node.__fields, key: node.__key })
   }
 
   static getType(): string {
@@ -67,7 +67,7 @@ export class AutoLinkNode extends LinkNode {
 }
 
 export function $createAutoLinkNode({ fields }: { fields: LinkFields }): AutoLinkNode {
-  return $applyNodeReplacement(new AutoLinkNode({ id: undefined, fields }))
+  return $applyNodeReplacement(new AutoLinkNode({ id: '', fields }))
 }
 export function $isAutoLinkNode(node: LexicalNode | null | undefined): node is AutoLinkNode {
   return node instanceof AutoLinkNode

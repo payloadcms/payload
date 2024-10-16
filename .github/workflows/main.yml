@@ -310,6 +310,7 @@ jobs:
           - fields__collections__Upload
           - live-preview
           - localization
+          - locked-documents
           - i18n
           - plugin-cloud-storage
           - plugin-form-builder

@@ -1,29 +1,44 @@
 @import '../../scss/styles.scss';
 
-.delete-document {
-  @include blur-bg;
-  display: flex;
-  align-items: center;
-  height: 100%;
-  justify-content: center;
-  padding: base(2);
-
-  &__template {
-    z-index: 1;
-    position: relative;
-  }
-
-  &__toggle {
-    @extend %btn-reset;
-  }
-
-  .btn {
-    margin: 0;
-  }
-
-  &__actions {
+@layer payload-default {
+  .delete-document {
+    @include blur-bg;
     display: flex;
-    flex-wrap: wrap;
-    gap: $baseline;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+
+    &__toggle {
+      @extend %btn-reset;
+    }
+
+    &__wrapper {
+      z-index: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: base(0.8);
+      padding: base(2);
+      max-width: base(36);
+    }
+
+    &__content {
+      display: flex;
+      flex-direction: column;
+      gap: base(0.4);
+
+      > * {
+        margin: 0;
+      }
+    }
+
+    &__controls {
+      display: flex;
+      gap: base(0.4);
+
+      .btn {
+        margin: 0;
+      }
+    }
   }
 }

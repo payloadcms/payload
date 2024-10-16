@@ -1,0 +1,43 @@
+{
+  "name": "payload-example-custom-fields",
+  "version": "1.0.0",
+  "description": "An example of custom fields in Payload.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "_dev": "cross-env NODE_OPTIONS=--no-deprecation && pnpm generate:importmap && next dev",
+    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation && pnpm generate:importmap && pnpm seed && next dev --turbo",
+    "generate:importmap": "payload generate:importmap",
+    "generate:schema": "payload-graphql generate:schema",
+    "generate:types": "payload generate:types",
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "seed": "npm run payload migrate:fresh",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
+  },
+  "dependencies": {
+    "@payloadcms/db-mongodb": "3.0.0-beta.106",
+    "@payloadcms/next": "3.0.0-beta.106",
+    "@payloadcms/richtext-lexical": "3.0.0-beta.106",
+    "@payloadcms/ui": "3.0.0-beta.106",
+    "cross-env": "^7.0.3",
+    "dotenv": "^8.2.0",
+    "graphql": "^16.9.0",
+    "next": "15.0.0-canary.160",
+    "payload": "3.0.0-beta.106",
+    "react": "19.0.0-rc-5dcb0097-20240918",
+    "react-dom": "19.0.0-rc-5dcb0097-20240918"
+  },
+  "devDependencies": {
+    "@payloadcms/graphql": "3.0.0-beta.106",
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "15.0.0-canary.146",
+    "tsx": "^4.7.1",
+    "typescript": "5.5.2"
+  },
+  "engines": {
+    "node": "^18.20.2 || >=20.9.0"
+  }
+}

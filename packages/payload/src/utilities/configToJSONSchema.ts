@@ -299,6 +299,30 @@ export function fieldsToJSONSchema(
             break
           }
 
+          case 'join': {
+            fieldSchema = {
+              type: withNullableJSONSchemaType('object', false),
+              additionalProperties: false,
+              properties: {
+                docs: {
+                  type: withNullableJSONSchemaType('array', false),
+                  items: {
+                    oneOf: [
+                      {
+                        type: collectionIDFieldTypes[field.collection],
+                      },
+                      {
+                        $ref: `#/definitions/${field.collection}`,
+                      },
+                    ],
+                  },
+                },
+                hasNextPage: { type: withNullableJSONSchemaType('boolean', false) },
+              },
+            }
+            break
+          }
+
           case 'upload':
           case 'relationship': {
             if (Array.isArray(field.relationTo)) {

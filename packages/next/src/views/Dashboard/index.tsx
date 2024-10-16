@@ -17,7 +17,11 @@ export { generateDashboardMetadata } from './meta.js'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult, params, searchParams }) => {
+export const Dashboard: React.FC<AdminViewProps> = async ({
+  initPageResult,
+  params,
+  searchParams,
+}) => {
   const {
     locale,
     permissions,
@@ -42,6 +46,29 @@ export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult, params, se
     (global) =>
       permissions?.globals?.[global.slug]?.read?.permission &&
       visibleEntities.globals.includes(global.slug),
+  )
+
+  const globalSlugs = config.globals.map((global) => global.slug)
+
+  // Filter the slugs based on permissions and visibility
+  const filteredGlobalSlugs = globalSlugs.filter(
+    (slug) =>
+      permissions?.globals?.[slug]?.read?.permission && visibleEntities.globals.includes(slug),
+  )
+
+  const globalData = await Promise.all(
+    filteredGlobalSlugs.map(async (slug) => {
+      const data = await payload.findGlobal({
+        slug,
+        depth: 0,
+        includeLockStatus: true,
+      })
+
+      return {
+        slug,
+        data,
+      }
+    }),
   )
 
   const navGroups = groupNavItems(
@@ -70,6 +97,7 @@ export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult, params, se
   const createMappedComponent = getCreateMappedComponent({
     importMap: payload.importMap,
     serverProps: {
+      globalData,
       i18n,
       Link,
       locale,

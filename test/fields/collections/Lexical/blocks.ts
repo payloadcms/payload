@@ -281,3 +281,13 @@ export const TabBlock: Block = {
     },
   ],
 }
+
+export const CodeBlock: Block = {
+  fields: [
+    {
+      name: 'code',
+      type: 'code',
+    },
+  ],
+  slug: 'code',
+}

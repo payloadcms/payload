@@ -48,8 +48,8 @@ import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { titleToDelete } from './shared.js'
 import {
-  autoSaveGlobalSlug,
   autosaveCollectionSlug,
+  autoSaveGlobalSlug,
   customIDSlug,
   disablePublishGlobalSlug,
   disablePublishSlug,
@@ -57,6 +57,8 @@ import {
   draftGlobalSlug,
   draftWithMaxCollectionSlug,
   draftWithMaxGlobalSlug,
+  localizedCollectionSlug,
+  localizedGlobalSlug,
   postCollectionSlug,
 } from './slugs.js'
 
@@ -66,6 +68,8 @@ const dirname = path.dirname(filename)
 const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
+let global: AdminUrlUtil
+let id: string
 
 const waitForAutoSaveToComplete = async (page: Page) => {
   await expect(async () => {
@@ -97,6 +101,8 @@ describe('versions', () => {
   let disablePublishURL: AdminUrlUtil
   let customIDURL: AdminUrlUtil
   let postURL: AdminUrlUtil
+  let global: AdminUrlUtil
+  let id: string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -282,7 +288,7 @@ describe('versions', () => {
         hasText: 'Versions',
       })
       await versionsTab.waitFor({ state: 'visible' })
-      const versionsPill = versionsTab.locator('.doc-tab__count--has-count')
+      const versionsPill = versionsTab.locator('.doc-tab__count')
       await versionsPill.waitFor({ state: 'visible' })
       const versionCount = versionsTab.locator('.doc-tab__count').first()
       await expect(versionCount).toHaveText('11')
@@ -320,7 +326,6 @@ describe('versions', () => {
       await saveDocAndAssert(page, '#action-save-draft')
       const savedDocURL = page.url()
       await page.goto(`${savedDocURL}/versions`)
-      await page.waitForURL(`${savedDocURL}/versions`)
       const row2 = page.locator('tbody .row-2')
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
@@ -610,6 +615,102 @@ describe('versions', () => {
       await versionsTabUpdated.waitFor({ state: 'visible' })
 
       expect(versionsTabUpdated).toBeTruthy()
+    })
+  })
+  describe('Collections - publish specific locale', () => {
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, localizedCollectionSlug)
+      global = new AdminUrlUtil(serverURL, localizedGlobalSlug)
+    })
+    test('should show publish individual locale dropdown', async () => {
+      await page.goto(url.create)
+      const publishOptions = page.locator('.doc-controls__controls .popup')
+
+      await expect(publishOptions).toBeVisible()
+    })
+
+    test('should show option to publish current locale', async () => {
+      await page.goto(url.create)
+      const publishOptions = page.locator('.doc-controls__controls .popup')
+      await publishOptions.click()
+
+      const publishSpecificLocale = page.locator('.doc-controls__controls .popup__content')
+
+      await expect(publishSpecificLocale).toContainText('English')
+    })
+
+    test('should publish specific locale', async () => {
+      await page.goto(url.create)
+      await changeLocale(page, 'es')
+      const textField = page.locator('#field-text')
+      const status = page.locator('.status__value')
+
+      await textField.fill('spanish published')
+      await saveDocAndAssert(page)
+      await expect(status).toContainText('Published')
+
+      await textField.fill('spanish draft')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await expect(status).toContainText('Changed')
+
+      await changeLocale(page, 'en')
+      await textField.fill('english published')
+      const publishOptions = page.locator('.doc-controls__controls .popup')
+      await publishOptions.click()
+
+      const publishSpecificLocale = page.locator('.popup-button-list button').first()
+      await expect(publishSpecificLocale).toContainText('English')
+      await publishSpecificLocale.click()
+
+      await wait(500)
+
+      await expect(async () => {
+        await expect(
+          page.locator('.payload-toast-item:has-text("Updated successfully.")'),
+        ).toBeVisible()
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+
+      id = await page.locator('.id-label').getAttribute('title')
+
+      const data = await payload.find({
+        collection: localizedCollectionSlug,
+        locale: '*',
+        where: {
+          id: { equals: id },
+        },
+      })
+
+      const publishedDoc = data.docs[0]
+
+      expect(publishedDoc.text).toStrictEqual({
+        en: 'english published',
+        es: 'spanish published',
+      })
+    })
+  })
+
+  describe('Globals - publish individual locale', () => {
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, localizedGlobalSlug)
+    })
+
+    test('should show publish individual locale dropdown', async () => {
+      await page.goto(url.global(localizedGlobalSlug))
+      const publishOptions = page.locator('.doc-controls__controls .popup')
+
+      await expect(publishOptions).toBeVisible()
+    })
+
+    test('should show option to publish current locale', async () => {
+      await page.goto(url.global(localizedGlobalSlug))
+      const publishOptions = page.locator('.doc-controls__controls .popup')
+      await publishOptions.click()
+
+      const publishSpecificLocale = page.locator('.doc-controls__controls .popup__content')
+
+      await expect(publishSpecificLocale).toContainText('English')
     })
   })
 })

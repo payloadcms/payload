@@ -6,6 +6,7 @@ import { Pagination } from '@/components/Pagination'
 import configPromise from '@payload-config'
 import { getPayloadHMR } from '@payloadcms/next/utilities'
 import React from 'react'
+import PageClient from './page.client'
 
 export const dynamic = 'force-static'
 export const revalidate = 600
@@ -17,10 +18,12 @@ export default async function Page() {
     collection: 'posts',
     depth: 1,
     limit: 12,
+    overrideAccess: false,
   })
 
   return (
     <div className="pt-24 pb-24">
+      <PageClient />
       <div className="container mb-16">
         <div className="prose dark:prose-invert max-w-none">
           <h1>Posts</h1>

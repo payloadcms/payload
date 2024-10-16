@@ -62,6 +62,6 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
       },
     })
   } catch (err: unknown) {
-    payload.logger.error({ error: err, msg: 'Error deleting dev migration' })
+    payload.logger.error({ err, msg: 'Error deleting dev migration' })
   }
 }

@@ -13,6 +13,9 @@ const TextFields: CollectionConfig = {
       name: 'text',
       type: 'text',
       required: true,
+      hooks: {
+        beforeDuplicate: [({ value }) => `${value} - duplicate`],
+      },
     },
     {
       name: 'localizedText',
@@ -133,6 +136,33 @@ const TextFields: CollectionConfig = {
         disableListColumn: false,
         disableListFilter: true,
       },
+    },
+    {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'texts',
+          type: 'text',
+          hasMany: true,
+        },
+      ],
+    },
+    {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'block',
+          fields: [
+            {
+              name: 'texts',
+              type: 'text',
+              hasMany: true,
+            },
+          ],
+        },
+      ],
     },
   ],
 }

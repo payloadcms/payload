@@ -29,6 +29,16 @@ export default buildConfigWithDefaults({
           required: true,
         },
         {
+          name: 'hasTransaction',
+          type: 'checkbox',
+          hooks: {
+            beforeChange: [({ req }) => !!req.transactionID],
+          },
+          admin: {
+            readOnly: true,
+          },
+        },
+        {
           name: 'throwAfterChange',
           type: 'checkbox',
           defaultValue: false,
@@ -274,6 +284,41 @@ export default buildConfigWithDefaults({
       versions: {
         drafts: true,
       },
+    },
+    {
+      slug: 'places',
+      fields: [
+        {
+          name: 'country',
+          type: 'text',
+        },
+        {
+          name: 'city',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'fields-persistance',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+          virtual: true,
+        },
+        {
+          name: 'textHooked',
+          type: 'text',
+          virtual: true,
+          hooks: { afterRead: [() => 'hooked'] },
+        },
+        {
+          name: 'array',
+          type: 'array',
+          virtual: true,
+          fields: [],
+        },
+      ],
     },
   ],
   globals: [

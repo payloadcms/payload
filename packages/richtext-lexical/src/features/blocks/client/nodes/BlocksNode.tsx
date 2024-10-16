@@ -4,7 +4,11 @@ import type { EditorConfig, LexicalEditor, LexicalNode } from 'lexical'
 import ObjectID from 'bson-objectid'
 import React, { type JSX } from 'react'
 
-import type { BlockFields, SerializedBlockNode } from '../../server/nodes/BlocksNode.js'
+import type {
+  BlockFields,
+  BlockFieldsOptionalID,
+  SerializedBlockNode,
+} from '../../server/nodes/BlocksNode.js'
 
 import { ServerBlockNode } from '../../server/nodes/BlocksNode.js'
 
@@ -48,7 +52,7 @@ export class BlockNode extends ServerBlockNode {
   }
 }
 
-export function $createBlockNode(fields: Exclude<BlockFields, 'id'>): BlockNode {
+export function $createBlockNode(fields: BlockFieldsOptionalID): BlockNode {
   return new BlockNode({
     fields: {
       ...fields,

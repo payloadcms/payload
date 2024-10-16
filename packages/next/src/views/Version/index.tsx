@@ -60,12 +60,14 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
         latestDraftVersion = await getLatestVersion({
           slug,
           type: 'collection',
+          parentID: id,
           payload,
           status: 'draft',
         })
         latestPublishedVersion = await getLatestVersion({
           slug,
           type: 'collection',
+          parentID: id,
           payload,
           status: 'published',
         })

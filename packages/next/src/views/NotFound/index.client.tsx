@@ -38,8 +38,10 @@ export const NotFoundClient: React.FC<{
         .join(' ')}
     >
       <Gutter className={`${baseClass}__wrap`}>
-        <h1>{t('general:nothingFound')}</h1>
-        <p>{t('general:sorryNotFound')}</p>
+        <div className={`${baseClass}__content`}>
+          <h1>{t('general:nothingFound')}</h1>
+          <p>{t('general:sorryNotFound')}</p>
+        </div>
         <Button
           className={`${baseClass}__button`}
           el="link"

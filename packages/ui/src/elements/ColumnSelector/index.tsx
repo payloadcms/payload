@@ -53,9 +53,20 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
           return null
         }
 
-        const { accessor, active, Label } = col
+        const {
+          accessor,
+          active,
+          cellProps: {
+            field: {
+              admin: {
+                // @ts-expect-error // TODO: `Label` does not exist on the UI field
+                components: { Label } = {},
+              } = {},
+            } = {},
+          },
+        } = col
 
-        if (col.accessor === '_select') {
+        if (col.accessor === '_select' || Label === null) {
           return null
         }
 

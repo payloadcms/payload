@@ -1,5 +1,5 @@
 import type { PaginatedDocs } from '../../../database/types.js'
-import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
+import type { CollectionSlug, JoinQuery, Payload, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequest, RequestContext, Where } from '../../../types/index.js'
 import type { DataFromCollectionSlug } from '../../config/types.js'
 
@@ -18,6 +18,8 @@ export type Options<TSlug extends CollectionSlug> = {
   disableErrors?: boolean
   draft?: boolean
   fallbackLocale?: TypedLocale
+  includeLockStatus?: boolean
+  joins?: JoinQuery
   limit?: number
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
@@ -40,6 +42,8 @@ export async function findLocal<TSlug extends CollectionSlug>(
     depth,
     disableErrors,
     draft = false,
+    includeLockStatus,
+    joins,
     limit,
     overrideAccess = true,
     page,
@@ -63,6 +67,8 @@ export async function findLocal<TSlug extends CollectionSlug>(
     depth,
     disableErrors,
     draft,
+    includeLockStatus,
+    joins,
     limit,
     overrideAccess,
     page,

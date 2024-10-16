@@ -25,6 +25,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
       i18n,
       payload,
       payload: { config },
+      t,
       user,
     },
   } = initPageResult
@@ -34,6 +35,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
   const { limit, page, sort } = searchParams
 
   const {
+    localization,
     routes: { api: apiRoute },
     serverURL,
   } = config
@@ -45,6 +47,26 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
 
   if (collectionSlug) {
     limitToUse = limitToUse || collectionConfig.admin.pagination.defaultLimit
+    const whereQuery: {
+      and: Array<{ parent?: { equals: number | string }; snapshot?: { not_equals: boolean } }>
+    } = {
+      and: [
+        {
+          parent: {
+            equals: id,
+          },
+        },
+      ],
+    }
+
+    if (localization && collectionConfig?.versions?.drafts) {
+      whereQuery.and.push({
+        snapshot: {
+          not_equals: true,
+        },
+      })
+    }
+
     try {
       versionsData = await payload.findVersions({
         collection: collectionSlug,
@@ -55,22 +77,20 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
         req,
         sort: sort as string,
         user,
-        where: {
-          parent: {
-            equals: id,
-          },
-        },
+        where: whereQuery,
       })
       if (collectionConfig?.versions?.drafts) {
         latestDraftVersion = await getLatestVersion({
           slug: collectionSlug,
           type: 'collection',
+          parentID: id,
           payload,
           status: 'draft',
         })
         latestPublishedVersion = await getLatestVersion({
           slug: collectionSlug,
           type: 'collection',
+          parentID: id,
           payload,
           status: 'published',
         })
@@ -82,6 +102,15 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
 
   if (globalSlug) {
     limitToUse = limitToUse || 10
+    const whereQuery =
+      localization && globalConfig?.versions?.drafts
+        ? {
+            snapshot: {
+              not_equals: true,
+            },
+          }
+        : {}
+
     try {
       versionsData = await payload.findGlobalVersions({
         slug: globalSlug,
@@ -92,6 +121,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
         req,
         sort: sort as string,
         user,
+        where: whereQuery,
       })
 
       if (globalConfig?.versions?.drafts) {
@@ -141,13 +171,19 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
     latestPublishedVersion: latestPublishedVersion?.id,
   })
 
+  const pluralLabel = collectionConfig?.labels?.plural
+    ? typeof collectionConfig.labels.plural === 'function'
+      ? collectionConfig.labels.plural({ t })
+      : collectionConfig.labels.plural
+    : globalConfig?.label
+
   return (
     <React.Fragment>
       <SetDocumentStepNav
         collectionSlug={collectionConfig?.slug}
         globalSlug={globalConfig?.slug}
         id={id}
-        pluralLabel={collectionConfig?.labels?.plural || globalConfig?.label}
+        pluralLabel={pluralLabel}
         useAsTitle={collectionConfig?.admin?.useAsTitle || globalConfig?.slug}
         view={i18n.t('version:versions')}
       />

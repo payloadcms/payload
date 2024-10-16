@@ -1,7 +1,5 @@
-import type React from 'react'
-
 import type {
-  ClientComponentProps,
+  BaseClientFeatureProps,
   ClientFeature,
   ClientFeatureProviderMap,
   FeatureProviderClient,
@@ -10,14 +8,11 @@ import type {
 } from '../features/typesClient.js'
 import type { ClientEditorConfig } from '../lexical/config/types.js'
 
-import { createClientComponent } from '../features/createClientComponent.js'
-
 export type CreateClientFeatureArgs<UnSanitizedClientProps, ClientProps> =
   | ((props: {
-      clientFunctions: Record<string, any>
       /** unSanitizedEditorConfig.features, but mapped */
       featureProviderMap: ClientFeatureProviderMap
-      props: ClientComponentProps<UnSanitizedClientProps>
+      props: BaseClientFeatureProps<UnSanitizedClientProps>
       // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
       resolvedFeatures: ResolvedClientFeatureMap
       // unSanitized EditorConfig,
@@ -30,7 +25,7 @@ export const createClientFeature: <
   ClientProps = UnSanitizedClientProps,
 >(
   args: CreateClientFeatureArgs<UnSanitizedClientProps, ClientProps>,
-) => React.FC<ClientComponentProps<ClientProps>> = (feature) => {
+) => FeatureProviderProviderClient<UnSanitizedClientProps, ClientProps> = (feature) => {
   const featureProviderProvideClient: FeatureProviderProviderClient<any, any> = (props) => {
     const featureProviderClient: Partial<FeatureProviderClient<any, any>> = {
       clientFeatureProps: props,
@@ -38,13 +33,11 @@ export const createClientFeature: <
 
     if (typeof feature === 'function') {
       featureProviderClient.feature = ({
-        clientFunctions,
         featureProviderMap,
         resolvedFeatures,
         unSanitizedEditorConfig,
       }) => {
         const toReturn = feature({
-          clientFunctions,
           featureProviderMap,
           props,
           resolvedFeatures,
@@ -72,5 +65,5 @@ export const createClientFeature: <
     return featureProviderClient as FeatureProviderClient<any, any>
   }
 
-  return createClientComponent(featureProviderProvideClient)
+  return featureProviderProvideClient
 }

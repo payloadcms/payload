@@ -1,62 +1,64 @@
 @import '../../scss/styles.scss';
 
-.tabs-field {
-  margin-top: base(2);
-  margin-left: calc(var(--gutter-h) * -1);
-  margin-right: calc(var(--gutter-h) * -1);
+@layer payload-default {
+  .tabs-field {
+    margin-top: base(2);
+    margin-left: calc(var(--gutter-h) * -1);
+    margin-right: calc(var(--gutter-h) * -1);
 
-  &__content-wrap {
-    padding-left: var(--gutter-h);
-    padding-right: var(--gutter-h);
-  }
-
-  &--within-collapsible {
-    margin: 0 calc(#{$baseline} * -1);
-
-    .tabs-field__content-wrap {
-      padding-left: $baseline;
-      padding-right: $baseline;
+    &__content-wrap {
+      padding-left: var(--gutter-h);
+      padding-right: var(--gutter-h);
     }
 
-    .tabs-field__tabs {
+    &--within-collapsible {
+      margin: 0 calc(#{$baseline} * -1);
+
+      .tabs-field__content-wrap {
+        padding-left: $baseline;
+        padding-right: $baseline;
+      }
+
+      .tabs-field__tabs {
+        &:before,
+        &:after {
+          content: ' ';
+          display: block;
+          width: $baseline;
+        }
+      }
+    }
+
+    &__tabs-wrap {
+      overflow-x: auto;
+      overflow-y: hidden;
+      margin-bottom: $baseline;
+    }
+
+    &__tabs {
+      border-bottom: 1px solid var(--theme-elevation-100);
+      display: inline-flex;
+      min-width: 100%;
+      vertical-align: bottom;
+
       &:before,
       &:after {
         content: ' ';
         display: block;
-        width: $baseline;
+        width: var(--gutter-h);
+        flex-shrink: 0;
       }
     }
-  }
 
-  &__tabs-wrap {
-    overflow-x: auto;
-    overflow-y: hidden;
-    margin-bottom: $baseline;
-  }
-
-  &__tabs {
-    border-bottom: 1px solid var(--theme-elevation-100);
-    display: inline-flex;
-    min-width: 100%;
-    vertical-align: bottom;
-
-    &:before,
-    &:after {
-      content: ' ';
-      display: block;
-      width: var(--gutter-h);
-      flex-shrink: 0;
+    &__description {
+      margin-bottom: calc(var(--base) / 2);
     }
-  }
 
-  &__description {
-    margin-bottom: calc(var(--base) / 2);
-  }
-
-  @include small-break {
-    &--within-collapsible {
-      margin-left: calc(var(--gutter-h) * -1);
-      margin-right: calc(var(--gutter-h) * -1);
+    @include small-break {
+      &--within-collapsible {
+        margin-left: calc(var(--gutter-h) * -1);
+        margin-right: calc(var(--gutter-h) * -1);
+      }
     }
   }
 }

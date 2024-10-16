@@ -1,5 +1,5 @@
 'use client'
-import type { OptionObject, RadioFieldProps } from 'payload'
+import type { OptionObject, RadioFieldClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -13,7 +13,7 @@ const baseClass = 'radio-input'
 export const Radio: React.FC<{
   id: string
   isSelected: boolean
-  onChange: RadioFieldProps['onChange']
+  onChange: RadioFieldClientProps['onChange']
   option: OptionObject
   path: string
   readOnly?: boolean

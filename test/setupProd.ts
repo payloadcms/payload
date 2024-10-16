@@ -25,7 +25,6 @@ export const tgzToPkgNameMap = {
   '@payloadcms/plugin-form-builder': 'payloadcms-plugin-form-builder-*',
   '@payloadcms/plugin-nested-docs': 'payloadcms-plugin-nested-docs-*',
   '@payloadcms/plugin-redirects': 'payloadcms-plugin-redirects-*',
-  '@payloadcms/plugin-relationship-object-ids': 'payloadcms-plugin-relationship-object-ids-*',
   '@payloadcms/plugin-search': 'payloadcms-plugin-search-*',
   '@payloadcms/plugin-sentry': 'payloadcms-plugin-sentry-*',
   '@payloadcms/plugin-seo': 'payloadcms-plugin-seo-*',

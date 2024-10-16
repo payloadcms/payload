@@ -92,7 +92,6 @@ export const getViewFromConfig = ({
         }
         templateClassName = 'dashboard'
         templateType = 'default'
-        initPageOptions.redirectUnauthenticatedUser = true
       }
       break
     }
@@ -132,14 +131,13 @@ export const getViewFromConfig = ({
         templateType = 'minimal'
 
         if (viewKey === 'account') {
-          initPageOptions.redirectUnauthenticatedUser = true
           templateType = 'default'
         }
       }
       break
     }
     case 2: {
-      if (segmentOne === 'reset') {
+      if (`/${segmentOne}` === config.admin.routes.reset) {
         // --> /reset/:token
         ViewToRender = {
           Component: ResetPassword,
@@ -150,7 +148,6 @@ export const getViewFromConfig = ({
 
       if (isCollection) {
         // --> /collections/:collectionSlug
-        initPageOptions.redirectUnauthenticatedUser = true
 
         ViewToRender = {
           Component: ListView,
@@ -160,7 +157,6 @@ export const getViewFromConfig = ({
         templateType = 'default'
       } else if (isGlobal) {
         // --> /globals/:globalSlug
-        initPageOptions.redirectUnauthenticatedUser = true
 
         ViewToRender = {
           Component: DocumentView,
@@ -187,7 +183,6 @@ export const getViewFromConfig = ({
         // --> /collections/:collectionSlug/:id/versions
         // --> /collections/:collectionSlug/:id/versions/:versionId
         // --> /collections/:collectionSlug/:id/api
-        initPageOptions.redirectUnauthenticatedUser = true
 
         ViewToRender = {
           Component: DocumentView,
@@ -201,7 +196,6 @@ export const getViewFromConfig = ({
         // --> /globals/:globalSlug/preview
         // --> /globals/:globalSlug/versions/:versionId
         // --> /globals/:globalSlug/api
-        initPageOptions.redirectUnauthenticatedUser = true
 
         ViewToRender = {
           Component: DocumentView,

@@ -1,41 +1,62 @@
 @import '../../scss/styles.scss';
 
-.status {
-  &__label {
-    color: var(--theme-elevation-500);
-  }
-
-  &__value {
-    font-weight: 600;
-  }
-
-  &__value-wrap {
-    white-space: nowrap;
-  }
-
-  &__action {
-    text-decoration: underline;
-  }
-
-  &__modal {
-    @include blur-bg;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    padding: base(2);
-
-    &__toggle {
-      @extend %btn-reset;
+@layer payload-default {
+  .status {
+    &__label {
+      color: var(--theme-elevation-500);
     }
 
-    .btn {
-      margin-right: $baseline;
+    &__value {
+      font-weight: 600;
     }
-  }
 
-  &__modal-template {
-    position: relative;
-    z-index: 1;
+    &__value-wrap {
+      white-space: nowrap;
+    }
+
+    &__action {
+      text-decoration: underline;
+    }
+
+    &__modal {
+      @include blur-bg;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+
+      &__toggle {
+        @extend %btn-reset;
+      }
+    }
+
+    &__wrapper {
+      z-index: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: base(0.8);
+      padding: base(2);
+      max-width: base(36);
+    }
+
+    &__content {
+      display: flex;
+      flex-direction: column;
+      gap: base(0.4);
+
+      > * {
+        margin: 0;
+      }
+    }
+
+    &__controls {
+      display: flex;
+      gap: base(0.4);
+
+      .btn {
+        margin: 0;
+      }
+    }
   }
 }

@@ -62,6 +62,15 @@ export function UploadComponentHasMany(props: Props) {
       >
         {fileDocs.map(({ relationTo, value }, index) => {
           const id = String(value.id)
+          const url: string = value.thumbnailURL || value.url
+          let src: string
+
+          try {
+            src = new URL(url, serverURL).toString()
+          } catch {
+            src = `${serverURL}${url}`
+          }
+
           return (
             <DraggableSortableItem disabled={!isSortable} id={id} key={id}>
               {(draggableSortableItemProps) => (
@@ -100,7 +109,7 @@ export function UploadComponentHasMany(props: Props) {
                       id={id}
                       mimeType={value?.mimeType as string}
                       onRemove={() => removeItem(index)}
-                      src={`${serverURL}${value.url}`}
+                      src={src}
                       withMeta={false}
                       x={value?.width as number}
                       y={value?.height as number}

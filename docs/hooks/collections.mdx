@@ -46,6 +46,7 @@ export const CollectionWithHooks: CollectionConfig = {
     afterRead: [(args) => {...}],
     afterDelete: [(args) => {...}],
     afterOperation: [(args) => {...}],
+    afterError: [(args) => {....}],
 
     // Auth-enabled Hooks
     beforeLogin: [(args) => {...}],
@@ -288,6 +289,30 @@ The following arguments are provided to the `afterOperation` hook:
 | **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
 | **`operation`**          | The name of the operation that this hook is running within. |
 | **`result`**          |  The result of the operation, before modifications. |
+
+### afterError
+
+The `afterError` Hook is triggered when an error occurs in the Payload application. This can be useful for logging errors to a third-party service, sending an email to the development team, logging the error to Sentry or DataDog, etc. The output can be used to transform the result object / status code.
+
+```ts
+import type { CollectionAfterErrorHook } from 'payload';
+
+const afterDeleteHook: CollectionAfterErrorHook = async ({
+  req,
+  id,
+  doc,
+}) => {...}
+```
+The following arguments are provided to the `afterError` Hook:
+
+| Argument            | Description                                                                                                                                                                                     |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`error`**         | The error that occurred.                                                                                                                                                                        |
+| **`context`**       | Custom context passed between Hooks. [More details](./context).                                                                                                                                 |
+| **`graphqlResult`** | The GraphQL result object, available if the hook is executed within a GraphQL context.                                                                                                          |
+| **`req`**           | The `PayloadRequest` object that extends [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request). Contains currently authenticated `user` and the Local API instance `payload`. |
+| **`collection`**    | The [Collection](../configuration/collections) in which this Hook is running against.                                                                                                           |
+| **`result`**        | The formatted error result object, available if the hook is executed from a REST context.                                                                                                       |
 
 ### beforeLogin
 

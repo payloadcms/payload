@@ -67,7 +67,7 @@ export const UploadPlugin: PluginComponentWithAnchor<UploadFeaturePropsClient> =
                 $isParagraphNode(focusNode) &&
                 focusNode.getTextContentSize() === 0 &&
                 focusNode
-                  .getParent()
+                  .getParentOrThrow()
                   .getChildren()
                   .filter((node) => $isParagraphNode(node)).length > 1
               ) {

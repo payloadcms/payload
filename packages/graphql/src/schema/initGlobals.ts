@@ -105,7 +105,7 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
       const idType = config.db.defaultIDType === 'number' ? GraphQLInt : GraphQLString
 
       const versionGlobalFields: Field[] = [
-        ...buildVersionGlobalFields(global),
+        ...buildVersionGlobalFields(config, global),
         {
           name: 'id',
           type: config.db.defaultIDType as 'text',

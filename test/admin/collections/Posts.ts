@@ -12,6 +12,9 @@ export const Posts: CollectionConfig = {
     description: 'This is a custom collection description.',
     group: 'One',
     listSearchableFields: ['id', 'title', 'description', 'number'],
+    components: {
+      beforeListTable: ['/components/ResetColumns/index.js#ResetDefaultColumnsButton'],
+    },
     meta: {
       description: 'This is a custom meta description for posts',
       openGraph: {

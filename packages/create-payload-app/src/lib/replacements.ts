@@ -57,7 +57,7 @@ export const dbReplacements: Record<DbType, DbAdapterReplacement> = {
   mongodb: mongodbReplacement,
   postgres: postgresReplacement,
   sqlite: sqliteReplacement,
-  vercelPostgres: vercelPostgresReplacement,
+  'vercel-postgres': vercelPostgresReplacement,
 }
 
 type StorageAdapterReplacement = {

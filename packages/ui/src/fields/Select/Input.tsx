@@ -36,7 +36,7 @@ export type SelectInputProps = {
   readonly isClearable?: boolean
   readonly isSortable?: boolean
   readonly Label?: MappedComponent
-  readonly label: StaticLabel
+  readonly label?: StaticLabel
   readonly labelProps?: Record<string, unknown>
   readonly name: string
   readonly onChange?: ReactSelectAdapterProps['onChange']
@@ -47,7 +47,7 @@ export type SelectInputProps = {
   readonly showError?: boolean
   readonly style?: React.CSSProperties
   readonly value?: string | string[]
-  readonly width?: string
+  readonly width?: React.CSSProperties['width']
 }
 
 export const SelectInput: React.FC<SelectInputProps> = (props) => {

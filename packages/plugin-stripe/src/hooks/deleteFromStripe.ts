@@ -18,7 +18,7 @@ export type CollectionAfterDeleteHookWithArgs = (
     collection?: CollectionConfig
     pluginConfig?: StripePluginConfig
   } & HookArgsWithCustomCollection,
-) => void
+) => Promise<void>
 
 export const deleteFromStripe: CollectionAfterDeleteHookWithArgs = async (args) => {
   const { collection, doc, pluginConfig, req } = args

@@ -1,20 +1,22 @@
 @import '../../../scss/styles.scss';
 
-.multi-value-label {
-  @extend %small;
-  display: flex;
-  align-items: center;
-  max-width: 150px;
-  color: currentColor;
-  padding: 0 base(0.4);
+@layer payload-default {
+  .multi-value-label {
+    @extend %small;
+    display: flex;
+    align-items: center;
+    max-width: 150px;
+    color: currentColor;
+    padding: 0 base(0.4);
 
-  &__text {
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-  }
+    &__text {
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
 
-  &:focus-visible {
-    outline: var(--accessibility-outline);
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+    }
   }
 }

@@ -118,18 +118,20 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         }
       }
 
-      validationResult = await validate(data?.[field.name], {
-        ...field,
-        id,
-        collectionSlug,
-        data: fullData,
-        operation,
-        req,
-        siblingData: data,
-        // @ts-expect-error-next-line
-        jsonError,
-        preferences,
-      })
+      validationResult = await validate(
+        data?.[field.name] as never,
+        {
+          ...field,
+          id,
+          collectionSlug,
+          data: fullData,
+          jsonError,
+          operation,
+          preferences,
+          req,
+          siblingData: data,
+        } as any,
+      )
     }
 
     const addErrorPathToParent = (errorPath: string) => {

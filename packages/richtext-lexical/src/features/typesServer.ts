@@ -26,7 +26,7 @@ import type {
 import type { ServerEditorConfig } from '../lexical/config/types.js'
 import type { AdapterProps } from '../types.js'
 import type { HTMLConverter } from './converters/html/converter/types.js'
-import type { ClientComponentProps } from './typesClient.js'
+import type { BaseClientFeatureProps } from './typesClient.js'
 
 export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
   context,
@@ -180,7 +180,6 @@ export type BeforeValidateNodeHookArgs<T extends SerializedLexicalNode> = {
 }
 
 export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
-  duplicate: boolean
   /**
    * Only available in `beforeChange` hooks.
    */
@@ -282,11 +281,12 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
 }
 
 export type ServerFeature<ServerProps, ClientFeatureProps> = {
-  ClientFeature?: PayloadComponent<never, ClientComponentProps<ClientFeatureProps>>
+  ClientFeature?: PayloadComponent<never, BaseClientFeatureProps<ClientFeatureProps>>
   /**
    * This determines what props will be available on the Client.
    */
   clientFeatureProps?: ClientFeatureProps
+  // @ts-expect-error - TODO: fix this
   componentImports?: Config['admin']['importMap']['generators'][0] | PayloadComponent[]
   componentMap?:
     | ((args: { i18n: I18nClient; payload: Payload; props: ServerProps; schemaPath: string }) => {

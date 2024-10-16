@@ -40,6 +40,7 @@ export function helpMessage(): void {
       --use-npm                     Use npm to install dependencies
       --use-yarn                    Use yarn to install dependencies
       --use-pnpm                    Use pnpm to install dependencies
+      --use-bun                     Use bun to install dependencies (experimental)
       --no-deps                     Do not install any dependencies
       -h                            Show help
 `)

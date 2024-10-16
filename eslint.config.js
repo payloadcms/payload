@@ -21,8 +21,7 @@ export const defaultESLintIgnores = [
   '**/temp/',
 ]
 
-/** @typedef {import('eslint').Linter.FlatConfig} */
-let FlatConfig
+/** @typedef {import('eslint').Linter.Config} Config */
 
 export const rootParserOptions = {
   sourceType: 'module',
@@ -33,7 +32,7 @@ export const rootParserOptions = {
   },
 }
 
-/** @type {FlatConfig[]} */
+/** @type {Config[]} */
 export const rootEslintConfig = [
   ...payloadEsLintConfig,
   {
@@ -54,6 +53,7 @@ export const rootEslintConfig = [
       'payload/no-relative-monorepo-imports': 'error',
       'payload/no-imports-from-exports-dir': 'error',
       'payload/no-imports-from-self': 'error',
+      'payload/proper-payload-logger-usage': 'error',
     },
   },
   {

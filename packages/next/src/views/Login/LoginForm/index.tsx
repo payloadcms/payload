@@ -6,9 +6,10 @@ import React from 'react'
 const baseClass = 'login__form'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
+import type { UserWithToken } from '@payloadcms/ui'
 import type { FormState } from 'payload'
 
-import { Form, FormSubmit, PasswordField, useConfig, useTranslation } from '@payloadcms/ui'
+import { Form, FormSubmit, PasswordField, useAuth, useConfig, useTranslation } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 
 import type { LoginFieldProps } from '../LoginField/index.js'
@@ -50,6 +51,7 @@ export const LoginForm: React.FC<{
   })
 
   const { t } = useTranslation()
+  const { setUser } = useAuth()
 
   const initialState: FormState = {
     password: {
@@ -73,6 +75,10 @@ export const LoginForm: React.FC<{
     }
   }
 
+  const handleLogin = (data: UserWithToken) => {
+    setUser(data)
+  }
+
   return (
     <Form
       action={`${apiRoute}/${userSlug}/login`}
@@ -80,6 +86,7 @@ export const LoginForm: React.FC<{
       disableSuccessStatus
       initialState={initialState}
       method="POST"
+      onSuccess={handleLogin}
       redirect={typeof searchParams?.redirect === 'string' ? searchParams.redirect : adminRoute}
       waitForAutocomplete
     >

@@ -25,6 +25,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
 ) {
   const Model = this.versions[global]
   const versionFields = buildVersionGlobalFields(
+    this.payload.config,
     this.payload.globals.config.find(({ slug }) => slug === global),
   )
   const options = {

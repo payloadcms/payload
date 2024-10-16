@@ -50,16 +50,17 @@ export const MyRelationshipField: Field = {
 | **`unique`**           | Enforce that each entry in the Collection has a unique value for this field.                                                                                                    |
 | **`validate`**         | Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More](/docs/fields/overview#validation)                                    |
 | **`index`**            | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often.     |
-| **`saveToJWT`**        | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/overview), include its data in the user JWT.                                   |
-| **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                                                                                                         |
-| **`access`**           | Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                                                                                                                                  |
+| **`saveToJWT`**        | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/overview), include its data in the user JWT.                                 |
+| **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                           |
+| **`access`**           | Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                              |
 | **`hidden`**           | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin Panel.                                |
 | **`defaultValue`**     | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                            |
 | **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                 |
 | **`required`**         | Require this field to have a value.                                                                                                                                             |
-| **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                        |
+| **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                                                                                   |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                       |
 | **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                     |
+| **`virtual`**          | Provide `true` to disable field in the database. See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)                |
 
 _\* An asterisk denotes that a property is required._
 
@@ -89,6 +90,7 @@ The Relationship Field inherits all of the default options from the base [Field 
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | **`isSortable`**               | Set to `true` if you'd like this field to be sortable within the Admin UI using drag and drop (only works when `hasMany` is set to `true`). |
 | **`allowCreate`**              | Set to `false` if you'd like to disable the ability to create new documents from within the relationship field.                             |
+| **`allowEdit`**              | Set to `false` if you'd like to disable the ability to edit documents from within the relationship field.                             |
 | **`sortOptions`**              | Define a default sorting order for the options within a Relationship field's dropdown. [More](#sortOptions)                                |
 
 ### Sort Options
@@ -195,6 +197,12 @@ You can learn more about writing queries [here](/docs/queries/overview).
   unless you call the default relationship field validation function imported from{' '}
   <strong>payload/shared</strong> in your validate function.
 </Banner>
+
+## Bi-directional relationships
+
+The `relationship` field on its own is used to define relationships for the document that contains the relationship field, and this can be considered as a "one-way" relationship. For example, if you have a Post that has a `category` relationship field on it, the related `category` itself will not surface any information about the posts that have the category set.
+
+However, the `relationship` field can be used in conjunction with the `Join` field to produce powerful bi-directional relationship authoring capabilities. If you're interested in bi-directional relationships, check out the [documentation for the Join field](./join).
 
 ## How the data is saved
 

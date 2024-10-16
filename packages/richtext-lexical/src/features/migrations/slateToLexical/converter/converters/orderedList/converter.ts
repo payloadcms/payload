@@ -11,7 +11,7 @@ export const SlateOrderedListConverter: SlateNodeConverter = {
         canContainParagraphs: false,
         converters,
         parentNodeType: 'list',
-        slateNodes: slateNode.children,
+        slateNodes: slateNode.children!,
       }),
       direction: 'ltr',
       format: '',

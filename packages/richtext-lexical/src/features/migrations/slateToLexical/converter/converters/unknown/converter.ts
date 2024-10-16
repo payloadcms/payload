@@ -11,7 +11,7 @@ export const SlateUnknownConverter: SlateNodeConverter = {
         canContainParagraphs: false,
         converters,
         parentNodeType: 'unknownConverted',
-        slateNodes: slateNode.children,
+        slateNodes: slateNode.children!,
       }),
       data: {
         nodeData: slateNode,

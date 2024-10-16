@@ -19,10 +19,11 @@ const toolbarGroups: ToolbarGroup[] = [
           return false
         }
         for (const node of selection.getNodes()) {
+          const parent = node.getParentOrThrow()
           // If at least one node is indented, this should be active
           if (
             ('__indent' in node && (node.__indent as number) > 0) ||
-            (node.getParent() && '__indent' in node.getParent() && node.getParent().__indent > 0)
+            ('__indent' in parent && parent.__indent > 0)
           ) {
             return true
           }

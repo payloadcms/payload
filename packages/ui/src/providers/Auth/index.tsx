@@ -1,5 +1,5 @@
 'use client'
-import type { ClientUser, MeOperationResult, Permissions } from 'payload'
+import type { ClientUser, Permissions, User } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { usePathname, useRouter } from 'next/navigation.js'
@@ -14,15 +14,21 @@ import { requests } from '../../utilities/api.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { useConfig } from '../Config/index.js'
 
+export type UserWithToken<T = ClientUser> = {
+  exp: number
+  token: string
+  user: T
+}
+
 export type AuthContext<T = ClientUser> = {
-  fetchFullUser: () => Promise<void>
-  logOut: () => Promise<void>
+  fetchFullUser: () => Promise<null | User>
+  logOut: () => Promise<boolean>
   permissions?: Permissions
   refreshCookie: (forceRefresh?: boolean) => void
   refreshCookieAsync: () => Promise<ClientUser>
   refreshPermissions: () => Promise<void>
   setPermissions: (permissions: Permissions) => void
-  setUser: (user: T) => void
+  setUser: (user: null | UserWithToken<T>) => void
   strategy?: string
   token?: string
   tokenExpiration?: number
@@ -43,7 +49,7 @@ export function AuthProvider({
   permissions: initialPermissions,
   user: initialUser,
 }: Props) {
-  const [user, setUser] = useState<ClientUser | null>(initialUser)
+  const [user, setUserInMemory] = useState<ClientUser | null>(initialUser)
   const [tokenInMemory, setTokenInMemory] = useState<string>()
   const [tokenExpiration, setTokenExpiration] = useState<number>()
   const pathname = usePathname()
@@ -66,6 +72,7 @@ export function AuthProvider({
   const { closeAllModals, openModal } = useModal()
   const [lastLocationChange, setLastLocationChange] = useState(0)
   const debouncedLocationChange = useDebounce(lastLocationChange, 10000)
+  const refreshTokenTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
 
   const id = user?.id
 
@@ -92,15 +99,17 @@ export function AuthProvider({
   const revokeTokenAndExpire = useCallback(() => {
     setTokenInMemory(undefined)
     setTokenExpiration(undefined)
+    clearTimeout(refreshTokenTimeoutRef.current)
   }, [])
 
-  const setTokenAndExpiration = useCallback(
-    (json) => {
-      const token = json?.token || json?.refreshedToken
-      if (token && json?.exp) {
-        setTokenInMemory(token)
-        setTokenExpiration(json.exp)
+  const setNewUser = useCallback(
+    (userResponse: null | UserWithToken) => {
+      if (userResponse?.user) {
+        setUserInMemory(userResponse.user)
+        setTokenInMemory(userResponse.token)
+        setTokenExpiration(userResponse.exp)
       } else {
+        setUserInMemory(null)
         revokeTokenAndExpire()
       }
     },
@@ -113,11 +122,11 @@ export function AuthProvider({
       const remainingTime = (typeof tokenExpiration === 'number' ? tokenExpiration : 0) - now
 
       if (forceRefresh || (tokenExpiration && remainingTime < 120)) {
-        setTimeout(() => {
+        refreshTokenTimeoutRef.current = setTimeout(() => {
           async function refresh() {
             try {
               const request = await requests.post(
-                `${serverURL}${apiRoute}/${userSlug}/refresh-token`,
+                `${serverURL}${apiRoute}/${userSlug}/refresh-token?refresh`,
                 {
                   headers: {
                     'Accept-Language': i18n.language,
@@ -127,11 +136,9 @@ export function AuthProvider({
 
               if (request.status === 200) {
                 const json = await request.json()
-                setUser(json.user)
-
-                setTokenAndExpiration(json)
+                setNewUser(json)
               } else {
-                setUser(null)
+                setNewUser(null)
                 redirectToInactivityRoute()
               }
             } catch (e) {
@@ -142,15 +149,19 @@ export function AuthProvider({
           void refresh()
         }, 1000)
       }
+
+      return () => {
+        clearTimeout(refreshTokenTimeoutRef.current)
+      }
     },
     [
-      tokenExpiration,
-      serverURL,
       apiRoute,
-      userSlug,
-      i18n,
+      i18n.language,
       redirectToInactivityRoute,
-      setTokenAndExpiration,
+      serverURL,
+      setNewUser,
+      tokenExpiration,
+      userSlug,
     ],
   )
 
@@ -166,13 +177,12 @@ export function AuthProvider({
         if (request.status === 200) {
           const json = await request.json()
           if (!skipSetUser) {
-            setUser(json.user)
-            setTokenAndExpiration(json)
+            setNewUser(json)
           }
           return json.user
         }
 
-        setUser(null)
+        setNewUser(null)
         redirectToInactivityRoute()
         return null
       } catch (e) {
@@ -180,18 +190,20 @@ export function AuthProvider({
         return null
       }
     },
-    [serverURL, apiRoute, userSlug, i18n, redirectToInactivityRoute, setTokenAndExpiration],
+    [apiRoute, i18n.language, redirectToInactivityRoute, serverURL, setNewUser, userSlug],
   )
 
   const logOut = useCallback(async () => {
-    setUser(null)
-    revokeTokenAndExpire()
     try {
       await requests.post(`${serverURL}${apiRoute}/${userSlug}/logout`)
+      setNewUser(null)
+      revokeTokenAndExpire()
+      return true
     } catch (e) {
       toast.error(`Logging out failed: ${e.message}`)
+      return false
     }
-  }, [serverURL, apiRoute, userSlug, revokeTokenAndExpire])
+  }, [apiRoute, revokeTokenAndExpire, serverURL, setNewUser, userSlug])
 
   const refreshPermissions = useCallback(
     async ({ locale }: { locale?: string } = {}) => {
@@ -227,29 +239,25 @@ export function AuthProvider({
   const fetchFullUser = React.useCallback(async () => {
     try {
       const request = await requests.get(`${serverURL}${apiRoute}/${userSlug}/me`, {
+        credentials: 'include',
         headers: {
           'Accept-Language': i18n.language,
         },
       })
 
       if (request.status === 200) {
-        const json: MeOperationResult = await request.json()
+        const json: UserWithToken = await request.json()
+        const user = null
 
-        if (json?.user) {
-          setUser(json.user)
-
-          if (json?.token) {
-            setTokenAndExpiration(json)
-          }
-        } else {
-          setUser(null)
-          revokeTokenAndExpire()
-        }
+        setNewUser(json)
+        return user
       }
     } catch (e) {
       toast.error(`Fetching user failed: ${e.message}`)
     }
-  }, [serverURL, apiRoute, userSlug, i18n.language, setTokenAndExpiration, revokeTokenAndExpire])
+
+    return null
+  }, [serverURL, apiRoute, userSlug, i18n.language, setNewUser])
 
   // On mount, get user and set
   useEffect(() => {
@@ -263,58 +271,43 @@ export function AuthProvider({
     }
   }, [debouncedLocationChange, refreshCookie, id])
 
-  // When initialUser changes, reset in state
-  useEffect(() => {
-    setUser(initialUser)
-  }, [initialUser])
-
   useEffect(() => {
     setLastLocationChange(Date.now())
   }, [pathname])
 
   useEffect(() => {
     let reminder: ReturnType<typeof setTimeout>
+    let forceLogOut: ReturnType<typeof setTimeout>
     const now = Math.round(new Date().getTime() / 1000)
     const remainingTime = typeof tokenExpiration === 'number' ? tokenExpiration - now : 0
+    const remindInTimeFromNow = Math.max(Math.min((remainingTime - 60) * 1000, maxTimeoutTime), 0)
+    const forceLogOutInTimeFromNow = Math.max(Math.min(remainingTime * 1000, maxTimeoutTime), 0)
+
+    if (!user) {
+      clearTimeout(reminder)
+      clearTimeout(forceLogOut)
+      return
+    }
 
     if (remainingTime > 0) {
-      reminder = setTimeout(
-        () => {
-          openModal(stayLoggedInModalSlug)
-        },
-        Math.max(Math.min((remainingTime - 60) * 1000, maxTimeoutTime)),
-      )
+      reminder = setTimeout(() => {
+        openModal(stayLoggedInModalSlug)
+      }, remindInTimeFromNow)
+
+      forceLogOut = setTimeout(() => {
+        setNewUser(null)
+      }, forceLogOutInTimeFromNow)
     }
 
     return () => {
       if (reminder) {
         clearTimeout(reminder)
       }
-    }
-  }, [tokenExpiration, openModal])
-
-  useEffect(() => {
-    let forceLogOut: ReturnType<typeof setTimeout>
-    const now = Math.round(new Date().getTime() / 1000)
-    const remainingTime = typeof tokenExpiration === 'number' ? tokenExpiration - now : 0
-
-    if (remainingTime > 0) {
-      forceLogOut = setTimeout(
-        () => {
-          setUser(null)
-          revokeTokenAndExpire()
-          redirectToInactivityRoute()
-        },
-        Math.max(Math.min(remainingTime * 1000, maxTimeoutTime), 0),
-      )
-    }
-
-    return () => {
       if (forceLogOut) {
         clearTimeout(forceLogOut)
       }
     }
-  }, [tokenExpiration, closeAllModals, i18n, redirectToInactivityRoute, revokeTokenAndExpire])
+  }, [tokenExpiration, openModal, i18n, setNewUser, user])
 
   return (
     <Context.Provider
@@ -326,7 +319,7 @@ export function AuthProvider({
         refreshCookieAsync,
         refreshPermissions,
         setPermissions,
-        setUser,
+        setUser: setNewUser,
         token: tokenInMemory,
         user,
       }}

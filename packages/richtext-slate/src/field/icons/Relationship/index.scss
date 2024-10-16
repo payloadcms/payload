@@ -1,12 +1,14 @@
 @import '../../../scss/styles.scss';
 
-.icon--relationship {
-  height: $baseline;
-  width: $baseline;
+@layer payload-default {
+  .icon--relationship {
+    height: $baseline;
+    width: $baseline;
 
-  .stroke {
-    fill: none;
-    stroke: var(--theme-elevation-800);
-    stroke-width: $style-stroke-width-m;
+    .stroke {
+      fill: none;
+      stroke: var(--theme-elevation-800);
+      stroke-width: $style-stroke-width-m;
+    }
   }
 }

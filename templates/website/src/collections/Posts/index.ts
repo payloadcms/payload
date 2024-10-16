@@ -40,13 +40,21 @@ export const Posts: CollectionConfig = {
     livePreview: {
       url: ({ data }) => {
         const path = generatePreviewPath({
-          path: `/posts/${typeof data?.slug === 'string' ? data.slug : ''}`,
+          slug: typeof data?.slug === 'string' ? data.slug : '',
+          collection: 'posts',
         })
+
         return `${process.env.NEXT_PUBLIC_SERVER_URL}${path}`
       },
     },
-    preview: (doc) =>
-      generatePreviewPath({ path: `/posts/${typeof doc?.slug === 'string' ? doc.slug : ''}` }),
+    preview: (data) => {
+      const path = generatePreviewPath({
+        slug: typeof data?.slug === 'string' ? data.slug : '',
+        collection: 'posts',
+      })
+
+      return `${process.env.NEXT_PUBLIC_SERVER_URL}${path}`
+    },
     useAsTitle: 'title',
   },
   fields: [

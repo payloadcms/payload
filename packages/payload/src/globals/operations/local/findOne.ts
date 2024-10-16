@@ -11,6 +11,7 @@ export type Options<TSlug extends GlobalSlug> = {
   depth?: number
   draft?: boolean
   fallbackLocale?: TypedLocale
+  includeLockStatus?: boolean
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   req?: PayloadRequest
@@ -27,6 +28,7 @@ export default async function findOneLocal<TSlug extends GlobalSlug>(
     slug: globalSlug,
     depth,
     draft = false,
+    includeLockStatus,
     overrideAccess = true,
     showHiddenFields,
   } = options
@@ -42,6 +44,7 @@ export default async function findOneLocal<TSlug extends GlobalSlug>(
     depth,
     draft,
     globalConfig,
+    includeLockStatus,
     overrideAccess,
     req: await createLocalReq(options, payload),
     showHiddenFields,

@@ -1,4 +1,4 @@
-import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
+import type { CollectionSlug, JoinQuery, Payload, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequest, RequestContext } from '../../../types/index.js'
 import type { DataFromCollectionSlug } from '../../config/types.js'
 
@@ -6,7 +6,7 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findByIDOperation } from '../findByID.js'
 
-export type Options<TSlug extends CollectionSlug> = {
+export type Options<TSlug extends CollectionSlug = CollectionSlug> = {
   collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
@@ -18,6 +18,8 @@ export type Options<TSlug extends CollectionSlug> = {
   draft?: boolean
   fallbackLocale?: TypedLocale
   id: number | string
+  includeLockStatus?: boolean
+  joins?: JoinQuery
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   req?: PayloadRequest
@@ -25,10 +27,14 @@ export type Options<TSlug extends CollectionSlug> = {
   user?: Document
 }
 
-export default async function findByIDLocal<TSlug extends CollectionSlug>(
+export default async function findByIDLocal<TOptions extends Options>(
   payload: Payload,
-  options: Options<TSlug>,
-): Promise<DataFromCollectionSlug<TSlug>> {
+  options: TOptions,
+): Promise<
+  TOptions['disableErrors'] extends true
+    ? DataFromCollectionSlug<TOptions['collection']> | null
+    : DataFromCollectionSlug<TOptions['collection']>
+> {
   const {
     id,
     collection: collectionSlug,
@@ -36,6 +42,8 @@ export default async function findByIDLocal<TSlug extends CollectionSlug>(
     depth,
     disableErrors = false,
     draft = false,
+    includeLockStatus,
+    joins,
     overrideAccess = true,
     showHiddenFields,
   } = options
@@ -48,13 +56,15 @@ export default async function findByIDLocal<TSlug extends CollectionSlug>(
     )
   }
 
-  return findByIDOperation<TSlug>({
+  return findByIDOperation<TOptions['collection']>({
     id,
     collection,
     currentDepth,
     depth,
     disableErrors,
     draft,
+    includeLockStatus,
+    joins,
     overrideAccess,
     req: await createLocalReq(options, payload),
     showHiddenFields,

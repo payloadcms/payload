@@ -31,7 +31,7 @@ export const linkValidation = (
       siblingData: node.fields,
     })
 
-    let errorPaths = []
+    let errorPaths: string[] = []
     for (const fieldKey in result) {
       if (result[fieldKey].errorPaths) {
         errorPaths = errorPaths.concat(result[fieldKey].errorPaths)

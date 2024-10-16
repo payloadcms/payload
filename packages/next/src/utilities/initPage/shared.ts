@@ -1,6 +1,10 @@
 import type { SanitizedConfig } from 'payload'
 
-const authRouteKeys: (keyof SanitizedConfig['admin']['routes'])[] = [
+// Routes that require admin authentication
+const publicAdminRoutes: (keyof Pick<
+  SanitizedConfig['admin']['routes'],
+  'createFirstUser' | 'forgot' | 'inactivity' | 'login' | 'logout' | 'reset' | 'unauthorized'
+>)[] = [
   'createFirstUser',
   'forgot',
   'login',
@@ -13,17 +17,16 @@ const authRouteKeys: (keyof SanitizedConfig['admin']['routes'])[] = [
 
 export const isAdminRoute = ({
   adminRoute,
-  config,
   route,
 }: {
   adminRoute: string
   config: SanitizedConfig
   route: string
 }): boolean => {
-  return route.startsWith(adminRoute) && !isAdminAuthRoute({ adminRoute, config, route })
+  return route.startsWith(adminRoute)
 }
 
-export const isAdminAuthRoute = ({
+export const isPublicAdminRoute = ({
   adminRoute,
   config,
   route,
@@ -32,13 +35,17 @@ export const isAdminAuthRoute = ({
   config: SanitizedConfig
   route: string
 }): boolean => {
-  const authRoutes = config.admin?.routes
-    ? Object.entries(config.admin.routes)
-        .filter(([key]) => authRouteKeys.includes(key as keyof SanitizedConfig['admin']['routes']))
-        .map(([_, value]) => value)
-    : []
-
-  return authRoutes.some((r) => getRouteWithoutAdmin({ adminRoute, route }).startsWith(r))
+  return publicAdminRoutes.some((routeSegment) => {
+    const segment = config.admin?.routes?.[routeSegment] || routeSegment
+    const routeWithoutAdmin = getRouteWithoutAdmin({ adminRoute, route })
+    if (routeWithoutAdmin.startsWith(segment)) {
+      return true
+    } else if (routeWithoutAdmin.includes('/verify/')) {
+      return true
+    } else {
+      return false
+    }
+  })
 }
 
 export const getRouteWithoutAdmin = ({

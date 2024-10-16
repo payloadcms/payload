@@ -30,8 +30,9 @@ export const logout: CollectionRouteHandler = async ({ collection, req }) => {
   }
 
   const expiredCookie = generateExpiredPayloadCookie({
-    collectionConfig: collection.config,
-    payload: req.payload,
+    collectionAuthConfig: collection.config.auth,
+    config: req.payload.config,
+    cookiePrefix: req.payload.config.cookiePrefix,
   })
 
   headers.set('Set-Cookie', expiredCookie)

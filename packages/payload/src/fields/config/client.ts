@@ -12,6 +12,7 @@ export type ServerOnlyFieldProperties =
   | 'filterOptions' // This is a `relationship` and `upload` only property
   | 'label'
   | 'typescriptSchema'
-  | keyof Pick<FieldBase, 'access' | 'custom' | 'defaultValue' | 'hooks' | 'validate'>
+  | 'validate'
+  | keyof Pick<FieldBase, 'access' | 'custom' | 'defaultValue' | 'hooks'>
 
 export type ServerOnlyFieldAdminProperties = keyof Pick<FieldBase['admin'], 'condition'>

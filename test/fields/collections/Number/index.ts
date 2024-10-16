@@ -60,7 +60,7 @@ const NumberFields: CollectionConfig = {
       name: 'validatesHasMany',
       type: 'number',
       hasMany: true,
-      validate: (value: number[]) => {
+      validate: (value) => {
         if (value && !Array.isArray(value)) {
           return 'value should be an array'
         }
@@ -78,6 +78,33 @@ const NumberFields: CollectionConfig = {
       type: 'number',
       hasMany: true,
       minRows: 2,
+    },
+    {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'numbers',
+          type: 'number',
+          hasMany: true,
+        },
+      ],
+    },
+    {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'block',
+          fields: [
+            {
+              name: 'numbers',
+              type: 'number',
+              hasMany: true,
+            },
+          ],
+        },
+      ],
     },
   ],
 }

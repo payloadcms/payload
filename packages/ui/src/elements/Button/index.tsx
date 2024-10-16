@@ -176,6 +176,7 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
         {buttonElement}
         <Popup
           button={<ChevronIcon />}
+          buttonSize={size}
           className={disabled ? `${baseClass}--popup-disabled` : ''}
           horizontalAlign="right"
           noBackground

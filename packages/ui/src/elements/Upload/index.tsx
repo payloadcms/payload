@@ -218,6 +218,8 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   const showFocalPoint = focalPoint && (hasImageSizes || hasResizeOptions || focalPointEnabled)
 
+  const acceptMimeTypes = uploadConfig.mimeTypes?.join(', ')
+
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
       <FieldError field={null} message={errorMessage} showError={showError} />
@@ -251,6 +253,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
                     {t('upload:selectFile')}
                   </Button>
                   <input
+                    accept={acceptMimeTypes}
                     aria-hidden="true"
                     className={`${baseClass}__hidden-input`}
                     hidden

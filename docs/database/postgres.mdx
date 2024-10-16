@@ -60,9 +60,12 @@ export default buildConfig({
 | `schemaName` (experimental) | A string for the postgres schema to use, defaults to 'public'.                                                                                                                   |
 | `idType`                    | A string of 'serial', or 'uuid' that is used for the data type given to id columns.                                                                                              |
 | `transactionOptions`        | A PgTransactionConfig object for transactions, or set to `false` to disable using transactions. [More details](https://orm.drizzle.team/docs/transactions)                       |
+| `disableCreateDatabase`     | Pass `true` to disale auto database creation if it doesn't exist. Defaults to `false`.                                                                                           |
 | `localesSuffix`             | A string appended to the end of table names for storing localized fields. Default is '_locales'.                                                                                 |
 | `relationshipsSuffix`       | A string appended to the end of table names for storing relationships. Default is '_rels'.                                                                                       |
 | `versionsSuffix`            | A string appended to the end of table names for storing versions. Defaults to '_v'.                                                                                              |
+| `beforeSchemaInit`          | Drizzle schema hook. Runs before the schema is built. [More Details](#beforeschemainit)                                                                                          |
+| `afterSchemaInit`           | Drizzle schema hook. Runs after the schema is built. [More Details](#afterschemainit)                                                                                            |
 
 ## Access to Drizzle
 
@@ -97,3 +100,134 @@ Alternatively, you can disable `push` and rely solely on migrations to keep your
 In Postgres, migrations are a fundamental aspect of working with Payload and you should become familiar with how they work.
 
 For more information about migrations, [click here](/docs/beta/database/migrations#when-to-run-migrations).
+
+## Drizzle schema hooks
+
+### beforeSchemaInit
+
+Runs before the schema is built. You can use this hook to extend your database structure with tables that won't be managed by Payload.
+
+```ts
+import { postgresAdapter } from '@payloadcms/db-postgres'
+import { integer, pgTable, serial } from 'drizzle-orm/pg-core'
+
+postgresAdapter({
+  beforeSchemaInit: [
+    ({ schema, adapter }) => {
+      return {
+        ...schema,
+        tables: {
+          ...schema.tables,
+          addedTable: pgTable('added_table', {
+            id: serial('id').notNull(),
+          }),
+        },
+      }
+    },
+  ],
+})
+```
+
+One use case is preserving your existing database structure when migrating to Payload. By default, Payload drops the current database schema, which may not be desirable in this scenario.
+To quickly generate the Drizzle schema from your database you can use [Drizzle Introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
+You should get the `schema.ts` file which may look like this:
+
+```ts
+import { pgTable, uniqueIndex, serial, varchar, text } from 'drizzle-orm/pg-core'
+
+export const users = pgTable('users', {
+  id: serial('id').primaryKey(),
+  fullName: text('full_name'),
+  phone: varchar('phone', { length: 256 }),
+})
+
+export const countries = pgTable(
+  'countries',
+  {
+    id: serial('id').primaryKey(),
+    name: varchar('name', { length: 256 }),
+  },
+  (countries) => {
+    return {
+      nameIndex: uniqueIndex('name_idx').on(countries.name),
+    }
+  },
+)
+
+```
+
+You can import them into your config and append to the schema with the `beforeSchemaInit` hook like this:
+
+```ts
+import { postgresAdapter } from '@payloadcms/db-postgres'
+import { users, countries } from '../drizzle/schema'
+
+postgresAdapter({
+  beforeSchemaInit: [
+    ({ schema, adapter }) => {
+      return {
+        ...schema,
+        tables: {
+          ...schema.tables,
+          users,
+          countries
+        },
+      }
+    },
+  ],
+})
+```
+
+Make sure Payload doesn't overlap table names with its collections. For example, if you already have a collection with slug "users", you should either change the slug or `dbName` to change the table name for this collection. 
+
+
+### afterSchemaInit
+
+Runs after the Drizzle schema is built. You can use this hook to modify the schema with features that aren't supported by Payload, or if you want to add a column that you don't want to be in the Payload config.
+To extend a table, Payload exposes `extendTable` utillity to the args. You can refer to the [Drizzle documentation](https://orm.drizzle.team/docs/sql-schema-declaration).
+The following example adds the `extra_integer_column` column and a composite index on `country` and `city` columns.
+
+```ts
+import { postgresAdapter } from '@payloadcms/db-postgres'
+import { index, integer } from 'drizzle-orm/pg-core'
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  collections: [
+    {
+      slug: 'places',
+      fields: [
+        {
+          name: 'country',
+          type: 'text',
+        },
+        {
+          name: 'city',
+          type: 'text',
+        },
+      ],
+    },
+  ],
+  db: postgresAdapter({
+    afterSchemaInit: [
+      ({ schema, extendTable, adapter }) => {
+        extendTable({
+          table: schema.tables.places,
+          columns: {
+            extraIntegerColumn: integer('extra_integer_column'),
+          },
+          extraConfig: (table) => ({
+            country_city_composite_index: index('country_city_composite_index').on(
+              table.country,
+              table.city,
+            ),
+          }),
+        })
+
+        return schema
+      },
+    ],
+  }),
+})
+
+```

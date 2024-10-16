@@ -1,4 +1,4 @@
-import type { Field, PayloadComponent, RichTextFieldProps, SanitizedConfig } from 'payload'
+import type { Field, PayloadComponent, RichTextFieldClientProps, SanitizedConfig } from 'payload'
 import type { Editor } from 'slate'
 
 export type TextNode = { [x: string]: unknown; text: string }
@@ -70,4 +70,4 @@ export type AdapterArguments = {
   }
 }
 
-export type SlateFieldProps = RichTextFieldProps<any[], AdapterArguments, AdapterArguments>
+export type SlateFieldProps = RichTextFieldClientProps<any[], AdapterArguments, AdapterArguments>

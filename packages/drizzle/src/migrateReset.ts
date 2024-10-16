@@ -84,7 +84,7 @@ export async function migrateReset(this: DrizzleAdapter): Promise<void> {
         },
       })
     } catch (err: unknown) {
-      payload.logger.error({ error: err, msg: 'Error deleting dev migration' })
+      payload.logger.error({ err, msg: 'Error deleting dev migration' })
     }
   }
 }

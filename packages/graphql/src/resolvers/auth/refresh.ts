@@ -14,8 +14,8 @@ export function refresh(collection: Collection): any {
 
     const result = await refreshOperation(options)
     const cookie = generatePayloadCookie({
-      collectionConfig: collection.config,
-      payload: context.req.payload,
+      collectionAuthConfig: collection.config.auth,
+      cookiePrefix: context.req.payload.config.cookiePrefix,
       token: result.refreshedToken,
     })
     context.headers['Set-Cookie'] = cookie

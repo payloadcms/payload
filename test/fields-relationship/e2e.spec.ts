@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -21,11 +22,11 @@ import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   openCreateDocDrawer,
-  openDocControls,
   openDocDrawer,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { trackNetworkRequests } from '../helpers/e2e/trackNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
@@ -167,6 +168,22 @@ describe('fields - relationship', () => {
     await options.nth(0).click()
     await expect(field).toContainText(relationOneDoc.id)
     await saveDocAndAssert(page)
+  })
+
+  test('should only make a single request for relationship values', async () => {
+    await page.goto(url.create)
+    const field = page.locator('#field-relationship')
+    await expect(field.locator('input')).toBeEnabled()
+    await field.click({ delay: 100 })
+    const options = page.locator('.rs__option')
+    await expect(options).toHaveCount(2) // two docs
+    await options.nth(0).click()
+    await expect(field).toContainText(relationOneDoc.id)
+    await saveDocAndAssert(page)
+    await wait(200)
+    await trackNetworkRequests(page, `/api/${relationOneSlug}`, {
+      beforePoll: async () => await page.reload(),
+    })
   })
 
   // TODO: Flaky test in CI - fix this. https://github.com/payloadcms/payload/actions/runs/8559547748/job/23456806365

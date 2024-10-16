@@ -36,6 +36,8 @@ export type TypeWithVersion<T> = {
   createdAt: string
   id: string
   parent: number | string
+  publishedLocale?: string
+  snapshot?: boolean
   updatedAt: string
   version: T
 }

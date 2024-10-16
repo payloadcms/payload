@@ -49,9 +49,18 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
 
   if (docHasTimestamps(doc)) {
     queryToBuild.and.push({
-      updatedAt: {
-        greater_than: doc.updatedAt,
-      },
+      or: [
+        {
+          updatedAt: {
+            greater_than: doc.updatedAt,
+          },
+        },
+        {
+          latest: {
+            equals: true,
+          },
+        },
+      ],
     })
   }
 

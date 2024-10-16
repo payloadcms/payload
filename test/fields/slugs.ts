@@ -30,6 +30,7 @@ export const uploads3Slug = 'uploads3'
 export const uploadsMulti = 'uploads-multi'
 export const uploadsMultiPoly = 'uploads-multi-poly'
 export const uploadsPoly = 'uploads-poly'
+export const uploadsRestricted = 'uploads-restricted'
 export const uiSlug = 'ui-fields'
 
 export const collectionSlugs = [

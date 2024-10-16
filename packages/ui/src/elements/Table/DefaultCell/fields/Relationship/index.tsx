@@ -1,8 +1,13 @@
 'use client'
-import type { DefaultCellComponentProps, RelationshipFieldClient, UploadFieldClient } from 'payload'
+import type {
+  DefaultCellComponentProps,
+  JoinFieldClient,
+  RelationshipFieldClient,
+  UploadFieldClient,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import { useIntersect } from '../../../../../hooks/useIntersect.js'
 import { useConfig } from '../../../../../providers/Config/index.js'
@@ -17,15 +22,26 @@ type Value = { relationTo: string; value: number | string }
 const baseClass = 'relationship-cell'
 const totalToShow = 3
 
-export interface RelationshipCellProps
-  extends DefaultCellComponentProps<any, RelationshipFieldClient | UploadFieldClient> {}
+export type RelationshipCellProps = DefaultCellComponentProps<
+  any,
+  JoinFieldClient | RelationshipFieldClient | UploadFieldClient
+>
 
 export const RelationshipCell: React.FC<RelationshipCellProps> = ({
-  cellData,
+  cellData: cellDataFromProps,
   customCellContext,
   field,
-  field: { label, relationTo },
+  field: { label },
 }) => {
+  // conditionally extract relationTo both both relationship and join fields
+  const relationTo =
+    ('relationTo' in field && field.relationTo) || ('collection' in field && field.collection)
+
+  // conditionally extract docs from join fields
+  const cellData = useMemo(() => {
+    return 'collection' in field ? cellDataFromProps?.docs : cellDataFromProps
+  }, [cellDataFromProps, field])
+
   const { config } = useConfig()
   const { collections, routes } = config
   const [intersectionRef, entry] = useIntersect()

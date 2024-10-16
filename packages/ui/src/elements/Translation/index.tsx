@@ -1,4 +1,3 @@
-'use client'
 import type { ClientTranslationKeys, TFunction } from '@payloadcms/translations'
 
 import * as React from 'react'

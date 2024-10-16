@@ -41,7 +41,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     where,
   } = args
 
-  const versionFields = buildVersionGlobalFields(globalConfig)
+  const versionFields = buildVersionGlobalFields(payload.config, globalConfig)
 
   try {
     // /////////////////////////////////////

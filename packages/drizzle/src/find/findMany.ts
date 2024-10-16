@@ -19,6 +19,7 @@ type Args = {
 export const findMany = async function find({
   adapter,
   fields,
+  joins: joinQuery,
   limit: limitArg,
   locale,
   page = 1,
@@ -42,7 +43,7 @@ export const findMany = async function find({
     limit = undefined
   }
 
-  const { joins, orderBy, selectFields, where } = await buildQuery({
+  const { joins, orderBy, selectFields, where } = buildQuery({
     adapter,
     fields,
     locale,
@@ -67,6 +68,8 @@ export const findMany = async function find({
     adapter,
     depth: 0,
     fields,
+    joinQuery,
+    joins,
     tableName,
   })
 
@@ -151,6 +154,7 @@ export const findMany = async function find({
       config: adapter.payload.config,
       data,
       fields,
+      joinQuery,
     })
   })
 

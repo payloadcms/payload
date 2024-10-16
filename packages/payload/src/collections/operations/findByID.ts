@@ -1,5 +1,5 @@
 import type { FindOneArgs } from '../../database/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, JoinQuery } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { Collection, DataFromCollectionSlug } from '../config/types.js'
 
@@ -18,6 +18,8 @@ export type Arguments = {
   disableErrors?: boolean
   draft?: boolean
   id: number | string
+  includeLockStatus?: boolean
+  joins?: JoinQuery
   overrideAccess?: boolean
   req: PayloadRequest
   showHiddenFields?: boolean
@@ -53,6 +55,8 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
       depth,
       disableErrors,
       draft: draftEnabled = false,
+      includeLockStatus,
+      joins,
       overrideAccess = false,
       req: { fallbackLocale, locale, t },
       req,
@@ -74,6 +78,7 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
 
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
+      joins: req.payloadAPI === 'GraphQL' ? false : joins,
       locale,
       req: {
         transactionID: req.transactionID,
@@ -97,6 +102,47 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
       }
 
       return null
+    }
+
+    // /////////////////////////////////////
+    // Include Lock Status if required
+    // /////////////////////////////////////
+
+    if (includeLockStatus && id) {
+      let lockStatus = null
+
+      try {
+        const lockedDocument = await req.payload.find({
+          collection: 'payload-locked-documents',
+          depth: 1,
+          limit: 1,
+          pagination: false,
+          req,
+          where: {
+            and: [
+              {
+                'document.relationTo': {
+                  equals: collectionConfig.slug,
+                },
+              },
+              {
+                'document.value': {
+                  equals: id,
+                },
+              },
+            ],
+          },
+        })
+
+        if (lockedDocument && lockedDocument.docs.length > 0) {
+          lockStatus = lockedDocument.docs[0]
+        }
+      } catch {
+        // swallow error
+      }
+
+      result._isLocked = !!lockStatus
+      result._userEditing = lockStatus?.user?.value ?? null
     }
 
     // /////////////////////////////////////

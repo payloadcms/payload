@@ -1,7 +1,14 @@
-import type { CreateVersion, Document, PayloadRequest } from 'payload'
+import mongoose from 'mongoose'
+import {
+  buildVersionCollectionFields,
+  type CreateVersion,
+  type Document,
+  type PayloadRequest,
+} from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
 import { withSession } from './withSession.js'
 
 export const createVersion: CreateVersion = async function createVersion(
@@ -11,7 +18,9 @@ export const createVersion: CreateVersion = async function createVersion(
     collectionSlug,
     createdAt,
     parent,
+    publishedLocale,
     req = {} as PayloadRequest,
+    snapshot,
     updatedAt,
     versionData,
   },
@@ -19,20 +28,42 @@ export const createVersion: CreateVersion = async function createVersion(
   const VersionModel = this.versions[collectionSlug]
   const options = await withSession(this, req)
 
-  const [doc] = await VersionModel.create(
-    [
+  const data = sanitizeRelationshipIDs({
+    config: this.payload.config,
+    data: {
+      autosave,
+      createdAt,
+      latest: true,
+      parent,
+      publishedLocale,
+      snapshot,
+      updatedAt,
+      version: versionData,
+    },
+    fields: buildVersionCollectionFields(
+      this.payload.config,
+      this.payload.collections[collectionSlug].config,
+    ),
+  })
+
+  const [doc] = await VersionModel.create([data], options, req)
+
+  const parentQuery = {
+    $or: [
       {
-        autosave,
-        createdAt,
-        latest: true,
-        parent,
-        updatedAt,
-        version: versionData,
+        parent: {
+          $eq: data.parent,
+        },
       },
     ],
-    options,
-    req,
-  )
+  }
+  if (data.parent instanceof mongoose.Types.ObjectId) {
+    parentQuery.$or.push({
+      parent: {
+        $eq: data.parent.toString(),
+      },
+    })
+  }
 
   await VersionModel.updateMany(
     {
@@ -42,11 +73,7 @@ export const createVersion: CreateVersion = async function createVersion(
             $ne: doc._id,
           },
         },
-        {
-          parent: {
-            $eq: parent,
-          },
-        },
+        parentQuery,
         {
           latest: {
             $eq: true,

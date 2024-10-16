@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { Payload, Where } from 'payload'
 
 type ReturnType = {
   id: string
@@ -6,13 +6,30 @@ type ReturnType = {
 } | null
 
 type Args = {
+  parentID?: number | string
   payload: Payload
   slug: string
   status: 'draft' | 'published'
   type: 'collection' | 'global'
 }
 export async function getLatestVersion(args: Args): Promise<ReturnType> {
-  const { slug, type = 'collection', payload, status } = args
+  const { slug, type = 'collection', parentID, payload, status } = args
+
+  const and: Where[] = [
+    {
+      'version._status': {
+        equals: status,
+      },
+    },
+  ]
+
+  if (type === 'collection' && parentID) {
+    and.push({
+      parent: {
+        equals: parentID,
+      },
+    })
+  }
 
   try {
     const sharedOptions = {
@@ -20,9 +37,7 @@ export async function getLatestVersion(args: Args): Promise<ReturnType> {
       limit: 1,
       sort: '-updatedAt',
       where: {
-        'version._status': {
-          equals: status,
-        },
+        and,
       },
     }
 

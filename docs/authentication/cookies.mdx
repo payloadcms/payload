@@ -85,3 +85,47 @@ const config = buildConfig({
 
 export default config
 ```
+
+#### Cross domain authentication
+
+If your frontend is on a different domain than your Payload API then you will not be able to use HTTP-only cookies for authentication by default as they will be considered third-party cookies by the browser.
+There are a few strategies to get around this:
+
+##### 1. Use subdomains
+
+Cookies can cross subdomains without being considered third party cookies, for example if your API is at api.example.com then you can authenticate from example.com.
+
+##### 2. Configure cookies
+
+If option 1 isn't possible, then you can get around this limitation by [configuring your cookies](https://payloadcms.com/docs/beta/authentication/overview#config-options) on your authentication collection to achieve the following setup:
+
+```
+SameSite: None // allows the cookie to cross domains
+Secure: true // ensures its sent over HTTPS only
+HttpOnly: true // ensures its not accessible via client side JavaScript
+```
+
+Configuration example:
+
+```ts
+{
+  slug: 'users',
+  auth: {
+    cookies: {
+      sameSite: 'None',
+      secure: true,
+    }
+  },
+  fields: [
+    // your auth fields here
+  ]
+},
+```
+
+If you're configuring [cors](https://payloadcms.com/docs/beta/production/preventing-abuse#cross-origin-resource-sharing-cors) in your Payload config, you won't be able to use a wildcard anymore, you'll need to specify the list of allowed domains.
+
+
+<Banner type="success">
+  <strong>Good to know:</strong>
+  Setting up <code>secure: true</code> will not work if you're developing on <code>http://localhost</code> or any non-https domain. For local development you should conditionally set this to <code>false</code> based on the environment.
+</Banner>

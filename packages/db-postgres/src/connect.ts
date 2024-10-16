@@ -23,7 +23,7 @@ const connectWithReconnect = async function ({
   } else {
     try {
       result = await adapter.pool.connect()
-    } catch (err) {
+    } catch (ignore) {
       setTimeout(() => {
         payload.logger.info('Reconnecting to postgres')
         void connectWithReconnect({ adapter, payload, reconnect: true })
@@ -38,7 +38,7 @@ const connectWithReconnect = async function ({
       if (err.code === 'ECONNRESET') {
         void connectWithReconnect({ adapter, payload, reconnect: true })
       }
-    } catch (err) {
+    } catch (ignore) {
       // swallow error
     }
   })
@@ -76,7 +76,24 @@ export const connect: Connect = async function connect(
       }
     }
   } catch (err) {
-    this.payload.logger.error(`Error: cannot connect to Postgres. Details: ${err.message}`, err)
+    if (err.message?.match(/database .* does not exist/i) && !this.disableCreateDatabase) {
+      // capitalize first char of the err msg
+      this.payload.logger.info(
+        `${err.message.charAt(0).toUpperCase() + err.message.slice(1)}, creating...`,
+      )
+      const isCreated = await this.createDatabase()
+
+      if (isCreated) {
+        await this.connect(options)
+        return
+      }
+    } else {
+      this.payload.logger.error({
+        err,
+        msg: `Error: cannot connect to Postgres. Details: ${err.message}`,
+      })
+    }
+
     if (typeof this.rejectInitializing === 'function') {
       this.rejectInitializing()
     }

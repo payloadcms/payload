@@ -28,7 +28,7 @@ import {
 } from 'lexical'
 import React, { useCallback, useEffect, useId, useReducer, useRef, useState } from 'react'
 
-import type { ClientComponentProps } from '../../../typesClient.js'
+import type { BaseClientFeatureProps } from '../../../typesClient.js'
 import type { UploadData } from '../../server/nodes/UploadNode.js'
 import type { UploadFeaturePropsClient } from '../feature.client.js'
 import type { UploadNode } from '../nodes/UploadNode.js'
@@ -81,8 +81,8 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
-  const [relatedCollection] = useState<ClientCollectionConfig>(() =>
-    collections.find((coll) => coll.slug === relationTo),
+  const [relatedCollection] = useState<ClientCollectionConfig>(
+    () => collections.find((coll) => coll.slug === relationTo)!,
   )
 
   const componentID = useId()
@@ -107,7 +107,7 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const removeUpload = useCallback(() => {
     editor.update(() => {
-      $getNodeByKey(nodeKey).remove()
+      $getNodeByKey(nodeKey)?.remove()
     })
   }, [editor, nodeKey])
 
@@ -126,50 +126,56 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const $onDelete = useCallback(
     (event: KeyboardEvent) => {
-      if (isSelected && $isNodeSelection($getSelection())) {
+      const deleteSelection = $getSelection()
+      if (isSelected && $isNodeSelection(deleteSelection)) {
         event.preventDefault()
-        const node = $getNodeByKey(nodeKey)
-        if ($isUploadNode(node)) {
-          node.remove()
-          return true
-        }
+        editor.update(() => {
+          deleteSelection.getNodes().forEach((node) => {
+            if ($isUploadNode(node)) {
+              node.remove()
+            }
+          })
+        })
       }
       return false
     },
-    [isSelected, nodeKey],
-  )
-  const onClick = useCallback(
-    (event: MouseEvent) => {
-      // Check if uploadRef.target or anything WITHIN uploadRef.target was clicked
-      if (event.target === uploadRef.current || uploadRef.current?.contains(event.target as Node)) {
-        if (event.shiftKey) {
-          setSelected(!isSelected)
-        } else {
-          if (!isSelected) {
-            clearSelection()
-            setSelected(true)
-          }
-        }
-        return true
-      }
-
-      return false
-    },
-    [isSelected, setSelected, clearSelection],
+    [editor, isSelected],
   )
 
   useEffect(() => {
     return mergeRegister(
-      editor.registerCommand<MouseEvent>(CLICK_COMMAND, onClick, COMMAND_PRIORITY_LOW),
+      editor.registerCommand<MouseEvent>(
+        CLICK_COMMAND,
+        (event: MouseEvent) => {
+          // Check if uploadRef.target or anything WITHIN uploadRef.target was clicked
+          if (
+            event.target === uploadRef.current ||
+            uploadRef.current?.contains(event.target as Node)
+          ) {
+            if (event.shiftKey) {
+              setSelected(!isSelected)
+            } else {
+              if (!isSelected) {
+                clearSelection()
+                setSelected(true)
+              }
+            }
+            return true
+          }
+
+          return false
+        },
+        COMMAND_PRIORITY_LOW,
+      ),
 
       editor.registerCommand(KEY_DELETE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
       editor.registerCommand(KEY_BACKSPACE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
     )
-  }, [clearSelection, editor, isSelected, nodeKey, $onDelete, setSelected, onClick])
+  }, [clearSelection, editor, isSelected, nodeKey, $onDelete, setSelected])
 
   const hasExtraFields = (
     editorConfig?.resolvedFeatureMap?.get('upload')
-      ?.sanitizedClientFeatureProps as ClientComponentProps<UploadFeaturePropsClient>
+      ?.sanitizedClientFeatureProps as BaseClientFeatureProps<UploadFeaturePropsClient>
   ).collections?.[relatedCollection.slug]?.hasExtraFields
 
   const onExtraFieldsDrawerSubmit = useCallback(
@@ -272,7 +278,7 @@ const Component: React.FC<ElementProps> = (props) => {
           </DocumentDrawerToggler>
         </div>
       </div>
-      {value && <DocumentDrawer onSave={updateUpload} />}
+      {value ? <DocumentDrawer onSave={updateUpload} /> : null}
       {hasExtraFields ? (
         <FieldsDrawer
           data={fields}

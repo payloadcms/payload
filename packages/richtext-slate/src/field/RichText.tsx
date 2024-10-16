@@ -66,7 +66,6 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
         style,
         width,
       } = {},
-      label,
       required,
     },
     labelProps,
@@ -321,13 +320,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        Label={Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-        field={field}
-      />
+      <FieldLabel Label={Label} {...(labelProps || {})} field={field} />
       <div className={`${baseClass}__wrap`}>
         <FieldError CustomError={Error} field={field} path={path} {...(errorProps || {})} />
         <Slate

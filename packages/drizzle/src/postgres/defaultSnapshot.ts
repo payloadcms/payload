@@ -14,4 +14,5 @@ export const defaultDrizzleSnapshot: DrizzleSnapshotJSON = {
   sequences: {},
   tables: {},
   version: '7',
+  views: {},
 }

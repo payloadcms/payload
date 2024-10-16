@@ -63,7 +63,6 @@ export function getNodeCloseToPoint(props: Props): Output {
     point: { x, y },
     startIndex = 0,
     useEdgeAsDefault = false,
-    verbose = false,
   } = props
 
   // Use cache
@@ -104,12 +103,12 @@ export function getNodeCloseToPoint(props: Props): Output {
         editor.getElementByKey(topLevelNodeKeys[topLevelNodeKeys.length - 1]),
       ]
 
-      const [firstNodeRect, lastNodeRect] = [
-        getBoundingClientRectWithoutTransform(firstNode),
-        getBoundingClientRectWithoutTransform(lastNode),
-      ]
+      if (firstNode && lastNode) {
+        const [firstNodeRect, lastNodeRect] = [
+          getBoundingClientRectWithoutTransform(firstNode),
+          getBoundingClientRectWithoutTransform(lastNode),
+        ]
 
-      if (firstNodeRect && lastNodeRect) {
         if (y < firstNodeRect.top) {
           closestBlockElem.blockElem = firstNode
           closestBlockElem.distance = firstNodeRect.top - y

@@ -9,7 +9,7 @@ type HandleCreatedOrUpdated = (
     resourceType: string
     syncConfig: SanitizedStripePluginConfig['sync'][0]
   } & Parameters<StripeWebhookHandler>[0],
-) => void
+) => Promise<void>
 
 export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
   const { config: payloadConfig, event, payload, pluginConfig, resourceType, syncConfig } = args

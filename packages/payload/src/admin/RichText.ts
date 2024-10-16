@@ -13,7 +13,7 @@ import type {
 } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { JsonObject, Payload, PayloadRequest, RequestContext } from '../types/index.js'
-import type { RichTextFieldProps } from './fields/RichText.js'
+import type { RichTextFieldClientProps } from './fields/RichText.js'
 import type { CreateMappedComponent } from './types.js'
 
 export type AfterReadRichTextHookArgs<
@@ -261,7 +261,7 @@ export type RichTextAdapter<
   ExtraFieldProperties = any,
 > = {
   CellComponent: PayloadComponent<never>
-  FieldComponent: PayloadComponent<never, RichTextFieldProps>
+  FieldComponent: PayloadComponent<never, RichTextFieldClientProps>
 } & RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties>
 
 export type RichTextAdapterProvider<

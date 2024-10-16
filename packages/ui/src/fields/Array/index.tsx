@@ -1,5 +1,9 @@
 'use client'
-import type { ArrayFieldProps, ArrayField as ArrayFieldType } from 'payload'
+import type {
+  ArrayFieldClientComponent,
+  ArrayFieldClientProps,
+  ArrayField as ArrayFieldType,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -29,7 +33,7 @@ import './index.scss'
 
 const baseClass = 'array-field'
 
-export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
+export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const {
     descriptionProps,
     errorProps,
@@ -88,9 +92,12 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
   })()
 
   // Handle labeling for Arrays, Global Arrays, and Blocks
-  const getLabels = (p: ArrayFieldProps): Partial<ArrayFieldType['labels']> => {
+  const getLabels = (p: ArrayFieldClientProps): Partial<ArrayFieldType['labels']> => {
     if ('labels' in p && p?.labels) {
       return p.labels
+    }
+    if ('labels' in p.field && p.field.labels) {
+      return { plural: p.field.labels?.plural, singular: p.field.labels?.singular }
     }
     if ('label' in p.field && p.field.label) {
       return { plural: undefined, singular: p.field.label }
@@ -232,8 +239,6 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
                 as="span"
                 field={field}
                 Label={field?.admin?.components?.Label}
-                label={label}
-                required={required}
                 unstyled
                 {...(labelProps || {})}
               />

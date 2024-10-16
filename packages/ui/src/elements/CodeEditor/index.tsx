@@ -10,11 +10,9 @@ const LazyEditor = lazy(() => import('./CodeEditor.js'))
 export type { Props }
 
 export const CodeEditor: React.FC<Props> = (props) => {
-  const { height = '35vh' } = props
-
   return (
-    <Suspense fallback={<ShimmerEffect height={height} />}>
-      <LazyEditor {...props} height={height} />
+    <Suspense fallback={<ShimmerEffect />}>
+      <LazyEditor {...props} />
     </Suspense>
   )
 }

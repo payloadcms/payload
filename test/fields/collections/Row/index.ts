@@ -51,7 +51,36 @@ const RowFields: CollectionConfig = {
       type: 'row',
       fields: [
         {
-          label: 'Collapsible within a row',
+          name: 'field_with_width_30_percent',
+          label: 'Field with 30% width',
+          type: 'text',
+          admin: {
+            width: '30%',
+          },
+        },
+        {
+          name: 'field_with_width_60_percent',
+          label: 'Field with 60% width',
+          type: 'text',
+          admin: {
+            width: '60%',
+          },
+        },
+        {
+          name: 'field_with_width_20_percent',
+          label: 'Field with 20% width',
+          type: 'text',
+          admin: {
+            width: '20%',
+          },
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          label: 'Collapsible 30% width within a row',
           type: 'collapsible',
           fields: [
             {
@@ -60,6 +89,9 @@ const RowFields: CollectionConfig = {
               type: 'text',
             },
           ],
+          admin: {
+            width: '30%',
+          },
         },
         {
           label: 'Collapsible within a row',
@@ -71,6 +103,37 @@ const RowFields: CollectionConfig = {
               type: 'text',
             },
           ],
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          label: 'Explicit 20% width within a row (A)',
+          type: 'text',
+          name: 'field_20_percent_width_within_row_a',
+          admin: {
+            width: '20%',
+          },
+        },
+        {
+          label: 'No set width within a row (B)',
+          type: 'text',
+          name: 'no_set_width_within_row_b',
+        },
+        {
+          label: 'No set width within a row (C)',
+          type: 'text',
+          name: 'no_set_width_within_row_c',
+        },
+        {
+          label: 'Explicit 20% width within a row (D)',
+          type: 'text',
+          name: 'field_20_percent_width_within_row_d',
+          admin: {
+            width: '20%',
+          },
         },
       ],
     },

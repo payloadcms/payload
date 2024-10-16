@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -374,20 +374,89 @@ describe('fields', () => {
     test('should render row fields inline and with explicit widths', async () => {
       await page.goto(url.create)
       const fieldA = page.locator('input#field-field_with_width_a')
-      await expect(fieldA).toBeVisible()
       const fieldB = page.locator('input#field-field_with_width_b')
+
+      await expect(fieldA).toBeVisible()
       await expect(fieldB).toBeVisible()
+
       const fieldABox = await fieldA.boundingBox()
       const fieldBBox = await fieldB.boundingBox()
 
-      // Check that the top value of the fields are the same
-      // Give it some wiggle room of like 2px to account for differences in rendering
-      const tolerance = 2
-      expect(fieldABox.y).toBeLessThanOrEqual(fieldBBox.y + tolerance)
+      await expect(() => {
+        expect(fieldABox.y).toEqual(fieldBBox.y)
+        expect(fieldABox.width).toEqual(fieldBBox.width)
+      }).toPass()
 
-      // Check that the widths of the fields are the same
-      const difference = Math.abs(fieldABox.width - fieldBBox.width)
-      expect(difference).toBeLessThanOrEqual(tolerance)
+      const field_30_percent = page.locator(
+        '.field-type.text:has(input#field-field_with_width_30_percent)',
+      )
+      const field_60_percent = page.locator(
+        '.field-type.text:has(input#field-field_with_width_60_percent)',
+      )
+      const field_20_percent = page.locator(
+        '.field-type.text:has(input#field-field_with_width_20_percent)',
+      )
+      const collapsible_30_percent = page.locator(
+        '.collapsible-field:has(#field-field_within_collapsible_a)',
+      )
+
+      const field_20_percent_width_within_row_a = page.locator(
+        '.field-type.text:has(input#field-field_20_percent_width_within_row_a)',
+      )
+      const field_no_set_width_within_row_b = page.locator(
+        '.field-type.text:has(input#field-no_set_width_within_row_b)',
+      )
+      const field_no_set_width_within_row_c = page.locator(
+        '.field-type.text:has(input#field-no_set_width_within_row_c)',
+      )
+      const field_20_percent_width_within_row_d = page.locator(
+        '.field-type.text:has(input#field-field_20_percent_width_within_row_d)',
+      )
+
+      await expect(field_30_percent).toBeVisible()
+      await expect(field_60_percent).toBeVisible()
+      await expect(field_20_percent).toBeVisible()
+      await expect(collapsible_30_percent).toBeVisible()
+      await expect(field_20_percent_width_within_row_a).toBeVisible()
+      await expect(field_no_set_width_within_row_b).toBeVisible()
+      await expect(field_no_set_width_within_row_c).toBeVisible()
+      await expect(field_20_percent_width_within_row_d).toBeVisible()
+
+      const field_30_boundingBox = await field_30_percent.boundingBox()
+      const field_60_boundingBox = await field_60_percent.boundingBox()
+      const field_20_boundingBox = await field_20_percent.boundingBox()
+      const collapsible_30_boundingBox = await collapsible_30_percent.boundingBox()
+      const field_20_percent_width_within_row_a_box =
+        await field_20_percent_width_within_row_a.boundingBox()
+      const field_no_set_width_within_row_b_box =
+        await field_no_set_width_within_row_b.boundingBox()
+      const field_no_set_width_within_row_c_box =
+        await field_no_set_width_within_row_c.boundingBox()
+      const field_20_percent_width_within_row_d_box =
+        await field_20_percent_width_within_row_d.boundingBox()
+
+      await expect(() => {
+        expect(field_30_boundingBox.y).toEqual(field_60_boundingBox.y)
+        expect(field_30_boundingBox.x).toEqual(field_20_boundingBox.x)
+        expect(field_30_boundingBox.y).not.toEqual(field_20_boundingBox.y)
+        expect(field_30_boundingBox.height).toEqual(field_60_boundingBox.height)
+        expect(collapsible_30_boundingBox.width).toEqual(field_30_boundingBox.width)
+
+        expect(field_20_percent_width_within_row_a_box.y).toEqual(
+          field_no_set_width_within_row_b_box.y,
+        )
+        expect(field_no_set_width_within_row_b_box.y).toEqual(field_no_set_width_within_row_c_box.y)
+        expect(field_no_set_width_within_row_c_box.y).toEqual(
+          field_20_percent_width_within_row_d_box.y,
+        )
+
+        expect(field_20_percent_width_within_row_a_box.width).toEqual(
+          field_20_percent_width_within_row_d_box.width,
+        )
+        expect(field_no_set_width_within_row_b_box.width).toEqual(
+          field_no_set_width_within_row_c_box.width,
+        )
+      }).toPass()
     })
 
     test('should render nested row fields in the correct position', async () => {
@@ -402,15 +471,11 @@ describe('fields', () => {
       const fieldABox = await fieldA.boundingBox()
       const fieldBBox = await fieldB.boundingBox()
 
-      // Check that the top value of the fields are the same
-      // Give it some wiggle room of like 2px to account for differences in rendering
-      const tolerance = 2
-      expect(fieldABox.y).toBeLessThanOrEqual(fieldBBox.y + tolerance)
-
-      // Check that the widths of the fields are the same
-      const collapsibleDifference = Math.abs(fieldABox.width - fieldBBox.width)
-
-      expect(collapsibleDifference).toBeLessThanOrEqual(tolerance)
+      await expect(() => {
+        // Check that the top value of the fields are the same
+        expect(fieldABox.y).toEqual(fieldBBox.y)
+        expect(fieldABox.height).toEqual(fieldBBox.height)
+      }).toPass()
     })
   })
 

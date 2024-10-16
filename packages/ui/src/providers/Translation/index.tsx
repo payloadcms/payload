@@ -12,9 +12,8 @@ import type { ClientConfig, LanguageOptions } from 'payload'
 
 import { importDateFNSLocale, t } from '@payloadcms/translations'
 import { enUS } from 'date-fns/locale/en-US'
+import { useRouter } from 'next/navigation.js'
 import React, { createContext, useContext, useEffect, useState } from 'react'
-
-import { useRouteCache } from '../RouteCache/index.js'
 
 type ContextType<
   TAdditionalTranslations = {},
@@ -64,7 +63,7 @@ export const TranslationProvider: React.FC<Props> = ({
   switchLanguageServerAction,
   translations,
 }) => {
-  const { clearRouteCache } = useRouteCache()
+  const router = useRouter()
   const [dateFNS, setDateFNS] = useState<Locale>()
 
   const nextT: ContextType['t'] = (key, vars): string =>
@@ -78,13 +77,13 @@ export const TranslationProvider: React.FC<Props> = ({
     async (lang: string) => {
       try {
         await switchLanguageServerAction(lang)
-        clearRouteCache()
+        router.refresh()
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error(`Error loading language: "${lang}"`, error)
       }
     },
-    [switchLanguageServerAction, clearRouteCache],
+    [switchLanguageServerAction, router],
   )
 
   useEffect(() => {

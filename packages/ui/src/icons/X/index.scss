@@ -1,8 +1,10 @@
 @import '../../scss/styles';
 
-.icon--x {
-  .stroke {
-    stroke: currentColor;
-    stroke-width: $style-stroke-width-s;
+@layer payload-default {
+  .icon--x {
+    .stroke {
+      stroke: currentColor;
+      stroke-width: $style-stroke-width-s;
+    }
   }
 }

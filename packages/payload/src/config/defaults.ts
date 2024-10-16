@@ -25,6 +25,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
       reset: '/reset',
       unauthorized: '/unauthorized',
     },
+    theme: 'all',
   },
   bin: [],
   collections: [],

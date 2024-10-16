@@ -160,6 +160,8 @@ export const reduceClientFields = ({
         field: {
           ...field,
           ...(field?.admin?.components?.Cell || {}),
+          // Override the type with the field type, it can come back from the Cell component with type 'client' or 'server' which is an unintended assignment
+          type: field.type,
         },
         operators,
       }

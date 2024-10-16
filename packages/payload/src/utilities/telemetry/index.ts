@@ -1,7 +1,6 @@
 import { execSync } from 'child_process'
 import ciInfo from 'ci-info'
 import { randomBytes } from 'crypto'
-import { findUp } from 'find-up'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -10,6 +9,7 @@ import type { Payload } from '../../types/index.js'
 import type { AdminInitEvent } from './events/adminInit.js'
 import type { ServerInitEvent } from './events/serverInit.js'
 
+import { findUp } from '../findUp.js'
 import { Conf } from './conf/index.js'
 import { oneWayHash } from './oneWayHash.js'
 
@@ -136,13 +136,15 @@ const getPackageJSON = async (): Promise<{
     // Old logic
     const filename = fileURLToPath(import.meta.url)
     const dirname = path.dirname(filename)
-    packageJSONPath = await findUp('package.json', { cwd: dirname })
-    const jsonContent: PackageJSON = JSON.parse(fs.readFileSync(packageJSONPath, 'utf-8'))
-    return { packageJSON: jsonContent, packageJSONPath }
+    packageJSONPath = await findUp({
+      dir: dirname,
+      fileNames: ['package.json'],
+    })
   }
 
-  const packageJSON: PackageJSON = JSON.parse(fs.readFileSync(packageJSONPath, 'utf-8'))
-  return { packageJSON, packageJSONPath }
+  const jsonContentString = await fs.promises.readFile(packageJSONPath, 'utf-8')
+  const jsonContent: PackageJSON = JSON.parse(jsonContentString)
+  return { packageJSON: jsonContent, packageJSONPath }
 }
 
 const getPackageJSONID = (payload: Payload, packageJSON: PackageJSON): string => {

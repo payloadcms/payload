@@ -28,12 +28,12 @@ export const TableCellProvider: React.FC<{
   return (
     <TableCellContext.Provider
       value={{
+        ...contextToInherit,
         cellData,
         cellProps,
         columnIndex,
         customCellContext,
         rowData,
-        ...contextToInherit,
       }}
     >
       {children}

@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
@@ -100,6 +101,7 @@ describe('field error states', () => {
       await saveDocAndAssert(page)
       await page.locator('#field-title').fill('original value 2')
       await saveDocAndAssert(page)
+      await wait(500)
 
       // create relation to doc
       await page.goto(prevValueRelation.create)

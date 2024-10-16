@@ -7,11 +7,11 @@ import { isEligibleRequest } from './isEligibleRequest.js'
 import { processMultipart } from './processMultipart.js'
 import { debugLog } from './utilities.js'
 
-const DEFAULT_OPTIONS = {
+const DEFAULT_OPTIONS: FetchAPIFileUploadOptions = {
   abortOnLimit: false,
   createParentPath: false,
   debug: false,
-  fileHandler: false,
+  defParamCharset: 'utf8',
   limitHandler: false,
   parseNested: false,
   preserveExtension: false,

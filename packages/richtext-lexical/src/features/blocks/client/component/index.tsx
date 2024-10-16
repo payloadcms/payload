@@ -1,7 +1,5 @@
 'use client'
 
-import type { FormProps } from '@payloadcms/ui'
-
 import {
   Collapsible,
   Form,
@@ -18,7 +16,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 const baseClass = 'lexical-block'
-import type { BlockFieldClient, FormState } from 'payload'
+import type { BlocksFieldClient, FormState } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { getFormState } from '@payloadcms/ui/shared'
@@ -33,7 +31,7 @@ import './index.scss'
 type Props = {
   readonly children?: React.ReactNode
   readonly formData: BlockFields
-  readonly nodeKey?: string
+  readonly nodeKey: string
 }
 
 export const BlockComponent: React.FC<Props> = (props) => {
@@ -52,14 +50,14 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.lexical_blocks.${formData.blockType}`
 
   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
-  const blocksField: BlockFieldClient = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
+  const blocksField: BlocksFieldClient = richTextComponentMap?.get(componentMapRenderedBlockPath)[0]
 
   const clientBlock = blocksField.blocks.find((block) => block.slug === formData.blockType)
 
   // Field Schema
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await getFormState({
+      const { state } = await getFormState({
         apiRoute: config.routes.api,
         body: {
           id,
@@ -87,9 +85,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
     }
   }, [config.routes.api, config.serverURL, schemaFieldsPath, id]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
 
-  const onChange: FormProps['onChange'][0] = useCallback(
+  const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      const formState = await getFormState({
+      const { state: formState } = await getFormState({
         apiRoute: config.routes.api,
         body: {
           id,
@@ -155,13 +153,13 @@ export const BlockComponent: React.FC<Props> = (props) => {
                   className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
                   pillStyle="white"
                 >
-                  {clientBlock && typeof clientBlock.labels.singular === 'string'
+                  {clientBlock && typeof clientBlock.labels?.singular === 'string'
                     ? getTranslation(clientBlock.labels.singular, i18n)
-                    : clientBlock.slug}
+                    : clientBlock?.slug}
                 </Pill>
                 <SectionTitle
                   path="blockName"
-                  readOnly={parentLexicalRichTextField?.admin?.readOnly}
+                  readOnly={parentLexicalRichTextField?.admin?.readOnly || false}
                 />
               </div>
             </div>

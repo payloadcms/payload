@@ -1,6 +1,6 @@
 'use client'
-export function debounce(func: Function, wait: number) {
-  let timeout: null | number = null
+export function debounce(func: (...args: any[]) => void, wait: number) {
+  let timeout
   return function (...args: any[]) {
     const later = () => {
       clearTimeout(timeout)

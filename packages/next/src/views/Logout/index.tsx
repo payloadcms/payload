@@ -25,7 +25,7 @@ export const LogoutView: React.FC<
   } = initPageResult
 
   return (
-    <div className={`${baseClass}__wrap`}>
+    <div className={`${baseClass}`}>
       <LogoutClient
         adminRoute={adminRoute}
         inactivity={inactivity}

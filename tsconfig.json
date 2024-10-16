@@ -78,6 +78,9 @@
       "@payloadcms/plugin-seo/client": [
         "./packages/plugin-seo/src/exports/client.ts"
       ],
+      "@payloadcms/plugin-sentry/client": [
+        "./packages/plugin-sentry/src/exports/client.ts"
+      ],
       "@payloadcms/plugin-stripe/client": [
         "./packages/plugin-stripe/src/exports/client.ts"
       ],
@@ -171,6 +174,9 @@
     "app",
     "next-env.d.ts",
     ".next/types/**/*.ts",
-    "scripts/**/*.ts"
+    "scripts/**/*.ts",
+    "instrumentation.ts",
+    "sentry.server.config.ts",
+    "sentry.client.config.ts"
   ]
 }

@@ -20,7 +20,7 @@ export type CollectionBeforeChangeHookWithArgs = (
     collection?: CollectionConfig
     pluginConfig?: StripePluginConfig
   } & HookArgsWithCustomCollection,
-) => void
+) => Promise<Partial<any>>
 
 export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async (args) => {
   const { collection, data, operation, originalDoc, pluginConfig, req } = args

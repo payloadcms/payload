@@ -20,6 +20,7 @@ import {
 
 import { lexicalFieldsSlug } from '../../slugs.js'
 import {
+  CodeBlock,
   ConditionalLayoutBlock,
   RadioButtonsBlock,
   RelationshipBlock,
@@ -80,6 +81,7 @@ const editorConfig: ServerEditorConfig = {
         RadioButtonsBlock,
         ConditionalLayoutBlock,
         TabBlock,
+        CodeBlock,
       ],
       inlineBlocks: [
         {

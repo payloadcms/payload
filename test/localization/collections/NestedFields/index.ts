@@ -43,5 +43,44 @@ export const NestedFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'blocks',
+      type: 'blocks',
+      localized: true,
+      blocks: [
+        {
+          slug: 'block',
+          fields: [
+            {
+              name: 'nestedBlocks',
+              type: 'blocks',
+              blocks: [
+                {
+                  slug: 'content',
+                  fields: [
+                    {
+                      name: 'relation',
+                      type: 'relationship',
+                      relationTo: ['localized-posts'],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              name: 'array',
+              type: 'array',
+              fields: [
+                {
+                  name: 'relation',
+                  type: 'relationship',
+                  relationTo: ['localized-posts'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
 }

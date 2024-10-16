@@ -109,8 +109,8 @@ export const UploadFeature = createServerFeature<
                 req,
                 showHiddenFields,
               }) => {
-                // @ts-expect-error
-                const id = node?.value?.id || node?.value // for backwards-compatibility
+                // @ts-expect-error - for backwards-compatibility
+                const id = node?.value?.id || node?.value
 
                 if (req?.payload) {
                   const uploadDocument: {
@@ -141,7 +141,7 @@ export const UploadFeature = createServerFeature<
                     return `<img />`
                   }
 
-                  const url = getAbsoluteURL(uploadDocument?.value?.url, req?.payload)
+                  const url = getAbsoluteURL(uploadDocument?.value?.url ?? '', req?.payload)
 
                   /**
                    * If the upload is not an image, return a link to the upload

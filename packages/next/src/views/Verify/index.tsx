@@ -1,10 +1,10 @@
 import type { AdminViewProps } from 'payload'
 
 import { formatAdminURL } from '@payloadcms/ui/shared'
-import { redirect } from 'next/navigation.js'
 import React from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
+import { ToastAndRedirect } from './index.client.js'
 import './index.scss'
 
 export const verifyBaseClass = 'verify'
@@ -33,6 +33,7 @@ export const Verify: React.FC<AdminViewProps> = async ({
   } = config
 
   let textToRender
+  let isVerified = false
 
   try {
     await req.payload.verifyEmail({
@@ -40,13 +41,19 @@ export const Verify: React.FC<AdminViewProps> = async ({
       token,
     })
 
-    return redirect(formatAdminURL({ adminRoute, path: '/login' }))
+    isVerified = true
+    textToRender = req.t('authentication:emailVerified')
   } catch (e) {
-    // already verified
-    if (e?.status === 202) {
-      redirect(formatAdminURL({ adminRoute, path: '/login' }))
-    }
     textToRender = req.t('authentication:unableToVerify')
+  }
+
+  if (isVerified) {
+    return (
+      <ToastAndRedirect
+        message={req.t('authentication:emailVerified')}
+        redirectTo={formatAdminURL({ adminRoute, path: '/login' })}
+      />
+    )
   }
 
   return (

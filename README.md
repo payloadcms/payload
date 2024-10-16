@@ -100,6 +100,10 @@ If you want to add contributions to this repository, please follow the instructi
 
 The [Examples Directory](./examples) is a great resource for learning how to setup Payload in a variety of different ways, but you can also find great examples in our blog and throughout our social media.
 
+If you'd like to run the examples, you can either copy them to a folder outside this repo or run them directly by (1) navigating to the example's subfolder (`cd examples/your-example-folder`) and (2) using the `--ignore-workspace` flag to bypass workspace restrictions (e.g., `pnpm --ignore-workspace install` or `pnpm --ignore-workspace dev`).
+
+You can see more examples at:
+
 - [Examples Directory](./examples)
 - [Payload Blog](https://payloadcms.com/blog)
 - [Payload YouTube](https://www.youtube.com/@payloadcms)

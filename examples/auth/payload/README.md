@@ -48,7 +48,7 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
   ```ts
     import { headers as getHeaders } from 'next/headers.js'
-    import { getPayloadHMR } from '@payloadcms/next'
+    import { getPayloadHMR } from '@payloadcms/next/utilities'
     import config from '../../payload.config'
 
     export default async function AccountPage({ searchParams }) {

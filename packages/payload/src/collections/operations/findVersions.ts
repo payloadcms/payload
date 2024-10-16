@@ -52,7 +52,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
       accessResults = await executeAccess({ req }, collectionConfig.access.readVersions)
     }
 
-    const versionFields = buildVersionCollectionFields(collectionConfig)
+    const versionFields = buildVersionCollectionFields(payload.config, collectionConfig)
 
     await validateQueryPaths({
       collectionConfig,

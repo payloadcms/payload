@@ -1,5 +1,5 @@
 'use client'
-import type { DocumentPreferences, TabsFieldProps } from 'payload'
+import type { DocumentPreferences, TabsFieldClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { tabHasName, toKebabCase } from 'payload/shared'
@@ -22,7 +22,7 @@ const baseClass = 'tabs-field'
 
 export { TabsProvider }
 
-const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
+const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const {
     field,
     field: {
@@ -112,6 +112,12 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
     return tabPath
   }
 
+  const activeTabDescription = activeTabConfig.description
+  const activeTabStaticDescription =
+    typeof activeTabDescription === 'function'
+      ? activeTabDescription({ t: i18n.t })
+      : activeTabDescription
+
   return (
     <div
       className={[
@@ -154,7 +160,11 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
                 .filter(Boolean)
                 .join(' ')}
             >
-              <FieldDescription Description={field?.admin?.components?.Description} field={field} />
+              <FieldDescription
+                Description={field?.admin?.components?.Description}
+                description={activeTabStaticDescription}
+                field={field}
+              />
               <RenderFields
                 fields={activeTabConfig.fields}
                 forceRender={forceRender}

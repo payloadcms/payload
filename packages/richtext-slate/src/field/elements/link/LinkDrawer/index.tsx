@@ -38,7 +38,7 @@ export const LinkDrawer: React.FC<Props> = ({
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      return await getFormState({
+      const { state } = await getFormState({
         apiRoute: config.routes.api,
         body: {
           id,
@@ -48,6 +48,8 @@ export const LinkDrawer: React.FC<Props> = ({
         },
         serverURL: config.serverURL,
       })
+
+      return state
     },
 
     [config.routes.api, config.serverURL, fieldMapPath, id],

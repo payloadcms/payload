@@ -41,21 +41,22 @@ export type GenerateViewMetadata = (args: {
 export const NotFoundPage = async ({
   config: configPromise,
   importMap,
-  params,
-  searchParams,
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
 }: {
   config: Promise<SanitizedConfig>
   importMap: ImportMap
-  params: {
+  params: Promise<{
     segments: string[]
-  }
-  searchParams: {
+  }>
+  searchParams: Promise<{
     [key: string]: string | string[]
-  }
+  }>
 }) => {
   const config = await configPromise
   const { routes: { admin: adminRoute } = {} } = config
 
+  const searchParams = await searchParamsPromise
   const initPageResult = await initPage({
     config,
     importMap,
@@ -63,6 +64,8 @@ export const NotFoundPage = async ({
     route: formatAdminURL({ adminRoute, path: '/not-found' }),
     searchParams,
   })
+
+  const params = await paramsPromise
 
   return (
     <DefaultTemplate

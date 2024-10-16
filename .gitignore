@@ -5,6 +5,9 @@ dist
 !/.idea/runConfigurations
 !/.idea/payload.iml
 
+# Custom actions
+!.github/actions/**/dist
+
 test/packed
 test-results
 .devcontainer
@@ -310,3 +313,7 @@ test/admin-root/app/(payload)/admin/importMap.js
 test/app/(payload)/admin/importMap.js
 /test/app/(payload)/admin/importMap.js
 test/pnpm-lock.yaml
+test/databaseAdapter.js
+/filename-compound-index
+/media-with-relation-preview
+/media-without-relation-preview

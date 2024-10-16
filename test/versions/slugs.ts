@@ -25,3 +25,7 @@ export const draftGlobalSlug = 'draft-global'
 export const draftWithMaxGlobalSlug = 'draft-with-max-global'
 
 export const globalSlugs = [autoSaveGlobalSlug, draftGlobalSlug]
+
+export const localizedCollectionSlug = 'localized-posts'
+
+export const localizedGlobalSlug = 'localized-global'

@@ -16,6 +16,7 @@ export type Options<TSlug extends CollectionSlug> = {
   context?: RequestContext
   data: RequiredDataFromCollectionSlug<TSlug>
   depth?: number
+  disableTransaction?: boolean
   disableVerificationEmail?: boolean
   draft?: boolean
   fallbackLocale?: TypedLocale
@@ -38,6 +39,7 @@ export default async function createLocal<TSlug extends CollectionSlug>(
     collection: collectionSlug,
     data,
     depth,
+    disableTransaction,
     disableVerificationEmail,
     draft,
     file,
@@ -61,6 +63,7 @@ export default async function createLocal<TSlug extends CollectionSlug>(
     collection,
     data,
     depth,
+    disableTransaction,
     disableVerificationEmail,
     draft,
     overrideAccess,

@@ -25,6 +25,11 @@ export const baseIDField: TextField = {
         return value
       },
     ],
+    beforeDuplicate: [
+      () => {
+        return new ObjectId().toHexString()
+      },
+    ],
   },
   label: 'ID',
 }

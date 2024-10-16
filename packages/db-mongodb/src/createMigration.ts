@@ -11,11 +11,11 @@ const migrationTemplate = ({ downSQL, imports, upSQL }: MigrationTemplateArgs): 
 } from '@payloadcms/db-mongodb'
 ${imports}
 
-export async function up({ payload }: MigrateUpArgs): Promise<void> {
+export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
 ${upSQL ?? `  // Migration code`}
 }
 
-export async function down({ payload }: MigrateDownArgs): Promise<void> {
+export async function down({ payload, req }: MigrateDownArgs): Promise<void> {
 ${downSQL ?? `  // Migration code`}
 }
 `

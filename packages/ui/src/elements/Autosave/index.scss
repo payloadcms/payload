@@ -1,5 +1,7 @@
 @import '../../scss/styles.scss';
 
-.autosave {
-  white-space: nowrap;
+@layer payload-default {
+  .autosave {
+    white-space: nowrap;
+  }
 }
