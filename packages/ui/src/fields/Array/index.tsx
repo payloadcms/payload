@@ -3,6 +3,7 @@ import type {
   ArrayFieldClientComponent,
   ArrayFieldClientProps,
   ArrayField as ArrayFieldType,
+  Row,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -61,7 +62,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const minRows = (minRowsProp ?? required) ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const { addFieldRow, dispatchFields, setModified } = useForm()
+  const { addFieldRow, dispatchFields, getDataByPath, setModified } = useForm()
   const submitted = useFormSubmitted()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
@@ -128,17 +129,19 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
-  const { renderedRows, setRenderedRows } = useFieldRows()
+  const { setRenderedRows } = useFieldRows()
 
   const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const addRow = useCallback(
     async (rowIndex: number): Promise<void> => {
-      // TODO add the new row into the rowsData array using the incoming rowIndex
+      // TODO add the new row into the currentData array using the incoming rowIndex
       const newRow = { id: uuid() }
 
+      const currentData: Row[] = getDataByPath(path)
+
       const renderedFieldRow = await addFieldRow({
-        data: { [name]: [...rowsData, newRow] },
+        data: { [name]: [...currentData, newRow] },
         schemaPath,
       })
 
@@ -150,7 +153,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, setModified, schemaPath, setRenderedRows, rowsData, name],
+    [addFieldRow, path, setModified, schemaPath, setRenderedRows, getDataByPath, name],
   )
 
   const duplicateRow = useCallback(
