@@ -60,6 +60,7 @@ export interface Config {
     'uploads-multi': UploadsMulti;
     'uploads-poly': UploadsPoly;
     'uploads-multi-poly': UploadsMultiPoly;
+    'uploads-restricted': UploadsRestricted;
     'ui-fields': UiField;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -1328,6 +1329,15 @@ export interface SelectField {
   select?: ('one' | 'two' | 'three') | null;
   selectReadOnly?: ('one' | 'two' | 'three') | null;
   selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
+  array?:
+    | {
+        selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
+        group?: {
+          selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
   selectHasManyLocalized?: ('one' | 'two')[] | null;
   selectI18n?: ('one' | 'two' | 'three') | null;
   simple?: ('One' | 'Two' | 'Three') | null;
@@ -1621,6 +1631,19 @@ export interface UploadsMultiPoly {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-restricted".
+ */
+export interface UploadsRestricted {
+  id: string;
+  text?: string | null;
+  uploadWithoutRestriction?: (string | null) | Upload;
+  uploadWithAllowCreateFalse?: (string | null) | Upload;
+  uploadMultipleWithAllowCreateFalse?: (string | Upload)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ui-fields".
  */
 export interface UiField {
@@ -1763,6 +1786,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'uploads-multi-poly';
         value: string | UploadsMultiPoly;
+      } | null)
+    | ({
+        relationTo: 'uploads-restricted';
+        value: string | UploadsRestricted;
       } | null)
     | ({
         relationTo: 'ui-fields';
