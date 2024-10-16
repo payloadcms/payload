@@ -268,7 +268,7 @@ describe('Localization', () => {
       await page.locator('.copy-locale-data').click()
       const firstButton = page.locator('.copy-locale-data button').nth(1)
       await expect(firstButton).toBeVisible()
-      await expect(firstButton).toContainText('Spanish to English')
+      await expect(firstButton).toContainText('English to Spanish')
     })
 
     test('should show correct locales', async () => {
@@ -278,6 +278,7 @@ describe('Localization', () => {
       const fourthOption = 'English to Hungarian'
 
       await page.goto(url.create)
+      await changeLocale(page, englishLocale)
       await fillValues({ description, title })
       await saveDocAndAssert(page)
       await page.locator('.copy-locale-data').click()
@@ -310,10 +311,10 @@ describe('Localization', () => {
 
     test('should throw error if unsaved data', async () => {
       await page.goto(url.create)
-      await fillValues({ description, title })
+      await fillValues({ title })
+      await saveDocAndAssert(page)
+      await fillValues({ title: 'updated' })
       await page.locator('.copy-locale-data').click()
-      const firstButton = page.locator('.copy-locale-data button').nth(1)
-      await firstButton.click()
       await expect(page.locator('.payload-toast-container')).toContainText('unsaved')
     })
   })
