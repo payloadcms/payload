@@ -573,6 +573,54 @@ describe('Fields', () => {
 
       expect(resInSecond.totalDocs).toBe(1)
     })
+
+    it('should CRUD within array hasMany', async () => {
+      const doc = await payload.create({
+        collection: 'select-fields',
+        data: { array: [{ selectHasMany: ['one', 'two'] }] },
+      })
+
+      expect(doc.array[0].selectHasMany).toStrictEqual(['one', 'two'])
+
+      const upd = await payload.update({
+        collection: 'select-fields',
+        id: doc.id,
+        data: {
+          array: [
+            {
+              id: doc.array[0].id,
+              selectHasMany: ['six'],
+            },
+          ],
+        },
+      })
+
+      expect(upd.array[0].selectHasMany).toStrictEqual(['six'])
+    })
+
+    it('should CRUD within array + group hasMany', async () => {
+      const doc = await payload.create({
+        collection: 'select-fields',
+        data: { array: [{ group: { selectHasMany: ['one', 'two'] } }] },
+      })
+
+      expect(doc.array[0].group.selectHasMany).toStrictEqual(['one', 'two'])
+
+      const upd = await payload.update({
+        collection: 'select-fields',
+        id: doc.id,
+        data: {
+          array: [
+            {
+              id: doc.array[0].id,
+              group: { selectHasMany: ['six'] },
+            },
+          ],
+        },
+      })
+
+      expect(upd.array[0].group.selectHasMany).toStrictEqual(['six'])
+    })
   })
 
   describe('number', () => {
