@@ -14,10 +14,10 @@ body:
     attributes:
       label: Link to the code that reproduces this issue
       description: >-
-        Please provide a link to your reproduction. Note, if the URL is invalid (eg.: 404, or a private repository), we may close the issue.
-        Either use `npx create-payload-app@beta` or follow the [reproduction-guide](https://github.com/payloadcms/payload/blob/main/.github/reproduction-guide.md) for more information.
+        Required: Please provide a link to your reproduction. Note, if the URL is invalid (404 or a private repository), we may close the issue.
+        Either use `npx create-payload-app@beta -t blank` or follow the [reproduction-guide](https://github.com/payloadcms/payload/blob/main/.github/reproduction-guide.md) for more information.
     validations:
-      required: false
+      required: true
 
   - type: textarea
     attributes:
