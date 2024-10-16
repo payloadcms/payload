@@ -49,7 +49,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
   const { config } = useConfig()
 
-  const { i18n, t } = useTranslation()
+  const { i18n, t } = useTranslation<object, 'lexical:link:loadingWithEllipsis'>()
 
   const [stateData, setStateData] = useState<
     ({ id?: string; text: string } & LinkFields) | undefined
@@ -81,7 +81,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     setStateData(undefined)
   }, [setIsLink, setLinkUrl, setLinkLabel, setSelectedNodes])
 
-  const $updateLinkEditor = useCallback(async () => {
+  const $updateLinkEditor = useCallback(() => {
     const selection = $getSelection()
     let selectedNodeDomRect: DOMRect | undefined
 
@@ -109,7 +109,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       })
 
     if (focusLinkParent == null || badNode) {
-      void setNotLink()
+      setNotLink()
       return
     }
 
@@ -147,13 +147,12 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         }
 
         const loadingLabel = t('fields:linkedTo', {
-          label: `${getTranslation(relatedField.labels.singular, i18n)} - ${getTranslation('loading...', i18n)}`,
+          label: `${getTranslation(relatedField.labels.singular, i18n)} - ${t('lexical:link:loadingWithEllipsis', i18n)}`,
         }).replace(/<[^>]*>?/g, '')
         setLinkLabel(loadingLabel)
 
-        const res = await requests.get(
-          `${config.serverURL}${config.routes.api}/${collection}/${id}`,
-          {
+        requests
+          .get(`${config.serverURL}${config.routes.api}/${collection}/${id}`, {
             headers: {
               'Accept-Language': i18n.language,
             },
@@ -161,15 +160,19 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
               depth: 0,
               locale: locale?.code,
             },
-          },
-        )
-        const data = await res.json()
-        const useAsTitle = relatedField?.admin?.useAsTitle || 'id'
-        const title = data[useAsTitle]
-        const label = t('fields:linkedTo', {
-          label: `${getTranslation(relatedField.labels.singular, i18n)} - ${title}`,
-        }).replace(/<[^>]*>?/g, '')
-        setLinkLabel(label)
+          })
+          .then(async (res) => {
+            const data = await res.json()
+            const useAsTitle = relatedField?.admin?.useAsTitle || 'id'
+            const title = data[useAsTitle]
+            const label = t('fields:linkedTo', {
+              label: `${getTranslation(relatedField.labels.singular, i18n)} - ${title}`,
+            }).replace(/<[^>]*>?/g, '')
+            setLinkLabel(label)
+          })
+          .catch((err) => {
+            throw new Error(err)
+          })
       }
     }
 
@@ -227,7 +230,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
           editor.dispatchCommand(TOGGLE_LINK_COMMAND, payload)
 
           // Now, open the modal
-          void $updateLinkEditor()
+          $updateLinkEditor()
           toggleModal(drawerSlug)
 
           return true
