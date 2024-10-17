@@ -136,6 +136,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       findGlobalVersions,
       findOne,
       findVersions,
+      indexes: new Set<string>(),
       init,
       insert,
       migrate,
