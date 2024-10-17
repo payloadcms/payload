@@ -1,3 +1,14 @@
+## [2.30.2](https://github.com/payloadcms/payload/compare/v2.30.1...v2.30.2) (2024-10-17)
+
+### Bug Fixes
+
+* applies resize after cropping if `resizeOptions` are defined ([#8535](https://github.com/payloadcms/payload/issues/8535)) ([f2284f3](https://github.com/payloadcms/payload/commit/f2284f3d1b420c543d9eee9929f961db4cbef8a1))
+* calculates correct aspect ratio dimensions on sharp based files ([#8510](https://github.com/payloadcms/payload/issues/8510)) ([9d05b82](https://github.com/payloadcms/payload/commit/9d05b82dc67b967e55176b92f7b20d4486883201)), closes [#8317](https://github.com/payloadcms/payload/issues/8317)
+* **db-postgres:** build indexes for relationships ([#8446](https://github.com/payloadcms/payload/issues/8446)) ([d05e3b0](https://github.com/payloadcms/payload/commit/d05e3b0411c2e705bd7a26e93ba55f2b7532e41b))
+* **db-postgres:** port many various fixes from 3.0 ([#8468](https://github.com/payloadcms/payload/issues/8468)) ([1347b6c](https://github.com/payloadcms/payload/commit/1347b6cc36c33043755b4e31d7731ba19b8c985f))
+* **db-postgres:** select hasMany nested to array + tab/group ([#8739](https://github.com/payloadcms/payload/issues/8739)) ([0efc610](https://github.com/payloadcms/payload/commit/0efc6102104729a162912157a7e34293ec9764a5))
+* **richtext-lexical:** add target _blank for new-tab in linkFeature ([#8571](https://github.com/payloadcms/payload/issues/8571)) ([61e8ce1](https://github.com/payloadcms/payload/commit/61e8ce17439301cb16aee92887e97a69cac4e044)), closes [#8569](https://github.com/payloadcms/payload/issues/8569)
+
 ## [2.30.1](https://github.com/payloadcms/payload/compare/v2.30.0...v2.30.1) (2024-10-02)
 
 
