@@ -23,6 +23,7 @@ type CreateAccessPromise = (args: {
   access: Access | FieldAccess
   accessLevel: 'entity' | 'field'
   disableWhere?: boolean
+  locale?: string
   operation: AllOperations
   policiesObj: {
     [key: string]: any
@@ -113,7 +114,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     await docBeingAccessed
 
     // https://payloadcms.slack.com/archives/C048Z9C2BEX/p1702054928343769
-    const accessResult = await access({ id, data, doc: docBeingAccessed, req })
+    const accessResult = await access({ id, data, doc: docBeingAccessed, locale, req })
 
     if (typeof accessResult === 'object' && !disableWhere) {
       mutablePolicies[operation] = {

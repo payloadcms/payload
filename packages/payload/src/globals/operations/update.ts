@@ -69,6 +69,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
       ? await executeAccess(
           {
             data,
+            locale,
             req,
           },
           globalConfig.access.update,

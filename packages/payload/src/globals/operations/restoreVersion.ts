@@ -42,7 +42,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     // /////////////////////////////////////
 
     if (!overrideAccess) {
-      await executeAccess({ req }, globalConfig.access.update)
+      await executeAccess({ locale, req }, globalConfig.access.update)
     }
 
     // /////////////////////////////////////

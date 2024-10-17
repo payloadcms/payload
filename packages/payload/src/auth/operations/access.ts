@@ -6,16 +6,17 @@ import { adminInit as adminInitTelemetry } from '../../utilities/telemetry/event
 import { getAccessResults } from '../getAccessResults.js'
 
 type Arguments = {
+  locale?: string
   req: PayloadRequest
 }
 
 export const accessOperation = async (args: Arguments): Promise<Permissions> => {
-  const { req } = args
+  const { locale, req } = args
 
   adminInitTelemetry(req)
 
   try {
-    return getAccessResults({ req })
+    return getAccessResults({ locale, req })
   } catch (e: unknown) {
     await killTransaction(req)
     throw e

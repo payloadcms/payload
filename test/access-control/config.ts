@@ -117,7 +117,12 @@ export default buildConfigWithDefaults({
     {
       slug: localizedSlug,
       access: {
-        create: ({ req }) => (console.log('create access', req), true),
+        update: ({ locale }) => {
+          if (locale === 'en') {
+            return true
+          }
+          return false
+        },
       },
       fields: [
         {
