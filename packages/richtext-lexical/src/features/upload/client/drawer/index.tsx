@@ -57,7 +57,7 @@ const UploadDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }) => {
 
   const [replaceNodeKey, setReplaceNodeKey] = useState<null | string>(null)
 
-  const [ListDrawer, ListDrawerToggler, { closeDrawer, openDrawer }] = useListDrawer({
+  const [ListDrawer, _ListDrawerToggler, { closeDrawer, openDrawer }] = useListDrawer({
     collectionSlugs: enabledCollectionSlugs,
     uploads: true,
   })
@@ -77,7 +77,7 @@ const UploadDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }) => {
   }, [editor, openDrawer])
 
   const onSelect = useCallback(
-    ({ collectionSlug, docID }) => {
+    ({ collectionSlug, docID }: { collectionSlug: string; docID: string }) => {
       insertUpload({
         editor,
         relationTo: collectionSlug,
