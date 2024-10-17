@@ -115,7 +115,6 @@ export const runJSONJob = async ({
       // Tasks update the job if they error - but in case there is an unhandled error (e.g. in the workflow itself, not in a task)
       // we need to ensure the job is updated to reflect the error
       await updateJob({
-        ...job, // ensure locally modified job data is saved
         completedAt: new Date().toISOString(),
         error: hasFinalError ? error : undefined,
         hasError: hasFinalError, // If reached max retries => final error. If hasError is true this job will not be retried
@@ -124,7 +123,6 @@ export const runJSONJob = async ({
       })
     } else {
       await updateJob({
-        ...job, // ensure locally modified job data is saved
         completedAt: new Date().toISOString(),
         processing: false,
         totalTried: (job.totalTried ?? 0) + 1,
@@ -139,7 +137,6 @@ export const runJSONJob = async ({
       // Tasks update the job if they error - but in case there is an unhandled error (e.g. in the workflow itself, not in a task)
       // we need to ensure the job is updated to reflect the error
       await updateJob({
-        ...job, // ensure locally modified job data is saved
         error: hasFinalError ? error : undefined,
         hasError: hasFinalError, // If reached max retries => final error. If hasError is true this job will not be retried
         processing: false,
@@ -150,7 +147,6 @@ export const runJSONJob = async ({
       }
     } else {
       // Retry the job - no need to bump processing or totalTried as this does not count as a retry. A condition of a different task might have just opened up!
-      await updateJob(job)
       return await runJSONJob({
         job,
         req,

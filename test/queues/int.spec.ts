@@ -1,5 +1,6 @@
+import type { JobTaskStatus, type Payload } from 'payload';
+
 import path from 'path'
-import { type Payload } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -301,7 +302,7 @@ describe('Queues', () => {
       id: job.id,
     })
     expect(jobAfterRun.totalTried).toBe(5)
-    expect(jobAfterRun.taskStatus.inline['1'].totalTried).toBe(5)
+    expect((jobAfterRun.taskStatus as JobTaskStatus).inline['1'].totalTried).toBe(5)
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(4)

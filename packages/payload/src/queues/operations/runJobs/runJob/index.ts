@@ -59,7 +59,6 @@ export const runJob = async ({
     // Tasks update the job if they error - but in case there is an unhandled error (e.g. in the workflow itself, not in a task)
     // we need to ensure the job is updated to reflect the error
     await updateJob({
-      ...job, // ensure locally modified job data is saved
       error: hasFinalError ? err : undefined,
       hasError: hasFinalError, // If reached max retries => final error. If hasError is true this job will not be retried
       processing: false,
@@ -73,7 +72,6 @@ export const runJob = async ({
 
   // Workflow has completed
   await updateJob({
-    ...job, // ensure locally modified job data is saved
     completedAt: new Date().toISOString(),
     processing: false,
     totalTried: (job.totalTried ?? 0) + 1,

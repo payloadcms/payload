@@ -13,7 +13,7 @@ export function getUpdateJobFunction(job: BaseJob, req: PayloadRequest): UpdateJ
       disableTransaction: true,
     })) as BaseJob
 
-    // Update job object like this to modify the original object - that way, the changes will be reflected in the calling function
+    // Update job object like this to modify the original object - that way, incoming changes (e.g. taskStatus field that will be re-generated through the hook) will be reflected in the calling function
     for (const key in updatedJob) {
       job[key] = updatedJob[key]
     }

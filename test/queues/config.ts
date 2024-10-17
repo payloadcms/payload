@@ -312,11 +312,19 @@ export default buildConfigWithDefaults({
             required: true,
           },
         ],
-        handler: async ({ job, tasks }) => {
-          // @ts-expect-error amountRetried is new arbitrary data and not in the type
-          job.input.amountRetried =
-            // @ts-expect-error amountRetried is new arbitrary data and not in the type
-            job.input.amountRetried !== undefined ? job.input.amountRetried + 1 : 0
+        handler: async ({ job, tasks, req }) => {
+          await req.payload.update({
+            collection: 'payload-jobs',
+            data: {
+              input: {
+                ...job.input,
+                amountRetried:
+                  // @ts-expect-error amountRetried is new arbitrary data and not in the type
+                  job.input.amountRetried !== undefined ? job.input.amountRetried + 1 : 0,
+              },
+            },
+            id: job.id,
+          })
 
           await tasks.CreateSimple('1', {
             input: {
@@ -344,11 +352,19 @@ export default buildConfigWithDefaults({
             required: true,
           },
         ],
-        handler: async ({ job, inlineTask }) => {
-          // @ts-expect-error amountRetried is new arbitrary data and not in the type
-          job.input.amountRetried =
-            // @ts-expect-error amountRetried is new arbitrary data and not in the type
-            job.input.amountRetried !== undefined ? job.input.amountRetried + 1 : 0
+        handler: async ({ job, inlineTask, req }) => {
+          await req.payload.update({
+            collection: 'payload-jobs',
+            data: {
+              input: {
+                ...job.input,
+                amountRetried:
+                  // @ts-expect-error amountRetried is new arbitrary data and not in the type
+                  job.input.amountRetried !== undefined ? job.input.amountRetried + 1 : 0,
+              },
+            },
+            id: job.id,
+          })
 
           await inlineTask('1', {
             task: async ({ req }) => {
@@ -396,11 +412,19 @@ export default buildConfigWithDefaults({
           },
         ],
         retries: 2, // Even though CreateSimple has 3 retries, this workflow only has 2. Thus, it will only retry once
-        handler: async ({ job, tasks }) => {
-          // @ts-expect-error amountRetried is new arbitrary data and not in the type
-          job.input.amountRetried =
-            // @ts-expect-error amountRetried is new arbitrary data and not in the type
-            job.input.amountRetried !== undefined ? job.input.amountRetried + 1 : 0
+        handler: async ({ job, tasks, req }) => {
+          await req.payload.update({
+            collection: 'payload-jobs',
+            data: {
+              input: {
+                ...job.input,
+                amountRetried:
+                  // @ts-expect-error amountRetried is new arbitrary data and not in the type
+                  job.input.amountRetried !== undefined ? job.input.amountRetried + 1 : 0,
+              },
+            },
+            id: job.id,
+          })
 
           await tasks.CreateSimple('1', {
             input: {
@@ -470,11 +494,20 @@ export default buildConfigWithDefaults({
             required: true,
           },
         ],
-        handler: async ({ job, inlineTask }) => {
-          // @ts-expect-error amountRetried is new arbitrary data and not in the type
-          job.input.amountRetried =
-            // @ts-expect-error amountRetried is new arbitrary data and not in the type
-            job.input.amountRetried !== undefined ? job.input.amountRetried + 1 : 0
+        handler: async ({ job, inlineTask, req }) => {
+          const newJob = await req.payload.update({
+            collection: 'payload-jobs',
+            data: {
+              input: {
+                ...job.input,
+                amountRetried:
+                  // @ts-expect-error amountRetried is new arbitrary data and not in the type
+                  job.input.amountRetried !== undefined ? job.input.amountRetried + 1 : 0,
+              },
+            },
+            id: job.id,
+          })
+          job.input = newJob.input as any
 
           await inlineTask('1', {
             task: async ({ req }) => {
@@ -496,6 +529,14 @@ export default buildConfigWithDefaults({
 
               // @ts-expect-error timeTried is new arbitrary data and not in the type
               job.input.timeTried[totalTried] = new Date().toISOString()
+
+              await req.payload.update({
+                collection: 'payload-jobs',
+                data: {
+                  input: job.input,
+                },
+                id: job.id,
+              })
 
               if (totalTried < 4) {
                 // Cleanup the post

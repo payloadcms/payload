@@ -95,11 +95,14 @@ export async function handleTaskFailed({
 
   if (taskStatus && !taskStatus.complete && taskStatus.totalTried >= maxRetries) {
     state.reachedMaxRetries = true
-    job.hasError = true
-    job.processing = false
-    job.error = error
 
-    await updateJob(job)
+    await updateJob({
+      error,
+      hasError: true,
+      log: job.log,
+      processing: false,
+      waitUntil: job.waitUntil,
+    })
 
     throw new Error(
       `Task ${taskSlug} has failed more than the allowed retries in workflow ${job.workflowSlug}${error ? `. Error: ${String(error)}` : ''}`,
@@ -116,7 +119,11 @@ export async function handleTaskFailed({
       job.waitUntil = waitUntil.toISOString()
     }
 
-    await updateJob(job)
+    await updateJob({
+      log: job.log,
+      processing: false,
+      waitUntil: job.waitUntil,
+    })
     throw error ?? new Error('Task failed')
   }
 }
@@ -271,7 +278,9 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         taskSlug,
       })
 
-      await updateJob(job)
+      await updateJob({
+        log: job.log,
+      })
 
       return output
     }) as any
