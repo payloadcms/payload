@@ -5,6 +5,7 @@ import type { Field, FieldAccess } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { AllOperations, Document, PayloadRequest, Where } from '../types/index.js'
 
+import { combineQueries } from '../database/combineQueries.js'
 import { tabHasName } from '../fields/config/types.js'
 
 type Args = {
@@ -63,17 +64,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
             overrideAccess: true,
             pagination: false,
             req,
-            where: {
-              ...where,
-              and: [
-                ...(where.and || []),
-                {
-                  id: {
-                    equals: id,
-                  },
-                },
-              ],
-            },
+            where: combineQueries(where, { id: { equals: id } }),
           })
 
           return paginatedRes?.docs?.[0] || undefined

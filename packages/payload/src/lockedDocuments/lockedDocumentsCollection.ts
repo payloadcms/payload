@@ -29,4 +29,5 @@ export const getLockedDocumentsCollection = (config: Config): CollectionConfig =
       required: true,
     },
   ],
+  lockDocuments: false,
 })

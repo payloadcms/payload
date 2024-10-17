@@ -64,7 +64,7 @@
     "comment-json": "^4.2.3",
     "create-payload-app": "workspace:*",
     "dotenv": "16.4.5",
-    "drizzle-kit": "0.23.2-df9e596",
+    "drizzle-kit": "0.26.2",
     "eslint-plugin-playwright": "1.6.2",
     "execa": "5.1.1",
     "file-type": "19.3.0",
