@@ -488,8 +488,8 @@ describe('Queues', () => {
     expect(allSimples.totalDocs).toBe(30)
   })*/
 
-  it('can queue single tasks multiple times', async () => {
-    for (let i = 0; i < 10; i++) {
+  it('can queue single tasks 8 times', async () => {
+    for (let i = 0; i < 8; i++) {
       await payload.jobs.queue({
         task: 'CreateSimple',
         input: {
@@ -505,9 +505,80 @@ describe('Queues', () => {
       limit: 100,
     })
 
-    expect(allSimples.totalDocs).toBe(10)
+    expect(allSimples.totalDocs).toBe(8)
+    expect(allSimples.docs[0].title).toBe('from single task')
+    expect(allSimples.docs[7].title).toBe('from single task')
+  })
+
+  it('can queue single tasks 500 times', async () => {
+    for (let i = 0; i < 500; i++) {
+      await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'from single task',
+        },
+      })
+    }
+
+    await payload.jobs.run({
+      limit: 1000,
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 1000,
+    })
+
+    expect(allSimples.totalDocs).toBe(500) // Default limit: 10
+    expect(allSimples.docs[0].title).toBe('from single task')
+    expect(allSimples.docs[490].title).toBe('from single task')
+  })
+
+  it('ensure default jobs run limit of 10 works', async () => {
+    for (let i = 0; i < 500; i++) {
+      await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'from single task',
+        },
+      })
+    }
+
+    await payload.jobs.run()
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 1000,
+    })
+
+    expect(allSimples.totalDocs).toBe(10) // Default limit: 10
     expect(allSimples.docs[0].title).toBe('from single task')
     expect(allSimples.docs[9].title).toBe('from single task')
+  })
+
+  it('ensure jobs run limit can be customized', async () => {
+    for (let i = 0; i < 500; i++) {
+      await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'from single task',
+        },
+      })
+    }
+
+    await payload.jobs.run({
+      limit: 42,
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 1000,
+    })
+
+    expect(allSimples.totalDocs).toBe(42) // Default limit: 10
+    expect(allSimples.docs[0].title).toBe('from single task')
+    expect(allSimples.docs[30].title).toBe('from single task')
+    expect(allSimples.docs[41].title).toBe('from single task')
   })
 
   it('can queue different kinds of single tasks multiple times', async () => {
