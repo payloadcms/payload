@@ -8,6 +8,7 @@ async function findOne(
   const {
     key,
     req: { payload },
+    req,
     user,
   } = args
 
@@ -25,6 +26,7 @@ async function findOne(
     collection: 'payload-preferences',
     depth: 0,
     pagination: false,
+    req,
     user,
     where,
   })
