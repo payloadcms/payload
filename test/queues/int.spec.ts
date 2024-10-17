@@ -1,4 +1,4 @@
-import type { JobTaskStatus, type Payload } from 'payload';
+import type { JobTaskStatus, Payload } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'

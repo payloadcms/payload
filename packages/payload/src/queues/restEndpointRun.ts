@@ -45,9 +45,11 @@ export const runJobsEndpoint: Endpoint = {
     }
 
     let noJobsRemaining = false
+    let remainingJobsFromQueried = 0
     try {
       const result = await runJobs(runJobsArgs)
       noJobsRemaining = result.noJobsRemaining
+      remainingJobsFromQueried = result.remainingJobsFromQueried
     } catch (err) {
       req.payload.logger.error({
         err,
@@ -59,6 +61,7 @@ export const runJobsEndpoint: Endpoint = {
         {
           message: req.i18n.t('error:unknown'),
           noJobsRemaining: true,
+          remainingJobsFromQueried,
         },
         { status: 500 },
       )
@@ -68,6 +71,7 @@ export const runJobsEndpoint: Endpoint = {
       {
         message: req.i18n.t('general:success'),
         noJobsRemaining,
+        remainingJobsFromQueried,
       },
       { status: 200 },
     )

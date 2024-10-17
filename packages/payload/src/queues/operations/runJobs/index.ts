@@ -24,7 +24,14 @@ export type RunJobsArgs = {
 
 export type RunJobsResult = {
   jobStatus?: Record<string, RunJobResult>
+  /**
+   * If this is false, there for sure are no jobs remaining, regardless of the limit
+   */
   noJobsRemaining?: boolean
+  /**
+   * Out of the jobs that were queried & processed (within the set limit), how many are remaining and retryable?
+   */
+  remainingJobsFromQueried: number
 }
 
 export const runJobs = async ({
@@ -119,6 +126,7 @@ export const runJobs = async ({
   if (!jobsQuery.docs.length) {
     return {
       noJobsRemaining: true,
+      remainingJobsFromQueried: 0,
     }
   }
 
@@ -209,16 +217,16 @@ export const runJobs = async ({
     return acc
   }, {})
 
-  let noJobsRemaining = true
+  let remainingJobsFromQueried = 0
   for (const jobID in resultsObject) {
     const jobResult = resultsObject[jobID]
     if (jobResult.status === 'error') {
-      noJobsRemaining = false // Can be retried
+      remainingJobsFromQueried++ // Can be retried
     }
   }
 
   return {
     jobStatus: resultsObject,
-    noJobsRemaining,
+    remainingJobsFromQueried,
   }
 }
