@@ -29,6 +29,16 @@ export default buildConfigWithDefaults({
           required: true,
         },
         {
+          name: 'hasTransaction',
+          type: 'checkbox',
+          hooks: {
+            beforeChange: [({ req }) => !!req.transactionID],
+          },
+          admin: {
+            readOnly: true,
+          },
+        },
+        {
           name: 'throwAfterChange',
           type: 'checkbox',
           defaultValue: false,

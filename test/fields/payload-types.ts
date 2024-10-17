@@ -60,6 +60,7 @@ export interface Config {
     'uploads-multi': UploadsMulti;
     'uploads-poly': UploadsPoly;
     'uploads-multi-poly': UploadsMultiPoly;
+    'uploads-restricted': UploadsRestricted;
     'ui-fields': UiField;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -1020,6 +1021,29 @@ export interface IndexedField {
   id: string;
   text: string;
   uniqueText?: string | null;
+  uniqueRelationship?: (string | null) | TextField;
+  uniqueHasManyRelationship?: (string | TextField)[] | null;
+  uniqueHasManyRelationship_2?: (string | TextField)[] | null;
+  uniquePolymorphicRelationship?: {
+    relationTo: 'text-fields';
+    value: string | TextField;
+  } | null;
+  uniquePolymorphicRelationship_2?: {
+    relationTo: 'text-fields';
+    value: string | TextField;
+  } | null;
+  uniqueHasManyPolymorphicRelationship?:
+    | {
+        relationTo: 'text-fields';
+        value: string | TextField;
+      }[]
+    | null;
+  uniqueHasManyPolymorphicRelationship_2?:
+    | {
+        relationTo: 'text-fields';
+        value: string | TextField;
+      }[]
+    | null;
   uniqueRequiredText: string;
   localizedUniqueRequiredText: string;
   /**
@@ -1038,6 +1062,13 @@ export interface IndexedField {
   };
   collapsibleLocalizedUnique?: string | null;
   collapsibleTextUnique?: string | null;
+  someText?: string | null;
+  some?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1305,6 +1336,15 @@ export interface SelectField {
   select?: ('one' | 'two' | 'three') | null;
   selectReadOnly?: ('one' | 'two' | 'three') | null;
   selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
+  array?:
+    | {
+        selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
+        group?: {
+          selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
   selectHasManyLocalized?: ('one' | 'two')[] | null;
   selectI18n?: ('one' | 'two' | 'three') | null;
   simple?: ('One' | 'Two' | 'Three') | null;
@@ -1598,6 +1638,19 @@ export interface UploadsMultiPoly {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-restricted".
+ */
+export interface UploadsRestricted {
+  id: string;
+  text?: string | null;
+  uploadWithoutRestriction?: (string | null) | Upload;
+  uploadWithAllowCreateFalse?: (string | null) | Upload;
+  uploadMultipleWithAllowCreateFalse?: (string | Upload)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ui-fields".
  */
 export interface UiField {
@@ -1740,6 +1793,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'uploads-multi-poly';
         value: string | UploadsMultiPoly;
+      } | null)
+    | ({
+        relationTo: 'uploads-restricted';
+        value: string | UploadsRestricted;
       } | null)
     | ({
         relationTo: 'ui-fields';

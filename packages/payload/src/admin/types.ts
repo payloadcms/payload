@@ -353,14 +353,14 @@ export type {
 } from './views/types.js'
 
 export type MappedServerComponent<TComponentClientProps extends JsonObject = JsonObject> = {
-  Component: React.ComponentType<TComponentClientProps>
+  Component?: React.ComponentType<TComponentClientProps>
   props?: Partial<any>
   RenderedComponent: React.ReactNode
   type: 'server'
 }
 
 export type MappedClientComponent<TComponentClientProps extends JsonObject = JsonObject> = {
-  Component: React.ComponentType<TComponentClientProps>
+  Component?: React.ComponentType<TComponentClientProps>
   props?: Partial<TComponentClientProps>
   RenderedComponent?: React.ReactNode
   type: 'client'

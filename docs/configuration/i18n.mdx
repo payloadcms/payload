@@ -40,7 +40,6 @@ export default buildConfig({
   // highlight-start
   i18n: {
     fallbackLanguage: 'en', // default
-    debug: false, // default
   }
   // highlight-end
 })
@@ -183,8 +182,9 @@ Here we create a shareable translations object. We will import this in both our 
 // <rootDir>/custom-translations.ts
 
 import type { Config } from 'payload'
+import type { NestedKeysStripped } from '@payloadcms/translations'
 
-export customTranslations: Config['i18n']['translations'] = {
+export const customTranslations: Config['i18n']['translations'] = {
   en: {
     general: {
       myCustomKey: 'My custom english translation',
@@ -194,9 +194,12 @@ export customTranslations: Config['i18n']['translations'] = {
     }
   },
 }
+
+export type CustomTranslationsObject = typeof customTranslations.en
+export type CustomTranslationsKeys = NestedKeysStripped<CustomTranslationsObject>
 ```
 
-We import the shared translations object into our Payload config so they are available for use:
+Import the shared translations object into our Payload config so they are available for use:
 
 ```ts
 // <rootDir>/payload.config.ts
@@ -214,23 +217,19 @@ export default buildConfig({
 })
 ```
 
-We import the shared translations and use it to create types to use in a [Custom Component](../admin/components):
+Import the shared translation types to use in your [Custom Component](../admin/components):
 
 ```ts
 // <rootDir>/components/MyComponent.tsx
 
 'use client'
-import type { NestedKeysStripped } from '@payloadcms/translations'
 import type React from 'react'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { useTranslation } from '@payloadcms/ui'
 
-import { customTranslations } from '../custom-translations'
-
-type CustomTranslationObject = typeof customTranslations.en
-type CustomTranslationKeys = NestedKeysStripped<CustomTranslationObject>
+import type { CustomTranslationsObject, CustomTranslationsKeys } from '../custom-translations'
 
 export const MyComponent: React.FC = () => {
-  const { i18n, t } = useTranslation<CustomTranslationObject, CustomTranslationKeys>() // These generics merge your custom translations with the default client translations
+  const { i18n, t } = useTranslation<CustomTranslationsObject, CustomTranslationsKeys>() // These generics merge your custom translations with the default client translations
 
   return t('general:myCustomKey')
 }
@@ -241,23 +240,16 @@ Additionally, Payload exposes the `t` function in various places, for example in
 ```ts
 // <rootDir>/fields/myField.ts
 
-import type {
-  DefaultTranslationKeys,
-  NestedKeysStripped,
-  TFunction,
-} from '@payloadcms/translations'
+import type { DefaultTranslationKeys, TFunction } from '@payloadcms/translations'
 import type { Field } from 'payload'
 
-import { customTranslations } from '../custom-translations'
-
-type CustomTranslationObject = typeof customTranslations.en
-type CustomTranslationKeys = NestedKeysStripped<CustomTranslationObject>
+import { CustomTranslationsKeys } from '../custom-translations'
 
 const field: Field = {
   name: 'myField',
   type: 'text',
   label: (
-    { t }: { t: TFunction<CustomTranslationKeys | DefaultTranslationKeys> }, // The generic passed to TFunction does not automatically merge the custom translations with the default translations. We need to merge them ourselves here
+    { t }: { t: TFunction<CustomTranslationsKeys | DefaultTranslationKeys> }, // The generic passed to TFunction does not automatically merge the custom translations with the default translations. We need to merge them ourselves here
   ) => t('fields:addLabel'),
 }
 ```

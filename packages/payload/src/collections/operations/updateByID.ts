@@ -39,6 +39,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
   data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
   depth?: number
+  disableTransaction?: boolean
   disableVerificationEmail?: boolean
   draft?: boolean
   id: number | string
@@ -56,7 +57,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
   let args = incomingArgs
 
   try {
-    const shouldCommit = await initTransaction(args.req)
+    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -356,10 +357,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
         id,
         autosave,
         collection: collectionConfig,
-        docWithLocales: {
-          ...result,
-          createdAt: docWithLocales.createdAt,
-        },
+        docWithLocales: result,
         draft: shouldSaveDraft,
         payload,
         publishSpecificLocale,

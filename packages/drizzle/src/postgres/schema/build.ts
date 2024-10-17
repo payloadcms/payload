@@ -30,6 +30,8 @@ import type {
 } from '../types.js'
 
 import { createTableName } from '../../createTableName.js'
+import { buildIndexName } from '../../utilities/buildIndexName.js'
+import { createIndex } from './createIndex.js'
 import { parentIDColumnMap } from './parentIDColumnMap.js'
 import { setColumnID } from './setColumnID.js'
 import { traverseFields } from './traverseFields.js'
@@ -45,6 +47,7 @@ type Args = {
   buildNumbers?: boolean
   buildRelationships?: boolean
   disableNotNull: boolean
+  disableRelsTableUnique?: boolean
   disableUnique: boolean
   fields: Field[]
   joins?: SanitizedJoins
@@ -52,6 +55,7 @@ type Args = {
   rootRelationsToBuild?: RelationMap
   rootTableIDColType?: string
   rootTableName?: string
+  rootUniqueRelationships?: Set<string>
   tableName: string
   timestamps?: boolean
   versions: boolean
@@ -76,6 +80,7 @@ export const buildTable = ({
   baseColumns = {},
   baseExtraConfig = {},
   disableNotNull,
+  disableRelsTableUnique = false,
   disableUnique = false,
   fields,
   joins,
@@ -83,6 +88,7 @@ export const buildTable = ({
   rootRelationsToBuild,
   rootTableIDColType,
   rootTableName: incomingRootTableName,
+  rootUniqueRelationships,
   tableName,
   timestamps,
   versions,
@@ -102,6 +108,9 @@ export const buildTable = ({
   // Relationships to the base collection
   const relationships: Set<string> = rootRelationships || new Set()
 
+  // Unique relationships to the base collection
+  const uniqueRelationships: Set<string> = rootUniqueRelationships || new Set()
+
   let relationshipsTable: GenericTable | PgTableWithColumns<any>
 
   // Drizzle relations
@@ -120,6 +129,7 @@ export const buildTable = ({
     adapter,
     columns,
     disableNotNull,
+    disableRelsTableUnique,
     disableUnique,
     fields,
     indexes,
@@ -133,6 +143,7 @@ export const buildTable = ({
     rootRelationsToBuild: rootRelationsToBuild || relationsToBuild,
     rootTableIDColType: rootTableIDColType || idColType,
     rootTableName,
+    uniqueRelationships,
     versions,
     withinLocalizedArrayOrBlock,
   })
@@ -368,16 +379,38 @@ export const buildTable = ({
           colType = 'varchar'
         }
 
-        relationshipColumns[`${relationTo}ID`] = parentIDColumnMap[colType](
-          `${formattedRelationTo}_id`,
-        )
+        const colName = `${relationTo}ID`
+
+        relationshipColumns[colName] = parentIDColumnMap[colType](`${formattedRelationTo}_id`)
 
         relationExtraConfig[`${relationTo}IdFk`] = (cols) =>
           foreignKey({
             name: `${relationshipsTableName}_${toSnakeCase(relationTo)}_fk`,
-            columns: [cols[`${relationTo}ID`]],
+            columns: [cols[colName]],
             foreignColumns: [adapter.tables[formattedRelationTo].id],
           }).onDelete('cascade')
+
+        const indexColumns = [colName]
+
+        const unique = !disableUnique && uniqueRelationships.has(relationTo)
+
+        if (unique) {
+          indexColumns.push('path')
+        }
+        if (hasLocalizedRelationshipField) {
+          indexColumns.push('locale')
+        }
+
+        const indexName = buildIndexName({
+          name: `${relationshipsTableName}_${formattedRelationTo}_id`,
+          adapter,
+        })
+
+        relationExtraConfig[indexName] = createIndex({
+          name: indexColumns,
+          indexName,
+          unique,
+        })
       })
 
       relationshipsTable = adapter.pgSchema.table(
