@@ -123,7 +123,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
           // At this point, we are dealing with a `row`, etc
           if ('fields' in field) {
             return (
-              <Nested
+              <Component
                 comparison={comparison}
                 diffComponents={diffComponents}
                 disableGutter

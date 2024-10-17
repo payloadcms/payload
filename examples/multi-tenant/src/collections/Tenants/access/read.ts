@@ -7,7 +7,9 @@ export const tenantRead: Access = (args) => {
   const req = args.req
 
   // Super admin can read all
-  if (isSuperAdmin(args)) {return true}
+  if (isSuperAdmin(args)) {
+    return true
+  }
 
   const tenantIDs = getTenantAccessIDs(req.user)
 
