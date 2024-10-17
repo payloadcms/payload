@@ -8,10 +8,11 @@ type OperationArgs = {
   disableErrors?: boolean
   id?: number | string
   isReadingStaticFile?: boolean
+  locale?: string
   req: PayloadRequest
 }
 const executeAccess = async (
-  { id, data, disableErrors, isReadingStaticFile = false, req }: OperationArgs,
+  { id, data, disableErrors, isReadingStaticFile = false, locale, req }: OperationArgs,
   access: Access,
 ): Promise<AccessResult> => {
   if (access) {
@@ -19,6 +20,7 @@ const executeAccess = async (
       id,
       data,
       isReadingStaticFile,
+      locale,
       req,
     })
 

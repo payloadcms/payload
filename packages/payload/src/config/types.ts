@@ -315,6 +315,8 @@ export type AccessArgs<TData = any> = {
   id?: number | string
   /** If true, the request is for a static file */
   isReadingStaticFile?: boolean
+  /** The locale of the request */
+  locale?: string
   /** The original request that requires an access check */
   req: PayloadRequest
 }

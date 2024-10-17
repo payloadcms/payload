@@ -4,9 +4,13 @@ import type { Permissions } from './types.js'
 import { getEntityPolicies } from '../utilities/getEntityPolicies.js'
 
 type GetAccessResultsArgs = {
+  locale?: string
   req: PayloadRequest
 }
-export async function getAccessResults({ req }: GetAccessResultsArgs): Promise<Permissions> {
+export async function getAccessResults({
+  locale,
+  req,
+}: GetAccessResultsArgs): Promise<Permissions> {
   const results = {} as Permissions
   const { payload, user } = req
 
@@ -43,6 +47,7 @@ export async function getAccessResults({ req }: GetAccessResultsArgs): Promise<P
       const collectionPolicy = await getEntityPolicies({
         type: 'collection',
         entity: collection,
+        locale,
         operations: collectionOperations,
         req,
       })
@@ -64,6 +69,7 @@ export async function getAccessResults({ req }: GetAccessResultsArgs): Promise<P
       const globalPolicy = await getEntityPolicies({
         type: 'global',
         entity: global,
+        locale,
         operations: globalOperations,
         req,
       })
