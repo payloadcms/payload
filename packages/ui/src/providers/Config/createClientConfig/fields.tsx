@@ -77,6 +77,8 @@ export const createClientField = ({
     // `admin`
   ]
 
+  const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = ['condition']
+
   serverOnlyFieldProperties.forEach((key) => {
     if (key in clientField) {
       delete clientField[key]
@@ -304,6 +306,14 @@ export const createClientField = ({
             }
           })
 
+          if ('admin' in clientTab) {
+            serverOnlyFieldAdminProperties.forEach((key) => {
+              if (key in clientTab.admin) {
+                delete clientTab.admin[key]
+              }
+            })
+          }
+
           clientTab.fields = createClientFields({
             clientFields: clientTab.fields,
             createMappedComponent,
@@ -347,8 +357,6 @@ export const createClientField = ({
     default:
       break
   }
-
-  const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = ['condition']
 
   if (!clientField.admin) {
     clientField.admin = {}

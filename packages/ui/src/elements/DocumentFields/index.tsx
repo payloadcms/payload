@@ -31,8 +31,6 @@ export const DocumentFields: React.FC<Args> = ({
   readOnly,
   schemaPath,
 }) => {
-  const mainFields = fields.filter((field) => !fieldIsSidebar(field))
-
   const sidebarFields = fields.filter((field) => fieldIsSidebar(field))
 
   const hasSidebarFields = sidebarFields && sidebarFields.length > 0
@@ -59,7 +57,8 @@ export const DocumentFields: React.FC<Args> = ({
           {BeforeFields}
           <RenderFields
             className={`${baseClass}__fields`}
-            fields={mainFields}
+            fields={fields}
+            filter={(field: ClientField) => !fieldIsSidebar(field)}
             forceRender={10}
             path=""
             permissions={docPermissions?.fields}
@@ -74,7 +73,8 @@ export const DocumentFields: React.FC<Args> = ({
           <div className={`${baseClass}__sidebar`}>
             <div className={`${baseClass}__sidebar-fields`}>
               <RenderFields
-                fields={sidebarFields}
+                fields={fields}
+                filter={(field: ClientField) => fieldIsSidebar(field)}
                 forceRender={10}
                 path=""
                 permissions={docPermissions?.fields}

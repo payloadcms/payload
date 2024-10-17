@@ -767,11 +767,14 @@ export type CollapsibleFieldClient = {
   Pick<CollapsibleField, 'type'>
 
 type TabBase = {
+  admin?: {
+    condition?: Condition
+  }
   description?: Description
   fields: Field[]
   interfaceName?: string
   saveToJWT?: boolean | string
-} & Omit<FieldBase, 'required' | 'validate'>
+} & Omit<FieldBase, 'admin' | 'required' | 'validate'>
 
 export type NamedTab = {
   /** Customize generated GraphQL and Typescript schema names.
@@ -803,9 +806,8 @@ export type Tab = NamedTab | UnnamedTab
 
 export type TabsField = {
   admin?: Omit<Admin, 'description'>
-  tabs: Tab[]
   type: 'tabs'
-} & Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT' | 'virtual'>
+} & { tabs: Tab[] } & Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT' | 'virtual'>
 
 export type TabsFieldClient = {
   admin?: Omit<AdminClient, 'description'>
