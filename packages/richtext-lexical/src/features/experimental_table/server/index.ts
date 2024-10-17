@@ -12,6 +12,7 @@ import { sanitizeFields } from 'payload'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { convertLexicalNodesToHTML } from '../../converters/html/converter/index.js'
 import { createNode } from '../../typeUtilities.js'
+import { TableMarkdownTransformer } from '../markdownTransformer.js'
 
 const fields: Field[] = [
   {
@@ -68,6 +69,7 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
 
         return schemaMap
       },
+      markdownTransformers: [TableMarkdownTransformer],
       nodes: [
         createNode({
           converters: {

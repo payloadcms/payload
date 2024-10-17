@@ -8,6 +8,7 @@ import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
 import { blockPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
+import { getBlockMarkdownTransformers } from './markdownTransformer.js'
 import { ServerBlockNode } from './nodes/BlocksNode.js'
 import { ServerInlineBlockNode } from './nodes/InlineBlocksNode.js'
 import { blockValidationHOC } from './validate.js'
@@ -127,6 +128,11 @@ export const BlocksFeature = createServerFeature<
         return schemaMap
       },
       i18n,
+      markdownTransformers: getBlockMarkdownTransformers({
+        blocks: props.blocks,
+        inlineBlocks: props.inlineBlocks,
+      }),
+
       nodes: [
         createNode({
           // @ts-expect-error - TODO: fix this
