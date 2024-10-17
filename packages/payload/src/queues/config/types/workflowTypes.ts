@@ -100,6 +100,10 @@ export type WorkflowConfig<TWorkflowSlugOrInput extends keyof TypedJobs['workflo
    */
   inputSchema?: Field[]
   /**
+   * You can use interfaceName to change the name of the interface that is generated for this workflow. By default, this is "Workflow" + the capitalized workflow slug.
+   */
+  interfaceName?: string
+  /**
    * Define a human-friendly label for this workflow.
    */
   label?: string

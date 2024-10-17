@@ -29,7 +29,7 @@ export interface Config {
   };
   jobs?: {
     tasks: {
-      UpdatePost: TaskUpdatePost;
+      UpdatePost: MyUpdatePostType;
       UpdatePostStep2: TaskUpdatePostStep2;
       CreateSimple: TaskCreateSimple;
       CreateSimpleWithDuplicateMessage: TaskCreateSimpleWithDuplicateMessage;
@@ -40,7 +40,7 @@ export interface Config {
       };
     };
     workflows?: {
-      updatePost?: WorkflowUpdatePost;
+      updatePost?: MyUpdatePostWorkflowType;
       updatePostJSONWorkflow?: WorkflowUpdatePostJSONWorkflow;
       retriesTest?: WorkflowRetriesTest;
       retriesRollbackTest?: WorkflowRetriesRollbackTest;
@@ -297,9 +297,9 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TaskUpdatePost".
+ * via the `definition` "MyUpdatePostType".
  */
-export interface TaskUpdatePost {
+export interface MyUpdatePostType {
   input: {
     post: string | Post;
     message: string;
@@ -359,9 +359,9 @@ export interface TaskExternalTask {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "WorkflowUpdatePost".
+ * via the `definition` "MyUpdatePostWorkflowType".
  */
-export interface WorkflowUpdatePost {
+export interface MyUpdatePostWorkflowType {
   input: {
     post: string | Post;
     message: string;

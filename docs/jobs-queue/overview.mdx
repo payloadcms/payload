@@ -21,6 +21,7 @@ Simply add a task to the `jobs.tasks` array in your Payload config. A task consi
 | `slug` | Define a slug-based name for this job. This slug needs to be unique among both tasks and workflows.|
 | `handler`   | The function that should be responsible for running the job. You can either pass a string-based path to the job function file, or the job function itself. If you are using large dependencies within your job, you might prefer to pass the string path because that will avoid bundling large dependencies in your Next.js app.         |
 | `inputSchema` | Define the input field schema - payload will generate a type for this schema. |
+| `interfaceName` | You can use interfaceName to change the name of the interface that is generated for this task. By default, this is "Task" + the capitalized task slug. |
 | `outputSchema` | Define the output field schema - payload will generate a type for this schema. |
 | `label` | Define a human-friendly label for this task. |
 | `onFail` | Function to be executed if the task fails. |
@@ -151,6 +152,7 @@ Simply add a workflow to the `jobs.wokflows` array in your Payload config. A wok
 | `slug` | Define a slug-based name for this workflow. This slug needs to be unique among both tasks and workflows.|
 | `handler`   | The function that should be responsible for running the workflow. You can either pass a string-based path to the workflow function file, or workflow job function itself. If you are using large dependencies within your workflow, you might prefer to pass the string path because that will avoid bundling large dependencies in your Next.js app.         |
 | `inputSchema` | Define the input field schema - payload will generate a type for this schema. |
+| `interfaceName` | You can use interfaceName to change the name of the interface that is generated for this workflow. By default, this is "Workflow" + the capitalized workflow slug. |
 | `label` | Define a human-friendly label for this workflow. |
 | `queue` | Optionally, define the queue name that this workflow should be tied to. Defaults to "default". |
 

@@ -91,6 +91,7 @@ export default buildConfigWithDefaults({
       {
         retries: 2,
         slug: 'UpdatePost',
+        interfaceName: 'MyUpdatePostType',
         inputSchema: [
           {
             name: 'post',
@@ -234,6 +235,7 @@ export default buildConfigWithDefaults({
     workflows: [
       {
         slug: 'updatePost',
+        interfaceName: 'MyUpdatePostWorkflowType',
         inputSchema: [
           {
             name: 'post',

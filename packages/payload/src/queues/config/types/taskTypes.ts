@@ -141,6 +141,10 @@ export type TaskConfig<
    */
   inputSchema?: Field[]
   /**
+   * You can use interfaceName to change the name of the interface that is generated for this task. By default, this is "Task" + the capitalized task slug.
+   */
+  interfaceName?: string
+  /**
    * Define a human-friendly label for this task.
    */
   label?: string

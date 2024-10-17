@@ -75,7 +75,7 @@ export function generateJobsJSONSchemas(
 
       const normalizedTaskSlug = task.slug[0].toUpperCase() + task.slug.slice(1)
 
-      definitions.set(`Task${normalizedTaskSlug}`, fullTaskJsonSchema)
+      definitions.set(task.interfaceName ?? `Task${normalizedTaskSlug}`, fullTaskJsonSchema)
     }
     // Now add properties.tasks definition that references the types in definitions keyed by task slug:
     properties.tasks = {
@@ -87,7 +87,9 @@ export function generateJobsJSONSchemas(
             const normalizedTaskSlug = task.slug[0].toUpperCase() + task.slug.slice(1)
 
             const toReturn: JSONSchema4 = {
-              $ref: `#/definitions/Task${normalizedTaskSlug}`,
+              $ref: task.interfaceName
+                ? `#/definitions/${task.interfaceName}`
+                : `#/definitions/Task${normalizedTaskSlug}`,
             }
 
             return [task.slug, toReturn]
@@ -138,7 +140,10 @@ export function generateJobsJSONSchemas(
       }
       const normalizedWorkflowSlug = workflow.slug[0].toUpperCase() + workflow.slug.slice(1)
 
-      definitions.set(`Workflow${normalizedWorkflowSlug}`, fullWorkflowJsonSchema)
+      definitions.set(
+        workflow.interfaceName ?? `Workflow${normalizedWorkflowSlug}`,
+        fullWorkflowJsonSchema,
+      )
 
       properties.workflows = {
         type: 'object',
@@ -148,7 +153,9 @@ export function generateJobsJSONSchemas(
             const normalizedWorkflowSlug = workflow.slug[0].toUpperCase() + workflow.slug.slice(1)
 
             const toReturn: JSONSchema4 = {
-              $ref: `#/definitions/Workflow${normalizedWorkflowSlug}`,
+              $ref: workflow.interfaceName
+                ? `#/definitions/${workflow.interfaceName}`
+                : `#/definitions/Workflow${normalizedWorkflowSlug}`,
             }
 
             return [workflow.slug, toReturn]
