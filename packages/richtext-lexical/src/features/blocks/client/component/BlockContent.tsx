@@ -76,7 +76,7 @@ export const BlockContent: React.FC<Props> = (props) => {
     void getDocPreferences().then((currentDocPreferences) => {
       const currentFieldPreferences = currentDocPreferences?.fields[field.name]
       const collapsedArray = currentFieldPreferences?.collapsed
-      setIsCollapsed(collapsedArray && collapsedArray.includes(formData.id))
+      setIsCollapsed(collapsedArray ? collapsedArray.includes(formData.id) : false)
     })
   }, [field.name, formData.id, getDocPreferences])
 
@@ -174,7 +174,9 @@ export const BlockContent: React.FC<Props> = (props) => {
     })
   }, [editor, nodeKey])
 
-  if (typeof isCollapsed !== 'boolean') return null
+  if (typeof isCollapsed !== 'boolean') {
+    return null
+  }
 
   return (
     <React.Fragment>
