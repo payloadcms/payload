@@ -16,6 +16,7 @@ export const ToggleTheme: React.FC = () => {
 
   return (
     <RadioGroupField
+      disableModifyingForm={true}
       field={{
         name: 'theme',
         label: t('general:adminTheme'),
