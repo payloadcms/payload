@@ -90,6 +90,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       fieldConstraints: {},
       getMigrationTemplate,
       idType: postgresIDType,
+      indexes: new Set<string>(),
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
