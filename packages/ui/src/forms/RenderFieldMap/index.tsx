@@ -62,7 +62,7 @@ export const RenderFieldMap: React.FC<Props> = (props) => {
         ref={intersectionRef}
       >
         {hasRendered &&
-          renderedFields?.map(({ Field, renderedRows }, index) => (
+          renderedFields?.map(({ Field, renderedRows, schemaPath }, index) => (
             <FieldRowsProvider key={index} renderedRows={renderedRows}>
               {Field}
             </FieldRowsProvider>

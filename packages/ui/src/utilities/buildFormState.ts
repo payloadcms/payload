@@ -130,7 +130,7 @@ export const buildFormStateFn = async (
     globalSlug,
     locale,
     operation,
-    path,
+    path: pathFromArgs,
     renderFields: shouldRenderFields,
     req,
     req: {
@@ -189,6 +189,7 @@ export const buildFormStateFn = async (
 
   const id = collectionSlug ? idFromArgs : undefined
   const schemaPathSegments = schemaPath && schemaPath.split('.')
+  const pathSegments = pathFromArgs && pathFromArgs.split('.')
 
   const entitySlug = schemaPathSegments[0]
   let entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
@@ -206,6 +207,8 @@ export const buildFormStateFn = async (
 
   let fields: Field[]
   let clientFields: ClientField[]
+  let baseSchemaPath = schemaPath
+  let basePath = ''
 
   if (schemaPathSegments && schemaPathSegments.length === 1) {
     // If the schema path is just the entity slug, then we are dealing with an entire collection or global
@@ -215,8 +218,10 @@ export const buildFormStateFn = async (
     const mappedField = fieldMap.get(schemaPath)
     fields = [mappedField?.field]
     clientFields = [mappedField?.clientField]
-    // remove 1st and last element from schemaPathSegments
-    // basePath = `${schemaPathSegments.slice(1, schemaPathSegments.length - 1).join('.')}.`
+    // TODO: this is a bit of a hack, but it works for now
+    baseSchemaPath = schemaPathSegments.slice(0, schemaPathSegments.length - 1).join('.')
+    basePath =
+      pathSegments.length > 1 ? pathSegments.slice(0, pathSegments.length - 1).join('.') : ''
   }
 
   if (!fields || !Array.isArray(fields) || fields.length === 0) {
@@ -336,7 +341,7 @@ export const buildFormStateFn = async (
     data,
     fields,
     operation,
-    path,
+    path: basePath ? `${basePath}.` : '',
     preferences: docPreferences || { fields: {} },
     req,
     // schemaPath,
@@ -429,9 +434,10 @@ export const buildFormStateFn = async (
           fields,
           formState: formStateResult,
           i18n,
+          path: basePath,
           payload,
           permissions: {}, // TODO
-          schemaPath,
+          schemaPath: baseSchemaPath,
         })
       : undefined,
     state: formStateResult,

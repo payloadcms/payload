@@ -140,15 +140,13 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
       const currentData: Row[] = getDataByPath(path)
 
-      const parentPath = `${path.slice(0, path.lastIndexOf('.'))}.`
-
-      const renderedFieldRow = await addFieldRow({
+      const renderedFieldMap = await addFieldRow({
         data: { [name]: [...currentData, newRow] },
-        path: parentPath,
+        path,
         schemaPath,
       })
 
-      // setRenderedRows(renderedFieldRow?.get(name)?.renderedRows || [])
+      setRenderedRows(renderedFieldMap?.get(path)?.renderedRows || [])
 
       setModified(true)
 

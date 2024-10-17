@@ -274,7 +274,6 @@ const traverseFields = ({
 
 export const renderFields: RenderFieldsFn = (args) => {
   const result: RenderedFieldMap = new Map()
-
   traverseFields({ ...args, result })
 
   return result
@@ -369,8 +368,10 @@ export const renderField: RenderFieldFn = (args) => {
           />
         )
 
+        const newMap = new Map() as RenderedFieldMap
+
         renderedFieldResult.renderedRows.push({
-          renderedFieldMap: new Map() as RenderedFieldMap,
+          renderedFieldMap: newMap,
           RowLabel,
         })
 
@@ -387,7 +388,7 @@ export const renderField: RenderFieldFn = (args) => {
           path: `${path}.${rowIndex}`,
           payload,
           permissions,
-          result: renderedFieldResult.renderedRows[rowIndex].renderedFieldMap,
+          result: newMap,
           schemaPath,
         })
       })
