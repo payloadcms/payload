@@ -27,6 +27,15 @@ export function generateJobsJSONSchemas(
 
   if (jobsConfig?.tasks?.length) {
     for (const task of jobsConfig.tasks) {
+      const fullTaskJsonSchema: JSONSchema4 = {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          input: {},
+          output: {},
+        },
+        required: [],
+      }
       if (task?.inputSchema?.length) {
         const inputJsonSchema = fieldsToJSONSchema(
           collectionIDFieldTypes,
@@ -42,7 +51,8 @@ export function generateJobsJSONSchemas(
           required: inputJsonSchema.required,
         }
 
-        definitions.set(`Task${task.slug}Input`, fullInputJsonSchema)
+        fullTaskJsonSchema.properties.input = fullInputJsonSchema
+        ;(fullTaskJsonSchema.required as string[]).push('input')
       }
       if (task?.outputSchema?.length) {
         const outputJsonSchema = fieldsToJSONSchema(
@@ -59,8 +69,13 @@ export function generateJobsJSONSchemas(
           required: outputJsonSchema.required,
         }
 
-        definitions.set(`Task${task.slug}Output`, fullOutputJsonSchema)
+        fullTaskJsonSchema.properties.output = fullOutputJsonSchema
+        ;(fullTaskJsonSchema.required as string[]).push('output')
       }
+
+      const normalizedTaskSlug = task.slug[0].toUpperCase() + task.slug.slice(1)
+
+      definitions.set(`Task${normalizedTaskSlug}`, fullTaskJsonSchema)
     }
     // Now add properties.tasks definition that references the types in definitions keyed by task slug:
     properties.tasks = {
@@ -69,27 +84,12 @@ export function generateJobsJSONSchemas(
       properties: {
         ...Object.fromEntries(
           jobsConfig.tasks.map((task) => {
+            const normalizedTaskSlug = task.slug[0].toUpperCase() + task.slug.slice(1)
+
             const toReturn: JSONSchema4 = {
-              type: 'object',
-              additionalProperties: false,
-              properties: {
-                input: {},
-              },
-              required: ['input', 'output'],
+              $ref: `#/definitions/Task${normalizedTaskSlug}`,
             }
 
-            if (task.inputSchema?.length) {
-              ;(toReturn.required as string[]).push('input')
-              toReturn.properties.input = {
-                $ref: `#/definitions/Task${task.slug}Input`,
-              }
-            }
-            if (task.outputSchema?.length) {
-              ;(toReturn.required as string[]).push('output')
-              toReturn.properties.output = {
-                $ref: `#/definitions/Task${task.slug}Output`,
-              }
-            }
             return [task.slug, toReturn]
           }),
         ),
@@ -123,8 +123,9 @@ export function generateJobsJSONSchemas(
           properties: inputJsonSchema.properties,
           required: inputJsonSchema.required,
         }
+        const normalizedWorkflowSlug = workflow.slug[0].toUpperCase() + workflow.slug.slice(1)
 
-        definitions.set(`Workflow${workflow.slug}Input`, fullInputJsonSchema)
+        definitions.set(`Workflow${normalizedWorkflowSlug}Input`, fullInputJsonSchema)
       }
 
       properties.workflows = {
@@ -143,8 +144,10 @@ export function generateJobsJSONSchemas(
 
             if (workflow.inputSchema?.length) {
               ;(toReturn.required as string[]).push('input')
+              const normalizedWorkflowSlug = workflow.slug[0].toUpperCase() + workflow.slug.slice(1)
+
               toReturn.properties.input = {
-                $ref: `#/definitions/Workflow${workflow.slug}Input`,
+                $ref: `#/definitions/Workflow${normalizedWorkflowSlug}Input`,
               }
             }
 

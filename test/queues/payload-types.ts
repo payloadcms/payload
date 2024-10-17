@@ -29,25 +29,11 @@ export interface Config {
   };
   jobs?: {
     tasks: {
-      UpdatePost: {
-        input: TaskUpdatePostInput;
-        output: TaskUpdatePostOutput;
-      };
-      UpdatePostStep2: {
-        input: TaskUpdatePostStep2Input;
-      };
-      CreateSimple: {
-        input: TaskCreateSimpleInput;
-        output: TaskCreateSimpleOutput;
-      };
-      CreateSimpleWithDuplicateMessage: {
-        input: TaskCreateSimpleWithDuplicateMessageInput;
-        output: TaskCreateSimpleWithDuplicateMessageOutput;
-      };
-      ExternalTask: {
-        input: TaskExternalTaskInput;
-        output: TaskExternalTaskOutput;
-      };
+      UpdatePost: TaskUpdatePost;
+      UpdatePostStep2: TaskUpdatePostStep2;
+      CreateSimple: TaskCreateSimple;
+      CreateSimpleWithDuplicateMessage: TaskCreateSimpleWithDuplicateMessage;
+      ExternalTask: TaskExternalTask;
       inline?: {
         input: unknown;
         output: unknown;
@@ -55,28 +41,28 @@ export interface Config {
     };
     workflows?: {
       updatePost?: {
-        input: WorkflowupdatePostInput;
+        input: WorkflowUpdatePostInput;
       };
       updatePostJSONWorkflow?: {
-        input: WorkflowupdatePostJSONWorkflowInput;
+        input: WorkflowUpdatePostJSONWorkflowInput;
       };
       retriesTest?: {
-        input: WorkflowretriesTestInput;
+        input: WorkflowRetriesTestInput;
       };
       retriesRollbackTest?: {
-        input: WorkflowretriesRollbackTestInput;
+        input: WorkflowRetriesRollbackTestInput;
       };
       retriesWorkflowLevelTest?: {
-        input: WorkflowretriesWorkflowLevelTestInput;
+        input: WorkflowRetriesWorkflowLevelTestInput;
       };
       inlineTaskTest?: {
-        input: WorkflowinlineTaskTestInput;
+        input: WorkflowInlineTaskTestInput;
       };
       externalWorkflow?: {
-        input: WorkflowexternalWorkflowInput;
+        input: WorkflowExternalWorkflowInput;
       };
       retriesBackoffTest?: {
-        input: WorkflowretriesBackoffTestInput;
+        input: WorkflowRetriesBackoffTestInput;
       };
     };
   };
@@ -327,127 +313,122 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TaskUpdatePostInput".
+ * via the `definition` "TaskUpdatePost".
  */
-export interface TaskUpdatePostInput {
+export interface TaskUpdatePost {
+  input: {
+    post: string | Post;
+    message: string;
+  };
+  output: {
+    messageTwice: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskUpdatePostStep2".
+ */
+export interface TaskUpdatePostStep2 {
+  input: {
+    post: string | Post;
+    messageTwice: string;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskCreateSimple".
+ */
+export interface TaskCreateSimple {
+  input: {
+    message: string;
+    shouldFail?: boolean | null;
+  };
+  output: {
+    simpleID: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskCreateSimpleWithDuplicateMessage".
+ */
+export interface TaskCreateSimpleWithDuplicateMessage {
+  input: {
+    message: string;
+    shouldFail?: boolean | null;
+  };
+  output: {
+    simpleID: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskExternalTask".
+ */
+export interface TaskExternalTask {
+  input: {
+    message: string;
+  };
+  output: {
+    simpleID: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowUpdatePostInput".
+ */
+export interface WorkflowUpdatePostInput {
   post: string | Post;
   message: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TaskUpdatePostOutput".
+ * via the `definition` "WorkflowUpdatePostJSONWorkflowInput".
  */
-export interface TaskUpdatePostOutput {
-  messageTwice: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TaskUpdatePostStep2Input".
- */
-export interface TaskUpdatePostStep2Input {
-  post: string | Post;
-  messageTwice: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TaskCreateSimpleInput".
- */
-export interface TaskCreateSimpleInput {
-  message: string;
-  shouldFail?: boolean | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TaskCreateSimpleOutput".
- */
-export interface TaskCreateSimpleOutput {
-  simpleID: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TaskCreateSimpleWithDuplicateMessageInput".
- */
-export interface TaskCreateSimpleWithDuplicateMessageInput {
-  message: string;
-  shouldFail?: boolean | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TaskCreateSimpleWithDuplicateMessageOutput".
- */
-export interface TaskCreateSimpleWithDuplicateMessageOutput {
-  simpleID: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TaskExternalTaskInput".
- */
-export interface TaskExternalTaskInput {
-  message: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TaskExternalTaskOutput".
- */
-export interface TaskExternalTaskOutput {
-  simpleID: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "WorkflowupdatePostInput".
- */
-export interface WorkflowupdatePostInput {
+export interface WorkflowUpdatePostJSONWorkflowInput {
   post: string | Post;
   message: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "WorkflowupdatePostJSONWorkflowInput".
+ * via the `definition` "WorkflowRetriesTestInput".
  */
-export interface WorkflowupdatePostJSONWorkflowInput {
-  post: string | Post;
+export interface WorkflowRetriesTestInput {
   message: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "WorkflowretriesTestInput".
+ * via the `definition` "WorkflowRetriesRollbackTestInput".
  */
-export interface WorkflowretriesTestInput {
+export interface WorkflowRetriesRollbackTestInput {
   message: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "WorkflowretriesRollbackTestInput".
+ * via the `definition` "WorkflowRetriesWorkflowLevelTestInput".
  */
-export interface WorkflowretriesRollbackTestInput {
+export interface WorkflowRetriesWorkflowLevelTestInput {
   message: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "WorkflowretriesWorkflowLevelTestInput".
+ * via the `definition` "WorkflowInlineTaskTestInput".
  */
-export interface WorkflowretriesWorkflowLevelTestInput {
+export interface WorkflowInlineTaskTestInput {
   message: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "WorkflowinlineTaskTestInput".
+ * via the `definition` "WorkflowExternalWorkflowInput".
  */
-export interface WorkflowinlineTaskTestInput {
+export interface WorkflowExternalWorkflowInput {
   message: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "WorkflowexternalWorkflowInput".
+ * via the `definition` "WorkflowRetriesBackoffTestInput".
  */
-export interface WorkflowexternalWorkflowInput {
-  message: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "WorkflowretriesBackoffTestInput".
- */
-export interface WorkflowretriesBackoffTestInput {
+export interface WorkflowRetriesBackoffTestInput {
   message: string;
 }
 /**
