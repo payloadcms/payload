@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck - not worth it migrate jsdoc to tsdoc
 'use client'
 // Copied & modified from https://github.com/lodash/lodash/blob/main/src/debounce.ts
 /*
@@ -242,4 +244,5 @@ function debounce(func, wait, options) {
   return debounced
 }
 
+// eslint-disable-next-line no-restricted-exports
 export default debounce

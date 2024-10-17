@@ -1,5 +1,6 @@
 'use client'
 
+import type { I18nClient } from '@payloadcms/translations'
 import type { BlocksFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -44,8 +45,8 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                   }
 
                   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
-                  const blocksField: BlocksFieldClient = richTextComponentMap.get(
-                    componentMapRenderedBlockPath,
+                  const blocksField = (
+                    richTextComponentMap.get(componentMapRenderedBlockPath) as BlocksFieldClient[]
                   )?.[0]
 
                   const clientBlock = blocksField.blocks.find((_block) => _block.slug === blockSlug)
@@ -65,7 +66,7 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
               } as SlashMenuItem
             }),
             key: 'blocks',
-            label: ({ i18n }) => {
+            label: ({ i18n }: { i18n: I18nClient<object, 'lexical:blocks:label'> }) => {
               return i18n.t('lexical:blocks:label')
             },
           }
@@ -84,8 +85,8 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
 
                   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
 
-                  const blocksField: BlocksFieldClient = richTextComponentMap.get(
-                    componentMapRenderedBlockPath,
+                  const blocksField = (
+                    richTextComponentMap.get(componentMapRenderedBlockPath) as BlocksFieldClient[]
                   )?.[0]
 
                   const clientBlock = blocksField.blocks.find(
@@ -109,7 +110,11 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
               } as SlashMenuItem
             }),
             key: 'inlineBlocks',
-            label: ({ i18n }) => {
+            label: ({
+              i18n,
+            }: {
+              i18n: I18nClient<object, 'lexical:blocks:inlineBlocks:label'>
+            }) => {
               return i18n.t('lexical:blocks:inlineBlocks:label')
             },
           }
@@ -132,8 +137,8 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                     return blockSlug
                   }
                   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
-                  const blocksField: BlocksFieldClient = richTextComponentMap.get(
-                    componentMapRenderedBlockPath,
+                  const blocksField = (
+                    richTextComponentMap.get(componentMapRenderedBlockPath) as BlocksFieldClient[]
                   )?.[0]
 
                   const clientBlock = blocksField.blocks.find((_block) => _block.slug === blockSlug)
@@ -172,8 +177,8 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                   }
 
                   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
-                  const blocksField: BlocksFieldClient = richTextComponentMap.get(
-                    componentMapRenderedBlockPath,
+                  const blocksField = (
+                    richTextComponentMap.get(componentMapRenderedBlockPath) as BlocksFieldClient[]
                   )?.[0]
 
                   const clientBlock = blocksField.blocks.find(
