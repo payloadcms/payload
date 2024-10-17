@@ -1062,6 +1062,13 @@ export interface IndexedField {
   };
   collapsibleLocalizedUnique?: string | null;
   collapsibleTextUnique?: string | null;
+  someText?: string | null;
+  some?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
