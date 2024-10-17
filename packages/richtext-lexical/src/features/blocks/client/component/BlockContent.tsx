@@ -43,13 +43,13 @@ type Props = {
 // Inside of fields.data however, that sub-blocks blockName property does not exist at all.
 function removeUndefinedAndNullAndEmptyArraysRecursively(obj: object) {
   for (const key in obj) {
-    const value = obj[key]
+    const value = obj[key as keyof object] as unknown
     if (Array.isArray(value) && !value?.length) {
-      delete obj[key]
+      delete obj[key as keyof object]
     } else if (value && typeof value === 'object') {
       removeUndefinedAndNullAndEmptyArraysRecursively(value)
     } else if (value === undefined || value === null) {
-      delete obj[key]
+      delete obj[key as keyof object]
     }
   }
 }

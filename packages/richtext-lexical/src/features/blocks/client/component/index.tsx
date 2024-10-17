@@ -86,7 +86,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   }, [config.routes.api, config.serverURL, schemaFieldsPath, id]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
 
   const onChange = useCallback(
-    async ({ formState: prevFormState }) => {
+    async ({ formState: prevFormState }: { formState: FormState }) => {
       const { state: formState } = await getFormState({
         apiRoute: config.routes.api,
         body: {
