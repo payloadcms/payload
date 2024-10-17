@@ -271,6 +271,17 @@ export interface ArrayField {
         id?: string | null
       }[]
     | null
+  nestedArrayLocalized?:
+    | {
+        array?:
+          | {
+              text?: string | null
+              id?: string | null
+            }[]
+          | null
+        id?: string | null
+      }[]
+    | null
   updatedAt: string
   createdAt: string
 }
@@ -841,6 +852,37 @@ export interface GroupField {
         | null
     }
   }
+  localizedGroupArr?: {
+    array?:
+      | {
+          text?: string | null
+          id?: string | null
+        }[]
+      | null
+  }
+  localizedGroupSelect?: {
+    select?: ('one' | 'two')[] | null
+  }
+  localizedGroupRel?: {
+    rel?: (string | null) | TextField
+  }
+  localizedGroupManyRel?: {
+    email?: (string | TextField)[] | null
+  }
+  localizedGroupPolyRel?: {
+    email?: {
+      relationTo: 'text-fields'
+      value: string | TextField
+    } | null
+  }
+  localizedGroupPolyHasManyRel?: {
+    email?:
+      | {
+          relationTo: 'text-fields'
+          value: string | TextField
+        }[]
+      | null
+  }
   updatedAt: string
   createdAt: string
 }
@@ -1116,6 +1158,15 @@ export interface SelectField {
   select?: ('one' | 'two' | 'three') | null
   selectReadOnly?: ('one' | 'two' | 'three') | null
   selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null
+  array?:
+    | {
+        selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null
+        group?: {
+          selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null
+        }
+        id?: string | null
+      }[]
+    | null
   selectHasManyLocalized?: ('one' | 'two')[] | null
   selectI18n?: ('one' | 'two' | 'three') | null
   simple?: ('One' | 'Two' | 'Three') | null
