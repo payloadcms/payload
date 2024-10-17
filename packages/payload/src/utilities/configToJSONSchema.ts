@@ -797,18 +797,6 @@ function generateAuthOperationSchemas(collections: SanitizedCollectionConfig[]):
   }
 }
 
-export function jsonSchemaExternalImport({
-  from,
-  generics,
-  specifier,
-}: {
-  from: string
-  generics: string[]
-  specifier: 'default' | ({} & string)
-}): JSONSchema4 {
-  return { type: 'string', const: `externalImport:${from}#${specifier}:${generics.join(',')}` }
-}
-
 /**
  * This is used for generating the TypeScript types (payload-types.ts) with the payload generate:types command.
  */

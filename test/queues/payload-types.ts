@@ -1,5 +1,3 @@
-import { SingleTaskStatus as SingleTaskStatus_1 } from 'payload'
-
 /* tslint:disable */
 /* eslint-disable */
 /**
@@ -49,6 +47,10 @@ export interface Config {
       ExternalTask: {
         input: TaskExternalTaskInput;
         output: TaskExternalTaskOutput;
+      };
+      inline?: {
+        input: unknown;
+        output: unknown;
       };
     };
     workflows?: {
@@ -166,50 +168,15 @@ export interface PayloadJob {
     | number
     | boolean
     | null;
-  taskStatus?: {
-    UpdatePost?: {
-      /**
-       * This interface was referenced by `undefined`'s JSON-Schema definition
-       * via the `patternProperty` "^.*$".
-       */
-      [k: string]: SingleTaskStatus_1<"UpdatePost">;
-    };
-    UpdatePostStep2?: {
-      /**
-       * This interface was referenced by `undefined`'s JSON-Schema definition
-       * via the `patternProperty` "^.*$".
-       */
-      [k: string]: SingleTaskStatus_1<"UpdatePostStep2">;
-    };
-    CreateSimple?: {
-      /**
-       * This interface was referenced by `undefined`'s JSON-Schema definition
-       * via the `patternProperty` "^.*$".
-       */
-      [k: string]: SingleTaskStatus_1<"CreateSimple">;
-    };
-    CreateSimpleWithDuplicateMessage?: {
-      /**
-       * This interface was referenced by `undefined`'s JSON-Schema definition
-       * via the `patternProperty` "^.*$".
-       */
-      [k: string]: SingleTaskStatus_1<"CreateSimpleWithDuplicateMessage">;
-    };
-    ExternalTask?: {
-      /**
-       * This interface was referenced by `undefined`'s JSON-Schema definition
-       * via the `patternProperty` "^.*$".
-       */
-      [k: string]: SingleTaskStatus_1<"ExternalTask">;
-    };
-    inline?: {
-      /**
-       * This interface was referenced by `undefined`'s JSON-Schema definition
-       * via the `patternProperty` "^.*$".
-       */
-      [k: string]: SingleTaskStatus_1<any>;
-    };
-  };
+  taskStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   completedAt?: string | null;
   totalTried?: number | null;
   hasError?: boolean | null;

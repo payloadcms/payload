@@ -44,7 +44,8 @@ export type RunningJob<TWorkflowSlugOrInput extends keyof TypedJobs['workflows']
   input: TWorkflowSlugOrInput extends keyof TypedJobs['workflows']
     ? TypedJobs['workflows'][TWorkflowSlugOrInput]['input']
     : TWorkflowSlugOrInput
-} & TypedCollection['payload-jobs']
+  taskStatus: JobTaskStatus
+} & Omit<TypedCollection['payload-jobs'], 'input' | 'taskStatus'>
 
 export type RunningJobSimple<TWorkflowInput extends object> = {
   input: TWorkflowInput
@@ -67,7 +68,7 @@ export type SingleTaskStatus<T extends keyof TypedJobs['tasks']> = {
   complete: boolean
   input: TaskInput<T>
   output: TaskOutput<T>
-  taskSlug: 'inline' | TaskType
+  taskSlug: TaskType
   totalTried: number
 }
 
@@ -76,8 +77,8 @@ export type SingleTaskStatus<T extends keyof TypedJobs['tasks']> = {
  */
 export type JobTaskStatus = {
   // Wrap in taskSlug to improve typing
-  [taskSlug: 'inline' | TaskType]: {
-    [taskID: string]: SingleTaskStatus<TaskType>
+  [taskSlug in TaskType]: {
+    [taskID: string]: SingleTaskStatus<taskSlug>
   }
 }
 

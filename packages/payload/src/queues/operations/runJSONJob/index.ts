@@ -73,7 +73,7 @@ export const runJSONJob = async ({
         } else {
           await inlineTask(step.id, {
             retries: step.retries,
-            task: step.inlineTask,
+            task: step.inlineTask as any, // TODO: Fix type
           })
         }
       }),

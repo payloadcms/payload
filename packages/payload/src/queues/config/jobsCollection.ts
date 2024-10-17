@@ -1,9 +1,6 @@
-import type { JSONSchema4 } from 'json-schema'
-
 import type { CollectionConfig } from '../../collections/config/types.js'
 import type { Config } from '../../config/types.js'
 
-import { jsonSchemaExternalImport } from '../../utilities/configToJSONSchema.js'
 import { runJobsEndpoint } from '../operations/rest/run.js'
 import { getJobTaskStatus } from '../utilities/getJobTaskStatus.js'
 
@@ -34,40 +31,6 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
     taskSlugs.add(task.slug)
   })
 
-  const taskStatusJsonSchema: JSONSchema4 = {
-    type: 'object',
-    additionalProperties: false,
-    properties: {
-      ...Object.fromEntries(
-        config.jobs.tasks.map((task) => [
-          task.slug,
-          {
-            type: 'object',
-            additionalProperties: false,
-            patternProperties: {
-              '^.*$': jsonSchemaExternalImport({
-                from: 'payload',
-                generics: [`"${task.slug}"`],
-                specifier: 'SingleTaskStatus',
-              }),
-            },
-          },
-        ]),
-      ),
-      inline: {
-        type: 'object',
-        additionalProperties: false,
-        patternProperties: {
-          '^.*$': jsonSchemaExternalImport({
-            from: 'payload',
-            generics: [`any`],
-            specifier: 'SingleTaskStatus',
-          }),
-        },
-      },
-    },
-  }
-
   const jobsCollection: CollectionConfig = {
     slug: 'payload-jobs',
     admin: {
@@ -86,11 +49,6 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
       {
         name: 'taskStatus',
         type: 'json',
-        typescriptSchema: [
-          () => {
-            return taskStatusJsonSchema
-          },
-        ],
         virtual: true,
       },
       {

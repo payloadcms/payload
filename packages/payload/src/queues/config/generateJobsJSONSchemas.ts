@@ -66,32 +66,43 @@ export function generateJobsJSONSchemas(
     properties.tasks = {
       type: 'object',
       additionalProperties: false,
-      properties: Object.fromEntries(
-        jobsConfig.tasks.map((task) => {
-          const toReturn: JSONSchema4 = {
-            type: 'object',
-            additionalProperties: false,
-            properties: {
-              input: {},
-            },
-            required: ['input', 'output'],
-          }
+      properties: {
+        ...Object.fromEntries(
+          jobsConfig.tasks.map((task) => {
+            const toReturn: JSONSchema4 = {
+              type: 'object',
+              additionalProperties: false,
+              properties: {
+                input: {},
+              },
+              required: ['input', 'output'],
+            }
 
-          if (task.inputSchema?.length) {
-            ;(toReturn.required as string[]).push('input')
-            toReturn.properties.input = {
-              $ref: `#/definitions/Task${task.slug}Input`,
+            if (task.inputSchema?.length) {
+              ;(toReturn.required as string[]).push('input')
+              toReturn.properties.input = {
+                $ref: `#/definitions/Task${task.slug}Input`,
+              }
             }
-          }
-          if (task.outputSchema?.length) {
-            ;(toReturn.required as string[]).push('output')
-            toReturn.properties.output = {
-              $ref: `#/definitions/Task${task.slug}Output`,
+            if (task.outputSchema?.length) {
+              ;(toReturn.required as string[]).push('output')
+              toReturn.properties.output = {
+                $ref: `#/definitions/Task${task.slug}Output`,
+              }
             }
-          }
-          return [task.slug, toReturn]
-        }),
-      ),
+            return [task.slug, toReturn]
+          }),
+        ),
+        inline: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            input: {},
+            output: {},
+          },
+          required: ['input', 'output'],
+        },
+      },
       required: jobsConfig.tasks.map((task) => task.slug),
     }
   }
