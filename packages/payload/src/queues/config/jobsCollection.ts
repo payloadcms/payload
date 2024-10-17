@@ -242,6 +242,7 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
         },
       ],
     },
+    lockDocuments: false,
   }
   return jobsCollection
 }
