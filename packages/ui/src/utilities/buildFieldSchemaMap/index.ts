@@ -1,23 +1,28 @@
 import type { I18n } from '@payloadcms/translations'
-import type { ClientConfig, Field, FieldMap, SanitizedConfig } from 'payload'
+import type {
+  ClientConfig,
+  ClientFieldSchemaMap,
+  Field,
+  FieldSchemaMap,
+  SanitizedConfig,
+} from 'payload'
 
 import { confirmPassword, password } from 'payload/shared'
 
 import { traverseFields } from './traverseFields.js'
 
-export const buildFieldMap = (args: {
+export const buildFieldSchemaMap = (args: {
   clientConfig?: ClientConfig
   config: SanitizedConfig
   i18n: I18n
-}): FieldMap => {
+}): { clientSchemaMap: ClientFieldSchemaMap; fieldSchemaMap: FieldSchemaMap } => {
   const { clientConfig, config, i18n } = args
 
-  const fieldMap: FieldMap = new Map()
+  const schemaMap: FieldSchemaMap = new Map()
+  const clientSchemaMap: ClientFieldSchemaMap = new Map()
 
-  config.collections.forEach((collection) => {
-    const clientCollectionConfig = clientConfig?.collections.find(
-      (clientCollection) => clientCollection.slug === collection.slug,
-    )
+  config.collections.forEach((collection, i) => {
+    const clientCollection = clientConfig?.collections?.[i]
 
     if (collection.auth && !collection.auth.disableLocalStrategy) {
       // register schema with auth schemaPath
@@ -38,37 +43,28 @@ export const buildFieldMap = (args: {
         },
       ]
 
-      ;[...collection.fields, ...baseAuthFields].forEach((field) => {
-        if ('name' in field) {
-          fieldMap.set(`_${collection.slug}.auth.${field.name}`, { field })
-        }
-      })
+      schemaMap.set(`_${collection.slug}.auth`, [...collection.fields, ...baseAuthFields])
+      clientSchemaMap.set(`_${clientCollection?.slug}.auth`, clientCollection?.fields)
     }
 
     traverseFields({
-      clientFields: clientCollectionConfig?.fields || [],
       config,
-      fieldMap,
       fields: collection.fields,
       i18n,
+      schemaMap,
       schemaPath: collection.slug,
     })
   })
 
   config.globals.forEach((global) => {
-    const clientGlobalConfig = clientConfig?.globals.find(
-      (clientGlobal) => clientGlobal.slug === global.slug,
-    )
-
     traverseFields({
-      clientFields: clientGlobalConfig?.fields || [],
       config,
-      fieldMap,
       fields: global.fields,
       i18n,
+      schemaMap,
       schemaPath: global.slug,
     })
   })
 
-  return fieldMap
+  return { clientSchemaMap, fieldSchemaMap: schemaMap }
 }

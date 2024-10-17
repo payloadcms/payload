@@ -3,9 +3,9 @@ import type React from 'react'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { ClientBlock, ClientField, Field, FieldTypes } from '../fields/config/types.js'
+import type { ClientField, Field, FieldTypes } from '../fields/config/types.js'
 import type { JsonObject } from '../types/index.js'
-import type { ClientTab, Data, FormState } from './types.js'
+import type { Data, FormState } from './types.js'
 
 export type { CellComponentProps, DefaultCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
@@ -322,7 +322,7 @@ export type {
   GenericErrorProps,
 } from './forms/Error.js'
 
-export type { FormFieldBase, ServerFieldBase } from './forms/Field.js'
+export type { FormFieldBase, SchemaAccessor, ServerFieldBase } from './forms/Field.js'
 
 export type {
   BuildFormStateArgs,
@@ -415,6 +415,7 @@ export type PayloadServerAction = (
 export type RenderedField = {
   Field: React.ReactNode
   indexPath?: string
+  initialSchemaPath?: string
   isSidebar: boolean
   path: string
   renderedFieldMap?: RenderedFieldMap
@@ -465,10 +466,6 @@ export type {
   VisibleEntities,
 } from './views/types.js'
 
-export type FieldMap = Map<
-  string,
-  {
-    clientField?: ClientField
-    field: Field
-  }
->
+export type FieldSchemaMap = Map<string, Field[]>
+
+export type ClientFieldSchemaMap = Map<string, ClientField[]>

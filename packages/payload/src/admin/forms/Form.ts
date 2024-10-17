@@ -3,6 +3,7 @@ import { type SupportedLanguages } from '@payloadcms/translations'
 import type { Field, Validate } from '../../fields/config/types.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
+import type { SchemaAccessor } from './Field.js'
 
 export type Data = {
   [key: string]: any
@@ -64,6 +65,6 @@ export type BuildFormStateArgs = {
   */
   returnClientConfig?: boolean
   returnLockStatus?: boolean
-  schemaPath: string
+  schemaAccessor: SchemaAccessor
   updateLastEdited?: boolean
 }

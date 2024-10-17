@@ -272,7 +272,9 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
         operation,
         renderFields: true,
         returnLockStatus: isLockingEnabled ? true : false,
-        schemaPath,
+        schemaAccessor: {
+          schemaPath,
+        },
         // signal: abortController.signal,
         updateLastEdited,
       })

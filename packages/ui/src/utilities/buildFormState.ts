@@ -9,7 +9,7 @@ import type {
   DocumentPreferences,
   ErrorResult,
   Field,
-  FieldMap,
+  FieldSchemaMap,
   FormState,
   RenderedFieldMap,
   SanitizedCollectionConfig,
@@ -22,7 +22,8 @@ import { createClientConfig, formatErrors } from 'payload'
 import { reduceFieldsToValues } from 'payload/shared'
 
 import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
-import { buildFieldMap } from './buildFieldMap/index.js'
+import { getFieldByIndexPath } from './buildFieldSchemaMap/getFieldByIndexPath.js'
+import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
 import { renderFields } from './renderFields.js'
 
 let cachedFieldMap = global._payload_fieldMap
@@ -36,19 +37,17 @@ if (!cachedClientConfig) {
   cachedClientConfig = global._payload_clientConfig = null
 }
 
-export const getFieldMap = (args: {
-  clientConfig: ClientConfig
+export const getFieldSchemaMap = (args: {
   config: SanitizedConfig
   i18n: I18nClient
-}): FieldMap => {
-  const { clientConfig, config, i18n } = args
+}): FieldSchemaMap => {
+  const { config, i18n } = args
 
   if (cachedFieldMap && process.env.NODE_ENV !== 'development') {
     return cachedFieldMap
   }
 
-  cachedFieldMap = buildFieldMap({
-    clientConfig,
+  cachedFieldMap = buildFieldSchemaMap({
     config,
     i18n: i18n as I18n, // TODO: Fix this
   })
@@ -77,6 +76,7 @@ export const getClientConfig = (args: {
 type BuildFormStateSuccessResult = {
   clientConfig?: ClientConfig
   errors?: never
+  indexPath?: string
   lockedState?: { isLocked: boolean; user: ClientUser | number | string }
   renderedFieldMap?: RenderedFieldMap
   state: FormState
@@ -140,7 +140,7 @@ export const buildFormStateFn = async (
       user,
     },
     returnLockStatus,
-    schemaPath,
+    schemaAccessor: { initialSchemaPath, schemaIndexPath, schemaPath } = {},
     updateLastEdited,
   } = args
 
@@ -170,6 +170,7 @@ export const buildFormStateFn = async (
       limit: 1,
       pagination: false,
     })
+
     // If there are users, we should not allow access because of /create-first-user
     if (hasUsers.docs.length) {
       throw new Error('Unauthorized')
@@ -181,7 +182,7 @@ export const buildFormStateFn = async (
     i18n,
   })
 
-  const fieldMap = getFieldMap({
+  const { clientSchemaMap, fieldSchemaMap } = buildFieldSchemaMap({
     clientConfig,
     config,
     i18n,
@@ -191,7 +192,7 @@ export const buildFormStateFn = async (
   const schemaPathSegments = schemaPath && schemaPath.split('.')
   const pathSegments = pathFromArgs && pathFromArgs.split('.')
 
-  const entitySlug = schemaPathSegments[0]
+  const entitySlug = schemaPathSegments?.[0]
   let entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
   let clientEntityConfig: ClientCollectionConfig | ClientGlobalConfig
 
@@ -207,23 +208,38 @@ export const buildFormStateFn = async (
 
   let fields: Field[]
   let clientFields: ClientField[]
-  let baseSchemaPath = schemaPath
+  let parentSchemaPath = schemaPath
   let basePath = ''
 
   if (schemaPathSegments && schemaPathSegments.length === 1) {
     // If the schema path is just the entity slug, then we are dealing with an entire collection or global
     fields = entityConfig.fields
     clientFields = clientEntityConfig?.fields || []
-  } else if (fieldMap.has(schemaPath)) {
-    const mappedField = fieldMap.get(schemaPath)
-    fields = [mappedField?.field]
-    clientFields = [mappedField?.clientField]
-    // TODO: this is a bit of a hack, but it works for now
-    baseSchemaPath = schemaPathSegments.slice(0, schemaPathSegments.length - 1).join('.')
+  } else if (initialSchemaPath && schemaIndexPath) {
+    let baseFields: Field[] = []
+    let baseClientFields: ClientField[] = []
+    parentSchemaPath = schemaPathSegments.slice(0, schemaPathSegments.length - 1).join('.')
+
+    if (initialSchemaPath.split('.').length === 1) {
+      baseFields = entityConfig.fields
+      baseClientFields = clientEntityConfig.fields
+    } else {
+      baseFields = fieldSchemaMap.get(initialSchemaPath)
+      baseClientFields = clientSchemaMap.get(initialSchemaPath)
+    }
+
+    const field = getFieldByIndexPath({ fields: baseFields, schemaIndexPath }) as Field
+
+    const clientField = getFieldByIndexPath({
+      fields: baseClientFields,
+      schemaIndexPath,
+    }) as ClientField
+
+    fields = [field]
+    clientFields = [clientField]
+
     basePath =
       pathSegments.length > 1 ? pathSegments.slice(0, pathSegments.length - 1).join('.') : ''
-  } else {
-    throw new Error(`Schema path "${schemaPath}" does not exist in the field map`)
   }
 
   if (!fields || !Array.isArray(fields) || fields.length === 0) {
@@ -432,14 +448,15 @@ export const buildFormStateFn = async (
           clientFields,
           config,
           entityConfig,
-          fieldMap,
           fields,
+          fieldSchemaMap,
           formState: formStateResult,
           i18n,
+          initialSchemaPath,
           path: basePath,
           payload,
           permissions: {}, // TODO
-          schemaPath: baseSchemaPath,
+          schemaPath: parentSchemaPath,
         })
       : undefined,
     state: formStateResult,

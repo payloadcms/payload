@@ -6,9 +6,9 @@ import type {
   ClientGlobalConfig,
   ClientTab,
   Field,
-  FieldMap,
   FieldPermissions,
   FieldRow,
+  FieldSchemaMap,
   FieldSlots,
   FieldTypes,
   FormField,
@@ -106,6 +106,7 @@ export type RenderFieldFn = (
     readonly i18n: I18nClient
     readonly importMap: ImportMap
     readonly indexPath: string
+    readonly initialSchemaPath?: string
     readonly margins?: 'small' | false
     readonly path: string
     readonly payload: Payload
@@ -128,8 +129,8 @@ export type RenderFieldsArgs = {
   readonly clientGlobalConfig?: ClientGlobalConfig
   readonly config: SanitizedConfig
   readonly entityConfig?: SanitizedCollectionConfig | SanitizedGlobalConfig
-  readonly fieldMap?: FieldMap
   readonly fields: Field[]
+  readonly fieldSchemaMap?: FieldSchemaMap
   /**
    * Controls the rendering behavior of the fields, i.e. defers rendering until they intersect with the viewport using the Intersection Observer API.
    *
@@ -141,6 +142,7 @@ export type RenderFieldsArgs = {
   readonly formState?: FormState
   readonly i18n: I18nClient
   readonly indexPath?: string
+  readonly initialSchemaPath?: string
   readonly margins?: 'small' | false
   readonly operation?: Operation
   readonly path?: string
@@ -182,7 +184,11 @@ export type ClientSlotProps = {
   readOnly?: boolean
   renderedBlocks?: RenderedField[]
   renderedFieldMap?: RenderedFieldMap
-  schemaPath: string
+  schemaAccessor: {
+    initialSchemaPath: string
+    schemaIndexPath: string
+    schemaPath: string
+  }
 }
 
 export type ServerSlotProps = {
@@ -209,6 +215,7 @@ const traverseFields = ({
   permissions,
   result,
   schemaPath,
+  initialSchemaPath = schemaPath,
 }: {
   result: RenderedFieldMap
 } & RenderFieldsArgs) => {
@@ -243,8 +250,7 @@ const traverseFields = ({
         return null
       }
 
-      const fieldIndexPath =
-        indexPath !== undefined ? `${indexPath}.${fieldIndex}` : `${fieldIndex}`
+      const fieldIndexPath = [indexPath, fieldIndex].filter(Boolean).join('.')
 
       const path = [parentPath, name].filter(Boolean).join('.')
 
@@ -261,6 +267,7 @@ const traverseFields = ({
         i18n,
         importMap: payload.importMap,
         indexPath: fieldIndexPath,
+        initialSchemaPath,
         margins,
         path,
         payload,
@@ -274,6 +281,12 @@ const traverseFields = ({
 
 export const renderFields: RenderFieldsFn = (args) => {
   const result: RenderedFieldMap = new Map()
+  console.log({
+    fields: args.fields.map((field) => field.name),
+    initialSchemaPath: args.initialSchemaPath,
+    path: args.path,
+    schemaPath: args.schemaPath,
+  })
   traverseFields({ ...args, result })
 
   return result
@@ -291,6 +304,7 @@ export const renderField: RenderFieldFn = (args) => {
     i18n,
     importMap,
     indexPath,
+    initialSchemaPath,
     margins,
     path,
     payload,
@@ -310,7 +324,11 @@ export const renderField: RenderFieldFn = (args) => {
     path,
     permissions: fieldPermissions,
     readOnly,
-    schemaPath,
+    schemaAccessor: {
+      initialSchemaPath,
+      schemaIndexPath: indexPath,
+      schemaPath,
+    },
   }
 
   const serverProps: ServerSlotProps = {
@@ -328,6 +346,7 @@ export const renderField: RenderFieldFn = (args) => {
     type: field.type,
     Field: null,
     indexPath,
+    initialSchemaPath,
     isSidebar: fieldIsSidebar(field),
     path,
     renderedFieldMap: new Map() as RenderedFieldMap,
@@ -384,7 +403,8 @@ export const renderField: RenderFieldFn = (args) => {
           forceRender,
           formState,
           i18n,
-          indexPath: `${indexPath}.${rowIndex}`,
+          indexPath,
+          initialSchemaPath,
           margins,
           path: `${path}.${rowIndex}`,
           payload,
@@ -420,7 +440,8 @@ export const renderField: RenderFieldFn = (args) => {
           forceRender,
           formState,
           i18n,
-          indexPath: `${indexPath}.${rowIndex}`,
+          indexPath,
+          initialSchemaPath,
           margins,
           path: `${path}.${rowIndex}`,
           payload,
@@ -444,6 +465,7 @@ export const renderField: RenderFieldFn = (args) => {
         formState,
         i18n,
         indexPath,
+        initialSchemaPath,
         margins,
         path,
         payload,
@@ -468,6 +490,7 @@ export const renderField: RenderFieldFn = (args) => {
           formState,
           i18n,
           indexPath,
+          initialSchemaPath,
           margins,
           path,
           payload,

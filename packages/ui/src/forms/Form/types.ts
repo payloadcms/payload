@@ -1,11 +1,11 @@
 import type {
   ClientField,
   Data,
-  FieldRow,
   FormField,
   FormState,
   RenderedFieldMap,
   Row,
+  SchemaAccessor,
   User,
 } from 'payload'
 import type React from 'react'
@@ -187,11 +187,11 @@ export type Context = {
   addFieldRow: ({
     data,
     path,
-    schemaPath,
+    schemaAccessor,
   }: {
     data?: Data
     path: string
-    schemaPath: string
+    schemaAccessor: SchemaAccessor
   }) => Promise<RenderedFieldMap>
   buildRowErrors: () => void
   createFormData: CreateFormData
@@ -213,12 +213,12 @@ export type Context = {
     data,
     path,
     rowIndex,
-    schemaPath,
+    schemaAccessor,
   }: {
     data?: Data
     path: string
     rowIndex: number
-    schemaPath: string
+    schemaAccessor: SchemaAccessor
   }) => Promise<void>
   replaceState: (state: FormState) => void
   reset: Reset

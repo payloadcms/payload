@@ -32,6 +32,12 @@ export type ServerFieldBase<
 } & FormFieldBase &
   Partial<ServerProps>
 
+export type SchemaAccessor = {
+  initialSchemaPath?: string
+  schemaIndexPath?: string
+  schemaPath?: string
+}
+
 export type FormFieldBase = {
   readonly Blocks?: React.ReactNode[]
   readonly docPreferences?: DocumentPreferences
@@ -39,13 +45,12 @@ export type FormFieldBase = {
    * `forceRender` is added by RenderField automatically.
    */
   readonly forceRender?: boolean
-  readonly indexPath?: string
   readonly locale?: Locale
   /**
    * `readOnly` is added by RenderField automatically. This should be used instead of `field.admin.readOnly`.
    */
   readonly readOnly?: boolean
-  readonly schemaPath?: string
+  readonly schemaAccessor: SchemaAccessor
   readonly user?: User
   readonly validate?: Validate
 }

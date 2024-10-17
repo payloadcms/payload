@@ -53,7 +53,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     Label,
     path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
-    schemaPath,
+    schemaAccessor,
     validate,
   } = props
 
@@ -143,8 +143,10 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       const renderedFieldMap = await addFieldRow({
         data: { [name]: [...currentData, newRow] },
         path,
-        schemaPath,
+        schemaAccessor,
       })
+
+      console.log('renderedFieldMap', renderedFieldMap)
 
       setRenderedRows(renderedFieldMap?.get(path)?.renderedRows || [])
 
@@ -154,7 +156,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, setModified, schemaPath, setRenderedRows, getDataByPath, name],
+    [addFieldRow, path, setModified, setRenderedRows, getDataByPath, name, schemaAccessor],
   )
 
   const duplicateRow = useCallback(
@@ -267,6 +269,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         {Description}
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
+      {JSON.stringify(schemaAccessor)}
       {(rowsData?.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
           className={`${baseClass}__draggable-rows`}

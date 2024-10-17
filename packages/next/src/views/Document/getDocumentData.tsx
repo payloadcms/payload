@@ -40,7 +40,9 @@ export const getDocumentData = async (args: {
       operation: (collectionConfig && id) || globalConfig ? 'update' : 'create',
       renderFields: true,
       req,
-      schemaPath,
+      schemaAccessor: {
+        schemaPath,
+      },
     })
 
     const data = reduceFieldsToValues(result.state, true)
