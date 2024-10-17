@@ -21,7 +21,7 @@ import type {
 } from 'drizzle-orm/pg-core'
 import type { PgTableFn } from 'drizzle-orm/pg-core/table'
 import type { Payload, PayloadRequest } from 'payload'
-import type { ClientConfig, QueryResult } from 'pg'
+import type { ClientConfig, Pool, QueryResult } from 'pg'
 
 import type { extendDrizzleTable, Operators } from '../index.js'
 import type { BuildQueryJoinAliases, DrizzleAdapter, TransactionPg } from '../types.js'
@@ -134,7 +134,9 @@ export type BasePostgresAdapter = {
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
   deleteWhere: DeleteWhere
   disableCreateDatabase: boolean
-  drizzle: PostgresDB
+  drizzle: {
+    $client: Pool
+  } & PostgresDB
   dropDatabase: DropDatabase
   enums: Record<string, GenericEnum>
   execute: Execute<unknown>

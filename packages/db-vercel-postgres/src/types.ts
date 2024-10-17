@@ -56,6 +56,9 @@ export type Args = {
 }
 
 export type VercelPostgresAdapter = {
+  drizzle: {
+    $client: VercelPool
+  } & PostgresDB
   pool?: VercelPool
   poolOptions?: Args['pool']
 } & BasePostgresAdapter
@@ -67,7 +70,9 @@ declare module 'payload' {
     afterSchemaInit: PostgresSchemaHook[]
     beforeSchemaInit: PostgresSchemaHook[]
     beginTransaction: (options?: PgTransactionConfig) => Promise<null | number | string>
-    drizzle: PostgresDB
+    drizzle: {
+      $client: VercelPool
+    } & PostgresDB
     enums: Record<string, GenericEnum>
     /**
      * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
