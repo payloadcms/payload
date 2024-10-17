@@ -65,6 +65,7 @@ import localOperations from './collections/operations/local/index.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
+import { getJobsLocalAPI } from './queues/localAPI.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
@@ -97,6 +98,19 @@ export interface GeneratedTypes {
   globalsUntyped: {
     [slug: string]: JsonObject
   }
+  jobsUntyped: {
+    tasks: {
+      [slug: string]: {
+        input?: JsonObject
+        output?: JsonObject
+      }
+    }
+    workflows: {
+      [slug: string]: {
+        input: JsonObject
+      }
+    }
+  }
   localeUntyped: null | string
   userUntyped: User
 }
@@ -114,7 +128,7 @@ export type TypedCollection = ResolveCollectionType<GeneratedTypes>
 export type TypedGlobal = ResolveGlobalType<GeneratedTypes>
 
 // Extract string keys from the type
-type StringKeyOf<T> = Extract<keyof T, string>
+export type StringKeyOf<T> = Extract<keyof T, string>
 
 // Define the types for slugs using the appropriate collections and globals
 export type CollectionSlug = StringKeyOf<TypedCollection>
@@ -140,6 +154,10 @@ export type TypedUser = ResolveUserType<GeneratedTypes>
 // @ts-expect-error
 type ResolveAuthOperationsType<T> = 'auth' extends keyof T ? T['auth'] : T['authUntyped']
 export type TypedAuthOperations = ResolveAuthOperationsType<GeneratedTypes>
+
+// @ts-expect-error
+type ResolveJobOperationsType<T> = 'jobs' extends keyof T ? T['jobs'] : T['jobsUntyped']
+export type TypedJobs = ResolveJobOperationsType<GeneratedTypes>
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -311,6 +329,8 @@ export class BasePayload {
   globals: Globals
 
   importMap: ImportMap
+
+  jobs = getJobsLocalAPI(this)
 
   logger: Logger
 
@@ -1020,6 +1040,27 @@ export type {
   PreferenceUpdateRequest,
   TabsPreferences,
 } from './preferences/types.js'
+export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
+export type {
+  RunTaskFunction,
+  TaskConfig,
+  TaskHandler,
+  TaskHandlerArgs,
+  TaskHandlerResult,
+  TaskHandlerResults,
+  TaskInput,
+  TaskOutput,
+  TaskType,
+} from './queues/config/types/taskTypes.js'
+export type {
+  BaseJob,
+  JobTaskStatus,
+  RunningJob,
+  SingleTaskStatus,
+  WorkflowConfig,
+  WorkflowHandler,
+  WorkflowTypes,
+} from './queues/config/types/workflowTypes.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'

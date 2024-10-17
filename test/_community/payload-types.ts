@@ -30,6 +30,10 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
+  jobs?: {
+    tasks: unknown;
+    workflows?: unknown;
+  };
 }
 export interface UserAuthOperations {
   forgotPassword: {
