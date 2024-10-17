@@ -18,7 +18,7 @@ The Select Field provides a dropdown-style interface for choosing options from a
 To add a Select Field, set the `type` to `select` in your [Field Config](./overview):
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MySelectField: Field = {
   // ...
@@ -71,7 +71,7 @@ _\* An asterisk denotes that a property is required._
 The customize the appearance and behavior of the Select Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MySelectField: Field = {
   // ...
@@ -93,7 +93,7 @@ The Select Field inherits all of the default options from the base [Field Admin 
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
@@ -156,8 +156,7 @@ You can import the existing Select component directly from Payload, then extend 
 
 ```ts
 import * as React from 'react';
-import { SelectInput, useField } from 'payload/components/forms';
-import { useAuth } from 'payload/components/utilities';
+import { SelectInput, useAuth, useField } from '@payloadcms/ui';
 
 type CustomSelectProps = {
   path: string;

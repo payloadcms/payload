@@ -18,7 +18,7 @@ The Text Field is one of the most commonly used fields. It saves a string to the
 To add a Text Field, set the `type` to `text` in your [Field Config](./overview):
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyTextField: Field = {
   // ...
@@ -59,7 +59,7 @@ _\* An asterisk denotes that a property is required._
 The customize the appearance and behavior of the Text Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyTextField: Field = {
   // ...
@@ -82,7 +82,7 @@ The Text Field inherits all of the default options from the base [Field Admin Co
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',

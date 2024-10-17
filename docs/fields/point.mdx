@@ -18,7 +18,7 @@ The Point Field saves a pair of coordinates in the database and assigns an index
 To add a Point Field, set the `type` to `point` in your [Field Config](./overview):
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyPointField: Field = {
   // ...
@@ -59,7 +59,7 @@ _\* An asterisk denotes that a property is required._
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',

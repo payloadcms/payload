@@ -38,7 +38,7 @@ At its core a strategy simply takes information from the incoming request and re
 Your `authenticate` method should return an object containing a Payload user document and any optional headers that you'd like Payload to set for you when we return a response.
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const Users: CollectionConfig = {
   slug: 'users',

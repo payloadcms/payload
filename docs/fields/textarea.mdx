@@ -18,7 +18,7 @@ The Textarea Field is nearly identical to the [Text Field](./text) but it featur
 To add a Textarea Field, set the `type` to `textarea` in your [Field Config](./overview):
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyTextareaField: Field = {
   // ...
@@ -56,7 +56,7 @@ _\* An asterisk denotes that a property is required._
 The customize the appearance and behavior of the Textarea Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyTextareaField: Field = {
   // ...
@@ -79,7 +79,7 @@ The Textarea Field inherits all of the default options from the base [Field Admi
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',

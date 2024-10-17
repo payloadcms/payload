@@ -25,7 +25,7 @@ caption="Admin Panel screenshot of an Upload field"
 To create an Upload Field, set the `type` to `upload` in your [Field Config](./overview):
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyUploadField: Field = {
   // ...
@@ -73,7 +73,7 @@ _\* An asterisk denotes that a property is required._
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
