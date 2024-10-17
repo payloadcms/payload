@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-exports */
 import auth from '../../../auth/operations/local/index.js'
 import count from './count.js'
 import create from './create.js'

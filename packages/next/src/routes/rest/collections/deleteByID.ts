@@ -6,6 +6,7 @@ import type { CollectionRouteHandlerWithID } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { sanitizeCollectionID } from '../utilities/sanitizeCollectionID.js'
+import { sanitizeSelect } from '../utilities/sanitizeSelect.js'
 
 export const deleteByID: CollectionRouteHandlerWithID = async ({
   id: incomingID,
@@ -26,6 +27,7 @@ export const deleteByID: CollectionRouteHandlerWithID = async ({
     collection,
     depth: isNumber(depth) ? depth : undefined,
     req,
+    select: sanitizeSelect(req.query.select),
   })
 
   const headers = headersWithCors({

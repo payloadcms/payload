@@ -8,7 +8,7 @@ import { upsertRow } from './upsertRow/index.js'
 
 export async function updateGlobal<T extends Record<string, unknown>>(
   this: DrizzleAdapter,
-  { slug, data, req = {} as PayloadRequest }: UpdateGlobalArgs,
+  { slug, data, req = {} as PayloadRequest, select }: UpdateGlobalArgs,
 ): Promise<T> {
   const db = this.sessions[await req?.transactionID]?.db || this.drizzle
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
@@ -23,6 +23,7 @@ export async function updateGlobal<T extends Record<string, unknown>>(
     db,
     fields: globalConfig.fields,
     req,
+    select,
     tableName,
   })
 
