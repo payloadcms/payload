@@ -151,11 +151,11 @@ export type TaskConfig<
   /**
    * Function to be executed if the task fails.
    */
-  onFail?: () => void
+  onFail?: () => Promise<void> | void
   /**
    * Function to be executed if the task succeeds.
    */
-  onSuccess?: () => void
+  onSuccess?: () => Promise<void> | void
   /**
    * Define the output field schema - payload will generate a type for this schema.
    */

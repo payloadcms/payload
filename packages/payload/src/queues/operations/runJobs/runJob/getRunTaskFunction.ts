@@ -48,6 +48,7 @@ export async function handleTaskFailed({
   retriesConfig,
   runnerOutput,
   state,
+  taskConfig,
   taskID,
   taskSlug,
   taskStatus,
@@ -63,12 +64,17 @@ export async function handleTaskFailed({
   retriesConfig: number | RetryConfig
   runnerOutput?: TaskHandlerResult<string>
   state: RunTaskFunctionState
+  taskConfig?: TaskConfig<string>
   taskID: string
   taskSlug: string
   taskStatus: null | SingleTaskStatus<string>
   updateJob: UpdateJobFunction
 }): Promise<never> {
   req.payload.logger.error({ err: error, job, msg: 'Error running task', taskSlug })
+
+  if (taskConfig?.onFail) {
+    await taskConfig.onFail()
+  }
 
   if (!job.log) {
     job.log = []
@@ -237,6 +243,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
             retriesConfig,
             runnerOutput,
             state,
+            taskConfig,
             taskID,
             taskSlug,
             taskStatus,
@@ -257,12 +264,17 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           req,
           retriesConfig,
           state,
+          taskConfig,
           taskID,
           taskSlug,
           taskStatus,
           updateJob,
         })
         throw new Error('Task failed')
+      }
+
+      if (taskConfig?.onSuccess) {
+        await taskConfig.onSuccess()
       }
 
       if (!job.log) {
