@@ -9,7 +9,7 @@ export const buildIndexName = ({
   name: string
   number?: number
 }): string => {
-  const indexName = `${name}_idx${number ? `_${number}` : ''}`
+  const indexName = `${name}${number ? `_${number}` : ''}_idx`
 
   if (!adapter.indexes.has(indexName)) {
     adapter.indexes.add(indexName)
