@@ -13,6 +13,10 @@
       flex-wrap: nowrap;
     }
 
+    .rs__menu-notice {
+      padding: base(0.5) base(0.6);
+    }
+
     .rs__indicators {
       gap: calc(var(--base) / 4);
     }
