@@ -147,7 +147,6 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
     }
   }, [apiRoute, hasInitializedState, serverURL, slug])
 
-  // Fetch locked document IDs and set the action URL
   React.useEffect(() => {
     const fetchActionUrl = async () => {
       const lockedDocumentIds = await getLockedDocumentIds(serverURL, apiRoute)

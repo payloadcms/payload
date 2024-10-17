@@ -56,9 +56,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
   const handleDelete = useCallback(async () => {
     setDeleting(true)
 
-    // Fetch locked document IDs before calling `getQueryParams`
     const lockedDocumentIds = await getLockedDocumentIds(serverURL, api)
-
     const queryParams = getQueryParams(lockedDocumentIds)
 
     await requests

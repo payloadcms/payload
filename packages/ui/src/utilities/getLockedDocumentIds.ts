@@ -2,7 +2,6 @@ import { requests } from './api.js'
 
 export const getLockedDocumentIds = async (serverURL: string, api: string): Promise<string[]> => {
   try {
-    // Fetch all locked documents from the 'payload-locked-documents' collection
     const response = await requests.get(`${serverURL}${api}/payload-locked-documents`)
 
     // Extract the IDs from the response

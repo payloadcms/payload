@@ -56,10 +56,7 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
   const handlePublish = useCallback(async () => {
     setSubmitted(true)
 
-    // Fetch locked document IDs before calling `getQueryParams`
     const lockedDocumentIds = await getLockedDocumentIds(serverURL, api)
-
-    // Pass the locked IDs to `getQueryParams`
     const queryParams = getQueryParams(lockedDocumentIds, {
       _status: { not_equals: 'published' },
     })
