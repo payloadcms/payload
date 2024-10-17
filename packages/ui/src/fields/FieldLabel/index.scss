@@ -8,10 +8,7 @@
 
   .localized {
     @extend %body;
-    background: var(--theme-elevation-100);
-    padding: 0 calc(var(--base) * 0.25);
-    margin: 0 calc(var(--base) * 0.25);
-    border-radius: $style-radius-m;
+    display: none;
   }
 
   label.field-label:not(.unstyled) {
@@ -29,6 +26,14 @@
 
     .required {
       color: var(--theme-error-500);
+    }
+
+    .localized {
+      display: unset;
+    }
+
+    .required,
+    .localized {
       [dir='ltr'] & {
         margin-left: base(0.25);
       }
