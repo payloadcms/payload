@@ -84,7 +84,7 @@ export const DocumentFields: React.FC<Args> = ({
           {AfterFields}
         </Gutter>
       </div>
-      {sidebarFields ? (
+      {hasSidebarFields ? (
         <div className={`${baseClass}__sidebar-wrap`}>
           <div className={`${baseClass}__sidebar`}>
             <div className={`${baseClass}__sidebar-fields`}>
