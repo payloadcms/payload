@@ -4,6 +4,7 @@ import type { PayloadRequest } from '../types/index.js'
 
 import { getDataLoader } from '../collections/dataloader.js'
 import { getLocalI18n } from '../translations/getLocalI18n.js'
+import { sanitizeFallbackLocale } from '../utilities/sanitizeFallbackLocale.js'
 
 function getRequestContext(
   req: PayloadRequest = { context: null } as PayloadRequest,
@@ -82,20 +83,21 @@ export const createLocalReq: CreateLocalReq = async (
   { context, fallbackLocale, locale: localeArg, req = {} as PayloadRequest, user },
   payload,
 ) => {
-  if (payload.config?.localization) {
+  const localization = payload.config?.localization
+  if (localization) {
     const locale = localeArg === '*' ? 'all' : localeArg
-    const defaultLocale = payload.config.localization.defaultLocale
+    const defaultLocale = localization.defaultLocale
     const localeCandidate = locale || req?.locale || req?.query?.locale
     req.locale =
       localeCandidate && typeof localeCandidate === 'string' ? localeCandidate : defaultLocale
-    const fallbackLocaleFromConfig = payload.config.localization.locales.find(
-      ({ code }) => req.locale === code,
-    )?.fallbackLocale
-    if (typeof fallbackLocale !== 'undefined') {
-      req.fallbackLocale = fallbackLocale
-    } else if (typeof req?.fallbackLocale === 'undefined') {
-      req.fallbackLocale = fallbackLocaleFromConfig || defaultLocale
-    }
+
+    const sanitizedFallback = sanitizeFallbackLocale({
+      fallbackLocale,
+      locale: req.locale,
+      localization,
+    })
+
+    req.fallbackLocale = sanitizedFallback.fallbackLocale
   }
 
   const i18n =

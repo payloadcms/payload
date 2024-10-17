@@ -13,7 +13,7 @@ export type Options<TSlug extends GlobalSlug> = {
   data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
   depth?: number
   draft?: boolean
-  fallbackLocale?: TypedLocale
+  fallbackLocale?: 'none' | TypedLocale
   locale?: TypedLocale
   overrideAccess?: boolean
   overrideLock?: boolean
