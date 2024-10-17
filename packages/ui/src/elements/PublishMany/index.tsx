@@ -14,6 +14,7 @@ import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
+import { getLockedDocumentIds } from '../../utilities/getLockedDocumentIds.js'
 import { Button } from '../Button/index.js'
 import { Pill } from '../Pill/index.js'
 import './index.scss'
@@ -54,19 +55,25 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
 
   const handlePublish = useCallback(async () => {
     setSubmitted(true)
+
+    // Fetch locked document IDs before calling `getQueryParams`
+    const lockedDocumentIds = await getLockedDocumentIds(serverURL, api)
+
+    // Pass the locked IDs to `getQueryParams`
+    const queryParams = getQueryParams(lockedDocumentIds, {
+      _status: { not_equals: 'published' },
+    })
+
     await requests
-      .patch(
-        `${serverURL}${api}/${slug}${getQueryParams({ _status: { not_equals: 'published' } })}&draft=true`,
-        {
-          body: JSON.stringify({
-            _status: 'published',
-          }),
-          headers: {
-            'Accept-Language': i18n.language,
-            'Content-Type': 'application/json',
-          },
+      .patch(`${serverURL}${api}/${slug}${queryParams}&draft=true`, {
+        body: JSON.stringify({
+          _status: 'published',
+        }),
+        headers: {
+          'Accept-Language': i18n.language,
+          'Content-Type': 'application/json',
         },
-      )
+      })
       .then(async (res) => {
         try {
           const json = await res.json()

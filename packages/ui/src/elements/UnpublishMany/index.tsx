@@ -11,6 +11,7 @@ import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
+import { getLockedDocumentIds } from '../../utilities/getLockedDocumentIds.js'
 import { Button } from '../Button/index.js'
 import { Pill } from '../Pill/index.js'
 import './index.scss'
@@ -55,8 +56,17 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
 
   const handleUnpublish = useCallback(async () => {
     setSubmitted(true)
+
+    // Fetch locked document IDs before calling `getQueryParams`
+    const lockedDocumentIds = await getLockedDocumentIds(serverURL, api)
+
+    // Pass the locked IDs to `getQueryParams`
+    const queryParams = getQueryParams(lockedDocumentIds, {
+      _status: { not_equals: 'draft' },
+    })
+
     await requests
-      .patch(`${serverURL}${api}/${slug}${getQueryParams({ _status: { not_equals: 'draft' } })}`, {
+      .patch(`${serverURL}${api}/${slug}${queryParams}`, {
         body: JSON.stringify({
           _status: 'draft',
         }),

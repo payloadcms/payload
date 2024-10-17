@@ -18,12 +18,13 @@ type SelectionContext = {
   count: number
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
-  getQueryParams: (additionalParams?: Where) => string
+  getQueryParams: (lockedDocumentIds: string[], additionalParams?: Where) => string
   selectAll: SelectAllStatus
   selected: Map<number | string, boolean>
   setSelection: (id: number | string) => void
   toggleAll: (allAvailable?: boolean) => void
   totalDocs: number
+  totalSelectableDocs: number
 }
 
 const Context = createContext({} as SelectionContext)
@@ -48,6 +49,12 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     return rows
   })
 
+  const totalSelectableDocs =
+    totalDocs -
+    docs.filter(({ _isLocked, _userEditing }) => {
+      return _isLocked && _userEditing?.id !== user?.id
+    }).length
+
   const [selectAll, setSelectAll] = useState<SelectAllStatus>(SelectAllStatus.None)
   const [count, setCount] = useState(0)
   const { searchParams } = useSearchParams()
@@ -56,12 +63,12 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     (allAvailable = false) => {
       const rows = new Map()
       if (allAvailable) {
-        setSelectAll(SelectAllStatus.AllAvailable)
         docs.forEach(({ id, _isLocked, _userEditing }) => {
           if (!_isLocked || _userEditing?.id === user?.id) {
             rows.set(id, true)
           }
         })
+        setSelectAll(SelectAllStatus.AllAvailable)
       } else if (
         selectAll === SelectAllStatus.AllAvailable ||
         selectAll === SelectAllStatus.AllInPage
@@ -104,12 +111,16 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   )
 
   const getQueryParams = useCallback(
-    (additionalParams?: Where): string => {
+    (lockedDocumentIds: string[], additionalParams?: Where): string => {
       let where: Where
+
       if (selectAll === SelectAllStatus.AllAvailable) {
         const params = searchParams?.where as Where
-        where = params || {
-          id: { not_equals: '' },
+        where = {
+          ...params,
+          id: {
+            not_in: lockedDocumentIds,
+          },
         }
       } else {
         const ids = []
@@ -175,7 +186,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     let newCount = 0
 
     if (selectAll === SelectAllStatus.AllAvailable) {
-      newCount = totalDocs
+      newCount = totalSelectableDocs
     } else {
       for (const [_, value] of selected) {
         if (value) {
@@ -186,7 +197,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
 
     // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
     setCount(newCount)
-  }, [selectAll, selected, totalDocs])
+  }, [docs, selectAll, selected, totalSelectableDocs])
 
   contextRef.current = {
     count,
@@ -196,6 +207,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     setSelection,
     toggleAll,
     totalDocs,
+    totalSelectableDocs,
   }
 
   return <Context.Provider value={contextRef.current}>{children}</Context.Provider>

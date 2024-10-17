@@ -14,6 +14,7 @@ import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
+import { getLockedDocumentIds } from '../../utilities/getLockedDocumentIds.js'
 import { Button } from '../Button/index.js'
 import { Pill } from '../Pill/index.js'
 import './index.scss'
@@ -54,8 +55,14 @@ export const DeleteMany: React.FC<Props> = (props) => {
 
   const handleDelete = useCallback(async () => {
     setDeleting(true)
+
+    // Fetch locked document IDs before calling `getQueryParams`
+    const lockedDocumentIds = await getLockedDocumentIds(serverURL, api)
+
+    const queryParams = getQueryParams(lockedDocumentIds)
+
     await requests
-      .delete(`${serverURL}${api}/${slug}${getQueryParams()}`, {
+      .delete(`${serverURL}${api}/${slug}${queryParams}`, {
         headers: {
           'Accept-Language': i18n.language,
           'Content-Type': 'application/json',

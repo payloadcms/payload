@@ -22,6 +22,7 @@ import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { getFormState } from '../../utilities/getFormState.js'
+import { getLockedDocumentIds } from '../../utilities/getLockedDocumentIds.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { FieldSelect } from '../FieldSelect/index.js'
 import './index.scss'
@@ -117,6 +118,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   const [initialState, setInitialState] = useState<FormState>()
   const hasInitializedState = React.useRef(false)
   const { clearRouteCache } = useRouteCache()
+  const [actionUrl, setActionUrl] = useState<null | string>(null)
 
   const collectionPermissions = permissions?.collections?.[slug]
   const hasUpdatePermission = collectionPermissions?.update?.permission
@@ -144,6 +146,18 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
       void getInitialState()
     }
   }, [apiRoute, hasInitializedState, serverURL, slug])
+
+  // Fetch locked document IDs and set the action URL
+  React.useEffect(() => {
+    const fetchActionUrl = async () => {
+      const lockedDocumentIds = await getLockedDocumentIds(serverURL, apiRoute)
+      const queryParams = getQueryParams(lockedDocumentIds)
+      const url = `${serverURL}${apiRoute}/${slug}${queryParams}`
+      setActionUrl(url)
+    }
+
+    void fetchActionUrl()
+  }, [serverURL, apiRoute, slug, getQueryParams])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
@@ -224,19 +238,16 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                         {collection?.versions?.drafts ? (
                           <React.Fragment>
                             <PublishButton
-                              action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}&draft=true`}
+                              action={actionUrl ? `${actionUrl}&draft=true` : ''}
                               disabled={selected.length === 0}
                             />
                             <SaveDraftButton
-                              action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}&draft=true`}
+                              action={actionUrl ? `${actionUrl}&draft=true` : ''}
                               disabled={selected.length === 0}
                             />
                           </React.Fragment>
                         ) : (
-                          <Submit
-                            action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}`}
-                            disabled={selected.length === 0}
-                          />
+                          <Submit action={actionUrl || ''} disabled={selected.length === 0} />
                         )}
                       </div>
                     </div>
