@@ -227,6 +227,94 @@ describe('fields', () => {
       await expect(field.locator('.rs__value-container')).toContainText(input)
       await expect(field.locator('.rs__value-container')).toContainText(furtherInput)
     })
+
+    describe('hidden', () => {
+      test('should be hidden in the edit view', async () => {
+        await page.goto(url.create)
+        await expect(page.locator('#field-text')).toBeVisible()
+        await expect(page.locator('#field-hidden')).toBeHidden()
+      })
+      test('should be hidden in the list view', async () => {
+        await page.goto(url.list)
+        await page.locator('.list-controls__toggle-columns').click()
+
+        // Make sure the locator is working and the column selectors are visible
+        await expect(
+          page.locator('.column-selector__column', {
+            hasText: exactText('Text'),
+          }),
+        ).toBeVisible()
+
+        // Expect the hidden field to be hidden in the column selector
+        await expect(
+          page.locator(`.column-selector__column`, {
+            hasText: exactText('Hidden'),
+          }),
+        ).toBeHidden()
+      })
+
+      test('should be hidden in the version view', async () => {
+        const doc = await payload.create({
+          collection: textFieldsSlug,
+          data: textDoc,
+        })
+        const versions = await payload.findVersions({
+          collection: textFieldsSlug,
+          where: { parent: { equals: doc.id } },
+          limit: 1,
+        })
+
+        await page.goto(url.version(doc.id, versions.docs[0].id))
+
+        await expect(
+          page.locator('.field-diff-label', {
+            hasText: exactText('Text'),
+          }),
+        ).toBeVisible()
+
+        await expect(
+          page.locator('.field-diff-label', {
+            hasText: exactText('Hidden'),
+          }),
+        ).toBeHidden()
+      })
+    })
+
+    describe('admin.hidden', () => {
+      test('should be hidden in the edit view', async () => {
+        await page.goto(url.create)
+        await expect(page.locator('#field-text')).toBeVisible()
+        await expect(page.locator('#field-adminHidden')).toBeHidden()
+      })
+    })
+
+    describe('admin.hiddenInVersionView', () => {
+      test('should be hidden in the version view', async () => {
+        const doc = await payload.create({
+          collection: textFieldsSlug,
+          data: textDoc,
+        })
+        const versions = await payload.findVersions({
+          collection: textFieldsSlug,
+          where: { parent: { equals: doc.id } },
+          limit: 1,
+        })
+
+        await page.goto(url.version(doc.id, versions.docs[0].id))
+
+        await expect(
+          page.locator('.field-diff-label', {
+            hasText: exactText('Text'),
+          }),
+        ).toBeVisible()
+
+        await expect(
+          page.locator('.field-diff-label', {
+            hasText: exactText('Hidden In Version View'),
+          }),
+        ).toBeHidden()
+      })
+    })
   })
 
   describe('number', () => {
