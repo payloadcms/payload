@@ -14,6 +14,7 @@ type Args = {
   adapter: DrizzleAdapter
   fields: Field[]
   tableName: string
+  versions?: boolean
 } & Omit<FindArgs, 'collection'>
 
 export const findMany = async function find({
@@ -28,6 +29,7 @@ export const findMany = async function find({
   skip,
   sort,
   tableName,
+  versions,
   where: whereArg,
 }: Args) {
   const db = adapter.sessions[await req.transactionID]?.db || adapter.drizzle
@@ -71,6 +73,7 @@ export const findMany = async function find({
     joinQuery,
     joins,
     tableName,
+    versions,
   })
 
   selectDistinctMethods.push({ args: [offset], method: 'offset' })

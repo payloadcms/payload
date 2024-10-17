@@ -941,15 +941,18 @@ export const traverseFields = ({
         // using `on` as the key for the relation
         const localized = adapter.payload.config.localization && field.localized
         const fieldSchemaPath = `${fieldPrefix || ''}${field.name}`
-        let target: string
+
         const joinConfig = joins[field.collection].find(
-          ({ schemaPath }) => fieldSchemaPath === schemaPath,
+          ({ schemaPath }) => fieldSchemaPath === (versions ? `version.${schemaPath}` : schemaPath),
         )
+
+        // we dont use drizzle rels for hasmany
         if (joinConfig.targetField.hasMany) {
-          target = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${adapter.relationshipsSuffix}`
-        } else {
-          target = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${localized ? adapter.localesSuffix : ''}`
+          break
         }
+
+        const target = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${localized ? adapter.localesSuffix : ''}`
+
         relationsToBuild.set(fieldName, {
           type: 'many',
           // joins are not localized on the parent table
