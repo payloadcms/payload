@@ -40,30 +40,14 @@ export interface Config {
       };
     };
     workflows?: {
-      updatePost?: {
-        input: WorkflowUpdatePostInput;
-      };
-      updatePostJSONWorkflow?: {
-        input: WorkflowUpdatePostJSONWorkflowInput;
-      };
-      retriesTest?: {
-        input: WorkflowRetriesTestInput;
-      };
-      retriesRollbackTest?: {
-        input: WorkflowRetriesRollbackTestInput;
-      };
-      retriesWorkflowLevelTest?: {
-        input: WorkflowRetriesWorkflowLevelTestInput;
-      };
-      inlineTaskTest?: {
-        input: WorkflowInlineTaskTestInput;
-      };
-      externalWorkflow?: {
-        input: WorkflowExternalWorkflowInput;
-      };
-      retriesBackoffTest?: {
-        input: WorkflowRetriesBackoffTestInput;
-      };
+      updatePost?: WorkflowUpdatePost;
+      updatePostJSONWorkflow?: WorkflowUpdatePostJSONWorkflow;
+      retriesTest?: WorkflowRetriesTest;
+      retriesRollbackTest?: WorkflowRetriesRollbackTest;
+      retriesWorkflowLevelTest?: WorkflowRetriesWorkflowLevelTest;
+      inlineTaskTest?: WorkflowInlineTaskTest;
+      externalWorkflow?: WorkflowExternalWorkflow;
+      retriesBackoffTest?: WorkflowRetriesBackoffTest;
     };
   };
 }
@@ -375,61 +359,77 @@ export interface TaskExternalTask {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "WorkflowUpdatePostInput".
+ * via the `definition` "WorkflowUpdatePost".
  */
-export interface WorkflowUpdatePostInput {
-  post: string | Post;
-  message: string;
+export interface WorkflowUpdatePost {
+  input: {
+    post: string | Post;
+    message: string;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "WorkflowUpdatePostJSONWorkflowInput".
+ * via the `definition` "WorkflowUpdatePostJSONWorkflow".
  */
-export interface WorkflowUpdatePostJSONWorkflowInput {
-  post: string | Post;
-  message: string;
+export interface WorkflowUpdatePostJSONWorkflow {
+  input: {
+    post: string | Post;
+    message: string;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "WorkflowRetriesTestInput".
+ * via the `definition` "WorkflowRetriesTest".
  */
-export interface WorkflowRetriesTestInput {
-  message: string;
+export interface WorkflowRetriesTest {
+  input: {
+    message: string;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "WorkflowRetriesRollbackTestInput".
+ * via the `definition` "WorkflowRetriesRollbackTest".
  */
-export interface WorkflowRetriesRollbackTestInput {
-  message: string;
+export interface WorkflowRetriesRollbackTest {
+  input: {
+    message: string;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "WorkflowRetriesWorkflowLevelTestInput".
+ * via the `definition` "WorkflowRetriesWorkflowLevelTest".
  */
-export interface WorkflowRetriesWorkflowLevelTestInput {
-  message: string;
+export interface WorkflowRetriesWorkflowLevelTest {
+  input: {
+    message: string;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "WorkflowInlineTaskTestInput".
+ * via the `definition` "WorkflowInlineTaskTest".
  */
-export interface WorkflowInlineTaskTestInput {
-  message: string;
+export interface WorkflowInlineTaskTest {
+  input: {
+    message: string;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "WorkflowExternalWorkflowInput".
+ * via the `definition` "WorkflowExternalWorkflow".
  */
-export interface WorkflowExternalWorkflowInput {
-  message: string;
+export interface WorkflowExternalWorkflow {
+  input: {
+    message: string;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "WorkflowRetriesBackoffTestInput".
+ * via the `definition` "WorkflowRetriesBackoffTest".
  */
-export interface WorkflowRetriesBackoffTestInput {
-  message: string;
+export interface WorkflowRetriesBackoffTest {
+  input: {
+    message: string;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

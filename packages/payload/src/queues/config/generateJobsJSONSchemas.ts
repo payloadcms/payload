@@ -109,6 +109,15 @@ export function generateJobsJSONSchemas(
 
   if (jobsConfig?.workflows?.length) {
     for (const workflow of jobsConfig.workflows) {
+      const fullWorkflowJsonSchema: JSONSchema4 = {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          input: {},
+        },
+        required: [],
+      }
+
       if (workflow?.inputSchema?.length) {
         const inputJsonSchema = fieldsToJSONSchema(
           collectionIDFieldTypes,
@@ -123,32 +132,23 @@ export function generateJobsJSONSchemas(
           properties: inputJsonSchema.properties,
           required: inputJsonSchema.required,
         }
-        const normalizedWorkflowSlug = workflow.slug[0].toUpperCase() + workflow.slug.slice(1)
 
-        definitions.set(`Workflow${normalizedWorkflowSlug}Input`, fullInputJsonSchema)
+        fullWorkflowJsonSchema.properties.input = fullInputJsonSchema
+        ;(fullWorkflowJsonSchema.required as string[]).push('input')
       }
+      const normalizedWorkflowSlug = workflow.slug[0].toUpperCase() + workflow.slug.slice(1)
+
+      definitions.set(`Workflow${normalizedWorkflowSlug}`, fullWorkflowJsonSchema)
 
       properties.workflows = {
         type: 'object',
         additionalProperties: false,
         properties: Object.fromEntries(
           jobsConfig.workflows.map((workflow) => {
+            const normalizedWorkflowSlug = workflow.slug[0].toUpperCase() + workflow.slug.slice(1)
+
             const toReturn: JSONSchema4 = {
-              type: 'object',
-              additionalProperties: false,
-              properties: {
-                input: {},
-              },
-              required: ['input'],
-            }
-
-            if (workflow.inputSchema?.length) {
-              ;(toReturn.required as string[]).push('input')
-              const normalizedWorkflowSlug = workflow.slug[0].toUpperCase() + workflow.slug.slice(1)
-
-              toReturn.properties.input = {
-                $ref: `#/definitions/Workflow${normalizedWorkflowSlug}Input`,
-              }
+              $ref: `#/definitions/Workflow${normalizedWorkflowSlug}`,
             }
 
             return [workflow.slug, toReturn]
