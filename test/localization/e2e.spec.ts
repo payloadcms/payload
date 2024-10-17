@@ -262,6 +262,7 @@ describe('Localization', () => {
     })
 
     test('should show popup', async () => {
+      await changeLocale(page, englishLocale)
       await page.goto(url.create)
       await fillValues({ description, title })
       await saveDocAndAssert(page)
