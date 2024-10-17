@@ -329,7 +329,7 @@ export default buildConfigWithDefaults({
           ],
         },
         {
-          type: 'row',
+          type: 'collapsible',
           fields: [
             {
               type: 'text',
@@ -337,6 +337,7 @@ export default buildConfigWithDefaults({
               virtual: true,
             },
           ],
+          label: 'Colllapsible',
         },
         {
           type: 'tabs',
