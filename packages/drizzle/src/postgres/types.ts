@@ -106,7 +106,7 @@ export type CreateDatabase = (args?: {
 type Schema =
   | {
       enum: typeof pgEnum
-      table: PgTableFn
+      table: PgTableFn<string>
     }
   | PgSchema
 
@@ -149,7 +149,7 @@ export type BasePostgresAdapter = {
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   operators: Operators
-  pgSchema?: Schema
+  pgSchema: Schema
   poolOptions?: ClientConfig
   prodMigrations?: {
     down: (args: MigrateDownArgs) => Promise<void>

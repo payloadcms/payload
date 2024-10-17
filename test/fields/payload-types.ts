@@ -1068,6 +1068,13 @@ export interface IndexedField {
   };
   collapsibleLocalizedUnique?: string | null;
   collapsibleTextUnique?: string | null;
+  someText?: string | null;
+  some?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1335,6 +1342,15 @@ export interface SelectField {
   select?: ('one' | 'two' | 'three') | null;
   selectReadOnly?: ('one' | 'two' | 'three') | null;
   selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
+  array?:
+    | {
+        selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
+        group?: {
+          selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
   selectHasManyLocalized?: ('one' | 'two')[] | null;
   selectI18n?: ('one' | 'two' | 'three') | null;
   simple?: ('One' | 'Two' | 'Three') | null;

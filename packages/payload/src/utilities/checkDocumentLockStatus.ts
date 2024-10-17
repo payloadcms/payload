@@ -47,8 +47,12 @@ export const checkDocumentLockStatus = async ({
     throw new Error('Either collectionSlug or globalSlug must be provided.')
   }
 
+  if (!isLockingEnabled) {
+    return
+  }
+
   // Only perform lock checks if overrideLock is false and locking is enabled
-  if (!overrideLock && isLockingEnabled !== false) {
+  if (!overrideLock) {
     const defaultLockErrorMessage = collectionSlug
       ? `Document with ID ${id} is currently locked by another user and cannot be modified.`
       : `Global document with slug "${globalSlug}" is currently locked by another user and cannot be modified.`
