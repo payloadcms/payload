@@ -54,7 +54,7 @@ export const createDatabase = async function (this: BasePostgresAdapter, args: A
   }
 
   // import pg only when createDatabase is used
-  const pg = await import('pg')
+  const pg = await import('pg').then((mod) => mod.default)
 
   const managementClient = new pg.Client(managementClientConfig)
 
