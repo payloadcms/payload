@@ -1,5 +1,4 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { Connect } from 'payload'
 
 import { createClient } from '@libsql/client'
