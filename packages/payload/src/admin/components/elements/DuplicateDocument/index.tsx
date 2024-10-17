@@ -76,6 +76,8 @@ const Duplicate: React.FC<Props> = ({ id, slug, collection }) => {
           })
         }
 
+        delete data['id']
+
         if (!duplicateID) {
           if ('createdAt' in data) delete data.createdAt
           if ('updatedAt' in data) delete data.updatedAt
