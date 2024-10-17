@@ -196,10 +196,14 @@ export const trTranslations: DefaultTranslationsObject = {
     columns: 'Sütunlar',
     columnToSort: 'Sıralanacak Sütunlar',
     confirm: 'Onayla',
+    confirmCopy: 'Kopyayı onayla',
     confirmDeletion: 'Silmeyi onayla',
     confirmDuplication: 'Çoğaltmayı onayla',
     copied: 'Kopyalandı',
     copy: 'Kopyala',
+    copying: 'Kopyalama',
+    copyWarning:
+      "{{to}}'yu {{from}} ile {{label}} {{title}} için üstüne yazmak üzeresiniz. Emin misiniz?",
     create: 'Oluştur',
     created: 'Oluşturma tarihi',
     createdAt: 'Oluşturma tarihi',
@@ -305,6 +309,7 @@ export const trTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} {{title}} başarıyla silindi.',
     true: 'Doğru',
     unauthorized: 'Yetkisiz',
+    unsavedChanges: 'Kaydedilmemiş değişiklikleriniz var. Devam etmeden önce kaydedin veya atın.',
     unsavedChangesDuplicate:
       'Kaydedilmemiş değişiklikler var. Çoğaltma işlemine devam etmek istiyor musunuz?',
     untitled: 'Başlıksız',
