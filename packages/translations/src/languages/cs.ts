@@ -410,6 +410,7 @@ export const csTranslations: DefaultTranslationsObject = {
     draft: 'Koncept',
     draftSavedSuccessfully: 'Koncept úspěšně uložen.',
     lastSavedAgo: 'Naposledy uloženo před {{distance}}',
+    modifiedOnly: undefined,
     noFurtherVersionsFound: 'Nenalezeny další verze',
     noRowsFound: 'Nenalezen {{label}}',
     noRowsSelected: 'Nebyl vybrán žádný {{label}}',
