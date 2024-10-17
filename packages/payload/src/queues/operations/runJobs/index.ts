@@ -7,13 +7,13 @@ import type {
   WorkflowHandler,
   WorkflowTypes,
 } from '../../config/types/workflowTypes.js'
-import type { RunJobResult } from '../runJob/index.js'
+import type { RunJobResult } from './runJob/index.js'
 
 import { Forbidden } from '../../../errors/Forbidden.js'
-import { getUpdateJobFunction } from '../runJob/getUpdateJobFunction.js'
-import { importHandlerPath } from '../runJob/importHandlerPath.js'
-import { runJob } from '../runJob/index.js'
-import { runJSONJob } from '../runJSONJob/index.js'
+import { getUpdateJobFunction } from './runJob/getUpdateJobFunction.js'
+import { importHandlerPath } from './runJob/importHandlerPath.js'
+import { runJob } from './runJob/index.js'
+import { runJSONJob } from './runJSONJob/index.js'
 
 export type RunJobsArgs = {
   limit?: number

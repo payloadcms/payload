@@ -1,4 +1,4 @@
-import type { PayloadRequest } from '../../../types/index.js'
+import type { PayloadRequest } from '../../../../types/index.js'
 import type {
   RetryConfig,
   RunInlineTaskFunction,
@@ -8,14 +8,14 @@ import type {
   TaskHandler,
   TaskHandlerResult,
   TaskType,
-} from '../../config/types/taskTypes.js'
+} from '../../../config/types/taskTypes.js'
 import type {
   BaseJob,
   RunningJob,
   SingleTaskStatus,
   WorkflowConfig,
   WorkflowTypes,
-} from '../../config/types/workflowTypes.js'
+} from '../../../config/types/workflowTypes.js'
 import type { UpdateJobFunction } from './getUpdateJobFunction.js'
 
 import { calculateBackoffWaitUntil } from './calculateBackoffWaitUntil.js'

@@ -1,6 +1,6 @@
-import type { Endpoint } from '../../../config/types.js'
+import type { Endpoint } from '../config/types.js'
 
-import { runJobs, type RunJobsArgs } from '../runJobs/index.js'
+import { runJobs, type RunJobsArgs } from './operations/runJobs/index.js'
 
 export const runJobsEndpoint: Endpoint = {
   handler: async (req) => {

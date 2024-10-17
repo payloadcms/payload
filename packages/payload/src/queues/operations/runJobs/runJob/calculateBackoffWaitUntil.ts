@@ -1,4 +1,4 @@
-import type { RetryConfig } from '../../config/types/taskTypes.js'
+import type { RetryConfig } from '../../../config/types/taskTypes.js'
 
 export function calculateBackoffWaitUntil({
   retriesConfig,

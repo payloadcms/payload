@@ -1,4 +1,4 @@
-import type { RunningJobFromTask } from '../../config/types/workflowTypes.js'
+import type { RunningJobFromTask } from './config/types/workflowTypes.js'
 
 import {
   createLocalReq,
@@ -6,8 +6,8 @@ import {
   type PayloadRequest,
   type RunningJob,
   type TypedJobs,
-} from '../../../index.js'
-import { runJobs } from '../runJobs/index.js'
+} from '../index.js'
+import { runJobs } from './operations/runJobs/index.js'
 
 export const getJobsLocalAPI = (payload: Payload) => ({
   queue: async <
