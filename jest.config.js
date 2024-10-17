@@ -5,7 +5,6 @@ const esModules = [
   'readable-web-to-node-stream',
   'token-types',
   'peek-readable',
-  'find-up',
   'locate-path',
   'p-locate',
   'p-limit',
@@ -13,7 +12,14 @@ const esModules = [
   'unicorn-magic',
   'path-exists',
   'qs-esm',
+  'uint8array-extras',
 ].join('|')
+
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 /** @type {import('jest').Config}  */
 const baseJestConfig = {
@@ -36,10 +42,14 @@ const baseJestConfig = {
     '^.+\\.(t|j)sx?$': ['@swc/jest'],
   },
   verbose: true,
+  reporters: [
+    path.resolve(dirname, './test/jest-spec-reporter.cjs'),
+    path.resolve(dirname, './test/jestreporter.cjs'),
+  ],
 }
 
 if (process.env.CI) {
-  baseJestConfig.reporters = [['github-actions', { silent: false }], 'summary']
+  baseJestConfig.reporters.push(['github-actions', { silent: false }], 'summary')
 }
 
 export default baseJestConfig

@@ -81,8 +81,27 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
     user.resetPasswordExpiration = new Date().toISOString()
 
     if (collectionConfig.auth.verify) {
-      user._verified = true
+      user._verified = Boolean(user._verified)
     }
+    // /////////////////////////////////////
+    // beforeValidate - Collection
+    // /////////////////////////////////////
+
+    await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
+      await priorHook
+
+      await hook({
+        collection: args.collection?.config,
+        context: req.context,
+        data: user,
+        operation: 'update',
+        req,
+      })
+    }, Promise.resolve())
+
+    // /////////////////////////////////////
+    // Update new password
+    // /////////////////////////////////////
 
     const doc = await payload.db.updateOne({
       id: user.id,

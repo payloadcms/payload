@@ -20,8 +20,8 @@ export const refresh: CollectionRouteHandler = async ({ collection, req }) => {
 
   if (result.setCookie) {
     const cookie = generatePayloadCookie({
-      collectionConfig: collection.config,
-      payload: req.payload,
+      collectionAuthConfig: collection.config.auth,
+      cookiePrefix: req.payload.config.cookiePrefix,
       token: result.refreshedToken,
     })
 

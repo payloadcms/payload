@@ -1,12 +1,12 @@
 import type { CollationOptions, TransactionOptions } from 'mongodb'
 import type { MongoMemoryReplSet } from 'mongodb-memory-server'
-import type { ClientSession, ConnectOptions, Connection } from 'mongoose'
-import type { BaseDatabaseAdapter, DatabaseAdapterObj, Payload } from 'payload'
+import type { ClientSession, Connection, ConnectOptions, QueryOptions } from 'mongoose'
+import type { BaseDatabaseAdapter, DatabaseAdapterObj, Payload, UpdateOneArgs } from 'payload'
 
 import fs from 'fs'
 import mongoose from 'mongoose'
 import path from 'path'
-import { createDatabaseAdapter } from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
 
 import type { CollectionModel, GlobalModel, MigrateDownArgs, MigrateUpArgs } from './types.js'
 
@@ -36,6 +36,7 @@ import { updateGlobal } from './updateGlobal.js'
 import { updateGlobalVersion } from './updateGlobalVersion.js'
 import { updateOne } from './updateOne.js'
 import { updateVersion } from './updateVersion.js'
+import { upsert } from './upsert.js'
 
 export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
@@ -83,7 +84,7 @@ export interface Args {
     name: string
     up: (args: MigrateUpArgs) => Promise<void>
   }[]
-  transactionOptions?: TransactionOptions | false
+  transactionOptions?: false | TransactionOptions
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
 }
@@ -124,6 +125,7 @@ declare module 'payload' {
     }[]
     sessions: Record<number | string, ClientSession>
     transactionOptions: TransactionOptions
+    updateOne: (args: { options?: QueryOptions } & UpdateOneArgs) => Promise<Document>
     versions: {
       [slug: string]: CollectionModel
     }
@@ -150,8 +152,8 @@ export function mongooseAdapter({
       // Mongoose-specific
       autoPluralization,
       collections: {},
-      connectOptions: connectOptions || {},
       connection: undefined,
+      connectOptions: connectOptions || {},
       count,
       disableIndexHints,
       globals: undefined,
@@ -161,7 +163,7 @@ export function mongooseAdapter({
       url,
       versions: {},
       // DatabaseAdapter
-      beginTransaction: transactionOptions ? beginTransaction : undefined,
+      beginTransaction: transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
       commitTransaction,
       connect,
       create,
@@ -191,6 +193,7 @@ export function mongooseAdapter({
       updateGlobalVersion,
       updateOne,
       updateVersion,
+      upsert,
     })
   }
 
@@ -221,7 +224,9 @@ function findMigrationDir(migrationDir?: string): string {
   const relativeMigrations = path.resolve(cwd, 'migrations')
 
   // Use arg if provided
-  if (migrationDir) return migrationDir
+  if (migrationDir) {
+    return migrationDir
+  }
 
   // Check other common locations
   if (fs.existsSync(srcDir)) {

@@ -22,9 +22,16 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   id: existingDocID,
   AfterFields,
   collectionSlug,
+  disableActions,
   drawerSlug,
   Header,
+  initialData,
+  initialState,
+  onDelete: onDeleteFromProps,
+  onDuplicate: onDuplicateFromProps,
   onSave: onSaveFromProps,
+  redirectAfterDelete,
+  redirectAfterDuplicate,
 }) => {
   const { config } = useConfig()
 
@@ -74,6 +81,34 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
     [onSaveFromProps, collectionConfig],
   )
 
+  const onDuplicate = useCallback<DocumentDrawerProps['onSave']>(
+    (args) => {
+      setDocID(args.doc.id)
+
+      if (typeof onDuplicateFromProps === 'function') {
+        void onDuplicateFromProps({
+          ...args,
+          collectionConfig,
+        })
+      }
+    },
+    [onDuplicateFromProps, collectionConfig],
+  )
+
+  const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
+    (args) => {
+      if (typeof onDeleteFromProps === 'function') {
+        void onDeleteFromProps({
+          ...args,
+          collectionConfig,
+        })
+      }
+
+      closeModal(drawerSlug)
+    },
+    [onDeleteFromProps, collectionConfig, closeModal, drawerSlug],
+  )
+
   return (
     <DocumentInfoProvider
       AfterFields={AfterFields}
@@ -100,12 +135,21 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
         </Gutter>
       }
       collectionSlug={collectionConfig.slug}
-      disableActions
+      disableActions={disableActions}
       disableLeaveWithoutSaving
       id={docID}
+      initialData={initialData}
+      initialState={initialState}
       isEditing={isEditing}
+      onDelete={onDelete}
+      onDrawerCreate={() => {
+        setDocID(null)
+      }}
+      onDuplicate={onDuplicate}
       onLoadError={onLoadError}
       onSave={onSave}
+      redirectAfterDelete={redirectAfterDelete !== undefined ? redirectAfterDelete : false}
+      redirectAfterDuplicate={redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false}
     >
       <RenderComponent mappedComponent={Edit} />
     </DocumentInfoProvider>

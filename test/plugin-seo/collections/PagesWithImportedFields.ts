@@ -65,6 +65,9 @@ export const PagesWithImportedFields: CollectionConfig = {
           fields: [
             MetaTitleField({
               hasGenerateFn: true,
+              overrides: {
+                required: true,
+              },
             }),
             PreviewField({
               hasGenerateFn: true,

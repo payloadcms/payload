@@ -27,7 +27,7 @@ export type TextInputProps = {
   readonly field?: MarkOptional<TextFieldClient, 'type'>
   readonly inputRef?: React.RefObject<HTMLInputElement>
   readonly Label?: MappedComponent
-  readonly label: StaticLabel
+  readonly label?: StaticLabel
   readonly labelProps?: Record<string, unknown>
   readonly maxRows?: number
   readonly minRows?: number
@@ -41,5 +41,5 @@ export type TextInputProps = {
   readonly style?: React.CSSProperties
   readonly value?: string
   readonly valueToRender?: Option[]
-  readonly width?: string
+  readonly width?: React.CSSProperties['width']
 } & SharedTextFieldProps

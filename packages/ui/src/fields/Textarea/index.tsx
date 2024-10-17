@@ -1,5 +1,5 @@
 'use client'
-import type { TextareaFieldProps, TextareaFieldValidation } from 'payload'
+import type { TextareaFieldClientComponent, TextareaFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -10,6 +10,7 @@ import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { isFieldRTL } from '../shared/index.js'
 import './index.scss'
@@ -17,7 +18,7 @@ import { TextareaInput } from './Input.js'
 
 export { TextareaInput, TextAreaInputProps }
 
-const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
+const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
   const {
     descriptionProps,
     errorProps,
@@ -42,7 +43,6 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
       required,
     },
     labelProps,
-    locale,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
@@ -50,6 +50,7 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n } = useTranslation()
+  const locale = useLocale()
 
   const {
     config: { localization },
@@ -90,8 +91,8 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
       descriptionProps={descriptionProps}
       Error={field?.admin?.components?.Error}
       errorProps={errorProps}
-      Label={field?.admin?.components?.Label}
       label={label}
+      Label={field?.admin?.components?.Label}
       labelProps={labelProps}
       onChange={(e) => {
         setValue(e.target.value)

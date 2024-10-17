@@ -37,6 +37,7 @@ import Uploads2 from './collections/Upload2/index.js'
 import UploadsMulti from './collections/UploadMulti/index.js'
 import UploadsMultiPoly from './collections/UploadMultiPoly/index.js'
 import UploadsPoly from './collections/UploadPoly/index.js'
+import UploadRestricted from './collections/UploadRestricted/index.js'
 import Uploads3 from './collections/Uploads3/index.js'
 import TabsWithRichText from './globals/TabsWithRichText.js'
 import { clearAndSeedEverything } from './seed.js'
@@ -87,6 +88,7 @@ export const collectionSlugs: CollectionConfig[] = [
   UploadsMulti,
   UploadsPoly,
   UploadsMultiPoly,
+  UploadRestricted,
   UIFields,
 ]
 
@@ -104,6 +106,9 @@ export default buildConfigWithDefaults({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
+    },
+    components: {
+      afterNavLinks: ['/components/AfterNavLinks.js#AfterNavLinks'],
     },
     custom: {
       client: {

@@ -7,7 +7,7 @@ import type {
   SQLiteTableWithColumns,
   UniqueConstraintBuilder,
 } from 'drizzle-orm/sqlite-core'
-import type { Field } from 'payload'
+import type { Field, SanitizedJoins } from 'payload'
 
 import { createTableName } from '@payloadcms/drizzle'
 import { relations, sql } from 'drizzle-orm'
@@ -24,6 +24,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, GenericTable, IDType, SQLiteAdapter } from '../types.js'
 
+import { createIndex } from './createIndex.js'
 import { getIDColumn } from './getIDColumn.js'
 import { setColumnID } from './setColumnID.js'
 import { traverseFields } from './traverseFields.js'
@@ -35,7 +36,15 @@ export type BaseExtraConfig = Record<
   }) => ForeignKeyBuilder | IndexBuilder | UniqueConstraintBuilder
 >
 
-export type RelationMap = Map<string, { localized: boolean; target: string; type: 'many' | 'one' }>
+export type RelationMap = Map<
+  string,
+  {
+    localized: boolean
+    relationName?: string
+    target: string
+    type: 'many' | 'one'
+  }
+>
 
 type Args = {
   adapter: SQLiteAdapter
@@ -48,13 +57,16 @@ type Args = {
   buildNumbers?: boolean
   buildRelationships?: boolean
   disableNotNull: boolean
+  disableRelsTableUnique?: boolean
   disableUnique: boolean
   fields: Field[]
+  joins?: SanitizedJoins
   locales?: [string, ...string[]]
-  rootRelationsToBuild?: RelationMap
   rootRelationships?: Set<string>
+  rootRelationsToBuild?: RelationMap
   rootTableIDColType?: IDType
   rootTableName?: string
+  rootUniqueRelationships?: Set<string>
   tableName: string
   timestamps?: boolean
   versions: boolean
@@ -79,13 +91,16 @@ export const buildTable = ({
   baseColumns = {},
   baseExtraConfig = {},
   disableNotNull,
+  disableRelsTableUnique,
   disableUnique = false,
   fields,
+  joins,
   locales,
-  rootRelationsToBuild,
   rootRelationships,
+  rootRelationsToBuild,
   rootTableIDColType,
   rootTableName: incomingRootTableName,
+  rootUniqueRelationships,
   tableName,
   timestamps,
   versions,
@@ -104,6 +119,7 @@ export const buildTable = ({
 
   // Relationships to the base collection
   const relationships: Set<string> = rootRelationships || new Set()
+  const uniqueRelationships: Set<string> = rootUniqueRelationships || new Set()
 
   let relationshipsTable: GenericTable | SQLiteTableWithColumns<any>
 
@@ -123,19 +139,22 @@ export const buildTable = ({
     adapter,
     columns,
     disableNotNull,
+    disableRelsTableUnique,
     disableUnique,
     fields,
     indexes,
+    joins,
     locales,
     localesColumns,
     localesIndexes,
     newTableName: tableName,
     parentTableName: tableName,
-    relationsToBuild,
     relationships,
+    relationsToBuild,
     rootRelationsToBuild: rootRelationsToBuild || relationsToBuild,
     rootTableIDColType: rootTableIDColType || idColType,
     rootTableName,
+    uniqueRelationships,
     versions,
     withinLocalizedArrayOrBlock,
   })
@@ -144,9 +163,9 @@ export const buildTable = ({
   const localizedRelations = new Map()
   const nonLocalizedRelations = new Map()
 
-  relationsToBuild.forEach(({ type, localized, target }, key) => {
+  relationsToBuild.forEach(({ type, localized, relationName, target }, key) => {
     const map = localized ? localizedRelations : nonLocalizedRelations
-    map.set(key, { type, target })
+    map.set(key, { type, relationName, target })
   })
 
   if (timestamps) {
@@ -375,10 +394,16 @@ export const buildTable = ({
         const relatedCollectionCustomIDType =
           adapter.payload.collections[relationshipConfig.slug]?.customIDType
 
-        if (relatedCollectionCustomIDType === 'number') colType = 'numeric'
-        if (relatedCollectionCustomIDType === 'text') colType = 'text'
+        if (relatedCollectionCustomIDType === 'number') {
+          colType = 'numeric'
+        }
+        if (relatedCollectionCustomIDType === 'text') {
+          colType = 'text'
+        }
 
-        relationshipColumns[`${relationTo}ID`] = getIDColumn({
+        const colName = `${relationTo}ID`
+
+        relationshipColumns[colName] = getIDColumn({
           name: `${formattedRelationTo}_id`,
           type: colType,
           primaryKey: false,
@@ -387,9 +412,27 @@ export const buildTable = ({
         relationExtraConfig[`${relationTo}IdFk`] = (cols) =>
           foreignKey({
             name: `${relationshipsTableName}_${toSnakeCase(relationTo)}_fk`,
-            columns: [cols[`${relationTo}ID`]],
+            columns: [cols[colName]],
             foreignColumns: [adapter.tables[formattedRelationTo].id],
           }).onDelete('cascade')
+
+        const indexName = [colName]
+
+        const unique = !disableUnique && uniqueRelationships.has(relationTo)
+
+        if (unique) {
+          indexName.push('path')
+        }
+        if (hasLocalizedRelationshipField) {
+          indexName.push('locale')
+        }
+
+        relationExtraConfig[`${relationTo}IdIdx`] = createIndex({
+          name: indexName,
+          columnName: `${formattedRelationTo}_id`,
+          tableName: relationshipsTableName,
+          unique,
+        })
       })
 
       relationshipsTable = sqliteTable(relationshipsTableName, relationshipColumns, (cols) => {
@@ -454,7 +497,7 @@ export const buildTable = ({
   adapter.relations[`relations_${tableName}`] = relations(table, ({ many, one }) => {
     const result: Record<string, Relation<string>> = {}
 
-    nonLocalizedRelations.forEach(({ type, target }, key) => {
+    nonLocalizedRelations.forEach(({ type, relationName, target }, key) => {
       if (type === 'one') {
         result[key] = one(adapter.tables[target], {
           fields: [table[key]],
@@ -463,7 +506,7 @@ export const buildTable = ({
         })
       }
       if (type === 'many') {
-        result[key] = many(adapter.tables[target], { relationName: key })
+        result[key] = many(adapter.tables[target], { relationName: relationName || key })
       }
     })
 

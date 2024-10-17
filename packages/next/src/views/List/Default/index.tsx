@@ -21,20 +21,20 @@ import {
   StaggeredShimmers,
   Table,
   UnpublishMany,
+  useAuth,
   useBulkUpload,
   useConfig,
   useEditDepth,
   useListInfo,
   useListQuery,
   useModal,
-  useRouteCache,
-  useSearchParams,
   useStepNav,
   useTranslation,
   useWindowInfo,
   ViewDescription,
 } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
+import { useRouter } from 'next/navigation.js'
 import { formatFilesize, isNumber } from 'payload/shared'
 import React, { Fragment, useEffect } from 'react'
 
@@ -44,6 +44,7 @@ const baseClass = 'collection-list'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const DefaultListView: React.FC = () => {
+  const { user } = useAuth()
   const {
     beforeActions,
     collectionSlug,
@@ -54,10 +55,10 @@ export const DefaultListView: React.FC = () => {
     newDocumentURL,
   } = useListInfo()
 
-  const { data, defaultLimit, handlePageChange, handlePerPageChange } = useListQuery()
-  const { searchParams } = useSearchParams()
+  const router = useRouter()
+
+  const { data, defaultLimit, handlePageChange, handlePerPageChange, params } = useListQuery()
   const { openModal } = useModal()
-  const { clearRouteCache } = useRouteCache()
   const { setCollectionSlug, setOnSuccess } = useBulkUpload()
   const { drawerSlug } = useBulkUpload()
 
@@ -109,8 +110,8 @@ export const DefaultListView: React.FC = () => {
   const openBulkUpload = React.useCallback(() => {
     setCollectionSlug(collectionSlug)
     openModal(drawerSlug)
-    setOnSuccess(clearRouteCache)
-  }, [clearRouteCache, collectionSlug, drawerSlug, openModal, setCollectionSlug, setOnSuccess])
+    setOnSuccess(() => router.refresh())
+  }, [router, collectionSlug, drawerSlug, openModal, setCollectionSlug, setOnSuccess])
 
   useEffect(() => {
     if (drawerDepth <= 1) {
@@ -127,7 +128,7 @@ export const DefaultListView: React.FC = () => {
   return (
     <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
       <SetViewActions actions={actions} />
-      <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
+      <SelectionProvider docs={data.docs} totalDocs={data.totalDocs} user={user}>
         <RenderComponent mappedComponent={beforeList} />
         <Gutter className={`${baseClass}__wrap`}>
           {Header || (
@@ -226,9 +227,7 @@ export const DefaultListView: React.FC = () => {
                   </div>
                   <PerPage
                     handleChange={(limit) => void handlePerPageChange(limit)}
-                    limit={
-                      isNumber(searchParams?.limit) ? Number(searchParams.limit) : defaultLimit
-                    }
+                    limit={isNumber(params?.limit) ? Number(params.limit) : defaultLimit}
                     limits={collectionConfig?.admin?.pagination?.limits}
                     resetPage={data.totalDocs <= data.pagingCounter}
                   />

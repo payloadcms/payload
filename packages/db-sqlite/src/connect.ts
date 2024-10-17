@@ -27,7 +27,7 @@ export const connect: Connect = async function connect(
     }
 
     const logger = this.logger || false
-    this.drizzle = drizzle(this.client, { logger, schema: this.schema }) as LibSQLDatabase
+    this.drizzle = drizzle(this.client, { logger, schema: this.schema })
 
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
@@ -37,8 +37,10 @@ export const connect: Connect = async function connect(
       }
     }
   } catch (err) {
-    this.payload.logger.error(`Error: cannot connect to SQLite. Details: ${err.message}`, err)
-    if (typeof this.rejectInitializing === 'function') this.rejectInitializing()
+    this.payload.logger.error({ err, msg: `Error: cannot connect to SQLite: ${err.message}` })
+    if (typeof this.rejectInitializing === 'function') {
+      this.rejectInitializing()
+    }
     process.exit(1)
   }
 
@@ -51,7 +53,9 @@ export const connect: Connect = async function connect(
     await pushDevSchema(this as unknown as DrizzleAdapter)
   }
 
-  if (typeof this.resolveInitializing === 'function') this.resolveInitializing()
+  if (typeof this.resolveInitializing === 'function') {
+    this.resolveInitializing()
+  }
 
   if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
     await this.migrate({ migrations: this.prodMigrations })

@@ -15,7 +15,9 @@ type Args = {
   global?: SanitizedGlobalConfig
   id?: number | string
   payload: Payload
+  publishSpecificLocale?: string
   req?: PayloadRequest
+  snapshot?: any
 }
 
 export const saveVersion = async ({
@@ -26,7 +28,9 @@ export const saveVersion = async ({
   draft,
   global,
   payload,
+  publishSpecificLocale,
   req,
+  snapshot,
 }: Args): Promise<TypeWithID> => {
   let result
   let createNewVersion = true
@@ -52,6 +56,8 @@ export const saveVersion = async ({
         ;({ docs } = await payload.db.findVersions({
           ...findVersionArgs,
           collection: collection.slug,
+          limit: 1,
+          pagination: false,
           req,
           where: {
             parent: {
@@ -63,6 +69,8 @@ export const saveVersion = async ({
         ;({ docs } = await payload.db.findGlobalVersions({
           ...findVersionArgs,
           global: global.slug,
+          limit: 1,
+          pagination: false,
           req,
         }))
       }
@@ -74,8 +82,10 @@ export const saveVersion = async ({
 
         const data: Record<string, unknown> = {
           createdAt: new Date(latestVersion.createdAt).toISOString(),
-          updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
-          version: versionData,
+          updatedAt: now,
+          version: {
+            ...versionData,
+          },
         }
 
         const updateVersionArgs = {
@@ -101,28 +111,52 @@ export const saveVersion = async ({
     }
 
     if (createNewVersion) {
+      const createVersionArgs = {
+        autosave: Boolean(autosave),
+        collectionSlug: undefined,
+        createdAt: now,
+        globalSlug: undefined,
+        parent: collection ? id : undefined,
+        publishedLocale: publishSpecificLocale || undefined,
+        req,
+        updatedAt: now,
+        versionData,
+      }
+
       if (collection) {
-        result = await payload.db.createVersion({
-          autosave: Boolean(autosave),
-          collectionSlug: collection.slug,
-          createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
-          parent: collection ? id : undefined,
-          req,
-          updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
-          versionData,
-        })
+        createVersionArgs.collectionSlug = collection.slug
+        result = await payload.db.createVersion(createVersionArgs)
       }
 
       if (global) {
-        result = await payload.db.createGlobalVersion({
-          autosave: Boolean(autosave),
-          createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
-          globalSlug: global.slug,
-          parent: collection ? id : undefined,
-          req,
-          updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
-          versionData,
-        })
+        createVersionArgs.globalSlug = global.slug
+        result = await payload.db.createGlobalVersion(createVersionArgs)
+      }
+
+      if (publishSpecificLocale && snapshot) {
+        const snapshotData = deepCopyObjectSimple(snapshot)
+        if (snapshotData._id) {
+          delete snapshotData._id
+        }
+
+        snapshotData._status = 'draft'
+
+        const snapshotDate = new Date().toISOString()
+
+        const updatedArgs = {
+          ...createVersionArgs,
+          createdAt: snapshotDate,
+          snapshot: true,
+          updatedAt: snapshotDate,
+          versionData: snapshotData,
+        } as any
+
+        if (collection) {
+          await payload.db.createVersion(updatedArgs)
+        }
+        if (global) {
+          await payload.db.createGlobalVersion(updatedArgs)
+        }
       }
     }
   } catch (err) {
@@ -160,8 +194,6 @@ export const saveVersion = async ({
   }
 
   let createdVersion = result.version
-  createdVersion.createdAt = result.createdAt
-  createdVersion.updatedAt = result.updatedAt
 
   createdVersion = sanitizeInternalFields(createdVersion)
   createdVersion.id = result.parent

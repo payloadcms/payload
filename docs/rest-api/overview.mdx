@@ -573,6 +573,11 @@ In addition to the dynamically generated endpoints above Payload also has REST e
 
 Additional REST API endpoints can be added to your application by providing an array of `endpoints` in various places within a Payload Config. Custom endpoints are useful for adding additional middleware on existing routes or for building custom functionality into Payload apps and plugins. Endpoints can be added at the top of the Payload Config, `collections`, and `globals` and accessed respective of the api and slugs you have configured.
 
+<Banner type="warning">
+  Custom endpoints are not authenticated by default. You are responsible for securing your own endpoints.
+</Banner>
+
+
 Each endpoint object needs to have:
 
 | Property      | Description                                                                                                                                                                                                                                                |
@@ -600,7 +605,7 @@ export const Orders: CollectionConfig = {
       path: '/:id/tracking',
       method: 'get',
       handler: async (req) => {
-        const tracking = await getTrackingInfo(req.params.id)
+        const tracking = await getTrackingInfo(req.routeParams.id)
 
         if (!tracking) {
           return Response.json({ error: 'not found' }, { status: 404})
@@ -625,6 +630,22 @@ export const Orders: CollectionConfig = {
             // data to update the document with
           }
         })
+        return Response.json({
+          message: 'successfully updated tracking info'
+        })
+      }
+    },
+    {
+      path: '/:id/forbidden',
+      method: 'post',
+      handler: async (req) => {
+        // this is an example of an authenticated endpoint
+        if (!req.user) {
+          return Response.json({ error: 'forbidden' }, { status: 403 })
+        }
+
+        // do something
+
         return Response.json({
           message: 'successfully updated tracking info'
         })

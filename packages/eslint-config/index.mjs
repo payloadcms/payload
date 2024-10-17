@@ -104,11 +104,10 @@ const typescriptRules = {
       },
     },
   ],
-  '@typescript-eslint/no-empty-object-type': 'warn'
+  '@typescript-eslint/no-empty-object-type': 'warn',
 }
 
-/** @typedef {import('eslint').Linter.FlatConfig} */
-let FlatConfig
+/** @typedef {import('eslint').Linter.Config} Config */
 
 /** @type {FlatConfig} */
 const baseExtends = deepMerge(
@@ -117,7 +116,7 @@ const baseExtends = deepMerge(
   regexpPluginConfigs['flat/recommended'],
 )
 
-/** @type {FlatConfig[]} */
+/** @type {Config[]} */
 export const rootEslintConfig = [
   {
     name: 'Settings',

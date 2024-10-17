@@ -32,9 +32,9 @@ export async function updateVersion<T extends TypeWithID>(
     `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`,
   )
 
-  const fields = buildVersionCollectionFields(collectionConfig)
+  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig)
 
-  const { where } = await buildQuery({
+  const { where } = buildQuery({
     adapter: this,
     fields,
     locale,

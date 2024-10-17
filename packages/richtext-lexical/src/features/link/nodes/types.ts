@@ -1,5 +1,5 @@
 import type { SerializedElementNode, SerializedLexicalNode, Spread } from 'lexical'
-import type { JsonValue } from 'payload'
+import type { DefaultDocumentIDType, JsonValue } from 'payload'
 
 export type LinkFields = {
   [key: string]: JsonValue
@@ -9,9 +9,9 @@ export type LinkFields = {
       | {
           // Actual doc data, populated in afterRead hook
           [key: string]: JsonValue
-          id: string
+          id: DefaultDocumentIDType
         }
-      | string
+      | DefaultDocumentIDType
   } | null
   linkType: 'custom' | 'internal'
   newTab: boolean

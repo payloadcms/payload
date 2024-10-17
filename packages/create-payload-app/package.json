@@ -1,6 +1,6 @@
 {
   "name": "create-payload-app",
-  "version": "3.0.0-beta.97",
+  "version": "3.0.0-beta.114",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -68,6 +68,9 @@
     "@types/esprima": "^4.0.6",
     "@types/fs-extra": "^9.0.12",
     "@types/jest": "29.5.12",
-    "@types/node": "20.12.5"
+    "@types/node": "22.5.4"
+  },
+  "engines": {
+    "node": "^18.20.2 || >=20.9.0"
   }
 }

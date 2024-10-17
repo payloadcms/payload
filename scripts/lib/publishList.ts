@@ -42,12 +42,11 @@ export const packagePublishList = [
   'plugin-nested-docs',
   'plugin-redirects',
   'plugin-search',
+  'plugin-sentry',
   'plugin-seo',
   'plugin-stripe',
-  'plugin-relationship-object-ids',
 
   // Unpublished
-  // 'plugin-sentry'
   // 'storage-uploadthing',
   // 'eslint-config',
   // 'eslint-plugin',

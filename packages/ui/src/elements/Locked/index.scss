@@ -1,0 +1,16 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .locked {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: all;
+
+    &__tooltip {
+      left: 0;
+      transform: translate3d(-0%, calc(var(--caret-size) * -1), 0);
+    }
+  }
+}

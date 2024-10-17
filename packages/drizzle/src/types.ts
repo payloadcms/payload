@@ -162,7 +162,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   deleteWhere: DeleteWhere
   drizzle: LibSQLDatabase | PostgresDB
   dropDatabase: DropDatabase
-  enums?: Record<string, unknown> | never
+  enums?: never | Record<string, unknown>
   execute: Execute<unknown>
   features: {
     json?: boolean

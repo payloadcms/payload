@@ -870,7 +870,8 @@ describe('lexicalBlocks', () => {
 
       // navigate to list view
       await page.locator('.step-nav a').nth(1).click()
-      await page.waitForURL('**/lexical-fields?limit=10')
+
+      await page.waitForURL(/^.*\/lexical-fields(\?.*)?$/)
 
       // Click on lexical document in list view (navigateToLexicalFields is client-side navigation which is what we need to reproduce the issue here)
       await navigateToLexicalFields(false)
@@ -1015,6 +1016,28 @@ describe('lexicalBlocks', () => {
       }).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
+    })
+
+    test('dynamic height of code editor is correctly calculated', async () => {
+      await navigateToLexicalFields()
+
+      const codeEditor = page.locator('.code-editor')
+
+      await codeEditor.scrollIntoViewIfNeeded()
+      await expect(codeEditor).toBeVisible()
+
+      const height = (await codeEditor.boundingBox()).height
+
+      await expect(() => {
+        expect(height).toBe(56)
+      }).toPass()
+      await codeEditor.click()
+      await page.keyboard.press('Enter')
+
+      const height2 = (await codeEditor.boundingBox()).height
+      await expect(() => {
+        expect(height2).toBe(74)
+      }).toPass()
     })
   })
 })

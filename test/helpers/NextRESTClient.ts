@@ -1,4 +1,4 @@
-import type { SanitizedConfig, Where } from 'payload'
+import type { JoinQuery, SanitizedConfig, Where } from 'payload'
 import type { ParsedQs } from 'qs-esm'
 
 import {
@@ -18,6 +18,7 @@ type RequestOptions = {
   query?: {
     depth?: number
     fallbackLocale?: string
+    joins?: JoinQuery
     limit?: number
     locale?: string
     page?: number
@@ -61,7 +62,7 @@ export class NextRESTClient {
 
   constructor(config: SanitizedConfig) {
     this.config = config
-    if (config?.serverURL) this.serverURL = config.serverURL
+    if (config?.serverURL) {this.serverURL = config.serverURL}
     this._GET = createGET(config)
     this._POST = createPOST(config)
     this._DELETE = createDELETE(config)
@@ -150,33 +151,6 @@ export class NextRESTClient {
     return this._GRAPHQL_POST(request)
   }
 
-  async PATCH(path: ValidPath, options: FileArg & RequestInit & RequestOptions): Promise<Response> {
-    const { slug, params, url } = this.generateRequestParts(path)
-    const { query, ...rest } = options
-    const queryParams = generateQueryString(query, params)
-
-    const request = new Request(`${url}${queryParams}`, {
-      ...rest,
-      headers: this.buildHeaders(options),
-      method: 'PATCH',
-    })
-    return this._PATCH(request, { params: { slug } })
-  }
-
-  async POST(
-    path: ValidPath,
-    options: FileArg & RequestInit & RequestOptions = {},
-  ): Promise<Response> {
-    const { slug, params, url } = this.generateRequestParts(path)
-    const queryParams = generateQueryString({}, params)
-    const request = new Request(`${url}${queryParams}`, {
-      ...options,
-      headers: this.buildHeaders(options),
-      method: 'POST',
-    })
-    return this._POST(request, { params: { slug } })
-  }
-
   async login({
     slug,
     credentials,
@@ -204,5 +178,32 @@ export class NextRESTClient {
     }
 
     return result
+  }
+
+  async PATCH(path: ValidPath, options: FileArg & RequestInit & RequestOptions): Promise<Response> {
+    const { slug, params, url } = this.generateRequestParts(path)
+    const { query, ...rest } = options
+    const queryParams = generateQueryString(query, params)
+
+    const request = new Request(`${url}${queryParams}`, {
+      ...rest,
+      headers: this.buildHeaders(options),
+      method: 'PATCH',
+    })
+    return this._PATCH(request, { params: { slug } })
+  }
+
+  async POST(
+    path: ValidPath,
+    options: FileArg & RequestInit & RequestOptions = {},
+  ): Promise<Response> {
+    const { slug, params, url } = this.generateRequestParts(path)
+    const queryParams = generateQueryString({}, params)
+    const request = new Request(`${url}${queryParams}`, {
+      ...options,
+      headers: this.buildHeaders(options),
+      method: 'POST',
+    })
+    return this._POST(request, { params: { slug } })
   }
 }

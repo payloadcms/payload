@@ -34,9 +34,13 @@ function ButtonGroupItem({
     )
   }
 
+  if (!item.ChildComponent) {
+    return null
+  }
+
   return (
     <ToolbarButton editor={editor} item={item} key={item.key}>
-      {item?.ChildComponent && <item.ChildComponent />}
+      {<item.ChildComponent />}
     </ToolbarButton>
   )
 }
@@ -58,42 +62,45 @@ function ToolbarGroupComponent({
   const {
     field: { richTextComponentMap },
   } = useEditorConfigContext()
-  const [dropdownLabel, setDropdownLabel] = React.useState<null | string>(null)
-  const [DropdownIcon, setDropdownIcon] = React.useState<null | React.FC>(null)
+  const [dropdownLabel, setDropdownLabel] = React.useState<string | undefined>(undefined)
+  const [DropdownIcon, setDropdownIcon] = React.useState<React.FC | undefined>(undefined)
 
   React.useEffect(() => {
     if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
-      setDropdownIcon(() => group.ChildComponent)
+      setDropdownIcon(() => group.ChildComponent!)
     } else {
-      setDropdownIcon(null)
+      setDropdownIcon(undefined)
     }
   }, [group])
 
-  const onActiveChange = ({ activeItems }: { activeItems: ToolbarGroupItem[] }) => {
-    if (!activeItems.length) {
-      if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
-        setDropdownIcon(() => group.ChildComponent)
-        setDropdownLabel(null)
-      } else {
-        setDropdownIcon(null)
-        setDropdownLabel(null)
+  const onActiveChange = React.useCallback(
+    ({ activeItems }: { activeItems: ToolbarGroupItem[] }) => {
+      if (!activeItems.length) {
+        if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
+          setDropdownIcon(() => group.ChildComponent!)
+          setDropdownLabel(undefined)
+        } else {
+          setDropdownIcon(undefined)
+          setDropdownLabel(undefined)
+        }
+        return
       }
-      return
-    }
-    const item = activeItems[0]
+      const item = activeItems[0]
 
-    let label = item.key
-    if (item.label) {
-      label =
-        typeof item.label === 'function' ? item.label({ i18n, richTextComponentMap }) : item.label
-    }
-    // Crop title to max. 25 characters
-    if (label.length > 25) {
-      label = label.substring(0, 25) + '...'
-    }
-    setDropdownLabel(label)
-    setDropdownIcon(() => item.ChildComponent)
-  }
+      let label = item.key
+      if (item.label) {
+        label =
+          typeof item.label === 'function' ? item.label({ i18n, richTextComponentMap }) : item.label
+      }
+      // Crop title to max. 25 characters
+      if (label.length > 25) {
+        label = label.substring(0, 25) + '...'
+      }
+      setDropdownLabel(label)
+      setDropdownIcon(() => item.ChildComponent)
+    },
+    [group, i18n, richTextComponentMap],
+  )
 
   return (
     <div className={`fixed-toolbar__group fixed-toolbar__group-${group.key}`} key={group.key}>
@@ -103,9 +110,8 @@ function ToolbarGroupComponent({
           <ToolbarDropdown
             anchorElem={anchorElem}
             editor={editor}
-            groupKey={group.key}
+            group={group}
             Icon={DropdownIcon}
-            items={group.items}
             itemsContainerClassNames={['fixed-toolbar__dropdown-items']}
             label={dropdownLabel}
             maxActiveItems={1}
@@ -115,8 +121,7 @@ function ToolbarGroupComponent({
           <ToolbarDropdown
             anchorElem={anchorElem}
             editor={editor}
-            groupKey={group.key}
-            items={group.items}
+            group={group}
             itemsContainerClassNames={['fixed-toolbar__dropdown-items']}
             label={dropdownLabel}
             maxActiveItems={1}
@@ -150,7 +155,7 @@ function FixedToolbar({
 }): React.ReactNode {
   const currentToolbarRef = React.useRef<HTMLDivElement>(null)
 
-  const { y } = useScrollInfo()
+  const { y } = useScrollInfo!()
 
   // Memoize the parent toolbar element
   const parentToolbarElem = useMemo(() => {
@@ -189,13 +194,13 @@ function FixedToolbar({
       )
 
       if (overlapping) {
-        currentToolbarRef.current.className = 'fixed-toolbar fixed-toolbar--overlapping'
+        currentToolbarElem.className = 'fixed-toolbar fixed-toolbar--overlapping'
         parentToolbarElem.className = 'fixed-toolbar fixed-toolbar--hide'
       } else {
-        if (!currentToolbarRef.current.classList.contains('fixed-toolbar--overlapping')) {
+        if (!currentToolbarElem.classList.contains('fixed-toolbar--overlapping')) {
           return
         }
-        currentToolbarRef.current.className = 'fixed-toolbar'
+        currentToolbarElem.className = 'fixed-toolbar'
         parentToolbarElem.className = 'fixed-toolbar'
       }
     },

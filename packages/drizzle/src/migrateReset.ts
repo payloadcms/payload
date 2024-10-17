@@ -57,7 +57,9 @@ export async function migrateReset(this: DrizzleAdapter): Promise<void> {
     } catch (err: unknown) {
       let msg = `Error running migration ${migrationFile.name}.`
 
-      if (err instanceof Error) msg += ` ${err.message}`
+      if (err instanceof Error) {
+        msg += ` ${err.message}`
+      }
 
       await killTransaction(req)
       payload.logger.error({
@@ -82,7 +84,7 @@ export async function migrateReset(this: DrizzleAdapter): Promise<void> {
         },
       })
     } catch (err: unknown) {
-      payload.logger.error({ error: err, msg: 'Error deleting dev migration' })
+      payload.logger.error({ err, msg: 'Error deleting dev migration' })
     }
   }
 }

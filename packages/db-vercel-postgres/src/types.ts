@@ -4,6 +4,7 @@ import type {
   MigrateDownArgs,
   MigrateUpArgs,
   PostgresDB,
+  PostgresSchemaHook,
 } from '@payloadcms/drizzle/postgres'
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { VercelPool, VercelPostgresPoolConfig } from '@vercel/postgres'
@@ -11,7 +12,24 @@ import type { DrizzleConfig } from 'drizzle-orm'
 import type { PgSchema, PgTableFn, PgTransactionConfig } from 'drizzle-orm/pg-core'
 
 export type Args = {
+  /**
+   * Transform the schema after it's built.
+   * You can use it to customize the schema with features that aren't supported by Payload.
+   * Examples may include: composite indices, generated columns, vectors
+   */
+  afterSchemaInit?: PostgresSchemaHook[]
+  /**
+   * Transform the schema before it's built.
+   * You can use it to preserve an existing database schema and if there are any collissions Payload will override them.
+   * To generate Drizzle schema from the database, see [Drizzle Kit introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
+   */
+  beforeSchemaInit?: PostgresSchemaHook[]
   connectionString?: string
+  /**
+   * Pass `true` to disale auto database creation if it doesn't exist.
+   * @default false
+   */
+  disableCreateDatabase?: boolean
   idType?: 'serial' | 'uuid'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
@@ -33,7 +51,7 @@ export type Args = {
    * @experimental This only works when there are not other tables or enums of the same name in the database under a different schema. Awaiting fix from Drizzle.
    */
   schemaName?: string
-  transactionOptions?: PgTransactionConfig | false
+  transactionOptions?: false | PgTransactionConfig
   versionsSuffix?: string
 }
 
@@ -46,6 +64,8 @@ declare module 'payload' {
   export interface DatabaseAdapter
     extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
       DrizzleAdapter {
+    afterSchemaInit: PostgresSchemaHook[]
+    beforeSchemaInit: PostgresSchemaHook[]
     beginTransaction: (options?: PgTransactionConfig) => Promise<null | number | string>
     drizzle: PostgresDB
     enums: Record<string, GenericEnum>

@@ -34,14 +34,7 @@ const RichTextComponent: React.FC<
     field: {
       name,
       _path: pathFromProps,
-      admin: {
-        className,
-        components: { Description, Error, Label },
-        readOnly: readOnlyFromAdmin,
-        style,
-        width,
-      } = {},
-      label,
+      admin: { className, components, readOnly: readOnlyFromAdmin, style, width } = {},
       required,
     },
     field,
@@ -49,6 +42,9 @@ const RichTextComponent: React.FC<
     readOnly: readOnlyFromTopLevelProps,
     validate, // Users can pass in client side validation if they WANT to, but it's not required anymore
   } = props
+  const Description = components?.Description
+  const Error = components?.Error
+  const Label = components?.Label
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const memoizedValidate = useCallback(
@@ -66,6 +62,7 @@ const RichTextComponent: React.FC<
 
   const fieldType = useField<SerializedEditorState>({
     path: pathFromContext ?? pathFromProps ?? name,
+    // @ts-expect-error: TODO: Fix this
     validate: memoizedValidate,
   })
 
@@ -96,18 +93,12 @@ const RichTextComponent: React.FC<
     >
       <FieldError
         CustomError={Error}
-        field={field}
         path={path}
         {...(errorProps || {})}
         alignCaret="left"
-      />
-      <FieldLabel
         field={field}
-        Label={Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
       />
+      <FieldLabel Label={Label} {...(labelProps || {})} field={field} />
       <div className={`${baseClass}__wrap`}>
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           <LexicalProvider
@@ -131,7 +122,7 @@ const RichTextComponent: React.FC<
             value={value}
           />
         </ErrorBoundary>
-        <FieldDescription Description={Description} field={field} {...(descriptionProps || {})} />
+        <FieldDescription Description={Description} {...(descriptionProps || {})} field={field} />
       </div>
     </div>
   )

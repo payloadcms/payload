@@ -29,7 +29,9 @@ export const connect: Connect = async function connect(
     useFacet: undefined,
   }
 
-  if (hotReload) connectionOptions.autoIndex = false
+  if (hotReload) {
+    connectionOptions.autoIndex = false
+  }
 
   try {
     this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection

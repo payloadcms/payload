@@ -2,7 +2,7 @@ import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { Connect } from 'payload'
 
 import { pushDevSchema } from '@payloadcms/drizzle'
-import { VercelPool, sql } from '@vercel/postgres'
+import { sql, VercelPool } from '@vercel/postgres'
 import { drizzle } from 'drizzle-orm/node-postgres'
 
 import type { VercelPostgresAdapter } from './types.js'
@@ -39,8 +39,27 @@ export const connect: Connect = async function connect(
       }
     }
   } catch (err) {
-    this.payload.logger.error(`Error: cannot connect to Postgres. Details: ${err.message}`, err)
-    if (typeof this.rejectInitializing === 'function') this.rejectInitializing()
+    if (err.message?.match(/database .* does not exist/i) && !this.disableCreateDatabase) {
+      // capitalize first char of the err msg
+      this.payload.logger.info(
+        `${err.message.charAt(0).toUpperCase() + err.message.slice(1)}, creating...`,
+      )
+      const isCreated = await this.createDatabase()
+
+      if (isCreated) {
+        await this.connect(options)
+        return
+      }
+    } else {
+      this.payload.logger.error({
+        err,
+        msg: `Error: cannot connect to Postgres. Details: ${err.message}`,
+      })
+    }
+
+    if (typeof this.rejectInitializing === 'function') {
+      this.rejectInitializing()
+    }
     process.exit(1)
   }
 
@@ -53,7 +72,9 @@ export const connect: Connect = async function connect(
     await pushDevSchema(this as unknown as DrizzleAdapter)
   }
 
-  if (typeof this.resolveInitializing === 'function') this.resolveInitializing()
+  if (typeof this.resolveInitializing === 'function') {
+    this.resolveInitializing()
+  }
 
   if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
     await this.migrate({ migrations: this.prodMigrations })

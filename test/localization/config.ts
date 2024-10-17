@@ -24,9 +24,9 @@ import {
   portugueseLocale,
   relationEnglishTitle,
   relationEnglishTitle2,
+  relationshipLocalizedSlug,
   relationSpanishTitle,
   relationSpanishTitle2,
-  relationshipLocalizedSlug,
   spanishLocale,
   spanishTitle,
   withLocalizedRelSlug,
@@ -111,6 +111,12 @@ export default buildConfigWithDefaults({
           ],
           type: 'group',
         },
+        {
+          name: 'unique',
+          type: 'text',
+          localized: true,
+          unique: true,
+        },
       ],
     },
     ArrayCollection,
@@ -123,30 +129,108 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
         {
-          name: 'layout',
-          blocks: [
+          type: 'tabs',
+          tabs: [
             {
+              label: 'Main Nav',
+              fields: [
+                {
+                  name: 'nav',
+                  type: 'group',
+                  fields: [
+                    {
+                      name: 'layout',
+                      blocks: [
+                        {
+                          fields: [
+                            {
+                              name: 'text',
+                              type: 'text',
+                            },
+                            {
+                              name: 'nestedArray',
+                              type: 'array',
+                              fields: [
+                                {
+                                  name: 'text',
+                                  type: 'text',
+                                },
+                                {
+                                  name: 'l2',
+                                  type: 'array',
+                                  fields: [
+                                    {
+                                      name: 'l3',
+                                      type: 'array',
+                                      fields: [
+                                        {
+                                          name: 'l4',
+                                          type: 'array',
+                                          fields: [
+                                            {
+                                              name: 'superNestedText',
+                                              type: 'text',
+                                            },
+                                          ],
+                                        },
+                                      ],
+                                    },
+                                  ],
+                                },
+                              ],
+                            },
+                          ],
+                          slug: 'text',
+                        },
+                        {
+                          fields: [
+                            {
+                              name: 'number',
+                              type: 'number',
+                            },
+                          ],
+                          slug: 'number',
+                        },
+                      ],
+                      localized: true,
+                      required: true,
+                      type: 'blocks',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              name: 'myTab',
               fields: [
                 {
                   name: 'text',
                   type: 'text',
                 },
-              ],
-              slug: 'text',
-            },
-            {
-              fields: [
                 {
-                  name: 'number',
-                  type: 'number',
+                  name: 'group',
+                  type: 'group',
+                  localized: true,
+                  fields: [
+                    {
+                      name: 'nestedArray2',
+                      type: 'array',
+                      fields: [
+                        {
+                          name: 'nestedText',
+                          type: 'text',
+                        },
+                      ],
+                    },
+                    {
+                      name: 'nestedText',
+                      type: 'text',
+                    },
+                  ],
                 },
               ],
-              slug: 'number',
             },
           ],
-          localized: true,
-          required: true,
-          type: 'blocks',
         },
       ],
       slug: withRequiredLocalizedFields,
@@ -348,7 +432,9 @@ export default buildConfigWithDefaults({
     if (payload.db.name === 'mongoose') {
       await new Promise((resolve, reject) => {
         payload.db?.collections[localizedPostsSlug]?.ensureIndexes(function (err) {
-          if (err) reject(err)
+          if (err) {
+            reject(err)
+          }
           resolve(true)
         })
       })
