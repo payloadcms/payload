@@ -1,8 +1,8 @@
 import type { Endpoint } from '../../../config/types.js'
 
-import { runAllJobs, type RunAllJobsArgs } from '../runAllJobs/index.js'
+import { runJobs, type RunJobsArgs } from '../runJobs/index.js'
 
-export const runAllJobsEndpoint: Endpoint = {
+export const runJobsEndpoint: Endpoint = {
   handler: async (req) => {
     if (
       !Array.isArray(req.payload.config.jobs.workflows) ||
@@ -29,7 +29,7 @@ export const runAllJobsEndpoint: Endpoint = {
 
     const { limit, queue } = req.query
 
-    const runJobsArgs: RunAllJobsArgs = {
+    const runJobsArgs: RunJobsArgs = {
       queue: 'default',
       req,
       // We are checking access above, so we can override it here
@@ -46,7 +46,7 @@ export const runAllJobsEndpoint: Endpoint = {
 
     let noJobsRemaining = false
     try {
-      const result = await runAllJobs(runJobsArgs)
+      const result = await runJobs(runJobsArgs)
       noJobsRemaining = result.noJobsRemaining
     } catch (err) {
       req.payload.logger.error({

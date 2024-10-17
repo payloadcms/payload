@@ -15,24 +15,24 @@ import { importHandlerPath } from '../runJob/importHandlerPath.js'
 import { runJob } from '../runJob/index.js'
 import { runJSONJob } from '../runJSONJob/index.js'
 
-export type RunAllJobsArgs = {
+export type RunJobsArgs = {
   limit?: number
   overrideAccess?: boolean
   queue?: string
   req: PayloadRequest
 }
 
-export type RunAllJobsResult = {
+export type RunJobsResult = {
   jobStatus?: Record<string, RunJobResult>
   noJobsRemaining?: boolean
 }
 
-export const runAllJobs = async ({
+export const runJobs = async ({
   limit = 10,
   overrideAccess,
   queue,
   req,
-}: RunAllJobsArgs): Promise<RunAllJobsResult> => {
+}: RunJobsArgs): Promise<RunJobsResult> => {
   if (!overrideAccess) {
     const hasAccess = await req.payload.config.jobs.access.run({ req })
     if (!hasAccess) {
@@ -201,7 +201,7 @@ export const runAllJobs = async ({
   })
 
   const resultsArray = await Promise.all(jobPromises)
-  const resultsObject: RunAllJobsResult['jobStatus'] = resultsArray.reduce((acc, cur) => {
+  const resultsObject: RunJobsResult['jobStatus'] = resultsArray.reduce((acc, cur) => {
     if (cur !== null) {
       // Check if there's a valid result to include
       acc[cur.id] = cur.result

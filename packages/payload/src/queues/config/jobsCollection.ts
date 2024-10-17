@@ -4,7 +4,7 @@ import type { CollectionConfig } from '../../collections/config/types.js'
 import type { Config } from '../../config/types.js'
 
 import { jsonSchemaExternalImport } from '../../utilities/configToJSONSchema.js'
-import { runAllJobsEndpoint } from '../operations/rest/run.js'
+import { runJobsEndpoint } from '../operations/rest/run.js'
 import { getJobTaskStatus } from '../utilities/getJobTaskStatus.js'
 
 export const getDefaultJobsCollection: (config: Config) => CollectionConfig | null = (config) => {
@@ -74,7 +74,7 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
       group: 'System',
       hidden: true,
     },
-    endpoints: [runAllJobsEndpoint],
+    endpoints: [runJobsEndpoint],
     fields: [
       {
         name: 'input',
