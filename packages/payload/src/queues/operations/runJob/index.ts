@@ -42,10 +42,10 @@ export const runJob = async ({
   // Run the job
   try {
     await workflowHandler({
+      inlineTask: getRunTaskFunction(state, job, workflowConfig, req, true, updateJob),
       job: job as unknown as RunningJob<WorkflowTypes>, //TODO: Type this better
       req,
-      runTask: getRunTaskFunction(state, job, workflowConfig, req, false, updateJob),
-      runTaskInline: getRunTaskFunction(state, job, workflowConfig, req, true, updateJob),
+      tasks: getRunTaskFunction(state, job, workflowConfig, req, false, updateJob),
     })
   } catch (err) {
     const { hasFinalError } = handleWorkflowError({

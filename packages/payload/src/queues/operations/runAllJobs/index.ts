@@ -137,11 +137,9 @@ export const runAllJobs = async ({
       ? req.payload.config.jobs.workflows.find(({ slug }) => slug === job.workflowSlug)
       : {
           slug: 'singleTask',
-          handler: async ({ job, runTask }) => {
-            await runTask({
-              id: '1',
+          handler: async ({ job, tasks }) => {
+            await tasks[job.taskSlug as string]('1', {
               input: job.input,
-              task: job.taskSlug as string,
             })
           },
         }

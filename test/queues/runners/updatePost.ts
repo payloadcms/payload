@@ -1,6 +1,6 @@
 import type { TaskHandler } from 'payload'
 
-export const updatePostStep1: TaskHandler<'UpdatePost'> = async ({ req, input, job }) => {
+export const updatePostStep1: TaskHandler<'UpdatePost'> = async ({ req, input }) => {
   const postID =
     typeof input.post === 'string' || typeof input.post === 'number' ? input.post : input.post.id
 

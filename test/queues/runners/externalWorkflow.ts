@@ -2,11 +2,9 @@ import type { WorkflowHandler } from 'payload'
 
 export const externalWorkflowHandler: WorkflowHandler<'externalWorkflow'> = async ({
   job,
-  runTask,
+  tasks,
 }) => {
-  await runTask({
-    id: '1',
-    task: 'ExternalTask',
+  await tasks.ExternalTask('1', {
     input: {
       message: job.input.message,
     },

@@ -3,6 +3,7 @@ import type {
   RetryConfig,
   RunInlineTaskFunction,
   RunTaskFunction,
+  RunTaskFunctions,
   TaskConfig,
   TaskHandler,
   TaskHandlerResult,
@@ -17,10 +18,6 @@ import type {
 } from '../../config/types/workflowTypes.js'
 import type { UpdateJobFunction } from './getUpdateJobFunction.js'
 
-import { commitTransaction } from '../../../utilities/commitTransaction.js'
-import { initTransaction } from '../../../utilities/initTransaction.js'
-import isolateObjectProperty from '../../../utilities/isolateObjectProperty.js'
-import { killTransaction } from '../../../utilities/killTransaction.js'
 import { calculateBackoffWaitUntil } from './calculateBackoffWaitUntil.js'
 import { importHandlerPath } from './importHandlerPath.js'
 
@@ -29,7 +26,7 @@ export type RunTaskFunctionState = {
   reachedMaxRetries: boolean
 }
 
-async function getTaskHandlerFromConfig(taskConfig: TaskConfig<any>) {
+async function getTaskHandlerFromConfig(taskConfig: TaskConfig<string>) {
   let handler: TaskHandler<TaskType>
 
   if (typeof taskConfig.handler === 'function') {
@@ -58,10 +55,10 @@ export async function handleTaskFailed({
 }: {
   error?: Error
   executedAt: Date
-  input: any
+  input: object
   job: BaseJob
   maxRetries: number
-  output: any
+  output: object
   req: PayloadRequest
   retriesConfig: number | RetryConfig
   runnerOutput?: TaskHandlerResult<string>
@@ -105,7 +102,7 @@ export async function handleTaskFailed({
     await updateJob(job)
 
     throw new Error(
-      `Task ${taskSlug} has failed more than the allowed retries in workflow ${job.workflowSlug}${error ? `. Error: ${error}` : ''}`,
+      `Task ${taskSlug} has failed more than the allowed retries in workflow ${job.workflowSlug}${error ? `. Error: ${String(error)}` : ''}`,
     )
   } else {
     // Job will retry. Let's determine when!
@@ -127,110 +124,124 @@ export async function handleTaskFailed({
 export const getRunTaskFunction = <TIsInline extends boolean>(
   state: RunTaskFunctionState,
   job: BaseJob,
-  workflowConfig: WorkflowConfig<any>,
+  workflowConfig: WorkflowConfig<string>,
   req: PayloadRequest,
   isInline: TIsInline,
   updateJob: UpdateJobFunction,
-): TIsInline extends true ? RunInlineTaskFunction : RunTaskFunction => {
-  const runTask = async ({
-    id,
-    input,
-    retries,
-    task,
-  }: Parameters<RunInlineTaskFunction>[0] | Parameters<RunTaskFunction>[0]) => {
-    const executedAt = new Date()
-
-    let inlineRunner: TaskHandler<TaskType> = null
-    if (isInline) {
-      inlineRunner = task as unknown as TaskHandler<TaskType>
-      task = 'inline'
-    }
-
-    let retriesConfig: number | RetryConfig = retries
-    let taskConfig: TaskConfig<any>
-    if (!isInline) {
-      taskConfig = req.payload.config.jobs.tasks.find((t) => t.slug === task)
-      if (!retriesConfig) {
-        retriesConfig = taskConfig.retries
-      }
-
-      if (!taskConfig) {
-        throw new Error(`Task ${String(task)} not found in workflow ${job.workflowSlug}`)
-      }
-    }
-    const maxRetries: number =
-      typeof retriesConfig === 'object' ? retriesConfig?.attempts : retriesConfig
-
-    const taskStatus: null | SingleTaskStatus<string> = job?.taskStatus?.[String(task)]
-      ? job.taskStatus[String(task)][id]
-      : null
-
-    if (taskStatus && taskStatus.complete === true) {
-      return taskStatus.output
-    }
-
-    let runner: TaskHandler<TaskType>
-    if (isInline) {
-      runner = inlineRunner
-    } else {
-      if (!taskConfig) {
-        throw new Error(`Task ${String(task)} not found in workflow ${job.workflowSlug}`)
-      }
-      runner = await getTaskHandlerFromConfig(taskConfig)
-    }
-
-    if (!runner || typeof runner !== 'function') {
-      const errorMessage = isInline
-        ? `Can't find runner for inline task with ID ${id}`
-        : `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${job.workflowSlug} for task ${String(task)}.`
-      req.payload.logger.error(errorMessage)
-
-      await updateJob({
-        error: {
-          error: errorMessage,
-        },
-        hasError: true,
-        log: [
-          ...job.log,
-          {
-            completedAt: new Date().toISOString(),
-            error: errorMessage,
-            executedAt: executedAt.toISOString(),
-            state: 'failed',
-            taskID: id,
-            taskSlug: String(task),
-          },
-        ],
-        processing: false,
-      })
-
-      return
-    }
-
-    let output: object
-    // TODO: The following is disabled for now due to transaction issues
-    // Create a transaction so that all seeding happens in one transaction.
-    // Each workflow gets an own transaction, and also each task.
-    // That's because within one job run, some tasks can pass (thus their transaction should be committed) and
-    // Some tasks can fail (thus their transaction should be rolled back). Thus, we need different transactions for each task.
-    const newReq = isolateObjectProperty(req, 'transactionID')
-    // Still remove the workflow req, as we generally still want operations within a task to be committed after the task is done - not after the workflow is done
-    delete newReq.transactionID
-
-    //await initTransaction(newReq)
-
-    try {
-      const runnerOutput = await runner({
+): TIsInline extends true ? RunInlineTaskFunction : RunTaskFunctions => {
+  const runTask: <TTaskSlug extends string>(
+    taskSlug: TTaskSlug,
+  ) => TTaskSlug extends 'inline' ? RunInlineTaskFunction : RunTaskFunction<TTaskSlug> = (
+    taskSlug,
+  ) =>
+    (async (
+      taskID: Parameters<RunInlineTaskFunction>[0],
+      {
         input,
-        job: job as unknown as RunningJob<WorkflowTypes>, // TODO: Type this better
-        req: newReq,
-      })
+        retries,
+        task,
+      }: Parameters<RunInlineTaskFunction>[1] & Parameters<RunTaskFunction<string>>[1],
+    ) => {
+      const executedAt = new Date()
 
-      if (runnerOutput.state === 'failed') {
-        // Rollback everything the job did.  // TODO: disabled for now due to transaction issues. Add flag for the user to enable
-        //await killTransaction(newReq)
+      let inlineRunner: TaskHandler<TaskType> = null
+      if (isInline) {
+        inlineRunner = task
+      }
 
+      let retriesConfig: number | RetryConfig = retries
+      let taskConfig: TaskConfig<string>
+      if (!isInline) {
+        taskConfig = req.payload.config.jobs.tasks.find((t) => t.slug === taskSlug)
+        if (!retriesConfig) {
+          retriesConfig = taskConfig.retries
+        }
+
+        if (!taskConfig) {
+          throw new Error(`Task ${taskSlug} not found in workflow ${job.workflowSlug}`)
+        }
+      }
+      const maxRetries: number =
+        typeof retriesConfig === 'object' ? retriesConfig?.attempts : retriesConfig
+
+      const taskStatus: null | SingleTaskStatus<string> = job?.taskStatus?.[taskSlug]
+        ? job.taskStatus[taskSlug][taskID]
+        : null
+
+      if (taskStatus && taskStatus.complete === true) {
+        return taskStatus.output
+      }
+
+      let runner: TaskHandler<TaskType>
+      if (isInline) {
+        runner = inlineRunner
+      } else {
+        if (!taskConfig) {
+          throw new Error(`Task ${taskSlug} not found in workflow ${job.workflowSlug}`)
+        }
+        runner = await getTaskHandlerFromConfig(taskConfig)
+      }
+
+      if (!runner || typeof runner !== 'function') {
+        const errorMessage = isInline
+          ? `Can't find runner for inline task with ID ${taskID}`
+          : `Can't find runner while importing with the path ${typeof workflowConfig.handler === 'string' ? workflowConfig.handler : 'unknown - no string path'} in job type ${job.workflowSlug} for task ${taskSlug}.`
+        req.payload.logger.error(errorMessage)
+
+        await updateJob({
+          error: {
+            error: errorMessage,
+          },
+          hasError: true,
+          log: [
+            ...job.log,
+            {
+              completedAt: new Date().toISOString(),
+              error: errorMessage,
+              executedAt: executedAt.toISOString(),
+              state: 'failed',
+              taskID,
+              taskSlug,
+            },
+          ],
+          processing: false,
+        })
+
+        return
+      }
+
+      let output: object
+
+      try {
+        const runnerOutput = await runner({
+          input,
+          job: job as unknown as RunningJob<WorkflowTypes>, // TODO: Type this better
+          req,
+        })
+
+        if (runnerOutput.state === 'failed') {
+          await handleTaskFailed({
+            executedAt,
+            input,
+            job,
+            maxRetries,
+            output,
+            req,
+            retriesConfig,
+            runnerOutput,
+            state,
+            taskID,
+            taskSlug,
+            taskStatus,
+            updateJob,
+          })
+          throw new Error('Task failed')
+        } else {
+          output = runnerOutput.output
+        }
+      } catch (err) {
         await handleTaskFailed({
+          error: err,
           executedAt,
           input,
           job,
@@ -238,58 +249,40 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           output,
           req,
           retriesConfig,
-          runnerOutput,
           state,
-          taskID: id,
-          taskSlug: String(task),
+          taskID,
+          taskSlug,
           taskStatus,
           updateJob,
         })
         throw new Error('Task failed')
-      } else {
-        // Commit Success => commit transaction // TODO: disabled for now due to transaction issues. Add flag for the user to enable
-        //await commitTransaction(newReq)
-        output = runnerOutput.output
       }
-    } catch (err) {
-      // Rollback everything the job did.  // TODO: disabled for now due to transaction issues. Add flag for the user to enable
-      // await killTransaction(newReq)
 
-      await handleTaskFailed({
-        error: err,
-        executedAt,
+      if (!job.log) {
+        job.log = []
+      }
+      job.log.push({
+        completedAt: new Date().toISOString(),
+        executedAt: executedAt.toISOString(),
         input,
-        job,
-        maxRetries,
         output,
-        req,
-        retriesConfig,
-        state,
-        taskID: id,
-        taskSlug: String(task),
-        taskStatus,
-        updateJob,
+        state: 'succeeded',
+        taskID,
+        taskSlug,
       })
-      throw new Error('Task failed')
+
+      await updateJob(job)
+
+      return output
+    }) as any
+
+  if (isInline) {
+    return runTask('inline') as TIsInline extends true ? RunInlineTaskFunction : RunTaskFunctions
+  } else {
+    const tasks: RunTaskFunctions = {}
+    for (const task of req?.payload?.config?.jobs?.tasks ?? []) {
+      tasks[task.slug] = runTask(task.slug)
     }
-
-    if (!job.log) {
-      job.log = []
-    }
-    job.log.push({
-      completedAt: new Date().toISOString(),
-      executedAt: executedAt.toISOString(),
-      input,
-      output,
-      state: 'succeeded',
-      taskID: id,
-      taskSlug: String(task),
-    })
-
-    await updateJob(job)
-
-    return output
+    return tasks as TIsInline extends true ? RunInlineTaskFunction : RunTaskFunctions
   }
-
-  return runTask as any
 }

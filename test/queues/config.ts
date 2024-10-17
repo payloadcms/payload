@@ -154,7 +154,7 @@ export default buildConfigWithDefaults({
             required: true,
           },
         ],
-        handler: async ({ input, job, req }) => {
+        handler: async ({ input, req }) => {
           if (input.shouldFail) {
             throw new Error('Failed on purpose')
           }
@@ -193,7 +193,7 @@ export default buildConfigWithDefaults({
             required: true,
           },
         ],
-        handler: async ({ input, job, req }) => {
+        handler: async ({ input, req }) => {
           if (input.shouldFail) {
             throw new Error('Failed on purpose')
           }
@@ -248,19 +248,15 @@ export default buildConfigWithDefaults({
             required: true,
           },
         ],
-        handler: async ({ job, runTask }) => {
-          const output = await runTask({
-            task: 'UpdatePost',
-            id: '1',
+        handler: async ({ job, tasks }) => {
+          await tasks.UpdatePost('1', {
             input: {
               post: job.input.post,
               message: job.input.message,
             },
           })
 
-          await runTask({
-            task: 'UpdatePostStep2',
-            id: '2',
+          await tasks.UpdatePostStep2('2', {
             input: {
               post: job.taskStatus.UpdatePost['1'].input.post,
               messageTwice: job.taskStatus.UpdatePost['1'].output.messageTwice,
@@ -316,15 +312,13 @@ export default buildConfigWithDefaults({
             required: true,
           },
         ],
-        handler: async ({ job, runTask }) => {
+        handler: async ({ job, tasks }) => {
           // @ts-expect-error amountRetried is new arbitrary data and not in the type
           job.input.amountRetried =
             // @ts-expect-error amountRetried is new arbitrary data and not in the type
             job.input.amountRetried !== undefined ? job.input.amountRetried + 1 : 0
 
-          await runTask({
-            task: 'CreateSimple',
-            id: '1',
+          await tasks.CreateSimple('1', {
             input: {
               message: job.input.message,
             },
@@ -332,9 +326,7 @@ export default buildConfigWithDefaults({
 
           // At this point there should always be one post created.
           // job.input.amountRetried will go up to 2 as CreatePost has 2 retries
-          await runTask({
-            task: 'CreateSimple',
-            id: '2',
+          await tasks.CreateSimple('2', {
             input: {
               message: job.input.message,
               shouldFail: true,
@@ -352,13 +344,13 @@ export default buildConfigWithDefaults({
             required: true,
           },
         ],
-        handler: async ({ job, runTaskInline }) => {
+        handler: async ({ job, inlineTask }) => {
           // @ts-expect-error amountRetried is new arbitrary data and not in the type
           job.input.amountRetried =
             // @ts-expect-error amountRetried is new arbitrary data and not in the type
             job.input.amountRetried !== undefined ? job.input.amountRetried + 1 : 0
 
-          await runTaskInline({
+          await inlineTask('1', {
             task: async ({ req }) => {
               const newSimple = await req.payload.create({
                 collection: 'simple',
@@ -373,10 +365,9 @@ export default buildConfigWithDefaults({
                 },
               }
             },
-            id: '1',
           })
 
-          await runTaskInline({
+          await inlineTask('2', {
             task: async ({ req }) => {
               await req.payload.create({
                 collection: 'simple',
@@ -389,7 +380,6 @@ export default buildConfigWithDefaults({
 
               throw new Error('Failed on purpose')
             },
-            id: '2',
             retries: {
               attempts: 4,
             },
@@ -406,15 +396,13 @@ export default buildConfigWithDefaults({
           },
         ],
         retries: 2, // Even though CreateSimple has 3 retries, this workflow only has 2. Thus, it will only retry once
-        handler: async ({ job, runTask }) => {
+        handler: async ({ job, tasks }) => {
           // @ts-expect-error amountRetried is new arbitrary data and not in the type
           job.input.amountRetried =
             // @ts-expect-error amountRetried is new arbitrary data and not in the type
             job.input.amountRetried !== undefined ? job.input.amountRetried + 1 : 0
 
-          await runTask({
-            task: 'CreateSimple',
-            id: '1',
+          await tasks.CreateSimple('1', {
             input: {
               message: job.input.message,
             },
@@ -422,9 +410,7 @@ export default buildConfigWithDefaults({
 
           // At this point there should always be one post created.
           // job.input.amountRetried will go up to 2 as CreatePost has 2 retries
-          await runTask({
-            task: 'CreateSimple',
-            id: '2',
+          await tasks.CreateSimple('2', {
             input: {
               message: job.input.message,
               shouldFail: true,
@@ -442,8 +428,8 @@ export default buildConfigWithDefaults({
             required: true,
           },
         ],
-        handler: async ({ job, runTaskInline }) => {
-          await runTaskInline({
+        handler: async ({ job, inlineTask }) => {
+          await inlineTask('1', {
             task: async ({ input, req }) => {
               const newSimple = await req.payload.create({
                 collection: 'simple',
@@ -458,7 +444,6 @@ export default buildConfigWithDefaults({
                 },
               }
             },
-            id: '1',
             input: {
               message: job.input.message,
             },
@@ -485,13 +470,13 @@ export default buildConfigWithDefaults({
             required: true,
           },
         ],
-        handler: async ({ job, runTaskInline }) => {
+        handler: async ({ job, inlineTask }) => {
           // @ts-expect-error amountRetried is new arbitrary data and not in the type
           job.input.amountRetried =
             // @ts-expect-error amountRetried is new arbitrary data and not in the type
             job.input.amountRetried !== undefined ? job.input.amountRetried + 1 : 0
 
-          await runTaskInline({
+          await inlineTask('1', {
             task: async ({ req }) => {
               const totalTried = job?.taskStatus?.inline?.['1']?.totalTried || 0
 
@@ -527,7 +512,6 @@ export default buildConfigWithDefaults({
                 output: {},
               }
             },
-            id: '1',
             retries: {
               attempts: 4,
               backoff: {

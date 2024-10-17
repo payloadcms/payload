@@ -57,25 +57,35 @@ export type TaskHandlerResults = {
   }
 }
 
-export type RunTaskFunction = <TTaskSlug extends keyof TypedJobs['tasks']>(args: {
-  id: string
+// Helper type to create correct argument type for the function corresponding to each task.
+export type RunTaskFunctionArgs<TTaskSlug extends keyof TypedJobs['tasks']> = {
   input?: TaskInput<TTaskSlug>
   retries?: number | RetryConfig
-  task: TTaskSlug
-}) => Promise<TaskOutput<TTaskSlug>>
+}
 
-export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput extends object>(args: {
-  id: string
-  input?: TTaskInput
-  retries?: number | RetryConfig
-  // This is the same as TaskHandler, but typed out explicitly in order to improve type inference
-  task: (args: { input: TTaskInput; job: RunningJob<any>; req: PayloadRequest }) =>
-    | {
-        output: TTaskOutput
-        state?: 'failed' | 'succeeded'
-      }
-    | Promise<{ output: TTaskOutput; state?: 'failed' | 'succeeded' }>
-}) => Promise<TTaskOutput>
+export type RunTaskFunction<TTaskSlug extends keyof TypedJobs['tasks']> = (
+  taskID: string,
+  taskArgs?: RunTaskFunctionArgs<TTaskSlug>,
+) => Promise<TaskOutput<TTaskSlug>>
+
+export type RunTaskFunctions = {
+  [TTaskSlug in keyof TypedJobs['tasks']]: RunTaskFunction<TTaskSlug>
+}
+
+export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput extends object>(
+  taskID: string,
+  taskArgs: {
+    input?: TTaskInput
+    retries?: number | RetryConfig
+    // This is the same as TaskHandler, but typed out explicitly in order to improve type inference
+    task: (args: { input: TTaskInput; job: RunningJob<any>; req: PayloadRequest }) =>
+      | {
+          output: TTaskOutput
+          state?: 'failed' | 'succeeded'
+        }
+      | Promise<{ output: TTaskOutput; state?: 'failed' | 'succeeded' }>
+  },
+) => Promise<TTaskOutput>
 
 export type RetryConfig = {
   attempts: number

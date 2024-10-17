@@ -3,7 +3,7 @@ import type { PayloadRequest, StringKeyOf, TypedCollection, TypedJobs } from '..
 import type {
   RetryConfig,
   RunInlineTaskFunction,
-  RunTaskFunction,
+  RunTaskFunctions,
   TaskInput,
   TaskOutput,
   TaskType,
@@ -57,10 +57,10 @@ export type RunningJobFromTask<TTaskSlug extends keyof TypedJobs['tasks']> = {
 
 export type WorkflowHandler<TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object> =
   (args: {
+    inlineTask: RunInlineTaskFunction
     job: RunningJob<TWorkflowSlugOrInput>
     req: PayloadRequest
-    runTask: RunTaskFunction
-    runTaskInline: RunInlineTaskFunction
+    tasks: RunTaskFunctions
   }) => Promise<void>
 
 export type SingleTaskStatus<T extends keyof TypedJobs['tasks']> = {

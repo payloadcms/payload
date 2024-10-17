@@ -56,8 +56,8 @@ export const runJSONJob = async ({
     stepsToRun.push(step)
   }
 
-  const runTaskFn = getRunTaskFunction(state, job, workflowConfig, req, false, updateJob)
-  const runTaskInlineFn = getRunTaskFunction(state, job, workflowConfig, req, true, updateJob)
+  const tasks = getRunTaskFunction(state, job, workflowConfig, req, false, updateJob)
+  const inlineTask = getRunTaskFunction(state, job, workflowConfig, req, true, updateJob)
 
   // Run the job
   let hasFinalError = false
@@ -66,15 +66,12 @@ export const runJSONJob = async ({
     await Promise.all(
       stepsToRun.map(async (step) => {
         if ('task' in step) {
-          await runTaskFn({
-            id: step.id,
+          await tasks[step.task](step.id, {
             input: step.input ? step.input({ job: job as RunningJob<any> }) : {}, // TODO: Type better. We should use RunningJob anywhere and make TypedCollection['payload-jobs'] be BaseJob if type not generated
             retries: step.retries,
-            task: step.task,
           })
         } else {
-          await runTaskInlineFn({
-            id: step.id,
+          await inlineTask(step.id, {
             retries: step.retries,
             task: step.inlineTask,
           })
