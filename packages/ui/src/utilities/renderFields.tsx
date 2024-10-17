@@ -327,6 +327,7 @@ export const renderField: RenderFieldFn = (args) => {
   const renderedFieldResult: RenderedField = {
     type: field.type,
     Field: null,
+    indexPath,
     isSidebar: fieldIsSidebar(field),
     path,
     renderedFieldMap: new Map() as RenderedFieldMap,
@@ -393,87 +394,88 @@ export const renderField: RenderFieldFn = (args) => {
         })
       })
 
-      // RowLabel: (
-      //   <RenderServerComponent
-      //     clientProps={{
-      //       ...clientProps,
-      //       rowLabel: `${getTranslation(field.labels.singular, i18n)} ${String(
-      //         rowIndex + 1,
-      //       ).padStart(2, '0')}`,
-      //       rowNumber: rowIndex + 1,
-      //     }}
-      //     Component={field.admin?.components?.RowLabel}
-      //     Fallback={RowLabel}
-      //     importMap={importMap}
-      //     serverProps={serverProps}
-      //   />
-      // )
       break
     }
 
     case 'blocks': {
-      // clientProps.renderedBlocks = fieldState?.rows?.map((row, rowIndex) => {
-      //   const blockConfig = field.blocks.find((block) => block.slug === row.blockType)
-      //   return renderFields({
-      //     className,
-      //     clientConfigMap,
-      //     config,
-      //     fields: blockConfig?.fields,
-      //     forceRender,
-      //     formState,
-      //     i18n,
-      //     indexPath: `${indexPath}.${rowIndex}`,
-      //     margins,
-      //     path,
-      //     payload,
-      //     permissions,
-      //     schemaPath,
-      //   })
-      // })
+      fieldState?.rows?.forEach((row, rowIndex) => {
+        const blockConfig = field.blocks.find((block) => block.slug === row.blockType)
+
+        const clientBlockConfig =
+          'blocks' in clientField &&
+          clientField?.blocks?.find((block) => block.slug === row.blockType)
+
+        const newMap = new Map() as RenderedFieldMap
+
+        renderedFieldResult.renderedRows.push({
+          renderedFieldMap: newMap,
+        })
+
+        traverseFields({
+          className,
+          clientFields:
+            clientBlockConfig && 'fields' in clientBlockConfig && clientBlockConfig.fields,
+          config,
+          fields: blockConfig.fields,
+          forceRender,
+          formState,
+          i18n,
+          indexPath: `${indexPath}.${rowIndex}`,
+          margins,
+          path: `${path}.${rowIndex}`,
+          payload,
+          permissions,
+          result: newMap,
+          schemaPath,
+        })
+      })
+
       break
     }
 
     case 'group':
     case 'collapsible': {
-      // clientProps.renderedFields = renderFields({
-      //   className,
-      //   clientConfigMap,
-      //   config,
-      //   fields: field.fields,
-      //   forceRender,
-      //   formState,
-      //   i18n,
-      //   indexPath,
-      //   margins,
-      //   path,
-      //   payload,
-      //   permissions,
-      //   schemaPath,
-      // })
+      traverseFields({
+        className,
+        clientFields: clientField && 'fields' in clientField && clientField.fields,
+        config,
+        fields: field.fields,
+        forceRender,
+        formState,
+        i18n,
+        indexPath,
+        margins,
+        path,
+        payload,
+        permissions,
+        result: renderedFieldResult.renderedFieldMap,
+        schemaPath,
+      })
 
       break
     }
 
     case 'tabs': {
-      // clientProps.fields = field.tabs.map((tab, tabIndex) => {
-      //   const clientTabConfig = 'tabs' in clientField && clientField.tabs[tabIndex]
+      field.tabs.map((tab, tabIndex) => {
+        const clientTabConfig = 'tabs' in clientField && clientField?.tabs?.[tabIndex]
 
-      //   return renderFields({
-      //     className,
-      //     clientConfigMap,
-      //     config,
-      //     fields: tab.fields,
-      //     forceRender,
-      //     formState,
-      //     i18n,
-      //     indexPath: `${indexPath}.${tabIndex}`,
-      //     margins,
-      //     path,
-      //     payload,
-      //     permissions,
-      //     schemaPath,
-      //   })
-      // })
+        traverseFields({
+          className,
+          clientFields: 'fields' in clientTabConfig && clientTabConfig.fields,
+          config,
+          fields: tab.fields,
+          forceRender,
+          formState,
+          i18n,
+          indexPath,
+          margins,
+          path,
+          payload,
+          permissions,
+          result: 'name' in tab ? new Map() : renderedFieldResult.renderedFieldMap,
+          schemaPath,
+        })
+      })
 
       break
     }

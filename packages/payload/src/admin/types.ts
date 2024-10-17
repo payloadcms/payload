@@ -414,6 +414,7 @@ export type PayloadServerAction = (
 
 export type RenderedField = {
   Field: React.ReactNode
+  indexPath?: string
   isSidebar: boolean
   path: string
   renderedFieldMap?: RenderedFieldMap

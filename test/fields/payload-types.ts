@@ -13,6 +13,7 @@ export interface Config {
   collections: {
     users: User;
     'array-fields': ArrayField;
+    'block-fields': BlockField;
     'row-fields': RowField;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -85,6 +86,29 @@ export interface ArrayField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "block-fields".
+ */
+export interface BlockField {
+  id: string;
+  blocks: (
+    | {
+        text: string;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'content';
+      }
+    | {
+        number: number;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'number';
+      }
+  )[];
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "row-fields".
  */
 export interface RowField {
@@ -118,6 +142,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'array-fields';
         value: string | ArrayField;
+      } | null)
+    | ({
+        relationTo: 'block-fields';
+        value: string | BlockField;
       } | null)
     | ({
         relationTo: 'row-fields';

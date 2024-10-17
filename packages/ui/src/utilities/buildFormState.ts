@@ -222,6 +222,8 @@ export const buildFormStateFn = async (
     baseSchemaPath = schemaPathSegments.slice(0, schemaPathSegments.length - 1).join('.')
     basePath =
       pathSegments.length > 1 ? pathSegments.slice(0, pathSegments.length - 1).join('.') : ''
+  } else {
+    throw new Error(`Schema path "${schemaPath}" does not exist in the field map`)
   }
 
   if (!fields || !Array.isArray(fields) || fields.length === 0) {

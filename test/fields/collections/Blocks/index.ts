@@ -34,79 +34,79 @@ export const getBlocksField = (prefix?: string): BlockField => ({
         },
       ],
     },
-    {
-      slug: prefix ? `${prefix}SubBlocks` : 'subBlocks',
-      fields: [
-        {
-          type: 'collapsible',
-          fields: [
-            {
-              name: 'subBlocks',
-              type: 'blocks',
-              blocks: [
-                {
-                  slug: 'text',
-                  fields: [
-                    {
-                      name: 'text',
-                      type: 'text',
-                      required: true,
-                    },
-                  ],
-                },
-                {
-                  slug: 'number',
-                  fields: [
-                    {
-                      name: 'number',
-                      type: 'number',
-                      required: true,
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-          label: 'Collapsible within Block',
-        },
-      ],
-    },
-    {
-      slug: prefix ? `${prefix}Tabs` : 'tabs',
-      fields: [
-        {
-          type: 'tabs',
-          tabs: [
-            {
-              fields: [
-                {
-                  type: 'collapsible',
-                  fields: [
-                    {
-                      // collapsible
-                      name: 'textInCollapsible',
-                      type: 'text',
-                    },
-                  ],
-                  label: 'Collapsible within Block',
-                },
-                {
-                  type: 'row',
-                  fields: [
-                    {
-                      // collapsible
-                      name: 'textInRow',
-                      type: 'text',
-                    },
-                  ],
-                },
-              ],
-              label: 'Tab with Collapsible',
-            },
-          ],
-        },
-      ],
-    },
+    // {
+    //   slug: prefix ? `${prefix}SubBlocks` : 'subBlocks',
+    //   fields: [
+    //     {
+    //       type: 'collapsible',
+    //       fields: [
+    //         {
+    //           name: 'subBlocks',
+    //           type: 'blocks',
+    //           blocks: [
+    //             {
+    //               slug: 'text',
+    //               fields: [
+    //                 {
+    //                   name: 'text',
+    //                   type: 'text',
+    //                   required: true,
+    //                 },
+    //               ],
+    //             },
+    //             {
+    //               slug: 'number',
+    //               fields: [
+    //                 {
+    //                   name: 'number',
+    //                   type: 'number',
+    //                   required: true,
+    //                 },
+    //               ],
+    //             },
+    //           ],
+    //         },
+    //       ],
+    //       label: 'Collapsible within Block',
+    //     },
+    //   ],
+    // },
+    // {
+    //   slug: prefix ? `${prefix}Tabs` : 'tabs',
+    //   fields: [
+    //     {
+    //       type: 'tabs',
+    //       tabs: [
+    //         {
+    //           fields: [
+    //             {
+    //               type: 'collapsible',
+    //               fields: [
+    //                 {
+    //                   // collapsible
+    //                   name: 'textInCollapsible',
+    //                   type: 'text',
+    //                 },
+    //               ],
+    //               label: 'Collapsible within Block',
+    //             },
+    //             {
+    //               type: 'row',
+    //               fields: [
+    //                 {
+    //                   // collapsible
+    //                   name: 'textInRow',
+    //                   type: 'text',
+    //                 },
+    //               ],
+    //             },
+    //           ],
+    //           label: 'Tab with Collapsible',
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
   ],
   defaultValue: getBlocksFieldSeedData(prefix),
   required: true,

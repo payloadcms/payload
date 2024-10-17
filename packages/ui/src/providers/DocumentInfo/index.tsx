@@ -149,20 +149,20 @@ const DocumentInfo: React.FC<
   const operation = isEditing ? 'update' : 'create'
   const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions?.permission)
 
-  useEffect(() => {
-    if (!collectionConfig && !globalConfig && initialState) {
-      const getNewConfig = async () => {
-        // @ts-expect-error eslint-disable-next-line
-        const res = (await serverFunction('render-config', {
-          collectionSlug,
-          formState: initialState,
-          globalSlug,
-          languageCode: i18n.language,
-        })) as any as ClientCollectionConfig | ClientGlobalConfig
-      }
-      void getNewConfig()
-    }
-  }, [collectionSlug, initialState, i18n.language, globalSlug, collectionConfig, globalConfig])
+  // useEffect(() => {
+  //   if (!collectionConfig && !globalConfig && initialState) {
+  //     const getNewConfig = async () => {
+  //       // @ts-expect-error eslint-disable-next-line
+  //       const res = (await serverFunction('render-config', {
+  //         collectionSlug,
+  //         formState: initialState,
+  //         globalSlug,
+  //         languageCode: i18n.language,
+  //       })) as any as ClientCollectionConfig | ClientGlobalConfig
+  //     }
+  //     void getNewConfig()
+  //   }
+  // }, [collectionSlug, initialState, i18n.language, globalSlug, collectionConfig, globalConfig])
 
   const unlockDocument = useCallback(
     async (docId: number | string, slug: string) => {

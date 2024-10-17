@@ -1,8 +1,9 @@
 'use client'
-import type { BlocksFieldClientComponent } from 'payload'
+import type { Block, BlocksFieldClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback } from 'react'
+import { v4 as uuid } from 'uuid'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -14,6 +15,7 @@ import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
+import { useFieldRows } from '../../forms/RenderFieldMap/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -32,13 +34,10 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
-    Blocks,
     Description,
     Error,
     field: {
       name,
-      _path: path,
-      _schemaPath,
       admin: { className, isSortable = true, readOnly: readOnlyFromAdmin } = {},
       blocks,
       labels: labelsFromProps,
@@ -47,9 +46,10 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       minRows: minRowsProp,
       required,
     },
-    forceRender = false,
     Label,
+    path,
     readOnly: readOnlyFromTopLevelProps,
+    schemaPath,
     validate,
   } = props
 
@@ -58,7 +58,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const minRows = (minRowsProp ?? required) ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const { addFieldRow, dispatchFields, setModified } = useForm()
+  const { addFieldRow, dispatchFields, getDataByPath, setModified } = useForm()
   const { code: locale } = useLocale()
   const {
     config: { localization },
@@ -108,23 +108,32 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
+  const { setRenderedRows } = useFieldRows()
+
   const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const addRow = useCallback(
     async (rowIndex: number, blockType: string): Promise<void> => {
-      await addFieldRow({
-        data: { blockType },
+      // TODO add the new row into the currentData array using the incoming rowIndex
+      const newRow = { id: uuid(), blockType }
+
+      const currentData: Block[] = getDataByPath(path)
+
+      const renderedFieldMap = await addFieldRow({
+        data: { [name]: [...currentData, newRow] },
         path,
-        rowIndex,
-        schemaPath: `${_schemaPath}.${blockType}`,
+        schemaPath,
       })
+
+      setRenderedRows(renderedFieldMap?.get(path)?.renderedRows || [])
+
       setModified(true)
 
       setTimeout(() => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, setModified, _schemaPath],
+    [addFieldRow, path, setModified, schemaPath, setRenderedRows, getDataByPath, name],
   )
 
   const duplicateRow = useCallback(
@@ -264,8 +273,6 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       blocks={blocks}
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}
-                      Fields={Blocks}
-                      forceRender={forceRender}
                       hasMaxRows={hasMaxRows}
                       isSortable={isSortable}
                       Label={Label}

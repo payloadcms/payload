@@ -61,7 +61,7 @@ export const collectionSlugs: CollectionConfig[] = [
     ],
   },
   ArrayFields,
-  // BlockFields,
+  BlockFields,
   // CheckboxFields,
   // CodeFields,
   // CollapsibleFields,

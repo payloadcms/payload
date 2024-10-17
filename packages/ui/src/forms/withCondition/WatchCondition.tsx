@@ -19,7 +19,7 @@ export const WatchCondition: React.FC<{
   let formStateID = path
 
   if (['collapsible', 'row'].includes(type)) {
-    const index = indexPath.split('.').pop()
+    const index = indexPath?.split('.').pop()
     formStateID = `${path ? `${path}.` : ''}_index-${index}`
   }
 

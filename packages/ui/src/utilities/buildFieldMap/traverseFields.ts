@@ -54,6 +54,8 @@ export const traverseFields = ({
 
       case 'blocks':
         field.blocks.map((block, i) => {
+          fieldMap.set(`${schemaPath}.${field.name}`, { clientField, field })
+
           traverseFields({
             clientFields: ('blocks' in clientField && clientField.blocks?.[i]?.fields) || [],
             config,
