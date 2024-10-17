@@ -1,7 +1,7 @@
 import type { CollectionConfig } from '../../collections/config/types.js'
 import type { Config } from '../../config/types.js'
 
-import { runJobsEndpoint } from '../rest-endpoint-run.js'
+import { runJobsEndpoint } from '../restEndpointRun.js'
 import { getJobTaskStatus } from '../utilities/getJobTaskStatus.js'
 
 export const getDefaultJobsCollection: (config: Config) => CollectionConfig | null = (config) => {
