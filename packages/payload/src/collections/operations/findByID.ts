@@ -75,9 +75,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
       locale,
-      req: {
-        transactionID: req.transactionID,
-      } as PayloadRequest,
+      req,
       where: combineQueries({ id: { equals: id } }, accessResult),
     }
 
