@@ -1,5 +1,7 @@
 'use client'
 
+import type { RichTextFieldClient } from 'payload'
+
 import { ShimmerEffect } from '@payloadcms/ui'
 import React, { lazy, Suspense, useEffect, useState } from 'react'
 
@@ -19,6 +21,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
   const {
     admin = {},
     field: { richTextComponentMap },
+    field,
     lexicalEditorConfig,
   } = props
 
@@ -43,6 +46,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
       : defaultEditorLexicalConfig
 
     const resolvedClientFeatures = loadClientFeatures({
+      field: field as RichTextFieldClient,
       unSanitizedEditorConfig: {
         features: featureProvidersLocal,
         lexical: finalLexicalEditorConfig,
@@ -52,7 +56,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
     setFinalSanitizedEditorConfig(
       sanitizeClientEditorConfig(resolvedClientFeatures, finalLexicalEditorConfig, admin),
     )
-  }, [lexicalEditorConfig, richTextComponentMap, admin, finalSanitizedEditorConfig]) // TODO: Optimize this and use useMemo for this in the future. This might break sub-richtext-blocks from the blocks feature. Need to investigate
+  }, [lexicalEditorConfig, richTextComponentMap, admin, finalSanitizedEditorConfig, field]) // TODO: Optimize this and use useMemo for this in the future. This might break sub-richtext-blocks from the blocks feature. Need to investigate
 
   return (
     <Suspense fallback={<ShimmerEffect height="35vh" />}>
