@@ -250,7 +250,7 @@ export const createClientField = ({
 
       /**
        * We have to deep copy all the props we send to the client (= FieldComponent.clientProps).
-       * That way, every editor field / cell props we send to the client have their own object references.
+       * That way, every editor's field / cell props we send to the client have their own object references.
        *
        * If we send the same object reference to the client twice (e.g. through some configurations where 2 or more fields
        * reference the same editor object, like the root editor), the admin panel may hang indefinitely. This has been happening since
