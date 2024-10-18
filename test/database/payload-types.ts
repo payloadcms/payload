@@ -60,6 +60,7 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title: string;
+  hasTransaction?: boolean | null;
   throwAfterChange?: boolean | null;
   updatedAt: string;
   createdAt: string;
@@ -225,6 +226,9 @@ export interface FieldsPersistance {
         id?: string | null;
       }[]
     | null;
+  textWithinRow?: string | null;
+  textWithinCollapsible?: string | null;
+  textWithinTabs?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -289,14 +293,10 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null);
   globalSlug?: string | null;
-  _lastEdited: {
-    user: {
-      relationTo: 'users';
-      value: string | User;
-    };
-    editedAt?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string | User;
   };
-  isLocked?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
