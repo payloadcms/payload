@@ -90,8 +90,9 @@ describe('database', () => {
       await migrate(args)
 
       // read files names in migrationsDir
-      const migrationFile = path.normalize(fs.readdirSync(payload.db.migrationDir)[0])
+      const migrationFile = path.normalize(fs.readdirSync(payload.db.migrationDir)[2])
       expect(migrationFile).toContain('_test')
+      removeFiles(path.normalize(payload.db.migrationDir), (name) => !name.includes('test_v5'))
       payload.db.migrationDir = ogMigrationDir
     })
 
