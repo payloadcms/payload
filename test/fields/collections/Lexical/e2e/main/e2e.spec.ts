@@ -573,15 +573,15 @@ describe('lexicalMain', () => {
     await richTextField.scrollIntoViewIfNeeded()
     await expect(richTextField).toBeVisible()
 
-    const lastParagraph = richTextField.locator('p').last()
-    await lastParagraph.scrollIntoViewIfNeeded()
-    await expect(lastParagraph).toBeVisible()
+    const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
+    await paragraph.scrollIntoViewIfNeeded()
+    await expect(paragraph).toBeVisible()
 
     /**
      * Create new relationship node
      */
     // type / to open the slash menu
-    await lastParagraph.click()
+    await paragraph.click()
     await page.keyboard.press('/')
     await page.keyboard.type('Relationship')
 
