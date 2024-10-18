@@ -26,6 +26,7 @@ type TraverseFieldArgs = {
   tablePath: string
   topLevelArgs: Record<string, unknown>
   topLevelTableName: string
+  versions?: boolean
 }
 
 export const traverseFields = ({
@@ -42,6 +43,7 @@ export const traverseFields = ({
   tablePath,
   topLevelArgs,
   topLevelTableName,
+  versions,
 }: TraverseFieldArgs) => {
   fields.forEach((field) => {
     if (fieldIsVirtual(field)) {
@@ -76,6 +78,7 @@ export const traverseFields = ({
         tablePath,
         topLevelArgs,
         topLevelTableName,
+        versions,
       })
 
       return
@@ -99,6 +102,7 @@ export const traverseFields = ({
           tablePath: tabTablePath,
           topLevelArgs,
           topLevelTableName,
+          versions,
         })
       })
 
@@ -145,6 +149,7 @@ export const traverseFields = ({
             tablePath: '',
             topLevelArgs,
             topLevelTableName,
+            versions,
           })
 
           break
@@ -203,6 +208,7 @@ export const traverseFields = ({
                 tablePath: '',
                 topLevelArgs,
                 topLevelTableName,
+                versions,
               })
             }
           })
@@ -223,6 +229,7 @@ export const traverseFields = ({
             tablePath: `${tablePath}${toSnakeCase(field.name)}_`,
             topLevelArgs,
             topLevelTableName,
+            versions,
           })
 
           break
@@ -233,11 +240,14 @@ export const traverseFields = ({
           if (joinQuery === false) {
             break
           }
-          const {
-            limit: limitArg = 10,
-            sort,
-            where,
-          } = joinQuery[`${path.replaceAll('_', '.')}${field.name}`] || {}
+
+          let joinKey = `${path.replaceAll('_', '.')}${field.name}`
+
+          if (versions) {
+            joinKey = joinKey.replace('version.', '')
+          }
+
+          const { limit: limitArg = 10, sort, where } = joinQuery[joinKey] || {}
           let limit = limitArg
           if (limit !== 0) {
             // get an additional document and slice it later to determine if there is a next page
@@ -264,7 +274,9 @@ export const traverseFields = ({
                   eq(adapter.tables[joinTable].parent, adapter.tables[joinTableName].id),
                   eq(
                     sql.raw(`"${joinTable}"."${topLevelTableName}_id"`),
-                    adapter.tables[currentTableName].id,
+                    versions
+                      ? adapter.tables[currentTableName].parent
+                      : adapter.tables[currentTableName].id,
                   ),
                   eq(adapter.tables[joinTable].path, field.on),
                 ),

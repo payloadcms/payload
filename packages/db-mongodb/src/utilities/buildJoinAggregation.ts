@@ -15,6 +15,8 @@ type BuildJoinAggregationArgs = {
   locale: string
   // the where clause for the top collection
   query?: Where
+  /** whether the query is from drafts */
+  versions?: boolean
 }
 
 export const buildJoinAggregation = async ({
@@ -25,6 +27,7 @@ export const buildJoinAggregation = async ({
   limit,
   locale,
   query,
+  versions,
 }: BuildJoinAggregationArgs): Promise<PipelineStage[] | undefined> => {
   if (Object.keys(collectionConfig.joins).length === 0 || joins === false) {
     return
@@ -90,7 +93,7 @@ export const buildJoinAggregation = async ({
 
       if (adapter.payload.config.localization && locale === 'all') {
         adapter.payload.config.localization.localeCodes.forEach((code) => {
-          const as = `${join.schemaPath}${code}`
+          const as = `${versions ? `version.${join.schemaPath}` : join.schemaPath}${code}`
 
           aggregate.push(
             {
@@ -98,7 +101,7 @@ export const buildJoinAggregation = async ({
                 as: `${as}.docs`,
                 foreignField: `${join.field.on}${code}`,
                 from: slug,
-                localField: '_id',
+                localField: versions ? 'parent' : '_id',
                 pipeline,
               },
             },
@@ -131,7 +134,7 @@ export const buildJoinAggregation = async ({
       } else {
         const localeSuffix =
           join.field.localized && adapter.payload.config.localization && locale ? `.${locale}` : ''
-        const as = `${join.schemaPath}${localeSuffix}`
+        const as = `${versions ? `version.${join.schemaPath}` : join.schemaPath}${localeSuffix}`
 
         aggregate.push(
           {
@@ -139,7 +142,7 @@ export const buildJoinAggregation = async ({
               as: `${as}.docs`,
               foreignField: `${join.field.on}${localeSuffix}`,
               from: slug,
-              localField: '_id',
+              localField: versions ? 'parent' : '_id',
               pipeline,
             },
           },
