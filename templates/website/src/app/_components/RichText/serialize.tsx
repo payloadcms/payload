@@ -1,6 +1,5 @@
 import React, { Fragment } from 'react'
 import escapeHTML from 'escape-html'
-import Link from 'next/link'
 import { Text } from 'slate'
 
 import { Label } from '../Label'
@@ -24,7 +23,8 @@ type Leaf = {
 const serialize = (children?: Children): React.ReactNode[] =>
   children?.map((node, i) => {
     if (Text.isText(node)) {
-      let text = <span dangerouslySetInnerHTML={{ __html: escapeHTML(node.text) }} />
+      const escapedText = escapeHTML(node.text).replaceAll('\n', '<br/>')
+      let text = <span dangerouslySetInnerHTML={{ __html: escapedText }} />
 
       if (node.bold) {
         text = <strong key={i}>{text}</strong>
