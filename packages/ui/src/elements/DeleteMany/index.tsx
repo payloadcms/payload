@@ -14,7 +14,6 @@ import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
-import { getLockedDocumentIds } from '../../utilities/getLockedDocumentIds.js'
 import { Button } from '../Button/index.js'
 import { Pill } from '../Pill/index.js'
 import './index.scss'
@@ -37,7 +36,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
     },
   } = useConfig()
   const { toggleModal } = useModal()
-  const { count, getQueryParams, selectAll, toggleAll } = useSelection()
+  const { count, getQueryParams, lockedDocumentIds, selectAll, toggleAll } = useSelection()
   const { i18n, t } = useTranslation()
   const [deleting, setDeleting] = useState(false)
   const router = useRouter()
@@ -56,7 +55,6 @@ export const DeleteMany: React.FC<Props> = (props) => {
   const handleDelete = useCallback(async () => {
     setDeleting(true)
 
-    const lockedDocumentIds = await getLockedDocumentIds(serverURL, api)
     const queryParams = getQueryParams(lockedDocumentIds)
 
     await requests
@@ -102,6 +100,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
     api,
     getQueryParams,
     i18n.language,
+    lockedDocumentIds,
     modalSlug,
     router,
     selectAll,

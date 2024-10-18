@@ -11,7 +11,6 @@ import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
-import { getLockedDocumentIds } from '../../utilities/getLockedDocumentIds.js'
 import { Button } from '../Button/index.js'
 import { Pill } from '../Pill/index.js'
 import './index.scss'
@@ -39,7 +38,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
   const { permissions } = useAuth()
   const { toggleModal } = useModal()
   const { i18n, t } = useTranslation()
-  const { getQueryParams, selectAll } = useSelection()
+  const { getQueryParams, lockedDocumentIds, selectAll } = useSelection()
   const [submitted, setSubmitted] = useState(false)
   const { stringifyParams } = useSearchParams()
   const router = useRouter()
@@ -57,7 +56,6 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
   const handleUnpublish = useCallback(async () => {
     setSubmitted(true)
 
-    const lockedDocumentIds = await getLockedDocumentIds(serverURL, api)
     const queryParams = getQueryParams(lockedDocumentIds, {
       _status: { not_equals: 'draft' },
     })
@@ -104,6 +102,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
     api,
     getQueryParams,
     i18n.language,
+    lockedDocumentIds,
     modalSlug,
     selectAll,
     serverURL,

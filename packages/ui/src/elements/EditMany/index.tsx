@@ -22,7 +22,6 @@ import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { getFormState } from '../../utilities/getFormState.js'
-import { getLockedDocumentIds } from '../../utilities/getLockedDocumentIds.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { FieldSelect } from '../FieldSelect/index.js'
 import './index.scss'
@@ -42,10 +41,10 @@ const Submit: React.FC<{
   readonly slug: string
 }> = ({ slug, apiRoute, disabled, getQueryParams, serverURL }) => {
   const { submit } = useForm()
+  const { lockedDocumentIds } = useSelection()
   const { t } = useTranslation()
 
-  const save = useCallback(async () => {
-    const lockedDocumentIds = await getLockedDocumentIds(serverURL, apiRoute)
+  const save = useCallback(() => {
     const queryParams = getQueryParams(lockedDocumentIds)
     const url = `${serverURL}${apiRoute}/${slug}${queryParams}`
 
@@ -54,7 +53,7 @@ const Submit: React.FC<{
       method: 'PATCH',
       skipValidation: true,
     })
-  }, [submit, serverURL, apiRoute, slug, getQueryParams])
+  }, [submit, serverURL, apiRoute, lockedDocumentIds, slug, getQueryParams])
 
   return (
     <FormSubmit className={`${baseClass}__save`} disabled={disabled} onClick={save}>
@@ -71,10 +70,10 @@ const PublishButton: React.FC<{
   readonly slug: string
 }> = ({ slug, apiRoute, disabled, getQueryParams, serverURL }) => {
   const { submit } = useForm()
+  const { lockedDocumentIds } = useSelection()
   const { t } = useTranslation()
 
-  const save = useCallback(async () => {
-    const lockedDocumentIds = await getLockedDocumentIds(serverURL, apiRoute)
+  const save = useCallback(() => {
     const queryParams = getQueryParams(lockedDocumentIds)
     const url = `${serverURL}${apiRoute}/${slug}${queryParams}&draft=true`
 
@@ -86,7 +85,7 @@ const PublishButton: React.FC<{
       },
       skipValidation: true,
     })
-  }, [submit, serverURL, apiRoute, slug, getQueryParams])
+  }, [submit, serverURL, apiRoute, lockedDocumentIds, slug, getQueryParams])
 
   return (
     <FormSubmit className={`${baseClass}__publish`} disabled={disabled} onClick={save}>
@@ -103,10 +102,10 @@ const SaveDraftButton: React.FC<{
   readonly slug: string
 }> = ({ slug, apiRoute, disabled, getQueryParams, serverURL }) => {
   const { submit } = useForm()
+  const { lockedDocumentIds } = useSelection()
   const { t } = useTranslation()
 
-  const save = useCallback(async () => {
-    const lockedDocumentIds = await getLockedDocumentIds(serverURL, apiRoute)
+  const save = useCallback(() => {
     const queryParams = getQueryParams(lockedDocumentIds)
     const url = `${serverURL}${apiRoute}/${slug}${queryParams}&draft=true`
 
@@ -118,7 +117,7 @@ const SaveDraftButton: React.FC<{
       },
       skipValidation: true,
     })
-  }, [submit, serverURL, apiRoute, slug, getQueryParams])
+  }, [submit, serverURL, apiRoute, lockedDocumentIds, slug, getQueryParams])
 
   return (
     <FormSubmit className={`${baseClass}__draft`} disabled={disabled} onClick={save}>

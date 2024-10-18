@@ -4,6 +4,8 @@ import type { ClientUser, Where } from 'payload'
 import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
+import { useConfig } from '../../providers/Config/index.js'
+import { getLockedDocumentIds } from '../../utilities/getLockedDocumentIds.js'
 import { useLocale } from '../Locale/index.js'
 import { useSearchParams } from '../SearchParams/index.js'
 
@@ -19,12 +21,13 @@ type SelectionContext = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   getQueryParams: (lockedDocumentIds: string[], additionalParams?: Where) => string
+  lockedDocumentIds?: string[]
   selectAll: SelectAllStatus
   selected: Map<number | string, boolean>
   setSelection: (id: number | string) => void
   toggleAll: (allAvailable?: boolean) => void
   totalDocs: number
-  totalSelectableDocs: number
+  totalSelectableDocs?: number
 }
 
 const Context = createContext({} as SelectionContext)
@@ -38,6 +41,13 @@ type Props = {
 }
 
 export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalDocs, user }) => {
+  const {
+    config: {
+      routes: { api },
+      serverURL,
+    },
+  } = useConfig()
+
   const contextRef = useRef({} as SelectionContext)
 
   const { code: locale } = useLocale()
@@ -48,20 +58,34 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     })
     return rows
   })
+  const [lockedDocumentIds, setLockedDocumentIds] = useState<string[]>([])
+  const [totalSelectableDocs, setTotalSelectableDocs] = useState(totalDocs)
 
-  const totalSelectableDocs =
-    totalDocs -
-    docs.filter(({ _isLocked, _userEditing }) => {
-      return _isLocked && _userEditing?.id !== user?.id
-    }).length
+  const fetchLockedDocumentIds = useCallback(async () => {
+    if (lockedDocumentIds.length === 0) {
+      const ids = await getLockedDocumentIds(serverURL, api)
+      setLockedDocumentIds(ids)
+      // Update the total selectable documents based on the locked ones.
+      setTotalSelectableDocs(totalDocs - ids.length)
+    }
+  }, [lockedDocumentIds.length, serverURL, api, totalDocs])
 
   const [selectAll, setSelectAll] = useState<SelectAllStatus>(SelectAllStatus.None)
   const [count, setCount] = useState(0)
   const { searchParams } = useSearchParams()
 
   const toggleAll = useCallback(
-    (allAvailable = false) => {
+    async (allAvailable = false) => {
       const rows = new Map()
+
+      try {
+        await fetchLockedDocumentIds()
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to fetch locked document IDs', error)
+        return
+      }
+
       if (allAvailable) {
         docs.forEach(({ id, _isLocked, _userEditing }) => {
           if (!_isLocked || _userEditing?.id === user?.id) {
@@ -81,9 +105,10 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
           }
         })
       }
+
       setSelected(rows)
     },
-    [docs, selectAll, user?.id],
+    [docs, fetchLockedDocumentIds, selectAll, user?.id],
   )
 
   const setSelection = useCallback(
@@ -118,11 +143,12 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
         const params = searchParams?.where as Where
         where = {
           ...params,
-          ...(lockedDocumentIds.length > 0 && {
-            id: {
+          id: {
+            not_equals: '',
+            ...(lockedDocumentIds.length > 0 && {
               not_in: lockedDocumentIds,
-            },
-          }),
+            }),
+          },
         }
       } else {
         const ids = []
@@ -204,10 +230,13 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   contextRef.current = {
     count,
     getQueryParams,
+    lockedDocumentIds,
     selectAll,
     selected,
     setSelection,
-    toggleAll,
+    toggleAll: (allAvailable) => {
+      void toggleAll(allAvailable)
+    },
     totalDocs,
     totalSelectableDocs,
   }
