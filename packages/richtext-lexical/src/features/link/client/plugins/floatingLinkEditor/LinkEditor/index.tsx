@@ -170,8 +170,10 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
             }).replace(/<[^>]*>?/g, '')
             setLinkLabel(label)
           })
-          .catch((err) => {
-            throw new Error(err)
+          .catch(() => {
+            setLinkLabel(
+              `${getTranslation(relatedField.labels.singular, i18n)} - ${t('general:untitled', i18n)}`,
+            )
           })
       }
     }
