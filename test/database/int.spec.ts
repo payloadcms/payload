@@ -63,12 +63,6 @@ describe('database', () => {
     })
 
     it('should run migrate:create', async () => {
-      const db = payload.db as unknown as PostgresAdapter
-      // eslint-disable-next-line jest/no-if
-      if (db.schemaName && db.schemaName !== 'public') {
-        return
-      }
-
       const args = {
         _: ['migrate:create', 'test'],
         forceAcceptWarning: true,
@@ -81,6 +75,12 @@ describe('database', () => {
     })
 
     it('should run migrate:create with older drizzle version schema', async () => {
+      const db = payload.db as unknown as PostgresAdapter
+      // eslint-disable-next-line jest/no-if
+      if (db.schemaName && db.schemaName !== 'public') {
+        return
+      }
+
       const args = {
         _: ['migrate:create', 'test'],
         forceAcceptWarning: true,
