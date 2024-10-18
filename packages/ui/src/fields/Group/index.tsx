@@ -12,6 +12,7 @@ import {
   useFormProcessing,
   useFormSubmitted,
 } from '../../forms/Form/context.js'
+import { RenderFieldMap } from '../../forms/RenderFieldMap/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -27,14 +28,13 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const {
     Description,
     field: {
-      _path: path,
-      _schemaPath,
       admin: { className, hideGutter, readOnly: readOnlyFromAdmin, style, width } = {},
       label,
     },
-    Fields,
     Label,
+    path,
     readOnly: readOnlyFromTopLevelProps,
+    renderedFieldMap,
   } = props
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
@@ -91,7 +91,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
             )}
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
-          {Fields ? Fields.map((Field) => Field) : null}
+          <RenderFieldMap renderedFieldMap={renderedFieldMap} />
         </div>
       </GroupProvider>
     </div>

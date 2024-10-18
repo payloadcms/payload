@@ -313,12 +313,25 @@ export const renderField: RenderFieldFn = (args) => {
 
   const fieldState = formState?.[path]
 
+  const renderedFieldResult: RenderedField = {
+    type: field.type,
+    Field: null,
+    indexPath,
+    initialSchemaPath,
+    isSidebar: fieldIsSidebar(field),
+    path,
+    renderedFieldMap: new Map() as RenderedFieldMap,
+    renderedRows: [] as FieldRow[],
+    schemaPath,
+  }
+
   let clientProps: ClientSlotProps = {
     field: clientField,
     fieldState,
     path,
     permissions: fieldPermissions,
     readOnly,
+    renderedFieldMap: renderedFieldResult.renderedFieldMap,
     schemaAccessor: {
       initialSchemaPath,
       schemaIndexPath: indexPath,
@@ -336,18 +349,6 @@ export const renderField: RenderFieldFn = (args) => {
   }
 
   const fieldSlots: FieldSlots = {}
-
-  const renderedFieldResult: RenderedField = {
-    type: field.type,
-    Field: null,
-    indexPath,
-    initialSchemaPath,
-    isSidebar: fieldIsSidebar(field),
-    path,
-    renderedFieldMap: new Map() as RenderedFieldMap,
-    renderedRows: [] as FieldRow[],
-    schemaPath,
-  }
 
   if ('label' in field) {
     fieldSlots.Label = (

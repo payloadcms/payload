@@ -139,14 +139,12 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       const newRow = { id: uuid() }
 
       const currentData: Row[] = getDataByPath(path)
-      console.log('schemaAccessor', schemaAccessor)
+
       const renderedFieldMap = await addFieldRow({
         data: { [name]: [...currentData, newRow] },
         path,
         schemaAccessor,
       })
-
-      console.log('renderedFieldMap', renderedFieldMap)
 
       setRenderedRows(renderedFieldMap?.get(path)?.renderedRows || [])
 
