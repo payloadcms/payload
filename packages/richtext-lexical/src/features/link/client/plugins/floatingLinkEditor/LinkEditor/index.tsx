@@ -11,9 +11,11 @@ import {
   formatDrawerSlug,
   useConfig,
   useEditDepth,
+  useLocale,
   useModal,
   useTranslation,
 } from '@payloadcms/ui'
+import { requests } from '@payloadcms/ui/shared'
 import {
   $getSelection,
   $isLineBreakNode,
@@ -25,7 +27,6 @@ import {
 } from 'lexical'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import type { LinkNode } from '../../../../nodes/LinkNode.js'
 import type { LinkFields } from '../../../../nodes/types.js'
 import type { LinkPayload } from '../types.js'
 
@@ -48,7 +49,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
   const { config } = useConfig()
 
-  const { i18n, t } = useTranslation()
+  const { i18n, t } = useTranslation<object, 'lexical:link:loadingWithEllipsis'>()
 
   const [stateData, setStateData] = useState<
     ({ id?: string; text: string } & LinkFields) | undefined
@@ -58,6 +59,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
   const editDepth = useEditDepth()
   const [isLink, setIsLink] = useState(false)
   const [selectedNodes, setSelectedNodes] = useState<LexicalNode[]>([])
+  const locale = useLocale()
 
   const [isAutoLink, setIsAutoLink] = useState(false)
 
@@ -84,7 +86,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     let selectedNodeDomRect: DOMRect | undefined
 
     if (!$isRangeSelection(selection) || !selection) {
-      setNotLink()
+      void setNotLink()
       return
     }
 
@@ -111,41 +113,68 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       return
     }
 
+    const fields = focusLinkParent.getFields()
+
     // Initial state:
     const data: { text: string } & LinkFields = {
-      ...focusLinkParent.getFields(),
+      ...fields,
       id: focusLinkParent.getID(),
       text: focusLinkParent.getTextContent(),
     }
 
-    if (focusLinkParent.getFields()?.linkType === 'custom') {
-      setLinkUrl(focusLinkParent.getFields()?.url ?? null)
+    if (fields?.linkType === 'custom') {
+      setLinkUrl(fields?.url ?? null)
       setLinkLabel(null)
     } else {
       // internal link
       setLinkUrl(
-        `${config.routes.admin === '/' ? '' : config.routes.admin}/collections/${focusLinkParent.getFields()?.doc?.relationTo}/${
-          focusLinkParent.getFields()?.doc?.value
+        `${config.routes.admin === '/' ? '' : config.routes.admin}/collections/${fields?.doc?.relationTo}/${
+          fields?.doc?.value
         }`,
       )
 
-      const relatedField = config.collections.find(
-        (coll) => coll.slug === focusLinkParent.getFields()?.doc?.relationTo,
-      )
+      const relatedField = config.collections.find((coll) => coll.slug === fields?.doc?.relationTo)
       if (!relatedField) {
         // Usually happens if the user removed all default fields. In this case, we let them specify the label or do not display the label at all.
         // label could be a virtual field the user added. This is useful if they want to use the link feature for things other than links.
-        setLinkLabel(
-          focusLinkParent.getFields()?.label ? String(focusLinkParent.getFields()?.label) : null,
-        )
-        setLinkUrl(
-          focusLinkParent.getFields()?.url ? String(focusLinkParent.getFields()?.url) : null,
-        )
+        setLinkLabel(fields?.label ? String(fields?.label) : null)
+        setLinkUrl(fields?.url ? String(fields?.url) : null)
       } else {
-        const label = t('fields:linkedTo', {
-          label: getTranslation(relatedField.labels.singular, i18n),
+        const id = typeof fields.doc?.value === 'object' ? fields.doc.value.id : fields.doc?.value
+        const collection = fields.doc?.relationTo
+        if (!id || !collection) {
+          throw new Error(`Focus link parent is missing doc.value or doc.relationTo`)
+        }
+
+        const loadingLabel = t('fields:linkedTo', {
+          label: `${getTranslation(relatedField.labels.singular, i18n)} - ${t('lexical:link:loadingWithEllipsis', i18n)}`,
         }).replace(/<[^>]*>?/g, '')
-        setLinkLabel(label)
+        setLinkLabel(loadingLabel)
+
+        requests
+          .get(`${config.serverURL}${config.routes.api}/${collection}/${id}`, {
+            headers: {
+              'Accept-Language': i18n.language,
+            },
+            params: {
+              depth: 0,
+              locale: locale?.code,
+            },
+          })
+          .then(async (res) => {
+            const data = await res.json()
+            const useAsTitle = relatedField?.admin?.useAsTitle || 'id'
+            const title = data[useAsTitle]
+            const label = t('fields:linkedTo', {
+              label: `${getTranslation(relatedField.labels.singular, i18n)} - ${title}`,
+            }).replace(/<[^>]*>?/g, '')
+            setLinkLabel(label)
+          })
+          .catch(() => {
+            setLinkLabel(
+              `${getTranslation(relatedField.labels.singular, i18n)} - ${t('general:untitled', i18n)}`,
+            )
+          })
       }
     }
 
@@ -193,7 +222,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     }
 
     return true
-  }, [editor, setNotLink, config.collections, t, i18n, anchorElem])
+  }, [editor, setNotLink, config, locale.code, t, i18n, anchorElem])
 
   useEffect(() => {
     return mergeRegister(
