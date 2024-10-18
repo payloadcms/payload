@@ -410,6 +410,7 @@ export const daTranslations: DefaultTranslationsObject = {
     draft: 'Kladde',
     draftSavedSuccessfully: 'Kladde gemt.',
     lastSavedAgo: 'Sidst gemt {{distance}}',
+    modifiedOnly: undefined,
     noFurtherVersionsFound: 'Ingen yderligere versioner fundet',
     noRowsFound: 'Ingen {{label}} fundet',
     noRowsSelected: 'Ingen {{label}} valgt',

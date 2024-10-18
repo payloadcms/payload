@@ -20,6 +20,7 @@ const Iterable: React.FC<DiffComponentProps> = ({
   i18n,
   locale,
   locales,
+  modifiedOnly,
   permissions,
   version,
 }) => {
@@ -90,6 +91,7 @@ const Iterable: React.FC<DiffComponentProps> = ({
                   fields={fields}
                   i18n={i18n}
                   locales={locales}
+                  modifiedOnly
                   version={versionRow}
                 />
               </div>

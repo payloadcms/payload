@@ -418,6 +418,7 @@ export const myTranslations: DefaultTranslationsObject = {
     draft: 'မူကြမ်း',
     draftSavedSuccessfully: 'မူကြမ်းကို အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ။',
     lastSavedAgo: 'နောက်ဆုံး သိမ်းချက် {{distance}} ကြာပြီး',
+    modifiedOnly: undefined,
     noFurtherVersionsFound: 'နောက်ထပ်ဗားရှင်းများ မတွေ့ပါ။',
     noRowsFound: '{{label}} အားမတွေ့ပါ။',
     noRowsSelected: 'Tiada {{label}} yang dipilih',
