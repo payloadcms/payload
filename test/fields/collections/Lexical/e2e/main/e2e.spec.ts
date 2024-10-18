@@ -617,17 +617,17 @@ describe('lexicalMain', () => {
      * Let's test if its inline toolbar works
      */
     const docDrawer = page.locator('dialog[id^=doc-drawer_lexical-fields_1_]').first() // IDs starting with list-drawer_1_ (there's some other symbol after the underscore)
-    await expect(relationshipListDrawer).toBeVisible()
+    await expect(docDrawer).toBeVisible()
     await wait(500)
 
     const docRichTextField = docDrawer.locator('.rich-text-lexical').first()
     await docRichTextField.scrollIntoViewIfNeeded()
     await expect(docRichTextField).toBeVisible()
 
-    const docLastParagraph = docRichTextField.locator('p').last()
-    await docLastParagraph.scrollIntoViewIfNeeded()
-    await expect(docLastParagraph).toBeVisible()
-    await lastParagraph.click()
+    const docParagraph = docRichTextField.locator('.LexicalEditorTheme__paragraph').first()
+    await docParagraph.scrollIntoViewIfNeeded()
+    await expect(docParagraph).toBeVisible()
+    await docParagraph.click()
     await page.keyboard.type('Some text')
     // Select "text" by pressing shift + arrow left
     for (let i = 0; i < 4; i++) {
@@ -637,7 +637,7 @@ describe('lexicalMain', () => {
     const inlineToolbar = docRichTextField.locator('.inline-toolbar-popup')
     await expect(inlineToolbar).toBeVisible()
 
-    const boldButton = inlineToolbar.locator('.toolbar-popup__button-bold').locator('button')
+    const boldButton = inlineToolbar.locator('.toolbar-popup__button-bold')
     await expect(boldButton).toBeVisible()
 
     // make text bold
@@ -646,9 +646,9 @@ describe('lexicalMain', () => {
     // Save drawer
     await docDrawer.locator('button').getByText('Save').first().click()
     await expect(docDrawer).toBeHidden()
-    await wait(500)
-    await saveDocAndAssert(page)
-    await wait(500)
+    await wait(1500) // Ensure doc is saved in the database
+
+    // Do not save the main page, as it will still have the stale, previous data. // TODO: This should eventually be fixed. It's a separate issue than what this test is about though.
 
     // Check if the text is bold. It's a self-relationship, so no need to follow relationship
     await expect(async () => {
@@ -668,6 +668,7 @@ describe('lexicalMain', () => {
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor
       const firstParagraph: SerializedParagraphNode = lexicalField.root
         .children[0] as SerializedParagraphNode
+
       expect(firstParagraph.children).toHaveLength(2)
 
       const textNode: SerializedTextNode = firstParagraph.children[0] as SerializedTextNode
