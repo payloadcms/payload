@@ -21,6 +21,7 @@ import { FieldError } from '../FieldError/index.js'
 const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
   const {
     descriptionProps,
+    disableModifyingForm: disableModifyingFormFromProps,
     errorProps,
     field,
     field: {
@@ -126,7 +127,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
                     }
 
                     if (!disabled) {
-                      setValue(optionValue)
+                      setValue(optionValue, !!disableModifyingFormFromProps)
                     }
                   }}
                   option={optionIsObject(option) ? option : { label: option, value: option }}

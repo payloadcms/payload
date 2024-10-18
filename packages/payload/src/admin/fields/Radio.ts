@@ -19,6 +19,10 @@ import type {
 type RadioFieldClientWithoutType = MarkOptional<RadioFieldClient, 'type'>
 
 type RadioFieldBaseClientProps = {
+  /**
+   * Threaded through to the setValue function from the form context when the value changes
+   */
+  readonly disableModifyingForm?: boolean
   readonly onChange?: OnChange
   readonly validate?: RadioFieldValidation
   readonly value?: string
