@@ -77,7 +77,7 @@ const UploadDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }) => {
   }, [editor, openDrawer])
 
   const onSelect = useCallback(
-    ({ collectionSlug, docID }: { collectionSlug: string; docID: string }) => {
+    ({ collectionSlug, docID }: { collectionSlug: string; docID: number | string }) => {
       insertUpload({
         editor,
         relationTo: collectionSlug,
