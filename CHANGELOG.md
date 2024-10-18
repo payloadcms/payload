@@ -1,3 +1,11 @@
+## [2.30.3](https://github.com/payloadcms/payload/compare/v2.30.2...v2.30.3) (2024-10-18)
+
+
+### Bug Fixes
+
+* **db-postgres:** migrate:create errors with previous schemas ([#8786](https://github.com/payloadcms/payload/issues/8786)) ([e9c1222](https://github.com/payloadcms/payload/commit/e9c12221824a9a180991722135d22ff91d07ef11))
+* duplicate with select hasMany fields ([#8734](https://github.com/payloadcms/payload/issues/8734)) ([c8ed645](https://github.com/payloadcms/payload/commit/c8ed6454a733bea09ae620517c4894701999e119))
+
 ## [2.30.2](https://github.com/payloadcms/payload/compare/v2.30.1...v2.30.2) (2024-10-17)
 
 ### Bug Fixes
