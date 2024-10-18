@@ -69,11 +69,12 @@ export const sanitizeServerFeatures = (
 
     if (feature?.i18n) {
       for (const lang in feature.i18n) {
-        if (!sanitized.i18n[lang]) {
-          sanitized.i18n[lang] = {
+        if (!sanitized.i18n[lang as keyof typeof sanitized.i18n]) {
+          sanitized.i18n[lang as keyof typeof sanitized.i18n] = {
             lexical: {},
           }
         }
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
         sanitized.i18n[lang].lexical[feature.key] = feature.i18n[lang]
       }
     }
