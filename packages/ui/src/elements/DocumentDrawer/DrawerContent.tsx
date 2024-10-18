@@ -24,6 +24,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   collectionSlug,
   disableActions,
   drawerSlug,
+  fetchInitialState,
   Header,
   initialData,
   initialState,
@@ -137,6 +138,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       collectionSlug={collectionConfig.slug}
       disableActions={disableActions}
       disableLeaveWithoutSaving
+      fetchInitialState={fetchInitialState}
       id={docID}
       initialData={initialData}
       initialState={initialState}

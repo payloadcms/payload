@@ -37,6 +37,7 @@ import { RelationshipTableWrapper } from './TableWrapper.js'
 const baseClass = 'relationship-table'
 
 type RelationshipTableComponentProps = {
+  readonly fetchInitialState?: boolean
   readonly field: JoinFieldClient
   readonly filterOptions?: boolean | Where
   readonly initialData?: PaginatedDocs
@@ -47,6 +48,7 @@ type RelationshipTableComponentProps = {
 
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
   const {
+    fetchInitialState,
     field,
     filterOptions,
     initialData: initialDataFromProps,
@@ -319,6 +321,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         </RelationshipProvider>
       )}
       <DocumentDrawer
+        fetchInitialState={fetchInitialState}
         initialData={{
           category: docID,
         }}

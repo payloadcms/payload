@@ -47,6 +47,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
   return (
     <div className={[fieldBaseClass, 'join'].filter(Boolean).join(' ')}>
       <RelationshipTable
+        fetchInitialState
         field={field as JoinFieldClient}
         filterOptions={filterOptions}
         initialData={docID && value ? value : ({ docs: [] } as PaginatedDocs)}

@@ -28,6 +28,7 @@ export type DocumentInfoProps = {
   readonly disableCreate?: boolean
   readonly disableLeaveWithoutSaving?: boolean
   readonly docPermissions?: DocumentPermissions
+  readonly fetchInitialState?: boolean
   readonly globalSlug?: SanitizedGlobalConfig['slug']
   readonly hasPublishPermission?: boolean
   readonly hasSavePermission?: boolean
