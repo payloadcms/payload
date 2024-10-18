@@ -200,10 +200,14 @@ export const frTranslations: DefaultTranslationsObject = {
     columns: 'Colonnes',
     columnToSort: 'Colonne à trier',
     confirm: 'Confirmer',
+    confirmCopy: 'Confirmer la copie',
     confirmDeletion: 'Confirmer la suppression',
     confirmDuplication: 'Confirmer la duplication',
     copied: 'Copié',
     copy: 'Copie',
+    copying: 'Copie',
+    copyWarning:
+      "Vous êtes sur le point d'écraser {{to}} avec {{from}} pour {{label}} {{title}}. Êtes-vous sûr ?",
     create: 'Créer',
     created: 'Créé(e)',
     createdAt: 'Créé(e) à',
@@ -309,6 +313,8 @@ export const frTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" supprimé(e) avec succès.',
     true: 'Vrai',
     unauthorized: 'Non autorisé',
+    unsavedChanges:
+      'Vous avez des modifications non enregistrées. Enregistrez ou supprimez avant de continuer.',
     unsavedChangesDuplicate:
       'Vous avez des changements non enregistrés. Souhaitez-vous continuer la duplication ?',
     untitled: 'Sans titre',
