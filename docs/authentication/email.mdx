@@ -15,7 +15,7 @@ Email Verification forces users to prove they have access to the email address t
 To enable Email Verification, use the `auth.verify` property on your [Collection Config](../configuration/collections):
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const Customers: CollectionConfig = {
   // ...
@@ -42,7 +42,7 @@ The following options are available:
 Function that accepts one argument, containing `{ req, token, user }`, that allows for overriding the HTML within emails that are sent to users indicating how to validate their account. The function should return a string that supports HTML, which can optionally be a full HTML email.
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const Customers: CollectionConfig = {
   // ...
@@ -74,7 +74,7 @@ export const Customers: CollectionConfig = {
 Similarly to the above `generateEmailHTML`, you can also customize the subject of the email. The function argument are the same but you can only return a string - not HTML.
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const Customers: CollectionConfig = {
   // ...
@@ -95,7 +95,7 @@ export const Customers: CollectionConfig = {
 You can customize how the Forgot Password workflow operates with the following options on the `auth.forgotPassword` property:
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const Customers: CollectionConfig = {
   // ...
@@ -119,7 +119,7 @@ The following options are available:
 This function allows for overriding the HTML within emails that are sent to users attempting to reset their password. The function should return a string that supports HTML, which can be a full HTML email.
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const Customers: CollectionConfig = {
   // ...
@@ -179,7 +179,7 @@ The following arguments are passed to the `generateEmailHTML` function:
 Similarly to the above `generateEmailHTML`, you can also customize the subject of the email. The function argument are the same but you can only return a string - not HTML.
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const Customers: CollectionConfig = {
   // ...
