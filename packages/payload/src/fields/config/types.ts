@@ -213,6 +213,8 @@ export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (a
    * The `id` of the current document being read or updated. `id` is undefined during the `create` operation.
    */
   id?: number | string
+  /** The locale of the request */
+  locale?: string
   /** The `payload` object to interface with the payload API */
   req: PayloadRequest
   /**
