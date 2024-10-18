@@ -3,6 +3,9 @@ import type { FindOneArgs } from '../database/types.js'
 import type { Payload, PayloadRequest } from '../types/index.js'
 import type { TypeWithVersion } from './types.js'
 
+import { combineQueries } from '../database/combineQueries.js'
+import { appendVersionToQueryKey } from './drafts/appendVersionToQueryKey.js'
+
 type Args = {
   config: SanitizedCollectionConfig
   id: number | string
@@ -33,7 +36,7 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
       pagination: false,
       req,
       sort: '-updatedAt',
-      where: whereQuery,
+      where: combineQueries(appendVersionToQueryKey(query.where), whereQuery),
     })
     ;[latestVersion] = docs
   }

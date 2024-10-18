@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/drizzle",
-  "version": "3.0.0-beta.114",
+  "version": "3.0.0-beta.116",
   "description": "A library of shared functions used by different payload database adapters",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -46,7 +46,7 @@
   },
   "dependencies": {
     "console-table-printer": "2.11.2",
-    "drizzle-orm": "0.34.1-1f15bfd",
+    "drizzle-orm": "0.35.1",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
     "uuid": "9.0.0"

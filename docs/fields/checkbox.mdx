@@ -18,7 +18,7 @@ The Checkbox Field saves a boolean in the database.
 To add a Checkbox Field, set the `type` to `checkbox` in your [Field Config](./overview):
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyCheckboxField: Field = {
   // ...
@@ -53,7 +53,7 @@ _\* An asterisk denotes that a property is required._
 Here is an example of a Checkbox Field in a Collection:
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',

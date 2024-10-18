@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.0.0-beta.114",
+  "version": "3.0.0-beta.116",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -101,8 +101,8 @@
     "json-schema-to-typescript": "15.0.1",
     "jsonwebtoken": "9.0.2",
     "minimist": "1.2.8",
-    "pino": "9.3.1",
-    "pino-pretty": "11.2.1",
+    "pino": "9.5.0",
+    "pino-pretty": "11.3.0",
     "pluralize": "8.0.0",
     "sanitize-filename": "1.6.3",
     "scmp": "2.1.0",

@@ -1,8 +1,10 @@
+import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { Relation } from 'drizzle-orm'
 import type { IndexBuilder, SQLiteColumnBuilder } from 'drizzle-orm/sqlite-core'
 import type { Field, SanitizedJoins, TabAsField } from 'payload'
 
 import {
+  buildIndexName,
   createTableName,
   hasLocalesTable,
   validateExistingBlockIsIdentical,
@@ -164,10 +166,15 @@ export const traverseFields = ({
           }
           adapter.fieldConstraints[rootTableName][`${columnName}_idx`] = constraintValue
         }
-        targetIndexes[`${newTableName}_${field.name}Idx`] = createIndex({
+
+        const indexName = buildIndexName({
+          name: `${newTableName}_${columnName}`,
+          adapter: adapter as unknown as DrizzleAdapter,
+        })
+
+        targetIndexes[indexName] = createIndex({
           name: field.localized ? [fieldName, '_locale'] : fieldName,
-          columnName,
-          tableName: newTableName,
+          indexName,
           unique,
         })
       }

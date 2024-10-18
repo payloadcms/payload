@@ -216,7 +216,7 @@ Cross-origin resource sharing (CORS) can be configured with either a whitelist a
 Here's an example showing how to allow incoming requests from any domain:
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 
 export default buildConfig({
   // ...
@@ -227,7 +227,7 @@ export default buildConfig({
 Here's an example showing how to append a new header (`x-custom-header`) in `Access-Control-Allow-Headers`:
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 
 export default buildConfig({
   // ...
