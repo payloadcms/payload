@@ -128,10 +128,10 @@ This is how you can preview changes you made locally to the docs:
 If your PR adds a string to the UI, we need to make sure to translate it into all the languages ​​that Payload supports. To do that:
 
 - Find the appropriate internationalization file for your package. These are typically located in `packages/translations/src/languages`, although some packages (e.g., richtext-lexical) have separate i18n files for each feature.
-- add the string to the English locale "en".
-- translate it to other languages. You can use the `translateNewKeys` script if you have an Open AI API key in your `.env`, or you can use ChatGPT or Google translate. Whatever is easier for you. External contributors can skip this step and leave it to us.
+- Add the string to the English locale "en".
+- Translate it to other languages. You can use the `translateNewKeys` script if you have an OpenAI API key in your `.env` (under `OPENAI_KEY`), or you can use ChatGPT or Google translate - whatever is easier for you. For payload core translations (in packages/translations) you can run the `translateNewKeys` script using `cd packages/translations && pnpm translateNewKeys`. For lexical translations, you can run it using `cd packages/richtext-lexical && pnpm translateNewKeys`. External contributors can skip this step and leave it to us.
 
-To call the string in the UI, make sure to use the `t` utility of the `useTranslation` hook:
+To display translation strings in the UI, make sure to use the `t` utility of the `useTranslation` hook:
 
 ```ts
 const { t } = useTranslation()
