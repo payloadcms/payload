@@ -111,16 +111,18 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   )
 
   const getQueryParams = useCallback(
-    (lockedDocumentIds: string[], additionalParams?: Where): string => {
+    (lockedDocumentIds?: string[], additionalParams?: Where): string => {
       let where: Where
 
       if (selectAll === SelectAllStatus.AllAvailable) {
         const params = searchParams?.where as Where
         where = {
           ...params,
-          id: {
-            not_in: lockedDocumentIds,
-          },
+          ...(lockedDocumentIds.length > 0 && {
+            id: {
+              not_in: lockedDocumentIds,
+            },
+          }),
         }
       } else {
         const ids = []
