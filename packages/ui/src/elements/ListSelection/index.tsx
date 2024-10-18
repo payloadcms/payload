@@ -12,7 +12,7 @@ export type ListSelectionProps = {
 }
 
 export const ListSelection: React.FC<ListSelectionProps> = ({ label }) => {
-  const { count, selectAll, toggleAll, totalDocs } = useSelection()
+  const { count, selectAll, toggleAll, totalSelectableDocs } = useSelection()
   const { t } = useTranslation()
 
   if (count === 0) {
@@ -32,7 +32,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({ label }) => {
             onClick={() => toggleAll(true)}
             type="button"
           >
-            {t('general:selectAll', { count: totalDocs, label })}
+            {t('general:selectAll', { count: totalSelectableDocs, label })}
           </button>
         </Fragment>
       )}
