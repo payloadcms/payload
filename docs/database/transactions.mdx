@@ -126,6 +126,6 @@ await payload.update({
   where: {
     slug: { equals: 'my-slug' }
   },
-  req: { disableTransaction: true },
+  disableTransaction: true,
 })
 ```
