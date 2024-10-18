@@ -120,6 +120,9 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         toString: () => locale.code,
       }))
     }
+
+    // Default fallback to true if not provided
+    config.localization.fallback = config.localization?.fallback ?? true
   }
 
   const i18nConfig: SanitizedConfig['i18n'] = {
