@@ -8,10 +8,12 @@ import { isNumber } from 'payload/shared'
 import type { CollectionRouteHandler } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
+import { sanitizeSelect } from '../utilities/sanitizeSelect.js'
 
 export const deleteDoc: CollectionRouteHandler = async ({ collection, req }) => {
-  const { depth, where } = req.query as {
+  const { depth, select, where } = req.query as {
     depth?: string
+    select?: Record<string, unknown>
     where?: Where
   }
 
@@ -19,6 +21,7 @@ export const deleteDoc: CollectionRouteHandler = async ({ collection, req }) => 
     collection,
     depth: isNumber(depth) ? Number(depth) : undefined,
     req,
+    select: sanitizeSelect(select),
     where,
   })
 

@@ -9,7 +9,17 @@ import { findMany } from './find/findMany.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: DrizzleAdapter,
-  { collection, limit, locale, page = 1, pagination, req = {} as PayloadRequest, sort, where },
+  {
+    collection,
+    limit,
+    locale,
+    page = 1,
+    pagination,
+    req = {} as PayloadRequest,
+    select,
+    sort,
+    where,
+  },
 ) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const tableName = this.tableNameMap.get(
@@ -27,6 +37,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     page,
     pagination,
     req,
+    select,
     sort,
     tableName,
     where: combinedWhere,

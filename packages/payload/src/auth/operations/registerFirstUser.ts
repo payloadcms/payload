@@ -5,7 +5,7 @@ import type {
   RequiredDataFromCollectionSlug,
 } from '../../collections/config/types.js'
 import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequest, SelectType } from '../../types/index.js'
 
 import { Forbidden } from '../../errors/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -66,7 +66,7 @@ export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
     // Register first user
     // /////////////////////////////////////
 
-    const result = await payload.create<TSlug>({
+    const result = await payload.create<TSlug, SelectType>({
       collection: slug as TSlug,
       data,
       overrideAccess: true,

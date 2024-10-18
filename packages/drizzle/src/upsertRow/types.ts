@@ -1,5 +1,5 @@
 import type { SQL } from 'drizzle-orm'
-import type { Field, JoinQuery, PayloadRequest } from 'payload'
+import type { Field, JoinQuery, PayloadRequest, SelectType } from 'payload'
 
 import type { DrizzleAdapter, DrizzleTransaction, GenericColumn } from '../types.js'
 
@@ -23,6 +23,7 @@ type CreateArgs = {
   id?: never
   joinQuery?: never
   operation: 'create'
+  select?: SelectType
   upsertTarget?: never
   where?: never
 } & BaseArgs
@@ -31,6 +32,7 @@ type UpdateArgs = {
   id?: number | string
   joinQuery?: JoinQuery
   operation: 'update'
+  select?: SelectType
   upsertTarget?: GenericColumn
   where?: SQL<unknown>
 } & BaseArgs
