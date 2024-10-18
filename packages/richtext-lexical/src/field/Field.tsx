@@ -5,6 +5,7 @@ import {
   FieldDescription,
   FieldError,
   FieldLabel,
+  useEditDepth,
   useField,
   useFieldProps,
   withCondition,
@@ -47,6 +48,8 @@ const RichTextComponent: React.FC<
   const Label = components?.Label
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
+  const editDepth = useEditDepth()
+
   const memoizedValidate = useCallback(
     (value, validationOptions) => {
       if (typeof validate === 'function') {
@@ -82,10 +85,12 @@ const RichTextComponent: React.FC<
     .filter(Boolean)
     .join(' ')
 
+  const pathWithEditDepth = `${path}.${editDepth}`
+
   return (
     <div
       className={classes}
-      key={path}
+      key={pathWithEditDepth}
       style={{
         ...style,
         width,
@@ -102,6 +107,7 @@ const RichTextComponent: React.FC<
       <div className={`${baseClass}__wrap`}>
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           <LexicalProvider
+            composerKey={pathWithEditDepth}
             editorConfig={editorConfig}
             field={field}
             key={JSON.stringify({ initialValue, path })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
@@ -117,7 +123,6 @@ const RichTextComponent: React.FC<
 
               setValue(serializedEditorState)
             }}
-            path={path}
             readOnly={disabled}
             value={value}
           />
