@@ -10,6 +10,7 @@ import {
   InvalidFieldRelationship,
   MissingEditorProp,
   MissingFieldType,
+  MissingTabsId,
 } from '../../errors/index.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
@@ -272,6 +273,7 @@ export const sanitizeFields = async ({
     if (field.type === 'tabs') {
       for (let j = 0; j < field.tabs.length; j++) {
         const tab = field.tabs[j]
+
         if (tabHasName(tab)) {
           if (typeof tab.label === 'undefined') {
             tab.label = toWords(tab.name)

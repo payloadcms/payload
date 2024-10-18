@@ -22,8 +22,8 @@ import type {
 } from '../types.js'
 
 export type ClientTab =
-  | ({ fields: ClientField[] } & Omit<NamedTab, 'fields'>)
-  | ({ fields: ClientField[] } & Omit<UnnamedTab, 'fields'>)
+  | ({ fields: ClientField[]; passesCondition?: boolean } & Omit<NamedTab, 'fields'>)
+  | ({ fields: ClientField[]; passesCondition?: boolean } & Omit<UnnamedTab, 'fields'>)
 
 type TabsFieldClientWithoutType = MarkOptional<TabsFieldClient, 'type'>
 
