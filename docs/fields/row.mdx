@@ -18,7 +18,7 @@ The Row Field is presentational-only and only affects the [Admin Panel](../admin
 To add a Row Field, set the `type` to `row` in your [Field Config](./overview):
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyRowField: Field = {
   // ...
@@ -46,7 +46,7 @@ _\* An asterisk denotes that a property is required._
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
