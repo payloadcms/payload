@@ -21,7 +21,6 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
     Error,
     field: {
       name,
-      _path: pathFromProps,
       admin: {
         className,
         layout = 'horizontal',
@@ -35,6 +34,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
     } = {} as RadioFieldClientProps['field'],
     Label,
     onChange: onChangeFromProps,
+    path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
     validate,
     value: valueFromProps,

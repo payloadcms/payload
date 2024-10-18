@@ -35,7 +35,6 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
     Error,
     field: {
       name,
-      _path: pathFromProps,
       admin: {
         className,
         isClearable = true,
@@ -51,6 +50,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
     },
     Label,
     onChange: onChangeFromProps,
+    path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props

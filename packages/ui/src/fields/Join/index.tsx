@@ -13,8 +13,9 @@ import { fieldBaseClass } from '../index.js'
 const JoinFieldComponent: JoinFieldClientComponent = (props) => {
   const {
     field,
-    field: { name, _path: path, collection, on },
+    field: { name, collection, on },
     Label,
+    path,
   } = props
 
   const { id: docID } = useDocumentInfo()

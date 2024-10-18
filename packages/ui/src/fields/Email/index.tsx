@@ -24,7 +24,6 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
     Error,
     field: {
       name,
-      _path: pathFromProps,
       admin: {
         className,
         placeholder,
@@ -35,6 +34,7 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
       required,
     } = {} as EmailFieldClientProps['field'],
     Label,
+    path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props

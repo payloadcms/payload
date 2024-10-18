@@ -23,7 +23,6 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
     Error,
     field: {
       name,
-      _path: pathFromProps,
       admin: {
         className,
         date: datePickerProps,
@@ -36,6 +35,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
       required,
     },
     Label,
+    path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props

@@ -19,12 +19,12 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     Error,
     field: {
       name,
-      _path: path,
       admin: { className, editorOptions, readOnly: readOnlyFromAdmin, style, width } = {},
       jsonSchema,
       required,
     },
     Label,
+    path,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props

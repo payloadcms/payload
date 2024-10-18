@@ -16,21 +16,22 @@ import './index.scss'
 const baseClass = 'collapsible-field'
 
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
+import { RenderFieldMap } from '../../forms/RenderFieldMap/index.js'
 
 const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
   const {
     Description,
     field,
     field: {
-      _path: path,
-      _schemaPath,
       admin: { className, initCollapsed = false, readOnly: readOnlyFromAdmin } = {},
       fields,
     },
-    Fields,
     indexPath,
+    path,
     readOnly: readOnlyFromTopLevelProps,
+    renderedFieldMap,
     RowLabel,
+    schemaAccessor: { schemaPath },
   } = props
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
@@ -122,7 +123,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
         ]
           .filter(Boolean)
           .join(' ')}
-        id={`field-${fieldPreferencesKey}${path ? `-${path.replace(/\./g, '__')}` : ''}`}
+        id={`field-${fieldPreferencesKey}${path ? `-${path?.replace(/\./g, '__')}` : ''}`}
         style={style}
       >
         <CollapsibleElement
@@ -137,7 +138,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
           initCollapsed={collapsedOnMount}
           onToggle={onToggle}
         >
-          {Fields ? Fields?.map((Field) => Field) : null}
+          <RenderFieldMap renderedFieldMap={renderedFieldMap} />
         </CollapsibleElement>
         {Description}
       </div>

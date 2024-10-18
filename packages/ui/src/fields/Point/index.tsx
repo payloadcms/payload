@@ -22,12 +22,12 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
     Error,
     field: {
       name,
-      _path: path,
       admin: { className, placeholder, readOnly: readOnlyFromAdmin, step, style, width } = {},
       label,
       required,
     },
     Label,
+    path,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props

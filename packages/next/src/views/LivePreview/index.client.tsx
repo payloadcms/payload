@@ -197,7 +197,9 @@ const PreviewView: React.FC<Props> = ({
         globalSlug,
         operation,
         returnLockStatus: isLockingEnabled ? true : false,
-        schemaPath,
+        schemaAccessor: {
+          schemaPath,
+        },
         signal: abortController.signal,
         updateLastEdited,
       })

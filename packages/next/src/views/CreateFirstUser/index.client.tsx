@@ -46,7 +46,9 @@ export const CreateFirstUserClient: React.FC<{
         collectionSlug: userSlug,
         formState: prevFormState,
         operation: 'create',
-        schemaPath: `_${userSlug}.auth`,
+        schemaAccessor: {
+          schemaPath: `_${userSlug}.auth`,
+        },
       })
 
       return state

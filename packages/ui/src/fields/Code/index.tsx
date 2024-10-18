@@ -25,7 +25,6 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
     Error,
     field: {
       name,
-      _path: pathFromProps,
       admin: {
         className,
         editorOptions = {},
@@ -38,6 +37,7 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
       required,
     },
     Label,
+    path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props

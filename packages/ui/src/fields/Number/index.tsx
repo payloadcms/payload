@@ -23,7 +23,6 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
     Error,
     field: {
       name,
-      _path: pathFromProps,
       admin: {
         className,
         placeholder,
@@ -41,6 +40,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
     },
     Label,
     onChange: onChangeFromProps,
+    path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
