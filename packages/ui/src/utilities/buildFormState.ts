@@ -235,8 +235,8 @@ export const buildFormStateFn = async (
       schemaIndexPath,
     }) as ClientField
 
-    fields = [field]
-    clientFields = [clientField]
+    fields = field ? [field] : []
+    clientFields = clientField ? [clientField] : []
 
     basePath =
       pathSegments.length > 1 ? pathSegments.slice(0, pathSegments.length - 1).join('.') : ''

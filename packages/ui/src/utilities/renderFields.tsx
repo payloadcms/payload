@@ -281,12 +281,7 @@ const traverseFields = ({
 
 export const renderFields: RenderFieldsFn = (args) => {
   const result: RenderedFieldMap = new Map()
-  console.log({
-    fields: args.fields.map((field) => field.name),
-    initialSchemaPath: args.initialSchemaPath,
-    path: args.path,
-    schemaPath: args.schemaPath,
-  })
+
   traverseFields({ ...args, result })
 
   return result
