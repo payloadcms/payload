@@ -74,6 +74,21 @@ describe('database', () => {
       expect(migrationFile).toContain('_test')
     })
 
+    it('should run migrate:create with older drizzle version schema', async () => {
+      const args = {
+        _: ['migrate:create', 'test'],
+        forceAcceptWarning: true,
+      }
+      const ogMigrationDir = payload.db.migrationDir
+      payload.db.migrationDir = path.resolve(__dirname, 'v5_migrations')
+      await migrate(args)
+
+      // read files names in migrationsDir
+      const migrationFile = path.normalize(fs.readdirSync(payload.db.migrationDir)[0])
+      expect(migrationFile).toContain('_test')
+      payload.db.migrationDir = ogMigrationDir
+    })
+
     it('should run migrate', async () => {
       const args = {
         _: ['migrate'],
