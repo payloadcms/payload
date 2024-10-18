@@ -59,7 +59,7 @@ describe('database', () => {
     })
 
     afterAll(() => {
-      removeFiles(path.normalize(payload.db.migrationDir))
+      removeFiles(path.normalize(payload.db.migrationDir), (name) => !name.includes('test_v5'))
     })
 
     it('should run migrate:create', async () => {
@@ -72,6 +72,32 @@ describe('database', () => {
       // read files names in migrationsDir
       const migrationFile = path.normalize(fs.readdirSync(payload.db.migrationDir)[0])
       expect(migrationFile).toContain('_test')
+    })
+
+    it('should run migrate:create with older drizzle version schema', async () => {
+      const db = payload.db as unknown as PostgresAdapter
+
+      // eslint-disable-next-line jest/no-if
+      if (db.name !== 'postgres') return
+
+      // eslint-disable-next-line jest/no-if
+      if (db.schemaName && db.schemaName !== 'public') {
+        return
+      }
+
+      const args = {
+        _: ['migrate:create', 'test'],
+        forceAcceptWarning: true,
+      }
+      const ogMigrationDir = payload.db.migrationDir
+      payload.db.migrationDir = path.resolve(__dirname, 'v5_migrations')
+      await migrate(args)
+
+      // read files names in migrationsDir
+      const migrationFile = path.normalize(fs.readdirSync(payload.db.migrationDir)[2])
+      expect(migrationFile).toContain('_test')
+      removeFiles(path.normalize(payload.db.migrationDir), (name) => !name.includes('test_v5'))
+      payload.db.migrationDir = ogMigrationDir
     })
 
     it('should run migrate', async () => {

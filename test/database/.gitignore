@@ -1,1 +1,4 @@
 migrations
+v5_migrations/*
+!v5_migrations/20241018_162142_test_v5.ts
+!v5_migrations/20241018_162142_test_v5.json
