@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, ClientField, FormState } from 'payload'
+import type { ClientCollectionConfig, ClientField, FormState, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -34,19 +34,26 @@ export type EditManyProps = {
 }
 
 const Submit: React.FC<{
-  readonly action: string
+  readonly apiRoute: string
   readonly disabled: boolean
-}> = ({ action, disabled }) => {
+  readonly getQueryParams: (lockedDocumentIds: string[], additionalParams?: Where) => string
+  readonly serverURL: string
+  readonly slug: string
+}> = ({ slug, apiRoute, disabled, getQueryParams, serverURL }) => {
   const { submit } = useForm()
+  const { lockedDocumentIds } = useSelection()
   const { t } = useTranslation()
 
   const save = useCallback(() => {
+    const queryParams = getQueryParams(lockedDocumentIds)
+    const url = `${serverURL}${apiRoute}/${slug}${queryParams}`
+
     void submit({
-      action,
+      action: url,
       method: 'PATCH',
       skipValidation: true,
     })
-  }, [action, submit])
+  }, [submit, serverURL, apiRoute, lockedDocumentIds, slug, getQueryParams])
 
   return (
     <FormSubmit className={`${baseClass}__save`} disabled={disabled} onClick={save}>
@@ -55,20 +62,30 @@ const Submit: React.FC<{
   )
 }
 
-const PublishButton: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
+const PublishButton: React.FC<{
+  readonly apiRoute: string
+  readonly disabled: boolean
+  readonly getQueryParams: (lockedDocumentIds: string[], additionalParams?: Where) => string
+  readonly serverURL: string
+  readonly slug: string
+}> = ({ slug, apiRoute, disabled, getQueryParams, serverURL }) => {
   const { submit } = useForm()
+  const { lockedDocumentIds } = useSelection()
   const { t } = useTranslation()
 
   const save = useCallback(() => {
+    const queryParams = getQueryParams(lockedDocumentIds)
+    const url = `${serverURL}${apiRoute}/${slug}${queryParams}&draft=true`
+
     void submit({
-      action,
+      action: url,
       method: 'PATCH',
       overrides: {
         _status: 'published',
       },
       skipValidation: true,
     })
-  }, [action, submit])
+  }, [submit, serverURL, apiRoute, lockedDocumentIds, slug, getQueryParams])
 
   return (
     <FormSubmit className={`${baseClass}__publish`} disabled={disabled} onClick={save}>
@@ -77,20 +94,30 @@ const PublishButton: React.FC<{ action: string; disabled: boolean }> = ({ action
   )
 }
 
-const SaveDraftButton: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
+const SaveDraftButton: React.FC<{
+  readonly apiRoute: string
+  readonly disabled: boolean
+  readonly getQueryParams: (lockedDocumentIds: string[], additionalParams?: Where) => string
+  readonly serverURL: string
+  readonly slug: string
+}> = ({ slug, apiRoute, disabled, getQueryParams, serverURL }) => {
   const { submit } = useForm()
+  const { lockedDocumentIds } = useSelection()
   const { t } = useTranslation()
 
   const save = useCallback(() => {
+    const queryParams = getQueryParams(lockedDocumentIds)
+    const url = `${serverURL}${apiRoute}/${slug}${queryParams}&draft=true`
+
     void submit({
-      action,
+      action: url,
       method: 'PATCH',
       overrides: {
         _status: 'draft',
       },
       skipValidation: true,
     })
-  }, [action, submit])
+  }, [submit, serverURL, apiRoute, lockedDocumentIds, slug, getQueryParams])
 
   return (
     <FormSubmit className={`${baseClass}__draft`} disabled={disabled} onClick={save}>
@@ -224,18 +251,27 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                         {collection?.versions?.drafts ? (
                           <React.Fragment>
                             <PublishButton
-                              action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}&draft=true`}
+                              apiRoute={apiRoute}
                               disabled={selected.length === 0}
+                              getQueryParams={getQueryParams}
+                              serverURL={serverURL}
+                              slug={slug}
                             />
                             <SaveDraftButton
-                              action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}&draft=true`}
+                              apiRoute={apiRoute}
                               disabled={selected.length === 0}
+                              getQueryParams={getQueryParams}
+                              serverURL={serverURL}
+                              slug={slug}
                             />
                           </React.Fragment>
                         ) : (
                           <Submit
-                            action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}`}
+                            apiRoute={apiRoute}
                             disabled={selected.length === 0}
+                            getQueryParams={getQueryParams}
+                            serverURL={serverURL}
+                            slug={slug}
                           />
                         )}
                       </div>

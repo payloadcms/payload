@@ -36,7 +36,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
     },
   } = useConfig()
   const { toggleModal } = useModal()
-  const { count, getQueryParams, selectAll, toggleAll } = useSelection()
+  const { count, getQueryParams, lockedDocumentIds, selectAll, toggleAll } = useSelection()
   const { i18n, t } = useTranslation()
   const [deleting, setDeleting] = useState(false)
   const router = useRouter()
@@ -54,8 +54,11 @@ export const DeleteMany: React.FC<Props> = (props) => {
 
   const handleDelete = useCallback(async () => {
     setDeleting(true)
+
+    const queryParams = getQueryParams(lockedDocumentIds)
+
     await requests
-      .delete(`${serverURL}${api}/${slug}${getQueryParams()}`, {
+      .delete(`${serverURL}${api}/${slug}${queryParams}`, {
         headers: {
           'Accept-Language': i18n.language,
           'Content-Type': 'application/json',
@@ -97,6 +100,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
     api,
     getQueryParams,
     i18n.language,
+    lockedDocumentIds,
     modalSlug,
     router,
     selectAll,

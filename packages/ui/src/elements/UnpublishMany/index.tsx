@@ -38,7 +38,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
   const { permissions } = useAuth()
   const { toggleModal } = useModal()
   const { i18n, t } = useTranslation()
-  const { getQueryParams, selectAll } = useSelection()
+  const { getQueryParams, lockedDocumentIds, selectAll } = useSelection()
   const [submitted, setSubmitted] = useState(false)
   const { stringifyParams } = useSearchParams()
   const router = useRouter()
@@ -55,8 +55,13 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
 
   const handleUnpublish = useCallback(async () => {
     setSubmitted(true)
+
+    const queryParams = getQueryParams(lockedDocumentIds, {
+      _status: { not_equals: 'draft' },
+    })
+
     await requests
-      .patch(`${serverURL}${api}/${slug}${getQueryParams({ _status: { not_equals: 'draft' } })}`, {
+      .patch(`${serverURL}${api}/${slug}${queryParams}`, {
         body: JSON.stringify({
           _status: 'draft',
         }),
@@ -97,6 +102,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
     api,
     getQueryParams,
     i18n.language,
+    lockedDocumentIds,
     modalSlug,
     selectAll,
     serverURL,

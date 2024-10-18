@@ -38,7 +38,7 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
   const { permissions } = useAuth()
   const { toggleModal } = useModal()
   const { i18n, t } = useTranslation()
-  const { getQueryParams, selectAll } = useSelection()
+  const { getQueryParams, lockedDocumentIds, selectAll } = useSelection()
   const [submitted, setSubmitted] = useState(false)
   const router = useRouter()
   const { stringifyParams } = useSearchParams()
@@ -54,19 +54,21 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
 
   const handlePublish = useCallback(async () => {
     setSubmitted(true)
+
+    const queryParams = getQueryParams(lockedDocumentIds, {
+      _status: { not_equals: 'published' },
+    })
+
     await requests
-      .patch(
-        `${serverURL}${api}/${slug}${getQueryParams({ _status: { not_equals: 'published' } })}&draft=true`,
-        {
-          body: JSON.stringify({
-            _status: 'published',
-          }),
-          headers: {
-            'Accept-Language': i18n.language,
-            'Content-Type': 'application/json',
-          },
+      .patch(`${serverURL}${api}/${slug}${queryParams}&draft=true`, {
+        body: JSON.stringify({
+          _status: 'published',
+        }),
+        headers: {
+          'Accept-Language': i18n.language,
+          'Content-Type': 'application/json',
         },
-      )
+      })
       .then(async (res) => {
         try {
           const json = await res.json()
@@ -100,6 +102,7 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
     api,
     getQueryParams,
     i18n.language,
+    lockedDocumentIds,
     modalSlug,
     selectAll,
     serverURL,
