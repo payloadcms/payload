@@ -771,7 +771,7 @@ type TabBase = {
   fields: Field[]
   interfaceName?: string
   saveToJWT?: boolean | string
-} & Omit<FieldBase, 'required' | 'validate'>
+} & Omit<FieldBase, 'admin' | 'required' | 'validate'>
 
 export type NamedTab = {
   /** Customize generated GraphQL and Typescript schema names.
@@ -782,6 +782,10 @@ export type NamedTab = {
    */
   interfaceName?: string
 } & TabBase
+
+export type NamedTabWithCondition = {
+  admin?: Pick<Admin, 'condition'>
+} & NamedTab
 
 export type UnnamedTab = {
   interfaceName?: never
@@ -799,24 +803,30 @@ export type UnnamedTab = {
   localized?: never
 } & Omit<TabBase, 'name' | 'virtual'>
 
-export type Tab = NamedTab | UnnamedTab
+export type UnnamedTabWithCondition = {
+  admin?: Pick<Admin, 'condition'>
+} & UnnamedTab
+
+export type TabWithoutCondition = NamedTab | UnnamedTab
+export type TabWithCondition = NamedTabWithCondition | UnnamedTabWithCondition
+export type Tab = TabWithCondition | TabWithoutCondition
 
 export type TabsField = {
   admin?: Omit<Admin, 'description'>
-  tabs: Tab[]
   type: 'tabs'
-} & Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT' | 'virtual'>
+} & ({ id: string; tabs: TabWithCondition[] } | { id?: never; tabs: TabWithoutCondition[] }) &
+  Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT' | 'virtual'>
 
 export type TabsFieldClient = {
   admin?: Omit<AdminClient, 'description'>
   tabs: ClientTab[]
 } & Omit<FieldBaseClient, 'admin' | 'localized' | 'name' | 'saveToJWT'> &
-  Pick<TabsField, 'type'>
+  Pick<TabsField, 'id' | 'type'>
 
 export type TabAsField = {
   name?: string
   type: 'tab'
-} & Tab
+} & TabWithCondition
 
 export type TabAsFieldClient = ClientTab & Pick<TabAsField, 'name' | 'type'>
 
