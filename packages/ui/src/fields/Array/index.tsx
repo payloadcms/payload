@@ -269,7 +269,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         {Description}
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
-      {JSON.stringify(schemaAccessor)}
       {(rowsData?.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
           className={`${baseClass}__draggable-rows`}

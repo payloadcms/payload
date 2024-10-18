@@ -16,17 +16,7 @@ type Args = {
 }
 
 export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
-  const {
-    id,
-    collectionSlug,
-    data = {},
-    fields,
-    operation,
-    path = '',
-    preferences,
-    req,
-    schemaPath = '',
-  } = args
+  const { id, collectionSlug, data = {}, fields, operation, path = '', preferences, req } = args
 
   if (fields) {
     const state: FormState = {}
@@ -54,7 +44,7 @@ export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
       path,
       preferences,
       req,
-      schemaPath,
+      schemaPath: '',
       state,
     })
 

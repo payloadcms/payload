@@ -362,7 +362,6 @@ export const buildFormStateFn = async (
     path: basePath ? `${basePath}.` : '',
     preferences: docPreferences || { fields: {} },
     req,
-    // schemaPath,
   })
 
   let lockedStateResult = undefined
@@ -452,6 +451,7 @@ export const buildFormStateFn = async (
           fieldSchemaMap,
           formState: formStateResult,
           i18n,
+          indexPath: schemaIndexPath,
           initialSchemaPath,
           path: basePath,
           payload,
