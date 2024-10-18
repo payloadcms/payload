@@ -59,7 +59,7 @@ describe('database', () => {
     })
 
     afterAll(() => {
-      removeFiles(path.normalize(payload.db.migrationDir))
+      removeFiles(path.normalize(payload.db.migrationDir), (name) => !name.includes('test_v5'))
     })
 
     it('should run migrate:create', async () => {
