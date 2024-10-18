@@ -553,6 +553,14 @@ describe('lexicalMain', () => {
     await expect(relationshipListDrawer).toHaveText('Array Fields')
   })
 
+  test('ensure navigation to collection that used to cause admin panel freeze due to object references bug is possible', async () => {
+    const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'lexicalObjectReferenceBug')
+    await page.goto(url.create)
+
+    await expect(page.locator('.rich-text-lexical').nth(0)).toBeVisible()
+    await expect(page.locator('.rich-text-lexical').nth(1)).toBeVisible()
+  })
+
   describe('localization', () => {
     test.skip('ensure simple localized lexical field works', async () => {
       await navigateToLexicalFields(true, true)
