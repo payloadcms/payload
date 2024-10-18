@@ -76,6 +76,10 @@ describe('database', () => {
 
     it('should run migrate:create with older drizzle version schema', async () => {
       const db = payload.db as unknown as PostgresAdapter
+
+      // eslint-disable-next-line jest/no-if
+      if (db.name !== 'postgres') return
+
       // eslint-disable-next-line jest/no-if
       if (db.schemaName && db.schemaName !== 'public') {
         return
