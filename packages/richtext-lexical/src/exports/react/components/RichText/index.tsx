@@ -7,9 +7,13 @@ import type { JSXConverters } from './converter/types.js'
 import { defaultJSXConverters } from './converter/defaultConverters.js'
 import { convertLexicalToJSX } from './converter/index.js'
 
+export type JSXConvertersFunction = (args: {
+  defaultConverters: JSXConverters[]
+}) => JSXConverters[]
+
 type Props = {
   className?: string
-  converters?: ((args: { defaultConverters: JSXConverters[] }) => JSXConverters[]) | JSXConverters[]
+  converters?: JSXConverters[] | JSXConvertersFunction
   disableIndent?: boolean | string[]
   disableTextAlign?: boolean | string[]
   editorState: SerializedEditorState

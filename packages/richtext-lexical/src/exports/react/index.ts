@@ -16,4 +16,4 @@ export type {
   JSXConverters,
   SerializedLexicalNodeWithParent,
 } from './components/RichText/converter/types.js'
-export { RichText } from './components/RichText/index.js'
+export { type JSXConvertersFunction, RichText } from './components/RichText/index.js'
