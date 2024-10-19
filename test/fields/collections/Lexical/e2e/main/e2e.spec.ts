@@ -1,3 +1,4 @@
+import type { SerializedLinkNode } from '@payloadcms/richtext-lexical'
 import type { BrowserContext, Page } from '@playwright/test'
 import type { SerializedEditorState, SerializedParagraphNode, SerializedTextNode } from 'lexical'
 
@@ -679,6 +680,101 @@ describe('lexicalMain', () => {
 
       expect(boldNode.text).toBe('text')
       expect(boldNode.format).toBe(1)
+    }).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+  })
+
+  test('creating a link, then clicking in the link drawer, then saving the link, should preserve cursor position and not move cursor to beginning of richtext field', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+
+    const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
+    await paragraph.scrollIntoViewIfNeeded()
+    await expect(paragraph).toBeVisible()
+
+    /**
+     * Type some text
+     */
+    await paragraph.click()
+    await page.keyboard.type('Some Text')
+
+    await page.keyboard.press('Enter')
+    await page.keyboard.type('Hello there')
+
+    // Select "there" by pressing shift + arrow left
+    for (let i = 0; i < 5; i++) {
+      await page.keyboard.press('Shift+ArrowLeft')
+    }
+    // Ensure inline toolbar appeared
+    const inlineToolbar = page.locator('.inline-toolbar-popup')
+    await expect(inlineToolbar).toBeVisible()
+
+    const linkButton = inlineToolbar.locator('.toolbar-popup__button-link')
+    await expect(linkButton).toBeVisible()
+    await linkButton.click()
+
+    /**
+     * Link Drawer
+     */
+
+    const linkDrawer = page.locator('dialog[id^=drawer_1_lexical-rich-text-link-]').first() // IDs starting with drawer_1_lexical-rich-text-link- (there's some other symbol after the underscore)
+    await expect(linkDrawer).toBeVisible()
+    await wait(500)
+
+    const urlInput = linkDrawer.locator('#field-url').first()
+    // Click on the input to focus it
+    await urlInput.click()
+    // should be https:// value
+    await expect(urlInput).toHaveValue('https://')
+    // Change it to https://google.com
+    await urlInput.fill('https://google.com')
+
+    // Save drawer
+    await linkDrawer.locator('button').getByText('Save').first().click()
+    await expect(linkDrawer).toBeHidden()
+    await wait(1500)
+
+    // Just keep typing - the cursor should not have moved to the beginning of the richtext field
+    await page.keyboard.type(' xxx')
+
+    await saveDocAndAssert(page)
+
+    // Check if the text is bold. It's a self-relationship, so no need to follow relationship
+    await expect(async () => {
+      const lexicalDoc: LexicalField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          depth: 0,
+          overrideAccess: true,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor
+      const firstParagraph: SerializedParagraphNode = lexicalField.root
+        .children[0] as SerializedParagraphNode
+      const secondParagraph: SerializedParagraphNode = lexicalField.root
+        .children[0] as SerializedParagraphNode
+
+      expect(firstParagraph.children).toHaveLength(1)
+      expect((firstParagraph.children[0] as SerializedTextNode).text).toBe('Some Text')
+
+      expect(secondParagraph.children).toHaveLength(3)
+      expect((secondParagraph.children[0] as SerializedTextNode).text).toBe('Hello ')
+      expect((secondParagraph.children[1] as SerializedLinkNode).type).toBe('link')
+      expect((secondParagraph.children[1] as SerializedLinkNode).children).toHaveLength(1)
+      expect(
+        ((secondParagraph.children[1] as SerializedLinkNode).children[0] as SerializedTextNode)
+          .text,
+      ).toBe('there')
+      expect((secondParagraph.children[2] as SerializedTextNode).text).toBe(' xxx')
     }).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
