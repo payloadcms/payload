@@ -18,7 +18,6 @@ import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
-import { useFieldRows } from '../../forms/RenderFieldMap/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -129,8 +128,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
-  const { setRenderedRows } = useFieldRows()
-
   const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const addRow = useCallback(
@@ -140,13 +137,11 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
       const currentData: Row[] = getDataByPath(path)
 
-      const renderedFieldMap = await addFieldRow({
+      await addFieldRow({
         data: { [name]: [...currentData, newRow] },
         path,
         schemaAccessor,
       })
-
-      setRenderedRows(renderedFieldMap?.get(path)?.renderedRows || [])
 
       setModified(true)
 
@@ -154,7 +149,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, setModified, setRenderedRows, getDataByPath, name, schemaAccessor],
+    [addFieldRow, path, setModified, getDataByPath, name, schemaAccessor],
   )
 
   const duplicateRow = useCallback(

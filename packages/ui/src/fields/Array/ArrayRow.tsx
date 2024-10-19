@@ -9,8 +9,8 @@ import type { UseDraggableSortableReturn } from '../../elements/DraggableSortabl
 import { ArrayAction } from '../../elements/ArrayAction/index.js'
 import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import { useFormSubmitted } from '../../forms/Form/context.js'
-import { RenderFieldMap, useFieldRows } from '../../forms/RenderFieldMap/index.js'
+import { useFieldSlots, useFormSubmitted } from '../../forms/Form/context.js'
+import { RenderFieldMap, useFieldRows } from '../../forms/RenderFields/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
@@ -65,9 +65,9 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
     '0',
   )}`
 
-  const { renderedRows } = useFieldRows()
+  const { fieldSlots } = useFieldSlots()
 
-  const renderedRow = renderedRows[rowIndex]
+  // const renderedRow = renderedRows[rowIndex]
 
   const fieldHasErrors = errorCount > 0 && hasSubmitted
 
@@ -117,14 +117,14 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         }
         header={
           <div className={`${baseClass}__row-header`}>
-            {renderedRow?.RowLabel}
+            {/* {renderedRow?.RowLabel} */}
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
         }
         isCollapsed={row.collapsed}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        <RenderFieldMap renderedFieldMap={renderedRow?.renderedFieldMap} />
+        {/* <RenderFields renderedFieldMap={renderedRow?.renderedFieldMap} /> */}
       </Collapsible>
     </div>
   )

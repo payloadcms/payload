@@ -3,6 +3,7 @@ import type { FieldTypes } from 'payload'
 
 import React, { Fragment } from 'react'
 
+import { generateFieldKey } from 'payload/shared'
 import { useFormFields } from '../Form/context.js'
 
 export const WatchCondition: React.FC<{
@@ -19,8 +20,10 @@ export const WatchCondition: React.FC<{
   let formStateID = path
 
   if (['collapsible', 'row'].includes(type)) {
-    const index = indexPath?.split('.').pop()
-    formStateID = `${path ? `${path}.` : ''}_index-${index}`
+    formStateID = generateFieldKey({
+      path: `${path ? `${path}.` : ''}`,
+      schemaIndex: indexPath?.split('.').pop(),
+    })
   }
 
   const field = useFormFields(([fields]) => (fields && fields?.[formStateID]) || null)

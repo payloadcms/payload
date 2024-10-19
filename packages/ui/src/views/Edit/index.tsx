@@ -396,6 +396,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
           method={id ? 'PATCH' : 'POST'}
           onChange={[onChange]}
           onSuccess={onSave}
+          renderedFieldMap={renderedFieldMap}
         >
           {BeforeDocument}
           {/* {isLockingEnabled && shouldShowDocumentLockedModal && !isReadOnlyForIncomingUser && (
@@ -527,7 +528,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
                 </Fragment>
               )
             }
-            renderedFieldMap={renderedFieldMap}
+            fields={docConfig.fields}
+            path={entitySlug}
           />
           {AfterDocument}
         </Form>

@@ -1,6 +1,6 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { BlocksField, BlocksFieldClient } from '../../fields/config/types.js'
+import type { BlocksField, BlocksFieldClient, ClientField } from '../../fields/config/types.js'
 import type { BlocksFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {

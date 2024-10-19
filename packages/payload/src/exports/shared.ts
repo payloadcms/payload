@@ -40,6 +40,8 @@ export {
   deepMergeWithSourceArrays,
 } from '../utilities/deepMerge.js'
 
+export { generateFieldKey } from '../utilities/generateFieldKey.js'
+
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 
 export { getDataByPath } from '../utilities/getDataByPath.js'

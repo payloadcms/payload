@@ -1,7 +1,8 @@
-import type { RenderedField } from 'payload'
+import type { ClientField } from 'payload'
 
 export type Props = {
   readonly className?: string
+  readonly fields: ClientField[]
   /**
    * Controls the rendering behavior of the fields, i.e. defers rendering until they intersect with the viewport using the Intersection Observer API.
    *
@@ -11,5 +12,5 @@ export type Props = {
    */
   readonly forceRender?: boolean
   readonly margins?: 'small' | false
-  readonly renderedFieldMap: Map<string, RenderedField>
+  readonly path: string
 }

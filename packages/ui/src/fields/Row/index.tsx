@@ -3,7 +3,7 @@ import type { RowFieldClientComponent } from 'payload'
 
 import React from 'react'
 
-import { RenderFieldMap, RenderFields } from '../../forms/RenderFieldMap/index.js'
+import { RenderFieldMap, RenderFields } from '../../forms/RenderFields/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
@@ -25,7 +25,7 @@ const RowFieldComponent: RowFieldClientComponent = (props) => {
   return (
     <RowProvider>
       <div className={[fieldBaseClass, baseClass, className].filter(Boolean).join(' ')}>
-        <RenderFieldMap renderedFieldMap={renderedFieldMap} />
+        <RenderFields renderedFieldMap={renderedFieldMap} />
       </div>
     </RowProvider>
   )

@@ -12,7 +12,7 @@ import {
   useFormProcessing,
   useFormSubmitted,
 } from '../../forms/Form/context.js'
-import { RenderFieldMap } from '../../forms/RenderFieldMap/index.js'
+import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -91,7 +91,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
             )}
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
-          <RenderFieldMap renderedFieldMap={renderedFieldMap} />
+          <RenderFields renderedFieldMap={renderedFieldMap} />
         </div>
       </GroupProvider>
     </div>

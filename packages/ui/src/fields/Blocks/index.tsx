@@ -15,7 +15,6 @@ import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
-import { useFieldRows } from '../../forms/RenderFieldMap/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -49,7 +48,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     Label,
     path,
     readOnly: readOnlyFromTopLevelProps,
-    schemaPath,
+    schemaAccessor,
     validate,
   } = props
 
@@ -108,8 +107,6 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
-  const { setRenderedRows } = useFieldRows()
-
   const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const addRow = useCallback(
@@ -119,13 +116,11 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
       const currentData: Block[] = getDataByPath(path)
 
-      const renderedFieldMap = await addFieldRow({
+      await addFieldRow({
         data: { [name]: [...currentData, newRow] },
         path,
-        schemaPath,
+        schemaAccessor,
       })
-
-      setRenderedRows(renderedFieldMap?.get(path)?.renderedRows || [])
 
       setModified(true)
 
@@ -133,7 +128,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, setModified, schemaPath, setRenderedRows, getDataByPath, name],
+    [addFieldRow, path, setModified, getDataByPath, name, schemaAccessor],
   )
 
   const duplicateRow = useCallback(
@@ -263,6 +258,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
               const rowErrorCount = errorPaths.filter((errorPath) =>
                 errorPath.startsWith(`${path}.${i}.`),
               ).length
+
               return (
                 <DraggableSortableItem disabled={disabled || !isSortable} id={row.id} key={row.id}>
                   {(draggableSortableItemProps) => (
@@ -273,6 +269,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       blocks={blocks}
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}
+                      fields={blockConfig.fields}
                       hasMaxRows={hasMaxRows}
                       isSortable={isSortable}
                       Label={Label}

@@ -35,9 +35,22 @@ export type ServerFieldBase<
   Partial<ServerProps>
 
 export type SchemaAccessor = {
-  initialSchemaPath?: string
-  schemaIndexPath?: string
-  schemaPath?: string
+  /**
+   * The unique identifier for the field in the schema, combining the schema path and the field index, e.g. `my-posts.my-array.text_index-2`
+   */
+  fieldKey: string
+  /**
+   * The dot-notated index path to the field in the schema, e.g. `0.1.2`
+   */
+  indexPath: string
+  /**
+   * The path by which the index path is in related to, e.g. `my-posts`
+   */
+  initialSchemaPath: string
+  /**
+   * The dot-notated path to the field in the schema, e.g. `my-posts.my-array.text`
+   */
+  schemaPath: string
 }
 
 export type FormFieldBase = {

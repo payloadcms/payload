@@ -162,366 +162,12 @@ export interface ArrayField {
  */
 export interface BlockField {
   id: string;
-  blocks: (
-    | {
-        text: string;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'content';
-      }
-    | {
-        number: number;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'number';
-      }
-    | {
-        subBlocks?:
-          | (
-              | {
-                  text: string;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'text';
-                }
-              | {
-                  number: number;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'number';
-                }
-            )[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'subBlocks';
-      }
-    | {
-        textInCollapsible?: string | null;
-        textInRow?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'tabs';
-      }
-  )[];
-  duplicate: (
-    | {
-        text: string;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'content';
-      }
-    | {
-        number: number;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'number';
-      }
-    | {
-        subBlocks?:
-          | (
-              | {
-                  text: string;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'text';
-                }
-              | {
-                  number: number;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'number';
-                }
-            )[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'subBlocks';
-      }
-    | {
-        textInCollapsible?: string | null;
-        textInRow?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'tabs';
-      }
-  )[];
-  collapsedByDefaultBlocks: (
-    | {
-        text: string;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'localizedContent';
-      }
-    | {
-        number: number;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'localizedNumber';
-      }
-    | {
-        subBlocks?:
-          | (
-              | {
-                  text: string;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'text';
-                }
-              | {
-                  number: number;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'number';
-                }
-            )[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'localizedSubBlocks';
-      }
-    | {
-        textInCollapsible?: string | null;
-        textInRow?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'localizedTabs';
-      }
-  )[];
-  disableSort: (
-    | {
-        text: string;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'localizedContent';
-      }
-    | {
-        number: number;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'localizedNumber';
-      }
-    | {
-        subBlocks?:
-          | (
-              | {
-                  text: string;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'text';
-                }
-              | {
-                  number: number;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'number';
-                }
-            )[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'localizedSubBlocks';
-      }
-    | {
-        textInCollapsible?: string | null;
-        textInRow?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'localizedTabs';
-      }
-  )[];
-  localizedBlocks: (
-    | {
-        text: string;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'localizedContent';
-      }
-    | {
-        number: number;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'localizedNumber';
-      }
-    | {
-        subBlocks?:
-          | (
-              | {
-                  text: string;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'text';
-                }
-              | {
-                  number: number;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'number';
-                }
-            )[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'localizedSubBlocks';
-      }
-    | {
-        textInCollapsible?: string | null;
-        textInRow?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'localizedTabs';
-      }
-  )[];
-  i18nBlocks?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'text';
-      }[]
-    | null;
-  blocksWithLocalizedArray?:
-    | {
-        array?:
-          | {
-              text?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'localizedArray';
-      }[]
-    | null;
-  blocksWithSimilarConfigs?:
-    | (
-        | {
-            items?:
-              | {
-                  title: string;
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'block-a';
-          }
-        | {
-            items?:
-              | {
-                  title2: string;
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'block-b';
-          }
-        | {
-            group?: {
-              text?: string | null;
-            };
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'group-block';
-          }
-      )[]
-    | null;
-  blocksWithSimilarGroup?:
-    | (
-        | {
-            group?: {
-              text?: string | null;
-            };
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'group-block';
-          }
-        | {
-            items?:
-              | {
-                  title2: string;
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'block-b';
-          }
-      )[]
-    | null;
-  blocksWithMinRows?:
-    | {
-        blockTitle?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block';
-      }[]
-    | null;
-  customBlocks?:
-    | (
-        | {
-            block1Title?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'block-1';
-          }
-        | {
-            block2Title?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'block-2';
-          }
-      )[]
-    | null;
-  relationshipBlocks?:
-    | {
-        relationship?: (string | null) | TextField;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'relationships';
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "text-fields".
- */
-export interface TextField {
-  id: string;
-  text: string;
-  localizedText?: string | null;
-  i18nText?: string | null;
-  defaultString?: string | null;
-  defaultEmptyString?: string | null;
-  defaultFunction?: string | null;
-  defaultAsync?: string | null;
-  overrideLength?: string | null;
-  fieldWithDefaultValue?: string | null;
-  dependentOnFieldWithDefaultValue?: string | null;
-  hasMany?: string[] | null;
-  validatesHasMany?: string[] | null;
-  localizedHasMany?: string[] | null;
-  withMinRows?: string[] | null;
-  withMaxRows?: string[] | null;
-  disableListColumnText?: string | null;
-  disableListFilterText?: string | null;
-  array?:
-    | {
-        texts?: string[] | null;
-        id?: string | null;
-      }[]
-    | null;
-  blocks?:
-    | {
-        texts?: string[] | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block';
-      }[]
-    | null;
+  blocks: {
+    text: string;
+    id?: string | null;
+    blockName?: string | null;
+    blockType: 'content';
+  }[];
   updatedAt: string;
   createdAt: string;
 }
@@ -923,6 +569,46 @@ export interface RelationshipField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "text-fields".
+ */
+export interface TextField {
+  id: string;
+  text: string;
+  localizedText?: string | null;
+  i18nText?: string | null;
+  defaultString?: string | null;
+  defaultEmptyString?: string | null;
+  defaultFunction?: string | null;
+  defaultAsync?: string | null;
+  overrideLength?: string | null;
+  fieldWithDefaultValue?: string | null;
+  dependentOnFieldWithDefaultValue?: string | null;
+  hasMany?: string[] | null;
+  validatesHasMany?: string[] | null;
+  localizedHasMany?: string[] | null;
+  withMinRows?: string[] | null;
+  withMaxRows?: string[] | null;
+  disableListColumnText?: string | null;
+  disableListFilterText?: string | null;
+  array?:
+    | {
+        texts?: string[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | {
+        texts?: string[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "select-fields".
  */
 export interface SelectField {
@@ -968,48 +654,12 @@ export interface TabsField {
     text: string;
     id?: string | null;
   }[];
-  blocks: (
-    | {
-        text: string;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'content';
-      }
-    | {
-        number: number;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'number';
-      }
-    | {
-        subBlocks?:
-          | (
-              | {
-                  text: string;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'text';
-                }
-              | {
-                  number: number;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'number';
-                }
-            )[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'subBlocks';
-      }
-    | {
-        textInCollapsible?: string | null;
-        textInRow?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'tabs';
-      }
-  )[];
+  blocks: {
+    text: string;
+    id?: string | null;
+    blockName?: string | null;
+    blockType: 'content';
+  }[];
   group: {
     number: number;
   };

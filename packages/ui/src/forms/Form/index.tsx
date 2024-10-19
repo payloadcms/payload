@@ -1,6 +1,6 @@
 'use client'
 import { dequal } from 'dequal/lite'
-import { type FormState, type PayloadRequest } from 'payload' // lite: no need for Map and Set support
+import { type FormState, type PayloadRequest, RenderedFieldMap } from 'payload' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
 import {
@@ -30,6 +30,7 @@ import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import {
+  FieldSlotsContext,
   FormContext,
   FormFieldsContext,
   FormWatchContext,
@@ -40,6 +41,7 @@ import {
 } from './context.js'
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
+import { fieldSlotReducer } from './fieldSlotReducer.js'
 import { initContextState } from './initContextState.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
 import { prepareFields } from './prepareFields.js'
@@ -65,10 +67,13 @@ export const Form: React.FC<FormProps> = (props) => {
     onSubmit,
     onSuccess,
     redirect,
+    renderedFieldMap,
     submitted: submittedFromProps,
     uuid,
     waitForAutocomplete,
   } = props
+
+  const [fieldSlots, setFieldSlots] = useReducer(fieldSlotReducer, renderedFieldMap)
 
   const method = 'method' in props ? props?.method : undefined
 
@@ -530,7 +535,13 @@ export const Form: React.FC<FormProps> = (props) => {
         formState: newFormState,
       })
 
-      return renderedFieldMap
+      console.log('newFormState', newFormState)
+
+      // setFieldSlots({
+      //   type: 'SET_FIELD_SLOT',
+      //   indexPath: schemaAccessor.schemaIndexPath,
+      //   renderedFieldMap,
+      // })
     },
     [getFieldStateBySchemaPath, dispatchFields],
   )
@@ -710,7 +721,9 @@ export const Form: React.FC<FormProps> = (props) => {
               <ProcessingContext.Provider value={processing}>
                 <ModifiedContext.Provider value={modified}>
                   <FormFieldsContext.Provider value={fieldsReducer}>
-                    {children}
+                    <FieldSlotsContext.Provider value={{ fieldSlots, setFieldSlots }}>
+                      {children}
+                    </FieldSlotsContext.Provider>
                   </FormFieldsContext.Provider>
                 </ModifiedContext.Provider>
               </ProcessingContext.Provider>

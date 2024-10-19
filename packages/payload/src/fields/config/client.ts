@@ -18,6 +18,7 @@ import {
   type SelectFieldClient,
   type TabsFieldClient,
 } from '../../fields/config/types.js'
+import { generateFieldKey } from '../../utilities/generateFieldKey.js'
 
 // Should not be used - ClientField should be used instead. This is why we don't export ClientField, we don't want people
 // to accidentally use it instead of ClientField and get confused
@@ -38,6 +39,7 @@ export type ServerOnlyFieldAdminProperties = keyof Pick<FieldBase['admin'], 'con
 
 function generateFieldPath(parentPath: string, name: string): string {
   let tabPath = parentPath || ''
+
   if (parentPath && name) {
     tabPath = `${parentPath}.${name}`
   } else if (!parentPath && name) {
@@ -52,12 +54,14 @@ export const createClientField = ({
   defaultIDType,
   field: incomingField,
   i18n,
+  indexPath,
   parentPath,
 }: {
   clientField: ClientField
   defaultIDType: Payload['config']['db']['defaultIDType']
   field: Field
   i18n: I18nClient
+  indexPath: string
   parentPath?: string
 }): ClientField => {
   const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
@@ -97,10 +101,23 @@ export const createClientField = ({
     return null
   }
 
-  clientField._schemaPath = generateFieldPath(
+  const schemaPath = generateFieldPath(
     parentPath,
     fieldAffectsData(clientField) ? clientField.name : '',
   )
+
+  const fieldKey = generateFieldKey({
+    schemaIndex: indexPath.split('.').pop(),
+    schemaPath,
+  })
+
+  const schemaAccessor = {
+    fieldKey,
+    indexPath,
+    schemaPath,
+  }
+
+  clientField._schemaAccessor = schemaAccessor
 
   if (
     'label' in clientField &&
@@ -141,7 +158,8 @@ export const createClientField = ({
         disableAddingID: incomingField.type !== 'array',
         fields: incomingField.fields,
         i18n,
-        parentPath: field._schemaPath,
+        indexPath,
+        parentPath: schemaAccessor.schemaPath,
       })
 
       break
@@ -185,7 +203,8 @@ export const createClientField = ({
             defaultIDType,
             fields: block.fields,
             i18n,
-            parentPath: `${field._schemaPath}.${block.slug}`,
+            indexPath,
+            parentPath: `${schemaAccessor.schemaPath}.${block.slug}`,
           })
 
           if (!field.blocks) {
@@ -231,7 +250,8 @@ export const createClientField = ({
             disableAddingID: true,
             fields: tab.fields,
             i18n,
-            parentPath: field._schemaPath,
+            indexPath: `${indexPath}.${i}`,
+            parentPath: schemaAccessor.schemaPath,
           })
         }
       }
@@ -307,6 +327,7 @@ export const createClientFields = ({
   disableAddingID,
   fields,
   i18n,
+  indexPath,
   parentPath,
 }: {
   clientFields: ClientField[]
@@ -314,9 +335,11 @@ export const createClientFields = ({
   disableAddingID?: boolean
   fields: Field[]
   i18n: I18nClient
+  indexPath: string
   parentPath?: string
 }): ClientField[] => {
   const newClientFields: ClientField[] = []
+
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]
 
@@ -325,6 +348,7 @@ export const createClientFields = ({
       defaultIDType,
       field,
       i18n,
+      indexPath: [indexPath, String(i)].filter(Boolean).join('.'),
       parentPath,
     })
 
@@ -336,10 +360,19 @@ export const createClientFields = ({
   const hasID = newClientFields.findIndex((f) => fieldAffectsData(f) && f.name === 'id') > -1
 
   if (!disableAddingID && !hasID) {
+    const schemaPath = generateFieldPath(parentPath, 'id')
+
     newClientFields.push({
       name: 'id',
       type: defaultIDType,
-      _schemaPath: generateFieldPath(parentPath, 'id'),
+      _schemaAccessor: {
+        fieldKey: generateFieldKey({
+          schemaIndex: indexPath.split('.').pop(),
+          schemaPath,
+        }),
+        indexPath,
+        schemaPath,
+      },
       admin: {
         components: null,
         description: 'The unique identifier for this document',
@@ -351,5 +384,6 @@ export const createClientFields = ({
       localized: undefined,
     })
   }
+
   return newClientFields
 }

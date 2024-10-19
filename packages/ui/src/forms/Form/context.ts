@@ -1,4 +1,6 @@
 'use client'
+import type { RenderedField } from 'payload'
+
 import { createContext, useContext } from 'react'
 import {
   createContext as createSelectorContext,
@@ -15,6 +17,9 @@ const ProcessingContext = createContext(false)
 const ModifiedContext = createContext(false)
 const InitializingContext = createContext(false)
 const FormFieldsContext = createSelectorContext<FormFieldsContextType>([{}, () => null])
+const FieldSlotsContext = createContext(null)
+
+export type RenderedFieldSlots = Map<string, RenderedField>
 
 /**
  * Get the state of the form, can be used to submit & validate the form.
@@ -27,6 +32,10 @@ const useFormSubmitted = (): boolean => useContext(SubmittedContext)
 const useFormProcessing = (): boolean => useContext(ProcessingContext)
 const useFormModified = (): boolean => useContext(ModifiedContext)
 const useFormInitializing = (): boolean => useContext(InitializingContext)
+const useFieldSlots = (): {
+  fieldSlots: RenderedFieldSlots
+  setFieldSlots: (fieldSlots: RenderedFieldSlots) => void
+} => useContext(FieldSlotsContext)
 
 /**
  * Get and set the value of a form field based on a selector
@@ -45,6 +54,7 @@ const useFormFields = <Value = unknown>(
 const useAllFormFields = (): FormFieldsContextType => useFullContext(FormFieldsContext)
 
 export {
+  FieldSlotsContext,
   FormContext,
   FormFieldsContext,
   FormWatchContext,
@@ -53,6 +63,7 @@ export {
   ProcessingContext,
   SubmittedContext,
   useAllFormFields,
+  useFieldSlots,
   useForm,
   useFormFields,
   useFormInitializing,

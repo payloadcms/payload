@@ -16,7 +16,7 @@ import './index.scss'
 const baseClass = 'collapsible-field'
 
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
-import { RenderFieldMap } from '../../forms/RenderFieldMap/index.js'
+import { RenderFields } from '../../forms/RenderFields/index.js'
 
 const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
   const {
@@ -138,7 +138,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
           initCollapsed={collapsedOnMount}
           onToggle={onToggle}
         >
-          <RenderFieldMap renderedFieldMap={renderedFieldMap} />
+          <RenderFields renderedFieldMap={renderedFieldMap} />
         </CollapsibleElement>
         {Description}
       </div>

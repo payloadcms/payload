@@ -44,6 +44,7 @@ export type FormProps = {
   onSubmit?: (fields: FormState, data: Data) => void
   onSuccess?: (json: unknown) => Promise<void> | void
   redirect?: string
+  renderedFieldMap?: RenderedFieldMap
   submitted?: boolean
   uuid?: string
   validationOperation?: 'create' | 'update'
@@ -192,7 +193,7 @@ export type Context = {
     data?: Data
     path: string
     schemaAccessor: SchemaAccessor
-  }) => Promise<RenderedFieldMap>
+  }) => Promise<void>
   buildRowErrors: () => void
   createFormData: CreateFormData
   disabled: boolean

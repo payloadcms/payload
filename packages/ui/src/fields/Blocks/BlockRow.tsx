@@ -1,5 +1,5 @@
 'use client'
-import type { ClientBlock, Labels, Row } from 'payload'
+import type { ClientBlock, ClientField, Labels, Row } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -10,7 +10,7 @@ import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { Pill } from '../../elements/Pill/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
-import { RenderFieldMap, useFieldRows } from '../../forms/RenderFieldMap/index.js'
+import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { RowActions } from './RowActions.js'
 import { SectionTitle } from './SectionTitle/index.js'
@@ -23,6 +23,7 @@ type BlocksFieldProps = {
   blocks: ClientBlock[]
   duplicateRow: (rowIndex: number) => void
   errorCount: number
+  fields: ClientField[]
   hasMaxRows?: boolean
   isSortable?: boolean
   Label?: React.ReactNode
@@ -44,6 +45,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   blocks,
   duplicateRow,
   errorCount,
+  fields,
   hasMaxRows,
   isSortable,
   Label,
@@ -63,10 +65,6 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   const path = `${parentPath}.${rowIndex}`
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
-
-  const { renderedRows } = useFieldRows()
-
-  const renderedRow = renderedRows[rowIndex]
 
   const fieldHasErrors = hasSubmitted && errorCount > 0
 
@@ -137,7 +135,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
         key={row.id}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        <RenderFieldMap renderedFieldMap={renderedRow?.renderedFieldMap} />
+        <RenderFields fields={fields} path={path} />
       </Collapsible>
     </div>
   )

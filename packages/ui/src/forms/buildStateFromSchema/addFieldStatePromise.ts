@@ -8,7 +8,13 @@ import type {
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
-import { fieldAffectsData, fieldHasSubFields, fieldIsSidebar, tabHasName } from 'payload/shared'
+import {
+  fieldAffectsData,
+  fieldHasSubFields,
+  fieldIsSidebar,
+  generateFieldKey,
+  tabHasName,
+} from 'payload/shared'
 
 import { getFilterOptionsQuery } from './getFilterOptionsQuery.js'
 import { iterateFields } from './iterateFields.js'
@@ -491,7 +497,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     // Handle field types that do not use names (row, etc)
 
     if (!filter || filter(args)) {
-      state[`${path}_index-${fieldIndex}`] = {
+      state[generateFieldKey({ path, schemaIndex: fieldIndex })] = {
         disableFormData: true,
         errorPaths: [],
         initialValue: undefined,
@@ -554,7 +560,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     await Promise.all(promises)
   } else if (field.type === 'ui') {
     if (!filter || filter(args)) {
-      state[`${path}_index-${fieldIndex}`] = {
+      state[generateFieldKey({ path, schemaIndex: fieldIndex })] = {
         disableFormData: true,
         errorPaths: [],
         initialValue: undefined,

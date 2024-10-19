@@ -6,7 +6,7 @@ import { tabHasName, toKebabCase } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
-import { RenderFieldMap } from '../../forms/RenderFieldMap/index.js'
+import { RenderFields } from '../../forms/RenderFields/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
@@ -143,7 +143,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
                 .join(' ')}
             >
               {Description}
-              <RenderFieldMap renderedFieldMap={renderedFieldMap} />
+              <RenderFields renderedFieldMap={renderedFieldMap} />
             </div>
           )}
         </div>

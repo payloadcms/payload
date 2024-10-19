@@ -152,7 +152,7 @@ export {
 export { Form, type FormProps } from '../../forms/Form/index.js'
 export { fieldReducer } from '../../forms/Form/fieldReducer.js'
 export { NullifyLocaleField } from '../../forms/NullifyField/index.js'
-export { RenderFieldMap } from '../../forms/RenderFieldMap/index.js'
+export { RenderFields } from '../../forms/RenderFields/index.js'
 export { RowLabel, type RowLabelProps } from '../../forms/RowLabel/index.js'
 export { RowLabelProvider, useRowLabel } from '../../forms/RowLabel/Context/index.js'
 

@@ -10,7 +10,7 @@ import type { FormProps } from '../../forms/Form/index.js'
 
 import { useForm } from '../../forms/Form/context.js'
 import { Form } from '../../forms/Form/index.js'
-import { RenderFieldMap } from '../../forms/RenderFieldMap/index.js'
+import { RenderFields } from '../../forms/RenderFields/index.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
@@ -211,7 +211,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
               >
                 <FieldSelect fields={fields} setSelected={setSelected} />
                 {selected.length === 0 ? null : (
-                  <RenderFieldMap fields={selected} path="" readOnly={false} schemaPath={slug} />
+                  <RenderFields fields={selected} path="" readOnly={false} schemaPath={slug} />
                 )}
                 <div className={`${baseClass}__sidebar-wrap`}>
                   <div className={`${baseClass}__sidebar`}>

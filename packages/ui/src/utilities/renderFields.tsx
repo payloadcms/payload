@@ -21,10 +21,11 @@ import type {
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
+  SchemaAccessor,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { fieldAffectsData, fieldIsSidebar } from 'payload/shared'
+import { fieldAffectsData, fieldIsSidebar, generateFieldKey } from 'payload/shared'
 import React from 'react'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
@@ -184,11 +185,7 @@ export type ClientSlotProps = {
   readOnly?: boolean
   renderedBlocks?: RenderedField[]
   renderedFieldMap?: RenderedFieldMap
-  schemaAccessor: {
-    initialSchemaPath: string
-    schemaIndexPath: string
-    schemaPath: string
-  }
+  schemaAccessor: SchemaAccessor
 }
 
 export type ServerSlotProps = {
@@ -250,7 +247,7 @@ const traverseFields = ({
         return null
       }
 
-      const fieldIndexPath = [indexPath, fieldIndex].filter(Boolean).join('.')
+      const fieldIndexPath = [indexPath, String(fieldIndex)].filter(Boolean).join('.')
 
       const path = [parentPath, name].filter(Boolean).join('.')
 
@@ -325,6 +322,11 @@ export const renderField: RenderFieldFn = (args) => {
     schemaPath,
   }
 
+  const fieldKey = generateFieldKey({
+    schemaIndex: renderedFieldResult.indexPath.split('.').pop(),
+    schemaPath,
+  })
+
   let clientProps: ClientSlotProps = {
     field: clientField,
     fieldState,
@@ -333,6 +335,7 @@ export const renderField: RenderFieldFn = (args) => {
     readOnly,
     renderedFieldMap: renderedFieldResult.renderedFieldMap,
     schemaAccessor: {
+      fieldKey,
       initialSchemaPath,
       schemaIndexPath: indexPath,
       schemaPath,
@@ -384,13 +387,6 @@ export const renderField: RenderFieldFn = (args) => {
           />
         )
 
-        const newMap = new Map() as RenderedFieldMap
-
-        renderedFieldResult.renderedRows.push({
-          renderedFieldMap: newMap,
-          RowLabel,
-        })
-
         traverseFields({
           className,
           clientFields: clientField && 'fields' in clientField && clientField.fields,
@@ -405,7 +401,7 @@ export const renderField: RenderFieldFn = (args) => {
           path: `${path}.${rowIndex}`,
           payload,
           permissions,
-          result: newMap,
+          result,
           schemaPath,
         })
       })
@@ -420,12 +416,6 @@ export const renderField: RenderFieldFn = (args) => {
         const clientBlockConfig =
           'blocks' in clientField &&
           clientField?.blocks?.find((block) => block.slug === row.blockType)
-
-        const newMap = new Map() as RenderedFieldMap
-
-        renderedFieldResult.renderedRows.push({
-          renderedFieldMap: newMap,
-        })
 
         traverseFields({
           className,
@@ -442,7 +432,7 @@ export const renderField: RenderFieldFn = (args) => {
           path: `${path}.${rowIndex}`,
           payload,
           permissions,
-          result: newMap,
+          result,
           schemaPath,
         })
       })
@@ -599,5 +589,5 @@ export const renderField: RenderFieldFn = (args) => {
     />
   )
 
-  result.set(path, renderedFieldResult)
+  result.set(schemaKey, renderedFieldResult)
 }

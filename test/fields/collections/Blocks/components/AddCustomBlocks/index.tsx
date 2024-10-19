@@ -19,13 +19,17 @@ export const AddCustomBlocks: React.FC = () => {
       <div className={`${baseClass}__blocks-grid`}>
         <button
           className={`${baseClass}__block-button`}
-          onClick={() =>
-            addFieldRow({
+          onClick={async () => {
+            const renderedFieldMap = await addFieldRow({
               data: { block1Title: 'Block 1: Prefilled Title', blockType: 'block-1' },
               path: blocksPath,
-              schemaPath: `${blockFieldsSlug}.${blocksPath}.block-1`,
+              schemaAccessor: {
+                schemaPath: `${blockFieldsSlug}.${blocksPath}.block-1`,
+              },
             })
-          }
+
+            // HOW DO WE THROW THIS INTO THE PROPER CONTEXT?!?!?!
+          }}
           type="button"
         >
           Add Block 1
@@ -33,13 +37,17 @@ export const AddCustomBlocks: React.FC = () => {
 
         <button
           className={`${baseClass}__block-button`}
-          onClick={() =>
-            addFieldRow({
+          onClick={() => {
+            const renderedFieldMap = addFieldRow({
               data: { block2Title: 'Block 2: Prefilled Title', blockType: 'block-2' },
               path: blocksPath,
-              schemaPath: `${blockFieldsSlug}.${blocksPath}.block-2`,
+              schemaAccessor: {
+                schemaPath: `${blockFieldsSlug}.${blocksPath}.block-2`,
+              },
             })
-          }
+
+            // HOW DO WE THROW THIS INTO THE PROPER CONTEXT?!?!?!
+          }}
           type="button"
         >
           Add Block 2
