@@ -12,7 +12,7 @@ export type RelationshipsBlockProps = {
   data: Page
 }
 
-export const RelationshipsBlock: React.FC<RelationshipsBlockProps> = (props) => {
+export const RelationshipsBlock = (props: RelationshipsBlockProps) => {
   const { data } = props
 
   return (

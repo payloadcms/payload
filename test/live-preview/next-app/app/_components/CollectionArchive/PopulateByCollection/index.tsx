@@ -31,7 +31,7 @@ export type Props = Omit<ArchiveBlockProps, 'blockType'> & {
   sort?: string
 }
 
-export const CollectionArchiveByCollection: React.FC<Props> = (props) => {
+export const CollectionArchiveByCollection = (props: Props) => {
   const {
     className,
     relationTo,

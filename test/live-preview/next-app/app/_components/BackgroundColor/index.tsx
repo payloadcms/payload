@@ -2,14 +2,14 @@ import React from 'react'
 
 import classes from './index.module.scss'
 
-type Props = {
+type BackgroundColorProps = {
   invert?: boolean | null
   className?: string
   children?: React.ReactNode
   id?: string
 }
 
-export const BackgroundColor: React.FC<Props> = (props) => {
+export const BackgroundColor = (props: BackgroundColorProps) => {
   const { id, className, children, invert } = props
 
   return (

@@ -19,7 +19,7 @@ type CMSLinkType = {
   invert?: ButtonProps['invert']
 }
 
-export const CMSLink: React.FC<CMSLinkType> = ({
+export const CMSLink = ({
   type,
   url,
   newTab,
@@ -29,7 +29,7 @@ export const CMSLink: React.FC<CMSLinkType> = ({
   children,
   className,
   invert,
-}) => {
+}: CMSLinkType) => {
   const href =
     type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
       ? `/${reference.value.slug}`

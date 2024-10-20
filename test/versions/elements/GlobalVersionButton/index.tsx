@@ -2,7 +2,7 @@ import React from 'react'
 
 const baseClass = 'global-version-button'
 
-const GlobalVersionButton: React.FC = () => {
+const GlobalVersionButton = () => {
   return (
     <div
       className={baseClass}

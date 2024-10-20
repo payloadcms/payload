@@ -7,7 +7,7 @@ type CustomContext = {
 
 const Context = createContext({} as CustomContext)
 
-const CustomProvider: React.FC = ({ children }) => {
+const CustomProvider = ({ children }) => {
   const [getCustom, setCustom] = useState({})
 
   const value = {

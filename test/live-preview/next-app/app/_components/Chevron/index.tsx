@@ -1,9 +1,11 @@
 import React from 'react'
 
-export const Chevron: React.FC<{
+export type ChevronProps = {
   className?: string
   rotate?: number
-}> = ({ className, rotate }) => {
+}
+
+export const Chevron = ({ className, rotate }: ChevronProps) => {
   return (
     <svg
       width="100%"

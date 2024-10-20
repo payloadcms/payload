@@ -2,7 +2,7 @@
 
 import React from 'react'
 
-const CustomLabel: React.FC<{ htmlFor: string }> = ({ htmlFor }) => {
+const CustomLabel = ({ htmlFor }: { htmlFor: string }) => {
   return (
     <label htmlFor={htmlFor} className="custom-label">
       #label

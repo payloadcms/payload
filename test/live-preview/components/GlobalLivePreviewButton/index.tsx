@@ -2,7 +2,7 @@ import React from 'react'
 
 const baseClass = 'global-live-preview-button'
 
-const GlobalLivePreviewButton: React.FC = () => {
+const GlobalLivePreviewButton = () => {
   return (
     <div
       className={baseClass}
