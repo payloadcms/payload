@@ -28,7 +28,7 @@ export type BuildQueryResult = {
   orderBy: {
     column: GenericColumn
     order: typeof asc | typeof desc
-  }
+  }[]
   selectFields: Record<string, GenericColumn>
   where: SQL
 }

@@ -302,7 +302,7 @@ export const traverseFields = ({
                 })
                 .from(adapter.tables[joinTableName])
                 .where(subQueryWhere)
-                .orderBy(orderBy.order(orderBy.column))
+                .orderBy(() => orderBy.map(({ column, order }) => order(column)))
                 .limit(limit),
             })
 
@@ -363,7 +363,7 @@ export const traverseFields = ({
           if (joinWhere) {
             withJoin.where = () => joinWhere
           }
-          withJoin.orderBy = orderBy.order(orderBy.column)
+          withJoin.orderBy = () => orderBy.map(({ column, order }) => order(column))
           currentArgs.with[`${path.replaceAll('.', '_')}${field.name}`] = withJoin
           break
         }

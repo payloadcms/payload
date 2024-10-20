@@ -25,32 +25,37 @@ export const buildSortParam = ({
   sort,
   timestamps,
 }: Args): PaginateOptions['sort'] => {
-  let sortProperty: string
-  let sortDirection: SortDirection = 'desc'
-
   if (!sort) {
     if (timestamps) {
-      sortProperty = 'createdAt'
+      sort = '-createdAt'
     } else {
-      sortProperty = '_id'
+      sort = '-id'
     }
-  } else if (sort.indexOf('-') === 0) {
-    sortProperty = sort.substring(1)
-  } else {
-    sortProperty = sort
-    sortDirection = 'asc'
   }
 
-  if (sortProperty === 'id') {
-    sortProperty = '_id'
-  } else {
-    sortProperty = getLocalizedSortProperty({
+  const sorting = sort.split(',').reduce<PaginateOptions['sort']>((acc, item) => {
+    let sortProperty: string
+    let sortDirection: SortDirection
+    if (item.indexOf('-') === 0) {
+      sortProperty = item.substring(1)
+      sortDirection = 'desc'
+    } else {
+      sortProperty = item
+      sortDirection = 'asc'
+    }
+    if (sortProperty === 'id') {
+      acc['_id'] = sortDirection
+      return acc
+    }
+    const localizedProperty = getLocalizedSortProperty({
       config,
       fields,
       locale,
       segments: sortProperty.split('.'),
     })
-  }
+    acc[localizedProperty] = sortDirection
+    return acc
+  }, {})
 
-  return { [sortProperty]: sortDirection }
+  return sorting
 }

@@ -19,17 +19,23 @@ export const getQueryDraftsSort = ({
     }
   }
 
-  let direction = ''
-  let orderBy = sort
+  return sort
+    .split(',')
+    .map((item) => {
+      let orderBy: string
+      let direction = ''
+      if (item[0] === '-') {
+        orderBy = item.substring(1)
+        direction = '-'
+      } else {
+        orderBy = item
+      }
 
-  if (sort[0] === '-') {
-    direction = '-'
-    orderBy = sort.substring(1)
-  }
+      if (orderBy === 'id') {
+        return `${direction}parent`
+      }
 
-  if (orderBy === 'id') {
-    return `${direction}parent`
-  }
-
-  return `${direction}version.${orderBy}`
+      return `${direction}version.${orderBy}`
+    })
+    .join(',')
 }
