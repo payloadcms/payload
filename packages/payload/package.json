@@ -129,7 +129,7 @@
     "react-router-dom": "5.3.4",
     "react-router-navigation-prompt": "1.9.6",
     "react-select": "5.7.4",
-    "react-toastify": "10.0.5",
+    "react-toastify": "10.0.6",
     "sanitize-filename": "1.6.3",
     "sass": "1.69.4",
     "scheduler": "0.23.2",
