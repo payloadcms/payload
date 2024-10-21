@@ -1,4 +1,5 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
+import type { Sort } from '../../types/index.js'
 
 /**
  * Takes the incoming sort argument and prefixes it with `versions.` and preserves any `-` prefixes for descending order
@@ -9,8 +10,8 @@ export const getQueryDraftsSort = ({
   sort,
 }: {
   collectionConfig: SanitizedCollectionConfig
-  sort: string
-}): string => {
+  sort?: Sort
+}): Sort => {
   if (!sort) {
     if (collectionConfig.defaultSort) {
       sort = collectionConfig.defaultSort
@@ -19,17 +20,24 @@ export const getQueryDraftsSort = ({
     }
   }
 
-  let direction = ''
-  let orderBy = sort
-
-  if (sort[0] === '-') {
-    direction = '-'
-    orderBy = sort.substring(1)
+  if (typeof sort === 'string') {
+    sort = [sort]
   }
 
-  if (orderBy === 'id') {
-    return `${direction}parent`
-  }
+  return sort.map((field: string) => {
+    let orderBy: string
+    let direction = ''
+    if (field[0] === '-') {
+      orderBy = field.substring(1)
+      direction = '-'
+    } else {
+      orderBy = field
+    }
 
-  return `${direction}version.${orderBy}`
+    if (orderBy === 'id') {
+      return `${direction}parent`
+    }
+
+    return `${direction}version.${orderBy}`
+  })
 }

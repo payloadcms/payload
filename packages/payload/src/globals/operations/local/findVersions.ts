@@ -1,6 +1,6 @@
 import type { PaginatedDocs } from '../../../database/types.js'
 import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
-import type { Document, PayloadRequest, Where } from '../../../types/index.js'
+import type { Document, PayloadRequest, Sort, Where } from '../../../types/index.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
 
@@ -19,7 +19,7 @@ export type Options<TSlug extends GlobalSlug> = {
   req?: PayloadRequest
   showHiddenFields?: boolean
   slug: TSlug
-  sort?: string
+  sort?: Sort
   user?: Document
   where?: Where
 }

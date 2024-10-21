@@ -1,6 +1,6 @@
 import type { PaginatedDocs } from '../../../database/types.js'
 import type { CollectionSlug, JoinQuery, Payload, TypedLocale } from '../../../index.js'
-import type { Document, PayloadRequest, RequestContext, Where } from '../../../types/index.js'
+import type { Document, PayloadRequest, RequestContext, Sort, Where } from '../../../types/index.js'
 import type { DataFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -27,7 +27,7 @@ export type Options<TSlug extends CollectionSlug> = {
   pagination?: boolean
   req?: PayloadRequest
   showHiddenFields?: boolean
-  sort?: string
+  sort?: Sort
   user?: Document
   where?: Where
 }
