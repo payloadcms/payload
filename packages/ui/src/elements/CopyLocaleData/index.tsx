@@ -69,7 +69,7 @@ export const DefaultComponent: React.FC = () => {
         }
         const response = await fetch(url)
         const data = await response.json()
-        const action = url.replace(`?locale=${from}`, `?locale=${to}`)
+        const action = url.replace(`locale=${from}`, `locale=${to}`)
 
         await submit({
           action,
