@@ -74,7 +74,6 @@ export const init: Init = async function init(this: BasePostgresAdapter) {
         disableNotNull: !!collection.versions?.drafts,
         disableUnique: true,
         fields: versionFields,
-        joins: collection.joins,
         tableName: versionsTableName,
         timestamps: true,
         versions: true,
