@@ -296,7 +296,12 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
     }
 
     if (publishSpecificLocale) {
-      publishedDocWithLocales = await getLatestCollectionVersion({
+      versionSnapshotResult = await beforeChange({
+        ...beforeChangeArgs,
+        docWithLocales,
+      })
+
+      const lastPublished = await getLatestCollectionVersion({
         id,
         config: collectionConfig,
         payload,
@@ -305,10 +310,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
         req,
       })
 
-      versionSnapshotResult = await beforeChange({
-        ...beforeChangeArgs,
-        docWithLocales,
-      })
+      publishedDocWithLocales = lastPublished ? lastPublished : {}
     }
 
     let result = await beforeChange({

@@ -100,7 +100,7 @@ const Restore: React.FC<Props> = ({
           className={[canRestoreAsDraft && `${baseClass}__button`].filter(Boolean).join(' ')}
           onClick={() => toggleModal(modalSlug)}
           size="small"
-          SubMenuPopupContent={
+          SubMenuPopupContent={() =>
             canRestoreAsDraft && (
               <PopupList.ButtonGroup>
                 <PopupList.Button onClick={() => [setDraft(true), toggleModal(modalSlug)]}>
