@@ -143,6 +143,7 @@ export type RenderFieldsArgs = {
   readonly formState?: FormState
   readonly i18n: I18nClient
   readonly indexPath?: string
+  readonly initialIndexPath?: string
   readonly initialSchemaPath?: string
   readonly margins?: 'small' | false
   readonly operation?: Operation
@@ -153,6 +154,7 @@ export type RenderFieldsArgs = {
   }
   readonly readOnly?: boolean
   readonly schemaPath?: string
+  readonly useInitialIndexPath?: boolean
 }
 
 export type RenderFieldArgs = {
@@ -206,6 +208,7 @@ const traverseFields = ({
   formState,
   i18n,
   indexPath,
+  initialIndexPath,
   margins,
   path: parentPath,
   payload,
@@ -247,7 +250,8 @@ const traverseFields = ({
         return null
       }
 
-      const fieldIndexPath = [indexPath, String(fieldIndex)].filter(Boolean).join('.')
+      const fieldIndexPath =
+        initialIndexPath || [indexPath, String(fieldIndex)].filter(Boolean).join('.')
 
       const path = [parentPath, name].filter(Boolean).join('.')
 

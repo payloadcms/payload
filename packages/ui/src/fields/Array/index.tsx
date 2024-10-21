@@ -325,6 +325,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           )}
         </DraggableSortable>
       )}
+      <p>{JSON.stringify(schemaAccessor, null, 2)}</p>
       {!disabled && !hasMaxRows && (
         <Button
           buttonStyle="icon-label"

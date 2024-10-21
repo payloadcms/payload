@@ -99,60 +99,6 @@ export interface ArrayField {
       | null;
     id?: string | null;
   }[];
-  collapsedArray?:
-    | {
-        text: string;
-        id?: string | null;
-      }[]
-    | null;
-  localized: {
-    text: string;
-    id?: string | null;
-  }[];
-  readOnly?:
-    | {
-        text?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  potentiallyEmptyArray?:
-    | {
-        text?: string | null;
-        groupInRow?: {
-          textInGroupInRow?: string | null;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  rowLabelAsComponent?:
-    | {
-        title?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  arrayWithMinRows?:
-    | {
-        text?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  disableSort?:
-    | {
-        text: string;
-        id?: string | null;
-      }[]
-    | null;
-  nestedArrayLocalized?:
-    | {
-        array?:
-          | {
-              text?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-      }[]
-    | null;
   updatedAt: string;
   createdAt: string;
 }

@@ -210,6 +210,9 @@ export const buildFormStateFn = async (
   let clientFields: ClientField[]
   let parentSchemaPath = schemaPath
   let basePath = ''
+  const baseIndexPath = indexPath
+
+  let initialIndexPath = ''
 
   if (schemaPathSegments && schemaPathSegments.length === 1) {
     // If the schema path is just the entity slug, then we are dealing with an entire collection or global
@@ -240,6 +243,8 @@ export const buildFormStateFn = async (
 
     basePath =
       pathSegments.length > 1 ? pathSegments.slice(0, pathSegments.length - 1).join('.') : ''
+
+    initialIndexPath = indexPath
   }
 
   if (!fields || !Array.isArray(fields) || fields.length === 0) {
@@ -451,7 +456,8 @@ export const buildFormStateFn = async (
           fieldSchemaMap,
           formState: formStateResult,
           i18n,
-          indexPath,
+          indexPath: baseIndexPath,
+          initialIndexPath,
           initialSchemaPath,
           path: basePath,
           payload,
