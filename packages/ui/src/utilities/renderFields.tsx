@@ -327,11 +327,6 @@ export const renderField: RenderFieldFn = (args) => {
     schemaPath,
   }
 
-  const fieldKey = generateFieldKey({
-    rowIndex: parentIndex,
-    schemaPath,
-  })
-
   let clientProps: ClientSlotProps = {
     field: clientField,
     fieldState,
@@ -340,7 +335,6 @@ export const renderField: RenderFieldFn = (args) => {
     readOnly,
     renderedFieldMap: renderedFieldResult.renderedFieldMap,
     schemaAccessor: {
-      fieldKey,
       indexPath,
       initialSchemaPath,
       schemaPath,
@@ -596,6 +590,11 @@ export const renderField: RenderFieldFn = (args) => {
       serverProps={serverProps}
     />
   )
+
+  const fieldKey = generateFieldKey({
+    rowIndex: parentIndex,
+    schemaPath,
+  })
 
   result.set(fieldKey, renderedFieldResult)
 }

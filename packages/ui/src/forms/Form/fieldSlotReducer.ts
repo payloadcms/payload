@@ -2,12 +2,12 @@ import type { RenderedFieldMap } from 'payload'
 
 type Action = {
   renderedFieldMap: RenderedFieldMap
-  type: 'SET_FIELD_SLOTS'
+  type: 'UPDATE_MANY'
 }
 
 export const fieldSlotReducer = (state: RenderedFieldMap, action: Action): RenderedFieldMap => {
   switch (action.type) {
-    case 'SET_FIELD_SLOTS': {
+    case 'UPDATE_MANY': {
       const newState = new Map(state)
 
       action.renderedFieldMap.entries().forEach(([fieldKey, field]) => {

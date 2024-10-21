@@ -1,7 +1,7 @@
 'use client'
 
 import { generateFieldKey } from 'payload/shared'
-import React from 'react'
+import React, { Fragment } from 'react'
 
 import type { Props } from './types.js'
 
@@ -73,7 +73,13 @@ export const RenderFields: React.FC<Props> = (props) => {
 
           const Field = fieldSlots.get(fieldKey)?.Field
 
-          return Field
+          return (
+            <Fragment key={fieldKey}>
+              <p>{`fieldKey: ${fieldKey}`}</p>
+              <p>{JSON.stringify(field._schemaAccessor, null, 2)}</p>
+              {Field}
+            </Fragment>
+          )
         })}
       </div>
     )

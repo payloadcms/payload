@@ -538,7 +538,7 @@ export const Form: React.FC<FormProps> = (props) => {
       })
 
       setFieldSlots({
-        type: 'SET_FIELD_SLOTS',
+        type: 'UPDATE_MANY',
         renderedFieldMap,
       })
     },
