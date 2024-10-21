@@ -228,6 +228,15 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       const duplicateRowState = deepCopyObject(rows[rowIndex])
       if (duplicateRowState.id) duplicateRowState.id = new ObjectID().toHexString()
 
+      for (const key of Object.keys(duplicateRowState).filter((key) => key.endsWith('.id'))) {
+        const idState = duplicateRowState[key]
+
+        if (idState && typeof idState.value === 'string' && ObjectId.isValid(idState.value)) {
+          duplicateRowState[key].value = new ObjectId().toHexString()
+          duplicateRowState[key].initialValue = new ObjectId().toHexString()
+        }
+      }
+
       // If there are subfields
       if (Object.keys(duplicateRowState).length > 0) {
         // Add new object containing subfield names to unflattenedRows array
