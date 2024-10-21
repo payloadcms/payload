@@ -21,8 +21,8 @@ export const WatchCondition: React.FC<{
 
   if (['collapsible', 'row'].includes(type)) {
     formStateID = generateFieldKey({
-      indexPath,
       path: `${path ? `${path}.` : ''}`,
+      schemaIndex: indexPath,
     })
   }
 

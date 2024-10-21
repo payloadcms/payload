@@ -15,7 +15,7 @@ const baseClass = 'render-fields'
 export { Props }
 
 export const RenderFields: React.FC<Props> = (props) => {
-  const { className, fields, forceRender, margins, rowIndex } = props
+  const { className, fields, forceRender, margins, path } = props
 
   const { fieldSlots } = useFieldSlots()
 
@@ -61,20 +61,22 @@ export const RenderFields: React.FC<Props> = (props) => {
           .join(' ')}
         ref={intersectionRef}
       >
-        {fields.map((field) => {
+        {fields.map((field, i) => {
           if (!('name' in field)) {
             return null
           }
 
+          const fieldPath = [path, field.name].filter(Boolean).join('.')
+
           const fieldKey = generateFieldKey({
-            rowIndex,
-            schemaPath: field._schemaAccessor.schemaPath,
+            path: fieldPath,
+            schemaIndex: i,
           })
 
           const Field = fieldSlots.get(fieldKey)?.Field
 
           return (
-            <Fragment key={fieldKey}>
+            <Fragment key={i}>
               <p>{`fieldKey: ${fieldKey}`}</p>
               <p>{JSON.stringify(field._schemaAccessor, null, 2)}</p>
               {Field}

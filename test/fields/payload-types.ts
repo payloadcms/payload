@@ -202,28 +202,6 @@ export interface CodeField {
 export interface CollapsibleField {
   id: string;
   text: string;
-  group?: {
-    textWithinGroup?: string | null;
-    subGroup?: {
-      textWithinSubGroup?: string | null;
-    };
-  };
-  someText?: string | null;
-  group2?: {
-    textWithinGroup?: string | null;
-    subGroup?: {
-      textWithinSubGroup?: string | null;
-    };
-  };
-  functionTitleField?: string | null;
-  componentTitleField?: string | null;
-  nestedTitle?: string | null;
-  arrayWithCollapsibles?:
-    | {
-        innerCollapsible?: string | null;
-        id?: string | null;
-      }[]
-    | null;
   updatedAt: string;
   createdAt: string;
 }

@@ -146,7 +146,6 @@ export type RenderFieldsArgs = {
   readonly initialSchemaPath?: string
   readonly margins?: 'small' | false
   readonly operation?: Operation
-  readonly parentIndex?: number
   readonly path?: string
   readonly payload: Payload
   readonly permissions?: {
@@ -168,7 +167,6 @@ export type RenderFieldArgs = {
   readonly importMap: ImportMap
   readonly indexPath: string
   readonly margins?: 'small' | false
-  readonly parentIndex?: number
   readonly path: string
   readonly payload: Payload
   readonly permissions?: {
@@ -215,7 +213,6 @@ const traverseFields = ({
   result,
   schemaPath,
   initialSchemaPath = schemaPath,
-  parentIndex,
 }: {
   result: RenderedFieldMap
 } & RenderFieldsArgs) => {
@@ -269,7 +266,6 @@ const traverseFields = ({
         indexPath: fieldIndexPath,
         initialSchemaPath,
         margins,
-        parentIndex,
         path,
         payload,
         permissions,
@@ -302,7 +298,6 @@ export const renderField: RenderFieldFn = (args) => {
     indexPath,
     initialSchemaPath,
     margins,
-    parentIndex,
     path,
     payload,
     permissions,
@@ -397,7 +392,6 @@ export const renderField: RenderFieldFn = (args) => {
           indexPath,
           initialSchemaPath,
           margins,
-          parentIndex: rowIndex,
           path: `${path}.${rowIndex}`,
           payload,
           permissions,
@@ -429,7 +423,6 @@ export const renderField: RenderFieldFn = (args) => {
           indexPath,
           initialSchemaPath,
           margins,
-          parentIndex: rowIndex,
           path: `${path}.${rowIndex}`,
           payload,
           permissions,
@@ -479,7 +472,6 @@ export const renderField: RenderFieldFn = (args) => {
           indexPath,
           initialSchemaPath,
           margins,
-          parentIndex: tabIndex,
           path,
           payload,
           permissions,
@@ -592,8 +584,8 @@ export const renderField: RenderFieldFn = (args) => {
   )
 
   const fieldKey = generateFieldKey({
-    rowIndex: parentIndex,
-    schemaPath,
+    path,
+    schemaIndex: indexPath.split('.').pop() || undefined,
   })
 
   result.set(fieldKey, renderedFieldResult)
