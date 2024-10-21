@@ -197,10 +197,14 @@ export const deTranslations: DefaultTranslationsObject = {
     columns: 'Spalten',
     columnToSort: 'Spalten zum Sortieren',
     confirm: 'Bestätigen',
+    confirmCopy: 'Kopie bestätigen',
     confirmDeletion: 'Löschen bestätigen',
     confirmDuplication: 'Duplizieren bestätigen',
     copied: 'Kopiert',
     copy: 'Kopieren',
+    copying: 'Kopieren',
+    copyWarning:
+      'Sie sind dabei, {{to}} mit {{from}} für {{label}} {{title}} zu überschreiben. Sind Sie sicher?',
     create: 'Erstellen',
     created: 'Erstellt',
     createdAt: 'Erstellt am',
@@ -306,6 +310,8 @@ export const deTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} {{title}} wurde erfolgreich gelöscht.',
     true: 'Wahr',
     unauthorized: 'Nicht autorisiert',
+    unsavedChanges:
+      'Sie haben ungespeicherte Änderungen. Speichern oder verwerfen Sie diese, bevor Sie fortfahren.',
     unsavedChangesDuplicate:
       'Du hast ungespeicherte Änderungen, möchtest du mit dem Duplizieren fortfahren?',
     untitled: 'ohne Titel',
