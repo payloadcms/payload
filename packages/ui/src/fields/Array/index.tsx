@@ -37,12 +37,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     Error,
     field: {
       name,
-      admin: {
-        className,
-        // components: { RowLabel },
-        isSortable = true,
-        readOnly: readOnlyFromAdmin,
-      } = {},
+      admin: { className, isSortable = true, readOnly: readOnlyFromAdmin } = {},
       fields,
       localized,
       maxRows,
@@ -53,6 +48,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     Label,
     path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
+    rowLabels,
     schemaAccessor,
     validate,
   } = props
@@ -298,6 +294,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     row={rowData}
                     rowCount={rowsData?.length}
                     rowIndex={i}
+                    rowLabels={rowLabels}
                     setCollapse={setCollapse}
                   />
                 )}

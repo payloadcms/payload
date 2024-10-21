@@ -187,6 +187,7 @@ export type ClientSlotProps = {
   readOnly?: boolean
   renderedBlocks?: RenderedField[]
   renderedFieldMap?: RenderedFieldMap
+  rowLabels?: React.ReactNode[]
   schemaAccessor: SchemaAccessor
 }
 
@@ -384,6 +385,12 @@ export const renderField: RenderFieldFn = (args) => {
             serverProps={serverProps}
           />
         )
+
+        if (!clientProps.rowLabels) {
+          clientProps.rowLabels = []
+        }
+
+        clientProps.rowLabels[rowIndex] = RowLabel
 
         traverseFields({
           className,

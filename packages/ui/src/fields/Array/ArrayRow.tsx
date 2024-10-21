@@ -54,6 +54,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   row,
   rowCount,
   rowIndex,
+  rowLabels,
   setCollapse,
   setNodeRef,
   transform,
@@ -75,6 +76,8 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   ]
     .filter(Boolean)
     .join(' ')
+
+  console.log(rowLabels)
 
   return (
     <div
@@ -115,7 +118,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         }
         header={
           <div className={`${baseClass}__row-header`}>
-            {/* {renderedRow?.RowLabel} */}
+            {rowLabels?.[rowIndex] || fallbackLabel}
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
         }
