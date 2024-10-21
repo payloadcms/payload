@@ -163,6 +163,15 @@ export const LexicalFields: CollectionConfig = {
       required: true,
     },
     {
+      name: 'lexicalRendered',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: './collections/Lexical/LexicalRendered.js#LexicalRendered',
+        },
+      },
+    },
+    {
       name: 'lexicalWithBlocks_markdown',
       type: 'textarea',
       hooks: {

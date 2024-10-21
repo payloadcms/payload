@@ -23,6 +23,11 @@
       "types": "./src/exports/client/index.ts",
       "default": "./src/exports/client/index.ts"
     },
+    "./react": {
+      "import": "./src/exports/react/index.ts",
+      "types": "./src/exports/react/index.ts",
+      "default": "./src/exports/react/index.ts"
+    },
     "./migrate": {
       "import": "./src/exports/server/migrate.ts",
       "types": "./src/exports/server/migrate.ts",
@@ -68,7 +73,7 @@
     "dequal": "2.0.3",
     "escape-html": "1.0.3",
     "lexical": "0.18.0",
-    "react-error-boundary": "4.0.13",
+    "react-error-boundary": "4.1.1",
     "uuid": "10.0.0"
   },
   "devDependencies": {
@@ -125,6 +130,11 @@
         "import": "./dist/exports/client/index.js",
         "types": "./dist/exports/client/index.d.ts",
         "default": "./dist/exports/client/index.js"
+      },
+      "./react": {
+        "import": "./dist/exports/react/index.js",
+        "types": "./dist/exports/react/index.d.ts",
+        "default": "./dist/exports/react/index.js"
       },
       "./migrate": {
         "import": "./dist/exports/server/migrate.js",
