@@ -36,10 +36,6 @@ export type ServerFieldBase<
 
 export type SchemaAccessor = {
   /**
-   * The unique identifier for the field in the schema, combining the schema path and the field index, e.g. `my-posts.my-array.text_index-2`
-   */
-  fieldKey: string
-  /**
    * The dot-notated index path to the field in the schema, e.g. `0.1.2`
    */
   indexPath: string

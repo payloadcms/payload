@@ -1,5 +1,6 @@
 'use client'
 
+import { generateFieldKey } from 'payload/shared'
 import React from 'react'
 
 import type { Props } from './types.js'
@@ -14,7 +15,7 @@ const baseClass = 'render-fields'
 export { Props }
 
 export const RenderFields: React.FC<Props> = (props) => {
-  const { className, fields, forceRender, margins, path } = props
+  const { className, fields, forceRender, margins, rowIndex } = props
 
   const { fieldSlots } = useFieldSlots()
 
@@ -40,7 +41,7 @@ export const RenderFields: React.FC<Props> = (props) => {
   }, [shouldRender, hasRendered])
 
   if (!fieldSlots || fieldSlots.size === 0) {
-    return null
+    return <p>No fields to render</p>
   }
 
   if (!i18n) {
@@ -65,7 +66,12 @@ export const RenderFields: React.FC<Props> = (props) => {
             return null
           }
 
-          const Field = fieldSlots.get(field._schemaAccessor.fieldKey)?.Field
+          const fieldKey = generateFieldKey({
+            rowIndex,
+            schemaPath: field._schemaAccessor.schemaPath,
+          })
+
+          const Field = fieldSlots.get(fieldKey)?.Field
 
           return Field
         })}

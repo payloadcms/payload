@@ -1,7 +1,7 @@
 export const generateFieldKey = ({
-  schemaIndex,
+  rowIndex,
   schemaPath,
 }: {
-  schemaIndex: number | string
-  schemaPath: string
-}) => `${schemaPath}_index-${schemaIndex}`
+  rowIndex: number // 0
+  schemaPath: string // array-fields.my-array.text
+}) => `${schemaPath}${rowIndex !== undefined ? `_index-${rowIndex}` : ''}`

@@ -1,9 +1,9 @@
 'use client'
 import type { FieldTypes } from 'payload'
 
+import { generateFieldKey } from 'payload/shared'
 import React, { Fragment } from 'react'
 
-import { generateFieldKey } from 'payload/shared'
 import { useFormFields } from '../Form/context.js'
 
 export const WatchCondition: React.FC<{
@@ -21,8 +21,8 @@ export const WatchCondition: React.FC<{
 
   if (['collapsible', 'row'].includes(type)) {
     formStateID = generateFieldKey({
+      indexPath,
       path: `${path ? `${path}.` : ''}`,
-      schemaIndex: indexPath?.split('.').pop(),
     })
   }
 

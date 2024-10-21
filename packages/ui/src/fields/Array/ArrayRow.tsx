@@ -1,5 +1,5 @@
 'use client'
-import type { ArrayField, Row } from 'payload'
+import type { ArrayField, ClientField, Row } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -10,7 +10,7 @@ import { ArrayAction } from '../../elements/ArrayAction/index.js'
 import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { useFieldSlots, useFormSubmitted } from '../../forms/Form/context.js'
-import { RenderFieldMap, useFieldRows } from '../../forms/RenderFields/index.js'
+import { RenderFieldMap, RenderFields, useFieldRows } from '../../forms/RenderFields/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
@@ -20,6 +20,7 @@ type ArrayRowProps = {
   readonly addRow: (rowIndex: number) => Promise<void> | void
   readonly duplicateRow: (rowIndex: number) => void
   readonly errorCount: number
+  readonly fields: ClientField[]
   readonly forceRender?: boolean
   readonly hasMaxRows?: boolean
   readonly isSortable?: boolean
@@ -39,6 +40,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   attributes,
   duplicateRow,
   errorCount,
+  fields,
   forceRender = false,
   hasMaxRows,
   isDragging,
@@ -124,7 +126,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         isCollapsed={row.collapsed}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        {/* <RenderFields renderedFieldMap={renderedRow?.renderedFieldMap} /> */}
+        <RenderFields fields={fields} rowIndex={rowIndex} />
       </Collapsible>
     </div>
   )

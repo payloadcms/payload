@@ -106,13 +106,7 @@ export const createClientField = ({
     fieldAffectsData(clientField) ? clientField.name : '',
   )
 
-  const fieldKey = generateFieldKey({
-    schemaIndex: indexPath.split('.').pop(),
-    schemaPath,
-  })
-
   const schemaAccessor = {
-    fieldKey,
     indexPath,
     schemaPath,
   }
@@ -327,7 +321,7 @@ export const createClientFields = ({
   disableAddingID,
   fields,
   i18n,
-  indexPath,
+  indexPath = '',
   parentPath,
 }: {
   clientFields: ClientField[]
@@ -335,7 +329,7 @@ export const createClientFields = ({
   disableAddingID?: boolean
   fields: Field[]
   i18n: I18nClient
-  indexPath: string
+  indexPath?: string
   parentPath?: string
 }): ClientField[] => {
   const newClientFields: ClientField[] = []
@@ -366,10 +360,6 @@ export const createClientFields = ({
       name: 'id',
       type: defaultIDType,
       _schemaAccessor: {
-        fieldKey: generateFieldKey({
-          schemaIndex: indexPath.split('.').pop(),
-          schemaPath,
-        }),
         indexPath,
         schemaPath,
       },

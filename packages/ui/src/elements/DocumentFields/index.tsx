@@ -19,7 +19,6 @@ type Args = {
   readonly description?: Description
   readonly fields: ClientField[]
   readonly forceSidebarWrap?: boolean
-  readonly path: string
 }
 
 export const DocumentFields: React.FC<Args> = ({
@@ -28,7 +27,6 @@ export const DocumentFields: React.FC<Args> = ({
   description,
   fields,
   forceSidebarWrap,
-  path,
 }) => {
   if (!fields) {
     return 'No fields to render'
@@ -81,12 +79,7 @@ export const DocumentFields: React.FC<Args> = ({
               .filter(Boolean)
               .join(' ')}
           >
-            <RenderFields
-              className={`${baseClass}__fields`}
-              fields={mainFields}
-              forceRender
-              path={path}
-            />
+            <RenderFields className={`${baseClass}__fields`} fields={mainFields} forceRender />
           </RenderIfInViewport>
           {AfterFields}
         </Gutter>
@@ -105,7 +98,7 @@ export const DocumentFields: React.FC<Args> = ({
                   .filter(Boolean)
                   .join(' ')}
               >
-                <RenderFields fields={sidebarFields} forceRender path={path} />
+                <RenderFields fields={sidebarFields} forceRender />
               </RenderIfInViewport>
             </div>
           </div>

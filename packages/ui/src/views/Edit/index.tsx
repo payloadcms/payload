@@ -529,7 +529,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
               )
             }
             fields={docConfig.fields}
-            path={entitySlug}
           />
           {AfterDocument}
         </Form>

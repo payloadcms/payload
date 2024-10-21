@@ -497,7 +497,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     // Handle field types that do not use names (row, etc)
 
     if (!filter || filter(args)) {
-      state[generateFieldKey({ path, schemaIndex: fieldIndex })] = {
+      state[generateFieldKey({ indexPath: '', schemaPath })] = {
         disableFormData: true,
         errorPaths: [],
         initialValue: undefined,
@@ -560,7 +560,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     await Promise.all(promises)
   } else if (field.type === 'ui') {
     if (!filter || filter(args)) {
-      state[generateFieldKey({ path, schemaIndex: fieldIndex })] = {
+      state[generateFieldKey({ indexPath: '', schemaPath })] = {
         disableFormData: true,
         errorPaths: [],
         initialValue: undefined,

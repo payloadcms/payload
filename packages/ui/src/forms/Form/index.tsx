@@ -535,8 +535,6 @@ export const Form: React.FC<FormProps> = (props) => {
         formState: newFormState,
       })
 
-      console.log('newFormState', newFormState)
-
       // setFieldSlots({
       //   type: 'SET_FIELD_SLOT',
       //   indexPath: schemaAccessor.schemaIndexPath,

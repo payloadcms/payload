@@ -48,6 +48,7 @@ export const createClientGlobalConfig = ({
     defaultIDType,
     fields: global.fields,
     i18n,
+    parentPath: global.slug,
   })
 
   const serverOnlyProperties: Partial<ServerOnlyGlobalProperties>[] = [
