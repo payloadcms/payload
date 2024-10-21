@@ -3,16 +3,23 @@ import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
+import { mapAsync } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
+import {
+  ensureCompilationIsDone,
+  exactText,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { TEST_TIMEOUT } from '../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT } from '../playwright.config.js'
+import { postsSlug } from './collections/Posts/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -160,13 +167,114 @@ describe('locked documents', () => {
       await expect(page.locator('.table .row-1 .checkbox-input__input')).toBeVisible()
     })
 
-    test('should only allow bulk delete on unlocked documents', async () => {
+    test('should only allow bulk delete on unlocked documents on current page', async () => {
       await page.goto(postsUrl.list)
       await page.locator('input#select-all').check()
       await page.locator('.delete-documents__toggle').click()
       await expect(page.locator('.delete-documents__content p')).toHaveText(
         'You are about to delete 2 Posts',
       )
+    })
+
+    test('should only allow bulk delete on unlocked documents on all pages', async () => {
+      await mapAsync([...Array(9)], async () => {
+        await createPostDoc({
+          text: 'Ready for delete',
+        })
+      })
+
+      await page.reload()
+
+      await page.goto(postsUrl.list)
+      await page.waitForURL(new RegExp(postsUrl.list))
+
+      await page.locator('input#select-all').check()
+      await page.locator('.list-selection .list-selection__button').click()
+      await page.locator('.delete-documents__toggle').click()
+      await page.locator('#confirm-delete').click()
+      await expect(page.locator('.cell-_select')).toHaveCount(1)
+    })
+
+    test('should only allow bulk publish on unlocked documents on all pages', async () => {
+      await mapAsync([...Array(10)], async () => {
+        await createPostDoc({
+          text: 'Ready for delete',
+        })
+      })
+
+      await page.reload()
+
+      await page.goto(postsUrl.list)
+      await page.waitForURL(new RegExp(postsUrl.list))
+
+      await page.locator('input#select-all').check()
+      await page.locator('.list-selection .list-selection__button').click()
+      await page.locator('.publish-many__toggle').click()
+      await page.locator('#confirm-publish').click()
+
+      const paginator = page.locator('.paginator')
+
+      await paginator.locator('button').nth(1).click()
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=2')
+      await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft')
+    })
+
+    test('should only allow bulk unpublish on unlocked documents on all pages', async () => {
+      await page.goto(postsUrl.list)
+      await page.waitForURL(new RegExp(postsUrl.list))
+
+      await page.locator('input#select-all').check()
+      await page.locator('.list-selection .list-selection__button').click()
+      await page.locator('.unpublish-many__toggle').click()
+      await page.locator('#confirm-unpublish').click()
+      await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+        'Updated 10 Posts successfully.',
+      )
+    })
+
+    test('should only allow bulk edit on unlocked documents on all pages', async () => {
+      await page.goto(postsUrl.list)
+      await page.waitForURL(new RegExp(postsUrl.list))
+
+      const bulkText = 'Bulk update title'
+
+      await page.locator('input#select-all').check()
+      await page.locator('.list-selection .list-selection__button').click()
+      await page.locator('.edit-many__toggle').click()
+
+      await page.locator('.field-select .rs__control').click()
+
+      const textOption = page.locator('.field-select .rs__option', {
+        hasText: exactText('Text'),
+      })
+
+      await expect(textOption).toBeVisible()
+
+      await textOption.click()
+
+      const textInput = page.locator('#field-text')
+
+      await expect(textInput).toBeVisible()
+
+      await textInput.fill(bulkText)
+
+      await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'Unable to update 1 out of 11 Posts.',
+      )
+
+      await page.locator('.edit-many__header__close').click()
+
+      await page.reload()
+
+      await expect(page.locator('.row-1 .cell-text')).toContainText(bulkText)
+      await expect(page.locator('.row-2 .cell-text')).toContainText(bulkText)
+
+      const paginator = page.locator('.paginator')
+
+      await paginator.locator('button').nth(1).click()
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=2')
+      await expect(page.locator('.row-1 .cell-text')).toContainText('hello')
     })
   })
 
@@ -898,4 +1006,8 @@ async function createPageDoc(data: any): Promise<Record<string, unknown> & TypeW
     collection: 'pages',
     data,
   }) as unknown as Promise<Record<string, unknown> & TypeWithID>
+}
+
+async function deleteAllPosts() {
+  await payload.delete({ collection: postsSlug, where: { id: { exists: true } } })
 }

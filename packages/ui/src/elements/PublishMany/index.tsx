@@ -71,8 +71,21 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
         try {
           const json = await res.json()
           toggleModal(modalSlug)
-          if (res.status < 400) {
-            toast.success(t('general:updatedSuccessfully'))
+
+          const deletedDocs = json?.docs.length || 0
+
+          if (res.status < 400 || deletedDocs > 0) {
+            toast.success(
+              t('general:updatedCountSuccessfully', {
+                count: deletedDocs,
+                label: getTranslation(plural, i18n),
+              }),
+            )
+            if (json?.errors.length > 0) {
+              toast.error(json.message, {
+                description: json.errors.map((error) => error.message).join('\n'),
+              })
+            }
             router.replace(
               stringifyParams({
                 params: {
@@ -99,8 +112,9 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
     addDefaultError,
     api,
     getQueryParams,
-    i18n.language,
+    i18n,
     modalSlug,
+    plural,
     selectAll,
     serverURL,
     slug,
