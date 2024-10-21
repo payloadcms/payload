@@ -1,4 +1,4 @@
-import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+import { BlocksFeature, FixedToolbarFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
@@ -36,6 +36,7 @@ export default buildConfigWithDefaults({
   editor: lexicalEditor({
     features: ({ defaultFeatures }) => [
       ...defaultFeatures,
+      FixedToolbarFeature(),
       BlocksFeature({
         blocks: [
           {
