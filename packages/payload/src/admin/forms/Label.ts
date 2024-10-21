@@ -8,6 +8,7 @@ export type GenericLabelProps = {
   readonly htmlFor?: string
   readonly Label?: MappedComponent
   readonly label?: StaticLabel
+  readonly localized?: boolean
   readonly required?: boolean
   readonly unstyled?: boolean
 }
