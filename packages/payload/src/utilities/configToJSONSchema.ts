@@ -580,26 +580,39 @@ export function fieldsToJSONSchema(
 }
 
 // This function is part of the public API and is exported through payload/utilities
-export function entityToJSONSchema(
-  config: SanitizedConfig,
-  incomingEntity: SanitizedCollectionConfig | SanitizedGlobalConfig,
-  interfaceNameDefinitions: Map<string, JSONSchema4>,
-  defaultIDType: 'number' | 'text',
-): JSONSchema4 {
+export function entityToJSONSchema({
+  config,
+  defaultIDType,
+  entityType,
+  incomingEntity,
+  interfaceNameDefinitions,
+}: {
+  config: SanitizedConfig
+  defaultIDType: 'number' | 'text'
+  entityType: 'collection' | 'global'
+  incomingEntity: SanitizedCollectionConfig | SanitizedGlobalConfig
+  interfaceNameDefinitions: Map<string, JSONSchema4>
+}): JSONSchema4 {
   const entity: SanitizedCollectionConfig | SanitizedGlobalConfig = deepCopyObject(incomingEntity)
   const title = entity.typescript?.interface
     ? entity.typescript.interface
     : singular(toWords(entity.slug, true))
 
-  const idField: FieldAffectingData = { name: 'id', type: defaultIDType as 'text', required: true }
-  const customIdField = entity.fields.find(
-    (field) => fieldAffectsData(field) && field.name === 'id',
-  ) as FieldAffectingData
+  if (entityType === 'collection') {
+    const idField: FieldAffectingData = {
+      name: 'id',
+      type: defaultIDType as 'text',
+      required: true,
+    }
+    const customIdField = entity.fields.find(
+      (field) => fieldAffectsData(field) && field.name === 'id',
+    ) as FieldAffectingData
 
-  if (customIdField && customIdField.type !== 'group' && customIdField.type !== 'tab') {
-    customIdField.required = true
-  } else {
-    entity.fields.unshift(idField)
+    if (customIdField && customIdField.type !== 'group' && customIdField.type !== 'tab') {
+      customIdField.required = true
+    } else {
+      entity.fields.unshift(idField)
+    }
   }
 
   // mark timestamp fields required
@@ -803,13 +816,33 @@ export function configToJSONSchema(
 
   // Collections and Globals have to be moved to the top-level definitions as well. Reason: The top-level type will be the `Config` type - we don't want all collection and global
   // types to be inlined inside the `Config` type
-  const entityDefinitions: { [k: string]: JSONSchema4 } = [
-    ...config.globals,
-    ...config.collections,
-  ].reduce((acc, entity) => {
-    acc[entity.slug] = entityToJSONSchema(config, entity, interfaceNameDefinitions, defaultIDType)
-    return acc
-  }, {})
+  const globalsEntityDefinitions: { [k: string]: JSONSchema4 } = [...config.globals].reduce(
+    (acc, entity) => {
+      acc[entity.slug] = entityToJSONSchema({
+        config,
+        defaultIDType,
+        entityType: 'global',
+        incomingEntity: entity,
+        interfaceNameDefinitions,
+      })
+      return acc
+    },
+    {},
+  )
+
+  const collectionsEntityDefinitions: { [k: string]: JSONSchema4 } = [...config.collections].reduce(
+    (acc, entity) => {
+      acc[entity.slug] = entityToJSONSchema({
+        config,
+        defaultIDType,
+        entityType: 'collection',
+        incomingEntity: entity,
+        interfaceNameDefinitions,
+      })
+      return acc
+    },
+    {},
+  )
 
   const authOperationDefinitions = [...config.collections]
     .filter(({ auth }) => Boolean(auth))
@@ -824,7 +857,8 @@ export function configToJSONSchema(
   let jsonSchema: JSONSchema4 = {
     additionalProperties: false,
     definitions: {
-      ...entityDefinitions,
+      ...globalsEntityDefinitions,
+      ...collectionsEntityDefinitions,
       ...Object.fromEntries(interfaceNameDefinitions),
       ...authOperationDefinitions,
     },
