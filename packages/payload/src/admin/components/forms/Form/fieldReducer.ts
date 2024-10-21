@@ -231,9 +231,9 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       for (const key of Object.keys(duplicateRowState).filter((key) => key.endsWith('.id'))) {
         const idState = duplicateRowState[key]
 
-        if (idState && typeof idState.value === 'string' && ObjectId.isValid(idState.value)) {
-          duplicateRowState[key].value = new ObjectId().toHexString()
-          duplicateRowState[key].initialValue = new ObjectId().toHexString()
+        if (idState && typeof idState.value === 'string' && ObjectID.isValid(idState.value)) {
+          duplicateRowState[key].value = new ObjectID().toHexString()
+          duplicateRowState[key].initialValue = new ObjectID().toHexString()
         }
       }
 
