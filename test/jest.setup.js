@@ -11,6 +11,6 @@ process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER = 's3'
 process.env.NODE_OPTIONS = '--no-deprecation'
 process.env.PAYLOAD_CI_DEPENDENCY_CHECKER = 'true'
 
-const dbAdapter = process.env.PAYLOAD_DATABASE || 'mongodb'
+const dbAdapter = process.env.PAYLOAD_DATABASE || 'postgres'
 
 generateDatabaseAdapter(dbAdapter)
