@@ -249,7 +249,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       data: {},
       depth: 0,
       draft: true,
-      fallbackLocale: null,
+      fallbackLocale: false,
       locale: locale?.code,
       req,
       user,
