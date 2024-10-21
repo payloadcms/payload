@@ -14,6 +14,7 @@ export const deleteByID: CollectionRouteHandlerWithID = async ({
 }) => {
   const { searchParams } = req
   const depth = searchParams.get('depth')
+  const overrideLock = searchParams.get('overrideLock')
 
   const id = sanitizeCollectionID({
     id: incomingID,
@@ -25,6 +26,7 @@ export const deleteByID: CollectionRouteHandlerWithID = async ({
     id,
     collection,
     depth: isNumber(depth) ? depth : undefined,
+    overrideLock: Boolean(overrideLock === 'true'),
     req,
   })
 
