@@ -20,6 +20,7 @@ import JSONFields from './collections/JSON/index.js'
 import { LexicalFields } from './collections/Lexical/index.js'
 import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
 import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
+import { LexicalObjectReferenceBugCollection } from './collections/LexicalObjectReferenceBug/index.js'
 import { LexicalRelationshipsFields } from './collections/LexicalRelationships/index.js'
 import NumberFields from './collections/Number/index.js'
 import PointFields from './collections/Point/index.js'
@@ -46,6 +47,7 @@ export const collectionSlugs: CollectionConfig[] = [
   LexicalFields,
   LexicalMigrateFields,
   LexicalLocalizedFields,
+  LexicalObjectReferenceBugCollection,
   {
     slug: 'users',
     admin: {

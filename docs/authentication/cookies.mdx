@@ -97,7 +97,7 @@ Cookies can cross subdomains without being considered third party cookies, for e
 
 ##### 2. Configure cookies
 
-If option 1 isn't possible, then you can get around this limitation by [configuring your cookies](https://payloadcms.com/docs/beta/authentication/overview#config-options) on your authentication collection to achieve the following setup:
+If option 1 isn't possible, then you can get around this limitation by [configuring your cookies](./overview#config-options) on your authentication collection to achieve the following setup:
 
 ```
 SameSite: None // allows the cookie to cross domains
@@ -122,7 +122,7 @@ Configuration example:
 },
 ```
 
-If you're configuring [cors](https://payloadcms.com/docs/beta/production/preventing-abuse#cross-origin-resource-sharing-cors) in your Payload config, you won't be able to use a wildcard anymore, you'll need to specify the list of allowed domains.
+If you're configuring [cors](../production/preventing-abuse#cross-origin-resource-sharing-cors) in your Payload config, you won't be able to use a wildcard anymore, you'll need to specify the list of allowed domains.
 
 
 <Banner type="success">

@@ -19,7 +19,7 @@ The JSON Field saves actual JSON in the database, which differs from the Code fi
 To add a JSON Field, set the `type` to `json` in your [Field Config](./overview):
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyJSONField: Field = {
   // ...
@@ -56,7 +56,7 @@ _\* An asterisk denotes that a property is required._
 The customize the appearance and behavior of the JSON Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyJSONField: Field = {
   // ...
@@ -77,7 +77,7 @@ The JSON Field inherits all of the default options from the base [Field Admin Co
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
@@ -102,7 +102,7 @@ If you only provide a URL to a schema, Payload will fetch the desired schema if 
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
@@ -135,7 +135,7 @@ export const ExampleCollection: CollectionConfig = {
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
