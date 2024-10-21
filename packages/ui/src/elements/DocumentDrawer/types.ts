@@ -10,6 +10,7 @@ export type DocumentDrawerProps = {
   readonly collectionSlug: string
   readonly disableActions?: boolean
   readonly drawerSlug?: string
+  readonly fetchInitialState?: boolean
   readonly id?: null | number | string
   readonly initialData?: Data
   readonly initialState?: FormState
