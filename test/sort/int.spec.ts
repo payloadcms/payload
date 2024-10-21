@@ -133,7 +133,7 @@ describe('Sort', () => {
       it('should sort posts by multiple fields', async () => {
         const posts = await payload.find({
           collection: 'posts',
-          sort: 'number2,number',
+          sort: ['number2', 'number'],
         })
 
         expect(posts.docs.map((post) => post.text)).toEqual([
@@ -149,7 +149,7 @@ describe('Sort', () => {
       it('should sort posts by multiple fields asc and desc', async () => {
         const posts = await payload.find({
           collection: 'posts',
-          sort: 'number2,-number',
+          sort: ['number2', '-number'],
         })
 
         expect(posts.docs.map((post) => post.text)).toEqual([
@@ -165,7 +165,7 @@ describe('Sort', () => {
       it('should sort posts by multiple fields with group', async () => {
         const posts = await payload.find({
           collection: 'posts',
-          sort: '-group.number,-number',
+          sort: ['-group.number', '-number'],
         })
 
         expect(posts.docs.map((post) => post.text)).toEqual([

@@ -7,7 +7,7 @@ export const DefaultSortCollection: CollectionConfig = {
   admin: {
     useAsTitle: 'text',
   },
-  defaultSort: 'number,-text',
+  defaultSort: ['number', '-text'],
   fields: [
     {
       name: 'text',

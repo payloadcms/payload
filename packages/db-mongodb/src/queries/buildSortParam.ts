@@ -1,5 +1,5 @@
 import type { PaginateOptions } from 'mongoose'
-import type { Field, SanitizedConfig } from 'payload'
+import type { Field, SanitizedConfig, Sort } from 'payload'
 
 import { getLocalizedSortProperty } from './getLocalizedSortProperty.js'
 
@@ -7,7 +7,7 @@ type Args = {
   config: SanitizedConfig
   fields: Field[]
   locale: string
-  sort: string
+  sort: Sort
   timestamps: boolean
 }
 
@@ -33,7 +33,11 @@ export const buildSortParam = ({
     }
   }
 
-  const sorting = sort.split(',').reduce<PaginateOptions['sort']>((acc, item) => {
+  if (typeof sort === 'string') {
+    sort = [sort]
+  }
+
+  const sorting = sort.reduce<PaginateOptions['sort']>((acc, item) => {
     let sortProperty: string
     let sortDirection: SortDirection
     if (item.indexOf('-') === 0) {

@@ -38,7 +38,7 @@ import type {
   TypedAuthOperations,
   TypedCollection,
 } from '../../index.js'
-import type { PayloadRequest, RequestContext } from '../../types/index.js'
+import type { PayloadRequest, RequestContext, Sort } from '../../types/index.js'
 import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
 import type {
   IncomingCollectionVersions,
@@ -375,7 +375,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   /**
    * Default field to sort by in collection list view
    */
-  defaultSort?: string
+  defaultSort?: Sort
   /**
    * When true, do not show the "Duplicate" button while editing documents within this collection and prevent `duplicate` from all APIs
    */
