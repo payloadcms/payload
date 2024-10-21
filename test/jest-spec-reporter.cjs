@@ -51,7 +51,7 @@ class JestCiSpecReporter {
     console.log(
       `Executed ${numNotSkippedTests} of ${numTotalTests} (skipped ${numPendingTests}) ${testResultText} (${runDuration})`,
     )
-    console.log(`TOTAL: ${numNotSkippedTests} ${testResultText}`)
+    console.log(`TOTAL: ${numFailedTests || numNotSkippedTests} ${testResultText}`)
   }
   onTestResult(test, { testResults }) {
     testResults.forEach((result) => {
