@@ -92,6 +92,7 @@
     "bson-objectid": "2.0.4",
     "ci-info": "^4.0.0",
     "console-table-printer": "2.11.2",
+    "croner": "8.1.2",
     "dataloader": "2.2.2",
     "deepmerge": "4.3.1",
     "file-type": "19.3.0",
