@@ -10,6 +10,7 @@ import type {
 import type { RunJobResult } from './runJob/index.js'
 
 import { Forbidden } from '../../../errors/Forbidden.js'
+import isolateObjectProperty from '../../../utilities/isolateObjectProperty.js'
 import { getUpdateJobFunction } from './runJob/getUpdateJobFunction.js'
 import { importHandlerPath } from './runJob/importHandlerPath.js'
 import { runJob } from './runJob/index.js'
@@ -140,6 +141,7 @@ export const runJobs = async ({
     if (!job.workflowSlug && !job.taskSlug) {
       throw new Error('Job must have either a workflowSlug or a taskSlug')
     }
+    const jobReq = isolateObjectProperty(req, 'transactionID')
 
     const workflowConfig: WorkflowConfig<WorkflowTypes> = job.workflowSlug
       ? req.payload.config.jobs.workflows.find(({ slug }) => slug === job.workflowSlug)
@@ -156,7 +158,7 @@ export const runJobs = async ({
       return null // Skip jobs with no workflow configuration
     }
 
-    const updateJob = getUpdateJobFunction(job, req)
+    const updateJob = getUpdateJobFunction(job, jobReq)
 
     // the runner will either be passed to the config
     // OR it will be a path, which we will need to import via eval to avoid
@@ -190,7 +192,7 @@ export const runJobs = async ({
     if (typeof workflowHandler === 'function') {
       const result = await runJob({
         job,
-        req,
+        req: jobReq,
         updateJob,
         workflowConfig,
         workflowHandler,
@@ -199,7 +201,7 @@ export const runJobs = async ({
     } else {
       const result = await runJSONJob({
         job,
-        req,
+        req: jobReq,
         updateJob,
         workflowConfig,
         workflowHandler,
