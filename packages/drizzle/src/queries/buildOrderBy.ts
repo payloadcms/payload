@@ -1,4 +1,4 @@
-import type { Field } from 'payload'
+import type { Field, Sort } from 'payload'
 
 import { asc, desc } from 'drizzle-orm'
 
@@ -13,7 +13,7 @@ type Args = {
   joins: BuildQueryJoinAliases
   locale?: string
   selectFields: Record<string, GenericColumn>
-  sort?: string
+  sort?: Sort
   tableName: string
 }
 
@@ -40,7 +40,11 @@ export const buildOrderBy = ({
     }
   }
 
-  for (const sortItem of sort.split(',')) {
+  if (typeof sort === 'string') {
+    sort = [sort]
+  }
+
+  for (const sortItem of sort) {
     let sortProperty: string
     let sortDirection: 'asc' | 'desc'
     if (sortItem[0] === '-') {
