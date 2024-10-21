@@ -50,7 +50,6 @@ type Args = {
   fields: (Field | TabAsField)[]
   forceLocalized?: boolean
   indexes: Record<string, (cols: GenericColumns) => IndexBuilder>
-  joins?: SanitizedJoins
   localesColumns: Record<string, PgColumnBuilder>
   localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder>
   newTableName: string
@@ -89,7 +88,6 @@ export const traverseFields = ({
   fields,
   forceLocalized,
   indexes,
-  joins,
   localesColumns,
   localesIndexes,
   newTableName,
@@ -672,7 +670,6 @@ export const traverseFields = ({
             fields: field.fields,
             forceLocalized,
             indexes,
-            joins,
             localesColumns,
             localesIndexes,
             newTableName,
@@ -727,7 +724,6 @@ export const traverseFields = ({
           fields: field.fields,
           forceLocalized: field.localized,
           indexes,
-          joins,
           localesColumns,
           localesIndexes,
           newTableName: `${parentTableName}_${columnName}`,
@@ -783,7 +779,6 @@ export const traverseFields = ({
           fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
           forceLocalized,
           indexes,
-          joins,
           localesColumns,
           localesIndexes,
           newTableName,
@@ -839,7 +834,6 @@ export const traverseFields = ({
           fields: field.fields,
           forceLocalized,
           indexes,
-          joins,
           localesColumns,
           localesIndexes,
           newTableName,
