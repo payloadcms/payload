@@ -10,7 +10,9 @@ export const tenantField: Field = {
   access: {
     read: () => true,
     update: (args) => {
-      if (isSuperAdmin(args)) {return true}
+      if (isSuperAdmin(args)) {
+        return true
+      }
       return tenantFieldUpdate(args)
     },
   },

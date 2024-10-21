@@ -20,7 +20,9 @@ export const Login = ({ tenantSlug }: Props) => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    if (!usernameRef?.current?.value || !passwordRef?.current?.value) {return}
+    if (!usernameRef?.current?.value || !passwordRef?.current?.value) {
+      return
+    }
     const actionRes = await fetch(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/external-users/login`,
       {

@@ -16,7 +16,7 @@ export type Options<TSlug extends CollectionSlug> = {
   depth?: number
   disableErrors?: boolean
   draft?: boolean
-  fallbackLocale?: TypedLocale
+  fallbackLocale?: 'none' | TypedLocale
   id: string
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean

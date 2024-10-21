@@ -11,7 +11,7 @@ export type Options<TSlug extends GlobalSlug> = {
   context?: RequestContext
   depth?: number
   disableErrors?: boolean
-  fallbackLocale?: TypedLocale
+  fallbackLocale?: 'none' | TypedLocale
   id: string
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean

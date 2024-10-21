@@ -65,7 +65,7 @@ export default buildConfig({
       },
     ],
     defaultLocale: 'en', // required
-    fallback: true,
+    fallback: true, // defaults to true
   },
 })
 ```
@@ -81,7 +81,7 @@ The following options are available:
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | **`locales`**  | Array of all the languages that you would like to support. [More details](#locales)                                            |
 | **`defaultLocale`** | Required string that matches one of the locale codes from the array provided. By default, if no locale is specified, documents will be returned in this locale. |
-| **`fallback`** | Boolean enabling "fallback" locale functionality. If a document is requested in a locale, but a field does not have a localized value corresponding to the requested locale, then if this property is enabled, the document will automatically fall back to the fallback locale value. If this property is not enabled, the value will not be populated. |
+| **`fallback`** | Boolean enabling "fallback" locale functionality. If a document is requested in a locale, but a field does not have a localized value corresponding to the requested locale, then if this property is enabled, the document will automatically fall back to the fallback locale value. If this property is not enabled, the value will not be populated unless a fallback is explicitly provided in the request. True by default. |
 
 ### Locales
 
