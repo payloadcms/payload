@@ -25,6 +25,7 @@ type TraverseFieldArgs = {
   tablePath: string
   topLevelArgs: Record<string, unknown>
   topLevelTableName: string
+  versions?: boolean
 }
 
 export const traverseFields = ({
@@ -41,6 +42,7 @@ export const traverseFields = ({
   tablePath,
   topLevelArgs,
   topLevelTableName,
+  versions,
 }: TraverseFieldArgs) => {
   fields.forEach((field) => {
     if (fieldIsVirtual(field)) {
@@ -98,6 +100,7 @@ export const traverseFields = ({
           tablePath: tabTablePath,
           topLevelArgs,
           topLevelTableName,
+          versions,
         })
       })
 
@@ -222,6 +225,7 @@ export const traverseFields = ({
             tablePath: `${tablePath}${toSnakeCase(field.name)}_`,
             topLevelArgs,
             topLevelTableName,
+            versions,
           })
 
           break
@@ -266,12 +270,24 @@ export const traverseFields = ({
 
           let joinLocalesCollectionTableName: string | undefined
 
+          const currentIDColumn = versions
+            ? adapter.tables[currentTableName].parent
+            : adapter.tables[currentTableName].id
+
           // Handle hasMany _rels table
           if (field.hasMany) {
             const joinRelsCollectionTableName = `${joinCollectionTableName}${adapter.relationshipsSuffix}`
 
             if (field.localized) {
               joinLocalesCollectionTableName = joinRelsCollectionTableName
+            }
+
+            let columnReferenceToCurrentID: string
+
+            if (versions) {
+              columnReferenceToCurrentID = `${topLevelTableName.replace('_', '').replace(new RegExp(`${adapter.versionsSuffix}$`), '')}_id`
+            } else {
+              columnReferenceToCurrentID = `${topLevelTableName}_id`
             }
 
             joins.push({
@@ -282,8 +298,8 @@ export const traverseFields = ({
                   adapter.tables[joinCollectionTableName].id,
                 ),
                 eq(
-                  sql.raw(`"${joinRelsCollectionTableName}"."${topLevelTableName}_id"`),
-                  adapter.tables[currentTableName].id,
+                  sql.raw(`"${joinRelsCollectionTableName}"."${columnReferenceToCurrentID}"`),
+                  currentIDColumn,
                 ),
                 eq(adapter.tables[joinRelsCollectionTableName].path, field.on),
               ),
@@ -306,7 +322,7 @@ export const traverseFields = ({
                   ),
                   eq(
                     adapter.tables[joinLocalesCollectionTableName][foreignColumn],
-                    adapter.tables[currentTableName].id,
+                    currentIDColumn,
                   ),
                 ),
                 table: adapter.tables[joinLocalesCollectionTableName],
@@ -315,7 +331,7 @@ export const traverseFields = ({
             } else {
               const constraint = eq(
                 adapter.tables[joinCollectionTableName][foreignColumn],
-                adapter.tables[currentTableName].id,
+                currentIDColumn,
               )
 
               if (subQueryWhere) {
