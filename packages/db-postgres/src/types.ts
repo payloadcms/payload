@@ -9,7 +9,7 @@ import type {
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { DrizzleConfig } from 'drizzle-orm'
 import type { PgSchema, PgTableFn, PgTransactionConfig } from 'drizzle-orm/pg-core'
-import type { Pool, PoolConfig } from 'pg'
+import type { Client, Pool, PoolConfig } from 'pg'
 
 export type Args = {
   /**
@@ -62,7 +62,9 @@ declare module 'payload' {
     afterSchemaInit: PostgresSchemaHook[]
     beforeSchemaInit: PostgresSchemaHook[]
     beginTransaction: (options?: PgTransactionConfig) => Promise<null | number | string>
-    drizzle: PostgresDB
+    drizzle: {
+      $client: Client | Pool
+    } & PostgresDB
     enums: Record<string, GenericEnum>
     /**
      * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
