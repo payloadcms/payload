@@ -24,7 +24,7 @@ import { reduceFieldsToValues } from 'payload/shared'
 import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
 import { getFieldByIndexPath } from './buildFieldSchemaMap/getFieldByIndexPath.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
-import { renderFields } from './renderFields.js'
+import { generateFieldMap } from './generateFieldMap.js'
 
 let cachedFieldMap = global._payload_fieldMap
 let cachedClientConfig = global._payload_clientConfig
@@ -445,26 +445,28 @@ export const buildFormStateFn = async (
     }
   }
 
+  const fieldMap = shouldRenderFields
+    ? generateFieldMap({
+        clientFields,
+        config,
+        entityConfig,
+        fields,
+        fieldSchemaMap,
+        formState: formStateResult,
+        i18n,
+        indexPath: baseIndexPath,
+        initialIndexPath,
+        initialSchemaPath,
+        path: basePath,
+        payload,
+        permissions: {}, // TODO
+        schemaPath: parentSchemaPath,
+      })
+    : undefined
+
   return {
     lockedState: lockedStateResult,
-    renderedFieldMap: shouldRenderFields
-      ? renderFields({
-          clientFields,
-          config,
-          entityConfig,
-          fields,
-          fieldSchemaMap,
-          formState: formStateResult,
-          i18n,
-          indexPath: baseIndexPath,
-          initialIndexPath,
-          initialSchemaPath,
-          path: basePath,
-          payload,
-          permissions: {}, // TODO
-          schemaPath: parentSchemaPath,
-        })
-      : undefined,
+    renderedFieldMap: fieldMap,
     state: formStateResult,
   }
 }

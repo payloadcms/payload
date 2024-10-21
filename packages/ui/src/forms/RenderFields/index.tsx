@@ -62,11 +62,7 @@ export const RenderFields: React.FC<Props> = (props) => {
         ref={intersectionRef}
       >
         {fields.map((field, i) => {
-          if (!('name' in field)) {
-            return null
-          }
-
-          const fieldPath = [path, field.name].filter(Boolean).join('.')
+          const fieldPath = [path, field?.name].filter(Boolean).join('.')
 
           const fieldKey = generateFieldKey({
             path: fieldPath,

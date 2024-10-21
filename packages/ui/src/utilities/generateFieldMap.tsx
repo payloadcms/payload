@@ -162,6 +162,7 @@ export type RenderFieldArgs = {
   readonly clientField: ClientBlock | ClientField | ClientTab
   readonly config: SanitizedConfig
   readonly field: Field
+  readonly fieldMap: RenderedFieldMap
   readonly fieldPermissions: FieldPermissions
   readonly forceRender?: boolean
   readonly formState: FormState
@@ -175,7 +176,6 @@ export type RenderFieldArgs = {
     [fieldName: string]: FieldPermissions
   }
   readonly readOnly?: boolean
-  readonly result: RenderedFieldMap
   readonly schemaPath: string
 }
 
@@ -200,10 +200,19 @@ export type ServerSlotProps = {
   payload: Payload
 }
 
+export const generateFieldMap: RenderFieldsFn = (args) => {
+  const fieldMap: RenderedFieldMap = new Map()
+
+  traverseFields({ ...args, fieldMap })
+
+  return fieldMap
+}
+
 const traverseFields = ({
   className,
   clientFields,
   config,
+  fieldMap,
   fields,
   forceRender,
   formState,
@@ -214,11 +223,10 @@ const traverseFields = ({
   path: parentPath,
   payload,
   permissions,
-  result,
   schemaPath,
   initialSchemaPath = schemaPath,
 }: {
-  result: RenderedFieldMap
+  fieldMap: RenderedFieldMap
 } & RenderFieldsArgs) => {
   if (!fields || (Array.isArray(fields) && fields.length === 0)) {
     console.warn(`No fields provided to renderFields for schemaPath: ${schemaPath}`) // eslint-disable-line no-console
@@ -258,11 +266,12 @@ const traverseFields = ({
 
       const fieldSchemaPath = [schemaPath, name].filter(Boolean).join('.')
 
-      renderField({
+      setFieldMapValue({
         className,
         clientField,
         config,
         field,
+        fieldMap,
         fieldPermissions,
         forceRender: forceRenderChildren,
         formState,
@@ -274,27 +283,20 @@ const traverseFields = ({
         path,
         payload,
         permissions,
-        result,
         schemaPath: fieldSchemaPath,
       })
     })
   }
 }
 
-export const renderFields: RenderFieldsFn = (args) => {
-  const result: RenderedFieldMap = new Map()
-
-  traverseFields({ ...args, result })
-
-  return result
-}
-
-export const renderField: RenderFieldFn = (args) => {
+// builds up the component w/ props and assign it to the fieldMap
+export const setFieldMapValue: RenderFieldFn = (args) => {
   const {
     className,
     clientField,
     config,
     field,
+    fieldMap,
     fieldPermissions,
     forceRender,
     formState,
@@ -307,7 +309,6 @@ export const renderField: RenderFieldFn = (args) => {
     payload,
     permissions,
     readOnly,
-    result,
     schemaPath,
   } = args
 
@@ -315,14 +316,14 @@ export const renderField: RenderFieldFn = (args) => {
 
   const fieldState = formState?.[path]
 
-  const renderedFieldResult: RenderedField = {
+  const fieldMapValue: RenderedField = {
     type: field.type,
     Field: null,
     indexPath,
     initialSchemaPath,
     isSidebar: fieldIsSidebar(field),
     path,
-    renderedFieldMap: new Map() as RenderedFieldMap,
+    // renderedFieldMap: new Map() as RenderedFieldMap,
     renderedRows: [] as FieldRow[],
     schemaPath,
   }
@@ -333,7 +334,7 @@ export const renderField: RenderFieldFn = (args) => {
     path,
     permissions: fieldPermissions,
     readOnly,
-    renderedFieldMap: renderedFieldResult.renderedFieldMap,
+    // renderedFieldMap: fieldMapValue.renderedFieldMap,
     schemaAccessor: {
       indexPath,
       initialSchemaPath,
@@ -396,6 +397,7 @@ export const renderField: RenderFieldFn = (args) => {
           className,
           clientFields: clientField && 'fields' in clientField && clientField.fields,
           config,
+          fieldMap,
           fields: field.fields,
           forceRender,
           formState,
@@ -406,7 +408,6 @@ export const renderField: RenderFieldFn = (args) => {
           path: `${path}.${rowIndex}`,
           payload,
           permissions,
-          result,
           schemaPath,
         })
       })
@@ -427,6 +428,7 @@ export const renderField: RenderFieldFn = (args) => {
           clientFields:
             clientBlockConfig && 'fields' in clientBlockConfig && clientBlockConfig.fields,
           config,
+          fieldMap,
           fields: blockConfig.fields,
           forceRender,
           formState,
@@ -437,7 +439,6 @@ export const renderField: RenderFieldFn = (args) => {
           path: `${path}.${rowIndex}`,
           payload,
           permissions,
-          result,
           schemaPath: `${schemaPath}.${blockConfig.slug}`,
         })
       })
@@ -451,6 +452,7 @@ export const renderField: RenderFieldFn = (args) => {
         className,
         clientFields: clientField && 'fields' in clientField && clientField.fields,
         config,
+        fieldMap,
         fields: field.fields,
         forceRender,
         formState,
@@ -461,7 +463,6 @@ export const renderField: RenderFieldFn = (args) => {
         path,
         payload,
         permissions,
-        result: renderedFieldResult.renderedFieldMap,
         schemaPath,
       })
 
@@ -476,6 +477,7 @@ export const renderField: RenderFieldFn = (args) => {
           className,
           clientFields: 'fields' in clientTabConfig && clientTabConfig.fields,
           config,
+          fieldMap,
           fields: tab.fields,
           forceRender,
           formState,
@@ -486,7 +488,6 @@ export const renderField: RenderFieldFn = (args) => {
           path,
           payload,
           permissions,
-          result: 'name' in tab ? new Map() : renderedFieldResult.renderedFieldMap,
           schemaPath,
         })
       })
@@ -584,7 +585,7 @@ export const renderField: RenderFieldFn = (args) => {
     ...fieldSlots,
   }
 
-  renderedFieldResult.Field = (
+  fieldMapValue.Field = (
     <RenderServerComponent
       clientProps={clientProps}
       Component={isHidden ? fieldComponents.hidden : field.admin?.components?.Field}
@@ -594,10 +595,10 @@ export const renderField: RenderFieldFn = (args) => {
     />
   )
 
-  const fieldKey = generateFieldKey({
+  const fieldMapKey = generateFieldKey({
     path,
     schemaIndex: indexPath.split('.').pop() || undefined,
   })
 
-  result.set(fieldKey, renderedFieldResult)
+  fieldMap.set(fieldMapKey, fieldMapValue)
 }
