@@ -25,6 +25,7 @@ export const findMany = async function find({
   page = 1,
   pagination,
   req = {} as PayloadRequest,
+  select,
   skip,
   sort,
   tableName,
@@ -70,6 +71,7 @@ export const findMany = async function find({
     fields,
     joinQuery,
     joins,
+    select,
     tableName,
   })
 

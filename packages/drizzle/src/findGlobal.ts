@@ -8,7 +8,7 @@ import { findMany } from './find/findMany.js'
 
 export const findGlobal: FindGlobal = async function findGlobal(
   this: DrizzleAdapter,
-  { slug, locale, req, where },
+  { slug, locale, req, select, where },
 ) {
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
 
@@ -23,6 +23,7 @@ export const findGlobal: FindGlobal = async function findGlobal(
     locale,
     pagination: false,
     req,
+    select,
     tableName,
     where,
   })

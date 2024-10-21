@@ -21,10 +21,22 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
+  collectionsSelect?: {
+    posts: PostsSelect<false> | PostsSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    uploads: UploadsSelect<false> | UploadsSelect<true>;
+    'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
+    'localized-categories': LocalizedCategoriesSelect<false> | LocalizedCategoriesSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+  };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   globals: {};
+  globalsSelect?: {};
   locale: 'en' | 'es';
   user: User & {
     collection: 'users';
@@ -53,15 +65,15 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: number;
+  id: string;
   title?: string | null;
-  upload?: (number | null) | Upload;
-  category?: (number | null) | Category;
-  categories?: (number | Category)[] | null;
-  categoriesLocalized?: (number | Category)[] | null;
+  upload?: (string | null) | Upload;
+  category?: (string | null) | Category;
+  categories?: (string | Category)[] | null;
+  categoriesLocalized?: (string | Category)[] | null;
   group?: {
-    category?: (number | null) | Category;
-    camelCaseCategory?: (number | null) | Category;
+    category?: (string | null) | Category;
+    camelCaseCategory?: (string | null) | Category;
   };
   updatedAt: string;
   createdAt: string;
@@ -71,9 +83,9 @@ export interface Post {
  * via the `definition` "uploads".
  */
 export interface Upload {
-  id: number;
+  id: string;
   relatedPosts?: {
-    docs?: (number | Post)[] | null;
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   updatedAt: string;
@@ -93,27 +105,27 @@ export interface Upload {
  * via the `definition` "categories".
  */
 export interface Category {
-  id: number;
+  id: string;
   name?: string | null;
   relatedPosts?: {
-    docs?: (number | Post)[] | null;
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   hasManyPosts?: {
-    docs?: (number | Post)[] | null;
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   hasManyPostsLocalized?: {
-    docs?: (number | Post)[] | null;
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   group?: {
     relatedPosts?: {
-      docs?: (number | Post)[] | null;
+      docs?: (string | Post)[] | null;
       hasNextPage?: boolean | null;
     } | null;
     camelCasePosts?: {
-      docs?: (number | Post)[] | null;
+      docs?: (string | Post)[] | null;
       hasNextPage?: boolean | null;
     } | null;
   };
@@ -125,9 +137,9 @@ export interface Category {
  * via the `definition` "localized-posts".
  */
 export interface LocalizedPost {
-  id: number;
+  id: string;
   title?: string | null;
-  category?: (number | null) | LocalizedCategory;
+  category?: (string | null) | LocalizedCategory;
   updatedAt: string;
   createdAt: string;
 }
@@ -136,10 +148,10 @@ export interface LocalizedPost {
  * via the `definition` "localized-categories".
  */
 export interface LocalizedCategory {
-  id: number;
+  id: string;
   name?: string | null;
   relatedPosts?: {
-    docs?: (number | LocalizedPost)[] | null;
+    docs?: (string | LocalizedPost)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   updatedAt: string;
@@ -150,7 +162,7 @@ export interface LocalizedCategory {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -167,36 +179,36 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'categories';
-        value: number | Category;
+        value: string | Category;
       } | null)
     | ({
         relationTo: 'uploads';
-        value: number | Upload;
+        value: string | Upload;
       } | null)
     | ({
         relationTo: 'localized-posts';
-        value: number | LocalizedPost;
+        value: string | LocalizedPost;
       } | null)
     | ({
         relationTo: 'localized-categories';
-        value: number | LocalizedCategory;
+        value: string | LocalizedCategory;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -206,10 +218,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -229,11 +241,133 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  upload?: T;
+  category?: T;
+  categories?: T;
+  categoriesLocalized?: T;
+  group?:
+    | T
+    | {
+        category?: T;
+        camelCaseCategory?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  name?: T;
+  relatedPosts?: T;
+  hasManyPosts?: T;
+  hasManyPostsLocalized?: T;
+  group?:
+    | T
+    | {
+        relatedPosts?: T;
+        camelCasePosts?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads_select".
+ */
+export interface UploadsSelect<T extends boolean = true> {
+  relatedPosts?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-posts_select".
+ */
+export interface LocalizedPostsSelect<T extends boolean = true> {
+  title?: T;
+  category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-categories_select".
+ */
+export interface LocalizedCategoriesSelect<T extends boolean = true> {
+  name?: T;
+  relatedPosts?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_select".
+ */
+export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_select".
+ */
+export interface PayloadPreferencesSelect<T extends boolean = true> {
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select".
+ */
+export interface PayloadMigrationsSelect<T extends boolean = true> {
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -37,8 +37,14 @@ import type {
   JsonObject,
   TypedAuthOperations,
   TypedCollection,
+  TypedCollectionSelect,
 } from '../../index.js'
-import type { PayloadRequest, RequestContext } from '../../types/index.js'
+import type {
+  PayloadRequest,
+  RequestContext,
+  SelectType,
+  TransformCollectionWithSelect,
+} from '../../types/index.js'
 import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
 import type {
   IncomingCollectionVersions,
@@ -47,6 +53,9 @@ import type {
 import type { AfterOperationArg, AfterOperationMap } from '../operations/utils.js'
 
 export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollection[TSlug]
+
+export type SelectFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollectionSelect[TSlug]
+
 export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
   TypedAuthOperations[TSlug]
 
@@ -523,8 +532,8 @@ export type Collection = {
   }
 }
 
-export type BulkOperationResult<TSlug extends CollectionSlug> = {
-  docs: DataFromCollectionSlug<TSlug>[]
+export type BulkOperationResult<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+  docs: TransformCollectionWithSelect<TSlug, TSelect>[]
   errors: {
     id: DataFromCollectionSlug<TSlug>['id']
     message: string

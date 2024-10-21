@@ -1,6 +1,6 @@
 import httpStatus from 'http-status'
 
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequest, SelectType } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { Collection, TypeWithID } from '../config/types.js'
 
@@ -18,6 +18,7 @@ export type Arguments = {
   id: number | string
   overrideAccess?: boolean
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
 }
 
@@ -33,6 +34,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     overrideAccess,
     req: { fallbackLocale, locale, payload },
     req,
+    select,
     showHiddenFields,
   } = args
 
@@ -68,6 +70,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
       locale,
       pagination: false,
       req,
+      select,
       where: fullWhere,
     })
 
@@ -119,6 +122,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
       locale,
       overrideAccess,
       req,
+      select: typeof select?.version === 'object' ? select.version : undefined,
       showHiddenFields,
     })
 
