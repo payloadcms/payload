@@ -29,12 +29,12 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
     Description,
     field: {
       admin: { className, hideGutter, readOnly: readOnlyFromAdmin, style, width } = {},
+      fields,
       label,
     },
     Label,
     path,
     readOnly: readOnlyFromTopLevelProps,
-    renderedFieldMap,
   } = props
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
@@ -91,7 +91,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
             )}
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
-          <RenderFields renderedFieldMap={renderedFieldMap} />
+          <RenderFields fields={fields} />
         </div>
       </GroupProvider>
     </div>

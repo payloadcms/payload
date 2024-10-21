@@ -9,8 +9,8 @@ import type { UseDraggableSortableReturn } from '../../elements/DraggableSortabl
 import { ArrayAction } from '../../elements/ArrayAction/index.js'
 import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import { useFieldSlots, useFormSubmitted } from '../../forms/Form/context.js'
-import { RenderFieldMap, RenderFields, useFieldRows } from '../../forms/RenderFields/index.js'
+import { useFormSubmitted } from '../../forms/Form/context.js'
+import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
@@ -66,10 +66,6 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
     2,
     '0',
   )}`
-
-  const { fieldSlots } = useFieldSlots()
-
-  // const renderedRow = renderedRows[rowIndex]
 
   const fieldHasErrors = errorCount > 0 && hasSubmitted
 

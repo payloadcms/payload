@@ -55,6 +55,7 @@ export const createClientField = ({
   field: incomingField,
   i18n,
   indexPath,
+  initialSchemaPath,
   parentPath,
 }: {
   clientField: ClientField
@@ -62,6 +63,7 @@ export const createClientField = ({
   field: Field
   i18n: I18nClient
   indexPath: string
+  initialSchemaPath: string
   parentPath?: string
 }): ClientField => {
   const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
@@ -108,6 +110,7 @@ export const createClientField = ({
 
   const schemaAccessor = {
     indexPath,
+    initialSchemaPath,
     schemaPath,
   }
 
@@ -153,6 +156,7 @@ export const createClientField = ({
         fields: incomingField.fields,
         i18n,
         indexPath,
+        initialSchemaPath,
         parentPath: schemaAccessor.schemaPath,
       })
 
@@ -198,6 +202,7 @@ export const createClientField = ({
             fields: block.fields,
             i18n,
             indexPath,
+            initialSchemaPath,
             parentPath: `${schemaAccessor.schemaPath}.${block.slug}`,
           })
 
@@ -245,6 +250,7 @@ export const createClientField = ({
             fields: tab.fields,
             i18n,
             indexPath: `${indexPath}.${i}`,
+            initialSchemaPath,
             parentPath: schemaAccessor.schemaPath,
           })
         }
@@ -322,7 +328,8 @@ export const createClientFields = ({
   fields,
   i18n,
   indexPath = '',
-  parentPath,
+  parentPath = '',
+  initialSchemaPath = parentPath,
 }: {
   clientFields: ClientField[]
   defaultIDType: Payload['config']['db']['defaultIDType']
@@ -330,6 +337,7 @@ export const createClientFields = ({
   fields: Field[]
   i18n: I18nClient
   indexPath?: string
+  initialSchemaPath: string
   parentPath?: string
 }): ClientField[] => {
   const newClientFields: ClientField[] = []
@@ -343,6 +351,7 @@ export const createClientFields = ({
       field,
       i18n,
       indexPath: [indexPath, String(i)].filter(Boolean).join('.'),
+      initialSchemaPath,
       parentPath,
     })
 
@@ -361,6 +370,7 @@ export const createClientFields = ({
       type: defaultIDType,
       _schemaAccessor: {
         indexPath,
+        initialSchemaPath,
         schemaPath,
       },
       admin: {

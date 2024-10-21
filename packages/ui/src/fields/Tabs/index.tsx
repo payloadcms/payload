@@ -143,7 +143,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
                 .join(' ')}
             >
               {Description}
-              <RenderFields renderedFieldMap={renderedFieldMap} />
+              <RenderFields fields={activeTabConfig.fields} />
             </div>
           )}
         </div>

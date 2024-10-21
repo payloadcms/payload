@@ -43,6 +43,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         isSortable = true,
         readOnly: readOnlyFromAdmin,
       } = {},
+      fields,
       localized,
       maxRows,
       minRows: minRowsProp,
@@ -285,6 +286,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     addRow={addRow}
                     duplicateRow={duplicateRow}
                     errorCount={rowErrorCount}
+                    fields={fields}
                     forceRender={forceRender}
                     hasMaxRows={hasMaxRows}
                     isSortable={isSortable}

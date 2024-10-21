@@ -140,7 +140,7 @@ export const buildFormStateFn = async (
       user,
     },
     returnLockStatus,
-    schemaAccessor: { initialSchemaPath, schemaIndexPath, schemaPath } = {},
+    schemaAccessor: { indexPath, initialSchemaPath, schemaPath } = {},
     updateLastEdited,
   } = args
 
@@ -215,7 +215,7 @@ export const buildFormStateFn = async (
     // If the schema path is just the entity slug, then we are dealing with an entire collection or global
     fields = entityConfig.fields
     clientFields = clientEntityConfig?.fields || []
-  } else if (initialSchemaPath && schemaIndexPath) {
+  } else if (initialSchemaPath && indexPath) {
     let baseFields: Field[] = []
     let baseClientFields: ClientField[] = []
     parentSchemaPath = schemaPathSegments.slice(0, schemaPathSegments.length - 1).join('.')
@@ -228,11 +228,11 @@ export const buildFormStateFn = async (
       baseClientFields = clientSchemaMap.get(initialSchemaPath)
     }
 
-    const field = getFieldByIndexPath({ fields: baseFields, schemaIndexPath }) as Field
+    const field = getFieldByIndexPath({ fields: baseFields, indexPath }) as Field
 
     const clientField = getFieldByIndexPath({
       fields: baseClientFields,
-      schemaIndexPath,
+      indexPath,
     }) as ClientField
 
     fields = field ? [field] : []
@@ -451,7 +451,7 @@ export const buildFormStateFn = async (
           fieldSchemaMap,
           formState: formStateResult,
           i18n,
-          indexPath: schemaIndexPath,
+          indexPath,
           initialSchemaPath,
           path: basePath,
           payload,

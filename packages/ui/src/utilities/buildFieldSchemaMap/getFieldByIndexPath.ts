@@ -2,12 +2,12 @@ import type { ClientField, Field } from 'payload'
 
 export const getFieldByIndexPath = ({
   fields,
-  schemaIndexPath,
+  indexPath,
 }: {
   fields: (ClientField | Field)[]
-  schemaIndexPath: string // '0.1.0'
+  indexPath: string // '0.1.0'
 }): ClientField | Field | undefined =>
-  schemaIndexPath
+  indexPath
     .split('.')
     .map(Number)
     .reduce(

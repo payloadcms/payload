@@ -16,7 +16,6 @@ export type ClientFieldBase<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
 > = {
   readonly field: TFieldClient
-  readonly renderedFieldMap?: RenderedFieldMap
 } & FieldSlots &
   FormFieldBase
 

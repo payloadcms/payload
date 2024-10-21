@@ -29,7 +29,6 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
     indexPath,
     path,
     readOnly: readOnlyFromTopLevelProps,
-    renderedFieldMap,
     RowLabel,
     schemaAccessor: { schemaPath },
   } = props
@@ -131,14 +130,14 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
           collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
           header={
             <div className={`${baseClass}__row-label-wrap`}>
-              {RowLabel}
+              {/* {RowLabel} */}
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
           }
           initCollapsed={collapsedOnMount}
           onToggle={onToggle}
         >
-          <RenderFields renderedFieldMap={renderedFieldMap} />
+          <RenderFields fields={fields} />
         </CollapsibleElement>
         {Description}
       </div>

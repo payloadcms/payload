@@ -1,6 +1,6 @@
 'use client'
 import { dequal } from 'dequal/lite'
-import { type FormState, type PayloadRequest, RenderedFieldMap } from 'payload' // lite: no need for Map and Set support
+import { type FormState, type PayloadRequest } from 'payload' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
 import {
@@ -475,6 +475,8 @@ export const Form: React.FC<FormProps> = (props) => {
         operation,
         renderFields: true,
         schemaAccessor: {
+          indexPath: '',
+          initialSchemaPath: collectionSlug || globalSlug,
           schemaPath: collectionSlug || globalSlug,
         },
         signal: abortController.signal,
@@ -535,11 +537,10 @@ export const Form: React.FC<FormProps> = (props) => {
         formState: newFormState,
       })
 
-      // setFieldSlots({
-      //   type: 'SET_FIELD_SLOT',
-      //   indexPath: schemaAccessor.schemaIndexPath,
-      //   renderedFieldMap,
-      // })
+      setFieldSlots({
+        type: 'SET_FIELD_SLOTS',
+        renderedFieldMap,
+      })
     },
     [getFieldStateBySchemaPath, dispatchFields],
   )
