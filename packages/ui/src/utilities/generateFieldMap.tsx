@@ -186,7 +186,6 @@ export type ClientSlotProps = {
   permissions: FieldPermissions
   readOnly?: boolean
   renderedBlocks?: RenderedField[]
-  renderedFieldMap?: RenderedFieldMap
   rowLabels?: React.ReactNode[]
   schemaAccessor: SchemaAccessor
 }
@@ -323,7 +322,6 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
     initialSchemaPath,
     isSidebar: fieldIsSidebar(field),
     path,
-    // renderedFieldMap: new Map() as RenderedFieldMap,
     renderedRows: [] as FieldRow[],
     schemaPath,
   }
@@ -334,7 +332,6 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
     path,
     permissions: fieldPermissions,
     readOnly,
-    // renderedFieldMap: fieldMapValue.renderedFieldMap,
     schemaAccessor: {
       indexPath,
       initialSchemaPath,
