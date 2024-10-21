@@ -79,6 +79,7 @@ export default buildConfigWithDefaults({
           exact: true,
           path: customViewPath,
           strict: true,
+          public: true,
         },
         CustomViewWithParam: {
           Component: '/components/views/CustomViewWithParam/index.js#CustomViewWithParam',
