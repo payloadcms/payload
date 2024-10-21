@@ -1247,8 +1247,8 @@ importers:
         specifier: 19.0.0-rc-3edc000d-20240926
         version: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
       react-error-boundary:
-        specifier: 4.0.13
-        version: 4.0.13(react@19.0.0-rc-3edc000d-20240926)
+        specifier: 4.1.1
+        version: 4.1.1(react@19.0.0-rc-3edc000d-20240926)
       uuid:
         specifier: 10.0.0
         version: 10.0.0
@@ -8518,8 +8518,9 @@ packages:
     peerDependencies:
       react: 19.0.0-rc-3edc000d-20240926
 
-  react-error-boundary@4.0.13:
-    resolution: {integrity: sha512-b6PwbdSv8XeOSYvjt8LpgpKrZ0yGdtZokYwkwV2wlcZbxgopHX/hgPl5VgpnoVOWd868n1hktM8Qm4b+02MiLQ==}
+  react-error-boundary@4.1.1:
+    resolution: {integrity: sha512-EOAEsbVm2EQD8zPS4m24SiaR/506RPC3CjMcjJ5JWKECsctyLsDTKxB26Hvl7jcz7KweSOkBYAcY/hmMpMn2jA==}
+    engines: {pnpm: '=9'}
     peerDependencies:
       react: 19.0.0-rc-3edc000d-20240926
 
@@ -18598,7 +18599,7 @@ snapshots:
       '@babel/runtime': 7.25.0
       react: 19.0.0-rc-3edc000d-20240926
 
-  react-error-boundary@4.0.13(react@19.0.0-rc-3edc000d-20240926):
+  react-error-boundary@4.1.1(react@19.0.0-rc-3edc000d-20240926):
     dependencies:
       '@babel/runtime': 7.25.0
       react: 19.0.0-rc-3edc000d-20240926

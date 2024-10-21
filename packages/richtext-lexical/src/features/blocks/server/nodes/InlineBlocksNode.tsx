@@ -8,6 +8,7 @@ import type {
   SerializedLexicalNode,
   Spread,
 } from 'lexical'
+import type { JsonObject } from 'payload'
 import type React from 'react'
 import type { JSX } from 'react'
 
@@ -15,13 +16,10 @@ import ObjectID from 'bson-objectid'
 import { DecoratorNode } from 'lexical'
 import { deepCopyObjectSimple } from 'payload/shared'
 
-export type InlineBlockFields = {
-  /** Block form data */
-  [key: string]: any
-  //blockName: string
+export type InlineBlockFields<TInlineBlockFields extends JsonObject = JsonObject> = {
   blockType: string
   id: string
-}
+} & TInlineBlockFields
 
 export type SerializedServerInlineBlockNode = Spread<
   {
