@@ -16,6 +16,10 @@ export type AdminViewConfig = {
   exact?: boolean
   meta?: MetaConfig
   path?: string
+  /** Whether the route is public or requires authentication and access to the admin panel
+   * @default false
+   */
+  public?: boolean
   sensitive?: boolean
   strict?: boolean
 }
