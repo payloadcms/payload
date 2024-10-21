@@ -27,7 +27,7 @@ export type PublishManyProps = {
 export const PublishMany: React.FC<PublishManyProps> = (props) => {
   const { clearRouteCache } = useRouteCache()
 
-  const { collection: { slug, labels: { plural }, versions } = {} } = props
+  const { collection: { slug, labels: { plural, singular }, versions } = {} } = props
 
   const {
     config: {
@@ -73,12 +73,13 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
           toggleModal(modalSlug)
 
           const deletedDocs = json?.docs.length || 0
+          const successLabel = deletedDocs > 1 ? plural : singular
 
           if (res.status < 400 || deletedDocs > 0) {
             toast.success(
               t('general:updatedCountSuccessfully', {
                 count: deletedDocs,
-                label: getTranslation(plural, i18n),
+                label: getTranslation(successLabel, i18n),
               }),
             )
             if (json?.errors.length > 0) {
@@ -117,6 +118,7 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
     plural,
     selectAll,
     serverURL,
+    singular,
     slug,
     t,
     toggleModal,

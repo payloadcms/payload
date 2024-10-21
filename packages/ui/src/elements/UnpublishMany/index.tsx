@@ -26,7 +26,7 @@ export type UnpublishManyProps = {
 }
 
 export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
-  const { collection: { slug, labels: { plural }, versions } = {} } = props
+  const { collection: { slug, labels: { plural, singular }, versions } = {} } = props
 
   const {
     config: {
@@ -71,12 +71,13 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
           toggleModal(modalSlug)
 
           const deletedDocs = json?.docs.length || 0
+          const successLabel = deletedDocs > 1 ? plural : singular
 
           if (res.status < 400 || deletedDocs > 0) {
             toast.success(
               t('general:updatedCountSuccessfully', {
                 count: deletedDocs,
-                label: getTranslation(plural, i18n),
+                label: getTranslation(successLabel, i18n),
               }),
             )
             if (json?.errors.length > 0) {
@@ -114,6 +115,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
     plural,
     selectAll,
     serverURL,
+    singular,
     slug,
     t,
     toggleModal,

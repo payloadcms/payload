@@ -26,7 +26,7 @@ export type Props = {
 }
 
 export const DeleteMany: React.FC<Props> = (props) => {
-  const { collection: { slug, labels: { plural } } = {} } = props
+  const { collection: { slug, labels: { plural, singular } } = {} } = props
 
   const { permissions } = useAuth()
   const {
@@ -67,12 +67,13 @@ export const DeleteMany: React.FC<Props> = (props) => {
           toggleModal(modalSlug)
 
           const deletedDocs = json?.docs.length || 0
+          const successLabel = deletedDocs > 1 ? plural : singular
 
           if (res.status < 400 || deletedDocs > 0) {
             toast.success(
               t('general:deletedCountSuccessfully', {
                 count: deletedDocs,
-                label: getTranslation(plural, i18n),
+                label: getTranslation(successLabel, i18n),
               }),
             )
             if (json?.errors.length > 0) {
@@ -115,6 +116,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
     router,
     selectAll,
     serverURL,
+    singular,
     slug,
     stringifyParams,
     t,
