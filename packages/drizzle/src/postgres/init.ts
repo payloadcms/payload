@@ -68,12 +68,13 @@ export const init: Init = async function init(this: BasePostgresAdapter) {
         `_${toSnakeCase(collection.slug)}${this.versionsSuffix}`,
       )
       const versionFields = buildVersionCollectionFields(this.payload.config, collection)
-
+      console.log(collection.joins)
       buildTable({
         adapter: this,
         disableNotNull: !!collection.versions?.drafts,
         disableUnique: true,
         fields: versionFields,
+        joins: collection.joins,
         tableName: versionsTableName,
         timestamps: true,
         versions: true,

@@ -942,9 +942,10 @@ export const traverseFields = ({
         const localized = adapter.payload.config.localization && field.localized
         const fieldSchemaPath = `${fieldPrefix || ''}${field.name}`
         let target: string
-        const joinConfig = joins[field.collection].find(
-          ({ schemaPath }) => fieldSchemaPath === schemaPath,
-        )
+        const joinConfig = joins[field.collection].find(({ schemaPath }) => {
+          const adjustedSchemaPath = versions ? `version.${schemaPath}` : schemaPath
+          return fieldSchemaPath === adjustedSchemaPath
+        })
         if (joinConfig.targetField.hasMany) {
           target = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${adapter.relationshipsSuffix}`
         } else {
