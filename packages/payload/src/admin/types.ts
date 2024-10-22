@@ -7,7 +7,7 @@ import type { ClientField, Field, FieldTypes } from '../fields/config/types.js'
 import type { JsonObject } from '../types/index.js'
 import type { Data, FormState } from './types.js'
 
-export type { CellComponentProps, DefaultCellComponentProps } from './elements/Cell.js'
+export type { DefaultCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
 export type { DayPickerProps, SharedProps, TimePickerProps } from './elements/DatePicker.js'
 export type { CustomPreviewButton } from './elements/PreviewButton.js'

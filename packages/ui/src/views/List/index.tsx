@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation.js'
 import { formatFilesize, isNumber } from 'payload/shared'
 import React, { Fragment, useEffect, useState } from 'react'
 
+import type { RenderedCells } from '../../elements/Table/index.js'
 import type { ListPreferences } from './types.js'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
@@ -44,12 +45,15 @@ import './index.scss'
 const baseClass = 'collection-list'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-export const DefaultListView: React.FC<{
-  collectionConfig: ClientCollectionConfig
+export type ListViewClientProps = {
+  collectionSlug: string
   listPreferences?: ListPreferences
   preferenceKey?: string
-}> = (props) => {
-  const { collectionConfig: collectionConfigFromProps, listPreferences, preferenceKey } = props
+  renderedCells?: RenderedCells
+}
+
+export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
+  const { listPreferences, preferenceKey, renderedCells } = props
 
   const payloadServerAction = useServerFunctions()
 
@@ -202,6 +206,7 @@ export const DefaultListView: React.FC<{
                   }}
                   data={docs}
                   fields={fields}
+                  renderedCells={renderedCells}
                 />
               </RelationshipProvider>
             )}

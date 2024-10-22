@@ -86,7 +86,6 @@ export { SetStepNav } from '../../elements/StepNav/SetStepNav.js'
 export { useStepNav } from '../../elements/StepNav/index.js'
 export type { StepNavItem } from '../../elements/StepNav/types.js'
 export { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
-export { TableCellProvider, useTableCell } from '../../elements/Table/TableCellProvider/index.js'
 export { type Column, Table } from '../../elements/Table/index.js'
 export { DefaultCell } from '../../elements/Table/DefaultCell/index.js'
 export { TableColumnsProvider } from '../../elements/TableColumns/index.js'
@@ -243,7 +242,7 @@ export { NumberField as NumberCondition } from '../../elements/WhereBuilder/Cond
 export { DateField as DateCondition } from '../../elements/WhereBuilder/Condition/Date/index.js'
 export { EmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
 
-export { DefaultListView } from '../../views/List/index.js'
+export { DefaultListView, type ListViewClientProps } from '../../views/List/index.js'
 export type { ListPreferences } from '../../views/List/types.js'
 
 export { DefaultEditView } from '../../views/Edit/index.js'

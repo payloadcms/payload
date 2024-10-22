@@ -1,3 +1,4 @@
+import type { ListPreferences, ListViewClientProps } from '@payloadcms/ui'
 import type { AdminViewProps, Where } from 'payload'
 
 import {
@@ -6,9 +7,9 @@ import {
   ListInfoProvider,
   ListQueryProvider,
 } from '@payloadcms/ui'
-import { type ListPreferences } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
+import { renderCells } from 'packages/ui/src/utilities/renderCells.js'
 import { mergeListSearchAndWhere } from 'payload'
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
@@ -21,6 +22,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
   initPageResult,
   params,
   // payloadServerAction,
+  clientConfig,
   searchParams,
 }) => {
   const {
@@ -122,6 +124,22 @@ export const ListView: React.FC<AdminViewProps> = async ({
       where: whereQuery || {},
     })
 
+    const renderedCells = renderCells({
+      clientFields: clientConfig.collections?.find(
+        (clientCollection) => clientCollection.slug === collectionSlug,
+      )?.fields,
+      collectionSlug,
+      data,
+      fields: collectionConfig.fields,
+      importMap: req.payload.importMap,
+    })
+
+    const clientProps: ListViewClientProps = {
+      collectionSlug,
+      listPreferences,
+      renderedCells,
+    }
+
     return (
       <Fragment>
         <HydrateAuthProvider permissions={permissions} />
@@ -141,10 +159,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
             preferenceKey={preferenceKey}
           >
             <RenderServerComponent
-              clientProps={{
-                collectionSlug,
-                listPreferences,
-              }}
+              clientProps={clientProps}
               Component={collectionConfig?.admin?.components?.views?.list.Component}
               Fallback={DefaultListView}
               importMap={payload.importMap}

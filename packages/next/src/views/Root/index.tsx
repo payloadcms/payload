@@ -114,6 +114,7 @@ export const RootPage = async ({
       importMap={importMap}
       serverProps={{
         ...serverProps,
+        clientConfig,
         i18n: initPageResult?.req.i18n,
         importMap,
         initPageResult,
