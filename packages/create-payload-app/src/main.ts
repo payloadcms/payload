@@ -21,6 +21,7 @@ export class Main {
     this.args = arg(
       {
         '--db': String,
+        '--dbUri': String,
         '--help': Boolean,
         '--name': String,
         '--secret': String,

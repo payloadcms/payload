@@ -24,6 +24,7 @@ const dbChoiceRecord: Record<DbType, DbChoice> = {
 
 export async function selectDb(args: CliArgs, projectName: string): Promise<DbDetails> {
   let dbType: DbType | undefined = undefined
+  let dbUri: string | undefined = undefined
   if (args['--db']) {
     if (!Object.values(dbChoiceRecord).some((dbChoice) => dbChoice.value === args['--db'])) {
       throw new Error(
@@ -57,6 +58,14 @@ export async function selectDb(args: CliArgs, projectName: string): Promise<DbDe
   }
 
   const dbChoice = dbChoiceRecord[dbType]
+
+  if (args['--dbUri']) {
+    dbUri = args['--dbUri'] as string
+    return {
+      dbUri,
+      type: dbChoice.value,
+    }
+  }
 
   const dbUriRes = await prompts(
     {
