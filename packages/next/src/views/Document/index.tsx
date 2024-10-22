@@ -71,7 +71,6 @@ export const Document: React.FC<AdminViewProps> = async ({
     id,
     collectionConfig,
     globalConfig,
-    importMap,
     locale,
     req,
   })
