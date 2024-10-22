@@ -13,6 +13,7 @@ import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
 import { isPolymorphicRelationship } from '../utilities/isPolymorphicRelationship.js'
+import { addJoinTable } from './addJoinTable.js'
 import { getTableAlias } from './getTableAlias.js'
 
 type Constraint = {
@@ -53,7 +54,6 @@ type Args = {
    * If creating a new table name for arrays and blocks, this suffix should be appended to the table name
    */
   tableNameSuffix?: string
-  useAlias?: boolean
   /**
    * The raw value of the query before sanitization
    */
@@ -79,7 +79,6 @@ export const getTableColumnFromPath = ({
   selectFields,
   tableName,
   tableNameSuffix = '',
-  useAlias,
   value,
 }: Args): TableColumn => {
   const fieldPath = incomingSegments[0]
@@ -141,7 +140,6 @@ export const getTableColumnFromPath = ({
           selectFields,
           tableName: newTableName,
           tableNameSuffix,
-          useAlias,
           value,
         })
       }
@@ -162,7 +160,6 @@ export const getTableColumnFromPath = ({
             selectFields,
             tableName: newTableName,
             tableNameSuffix: `${tableNameSuffix}${toSnakeCase(field.name)}_`,
-            useAlias,
             value,
           })
         }
@@ -181,7 +178,6 @@ export const getTableColumnFromPath = ({
           selectFields,
           tableName: newTableName,
           tableNameSuffix,
-          useAlias,
           value,
         })
       }
@@ -190,8 +186,9 @@ export const getTableColumnFromPath = ({
         if (locale && field.localized && adapter.payload.config.localization) {
           newTableName = `${tableName}${adapter.localesSuffix}`
 
-          joins.push({
+          addJoinTable({
             condition: eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
+            joins,
             table: adapter.tables[newTableName],
           })
           if (locale !== 'all') {
@@ -217,7 +214,6 @@ export const getTableColumnFromPath = ({
           selectFields,
           tableName: newTableName,
           tableNameSuffix: `${tableNameSuffix}${toSnakeCase(field.name)}_`,
-          useAlias,
           value,
         })
       }
@@ -229,11 +225,12 @@ export const getTableColumnFromPath = ({
           )
 
           if (locale && field.localized && adapter.payload.config.localization) {
-            joins.push({
+            addJoinTable({
               condition: and(
                 eq(adapter.tables[tableName].id, adapter.tables[newTableName].parent),
                 eq(adapter.tables[newTableName]._locale, locale),
               ),
+              joins,
               table: adapter.tables[newTableName],
             })
             if (locale !== 'all') {
@@ -244,8 +241,9 @@ export const getTableColumnFromPath = ({
               })
             }
           } else {
-            joins.push({
+            addJoinTable({
               condition: eq(adapter.tables[tableName].id, adapter.tables[newTableName].parent),
+              joins,
               table: adapter.tables[newTableName],
             })
           }
@@ -276,8 +274,9 @@ export const getTableColumnFromPath = ({
           ]
 
           if (locale && field.localized && adapter.payload.config.localization) {
-            joins.push({
+            addJoinTable({
               condition: and(...joinConstraints, eq(adapter.tables[newTableName]._locale, locale)),
+              joins,
               table: adapter.tables[newTableName],
             })
             if (locale !== 'all') {
@@ -288,8 +287,9 @@ export const getTableColumnFromPath = ({
               })
             }
           } else {
-            joins.push({
+            addJoinTable({
               condition: and(...joinConstraints),
+              joins,
               table: adapter.tables[newTableName],
             })
           }
@@ -313,11 +313,12 @@ export const getTableColumnFromPath = ({
 
         constraintPath = `${constraintPath}${field.name}.%.`
         if (locale && field.localized && adapter.payload.config.localization) {
-          joins.push({
+          addJoinTable({
             condition: and(
               eq(arrayParentTable.id, adapter.tables[newTableName]._parentID),
               eq(adapter.tables[newTableName]._locale, locale),
             ),
+            joins,
             table: adapter.tables[newTableName],
           })
           if (locale !== 'all') {
@@ -328,8 +329,9 @@ export const getTableColumnFromPath = ({
             })
           }
         } else {
-          joins.push({
+          addJoinTable({
             condition: eq(arrayParentTable.id, adapter.tables[newTableName]._parentID),
+            joins,
             table: adapter.tables[newTableName],
           })
         }
@@ -345,7 +347,6 @@ export const getTableColumnFromPath = ({
           rootTableName,
           selectFields,
           tableName: newTableName,
-          useAlias,
           value,
         })
       }
@@ -404,7 +405,6 @@ export const getTableColumnFromPath = ({
               rootTableName,
               selectFields: blockSelectFields,
               tableName: newTableName,
-              useAlias,
               value,
             })
           } catch (error) {
@@ -641,7 +641,6 @@ export const getTableColumnFromPath = ({
             rootTableName: newTableName,
             selectFields,
             tableName: newTableName,
-            useAlias,
             value,
           })
         } else if (
@@ -694,7 +693,6 @@ export const getTableColumnFromPath = ({
             pathSegments: pathSegments.slice(1),
             selectFields,
             tableName: newTableName,
-            useAlias,
             value,
           })
         }
@@ -716,12 +714,11 @@ export const getTableColumnFromPath = ({
         const parentTable = aliasTable || adapter.tables[tableName]
         newTableName = `${tableName}${adapter.localesSuffix}`
 
-        newTable = useAlias
-          ? getTableAlias({ adapter, tableName: newTableName }).newAliasTable
-          : adapter.tables[newTableName]
+        newTable = adapter.tables[newTableName]
 
-        joins.push({
+        addJoinTable({
           condition: eq(parentTable.id, newTable._parentID),
+          joins,
           table: newTable,
         })
 
