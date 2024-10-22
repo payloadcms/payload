@@ -1,4 +1,4 @@
-import type { PayloadRequest, QueryDrafts, SanitizedCollectionConfig } from 'payload'
+import type { JoinQuery, PayloadRequest, QueryDrafts, SanitizedCollectionConfig } from 'payload'
 
 import { buildVersionCollectionFields, combineQueries } from 'payload'
 import toSnakeCase from 'to-snake-case'
@@ -9,7 +9,17 @@ import { findMany } from './find/findMany.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: DrizzleAdapter,
-  { collection, limit, locale, page = 1, pagination, req = {} as PayloadRequest, sort, where },
+  {
+    collection,
+    joins,
+    limit,
+    locale,
+    page = 1,
+    pagination,
+    req = {} as PayloadRequest,
+    sort,
+    where,
+  },
 ) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const tableName = this.tableNameMap.get(
@@ -22,6 +32,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   const result = await findMany({
     adapter: this,
     fields,
+    joins,
     limit,
     locale,
     page,
@@ -29,6 +40,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     req,
     sort,
     tableName,
+    versions: true,
     where: combinedWhere,
   })
 
