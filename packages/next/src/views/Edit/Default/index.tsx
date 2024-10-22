@@ -368,7 +368,7 @@ export const DefaultEditView: React.FC = () => {
   const shouldShowDocumentLockedModal =
     documentIsLocked &&
     currentEditor &&
-    currentEditor.id !== user.id &&
+    currentEditor.id !== user?.id &&
     !isReadOnlyForIncomingUser &&
     !showTakeOverModal &&
     !documentLockStateRef.current?.hasShownLockedModal

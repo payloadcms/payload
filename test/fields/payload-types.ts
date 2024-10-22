@@ -31,6 +31,7 @@ export interface Config {
     'lexical-fields': LexicalField;
     'lexical-migrate-fields': LexicalMigrateField;
     'lexical-localized-fields': LexicalLocalizedField;
+    lexicalObjectReferenceBug: LexicalObjectReferenceBug;
     users: User;
     'array-fields': ArrayField;
     'block-fields': BlockField;
@@ -102,6 +103,21 @@ export interface UserAuthOperations {
 export interface LexicalField {
   id: string;
   title: string;
+  lexicalRootEditor?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   lexicalSimple?: {
     root: {
       type: string;
@@ -254,6 +270,45 @@ export interface LexicalLocalizedField {
     [k: string]: unknown;
   } | null;
   lexicalBlocksLocalized?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexicalObjectReferenceBug".
+ */
+export interface LexicalObjectReferenceBug {
+  id: string;
+  lexicalDefault?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  lexicalEditor?: {
     root: {
       type: string;
       children: {
@@ -1021,6 +1076,29 @@ export interface IndexedField {
   id: string;
   text: string;
   uniqueText?: string | null;
+  uniqueRelationship?: (string | null) | TextField;
+  uniqueHasManyRelationship?: (string | TextField)[] | null;
+  uniqueHasManyRelationship_2?: (string | TextField)[] | null;
+  uniquePolymorphicRelationship?: {
+    relationTo: 'text-fields';
+    value: string | TextField;
+  } | null;
+  uniquePolymorphicRelationship_2?: {
+    relationTo: 'text-fields';
+    value: string | TextField;
+  } | null;
+  uniqueHasManyPolymorphicRelationship?:
+    | {
+        relationTo: 'text-fields';
+        value: string | TextField;
+      }[]
+    | null;
+  uniqueHasManyPolymorphicRelationship_2?:
+    | {
+        relationTo: 'text-fields';
+        value: string | TextField;
+      }[]
+    | null;
   uniqueRequiredText: string;
   localizedUniqueRequiredText: string;
   /**
@@ -1039,6 +1117,13 @@ export interface IndexedField {
   };
   collapsibleLocalizedUnique?: string | null;
   collapsibleTextUnique?: string | null;
+  someText?: string | null;
+  some?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1306,6 +1391,15 @@ export interface SelectField {
   select?: ('one' | 'two' | 'three') | null;
   selectReadOnly?: ('one' | 'two' | 'three') | null;
   selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
+  array?:
+    | {
+        selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
+        group?: {
+          selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
   selectHasManyLocalized?: ('one' | 'two')[] | null;
   selectI18n?: ('one' | 'two' | 'three') | null;
   simple?: ('One' | 'Two' | 'Three') | null;
@@ -1638,6 +1732,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'lexical-localized-fields';
         value: string | LexicalLocalizedField;
+      } | null)
+    | ({
+        relationTo: 'lexicalObjectReferenceBug';
+        value: string | LexicalObjectReferenceBug;
       } | null)
     | ({
         relationTo: 'users';

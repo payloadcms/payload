@@ -1,3 +1,6 @@
+import console from 'console'
+global.console = console
+
 import { generateDatabaseAdapter } from './generateDatabaseAdapter.js'
 
 process.env.PAYLOAD_DISABLE_ADMIN = 'true'

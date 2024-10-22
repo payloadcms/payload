@@ -5,7 +5,9 @@ import type { FormState, PayloadRequest } from 'payload'
 
 import { EmailField, Form, FormSubmit, TextField, useConfig, useTranslation } from '@payloadcms/ui'
 import { email, text } from 'payload/shared'
-import React, { Fragment, useState } from 'react'
+import React, { useState } from 'react'
+
+import { FormHeader } from '../../../elements/FormHeader/index.js'
 
 export const ForgotPasswordForm: React.FC = () => {
   const { config } = useConfig()
@@ -54,10 +56,10 @@ export const ForgotPasswordForm: React.FC = () => {
 
   if (hasSubmitted) {
     return (
-      <Fragment>
-        <h1>{t('authentication:emailSent')}</h1>
-        <p>{t('authentication:checkYourEmailForPasswordReset')}</p>
-      </Fragment>
+      <FormHeader
+        description={t('authentication:checkYourEmailForPasswordReset')}
+        heading={t('authentication:emailSent')}
+      />
     )
   }
 
@@ -68,12 +70,14 @@ export const ForgotPasswordForm: React.FC = () => {
       initialState={initialState}
       method="POST"
     >
-      <h1>{t('authentication:forgotPassword')}</h1>
-      <p>
-        {loginWithUsername
-          ? t('authentication:forgotPasswordUsernameInstructions')
-          : t('authentication:forgotPasswordEmailInstructions')}
-      </p>
+      <FormHeader
+        description={
+          loginWithUsername
+            ? t('authentication:forgotPasswordUsernameInstructions')
+            : t('authentication:forgotPasswordEmailInstructions')
+        }
+        heading={t('authentication:forgotPassword')}
+      />
 
       {loginWithUsername ? (
         <TextField
@@ -120,7 +124,7 @@ export const ForgotPasswordForm: React.FC = () => {
           }
         />
       )}
-      <FormSubmit>{t('general:submit')}</FormSubmit>
+      <FormSubmit size="large">{t('general:submit')}</FormSubmit>
     </Form>
   )
 }

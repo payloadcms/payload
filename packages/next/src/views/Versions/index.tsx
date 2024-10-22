@@ -48,7 +48,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
   if (collectionSlug) {
     limitToUse = limitToUse || collectionConfig.admin.pagination.defaultLimit
     const whereQuery: {
-      and: Array<{ parent?: { equals: string }; snapshot?: { not_equals: boolean } }>
+      and: Array<{ parent?: { equals: number | string }; snapshot?: { not_equals: boolean } }>
     } = {
       and: [
         {

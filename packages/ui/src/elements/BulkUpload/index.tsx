@@ -5,6 +5,7 @@ import type { JsonObject } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import React from 'react'
 
+import { useConfig } from '../../providers/Config/index.js'
 import { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { AddFilesView } from './AddFilesView/index.js'
@@ -17,12 +18,27 @@ function DrawerContent() {
   const { addFiles, forms, isInitializing } = useFormsManager()
   const { closeModal } = useModal()
   const { collectionSlug, drawerSlug } = useBulkUpload()
+  const { config } = useConfig()
+
+  const uploadCollection = config.collections.find((col) => col.slug === collectionSlug)
+  const uploadConfig = uploadCollection.upload
+  const uploadMimeTypes = uploadConfig.mimeTypes
 
   const onDrop = React.useCallback(
     (acceptedFiles: FileList) => {
-      void addFiles(acceptedFiles)
+      const fileTransfer = new DataTransfer()
+      for (const candidateFile of acceptedFiles) {
+        if (
+          uploadMimeTypes === undefined ||
+          uploadMimeTypes.length === 0 ||
+          uploadMimeTypes?.includes(candidateFile.type)
+        ) {
+          fileTransfer.items.add(candidateFile)
+        }
+      }
+      void addFiles(fileTransfer.files)
     },
-    [addFiles],
+    [addFiles, uploadMimeTypes],
   )
 
   if (!collectionSlug) {
@@ -30,7 +46,13 @@ function DrawerContent() {
   }
 
   if (!forms.length && !isInitializing) {
-    return <AddFilesView onCancel={() => closeModal(drawerSlug)} onDrop={onDrop} />
+    return (
+      <AddFilesView
+        acceptMimeTypes={uploadMimeTypes?.join(', ')}
+        onCancel={() => closeModal(drawerSlug)}
+        onDrop={onDrop}
+      />
+    )
   } else {
     return <AddingFilesView />
   }

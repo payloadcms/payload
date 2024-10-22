@@ -38,8 +38,10 @@ export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
   data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
   depth?: number
+  disableTransaction?: boolean
   disableVerificationEmail?: boolean
   draft?: boolean
+  limit?: number
   overrideAccess?: boolean
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
@@ -54,7 +56,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
   let args = incomingArgs
 
   try {
-    const shouldCommit = await initTransaction(args.req)
+    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -78,6 +80,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
       collection,
       depth,
       draft: draftArg = false,
+      limit = 0,
       overrideAccess,
       overrideLock,
       overwriteExistingFiles = false,
@@ -136,6 +139,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
 
       const query = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
+        limit,
         locale,
         pagination: false,
         req,
@@ -146,7 +150,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
     } else {
       const query = await payload.db.find({
         collection: collectionConfig.slug,
-        limit: 0,
+        limit,
         locale,
         pagination: false,
         req,
@@ -329,10 +333,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
           result = await saveVersion({
             id,
             collection: collectionConfig,
-            docWithLocales: {
-              ...result,
-              createdAt: doc.createdAt,
-            },
+            docWithLocales: result,
             payload,
             req,
           })

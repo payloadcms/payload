@@ -69,7 +69,6 @@ export const useField = <T,>(options: Options): FieldType<T> => {
   const setValue = useCallback(
     (e, disableModifyingForm = false) => {
       const val = e && e.target ? e.target.value : e
-
       dispatchField({
         type: 'UPDATE',
         disableFormData: disableFormData || (hasRows && val > 0),
@@ -176,7 +175,9 @@ export const useField = <T,>(options: Options): FieldType<T> => {
                 } as unknown as PayloadRequest,
                 siblingData: getSiblingData(path),
               })
-            : true
+            : typeof prevErrorMessage.current === 'string'
+              ? prevErrorMessage.current
+              : prevValid.current
 
         if (typeof isValid === 'string') {
           valid = false

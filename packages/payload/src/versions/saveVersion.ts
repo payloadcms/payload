@@ -82,7 +82,7 @@ export const saveVersion = async ({
 
         const data: Record<string, unknown> = {
           createdAt: new Date(latestVersion.createdAt).toISOString(),
-          updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
+          updatedAt: now,
           version: {
             ...versionData,
           },
@@ -114,12 +114,12 @@ export const saveVersion = async ({
       const createVersionArgs = {
         autosave: Boolean(autosave),
         collectionSlug: undefined,
-        createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
+        createdAt: now,
         globalSlug: undefined,
         parent: collection ? id : undefined,
         publishedLocale: publishSpecificLocale || undefined,
         req,
-        updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
+        updatedAt: now,
         versionData,
       }
 
@@ -194,8 +194,6 @@ export const saveVersion = async ({
   }
 
   let createdVersion = result.version
-  createdVersion.createdAt = result.createdAt
-  createdVersion.updatedAt = result.updatedAt
 
   createdVersion = sanitizeInternalFields(createdVersion)
   createdVersion.id = result.parent

@@ -190,7 +190,7 @@ export const deTranslations: DefaultTranslationsObject = {
     cancel: 'Abbrechen',
     changesNotSaved:
       'Deine Änderungen wurden nicht gespeichert. Wenn du diese Seite verlässt, gehen deine Änderungen verloren.',
-    clearAll: undefined,
+    clearAll: 'Alles löschen',
     close: 'Schließen',
     collapse: 'Einklappen',
     collections: 'Sammlungen',
@@ -418,7 +418,7 @@ export const deTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Zuletzt vor {{distance}} gespeichert',
     noFurtherVersionsFound: 'Keine weiteren Versionen vorhanden',
     noRowsFound: 'Kein {{label}} gefunden',
-    noRowsSelected: undefined,
+    noRowsSelected: 'Kein {{label}} ausgewählt',
     preview: 'Vorschau',
     previouslyPublished: 'Zuvor Veröffentlicht',
     problemRestoringVersion: 'Es gab ein Problem bei der Wiederherstellung dieser Version',

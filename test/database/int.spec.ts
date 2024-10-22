@@ -458,6 +458,85 @@ describe('database', () => {
           ).rejects.toThrow('Not Found')
         })
       }
+
+      describe('disableTransaction', () => {
+        let disabledTransactionPost
+        beforeAll(async () => {
+          disabledTransactionPost = await payload.create({
+            collection,
+            data: {
+              title,
+            },
+            disableTransaction: true,
+          })
+        })
+        it('should not use transaction calling create() with disableTransaction', () => {
+          expect(disabledTransactionPost.hasTransaction).toBeFalsy()
+        })
+        it('should not use transaction calling update() with disableTransaction', async () => {
+          const result = await payload.update({
+            collection,
+            id: disabledTransactionPost.id,
+            data: {
+              title,
+            },
+            disableTransaction: true,
+          })
+
+          expect(result.hasTransaction).toBeFalsy()
+        })
+        it('should not use transaction calling delete() with disableTransaction', async () => {
+          const result = await payload.delete({
+            collection,
+            id: disabledTransactionPost.id,
+            data: {
+              title,
+            },
+            disableTransaction: true,
+          })
+
+          expect(result.hasTransaction).toBeFalsy()
+        })
+      })
+    })
+  })
+
+  describe('local API', () => {
+    it('should support `limit` arg in bulk updates', async () => {
+      for (let i = 0; i < 10; i++) {
+        await payload.create({
+          collection,
+          data: {
+            title: 'hello',
+          },
+        })
+      }
+
+      const updateResult = await payload.update({
+        collection,
+        data: {
+          title: 'world',
+        },
+        where: {
+          title: { equals: 'hello' },
+        },
+        limit: 5,
+      })
+
+      const findResult = await payload.find({
+        collection,
+        where: {
+          title: { exists: true },
+        },
+      })
+
+      const helloDocs = findResult.docs.filter((doc) => doc.title === 'hello')
+      const worldDocs = findResult.docs.filter((doc) => doc.title === 'world')
+
+      expect(updateResult.docs).toHaveLength(5)
+      expect(updateResult.docs[0].title).toStrictEqual('world')
+      expect(helloDocs).toHaveLength(5)
+      expect(worldDocs).toHaveLength(5)
     })
   })
 
@@ -731,6 +810,21 @@ describe('database', () => {
 
       expect(resLocal.textHooked).toBe('hooked')
     })
+
+    it('should not save a nested field to tabs/row/collapsible with virtual: true to the db', async () => {
+      const res = await payload.create({
+        data: {
+          textWithinCollapsible: '1',
+          textWithinRow: '2',
+          textWithinTabs: '3',
+        },
+        collection: 'fields-persistance',
+      })
+
+      expect(res.textWithinCollapsible).toBeUndefined()
+      expect(res.textWithinRow).toBeUndefined()
+      expect(res.textWithinTabs).toBeUndefined()
+    })
   })
 
   it('should not allow to query by a field with `virtual: true`', async () => {
@@ -740,5 +834,26 @@ describe('database', () => {
         where: { text: { equals: 'asd' } },
       }),
     ).rejects.toThrow(QueryError)
+  })
+
+  it('should not allow document creation with relationship data to an invalid document ID', async () => {
+    let invalidDoc
+
+    try {
+      invalidDoc = await payload.create({
+        collection: 'relation-b',
+        data: { title: 'invalid', relationship: 'not-real-id' },
+      })
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error)
+    }
+
+    expect(invalidDoc).toBeUndefined()
+
+    const relationBDocs = await payload.find({
+      collection: 'relation-b',
+    })
+
+    expect(relationBDocs.docs).toHaveLength(0)
   })
 })
