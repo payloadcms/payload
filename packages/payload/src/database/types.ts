@@ -174,6 +174,7 @@ export type CommitTransaction = (id: number | Promise<number | string> | string)
 
 export type QueryDraftsArgs = {
   collection: string
+  joins?: JoinQuery
   limit?: number
   locale?: string
   page?: number
