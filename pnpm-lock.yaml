@@ -925,6 +925,46 @@ importers:
         specifier: 0.32.6
         version: 0.32.6
 
+  packages/payload-cloud:
+    dependencies:
+      '@aws-sdk/client-cognito-identity':
+        specifier: ^3.614.0
+        version: 3.629.0
+      '@aws-sdk/client-s3':
+        specifier: ^3.614.0
+        version: 3.629.0
+      '@aws-sdk/credential-providers':
+        specifier: ^3.614.0
+        version: 3.630.0(@aws-sdk/client-sso-oidc@3.629.0(@aws-sdk/client-sts@3.629.0))
+      '@aws-sdk/lib-storage':
+        specifier: ^3.614.0
+        version: 3.629.0(@aws-sdk/client-s3@3.629.0)
+      '@payloadcms/email-nodemailer':
+        specifier: workspace:*
+        version: link:../email-nodemailer
+      amazon-cognito-identity-js:
+        specifier: ^6.1.2
+        version: 6.3.12
+      nodemailer:
+        specifier: 6.9.10
+        version: 6.9.10
+      resend:
+        specifier: ^0.17.2
+        version: 0.17.2
+    devDependencies:
+      '@types/jest':
+        specifier: 29.5.12
+        version: 29.5.12
+      '@types/nodemailer':
+        specifier: 6.4.14
+        version: 6.4.14
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+      ts-jest:
+        specifier: ^29.1.0
+        version: 29.2.4(@babel/core@7.25.2)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.25.2))(jest@29.7.0(@types/node@22.5.4)(babel-plugin-macros@3.1.0))(typescript@5.6.3)
+
   packages/plugin-cloud:
     dependencies:
       '@aws-sdk/client-cognito-identity':
@@ -1645,9 +1685,9 @@ importers:
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../packages/next
-      '@payloadcms/plugin-cloud':
+      '@payloadcms/payload-cloud':
         specifier: workspace:*
-        version: link:../packages/plugin-cloud
+        version: link:../packages/payload-cloud
       '@payloadcms/plugin-cloud-storage':
         specifier: workspace:*
         version: link:../packages/plugin-cloud-storage

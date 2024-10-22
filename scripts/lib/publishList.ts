@@ -36,6 +36,7 @@ export const packagePublishList = [
   'storage-uploadthing',
 
   // Plugins
+  'payload-cloud',
   'plugin-cloud',
   'plugin-cloud-storage',
   'plugin-form-builder',
