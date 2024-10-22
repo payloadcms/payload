@@ -157,6 +157,13 @@ export const findOperation = async <TSlug extends CollectionSlug>(
 
     if (includeLockStatus) {
       try {
+        const lockDocumentsProp = collectionConfig?.lockDocuments
+
+        const lockDurationDefault = 300 // Default 5 minutes in seconds
+        const lockDuration =
+          typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
+        const lockDurationInMilliseconds = lockDuration * 1000
+
         const lockedDocuments = await payload.find({
           collection: 'payload-locked-documents',
           depth: 1,
@@ -175,14 +182,27 @@ export const findOperation = async <TSlug extends CollectionSlug>(
                   in: result.docs.map((doc) => doc.id),
                 },
               },
+              // Query where the lock is newer than the current time minus lock time
+              {
+                updatedAt: {
+                  greater_than: new Date(new Date().getTime() - lockDurationInMilliseconds),
+                },
+              },
             ],
           },
         })
 
+        const now = new Date().getTime()
         const lockedDocs = Array.isArray(lockedDocuments?.docs) ? lockedDocuments.docs : []
 
+        // Filter out stale locks
+        const validLockedDocs = lockedDocs.filter((lock) => {
+          const lastEditedAt = new Date(lock?.updatedAt).getTime()
+          return lastEditedAt + lockDurationInMilliseconds > now
+        })
+
         result.docs = result.docs.map((doc) => {
-          const lockedDoc = lockedDocs.find((lock) => lock?.document?.value === doc.id)
+          const lockedDoc = validLockedDocs.find((lock) => lock?.document?.value === doc.id)
           return {
             ...doc,
             _isLocked: !!lockedDoc,
