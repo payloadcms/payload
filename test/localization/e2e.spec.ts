@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { englishLocale } from 'globals/config.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -42,6 +41,7 @@ let url: AdminUrlUtil
 let urlWithRequiredLocalizedFields: AdminUrlUtil
 
 const defaultLocale = 'en'
+const englishLocale = 'en'
 const title = 'english title'
 const spanishTitle = 'spanish title'
 const arabicTitle = 'arabic title'
