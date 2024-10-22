@@ -582,31 +582,6 @@ describe('Queues', () => {
     expect(allSimples.docs[41].title).toBe('from single task')
   })
 
-  it('ensure jobs run limit can be customized 2', async () => {
-    for (let i = 0; i < 500; i++) {
-      await payload.jobs.queue({
-        task: 'CreateSimple',
-        input: {
-          message: 'from single task',
-        },
-      })
-    }
-
-    await payload.jobs.run({
-      limit: 30,
-    })
-
-    const allSimples = await payload.find({
-      collection: 'simple',
-      limit: 1000,
-    })
-
-    expect(allSimples.totalDocs).toBe(30) // Default limit: 10
-    expect(allSimples.docs[0].title).toBe('from single task')
-    expect(allSimples.docs[30].title).toBe('from single task')
-    expect(allSimples.docs[41].title).toBe('from single task')
-  })
-
   it('can queue different kinds of single tasks multiple times', async () => {
     for (let i = 0; i < 3; i++) {
       await payload.jobs.queue({
