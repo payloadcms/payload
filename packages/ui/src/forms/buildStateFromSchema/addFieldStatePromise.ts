@@ -12,7 +12,7 @@ import {
   fieldAffectsData,
   fieldHasSubFields,
   fieldIsSidebar,
-  generateFieldKey,
+  generatePath,
   tabHasName,
 } from 'payload/shared'
 
@@ -497,7 +497,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     // Handle field types that do not use names (row, etc)
 
     if (!filter || filter(args)) {
-      state[generateFieldKey({ path, schemaIndex: fieldIndex })] = {
+      state[path] = {
         disableFormData: true,
         errorPaths: [],
         initialValue: undefined,
@@ -560,7 +560,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     await Promise.all(promises)
   } else if (field.type === 'ui') {
     if (!filter || filter(args)) {
-      state[generateFieldKey({ path, schemaIndex: fieldIndex })] = {
+      state[generatePath({ fieldType: field.type, parentPath: path, schemaIndex: fieldIndex })] = {
         disableFormData: true,
         errorPaths: [],
         initialValue: undefined,

@@ -25,7 +25,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { fieldAffectsData, fieldIsSidebar, generateFieldKey, generatePath } from 'payload/shared'
+import { fieldAffectsData, fieldIsSidebar, generatePath } from 'payload/shared'
 import React from 'react'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
@@ -281,8 +281,19 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
   } = args
 
   const name = 'name' in field ? field.name : undefined
-  const path = generatePath({ name, path: parentPath })
-  const schemaPath = generatePath({ name, path: parentSchemaPath })
+  const path = generatePath({
+    name,
+    fieldType: field.type,
+    parentPath,
+    schemaIndex: indexPath.split('.').pop() || undefined,
+  })
+
+  const schemaPath = generatePath({
+    name,
+    fieldType: field.type,
+    parentPath: parentSchemaPath,
+    schemaIndex: indexPath.split('.').pop() || undefined,
+  })
 
   const isHiddenField = 'hidden' in field && field?.hidden
   const disabledFromAdmin = field?.admin && 'disabled' in field.admin && field.admin.disabled
@@ -486,6 +497,7 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
 
   if (field.admin) {
     if ('description' in field.admin) {
+      // @TODO move this to client, only render if it is a function
       fieldSlots.Description = (
         <FieldDescription
           description={
@@ -579,10 +591,7 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
     />
   )
 
-  const fieldMapKey = generateFieldKey({
-    path,
-    schemaIndex: indexPath.split('.').pop() || undefined,
-  })
+  console.log({ path })
 
-  fieldMap.set(fieldMapKey, fieldMapValue)
+  fieldMap.set(path, fieldMapValue)
 }

@@ -42,8 +42,6 @@ export {
 
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 
-export { generateFieldKey } from '../utilities/generateFieldKey.js'
-
 export { generatePath } from '../utilities/generatePath.js'
 export { getDataByPath } from '../utilities/getDataByPath.js'
 export { getSiblingData } from '../utilities/getSiblingData.js'

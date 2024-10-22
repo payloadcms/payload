@@ -259,7 +259,9 @@ export const sanitizeFields = async ({
         richTextSanitizationPromises,
         schemaPath: generatePath({
           name: 'name' in field ? field.name : undefined,
-          path: schemaPath,
+          fieldType: field.type,
+          parentPath: schemaPath,
+          schemaIndex: i,
         }),
         validRelationships,
       })
@@ -282,7 +284,9 @@ export const sanitizeFields = async ({
           richTextSanitizationPromises,
           schemaPath: generatePath({
             name: 'name' in tab ? tab.name : undefined,
-            path: schemaPath,
+            fieldType: field.type,
+            parentPath: schemaPath,
+            schemaIndex: i,
           }),
           validRelationships,
         })

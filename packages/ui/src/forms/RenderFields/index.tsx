@@ -1,6 +1,6 @@
 'use client'
 
-import { generateFieldKey } from 'payload/shared'
+import { generatePath } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import type { Props } from './types.js'
@@ -15,7 +15,7 @@ const baseClass = 'render-fields'
 export { Props }
 
 export const RenderFields: React.FC<Props> = (props) => {
-  const { className, fields, forceRender, margins, path } = props
+  const { className, fields, forceRender, margins, path: parentPath } = props
 
   const { fieldSlots } = useFieldSlots()
 
@@ -62,18 +62,18 @@ export const RenderFields: React.FC<Props> = (props) => {
         ref={intersectionRef}
       >
         {fields.map((field, i) => {
-          const fieldPath = [path, field?.name].filter(Boolean).join('.')
-
-          const fieldKey = generateFieldKey({
-            path: fieldPath,
+          const path = generatePath({
+            name: 'name' in field ? field.name : undefined,
+            fieldType: field.type,
+            parentPath,
             schemaIndex: i,
           })
 
-          const Field = fieldSlots.get(fieldKey)?.Field
+          const Field = fieldSlots.get(path)?.Field
 
           return (
             <Fragment key={i}>
-              <p>{`fieldKey: ${fieldKey}`}</p>
+              <p>{`path: ${path}`}</p>
               <p>{JSON.stringify(field._schemaAccessor, null, 2)}</p>
               {Field}
             </Fragment>

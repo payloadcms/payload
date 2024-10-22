@@ -18,7 +18,6 @@ import {
   type SelectFieldClient,
   type TabsFieldClient,
 } from '../../fields/config/types.js'
-import { generateFieldKey } from '../../utilities/generateFieldKey.js'
 
 // Should not be used - ClientField should be used instead. This is why we don't export ClientField, we don't want people
 // to accidentally use it instead of ClientField and get confused

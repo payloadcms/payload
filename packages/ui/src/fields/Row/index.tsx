@@ -7,9 +7,6 @@ import { RenderFields } from '../../forms/RenderFields/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
-import { RowProvider, useRow } from './provider.js'
-
-export { RowProvider, useRow }
 
 const baseClass = 'row'
 
@@ -20,11 +17,9 @@ const RowFieldComponent: RowFieldClientComponent = (props) => {
   } = props
 
   return (
-    <RowProvider>
-      <div className={[fieldBaseClass, baseClass, className].filter(Boolean).join(' ')}>
-        <RenderFields fields={fields} />
-      </div>
-    </RowProvider>
+    <div className={[fieldBaseClass, baseClass, className].filter(Boolean).join(' ')}>
+      <RenderFields fields={fields} path={props.path} />
+    </div>
   )
 }
 
