@@ -49,7 +49,7 @@ import { prepareFields } from './prepareFields.js'
 const baseClass = 'form'
 
 export const Form: React.FC<FormProps> = (props) => {
-  const { id, collectionSlug, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const {
     action,
@@ -510,9 +510,11 @@ export const Form: React.FC<FormProps> = (props) => {
 
       const abortController = new AbortController()
       abortControllerRef2.current = abortController
+      const docPreferences = await getDocPreferences()
 
       const { renderedFieldMap, state: formState } = await getFormState({
         data,
+        docPreferences,
         path,
         renderFields: true,
         schemaAccessor,
@@ -521,7 +523,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       return { formState, renderedFieldMap }
     },
-    [getFormState],
+    [getFormState, getDocPreferences],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(

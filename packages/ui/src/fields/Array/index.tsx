@@ -182,8 +182,8 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         collapsed,
         rows: rowsData,
       })
-      dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, updatedRows })
       setDocFieldPreferences(path, { collapsed: collapsedIDs })
+      dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, updatedRows })
     },
     [dispatchFields, path, rowsData, setDocFieldPreferences],
   )
