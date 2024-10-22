@@ -30,6 +30,7 @@ import type {
 } from '../types.js'
 
 import { createTableName } from '../../createTableName.js'
+import { buildIndexName } from '../../utilities/buildIndexName.js'
 import { hasLocalesTable } from '../../utilities/hasLocalesTable.js'
 import { validateExistingBlockIsIdentical } from '../../utilities/validateExistingBlockIsIdentical.js'
 import { buildTable } from './build.js'
@@ -169,10 +170,12 @@ export const traverseFields = ({
           }
           adapter.fieldConstraints[rootTableName][`${columnName}_idx`] = constraintValue
         }
-        targetIndexes[`${newTableName}_${field.name}Idx`] = createIndex({
+
+        const indexName = buildIndexName({ name: `${newTableName}_${columnName}`, adapter })
+
+        targetIndexes[indexName] = createIndex({
           name: field.localized ? [fieldName, '_locale'] : fieldName,
-          columnName,
-          tableName: newTableName,
+          indexName,
           unique,
         })
       }

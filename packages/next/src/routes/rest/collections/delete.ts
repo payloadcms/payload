@@ -10,14 +10,16 @@ import type { CollectionRouteHandler } from '../types.js'
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
 
 export const deleteDoc: CollectionRouteHandler = async ({ collection, req }) => {
-  const { depth, where } = req.query as {
+  const { depth, overrideLock, where } = req.query as {
     depth?: string
+    overrideLock?: string
     where?: Where
   }
 
   const result = await deleteOperation({
     collection,
     depth: isNumber(depth) ? Number(depth) : undefined,
+    overrideLock: Boolean(overrideLock === 'true'),
     req,
     where,
   })

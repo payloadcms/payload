@@ -295,22 +295,18 @@ function InlineToolbar({
   return (
     <div className="inline-toolbar-popup" ref={floatingToolbarRef}>
       <div className="caret" ref={caretRef} />
-      {editor.isEditable() && (
-        <React.Fragment>
-          {editorConfig?.features &&
-            editorConfig.features?.toolbarInline?.groups.map((group, i) => {
-              return (
-                <ToolbarGroupComponent
-                  anchorElem={anchorElem}
-                  editor={editor}
-                  group={group}
-                  index={i}
-                  key={group.key}
-                />
-              )
-            })}
-        </React.Fragment>
-      )}
+      {editorConfig?.features &&
+        editorConfig.features?.toolbarInline?.groups.map((group, i) => {
+          return (
+            <ToolbarGroupComponent
+              anchorElem={anchorElem}
+              editor={editor}
+              group={group}
+              index={i}
+              key={group.key}
+            />
+          )
+        })}
     </div>
   )
 }
@@ -392,7 +388,7 @@ function useInlineToolbar(
     )
   }, [editor, updatePopup])
 
-  if (!isText) {
+  if (!isText || !editor.isEditable()) {
     return null
   }
 

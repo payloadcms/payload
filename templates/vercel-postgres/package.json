@@ -18,10 +18,10 @@
     "@payloadcms/storage-vercel-blob": "beta",
     "@vercel/blob": "^0.22.3",
     "cross-env": "^7.0.3",
-    "next": "15.0.0-canary.173",
+    "next": "15.0.0",
     "payload": "beta",
-    "react": "19.0.0-rc-3edc000d-20240926",
-    "react-dom": "19.0.0-rc-3edc000d-20240926",
+    "react": "19.0.0-rc-65a56d0e-20241020",
+    "react-dom": "19.0.0-rc-65a56d0e-20241020",
     "sharp": "0.32.6"
   },
   "devDependencies": {
@@ -30,10 +30,10 @@
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
-    "eslint-config-next": "15.0.0-canary.173",
+    "eslint-config-next": "15.0.0",
     "postcss": "^8",
     "tailwindcss": "^3.3.0",
-    "typescript": "5.6.2"
+    "typescript": "5.6.3"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
