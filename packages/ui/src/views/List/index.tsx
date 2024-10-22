@@ -8,7 +8,6 @@ import { useRouter } from 'next/navigation.js'
 import { formatFilesize, isNumber } from 'payload/shared'
 import React, { Fragment, useEffect, useState } from 'react'
 
-import type { RenderedCells } from '../../elements/Table/index.js'
 import type { ListPreferences } from './types.js'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
@@ -25,7 +24,6 @@ import { PerPage } from '../../elements/PerPage/index.js'
 import { PublishMany } from '../../elements/PublishMany/index.js'
 import { StaggeredShimmers } from '../../elements/ShimmerEffect/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
-import { Table } from '../../elements/Table/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../../elements/TableColumns/index.js'
 import { UnpublishMany } from '../../elements/UnpublishMany/index.js'
@@ -49,11 +47,13 @@ export type ListViewClientProps = {
   collectionSlug: string
   listPreferences?: ListPreferences
   preferenceKey?: string
-  renderedCells?: RenderedCells
+  Table: React.ReactNode
 }
 
 export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
-  const { listPreferences, preferenceKey, renderedCells } = props
+  const { listPreferences, preferenceKey, Table: InitialTable } = props
+
+  const [Table, setTable] = useState(InitialTable)
 
   const payloadServerAction = useServerFunctions()
 
@@ -198,17 +198,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
               />
             )}
             {data.docs && data.docs.length > 0 && (
-              <RelationshipProvider>
-                <Table
-                  customCellContext={{
-                    collectionSlug,
-                    uploadConfig: collectionConfig.upload,
-                  }}
-                  data={docs}
-                  fields={fields}
-                  renderedCells={renderedCells}
-                />
-              </RelationshipProvider>
+              <RelationshipProvider>{Table}</RelationshipProvider>
             )}
             {data.docs && data.docs.length === 0 && (
               <div className={`${baseClass}__no-results`}>

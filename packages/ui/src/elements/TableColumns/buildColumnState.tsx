@@ -1,6 +1,6 @@
-'use client'
-import type { ClientField, SanitizedCollectionConfig, StaticLabel } from 'payload'
+import type { ClientField, Field, ImportMap, SanitizedCollectionConfig, StaticLabel } from 'payload'
 
+import { fieldIsPresentationalOnly } from 'payload/shared'
 import React from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
@@ -9,29 +9,32 @@ import type { Column } from '../Table/index.js'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { flattenFieldMap } from '../../utilities/flattenFieldMap.js'
+// import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import { SelectAll } from '../SelectAll/index.js'
 import { SelectRow } from '../SelectRow/index.js'
 import { SortColumn } from '../SortColumn/index.js'
 import { DefaultCell } from '../Table/DefaultCell/index.js'
 
-type Args = {
+type Args<T extends ClientField | Field> = {
   beforeRows?: Column[]
   columnPreferences: ColumnPreferences
   columns?: ColumnPreferences
   enableRowSelections: boolean
   enableRowTypes?: boolean
-  fields: ClientField[]
+  fields: T[]
+  importMap: ImportMap
   sortColumnProps?: Partial<SortColumnProps>
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }
 
-export const buildColumnState = (args: Args): Column[] => {
+export const buildColumnState = <T extends ClientField | Field>(args: Args<T>): Column[] => {
   const {
     beforeRows,
     columnPreferences,
     columns,
     enableRowSelections,
     fields,
+    importMap,
     sortColumnProps,
     useAsTitle,
   } = args
@@ -116,7 +119,7 @@ export const buildColumnState = (args: Args): Column[] => {
 
     const Heading = (
       <SortColumn
-        disable={fieldAffectsDataSubFields || field?._isPresentational || undefined}
+        disable={fieldAffectsDataSubFields || fieldIsPresentationalOnly(field) || undefined}
         Label={Label}
         label={'label' in field ? (field.label as StaticLabel) : undefined}
         name={'name' in field ? field.name : undefined}
@@ -128,6 +131,14 @@ export const buildColumnState = (args: Args): Column[] => {
       const column: Column = {
         accessor: 'name' in field ? field.name : undefined,
         active,
+        Cell: (
+          <p>hello, world!</p>
+          // <RenderServerComponent
+          //   Component={field?.admin && 'components' in field.admin && field.admin.components?.Cell}
+          //   Fallback={DefaultCell}
+          //   importMap={importMap}
+          // />
+        ),
         cellProps: {
           field: {
             ...(field || ({} as ClientField)),

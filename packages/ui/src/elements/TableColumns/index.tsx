@@ -203,8 +203,6 @@ export const TableColumnsProvider: React.FC<Props> = ({
     sortColumnProps,
   ])
 
-  console.log('tableColumns', tableColumns)
-
   return (
     <TableColumnContext.Provider
       value={{

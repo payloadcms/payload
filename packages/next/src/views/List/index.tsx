@@ -1,5 +1,5 @@
 import type { ListPreferences, ListViewClientProps } from '@payloadcms/ui'
-import type { AdminViewProps, Where } from 'payload'
+import type { AdminViewProps, CollectionSlug, Where } from 'payload'
 
 import {
   DefaultListView,
@@ -9,7 +9,7 @@ import {
 } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
-import { renderCells } from 'packages/ui/src/utilities/renderCells.js'
+import { renderTable } from 'packages/ui/src/utilities/renderTable.js'
 import { mergeListSearchAndWhere } from 'payload'
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
@@ -27,6 +27,12 @@ export const ListView: React.FC<AdminViewProps> = async ({
 }) => {
   const {
     collectionConfig,
+    collectionConfig: {
+      slug: collectionSlug,
+      admin: { defaultColumns, useAsTitle },
+      defaultSort,
+      fields,
+    },
     locale: fullLocale,
     permissions,
     req,
@@ -40,8 +46,6 @@ export const ListView: React.FC<AdminViewProps> = async ({
     },
     visibleEntities,
   } = initPageResult
-
-  const collectionSlug = collectionConfig?.slug
 
   if (!permissions?.collections?.[collectionSlug]?.read?.permission) {
     notFound()
@@ -79,7 +83,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
         },
       })
       ?.then((res) => res?.docs?.[0]?.value)) as ListPreferences
-  } catch (error) {} // eslint-disable-line no-empty
+  } catch (_err) {} // eslint-disable-line no-empty
 
   const {
     routes: { admin: adminRoute },
@@ -106,7 +110,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
     const sort =
       query?.sort && typeof query.sort === 'string'
         ? query.sort
-        : listPreferences?.sort || collectionConfig.defaultSort || undefined
+        : listPreferences?.sort || defaultSort || undefined
 
     const data = await payload.find({
       collection: collectionSlug,
@@ -124,20 +128,20 @@ export const ListView: React.FC<AdminViewProps> = async ({
       where: whereQuery || {},
     })
 
-    const renderedCells = renderCells({
-      clientFields: clientConfig.collections?.find(
-        (clientCollection) => clientCollection.slug === collectionSlug,
-      )?.fields,
-      collectionSlug,
+    const Table = renderTable({
+      columnPreferences: listPreferences?.columns,
       data,
-      fields: collectionConfig.fields,
-      importMap: req.payload.importMap,
+      defaultColumns,
+      enableRowSelections: true,
+      fields: clientConfig.collections.find((c) => c.slug === collectionSlug)?.fields,
+      importMap: payload.importMap,
+      useAsTitle,
     })
 
     const clientProps: ListViewClientProps = {
       collectionSlug,
       listPreferences,
-      renderedCells,
+      Table,
     }
 
     return (

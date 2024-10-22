@@ -1,9 +1,7 @@
-'use client'
-import type { CellComponentProps, ClientField } from 'payload'
+import type { DefaultCellComponentProps } from 'payload'
 
 import React from 'react'
 
-import { useTableColumns } from '../TableColumns/index.js'
 import './index.scss'
 
 const baseClass = 'table'
@@ -11,36 +9,21 @@ const baseClass = 'table'
 export type Column = {
   readonly accessor: string
   readonly active: boolean
-  readonly cellProps?: Partial<CellComponentProps>
+  readonly Cell: React.ReactNode
+  readonly cellProps?: Partial<DefaultCellComponentProps>
+  readonly Heading: React.ReactNode
 }
 
-export type RenderedCells = {
-  cells: Map<string, React.ReactNode>
-  headings: Map<string, React.ReactNode>
-}
+export { TableCellProvider, useTableCell } from './TableCellProvider/index.js'
 
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
   readonly columns?: Column[]
   readonly customCellContext?: Record<string, unknown>
   readonly data: Record<string, unknown>[]
-  readonly fields: ClientField[]
-  readonly renderedCells?: RenderedCells
 }
 
-export const Table: React.FC<Props> = ({
-  appearance,
-  columns: columnsFromProps,
-  customCellContext,
-  data,
-  renderedCells: initialCells,
-}) => {
-  const [renderedCells, setRenderedCells] = React.useState(initialCells)
-
-  const { cellProps, columns: columnsFromContext } = useTableColumns()
-
-  const columns = columnsFromProps || columnsFromContext
-
+export const Table: React.FC<Props> = ({ appearance, columns, customCellContext, data }) => {
   const activeColumns = columns?.filter((col) => col?.active)
 
   if (!activeColumns || activeColumns.length === 0) {
@@ -58,7 +41,7 @@ export const Table: React.FC<Props> = ({
           <tr>
             {activeColumns.map((col, i) => (
               <th id={`heading-${col.accessor}`} key={i}>
-                {renderedCells?.headings?.get(col.accessor)}
+                {col.Heading}
               </th>
             ))}
           </tr>
@@ -67,11 +50,19 @@ export const Table: React.FC<Props> = ({
           {data &&
             data.map((row, rowIndex) => (
               <tr className={`row-${rowIndex + 1}`} key={rowIndex}>
-                {activeColumns.map((col, colIndex) => (
-                  <td className={`cell-${col.accessor}`} key={colIndex}>
-                    {renderedCells?.cells?.get(`${col.accessor}.${rowIndex}`)}
-                  </td>
-                ))}
+                {activeColumns.map((col, colIndex) => {
+                  const { accessor } = col
+
+                  const isLink =
+                    (colIndex === 0 && accessor !== '_select') ||
+                    (colIndex === 1 && activeColumns[0]?.accessor === '_select')
+
+                  return (
+                    <td className={`cell-${accessor}`} key={colIndex}>
+                      {col.Cell}
+                    </td>
+                  )
+                })}
               </tr>
             ))}
         </tbody>
