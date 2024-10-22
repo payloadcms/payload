@@ -15,7 +15,6 @@ export interface Config {
     users: User;
     forms: Form;
     'form-submissions': FormSubmission;
-    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -297,37 +296,6 @@ export interface FormSubmission {
       brand?: string | null;
       number?: string | null;
     };
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-locked-documents".
- */
-export interface PayloadLockedDocument {
-  id: string;
-  document?:
-    | ({
-        relationTo: 'pages';
-        value: string | Page;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
-        relationTo: 'forms';
-        value: string | Form;
-      } | null)
-    | ({
-        relationTo: 'form-submissions';
-        value: string | FormSubmission;
-      } | null);
-  globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
   };
   updatedAt: string;
   createdAt: string;

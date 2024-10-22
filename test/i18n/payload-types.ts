@@ -13,7 +13,6 @@ export interface Config {
   collections: {
     collection1: Collection1;
     users: User;
-    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -74,29 +73,6 @@ export interface User {
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-locked-documents".
- */
-export interface PayloadLockedDocument {
-  id: string;
-  document?:
-    | ({
-        relationTo: 'collection1';
-        value: string | Collection1;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null);
-  globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

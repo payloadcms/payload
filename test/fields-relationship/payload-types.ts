@@ -26,7 +26,6 @@ export interface Config {
     'mixed-media': MixedMedia;
     'versioned-relationship-field': VersionedRelationshipField;
     users: User;
-    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -295,81 +294,6 @@ export interface User {
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-locked-documents".
- */
-export interface PayloadLockedDocument {
-  id: string;
-  document?:
-    | ({
-        relationTo: 'fields-relationship';
-        value: string | FieldsRelationship;
-      } | null)
-    | ({
-        relationTo: 'relation-filter-false';
-        value: string | RelationFilterFalse;
-      } | null)
-    | ({
-        relationTo: 'relation-filter-true';
-        value: string | RelationFilterTrue;
-      } | null)
-    | ({
-        relationTo: 'relation-one';
-        value: string | RelationOne;
-      } | null)
-    | ({
-        relationTo: 'relation-two';
-        value: string | RelationTwo;
-      } | null)
-    | ({
-        relationTo: 'relation-restricted';
-        value: string | RelationRestricted;
-      } | null)
-    | ({
-        relationTo: 'relation-with-title';
-        value: string | RelationWithTitle;
-      } | null)
-    | ({
-        relationTo: 'relation-updated-externally';
-        value: string | RelationUpdatedExternally;
-      } | null)
-    | ({
-        relationTo: 'collection-1';
-        value: string | Collection1;
-      } | null)
-    | ({
-        relationTo: 'collection-2';
-        value: string | Collection2;
-      } | null)
-    | ({
-        relationTo: 'videos';
-        value: number | Video;
-      } | null)
-    | ({
-        relationTo: 'podcasts';
-        value: number | Podcast;
-      } | null)
-    | ({
-        relationTo: 'mixed-media';
-        value: string | MixedMedia;
-      } | null)
-    | ({
-        relationTo: 'versioned-relationship-field';
-        value: string | VersionedRelationshipField;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null);
-  globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
