@@ -9,7 +9,7 @@ import type { Column } from '../Table/index.js'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
-import { buildColumnState } from './buildColumnState.js'
+// import { buildColumnState } from './buildColumnState.js'
 import { filterFields } from './filterFields.js'
 import { getInitialColumns } from './getInitialColumns.js'
 
@@ -72,16 +72,17 @@ export const TableColumnsProvider: React.FC<Props> = ({
     }
   }, [defaultColumns, fields, useAsTitle])
 
-  const [tableColumns, setTableColumns] = React.useState(() =>
-    buildColumnState({
-      beforeRows,
-      columnPreferences: listPreferences?.columns,
-      columns: initialColumns,
-      enableRowSelections,
-      fields,
-      sortColumnProps,
-      useAsTitle,
-    }),
+  const [tableColumns, setTableColumns] = React.useState(
+    () => initialColumns,
+    // buildColumnState({
+    //   beforeRows,
+    //   columnPreferences: listPreferences?.columns,
+    //   columns: initialColumns,
+    //   enableRowSelections,
+    //   fields,
+    //   sortColumnProps,
+    //   useAsTitle,
+    // }),
   )
 
   const updateColumnPreferences = React.useCallback(
@@ -173,17 +174,16 @@ export const TableColumnsProvider: React.FC<Props> = ({
         prevCollection.current = collectionSlug
 
         if (currentPreferences?.columns) {
-          setTableColumns(
-            buildColumnState({
-              beforeRows,
-              columnPreferences: currentPreferences?.columns,
-              columns: initialColumns,
-              enableRowSelections,
-              fields,
-              sortColumnProps,
-              useAsTitle,
-            }),
-          )
+          setTableColumns()
+          // buildColumnState({
+          //   beforeRows,
+          //   columnPreferences: currentPreferences?.columns,
+          //   columns: initialColumns,
+          //   enableRowSelections,
+          //   fields,
+          //   sortColumnProps,
+          //   useAsTitle,
+          // }),
         }
       }
     }

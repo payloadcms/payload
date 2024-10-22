@@ -1,3 +1,5 @@
+'use client'
+
 import type { DefaultCellComponentProps } from 'payload'
 
 import React from 'react'
@@ -9,9 +11,9 @@ const baseClass = 'table'
 export type Column = {
   readonly accessor: string
   readonly active: boolean
-  readonly Cell: React.ReactNode
   readonly cellProps?: Partial<DefaultCellComponentProps>
   readonly Heading: React.ReactNode
+  readonly renderedCells: React.ReactNode[]
 }
 
 export { TableCellProvider, useTableCell } from './TableCellProvider/index.js'
@@ -59,7 +61,7 @@ export const Table: React.FC<Props> = ({ appearance, columns, customCellContext,
 
                   return (
                     <td className={`cell-${accessor}`} key={colIndex}>
-                      {col.Cell}
+                      {col.renderedCells[rowIndex]}
                     </td>
                   )
                 })}

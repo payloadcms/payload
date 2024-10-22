@@ -139,136 +139,125 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
   const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
 
   return (
-    <TableColumnsProvider
-      collectionSlug={collectionSlug}
-      enableRowSelections
-      listPreferences={listPreferences}
-      preferenceKey={preferenceKey}
-    >
-      <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
-        {/* <SetViewActions actions={actions} /> */}
-        <SelectionProvider docs={data.docs} totalDocs={data.totalDocs} user={user}>
-          {/* <RenderComponent mappedComponent={beforeList} /> */}
-          <Gutter className={`${baseClass}__wrap`}>
-            {Header || (
-              <ListHeader heading={getTranslation(labels?.plural, i18n)}>
-                {hasCreatePermission && (
-                  <>
-                    <Button
-                      aria-label={i18n.t('general:createNewLabel', {
-                        label: getTranslation(labels?.singular, i18n),
-                      })}
-                      buttonStyle="pill"
-                      el={'link'}
-                      Link={Link}
-                      size="small"
-                      to={newDocumentURL}
-                    >
-                      {i18n.t('general:createNew')}
-                    </Button>
+    <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
+      {/* <SetViewActions actions={actions} /> */}
+      <SelectionProvider docs={data.docs} totalDocs={data.totalDocs} user={user}>
+        {/* <RenderComponent mappedComponent={beforeList} /> */}
+        <Gutter className={`${baseClass}__wrap`}>
+          {Header || (
+            <ListHeader heading={getTranslation(labels?.plural, i18n)}>
+              {hasCreatePermission && (
+                <>
+                  <Button
+                    aria-label={i18n.t('general:createNewLabel', {
+                      label: getTranslation(labels?.singular, i18n),
+                    })}
+                    buttonStyle="pill"
+                    el={'link'}
+                    Link={Link}
+                    size="small"
+                    to={newDocumentURL}
+                  >
+                    {i18n.t('general:createNew')}
+                  </Button>
 
-                    {isBulkUploadEnabled && (
-                      <Button
-                        aria-label={t('upload:bulkUpload')}
-                        buttonStyle="pill"
-                        onClick={openBulkUpload}
-                        size="small"
-                      >
-                        {t('upload:bulkUpload')}
-                      </Button>
-                    )}
-                  </>
-                )}
-                {!smallBreak && (
-                  <ListSelection label={getTranslation(collectionConfig?.labels?.plural, i18n)} />
-                )}
-                {/* {(description || Description) && (
+                  {isBulkUploadEnabled && (
+                    <Button
+                      aria-label={t('upload:bulkUpload')}
+                      buttonStyle="pill"
+                      onClick={openBulkUpload}
+                      size="small"
+                    >
+                      {t('upload:bulkUpload')}
+                    </Button>
+                  )}
+                </>
+              )}
+              {!smallBreak && (
+                <ListSelection label={getTranslation(collectionConfig?.labels?.plural, i18n)} />
+              )}
+              {/* {(description || Description) && (
                   <div className={`${baseClass}__sub-header`}>
                     <ViewDescription Description={Description} description={description} />
                   </div>
                 )} */}
-              </ListHeader>
-            )}
-            <ListControls collectionConfig={collectionConfig} />
-            {/* <RenderComponent mappedComponent={beforeListTable} /> */}
-            {!data.docs && (
-              <StaggeredShimmers
-                className={[`${baseClass}__shimmer`, `${baseClass}__shimmer--rows`].join(' ')}
-                count={6}
+            </ListHeader>
+          )}
+          <ListControls collectionConfig={collectionConfig} />
+          {/* <RenderComponent mappedComponent={beforeListTable} /> */}
+          {!data.docs && (
+            <StaggeredShimmers
+              className={[`${baseClass}__shimmer`, `${baseClass}__shimmer--rows`].join(' ')}
+              count={6}
+            />
+          )}
+          {data.docs && data.docs.length > 0 && (
+            <RelationshipProvider>{Table}</RelationshipProvider>
+          )}
+          {data.docs && data.docs.length === 0 && (
+            <div className={`${baseClass}__no-results`}>
+              <p>{i18n.t('general:noResults', { label: getTranslation(labels?.plural, i18n) })}</p>
+              {hasCreatePermission && newDocumentURL && (
+                <Button el="link" Link={Link} to={newDocumentURL}>
+                  {i18n.t('general:createNewLabel', {
+                    label: getTranslation(labels?.singular, i18n),
+                  })}
+                </Button>
+              )}
+            </div>
+          )}
+          {/* <RenderComponent mappedComponent={afterListTable} /> */}
+          {data.docs && data.docs.length > 0 && (
+            <div className={`${baseClass}__page-controls`}>
+              <Pagination
+                hasNextPage={data.hasNextPage}
+                hasPrevPage={data.hasPrevPage}
+                limit={data.limit}
+                nextPage={data.nextPage}
+                numberOfNeighbors={1}
+                onChange={(page) => void handlePageChange(page)}
+                page={data.page}
+                prevPage={data.prevPage}
+                totalPages={data.totalPages}
               />
-            )}
-            {data.docs && data.docs.length > 0 && (
-              <RelationshipProvider>{Table}</RelationshipProvider>
-            )}
-            {data.docs && data.docs.length === 0 && (
-              <div className={`${baseClass}__no-results`}>
-                <p>
-                  {i18n.t('general:noResults', { label: getTranslation(labels?.plural, i18n) })}
-                </p>
-                {hasCreatePermission && newDocumentURL && (
-                  <Button el="link" Link={Link} to={newDocumentURL}>
-                    {i18n.t('general:createNewLabel', {
-                      label: getTranslation(labels?.singular, i18n),
-                    })}
-                  </Button>
-                )}
-              </div>
-            )}
-            {/* <RenderComponent mappedComponent={afterListTable} /> */}
-            {data.docs && data.docs.length > 0 && (
-              <div className={`${baseClass}__page-controls`}>
-                <Pagination
-                  hasNextPage={data.hasNextPage}
-                  hasPrevPage={data.hasPrevPage}
-                  limit={data.limit}
-                  nextPage={data.nextPage}
-                  numberOfNeighbors={1}
-                  onChange={(page) => void handlePageChange(page)}
-                  page={data.page}
-                  prevPage={data.prevPage}
-                  totalPages={data.totalPages}
-                />
-                {data?.totalDocs > 0 && (
-                  <Fragment>
-                    <div className={`${baseClass}__page-info`}>
-                      {data.page * data.limit - (data.limit - 1)}-
-                      {data.totalPages > 1 && data.totalPages !== data.page
-                        ? data.limit * data.page
-                        : data.totalDocs}{' '}
-                      {i18n.t('general:of')} {data.totalDocs}
-                    </div>
-                    <PerPage
-                      handleChange={(limit) => void handlePerPageChange(limit)}
-                      limit={isNumber(params?.limit) ? Number(params.limit) : defaultLimit}
-                      limits={collectionConfig?.admin?.pagination?.limits}
-                      resetPage={data.totalDocs <= data.pagingCounter}
-                    />
-                    {smallBreak && (
-                      <div className={`${baseClass}__list-selection`}>
-                        <ListSelection
-                          label={getTranslation(collectionConfig.labels.plural, i18n)}
-                        />
-                        <div className={`${baseClass}__list-selection-actions`}>
-                          {beforeActions && beforeActions}
-                          {!disableBulkEdit && (
-                            <Fragment>
-                              <EditMany collection={collectionConfig} />
-                              <PublishMany collection={collectionConfig} />
-                              <UnpublishMany collection={collectionConfig} />
-                            </Fragment>
-                          )}
-                          {!disableBulkDelete && <DeleteMany collection={collectionConfig} />}
-                        </div>
+              {data?.totalDocs > 0 && (
+                <Fragment>
+                  <div className={`${baseClass}__page-info`}>
+                    {data.page * data.limit - (data.limit - 1)}-
+                    {data.totalPages > 1 && data.totalPages !== data.page
+                      ? data.limit * data.page
+                      : data.totalDocs}{' '}
+                    {i18n.t('general:of')} {data.totalDocs}
+                  </div>
+                  <PerPage
+                    handleChange={(limit) => void handlePerPageChange(limit)}
+                    limit={isNumber(params?.limit) ? Number(params.limit) : defaultLimit}
+                    limits={collectionConfig?.admin?.pagination?.limits}
+                    resetPage={data.totalDocs <= data.pagingCounter}
+                  />
+                  {smallBreak && (
+                    <div className={`${baseClass}__list-selection`}>
+                      <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
+                      <div className={`${baseClass}__list-selection-actions`}>
+                        {beforeActions && beforeActions}
+                        {!disableBulkEdit && (
+                          <Fragment>
+                            <EditMany collection={collectionConfig} />
+                            <PublishMany collection={collectionConfig} />
+                            <UnpublishMany collection={collectionConfig} />
+                          </Fragment>
+                        )}
+                        {!disableBulkDelete && <DeleteMany collection={collectionConfig} />}
                       </div>
-                    )}
-                  </Fragment>
-                )}
-              </div>
-            )}
-          </Gutter>
-          {/* <RenderComponent mappedComponent={afterList} /> */}
-        </SelectionProvider>
-      </div>
-    </TableColumnsProvider>
+                    </div>
+                  )}
+                </Fragment>
+              )}
+            </div>
+          )}
+        </Gutter>
+        {/* <RenderComponent mappedComponent={afterList} /> */}
+      </SelectionProvider>
+    </div>
   )
 }

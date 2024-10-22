@@ -129,11 +129,12 @@ export const ListView: React.FC<AdminViewProps> = async ({
     })
 
     const Table = renderTable({
+      clientFields: clientConfig.collections.find((c) => c.slug === collectionSlug)?.fields,
       columnPreferences: listPreferences?.columns,
       data,
       defaultColumns,
       enableRowSelections: true,
-      fields: clientConfig.collections.find((c) => c.slug === collectionSlug)?.fields,
+      fields,
       importMap: payload.importMap,
       useAsTitle,
     })

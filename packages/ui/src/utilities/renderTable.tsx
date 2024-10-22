@@ -1,4 +1,4 @@
-import type { ClientField, CollectionConfig, ImportMap, PaginatedDocs } from 'payload'
+import type { ClientField, CollectionConfig, Field, ImportMap, PaginatedDocs } from 'payload'
 
 import type { ColumnPreferences } from '../providers/ListInfo/index.js'
 
@@ -8,6 +8,7 @@ import { filterFields } from '../elements/TableColumns/filterFields.js'
 import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
 
 export const renderTable = ({
+  clientFields,
   columnPreferences,
   data,
   defaultColumns,
@@ -16,11 +17,12 @@ export const renderTable = ({
   importMap,
   useAsTitle,
 }: {
+  clientFields: ClientField[]
   columnPreferences: ColumnPreferences
   data: PaginatedDocs
   defaultColumns: CollectionConfig['admin']['defaultColumns']
   enableRowSelections: boolean
-  fields: ClientField[]
+  fields: Field[]
   importMap: ImportMap
   useAsTitle: CollectionConfig['admin']['useAsTitle']
 }) => {
@@ -28,11 +30,13 @@ export const renderTable = ({
 
   const columnState = buildColumnState({
     // beforeRows,
+    clientFields,
     columnPreferences,
     columns: initialColumns,
     enableRowSelections,
     fields,
     // sortColumnProps,
+    docs: data.docs,
     importMap,
     useAsTitle,
   })
