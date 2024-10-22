@@ -353,6 +353,7 @@ export interface ArrayField {
   title?: string | null;
   items: {
     text: string;
+    anotherText?: string | null;
     localizedText?: string | null;
     subArray?:
       | {
