@@ -1,11 +1,13 @@
 import chalk from 'chalk'
+import { createServer } from 'http'
 import minimist from 'minimist'
-import { nextDev } from 'next/dist/cli/next-dev.js'
+import nextImport from 'next'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import open from 'open'
 import { loadEnv } from 'payload/node'
+import { parse } from 'url'
 
 import { getNextRootDir } from './helpers/getNextRootDir.js'
 import { runInit } from './runInit.js'
@@ -22,8 +24,6 @@ loadEnv()
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-
-process.env.PAYLOAD_DROP_DATABASE = process.env.PAYLOAD_DROP_DATABASE === 'false' ? 'false' : 'true'
 
 const {
   _: [testSuiteArg],
@@ -53,7 +53,30 @@ if (args.o) {
 
 const port = process.env.PORT ? Number(process.env.PORT) : 3000
 
-await nextDev({ port }, 'default', rootDir)
+const app = nextImport({
+  dev: true,
+  hostname: 'localhost',
+  port,
+  dir: rootDir,
+})
+
+const handle = app.getRequestHandler()
+
+let resolveServer
+
+const serverPromise = new Promise((res) => (resolveServer = res))
+
+void app.prepare().then(() => {
+  createServer(async (req, res) => {
+    const parsedUrl = parse(req.url, true)
+    await handle(req, res, parsedUrl)
+  }).listen(port, () => {
+    resolveServer()
+  })
+})
+
+await serverPromise
+process.env.PAYLOAD_DROP_DATABASE = process.env.PAYLOAD_DROP_DATABASE === 'false' ? 'false' : 'true'
 
 // fetch the admin url to force a render
 void fetch(`http://localhost:${port}${adminRoute}`)
