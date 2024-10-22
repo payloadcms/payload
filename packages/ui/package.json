@@ -116,10 +116,10 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "next": "^15.0.0-canary.173",
+    "next": "^15.0.0-rc.1",
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-3edc000d-20240926",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-3edc000d-20240926"
+    "react": "^19.0.0 || ^19.0.0-rc-cd22717c-20241013",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-cd22717c-20241013"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"

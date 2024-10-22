@@ -66,7 +66,7 @@ export const RootLayout = async ({
       dependencyVersions: {
         next: {
           required: false,
-          version: '>=15.0.0-canary.173',
+          version: '>=15.0.0-rc.1',
         },
         react: {
           customVersionParser: customReactVersionParser,

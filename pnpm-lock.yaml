@@ -13,8 +13,8 @@ overrides:
   drizzle-orm: 0.35.1
   graphql: ^16.8.1
   mongodb-memory-server: ^9.0
-  react: 19.0.0-rc-3edc000d-20240926
-  react-dom: 19.0.0-rc-3edc000d-20240926
+  react: 19.0.0-rc-cd22717c-20241013
+  react-dom: 19.0.0-rc-cd22717c-20241013
   typescript: 5.6.3
 
 importers:
@@ -28,8 +28,8 @@ importers:
         specifier: 0.14.0
         version: 0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4)
       '@next/bundle-analyzer':
-        specifier: 15.0.0-canary.173
-        version: 15.0.0-canary.173(bufferutil@4.0.8)
+        specifier: 15.0.0-rc.1
+        version: 15.0.0-rc.1(bufferutil@4.0.8)
       '@payloadcms/db-postgres':
         specifier: workspace:*
         version: link:packages/db-postgres
@@ -47,7 +47,7 @@ importers:
         version: 1.48.1
       '@sentry/nextjs':
         specifier: ^8.33.1
-        version: 8.33.1(@opentelemetry/api@1.9.0)(@opentelemetry/core@1.26.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.53.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.26.0(@opentelemetry/api@1.9.0))(next@15.0.0-canary.173(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)(sass@1.77.4))(react@19.0.0-rc-3edc000d-20240926)(webpack@5.95.0(@swc/core@1.7.10(@swc/helpers@0.5.13)))
+        version: 8.33.1(@opentelemetry/api@1.9.0)(@opentelemetry/core@1.26.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.53.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.26.0(@opentelemetry/api@1.9.0))(next@15.0.0-rc.1(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)(sass@1.77.4))(react@19.0.0-rc-cd22717c-20241013)(webpack@5.95.0(@swc/core@1.7.10(@swc/helpers@0.5.13)))
       '@sentry/node':
         specifier: ^8.33.1
         version: 8.33.1
@@ -113,7 +113,7 @@ importers:
         version: 0.26.2
       drizzle-orm:
         specifier: 0.35.1
-        version: 0.35.1(@libsql/client@0.14.0(bufferutil@4.0.8))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-3edc000d-20240926)(types-react@19.0.0-rc.1)
+        version: 0.35.1(@libsql/client@0.14.0(bufferutil@4.0.8))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-cd22717c-20241013)(types-react@19.0.0-rc.1)
       escape-html:
         specifier: ^1.0.3
         version: 1.0.3
@@ -148,8 +148,8 @@ importers:
         specifier: ^9.0
         version: 9.4.1(@aws-sdk/credential-providers@3.630.0(@aws-sdk/client-sso-oidc@3.629.0(@aws-sdk/client-sts@3.629.0)))
       next:
-        specifier: 15.0.0-canary.173
-        version: 15.0.0-canary.173(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)(sass@1.77.4)
+        specifier: 15.0.0-rc.1
+        version: 15.0.0-rc.1(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)(sass@1.77.4)
       open:
         specifier: ^10.1.0
         version: 10.1.0
@@ -169,11 +169,11 @@ importers:
         specifier: 2.4.2
         version: 2.4.2
       react:
-        specifier: 19.0.0-rc-3edc000d-20240926
-        version: 19.0.0-rc-3edc000d-20240926
+        specifier: 19.0.0-rc-cd22717c-20241013
+        version: 19.0.0-rc-cd22717c-20241013
       react-dom:
-        specifier: 19.0.0-rc-3edc000d-20240926
-        version: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
+        specifier: 19.0.0-rc-cd22717c-20241013
+        version: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
       rimraf:
         specifier: 3.0.2
         version: 3.0.2
@@ -319,7 +319,7 @@ importers:
         version: 0.26.2
       drizzle-orm:
         specifier: 0.35.1
-        version: 0.35.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-3edc000d-20240926)(types-react@19.0.0-rc.1)
+        version: 0.35.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-cd22717c-20241013)(types-react@19.0.0-rc.1)
       pg:
         specifier: 8.11.3
         version: 8.11.3
@@ -365,7 +365,7 @@ importers:
         version: 0.26.2
       drizzle-orm:
         specifier: 0.35.1
-        version: 0.35.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-3edc000d-20240926)(types-react@19.0.0-rc.1)
+        version: 0.35.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-cd22717c-20241013)(types-react@19.0.0-rc.1)
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -405,7 +405,7 @@ importers:
         version: 0.26.2
       drizzle-orm:
         specifier: 0.35.1
-        version: 0.35.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-3edc000d-20240926)(types-react@19.0.0-rc.1)
+        version: 0.35.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-cd22717c-20241013)(types-react@19.0.0-rc.1)
       pg:
         specifier: 8.11.3
         version: 8.11.3
@@ -445,7 +445,7 @@ importers:
         version: 2.11.2
       drizzle-orm:
         specifier: 0.35.1
-        version: 0.35.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-3edc000d-20240926)(types-react@19.0.0-rc.1)
+        version: 0.35.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-cd22717c-20241013)(types-react@19.0.0-rc.1)
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -654,11 +654,11 @@ importers:
         specifier: workspace:*
         version: link:../live-preview
       react:
-        specifier: 19.0.0-rc-3edc000d-20240926
-        version: 19.0.0-rc-3edc000d-20240926
+        specifier: 19.0.0-rc-cd22717c-20241013
+        version: 19.0.0-rc-cd22717c-20241013
       react-dom:
-        specifier: 19.0.0-rc-3edc000d-20240926
-        version: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
+        specifier: 19.0.0-rc-cd22717c-20241013
+        version: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -693,7 +693,7 @@ importers:
     dependencies:
       '@dnd-kit/core':
         specifier: 6.0.8
-        version: 6.0.8(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)
+        version: 6.0.8(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
       '@payloadcms/graphql':
         specifier: workspace:*
         version: link:../graphql
@@ -722,8 +722,8 @@ importers:
         specifier: 1.6.2
         version: 1.6.2
       next:
-        specifier: ^15.0.0-canary.173
-        version: 15.0.0-canary.173(@babel/core@7.25.2)(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)(sass@1.77.4)
+        specifier: ^15.0.0-rc.1
+        version: 15.0.0-rc.1(@babel/core@7.25.2)(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)(sass@1.77.4)
       path-to-regexp:
         specifier: ^6.2.1
         version: 6.2.2
@@ -732,13 +732,13 @@ importers:
         version: 7.0.2
       react-diff-viewer-continued:
         specifier: 3.2.6
-        version: 3.2.6(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)
+        version: 3.2.6(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
       sass:
         specifier: 1.77.4
         version: 1.77.4
       sonner:
         specifier: ^1.5.0
-        version: 1.5.0(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)
+        version: 1.5.0(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
       uuid:
         specifier: 10.0.0
         version: 10.0.0
@@ -762,8 +762,8 @@ importers:
         specifier: ^7.24.1
         version: 7.24.7(@babel/core@7.25.2)
       '@next/eslint-plugin-next':
-        specifier: 15.0.0-canary.173
-        version: 15.0.0-canary.173
+        specifier: 15.0.0-rc.1
+        version: 15.0.0-rc.1
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
@@ -805,10 +805,10 @@ importers:
     dependencies:
       '@monaco-editor/react':
         specifier: 4.6.0
-        version: 4.6.0(monaco-editor@0.38.0)(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)
+        version: 4.6.0(monaco-editor@0.38.0)(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
       '@next/env':
-        specifier: ^15.0.0-canary.173
-        version: 15.0.0-rc.0
+        specifier: ^15.0.0-rc.1
+        version: 15.0.0
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../translations
@@ -902,7 +902,7 @@ importers:
         version: 0.0.33
       '@types/react-datepicker':
         specifier: 6.2.0
-        version: 6.2.0(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)
+        version: 6.2.0(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
       '@types/uuid':
         specifier: 10.0.0
         version: 10.0.0
@@ -1008,11 +1008,11 @@ importers:
         specifier: ^1.0.3
         version: 1.0.3
       react:
-        specifier: 19.0.0-rc-3edc000d-20240926
-        version: 19.0.0-rc-3edc000d-20240926
+        specifier: 19.0.0-rc-cd22717c-20241013
+        version: 19.0.0-rc-cd22717c-20241013
       react-dom:
-        specifier: 19.0.0-rc-3edc000d-20240926
-        version: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
+        specifier: 19.0.0-rc-cd22717c-20241013
+        version: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -1060,11 +1060,11 @@ importers:
         specifier: workspace:*
         version: link:../ui
       react:
-        specifier: 19.0.0-rc-3edc000d-20240926
-        version: 19.0.0-rc-3edc000d-20240926
+        specifier: 19.0.0-rc-cd22717c-20241013
+        version: 19.0.0-rc-cd22717c-20241013
       react-dom:
-        specifier: 19.0.0-rc-3edc000d-20240926
-        version: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
+        specifier: 19.0.0-rc-cd22717c-20241013
+        version: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -1083,16 +1083,16 @@ importers:
     dependencies:
       '@sentry/nextjs':
         specifier: ^8.33.1
-        version: 8.33.1(@opentelemetry/api@1.9.0)(@opentelemetry/core@1.26.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.53.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.26.0(@opentelemetry/api@1.9.0))(next@15.0.0-canary.173(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)(sass@1.77.4))(react@19.0.0-rc-3edc000d-20240926)(webpack@5.95.0(@swc/core@1.7.10(@swc/helpers@0.5.13)))
+        version: 8.33.1(@opentelemetry/api@1.9.0)(@opentelemetry/core@1.26.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.53.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.26.0(@opentelemetry/api@1.9.0))(next@15.0.0-rc.1(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)(sass@1.77.4))(react@19.0.0-rc-cd22717c-20241013)(webpack@5.95.0(@swc/core@1.7.10(@swc/helpers@0.5.13)))
       '@sentry/types':
         specifier: ^8.33.1
         version: 8.33.1
       react:
-        specifier: 19.0.0-rc-3edc000d-20240926
-        version: 19.0.0-rc-3edc000d-20240926
+        specifier: 19.0.0-rc-cd22717c-20241013
+        version: 19.0.0-rc-cd22717c-20241013
       react-dom:
-        specifier: 19.0.0-rc-3edc000d-20240926
-        version: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
+        specifier: 19.0.0-rc-cd22717c-20241013
+        version: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -1116,11 +1116,11 @@ importers:
         specifier: workspace:*
         version: link:../ui
       react:
-        specifier: 19.0.0-rc-3edc000d-20240926
-        version: 19.0.0-rc-3edc000d-20240926
+        specifier: 19.0.0-rc-cd22717c-20241013
+        version: 19.0.0-rc-cd22717c-20241013
       react-dom:
-        specifier: 19.0.0-rc-3edc000d-20240926
-        version: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
+        specifier: 19.0.0-rc-cd22717c-20241013
+        version: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -1182,10 +1182,10 @@ importers:
     dependencies:
       '@faceless-ui/modal':
         specifier: 3.0.0-beta.2
-        version: 3.0.0-beta.2(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
+        version: 3.0.0-beta.2(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
       '@faceless-ui/scroll-info':
         specifier: 2.0.0-beta.0
-        version: 2.0.0-beta.0(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
+        version: 2.0.0-beta.0(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
       '@lexical/headless':
         specifier: 0.18.0
         version: 0.18.0
@@ -1203,7 +1203,7 @@ importers:
         version: 0.18.0
       '@lexical/react':
         specifier: 0.18.0
-        version: 0.18.0(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)(yjs@13.6.18)
+        version: 0.18.0(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)(yjs@13.6.18)
       '@lexical/rich-text':
         specifier: 0.18.0
         version: 0.18.0
@@ -1241,14 +1241,14 @@ importers:
         specifier: 0.18.0
         version: 0.18.0
       react:
-        specifier: 19.0.0-rc-3edc000d-20240926
-        version: 19.0.0-rc-3edc000d-20240926
+        specifier: 19.0.0-rc-cd22717c-20241013
+        version: 19.0.0-rc-cd22717c-20241013
       react-dom:
-        specifier: 19.0.0-rc-3edc000d-20240926
-        version: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
+        specifier: 19.0.0-rc-cd22717c-20241013
+        version: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
       react-error-boundary:
         specifier: 4.0.13
-        version: 4.0.13(react@19.0.0-rc-3edc000d-20240926)
+        version: 4.0.13(react@19.0.0-rc-cd22717c-20241013)
       uuid:
         specifier: 10.0.0
         version: 10.0.0
@@ -1323,8 +1323,8 @@ importers:
         specifier: 0.2.0
         version: 0.2.0
       react:
-        specifier: 19.0.0-rc-3edc000d-20240926
-        version: 19.0.0-rc-3edc000d-20240926
+        specifier: 19.0.0-rc-cd22717c-20241013
+        version: 19.0.0-rc-cd22717c-20241013
       slate:
         specifier: 0.91.4
         version: 0.91.4
@@ -1336,7 +1336,7 @@ importers:
         version: 0.81.3(slate@0.91.4)
       slate-react:
         specifier: 0.92.0
-        version: 0.92.0(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)(slate@0.91.4)
+        version: 0.92.0(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)(slate@0.91.4)
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -1415,7 +1415,7 @@ importers:
         version: link:../plugin-cloud-storage
       uploadthing:
         specifier: ^6.10.1
-        version: 6.13.2(express@4.19.2)(next@15.0.0-canary.173(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)(sass@1.77.4))
+        version: 6.13.2(express@4.19.2)(next@15.0.0-rc.1(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)(sass@1.77.4))
     devDependencies:
       payload:
         specifier: workspace:*
@@ -1466,22 +1466,22 @@ importers:
     dependencies:
       '@dnd-kit/core':
         specifier: 6.0.8
-        version: 6.0.8(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
+        version: 6.0.8(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
       '@dnd-kit/sortable':
         specifier: 7.0.2
-        version: 7.0.2(@dnd-kit/core@6.0.8(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
+        version: 7.0.2(@dnd-kit/core@6.0.8(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
       '@faceless-ui/modal':
         specifier: 3.0.0-beta.2
-        version: 3.0.0-beta.2(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
+        version: 3.0.0-beta.2(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
       '@faceless-ui/scroll-info':
         specifier: 2.0.0-beta.0
-        version: 2.0.0-beta.0(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
+        version: 2.0.0-beta.0(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
       '@faceless-ui/window-info':
         specifier: 3.0.0-beta.0
-        version: 3.0.0-beta.0(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
+        version: 3.0.0-beta.0(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
       '@monaco-editor/react':
         specifier: 4.6.0
-        version: 4.6.0(monaco-editor@0.38.0)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
+        version: 4.6.0(monaco-editor@0.38.0)(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../translations
@@ -1501,8 +1501,8 @@ importers:
         specifier: 2.3.0
         version: 2.3.0
       next:
-        specifier: ^15.0.0-canary.173
-        version: 15.0.0-canary.173(@babel/core@7.25.2)(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)(sass@1.77.4)
+        specifier: ^15.0.0-rc.1
+        version: 15.0.0-rc.1(@babel/core@7.25.2)(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)(sass@1.77.4)
       object-to-formdata:
         specifier: 4.5.1
         version: 4.5.1
@@ -1510,35 +1510,35 @@ importers:
         specifier: 7.0.2
         version: 7.0.2
       react:
-        specifier: 19.0.0-rc-3edc000d-20240926
-        version: 19.0.0-rc-3edc000d-20240926
+        specifier: 19.0.0-rc-cd22717c-20241013
+        version: 19.0.0-rc-cd22717c-20241013
       react-animate-height:
         specifier: 2.1.2
-        version: 2.1.2(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
+        version: 2.1.2(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
       react-datepicker:
         specifier: 6.9.0
-        version: 6.9.0(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
+        version: 6.9.0(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
       react-dom:
-        specifier: 19.0.0-rc-3edc000d-20240926
-        version: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
+        specifier: 19.0.0-rc-cd22717c-20241013
+        version: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
       react-image-crop:
         specifier: 10.1.8
-        version: 10.1.8(react@19.0.0-rc-3edc000d-20240926)
+        version: 10.1.8(react@19.0.0-rc-cd22717c-20241013)
       react-select:
         specifier: 5.8.0
-        version: 5.8.0(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)(types-react@19.0.0-rc.1)
+        version: 5.8.0(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)(types-react@19.0.0-rc.1)
       scheduler:
         specifier: 0.0.0-experimental-3edc000d-20240926
         version: 0.0.0-experimental-3edc000d-20240926
       sonner:
         specifier: ^1.5.0
-        version: 1.5.0(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
+        version: 1.5.0(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
       ts-essentials:
         specifier: 10.0.2
         version: 10.0.2(typescript@5.6.3)
       use-context-selector:
         specifier: 2.0.0
-        version: 2.0.0(react@19.0.0-rc-3edc000d-20240926)(scheduler@0.0.0-experimental-3edc000d-20240926)
+        version: 2.0.0(react@19.0.0-rc-cd22717c-20241013)(scheduler@0.0.0-experimental-3edc000d-20240926)
       uuid:
         specifier: 10.0.0
         version: 10.0.0
@@ -1572,7 +1572,7 @@ importers:
         version: types-react@19.0.0-rc.1
       '@types/react-datepicker':
         specifier: 6.2.0
-        version: 6.2.0(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
+        version: 6.2.0(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
       '@types/react-dom':
         specifier: npm:types-react-dom@19.0.0-rc.1
         version: types-react-dom@19.0.0-rc.1
@@ -1701,10 +1701,10 @@ importers:
         version: link:../packages/ui
       '@sentry/nextjs':
         specifier: ^8.33.1
-        version: 8.33.1(@opentelemetry/api@1.9.0)(@opentelemetry/core@1.26.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.53.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.26.0(@opentelemetry/api@1.9.0))(next@15.0.0-canary.173(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)(sass@1.77.4))(react@19.0.0-rc-3edc000d-20240926)(webpack@5.95.0(@swc/core@1.7.10(@swc/helpers@0.5.13)))
+        version: 8.33.1(@opentelemetry/api@1.9.0)(@opentelemetry/core@1.26.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.53.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.26.0(@opentelemetry/api@1.9.0))(next@15.0.0-rc.1(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)(sass@1.77.4))(react@19.0.0-rc-cd22717c-20241013)(webpack@5.95.0(@swc/core@1.7.10(@swc/helpers@0.5.13)))
       '@sentry/react':
         specifier: ^7.77.0
-        version: 7.118.0(react@19.0.0-rc-3edc000d-20240926)
+        version: 7.118.0(react@19.0.0-rc-cd22717c-20241013)
       '@types/react':
         specifier: npm:types-react@19.0.0-rc.1
         version: types-react@19.0.0-rc.1
@@ -1745,8 +1745,8 @@ importers:
         specifier: 0.18.0
         version: 0.18.0
       next:
-        specifier: 15.0.0-canary.173
-        version: 15.0.0-canary.173(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)(sass@1.77.4)
+        specifier: 15.0.0-rc.1
+        version: 15.0.0-rc.1(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)(sass@1.77.4)
       payload:
         specifier: workspace:*
         version: link:../packages/payload
@@ -1754,11 +1754,11 @@ importers:
         specifier: 7.0.2
         version: 7.0.2
       react:
-        specifier: 19.0.0-rc-3edc000d-20240926
-        version: 19.0.0-rc-3edc000d-20240926
+        specifier: 19.0.0-rc-cd22717c-20241013
+        version: 19.0.0-rc-cd22717c-20241013
       react-dom:
-        specifier: 19.0.0-rc-3edc000d-20240926
-        version: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
+        specifier: 19.0.0-rc-cd22717c-20241013
+        version: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
       server-only:
         specifier: ^0.0.1
         version: 0.0.1
@@ -1776,7 +1776,7 @@ importers:
         version: 5.6.3
       uploadthing:
         specifier: ^6.10.1
-        version: 6.13.2(express@4.19.2)(next@15.0.0-canary.173(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)(sass@1.77.4))
+        version: 6.13.2(express@4.19.2)(next@15.0.0-rc.1(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)(sass@1.77.4))
       uuid:
         specifier: 10.0.0
         version: 10.0.0
@@ -2702,24 +2702,24 @@ packages:
   '@dnd-kit/accessibility@3.1.0':
     resolution: {integrity: sha512-ea7IkhKvlJUv9iSHJOnxinBcoOI3ppGnnL+VDJ75O45Nss6HtZd8IdN8touXPDtASfeI2T2LImb8VOZcL47wjQ==}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
 
   '@dnd-kit/core@6.0.8':
     resolution: {integrity: sha512-lYaoP8yHTQSLlZe6Rr9qogouGUz9oRUj4AHhDQGQzq/hqaJRpFo65X+JKsdHf8oUFBzx5A+SJPUvxAwTF2OabA==}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013
 
   '@dnd-kit/sortable@7.0.2':
     resolution: {integrity: sha512-wDkBHHf9iCi1veM834Gbk1429bd4lHX4RpAwT0y2cHLf246GAvU2sVw/oxWNpPKQNQRQaeGXhAVgrOl1IT+iyA==}
     peerDependencies:
       '@dnd-kit/core': ^6.0.7
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
 
   '@dnd-kit/utilities@3.2.2':
     resolution: {integrity: sha512-+MKAJEOfaBe5SmV6t34p80MMKhjvUz0vRrvVJbPT0WElzaOJ/1xs+D+KDv+tD/NE5ujfrChEcshd4fLn0wpiqg==}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
 
   '@drizzle-team/brocli@0.10.1':
     resolution: {integrity: sha512-AHy0vjc+n/4w/8Mif+w86qpppHuF3AyXbcWW+R/W7GNA3F5/p2nuhlkCJaTXSLZheB4l1rtHzOfr9A7NwoR/Zg==}
@@ -2757,7 +2757,7 @@ packages:
     resolution: {integrity: sha512-WkL+bw1REC2VNV1goQyfxjx1GYJkcc23CRQkXX+vZNLINyfI7o+uUn/rTGPt/xJ3bJHd5GcljgnxHf4wRw5VWQ==}
     peerDependencies:
       '@types/react': '*'
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
     peerDependenciesMeta:
       '@types/react':
         optional: true
@@ -2774,7 +2774,7 @@ packages:
   '@emotion/use-insertion-effect-with-fallbacks@1.1.0':
     resolution: {integrity: sha512-+wBOcIV5snwGgI2ya3u99D7/FJquOIniQT1IKyDsBmEgwvpxMNeS65Oib7OnE2d2aY+3BU4OiH+0Wchf8yk3Hw==}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
 
   '@emotion/utils@1.4.0':
     resolution: {integrity: sha512-spEnrA1b6hDR/C68lC2M7m6ALPUHZC0lIY7jAS/B/9DuuO1ZP04eov8SMv/6fwRd8pzmsn2AuJEznRREWlQrlQ==}
@@ -3264,20 +3264,20 @@ packages:
   '@faceless-ui/modal@3.0.0-beta.2':
     resolution: {integrity: sha512-UmXvz7Iw3KMO4Pm3llZczU4uc5pPQDb6rdqwoBvYDFgWvkraOAHKx0HxSZgwqQvqOhn8joEFBfFp6/Do2562ow==}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013
 
   '@faceless-ui/scroll-info@2.0.0-beta.0':
     resolution: {integrity: sha512-pUBhQP8vduA7rVndNsjhaCcds1BykA/Q4iV23JWijU6ZFL/M3Fm9P3ypDS+0VVxolqemNhw8S3FXPwZGgjH4Rw==}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013
 
   '@faceless-ui/window-info@3.0.0-beta.0':
     resolution: {integrity: sha512-Qs8xRA+fl4sU2aFVe9xawxfi5TVZ9VTPuhdQpx9aSv7U5a2F0AXwT61lJfnaJ9Flm8tOcxzq67p8cVZsXNCVeQ==}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013
 
   '@fastify/busboy@2.1.1':
     resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
@@ -3292,14 +3292,14 @@ packages:
   '@floating-ui/react-dom@2.1.1':
     resolution: {integrity: sha512-4h84MJt3CHrtG18mGsXuLCHMrug49d7DFkU0RMIyshRveBeyV2hmV/pDaF2Uxtu8kgq5r46llp5E5FQiR0K2Yg==}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013
 
   '@floating-ui/react@0.26.22':
     resolution: {integrity: sha512-LNv4azPt8SpT4WW7Kku5JNVjLk2GcS0bGGjFTAgqOONRFo9r/aaGHHPpdiIuQbB1t8shmWyWqTTUDmZ9fcNshg==}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013
 
   '@floating-ui/utils@0.2.7':
     resolution: {integrity: sha512-X8R8Oj771YRl/w+c1HqAC1szL8zWQRwFvgDwT129k9ACdBoud/+/rX9V0qiMl6LWUdP9voC2nDVZYPMQQsb6eA==}
@@ -3569,8 +3569,8 @@ packages:
   '@lexical/devtools-core@0.18.0':
     resolution: {integrity: sha512-gVgtEkLwGjz1frOmDpFJzDPFxPgAcC9n5ZaaZWHo5GLcptnQmkuLm1t+UInQWujXhFmcyJzfiqDaMJ8EIcb2Ww==}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013
 
   '@lexical/dragon@0.18.0':
     resolution: {integrity: sha512-toD/y2/TgtG+eFVKXf65kDk/Mv02FwgmcGH18nyAabZnO1TLBaMYPkGFdTTZ8hVmQxqIu9nZuLWUbdIBMs8UWw==}
@@ -3616,8 +3616,8 @@ packages:
   '@lexical/react@0.18.0':
     resolution: {integrity: sha512-DLvIbTsjvFIFqm+9zvAjEwuZHAbSxzZf1AGqf1lLctlL/Ran0f+8EZOv5jttELTe7xISZ2+xSXTLRfyxhNwGXQ==}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013
 
   '@lexical/rich-text@0.18.0':
     resolution: {integrity: sha512-xMANCB7WueMsmWK8qxik5FZN4ApyaHWHQILS9r4FTbdv/DlNepsR7Pt8kg2317xZ56NAueQLIdyyKYXG1nBrHw==}
@@ -3703,8 +3703,8 @@ packages:
     resolution: {integrity: sha512-RFkU9/i7cN2bsq/iTkurMWOEErmYcY6JiQI3Jn+WeR/FGISH8JbHERjpS9oRuSOPvDMJI0Z8nJeKkbOs9sBYQw==}
     peerDependencies:
       monaco-editor: '>= 0.25.0 < 1'
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013
 
   '@mongodb-js/saslprep@1.1.8':
     resolution: {integrity: sha512-qKwC/M/nNNaKUBMQ0nuzm47b7ZYWQHN3pcXq4IIcoSBc2hOIrflAxJduIvvqmhoz3gR2TacTAs8vlsCVPkiEdQ==}
@@ -3718,68 +3718,62 @@ packages:
   '@neondatabase/serverless@0.9.4':
     resolution: {integrity: sha512-D0AXgJh6xkf+XTlsO7iwE2Q1w8981E1cLCPAALMU2YKtkF/1SF6BiAzYARZFYo175ON+b1RNIy9TdSFHm5nteg==}
 
-  '@next/bundle-analyzer@15.0.0-canary.173':
-    resolution: {integrity: sha512-HQjr1RBygRcdVT1nlE1QkRED/dOCeXZdsDwr46Z9ko9xvFOC9+gaXs59EfgTZTLCyjqd6Qm5wttdS5GIYcMsMA==}
+  '@next/bundle-analyzer@15.0.0-rc.1':
+    resolution: {integrity: sha512-bhToxrazcHYIuyNfI3Kr4snvejhed75DPl3OT0HDmBwKjHasks4o4MiGZh9Lkegg8eya0lceop5vb8X0+8DuJw==}
 
-  '@next/env@15.0.0-canary.173':
-    resolution: {integrity: sha512-ly6s88DqV1BSu4dthaU9/eTjyZDUeEC7KpXwnH0u4w2hu10ickyEFv52s7MXItoiiurtUorpg8h5nlK98UNQiQ==}
+  '@next/env@15.0.0':
+    resolution: {integrity: sha512-Mcv8ZVmEgTO3bePiH/eJ7zHqQEs2gCqZ0UId2RxHmDDc7Pw6ngfSrOFlxG8XDpaex+n2G+TKPsQAf28MO+88Gw==}
 
-  '@next/env@15.0.0-rc.0':
-    resolution: {integrity: sha512-6W0ndQvHR9sXcqcKeR/inD2UTRCs9+VkSK3lfaGmEuZs7EjwwXMO2BPYjz9oBrtfPL3xuTjtXsHKSsalYQ5l1Q==}
+  '@next/env@15.0.0-rc.1':
+    resolution: {integrity: sha512-4neDwowyr+9DfgickGjNATp6Lm3rJ/Y83ulg8irVXUoN+mLikrInYSzFDnwpkflO/wokFR4z5A171RVPnapZ/Q==}
 
-  '@next/eslint-plugin-next@15.0.0-canary.173':
-    resolution: {integrity: sha512-4nYoVrqN1HwXH3k+r79jxRWNyqBNYioarBwyY9RkFIJkduGAP0us0y9C4DFY+3SdZql4WtyRZMgn6WfwHeE7sA==}
+  '@next/eslint-plugin-next@15.0.0-rc.1':
+    resolution: {integrity: sha512-Nz/tMHzuGPYR0uK57+mxLhVFDTKtCK8HeVnPmDp/L1nrgcgICFZUCYHnKDUM9IUQ1XalzYhrLOlizOadpOosIQ==}
 
-  '@next/swc-darwin-arm64@15.0.0-canary.173':
-    resolution: {integrity: sha512-peEFAtJDrSpnVL0VKqmbvBzbgxuOdwT+Y86PGMNkh6zEctodQ0Ka5YBlsu5Tjzkzkbn1xMpIpxurbqnsMwHeOQ==}
+  '@next/swc-darwin-arm64@15.0.0-rc.1':
+    resolution: {integrity: sha512-YqDdpE3vgcDSiq9oJcFp0YUsLXCfIa3BpAHOZnVfbXNPBz1JcDtIGFsoz2w6l5jmjU9+41l7oeagY8KAWtYdpA==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [darwin]
 
-  '@next/swc-darwin-x64@15.0.0-canary.173':
-    resolution: {integrity: sha512-mXrx5JDB8lSSBRrzGOVrvt3155c4B5ctn8hBuWdsHaMpnbwg6zQtSESp2z8pcMyXFAWaJqpYJ+ImH3M0VdYzyw==}
+  '@next/swc-darwin-x64@15.0.0-rc.1':
+    resolution: {integrity: sha512-mM7rwGB9xuPM9dIAcInlmHpIOaFyBkOsUjj9ytUBANPNEqPkW8C06RITiPJ3toKAiocEcGdLuJeaYPS8MDgf6g==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [darwin]
 
-  '@next/swc-linux-arm64-gnu@15.0.0-canary.173':
-    resolution: {integrity: sha512-1rUBlXBKPQYe12+bddrD5GHG0sS7KD0aKDUoLAxXJ4iCPThdhOmT8PexJDBOE6D9JL1Lp5L4G01ntbRf360Jgw==}
+  '@next/swc-linux-arm64-gnu@15.0.0-rc.1':
+    resolution: {integrity: sha512-4V3PSaqvjW00qac6Pd7rWAv+zE3HGXv02JAac7TpwOvNIYuneqUq82HLGZe9aZTDtT+zhOS2RnCUuXE7v3BO2Q==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
 
-  '@next/swc-linux-arm64-musl@15.0.0-canary.173':
-    resolution: {integrity: sha512-6LjAq3zrmc8Dz8sao+ZtbjdUe9dkTMpv7MazHy6lAB33+mg9SwYuyvsg/YFRKlS2NetB8Gy1Fd+85YX6wYYiSQ==}
+  '@next/swc-linux-arm64-musl@15.0.0-rc.1':
+    resolution: {integrity: sha512-0xUM0jRNgezRT0F/wCMs2HJ5uuV/WDajYWWeBDSSOLKB8zfTMho+QiZtLqsGG1OjALIPttpKr1E2IDNWoUgXZQ==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
 
-  '@next/swc-linux-x64-gnu@15.0.0-canary.173':
-    resolution: {integrity: sha512-x72YkJvmqH/1PzMyQ2VUnL/Bsbn+aDodr/KNhj42uEhhxUEXOkfJT8k8iwjbN7rhP+Oid7qWmd7w3FPkL9pOvg==}
+  '@next/swc-linux-x64-gnu@15.0.0-rc.1':
+    resolution: {integrity: sha512-xCusIy4TN9tS5CoZVk1bs6XUqSy1H6/BMco71/LA64oPKO/MsnFv6tbmzVlBKmriASCdedrgPlREE6AXVANRaA==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
 
-  '@next/swc-linux-x64-musl@15.0.0-canary.173':
-    resolution: {integrity: sha512-DYOLKH97iTQRVatqJpxgCgUKdkgwtiza2mmLAC3roPSc/vPltwTvGDPtKKKiZ7Rn18VGe4GMb5j1DVUgnAzKMA==}
+  '@next/swc-linux-x64-musl@15.0.0-rc.1':
+    resolution: {integrity: sha512-eNiz8+boojGEVkTJYOC1BzuT2Wl9Nqoz91rHkZityAW2kd4KpeMEuxXj5Y+IPoRQXRFDfOi39hw7qpj+Nt0LXg==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
 
-  '@next/swc-win32-arm64-msvc@15.0.0-canary.173':
-    resolution: {integrity: sha512-wpOF0WMiiGeTbTvdaS20FhjyQl2qUsawN9oUNx/SKcOtHzjt2kBZiwtZmLNSdu9lSW3LPBpRxMA4EPf9ukjAxw==}
+  '@next/swc-win32-arm64-msvc@15.0.0-rc.1':
+    resolution: {integrity: sha512-KcH0BWiFqinwfb8dBbIvAT51oWmZqiGHoPOP8yjkEzJK2pVxwKm4mk4WM4Y17EgCSmfAtdT0xklM9bcAm3cD3Q==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [win32]
 
-  '@next/swc-win32-ia32-msvc@15.0.0-canary.173':
-    resolution: {integrity: sha512-VSOMf/GbBYHkuly/hSGbam5AQfkdgTPZOdcrFalHd03Q1mEL4GCJBRRqu/ejGBHTI1CNsFekEyVBJ0GpZQkFTg==}
-    engines: {node: '>= 10'}
-    cpu: [ia32]
-    os: [win32]
-
-  '@next/swc-win32-x64-msvc@15.0.0-canary.173':
-    resolution: {integrity: sha512-JBwVQkiebNPVxk70TCbbxcG/JpIAnd/XKKt0LDeQf51HDdyGfu6MN3OZC3uqm2h1vb1FGDPOX1u9Klf5yek+nA==}
+  '@next/swc-win32-x64-msvc@15.0.0-rc.1':
+    resolution: {integrity: sha512-mkw4njN+kXYJo1/+V3BxogTwVXRDdHzxBO9gTEEZzZVnxXTdD5TMiPPQuH5hdkZxdcx3O0qhob3j7wdH7gaZ2A==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
@@ -4227,13 +4221,13 @@ packages:
     resolution: {integrity: sha512-oEYe5TGk8S7YzPsFqDf4xDHjfzs35/QFE+dou3S2d24OYpso8Tq4C5f1VzYmnOOyy85T7JNicYLSo0n0NSJvQg==}
     engines: {node: '>=8'}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
 
   '@sentry/react@8.33.1':
     resolution: {integrity: sha512-SsEX05xfcfOvo7/pK1UyeyTAYWH8iSIsXXlsjvnSRsbuJkjb0c+q6yiZpj3A2PRdbcx43nTVE1n0lSpgaqj2HA==}
     engines: {node: '>=14.18'}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
 
   '@sentry/replay@7.118.0':
     resolution: {integrity: sha512-boQfCL+1L/tSZ9Huwi00+VtU+Ih1Lcg8HtxBuAsBCJR9pQgUL5jp7ECYdTeeHyCh/RJO7JqV1CEoGTgohe10mA==}
@@ -5895,7 +5889,7 @@ packages:
       pg: '>=8'
       postgres: '>=3'
       prisma: '*'
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
       sql.js: '>=1'
       sqlite3: '>=5'
     peerDependenciesMeta:
@@ -7885,16 +7879,16 @@ packages:
     resolution: {integrity: sha512-lDcBsjBSMlj3LXH2v/FW3txlh2pYTjmbOXPYJD93HI5EwuLzI11tdHSIpUMmfq/IOsldj4Ps8M8flhm+pCK4Ew==}
     engines: {node: '>=12.22.0'}
 
-  next@15.0.0-canary.173:
-    resolution: {integrity: sha512-wD6+sidDZAao/rJ4D/9agqLDTlc/DzlREAnC/+pQSgmpmL8rn41h9Empke6POBxJ4kQWm61dpNDEmz882DknOA==}
+  next@15.0.0-rc.1:
+    resolution: {integrity: sha512-MUoMUM7u6lh5zx1fRbze2jGESj4VIqc0dplx03wN5cLbpW3RhrVD7I3+sDW1khJxi+bayAZuGx03R5qNV9y/EA==}
     engines: {node: '>=18.18.0'}
     hasBin: true
     peerDependencies:
       '@opentelemetry/api': ^1.1.0
       '@playwright/test': ^1.41.2
       babel-plugin-react-compiler: '*'
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013
       sass: ^1.3.0
     peerDependenciesMeta:
       '@opentelemetry/api':
@@ -8486,47 +8480,42 @@ packages:
     resolution: {integrity: sha512-A9jfz/4CTdsIsE7WCQtO9UkOpMBcBRh8LxyHl2eoZz1ki02jpyUL5xt58gabd0CyeLQ8fRyQ+s2lyV2Ufu8Owg==}
     engines: {node: '>= 6.0.0'}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013
 
   react-datepicker@6.9.0:
     resolution: {integrity: sha512-QTxuzeem7BUfVFWv+g5WuvzT0c5BPo+XTCNbMTZKSZQLU+cMMwSUHwspaxuIcDlwNcOH0tiJ+bh1fJ2yxOGYWA==}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013
 
   react-diff-viewer-continued@3.2.6:
     resolution: {integrity: sha512-GrzyqQnjIMoej+jMjWvtVSsQqhXgzEGqpXlJ2dAGfOk7Q26qcm8Gu6xtI430PBUyZsERe8BJSQf+7VZZo8IBNQ==}
     engines: {node: '>= 8'}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013
 
-  react-dom@19.0.0-rc-3edc000d-20240926:
-    resolution: {integrity: sha512-0nEYp9I8IF5GZQOJdKSPhkwVFgBmYFiFJOzw5xfPD1USj/Wf8Z7lpruV7WStKD4uxbtfLamDMGZTRkSby7eAwQ==}
+  react-dom@19.0.0-rc-cd22717c-20241013:
+    resolution: {integrity: sha512-NzjTBOXygonUxLRQuUUW5V2QLGkAcyUwJoS8+UWxs089paMvQQfoRD51w65Ovgd2OEQ8Rm3HWx+82fvXiT0czQ==}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-
-  react-dom@19.0.0-rc-5dcb0097-20240918:
-    resolution: {integrity: sha512-QV5mYzXL8okN43EIxsMhjOMi6AP+mkZBbs3nmMcIKp3RbflINO/lUIdHnGsSm6Pc/Mc34QXCHy8RaN1DZ5o8fw==}
-    peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
 
   react-error-boundary@3.1.4:
     resolution: {integrity: sha512-uM9uPzZJTF6wRQORmSrvOIgt4lJ9MC1sNgEOj2XGsDTRE4kmpWxg7ENK9EWNKJRMAOY9z0MuF4yIfl6gp4sotA==}
     engines: {node: '>=10', npm: '>=6'}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
 
   react-error-boundary@4.0.13:
     resolution: {integrity: sha512-b6PwbdSv8XeOSYvjt8LpgpKrZ0yGdtZokYwkwV2wlcZbxgopHX/hgPl5VgpnoVOWd868n1hktM8Qm4b+02MiLQ==}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
 
   react-image-crop@10.1.8:
     resolution: {integrity: sha512-4rb8XtXNx7ZaOZarKKnckgz4xLMvds/YrU6mpJfGhGAsy2Mg4mIw1x+DCCGngVGq2soTBVVOxx2s/C6mTX9+pA==}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -8537,27 +8526,23 @@ packages:
   react-onclickoutside@6.13.1:
     resolution: {integrity: sha512-LdrrxK/Yh9zbBQdFbMTXPp3dTSN9B+9YJQucdDu3JNKRrbdU+H+/TVONJoWtOwy4II8Sqf1y/DTI6w/vGPYW0w==}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013
 
   react-select@5.8.0:
     resolution: {integrity: sha512-TfjLDo58XrhP6VG5M/Mi56Us0Yt8X7xD6cDybC7yoRMUNm7BGO7qk8J0TLQOua/prb8vUOtsfnXZwfm30HGsAA==}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013
 
   react-transition-group@4.4.5:
     resolution: {integrity: sha512-pZcd1MCJoiKiBR2NRxeCRg13uCXbydPnmB4EOeRrY7480qNWO8IIgQG6zlDkm6uRMsURXPuKq0GWtiM59a5Q6g==}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013
 
-  react@19.0.0-rc-3edc000d-20240926:
-    resolution: {integrity: sha512-twH/qd0P8clqn+Z5hAxDi+3nh9pJv3zV9kzhjpbwBW/FlCimK7ypfAoElMIm5QnkhBX/YtkSj1Th49ZcRhjpGA==}
-    engines: {node: '>=0.10.0'}
-
-  react@19.0.0-rc-5dcb0097-20240918:
-    resolution: {integrity: sha512-kpRDycbFGXguigJtTLzT67L6FJjWUJYLru40Yk/7GSYDPy2hAfdLVXwfjczfRrnKVyIO76EVbnlBuR+zNX0bdQ==}
+  react@19.0.0-rc-cd22717c-20241013:
+    resolution: {integrity: sha512-k28GszmyQ1tX/JmeLGZINq5KXiNy/MmN0fCAtcwF8a9INDyVYG0zATCRGJwaPB9WixmkuwPv1BfB1QBfJC7cNg==}
     engines: {node: '>=0.10.0'}
 
   readable-stream@1.0.34:
@@ -8891,11 +8876,8 @@ packages:
   scheduler@0.0.0-experimental-3edc000d-20240926:
     resolution: {integrity: sha512-360BMNajOhMyrirau0pzWVgeakvrfjbfdqHnX2K+tSGTmn6tBN+6K5NhhaebqeXXWyCU3rl5FApjgF2GN0W5JA==}
 
-  scheduler@0.25.0-rc-3edc000d-20240926:
-    resolution: {integrity: sha512-qAWyPrLLFM96Py4gnrFQLhYDrHkVXGw3P/hPrR3E6b5rriPeAA1a8YZBWlqH8Eehbc9waTih/WyDSyuwkxWWMw==}
-
-  scheduler@0.25.0-rc-5dcb0097-20240918:
-    resolution: {integrity: sha512-Sr3CaLDHJIA1p7wzNF8EyZ/JzetrV21S0sY6byC3AhREQMoEuKol8BSmXM5gd8Aoxo92uW9WCjWL0hwdb2DtqQ==}
+  scheduler@0.25.0-rc-cd22717c-20241013:
+    resolution: {integrity: sha512-MnsFR57bKcrYslnbCUsaUG0qBuAArk92VxE0zu6A2Usz38iIuL2uZLunqKlP1W47MF33GrRGDj1sXdPbFKIZfw==}
 
   schema-utils@3.3.0:
     resolution: {integrity: sha512-pN/yOAvcC+5rQ5nERGuwrjLlYvLTbCibnZ1I7B1LaiAz9BRBlE9GMgE/eqV30P7aJQUf7Ddimy/RsbYO/GrVGg==}
@@ -9060,8 +9042,8 @@ packages:
   slate-react@0.92.0:
     resolution: {integrity: sha512-xEDKu5RKw5f0N95l1UeNQnrB0Pxh4JPjpIZR/BVsMo0ININnLAknR99gLo46bl/Ffql4mr7LeaxQRoXxbFtJOQ==}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013
       slate: '>=0.65.3'
 
   slate@0.91.4:
@@ -9089,8 +9071,8 @@ packages:
   sonner@1.5.0:
     resolution: {integrity: sha512-FBjhG/gnnbN6FY0jaNnqZOMmB73R+5IiyYAw8yBj7L54ER7HB3fOSE5OFiQiE2iXWxeXKvg6fIP4LtVppHEdJA==}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013
 
   sort-keys-length@1.0.1:
     resolution: {integrity: sha512-GRbEOUqCxemTAk/b32F2xa8wDTs+Z1QHOkbhJDQTvv/6G3ZkbJ+frYWsTcc7cBB3Fu4wy4XlLCuNtJuMn7Gsvw==}
@@ -9289,7 +9271,7 @@ packages:
     peerDependencies:
       '@babel/core': '*'
       babel-plugin-macros: '*'
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
     peerDependenciesMeta:
       '@babel/core':
         optional: true
@@ -9734,14 +9716,14 @@ packages:
   use-context-selector@2.0.0:
     resolution: {integrity: sha512-owfuSmUNd3eNp3J9CdDl0kMgfidV+MkDvHPpvthN5ThqM+ibMccNE0k+Iq7TWC6JPFvGZqanqiGCuQx6DyV24g==}
     peerDependencies:
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
       scheduler: '>=0.19.0'
 
   use-isomorphic-layout-effect@1.1.2:
     resolution: {integrity: sha512-49L8yCO3iGT/ZF9QttjwLF/ZD9Iwto5LnH5LmEdk/6cFmXddqi2ulF0edxTwjj+7mqvpVVGQWvbXZdn32wRSHA==}
     peerDependencies:
       '@types/react': '*'
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
     peerDependenciesMeta:
       '@types/react':
         optional: true
@@ -11609,47 +11591,29 @@ snapshots:
 
   '@discoveryjs/json-ext@0.5.7': {}
 
-  '@dnd-kit/accessibility@3.1.0(react@19.0.0-rc-3edc000d-20240926)':
+  '@dnd-kit/accessibility@3.1.0(react@19.0.0-rc-cd22717c-20241013)':
     dependencies:
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
       tslib: 2.6.3
 
-  '@dnd-kit/accessibility@3.1.0(react@19.0.0-rc-5dcb0097-20240918)':
+  '@dnd-kit/core@6.0.8(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)':
     dependencies:
-      react: 19.0.0-rc-5dcb0097-20240918
+      '@dnd-kit/accessibility': 3.1.0(react@19.0.0-rc-cd22717c-20241013)
+      '@dnd-kit/utilities': 3.2.2(react@19.0.0-rc-cd22717c-20241013)
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
       tslib: 2.6.3
 
-  '@dnd-kit/core@6.0.8(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)':
+  '@dnd-kit/sortable@7.0.2(@dnd-kit/core@6.0.8(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)':
     dependencies:
-      '@dnd-kit/accessibility': 3.1.0(react@19.0.0-rc-3edc000d-20240926)
-      '@dnd-kit/utilities': 3.2.2(react@19.0.0-rc-3edc000d-20240926)
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
+      '@dnd-kit/core': 6.0.8(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
+      '@dnd-kit/utilities': 3.2.2(react@19.0.0-rc-cd22717c-20241013)
+      react: 19.0.0-rc-cd22717c-20241013
       tslib: 2.6.3
 
-  '@dnd-kit/core@6.0.8(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)':
+  '@dnd-kit/utilities@3.2.2(react@19.0.0-rc-cd22717c-20241013)':
     dependencies:
-      '@dnd-kit/accessibility': 3.1.0(react@19.0.0-rc-5dcb0097-20240918)
-      '@dnd-kit/utilities': 3.2.2(react@19.0.0-rc-5dcb0097-20240918)
-      react: 19.0.0-rc-5dcb0097-20240918
-      react-dom: 19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918)
-      tslib: 2.6.3
-
-  '@dnd-kit/sortable@7.0.2(@dnd-kit/core@6.0.8(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)':
-    dependencies:
-      '@dnd-kit/core': 6.0.8(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
-      '@dnd-kit/utilities': 3.2.2(react@19.0.0-rc-3edc000d-20240926)
-      react: 19.0.0-rc-3edc000d-20240926
-      tslib: 2.6.3
-
-  '@dnd-kit/utilities@3.2.2(react@19.0.0-rc-3edc000d-20240926)':
-    dependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      tslib: 2.6.3
-
-  '@dnd-kit/utilities@3.2.2(react@19.0.0-rc-5dcb0097-20240918)':
-    dependencies:
-      react: 19.0.0-rc-5dcb0097-20240918
+      react: 19.0.0-rc-cd22717c-20241013
       tslib: 2.6.3
 
   '@drizzle-team/brocli@0.10.1': {}
@@ -11713,17 +11677,17 @@ snapshots:
 
   '@emotion/memoize@0.9.0': {}
 
-  '@emotion/react@11.13.0(react@19.0.0-rc-3edc000d-20240926)(types-react@19.0.0-rc.1)':
+  '@emotion/react@11.13.0(react@19.0.0-rc-cd22717c-20241013)(types-react@19.0.0-rc.1)':
     dependencies:
       '@babel/runtime': 7.25.0
       '@emotion/babel-plugin': 11.12.0
       '@emotion/cache': 11.13.1
       '@emotion/serialize': 1.3.0
-      '@emotion/use-insertion-effect-with-fallbacks': 1.1.0(react@19.0.0-rc-3edc000d-20240926)
+      '@emotion/use-insertion-effect-with-fallbacks': 1.1.0(react@19.0.0-rc-cd22717c-20241013)
       '@emotion/utils': 1.4.0
       '@emotion/weak-memoize': 0.4.0
       hoist-non-react-statics: 3.3.2
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
     optionalDependencies:
       '@types/react': types-react@19.0.0-rc.1
     transitivePeerDependencies:
@@ -11741,9 +11705,9 @@ snapshots:
 
   '@emotion/unitless@0.9.0': {}
 
-  '@emotion/use-insertion-effect-with-fallbacks@1.1.0(react@19.0.0-rc-3edc000d-20240926)':
+  '@emotion/use-insertion-effect-with-fallbacks@1.1.0(react@19.0.0-rc-cd22717c-20241013)':
     dependencies:
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
 
   '@emotion/utils@1.4.0': {}
 
@@ -12106,23 +12070,23 @@ snapshots:
 
   '@eslint/object-schema@2.1.4': {}
 
-  '@faceless-ui/modal@3.0.0-beta.2(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)':
+  '@faceless-ui/modal@3.0.0-beta.2(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)':
     dependencies:
       body-scroll-lock: 4.0.0-beta.0
       focus-trap: 7.5.4
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
-      react-transition-group: 4.4.5(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
+      react-transition-group: 4.4.5(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
 
-  '@faceless-ui/scroll-info@2.0.0-beta.0(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)':
+  '@faceless-ui/scroll-info@2.0.0-beta.0(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)':
     dependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
 
-  '@faceless-ui/window-info@3.0.0-beta.0(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)':
+  '@faceless-ui/window-info@3.0.0-beta.0(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)':
     dependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
 
   '@fastify/busboy@2.1.1': {}
 
@@ -12135,32 +12099,18 @@ snapshots:
       '@floating-ui/core': 1.6.7
       '@floating-ui/utils': 0.2.7
 
-  '@floating-ui/react-dom@2.1.1(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)':
+  '@floating-ui/react-dom@2.1.1(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)':
     dependencies:
       '@floating-ui/dom': 1.6.10
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
 
-  '@floating-ui/react-dom@2.1.1(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)':
+  '@floating-ui/react@0.26.22(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)':
     dependencies:
-      '@floating-ui/dom': 1.6.10
-      react: 19.0.0-rc-5dcb0097-20240918
-      react-dom: 19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918)
-
-  '@floating-ui/react@0.26.22(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)':
-    dependencies:
-      '@floating-ui/react-dom': 2.1.1(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
+      '@floating-ui/react-dom': 2.1.1(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
       '@floating-ui/utils': 0.2.7
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
-      tabbable: 6.2.0
-
-  '@floating-ui/react@0.26.22(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)':
-    dependencies:
-      '@floating-ui/react-dom': 2.1.1(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)
-      '@floating-ui/utils': 0.2.7
-      react: 19.0.0-rc-5dcb0097-20240918
-      react-dom: 19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918)
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
       tabbable: 6.2.0
 
   '@floating-ui/utils@0.2.7': {}
@@ -12515,7 +12465,7 @@ snapshots:
       lexical: 0.18.0
       prismjs: 1.29.0
 
-  '@lexical/devtools-core@0.18.0(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)':
+  '@lexical/devtools-core@0.18.0(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)':
     dependencies:
       '@lexical/html': 0.18.0
       '@lexical/link': 0.18.0
@@ -12523,8 +12473,8 @@ snapshots:
       '@lexical/table': 0.18.0
       '@lexical/utils': 0.18.0
       lexical: 0.18.0
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
 
   '@lexical/dragon@0.18.0':
     dependencies:
@@ -12594,11 +12544,11 @@ snapshots:
       '@lexical/utils': 0.18.0
       lexical: 0.18.0
 
-  '@lexical/react@0.18.0(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)(yjs@13.6.18)':
+  '@lexical/react@0.18.0(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)(yjs@13.6.18)':
     dependencies:
       '@lexical/clipboard': 0.18.0
       '@lexical/code': 0.18.0
-      '@lexical/devtools-core': 0.18.0(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
+      '@lexical/devtools-core': 0.18.0(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
       '@lexical/dragon': 0.18.0
       '@lexical/hashtag': 0.18.0
       '@lexical/history': 0.18.0
@@ -12615,9 +12565,9 @@ snapshots:
       '@lexical/utils': 0.18.0
       '@lexical/yjs': 0.18.0(yjs@13.6.18)
       lexical: 0.18.0
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
-      react-error-boundary: 3.1.4(react@19.0.0-rc-3edc000d-20240926)
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
+      react-error-boundary: 3.1.4(react@19.0.0-rc-cd22717c-20241013)
     transitivePeerDependencies:
       - yjs
 
@@ -12728,19 +12678,12 @@ snapshots:
       monaco-editor: 0.38.0
       state-local: 1.0.7
 
-  '@monaco-editor/react@4.6.0(monaco-editor@0.38.0)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)':
+  '@monaco-editor/react@4.6.0(monaco-editor@0.38.0)(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)':
     dependencies:
       '@monaco-editor/loader': 1.4.0(monaco-editor@0.38.0)
       monaco-editor: 0.38.0
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
-
-  '@monaco-editor/react@4.6.0(monaco-editor@0.38.0)(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)':
-    dependencies:
-      '@monaco-editor/loader': 1.4.0(monaco-editor@0.38.0)
-      monaco-editor: 0.38.0
-      react: 19.0.0-rc-5dcb0097-20240918
-      react-dom: 19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918)
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
 
   '@mongodb-js/saslprep@1.1.8':
     dependencies:
@@ -12760,46 +12703,43 @@ snapshots:
     dependencies:
       '@types/pg': 8.11.6
 
-  '@next/bundle-analyzer@15.0.0-canary.173(bufferutil@4.0.8)':
+  '@next/bundle-analyzer@15.0.0-rc.1(bufferutil@4.0.8)':
     dependencies:
       webpack-bundle-analyzer: 4.10.1(bufferutil@4.0.8)
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  '@next/env@15.0.0-canary.173': {}
+  '@next/env@15.0.0': {}
 
-  '@next/env@15.0.0-rc.0': {}
+  '@next/env@15.0.0-rc.1': {}
 
-  '@next/eslint-plugin-next@15.0.0-canary.173':
+  '@next/eslint-plugin-next@15.0.0-rc.1':
     dependencies:
       fast-glob: 3.3.1
 
-  '@next/swc-darwin-arm64@15.0.0-canary.173':
+  '@next/swc-darwin-arm64@15.0.0-rc.1':
     optional: true
 
-  '@next/swc-darwin-x64@15.0.0-canary.173':
+  '@next/swc-darwin-x64@15.0.0-rc.1':
     optional: true
 
-  '@next/swc-linux-arm64-gnu@15.0.0-canary.173':
+  '@next/swc-linux-arm64-gnu@15.0.0-rc.1':
     optional: true
 
-  '@next/swc-linux-arm64-musl@15.0.0-canary.173':
+  '@next/swc-linux-arm64-musl@15.0.0-rc.1':
     optional: true
 
-  '@next/swc-linux-x64-gnu@15.0.0-canary.173':
+  '@next/swc-linux-x64-gnu@15.0.0-rc.1':
     optional: true
 
-  '@next/swc-linux-x64-musl@15.0.0-canary.173':
+  '@next/swc-linux-x64-musl@15.0.0-rc.1':
     optional: true
 
-  '@next/swc-win32-arm64-msvc@15.0.0-canary.173':
+  '@next/swc-win32-arm64-msvc@15.0.0-rc.1':
     optional: true
 
-  '@next/swc-win32-ia32-msvc@15.0.0-canary.173':
-    optional: true
-
-  '@next/swc-win32-x64-msvc@15.0.0-canary.173':
+  '@next/swc-win32-x64-msvc@15.0.0-rc.1':
     optional: true
 
   '@nicolo-ribaudo/chokidar-2@2.1.8-no-fsevents.3':
@@ -13136,8 +13076,8 @@ snapshots:
     dependencies:
       html-to-text: 9.0.3
       pretty: 2.0.0
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
 
   '@rollup/plugin-commonjs@26.0.1(rollup@3.29.5)':
     dependencies:
@@ -13302,7 +13242,7 @@ snapshots:
       '@sentry/utils': 7.118.0
       localforage: 1.10.0
 
-  '@sentry/nextjs@8.33.1(@opentelemetry/api@1.9.0)(@opentelemetry/core@1.26.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.53.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.26.0(@opentelemetry/api@1.9.0))(next@15.0.0-canary.173(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)(sass@1.77.4))(react@19.0.0-rc-3edc000d-20240926)(webpack@5.95.0(@swc/core@1.7.10(@swc/helpers@0.5.13)))':
+  '@sentry/nextjs@8.33.1(@opentelemetry/api@1.9.0)(@opentelemetry/core@1.26.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.53.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.26.0(@opentelemetry/api@1.9.0))(next@15.0.0-rc.1(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)(sass@1.77.4))(react@19.0.0-rc-cd22717c-20241013)(webpack@5.95.0(@swc/core@1.7.10(@swc/helpers@0.5.13)))':
     dependencies:
       '@opentelemetry/instrumentation-http': 0.53.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.27.0
@@ -13311,13 +13251,13 @@ snapshots:
       '@sentry/core': 8.33.1
       '@sentry/node': 8.33.1
       '@sentry/opentelemetry': 8.33.1(@opentelemetry/api@1.9.0)(@opentelemetry/core@1.26.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.53.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.26.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.27.0)
-      '@sentry/react': 8.33.1(react@19.0.0-rc-3edc000d-20240926)
+      '@sentry/react': 8.33.1(react@19.0.0-rc-cd22717c-20241013)
       '@sentry/types': 8.33.1
       '@sentry/utils': 8.33.1
       '@sentry/vercel-edge': 8.33.1
       '@sentry/webpack-plugin': 2.22.3(webpack@5.95.0(@swc/core@1.7.10(@swc/helpers@0.5.13)))
       chalk: 3.0.0
-      next: 15.0.0-canary.173(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)(sass@1.77.4)
+      next: 15.0.0-rc.1(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)(sass@1.77.4)
       resolve: 1.22.8
       rollup: 3.29.5
       stacktrace-parser: 0.1.10
@@ -13383,23 +13323,23 @@ snapshots:
       '@sentry/types': 8.33.1
       '@sentry/utils': 8.33.1
 
-  '@sentry/react@7.118.0(react@19.0.0-rc-3edc000d-20240926)':
+  '@sentry/react@7.118.0(react@19.0.0-rc-cd22717c-20241013)':
     dependencies:
       '@sentry/browser': 7.118.0
       '@sentry/core': 7.118.0
       '@sentry/types': 7.118.0
       '@sentry/utils': 7.118.0
       hoist-non-react-statics: 3.3.2
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
 
-  '@sentry/react@8.33.1(react@19.0.0-rc-3edc000d-20240926)':
+  '@sentry/react@8.33.1(react@19.0.0-rc-cd22717c-20241013)':
     dependencies:
       '@sentry/browser': 8.33.1
       '@sentry/core': 8.33.1
       '@sentry/types': 8.33.1
       '@sentry/utils': 8.33.1
       hoist-non-react-statics: 3.3.2
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
 
   '@sentry/replay@7.118.0':
     dependencies:
@@ -14086,18 +14026,9 @@ snapshots:
 
   '@types/range-parser@1.2.7': {}
 
-  '@types/react-datepicker@6.2.0(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)':
+  '@types/react-datepicker@6.2.0(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)':
     dependencies:
-      '@floating-ui/react': 0.26.22(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
-      '@types/react': types-react@19.0.0-rc.1
-      date-fns: 3.3.1
-    transitivePeerDependencies:
-      - react
-      - react-dom
-
-  '@types/react-datepicker@6.2.0(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)':
-    dependencies:
-      '@floating-ui/react': 0.26.22(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)
+      '@floating-ui/react': 0.26.22(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
       '@types/react': types-react@19.0.0-rc.1
       date-fns: 3.3.1
     transitivePeerDependencies:
@@ -15407,7 +15338,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.35.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-3edc000d-20240926)(types-react@19.0.0-rc.1):
+  drizzle-orm@0.35.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-cd22717c-20241013)(types-react@19.0.0-rc.1):
     optionalDependencies:
       '@libsql/client': 0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4)
       '@neondatabase/serverless': 0.9.4
@@ -15416,9 +15347,9 @@ snapshots:
       '@types/react': types-react@19.0.0-rc.1
       '@vercel/postgres': 0.9.0
       pg: 8.11.3
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
 
-  drizzle-orm@0.35.1(@libsql/client@0.14.0(bufferutil@4.0.8))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-3edc000d-20240926)(types-react@19.0.0-rc.1):
+  drizzle-orm@0.35.1(@libsql/client@0.14.0(bufferutil@4.0.8))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-cd22717c-20241013)(types-react@19.0.0-rc.1):
     optionalDependencies:
       '@libsql/client': 0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4)
       '@neondatabase/serverless': 0.9.4
@@ -15427,7 +15358,7 @@ snapshots:
       '@types/react': types-react@19.0.0-rc.1
       '@vercel/postgres': 0.9.0
       pg: 8.11.3
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
 
   duplexer@0.1.2: {}
 
@@ -17887,27 +17818,26 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  next@15.0.0-canary.173(@babel/core@7.25.2)(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)(sass@1.77.4):
+  next@15.0.0-rc.1(@babel/core@7.25.2)(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)(sass@1.77.4):
     dependencies:
-      '@next/env': 15.0.0-canary.173
+      '@next/env': 15.0.0-rc.1
       '@swc/counter': 0.1.3
       '@swc/helpers': 0.5.13
       busboy: 1.6.0
       caniuse-lite: 1.0.30001651
       postcss: 8.4.31
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
-      styled-jsx: 5.1.6(@babel/core@7.25.2)(babel-plugin-macros@3.1.0)(react@19.0.0-rc-3edc000d-20240926)
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
+      styled-jsx: 5.1.6(@babel/core@7.25.2)(babel-plugin-macros@3.1.0)(react@19.0.0-rc-cd22717c-20241013)
     optionalDependencies:
-      '@next/swc-darwin-arm64': 15.0.0-canary.173
-      '@next/swc-darwin-x64': 15.0.0-canary.173
-      '@next/swc-linux-arm64-gnu': 15.0.0-canary.173
-      '@next/swc-linux-arm64-musl': 15.0.0-canary.173
-      '@next/swc-linux-x64-gnu': 15.0.0-canary.173
-      '@next/swc-linux-x64-musl': 15.0.0-canary.173
-      '@next/swc-win32-arm64-msvc': 15.0.0-canary.173
-      '@next/swc-win32-ia32-msvc': 15.0.0-canary.173
-      '@next/swc-win32-x64-msvc': 15.0.0-canary.173
+      '@next/swc-darwin-arm64': 15.0.0-rc.1
+      '@next/swc-darwin-x64': 15.0.0-rc.1
+      '@next/swc-linux-arm64-gnu': 15.0.0-rc.1
+      '@next/swc-linux-arm64-musl': 15.0.0-rc.1
+      '@next/swc-linux-x64-gnu': 15.0.0-rc.1
+      '@next/swc-linux-x64-musl': 15.0.0-rc.1
+      '@next/swc-win32-arm64-msvc': 15.0.0-rc.1
+      '@next/swc-win32-x64-msvc': 15.0.0-rc.1
       '@opentelemetry/api': 1.9.0
       '@playwright/test': 1.48.1
       babel-plugin-react-compiler: 0.0.0-experimental-24ec0eb-20240918
@@ -17917,57 +17847,26 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  next@15.0.0-canary.173(@babel/core@7.25.2)(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918)(sass@1.77.4):
+  next@15.0.0-rc.1(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)(sass@1.77.4):
     dependencies:
-      '@next/env': 15.0.0-canary.173
+      '@next/env': 15.0.0-rc.1
       '@swc/counter': 0.1.3
       '@swc/helpers': 0.5.13
       busboy: 1.6.0
       caniuse-lite: 1.0.30001651
       postcss: 8.4.31
-      react: 19.0.0-rc-5dcb0097-20240918
-      react-dom: 19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918)
-      styled-jsx: 5.1.6(@babel/core@7.25.2)(babel-plugin-macros@3.1.0)(react@19.0.0-rc-5dcb0097-20240918)
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
+      styled-jsx: 5.1.6(@babel/core@7.25.2)(babel-plugin-macros@3.1.0)(react@19.0.0-rc-cd22717c-20241013)
     optionalDependencies:
-      '@next/swc-darwin-arm64': 15.0.0-canary.173
-      '@next/swc-darwin-x64': 15.0.0-canary.173
-      '@next/swc-linux-arm64-gnu': 15.0.0-canary.173
-      '@next/swc-linux-arm64-musl': 15.0.0-canary.173
-      '@next/swc-linux-x64-gnu': 15.0.0-canary.173
-      '@next/swc-linux-x64-musl': 15.0.0-canary.173
-      '@next/swc-win32-arm64-msvc': 15.0.0-canary.173
-      '@next/swc-win32-ia32-msvc': 15.0.0-canary.173
-      '@next/swc-win32-x64-msvc': 15.0.0-canary.173
-      '@opentelemetry/api': 1.9.0
-      '@playwright/test': 1.48.1
-      babel-plugin-react-compiler: 0.0.0-experimental-24ec0eb-20240918
-      sass: 1.77.4
-      sharp: 0.33.5
-    transitivePeerDependencies:
-      - '@babel/core'
-      - babel-plugin-macros
-
-  next@15.0.0-canary.173(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)(sass@1.77.4):
-    dependencies:
-      '@next/env': 15.0.0-canary.173
-      '@swc/counter': 0.1.3
-      '@swc/helpers': 0.5.13
-      busboy: 1.6.0
-      caniuse-lite: 1.0.30001651
-      postcss: 8.4.31
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
-      styled-jsx: 5.1.6(@babel/core@7.25.2)(babel-plugin-macros@3.1.0)(react@19.0.0-rc-3edc000d-20240926)
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 15.0.0-canary.173
-      '@next/swc-darwin-x64': 15.0.0-canary.173
-      '@next/swc-linux-arm64-gnu': 15.0.0-canary.173
-      '@next/swc-linux-arm64-musl': 15.0.0-canary.173
-      '@next/swc-linux-x64-gnu': 15.0.0-canary.173
-      '@next/swc-linux-x64-musl': 15.0.0-canary.173
-      '@next/swc-win32-arm64-msvc': 15.0.0-canary.173
-      '@next/swc-win32-ia32-msvc': 15.0.0-canary.173
-      '@next/swc-win32-x64-msvc': 15.0.0-canary.173
+      '@next/swc-darwin-arm64': 15.0.0-rc.1
+      '@next/swc-darwin-x64': 15.0.0-rc.1
+      '@next/swc-linux-arm64-gnu': 15.0.0-rc.1
+      '@next/swc-linux-arm64-musl': 15.0.0-rc.1
+      '@next/swc-linux-x64-gnu': 15.0.0-rc.1
+      '@next/swc-linux-x64-musl': 15.0.0-rc.1
+      '@next/swc-win32-arm64-msvc': 15.0.0-rc.1
+      '@next/swc-win32-x64-msvc': 15.0.0-rc.1
       '@opentelemetry/api': 1.9.0
       '@playwright/test': 1.48.1
       babel-plugin-react-compiler: 0.0.0-experimental-24ec0eb-20240918
@@ -18549,102 +18448,90 @@ snapshots:
       minimist: 1.2.8
       strip-json-comments: 2.0.1
 
-  react-animate-height@2.1.2(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926):
+  react-animate-height@2.1.2(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013):
     dependencies:
       classnames: 2.5.1
       prop-types: 15.8.1
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
 
-  react-datepicker@6.9.0(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926):
+  react-datepicker@6.9.0(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013):
     dependencies:
-      '@floating-ui/react': 0.26.22(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
+      '@floating-ui/react': 0.26.22(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
       clsx: 2.1.1
       date-fns: 3.3.1
       prop-types: 15.8.1
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
-      react-onclickoutside: 6.13.1(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
+      react-onclickoutside: 6.13.1(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
 
-  react-diff-viewer-continued@3.2.6(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918):
+  react-diff-viewer-continued@3.2.6(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013):
     dependencies:
       '@emotion/css': 11.13.0
       classnames: 2.5.1
       diff: 5.2.0
       memoize-one: 6.0.0
       prop-types: 15.8.1
-      react: 19.0.0-rc-5dcb0097-20240918
-      react-dom: 19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918)
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
     transitivePeerDependencies:
       - supports-color
 
-  react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926):
+  react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013):
     dependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      scheduler: 0.25.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
+      scheduler: 0.25.0-rc-cd22717c-20241013
 
-  react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-3edc000d-20240926):
-    dependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      scheduler: 0.25.0-rc-5dcb0097-20240918
-
-  react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918):
-    dependencies:
-      react: 19.0.0-rc-5dcb0097-20240918
-      scheduler: 0.25.0-rc-5dcb0097-20240918
-
-  react-error-boundary@3.1.4(react@19.0.0-rc-3edc000d-20240926):
+  react-error-boundary@3.1.4(react@19.0.0-rc-cd22717c-20241013):
     dependencies:
       '@babel/runtime': 7.25.0
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
 
-  react-error-boundary@4.0.13(react@19.0.0-rc-3edc000d-20240926):
+  react-error-boundary@4.0.13(react@19.0.0-rc-cd22717c-20241013):
     dependencies:
       '@babel/runtime': 7.25.0
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
 
-  react-image-crop@10.1.8(react@19.0.0-rc-3edc000d-20240926):
+  react-image-crop@10.1.8(react@19.0.0-rc-cd22717c-20241013):
     dependencies:
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
 
   react-is@16.13.1: {}
 
   react-is@18.3.1: {}
 
-  react-onclickoutside@6.13.1(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926):
+  react-onclickoutside@6.13.1(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013):
     dependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
 
-  react-select@5.8.0(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)(types-react@19.0.0-rc.1):
+  react-select@5.8.0(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)(types-react@19.0.0-rc.1):
     dependencies:
       '@babel/runtime': 7.25.0
       '@emotion/cache': 11.13.1
-      '@emotion/react': 11.13.0(react@19.0.0-rc-3edc000d-20240926)(types-react@19.0.0-rc.1)
+      '@emotion/react': 11.13.0(react@19.0.0-rc-cd22717c-20241013)(types-react@19.0.0-rc.1)
       '@floating-ui/dom': 1.6.10
       '@types/react-transition-group': 4.4.11
       memoize-one: 6.0.0
       prop-types: 15.8.1
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
-      react-transition-group: 4.4.5(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
-      use-isomorphic-layout-effect: 1.1.2(react@19.0.0-rc-3edc000d-20240926)(types-react@19.0.0-rc.1)
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
+      react-transition-group: 4.4.5(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
+      use-isomorphic-layout-effect: 1.1.2(react@19.0.0-rc-cd22717c-20241013)(types-react@19.0.0-rc.1)
     transitivePeerDependencies:
       - '@types/react'
       - supports-color
 
-  react-transition-group@4.4.5(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926):
+  react-transition-group@4.4.5(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013):
     dependencies:
       '@babel/runtime': 7.25.0
       dom-helpers: 5.2.1
       loose-envify: 1.4.0
       prop-types: 15.8.1
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
 
-  react@19.0.0-rc-3edc000d-20240926: {}
-
-  react@19.0.0-rc-5dcb0097-20240918: {}
+  react@19.0.0-rc-cd22717c-20241013: {}
 
   readable-stream@1.0.34:
     dependencies:
@@ -18960,9 +18847,7 @@ snapshots:
 
   scheduler@0.0.0-experimental-3edc000d-20240926: {}
 
-  scheduler@0.25.0-rc-3edc000d-20240926: {}
-
-  scheduler@0.25.0-rc-5dcb0097-20240918: {}
+  scheduler@0.25.0-rc-cd22717c-20241013: {}
 
   schema-utils@3.3.0:
     dependencies:
@@ -19167,7 +19052,7 @@ snapshots:
       is-plain-object: 5.0.0
       slate: 0.91.4
 
-  slate-react@0.92.0(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)(slate@0.91.4):
+  slate-react@0.92.0(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)(slate@0.91.4):
     dependencies:
       '@juggle/resize-observer': 3.4.0
       '@types/is-hotkey': 0.1.10
@@ -19176,8 +19061,8 @@ snapshots:
       is-hotkey: 0.1.8
       is-plain-object: 5.0.0
       lodash: 4.17.21
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-3edc000d-20240926)
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
       scroll-into-view-if-needed: 2.2.31
       slate: 0.91.4
       tiny-invariant: 1.0.6
@@ -19209,15 +19094,10 @@ snapshots:
     dependencies:
       atomic-sleep: 1.0.0
 
-  sonner@1.5.0(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926):
+  sonner@1.5.0(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013):
     dependencies:
-      react: 19.0.0-rc-3edc000d-20240926
-      react-dom: 19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926)
-
-  sonner@1.5.0(react-dom@19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918))(react@19.0.0-rc-5dcb0097-20240918):
-    dependencies:
-      react: 19.0.0-rc-5dcb0097-20240918
-      react-dom: 19.0.0-rc-5dcb0097-20240918(react@19.0.0-rc-5dcb0097-20240918)
+      react: 19.0.0-rc-cd22717c-20241013
+      react-dom: 19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013)
 
   sort-keys-length@1.0.1:
     dependencies:
@@ -19413,18 +19293,10 @@ snapshots:
 
   stubs@3.0.0: {}
 
-  styled-jsx@5.1.6(@babel/core@7.25.2)(babel-plugin-macros@3.1.0)(react@19.0.0-rc-3edc000d-20240926):
+  styled-jsx@5.1.6(@babel/core@7.25.2)(babel-plugin-macros@3.1.0)(react@19.0.0-rc-cd22717c-20241013):
     dependencies:
       client-only: 0.0.1
-      react: 19.0.0-rc-3edc000d-20240926
-    optionalDependencies:
-      '@babel/core': 7.25.2
-      babel-plugin-macros: 3.1.0
-
-  styled-jsx@5.1.6(@babel/core@7.25.2)(babel-plugin-macros@3.1.0)(react@19.0.0-rc-5dcb0097-20240918):
-    dependencies:
-      client-only: 0.0.1
-      react: 19.0.0-rc-5dcb0097-20240918
+      react: 19.0.0-rc-cd22717c-20241013
     optionalDependencies:
       '@babel/core': 7.25.2
       babel-plugin-macros: 3.1.0
@@ -19839,7 +19711,7 @@ snapshots:
       escalade: 3.1.2
       picocolors: 1.0.1
 
-  uploadthing@6.13.2(express@4.19.2)(next@15.0.0-canary.173(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)(sass@1.77.4)):
+  uploadthing@6.13.2(express@4.19.2)(next@15.0.0-rc.1(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)(sass@1.77.4)):
     dependencies:
       '@effect/schema': 0.68.12(effect@3.4.5)
       '@uploadthing/mime-types': 0.2.10
@@ -19849,7 +19721,7 @@ snapshots:
       std-env: 3.7.0
     optionalDependencies:
       express: 4.19.2
-      next: 15.0.0-canary.173(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)(sass@1.77.4)
+      next: 15.0.0-rc.1(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)(sass@1.77.4)
 
   uri-js@4.4.1:
     dependencies:
@@ -19860,14 +19732,14 @@ snapshots:
       querystringify: 2.2.0
       requires-port: 1.0.0
 
-  use-context-selector@2.0.0(react@19.0.0-rc-3edc000d-20240926)(scheduler@0.0.0-experimental-3edc000d-20240926):
+  use-context-selector@2.0.0(react@19.0.0-rc-cd22717c-20241013)(scheduler@0.0.0-experimental-3edc000d-20240926):
     dependencies:
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
       scheduler: 0.0.0-experimental-3edc000d-20240926
 
-  use-isomorphic-layout-effect@1.1.2(react@19.0.0-rc-3edc000d-20240926)(types-react@19.0.0-rc.1):
+  use-isomorphic-layout-effect@1.1.2(react@19.0.0-rc-cd22717c-20241013)(types-react@19.0.0-rc.1):
     dependencies:
-      react: 19.0.0-rc-3edc000d-20240926
+      react: 19.0.0-rc-cd22717c-20241013
     optionalDependencies:
       '@types/react': types-react@19.0.0-rc.1
 
