@@ -50,7 +50,6 @@ type Args = {
   disableRelsTableUnique?: boolean
   disableUnique: boolean
   fields: Field[]
-  joins?: SanitizedJoins
   rootRelationships?: Set<string>
   rootRelationsToBuild?: RelationMap
   rootTableIDColType?: string
@@ -83,7 +82,6 @@ export const buildTable = ({
   disableRelsTableUnique = false,
   disableUnique = false,
   fields,
-  joins,
   rootRelationships,
   rootRelationsToBuild,
   rootTableIDColType,
@@ -133,7 +131,6 @@ export const buildTable = ({
     disableUnique,
     fields,
     indexes,
-    joins,
     localesColumns,
     localesIndexes,
     newTableName: tableName,
