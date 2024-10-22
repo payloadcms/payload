@@ -91,7 +91,6 @@ export const Form: React.FC<FormProps> = (props) => {
   const [submitted, setSubmitted] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
-  const abortControllerRef = useRef(new AbortController())
 
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
 
@@ -456,14 +455,11 @@ export const Form: React.FC<FormProps> = (props) => {
         globalSlug,
         operation,
         schemaPath: collectionSlug || globalSlug,
-        signal: abortControllerRef.current.signal,
       })
 
-      if (!abortControllerRef.current.signal.aborted) {
-        contextRef.current = { ...initContextState } as FormContextType
-        setModified(false)
-        dispatchFields({ type: 'REPLACE_STATE', state: newState })
-      }
+      contextRef.current = { ...initContextState } as FormContextType
+      setModified(false)
+      dispatchFields({ type: 'REPLACE_STATE', state: newState })
     },
     [collectionSlug, dispatchFields, globalSlug, id, operation, getFormState],
   )
@@ -484,7 +480,6 @@ export const Form: React.FC<FormProps> = (props) => {
         data,
         globalSlug,
         schemaPath,
-        signal: abortControllerRef.current.signal,
       })
 
       return fieldSchema
@@ -496,15 +491,13 @@ export const Form: React.FC<FormProps> = (props) => {
     async ({ data, path, rowIndex, schemaPath }) => {
       const subFieldState = await getFieldStateBySchemaPath({ data, schemaPath })
 
-      if (!abortControllerRef.current.signal.aborted) {
-        dispatchFields({
-          type: 'ADD_ROW',
-          blockType: data?.blockType,
-          path,
-          rowIndex,
-          subFieldState,
-        })
-      }
+      dispatchFields({
+        type: 'ADD_ROW',
+        blockType: data?.blockType,
+        path,
+        rowIndex,
+        subFieldState,
+      })
     },
     [getFieldStateBySchemaPath, dispatchFields],
   )
@@ -530,21 +523,6 @@ export const Form: React.FC<FormProps> = (props) => {
     },
     [getFieldStateBySchemaPath, dispatchFields],
   )
-
-  // clean on unmount
-  useEffect(() => {
-    const abortController = abortControllerRef.current
-
-    return () => {
-      if (abortController) {
-        try {
-          abortController.abort()
-        } catch (_err) {
-          // swallow error
-        }
-      }
-    }
-  }, [])
 
   useEffect(() => {
     if (initializingFromProps !== undefined) {
