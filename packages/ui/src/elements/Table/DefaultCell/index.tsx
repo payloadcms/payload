@@ -91,17 +91,7 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
   if ('name' in field && field.name === 'id') {
     return (
       <WrapElement {...wrapElementProps}>
-        <CodeCell
-          cellData={`ID: ${cellData}`}
-          field={{
-            ...(field as CodeFieldClient),
-            _schemaAccessor: {
-              schemaPath: cellContext?.cellProps?.field?._schemaPath,
-            },
-          }}
-          nowrap
-          rowData={rowData}
-        />
+        <CodeCell cellData={`ID: ${cellData}`} field={field} nowrap rowData={rowData} />
       </WrapElement>
     )
   }

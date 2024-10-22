@@ -16,8 +16,10 @@ export const renderTable = ({
   fields,
   importMap,
   useAsTitle,
+  collectionSlug,
 }: {
   clientFields: ClientField[]
+  collectionSlug: string
   columnPreferences: ColumnPreferences
   data: PaginatedDocs
   defaultColumns: CollectionConfig['admin']['defaultColumns']
@@ -31,6 +33,7 @@ export const renderTable = ({
   const columnState = buildColumnState({
     // beforeRows,
     clientFields,
+    collectionSlug,
     columnPreferences,
     columns: initialColumns,
     enableRowSelections,

@@ -26,6 +26,7 @@ import { DefaultCell } from '../Table/DefaultCell/index.js'
 type Args = {
   beforeRows?: Column[]
   clientFields: ClientField[]
+  collectionSlug: string
   columnPreferences: ColumnPreferences
   columns?: ColumnPreferences
   docs: PaginatedDocs['docs']
@@ -41,6 +42,7 @@ export const buildColumnState = (args: Args): Column[] => {
   const {
     beforeRows,
     clientFields,
+    collectionSlug,
     columnPreferences,
     columns,
     docs,
@@ -149,7 +151,7 @@ export const buildColumnState = (args: Args): Column[] => {
       const baseCellClientProps: DefaultCellComponentProps = {
         cellData: undefined,
         customCellContext: {
-          collectionSlug: '',
+          collectionSlug,
         },
         field,
         rowData: undefined,
@@ -163,26 +165,29 @@ export const buildColumnState = (args: Args): Column[] => {
         accessor: 'name' in field ? field.name : undefined,
         active,
         Heading,
-        renderedCells: docs.map((doc, i) => {
-          const cellClientProps: DefaultCellComponentProps = {
-            ...baseCellClientProps,
-            cellData: 'name' in field ? doc[field.name] : undefined,
-            rowData: doc,
-          }
-
-          return (
-            <RenderServerComponent
-              clientProps={cellClientProps}
-              Component={
-                field?.admin && 'components' in field.admin && field.admin.components?.Cell
+        renderedCells: active
+          ? docs.map((doc, i) => {
+              const cellClientProps: DefaultCellComponentProps = {
+                ...baseCellClientProps,
+                cellData: 'name' in field ? doc[field.name] : undefined,
+                link: index === activeColumnsIndices[0],
+                rowData: doc,
               }
-              Fallback={DefaultCell}
-              importMap={importMap}
-              key={i}
-              serverProps={serverProps}
-            />
-          )
-        }),
+
+              return (
+                <RenderServerComponent
+                  clientProps={cellClientProps}
+                  Component={
+                    field?.admin && 'components' in field.admin && field.admin.components?.Cell
+                  }
+                  Fallback={DefaultCell}
+                  importMap={importMap}
+                  key={i}
+                  serverProps={serverProps}
+                />
+              )
+            })
+          : [],
       }
 
       acc.push(column)
