@@ -6,11 +6,6 @@
     align-items: center;
   }
 
-  .localized {
-    @extend %body;
-    display: none;
-  }
-
   label.field-label:not(.unstyled) {
     @extend %body;
     display: flex;
@@ -28,18 +23,23 @@
       color: var(--theme-error-500);
     }
 
-    .localized {
-      display: unset;
-    }
-
-    .required,
-    .localized {
+    .required {
       [dir='ltr'] & {
         margin-left: base(0.25);
       }
       [dir='rtl'] & {
         margin-right: base(0.25);
       }
+    }
+  }
+
+  .localized {
+    @extend %body;
+    [dir='ltr'] & {
+      margin-left: base(0.25);
+    }
+    [dir='rtl'] & {
+      margin-right: base(0.25);
     }
   }
 }

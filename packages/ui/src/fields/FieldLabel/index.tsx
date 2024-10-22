@@ -17,6 +17,7 @@ import './index.scss'
 const DefaultFieldLabel: React.FC<GenericLabelProps> = (props) => {
   const {
     as: Element = 'label',
+    hideLocale = false,
     htmlFor: htmlForFromProps,
     label: labelFromProps,
     localized = false,
@@ -36,7 +37,7 @@ const DefaultFieldLabel: React.FC<GenericLabelProps> = (props) => {
       <Element className={`field-label ${unstyled ? 'unstyled' : ''}`} htmlFor={htmlFor}>
         {getTranslation(labelFromProps, i18n)}
         {required && !unstyled && <span className="required">*</span>}
-        {localized && (
+        {localized && !hideLocale && (
           <span className="localized">
             &mdash; {typeof localLabel === 'string' ? localLabel : code}
           </span>
