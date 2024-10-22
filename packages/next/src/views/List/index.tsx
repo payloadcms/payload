@@ -1,4 +1,5 @@
-import type { AdminViewProps, Where } from 'payload'
+import type { ListPreferences, ListViewClientProps } from '@payloadcms/ui'
+import type { AdminViewProps, CollectionSlug, Where } from 'payload'
 
 import {
   DefaultListView,
@@ -6,9 +7,9 @@ import {
   ListInfoProvider,
   ListQueryProvider,
 } from '@payloadcms/ui'
-import { type ListPreferences } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
+import { renderTable } from 'packages/ui/src/utilities/renderTable.js'
 import { mergeListSearchAndWhere } from 'payload'
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
@@ -21,10 +22,17 @@ export const ListView: React.FC<AdminViewProps> = async ({
   initPageResult,
   params,
   // payloadServerAction,
+  clientConfig,
   searchParams,
 }) => {
   const {
     collectionConfig,
+    collectionConfig: {
+      slug: collectionSlug,
+      admin: { defaultColumns, useAsTitle },
+      defaultSort,
+      fields,
+    },
     locale: fullLocale,
     permissions,
     req,
@@ -38,8 +46,6 @@ export const ListView: React.FC<AdminViewProps> = async ({
     },
     visibleEntities,
   } = initPageResult
-
-  const collectionSlug = collectionConfig?.slug
 
   if (!permissions?.collections?.[collectionSlug]?.read?.permission) {
     notFound()
@@ -77,7 +83,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
         },
       })
       ?.then((res) => res?.docs?.[0]?.value)) as ListPreferences
-  } catch (error) {} // eslint-disable-line no-empty
+  } catch (_err) {} // eslint-disable-line no-empty
 
   const {
     routes: { admin: adminRoute },
@@ -104,7 +110,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
     const sort =
       query?.sort && typeof query.sort === 'string'
         ? query.sort
-        : listPreferences?.sort || collectionConfig.defaultSort || undefined
+        : listPreferences?.sort || defaultSort || undefined
 
     const data = await payload.find({
       collection: collectionSlug,
@@ -121,6 +127,24 @@ export const ListView: React.FC<AdminViewProps> = async ({
       user,
       where: whereQuery || {},
     })
+
+    const Table = renderTable({
+      clientFields: clientConfig.collections.find((c) => c.slug === collectionSlug)?.fields,
+      collectionSlug,
+      columnPreferences: listPreferences?.columns,
+      data,
+      defaultColumns,
+      enableRowSelections: true,
+      fields,
+      importMap: payload.importMap,
+      useAsTitle,
+    })
+
+    const clientProps: ListViewClientProps = {
+      collectionSlug,
+      listPreferences,
+      Table,
+    }
 
     return (
       <Fragment>
@@ -141,10 +165,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
             preferenceKey={preferenceKey}
           >
             <RenderServerComponent
-              clientProps={{
-                collectionSlug,
-                listPreferences,
-              }}
+              clientProps={clientProps}
               Component={collectionConfig?.admin?.components?.views?.list.Component}
               Fallback={DefaultListView}
               importMap={payload.importMap}

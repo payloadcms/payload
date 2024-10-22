@@ -159,7 +159,9 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           collectionSlug,
           locale: code,
           operation: 'create',
-          schemaPath: collectionSlug,
+          schemaAccessor: {
+            schemaPath: collectionSlug,
+          },
         })
         initialStateRef.current = formStateWithoutFiles
         setHasInitializedState(true)

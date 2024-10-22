@@ -1,11 +1,11 @@
 'use client'
-import type { CellComponentProps, DefaultCellComponentProps } from 'payload'
+import type { DefaultCellComponentProps } from 'payload'
 
 import React from 'react'
 
 export type ITableCellContext = {
   cellData: DefaultCellComponentProps['cellData']
-  cellProps?: Partial<CellComponentProps>
+  cellProps?: Partial<DefaultCellComponentProps>
   columnIndex?: number
   customCellContext: DefaultCellComponentProps['customCellContext']
   rowData: DefaultCellComponentProps['rowData']
@@ -15,7 +15,7 @@ const TableCellContext = React.createContext<ITableCellContext>({} as ITableCell
 
 export const TableCellProvider: React.FC<{
   readonly cellData?: DefaultCellComponentProps['cellData']
-  readonly cellProps?: Partial<CellComponentProps>
+  readonly cellProps?: Partial<DefaultCellComponentProps>
   readonly children: React.ReactNode
   readonly columnIndex?: number
   readonly customCellContext?: DefaultCellComponentProps['customCellContext']

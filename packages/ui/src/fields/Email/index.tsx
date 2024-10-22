@@ -31,6 +31,7 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
         style,
         width,
       } = {} as EmailFieldClientProps['field']['admin'],
+      label,
       required,
     } = {} as EmailFieldClientProps['field'],
     Label,

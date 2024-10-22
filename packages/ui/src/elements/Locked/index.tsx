@@ -3,7 +3,6 @@ import type { ClientUser } from 'payload'
 
 import React, { useState } from 'react'
 
-import { useTableCell } from '../../elements/Table/TableCellProvider/index.js'
 import { LockIcon } from '../../icons/Lock/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Tooltip } from '../Tooltip/index.js'
@@ -11,8 +10,13 @@ import './index.scss'
 
 const baseClass = 'locked'
 
-export const Locked: React.FC<{ className?: string; user: ClientUser }> = ({ className, user }) => {
-  const { rowData } = useTableCell()
+export const Locked: React.FC<{
+  className?: string
+  rowData: {
+    id: string
+  }
+  user: ClientUser
+}> = ({ className, rowData, user }) => {
   const [hovered, setHovered] = useState(false)
   const { t } = useTranslation()
 

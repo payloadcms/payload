@@ -32,6 +32,7 @@ type ArrayRowProps = {
   readonly row: Row
   readonly rowCount: number
   readonly rowIndex: number
+  readonly rowLabels?: React.ReactNode[]
   readonly setCollapse: (rowID: string, collapsed: boolean) => void
 } & UseDraggableSortableReturn
 

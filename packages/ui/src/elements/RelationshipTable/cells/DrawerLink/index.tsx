@@ -1,5 +1,5 @@
 'use client'
-import type { CellComponentProps, JoinFieldClient } from 'payload'
+import type { DefaultCellComponentProps, JoinFieldClient } from 'payload'
 
 import React, { useCallback } from 'react'
 
@@ -14,7 +14,7 @@ import './index.scss'
 export const DrawerLink: React.FC<
   {
     readonly onDrawerSave?: DocumentDrawerProps['onSave']
-  } & CellComponentProps<JoinFieldClient>
+  } & DefaultCellComponentProps<string, JoinFieldClient>
 > = (props) => {
   const context = useTableCell()
   const { field, onDrawerSave: onDrawerSaveFromProps } = props

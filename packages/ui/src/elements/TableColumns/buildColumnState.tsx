@@ -1,6 +1,14 @@
-'use client'
-import type { ClientField, SanitizedCollectionConfig, StaticLabel } from 'payload'
+import type {
+  ClientField,
+  DefaultCellComponentProps,
+  Field,
+  ImportMap,
+  PaginatedDocs,
+  SanitizedCollectionConfig,
+  StaticLabel,
+} from 'payload'
 
+import { fieldIsPresentationalOnly } from 'payload/shared'
 import React from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
@@ -9,6 +17,7 @@ import type { Column } from '../Table/index.js'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { flattenFieldMap } from '../../utilities/flattenFieldMap.js'
+import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import { SelectAll } from '../SelectAll/index.js'
 import { SelectRow } from '../SelectRow/index.js'
 import { SortColumn } from '../SortColumn/index.js'
@@ -16,11 +25,15 @@ import { DefaultCell } from '../Table/DefaultCell/index.js'
 
 type Args = {
   beforeRows?: Column[]
+  clientFields: ClientField[]
+  collectionSlug: string
   columnPreferences: ColumnPreferences
   columns?: ColumnPreferences
+  docs: PaginatedDocs['docs']
   enableRowSelections: boolean
   enableRowTypes?: boolean
-  fields: ClientField[]
+  fields: Field[]
+  importMap: ImportMap
   sortColumnProps?: Partial<SortColumnProps>
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }
@@ -28,15 +41,19 @@ type Args = {
 export const buildColumnState = (args: Args): Column[] => {
   const {
     beforeRows,
+    clientFields,
+    collectionSlug,
     columnPreferences,
     columns,
+    docs,
     enableRowSelections,
     fields,
+    importMap,
     sortColumnProps,
     useAsTitle,
   } = args
 
-  let sortedFieldMap = flattenFieldMap(fields)
+  let sortedFieldMap = flattenFieldMap(clientFields)
 
   // place the `ID` field first, if it exists
   // do the same for the `useAsTitle` field with precedence over the `ID` field
@@ -98,16 +115,22 @@ export const buildColumnState = (args: Args): Column[] => {
       activeColumnsIndices.push(index)
     }
 
+    // TODO: get label from raw field config
+    const CustomLabelToRender = null
     // const CustomLabelToRender =
-    //   field &&
-    //   'admin' in field &&
-    //   'components' in field.admin &&
-    //   'Label' in field.admin.components &&
-    //   field.admin.components.Label !== undefined // let it return `null`
-    //     ? field.admin.components.Label
-    //     : undefined
+    // field &&
+    // 'admin' in field &&
+    // 'components' in field.admin &&
+    // 'Label' in field.admin.components &&
+    // field.admin.components.Label !== undefined // let it return `null`
+    //   ? field.admin.components.Label
+    //   : undefined
 
-    const Label = null
+    const Label = CustomLabelToRender ? (
+      <CustomLabelToRender field={field} />
+    ) : (
+      <FieldLabel label={'label' in field ? (field.label as StaticLabel) : undefined} />
+    )
 
     const fieldAffectsDataSubFields =
       field &&
@@ -116,7 +139,7 @@ export const buildColumnState = (args: Args): Column[] => {
 
     const Heading = (
       <SortColumn
-        disable={fieldAffectsDataSubFields || field?._isPresentational || undefined}
+        disable={fieldAffectsDataSubFields || fieldIsPresentationalOnly(field) || undefined}
         Label={Label}
         label={'label' in field ? (field.label as StaticLabel) : undefined}
         name={'name' in field ? field.name : undefined}
@@ -125,27 +148,46 @@ export const buildColumnState = (args: Args): Column[] => {
     )
 
     if (field) {
+      const baseCellClientProps: DefaultCellComponentProps = {
+        cellData: undefined,
+        customCellContext: {
+          collectionSlug,
+        },
+        field,
+        rowData: undefined,
+      }
+
+      const serverProps = {
+        field, // TODO get the server field
+      }
+
       const column: Column = {
         accessor: 'name' in field ? field.name : undefined,
         active,
-        cellProps: {
-          field: {
-            ...(field || ({} as ClientField)),
-            admin: {
-              ...(field.admin || {}),
-              // components: {
-              //   ...(field.admin?.components || {}),
-              //   Cell: field.admin?.components?.Cell || {
-              //     type: 'client',
-              //     Component: DefaultCell,
-              //     RenderedComponent: null,
-              //   },
-              //   Label,
-              // },
-            },
-          } as ClientField,
-        },
         Heading,
+        renderedCells: active
+          ? docs.map((doc, i) => {
+              const cellClientProps: DefaultCellComponentProps = {
+                ...baseCellClientProps,
+                cellData: 'name' in field ? doc[field.name] : undefined,
+                link: index === activeColumnsIndices[0],
+                rowData: doc,
+              }
+
+              return (
+                <RenderServerComponent
+                  clientProps={cellClientProps}
+                  Component={
+                    field?.admin && 'components' in field.admin && field.admin.components?.Cell
+                  }
+                  Fallback={DefaultCell}
+                  importMap={importMap}
+                  key={i}
+                  serverProps={serverProps}
+                />
+              )
+            })
+          : [],
       }
 
       acc.push(column)
@@ -158,21 +200,8 @@ export const buildColumnState = (args: Args): Column[] => {
     sorted?.unshift({
       accessor: '_select',
       active: true,
-      cellProps: {
-        field: {
-          admin: {
-            components: {
-              Cell: {
-                type: 'client',
-                Component: null,
-                RenderedComponent: <SelectRow />,
-              },
-              Label: null,
-            },
-          },
-        } as ClientField,
-      },
       Heading: <SelectAll />,
+      renderedCells: docs.map((_, i) => <SelectRow key={i} rowData={docs[i]} />),
     })
   }
 

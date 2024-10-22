@@ -15,14 +15,25 @@ import { fieldAffectsData } from 'payload/shared'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
-import { useTableCell } from '../TableCellProvider/index.js'
 import { CodeCell } from './fields/Code/index.js'
 import { cellComponents } from './fields/index.js'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const DefaultCell: React.FC<CellComponentProps> = (props) => {
-  const { className: classNameFromProps, field, onClick: onClickFromProps } = props
+  const {
+    cellData,
+    className: classNameFromProps,
+    className: classNameFromContext,
+    columnIndex,
+    customCellContext,
+    field,
+    field: { admin },
+    link,
+    onClick: onClickFromProps,
+    onClick: onClickFromContext,
+    rowData,
+  } = props
 
   const { i18n } = useTranslation()
 
@@ -31,17 +42,6 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
       routes: { admin: adminRoute },
     },
   } = useConfig()
-
-  const cellContext = useTableCell()
-
-  const { cellData, cellProps, columnIndex, customCellContext, rowData } = cellContext || {}
-
-  const {
-    className: classNameFromContext,
-    field: { admin },
-    link,
-    onClick: onClickFromContext,
-  } = cellProps || {}
 
   const classNameFromConfigContext = admin && 'className' in admin ? admin.className : undefined
 
@@ -91,15 +91,7 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
   if ('name' in field && field.name === 'id') {
     return (
       <WrapElement {...wrapElementProps}>
-        <CodeCell
-          cellData={`ID: ${cellData}`}
-          field={{
-            ...(field as CodeFieldClient),
-            _schemaPath: cellContext?.cellProps?.field?._schemaPath,
-          }}
-          nowrap
-          rowData={rowData}
-        />
+        <CodeCell cellData={`ID: ${cellData}`} field={field} nowrap rowData={rowData} />
       </WrapElement>
     )
   }
@@ -127,7 +119,7 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
           cellData={cellData}
           customCellContext={customCellContext}
           rowData={rowData}
-          {...(props as CellComponentProps<UploadFieldClient>)}
+          {...(props as DefaultCellComponentProps<UploadFieldClient>)}
         />
       )
     } else {
