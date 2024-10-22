@@ -1,9 +1,7 @@
 import type { User } from '../payload-types'
 
 export const getTenantAccessIDs = (user: null | User): string[] => {
-  if (!user) {
-    return []
-  }
+  if (!user) {return []}
   return (
     user?.tenants?.reduce((acc: string[], { tenant }) => {
       if (tenant) {
@@ -15,9 +13,7 @@ export const getTenantAccessIDs = (user: null | User): string[] => {
 }
 
 export const getTenantAdminTenantAccessIDs = (user: null | User): string[] => {
-  if (!user) {
-    return []
-  }
+  if (!user) {return []}
 
   return (
     user?.tenants?.reduce((acc: string[], { roles, tenant }) => {

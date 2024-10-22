@@ -8,9 +8,7 @@ export const autofillTenant: FieldHook = ({ req, value }) => {
   // return that tenant ID as the value
   if (!value) {
     const tenantIDs = getTenantAccessIDs(req.user)
-    if (tenantIDs.length === 1) {
-      return tenantIDs[0]
-    }
+    if (tenantIDs.length === 1) {return tenantIDs[0]}
   }
 
   return value
