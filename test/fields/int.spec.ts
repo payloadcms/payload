@@ -1562,6 +1562,7 @@ describe('Fields', () => {
         },
       })
 
+      // left join collection_items + left join collection_items_locales
       const {
         docs: [res],
       } = await payload.find({
@@ -1576,6 +1577,11 @@ describe('Fields', () => {
             {
               'items.anotherText': {
                 equals: 'another',
+              },
+            },
+            {
+              'items.text': {
+                equals: 'required',
               },
             },
           ],
