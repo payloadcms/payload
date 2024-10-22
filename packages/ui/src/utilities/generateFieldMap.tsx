@@ -25,7 +25,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { fieldAffectsData, fieldIsSidebar, generateFieldKey } from 'payload/shared'
+import { fieldAffectsData, fieldIsSidebar, generateFieldKey, generatePath } from 'payload/shared'
 import React from 'react'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
@@ -105,7 +105,6 @@ export type RenderFieldFn = (
     readonly forceRender?: boolean
     readonly formState: FormState
     readonly i18n: I18nClient
-    readonly importMap: ImportMap
     readonly indexPath: string
     readonly initialSchemaPath?: string
     readonly margins?: 'small' | false
@@ -115,7 +114,7 @@ export type RenderFieldFn = (
       [fieldName: string]: FieldPermissions
     }
     readonly schemaPath: string
-  } & RenderFieldArgs,
+  } & Omit<RenderFieldArgs, 'fieldPermissions' | 'importMap'>,
 ) => void
 
 export type RenderFieldClient = (
@@ -216,10 +215,10 @@ const traverseFields = ({
   forceRender,
   formState,
   i18n,
-  indexPath,
+  indexPath: parentIndexPath,
   initialIndexPath,
   margins,
-  path: parentPath,
+  path,
   payload,
   permissions,
   schemaPath,
@@ -234,55 +233,27 @@ const traverseFields = ({
 
   if (fields) {
     fields?.forEach((field, fieldIndex) => {
-      const clientField = clientFields?.[fieldIndex]
-
+      const fieldIndexPath =
+        initialIndexPath || [parentIndexPath, String(fieldIndex)].filter(Boolean).join('.')
       const forceRenderChildren =
         (typeof forceRender === 'number' && fieldIndex <= forceRender) || true
 
-      const name = 'name' in field ? field.name : undefined
-
-      const fieldPermissions = permissions?.[name]
-
-      if (
-        fieldPermissions?.read?.permission === false ||
-        (field.admin && 'disabled' in field.admin && field.admin.disabled)
-      ) {
-        return null
-      }
-
-      const isHidden = 'hidden' in field && field?.hidden
-
-      const disabledFromAdmin = field?.admin && 'disabled' in field.admin && field.admin.disabled
-
-      if (fieldAffectsData(field) && (isHidden || disabledFromAdmin)) {
-        return null
-      }
-
-      const fieldIndexPath =
-        initialIndexPath || [indexPath, String(fieldIndex)].filter(Boolean).join('.')
-
-      const path = [parentPath, name].filter(Boolean).join('.')
-
-      const fieldSchemaPath = [schemaPath, name].filter(Boolean).join('.')
-
       setFieldMapValue({
         className,
-        clientField,
+        clientField: clientFields?.[fieldIndex],
         config,
         field,
         fieldMap,
-        fieldPermissions,
         forceRender: forceRenderChildren,
         formState,
         i18n,
-        importMap: payload.importMap,
         indexPath: fieldIndexPath,
         initialSchemaPath,
         margins,
         path,
         payload,
         permissions,
-        schemaPath: fieldSchemaPath,
+        schemaPath,
       })
     })
   }
@@ -296,20 +267,36 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
     config,
     field,
     fieldMap,
-    fieldPermissions,
     forceRender,
     formState,
     i18n,
-    importMap,
     indexPath,
     initialSchemaPath,
     margins,
-    path,
+    path: parentPath,
     payload,
     permissions,
     readOnly,
-    schemaPath,
+    schemaPath: parentSchemaPath,
   } = args
+
+  const name = 'name' in field ? field.name : undefined
+  const path = generatePath({ name, path: parentPath })
+  const schemaPath = generatePath({ name, path: parentSchemaPath })
+
+  const isHiddenField = 'hidden' in field && field?.hidden
+  const disabledFromAdmin = field?.admin && 'disabled' in field.admin && field.admin.disabled
+  if (fieldAffectsData(field) && (isHiddenField || disabledFromAdmin)) {
+    return null
+  }
+
+  const fieldPermissions = permissions?.[name]
+  if (
+    fieldPermissions?.read?.permission === false ||
+    (field.admin && 'disabled' in field.admin && field.admin.disabled)
+  ) {
+    return null
+  }
 
   const isHidden = 'admin' in field && 'hidden' in field.admin && field.admin.hidden
 
@@ -379,7 +366,7 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
             }}
             Component={field.admin?.components?.RowLabel}
             Fallback={DefaultRowLabel}
-            importMap={importMap}
+            importMap={payload.importMap}
             serverProps={serverProps}
           />
         )
@@ -520,7 +507,7 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
           <RenderServerComponent
             clientProps={clientProps}
             Component={field.admin.components.afterInput}
-            importMap={importMap}
+            importMap={payload.importMap}
             key="field.admin.components.afterInput"
             serverProps={serverProps}
           />
@@ -532,7 +519,7 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
           <RenderServerComponent
             clientProps={clientProps}
             Component={field.admin.components.beforeInput}
-            importMap={importMap}
+            importMap={payload.importMap}
             key="field.admin.components.beforeInput"
             serverProps={serverProps}
           />
@@ -544,7 +531,7 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
           <RenderServerComponent
             clientProps={clientProps}
             Component={field.admin.components.Description}
-            importMap={importMap}
+            importMap={payload.importMap}
             key="field.admin.components.Description"
             serverProps={serverProps}
           />
@@ -556,7 +543,7 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
           <RenderServerComponent
             clientProps={clientProps}
             Component={field.admin.components.Error}
-            importMap={importMap}
+            importMap={payload.importMap}
             key="field.admin.components.Error"
             serverProps={serverProps}
           />
@@ -568,7 +555,7 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
           <RenderServerComponent
             clientProps={clientProps}
             Component={field.admin.components.Label}
-            importMap={importMap}
+            importMap={payload.importMap}
             key="field.admin.components.Label"
             serverProps={serverProps}
           />
@@ -587,7 +574,7 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
       clientProps={clientProps}
       Component={isHidden ? fieldComponents.hidden : field.admin?.components?.Field}
       Fallback={fieldComponents?.[field?.type]}
-      importMap={importMap}
+      importMap={payload.importMap}
       serverProps={serverProps}
     />
   )

@@ -12,6 +12,7 @@ import {
   MissingFieldType,
 } from '../../errors/index.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
+import { generatePath } from '../../utilities/generatePath.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
 import { setDefaultBeforeDuplicate } from '../setDefaultBeforeDuplicate.js'
@@ -64,7 +65,7 @@ export const sanitizeFields = async ({
     return []
   }
 
-  let schemaPath = schemaPathArg
+  const schemaPath = schemaPathArg
 
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]
@@ -248,9 +249,6 @@ export const sanitizeFields = async ({
     }
 
     if ('fields' in field && field.fields) {
-      if ('name' in field && field.name) {
-        schemaPath = `${schemaPath || ''}${schemaPath ? '.' : ''}${field.name}`
-      }
       field.fields = await sanitizeFields({
         config,
         existingFieldNames: fieldAffectsData(field) ? new Set() : existingFieldNames,
@@ -259,7 +257,10 @@ export const sanitizeFields = async ({
         parentIsLocalized: parentIsLocalized || field.localized,
         requireFieldLevelRichTextEditor,
         richTextSanitizationPromises,
-        schemaPath,
+        schemaPath: generatePath({
+          name: 'name' in field ? field.name : undefined,
+          path: schemaPath,
+        }),
         validRelationships,
       })
     }
@@ -267,11 +268,8 @@ export const sanitizeFields = async ({
     if (field.type === 'tabs') {
       for (let j = 0; j < field.tabs.length; j++) {
         const tab = field.tabs[j]
-        if (tabHasName(tab)) {
-          schemaPath = `${schemaPath || ''}${schemaPath ? '.' : ''}${tab.name}`
-          if (typeof tab.label === 'undefined') {
-            tab.label = toWords(tab.name)
-          }
+        if (tabHasName(tab) && typeof tab.label === 'undefined') {
+          tab.label = toWords(tab.name)
         }
 
         tab.fields = await sanitizeFields({
@@ -282,7 +280,10 @@ export const sanitizeFields = async ({
           parentIsLocalized: parentIsLocalized || (tabHasName(tab) && tab.localized),
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
-          schemaPath,
+          schemaPath: generatePath({
+            name: 'name' in tab ? tab.name : undefined,
+            path: schemaPath,
+          }),
           validRelationships,
         })
         field.tabs[j] = tab

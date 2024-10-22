@@ -129,13 +129,11 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const addRow = useCallback(
     async (rowIndex: number): Promise<void> => {
-      // TODO add the new row into the currentData array using the incoming rowIndex
-      const newRow = { id: uuid() }
-
-      const currentData: Row[] = getDataByPath(path)
+      const newRows: Row[] = getDataByPath(path)
+      newRows.splice(rowIndex, 0, { id: uuid() })
 
       await addFieldRow({
-        data: { [name]: [...currentData, newRow] },
+        data: { [name]: newRows },
         path,
         schemaAccessor,
       })
@@ -143,7 +141,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       setModified(true)
 
       setTimeout(() => {
-        scrollToID(`${path}-row-${rowIndex + 1}`)
+        scrollToID(`${path}-row-${rowIndex}`)
       }, 0)
     },
     [addFieldRow, path, setModified, getDataByPath, name, schemaAccessor],
@@ -180,12 +178,12 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const toggleCollapseAll = useCallback(
     (collapsed: boolean) => {
-      // const { collapsedIDs, updatedRows } = toggleAllRows({
-      //   collapsed,
-      //   rows,
-      // })
-      // dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, updatedRows })
-      // setDocFieldPreferences(path, { collapsed: collapsedIDs })
+      const { collapsedIDs, updatedRows } = toggleAllRows({
+        collapsed,
+        rows: rowsData,
+      })
+      dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, updatedRows })
+      setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
     [dispatchFields, path, rowsData, setDocFieldPreferences],
   )
