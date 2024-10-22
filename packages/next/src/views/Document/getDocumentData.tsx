@@ -1,7 +1,6 @@
 import type {
   Data,
   FormState,
-  ImportMap,
   Locale,
   PayloadRequest,
   SanitizedCollectionConfig,
@@ -15,7 +14,6 @@ export const getDocumentData = async (args: {
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
   id?: number | string
-  importMap: ImportMap
   locale: Locale
   req: PayloadRequest
   schemaPath?: string

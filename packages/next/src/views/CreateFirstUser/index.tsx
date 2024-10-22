@@ -8,10 +8,7 @@ import './index.scss'
 
 export { generateCreateFirstUserMetadata } from './meta.js'
 
-export const CreateFirstUserView: React.FC<AdminViewProps> = async ({
-  importMap,
-  initPageResult,
-}) => {
+export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageResult }) => {
   const {
     locale,
     req,
@@ -31,7 +28,6 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({
 
   const { formState } = await getDocumentData({
     collectionConfig,
-    importMap,
     locale,
     req,
     schemaPath: `_${collectionConfig.slug}.auth`,

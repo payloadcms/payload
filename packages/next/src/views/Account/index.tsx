@@ -20,7 +20,6 @@ import { Settings } from './Settings/index.js'
 export { generateAccountMetadata } from './meta.js'
 
 export const Account: React.FC<AdminViewProps> = async ({
-  importMap,
   initPageResult,
   params,
   searchParams,
@@ -62,7 +61,6 @@ export const Account: React.FC<AdminViewProps> = async ({
     const { data, formState } = await getDocumentData({
       id: user.id,
       collectionConfig,
-      importMap,
       locale,
       req,
     })

@@ -27,7 +27,6 @@ export type MappedView = {
 
 export type AdminViewProps = {
   readonly clientConfig: ClientConfig
-  readonly importMap: ImportMap
   readonly initPageResult: InitPageResult
   readonly params?: { [key: string]: string | string[] | undefined }
   readonly searchParams: { [key: string]: string | string[] | undefined }
