@@ -320,7 +320,6 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
     initialSchemaPath,
     isSidebar: fieldIsSidebar(field),
     path,
-    renderedRows: [] as FieldRow[],
     schemaPath,
   }
 
@@ -442,6 +441,7 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
     }
 
     case 'group':
+    case 'row':
     case 'collapsible': {
       traverseFields({
         className,
@@ -590,8 +590,6 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
       serverProps={serverProps}
     />
   )
-
-  console.log({ path })
 
   fieldMap.set(path, fieldMapValue)
 }

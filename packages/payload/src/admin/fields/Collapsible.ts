@@ -15,9 +15,14 @@ import type {
   FieldLabelServerComponent,
 } from '../types.js'
 
+type CollapsibleFieldBaseClientProps = {
+  readonly path?: string
+}
+
 type CollapsibleFieldClientWithoutType = MarkOptional<CollapsibleFieldClient, 'type'>
 
-export type CollapsibleFieldClientProps = ClientFieldBase<CollapsibleFieldClientWithoutType>
+export type CollapsibleFieldClientProps = ClientFieldBase<CollapsibleFieldClientWithoutType> &
+  CollapsibleFieldBaseClientProps
 
 export type CollapsibleFieldServerProps = ServerFieldBase<
   CollapsibleField,
@@ -29,8 +34,10 @@ export type CollapsibleFieldServerComponent = FieldServerComponent<
   CollapsibleFieldClientWithoutType
 >
 
-export type CollapsibleFieldClientComponent =
-  FieldClientComponent<CollapsibleFieldClientWithoutType>
+export type CollapsibleFieldClientComponent = FieldClientComponent<
+  CollapsibleFieldClientWithoutType,
+  CollapsibleFieldBaseClientProps
+>
 
 export type CollapsibleFieldLabelServerComponent = FieldLabelServerComponent<
   CollapsibleField,

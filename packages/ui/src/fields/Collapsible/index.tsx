@@ -137,7 +137,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
           initCollapsed={collapsedOnMount}
           onToggle={onToggle}
         >
-          <RenderFields fields={fields} />
+          <RenderFields fields={fields} path={path} />
         </CollapsibleElement>
         {Description}
       </div>

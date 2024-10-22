@@ -419,7 +419,6 @@ export type RenderedField = {
   isSidebar: boolean
   path: string
   renderedFieldMap?: RenderedFieldMap
-  renderedRows?: FieldRow[]
   schemaPath: string
   type: FieldTypes
 }
@@ -434,7 +433,6 @@ export type FieldRow = {
 export type FieldSlots = {
   AfterInput?: React.ReactNode
   BeforeInput?: React.ReactNode
-  Blocks?: React.ReactNode[]
   Description?: React.ReactNode
   Error?: React.ReactNode
   Label?: React.ReactNode
@@ -466,6 +464,7 @@ export type {
   VisibleEntities,
 } from './views/types.js'
 
-export type FieldSchemaMap = Map<string, Field[]>
+type SchemaPath = {} & string
+export type FieldSchemaMap = Map<SchemaPath, Field[]>
 
-export type ClientFieldSchemaMap = Map<string, ClientField[]>
+export type ClientFieldSchemaMap = Map<SchemaPath, ClientField[]>
