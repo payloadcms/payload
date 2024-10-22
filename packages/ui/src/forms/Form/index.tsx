@@ -459,9 +459,11 @@ export const Form: React.FC<FormProps> = (props) => {
         signal: abortControllerRef.current.signal,
       })
 
-      contextRef.current = { ...initContextState } as FormContextType
-      setModified(false)
-      dispatchFields({ type: 'REPLACE_STATE', state: newState })
+      if (!abortControllerRef.current.signal.aborted) {
+        contextRef.current = { ...initContextState } as FormContextType
+        setModified(false)
+        dispatchFields({ type: 'REPLACE_STATE', state: newState })
+      }
     },
     [collectionSlug, dispatchFields, globalSlug, id, operation, getFormState],
   )
@@ -494,13 +496,15 @@ export const Form: React.FC<FormProps> = (props) => {
     async ({ data, path, rowIndex, schemaPath }) => {
       const subFieldState = await getFieldStateBySchemaPath({ data, schemaPath })
 
-      dispatchFields({
-        type: 'ADD_ROW',
-        blockType: data?.blockType,
-        path,
-        rowIndex,
-        subFieldState,
-      })
+      if (!abortControllerRef.current.signal.aborted) {
+        dispatchFields({
+          type: 'ADD_ROW',
+          blockType: data?.blockType,
+          path,
+          rowIndex,
+          subFieldState,
+        })
+      }
     },
     [getFieldStateBySchemaPath, dispatchFields],
   )
