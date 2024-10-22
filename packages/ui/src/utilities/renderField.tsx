@@ -1,26 +1,19 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientBlock,
-  ClientCollectionConfig,
   ClientField,
-  ClientGlobalConfig,
   ClientTab,
   Field,
   FieldPermissions,
-  FieldRow,
-  FieldSchemaMap,
   FieldSlots,
   FieldTypes,
   FormField,
   FormState,
   ImportMap,
-  Operation,
   Payload,
   RenderedField,
   RenderedFieldMap,
-  SanitizedCollectionConfig,
   SanitizedConfig,
-  SanitizedGlobalConfig,
   SchemaAccessor,
 } from 'payload'
 
@@ -90,12 +83,6 @@ export const fieldComponents: FieldTypesComponents = {
   upload: UploadField,
 }
 
-export type RenderFieldsFn = (props: RenderFieldsArgs) => RenderedFieldMap
-
-export type RenderFieldsClient = (
-  args: Omit<RenderFieldsArgs, 'config' | 'importMap' | 'payload'>,
-) => Promise<React.ReactNode[]>
-
 export type RenderFieldFn = (
   args: {
     readonly className?: string
@@ -115,46 +102,11 @@ export type RenderFieldFn = (
     }
     readonly schemaPath: string
   } & Omit<RenderFieldArgs, 'fieldPermissions' | 'importMap'>,
-) => void
+) => React.ReactNode
 
 export type RenderFieldClient = (
   args: Omit<RenderFieldArgs, 'config' | 'importMap' | 'payload'>,
 ) => Promise<React.ReactNode>
-
-export type RenderFieldsArgs = {
-  readonly Blocks?: React.ReactNode[]
-  readonly className?: string
-  readonly clientCollectionConfig?: ClientCollectionConfig
-  readonly clientFields?: ClientField[]
-  readonly clientGlobalConfig?: ClientGlobalConfig
-  readonly config: SanitizedConfig
-  readonly entityConfig?: SanitizedCollectionConfig | SanitizedGlobalConfig
-  readonly fields: Field[]
-  readonly fieldSchemaMap?: FieldSchemaMap
-  /**
-   * Controls the rendering behavior of the fields, i.e. defers rendering until they intersect with the viewport using the Intersection Observer API.
-   *
-   * If true, the fields will be rendered immediately, rather than waiting for them to intersect with the viewport.
-   *
-   * If a number is provided, will immediately render fields _up to that index_.
-   */
-  readonly forceRender?: boolean | number
-  readonly formState?: FormState
-  readonly i18n: I18nClient
-  readonly indexPath?: string
-  readonly initialIndexPath?: string
-  readonly initialSchemaPath?: string
-  readonly margins?: 'small' | false
-  readonly operation?: Operation
-  readonly path?: string
-  readonly payload: Payload
-  readonly permissions?: {
-    [fieldName: string]: FieldPermissions
-  }
-  readonly readOnly?: boolean
-  readonly schemaPath?: string
-  readonly useInitialIndexPath?: boolean
-}
 
 export type RenderFieldArgs = {
   readonly className?: string
@@ -198,75 +150,12 @@ export type ServerSlotProps = {
   payload: Payload
 }
 
-export const generateFieldMap: RenderFieldsFn = (args) => {
-  const fieldMap: RenderedFieldMap = new Map()
-
-  traverseFields({ ...args, fieldMap })
-
-  return fieldMap
-}
-
-const traverseFields = ({
-  className,
-  clientFields,
-  config,
-  fieldMap,
-  fields,
-  forceRender,
-  formState,
-  i18n,
-  indexPath: parentIndexPath,
-  initialIndexPath,
-  margins,
-  path,
-  payload,
-  permissions,
-  schemaPath,
-  initialSchemaPath = schemaPath,
-}: {
-  fieldMap: RenderedFieldMap
-} & RenderFieldsArgs) => {
-  if (!fields || (Array.isArray(fields) && fields.length === 0)) {
-    console.warn(`No fields provided to renderFields for schemaPath: ${schemaPath}`) // eslint-disable-line no-console
-    return null
-  }
-
-  if (fields) {
-    fields?.forEach((field, fieldIndex) => {
-      const fieldIndexPath =
-        initialIndexPath || [parentIndexPath, String(fieldIndex)].filter(Boolean).join('.')
-      const forceRenderChildren =
-        (typeof forceRender === 'number' && fieldIndex <= forceRender) || true
-
-      setFieldMapValue({
-        className,
-        clientField: clientFields?.[fieldIndex],
-        config,
-        field,
-        fieldMap,
-        forceRender: forceRenderChildren,
-        formState,
-        i18n,
-        indexPath: fieldIndexPath,
-        initialSchemaPath,
-        margins,
-        path,
-        payload,
-        permissions,
-        schemaPath,
-      })
-    })
-  }
-}
-
-// builds up the component w/ props and assign it to the fieldMap
-export const setFieldMapValue: RenderFieldFn = (args) => {
+export const renderField: RenderFieldFn = (args) => {
   const {
     className,
     clientField,
     config,
     field,
-    fieldMap,
     forceRender,
     formState,
     i18n,
@@ -281,6 +170,7 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
   } = args
 
   const name = 'name' in field ? field.name : undefined
+
   const path = generatePath({
     name,
     fieldType: field.type,
@@ -387,23 +277,23 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
 
         clientProps.rowLabels[rowIndex] = RowLabel
 
-        traverseFields({
-          className,
-          clientFields: clientField && 'fields' in clientField && clientField.fields,
-          config,
-          fieldMap,
-          fields: field.fields,
-          forceRender,
-          formState,
-          i18n,
-          indexPath,
-          initialSchemaPath,
-          margins,
-          path: `${path}.${rowIndex}`,
-          payload,
-          permissions,
-          schemaPath,
-        })
+        // traverseFields({
+        //   className,
+        //   clientFields: clientField && 'fields' in clientField && clientField.fields,
+        //   config,
+        //   fieldMap,
+        //   fields: field.fields,
+        //   forceRender,
+        //   formState,
+        //   i18n,
+        //   indexPath,
+        //   initialSchemaPath,
+        //   margins,
+        //   path: `${path}.${rowIndex}`,
+        //   payload,
+        //   permissions,
+        //   schemaPath,
+        // })
       })
 
       break
@@ -417,24 +307,24 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
           'blocks' in clientField &&
           clientField?.blocks?.find((block) => block.slug === row.blockType)
 
-        traverseFields({
-          className,
-          clientFields:
-            clientBlockConfig && 'fields' in clientBlockConfig && clientBlockConfig.fields,
-          config,
-          fieldMap,
-          fields: blockConfig.fields,
-          forceRender,
-          formState,
-          i18n,
-          indexPath,
-          initialSchemaPath,
-          margins,
-          path: `${path}.${rowIndex}`,
-          payload,
-          permissions,
-          schemaPath: `${schemaPath}.${blockConfig.slug}`,
-        })
+        // traverseFields({
+        //   className,
+        //   clientFields:
+        //     clientBlockConfig && 'fields' in clientBlockConfig && clientBlockConfig.fields,
+        //   config,
+        //   fieldMap,
+        //   fields: blockConfig.fields,
+        //   forceRender,
+        //   formState,
+        //   i18n,
+        //   indexPath,
+        //   initialSchemaPath,
+        //   margins,
+        //   path: `${path}.${rowIndex}`,
+        //   payload,
+        //   permissions,
+        //   schemaPath: `${schemaPath}.${blockConfig.slug}`,
+        // })
       })
 
       break
@@ -443,23 +333,23 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
     case 'group':
     case 'row':
     case 'collapsible': {
-      traverseFields({
-        className,
-        clientFields: clientField && 'fields' in clientField && clientField.fields,
-        config,
-        fieldMap,
-        fields: field.fields,
-        forceRender,
-        formState,
-        i18n,
-        indexPath,
-        initialSchemaPath,
-        margins,
-        path,
-        payload,
-        permissions,
-        schemaPath,
-      })
+      // traverseFields({
+      //   className,
+      //   clientFields: clientField && 'fields' in clientField && clientField.fields,
+      //   config,
+      //   fieldMap,
+      //   fields: field.fields,
+      //   forceRender,
+      //   formState,
+      //   i18n,
+      //   indexPath,
+      //   initialSchemaPath,
+      //   margins,
+      //   path,
+      //   payload,
+      //   permissions,
+      //   schemaPath,
+      // })
 
       break
     }
@@ -468,23 +358,23 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
       field.tabs.map((tab, tabIndex) => {
         const clientTabConfig = 'tabs' in clientField && clientField?.tabs?.[tabIndex]
 
-        traverseFields({
-          className,
-          clientFields: 'fields' in clientTabConfig && clientTabConfig.fields,
-          config,
-          fieldMap,
-          fields: tab.fields,
-          forceRender,
-          formState,
-          i18n,
-          indexPath,
-          initialSchemaPath,
-          margins,
-          path,
-          payload,
-          permissions,
-          schemaPath,
-        })
+        // traverseFields({
+        //   className,
+        //   clientFields: 'fields' in clientTabConfig && clientTabConfig.fields,
+        //   config,
+        //   fieldMap,
+        //   fields: tab.fields,
+        //   forceRender,
+        //   formState,
+        //   i18n,
+        //   indexPath,
+        //   initialSchemaPath,
+        //   margins,
+        //   path,
+        //   payload,
+        //   permissions,
+        //   schemaPath,
+        // })
       })
 
       break
@@ -581,7 +471,7 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
     ...fieldSlots,
   }
 
-  fieldMapValue.Field = (
+  return (
     <RenderServerComponent
       clientProps={clientProps}
       Component={isHidden ? fieldComponents.hidden : field.admin?.components?.Field}
@@ -590,6 +480,4 @@ export const setFieldMapValue: RenderFieldFn = (args) => {
       serverProps={serverProps}
     />
   )
-
-  fieldMap.set(path, fieldMapValue)
 }

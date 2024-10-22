@@ -23,6 +23,7 @@ export type FormField = {
   disableFormData?: boolean
   errorMessage?: string
   errorPaths?: string[]
+  Field?: React.ReactNode
   fieldSchema?: Field
   filterOptions?: FilterOptionsResult
   initialValue: unknown

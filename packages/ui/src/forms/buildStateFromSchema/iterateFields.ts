@@ -46,6 +46,7 @@ type Args = {
    */
   path?: string
   preferences?: DocumentPreferences
+  renderFields: boolean
   req: PayloadRequest
   schemaPath?: string
   /**
@@ -78,6 +79,7 @@ export const iterateFields = async ({
   parentPassesCondition = true,
   path = '',
   preferences,
+  renderFields,
   req,
   schemaPath = '',
   skipConditionChecks = false,
@@ -117,6 +119,7 @@ export const iterateFields = async ({
           passesCondition,
           path,
           preferences,
+          renderFields,
           req,
           schemaPath: _schemaPath,
           skipConditionChecks,

@@ -1,13 +1,4 @@
-import type {
-  ClientField,
-  Data,
-  FormField,
-  FormState,
-  RenderedFieldMap,
-  Row,
-  SchemaAccessor,
-  User,
-} from 'payload'
+import type { ClientField, Data, FormField, FormState, Row, SchemaAccessor, User } from 'payload'
 import type React from 'react'
 import type { Dispatch } from 'react'
 
@@ -44,7 +35,6 @@ export type FormProps = {
   onSubmit?: (fields: FormState, data: Data) => void
   onSuccess?: (json: unknown) => Promise<void> | void
   redirect?: string
-  renderedFieldMap?: RenderedFieldMap
   submitted?: boolean
   uuid?: string
   validationOperation?: 'create' | 'update'

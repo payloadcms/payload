@@ -16,6 +16,7 @@ import {
   tabHasName,
 } from 'payload/shared'
 
+// import { renderField } from '../../utilities/renderField.js'
 import { getFilterOptionsQuery } from './getFilterOptionsQuery.js'
 import { iterateFields } from './iterateFields.js'
 
@@ -54,6 +55,7 @@ export type AddFieldStatePromiseArgs = {
   passesCondition: boolean
   path: string
   preferences: DocumentPreferences
+  renderFields: boolean
   /**
    * Req is used for validation and defaultValue calculation. If you don't need validation,
    * just create your own req and pass in the locale and the user
@@ -93,6 +95,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     passesCondition,
     path,
     preferences,
+    renderFields,
     req,
     schemaPath,
     skipConditionChecks = false,
@@ -105,6 +108,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
     const fieldState: FormField = {
       errorPaths: [],
+      Field: undefined,
       fieldSchema: includeSchema ? field : undefined,
       initialValue: undefined,
       isSidebar: fieldIsSidebar(field),
@@ -197,6 +201,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 parentPassesCondition: passesCondition,
                 path: rowPath,
                 preferences,
+                renderFields,
                 req,
                 schemaPath,
                 skipConditionChecks,
@@ -239,6 +244,13 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           if (arrayValue.length > 0) {
             fieldState.disableFormData = true
           }
+        }
+
+        if (renderFields) {
+          // fieldState.Field = renderField({
+          //   i18n: req.i18n,
+          //   payload: req.payload,
+          // })
         }
 
         // Add field to state
@@ -312,6 +324,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   parentPassesCondition: passesCondition,
                   path: rowPath,
                   preferences,
+                  renderFields,
                   req,
                   schemaPath,
                   skipConditionChecks,
@@ -386,6 +399,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           parentPassesCondition: passesCondition,
           path: `${path}${field.name}.`,
           preferences,
+          renderFields,
           req,
           schemaPath,
           skipConditionChecks,
@@ -523,6 +537,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       parentPassesCondition: passesCondition,
       path,
       preferences,
+      renderFields,
       req,
       schemaPath,
       skipConditionChecks,
@@ -549,6 +564,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         parentPassesCondition: passesCondition,
         path: isNamedTab ? `${path}${tab.name}.` : path,
         preferences,
+        renderFields,
         req,
         schemaPath: isNamedTab ? `${schemaPath}.${tab.name}` : schemaPath,
         skipConditionChecks,

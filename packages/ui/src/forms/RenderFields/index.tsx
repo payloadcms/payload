@@ -1,13 +1,13 @@
 'use client'
 
 import { generatePath } from 'payload/shared'
-import React, { Fragment } from 'react'
+import React, { Fragment, useState } from 'react'
 
 import type { Props } from './types.js'
 
+import { useForm } from '../../forms/Form/context.js'
 import { useIntersect } from '../../hooks/useIntersect.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { useFieldSlots } from '../Form/context.js'
 import './index.scss'
 
 const baseClass = 'render-fields'
@@ -17,7 +17,9 @@ export { Props }
 export const RenderFields: React.FC<Props> = (props) => {
   const { className, fields, forceRender, margins, path: parentPath } = props
 
-  const { fieldSlots } = useFieldSlots()
+  const { getFields } = useForm()
+
+  const [formFields] = useState(() => getFields())
 
   const { i18n } = useTranslation()
 
@@ -40,7 +42,7 @@ export const RenderFields: React.FC<Props> = (props) => {
     }
   }, [shouldRender, hasRendered])
 
-  if (!fieldSlots || fieldSlots.size === 0) {
+  if (!formFields) {
     return <p>No fields to render</p>
   }
 
@@ -69,7 +71,7 @@ export const RenderFields: React.FC<Props> = (props) => {
             schemaIndex: i,
           })
 
-          const Field = fieldSlots.get(path)?.Field
+          const Field = formFields[path]?.Field
 
           return (
             <Fragment key={i}>

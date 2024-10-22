@@ -30,7 +30,6 @@ import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import {
-  FieldSlotsContext,
   FormContext,
   FormFieldsContext,
   FormWatchContext,
@@ -41,7 +40,6 @@ import {
 } from './context.js'
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
-import { fieldSlotReducer } from './fieldSlotReducer.js'
 import { initContextState } from './initContextState.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
 import { prepareFields } from './prepareFields.js'
@@ -67,13 +65,10 @@ export const Form: React.FC<FormProps> = (props) => {
     onSubmit,
     onSuccess,
     redirect,
-    renderedFieldMap,
     submitted: submittedFromProps,
     uuid,
     waitForAutocomplete,
   } = props
-
-  const [fieldSlots, setFieldSlots] = useReducer(fieldSlotReducer, renderedFieldMap)
 
   const method = 'method' in props ? props?.method : undefined
 
@@ -512,7 +507,7 @@ export const Form: React.FC<FormProps> = (props) => {
       abortControllerRef2.current = abortController
       const docPreferences = await getDocPreferences()
 
-      const { renderedFieldMap, state: formState } = await getFormState({
+      const { state: formState } = await getFormState({
         data,
         docPreferences,
         path,
@@ -521,14 +516,14 @@ export const Form: React.FC<FormProps> = (props) => {
         signal: abortController.signal,
       })
 
-      return { formState, renderedFieldMap }
+      return { formState }
     },
     [getFormState, getDocPreferences],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
     async ({ data, path, schemaAccessor }) => {
-      const { formState: newFormState, renderedFieldMap } = await getFieldStateBySchemaPath({
+      const { formState: newFormState } = await getFieldStateBySchemaPath({
         data,
         path,
         schemaAccessor,
@@ -537,11 +532,6 @@ export const Form: React.FC<FormProps> = (props) => {
       dispatchFields({
         type: 'UPDATE_MANY',
         formState: newFormState,
-      })
-
-      setFieldSlots({
-        type: 'UPDATE_MANY',
-        renderedFieldMap,
       })
     },
     [getFieldStateBySchemaPath, dispatchFields],
@@ -722,9 +712,7 @@ export const Form: React.FC<FormProps> = (props) => {
               <ProcessingContext.Provider value={processing}>
                 <ModifiedContext.Provider value={modified}>
                   <FormFieldsContext.Provider value={fieldsReducer}>
-                    <FieldSlotsContext.Provider value={{ fieldSlots, setFieldSlots }}>
-                      {children}
-                    </FieldSlotsContext.Provider>
+                    {children}
                   </FormFieldsContext.Provider>
                 </ModifiedContext.Provider>
               </ProcessingContext.Provider>

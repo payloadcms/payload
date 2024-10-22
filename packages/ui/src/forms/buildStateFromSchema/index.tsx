@@ -11,12 +11,23 @@ type Args = {
   operation?: 'create' | 'update'
   path?: string
   preferences: DocumentPreferences
+  renderFields?: boolean
   req: PayloadRequest
   siblingData?: Data
 }
 
 export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
-  const { id, collectionSlug, data = {}, fields, operation, path = '', preferences, req } = args
+  const {
+    id,
+    collectionSlug,
+    data = {},
+    fields,
+    operation,
+    path = '',
+    preferences,
+    renderFields,
+    req,
+  } = args
 
   if (fields) {
     const state: FormState = {}
@@ -43,6 +54,7 @@ export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
       parentPassesCondition: true,
       path,
       preferences,
+      renderFields,
       req,
       schemaPath: '',
       state,

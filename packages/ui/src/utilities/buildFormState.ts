@@ -11,7 +11,6 @@ import type {
   Field,
   FieldSchemaMap,
   FormState,
-  RenderedFieldMap,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
@@ -24,7 +23,6 @@ import { reduceFieldsToValues } from 'payload/shared'
 import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
 import { getFieldByIndexPath } from './buildFieldSchemaMap/getFieldByIndexPath.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
-import { generateFieldMap } from './generateFieldMap.js'
 
 let cachedFieldMap = global._payload_fieldMap
 let cachedClientConfig = global._payload_clientConfig
@@ -78,7 +76,6 @@ type BuildFormStateSuccessResult = {
   errors?: never
   indexPath?: string
   lockedState?: { isLocked: boolean; user: ClientUser | number | string }
-  renderedFieldMap?: RenderedFieldMap
   state: FormState
 }
 
@@ -366,6 +363,7 @@ export const buildFormStateFn = async (
     operation,
     path: basePath ? `${basePath}.` : '',
     preferences: docPreferences || { fields: {} },
+    renderFields: shouldRenderFields,
     req,
   })
 
@@ -445,28 +443,8 @@ export const buildFormStateFn = async (
     }
   }
 
-  const fieldMap = shouldRenderFields
-    ? generateFieldMap({
-        clientFields,
-        config,
-        entityConfig,
-        fields,
-        fieldSchemaMap,
-        formState: formStateResult,
-        i18n,
-        indexPath: baseIndexPath,
-        initialIndexPath,
-        initialSchemaPath,
-        path: basePath,
-        payload,
-        permissions: {}, // TODO
-        schemaPath: parentSchemaPath,
-      })
-    : undefined
-
   return {
     lockedState: lockedStateResult,
-    renderedFieldMap: fieldMap,
     state: formStateResult,
   }
 }
