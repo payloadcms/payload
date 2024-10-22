@@ -14,6 +14,8 @@ export interface Config {
     posts: Post;
     categories: Category;
     uploads: Upload;
+    versions: Version;
+    'categories-versions': CategoriesVersion;
     'localized-posts': LocalizedPost;
     'localized-categories': LocalizedCategory;
     users: User;
@@ -22,7 +24,7 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   globals: {};
   locale: 'en' | 'es';
@@ -53,15 +55,15 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: number;
+  id: string;
   title?: string | null;
-  upload?: (number | null) | Upload;
-  category?: (number | null) | Category;
-  categories?: (number | Category)[] | null;
-  categoriesLocalized?: (number | Category)[] | null;
+  upload?: (string | null) | Upload;
+  category?: (string | null) | Category;
+  categories?: (string | Category)[] | null;
+  categoriesLocalized?: (string | Category)[] | null;
   group?: {
-    category?: (number | null) | Category;
-    camelCaseCategory?: (number | null) | Category;
+    category?: (string | null) | Category;
+    camelCaseCategory?: (string | null) | Category;
   };
   updatedAt: string;
   createdAt: string;
@@ -71,9 +73,9 @@ export interface Post {
  * via the `definition` "uploads".
  */
 export interface Upload {
-  id: number;
+  id: string;
   relatedPosts?: {
-    docs?: (number | Post)[] | null;
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   updatedAt: string;
@@ -93,27 +95,27 @@ export interface Upload {
  * via the `definition` "categories".
  */
 export interface Category {
-  id: number;
+  id: string;
   name?: string | null;
   relatedPosts?: {
-    docs?: (number | Post)[] | null;
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   hasManyPosts?: {
-    docs?: (number | Post)[] | null;
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   hasManyPostsLocalized?: {
-    docs?: (number | Post)[] | null;
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   group?: {
     relatedPosts?: {
-      docs?: (number | Post)[] | null;
+      docs?: (string | Post)[] | null;
       hasNextPage?: boolean | null;
     } | null;
     camelCasePosts?: {
-      docs?: (number | Post)[] | null;
+      docs?: (string | Post)[] | null;
       hasNextPage?: boolean | null;
     } | null;
   };
@@ -122,12 +124,38 @@ export interface Category {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versions".
+ */
+export interface Version {
+  id: string;
+  category?: (string | null) | Category;
+  categoryVersion?: (string | null) | CategoriesVersion;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories-versions".
+ */
+export interface CategoriesVersion {
+  id: string;
+  relatedVersions?: {
+    docs?: (string | Version)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "localized-posts".
  */
 export interface LocalizedPost {
-  id: number;
+  id: string;
   title?: string | null;
-  category?: (number | null) | LocalizedCategory;
+  category?: (string | null) | LocalizedCategory;
   updatedAt: string;
   createdAt: string;
 }
@@ -136,10 +164,10 @@ export interface LocalizedPost {
  * via the `definition` "localized-categories".
  */
 export interface LocalizedCategory {
-  id: number;
+  id: string;
   name?: string | null;
   relatedPosts?: {
-    docs?: (number | LocalizedPost)[] | null;
+    docs?: (string | LocalizedPost)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   updatedAt: string;
@@ -150,7 +178,7 @@ export interface LocalizedCategory {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -167,36 +195,44 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'categories';
-        value: number | Category;
+        value: string | Category;
       } | null)
     | ({
         relationTo: 'uploads';
-        value: number | Upload;
+        value: string | Upload;
+      } | null)
+    | ({
+        relationTo: 'versions';
+        value: string | Version;
+      } | null)
+    | ({
+        relationTo: 'categories-versions';
+        value: string | CategoriesVersion;
       } | null)
     | ({
         relationTo: 'localized-posts';
-        value: number | LocalizedPost;
+        value: string | LocalizedPost;
       } | null)
     | ({
         relationTo: 'localized-categories';
-        value: number | LocalizedCategory;
+        value: string | LocalizedCategory;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -206,10 +242,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -229,7 +265,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
