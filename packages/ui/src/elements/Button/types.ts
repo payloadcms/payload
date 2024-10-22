@@ -23,7 +23,7 @@ export type Props = {
   round?: boolean
   secondaryActions?: secondaryAction | secondaryAction[]
   size?: 'large' | 'medium' | 'small'
-  SubMenuPopupContent?: (any) => React.ReactNode
+  SubMenuPopupContent?: (close: () => void) => React.ReactNode
   to?: string
   tooltip?: string
   type?: 'button' | 'submit'
