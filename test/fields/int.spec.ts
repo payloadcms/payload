@@ -1546,6 +1546,50 @@ describe('Fields', () => {
       expect(allLocales.localized.en[0].text).toStrictEqual(enText)
       expect(allLocales.localized.es[0].text).toStrictEqual(esText)
     })
+
+    it('should query by the same array', async () => {
+      const doc = await payload.create({
+        collection,
+        data: {
+          items: [
+            {
+              localizedText: 'test',
+              text: 'required',
+              anotherText: 'another',
+            },
+          ],
+          localized: [{ text: 'a' }],
+        },
+      })
+
+      // left join collection_items + left join collection_items_locales
+      const {
+        docs: [res],
+      } = await payload.find({
+        collection,
+        where: {
+          and: [
+            {
+              'items.localizedText': {
+                equals: 'test',
+              },
+            },
+            {
+              'items.anotherText': {
+                equals: 'another',
+              },
+            },
+            {
+              'items.text': {
+                equals: 'required',
+              },
+            },
+          ],
+        },
+      })
+
+      expect(res.id).toBe(doc.id)
+    })
   })
 
   describe('group', () => {

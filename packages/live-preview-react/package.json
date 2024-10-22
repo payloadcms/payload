@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/live-preview-react",
-  "version": "3.0.0-beta.116",
+  "version": "3.0.0-beta.117",
   "description": "The official React SDK for Payload Live Preview",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -43,8 +43,8 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "react": "^19.0.0 || ^19.0.0-rc-3edc000d-20240926",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-3edc000d-20240926"
+    "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020"
   },
   "publishConfig": {
     "exports": {

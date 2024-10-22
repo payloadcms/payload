@@ -27,7 +27,7 @@ export type PublishManyProps = {
 export const PublishMany: React.FC<PublishManyProps> = (props) => {
   const { clearRouteCache } = useRouteCache()
 
-  const { collection: { slug, labels: { plural }, versions } = {} } = props
+  const { collection: { slug, labels: { plural, singular }, versions } = {} } = props
 
   const {
     config: {
@@ -71,8 +71,22 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
         try {
           const json = await res.json()
           toggleModal(modalSlug)
-          if (res.status < 400) {
-            toast.success(t('general:updatedSuccessfully'))
+
+          const deletedDocs = json?.docs.length || 0
+          const successLabel = deletedDocs > 1 ? plural : singular
+
+          if (res.status < 400 || deletedDocs > 0) {
+            toast.success(
+              t('general:updatedCountSuccessfully', {
+                count: deletedDocs,
+                label: getTranslation(successLabel, i18n),
+              }),
+            )
+            if (json?.errors.length > 0) {
+              toast.error(json.message, {
+                description: json.errors.map((error) => error.message).join('\n'),
+              })
+            }
             router.replace(
               stringifyParams({
                 params: {
@@ -99,10 +113,12 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
     addDefaultError,
     api,
     getQueryParams,
-    i18n.language,
+    i18n,
     modalSlug,
+    plural,
     selectAll,
     serverURL,
+    singular,
     slug,
     t,
     toggleModal,
