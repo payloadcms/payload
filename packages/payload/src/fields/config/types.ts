@@ -771,6 +771,7 @@ type TabBase = {
   }
   description?: Description
   fields: Field[]
+  id?: string
   interfaceName?: string
   saveToJWT?: boolean | string
 } & Omit<FieldBase, 'admin' | 'required' | 'validate'>
@@ -802,11 +803,12 @@ export type UnnamedTab = {
 } & Omit<TabBase, 'name' | 'virtual'>
 
 export type Tab = NamedTab | UnnamedTab
-
 export type TabsField = {
   admin?: Omit<Admin, 'description'>
   type: 'tabs'
-} & { tabs: Tab[] } & Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT' | 'virtual'>
+} & {
+  tabs: Tab[]
+} & Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT' | 'virtual'>
 
 export type TabsFieldClient = {
   admin?: Omit<AdminClient, 'description'>

@@ -1,4 +1,5 @@
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
+import { v4 as uuid } from 'uuid'
 
 import type { CollectionConfig, SanitizedJoins } from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
@@ -10,7 +11,6 @@ import {
   InvalidFieldRelationship,
   MissingEditorProp,
   MissingFieldType,
-  MissingTabsId,
 } from '../../errors/index.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
@@ -274,6 +274,15 @@ export const sanitizeFields = async ({
           if (typeof tab.label === 'undefined') {
             tab.label = toWords(tab.name)
           }
+        }
+
+        if (
+          'admin' in tab &&
+          tab.admin?.condition &&
+          typeof tab.admin.condition === 'function' &&
+          !tab.id
+        ) {
+          tab.id = tabHasName(tab) ? tab.name : uuid()
         }
 
         tab.fields = await sanitizeFields({

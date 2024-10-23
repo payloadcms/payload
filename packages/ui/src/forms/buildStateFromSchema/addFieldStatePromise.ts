@@ -517,18 +517,15 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       state,
     })
   } else if (field.type === 'tabs') {
-    const promises = field.tabs.map((tab, tabIndex) => {
+    const promises = field.tabs.map((tab) => {
       const isNamedTab = tabHasName(tab)
 
       const tabData = isNamedTab ? data?.[tab.name] || {} : data
-      const tabPath = isNamedTab
-        ? `${path}${tab.name}.`
-        : `${path}_index-${fieldIndex}-${tabIndex}.`
 
-      const statePath = tabPath.endsWith('.') ? tabPath.slice(0, -1) : tabPath
+      const tabPath = isNamedTab ? `${path}${tab.name}.` : path
 
       if (tab.admin?.condition) {
-        state[statePath] = {
+        state[tab.id] = {
           disableFormData: true,
           errorPaths: [],
           initialValue: undefined,
@@ -556,7 +553,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         omitParents,
         operation,
         parentPassesCondition: passesCondition,
-        path: isNamedTab ? tabPath : path,
+        path: tabPath,
         preferences,
         req,
         skipConditionChecks,

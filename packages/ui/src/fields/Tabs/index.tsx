@@ -54,17 +54,9 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const tabsPrefKey = `tabs-${indexPath}`
   const tabInfos = useFormFields(([fields]) => {
     return tabs.map((tab, index) => {
-      const tabPath = tabHasName(tab)
-        ? path
-          ? `${path}.${tab.name}`
-          : tab.name
-        : path
-          ? `${path}._index-${indexPath}-${index}`
-          : `_index-${indexPath}-${index}`
-
       return {
         index,
-        passesCondition: fields?.[tabPath]?.passesCondition ?? true,
+        passesCondition: fields?.[tab?.id]?.passesCondition ?? true,
         tab,
       }
     })
@@ -75,7 +67,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   })
 
   const activeTabInfo = tabInfos[activeTabIndex]
-  const activeTabConfig = activeTabInfo.tab
+  const activeTabConfig = activeTabInfo?.tab
 
   useEffect(() => {
     if (preferencesKey) {
@@ -125,7 +117,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   )
 
   useEffect(() => {
-    if (activeTabInfo.passesCondition === false) {
+    if (activeTabInfo?.passesCondition === false) {
       const nextTab = tabInfos.find(({ passesCondition }) => passesCondition)
       if (nextTab) {
         void handleTabChange(nextTab.index)
