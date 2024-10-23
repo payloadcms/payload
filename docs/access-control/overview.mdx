@@ -58,3 +58,21 @@ To accomplish this, Payload exposes the [Access Operation](../authentication/ope
 </Banner>
 
 If you use `id` or `data` within your access control functions, make sure to check that they are defined first. If they are not, then you can assume that your Access Control is being executed via the Access Operation to determine solely what the user can do within the Admin Panel.
+
+## Locale Specific Access Control
+
+To implement locale-specific access control, you can use the `locale` argument in your access control functions. This argument allows you to evaluate the current locale of the request and determine access permissions accordingly.
+
+Here is an example of how you can implement localized access control:
+
+```ts
+const access = ({ locale }) => {
+  // Grant access if the locale is 'en'
+  if (locale === 'en') {
+    return true;
+  }
+
+  // Deny access for all other locales
+  return false;
+}
+```
