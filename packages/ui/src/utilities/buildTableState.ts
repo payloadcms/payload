@@ -88,7 +88,7 @@ export const buildTableStateFn = async (
   const {
     collectionSlug,
     columns,
-    docs,
+    docs: docsFromArgs,
     req,
     req: {
       i18n,
@@ -149,14 +149,25 @@ export const buildTableStateFn = async (
   const fields = collectionConfig.fields
   const clientFields = clientCollectionConfig?.fields || []
 
-  // TODO: if columns were sent, update preferences with them
+  let docs = docsFromArgs
+
+  if (!docs) {
+    docs = await payload
+      .find({
+        collection: collectionSlug,
+        depth: 0,
+        limit: 100,
+        pagination: false,
+        // where: {} TODO: pass where through args
+      })
+      ?.then((res) => res.docs)
+  }
 
   const { columnState, Table } = renderTable({
     clientFields,
     collectionSlug,
     columnPreferences: [], // TODO, might not be needed
     columns,
-    defaultColumns: collectionConfig.admin.defaultColumns,
     docs,
     enableRowSelections: true,
     fields,

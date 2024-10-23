@@ -57,6 +57,12 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
 
   const [Table, setTable] = useState(InitialTable)
 
+  useEffect(() => {
+    if (InitialTable) {
+      setTable(InitialTable)
+    }
+  }, [InitialTable])
+
   const payloadServerAction = useServerFunctions()
 
   const { user } = useAuth()
