@@ -24,10 +24,10 @@
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
     },
-    "./elements/RenderComponent": {
-      "import": "./src/elements/RenderComponent/index.tsx",
-      "types": "./src/elements/RenderComponent/index.tsx",
-      "default": "./src/elements/RenderComponent/index.tsx"
+    "./elements/RenderServerComponent": {
+      "import": "./src/elements/RenderServerComponent/index.tsx",
+      "types": "./src/elements/RenderServerComponent/index.tsx",
+      "default": "./src/elements/RenderServerComponent/index.tsx"
     },
     "./utilities/buildFormState": {
       "import": "./src/utilities/buildFormState.ts",
@@ -155,6 +155,11 @@
         "import": "./dist/assets/index.js",
         "types": "./dist/assets/index.d.ts",
         "default": "./dist/assets/index.js"
+      },
+      "./elements/RenderServerComponent": {
+        "import": "./dist/elements/RenderServerComponent/index.js",
+        "types": "./dist/elements/RenderServerComponent/index.d.ts",
+        "default": "./dist/elements/RenderServerComponent/index.js"
       },
       "./elements/*": {
         "import": "./dist/elements/*/index.js",

@@ -55,33 +55,33 @@ export type FieldTypesComponents = {
   [K in 'confirmPassword' | 'hidden' | 'password' | FieldTypes]: React.FC
 }
 
-export const fieldComponents: FieldTypesComponents = {
-  array: ArrayField,
-  blocks: BlocksField,
-  checkbox: CheckboxField,
-  code: CodeField,
-  collapsible: CollapsibleField,
-  confirmPassword: ConfirmPasswordField,
-  date: DateTimeField,
-  email: EmailField,
-  group: GroupField,
-  hidden: HiddenField,
-  join: JoinField,
-  json: JSONField,
-  number: NumberField,
-  password: PasswordField,
-  point: PointField,
-  radio: RadioGroupField,
-  relationship: RelationshipField,
-  richText: RichTextField,
-  row: RowField,
-  select: SelectField,
-  tabs: TabsField,
-  text: TextField,
-  textarea: TextareaField,
-  ui: UIField,
-  upload: UploadField,
-}
+// export const fieldComponents: FieldTypesComponents = {
+//   array: ArrayField,
+//   blocks: BlocksField,
+//   checkbox: CheckboxField,
+//   code: CodeField,
+//   collapsible: CollapsibleField,
+//   confirmPassword: ConfirmPasswordField,
+//   date: DateTimeField,
+//   email: EmailField,
+//   group: GroupField,
+//   hidden: HiddenField,
+//   join: JoinField,
+//   json: JSONField,
+//   number: NumberField,
+//   password: PasswordField,
+//   point: PointField,
+//   radio: RadioGroupField,
+//   relationship: RelationshipField,
+//   richText: RichTextField,
+//   row: RowField,
+//   select: SelectField,
+//   tabs: TabsField,
+//   text: TextField,
+//   textarea: TextareaField,
+//   ui: UIField,
+//   upload: UploadField,
+// }
 
 export type RenderFieldFn = (
   args: {
@@ -130,7 +130,7 @@ export type RenderFieldArgs = {
   readonly schemaPath: string
 }
 
-export type ClientSlotProps = {
+export type ClientComponentProps = {
   field: ClientBlock | ClientField | ClientTab
   fieldState: FormField
   path: string
@@ -141,7 +141,7 @@ export type ClientSlotProps = {
   schemaAccessor: SchemaAccessor
 }
 
-export type ServerSlotProps = {
+export type ServerFieldProps = {
   clientField: ClientBlock | ClientField | ClientTab
   config: SanitizedConfig
   field: Field
@@ -150,7 +150,7 @@ export type ServerSlotProps = {
   payload: Payload
 }
 
-export const renderField: RenderFieldFn = (args) => {
+export const renderField = (args) => {
   const {
     className,
     clientField,
@@ -162,28 +162,14 @@ export const renderField: RenderFieldFn = (args) => {
     indexPath,
     initialSchemaPath,
     margins,
-    path: parentPath,
+    path,
     payload,
     permissions,
     readOnly,
-    schemaPath: parentSchemaPath,
+    schemaPath,
   } = args
 
   const name = 'name' in field ? field.name : undefined
-
-  const path = generatePath({
-    name,
-    fieldType: field.type,
-    parentPath,
-    schemaIndex: indexPath.split('.').pop() || undefined,
-  })
-
-  const schemaPath = generatePath({
-    name,
-    fieldType: field.type,
-    parentPath: parentSchemaPath,
-    schemaIndex: indexPath.split('.').pop() || undefined,
-  })
 
   const isHiddenField = 'hidden' in field && field?.hidden
   const disabledFromAdmin = field?.admin && 'disabled' in field.admin && field.admin.disabled
@@ -203,17 +189,7 @@ export const renderField: RenderFieldFn = (args) => {
 
   const fieldState = formState?.[path]
 
-  const fieldMapValue: RenderedField = {
-    type: field.type,
-    Field: null,
-    indexPath,
-    initialSchemaPath,
-    isSidebar: fieldIsSidebar(field),
-    path,
-    schemaPath,
-  }
-
-  let clientProps: ClientSlotProps = {
+  let clientProps: ClientComponentProps = {
     field: clientField,
     fieldState,
     path,
@@ -226,7 +202,7 @@ export const renderField: RenderFieldFn = (args) => {
     },
   }
 
-  const serverProps: ServerSlotProps = {
+  const serverProps: ServerFieldProps = {
     clientField,
     config,
     field,
@@ -237,234 +213,231 @@ export const renderField: RenderFieldFn = (args) => {
 
   const fieldSlots: FieldSlots = {}
 
-  if ('label' in field) {
-    fieldSlots.Label = (
-      <FieldLabel
-        label={
-          typeof field.label === 'string' || typeof field.label === 'object'
-            ? field.label
-            : typeof field.label === 'function'
-              ? field.label({ t: i18n.t })
-              : ''
-        }
-        required={'required' in field && field.required}
-      />
-    )
-  }
+  // if ('label' in field) {
+  //   // fieldSlots.Label = (
+  //   //   <FieldLabel
+  //   //     label={
+  //   //       typeof field.label === 'string' || typeof field.label === 'object'
+  //   //         ? field.label
+  //   //         : typeof field.label === 'function'
+  //   //           ? field.label({ t: i18n.t })
+  //   //           : ''
+  //   //     }
+  //   //     required={'required' in field && field.required}
+  //   //   />
+  //   // )
+  // }
 
-  switch (field.type) {
-    case 'array': {
-      fieldState?.rows?.forEach((row, rowIndex) => {
-        const RowLabel = (
-          <RenderServerComponent
-            clientProps={{
-              ...clientProps,
-              rowLabel: `${getTranslation(field.labels.singular, i18n)} ${String(
-                rowIndex + 1,
-              ).padStart(2, '0')}`,
-              rowNumber: rowIndex + 1,
-            }}
-            Component={field.admin?.components?.RowLabel}
-            Fallback={DefaultRowLabel}
-            importMap={payload.importMap}
-            serverProps={serverProps}
-          />
-        )
+  // switch (field.type) {
+  //   case 'array': {
+  //     fieldState?.rows?.forEach((row, rowIndex) => {
+  //       // const RowLabel = (
+  //       //   <RenderServerComponent
+  //       //     clientProps={{
+  //       //       ...clientProps,
+  //       //       rowLabel: `${getTranslation(field.labels.singular, i18n)} ${String(
+  //       //         rowIndex + 1,
+  //       //       ).padStart(2, '0')}`,
+  //       //       rowNumber: rowIndex + 1,
+  //       //     }}
+  //       //     Component={field.admin?.components?.RowLabel}
+  //       //     Fallback={DefaultRowLabel}
+  //       //     importMap={payload.importMap}
+  //       //     serverProps={serverProps}
+  //       //   />
+  //       // )
+  //       // if (!clientProps.rowLabels) {
+  //       //   clientProps.rowLabels = []
+  //       // }
+  //       // clientProps.rowLabels[rowIndex] = RowLabel
+  //       // traverseFields({
+  //       //   className,
+  //       //   clientFields: clientField && 'fields' in clientField && clientField.fields,
+  //       //   config,
+  //       //   fieldMap,
+  //       //   fields: field.fields,
+  //       //   forceRender,
+  //       //   formState,
+  //       //   i18n,
+  //       //   indexPath,
+  //       //   initialSchemaPath,
+  //       //   margins,
+  //       //   path: `${path}.${rowIndex}`,
+  //       //   payload,
+  //       //   permissions,
+  //       //   schemaPath,
+  //       // })
+  //     })
 
-        if (!clientProps.rowLabels) {
-          clientProps.rowLabels = []
-        }
+  //     break
+  //   }
 
-        clientProps.rowLabels[rowIndex] = RowLabel
+  //   case 'blocks': {
+  //     fieldState?.rows?.forEach((row, rowIndex) => {
+  //       const blockConfig = field.blocks.find((block) => block.slug === row.blockType)
 
-        // traverseFields({
-        //   className,
-        //   clientFields: clientField && 'fields' in clientField && clientField.fields,
-        //   config,
-        //   fieldMap,
-        //   fields: field.fields,
-        //   forceRender,
-        //   formState,
-        //   i18n,
-        //   indexPath,
-        //   initialSchemaPath,
-        //   margins,
-        //   path: `${path}.${rowIndex}`,
-        //   payload,
-        //   permissions,
-        //   schemaPath,
-        // })
-      })
+  //       const clientBlockConfig =
+  //         'blocks' in clientField &&
+  //         clientField?.blocks?.find((block) => block.slug === row.blockType)
 
-      break
-    }
+  //       // traverseFields({
+  //       //   className,
+  //       //   clientFields:
+  //       //     clientBlockConfig && 'fields' in clientBlockConfig && clientBlockConfig.fields,
+  //       //   config,
+  //       //   fieldMap,
+  //       //   fields: blockConfig.fields,
+  //       //   forceRender,
+  //       //   formState,
+  //       //   i18n,
+  //       //   indexPath,
+  //       //   initialSchemaPath,
+  //       //   margins,
+  //       //   path: `${path}.${rowIndex}`,
+  //       //   payload,
+  //       //   permissions,
+  //       //   schemaPath: `${schemaPath}.${blockConfig.slug}`,
+  //       // })
+  //     })
 
-    case 'blocks': {
-      fieldState?.rows?.forEach((row, rowIndex) => {
-        const blockConfig = field.blocks.find((block) => block.slug === row.blockType)
+  //     break
+  //   }
 
-        const clientBlockConfig =
-          'blocks' in clientField &&
-          clientField?.blocks?.find((block) => block.slug === row.blockType)
+  //   case 'group':
+  //   case 'row':
+  //   case 'collapsible': {
+  //     // traverseFields({
+  //     //   className,
+  //     //   clientFields: clientField && 'fields' in clientField && clientField.fields,
+  //     //   config,
+  //     //   fieldMap,
+  //     //   fields: field.fields,
+  //     //   forceRender,
+  //     //   formState,
+  //     //   i18n,
+  //     //   indexPath,
+  //     //   initialSchemaPath,
+  //     //   margins,
+  //     //   path,
+  //     //   payload,
+  //     //   permissions,
+  //     //   schemaPath,
+  //     // })
 
-        // traverseFields({
-        //   className,
-        //   clientFields:
-        //     clientBlockConfig && 'fields' in clientBlockConfig && clientBlockConfig.fields,
-        //   config,
-        //   fieldMap,
-        //   fields: blockConfig.fields,
-        //   forceRender,
-        //   formState,
-        //   i18n,
-        //   indexPath,
-        //   initialSchemaPath,
-        //   margins,
-        //   path: `${path}.${rowIndex}`,
-        //   payload,
-        //   permissions,
-        //   schemaPath: `${schemaPath}.${blockConfig.slug}`,
-        // })
-      })
+  //     break
+  //   }
 
-      break
-    }
+  //   case 'tabs': {
+  //     field.tabs.map((tab, tabIndex) => {
+  //       const clientTabConfig = 'tabs' in clientField && clientField?.tabs?.[tabIndex]
 
-    case 'group':
-    case 'row':
-    case 'collapsible': {
-      // traverseFields({
-      //   className,
-      //   clientFields: clientField && 'fields' in clientField && clientField.fields,
-      //   config,
-      //   fieldMap,
-      //   fields: field.fields,
-      //   forceRender,
-      //   formState,
-      //   i18n,
-      //   indexPath,
-      //   initialSchemaPath,
-      //   margins,
-      //   path,
-      //   payload,
-      //   permissions,
-      //   schemaPath,
-      // })
+  //       // traverseFields({
+  //       //   className,
+  //       //   clientFields: 'fields' in clientTabConfig && clientTabConfig.fields,
+  //       //   config,
+  //       //   fieldMap,
+  //       //   fields: tab.fields,
+  //       //   forceRender,
+  //       //   formState,
+  //       //   i18n,
+  //       //   indexPath,
+  //       //   initialSchemaPath,
+  //       //   margins,
+  //       //   path,
+  //       //   payload,
+  //       //   permissions,
+  //       //   schemaPath,
+  //       // })
+  //     })
 
-      break
-    }
+  //     break
+  //   }
 
-    case 'tabs': {
-      field.tabs.map((tab, tabIndex) => {
-        const clientTabConfig = 'tabs' in clientField && clientField?.tabs?.[tabIndex]
+  //   default: {
+  //     break
+  //   }
+  // }
 
-        // traverseFields({
-        //   className,
-        //   clientFields: 'fields' in clientTabConfig && clientTabConfig.fields,
-        //   config,
-        //   fieldMap,
-        //   fields: tab.fields,
-        //   forceRender,
-        //   formState,
-        //   i18n,
-        //   indexPath,
-        //   initialSchemaPath,
-        //   margins,
-        //   path,
-        //   payload,
-        //   permissions,
-        //   schemaPath,
-        // })
-      })
+  // if (field.admin) {
+  //   if ('description' in field.admin) {
+  //     // @TODO move this to client, only render if it is a function
+  //     fieldSlots.Description = (
+  //       <FieldDescription
+  //         description={
+  //           typeof field.admin?.description === 'string' ||
+  //           typeof field.admin?.description === 'object'
+  //             ? field.admin.description
+  //             : typeof field.admin?.description === 'function'
+  //               ? field.admin?.description({ t: i18n.t })
+  //               : ''
+  //         }
+  //         path={path}
+  //       />
+  //     )
+  //   }
 
-      break
-    }
+  //   if (field.admin?.components) {
+  //     if ('afterInput' in field.admin.components) {
+  //       fieldSlots.AfterInput = (
+  //         <RenderServerComponent
+  //           clientProps={clientProps}
+  //           Component={field.admin.components.afterInput}
+  //           importMap={payload.importMap}
+  //           key="field.admin.components.afterInput"
+  //           serverProps={serverProps}
+  //         />
+  //       )
+  //     }
 
-    default: {
-      break
-    }
-  }
+  //     if ('beforeInput' in field.admin.components) {
+  //       fieldSlots.BeforeInput = (
+  //         <RenderServerComponent
+  //           clientProps={clientProps}
+  //           Component={field.admin.components.beforeInput}
+  //           importMap={payload.importMap}
+  //           key="field.admin.components.beforeInput"
+  //           serverProps={serverProps}
+  //         />
+  //       )
+  //     }
 
-  if (field.admin) {
-    if ('description' in field.admin) {
-      // @TODO move this to client, only render if it is a function
-      fieldSlots.Description = (
-        <FieldDescription
-          description={
-            typeof field.admin?.description === 'string' ||
-            typeof field.admin?.description === 'object'
-              ? field.admin.description
-              : typeof field.admin?.description === 'function'
-                ? field.admin?.description({ t: i18n.t })
-                : ''
-          }
-          path={path}
-        />
-      )
-    }
+  //     if ('Description' in field.admin.components) {
+  //       fieldSlots.Description = (
+  //         <RenderServerComponent
+  //           clientProps={clientProps}
+  //           Component={field.admin.components.Description}
+  //           importMap={payload.importMap}
+  //           key="field.admin.components.Description"
+  //           serverProps={serverProps}
+  //         />
+  //       )
+  //     }
 
-    if (field.admin?.components) {
-      if ('afterInput' in field.admin.components) {
-        fieldSlots.AfterInput = (
-          <RenderServerComponent
-            clientProps={clientProps}
-            Component={field.admin.components.afterInput}
-            importMap={payload.importMap}
-            key="field.admin.components.afterInput"
-            serverProps={serverProps}
-          />
-        )
-      }
+  //     if ('Error' in field.admin.components) {
+  //       fieldSlots.Error = (
+  //         <RenderServerComponent
+  //           clientProps={clientProps}
+  //           Component={field.admin.components.Error}
+  //           importMap={payload.importMap}
+  //           key="field.admin.components.Error"
+  //           serverProps={serverProps}
+  //         />
+  //       )
+  //     }
 
-      if ('beforeInput' in field.admin.components) {
-        fieldSlots.BeforeInput = (
-          <RenderServerComponent
-            clientProps={clientProps}
-            Component={field.admin.components.beforeInput}
-            importMap={payload.importMap}
-            key="field.admin.components.beforeInput"
-            serverProps={serverProps}
-          />
-        )
-      }
-
-      if ('Description' in field.admin.components) {
-        fieldSlots.Description = (
-          <RenderServerComponent
-            clientProps={clientProps}
-            Component={field.admin.components.Description}
-            importMap={payload.importMap}
-            key="field.admin.components.Description"
-            serverProps={serverProps}
-          />
-        )
-      }
-
-      if ('Error' in field.admin.components) {
-        fieldSlots.Error = (
-          <RenderServerComponent
-            clientProps={clientProps}
-            Component={field.admin.components.Error}
-            importMap={payload.importMap}
-            key="field.admin.components.Error"
-            serverProps={serverProps}
-          />
-        )
-      }
-
-      if ('Label' in field.admin.components) {
-        fieldSlots.Label = (
-          <RenderServerComponent
-            clientProps={clientProps}
-            Component={field.admin.components.Label}
-            importMap={payload.importMap}
-            key="field.admin.components.Label"
-            serverProps={serverProps}
-          />
-        )
-      }
-    }
-  }
+  //     if ('Label' in field.admin.components) {
+  //       fieldSlots.Label = (
+  //         <RenderServerComponent
+  //           clientProps={clientProps}
+  //           Component={field.admin.components.Label}
+  //           importMap={payload.importMap}
+  //           key="field.admin.components.Label"
+  //           serverProps={serverProps}
+  //         />
+  //       )
+  //     }
+  //   }
+  // }
 
   clientProps = {
     ...clientProps,
@@ -474,10 +447,20 @@ export const renderField: RenderFieldFn = (args) => {
   return (
     <RenderServerComponent
       clientProps={clientProps}
-      Component={isHidden ? fieldComponents.hidden : field.admin?.components?.Field}
-      Fallback={fieldComponents?.[field?.type]}
+      Component={field.admin?.components?.Field}
+      // Fallback={}
       importMap={payload.importMap}
       serverProps={serverProps}
     />
   )
+
+  // return (
+  //   <RenderServerComponent
+  //     clientProps={clientProps}
+  //     Component={isHidden ? fieldComponents.hidden : field.admin?.components?.Field}
+  //     Fallback={fieldComponents?.[field?.type]}
+  //     importMap={payload.importMap}
+  //     serverProps={serverProps}
+  //   />
+  // )
 }

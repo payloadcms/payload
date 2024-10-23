@@ -11,10 +11,12 @@ import type {
   TypeWithID,
 } from 'payload'
 
+import { headers as getHeaders } from 'next/headers.js'
 import { createClientConfig, formatErrors } from 'payload'
 import { reduceFieldsToValues } from 'payload/shared'
 
 import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
+import { attachComponentsToFormState } from './attachComponentsToFormState.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
 
 let cachedFieldMap = global._payload_fieldMap
@@ -189,13 +191,13 @@ export const buildFormStateFn = async (
 
   const id = collectionSlug ? idFromArgs : undefined
 
-  const fieldConfig = fieldSchemaMap.get(schemaPath)
+  const fieldOrEntityConfig = fieldSchemaMap.get(schemaPath)
 
-  if (!fieldConfig) {
+  if (!fieldOrEntityConfig) {
     throw new Error(`Could not find "${schemaPath}" in the fieldSchemaMap`)
   }
 
-  if (!('fields' in fieldConfig) || !fieldConfig.fields) {
+  if (!('fields' in fieldOrEntityConfig) || !fieldOrEntityConfig.fields) {
     throw new Error(
       `The field found in fieldSchemaMap for "${schemaPath}" does not contain any subfields.`,
     )
@@ -312,14 +314,12 @@ export const buildFormStateFn = async (
     id,
     collectionSlug,
     data,
-    fields: fieldConfig.fields,
+    fields: fieldOrEntityConfig.fields,
     operation,
     path: !path || path.endsWith('.') ? path : `${path}.`,
     preferences: docPreferences || { fields: {} },
     req,
   })
-
-  console.log('formStateResult', formStateResult)
 
   let lockedStateResult = undefined
 
@@ -397,13 +397,22 @@ export const buildFormStateFn = async (
     }
   }
 
+  const headers = await getHeaders()
+  const { permissions } = await payload.auth({ headers, req })
+
+  // mutates form state and adds custom components to field paths
+  attachComponentsToFormState({
+    config,
+    entitySlug: collectionSlug || globalSlug,
+    fieldSchemaMap,
+    formState: formStateResult,
+    i18n,
+    payload: req.payload,
+    permissions,
+  })
+
   return {
     lockedState: lockedStateResult,
     state: formStateResult,
   }
 }
-
-type Args = {
-  formState: FormState
-}
-function AddCustomComponentsToFormState(args: Args) {}

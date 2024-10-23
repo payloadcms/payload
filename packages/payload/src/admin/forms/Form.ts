@@ -18,7 +18,7 @@ export type FilterOptionsResult = {
   [relation: string]: boolean | Where
 }
 
-export type FormField = {
+export type FieldState = {
   customComponents?: {
     AfterInput?: React.ReactNode
     BeforeInput?: React.ReactNode
@@ -41,14 +41,14 @@ export type FormField = {
   value: unknown
 }
 
-export type FormFieldWithoutComponents = Omit<FormField, 'customComponents'>
+export type FieldStateWithoutComponents = Omit<FieldState, 'customComponents'>
 
 export type FormState = {
-  [path: string]: FormField
+  [path: string]: FieldState
 }
 
 export type FormStateWithoutComponents = {
-  [path: string]: FormFieldWithoutComponents
+  [path: string]: FieldStateWithoutComponents
 }
 
 export type BuildFormStateArgs = {

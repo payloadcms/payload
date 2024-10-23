@@ -469,11 +469,7 @@ export const Form: React.FC<FormProps> = (props) => {
         globalSlug,
         operation,
         renderFields: true,
-        schemaAccessor: {
-          indexPath: '',
-          initialSchemaPath: collectionSlug || globalSlug,
-          schemaPath: collectionSlug || globalSlug,
-        },
+        schemaPath: collectionSlug || globalSlug,
         signal: abortController.signal,
       })
 
@@ -512,7 +508,7 @@ export const Form: React.FC<FormProps> = (props) => {
         docPreferences,
         path,
         renderFields: true,
-        schemaAccessor,
+        schemaPath: schemaAccessor.schemaPath,
         signal: abortController.signal,
       })
 

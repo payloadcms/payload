@@ -71,15 +71,15 @@ export const RenderFields: React.FC<Props> = (props) => {
             schemaIndex: i,
           })
 
-          const Field = formFields[path]?.Field
+          const Field = formFields[path]?.customComponents?.Field
 
           return (
             <Fragment key={i}>
               <p>{`path: ${path}`}</p>
-              <p>{JSON.stringify(field._schemaAccessor, null, 2)}</p>
               {Field}
             </Fragment>
           )
+          // return <h1>test</h1>
         })}
       </div>
     )

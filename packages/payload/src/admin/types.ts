@@ -10,9 +10,9 @@ import type { JsonObject } from '../types/index.js'
 import type {
   BuildFormStateArgs,
   Data,
+  FieldState,
+  FieldStateWithoutComponents,
   FilterOptionsResult,
-  FormField,
-  FormFieldWithoutComponents,
   FormState,
   FormStateWithoutComponents,
   Row,
@@ -338,9 +338,9 @@ export type { FormFieldBase, ServerFieldBase } from './forms/Field.js'
 export type {
   BuildFormStateArgs,
   Data,
+  FieldState as FormField,
+  FieldStateWithoutComponents as FormFieldWithoutComponents,
   FilterOptionsResult,
-  FormField,
-  FormFieldWithoutComponents,
   FormState,
   FormStateWithoutComponents,
   Row,

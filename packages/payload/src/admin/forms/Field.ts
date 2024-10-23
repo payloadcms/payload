@@ -7,7 +7,7 @@ import type { DocumentPreferences } from '../../preferences/types.js'
 import type { FieldSlots, RenderedFieldMap } from '../types.js'
 import type { FieldDescriptionServerProps } from './Description.js'
 import type { FieldErrorServerProps } from './Error.js'
-import type { FormField } from './Form.js'
+import type { FieldState } from './Form.js'
 import type { FieldLabelServerProps } from './Label.js'
 
 export type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
@@ -27,7 +27,7 @@ export type ServerFieldBase<
   readonly descriptionProps?: FieldDescriptionServerProps<TFieldServer, TFieldClient>
   readonly errorProps?: FieldErrorServerProps<TFieldServer, TFieldClient>
   readonly field: TFieldServer
-  readonly fieldState?: FormField
+  readonly fieldState?: FieldState
   readonly labelProps?: FieldLabelServerProps<TFieldServer, TFieldClient>
   readonly renderedFieldMap?: RenderedFieldMap
 } & FormFieldBase &

@@ -41,16 +41,14 @@ export const createClientField = ({
   clientField = {} as ClientField,
   defaultIDType,
   field: incomingField,
-  fieldIndex,
   i18n,
-  parentSchemaPath,
+  schemaPath,
 }: {
-  clientField: ClientField
+  clientField?: ClientField
   defaultIDType: Payload['config']['db']['defaultIDType']
   field: Field
-  fieldIndex: number
   i18n: I18nClient
-  parentSchemaPath?: string
+  schemaPath: string
 }): ClientField => {
   const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
     'hooks',
@@ -88,13 +86,6 @@ export const createClientField = ({
   if (fieldAffectsData(clientField) && (isHidden || disabledFromAdmin)) {
     return null
   }
-
-  const schemaPath = generatePath({
-    name: 'name' in clientField ? clientField.name : undefined,
-    fieldType: clientField.type,
-    parentPath: parentSchemaPath,
-    schemaIndex: fieldIndex,
-  })
 
   if (
     'label' in clientField &&
@@ -320,13 +311,19 @@ export const createClientFields = ({
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]
 
+    const schemaPath = generatePath({
+      name: 'name' in field ? field.name : undefined,
+      fieldType: field.type,
+      parentPath: parentSchemaPath,
+      schemaIndex: i,
+    })
+
     const newField = createClientField({
       clientField: clientFields[i],
       defaultIDType,
       field,
-      fieldIndex: i,
       i18n,
-      parentSchemaPath,
+      schemaPath,
     })
 
     if (newField) {
