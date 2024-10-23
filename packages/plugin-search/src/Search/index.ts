@@ -36,7 +36,9 @@ export const generateSearchCollection = (pluginConfig: SearchPluginConfig): Coll
       type: 'ui',
       admin: {
         components: {
-          Field: '@payloadcms/plugin-search/client#LinkToDoc',
+          Field: {
+            path: '@payloadcms/plugin-search/client#LinkToDoc',
+          },
         },
         position: 'sidebar',
       },
