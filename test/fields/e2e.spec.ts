@@ -767,6 +767,39 @@ describe('fields', () => {
       await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields')
     })
 
+    test('should duplicate block', async () => {
+      await page.goto(url.create)
+      const firstRow = page.locator('#field-blocks #blocks-row-0')
+      const rowActions = firstRow.locator('.collapsible__actions')
+      await expect(rowActions).toBeVisible()
+
+      await rowActions.locator('.array-actions__button').click()
+      const duplicateButton = rowActions.locator('.array-actions__action.array-actions__duplicate')
+      await expect(duplicateButton).toBeVisible()
+      await duplicateButton.click()
+
+      const blocks = page.locator('#field-blocks > .blocks-field__rows > div')
+      expect(await blocks.count()).toEqual(4)
+    })
+
+    test('should save when duplicating subblocks', async () => {
+      await page.goto(url.create)
+      const subblocksRow = page.locator('#field-blocks #blocks-row-2')
+      const rowActions = subblocksRow.locator('.collapsible__actions').first()
+      await expect(rowActions).toBeVisible()
+
+      await rowActions.locator('.array-actions__button').click()
+      const duplicateButton = rowActions.locator('.array-actions__action.array-actions__duplicate')
+      await expect(duplicateButton).toBeVisible()
+      await duplicateButton.click()
+
+      const blocks = page.locator('#field-blocks > .blocks-field__rows > div')
+      expect(await blocks.count()).toEqual(4)
+
+      await page.click('#action-save')
+      await expect(page.locator('.Toastify')).toContainText('successfully')
+    })
+
     describe('row manipulation', () => {
       describe('react hooks', () => {
         test('should add 2 new block rows', async () => {
