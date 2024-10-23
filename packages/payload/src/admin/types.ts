@@ -345,6 +345,7 @@ export type {
 export type { RowLabel, RowLabelComponent } from './forms/RowLabel.js'
 
 export type {
+  BuildTableStateArgs,
   DefaultServerFunctionArgs,
   ServerFunction,
   ServerFunctionArgs,

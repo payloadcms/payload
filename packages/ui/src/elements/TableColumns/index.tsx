@@ -1,7 +1,7 @@
 'use client'
 import type { CellComponentProps, ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
 
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import React, { createContext, useCallback, useContext, useState } from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
 import type { SortColumnProps } from '../SortColumn/index.js'
@@ -9,6 +9,7 @@ import type { Column } from '../Table/index.js'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 // import { buildColumnState } from './buildColumnState.js'
 import { filterFields } from './filterFields.js'
 import { getInitialColumns } from './getInitialColumns.js'
@@ -35,10 +36,19 @@ type Props = {
   readonly cellProps?: Partial<CellComponentProps>[]
   readonly children: React.ReactNode
   readonly collectionSlug: string
+  readonly columnState: Column[]
+  readonly docs: any[]
   readonly enableRowSelections?: boolean
   readonly listPreferences?: ListPreferences
   readonly preferenceKey: string
+  readonly setTable: (Table: React.ReactNode) => void
   readonly sortColumnProps?: Partial<SortColumnProps>
+}
+
+// strip out Heading, Label, and renderedCells properties, they cannot be sent to the server
+const sanitizeColumns = (columns: Column[]) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return columns.map(({ Heading, Label, renderedCells, ...rest }) => rest)
 }
 
 export const TableColumnsProvider: React.FC<Props> = ({
@@ -46,12 +56,17 @@ export const TableColumnsProvider: React.FC<Props> = ({
   cellProps,
   children,
   collectionSlug,
+  columnState,
+  docs,
   enableRowSelections = false,
   listPreferences,
   preferenceKey,
+  setTable,
   sortColumnProps,
 }) => {
   const { getEntityConfig } = useConfig()
+
+  const { getTableState } = useServerFunctions()
 
   const { admin: { defaultColumns, useAsTitle } = {}, fields } = getEntityConfig({
     collectionSlug,
@@ -60,30 +75,17 @@ export const TableColumnsProvider: React.FC<Props> = ({
   const prevCollection = React.useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
   const { getPreference, setPreference } = usePreferences()
 
-  const [initialColumns, setInitialColumns] = useState<ColumnPreferences>(() => {
-    if (fields) {
-      return getInitialColumns(filterFields(fields), useAsTitle, defaultColumns)
-    }
-  })
-
-  useEffect(() => {
-    if (fields) {
-      setInitialColumns(getInitialColumns(filterFields(fields), useAsTitle, defaultColumns))
-    }
-  }, [defaultColumns, fields, useAsTitle])
-
-  const [tableColumns, setTableColumns] = React.useState(
-    () => initialColumns,
-    // buildColumnState({
-    //   beforeRows,
-    //   columnPreferences: listPreferences?.columns,
-    //   columns: initialColumns,
-    //   enableRowSelections,
-    //   fields,
-    //   sortColumnProps,
-    //   useAsTitle,
-    // }),
+  const [initialColumns, setInitialColumns] = useState<ColumnPreferences>(() =>
+    fields ? getInitialColumns(filterFields(fields), useAsTitle, defaultColumns) : [],
   )
+
+  // useEffect(() => {
+  //   if (fields) {
+  //     setInitialColumns(getInitialColumns(filterFields(fields), useAsTitle, defaultColumns))
+  //   }
+  // }, [defaultColumns, fields, useAsTitle])
+
+  const [tableColumns, setTableColumns] = React.useState(columnState)
 
   const updateColumnPreferences = React.useCallback(
     (newColumns: Column[]) => {
@@ -105,28 +107,44 @@ export const TableColumnsProvider: React.FC<Props> = ({
       withMovedColumn.splice(toIndex, 0, columnToMove)
       setTableColumns(withMovedColumn)
       updateColumnPreferences(withMovedColumn)
+
+      // TODO: instead of all this logic,
+      // just fire a server action to get new state and render new table
+      // This server action can handle all of the preferences changes, too
+      // const { Table, columnState } = renderTable({
+      //
+      // })
+      // setTableColumns(columnState)
+      // setTable(Table)
     },
     [tableColumns, updateColumnPreferences],
   )
 
   const toggleColumn = useCallback(
-    (column: string) => {
-      const toggledColumns = tableColumns.map((col) => {
-        return {
-          ...col,
-          active:
-            col?.cellProps?.field &&
-            'name' in col.cellProps.field &&
-            col?.cellProps?.field?.name === column
-              ? !col.active
-              : col.active,
+    async (column: string) => {
+      const toggledColumns = tableColumns.reduce((acc, col) => {
+        if (col.active || col.accessor === column) {
+          acc.push({
+            ...col,
+            active: col.accessor === column ? !col.active : col.active,
+          })
         }
+
+        return acc
+      }, [] as Column[])
+
+      const { state: columnState, Table } = await getTableState({
+        collectionSlug,
+        columns: sanitizeColumns(toggledColumns),
+        docs,
       })
 
-      setTableColumns(toggledColumns)
-      updateColumnPreferences(toggledColumns)
+      // updateColumnPreferences(toggledColumns)
+
+      setTableColumns(columnState)
+      setTable(Table)
     },
-    [tableColumns, updateColumnPreferences],
+    [tableColumns, getTableState, setTable, collectionSlug, docs],
   )
 
   const setActiveColumns = React.useCallback(
@@ -174,7 +192,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
         prevCollection.current = collectionSlug
 
         if (currentPreferences?.columns) {
-          setTableColumns()
+          // setTableColumns()
           // buildColumnState({
           //   beforeRows,
           //   columnPreferences: currentPreferences?.columns,

@@ -85,7 +85,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
               toggleColumn(accessor)
             }}
           >
-            TODO: Label
+            {col.Label}
           </Pill>
         )
       })}

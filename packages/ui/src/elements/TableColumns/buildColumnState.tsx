@@ -165,6 +165,7 @@ export const buildColumnState = (args: Args): Column[] => {
         accessor: 'name' in field ? field.name : undefined,
         active,
         Heading,
+        Label,
         renderedCells: active
           ? docs.map((doc, i) => {
               const cellClientProps: DefaultCellComponentProps = {
@@ -201,6 +202,7 @@ export const buildColumnState = (args: Args): Column[] => {
       accessor: '_select',
       active: true,
       Heading: <SelectAll />,
+      Label: null,
       renderedCells: docs.map((_, i) => <SelectRow key={i} rowData={docs[i]} />),
     })
   }

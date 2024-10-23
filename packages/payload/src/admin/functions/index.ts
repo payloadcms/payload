@@ -1,5 +1,6 @@
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { SanitizedConfig } from '../../config/types.js'
+import { PaginatedDocs } from '../../database/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 
 export type DefaultServerFunctionArgs = {
@@ -34,3 +35,10 @@ export type ServerFunctionHandler = (
     importMap: ImportMap
   } & ServerFunctionClientArgs,
 ) => Promise<unknown>
+
+export type BuildTableStateArgs = {
+  collectionSlug: string
+  columns?: any[] // TODO: type this (comes from ui pkg)
+  docs: PaginatedDocs['docs']
+  req: PayloadRequest
+}

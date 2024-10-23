@@ -1,11 +1,13 @@
 import type { ServerFunction, ServerFunctionHandler } from 'payload'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
+import { buildTableState } from '@payloadcms/ui/utilities/buildTableState'
 
 import { initReq } from './initReq.js'
 
 const defaultFunctions = {
   'form-state': buildFormState as any as ServerFunction,
+  'table-state': buildTableState as any as ServerFunction,
 }
 
 export const handleServerFunctions: ServerFunctionHandler = async (args) => {

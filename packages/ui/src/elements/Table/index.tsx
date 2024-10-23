@@ -1,6 +1,6 @@
 'use client'
 
-import type { DefaultCellComponentProps } from 'payload'
+import type { ClientField, DefaultCellComponentProps } from 'payload'
 
 import React from 'react'
 
@@ -11,8 +11,9 @@ const baseClass = 'table'
 export type Column = {
   readonly accessor: string
   readonly active: boolean
-  readonly cellProps?: Partial<DefaultCellComponentProps>
+  readonly field: ClientField
   readonly Heading: React.ReactNode
+  readonly Label: React.ReactNode
   readonly renderedCells: React.ReactNode[]
 }
 

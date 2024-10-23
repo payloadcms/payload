@@ -9,6 +9,8 @@ import {
 } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
+import { filterFields } from 'packages/ui/src/elements/TableColumns/filterFields.js'
+import { getInitialColumns } from 'packages/ui/src/elements/TableColumns/getInitialColumns.js'
 import { renderTable } from 'packages/ui/src/utilities/renderTable.js'
 import { mergeListSearchAndWhere } from 'payload'
 import { isNumber } from 'payload/shared'
@@ -128,12 +130,14 @@ export const ListView: React.FC<AdminViewProps> = async ({
       where: whereQuery || {},
     })
 
-    const Table = renderTable({
+    const initialColumns = getInitialColumns(filterFields(fields), useAsTitle, defaultColumns)
+
+    const { columnState, Table } = renderTable({
       clientFields: clientConfig.collections.find((c) => c.slug === collectionSlug)?.fields,
       collectionSlug,
       columnPreferences: listPreferences?.columns,
-      data,
-      defaultColumns,
+      columns: initialColumns,
+      docs: data.docs,
       enableRowSelections: true,
       fields,
       importMap: payload.importMap,
@@ -142,6 +146,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
 
     const clientProps: ListViewClientProps = {
       collectionSlug,
+      columnState,
       listPreferences,
       Table,
     }

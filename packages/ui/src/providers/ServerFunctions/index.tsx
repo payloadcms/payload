@@ -1,8 +1,9 @@
-import type { BuildFormStateArgs, ServerFunctionClient } from 'payload'
+import type { BuildFormStateArgs, BuildTableStateArgs, ServerFunctionClient } from 'payload'
 
 import React, { createContext, useCallback, useEffect, useRef } from 'react'
 
 import type { buildFormState } from '../../utilities/buildFormState.js'
+import type { buildTableState } from '../../utilities/buildTableState.js'
 
 type GetFormStateClient = (
   args: {
@@ -10,8 +11,15 @@ type GetFormStateClient = (
   } & Omit<BuildFormStateArgs, 'clientConfig' | 'req'>,
 ) => ReturnType<typeof buildFormState>
 
+type GetTableStateClient = (
+  args: {
+    signal?: AbortSignal
+  } & Omit<BuildTableStateArgs, 'clientConfig' | 'req'>,
+) => ReturnType<typeof buildTableState>
+
 type ServerFunctionsContextType = {
   getFormState: GetFormStateClient
+  getTableState: GetTableStateClient
   serverFunction: ServerFunctionClient
 }
 
@@ -71,6 +79,26 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
+  const getTableState = useCallback<GetTableStateClient>(
+    async (args) => {
+      const { ...rest } = args || {}
+
+      try {
+        const result = (await serverFunction({
+          name: 'table-state',
+          args: rest,
+        })) as ReturnType<typeof buildTableState> // TODO: infer this type when `strictNullChecks` is enabled
+
+        return result
+      } catch (_err) {
+        console.error(_err) // eslint-disable-line no-console
+      }
+
+      // return { state: args.formState }
+    },
+    [serverFunction],
+  )
+
   useEffect(() => {
     const controller = abortControllerRef.current
 
@@ -86,7 +114,7 @@ export const ServerFunctionsProvider: React.FC<{
   }, [])
 
   return (
-    <ServerFunctionsContext.Provider value={{ getFormState, serverFunction }}>
+    <ServerFunctionsContext.Provider value={{ getFormState, getTableState, serverFunction }}>
       {children}
     </ServerFunctionsContext.Provider>
   )

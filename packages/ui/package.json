@@ -34,6 +34,11 @@
       "types": "./src/utilities/buildFormState.ts",
       "default": "./src/utilities/buildFormState.ts"
     },
+    "./utilities/buildTableState": {
+      "import": "./src/utilities/buildTableState.ts",
+      "types": "./src/utilities/buildTableState.ts",
+      "default": "./src/utilities/buildTableState.ts"
+    },
     "./utilities/buildFieldSchemaMap/traverseFields": {
       "import": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
       "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
