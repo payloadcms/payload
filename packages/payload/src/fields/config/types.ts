@@ -11,11 +11,7 @@ import type {
   JoinFieldLabelClientComponent,
   JoinFieldLabelServerComponent,
 } from '../../admin/fields/Join.js'
-import type {
-  FieldClientComponent,
-  FieldServerComponent,
-  SchemaAccessor,
-} from '../../admin/forms/Field.js'
+import type { FieldClientComponent, FieldServerComponent } from '../../admin/forms/Field.js'
 import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
 import type {
   ArrayFieldClientProps,
@@ -424,7 +420,7 @@ export interface FieldBase {
 export interface FieldBaseClient {
   _isPresentational?: undefined
   _path?: string
-  _schemaAccessor: SchemaAccessor
+  _schemaPath: string
   admin?: AdminClient
   hidden?: boolean
   index?: boolean

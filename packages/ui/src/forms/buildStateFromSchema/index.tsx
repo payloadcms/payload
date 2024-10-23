@@ -1,4 +1,10 @@
-import type { Data, DocumentPreferences, Field, FormState, PayloadRequest } from 'payload'
+import type {
+  Data,
+  DocumentPreferences,
+  Field,
+  FormStateWithoutComponents,
+  PayloadRequest,
+} from 'payload'
 
 import { calculateDefaultValues } from './calculateDefaultValues/index.js'
 import { iterateFields } from './iterateFields.js'
@@ -11,26 +17,15 @@ type Args = {
   operation?: 'create' | 'update'
   path?: string
   preferences: DocumentPreferences
-  renderFields?: boolean
   req: PayloadRequest
   siblingData?: Data
 }
 
-export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
-  const {
-    id,
-    collectionSlug,
-    data = {},
-    fields,
-    operation,
-    path = '',
-    preferences,
-    renderFields,
-    req,
-  } = args
+export const buildStateFromSchema = async (args: Args): Promise<FormStateWithoutComponents> => {
+  const { id, collectionSlug, data = {}, fields, operation, path = '', preferences, req } = args
 
   if (fields) {
-    const state: FormState = {}
+    const state: FormStateWithoutComponents = {}
 
     const dataWithDefaultValues = { ...data }
 
@@ -54,7 +49,6 @@ export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
       parentPassesCondition: true,
       path,
       preferences,
-      renderFields,
       req,
       schemaPath: '',
       state,

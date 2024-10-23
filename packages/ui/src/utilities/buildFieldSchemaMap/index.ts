@@ -1,70 +1,81 @@
 import type { I18n } from '@payloadcms/translations'
-import type {
-  ClientConfig,
-  ClientFieldSchemaMap,
-  Field,
-  FieldSchemaMap,
-  SanitizedConfig,
-} from 'payload'
+import type { Field, FieldSchemaMap, SanitizedConfig } from 'payload'
 
 import { confirmPassword, password } from 'payload/shared'
 
 import { traverseFields } from './traverseFields.js'
-
+/**
+ * Flattens the config fields into a map of field schemas
+ */
 export const buildFieldSchemaMap = (args: {
-  clientConfig?: ClientConfig
+  collectionSlug?: string
   config: SanitizedConfig
+  globalSlug?: string
   i18n: I18n
-}): { clientSchemaMap: ClientFieldSchemaMap; fieldSchemaMap: FieldSchemaMap } => {
-  const { clientConfig, config, i18n } = args
+}): { fieldSchemaMap: FieldSchemaMap } => {
+  const { collectionSlug, config, globalSlug, i18n } = args
 
   const schemaMap: FieldSchemaMap = new Map()
-  const clientSchemaMap: ClientFieldSchemaMap = new Map()
 
-  config.collections.forEach((collection, i) => {
-    const clientCollection = clientConfig?.collections?.[i]
+  if (collectionSlug) {
+    const matchedCollection = config.collections.find(
+      (collection) => collection.slug === collectionSlug,
+    )
 
-    if (collection.auth && !collection.auth.disableLocalStrategy) {
-      // register schema with auth schemaPath
-      const baseAuthFields: Field[] = [
-        {
-          name: 'password',
-          type: 'text',
-          label: i18n.t('general:password'),
-          required: true,
-          validate: password,
-        },
-        {
-          name: 'confirm-password',
-          type: 'text',
-          label: i18n.t('authentication:confirmPassword'),
-          required: true,
-          validate: confirmPassword,
-        },
-      ]
+    if (matchedCollection) {
+      if (matchedCollection.auth && !matchedCollection.auth.disableLocalStrategy) {
+        // register schema with auth schemaPath
+        const baseAuthFields: Field[] = [
+          {
+            name: 'password',
+            type: 'text',
+            label: i18n.t('general:password'),
+            required: true,
+            validate: password,
+          },
+          {
+            name: 'confirm-password',
+            type: 'text',
+            label: i18n.t('authentication:confirmPassword'),
+            required: true,
+            validate: confirmPassword,
+          },
+        ]
 
-      schemaMap.set(`_${collection.slug}.auth`, [...collection.fields, ...baseAuthFields])
-      clientSchemaMap.set(`_${clientCollection?.slug}.auth`, clientCollection?.fields)
+        schemaMap.set(`_${matchedCollection.slug}.auth`, {
+          fields: [...baseAuthFields, ...matchedCollection.fields],
+        })
+      }
+
+      schemaMap.set(collectionSlug, {
+        fields: matchedCollection.fields,
+      })
+
+      traverseFields({
+        config,
+        fields: matchedCollection.fields,
+        i18n,
+        schemaMap,
+        schemaPath: collectionSlug,
+      })
     }
+  } else if (globalSlug) {
+    const matchedGlobal = config.globals.find((global) => global.slug === globalSlug)
 
-    traverseFields({
-      config,
-      fields: collection.fields,
-      i18n,
-      schemaMap,
-      schemaPath: collection.slug,
-    })
-  })
+    if (matchedGlobal) {
+      schemaMap.set(globalSlug, {
+        fields: matchedGlobal.fields,
+      })
 
-  config.globals.forEach((global) => {
-    traverseFields({
-      config,
-      fields: global.fields,
-      i18n,
-      schemaMap,
-      schemaPath: global.slug,
-    })
-  })
+      traverseFields({
+        config,
+        fields: matchedGlobal.fields,
+        i18n,
+        schemaMap,
+        schemaPath: globalSlug,
+      })
+    }
+  }
 
-  return { clientSchemaMap, fieldSchemaMap: schemaMap }
+  return { fieldSchemaMap: schemaMap }
 }

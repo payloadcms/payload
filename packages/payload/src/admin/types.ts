@@ -2,10 +2,21 @@ import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
 import type React from 'react'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { ClientField, Field, FieldTypes } from '../fields/config/types.js'
+import type { Block, ClientField, Field, FieldTypes, Tab } from '../fields/config/types.js'
+import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { JsonObject } from '../types/index.js'
-import type { Data, FormState } from './types.js'
+import type {
+  BuildFormStateArgs,
+  Data,
+  FilterOptionsResult,
+  FormField,
+  FormFieldWithoutComponents,
+  FormState,
+  FormStateWithoutComponents,
+  Row,
+} from './forms/Form.js'
 
 export type { DefaultCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
@@ -322,16 +333,18 @@ export type {
   GenericErrorProps,
 } from './forms/Error.js'
 
-export type { FormFieldBase, SchemaAccessor, ServerFieldBase } from './forms/Field.js'
+export type { FormFieldBase, ServerFieldBase } from './forms/Field.js'
 
 export type {
   BuildFormStateArgs,
   Data,
   FilterOptionsResult,
   FormField,
+  FormFieldWithoutComponents,
   FormState,
+  FormStateWithoutComponents,
   Row,
-} from './forms/Form.js'
+}
 
 export type {
   FieldLabelClientComponent,
@@ -465,6 +478,12 @@ export type {
 } from './views/types.js'
 
 type SchemaPath = {} & string
-export type FieldSchemaMap = Map<SchemaPath, Field[]>
-
-export type ClientFieldSchemaMap = Map<SchemaPath, ClientField[]>
+export type FieldSchemaMap = Map<
+  SchemaPath,
+  | {
+      fields: Field[]
+    }
+  | Block
+  | Field
+  | Tab
+>

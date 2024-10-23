@@ -2,8 +2,8 @@ import type {
   Data,
   DocumentPreferences,
   Field,
-  FormField,
-  FormState,
+  FormFieldWithoutComponents,
+  FormStateWithoutComponents,
   PayloadRequest,
 } from 'payload'
 
@@ -52,16 +52,15 @@ export type AddFieldStatePromiseArgs = {
    */
   omitParents?: boolean
   operation: 'create' | 'update'
+  parentPath: string
+  parentSchemaPath: string
   passesCondition: boolean
-  path: string
   preferences: DocumentPreferences
-  renderFields: boolean
   /**
    * Req is used for validation and defaultValue calculation. If you don't need validation,
    * just create your own req and pass in the locale and the user
    */
   req: PayloadRequest
-  schemaPath: string
   /**
    * Whether to skip checking the field's condition. @default false
    */
@@ -70,7 +69,7 @@ export type AddFieldStatePromiseArgs = {
    * Whether to skip validating the field. @default false
    */
   skipValidation?: boolean
-  state: FormState
+  state: FormStateWithoutComponents
 }
 
 /**
@@ -92,27 +91,39 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     includeSchema = false,
     omitParents = false,
     operation,
+    parentPath,
+    parentSchemaPath,
     passesCondition,
-    path,
     preferences,
-    renderFields,
     req,
-    schemaPath,
     skipConditionChecks = false,
     skipValidation = false,
     state,
   } = args
 
+  const path = generatePath({
+    name: 'name' in field ? field.name : undefined,
+    fieldType: field.type,
+    parentPath,
+    schemaIndex: fieldIndex,
+  })
+  const schemaPath = generatePath({
+    name: 'name' in field ? field.name : undefined,
+    fieldType: field.type,
+    parentPath: parentSchemaPath,
+    schemaIndex: fieldIndex,
+  })
+
   if (fieldAffectsData(field)) {
     const validate = field.validate
 
-    const fieldState: FormField = {
+    const fieldState: FormFieldWithoutComponents = {
       errorPaths: [],
-      Field: undefined,
       fieldSchema: includeSchema ? field : undefined,
       initialValue: undefined,
       isSidebar: fieldIsSidebar(field),
       passesCondition,
+      schemaPath,
       valid: true,
       value: undefined,
     }
@@ -160,7 +171,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     if (typeof validationResult === 'string') {
       fieldState.errorMessage = validationResult
       fieldState.valid = false
-      addErrorPathToParent(`${path}${field.name}`)
+      addErrorPathToParent(path)
     } else {
       fieldState.valid = true
     }
@@ -171,15 +182,17 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         const { promises, rows } = arrayValue.reduce(
           (acc, row, i) => {
-            const rowPath = `${path}${field.name}.${i}.`
+            const rowPath = `${path}.${i}`
+            const rowSchemaPath = `${schemaPath}`
             row.id = row?.id || new ObjectId().toHexString()
 
             if (!omitParents && (!filter || filter(args))) {
-              state[`${rowPath}id`] = {
+              state[`${rowPath}.id`] = {
                 fieldSchema: includeSchema
                   ? field.fields.find((field) => 'name' in field && field.name === 'id')
                   : undefined,
                 initialValue: row.id,
+                schemaPath: `${rowSchemaPath}.id`,
                 valid: true,
                 value: row.id,
               }
@@ -201,16 +214,15 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 parentPassesCondition: passesCondition,
                 path: rowPath,
                 preferences,
-                renderFields,
                 req,
-                schemaPath,
+                schemaPath: rowSchemaPath,
                 skipConditionChecks,
                 skipValidation,
                 state,
               }),
             )
 
-            const collapsedRowIDs = preferences?.fields?.[`${path}${field.name}`]?.collapsed
+            const collapsedRowIDs = preferences?.fields?.[path]?.collapsed
 
             acc.rows.push({
               id: row.id,
@@ -246,16 +258,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           }
         }
 
-        if (renderFields) {
-          // fieldState.Field = renderField({
-          //   i18n: req.i18n,
-          //   payload: req.payload,
-          // })
-        }
-
         // Add field to state
         if (!omitParents && (!filter || filter(args))) {
-          const fieldPath = `${path}${field.name}`
+          const fieldPath = `${path}`
           state[fieldPath] = fieldState
         }
 
@@ -268,41 +273,45 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         const { promises, rowMetadata } = blocksValue.reduce(
           (acc, row, i) => {
             const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
-            const rowPath = `${path}${field.name}.${i}.`
+            const rowPath = `${path}.${i}`
+            const rowSchemaPath = `${schemaPath}.${block.slug}`
 
             if (block) {
               row.id = row?.id || new ObjectId().toHexString()
 
               if (!omitParents && (!filter || filter(args))) {
-                state[`${rowPath}id`] = {
+                state[`${rowPath}.id`] = {
                   fieldSchema: includeSchema
                     ? block.fields.find(
                         (blockField) => 'name' in blockField && blockField.name === 'id',
                       )
                     : undefined,
                   initialValue: row.id,
+                  schemaPath: `${rowSchemaPath}.id`,
                   valid: true,
                   value: row.id,
                 }
 
-                state[`${rowPath}blockType`] = {
+                state[`${rowPath}.blockType`] = {
                   fieldSchema: includeSchema
                     ? block.fields.find(
                         (blockField) => 'name' in blockField && blockField.name === 'blockType',
                       )
                     : undefined,
                   initialValue: row.blockType,
+                  schemaPath: `${rowSchemaPath}.blockType`,
                   valid: true,
                   value: row.blockType,
                 }
 
-                state[`${rowPath}blockName`] = {
+                state[`${rowPath}.blockName`] = {
                   fieldSchema: includeSchema
                     ? block.fields.find(
                         (blockField) => 'name' in blockField && blockField.name === 'blockName',
                       )
                     : undefined,
                   initialValue: row.blockName,
+                  schemaPath: `${rowSchemaPath}.blockName`,
                   valid: true,
                   value: row.blockName,
                 }
@@ -324,16 +333,15 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   parentPassesCondition: passesCondition,
                   path: rowPath,
                   preferences,
-                  renderFields,
                   req,
-                  schemaPath,
+                  schemaPath: rowSchemaPath,
                   skipConditionChecks,
                   skipValidation,
                   state,
                 }),
               )
 
-              const collapsedRowIDs = preferences?.fields?.[`${path}${field.name}`]?.collapsed
+              const collapsedRowIDs = preferences?.fields?.[path]?.collapsed
 
               acc.rowMetadata.push({
                 id: row.id,
@@ -372,7 +380,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         // Add field to state
         if (!omitParents && (!filter || filter(args))) {
-          state[`${path}${field.name}`] = fieldState
+          state[path] = fieldState
         }
 
         break
@@ -381,7 +389,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       case 'group': {
         if (!filter || filter(args)) {
           fieldState.disableFormData = true
-          state[`${path}${field.name}`] = fieldState
+          state[path] = fieldState
         }
 
         await iterateFields({
@@ -397,9 +405,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           omitParents,
           operation,
           parentPassesCondition: passesCondition,
-          path: `${path}${field.name}.`,
+          path,
           preferences,
-          renderFields,
           req,
           schemaPath,
           skipConditionChecks,
@@ -489,7 +496,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         }
 
         if (!filter || filter(args)) {
-          state[`${path}${field.name}`] = fieldState
+          state[path] = fieldState
         }
 
         break
@@ -501,7 +508,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         // Add field to state
         if (!filter || filter(args)) {
-          state[`${path}${field.name}`] = fieldState
+          state[path] = fieldState
         }
 
         break
@@ -516,6 +523,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         errorPaths: [],
         initialValue: undefined,
         passesCondition,
+        schemaPath,
         valid: true,
         value: undefined,
       }
@@ -537,7 +545,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       parentPassesCondition: passesCondition,
       path,
       preferences,
-      renderFields,
       req,
       schemaPath,
       skipConditionChecks,
@@ -545,7 +552,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       state,
     })
   } else if (field.type === 'tabs') {
-    const promises = field.tabs.map((tab) => {
+    const promises = field.tabs.map((tab, tabIndex) => {
       const isNamedTab = tabHasName(tab)
 
       return iterateFields({
@@ -562,9 +569,14 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         omitParents,
         operation,
         parentPassesCondition: passesCondition,
-        path: isNamedTab ? `${path}${tab.name}.` : path,
+        path: isNamedTab
+          ? `${path}${tab.name}`
+          : generatePath({
+              fieldType: 'tab',
+              parentPath,
+              schemaIndex: tabIndex,
+            }),
         preferences,
-        renderFields,
         req,
         schemaPath: isNamedTab ? `${schemaPath}.${tab.name}` : schemaPath,
         skipConditionChecks,
@@ -576,11 +588,14 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     await Promise.all(promises)
   } else if (field.type === 'ui') {
     if (!filter || filter(args)) {
-      state[generatePath({ fieldType: field.type, parentPath: path, schemaIndex: fieldIndex })] = {
+      state[path] = {
         disableFormData: true,
         errorPaths: [],
+        fieldSchema: includeSchema ? field : undefined,
         initialValue: undefined,
+        isSidebar: fieldIsSidebar(field),
         passesCondition,
+        schemaPath,
         valid: true,
         value: undefined,
       }

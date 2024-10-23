@@ -1,9 +1,8 @@
 import { type SupportedLanguages } from '@payloadcms/translations'
 
-import type { Field, Validate } from '../../fields/config/types.js'
+import type { Field } from '../../fields/config/types.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
-import type { SchemaAccessor } from './Field.js'
 
 export type Data = {
   [key: string]: any
@@ -20,31 +19,42 @@ export type FilterOptionsResult = {
 }
 
 export type FormField = {
+  customComponents?: {
+    AfterInput?: React.ReactNode
+    BeforeInput?: React.ReactNode
+    Description?: React.ReactNode
+    Error?: React.ReactNode
+    Field?: React.ReactNode
+    Label?: React.ReactNode
+  }
   disableFormData?: boolean
   errorMessage?: string
   errorPaths?: string[]
-  Field?: React.ReactNode
   fieldSchema?: Field
   filterOptions?: FilterOptionsResult
   initialValue: unknown
   isSidebar?: boolean
   passesCondition?: boolean
   rows?: Row[]
+  schemaPath: string
   valid: boolean
-  validate?: Validate
   value: unknown
 }
+
+export type FormFieldWithoutComponents = Omit<FormField, 'customComponents'>
 
 export type FormState = {
   [path: string]: FormField
 }
 
+export type FormStateWithoutComponents = {
+  [path: string]: FormFieldWithoutComponents
+}
+
 export type BuildFormStateArgs = {
-  collectionSlug?: string
   data?: Data
   docPreferences?: DocumentPreferences
   formState?: FormState
-  globalSlug?: string
   id?: number | string
   /*
     If not i18n was passed, the language can be passed to init i18n
@@ -61,11 +71,16 @@ export type BuildFormStateArgs = {
   */
   renderFields?: boolean
   req: PayloadRequest
-  /*
-    If true, will return the client Config
-  */
-  returnClientConfig?: boolean
   returnLockStatus?: boolean
-  schemaAccessor: SchemaAccessor
+  schemaPath: string
   updateLastEdited?: boolean
-}
+} & (
+  | {
+      collectionSlug: string
+      globalSlug?: never
+    }
+  | {
+      collectionSlug?: never
+      globalSlug: string
+    }
+)

@@ -1,19 +1,13 @@
 import type { I18n, I18nClient } from '@payloadcms/translations'
 import type {
   BuildFormStateArgs,
-  ClientCollectionConfig,
   ClientConfig,
-  ClientField,
-  ClientGlobalConfig,
   ClientUser,
   DocumentPreferences,
   ErrorResult,
-  Field,
   FieldSchemaMap,
   FormState,
-  SanitizedCollectionConfig,
   SanitizedConfig,
-  SanitizedGlobalConfig,
   TypeWithID,
 } from 'payload'
 
@@ -21,7 +15,6 @@ import { createClientConfig, formatErrors } from 'payload'
 import { reduceFieldsToValues } from 'payload/shared'
 
 import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
-import { getFieldByIndexPath } from './buildFieldSchemaMap/getFieldByIndexPath.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
 
 let cachedFieldMap = global._payload_fieldMap
@@ -36,21 +29,35 @@ if (!cachedClientConfig) {
 }
 
 export const getFieldSchemaMap = (args: {
+  collectionSlug?: string
   config: SanitizedConfig
+  globalSlug?: string
   i18n: I18nClient
 }): FieldSchemaMap => {
-  const { config, i18n } = args
+  const { collectionSlug, config, globalSlug, i18n } = args
 
-  if (cachedFieldMap && process.env.NODE_ENV !== 'development') {
-    return cachedFieldMap
+  if (process.env.NODE_ENV !== 'development') {
+    if (!cachedFieldMap) {
+      cachedFieldMap = new Map()
+    }
+    const cachedEntityFieldMap = cachedFieldMap.get(collectionSlug || globalSlug)
+    if (cachedEntityFieldMap) {
+      return cachedEntityFieldMap
+    }
   }
 
-  cachedFieldMap = buildFieldSchemaMap({
+  const { fieldSchemaMap: entityFieldMap } = buildFieldSchemaMap({
+    collectionSlug,
     config,
-    i18n: i18n as I18n, // TODO: Fix this
+    globalSlug,
+    i18n: i18n as I18n,
   })
 
-  return cachedFieldMap
+  if (process.env.NODE_ENV !== 'development') {
+    cachedFieldMap.set(collectionSlug || globalSlug, entityFieldMap)
+  }
+
+  return entityFieldMap
 }
 
 export const getClientConfig = (args: {
@@ -127,8 +134,7 @@ export const buildFormStateFn = async (
     globalSlug,
     locale,
     operation,
-    path: pathFromArgs,
-    renderFields: shouldRenderFields,
+    path = '',
     req,
     req: {
       i18n,
@@ -137,7 +143,7 @@ export const buildFormStateFn = async (
       user,
     },
     returnLockStatus,
-    schemaAccessor: { indexPath, initialSchemaPath, schemaPath } = {},
+    schemaPath = collectionSlug || globalSlug,
     updateLastEdited,
   } = args
 
@@ -174,78 +180,25 @@ export const buildFormStateFn = async (
     }
   }
 
-  const clientConfig = getClientConfig({
+  const fieldSchemaMap = getFieldSchemaMap({
+    collectionSlug,
     config,
-    i18n,
-  })
-
-  const { clientSchemaMap, fieldSchemaMap } = buildFieldSchemaMap({
-    clientConfig,
-    config,
+    globalSlug,
     i18n,
   })
 
   const id = collectionSlug ? idFromArgs : undefined
-  const schemaPathSegments = schemaPath && schemaPath.split('.')
-  const pathSegments = pathFromArgs && pathFromArgs.split('.')
 
-  const entitySlug = schemaPathSegments?.[0]
-  let entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
-  let clientEntityConfig: ClientCollectionConfig | ClientGlobalConfig
+  const fieldConfig = fieldSchemaMap.get(schemaPath)
 
-  if (req.payload.collections[entitySlug]) {
-    entityConfig = req.payload.collections[entitySlug].config
-    clientEntityConfig = clientConfig.collections.find(
-      (collection) => collection.slug === entitySlug,
+  if (!fieldConfig) {
+    throw new Error(`Could not find "${schemaPath}" in the fieldSchemaMap`)
+  }
+
+  if (!('fields' in fieldConfig) || !fieldConfig.fields) {
+    throw new Error(
+      `The field found in fieldSchemaMap for "${schemaPath}" does not contain any subfields.`,
     )
-  } else {
-    entityConfig = req.payload.config.globals.find((global) => global.slug === entitySlug)
-    clientEntityConfig = clientConfig.globals.find((global) => global.slug === entitySlug)
-  }
-
-  let fields: Field[]
-  let clientFields: ClientField[]
-  let parentSchemaPath = schemaPath
-  let basePath = ''
-  const baseIndexPath = indexPath
-
-  let initialIndexPath = ''
-
-  if (schemaPathSegments && schemaPathSegments.length === 1) {
-    // If the schema path is just the entity slug, then we are dealing with an entire collection or global
-    fields = entityConfig.fields
-    clientFields = clientEntityConfig?.fields || []
-  } else if (initialSchemaPath && indexPath) {
-    let baseFields: Field[] = []
-    let baseClientFields: ClientField[] = []
-    parentSchemaPath = schemaPathSegments.slice(0, schemaPathSegments.length - 1).join('.')
-
-    if (initialSchemaPath.split('.').length === 1) {
-      baseFields = entityConfig.fields
-      baseClientFields = clientEntityConfig.fields
-    } else {
-      baseFields = fieldSchemaMap.get(initialSchemaPath)
-      baseClientFields = clientSchemaMap.get(initialSchemaPath)
-    }
-
-    const field = getFieldByIndexPath({ fields: baseFields, indexPath }) as Field
-
-    const clientField = getFieldByIndexPath({
-      fields: baseClientFields,
-      indexPath,
-    }) as ClientField
-
-    fields = field ? [field] : []
-    clientFields = clientField ? [clientField] : []
-
-    basePath =
-      pathSegments.length > 1 ? pathSegments.slice(0, pathSegments.length - 1).join('.') : ''
-
-    initialIndexPath = indexPath
-  }
-
-  if (!fields || !Array.isArray(fields) || fields.length === 0) {
-    throw new Error(`Could not find field(s) for given schema path "${schemaPath}"`)
   }
 
   let docPreferences = docPreferencesFromArgs
@@ -359,13 +312,14 @@ export const buildFormStateFn = async (
     id,
     collectionSlug,
     data,
-    fields,
+    fields: fieldConfig.fields,
     operation,
-    path: basePath ? `${basePath}.` : '',
+    path: !path || path.endsWith('.') ? path : `${path}.`,
     preferences: docPreferences || { fields: {} },
-    renderFields: shouldRenderFields,
     req,
   })
+
+  console.log('formStateResult', formStateResult)
 
   let lockedStateResult = undefined
 
@@ -448,3 +402,8 @@ export const buildFormStateFn = async (
     state: formStateResult,
   }
 }
+
+type Args = {
+  formState: FormState
+}
+function AddCustomComponentsToFormState(args: Args) {}

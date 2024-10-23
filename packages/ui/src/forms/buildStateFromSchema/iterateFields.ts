@@ -2,7 +2,7 @@ import type {
   Data,
   DocumentPreferences,
   Field as FieldSchema,
-  FormState,
+  FormStateWithoutComponents,
   PayloadRequest,
 } from 'payload'
 
@@ -46,7 +46,6 @@ type Args = {
    */
   path?: string
   preferences?: DocumentPreferences
-  renderFields: boolean
   req: PayloadRequest
   schemaPath?: string
   /**
@@ -57,7 +56,7 @@ type Args = {
    * Whether to skip validating the field. @default false
    */
   skipValidation?: boolean
-  state?: FormState
+  state?: FormStateWithoutComponents
 }
 
 /**
@@ -79,7 +78,6 @@ export const iterateFields = async ({
   parentPassesCondition = true,
   path = '',
   preferences,
-  renderFields,
   req,
   schemaPath = '',
   skipConditionChecks = false,
@@ -99,8 +97,6 @@ export const iterateFields = async ({
         )
       }
 
-      const _schemaPath = [schemaPath, 'name' in field && field.name].filter(Boolean).join('.')
-
       promises.push(
         addFieldStatePromise({
           id,
@@ -116,12 +112,11 @@ export const iterateFields = async ({
           includeSchema,
           omitParents,
           operation,
+          parentPath: path,
+          parentSchemaPath: schemaPath,
           passesCondition,
-          path,
           preferences,
-          renderFields,
           req,
-          schemaPath: _schemaPath,
           skipConditionChecks,
           skipValidation,
           state,

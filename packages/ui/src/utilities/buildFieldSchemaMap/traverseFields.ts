@@ -1,12 +1,10 @@
 import type { I18n } from '@payloadcms/translations'
-import type { ClientConfig, Field, FieldSchemaMap, SanitizedConfig } from 'payload'
+import type { Field, FieldSchemaMap, SanitizedConfig } from 'payload'
 
 import { MissingEditorProp } from 'payload'
-import { tabHasName } from 'payload/shared'
+import { generatePath, tabHasName } from 'payload/shared'
 
 type Args = {
-  clientConfig?: ClientConfig
-  clientSchemaMap?: FieldSchemaMap
   config: SanitizedConfig
   fields: Field[]
   i18n: I18n<any, any>
@@ -14,32 +12,26 @@ type Args = {
   schemaPath: string
 }
 
-export const traverseFields = ({
-  clientConfig,
-  clientSchemaMap,
-  config,
-  fields,
-  i18n,
-  schemaMap,
-  schemaPath,
-}: Args) => {
+export const traverseFields = ({ config, fields, i18n, schemaMap, schemaPath }: Args) => {
   for (const [index, field] of fields.entries()) {
-    const clientField = clientConfig && 'fields' in clientConfig && clientConfig?.fields?.[index]
+    const fieldKey = generatePath({
+      name: 'name' in field ? field.name : undefined,
+      fieldType: field.type,
+      parentPath: schemaPath,
+      schemaIndex: index,
+    })
+
+    schemaMap.set(fieldKey, field)
 
     switch (field.type) {
       case 'group':
       case 'array':
-        schemaMap.set(`${schemaPath}.${field.name}`, field.fields)
-        clientSchemaMap?.set(`${schemaPath}.${field.name}`, clientField.fields)
-
         traverseFields({
-          clientConfig,
-          clientSchemaMap,
           config,
           fields: field.fields,
           i18n,
           schemaMap,
-          schemaPath: `${schemaPath}.${field.name}`,
+          schemaPath: fieldKey,
         })
 
         break
@@ -47,8 +39,6 @@ export const traverseFields = ({
       case 'collapsible':
       case 'row':
         traverseFields({
-          clientConfig,
-          clientSchemaMap,
           config,
           fields: field.fields,
           i18n,
@@ -59,16 +49,12 @@ export const traverseFields = ({
         break
 
       case 'blocks':
-        field.blocks.map((block, blockIndex) => {
-          const blockSchemaPath = `${schemaPath}.${field.name}.${block.slug}`
-          const clientBlock = clientField?.blocks?.[blockIndex]
+        field.blocks.map((block) => {
+          const blockSchemaPath = `${fieldKey}.${block.slug}`
 
-          schemaMap.set(blockSchemaPath, block.fields)
-          clientSchemaMap?.set(blockSchemaPath, clientBlock.fields)
+          schemaMap.set(blockSchemaPath, block)
 
           traverseFields({
-            clientConfig,
-            clientSchemaMap,
             config,
             fields: block.fields,
             i18n,
@@ -94,23 +80,24 @@ export const traverseFields = ({
             field,
             i18n,
             schemaMap,
-            schemaPath: `${schemaPath}.${field.name}`,
+            schemaPath: fieldKey,
           })
         }
 
         break
 
       case 'tabs':
-        field.tabs.map((tab) => {
-          const tabSchemaPath = tabHasName(tab) ? `${schemaPath}.${tab.name}` : schemaPath
+        field.tabs.map((tab, tabIndex) => {
+          const tabSchemaPath = generatePath({
+            name: tabHasName(tab) ? tab.name : undefined,
+            fieldType: field.type,
+            parentPath: fieldKey,
+            schemaIndex: tabIndex,
+          })
 
-          if (tabHasName(tab)) {
-            schemaMap.set(tabSchemaPath, tab.fields)
-          }
+          schemaMap.set(tabSchemaPath, tab)
 
           traverseFields({
-            clientConfig,
-            clientSchemaMap,
             config,
             fields: tab.fields,
             i18n,

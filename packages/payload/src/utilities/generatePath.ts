@@ -1,7 +1,7 @@
 import type { FieldTypes } from '../fields/config/types.js'
 
 type Args = {
-  fieldType: FieldTypes
+  fieldType: 'tab' | FieldTypes
   name?: string
   parentPath?: string
   schemaIndex?: number | string
@@ -12,7 +12,12 @@ export function generatePath({ name, fieldType, parentPath = '', schemaIndex }: 
     fieldPath = parentPath ? `${parentPath}.${name}` : name
   }
 
-  if (fieldType === 'collapsible' || fieldType === 'row') {
+  if (
+    fieldType === 'collapsible' ||
+    fieldType === 'row' ||
+    fieldType === 'tabs' ||
+    (fieldType === 'tab' && !name)
+  ) {
     fieldPath = `${fieldPath}_index-${schemaIndex}`
   }
 

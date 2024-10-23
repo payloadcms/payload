@@ -18,6 +18,7 @@ import {
   type SelectFieldClient,
   type TabsFieldClient,
 } from '../../fields/config/types.js'
+import { generatePath } from '../../utilities/generatePath.js'
 
 // Should not be used - ClientField should be used instead. This is why we don't export ClientField, we don't want people
 // to accidentally use it instead of ClientField and get confused
@@ -36,34 +37,20 @@ export type ServerOnlyFieldProperties =
 
 export type ServerOnlyFieldAdminProperties = keyof Pick<FieldBase['admin'], 'condition'>
 
-function generateFieldPath(parentPath: string, name: string): string {
-  let tabPath = parentPath || ''
-
-  if (parentPath && name) {
-    tabPath = `${parentPath}.${name}`
-  } else if (!parentPath && name) {
-    tabPath = name
-  }
-
-  return tabPath
-}
-
 export const createClientField = ({
   clientField = {} as ClientField,
   defaultIDType,
   field: incomingField,
+  fieldIndex,
   i18n,
-  indexPath,
-  initialSchemaPath,
-  parentPath,
+  parentSchemaPath,
 }: {
   clientField: ClientField
   defaultIDType: Payload['config']['db']['defaultIDType']
   field: Field
+  fieldIndex: number
   i18n: I18nClient
-  indexPath: string
-  initialSchemaPath: string
-  parentPath?: string
+  parentSchemaPath?: string
 }): ClientField => {
   const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
     'hooks',
@@ -102,18 +89,12 @@ export const createClientField = ({
     return null
   }
 
-  const schemaPath = generateFieldPath(
-    parentPath,
-    fieldAffectsData(clientField) ? clientField.name : '',
-  )
-
-  const schemaAccessor = {
-    indexPath,
-    initialSchemaPath,
-    schemaPath,
-  }
-
-  clientField._schemaAccessor = schemaAccessor
+  const schemaPath = generatePath({
+    name: 'name' in clientField ? clientField.name : undefined,
+    fieldType: clientField.type,
+    parentPath: parentSchemaPath,
+    schemaIndex: fieldIndex,
+  })
 
   if (
     'label' in clientField &&
@@ -154,9 +135,7 @@ export const createClientField = ({
         disableAddingID: incomingField.type !== 'array',
         fields: incomingField.fields,
         i18n,
-        indexPath,
-        initialSchemaPath,
-        parentPath: schemaAccessor.schemaPath,
+        parentSchemaPath: schemaPath,
       })
 
       break
@@ -200,9 +179,7 @@ export const createClientField = ({
             defaultIDType,
             fields: block.fields,
             i18n,
-            indexPath,
-            initialSchemaPath,
-            parentPath: `${schemaAccessor.schemaPath}.${block.slug}`,
+            parentSchemaPath: `${schemaPath}.${block.slug}`,
           })
 
           if (!field.blocks) {
@@ -248,9 +225,12 @@ export const createClientField = ({
             disableAddingID: true,
             fields: tab.fields,
             i18n,
-            indexPath: `${indexPath}.${i}`,
-            initialSchemaPath,
-            parentPath: schemaAccessor.schemaPath,
+            parentSchemaPath: generatePath({
+              name: 'name' in tab ? tab.name : undefined,
+              fieldType: 'tab',
+              parentPath: schemaPath,
+              schemaIndex: i,
+            }),
           })
         }
       }
@@ -326,18 +306,14 @@ export const createClientFields = ({
   disableAddingID,
   fields,
   i18n,
-  indexPath = '',
-  parentPath = '',
-  initialSchemaPath = parentPath,
+  parentSchemaPath = '',
 }: {
   clientFields: ClientField[]
   defaultIDType: Payload['config']['db']['defaultIDType']
   disableAddingID?: boolean
   fields: Field[]
   i18n: I18nClient
-  indexPath?: string
-  initialSchemaPath: string
-  parentPath?: string
+  parentSchemaPath?: string
 }): ClientField[] => {
   const newClientFields: ClientField[] = []
 
@@ -348,10 +324,9 @@ export const createClientFields = ({
       clientField: clientFields[i],
       defaultIDType,
       field,
+      fieldIndex: i,
       i18n,
-      indexPath: [indexPath, String(i)].filter(Boolean).join('.'),
-      initialSchemaPath,
-      parentPath,
+      parentSchemaPath,
     })
 
     if (newField) {
@@ -362,16 +337,14 @@ export const createClientFields = ({
   const hasID = newClientFields.findIndex((f) => fieldAffectsData(f) && f.name === 'id') > -1
 
   if (!disableAddingID && !hasID) {
-    const schemaPath = generateFieldPath(parentPath, 'id')
-
     newClientFields.push({
       name: 'id',
       type: defaultIDType,
-      _schemaAccessor: {
-        indexPath,
-        initialSchemaPath,
-        schemaPath,
-      },
+      _schemaPath: generatePath({
+        name: 'id',
+        fieldType: 'text',
+        parentPath: parentSchemaPath,
+      }),
       admin: {
         components: null,
         description: 'The unique identifier for this document',
