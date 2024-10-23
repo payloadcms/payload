@@ -1,3 +1,4 @@
+import crypto from 'crypto'
 import fs from 'fs'
 import process from 'node:process'
 import path from 'path'
@@ -56,7 +57,8 @@ export function addPayloadComponentToImportMap({
     return
   }
 
-  const importIdentifier = exportName + '_' + Object.keys(imports).length
+  const importIdentifier =
+    exportName + '_' + crypto.createHash('md5').update(componentPath).digest('hex')
 
   // e.g. if baseDir is /test/fields and componentPath is /components/Field.tsx
   // then path needs to be /test/fields/components/Field.tsx NOT /users/username/project/test/fields/components/Field.tsx
