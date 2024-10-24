@@ -26,6 +26,7 @@ import { GlobalGroup1A } from './globals/Group1A.js'
 import { GlobalGroup1B } from './globals/Group1B.js'
 import { GlobalHidden } from './globals/Hidden.js'
 import { GlobalNoApiView } from './globals/NoApiView.js'
+import { Settings } from './globals/Settings.js'
 import { seed } from './seed.js'
 import {
   customAdminRoutes,
@@ -33,7 +34,11 @@ import {
   customParamViewPath,
   customRootViewMetaTitle,
   customViewPath,
+  protectedCustomNestedViewPath,
+  publicCustomViewPath,
 } from './shared.js'
+import { settingsGlobalSlug } from './slugs.js'
+
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
@@ -79,7 +84,25 @@ export default buildConfigWithDefaults({
           exact: true,
           path: customViewPath,
           strict: true,
-          public: true,
+        },
+        ProtectedCustomNestedView: {
+          Component: '/components/views/CustomViewNested/index.js#CustomNestedView',
+          exact: true,
+          path: protectedCustomNestedViewPath,
+          access: async ({ req }) => {
+            const settings = await req.payload.findGlobal({
+              slug: settingsGlobalSlug,
+            })
+
+            return Boolean(settings?.canAccessProtected)
+          },
+        },
+        PublicCustomView: {
+          Component: '/components/views/CustomView/index.js#CustomView',
+          exact: true,
+          path: publicCustomViewPath,
+          strict: true,
+          access: () => true,
         },
         CustomViewWithParam: {
           Component: '/components/views/CustomViewWithParam/index.js#CustomViewWithParam',
@@ -145,6 +168,7 @@ export default buildConfigWithDefaults({
     CustomGlobalViews2,
     GlobalGroup1A,
     GlobalGroup1B,
+    Settings,
   ],
   i18n: {
     translations: {

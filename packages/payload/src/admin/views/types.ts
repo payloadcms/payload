@@ -10,16 +10,37 @@ import type { PayloadRequest } from '../../types/index.js'
 import type { LanguageOptions } from '../LanguageOptions.js'
 import type { MappedComponent } from '../types.js'
 
+export type AdminViewAccessHook = (args: {
+  /**
+   * Whether the user can access admin
+   */
+  canAccessAdmin: boolean
+  /**
+   * Whether or not the route is an exact match
+   */
+  isExact: boolean
+  /**
+   * The path of the view as configured
+   */
+  path: string
+  req: PayloadRequest
+  /**
+   * The route being accessed
+   */
+  route: string
+}) => boolean | Promise<boolean>
+
 export type AdminViewConfig = {
+  /**
+   * Access control function that returns a boolean to determine if the route is accessible to the user or not.
+   * Custom views are protected by default.
+   */
+  access?: AdminViewAccessHook
   Component: AdminViewComponent
   /** Whether the path should be matched exactly or as a prefix */
   exact?: boolean
   meta?: MetaConfig
   path?: string
-  /** Whether the route is public or requires authentication and access to the admin panel
-   * @default false
-   */
-  public?: boolean
   sensitive?: boolean
   strict?: boolean
 }

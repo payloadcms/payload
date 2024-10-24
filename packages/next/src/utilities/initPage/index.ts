@@ -10,6 +10,7 @@ import type { Args } from './types.js'
 
 import { getPayloadHMR } from '../getPayloadHMR.js'
 import { initReq } from '../initReq.js'
+import { checkCustomViewAccess } from './checkCustomViewAccess.js'
 import { getRouteInfo } from './handleAdminPage.js'
 import { handleAuthRedirect } from './handleAuthRedirect.js'
 import { isPublicAdminRoute } from './shared.js'
@@ -131,10 +132,29 @@ export const initPage = async ({
 
   let redirectTo = null
 
+  const customViewPermissions = await checkCustomViewAccess({
+    adminRoute,
+    canAccessAdmin: permissions.canAccessAdmin,
+    config: payload.config,
+    req,
+    route,
+  })
+
   if (
     !permissions.canAccessAdmin &&
-    !isPublicAdminRoute({ adminRoute, config: payload.config, route })
+    !isPublicAdminRoute({ adminRoute, config: payload.config, route }) &&
+    !customViewPermissions.hasMatch
   ) {
+    redirectTo = handleAuthRedirect({
+      config: payload.config,
+      route,
+      searchParams,
+      user,
+    })
+  }
+
+  // If the route matches to a custom view, then check for access
+  if (customViewPermissions.hasMatch && !customViewPermissions.access) {
     redirectTo = handleAuthRedirect({
       config: payload.config,
       route,

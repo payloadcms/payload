@@ -35,6 +35,8 @@ import {
   customViewMetaTitle,
   customViewPath,
   customViewTitle,
+  protectedCustomNestedViewPath,
+  publicCustomViewPath,
   slugPluralLabel,
 } from '../../shared.js'
 import {
@@ -492,6 +494,18 @@ describe('admin1', () => {
       const pathname = new URL(pageURL).pathname
       expect(pathname).toEqual(`${adminRoutes.routes.admin}${customNestedViewPath}`)
       await expect(page.locator('h1#custom-view-title')).toContainText(customNestedViewTitle)
+    })
+
+    test('root — should render public custom view', async () => {
+      await page.goto(`${serverURL}${adminRoutes.routes.admin}${publicCustomViewPath}`)
+      await page.waitForURL(`**${adminRoutes.routes.admin}${publicCustomViewPath}`)
+      await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
+    })
+
+    test('root — should render protected nested custom view', async () => {
+      await page.goto(`${serverURL}${adminRoutes.routes.admin}${publicCustomViewPath}`)
+      await page.waitForURL(`**${adminRoutes.routes.admin}${publicCustomViewPath}`)
+      await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
     test('collection - should render custom tab view', async () => {
