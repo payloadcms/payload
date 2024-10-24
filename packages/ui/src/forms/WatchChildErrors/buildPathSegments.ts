@@ -14,7 +14,7 @@ export const buildPathSegments = (
       if (fieldAffectsData(field)) {
         // group, block, array
         const name = 'name' in field ? field.name : 'unnamed'
-        acc.push([...parentPath, name])
+        acc.push(...[...parentPath, name])
       } else {
         // rows, collapsibles, unnamed-tab
         acc.push(...buildPathSegments(parentPath, fields))
@@ -33,7 +33,7 @@ export const buildPathSegments = (
     } else if (fieldAffectsData(field)) {
       // text, number, date, etc.
       const name = 'name' in field ? field.name : 'unnamed'
-      acc.push([...parentPath, name])
+      acc.push(...[...parentPath, name])
     }
 
     return acc
