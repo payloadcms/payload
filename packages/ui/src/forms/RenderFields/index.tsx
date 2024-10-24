@@ -87,7 +87,6 @@ export const RenderFields: React.FC<Props> = (props) => {
 
           return (
             <Fragment key={i}>
-              <p>{`path: ${path}`}</p>
               {CustomField ? (
                 CustomField
               ) : (
