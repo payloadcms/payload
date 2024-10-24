@@ -276,8 +276,7 @@ describe('Sort', () => {
       })
     })
 
-    /* Disabled because of issue #5152
-    describe('Locaized sort', () => {
+    describe('Localized sort', () => {
       beforeAll(async () => {
         const testData1 = await payload.create({
           collection: 'localized',
@@ -327,7 +326,6 @@ describe('Sort', () => {
         ])
       })
     })
-      */
   })
 
   describe('REST API', () => {
