@@ -93,7 +93,7 @@ For more granular control, pass a configuration object instead. Payload exposes 
 | **`path`** \*      | Any valid URL path or array of paths that [`path-to-regexp`](https://www.npmjs.com/package/path-to-regex) understands.                                                                     |
 | **`exact`**        | Boolean. When true, will only match if the path matches the `usePathname()` exactly.                                                                                                     |
 | **`strict`**       | When true, a path that has a trailing slash will only match a `location.pathname` with a trailing slash. This has no effect when there are additional URL segments in the pathname. |
-| **`access`**       | Access control function that receives `req` and must return a boolean. When true, this path will be accessible to the given request. Combine it with `exact: true` if you want nested paths to not have the same logic. |
+| **`access`**       | Access control function that receives `req` and must return a boolean. When true, this path will be accessible to the given request. Combine it with `exact: true` if you want nested paths to not have the same logic. Function can be async to utilise the local API. |
 | **`sensitive`**    | When true, will match if the path is case sensitive.
 | **`meta`**         | Page metadata overrides to apply to this view within the Admin Panel. [More details](./metadata).                                                                           |
 
