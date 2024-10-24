@@ -224,8 +224,6 @@ export const Form: React.FC<FormProps> = (props) => {
         await wait(100)
       }
 
-      const preparedFields = prepareFields(fields)
-
       // Execute server side validations
       if (Array.isArray(beforeSubmit)) {
         let revalidatedFormState: FormState
@@ -234,7 +232,7 @@ export const Form: React.FC<FormProps> = (props) => {
           await priorOnChange
 
           const result = await beforeSubmitFn({
-            formState: preparedFields as FormState,
+            formState: fields,
           })
 
           revalidatedFormState = result
@@ -261,6 +259,8 @@ export const Form: React.FC<FormProps> = (props) => {
         setDisabled(false)
         return
       }
+
+      const preparedFields = prepareFields(fields)
 
       // If submit handler comes through via props, run that
       if (onSubmit) {
@@ -666,7 +666,7 @@ export const Form: React.FC<FormProps> = (props) => {
           let revalidatedFormState: FormState = contextRef.current.fields
 
           for (const onChangeFn of onChange) {
-            const prepared = prepareFields(revalidatedFormState)
+            const prepared = prepareFields(revalidatedFormState, true)
             revalidatedFormState = await onChangeFn({
               formState: prepared as FormState,
             })
