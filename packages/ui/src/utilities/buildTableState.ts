@@ -166,7 +166,7 @@ export const buildTableStateFn = async (
   const { columnState, Table } = renderTable({
     clientFields,
     collectionSlug,
-    columnPreferences: [], // TODO, might not be needed
+    columnPreferences: undefined, // TODO, might not be needed
     columns,
     docs,
     enableRowSelections: true,

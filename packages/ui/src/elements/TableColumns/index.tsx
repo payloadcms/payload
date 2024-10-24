@@ -17,10 +17,10 @@ import { getInitialColumns } from './getInitialColumns.js'
 export interface ITableColumns {
   cellProps?: Partial<CellComponentProps>[]
   columns: Column[]
-  moveColumn: (args: { fromIndex: number; toIndex: number }) => void
+  moveColumn: (args: { fromIndex: number; toIndex: number }) => Promise<void>
   resetColumnsState: () => void
   setActiveColumns: (columns: string[]) => void
-  toggleColumn: (column: string) => void
+  toggleColumn: (column: string) => Promise<void>
 }
 
 export const TableColumnContext = createContext<ITableColumns>({} as ITableColumns)
@@ -47,8 +47,10 @@ type Props = {
 
 // strip out Heading, Label, and renderedCells properties, they cannot be sent to the server
 const sanitizeColumns = (columns: Column[]) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return columns.map(({ Heading, Label, renderedCells, ...rest }) => rest)
+  return columns.map(({ accessor, active }) => ({
+    accessor,
+    active,
+  }))
 }
 
 export const TableColumnsProvider: React.FC<Props> = ({
@@ -100,38 +102,33 @@ export const TableColumnsProvider: React.FC<Props> = ({
   )
 
   const moveColumn = useCallback(
-    (args: { fromIndex: number; toIndex: number }) => {
+    async (args: { fromIndex: number; toIndex: number }) => {
       const { fromIndex, toIndex } = args
       const withMovedColumn = [...tableColumns]
       const [columnToMove] = withMovedColumn.splice(fromIndex, 1)
       withMovedColumn.splice(toIndex, 0, columnToMove)
-      setTableColumns(withMovedColumn)
-      updateColumnPreferences(withMovedColumn)
 
-      // TODO: instead of all this logic,
-      // just fire a server action to get new state and render new table
-      // This server action can handle all of the preferences changes, too
-      // const { Table, columnState } = renderTable({
-      //
-      // })
-      // setTableColumns(columnState)
-      // setTable(Table)
+      const { state: columnState, Table } = await getTableState({
+        collectionSlug,
+        columns: sanitizeColumns(withMovedColumn),
+        docs,
+      })
+
+      // updateColumnPreferences(withMovedColumn)
+      setTableColumns(columnState)
+      setTable(Table)
     },
-    [tableColumns, updateColumnPreferences],
+    [tableColumns, collectionSlug, docs, getTableState, setTable],
   )
 
   const toggleColumn = useCallback(
     async (column: string) => {
-      const toggledColumns = tableColumns.reduce((acc, col) => {
-        if (col.active || col.accessor === column) {
-          acc.push({
-            ...col,
-            active: col.accessor === column ? !col.active : col.active,
-          })
+      const toggledColumns = tableColumns.map((col) => {
+        return {
+          ...col,
+          active: col.accessor === column ? !col.active : col.active,
         }
-
-        return acc
-      }, [] as Column[])
+      })
 
       const { state: columnState, Table } = await getTableState({
         collectionSlug,

@@ -164,6 +164,7 @@ export const buildColumnState = (args: Args): Column[] => {
       const column: Column = {
         accessor: 'name' in field ? field.name : undefined,
         active,
+        field,
         Heading,
         Label,
         renderedCells: active
@@ -201,6 +202,7 @@ export const buildColumnState = (args: Args): Column[] => {
     sorted?.unshift({
       accessor: '_select',
       active: true,
+      field: null,
       Heading: <SelectAll />,
       Label: null,
       renderedCells: docs.map((_, i) => <SelectRow key={i} rowData={docs[i]} />),
