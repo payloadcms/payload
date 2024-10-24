@@ -16,6 +16,7 @@ export const RenderFields: React.FC<Props> = (props) => {
   const {
     className,
     fields,
+    filter,
     forceRender,
     indexPath,
     margins,
@@ -67,6 +68,9 @@ export const RenderFields: React.FC<Props> = (props) => {
       >
         {hasRendered &&
           fields?.map((field, fieldIndex) => {
+            if (filter && !filter(field)) {
+              return null
+            }
             const forceRenderChildren =
               (typeof forceRender === 'number' && fieldIndex <= forceRender) || true
 

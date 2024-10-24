@@ -4,6 +4,7 @@ import type {
   Field,
   FormField,
   FormState,
+  NamedTab,
   PayloadRequest,
 } from 'payload'
 
@@ -519,12 +520,31 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     const promises = field.tabs.map((tab) => {
       const isNamedTab = tabHasName(tab)
 
+      const tabData = isNamedTab ? data?.[tab.name] || {} : data
+
+      const tabPath = isNamedTab ? `${path}${tab.name}.` : path
+
+      if (tab.admin?.condition) {
+        state[tab.id] = {
+          disableFormData: true,
+          errorPaths: [],
+          initialValue: undefined,
+          passesCondition: Boolean(
+            (tab?.admin?.condition
+              ? Boolean(tab.admin.condition(fullData || {}, tabData, { user: req.user }))
+              : true) && passesCondition,
+          ),
+          valid: true,
+          value: undefined,
+        }
+      }
+
       return iterateFields({
         id,
         // passthrough parent functionality
         addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized: tab.localized || anyParentLocalized,
-        data: isNamedTab ? data?.[tab.name] || {} : data,
+        data: tabData,
         fields: tab.fields,
         filter,
         forceFullValue,
@@ -533,7 +553,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         omitParents,
         operation,
         parentPassesCondition: passesCondition,
-        path: isNamedTab ? `${path}${tab.name}.` : path,
+        path: tabPath,
         preferences,
         req,
         skipConditionChecks,
