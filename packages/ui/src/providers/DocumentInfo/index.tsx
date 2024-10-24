@@ -46,6 +46,7 @@ const DocumentInfo: React.FC<
     id,
     collectionSlug,
     docPermissions: docPermissionsFromProps,
+    fetchInitialState,
     globalSlug,
     hasPublishPermission: hasPublishPermissionFromProps,
     hasSavePermission: hasSavePermissionFromProps,
@@ -537,7 +538,8 @@ const DocumentInfo: React.FC<
     if (
       initialStateFromProps === undefined ||
       initialDataFromProps === undefined ||
-      localeChanged
+      localeChanged ||
+      fetchInitialState
     ) {
       if (localeChanged) {
         prevLocale.current = locale
@@ -569,7 +571,14 @@ const DocumentInfo: React.FC<
             void getDocPermissions(data)
           }
 
-          setInitialState(result)
+          setInitialState(
+            initialStateFromProps
+              ? {
+                  ...result,
+                  ...initialStateFromProps,
+                }
+              : result,
+          )
         } catch (err) {
           if (!abortController.signal.aborted) {
             if (typeof onLoadError === 'function') {
@@ -604,6 +613,7 @@ const DocumentInfo: React.FC<
     initialDataFromProps,
     initialStateFromProps,
     getDocPermissions,
+    fetchInitialState,
   ])
 
   useEffect(() => {
