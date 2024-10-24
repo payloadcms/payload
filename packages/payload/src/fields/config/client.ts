@@ -120,6 +120,10 @@ export const createClientField = ({
     case 'row': {
       const field = clientField as unknown as RowFieldClient
 
+      if (!field.fields) {
+        field.fields = []
+      }
+
       field.fields = createClientFields({
         clientFields: field.fields,
         defaultIDType,
