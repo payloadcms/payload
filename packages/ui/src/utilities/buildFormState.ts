@@ -16,6 +16,7 @@ import { createClientConfig, formatErrors } from 'payload'
 import { reduceFieldsToValues } from 'payload/shared'
 
 import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
+import { prepareFields } from '../forms/Form/prepareFields.js'
 import { attachComponentsToFormState } from './attachComponentsToFormState.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
 
@@ -269,7 +270,10 @@ export const buildFormStateFn = async (
   // If there is a form state,
   // then we can deduce data from that form state
   if (formState) {
-    data = reduceFieldsToValues(formState, true)
+    // formState may contain _index- paths (e.g. from row fields). In order to get the data that should not contain those,
+    // we use prepareFields to remove those paths
+    const sanitizedFormState = prepareFields(formState)
+    data = reduceFieldsToValues(sanitizedFormState, true)
   }
 
   // If we do not have data at this point,

@@ -19,12 +19,18 @@ const sanitizeField = (field: any): any => {
 
 export const prepareFields = (
   fields: FormState,
+  keepSchemaIndexes: boolean = false,
 ): {
   [key: string]: Omit<FormField, BlacklistedKeys>
 } => {
   return Object.keys(fields).reduce(
     (acc, key) => {
       const newField = sanitizeField(fields[key])
+
+      if (keepSchemaIndexes) {
+        acc[key] = newField
+        return acc
+      }
 
       /**
        * Remove all _index- schema indexes from the form state keys, as they represent fields
