@@ -4,6 +4,8 @@ import type { Field, FieldSchemaMap, SanitizedConfig } from 'payload'
 import { MissingEditorProp } from 'payload'
 import { generatePath, tabHasName } from 'payload/shared'
 
+import { ArrayFieldComponent } from '../../fields/Array/index.js'
+
 type Args = {
   config: SanitizedConfig
   fields: Field[]
@@ -12,26 +14,40 @@ type Args = {
   schemaPath: string
 }
 
-export const traverseFields = ({ config, fields, i18n, schemaMap, schemaPath }: Args) => {
+// ArrayFields = {
+//   fields: []
+// }
+
+// 'ArrayFields.items': {
+//   name: 'items',
+//   fields: []
+// }
+export const traverseFields = ({
+  config,
+  fields,
+  i18n,
+  schemaMap,
+  schemaPath: parentSchemaPath,
+}: Args) => {
   for (const [index, field] of fields.entries()) {
-    const fieldKey = generatePath({
+    const schemaPath = generatePath({
       name: 'name' in field ? field.name : undefined,
       fieldType: field.type,
-      parentPath: schemaPath,
+      parentPath: parentSchemaPath,
       schemaIndex: index,
     })
-
-    schemaMap.set(fieldKey, field)
+    schemaMap.set(schemaPath, field)
 
     switch (field.type) {
       case 'group':
       case 'array':
+        schemaMap.set(schemaPath, field)
         traverseFields({
           config,
           fields: field.fields,
           i18n,
           schemaMap,
-          schemaPath: fieldKey,
+          schemaPath,
         })
 
         break
@@ -43,14 +59,14 @@ export const traverseFields = ({ config, fields, i18n, schemaMap, schemaPath }: 
           fields: field.fields,
           i18n,
           schemaMap,
-          schemaPath: fieldKey,
+          schemaPath,
         })
 
         break
 
       case 'blocks':
         field.blocks.map((block) => {
-          const blockSchemaPath = `${fieldKey}.${block.slug}`
+          const blockSchemaPath = `${schemaPath}.${block.slug}`
 
           schemaMap.set(blockSchemaPath, block)
 
@@ -80,7 +96,7 @@ export const traverseFields = ({ config, fields, i18n, schemaMap, schemaPath }: 
             field,
             i18n,
             schemaMap,
-            schemaPath: fieldKey,
+            schemaPath,
           })
         }
 
@@ -91,7 +107,7 @@ export const traverseFields = ({ config, fields, i18n, schemaMap, schemaPath }: 
           const tabSchemaPath = generatePath({
             name: tabHasName(tab) ? tab.name : undefined,
             fieldType: field.type,
-            parentPath: fieldKey,
+            parentPath: schemaPath,
             schemaIndex: tabIndex,
           })
 

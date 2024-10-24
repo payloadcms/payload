@@ -1,6 +1,6 @@
-import buildStateFromSchema from './index.js'
+import fieldSchemasToFormState from './index.js'
 
-describe('Form - buildStateFromSchema', () => {
+describe('Form - fieldSchemasToFormState', () => {
   const defaultValue = 'Default'
   it('populates default value - normal fields', async () => {
     const fieldSchema = [
@@ -11,7 +11,7 @@ describe('Form - buildStateFromSchema', () => {
         label: 'Text',
       },
     ]
-    const state = await buildStateFromSchema({ fields: fieldSchema })
+    const state = await fieldSchemasToFormState({ fields: fieldSchema })
     expect(state.text.value).toBe(defaultValue)
   })
   it('field value overrides defaultValue - normal fields', async () => {
@@ -25,7 +25,7 @@ describe('Form - buildStateFromSchema', () => {
         label: 'Text',
       },
     ]
-    const state = await buildStateFromSchema({ data, fields: fieldSchema })
+    const state = await fieldSchemasToFormState({ data, fields: fieldSchema })
     expect(state.text.value).toBe(value)
   })
   it('populates default value from a function - normal fields', async () => {
@@ -47,7 +47,7 @@ describe('Form - buildStateFromSchema', () => {
         label: 'Text',
       },
     ]
-    const state = await buildStateFromSchema({ fields: fieldSchema, locale, user })
+    const state = await fieldSchemasToFormState({ fields: fieldSchema, locale, user })
     expect(state.text.value).toBe(defaultValue)
   })
 })

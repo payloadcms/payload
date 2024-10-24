@@ -111,6 +111,12 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const path = pathFromProps ?? name
 
+  console.log({
+    name,
+    path,
+    pathFromProps,
+  })
+
   const {
     errorPaths,
     formInitializing,

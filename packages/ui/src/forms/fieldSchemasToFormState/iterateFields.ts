@@ -44,10 +44,13 @@ type Args = {
   /**
    * The initial path of the field. @default ''
    */
-  path?: string
+  parentPath?: string
+  /**
+   * The initial schema path of the field. @default ''
+   */
+  parentSchemaPath?: string
   preferences?: DocumentPreferences
   req: PayloadRequest
-  schemaPath?: string
   /**
    * Whether to skip checking the field's condition. @default false
    */
@@ -76,10 +79,10 @@ export const iterateFields = async ({
   omitParents = false,
   operation,
   parentPassesCondition = true,
-  path = '',
+  parentPath = '',
+  parentSchemaPath = '',
   preferences,
   req,
-  schemaPath = '',
   skipConditionChecks = false,
   skipValidation = false,
   state = {},
@@ -112,8 +115,8 @@ export const iterateFields = async ({
           includeSchema,
           omitParents,
           operation,
-          parentPath: path,
-          parentSchemaPath: schemaPath,
+          parentPath,
+          parentSchemaPath,
           passesCondition,
           preferences,
           req,

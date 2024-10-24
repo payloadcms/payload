@@ -5,6 +5,7 @@ import type {
   ClientUser,
   DocumentPreferences,
   ErrorResult,
+  Field,
   FieldSchemaMap,
   FormState,
   SanitizedConfig,
@@ -15,7 +16,7 @@ import { headers as getHeaders } from 'next/headers.js'
 import { createClientConfig, formatErrors } from 'payload'
 import { reduceFieldsToValues } from 'payload/shared'
 
-import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
+import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
 import { attachComponentsToFormState } from './attachComponentsToFormState.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
 
@@ -201,7 +202,11 @@ export const buildFormStateFn = async (
     throw new Error(`Could not find "${schemaPath}" in the fieldSchemaMap`)
   }
 
-  if (!('fields' in fieldOrEntityConfig) || !fieldOrEntityConfig.fields) {
+  if (
+    !('fields' in fieldOrEntityConfig) ||
+    !fieldOrEntityConfig.fields ||
+    !fieldOrEntityConfig.fields.length
+  ) {
     throw new Error(
       `The field found in fieldSchemaMap for "${schemaPath}" does not contain any subfields.`,
     )
@@ -314,16 +319,30 @@ export const buildFormStateFn = async (
     await Promise.all(Object.values(promises))
   }
 
-  const formStateResult = await buildStateFromSchema({
+  const isEntitySchema = schemaPath === collectionSlug || schemaPath === globalSlug
+
+  /**
+   * When building state for sub schemas we need to adjust:
+   * - `fields`
+   * - `parentSchemaPath`
+   * - `parentPath`
+   */
+  const fields = isEntitySchema ? fieldOrEntityConfig.fields : ([fieldOrEntityConfig] as Field[])
+  const parentSchemaPath = isEntitySchema
+    ? schemaPath
+    : schemaPath.split('.').slice(0, -1).join('.')
+  const parentPath = isEntitySchema ? path : path.split('.').slice(0, -1).join('.')
+
+  const formStateResult = await fieldSchemasToFormState({
     id,
     collectionSlug,
     data,
-    fields: fieldOrEntityConfig.fields,
+    fields,
     operation,
-    path,
+    parentPath,
+    parentSchemaPath,
     preferences: docPreferences || { fields: {} },
     req,
-    schemaPath,
   })
 
   let lockedStateResult = undefined

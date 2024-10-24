@@ -1,6 +1,6 @@
 import type { Field } from 'payload'
 
-import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
+import { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
 
 import type { NodeValidation } from '../../typesServer.js'
 import type { SerializedAutoLinkNode, SerializedLinkNode } from '../nodes/types.js'
@@ -17,10 +17,10 @@ export const linkValidation = (
     },
   }) => {
     /**
-     * Run buildStateFromSchema as that properly validates link fields and link sub-fields
+     * Run fieldSchemasToFormState as that properly validates link fields and link sub-fields
      */
 
-    const result = await buildStateFromSchema({
+    const result = await fieldSchemasToFormState({
       id,
       collectionSlug,
       data: node.fields,

@@ -39,10 +39,10 @@
       "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
       "default": "./src/utilities/buildFieldSchemaMap/traverseFields.ts"
     },
-    "./forms/buildStateFromSchema": {
-      "import": "./src/forms/buildStateFromSchema/index.tsx",
-      "types": "./src/forms/buildStateFromSchema/index.tsx",
-      "default": "./src/forms/buildStateFromSchema/index.tsx"
+    "./forms/fieldSchemasToFormState": {
+      "import": "./src/forms/fieldSchemasToFormState/index.tsx",
+      "types": "./src/forms/fieldSchemasToFormState/index.tsx",
+      "default": "./src/forms/fieldSchemasToFormState/index.tsx"
     },
     "./scss/app.scss": "./src/scss/app.scss",
     "./assets": {
