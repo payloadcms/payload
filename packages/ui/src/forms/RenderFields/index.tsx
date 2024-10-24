@@ -81,6 +81,10 @@ export const RenderFields: React.FC<Props> = (props) => {
 
           const DefaultField = fieldComponents?.[field?.type]
 
+          if (field.hidden || field.admin?.hidden) {
+            return null
+          }
+
           return (
             <Fragment key={i}>
               <p>{`path: ${path}`}</p>
