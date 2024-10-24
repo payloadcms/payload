@@ -52,6 +52,7 @@ import {
   noApiViewCollectionSlug,
   noApiViewGlobalSlug,
   postsCollectionSlug,
+  settingsGlobalSlug,
 } from '../../slugs.js'
 
 const { beforeAll, beforeEach, describe } = test
@@ -503,9 +504,21 @@ describe('admin1', () => {
     })
 
     test('root — should render protected nested custom view', async () => {
-      await page.goto(`${serverURL}${adminRoutes.routes.admin}${publicCustomViewPath}`)
-      await page.waitForURL(`**${adminRoutes.routes.admin}${publicCustomViewPath}`)
-      await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
+      await page.goto(`${serverURL}${adminRoutes.routes.admin}${protectedCustomNestedViewPath}`)
+      await page.waitForURL(`**${adminRoutes.routes.admin}/unauthorized`)
+      await expect(page.locator('.unauthorized')).toBeVisible()
+
+      await page.goto(globalURL.global(settingsGlobalSlug))
+
+      const checkbox = page.locator('#field-canAccessProtected')
+
+      await checkbox.check()
+
+      await saveDocAndAssert(page)
+
+      await page.goto(`${serverURL}${adminRoutes.routes.admin}${protectedCustomNestedViewPath}`)
+      await page.waitForURL(`**${adminRoutes.routes.admin}${protectedCustomNestedViewPath}`)
+      await expect(page.locator('h1#custom-view-title')).toContainText(customNestedViewTitle)
     })
 
     test('collection - should render custom tab view', async () => {
