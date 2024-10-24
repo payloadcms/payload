@@ -111,12 +111,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const path = pathFromProps ?? name
 
-  console.log({
-    name,
-    path,
-    pathFromProps,
-  })
-
   const {
     errorPaths,
     formInitializing,
@@ -137,6 +131,8 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     async (rowIndex: number): Promise<void> => {
       const newRows: Row[] = getDataByPath(path)
       newRows.splice(rowIndex, 0, { id: uuid() })
+
+      console.log('newRows', newRows)
 
       await addFieldRow({
         data: { [name]: newRows },
