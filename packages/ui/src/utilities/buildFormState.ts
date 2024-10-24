@@ -149,6 +149,10 @@ export const buildFormStateFn = async (
     updateLastEdited,
   } = args
 
+  if (!collectionSlug && !globalSlug) {
+    throw new Error('Either collectionSlug or globalSlug must be provided')
+  }
+
   const incomingUserSlug = user?.collection
 
   const adminUserSlug = config.admin.user

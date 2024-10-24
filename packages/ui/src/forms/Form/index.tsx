@@ -490,7 +490,7 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const getFieldStateBySchemaPath = useCallback(
-    async ({ data, path, schemaPath }) => {
+    async ({ collectionSlug, data, globalSlug, path, schemaPath }) => {
       if (abortControllerRef2.current) {
         try {
           abortControllerRef2.current.abort()
@@ -504,8 +504,10 @@ export const Form: React.FC<FormProps> = (props) => {
       const docPreferences = await getDocPreferences()
 
       const { state: formState } = await getFormState({
+        collectionSlug,
         data,
         docPreferences,
+        globalSlug,
         path,
         renderFields: true,
         schemaPath,
@@ -520,7 +522,9 @@ export const Form: React.FC<FormProps> = (props) => {
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
     async ({ data, path, schemaPath }) => {
       const { formState: newFormState } = await getFieldStateBySchemaPath({
+        collectionSlug,
         data,
+        globalSlug,
         path,
         schemaPath,
       })
@@ -530,7 +534,7 @@ export const Form: React.FC<FormProps> = (props) => {
         formState: newFormState,
       })
     },
-    [getFieldStateBySchemaPath, dispatchFields],
+    [getFieldStateBySchemaPath, dispatchFields, collectionSlug, globalSlug],
   )
 
   const removeFieldRow: FormContextType['removeFieldRow'] = useCallback(
@@ -543,7 +547,9 @@ export const Form: React.FC<FormProps> = (props) => {
   const replaceFieldRow: FormContextType['replaceFieldRow'] = useCallback(
     async ({ data, path, rowIndex, schemaPath }) => {
       const { formState: subFieldState } = await getFieldStateBySchemaPath({
+        collectionSlug,
         data,
+        globalSlug,
         path,
         schemaPath,
       })
@@ -556,7 +562,7 @@ export const Form: React.FC<FormProps> = (props) => {
         subFieldState,
       })
     },
-    [getFieldStateBySchemaPath, dispatchFields],
+    [getFieldStateBySchemaPath, dispatchFields, collectionSlug, globalSlug],
   )
 
   // clean on unmount

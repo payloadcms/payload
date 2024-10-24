@@ -4,6 +4,7 @@ import {
   type ClientField,
   type ClientTab,
   createClientField,
+  deepCopyObjectSimple,
   type Field,
   type FieldPermissions,
   type FieldSchemaMap,
@@ -61,7 +62,13 @@ export function attachComponentsToFormState(args: Args): args is OutputArgs {
 
   Object.entries(formState).forEach(([path, fieldState]) => {
     const fieldConfig = fieldSchemaMap.get(`${entitySlug}.${fieldState.schemaPath}`)
+
+    if (!fieldConfig) {
+      throw new Error(`Field config not found for ${entitySlug}.${fieldState.schemaPath}`)
+    }
+
     const clientField = createClientField({
+      clientField: deepCopyObjectSimple(fieldState),
       defaultIDType: config.db.defaultIDType,
       field: fieldConfig,
       i18n,

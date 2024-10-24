@@ -59,10 +59,11 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         newState[field] = {
           ...(newState[field] || {
             initialValue: null,
+            schemaPath: '',
             value: null,
           }),
           errorMessage: message,
-          Field: undefined,
+
           valid: false,
         }
 

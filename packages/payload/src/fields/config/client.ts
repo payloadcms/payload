@@ -69,6 +69,8 @@ export const createClientField = ({
     // `admin`
   ]
 
+  clientField._schemaPath = schemaPath
+
   serverOnlyFieldProperties.forEach((key) => {
     if (key in clientField) {
       delete clientField[key]
@@ -267,8 +269,6 @@ export const createClientField = ({
     clientField.admin = {} as AdminClient
   }
 
-  clientField.admin.components = null
-
   serverOnlyFieldAdminProperties.forEach((key) => {
     if (key in clientField.admin) {
       delete clientField.admin[key]
@@ -347,7 +347,6 @@ export const createClientFields = ({
         parentPath: parentSchemaPath,
       }),
       admin: {
-        components: null,
         description: 'The unique identifier for this document',
         disableBulkEdit: true,
         hidden: true,
