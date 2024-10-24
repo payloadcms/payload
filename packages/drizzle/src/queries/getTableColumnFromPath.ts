@@ -186,18 +186,17 @@ export const getTableColumnFromPath = ({
         if (locale && field.localized && adapter.payload.config.localization) {
           newTableName = `${tableName}${adapter.localesSuffix}`
 
+          let condition = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID)
+
+          if (locale !== 'all') {
+            condition = and(condition, eq(adapter.tables[newTableName]._locale, locale))
+          }
+
           addJoinTable({
-            condition: eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
+            condition,
             joins,
             table: adapter.tables[newTableName],
           })
-          if (locale !== 'all') {
-            constraints.push({
-              columnName: '_locale',
-              table: adapter.tables[newTableName],
-              value: locale,
-            })
-          }
         }
         return getTableColumnFromPath({
           adapter,
@@ -225,21 +224,20 @@ export const getTableColumnFromPath = ({
           )
 
           if (locale && field.localized && adapter.payload.config.localization) {
+            const conditions = [
+              eq(adapter.tables[tableName].id, adapter.tables[newTableName].parent),
+              eq(adapter.tables[newTableName]._locale, locale),
+            ]
+
+            if (locale !== 'all') {
+              conditions.push(eq(adapter.tables[newTableName]._locale, locale))
+            }
+
             addJoinTable({
-              condition: and(
-                eq(adapter.tables[tableName].id, adapter.tables[newTableName].parent),
-                eq(adapter.tables[newTableName]._locale, locale),
-              ),
+              condition: and(...conditions),
               joins,
               table: adapter.tables[newTableName],
             })
-            if (locale !== 'all') {
-              constraints.push({
-                columnName: '_locale',
-                table: adapter.tables[newTableName],
-                value: locale,
-              })
-            }
           } else {
             addJoinTable({
               condition: eq(adapter.tables[tableName].id, adapter.tables[newTableName].parent),
@@ -274,18 +272,16 @@ export const getTableColumnFromPath = ({
           ]
 
           if (locale && field.localized && adapter.payload.config.localization) {
+            const conditions = [...joinConstraints]
+
+            if (locale !== 'all') {
+              conditions.push(eq(adapter.tables[newTableName]._locale, locale))
+            }
             addJoinTable({
-              condition: and(...joinConstraints, eq(adapter.tables[newTableName]._locale, locale)),
+              condition: and(...conditions),
               joins,
               table: adapter.tables[newTableName],
             })
-            if (locale !== 'all') {
-              constraints.push({
-                columnName: 'locale',
-                table: adapter.tables[newTableName],
-                value: locale,
-              })
-            }
           } else {
             addJoinTable({
               condition: and(...joinConstraints),
@@ -313,21 +309,16 @@ export const getTableColumnFromPath = ({
 
         constraintPath = `${constraintPath}${field.name}.%.`
         if (locale && field.localized && adapter.payload.config.localization) {
+          const conditions = [eq(arrayParentTable.id, adapter.tables[newTableName]._parentID)]
+
+          if (locale !== 'all') {
+            conditions.push(eq(adapter.tables[newTableName]._locale, locale))
+          }
           addJoinTable({
-            condition: and(
-              eq(arrayParentTable.id, adapter.tables[newTableName]._parentID),
-              eq(adapter.tables[newTableName]._locale, locale),
-            ),
+            condition: and(...conditions),
             joins,
             table: adapter.tables[newTableName],
           })
-          if (locale !== 'all') {
-            constraints.push({
-              columnName: '_locale',
-              table: adapter.tables[newTableName],
-              value: locale,
-            })
-          }
         } else {
           addJoinTable({
             condition: eq(arrayParentTable.id, adapter.tables[newTableName]._parentID),
@@ -417,23 +408,21 @@ export const getTableColumnFromPath = ({
           constraints = constraints.concat(blockConstraints)
           selectFields = { ...selectFields, ...blockSelectFields }
           if (field.localized && adapter.payload.config.localization) {
-            joins.push({
-              condition: and(
-                eq(
-                  (aliasTable || adapter.tables[tableName]).id,
-                  adapter.tables[newTableName]._parentID,
-                ),
-                eq(adapter.tables[newTableName]._locale, locale),
+            const conditions = [
+              eq(
+                (aliasTable || adapter.tables[tableName]).id,
+                adapter.tables[newTableName]._parentID,
               ),
+            ]
+
+            if (locale !== 'all') {
+              conditions.push(eq(adapter.tables[newTableName]._locale, locale))
+            }
+
+            joins.push({
+              condition: and(...conditions),
               table: adapter.tables[newTableName],
             })
-            if (locale) {
-              constraints.push({
-                columnName: '_locale',
-                table: adapter.tables[newTableName],
-                value: locale,
-              })
-            }
           } else {
             joins.push({
               condition: eq(
@@ -471,21 +460,18 @@ export const getTableColumnFromPath = ({
 
           // Join in the relationships table
           if (locale && field.localized && adapter.payload.config.localization) {
+            const conditions = [
+              eq((aliasTable || adapter.tables[rootTableName]).id, aliasRelationshipTable.parent),
+              like(aliasRelationshipTable.path, `${constraintPath}${field.name}`),
+            ]
+
+            if (locale !== 'all') {
+              conditions.push(eq(aliasRelationshipTable.locale, locale))
+            }
             joins.push({
-              condition: and(
-                eq((aliasTable || adapter.tables[rootTableName]).id, aliasRelationshipTable.parent),
-                eq(aliasRelationshipTable.locale, locale),
-                like(aliasRelationshipTable.path, `${constraintPath}${field.name}`),
-              ),
+              condition: and(...conditions),
               table: aliasRelationshipTable,
             })
-            if (locale !== 'all') {
-              constraints.push({
-                columnName: 'locale',
-                table: aliasRelationshipTable,
-                value: locale,
-              })
-            }
           } else {
             // Join in the relationships table
             joins.push({
@@ -660,15 +646,22 @@ export const getTableColumnFromPath = ({
               tableName: `${rootTableName}${adapter.localesSuffix}`,
             })
 
-            joins.push({
-              condition: and(
-                eq(aliasLocaleTable._parentID, adapter.tables[rootTableName].id),
-                eq(aliasLocaleTable._locale, locale),
-              ),
-              table: aliasLocaleTable,
+            const condtions = [eq(aliasLocaleTable._parentID, adapter.tables[rootTableName].id)]
+
+            if (locale !== 'all') {
+              condtions.push(eq(aliasLocaleTable._locale, locale))
+            }
+
+            const localesTable = adapter.tables[`${rootTableName}${adapter.localesSuffix}`]
+
+            addJoinTable({
+              condition: and(...condtions),
+              joins,
+              table: localesTable,
             })
+
             joins.push({
-              condition: eq(aliasLocaleTable[columnName], newAliasTable.id),
+              condition: eq(localesTable[columnName], newAliasTable.id),
               table: newAliasTable,
             })
           } else {
@@ -716,21 +709,19 @@ export const getTableColumnFromPath = ({
 
         newTable = adapter.tables[newTableName]
 
+        let condition = eq(parentTable.id, newTable._parentID)
+
+        if (locale !== 'all') {
+          condition = and(condition, eq(newTable._locale, locale))
+        }
+
         addJoinTable({
-          condition: eq(parentTable.id, newTable._parentID),
+          condition,
           joins,
           table: newTable,
         })
 
         aliasTable = undefined
-
-        if (locale !== 'all') {
-          constraints.push({
-            columnName: '_locale',
-            table: newTable,
-            value: locale,
-          })
-        }
       }
 
       const targetTable = aliasTable || newTable

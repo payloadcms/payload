@@ -120,6 +120,8 @@ export type Where = {
   or?: Where[]
 }
 
+export type Sort = Array<string> | string
+
 /**
  * Applies pagination for join fields for including collection relationships
  */

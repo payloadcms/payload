@@ -5,6 +5,7 @@ import type {
   Payload,
   PayloadRequest,
   SelectType,
+  Sort,
   Where,
 } from '../types/index.js'
 import type { TypeWithVersion } from '../versions/types.js'
@@ -188,7 +189,7 @@ export type QueryDraftsArgs = {
   pagination?: boolean
   req: PayloadRequest
   select?: SelectType
-  sort?: string
+  sort?: Sort
   where?: Where
 }
 
@@ -217,7 +218,7 @@ export type FindArgs = {
   req: PayloadRequest
   select?: SelectType
   skip?: number
-  sort?: string
+  sort?: Sort
   versions?: boolean
   where?: Where
 }
@@ -241,7 +242,7 @@ type BaseVersionArgs = {
   req: PayloadRequest
   select?: SelectType
   skip?: number
-  sort?: string
+  sort?: Sort
   versions?: boolean
   where?: Where
 }

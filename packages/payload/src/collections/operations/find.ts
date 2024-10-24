@@ -4,14 +4,11 @@ import type { CollectionSlug, JoinQuery } from '../../index.js'
 import type {
   PayloadRequest,
   SelectType,
+  Sort,
   TransformCollectionWithSelect,
   Where,
 } from '../../types/index.js'
-import type {
-  Collection,
-  DataFromCollectionSlug,
-  SelectFromCollectionSlug,
-} from '../config/types.js'
+import type { Collection, DataFromCollectionSlug } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
@@ -39,7 +36,7 @@ export type Arguments = {
   req?: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
-  sort?: string
+  sort?: Sort
   where?: Where
 }
 

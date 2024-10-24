@@ -25,7 +25,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   const globalConfig: SanitizedGlobalConfig = this.payload.globals.config.find(
     ({ slug }) => slug === global,
   )
-  const sort = typeof sortArg === 'string' ? sortArg : '-createdAt'
+  const sort = sortArg !== undefined && sortArg !== null ? sortArg : '-createdAt'
 
   const tableName = this.tableNameMap.get(
     `_${toSnakeCase(globalConfig.slug)}${this.versionsSuffix}`,

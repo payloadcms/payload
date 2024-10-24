@@ -5,6 +5,7 @@ import type {
   PayloadRequest,
   RequestContext,
   SelectType,
+  Sort,
   TransformCollectionWithSelect,
   Where,
 } from '../../../types/index.js'
@@ -35,7 +36,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   req?: PayloadRequest
   select?: TSelect
   showHiddenFields?: boolean
-  sort?: string
+  sort?: Sort
   user?: Document
   where?: Where
 }

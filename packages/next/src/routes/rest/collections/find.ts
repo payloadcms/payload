@@ -31,7 +31,7 @@ export const find: CollectionRouteHandler = async ({ collection, req }) => {
     page: isNumber(page) ? Number(page) : undefined,
     req,
     select: sanitizeSelect(select),
-    sort,
+    sort: typeof sort === 'string' ? sort.split(',') : undefined,
     where,
   })
 

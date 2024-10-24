@@ -5,6 +5,7 @@ import type {
   PayloadRequest,
   RequestContext,
   SelectType,
+  Sort,
   Where,
 } from '../../../types/index.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
@@ -30,7 +31,7 @@ export type Options<TSlug extends CollectionSlug> = {
   req?: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
-  sort?: string
+  sort?: Sort
   user?: Document
   where?: Where
 }

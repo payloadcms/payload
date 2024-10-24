@@ -43,6 +43,7 @@ import type {
   PayloadRequest,
   RequestContext,
   SelectType,
+  Sort,
   TransformCollectionWithSelect,
 } from '../../types/index.js'
 import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
@@ -384,7 +385,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   /**
    * Default field to sort by in collection list view
    */
-  defaultSort?: string
+  defaultSort?: Sort
   /**
    * When true, do not show the "Duplicate" button while editing documents within this collection and prevent `duplicate` from all APIs
    */

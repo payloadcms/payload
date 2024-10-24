@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-exports */
 import type { PaginatedDocs } from '../../../database/types.js'
 import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
-import type { Document, PayloadRequest, SelectType, Where } from '../../../types/index.js'
+import type { Document, PayloadRequest, SelectType, Sort, Where } from '../../../types/index.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
 
@@ -21,7 +21,7 @@ export type Options<TSlug extends GlobalSlug> = {
   select?: SelectType
   showHiddenFields?: boolean
   slug: TSlug
-  sort?: string
+  sort?: Sort
   user?: Document
   where?: Where
 }
