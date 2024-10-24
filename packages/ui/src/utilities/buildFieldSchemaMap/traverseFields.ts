@@ -43,7 +43,7 @@ export const traverseFields = ({ config, fields, i18n, schemaMap, schemaPath }: 
           fields: field.fields,
           i18n,
           schemaMap,
-          schemaPath,
+          schemaPath: fieldKey,
         })
 
         break

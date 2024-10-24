@@ -18,7 +18,7 @@ export function generatePath({ name, fieldType, parentPath = '', schemaIndex }: 
     fieldType === 'tabs' ||
     (fieldType === 'tab' && !name)
   ) {
-    fieldPath = `${fieldPath}_index-${schemaIndex}`
+    fieldPath = fieldPath?.length ? `${fieldPath}._index-${schemaIndex}` : `_index-${schemaIndex}`
   }
 
   return fieldPath
