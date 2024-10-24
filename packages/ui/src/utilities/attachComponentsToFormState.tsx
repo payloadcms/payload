@@ -66,7 +66,10 @@ export function attachComponentsToFormState(args: Args): args is OutputArgs {
     }
 
     const clientField = createClientField({
-      clientField: deepCopyObjectSimple(fieldState),
+      clientField: deepCopyObjectSimple({
+        _schemaPath: fieldState.schemaPath,
+        ...fieldConfig,
+      }),
       defaultIDType: config.db.defaultIDType,
       field: fieldConfig,
       i18n,
