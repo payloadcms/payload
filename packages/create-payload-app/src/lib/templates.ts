@@ -16,38 +16,38 @@ export function getValidTemplates(): ProjectTemplate[] {
   return [
     {
       name: 'blank',
-      description: 'Blank Template',
       type: 'starter',
-      url: 'https://github.com/payloadcms/payload/templates/blank',
+      description: 'Blank Template',
+      url: 'https://github.com/payloadcms/payload/templates/blank#v2.30.3',
     },
     {
       name: 'website',
-      description: 'Website Template',
       type: 'starter',
-      url: 'https://github.com/payloadcms/payload/templates/website',
+      description: 'Website Template',
+      url: 'https://github.com/payloadcms/payload/templates/website#v2.30.3',
     },
     {
       name: 'ecommerce',
-      description: 'E-commerce Template',
       type: 'starter',
-      url: 'https://github.com/payloadcms/payload/templates/ecommerce',
+      description: 'E-commerce Template',
+      url: 'https://github.com/payloadcms/payload/templates/ecommerce#v2.30.3',
     },
     {
       name: 'plugin',
-      description: 'Template for creating a Payload plugin',
       type: 'plugin',
+      description: 'Template for creating a Payload plugin',
       url: 'https://github.com/payloadcms/payload-plugin-template',
     },
     {
       name: 'payload-demo',
-      description: 'Payload demo site at https://demo.payloadcms.com',
       type: 'starter',
+      description: 'Payload demo site at https://demo.payloadcms.com',
       url: 'https://github.com/payloadcms/public-demo',
     },
     {
       name: 'payload-website',
-      description: 'Payload website CMS at https://payloadcms.com',
       type: 'starter',
+      description: 'Payload website CMS at https://payloadcms.com',
       url: 'https://github.com/payloadcms/website-cms',
     },
   ]
