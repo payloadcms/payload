@@ -34,6 +34,8 @@ export const globalSlug = 'global'
 export const group1GlobalSlug = 'group-globals-one'
 export const group2GlobalSlug = 'group-globals-two'
 export const hiddenGlobalSlug = 'hidden-global'
+
+export const settingsGlobalSlug = 'settings'
 export const noApiViewGlobalSlug = 'global-no-api-view'
 export const globalSlugs = [
   customGlobalViews1GlobalSlug,

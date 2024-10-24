@@ -6,6 +6,12 @@ export const slugPluralLabel = 'Posts'
 
 export const customViewPath = '/custom-view'
 
+export const customNestedViewPath = `${customViewPath}/nested-view`
+
+export const publicCustomViewPath = '/public-custom-view'
+
+export const protectedCustomNestedViewPath = `${publicCustomViewPath}/protected-nested-view`
+
 export const customParamViewPathBase = '/custom-param'
 
 export const customParamViewPath = `${customParamViewPathBase}/:id`
@@ -13,8 +19,6 @@ export const customParamViewPath = `${customParamViewPathBase}/:id`
 export const customViewTitle = 'Custom View'
 
 export const customParamViewTitle = 'Custom Param View'
-
-export const customNestedViewPath = `${customViewPath}/nested-view`
 
 export const customNestedViewTitle = 'Custom Nested View'
 

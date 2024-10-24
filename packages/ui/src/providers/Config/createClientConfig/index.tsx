@@ -97,6 +97,14 @@ export const createClientConfig = async ({
       )
     }
 
+    if (config.admin?.components?.views) {
+      Object.entries(config.admin.components.views).forEach(([key, view]) => {
+        if (view.access && clientConfig.admin?.components?.views?.[key]?.access) {
+          delete clientConfig.admin.components.views[key].access
+        }
+      })
+    }
+
     if (config.admin?.components?.graphics?.Icon) {
       clientConfig.admin.components.graphics.Icon = createMappedComponent(
         config.admin.components.graphics.Icon,

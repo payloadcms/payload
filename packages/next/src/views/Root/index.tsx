@@ -66,24 +66,29 @@ export const RootPage = async ({
 
   let dbHasUser = false
 
-  if (!DefaultView?.Component && !DefaultView?.payloadComponent) {
-    notFound()
-  }
-
   const initPageResult = await initPage(initPageOptions)
+
+  dbHasUser = await initPageResult?.req.payload.db
+    .findOne({
+      collection: userSlug,
+      req: initPageResult?.req,
+    })
+    ?.then((doc) => !!doc)
+
+  if (!DefaultView?.Component && !DefaultView?.payloadComponent) {
+    if (initPageResult?.req?.user) {
+      notFound()
+    }
+    if (dbHasUser) {
+      redirect(adminRoute)
+    }
+  }
 
   if (typeof initPageResult?.redirectTo === 'string') {
     redirect(initPageResult.redirectTo)
   }
 
   if (initPageResult) {
-    dbHasUser = await initPageResult?.req.payload.db
-      .findOne({
-        collection: userSlug,
-        req: initPageResult?.req,
-      })
-      ?.then((doc) => !!doc)
-
     const createFirstUserRoute = formatAdminURL({ adminRoute, path: _createFirstUserRoute })
 
     const collectionConfig = config.collections.find(({ slug }) => slug === userSlug)
@@ -100,6 +105,10 @@ export const RootPage = async ({
     if (dbHasUser && currentRoute === createFirstUserRoute) {
       redirect(adminRoute)
     }
+  }
+
+  if (!DefaultView?.Component && !DefaultView?.payloadComponent && !dbHasUser) {
+    redirect(adminRoute)
   }
 
   const createMappedView = getCreateMappedComponent({
