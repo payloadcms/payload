@@ -1,23 +1,25 @@
-import type { Field, TabAsField } from './config/types.js'
+import type { ClientField, Field, TabAsField } from './config/types.js'
 
 import { tabHasName } from './config/types.js'
 
 export function getFieldPaths({
   field,
-  parentPath,
-  parentSchemaPath,
+  parentPath = [],
+  parentSchemaPath = [],
+  schemaIndex,
 }: {
-  field: Field | TabAsField
+  field: ClientField | Field | TabAsField
   parentPath: (number | string)[]
   parentSchemaPath: string[]
+  schemaIndex: number
 }): {
   path: (number | string)[]
   schemaPath: string[]
 } {
   if (field.type === 'tabs' || field.type === 'row' || field.type === 'collapsible') {
     return {
-      path: parentPath,
-      schemaPath: parentSchemaPath,
+      path: [...parentPath, `_index-${schemaIndex}`],
+      schemaPath: [...parentSchemaPath, `_index-${schemaIndex}`],
     }
   } else if (field.type === 'tab') {
     if (tabHasName(field)) {
@@ -27,8 +29,8 @@ export function getFieldPaths({
       }
     } else {
       return {
-        path: parentPath,
-        schemaPath: parentSchemaPath,
+        path: [...parentPath, `_index-${schemaIndex}`],
+        schemaPath: [...parentSchemaPath, `_index-${schemaIndex}`],
       }
     }
   }

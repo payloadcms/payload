@@ -21,6 +21,7 @@ type Args<T> = {
    */
   doc: T
   field: Field | TabAsField
+  fieldIndex: number
   global: null | SanitizedGlobalConfig
   id?: number | string
   operation: 'create' | 'update'
@@ -49,6 +50,7 @@ export const promise = async <T>({
   data,
   doc,
   field,
+  fieldIndex,
   global,
   operation,
   overrideAccess,
@@ -62,6 +64,7 @@ export const promise = async <T>({
     field,
     parentPath,
     parentSchemaPath,
+    schemaIndex: fieldIndex,
   })
 
   if (fieldAffectsData(field)) {

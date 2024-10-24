@@ -124,7 +124,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         isCollapsed={row.collapsed}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        <RenderFields fields={fields} path={`${parentPath}.${rowIndex}`} />
+        <RenderFields fields={fields} parentPath={[...parentPath.split('.'), rowIndex]} />
       </Collapsible>
     </div>
   )

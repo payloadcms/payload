@@ -20,7 +20,6 @@ type RowFieldClientWithoutType = MarkOptional<RowFieldClient, 'type'>
 
 type RowFieldBaseClientProps = {
   readonly forceRender?: boolean
-  readonly indexPath: string
 }
 
 export type RowFieldClientProps = ClientFieldBase<RowFieldClientWithoutType> &

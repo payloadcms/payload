@@ -55,11 +55,11 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
       const errorPaths: { fieldErrorPath: string; parentPath: string }[] = []
 
-      action.errors.forEach(({ field, message }) => {
-        newState[field] = {
-          ...(newState[field] || {
+      action.errors.forEach(({ fieldPath, fieldSchemaPath, message }) => {
+        newState[fieldPath.join('.')] = {
+          ...(newState[fieldPath.join('.')] || {
             initialValue: null,
-            schemaPath: '',
+            schemaPath: fieldSchemaPath,
             value: null,
           }),
           errorMessage: message,
@@ -67,11 +67,10 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
           valid: false,
         }
 
-        const segments = field.split('.')
-        if (segments.length > 1) {
+        if (fieldPath.length > 1) {
           errorPaths.push({
-            fieldErrorPath: field,
-            parentPath: segments.slice(0, segments.length - 1).join('.'),
+            fieldErrorPath: fieldPath.join('.'),
+            parentPath: fieldPath.slice(0, fieldPath.length - 1).join('.'),
           })
         }
       })
@@ -191,15 +190,12 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         id: (subFieldState?.id?.value as string) || new ObjectId().toHexString(),
         blockType: blockType || undefined,
         collapsed: false,
-        fields: undefined,
-        RowLabel: undefined,
       }
 
       withNewRow.splice(rowIndex, 0, newRow)
 
       if (blockType) {
         subFieldState.blockType = {
-          Field: undefined,
           initialValue: blockType,
           valid: true,
           value: blockType,
@@ -235,13 +231,10 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         id: new ObjectId().toHexString(),
         blockType: blockType || undefined,
         collapsed: false,
-        fields: undefined,
-        RowLabel: undefined,
       }
 
       if (blockType) {
         subFieldState.blockType = {
-          Field: undefined,
           initialValue: blockType,
           valid: true,
           value: blockType,

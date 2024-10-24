@@ -12,6 +12,7 @@ type Args<T> = {
   context: RequestContext
   doc: T
   field: Field | TabAsField
+  fieldIndex: number
   id?: number | string
   overrideAccess: boolean
   parentPath: (number | string)[]
@@ -26,6 +27,7 @@ export const promise = async <T>({
   context,
   doc,
   field,
+  fieldIndex,
   overrideAccess,
   parentPath,
   parentSchemaPath,
@@ -38,6 +40,7 @@ export const promise = async <T>({
     field,
     parentPath,
     parentSchemaPath,
+    schemaIndex: fieldIndex,
   })
 
   // Handle unnamed tabs

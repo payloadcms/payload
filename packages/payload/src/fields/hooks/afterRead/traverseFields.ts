@@ -57,7 +57,7 @@ export const traverseFields = ({
   triggerAccessControl = true,
   triggerHooks = true,
 }: Args): void => {
-  fields.forEach((field) => {
+  fields.forEach((field, fieldIndex) => {
     fieldPromises.push(
       promise({
         collection,
@@ -68,6 +68,7 @@ export const traverseFields = ({
         draft,
         fallbackLocale,
         field,
+        fieldIndex,
         fieldPromises,
         findMany,
         flattenLocales,

@@ -69,8 +69,9 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
     [validate, config, t, required],
   )
 
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
-    path: pathFromProps || name,
+  const path = pathFromProps || name
+  const { formInitializing, formProcessing, setValue, showError, value } = useField({
+    path,
     validate: memoizedValidate,
   })
 

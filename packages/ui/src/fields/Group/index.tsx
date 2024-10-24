@@ -91,7 +91,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
             )}
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
-          <RenderFields fields={fields} path={path} />
+          <RenderFields fields={fields} parentPath={path.split('.')} />
         </div>
       </GroupProvider>
     </div>

@@ -143,7 +143,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
                 .join(' ')}
             >
               {Description}
-              <RenderFields fields={activeTabConfig.fields} />
+              <RenderFields fields={activeTabConfig.fields} parentPath={path.split('.')} />
             </div>
           )}
         </div>

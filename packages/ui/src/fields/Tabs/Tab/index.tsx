@@ -29,7 +29,7 @@ export const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsAc
 
   return (
     <React.Fragment>
-      <WatchChildErrors fields={tab.fields} path={path} setErrorCount={setErrorCount} />
+      <WatchChildErrors fields={tab.fields} path={path.split('.')} setErrorCount={setErrorCount} />
       <button
         className={[
           baseClass,

@@ -9,8 +9,8 @@ import { APIError } from './APIError.js'
 export let ValidationErrorName = 'ValidationError'
 
 export type ValidationFieldError = {
-  // The field path, i.e. "textField", "groupField.subTextField", etc.
-  field: string
+  fieldPath: (number | string)[]
+  fieldSchemaPath: string[]
   // The error message to display for this field
   message: string
 }
@@ -36,7 +36,7 @@ export class ValidationError extends APIError<{
         : en.translations.error.followingFieldsInvalid_other
 
     super(
-      `${message} ${results.errors.map((f) => f.field).join(', ')}`,
+      `${message} ${results.errors.map((f) => f.fieldPath.join('.')).join(', ')}`,
       httpStatus.BAD_REQUEST,
       results,
     )

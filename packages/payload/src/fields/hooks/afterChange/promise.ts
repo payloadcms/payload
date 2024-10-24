@@ -15,6 +15,7 @@ type Args = {
   data: JsonObject
   doc: JsonObject
   field: Field | TabAsField
+  fieldIndex: number
   global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
   /**
@@ -41,6 +42,7 @@ export const promise = async ({
   data,
   doc,
   field,
+  fieldIndex,
   global,
   operation,
   parentPath,
@@ -55,6 +57,7 @@ export const promise = async ({
     field,
     parentPath,
     parentSchemaPath,
+    schemaIndex: fieldIndex,
   })
 
   if (fieldAffectsData(field)) {

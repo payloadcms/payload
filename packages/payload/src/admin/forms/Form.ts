@@ -36,7 +36,7 @@ export type FieldState = {
   isSidebar?: boolean
   passesCondition?: boolean
   rows?: Row[]
-  schemaPath: string
+  schemaPath: string[]
   valid: boolean
   value: unknown
 }
@@ -65,14 +65,14 @@ export type BuildFormStateArgs = {
   /*
    Used as a "base path" when adding form state to nested fields
   */
-  path?: string
+  path?: (number | string)[]
   /*
     If true, will render field components within their state object
   */
   renderFields?: boolean
   req: PayloadRequest
   returnLockStatus?: boolean
-  schemaPath: string
+  schemaPath: string[]
   updateLastEdited?: boolean
 } & (
   | {

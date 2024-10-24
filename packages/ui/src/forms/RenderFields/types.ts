@@ -12,5 +12,5 @@ export type Props = {
    */
   readonly forceRender?: boolean
   readonly margins?: 'small' | false
-  readonly path: string
+  readonly parentPath: (number | string)[]
 }

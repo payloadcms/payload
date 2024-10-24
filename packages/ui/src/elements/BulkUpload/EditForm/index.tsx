@@ -70,7 +70,7 @@ export function EditForm({ submitted }: EditFormProps) {
 
   const collectionSlug = collectionConfig.slug
 
-  const [schemaPath] = React.useState(collectionSlug)
+  const [schemaPath] = React.useState([collectionSlug])
 
   const onSave = useCallback(
     (json) => {
@@ -206,5 +206,7 @@ function ReportAllErrors() {
     return null
   }
 
-  return <WatchChildErrors fields={docConfig.fields} path="" setErrorCount={reportFormErrorCount} />
+  return (
+    <WatchChildErrors fields={docConfig.fields} path={[]} setErrorCount={reportFormErrorCount} />
+  )
 }

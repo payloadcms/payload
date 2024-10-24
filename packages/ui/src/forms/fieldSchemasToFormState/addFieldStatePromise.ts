@@ -12,7 +12,7 @@ import {
   fieldAffectsData,
   fieldHasSubFields,
   fieldIsSidebar,
-  generatePath,
+  getFieldPaths,
   tabHasName,
 } from 'payload/shared'
 
@@ -24,7 +24,7 @@ const ObjectId = (ObjectIdImport.default ||
   ObjectIdImport) as unknown as typeof ObjectIdImport.default
 
 export type AddFieldStatePromiseArgs = {
-  addErrorPathToParent: (path: string) => void
+  addErrorPathToParent: (fieldPath: (number | string)[]) => void
   /**
    * if all parents are localized, then the field is localized
    */
@@ -52,8 +52,8 @@ export type AddFieldStatePromiseArgs = {
    */
   omitParents?: boolean
   operation: 'create' | 'update'
-  parentPath: string
-  parentSchemaPath: string
+  parentPath: (number | string)[]
+  parentSchemaPath: string[]
   passesCondition: boolean
   preferences: DocumentPreferences
   /**
@@ -101,16 +101,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     state,
   } = args
 
-  const fieldPath = generatePath({
-    name: 'name' in field ? field.name : undefined,
-    fieldType: field.type,
+  const { path: fieldPath, schemaPath: fieldSchemaPath } = getFieldPaths({
+    field,
     parentPath,
-    schemaIndex: fieldIndex,
-  })
-  const fieldSchemaPath = generatePath({
-    name: 'name' in field ? field.name : undefined,
-    fieldType: field.type,
-    parentPath: parentSchemaPath,
+    parentSchemaPath,
     schemaIndex: fieldIndex,
   })
 
@@ -157,13 +151,14 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       )
     }
 
-    const addErrorPathToParent = (errorPath: string) => {
+    const addErrorPathToParent = (errorPath: (number | string)[]) => {
       if (typeof addErrorPathToParentArg === 'function') {
         addErrorPathToParentArg(errorPath)
       }
 
-      if (!fieldState.errorPaths.includes(errorPath)) {
-        fieldState.errorPaths.push(errorPath)
+      const errorPathString = errorPath.join('.')
+      if (!fieldState.errorPaths.includes(errorPathString)) {
+        fieldState.errorPaths.push(errorPathString)
         fieldState.valid = false
       }
     }
@@ -182,16 +177,16 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         const { promises, rows } = arrayValue.reduce(
           (acc, row, i) => {
-            const parentPath = `${fieldPath}.${i}`
+            const parentPath = [...fieldPath, i]
             row.id = row?.id || new ObjectId().toHexString()
 
             if (!omitParents && (!filter || filter(args))) {
-              state[`${parentPath}.id`] = {
+              state[[...parentPath, 'id'].join('.')] = {
                 fieldSchema: includeSchema
                   ? field.fields.find((field) => 'name' in field && field.name === 'id')
                   : undefined,
                 initialValue: row.id,
-                schemaPath: `${fieldSchemaPath}.id`,
+                schemaPath: [...fieldSchemaPath, 'id'],
                 valid: true,
                 value: row.id,
               }
@@ -221,7 +216,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               }),
             )
 
-            const collapsedRowIDs = preferences?.fields?.[fieldPath]?.collapsed
+            const collapsedRowIDs = preferences?.fields?.[fieldPath.join('.')]?.collapsed
 
             acc.rows.push({
               id: row.id,
@@ -259,7 +254,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         // Add field to state
         if (!omitParents && (!filter || filter(args))) {
-          state[fieldPath] = fieldState
+          state[fieldPath.join('.')] = fieldState
         }
 
         break
@@ -277,45 +272,45 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               )
             }
 
-            const rowPath = `${fieldPath}.${i}`
-            const rowSchemaPath = `${fieldSchemaPath}.${block.slug}`
+            const rowPath = [...fieldPath, i]
+            const rowSchemaPath = [...fieldSchemaPath, block.slug]
 
             if (block) {
               row.id = row?.id || new ObjectId().toHexString()
 
               if (!omitParents && (!filter || filter(args))) {
-                state[`${rowPath}.id`] = {
+                state[[...rowPath, 'id'].join('.')] = {
                   fieldSchema: includeSchema
                     ? block.fields.find(
                         (blockField) => 'name' in blockField && blockField.name === 'id',
                       )
                     : undefined,
                   initialValue: row.id,
-                  schemaPath: `${rowSchemaPath}.id`,
+                  schemaPath: [...rowSchemaPath, 'id'],
                   valid: true,
                   value: row.id,
                 }
 
-                state[`${rowPath}.blockType`] = {
+                state[[...rowPath, 'blockType'].join('.')] = {
                   fieldSchema: includeSchema
                     ? block.fields.find(
                         (blockField) => 'name' in blockField && blockField.name === 'blockType',
                       )
                     : undefined,
                   initialValue: row.blockType,
-                  schemaPath: `${rowSchemaPath}.blockType`,
+                  schemaPath: [...rowSchemaPath, 'blockType'],
                   valid: true,
                   value: row.blockType,
                 }
 
-                state[`${rowPath}.blockName`] = {
+                state[[...rowPath, 'blockName'].join('.')] = {
                   fieldSchema: includeSchema
                     ? block.fields.find(
                         (blockField) => 'name' in blockField && blockField.name === 'blockName',
                       )
                     : undefined,
                   initialValue: row.blockName,
-                  schemaPath: `${rowSchemaPath}.blockName`,
+                  schemaPath: [...rowSchemaPath, 'blockName'],
                   valid: true,
                   value: row.blockName,
                 }
@@ -345,7 +340,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 }),
               )
 
-              const collapsedRowIDs = preferences?.fields?.[fieldPath]?.collapsed
+              const collapsedRowIDs = preferences?.fields?.[fieldPath.join('.')]?.collapsed
 
               acc.rowMetadata.push({
                 id: row.id,
@@ -384,7 +379,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         // Add field to state
         if (!omitParents && (!filter || filter(args))) {
-          state[fieldPath] = fieldState
+          state[fieldPath.join('.')] = fieldState
         }
 
         break
@@ -393,7 +388,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       case 'group': {
         if (!filter || filter(args)) {
           fieldState.disableFormData = true
-          state[fieldPath] = fieldState
+          state[fieldPath.join('.')] = fieldState
         }
 
         await iterateFields({
@@ -500,7 +495,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         }
 
         if (!filter || filter(args)) {
-          state[fieldPath] = fieldState
+          state[fieldPath.join('.')] = fieldState
         }
 
         break
@@ -512,7 +507,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         // Add field to state
         if (!filter || filter(args)) {
-          state[fieldPath] = fieldState
+          state[fieldPath.join('.')] = fieldState
         }
 
         break
@@ -522,7 +517,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     // Handle field types that do not use names (row, etc)
 
     if (!filter || filter(args)) {
-      state[fieldPath] = {
+      state[fieldPath.join('.')] = {
         disableFormData: true,
         errorPaths: [],
         initialValue: undefined,
@@ -559,6 +554,16 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     const promises = field.tabs.map((tab, tabIndex) => {
       const isNamedTab = tabHasName(tab)
 
+      const tabPaths = getFieldPaths({
+        field: {
+          ...tab,
+          type: 'tab',
+        },
+        parentPath: fieldPath,
+        parentSchemaPath: fieldSchemaPath,
+        schemaIndex: tabIndex,
+      })
+
       return iterateFields({
         id,
         // passthrough parent functionality
@@ -573,14 +578,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         omitParents,
         operation,
         parentPassesCondition: passesCondition,
-        parentPath: isNamedTab
-          ? `${fieldPath}${tab.name}`
-          : generatePath({
-              fieldType: 'tab',
-              parentPath,
-              schemaIndex: tabIndex,
-            }),
-        parentSchemaPath: isNamedTab ? `${fieldSchemaPath}.${tab.name}` : fieldSchemaPath,
+        parentPath: tabPaths.path,
+        parentSchemaPath: tabPaths.schemaPath,
         preferences,
         req,
         skipConditionChecks,
@@ -592,7 +591,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     await Promise.all(promises)
   } else if (field.type === 'ui') {
     if (!filter || filter(args)) {
-      state[fieldPath] = {
+      state[fieldPath.join('.')] = {
         disableFormData: true,
         errorPaths: [],
         fieldSchema: includeSchema ? field : undefined,

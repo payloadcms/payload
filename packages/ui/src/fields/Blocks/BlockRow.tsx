@@ -135,7 +135,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
         key={row.id}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        <RenderFields fields={fields} path={path} />
+        <RenderFields fields={fields} parentPath={path.split('.')} />
       </Collapsible>
     </div>
   )

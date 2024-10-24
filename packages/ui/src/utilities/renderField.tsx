@@ -17,7 +17,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { fieldAffectsData, fieldIsSidebar, generatePath } from 'payload/shared'
+import { fieldAffectsData, fieldIsSidebar } from 'payload/shared'
 import React from 'react'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'

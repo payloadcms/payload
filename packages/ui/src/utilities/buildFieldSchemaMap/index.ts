@@ -56,7 +56,7 @@ export const buildFieldSchemaMap = (args: {
         fields: matchedCollection.fields,
         i18n,
         schemaMap,
-        schemaPath: collectionSlug,
+        schemaPath: [collectionSlug],
       })
     }
   } else if (globalSlug) {
@@ -72,7 +72,7 @@ export const buildFieldSchemaMap = (args: {
         fields: matchedGlobal.fields,
         i18n,
         schemaMap,
-        schemaPath: globalSlug,
+        schemaPath: [globalSlug],
       })
     }
   }

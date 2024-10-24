@@ -1,11 +1,9 @@
 import type {
-  ClientConfig,
   Data,
   FormState,
   ImportMap,
   Locale,
   PayloadRequest,
-  RenderedField,
   RenderedFieldMap,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
@@ -21,7 +19,7 @@ export const getDocumentData = async (args: {
   importMap: ImportMap
   locale: Locale
   req: PayloadRequest
-  schemaPath?: string
+  schemaPath?: string[]
 }): Promise<{
   data: Data
   formState: FormState
@@ -29,7 +27,11 @@ export const getDocumentData = async (args: {
 }> => {
   const { id, collectionConfig, globalConfig, locale, req, schemaPath: schemaPathFromProps } = args
 
-  const schemaPath = schemaPathFromProps || collectionConfig?.slug || globalConfig?.slug
+  const schemaPath = schemaPathFromProps?.length
+    ? schemaPathFromProps
+    : collectionConfig?.slug
+      ? [collectionConfig.slug]
+      : [globalConfig?.slug]
 
   try {
     const result = await buildFormState({
@@ -57,7 +59,7 @@ export const getDocumentData = async (args: {
       formState: {
         fields: {
           initialValue: undefined,
-          schemaPath: '',
+          schemaPath: [],
           valid: false,
           value: undefined,
         },

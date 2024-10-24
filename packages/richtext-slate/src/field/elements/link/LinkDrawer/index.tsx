@@ -41,7 +41,7 @@ export const LinkDrawer: React.FC<Props> = ({
         id,
         formState: prevFormState,
         operation: 'update',
-        schemaPath: fieldMapPath,
+        schemaPath: fieldMapPath ? fieldMapPath.split('.') : [],
       })
 
       return state
@@ -59,7 +59,7 @@ export const LinkDrawer: React.FC<Props> = ({
         onChange={[onChange]}
         onSubmit={handleModalSubmit}
       >
-        <RenderFields fields={fields} forceRender path="" readOnly={false} schemaPath="" />
+        <RenderFields fields={fields} forceRender parentPath={[]} readOnly={false} schemaPath="" />
         <LinkSubmit />
       </Form>
     </Drawer>

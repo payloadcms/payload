@@ -77,7 +77,7 @@ export const UploadDrawer: React.FC<{
         collectionSlug,
         data,
         operation: 'update',
-        schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
+        schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`.split('.'),
       })
 
       setInitialState(state)
@@ -102,7 +102,7 @@ export const UploadDrawer: React.FC<{
         id,
         formState: prevFormState,
         operation: 'update',
-        schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
+        schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`.split('.'),
       })
 
       return state

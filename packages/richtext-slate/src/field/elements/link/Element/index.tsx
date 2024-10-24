@@ -103,7 +103,7 @@ export const LinkElement = () => {
       const { state } = await getFormState({
         data,
         operation: 'update',
-        schemaPath: fieldMapPath,
+        schemaPath: fieldMapPath ? fieldMapPath.split('.') : [],
       })
 
       setInitialState(state)

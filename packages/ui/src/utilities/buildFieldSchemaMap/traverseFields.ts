@@ -2,16 +2,14 @@ import type { I18n } from '@payloadcms/translations'
 import type { Field, FieldSchemaMap, SanitizedConfig } from 'payload'
 
 import { MissingEditorProp } from 'payload'
-import { generatePath, tabHasName } from 'payload/shared'
-
-import { ArrayFieldComponent } from '../../fields/Array/index.js'
+import { getFieldPaths } from 'payload/shared'
 
 type Args = {
   config: SanitizedConfig
   fields: Field[]
   i18n: I18n<any, any>
   schemaMap: FieldSchemaMap
-  schemaPath: string
+  schemaPath: string[]
 }
 
 // ArrayFields = {
@@ -30,18 +28,17 @@ export const traverseFields = ({
   schemaPath: parentSchemaPath,
 }: Args) => {
   for (const [index, field] of fields.entries()) {
-    const schemaPath = generatePath({
-      name: 'name' in field ? field.name : undefined,
-      fieldType: field.type,
-      parentPath: parentSchemaPath,
+    const { schemaPath } = getFieldPaths({
+      field,
+      parentPath: [],
+      parentSchemaPath,
       schemaIndex: index,
     })
-    schemaMap.set(schemaPath, field)
+    schemaMap.set(schemaPath.join('.'), field)
 
     switch (field.type) {
       case 'group':
       case 'array':
-        schemaMap.set(schemaPath, field)
         traverseFields({
           config,
           fields: field.fields,
@@ -66,9 +63,9 @@ export const traverseFields = ({
 
       case 'blocks':
         field.blocks.map((block) => {
-          const blockSchemaPath = `${schemaPath}.${block.slug}`
+          const blockSchemaPath = [...schemaPath, block.slug]
 
-          schemaMap.set(blockSchemaPath, block)
+          schemaMap.set(blockSchemaPath.join('.'), block)
 
           traverseFields({
             config,
@@ -104,14 +101,17 @@ export const traverseFields = ({
 
       case 'tabs':
         field.tabs.map((tab, tabIndex) => {
-          const tabSchemaPath = generatePath({
-            name: tabHasName(tab) ? tab.name : undefined,
-            fieldType: field.type,
-            parentPath: schemaPath,
+          const { schemaPath: tabSchemaPath } = getFieldPaths({
+            field: {
+              ...tab,
+              type: 'tab',
+            },
+            parentPath: [],
+            parentSchemaPath: schemaPath,
             schemaIndex: tabIndex,
           })
 
-          schemaMap.set(tabSchemaPath, tab)
+          schemaMap.set(tabSchemaPath.join('.'), tab)
 
           traverseFields({
             config,

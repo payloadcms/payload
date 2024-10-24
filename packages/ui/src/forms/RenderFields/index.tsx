@@ -1,6 +1,6 @@
 'use client'
 
-import { generatePath } from 'payload/shared'
+import { getFieldPaths } from 'payload/shared'
 import React, { Fragment, useState } from 'react'
 
 import type { Props } from './types.js'
@@ -16,7 +16,7 @@ const baseClass = 'render-fields'
 export { Props }
 
 export const RenderFields: React.FC<Props> = (props) => {
-  const { className, fields, forceRender, margins, path: parentPath } = props
+  const { className, fields, forceRender, margins, parentPath } = props
 
   const { getFields } = useForm()
 
@@ -70,14 +70,14 @@ export const RenderFields: React.FC<Props> = (props) => {
         ref={intersectionRef}
       >
         {fields.map((field, i) => {
-          const path = generatePath({
-            name: 'name' in field ? field.name : undefined,
-            fieldType: field.type,
+          const { path } = getFieldPaths({
+            field,
             parentPath,
+            parentSchemaPath: [],
             schemaIndex: i,
           })
 
-          const CustomField = formFields[path]?.customComponents?.Field
+          const CustomField = formFields[path.join('.')]?.customComponents?.Field
 
           const DefaultField = fieldComponents?.[field?.type]
 
@@ -91,7 +91,12 @@ export const RenderFields: React.FC<Props> = (props) => {
                 CustomField
               ) : (
                 // TODO: Pass other properties
-                <DefaultField field={field} key={i} path={path} schemaPath={field._schemaPath} />
+                <DefaultField
+                  field={field}
+                  key={i}
+                  path={path.join('.')}
+                  schemaPath={field._schemaPath.join('.')}
+                />
               )}
             </Fragment>
           )

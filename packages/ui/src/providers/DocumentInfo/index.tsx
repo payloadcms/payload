@@ -531,7 +531,7 @@ const DocumentInfo: React.FC<
         globalSlug,
         locale,
         operation,
-        schemaPath: collectionSlug || globalSlug,
+        schemaPath: collectionSlug ? [collectionSlug] : [globalSlug],
         signal: abortController.signal,
       })
 
@@ -577,7 +577,7 @@ const DocumentInfo: React.FC<
             globalSlug,
             locale,
             operation,
-            schemaPath: collectionSlug || globalSlug,
+            schemaPath: collectionSlug ? [collectionSlug] : [globalSlug],
             signal: abortController.signal,
           })
 

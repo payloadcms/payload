@@ -24,7 +24,7 @@ const RowFieldComponent: RowFieldClientComponent = (props) => {
           className={`${baseClass}__fields`}
           fields={fields}
           margins={false}
-          path={props.path}
+          parentPath={props.path?.split('.')}
         />
       </div>
     </RowProvider>
