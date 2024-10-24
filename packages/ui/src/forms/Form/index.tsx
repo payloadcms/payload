@@ -224,6 +224,8 @@ export const Form: React.FC<FormProps> = (props) => {
         await wait(100)
       }
 
+      const preparedFields = prepareFields(fields)
+
       // Execute server side validations
       if (Array.isArray(beforeSubmit)) {
         let revalidatedFormState: FormState
@@ -232,7 +234,7 @@ export const Form: React.FC<FormProps> = (props) => {
           await priorOnChange
 
           const result = await beforeSubmitFn({
-            formState: prepareFields(fields) as FormState,
+            formState: preparedFields as FormState,
           })
 
           revalidatedFormState = result
@@ -263,11 +265,11 @@ export const Form: React.FC<FormProps> = (props) => {
       // If submit handler comes through via props, run that
       if (onSubmit) {
         const data = {
-          ...reduceFieldsToValues(fields, true),
+          ...reduceFieldsToValues(preparedFields, true),
           ...overrides,
         }
 
-        onSubmit(fields, data)
+        onSubmit(preparedFields, data)
       }
 
       if (!hasFormSubmitAction) {
@@ -425,7 +427,8 @@ export const Form: React.FC<FormProps> = (props) => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const createFormData = useCallback((overrides: any = {}) => {
-    const data = reduceFieldsToValues(contextRef.current.fields, true)
+    const preparedFields = prepareFields(contextRef.current.fields)
+    const data = reduceFieldsToValues(preparedFields, true)
 
     const file = data?.file
 
@@ -663,8 +666,9 @@ export const Form: React.FC<FormProps> = (props) => {
           let revalidatedFormState: FormState = contextRef.current.fields
 
           for (const onChangeFn of onChange) {
+            const prepared = prepareFields(revalidatedFormState)
             revalidatedFormState = await onChangeFn({
-              formState: prepareFields(revalidatedFormState) as FormState,
+              formState: prepared as FormState,
             })
           }
 

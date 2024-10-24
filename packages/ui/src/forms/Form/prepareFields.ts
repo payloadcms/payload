@@ -25,7 +25,23 @@ export const prepareFields = (
   return Object.keys(fields).reduce(
     (acc, key) => {
       const newField = sanitizeField(fields[key])
-      acc[key] = newField
+
+      /**
+       * Remove all _index- schema indexes from the form state keys, as they represent fields
+       * that do not affect data and are not processed by the server
+       */
+      const keySplit = key.split('.')
+      const newKeyArray = []
+      for (const keyPart of keySplit) {
+        if (!keyPart.startsWith('_index-')) {
+          newKeyArray.push(keyPart)
+        }
+      }
+
+      if (newKeyArray.length > 0) {
+        acc[newKeyArray.join('.')] = newField
+      }
+
       return acc
     },
     {} as {
