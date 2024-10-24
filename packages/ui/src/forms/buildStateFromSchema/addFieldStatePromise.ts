@@ -273,6 +273,12 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         const { promises, rowMetadata } = blocksValue.reduce(
           (acc, row, i) => {
             const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
+            if (!block) {
+              throw new Error(
+                `Block with type "${row.blockType}" was found in block data, but no block with that type is defined in the config.`,
+              )
+            }
+
             const rowPath = `${path}.${i}`
             const rowSchemaPath = `${schemaPath}.${block.slug}`
 
