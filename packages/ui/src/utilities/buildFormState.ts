@@ -324,7 +324,7 @@ export const buildFormStateFn = async (
   }
 
   const isEntitySchema =
-    schemaPath.length && (schemaPath[0] === collectionSlug || schemaPath[0] === globalSlug)
+    schemaPath.length === 1 && (schemaPath[0] === collectionSlug || schemaPath[0] === globalSlug)
 
   /**
    * When building state for sub schemas we need to adjust:
