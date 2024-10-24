@@ -195,10 +195,14 @@ export const myTranslations: DefaultTranslationsObject = {
     columns: 'ကော်လံများ',
     columnToSort: 'ကော်လံ စီရန်',
     confirm: 'သေချာပါပြီ။',
+    confirmCopy: 'အောင်မြင်စေသည့်ကူးထားပြီးအတည်ပြုပါ',
     confirmDeletion: 'ဖျက်တော့မယ်နော်။',
     confirmDuplication: 'ပုံတူပွားခြင်းကို အတည်ပြုပါ။',
     copied: 'ကူးယူပြီးပြီ။',
     copy: 'ကူးယူမည်။',
+    copying: 'ကူးယူခြင်း',
+    copyWarning:
+      'Anda akan menulis ganti {{to}} dengan {{from}} untuk {{label}} {{title}}. Adakah anda pasti?',
     create: 'ဖန်တီးမည်။',
     created: 'ဖန်တီးခဲ့သည်။',
     createdAt: 'ဖန်တီးခဲ့သည့်အချိန်',
@@ -304,6 +308,8 @@ export const myTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} {{title}} အောင်မြင်စွာ ဖျက်သိမ်းခဲ့သည်။',
     true: 'အမှန်',
     unauthorized: 'အခွင့်မရှိပါ။',
+    unsavedChanges:
+      'Anda mempunyai perubahan yang belum disimpan. Simpan atau buang sebelum meneruskan.',
     unsavedChangesDuplicate:
       'သင့်တွင် မသိမ်းဆည်းရသေးသော ပြောင်းလဲမှုများ ရှိနေပါသည်။ ပုံတူပွားမှာ သေချာပြီလား။',
     untitled: 'ခေါင်းစဥ်မဲ့',
