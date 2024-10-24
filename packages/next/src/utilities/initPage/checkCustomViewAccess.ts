@@ -9,7 +9,6 @@ type PublicCustomView = Pick<AdminViewConfig, 'access' | 'exact' | 'path'>
  */
 export const checkCustomViewAccess = async ({
   adminRoute,
-  canAccessAdmin = false,
   config,
   req,
   route,
@@ -32,11 +31,7 @@ export const checkCustomViewAccess = async ({
 
   for await (const view of publicViews) {
     const canAccess = await view.access({
-      canAccessAdmin,
-      isExact: view.exact || false,
-      path: view.path,
       req,
-      route,
     })
 
     if (canAccess) {

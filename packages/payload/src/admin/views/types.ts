@@ -10,25 +10,7 @@ import type { PayloadRequest } from '../../types/index.js'
 import type { LanguageOptions } from '../LanguageOptions.js'
 import type { MappedComponent } from '../types.js'
 
-export type AdminViewAccessHook = (args: {
-  /**
-   * Whether the user can access admin
-   */
-  canAccessAdmin: boolean
-  /**
-   * Whether or not the route is an exact match
-   */
-  isExact: boolean
-  /**
-   * The path of the view as configured
-   */
-  path: string
-  req: PayloadRequest
-  /**
-   * The route being accessed
-   */
-  route: string
-}) => boolean | Promise<boolean>
+export type AdminViewAccessHook = (args: { req: PayloadRequest }) => boolean | Promise<boolean>
 
 export type AdminViewConfig = {
   /**
