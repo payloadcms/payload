@@ -44,7 +44,6 @@ export type ServerComponentProps = {
 
 type Args = {
   config: SanitizedConfig
-  entitySlug?: string
   fieldSchemaMap: FieldSchemaMap
   formState: FormStateWithoutComponents
   i18n: I18n
@@ -57,14 +56,13 @@ type OutputArgs = {
 } & Omit<Args, 'formState'>
 
 export function attachComponentsToFormState(args: Args): args is OutputArgs {
-  const { config, entitySlug, fieldSchemaMap, formState, i18n, payload, permissions } =
-    args as OutputArgs
+  const { config, fieldSchemaMap, formState, i18n, payload, permissions } = args as OutputArgs
 
   Object.entries(formState).forEach(([path, fieldState]) => {
-    const fieldConfig = fieldSchemaMap.get(`${entitySlug}.${fieldState.schemaPath}`)
+    const fieldConfig = fieldSchemaMap.get(fieldState.schemaPath)
 
     if (!fieldConfig) {
-      throw new Error(`Field config not found for ${entitySlug}.${fieldState.schemaPath}`)
+      throw new Error(`Field config not found for ${fieldState.schemaPath}`)
     }
 
     const clientField = createClientField({

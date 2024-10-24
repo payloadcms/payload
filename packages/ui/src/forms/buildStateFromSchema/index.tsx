@@ -18,11 +18,22 @@ type Args = {
   path?: string
   preferences: DocumentPreferences
   req: PayloadRequest
+  schemaPath?: string
   siblingData?: Data
 }
 
 export const buildStateFromSchema = async (args: Args): Promise<FormStateWithoutComponents> => {
-  const { id, collectionSlug, data = {}, fields, operation, path = '', preferences, req } = args
+  const {
+    id,
+    collectionSlug,
+    data = {},
+    fields,
+    operation,
+    path = '',
+    preferences,
+    req,
+    schemaPath = '',
+  } = args
 
   if (fields) {
     const state: FormStateWithoutComponents = {}
@@ -50,7 +61,7 @@ export const buildStateFromSchema = async (args: Args): Promise<FormStateWithout
       path,
       preferences,
       req,
-      schemaPath: '',
+      schemaPath,
       state,
     })
 

@@ -323,6 +323,7 @@ export const buildFormStateFn = async (
     path,
     preferences: docPreferences || { fields: {} },
     req,
+    schemaPath,
   })
 
   let lockedStateResult = undefined
@@ -407,7 +408,6 @@ export const buildFormStateFn = async (
   // mutates form state and adds custom components to field paths
   attachComponentsToFormState({
     config,
-    entitySlug: collectionSlug || globalSlug,
     fieldSchemaMap,
     formState: formStateResult,
     i18n,
