@@ -1,4 +1,4 @@
-import type { ClientField, Data, FormField, FormState, Row, SchemaAccessor, User } from 'payload'
+import type { ClientField, Data, FormField, FormState, Row, User } from 'payload'
 import type React from 'react'
 import type { Dispatch } from 'react'
 
@@ -178,11 +178,11 @@ export type Context = {
   addFieldRow: ({
     data,
     path,
-    schemaAccessor,
+    schemaPath,
   }: {
     data?: Data
     path: string
-    schemaAccessor: SchemaAccessor
+    schemaPath: string
   }) => Promise<void>
   buildRowErrors: () => void
   createFormData: CreateFormData
@@ -204,12 +204,12 @@ export type Context = {
     data,
     path,
     rowIndex,
-    schemaAccessor,
+    schemaPath,
   }: {
     data?: Data
     path: string
     rowIndex: number
-    schemaAccessor: SchemaAccessor
+    schemaPath: string
   }) => Promise<void>
   replaceState: (state: FormState) => void
   reset: Reset

@@ -333,7 +333,7 @@ export type {
   GenericErrorProps,
 } from './forms/Error.js'
 
-export type { FormFieldBase, ServerFieldBase } from './forms/Field.js'
+export type { ClientFieldBase, FormFieldBase, ServerFieldBase } from './forms/Field.js'
 
 export type {
   BuildFormStateArgs,

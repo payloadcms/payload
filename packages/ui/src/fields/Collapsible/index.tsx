@@ -26,11 +26,10 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
       admin: { className, initCollapsed = false, readOnly: readOnlyFromAdmin } = {},
       fields,
     },
-    indexPath,
     path,
     readOnly: readOnlyFromTopLevelProps,
     RowLabel,
-    schemaAccessor: { schemaPath },
+    schemaPath,
   } = props
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
@@ -42,7 +41,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
   const [collapsedOnMount, setCollapsedOnMount] = useState<boolean>()
-  const fieldPreferencesKey = `collapsible-${indexPath?.replace(/\./g, '__')}`
+  const fieldPreferencesKey = `collapsible-${schemaPath?.replace(/\./g, '__')}`
   const [errorCount, setErrorCount] = useState(0)
   const fieldHasErrors = errorCount > 0
 

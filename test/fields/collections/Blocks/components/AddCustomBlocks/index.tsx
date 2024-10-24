@@ -23,9 +23,7 @@ export const AddCustomBlocks: React.FC = () => {
             const renderedFieldMap = await addFieldRow({
               data: { block1Title: 'Block 1: Prefilled Title', blockType: 'block-1' },
               path: blocksPath,
-              schemaAccessor: {
-                schemaPath: `${blockFieldsSlug}.${blocksPath}.block-1`,
-              },
+              schemaPath: `${blockFieldsSlug}.${blocksPath}.block-1`,
             })
 
             // HOW DO WE THROW THIS INTO THE PROPER CONTEXT?!?!?!
@@ -41,9 +39,7 @@ export const AddCustomBlocks: React.FC = () => {
             const renderedFieldMap = addFieldRow({
               data: { block2Title: 'Block 2: Prefilled Title', blockType: 'block-2' },
               path: blocksPath,
-              schemaAccessor: {
-                schemaPath: `${blockFieldsSlug}.${blocksPath}.block-2`,
-              },
+              schemaPath: `${blockFieldsSlug}.${blocksPath}.block-2`,
             })
 
             // HOW DO WE THROW THIS INTO THE PROPER CONTEXT?!?!?!

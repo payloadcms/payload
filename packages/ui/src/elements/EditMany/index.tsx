@@ -134,7 +134,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
           collectionSlug: slug,
           data: {},
           operation: 'update',
-          schemaAccessor: { schemaPath: slug },
+          schemaPath: slug,
         })
 
         setInitialState(result)
@@ -151,9 +151,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
         collectionSlug: slug,
         formState: prevFormState,
         operation: 'update',
-        schemaAccessor: {
-          schemaPath: slug,
-        },
+        schemaPath: slug,
       })
 
       return state

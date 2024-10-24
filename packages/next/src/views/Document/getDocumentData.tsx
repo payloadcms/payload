@@ -40,9 +40,7 @@ export const getDocumentData = async (args: {
       operation: (collectionConfig && id) || globalConfig ? 'update' : 'create',
       renderFields: true,
       req,
-      schemaAccessor: {
-        schemaPath,
-      },
+      schemaPath,
     })
 
     const data = reduceFieldsToValues(result.state, true)
@@ -50,7 +48,6 @@ export const getDocumentData = async (args: {
     return {
       data,
       formState: result.state,
-      renderedFieldMap: result.renderedFieldMap,
     }
   } catch (error) {
     console.error('Error getting document data', error) // eslint-disable-line no-console
@@ -60,6 +57,7 @@ export const getDocumentData = async (args: {
       formState: {
         fields: {
           initialValue: undefined,
+          schemaPath: '',
           valid: false,
           value: undefined,
         },

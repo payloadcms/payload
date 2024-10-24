@@ -14,7 +14,6 @@ import type {
   RenderedField,
   RenderedFieldMap,
   SanitizedConfig,
-  SchemaAccessor,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -138,7 +137,7 @@ export type ClientComponentProps = {
   readOnly?: boolean
   renderedBlocks?: RenderedField[]
   rowLabels?: React.ReactNode[]
-  schemaAccessor: SchemaAccessor
+  schemaPath: string
 }
 
 export type ServerFieldProps = {
@@ -195,11 +194,7 @@ export const renderField = (args) => {
     path,
     permissions: fieldPermissions,
     readOnly,
-    schemaAccessor: {
-      indexPath,
-      initialSchemaPath,
-      schemaPath,
-    },
+    schemaPath,
   }
 
   const serverProps: ServerFieldProps = {

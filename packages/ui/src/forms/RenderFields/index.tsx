@@ -7,6 +7,7 @@ import type { Props } from './types.js'
 
 import { useForm } from '../../forms/Form/context.js'
 import { useIntersect } from '../../hooks/useIntersect.js'
+import { useFieldComponents } from '../../providers/FieldComponents/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
@@ -35,6 +36,7 @@ export const RenderFields: React.FC<Props> = (props) => {
   const isIntersecting = Boolean(entry?.isIntersecting)
   const isAboveViewport = entry?.boundingClientRect?.top < 0
   const shouldRender = forceRender || isIntersecting || isAboveViewport
+  const fieldComponents = useFieldComponents()
 
   React.useEffect(() => {
     if (shouldRender && !hasRendered) {
@@ -44,6 +46,10 @@ export const RenderFields: React.FC<Props> = (props) => {
 
   if (!formFields) {
     return <p>No fields to render</p>
+  }
+
+  if (!fieldComponents) {
+    throw new Error('Field components not found')
   }
 
   if (!i18n) {
@@ -71,15 +77,21 @@ export const RenderFields: React.FC<Props> = (props) => {
             schemaIndex: i,
           })
 
-          const Field = formFields[path]?.customComponents?.Field
+          const CustomField = formFields[path]?.customComponents?.Field
+
+          const DefaultField = fieldComponents?.[field?.type]
 
           return (
             <Fragment key={i}>
               <p>{`path: ${path}`}</p>
-              {Field}
+              {CustomField ? (
+                CustomField
+              ) : (
+                // TODO: Pass other properties
+                <DefaultField field={field} key={i} path={path} schemaPath={field._schemaPath} />
+              )}
             </Fragment>
           )
-          // return <h1>test</h1>
         })}
       </div>
     )

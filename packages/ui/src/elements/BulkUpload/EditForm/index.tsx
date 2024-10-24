@@ -121,9 +121,7 @@ export function EditForm({ submitted }: EditFormProps) {
         docPreferences,
         formState: prevFormState,
         operation: 'create',
-        schemaAccessor: {
-          schemaPath,
-        },
+        schemaPath,
       })
 
       return newFormState

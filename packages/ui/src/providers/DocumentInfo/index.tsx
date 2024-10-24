@@ -577,9 +577,7 @@ const DocumentInfo: React.FC<
             globalSlug,
             locale,
             operation,
-            schemaAccessor: {
-              schemaPath: collectionSlug || globalSlug,
-            },
+            schemaPath: collectionSlug || globalSlug,
             signal: abortController.signal,
           })
 

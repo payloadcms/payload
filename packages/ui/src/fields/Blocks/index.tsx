@@ -48,7 +48,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     Label,
     path,
     readOnly: readOnlyFromTopLevelProps,
-    schemaAccessor,
+    schemaPath,
     validate,
   } = props
 
@@ -119,7 +119,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       await addFieldRow({
         data: { [name]: [...currentData, newRow] },
         path,
-        schemaAccessor,
+        schemaPath,
       })
 
       setModified(true)
@@ -128,7 +128,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, setModified, getDataByPath, name, schemaAccessor],
+    [addFieldRow, path, setModified, getDataByPath, name, schemaPath],
   )
 
   const duplicateRow = useCallback(
