@@ -36,6 +36,7 @@ export type ListControlsProps = {
   readonly handleSearchChange?: (search: string) => void
   readonly handleSortChange?: (sort: string) => void
   readonly handleWhereChange?: (where: Where) => void
+  readonly renderedFilters?: Map<string, React.ReactNode>
 }
 
 /**
@@ -44,7 +45,7 @@ export type ListControlsProps = {
  * the collection's documents.
  */
 export const ListControls: React.FC<ListControlsProps> = (props) => {
-  const { collectionConfig, enableColumns = true, enableSort = false } = props
+  const { collectionConfig, enableColumns = true, enableSort = false, renderedFilters } = props
 
   const { handleSearchChange, params } = useListQuery()
   const { beforeActions, collectionSlug, disableBulkDelete, disableBulkEdit } = useListInfo()
@@ -206,6 +207,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           collectionSlug={collectionConfig.slug}
           fields={collectionConfig?.fields}
           key={String(hasWhereParam.current && !params?.where)}
+          renderedFilters={renderedFilters}
         />
       </AnimateHeight>
       {enableSort && (

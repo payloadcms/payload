@@ -24,7 +24,7 @@ export { WhereBuilderProps }
  * It is part of the {@link ListControls} component which is used to render the controls (search, filter, where).
  */
 export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
-  const { collectionPluralLabel, fields } = props
+  const { collectionPluralLabel, fields, renderedFilters } = props
   const { i18n, t } = useTranslation()
 
   const [reducedFields, setReducedColumns] = useState(() => reduceClientFields({ fields, i18n }))
@@ -190,6 +190,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                               operator={initialOperator}
                               orIndex={orIndex}
                               removeCondition={removeCondition}
+                              RenderedFilter={renderedFilters?.get(initialFieldName)}
                               updateCondition={updateCondition}
                             />
                           </li>

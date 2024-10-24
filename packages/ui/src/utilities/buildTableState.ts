@@ -12,7 +12,7 @@ import { createClientConfig, formatErrors } from 'payload'
 
 import type { Column } from '../elements/Table/index.js'
 
-import { renderTable } from './renderTable.js'
+import { renderFilters, renderTable } from './renderTable.js'
 
 let cachedClientConfig = global._payload_clientConfig
 
@@ -41,11 +41,13 @@ export const getClientConfig = (args: {
 type BuildTableStateSuccessResult = {
   clientConfig?: ClientConfig
   errors?: never
+  renderedFilters: Map<string, React.ReactNode>
   state: Column[]
   Table: React.ReactNode
 }
 
 type BuildTableStateErrorResult = {
+  renderedFilters?: never
   state?: never
   Table?: never
 } & (
@@ -175,7 +177,10 @@ export const buildTableStateFn = async (
     useAsTitle: collectionConfig.admin.useAsTitle,
   })
 
+  const renderedFilters = renderFilters(fields)
+
   return {
+    renderedFilters,
     state: columnState,
     Table,
   }

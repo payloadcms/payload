@@ -3,8 +3,22 @@ import type { ClientField, CollectionConfig, Field, ImportMap, PaginatedDocs } f
 import type { Column } from '../elements/Table/index.js'
 import type { ColumnPreferences } from '../providers/ListInfo/index.js'
 
+import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { Table } from '../elements/Table/index.js'
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
+
+export const renderFilters = (fields: Field[]): Map<string, React.ReactNode> =>
+  fields.reduce(
+    (acc, field) => {
+      if ('name' in field && field.admin.components?.Filter) {
+        acc.set(field.name, <RenderServerComponent Component={field.admin.components?.Filter} />)
+      }
+
+      return acc
+    },
+    new Map() as Map<string, React.ReactNode>,
+  )
+
 export const renderTable = ({
   clientFields,
   collectionSlug,

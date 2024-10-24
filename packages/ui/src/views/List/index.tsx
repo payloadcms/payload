@@ -49,11 +49,18 @@ export type ListViewClientProps = {
   columnState: Column[]
   listPreferences?: ListPreferences
   preferenceKey?: string
+  renderedFilters?: Map<string, React.ReactNode>
   Table: React.ReactNode
 }
 
 export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
-  const { columnState, listPreferences, preferenceKey, Table: InitialTable } = props
+  const {
+    columnState,
+    listPreferences,
+    preferenceKey,
+    renderedFilters,
+    Table: InitialTable,
+  } = props
 
   const [Table, setTable] = useState(InitialTable)
 
@@ -200,7 +207,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                 )} */}
               </ListHeader>
             )}
-            <ListControls collectionConfig={collectionConfig} />
+            <ListControls collectionConfig={collectionConfig} renderedFilters={renderedFilters} />
             {/* <RenderComponent mappedComponent={beforeListTable} /> */}
             {!data.docs && (
               <StaggeredShimmers

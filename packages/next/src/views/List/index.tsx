@@ -11,7 +11,7 @@ import { formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import { filterFields } from 'packages/ui/src/elements/TableColumns/filterFields.js'
 import { getInitialColumns } from 'packages/ui/src/elements/TableColumns/getInitialColumns.js'
-import { renderTable } from 'packages/ui/src/utilities/renderTable.js'
+import { renderFilters, renderTable } from 'packages/ui/src/utilities/renderTable.js'
 import { mergeListSearchAndWhere } from 'payload'
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
@@ -144,10 +144,13 @@ export const ListView: React.FC<AdminViewProps> = async ({
       useAsTitle,
     })
 
+    const renderedFilters = renderFilters(fields)
+
     const clientProps: ListViewClientProps = {
       collectionSlug,
       columnState,
       listPreferences,
+      renderedFilters,
       Table,
     }
 
