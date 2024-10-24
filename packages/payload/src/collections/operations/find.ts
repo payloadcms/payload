@@ -8,7 +8,11 @@ import type {
   TransformCollectionWithSelect,
   Where,
 } from '../../types/index.js'
-import type { Collection, DataFromCollectionSlug } from '../config/types.js'
+import type {
+  Collection,
+  DataFromCollectionSlug,
+  SelectFromCollectionSlug,
+} from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'

@@ -1,4 +1,4 @@
-import type { JoinQuery, PayloadRequest, QueryDrafts, SanitizedCollectionConfig } from 'payload'
+import type { PayloadRequest, QueryDrafts, SanitizedCollectionConfig } from 'payload'
 
 import { buildVersionCollectionFields, combineQueries } from 'payload'
 import toSnakeCase from 'to-snake-case'
