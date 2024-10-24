@@ -272,7 +272,8 @@ describe('lexicalBlocks', () => {
 
       const urlField = drawerContent.locator('input#field-url').first()
       await expect(urlField).toBeVisible()
-      // Fill with https://www.payloadcms.com
+      await expect(urlField).toHaveValue('https://')
+      await wait(1000)
       await urlField.fill('https://www.payloadcms.com')
       await expect(urlField).toHaveValue('https://www.payloadcms.com')
       await drawerContent.locator('.form-submit button').click({ delay: 100 })

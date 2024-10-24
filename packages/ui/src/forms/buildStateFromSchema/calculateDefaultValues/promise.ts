@@ -25,7 +25,7 @@ export const defaultValuePromise = async <T>({
 }: Args<T>): Promise<void> => {
   if (fieldAffectsData(field)) {
     if (
-      typeof siblingData[field.name] === 'undefined' &&
+      typeof siblingData?.[field.name] === 'undefined' &&
       typeof field.defaultValue !== 'undefined'
     ) {
       siblingData[field.name] = await getDefaultValue({
@@ -40,7 +40,7 @@ export const defaultValuePromise = async <T>({
   // Traverse subfields
   switch (field.type) {
     case 'group': {
-      if (typeof siblingData[field.name] !== 'object') {
+      if (typeof siblingData?.[field.name] !== 'object') {
         siblingData[field.name] = {}
       }
 

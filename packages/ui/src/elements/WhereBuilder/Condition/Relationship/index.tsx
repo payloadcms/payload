@@ -253,7 +253,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
         if (controller.signal) {
           try {
             controller.abort()
-          } catch (error) {
+          } catch (_err) {
             // swallow error
           }
         }

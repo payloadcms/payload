@@ -5,13 +5,12 @@ import {
   Form,
   FormSubmit,
   RenderFields,
-  useConfig,
   useDocumentInfo,
   useFieldProps,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
 import type { FieldsDrawerProps } from './Drawer.js'
@@ -29,11 +28,16 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   const { t } = useTranslation()
   const { id } = useDocumentInfo()
   const { schemaPath } = useFieldProps()
-  const { config } = useConfig()
-  const [initialState, setInitialState] = useState<false | FormState>(false)
+
+  const abortControllerRef = useRef(new AbortController())
+
+  const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
+
   const {
     field: { richTextComponentMap },
   } = useEditorConfigContext()
+
+  const { getFormState } = useServerFunctions()
 
   const componentMapRenderedFieldsPath = `lexical_internal_feature.${featureKey}.fields${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
   const schemaFieldsPath =
@@ -44,42 +48,74 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     fieldMapOverride ?? (richTextComponentMap?.get(componentMapRenderedFieldsPath) as ClientField[]) // Field Schema
 
   useEffect(() => {
+    const abortController = new AbortController()
+
     const awaitInitialState = async () => {
       const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
-          id: id!,
-          data: data ?? {},
-          operation: 'update',
-          schemaPath: schemaFieldsPath,
-        },
-        serverURL: config.serverURL,
-      }) // Form State
+        id,
+        data: data ?? {},
+        operation: 'update',
+        schemaPath: schemaFieldsPath,
+        signal: abortController.signal,
+      })
 
       setInitialState(state)
     }
 
     void awaitInitialState()
-  }, [config.routes.api, config.serverURL, schemaFieldsPath, id, data])
+
+    return () => {
+      try {
+        abortController.abort()
+      } catch (_err) {
+        // swallow error
+      }
+    }
+  }, [schemaFieldsPath, id, data, getFormState])
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
+      // only allow a single onChange event to process at a time
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+
       const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
-          id: id!,
-          formState: prevFormState,
-          operation: 'update',
-          schemaPath: schemaFieldsPath,
-        },
-        serverURL: config.serverURL,
+        id,
+        formState: prevFormState,
+        operation: 'update',
+        schemaPath: schemaFieldsPath,
+        signal: abortController.signal,
       })
+
+      if (!state) {
+        return prevFormState
+      }
 
       return state
     },
-
-    [config.routes.api, config.serverURL, schemaFieldsPath, id],
+    [schemaFieldsPath, id, getFormState],
   )
+
+  // cleanup effect
+  useEffect(() => {
+    const abortController = abortControllerRef.current
+
+    return () => {
+      try {
+        abortController.abort()
+      } catch (_err) {
+        // swallow error
+      }
+    }
+  }, [])
 
   if (initialState === false) {
     return null

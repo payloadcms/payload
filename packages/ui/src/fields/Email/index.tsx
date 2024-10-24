@@ -28,15 +28,13 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
       name,
       _path: pathFromProps,
       admin: {
-        readOnly: readOnlyFromAdmin,
-
         className,
         description,
         placeholder,
+        readOnly: readOnlyFromAdmin,
         style,
         width,
       } = {} as EmailFieldClientProps['field']['admin'],
-      label,
       required,
     } = {} as EmailFieldClientProps['field'],
     field,
