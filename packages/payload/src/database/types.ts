@@ -1,5 +1,5 @@
 import type { TypeWithID } from '../collections/config/types.js'
-import type { Document, JoinQuery, Payload, PayloadRequest, Where } from '../types/index.js'
+import type { Document, JoinQuery, Payload, PayloadRequest, Sort, Where } from '../types/index.js'
 import type { TypeWithVersion } from '../versions/types.js'
 
 export type { TypeWithVersion }
@@ -180,7 +180,7 @@ export type QueryDraftsArgs = {
   page?: number
   pagination?: boolean
   req: PayloadRequest
-  sort?: string
+  sort?: Sort
   where?: Where
 }
 
@@ -207,7 +207,7 @@ export type FindArgs = {
   projection?: Record<string, unknown>
   req: PayloadRequest
   skip?: number
-  sort?: string
+  sort?: Sort
   versions?: boolean
   where?: Where
 }
@@ -230,7 +230,7 @@ type BaseVersionArgs = {
   pagination?: boolean
   req: PayloadRequest
   skip?: number
-  sort?: string
+  sort?: Sort
   versions?: boolean
   where?: Where
 }

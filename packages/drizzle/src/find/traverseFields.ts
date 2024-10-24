@@ -373,7 +373,7 @@ export const traverseFields = ({
               })
               .from(adapter.tables[joinCollectionTableName])
               .where(subQueryWhere)
-              .orderBy(orderBy.order(orderBy.column)),
+              .orderBy(() => orderBy.map(({ column, order }) => order(column))),
           })
 
           const columnName = `${path.replaceAll('.', '_')}${field.name}`
