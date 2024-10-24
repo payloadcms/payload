@@ -320,7 +320,7 @@ export const buildFormStateFn = async (
     data,
     fields: fieldOrEntityConfig.fields,
     operation,
-    path: !path || path.endsWith('.') ? path : `${path}.`,
+    path,
     preferences: docPreferences || { fields: {} },
     req,
   })
