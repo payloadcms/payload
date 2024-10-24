@@ -118,6 +118,7 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
         afterInput={field?.admin?.components?.afterInput}
         beforeInput={field?.admin?.components?.beforeInput}
         checked={checked}
+        field={field}
         id={fieldID}
         inputRef={null}
         Label={field?.admin?.components?.Label}
