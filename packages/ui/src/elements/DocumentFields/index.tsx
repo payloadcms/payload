@@ -20,6 +20,7 @@ type Args = {
   readonly docPermissions: DocumentPermissions
   readonly fields: ClientField[]
   readonly forceSidebarWrap?: boolean
+  readonly readOnly?: boolean
 }
 
 export const DocumentFields: React.FC<Args> = ({
@@ -29,6 +30,7 @@ export const DocumentFields: React.FC<Args> = ({
   docPermissions,
   fields,
   forceSidebarWrap,
+  readOnly,
 }) => {
   if (!fields) {
     return 'No fields to render'
@@ -85,8 +87,9 @@ export const DocumentFields: React.FC<Args> = ({
               className={`${baseClass}__fields`}
               fields={mainFields}
               forceRender
-              path=""
+              parentPath={[]}
               permissions={docPermissions.fields}
+              readOnly={readOnly}
             />
           </RenderIfInViewport>
           {AfterFields}
@@ -109,8 +112,9 @@ export const DocumentFields: React.FC<Args> = ({
                 <RenderFields
                   fields={sidebarFields}
                   forceRender
-                  path=""
+                  parentPath={[]}
                   permissions={docPermissions.fields}
+                  readOnly={readOnly}
                 />
               </RenderIfInViewport>
             </div>

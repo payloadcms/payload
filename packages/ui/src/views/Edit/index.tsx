@@ -526,6 +526,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
             }
             docPermissions={docPermissions}
             fields={docConfig.fields}
+            readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
           />
           {AfterDocument}
         </Form>

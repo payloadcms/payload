@@ -158,6 +158,7 @@ export const Auth: React.FC<Props> = (props) => {
                   required: true,
                 }}
                 path="password"
+                schemaPath="password"
               />
               <ConfirmPasswordField disabled={readOnly} />
             </div>

@@ -419,9 +419,10 @@ const PreviewView: React.FC<Props> = ({
             <DocumentFields
               AfterFields={AfterFields}
               BeforeFields={BeforeFields}
+              docPermissions={docPermissions}
               fields={fields}
               forceSidebarWrap
-              formState={initialState}
+              readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
             />
             {AfterDocument}
           </div>

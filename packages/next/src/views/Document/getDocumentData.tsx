@@ -4,7 +4,6 @@ import type {
   ImportMap,
   Locale,
   PayloadRequest,
-  RenderedFieldMap,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
 } from 'payload'
@@ -23,7 +22,6 @@ export const getDocumentData = async (args: {
 }): Promise<{
   data: Data
   formState: FormState
-  renderedFieldMap?: RenderedFieldMap
 }> => {
   const { id, collectionConfig, globalConfig, locale, req, schemaPath: schemaPathFromProps } = args
 

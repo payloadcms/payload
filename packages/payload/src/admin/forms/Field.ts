@@ -4,7 +4,7 @@ import type { User } from '../../auth/types.js'
 import type { Locale, ServerProps } from '../../config/types.js'
 import type { ClientField, Field, Validate } from '../../fields/config/types.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { FieldSlots, RenderedFieldMap } from '../types.js'
+import type { FieldSlots } from '../types.js'
 import type { FieldDescriptionServerProps } from './Description.js'
 import type { FieldErrorServerProps } from './Error.js'
 import type { FieldState } from './Form.js'
@@ -29,7 +29,6 @@ export type ServerFieldBase<
   readonly field: TFieldServer
   readonly fieldState?: FieldState
   readonly labelProps?: FieldLabelServerProps<TFieldServer, TFieldClient>
-  readonly renderedFieldMap?: RenderedFieldMap
 } & FormFieldBase &
   Partial<ServerProps>
 

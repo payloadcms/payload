@@ -431,15 +431,11 @@ export type RenderedField = {
   initialSchemaPath?: string
   isSidebar: boolean
   path: string
-  renderedFieldMap?: RenderedFieldMap
   schemaPath: string
   type: FieldTypes
 }
 
-export type RenderedFieldMap = Map<string, RenderedField>
-
 export type FieldRow = {
-  renderedFieldMap: RenderedFieldMap
   RowLabel?: React.ReactNode
 }
 

@@ -28,7 +28,6 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
     indexPath,
     path,
     readOnly: readOnlyFromTopLevelProps,
-    renderedFieldMap,
   } = props
 
   const readOnly = readOnlyFromTopLevelProps || readOnlyFromAdmin
