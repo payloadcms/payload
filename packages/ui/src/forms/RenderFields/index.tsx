@@ -1,7 +1,7 @@
 'use client'
 
 import { getFieldPaths } from 'payload/shared'
-import React, { Fragment, useState } from 'react'
+import React, { Fragment } from 'react'
 
 import type { Props } from './types.js'
 
@@ -28,9 +28,8 @@ export const RenderFields: React.FC<Props> = (props) => {
     readOnly: readOnlyFromParent,
   } = props
 
-  const { getFields } = useForm()
+  const { fields: formFields } = useForm()
 
-  const [formFields] = useState(() => getFields())
   const operation = useOperation()
 
   const { i18n } = useTranslation()

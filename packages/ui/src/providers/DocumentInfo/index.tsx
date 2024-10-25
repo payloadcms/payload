@@ -582,6 +582,7 @@ const DocumentInfo: React.FC<
             globalSlug,
             locale,
             operation,
+            renderFields: true,
             schemaPath: collectionSlug ? [collectionSlug] : [globalSlug],
             signal: abortController.signal,
           })
