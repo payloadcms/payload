@@ -27,11 +27,12 @@ function DrawerContent() {
   const onDrop = React.useCallback(
     (acceptedFiles: FileList) => {
       const fileTransfer = new DataTransfer()
+      const validPatterns = uploadMimeTypes?.map((v) => v.replace('*', ''))
       for (const candidateFile of acceptedFiles) {
         if (
           uploadMimeTypes === undefined ||
           uploadMimeTypes.length === 0 ||
-          uploadMimeTypes?.includes(candidateFile.type)
+          validPatterns?.some((v) => candidateFile.type.startsWith(v))
         ) {
           fileTransfer.items.add(candidateFile)
         }
