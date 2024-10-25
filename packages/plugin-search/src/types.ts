@@ -1,5 +1,6 @@
 import type {
   CollectionAfterChangeHook,
+  CollectionAfterDeleteHook,
   CollectionConfig,
   Field,
   Payload,
@@ -45,3 +46,9 @@ export type SyncWithSearch = (
     pluginConfig: SearchPluginConfig
   } & Omit<Parameters<CollectionAfterChangeHook>[0], 'collection'>,
 ) => ReturnType<CollectionAfterChangeHook>
+
+export type DeleteFromSearch = (
+  Args: {
+    pluginConfig: SearchPluginConfig
+  } & Omit<Parameters<CollectionAfterDeleteHook>[0], 'collection'>,
+) => ReturnType<CollectionAfterDeleteHook>

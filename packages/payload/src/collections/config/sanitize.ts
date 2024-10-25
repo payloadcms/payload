@@ -71,6 +71,7 @@ export const sanitizeCollection = async (
           disableBulkEdit: true,
           hidden: true,
         },
+        index: true,
         label: ({ t }) => t('general:updatedAt'),
       })
     }

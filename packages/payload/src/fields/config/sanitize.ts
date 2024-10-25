@@ -50,6 +50,13 @@ type Args = {
   validRelationships: null | string[]
 }
 
+function generateSchemaPath({ name, path = '' }: { name?: string; path?: string }): string {
+  if (!name) {
+    return path
+  }
+  return path ? `${path}.${name}` : name
+}
+
 export const sanitizeFields = async ({
   config,
   existingFieldNames = new Set(),
@@ -58,14 +65,12 @@ export const sanitizeFields = async ({
   parentIsLocalized,
   requireFieldLevelRichTextEditor = false,
   richTextSanitizationPromises,
-  schemaPath: schemaPathArg,
+  schemaPath = [],
   validRelationships,
 }: Args): Promise<Field[]> => {
   if (!fields) {
     return []
   }
-
-  const schemaPath = schemaPathArg
 
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]
@@ -235,7 +240,6 @@ export const sanitizeFields = async ({
         block._sanitized = true
         block.fields = block.fields.concat(baseBlockFields)
         block.labels = !block.labels ? formatLabels(block.slug) : block.labels
-
         block.fields = await sanitizeFields({
           config,
           existingFieldNames: new Set(),

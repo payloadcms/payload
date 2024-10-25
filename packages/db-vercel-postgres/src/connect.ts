@@ -26,7 +26,8 @@ export const connect: Connect = async function connect(
     const logger = this.logger || false
     // Passed the poolOptions if provided,
     // else have vercel/postgres detect the connection string from the environment
-    this.drizzle = drizzle(this.poolOptions ? new VercelPool(this.poolOptions) : sql, {
+    this.drizzle = drizzle({
+      client: this.poolOptions ? new VercelPool(this.poolOptions) : sql,
       logger,
       schema: this.schema,
     })
@@ -39,7 +40,24 @@ export const connect: Connect = async function connect(
       }
     }
   } catch (err) {
-    this.payload.logger.error({ err, msg: `Error: cannot connect to Postgres: ${err.message}` })
+    if (err.message?.match(/database .* does not exist/i) && !this.disableCreateDatabase) {
+      // capitalize first char of the err msg
+      this.payload.logger.info(
+        `${err.message.charAt(0).toUpperCase() + err.message.slice(1)}, creating...`,
+      )
+      const isCreated = await this.createDatabase()
+
+      if (isCreated) {
+        await this.connect(options)
+        return
+      }
+    } else {
+      this.payload.logger.error({
+        err,
+        msg: `Error: cannot connect to Postgres. Details: ${err.message}`,
+      })
+    }
+
     if (typeof this.rejectInitializing === 'function') {
       this.rejectInitializing()
     }

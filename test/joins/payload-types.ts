@@ -14,6 +14,8 @@ export interface Config {
     posts: Post;
     categories: Category;
     uploads: Upload;
+    versions: Version;
+    'categories-versions': CategoriesVersion;
     'localized-posts': LocalizedPost;
     'localized-categories': LocalizedCategory;
     users: User;
@@ -57,6 +59,8 @@ export interface Post {
   title?: string | null;
   upload?: (string | null) | Upload;
   category?: (string | null) | Category;
+  categories?: (string | Category)[] | null;
+  categoriesLocalized?: (string | Category)[] | null;
   group?: {
     category?: (string | null) | Category;
     camelCaseCategory?: (string | null) | Category;
@@ -97,6 +101,14 @@ export interface Category {
     docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
+  hasManyPosts?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  hasManyPostsLocalized?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
   group?: {
     relatedPosts?: {
       docs?: (string | Post)[] | null;
@@ -109,6 +121,32 @@ export interface Category {
   };
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versions".
+ */
+export interface Version {
+  id: string;
+  category?: (string | null) | Category;
+  categoryVersion?: (string | null) | CategoriesVersion;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories-versions".
+ */
+export interface CategoriesVersion {
+  id: string;
+  relatedVersions?: {
+    docs?: (string | Version)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -170,6 +208,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'uploads';
         value: string | Upload;
+      } | null)
+    | ({
+        relationTo: 'versions';
+        value: string | Version;
+      } | null)
+    | ({
+        relationTo: 'categories-versions';
+        value: string | CategoriesVersion;
       } | null)
     | ({
         relationTo: 'localized-posts';

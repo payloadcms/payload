@@ -174,6 +174,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   fieldConstraints: Record<string, Record<string, string>>
   getMigrationTemplate: (args: MigrationTemplateArgs) => string
   idType: 'serial' | 'uuid'
+  indexes: Set<string>
   initializing: Promise<void>
   insert: Insert
   localesSuffix?: string

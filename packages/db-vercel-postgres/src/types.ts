@@ -25,6 +25,11 @@ export type Args = {
    */
   beforeSchemaInit?: PostgresSchemaHook[]
   connectionString?: string
+  /**
+   * Pass `true` to disale auto database creation if it doesn't exist.
+   * @default false
+   */
+  disableCreateDatabase?: boolean
   idType?: 'serial' | 'uuid'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']

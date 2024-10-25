@@ -8,6 +8,10 @@ import { PayloadAdminBar } from 'payload-admin-bar'
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
+import './index.scss'
+
+const baseClass = 'admin-bar'
+
 const collectionLabels = {
   pages: {
     plural: 'Pages',
@@ -40,7 +44,7 @@ export const AdminBar: React.FC<{
 
   return (
     <div
-      className={cn('py-2 bg-black text-white', {
+      className={cn(baseClass, 'py-2 bg-black text-white', {
         block: show,
         hidden: !show,
       })}

@@ -188,7 +188,7 @@ export const myTranslations: DefaultTranslationsObject = {
     cancel: 'မလုပ်တော့ပါ။',
     changesNotSaved:
       'သင်၏ပြောင်းလဲမှုများကို မသိမ်းဆည်းရသေးပါ။ ယခု စာမျက်နှာက ထွက်လိုက်ပါက သင်၏ပြောင်းလဲမှုများ အကုန် ဆုံးရှုံးသွားပါမည်။ အကုန်နော်။',
-    clearAll: undefined,
+    clearAll: 'အားလုံးကိုရှင်းလင်းပါ',
     close: 'ပိတ်',
     collapse: 'ခေါက်သိမ်းပါ။',
     collections: 'စုစည်းမှူများ',
@@ -420,7 +420,7 @@ export const myTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'နောက်ဆုံး သိမ်းချက် {{distance}} ကြာပြီး',
     noFurtherVersionsFound: 'နောက်ထပ်ဗားရှင်းများ မတွေ့ပါ။',
     noRowsFound: '{{label}} အားမတွေ့ပါ။',
-    noRowsSelected: undefined,
+    noRowsSelected: 'Tiada {{label}} yang dipilih',
     preview: 'နမူနာပြရန်',
     previouslyPublished: 'တိုင်းရင်းသားထုတ်ဝေခဲ့',
     problemRestoringVersion: 'ဤဗားရှင်းကို ပြန်လည်ရယူရာတွင် ပြဿနာရှိနေသည်။',

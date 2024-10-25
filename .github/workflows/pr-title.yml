@@ -5,7 +5,6 @@ on:
     types:
       - opened
       - edited
-      - synchronize
 
 permissions:
   pull-requests: write
@@ -47,7 +46,6 @@ jobs:
             live-preview
             live-preview-react
             next
-            payload
             plugin-cloud
             plugin-cloud-storage
             plugin-form-builder

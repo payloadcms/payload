@@ -16,6 +16,7 @@ export const updateByID: CollectionRouteHandlerWithID = async ({
   const depth = searchParams.get('depth')
   const autosave = searchParams.get('autosave') === 'true'
   const draft = searchParams.get('draft') === 'true'
+  const overrideLock = searchParams.get('overrideLock')
   const publishSpecificLocale = req.query.publishSpecificLocale as string | undefined
 
   const id = sanitizeCollectionID({
@@ -31,6 +32,7 @@ export const updateByID: CollectionRouteHandlerWithID = async ({
     data: req.data,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft,
+    overrideLock: Boolean(overrideLock === 'true'),
     publishSpecificLocale,
     req,
   })

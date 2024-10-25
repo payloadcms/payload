@@ -24,6 +24,11 @@ export type Args = {
    * To generate Drizzle schema from the database, see [Drizzle Kit introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
    */
   beforeSchemaInit?: PostgresSchemaHook[]
+  /**
+   * Pass `true` to disale auto database creation if it doesn't exist.
+   * @default false
+   */
+  disableCreateDatabase?: boolean
   idType?: 'serial' | 'uuid'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']

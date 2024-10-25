@@ -44,11 +44,12 @@ export type VisibleEntities = {
 export type InitPageResult = {
   collectionConfig?: SanitizedCollectionConfig
   cookies: Map<string, string>
-  docID?: string
+  docID?: number | string
   globalConfig?: SanitizedGlobalConfig
   languageOptions: LanguageOptions
   locale?: Locale
   permissions: Permissions
+  redirectTo?: string
   req: PayloadRequest
   translations: ClientTranslationsObject
   visibleEntities: VisibleEntities

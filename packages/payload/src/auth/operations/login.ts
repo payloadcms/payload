@@ -1,5 +1,3 @@
-import jwt from 'jsonwebtoken'
-
 import type {
   AuthOperationsFromCollectionSlug,
   Collection,
@@ -16,6 +14,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import isLocked from '../isLocked.js'
+import { jwtSign } from '../jwt.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js'
 import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
@@ -234,8 +233,10 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
         })) || user
     }, Promise.resolve())
 
-    const token = jwt.sign(fieldsToSign, secret, {
-      expiresIn: collectionConfig.auth.tokenExpiration,
+    const { exp, token } = await jwtSign({
+      fieldsToSign,
+      secret,
+      tokenExpiration: collectionConfig.auth.tokenExpiration,
     })
 
     req.user = user
@@ -308,7 +309,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     }, Promise.resolve())
 
     let result: { user: DataFromCollectionSlug<TSlug> } & Result = {
-      exp: (jwt.decode(token) as jwt.JwtPayload).exp,
+      exp,
       token,
       user,
     }

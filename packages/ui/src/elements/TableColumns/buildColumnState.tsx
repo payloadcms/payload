@@ -129,7 +129,11 @@ export const buildColumnState = (args: Args): Column[] => {
     const Label = CustomLabelToRender ? (
       <CustomLabelToRender field={field} />
     ) : (
-      <FieldLabel label={'label' in field ? (field.label as StaticLabel) : undefined} />
+      <FieldLabel
+        hideLocale
+        label={'label' in field ? (field.label as StaticLabel) : undefined}
+        unstyled
+      />
     )
 
     const fieldAffectsDataSubFields =

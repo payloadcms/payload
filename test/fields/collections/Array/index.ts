@@ -24,6 +24,10 @@ const ArrayFields: CollectionConfig = {
           required: true,
         },
         {
+          name: 'anotherText',
+          type: 'text',
+        },
+        {
           name: 'localizedText',
           type: 'text',
           localized: true,

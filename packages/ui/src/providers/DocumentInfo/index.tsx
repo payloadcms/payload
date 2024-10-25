@@ -361,6 +361,11 @@ const DocumentInfo: React.FC<
               and: [
                 ...versionParams.where.and,
                 {
+                  'version._status': {
+                    equals: 'draft',
+                  },
+                },
+                {
                   updatedAt: {
                     greater_than: publishedJSON.updatedAt,
                   },

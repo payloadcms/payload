@@ -1,16 +1,11 @@
 'use client'
-import type {
-  ClientCollectionConfig,
-  ClientUser,
-  FormState,
-  LoginWithUsernameOptions,
-} from 'payload'
+import type { FormProps, UserWithToken } from '@payloadcms/ui'
+import type { ClientCollectionConfig, FormState, LoginWithUsernameOptions } from 'payload'
 
 import {
   ConfirmPasswordField,
   EmailAndUsernameFields,
   Form,
-  type FormProps,
   FormSubmit,
   PasswordField,
   useAuth,
@@ -54,8 +49,8 @@ export const CreateFirstUserClient: React.FC<{
     [userSlug, getFormState],
   )
 
-  const handleFirstRegister = (data: { user: ClientUser }) => {
-    setUser(data.user)
+  const handleFirstRegister = (data: UserWithToken) => {
+    setUser(data)
   }
 
   return (

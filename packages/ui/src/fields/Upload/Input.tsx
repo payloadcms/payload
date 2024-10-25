@@ -144,6 +144,10 @@ export function UploadInput(props: UploadInputProps) {
   const loadedValueDocsRef = React.useRef<boolean>(false)
 
   const canCreate = useMemo(() => {
+    if (readOnly || !allowCreate) {
+      return false
+    }
+
     if (typeof activeRelationTo === 'string') {
       if (permissions?.collections && permissions.collections?.[activeRelationTo]?.create) {
         if (permissions.collections[activeRelationTo].create?.permission === true) {
@@ -153,7 +157,7 @@ export function UploadInput(props: UploadInputProps) {
     }
 
     return false
-  }, [activeRelationTo, permissions])
+  }, [activeRelationTo, permissions, readOnly, allowCreate])
 
   const onChange = React.useCallback(
     (newValue) => {
@@ -463,10 +467,14 @@ export function UploadInput(props: UploadInputProps) {
         ) : null}
 
         {showDropzone ? (
-          <Dropzone disabled={!allowCreate} multipleFiles={hasMany} onChange={onLocalFileSelection}>
+          <Dropzone
+            disabled={readOnly || !canCreate}
+            multipleFiles={hasMany}
+            onChange={onLocalFileSelection}
+          >
             <div className={`${baseClass}__dropzoneContent`}>
               <div className={`${baseClass}__dropzoneContent__buttons`}>
-                {allowCreate && (
+                {canCreate && (
                   <>
                     <Button
                       buttonStyle="pill"
@@ -502,14 +510,14 @@ export function UploadInput(props: UploadInputProps) {
 
                 <CreateDocDrawer onSave={onDocCreate} />
                 <ListDrawer
-                  allowCreate={allowCreate}
+                  allowCreate={canCreate}
                   enableRowSelections={hasMany}
                   onBulkSelect={onListBulkSelect}
                   onSelect={onListSelect}
                 />
               </div>
 
-              {allowCreate && (
+              {canCreate && (
                 <p className={`${baseClass}__dragAndDropText`}>
                   {t('general:or')} {t('upload:dragAndDrop')}
                 </p>

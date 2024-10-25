@@ -29,6 +29,16 @@ export default buildConfigWithDefaults({
           required: true,
         },
         {
+          name: 'hasTransaction',
+          type: 'checkbox',
+          hooks: {
+            beforeChange: [({ req }) => !!req.transactionID],
+          },
+          admin: {
+            readOnly: true,
+          },
+        },
+        {
           name: 'throwAfterChange',
           type: 'checkbox',
           defaultValue: false,
@@ -307,6 +317,42 @@ export default buildConfigWithDefaults({
           type: 'array',
           virtual: true,
           fields: [],
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              type: 'text',
+              name: 'textWithinRow',
+              virtual: true,
+            },
+          ],
+        },
+        {
+          type: 'collapsible',
+          fields: [
+            {
+              type: 'text',
+              name: 'textWithinCollapsible',
+              virtual: true,
+            },
+          ],
+          label: 'Colllapsible',
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'tab',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'textWithinTabs',
+                  virtual: true,
+                },
+              ],
+            },
+          ],
         },
       ],
     },
