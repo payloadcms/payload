@@ -136,7 +136,7 @@ export const RenderFields: React.FC<Props> = (props) => {
                   forceRender={forceRender}
                   key={i}
                   path={path.join('.')}
-                  readOnly
+                  readOnly={isReadOnly}
                   schemaPath={field._schemaPath.join('.')}
                 />
               )}
