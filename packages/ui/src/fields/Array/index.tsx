@@ -211,7 +211,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const showRequired = disabled && rowsData.length === 0
   const showMinRows = rowsData.length < minRows || (required && rowsData.length === 0)
-  console.log({ disabled, path })
+
   return (
     <div
       className={[

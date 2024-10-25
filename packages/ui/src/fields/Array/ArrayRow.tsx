@@ -79,7 +79,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   ]
     .filter(Boolean)
     .join(' ')
-  console.log(fields)
+
   return (
     <div
       id={`${parentPath.split('.').join('-')}-row-${rowIndex}`}

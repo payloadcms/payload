@@ -33,7 +33,6 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
     Error,
     field: {
       name,
-      _path: pathFromProps,
       admin: {
         className,
         readOnly: readOnlyFromAdmin,
@@ -46,6 +45,7 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
     Label,
     onChange: onChangeFromProps,
     partialChecked,
+    path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
@@ -109,7 +109,6 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
         AfterInput={AfterInput}
         BeforeInput={BeforeInput}
         checked={checked}
-        field={field}
         id={fieldID}
         inputRef={null}
         Label={Label}

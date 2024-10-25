@@ -88,7 +88,7 @@ export const DocumentFields: React.FC<Args> = ({
               fields={mainFields}
               forceRender
               parentPath={[]}
-              permissions={docPermissions.fields}
+              permissions={docPermissions?.fields}
               readOnly={readOnly}
             />
           </RenderIfInViewport>
@@ -113,7 +113,7 @@ export const DocumentFields: React.FC<Args> = ({
                   fields={sidebarFields}
                   forceRender
                   parentPath={[]}
-                  permissions={docPermissions.fields}
+                  permissions={docPermissions?.fields}
                   readOnly={readOnly}
                 />
               </RenderIfInViewport>

@@ -19,7 +19,7 @@ import type {
   SubmitOptions,
 } from './types.js'
 
-import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
+import { useIgnoredEffectDebounced } from '../../hooks/useIgnoredEffect.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -671,7 +671,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
-  useDebouncedEffect(
+  useIgnoredEffectDebounced(
     () => {
       const executeOnChange = async () => {
         if (Array.isArray(onChange)) {
@@ -703,10 +703,19 @@ export const Form: React.FC<FormProps> = (props) => {
         void executeOnChange()
       }
     },
-    150,
-    // Make sure we trigger this whenever modified changes (not just when `fields` changes), otherwise we will miss merging server form state for the first form update/onChange. Here's why:
-    // `fields` updates before `modified`, because setModified is in a setTimeout. So on the first change, modified is false, so we don't trigger the effect even though we should.
-    [contextRef.current.fields, dispatchFields, onChange, modified],
+    /* 
+      Make sure we trigger this whenever modified changes (not just when `fields` changes),
+      otherwise we will miss merging server form state for the first form update/onChange.
+
+      Here's why:
+        `fields` updates before `modified`, because setModified is in a setTimeout. 
+        So on the first change, modified is false, so we don't trigger the effect even though we should.
+    **/
+    [contextRef.current.fields, modified],
+    [dispatchFields, onChange],
+    {
+      delay: 250,
+    },
   )
 
   return (
