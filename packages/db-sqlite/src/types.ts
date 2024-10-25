@@ -167,7 +167,9 @@ declare module 'payload' {
     extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
       DrizzleAdapter {
     beginTransaction: (options?: SQLiteTransactionConfig) => Promise<null | number | string>
-    drizzle: LibSQLDatabase
+    drizzle: { $client: Client } & LibSQLDatabase<
+      Record<string, GenericRelation | GenericTable> & Record<string, unknown>
+    >
     /**
      * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
      * Used for returning properly formed errors from unique fields
