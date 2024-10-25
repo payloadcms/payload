@@ -7,11 +7,20 @@ import { RenderServerComponent } from '../elements/RenderServerComponent/index.j
 import { Table } from '../elements/Table/index.js'
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
 
-export const renderFilters = (fields: Field[]): Map<string, React.ReactNode> =>
+export const renderFilters = (
+  fields: Field[],
+  importMap: ImportMap,
+): Map<string, React.ReactNode> =>
   fields.reduce(
     (acc, field) => {
-      if ('name' in field && field.admin.components?.Filter) {
-        acc.set(field.name, <RenderServerComponent Component={field.admin.components?.Filter} />)
+      if ('name' in field && field.admin?.components?.Filter) {
+        acc.set(
+          field.name,
+          <RenderServerComponent
+            Component={field.admin.components?.Filter}
+            importMap={importMap}
+          />,
+        )
       }
 
       return acc

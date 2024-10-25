@@ -1,5 +1,5 @@
 import type { ListPreferences, ListViewClientProps } from '@payloadcms/ui'
-import type { AdminViewProps, CollectionSlug, Where } from 'payload'
+import type { AdminViewProps, Where } from 'payload'
 
 import {
   DefaultListView,
@@ -147,7 +147,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
       useAsTitle,
     })
 
-    const renderedFilters = renderFilters(fields)
+    const renderedFilters = renderFilters(fields, req.payload.importMap)
 
     const clientProps: ListViewClientProps = {
       collectionSlug,
