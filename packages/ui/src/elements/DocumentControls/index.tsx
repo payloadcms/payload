@@ -25,6 +25,10 @@ import { DuplicateDocument } from '../DuplicateDocument/index.js'
 import { Gutter } from '../Gutter/index.js'
 import { Locked } from '../Locked/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
+import { PreviewButton } from '../PreviewButton/index.js'
+import { PublishButton } from '../PublishButton/index.js'
+import { SaveButton } from '../SaveButton/index.js'
+import { SaveDraftButton } from '../SaveDraftButton/index.js'
 import { Status } from '../Status/index.js'
 import './index.scss'
 
@@ -32,6 +36,12 @@ const baseClass = 'doc-controls'
 
 export const DocumentControls: React.FC<{
   readonly apiURL: string
+  readonly customComponents?: {
+    readonly PreviewButton?: React.ReactNode
+    readonly PublishButton?: React.ReactNode
+    readonly SaveButton?: React.ReactNode
+    readonly SaveDraftButton?: React.ReactNode
+  }
   readonly data?: any
   readonly disableActions?: boolean
   readonly disableCreate?: boolean
@@ -47,18 +57,20 @@ export const DocumentControls: React.FC<{
   readonly onSave?: DocumentInfoContext['onSave']
   readonly onTakeOver?: () => void
   readonly permissions: CollectionPermission | GlobalPermission | null
-  readonly PreviewButton?: React.ReactNode
-  readonly PublishButton?: React.ReactNode
   readonly readOnlyForIncomingUser?: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
-  readonly SaveButton?: React.ReactNode
-  readonly SaveDraftButton?: React.ReactNode
   readonly slug: SanitizedCollectionConfig['slug']
   readonly user?: ClientUser
 }> = (props) => {
   const {
     id,
+    customComponents: {
+      PreviewButton: CustomPreviewButton,
+      PublishButton: CustomPublishButton,
+      SaveButton: CustomSaveButton,
+      SaveDraftButton: CustomSaveDraftButton,
+    } = {},
     data,
     disableActions,
     disableCreate,
@@ -70,13 +82,9 @@ export const DocumentControls: React.FC<{
     onDuplicate,
     onTakeOver,
     permissions,
-    PreviewButton,
-    PublishButton,
     readOnlyForIncomingUser,
     redirectAfterDelete,
     redirectAfterDuplicate,
-    SaveButton,
-    SaveDraftButton,
     user,
   } = props
 
@@ -198,10 +206,27 @@ export const DocumentControls: React.FC<{
         </div>
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
-            {PreviewButton}
-            {SaveDraftButton}
-            {PublishButton}
-            {SaveButton}
+            {(collectionConfig?._isPreviewEnabled || globalConfig?._isPreviewEnabled) && (
+              <Fragment>{CustomPreviewButton || <PreviewButton />}</Fragment>
+            )}
+            {hasSavePermission && (
+              <Fragment>
+                {collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts ? (
+                  <Fragment>
+                    {CustomPublishButton || <PublishButton />}
+                    {(collectionConfig?.versions?.drafts &&
+                      !collectionConfig?.versions?.drafts?.autosave) ||
+                      unsavedDraftWithValidations ||
+                      (globalConfig?.versions?.drafts &&
+                        !globalConfig?.versions?.drafts?.autosave && (
+                          <Fragment>{CustomSaveDraftButton || <SaveDraftButton />}</Fragment>
+                        ))}
+                  </Fragment>
+                ) : (
+                  <Fragment>{CustomSaveButton || <SaveButton />}</Fragment>
+                )}
+              </Fragment>
+            )}
             {user && readOnlyForIncomingUser && (
               <Button
                 buttonStyle="secondary"

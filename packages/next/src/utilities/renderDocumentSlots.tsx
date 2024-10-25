@@ -7,7 +7,6 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
-import { PublishButton, SaveButton, SaveDraftButton } from '@payloadcms/ui'
 import React from 'react'
 
 import { RenderServerComponent } from '../../../ui/src/elements/RenderServerComponent/index.js'
@@ -26,14 +25,17 @@ export const renderDocumentSlots: (args: {
 
   const unsavedDraftWithValidations = undefined
 
-  if (collectionConfig?.admin?.preview || globalConfig?.admin?.preview) {
+  if (
+    (collectionConfig?.admin?.preview || globalConfig?.admin?.preview) &&
+    (collectionConfig?.admin?.components?.edit?.PreviewButton ||
+      globalConfig?.admin?.components?.elements?.PreviewButton)
+  ) {
     components.PreviewButton = (
       <RenderServerComponent
         Component={
           collectionConfig?.admin?.components?.edit?.PreviewButton ||
           globalConfig?.admin?.components?.elements?.PreviewButton
         }
-        Fallback={PublishButton}
         importMap={importMap}
       />
     )
@@ -41,21 +43,27 @@ export const renderDocumentSlots: (args: {
 
   if (hasSavePermission) {
     if (collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) {
-      components.PublishButton = (
-        <RenderServerComponent
-          Component={
-            collectionConfig?.admin?.components?.edit?.PublishButton ||
-            globalConfig?.admin?.components?.elements?.PublishButton
-          }
-          Fallback={PublishButton}
-          importMap={importMap}
-        />
-      )
+      if (
+        collectionConfig?.admin?.components?.edit?.PublishButton ||
+        globalConfig?.admin?.components?.elements?.PublishButton
+      ) {
+        components.PublishButton = (
+          <RenderServerComponent
+            Component={
+              collectionConfig?.admin?.components?.edit?.PublishButton ||
+              globalConfig?.admin?.components?.elements?.PublishButton
+            }
+            importMap={importMap}
+          />
+        )
+      }
 
       if (
-        (collectionConfig?.versions?.drafts && !collectionConfig?.versions?.drafts?.autosave) ||
-        unsavedDraftWithValidations ||
-        (globalConfig?.versions?.drafts && !globalConfig?.versions?.drafts?.autosave)
+        ((collectionConfig?.versions?.drafts && !collectionConfig?.versions?.drafts?.autosave) ||
+          unsavedDraftWithValidations ||
+          (globalConfig?.versions?.drafts && !globalConfig?.versions?.drafts?.autosave)) &&
+        (collectionConfig?.admin?.components?.edit?.SaveDraftButton ||
+          globalConfig?.admin?.components?.elements?.SaveDraftButton)
       ) {
         components.SaveDraftButton = (
           <RenderServerComponent
@@ -63,22 +71,25 @@ export const renderDocumentSlots: (args: {
               collectionConfig?.admin?.components?.edit?.SaveDraftButton ||
               globalConfig?.admin?.components?.elements?.SaveDraftButton
             }
-            Fallback={SaveDraftButton}
             importMap={importMap}
           />
         )
       }
     } else {
-      components.SaveButton = (
-        <RenderServerComponent
-          Component={
-            collectionConfig?.admin?.components?.edit?.SaveButton ||
-            globalConfig?.admin?.components?.elements?.SaveButton
-          }
-          Fallback={SaveButton}
-          importMap={importMap}
-        />
-      )
+      if (
+        collectionConfig?.admin?.components?.edit?.SaveButton ||
+        globalConfig?.admin?.components?.elements?.SaveButton
+      ) {
+        components.SaveButton = (
+          <RenderServerComponent
+            Component={
+              collectionConfig?.admin?.components?.edit?.SaveButton ||
+              globalConfig?.admin?.components?.elements?.SaveButton
+            }
+            importMap={importMap}
+          />
+        )
+      }
     }
   }
 

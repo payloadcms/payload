@@ -446,6 +446,12 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
           />
           <DocumentControls
             apiURL={apiURL}
+            customComponents={{
+              PreviewButton,
+              PublishButton,
+              SaveButton,
+              SaveDraftButton,
+            }}
             data={data}
             disableActions={disableActions}
             disableCreate={disableCreate}
@@ -472,13 +478,9 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
               )
             }
             permissions={docPermissions}
-            PreviewButton={PreviewButton}
-            PublishButton={PublishButton}
             readOnlyForIncomingUser={isReadOnlyForIncomingUser}
             redirectAfterDelete={redirectAfterDelete}
             redirectAfterDuplicate={redirectAfterDuplicate}
-            SaveButton={SaveButton}
-            SaveDraftButton={SaveDraftButton}
             slug={collectionConfig?.slug || globalConfig?.slug}
             user={currentEditor}
           />
