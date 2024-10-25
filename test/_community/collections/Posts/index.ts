@@ -28,6 +28,16 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'sel',
+      type: 'select',
+      options: ['a', 'b', 'c', 'd', 'f'],
+    },
+    {
+      name: 'select',
+      type: 'select',
+      options: ['a', 'b', 'c', 'd', 'f'],
+    },
+    {
       name: 'richText',
       type: 'richText',
     },
