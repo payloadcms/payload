@@ -729,6 +729,7 @@ export type {
   RequiredDataFromCollection,
   RequiredDataFromCollectionSlug,
   SanitizedCollectionConfig,
+  SanitizedJoins,
   TypeWithID,
   TypeWithTimestamps,
 } from './collections/config/types.js'
@@ -859,6 +860,8 @@ export {
   ValidationError,
   ValidationErrorName,
 } from './errors/index.js'
+export type { ValidationFieldError } from './errors/index.js'
+
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'
 export {

@@ -37,7 +37,7 @@ To help you visualize what your page might look like in a search engine, a previ
 Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
 
 ```bash
-  pnpm add @payloadcms/plugin-seo
+  pnpm add @payloadcms/plugin-seo@beta
 ```
 
 ## Basic Usage
@@ -275,6 +275,10 @@ OverviewField({
   imagePath: 'meta.image',
 })
 ```
+
+<Banner type="info">
+Tip: You can override the length rules by changing the minLength and maxLength props on the fields. In the case of the OverviewField you can use `titleOverrides` and `descriptionOverrides` to override the length rules.
+</Banner>
 
 ## TypeScript
 

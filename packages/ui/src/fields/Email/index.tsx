@@ -32,6 +32,7 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
         width,
       } = {} as EmailFieldClientProps['field']['admin'],
       label,
+      localized,
       required,
     } = {} as EmailFieldClientProps['field'],
     Label,
@@ -72,7 +73,7 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Label || <FieldLabel label={label} required={required} />}
+      {Label || <FieldLabel label={label} localized={localized} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
         {Error}
         {BeforeInput}

@@ -1,30 +1,25 @@
 import type { I18n, I18nClient } from '@payloadcms/translations'
 import type {
   BuildFormStateArgs,
-  ClientCollectionConfig,
   ClientConfig,
-  ClientField,
-  ClientGlobalConfig,
   ClientUser,
   DocumentPreferences,
   ErrorResult,
   Field,
   FieldSchemaMap,
   FormState,
-  RenderedFieldMap,
-  SanitizedCollectionConfig,
   SanitizedConfig,
-  SanitizedGlobalConfig,
   TypeWithID,
 } from 'payload'
 
+import { headers as getHeaders } from 'next/headers.js'
 import { createClientConfig, formatErrors } from 'payload'
 import { reduceFieldsToValues } from 'payload/shared'
 
-import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
-import { getFieldByIndexPath } from './buildFieldSchemaMap/getFieldByIndexPath.js'
+import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
+import { prepareFields } from '../forms/Form/prepareFields.js'
+import { attachComponentsToFormState } from './attachComponentsToFormState.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
-import { generateFieldMap } from './generateFieldMap.js'
 
 let cachedFieldMap = global._payload_fieldMap
 let cachedClientConfig = global._payload_clientConfig
@@ -38,21 +33,35 @@ if (!cachedClientConfig) {
 }
 
 export const getFieldSchemaMap = (args: {
+  collectionSlug?: string
   config: SanitizedConfig
+  globalSlug?: string
   i18n: I18nClient
 }): FieldSchemaMap => {
-  const { config, i18n } = args
+  const { collectionSlug, config, globalSlug, i18n } = args
 
-  if (cachedFieldMap && process.env.NODE_ENV !== 'development') {
-    return cachedFieldMap
+  if (process.env.NODE_ENV !== 'development') {
+    if (!cachedFieldMap) {
+      cachedFieldMap = new Map()
+    }
+    const cachedEntityFieldMap = cachedFieldMap.get(collectionSlug || globalSlug)
+    if (cachedEntityFieldMap) {
+      return cachedEntityFieldMap
+    }
   }
 
-  cachedFieldMap = buildFieldSchemaMap({
+  const { fieldSchemaMap: entityFieldMap } = buildFieldSchemaMap({
+    collectionSlug,
     config,
-    i18n: i18n as I18n, // TODO: Fix this
+    globalSlug,
+    i18n: i18n as I18n,
   })
 
-  return cachedFieldMap
+  if (process.env.NODE_ENV !== 'development') {
+    cachedFieldMap.set(collectionSlug || globalSlug, entityFieldMap)
+  }
+
+  return entityFieldMap
 }
 
 export const getClientConfig = (args: {
@@ -78,13 +87,11 @@ type BuildFormStateSuccessResult = {
   errors?: never
   indexPath?: string
   lockedState?: { isLocked: boolean; user: ClientUser | number | string }
-  renderedFieldMap?: RenderedFieldMap
   state: FormState
 }
 
 type BuildFormStateErrorResult = {
   lockedState?: never
-  renderedFieldMap?: never
   state?: never
 } & (
   | {
@@ -130,8 +137,7 @@ export const buildFormStateFn = async (
     globalSlug,
     locale,
     operation,
-    path: pathFromArgs,
-    renderFields: shouldRenderFields,
+    path = [],
     req,
     req: {
       i18n,
@@ -140,9 +146,13 @@ export const buildFormStateFn = async (
       user,
     },
     returnLockStatus,
-    schemaAccessor: { indexPath, initialSchemaPath, schemaPath } = {},
+    schemaPath = collectionSlug ? [collectionSlug] : [globalSlug],
     updateLastEdited,
   } = args
+
+  if (!collectionSlug && !globalSlug) {
+    throw new Error('Either collectionSlug or globalSlug must be provided')
+  }
 
   const incomingUserSlug = user?.collection
 
@@ -177,78 +187,29 @@ export const buildFormStateFn = async (
     }
   }
 
-  const clientConfig = getClientConfig({
+  const fieldSchemaMap = getFieldSchemaMap({
+    collectionSlug,
     config,
-    i18n,
-  })
-
-  const { clientSchemaMap, fieldSchemaMap } = buildFieldSchemaMap({
-    clientConfig,
-    config,
+    globalSlug,
     i18n,
   })
 
   const id = collectionSlug ? idFromArgs : undefined
-  const schemaPathSegments = schemaPath && schemaPath.split('.')
-  const pathSegments = pathFromArgs && pathFromArgs.split('.')
 
-  const entitySlug = schemaPathSegments?.[0]
-  let entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
-  let clientEntityConfig: ClientCollectionConfig | ClientGlobalConfig
+  const fieldOrEntityConfig = fieldSchemaMap.get(schemaPath.join('.'))
 
-  if (req.payload.collections[entitySlug]) {
-    entityConfig = req.payload.collections[entitySlug].config
-    clientEntityConfig = clientConfig.collections.find(
-      (collection) => collection.slug === entitySlug,
+  if (!fieldOrEntityConfig) {
+    throw new Error(`Could not find "${schemaPath.join('.')}" in the fieldSchemaMap`)
+  }
+
+  if (
+    !('fields' in fieldOrEntityConfig) ||
+    !fieldOrEntityConfig.fields ||
+    !fieldOrEntityConfig.fields.length
+  ) {
+    throw new Error(
+      `The field found in fieldSchemaMap for "${schemaPath.join('.')}" does not contain any subfields.`,
     )
-  } else {
-    entityConfig = req.payload.config.globals.find((global) => global.slug === entitySlug)
-    clientEntityConfig = clientConfig.globals.find((global) => global.slug === entitySlug)
-  }
-
-  let fields: Field[]
-  let clientFields: ClientField[]
-  let parentSchemaPath = schemaPath
-  let basePath = ''
-  const baseIndexPath = indexPath
-
-  let initialIndexPath = ''
-
-  if (schemaPathSegments && schemaPathSegments.length === 1) {
-    // If the schema path is just the entity slug, then we are dealing with an entire collection or global
-    fields = entityConfig.fields
-    clientFields = clientEntityConfig?.fields || []
-  } else if (initialSchemaPath && indexPath) {
-    let baseFields: Field[] = []
-    let baseClientFields: ClientField[] = []
-    parentSchemaPath = schemaPathSegments.slice(0, schemaPathSegments.length - 1).join('.')
-
-    if (initialSchemaPath.split('.').length === 1) {
-      baseFields = entityConfig.fields
-      baseClientFields = clientEntityConfig.fields
-    } else {
-      baseFields = fieldSchemaMap.get(initialSchemaPath)
-      baseClientFields = clientSchemaMap.get(initialSchemaPath)
-    }
-
-    const field = getFieldByIndexPath({ fields: baseFields, indexPath }) as Field
-
-    const clientField = getFieldByIndexPath({
-      fields: baseClientFields,
-      indexPath,
-    }) as ClientField
-
-    fields = field ? [field] : []
-    clientFields = clientField ? [clientField] : []
-
-    basePath =
-      pathSegments.length > 1 ? pathSegments.slice(0, pathSegments.length - 1).join('.') : ''
-
-    initialIndexPath = indexPath
-  }
-
-  if (!fields || !Array.isArray(fields) || fields.length === 0) {
-    throw new Error(`Could not find field(s) for given schema path "${schemaPath}"`)
   }
 
   let docPreferences = docPreferencesFromArgs
@@ -313,7 +274,10 @@ export const buildFormStateFn = async (
   // If there is a form state,
   // then we can deduce data from that form state
   if (formState) {
-    data = reduceFieldsToValues(formState, true)
+    // formState may contain _index- paths (e.g. from row fields). In order to get the data that should not contain those,
+    // we use prepareFields to remove those paths
+    const sanitizedFormState = prepareFields(formState)
+    data = reduceFieldsToValues(sanitizedFormState, true)
   }
 
   // If we do not have data at this point,
@@ -336,7 +300,7 @@ export const buildFormStateFn = async (
         })
       }
 
-      if (globalSlug && schemaPath === globalSlug) {
+      if (globalSlug && schemaPath?.length === 1 && schemaPath[0] === globalSlug) {
         resolvedData = await payload.findGlobal({
           slug: globalSlug,
           depth: 0,
@@ -358,13 +322,27 @@ export const buildFormStateFn = async (
     await Promise.all(Object.values(promises))
   }
 
-  const formStateResult = await buildStateFromSchema({
+  const isEntitySchema =
+    schemaPath.length === 1 && (schemaPath[0] === collectionSlug || schemaPath[0] === globalSlug)
+
+  /**
+   * When building state for sub schemas we need to adjust:
+   * - `fields`
+   * - `parentSchemaPath`
+   * - `parentPath`
+   */
+  const fields = isEntitySchema ? fieldOrEntityConfig.fields : ([fieldOrEntityConfig] as Field[])
+  const parentSchemaPath = isEntitySchema ? schemaPath : schemaPath.slice(0, -1)
+  const parentPath = isEntitySchema ? path : path.slice(0, -1)
+
+  const formStateResult = await fieldSchemasToFormState({
     id,
     collectionSlug,
     data,
     fields,
     operation,
-    path: basePath ? `${basePath}.` : '',
+    parentPath,
+    parentSchemaPath,
     preferences: docPreferences || { fields: {} },
     req,
   })
@@ -445,28 +423,21 @@ export const buildFormStateFn = async (
     }
   }
 
-  const fieldMap = shouldRenderFields
-    ? generateFieldMap({
-        clientFields,
-        config,
-        entityConfig,
-        fields,
-        fieldSchemaMap,
-        formState: formStateResult,
-        i18n,
-        indexPath: baseIndexPath,
-        initialIndexPath,
-        initialSchemaPath,
-        path: basePath,
-        payload,
-        permissions: {}, // TODO
-        schemaPath: parentSchemaPath,
-      })
-    : undefined
+  const headers = await getHeaders()
+  const { permissions } = await payload.auth({ headers, req })
+
+  // mutates form state and adds custom components to field paths
+  attachComponentsToFormState({
+    config,
+    fieldSchemaMap,
+    formState: formStateResult,
+    i18n,
+    payload: req.payload,
+    permissions,
+  })
 
   return {
     lockedState: lockedStateResult,
-    renderedFieldMap: fieldMap,
     state: formStateResult,
   }
 }

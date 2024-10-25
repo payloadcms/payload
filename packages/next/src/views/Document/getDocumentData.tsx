@@ -1,12 +1,9 @@
 import type {
-  ClientConfig,
   Data,
   FormState,
   ImportMap,
   Locale,
   PayloadRequest,
-  RenderedField,
-  RenderedFieldMap,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
 } from 'payload'
@@ -21,15 +18,18 @@ export const getDocumentData = async (args: {
   importMap: ImportMap
   locale: Locale
   req: PayloadRequest
-  schemaPath?: string
+  schemaPath?: string[]
 }): Promise<{
   data: Data
   formState: FormState
-  renderedFieldMap?: RenderedFieldMap
 }> => {
   const { id, collectionConfig, globalConfig, locale, req, schemaPath: schemaPathFromProps } = args
 
-  const schemaPath = schemaPathFromProps || collectionConfig?.slug || globalConfig?.slug
+  const schemaPath = schemaPathFromProps?.length
+    ? schemaPathFromProps
+    : collectionConfig?.slug
+      ? [collectionConfig.slug]
+      : [globalConfig?.slug]
 
   try {
     const result = await buildFormState({
@@ -40,9 +40,7 @@ export const getDocumentData = async (args: {
       operation: (collectionConfig && id) || globalConfig ? 'update' : 'create',
       renderFields: true,
       req,
-      schemaAccessor: {
-        schemaPath,
-      },
+      schemaPath,
     })
 
     const data = reduceFieldsToValues(result.state, true)
@@ -50,7 +48,6 @@ export const getDocumentData = async (args: {
     return {
       data,
       formState: result.state,
-      renderedFieldMap: result.renderedFieldMap,
     }
   } catch (error) {
     console.error('Error getting document data', error) // eslint-disable-line no-console
@@ -60,6 +57,7 @@ export const getDocumentData = async (args: {
       formState: {
         fields: {
           initialValue: undefined,
+          schemaPath: [],
           valid: false,
           value: undefined,
         },

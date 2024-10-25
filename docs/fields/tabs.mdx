@@ -18,7 +18,7 @@ The Tabs Field is presentational-only and only affects the [Admin Panel](../admi
 To add a Tabs Field, set the `type` to `tabs` in your [Field Config](./overview):
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyTabsField: Field = {
   // ...
@@ -59,7 +59,7 @@ _\* An asterisk denotes that a property is required._
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',

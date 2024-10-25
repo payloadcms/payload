@@ -101,7 +101,7 @@ describe('lexicalBlocks', () => {
   describe('nested lexical editor in block', () => {
     test('should type and save typed text', async () => {
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
@@ -157,7 +157,7 @@ describe('lexicalBlocks', () => {
     test('should be able to bold text using floating select toolbar', async () => {
       // Reproduces https://github.com/payloadcms/payload/issues/4025
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
@@ -239,7 +239,7 @@ describe('lexicalBlocks', () => {
     test('should be able to select text, make it an external link and receive the updated link value', async () => {
       // Reproduces https://github.com/payloadcms/payload/issues/4025
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
@@ -324,7 +324,7 @@ describe('lexicalBlocks', () => {
     test('ensure slash menu is not hidden behind other blocks', async () => {
       // This test makes sure there are no z-index issues here
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
@@ -397,7 +397,7 @@ describe('lexicalBlocks', () => {
     })
     test('should allow adding new blocks to a sub-blocks field, part of a parent lexical blocks field', async () => {
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
@@ -472,7 +472,7 @@ describe('lexicalBlocks', () => {
     // Big test which tests a bunch of things: Creation of blocks via slash commands, creation of deeply nested sub-lexical-block fields via slash commands, properly populated deeply nested fields within those
     test('ensure creation of a lexical, lexical-field-block, which contains another lexical, lexical-and-upload-field-block, works and that the sub-upload field is properly populated', async () => {
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
@@ -691,7 +691,7 @@ describe('lexicalBlocks', () => {
       // This test ensures that https://github.com/payloadcms/payload/issues/3911 does not happen again
 
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
@@ -763,7 +763,7 @@ describe('lexicalBlocks', () => {
       // 3. In the issue, after writing one character, the cursor focuses back into the parent editor
 
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
@@ -803,7 +803,7 @@ describe('lexicalBlocks', () => {
     })
 
     const shouldRespectRowRemovalTest = async () => {
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
@@ -860,7 +860,7 @@ describe('lexicalBlocks', () => {
       await navigateToLexicalFields()
 
       // Wait for lexical to be loaded up fully
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
@@ -883,7 +883,7 @@ describe('lexicalBlocks', () => {
     test('ensure pre-seeded uploads node is visible', async () => {
       // Due to issues with the relationships condition, we had issues with that not being visible. Checking for visibility ensures there is no breakage there again
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
@@ -898,7 +898,7 @@ describe('lexicalBlocks', () => {
 
     test('should respect required error state in deeply nested text field', async () => {
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
 
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
@@ -947,7 +947,7 @@ describe('lexicalBlocks', () => {
     // Reproduces https://github.com/payloadcms/payload/issues/6631
     test('ensure tabs field within lexical block correctly loads and saves data', async () => {
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
 
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()

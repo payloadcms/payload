@@ -54,6 +54,7 @@ export type UploadInputProps = {
   readonly Label?: React.ReactNode
   readonly label?: StaticLabel
   readonly labelProps?: FieldLabelClientProps<MarkOptional<UploadFieldClient, 'type'>>
+  readonly localized?: boolean
   readonly maxRows?: number
   readonly onChange?: (e) => void
   readonly path: string
@@ -78,6 +79,7 @@ export function UploadInput(props: UploadInputProps) {
     isSortable,
     Label,
     label,
+    localized,
     maxRows,
     onChange: onChangeFromProps,
     path,
@@ -90,7 +92,6 @@ export function UploadInput(props: UploadInputProps) {
     value,
     width,
   } = props
-  const allowCreate = field?.admin?.allowCreate !== false
 
   const [populatedDocs, setPopulatedDocs] = React.useState<
     {
@@ -144,6 +145,10 @@ export function UploadInput(props: UploadInputProps) {
   const loadedValueDocsRef = React.useRef<boolean>(false)
 
   const canCreate = useMemo(() => {
+    if (readOnly) {
+      return false
+    }
+
     if (typeof activeRelationTo === 'string') {
       if (permissions?.collections && permissions.collections?.[activeRelationTo]?.create) {
         if (permissions.collections[activeRelationTo].create?.permission === true) {
@@ -153,7 +158,7 @@ export function UploadInput(props: UploadInputProps) {
     }
 
     return false
-  }, [activeRelationTo, permissions])
+  }, [activeRelationTo, permissions, readOnly])
 
   const onChange = React.useCallback(
     (newValue) => {
@@ -419,7 +424,7 @@ export function UploadInput(props: UploadInputProps) {
         width,
       }}
     >
-      {Label || <FieldLabel label={label} required={required} />}
+      {Label || <FieldLabel label={label} localized={localized} required={required} />}
       <div className={`${baseClass}__wrap`}>{Error}</div>
       <div className={`${baseClass}__dropzoneAndUpload`}>
         {hasMany && Array.isArray(value) && value.length > 0 ? (
@@ -463,10 +468,14 @@ export function UploadInput(props: UploadInputProps) {
         ) : null}
 
         {showDropzone ? (
-          <Dropzone disabled={!allowCreate} multipleFiles={hasMany} onChange={onLocalFileSelection}>
+          <Dropzone
+            disabled={readOnly || !canCreate}
+            multipleFiles={hasMany}
+            onChange={onLocalFileSelection}
+          >
             <div className={`${baseClass}__dropzoneContent`}>
               <div className={`${baseClass}__dropzoneContent__buttons`}>
-                {allowCreate && (
+                {canCreate && (
                   <>
                     <Button
                       buttonStyle="pill"
@@ -502,14 +511,14 @@ export function UploadInput(props: UploadInputProps) {
 
                 <CreateDocDrawer onSave={onDocCreate} />
                 <ListDrawer
-                  allowCreate={allowCreate}
+                  allowCreate={canCreate}
                   enableRowSelections={hasMany}
                   onBulkSelect={onListBulkSelect}
                   onSelect={onListSelect}
                 />
               </div>
 
-              {allowCreate && (
+              {canCreate && (
                 <p className={`${baseClass}__dragAndDropText`}>
                   {t('general:or')} {t('upload:dragAndDrop')}
                 </p>

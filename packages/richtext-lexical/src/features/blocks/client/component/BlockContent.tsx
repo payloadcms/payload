@@ -15,7 +15,7 @@ import {
 } from '@payloadcms/ui'
 import { dequal } from 'dequal/lite'
 import { $getNodeByKey } from 'lexical'
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 
 import type { LexicalRichTextFieldProps } from '../../../../types.js'
 import type { BlockFields } from '../../server/nodes/BlocksNode.js'
@@ -69,21 +69,15 @@ export const BlockContent: React.FC<Props> = (props) => {
   // is important to consider for the data path used in setDocFieldPreferences
   const { getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
 
-  const [isCollapsed, setIsCollapsed] = React.useState<boolean>(() => {
-    let initialState = false
+  const [isCollapsed, setIsCollapsed] = React.useState<boolean>()
 
+  useEffect(() => {
     void getDocPreferences().then((currentDocPreferences) => {
       const currentFieldPreferences = currentDocPreferences?.fields[field.name]
-
       const collapsedArray = currentFieldPreferences?.collapsed
-
-      if (collapsedArray && collapsedArray.includes(formData.id)) {
-        initialState = true
-        setIsCollapsed(true)
-      }
+      setIsCollapsed(collapsedArray ? collapsedArray.includes(formData.id) : false)
     })
-    return initialState
-  })
+  }, [field.name, formData.id, getDocPreferences])
 
   const hasSubmitted = useFormSubmitted()
 
@@ -178,6 +172,10 @@ export const BlockContent: React.FC<Props> = (props) => {
       $getNodeByKey(nodeKey)?.remove()
     })
   }, [editor, nodeKey])
+
+  if (typeof isCollapsed !== 'boolean') {
+    return null
+  }
 
   return (
     <React.Fragment>

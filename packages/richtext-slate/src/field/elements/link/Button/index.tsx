@@ -93,7 +93,7 @@ export const LinkButton: React.FC<{
               const { state } = await getFormState({
                 data,
                 operation: 'update',
-                schemaPath: `${schemaPath}.${linkFieldsSchemaPath}`,
+                schemaPath: [...schemaPath.split('.'), ...linkFieldsSchemaPath.split('.')],
               })
 
               setInitialState(state)

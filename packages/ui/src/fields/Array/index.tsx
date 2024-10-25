@@ -49,7 +49,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
     rowLabels,
-    schemaAccessor,
+    schemaPath,
     validate,
   } = props
 
@@ -132,10 +132,12 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       const newRows: Row[] = getDataByPath(path)
       newRows.splice(rowIndex, 0, { id: uuid() })
 
+      console.log('newRows', newRows)
+
       await addFieldRow({
         data: { [name]: newRows },
         path,
-        schemaAccessor,
+        schemaPath,
       })
 
       setModified(true)
@@ -144,7 +146,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         scrollToID(`${path}-row-${rowIndex}`)
       }, 0)
     },
-    [addFieldRow, path, setModified, getDataByPath, name, schemaAccessor],
+    [addFieldRow, path, setModified, getDataByPath, name, schemaPath],
   )
 
   const duplicateRow = useCallback(
@@ -209,7 +211,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const showRequired = disabled && rowsData.length === 0
   const showMinRows = rowsData.length < minRows || (required && rowsData.length === 0)
-
+  console.log({ disabled, path })
   return (
     <div
       className={[
@@ -320,7 +322,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           )}
         </DraggableSortable>
       )}
-      <p>{JSON.stringify(schemaAccessor, null, 2)}</p>
       {!disabled && !hasMaxRows && (
         <Button
           buttonStyle="icon-label"

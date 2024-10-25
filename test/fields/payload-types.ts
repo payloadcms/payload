@@ -90,6 +90,7 @@ export interface ArrayField {
   title?: string | null;
   items: {
     text: string;
+    anotherText?: string | null;
     localizedText?: string | null;
     subArray?:
       | {
@@ -540,6 +541,15 @@ export interface SelectField {
   select?: ('one' | 'two' | 'three') | null;
   selectReadOnly?: ('one' | 'two' | 'three') | null;
   selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
+  array?:
+    | {
+        selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
+        group?: {
+          selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
   selectHasManyLocalized?: ('one' | 'two')[] | null;
   selectI18n?: ('one' | 'two' | 'three') | null;
   simple?: ('One' | 'Two' | 'Three') | null;

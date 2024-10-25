@@ -6,6 +6,7 @@ import type {
 } from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { formatAdminURL, isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React from 'react'
@@ -13,7 +14,6 @@ import React from 'react'
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 import type { ViewFromConfig } from './getViewsFromConfig.js'
 
-import { RenderServerComponent } from '../../../../ui/src/elements/RenderServerComponent/index.js'
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { renderDocumentSlots } from '../../utilities/renderDocumentSlots.js'
 import { NotFoundView } from '../NotFound/index.js'
@@ -68,7 +68,7 @@ export const Document: React.FC<AdminViewProps> = async ({
 
   let apiURL: string
 
-  const { data, formState, renderedFieldMap } = await getDocumentData({
+  const { data, formState } = await getDocumentData({
     id,
     collectionConfig,
     globalConfig,
@@ -236,7 +236,7 @@ export const Document: React.FC<AdminViewProps> = async ({
     permissions,
   })
 
-  const clientProps = { formState, payloadServerAction, renderedFieldMap, ...documentSlots }
+  const clientProps = { formState, payloadServerAction, ...documentSlots }
 
   return (
     <DocumentInfoProvider

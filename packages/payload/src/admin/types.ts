@@ -2,10 +2,21 @@ import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
 import type React from 'react'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { ClientField, Field, FieldTypes } from '../fields/config/types.js'
+import type { Block, ClientField, Field, FieldTypes, Tab } from '../fields/config/types.js'
+import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { JsonObject } from '../types/index.js'
-import type { Data, FormState } from './types.js'
+import type {
+  BuildFormStateArgs,
+  Data,
+  FieldState,
+  FieldStateWithoutComponents,
+  FilterOptionsResult,
+  FormState,
+  FormStateWithoutComponents,
+  Row,
+} from './forms/Form.js'
 
 export type { DefaultCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
@@ -322,16 +333,18 @@ export type {
   GenericErrorProps,
 } from './forms/Error.js'
 
-export type { FormFieldBase, SchemaAccessor, ServerFieldBase } from './forms/Field.js'
+export type { ClientFieldBase, FormFieldBase, ServerFieldBase } from './forms/Field.js'
 
 export type {
   BuildFormStateArgs,
   Data,
+  FieldState as FormField,
+  FieldStateWithoutComponents as FormFieldWithoutComponents,
   FilterOptionsResult,
-  FormField,
   FormState,
+  FormStateWithoutComponents,
   Row,
-} from './forms/Form.js'
+}
 
 export type {
   FieldLabelClientComponent,
@@ -358,14 +371,14 @@ export type {
 export type { LanguageOptions } from './LanguageOptions.js'
 
 export type MappedServerComponent<TComponentClientProps extends JsonObject = JsonObject> = {
-  Component: React.ComponentType<TComponentClientProps>
+  Component?: React.ComponentType<TComponentClientProps>
   props?: Partial<any>
   RenderedComponent: React.ReactNode
   type: 'server'
 }
 
 export type MappedClientComponent<TComponentClientProps extends JsonObject = JsonObject> = {
-  Component: React.ComponentType<TComponentClientProps>
+  Component?: React.ComponentType<TComponentClientProps>
   props?: Partial<TComponentClientProps>
   RenderedComponent?: React.ReactNode
   type: 'client'
@@ -419,15 +432,11 @@ export type RenderedField = {
   initialSchemaPath?: string
   isSidebar: boolean
   path: string
-  renderedFieldMap?: RenderedFieldMap
   schemaPath: string
   type: FieldTypes
 }
 
-export type RenderedFieldMap = Map<string, RenderedField>
-
 export type FieldRow = {
-  renderedFieldMap: RenderedFieldMap
   RowLabel?: React.ReactNode
 }
 
@@ -442,7 +451,6 @@ export type FieldSlots = {
 export type DocumentSlots = {
   PreviewButton?: React.ReactNode
   PublishButton?: React.ReactNode
-  renderedFieldMap?: RenderedFieldMap
   SaveButton?: React.ReactNode
   SaveDraftButton?: React.ReactNode
 }
@@ -466,6 +474,12 @@ export type {
 } from './views/types.js'
 
 type SchemaPath = {} & string
-export type FieldSchemaMap = Map<SchemaPath, Field[]>
-
-export type ClientFieldSchemaMap = Map<SchemaPath, ClientField[]>
+export type FieldSchemaMap = Map<
+  SchemaPath,
+  | {
+      fields: Field[]
+    }
+  | Block
+  | Field
+  | Tab
+>

@@ -34,6 +34,7 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
         width,
       } = {},
       label,
+      localized,
       required,
     },
     Label,
@@ -78,7 +79,7 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Label || <FieldLabel label={label} required={required} />}
+      {Label || <FieldLabel label={label} localized={localized} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
         {Error}
         {BeforeInput}

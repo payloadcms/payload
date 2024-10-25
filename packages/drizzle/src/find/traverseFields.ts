@@ -1,14 +1,15 @@
-import type { DBQueryConfig } from 'drizzle-orm'
+import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { Field, JoinQuery } from 'payload'
 
+import { and, eq, sql } from 'drizzle-orm'
 import { fieldAffectsData, fieldIsVirtual, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
-import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
+import type { BuildQueryJoinAliases, ChainedMethods, DrizzleAdapter } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
-import { buildOrderBy } from '../queries/buildOrderBy.js'
 import buildQuery from '../queries/buildQuery.js'
+import { chainMethods } from './chainMethods.js'
 
 type TraverseFieldArgs = {
   _locales: Result
@@ -24,6 +25,7 @@ type TraverseFieldArgs = {
   tablePath: string
   topLevelArgs: Record<string, unknown>
   topLevelTableName: string
+  versions?: boolean
 }
 
 export const traverseFields = ({
@@ -40,6 +42,7 @@ export const traverseFields = ({
   tablePath,
   topLevelArgs,
   topLevelTableName,
+  versions,
 }: TraverseFieldArgs) => {
   fields.forEach((field) => {
     if (fieldIsVirtual(field)) {
@@ -97,6 +100,7 @@ export const traverseFields = ({
           tablePath: tabTablePath,
           topLevelArgs,
           topLevelTableName,
+          versions,
         })
       })
 
@@ -221,6 +225,7 @@ export const traverseFields = ({
             tablePath: `${tablePath}${toSnakeCase(field.name)}_`,
             topLevelArgs,
             topLevelTableName,
+            versions,
           })
 
           break
@@ -231,59 +236,174 @@ export const traverseFields = ({
           if (joinQuery === false) {
             break
           }
+
           const {
             limit: limitArg = 10,
             sort,
             where,
           } = joinQuery[`${path.replaceAll('_', '.')}${field.name}`] || {}
           let limit = limitArg
+
           if (limit !== 0) {
             // get an additional document and slice it later to determine if there is a next page
             limit += 1
           }
-          const fields = adapter.payload.collections[field.collection].config.fields
-          const joinTableName = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${
-            field.localized && adapter.payload.config.localization ? adapter.localesSuffix : ''
-          }`
-          const selectFields = {}
 
-          const orderBy = buildOrderBy({
+          const fields = adapter.payload.collections[field.collection].config.fields
+
+          const joinCollectionTableName = adapter.tableNameMap.get(toSnakeCase(field.collection))
+
+          const joins: BuildQueryJoinAliases = []
+
+          const buildQueryResult = buildQuery({
             adapter,
             fields,
-            joins: [],
+            joins,
             locale,
-            selectFields,
             sort,
-            tableName: joinTableName,
+            tableName: joinCollectionTableName,
+            where,
           })
-          const withJoin: DBQueryConfig<'many', true, any, any> = {
-            columns: selectFields,
-            orderBy: () => [orderBy.order(orderBy.column)],
-          }
-          if (limit) {
-            withJoin.limit = limit
-          }
 
-          if (field.localized) {
-            withJoin.columns._locale = true
-            withJoin.columns._parentID = true
-          } else {
-            withJoin.columns.id = true
-          }
+          let subQueryWhere = buildQueryResult.where
+          const orderBy = buildQueryResult.orderBy
 
-          if (where) {
-            const { where: joinWhere } = buildQuery({
-              adapter,
-              fields,
-              joins,
-              locale,
-              sort,
-              tableName: joinTableName,
-              where,
+          let joinLocalesCollectionTableName: string | undefined
+
+          const currentIDColumn = versions
+            ? adapter.tables[currentTableName].parent
+            : adapter.tables[currentTableName].id
+
+          // Handle hasMany _rels table
+          if (field.hasMany) {
+            const joinRelsCollectionTableName = `${joinCollectionTableName}${adapter.relationshipsSuffix}`
+
+            if (field.localized) {
+              joinLocalesCollectionTableName = joinRelsCollectionTableName
+            }
+
+            let columnReferenceToCurrentID: string
+
+            if (versions) {
+              columnReferenceToCurrentID = `${topLevelTableName.replace('_', '').replace(new RegExp(`${adapter.versionsSuffix}$`), '')}_id`
+            } else {
+              columnReferenceToCurrentID = `${topLevelTableName}_id`
+            }
+
+            joins.push({
+              type: 'innerJoin',
+              condition: and(
+                eq(
+                  adapter.tables[joinRelsCollectionTableName].parent,
+                  adapter.tables[joinCollectionTableName].id,
+                ),
+                eq(
+                  sql.raw(`"${joinRelsCollectionTableName}"."${columnReferenceToCurrentID}"`),
+                  currentIDColumn,
+                ),
+                eq(adapter.tables[joinRelsCollectionTableName].path, field.on),
+              ),
+              table: adapter.tables[joinRelsCollectionTableName],
             })
-            withJoin.where = () => joinWhere
+          } else {
+            // Handle localized without hasMany
+
+            const foreignColumn = field.on.replaceAll('.', '_')
+
+            if (field.localized) {
+              joinLocalesCollectionTableName = `${joinCollectionTableName}${adapter.localesSuffix}`
+
+              joins.push({
+                type: 'innerJoin',
+                condition: and(
+                  eq(
+                    adapter.tables[joinLocalesCollectionTableName]._parentID,
+                    adapter.tables[joinCollectionTableName].id,
+                  ),
+                  eq(
+                    adapter.tables[joinLocalesCollectionTableName][foreignColumn],
+                    currentIDColumn,
+                  ),
+                ),
+                table: adapter.tables[joinLocalesCollectionTableName],
+              })
+              // Handle without localized and without hasMany, just a condition append to where. With localized the inner join handles eq.
+            } else {
+              const constraint = eq(
+                adapter.tables[joinCollectionTableName][foreignColumn],
+                currentIDColumn,
+              )
+
+              if (subQueryWhere) {
+                subQueryWhere = and(subQueryWhere, constraint)
+              } else {
+                subQueryWhere = constraint
+              }
+            }
           }
-          currentArgs.with[`${path.replaceAll('.', '_')}${field.name}`] = withJoin
+
+          const chainedMethods: ChainedMethods = []
+
+          joins.forEach(({ type, condition, table }) => {
+            chainedMethods.push({
+              args: [table, condition],
+              method: type ?? 'leftJoin',
+            })
+          })
+
+          if (limit !== 0) {
+            chainedMethods.push({
+              args: [limit],
+              method: 'limit',
+            })
+          }
+
+          const db = adapter.drizzle as LibSQLDatabase
+
+          const subQuery = chainMethods({
+            methods: chainedMethods,
+            query: db
+              .select({
+                id: adapter.tables[joinCollectionTableName].id,
+                ...(joinLocalesCollectionTableName && {
+                  locale:
+                    adapter.tables[joinLocalesCollectionTableName].locale ||
+                    adapter.tables[joinLocalesCollectionTableName]._locale,
+                }),
+              })
+              .from(adapter.tables[joinCollectionTableName])
+              .where(subQueryWhere)
+              .orderBy(() => orderBy.map(({ column, order }) => order(column))),
+          })
+
+          const columnName = `${path.replaceAll('.', '_')}${field.name}`
+
+          const jsonObjectSelect = field.localized
+            ? sql.raw(
+                `'_parentID', "id", '_locale', "${adapter.tables[joinLocalesCollectionTableName].locale ? 'locale' : '_locale'}"`,
+              )
+            : sql.raw(`'id', "id"`)
+
+          if (adapter.name === 'sqlite') {
+            currentArgs.extras[columnName] = sql`
+              COALESCE((
+                SELECT json_group_array(json_object(${jsonObjectSelect}))
+                FROM (
+                  ${subQuery}
+                ) AS ${sql.raw(`${columnName}_sub`)}
+              ), '[]')
+            `.as(columnName)
+          } else {
+            currentArgs.extras[columnName] = sql`
+              COALESCE((
+                SELECT json_agg(json_build_object(${jsonObjectSelect}))
+                FROM (
+                  ${subQuery}
+                ) AS ${sql.raw(`${columnName}_sub`)}
+              ), '[]'::json)
+            `.as(columnName)
+          }
+
           break
         }
 

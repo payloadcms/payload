@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.0.0-beta.111",
+  "version": "3.0.0-beta.118",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -24,10 +24,10 @@
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
     },
-    "./elements/RenderComponent": {
-      "import": "./src/elements/RenderComponent/index.tsx",
-      "types": "./src/elements/RenderComponent/index.tsx",
-      "default": "./src/elements/RenderComponent/index.tsx"
+    "./elements/RenderServerComponent": {
+      "import": "./src/elements/RenderServerComponent/index.tsx",
+      "types": "./src/elements/RenderServerComponent/index.tsx",
+      "default": "./src/elements/RenderServerComponent/index.tsx"
     },
     "./utilities/buildFormState": {
       "import": "./src/utilities/buildFormState.ts",
@@ -44,10 +44,10 @@
       "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
       "default": "./src/utilities/buildFieldSchemaMap/traverseFields.ts"
     },
-    "./forms/buildStateFromSchema": {
-      "import": "./src/forms/buildStateFromSchema/index.tsx",
-      "types": "./src/forms/buildStateFromSchema/index.tsx",
-      "default": "./src/forms/buildStateFromSchema/index.tsx"
+    "./forms/fieldSchemasToFormState": {
+      "import": "./src/forms/fieldSchemasToFormState/index.tsx",
+      "types": "./src/forms/fieldSchemasToFormState/index.tsx",
+      "default": "./src/forms/fieldSchemasToFormState/index.tsx"
     },
     "./scss/app.scss": "./src/scss/app.scss",
     "./assets": {
@@ -121,10 +121,10 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "next": "^15.0.0-canary.173",
+    "next": "^15.0.0",
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-3edc000d-20240926",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-3edc000d-20240926"
+    "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
@@ -160,6 +160,11 @@
         "import": "./dist/assets/index.js",
         "types": "./dist/assets/index.d.ts",
         "default": "./dist/assets/index.js"
+      },
+      "./elements/RenderServerComponent": {
+        "import": "./dist/elements/RenderServerComponent/index.js",
+        "types": "./dist/elements/RenderServerComponent/index.d.ts",
+        "default": "./dist/elements/RenderServerComponent/index.js"
       },
       "./elements/*": {
         "import": "./dist/elements/*/index.js",

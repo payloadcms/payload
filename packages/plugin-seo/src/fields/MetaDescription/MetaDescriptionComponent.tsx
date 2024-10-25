@@ -22,7 +22,7 @@ import type { GenerateDescription } from '../../types.js'
 import { defaults } from '../../defaults.js'
 import { LengthIndicator } from '../../ui/LengthIndicator.js'
 
-const { maxLength, minLength } = defaults.description
+const { maxLength: maxLengthDefault, minLength: minLengthDefault } = defaults.description
 
 type MetaDescriptionProps = {
   readonly hasGenerateDescriptionFn: boolean
@@ -35,6 +35,8 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
         components: { Label },
       },
       label,
+      maxLength: maxLengthFromProps,
+      minLength: minLengthFromProps,
       required,
     },
     hasGenerateDescriptionFn,
@@ -54,6 +56,9 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
   const locale = useLocale()
   const { getData } = useForm()
   const docInfo = useDocumentInfo()
+
+  const maxLength = maxLengthFromProps || maxLengthDefault
+  const minLength = minLengthFromProps || minLengthDefault
 
   const field: FieldType<string> = useField({
     path: pathFromContext,

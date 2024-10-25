@@ -23,6 +23,7 @@ export type SelectInputProps = {
   readonly isSortable?: boolean
   readonly Label?: React.ReactNode
   readonly label?: StaticLabel
+  readonly localized?: boolean
   readonly name: string
   readonly onChange?: ReactSelectAdapterProps['onChange']
   readonly options?: OptionObject[]
@@ -46,6 +47,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     isSortable = true,
     label,
     Label,
+    localized,
     onChange,
     options,
     path,
@@ -93,7 +95,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         width,
       }}
     >
-      {Label || <FieldLabel label={label} required={false} />}
+      {Label || <FieldLabel label={label} localized={localized} required={false} />}
       <div className={`${fieldBaseClass}__wrap`}>
         {Error}
         {BeforeInput}

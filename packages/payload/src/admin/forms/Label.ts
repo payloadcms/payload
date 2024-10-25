@@ -4,8 +4,10 @@ import type { ClientFieldWithOptionalType } from './Field.js'
 
 export type GenericLabelProps = {
   readonly as?: 'label' | 'span'
+  readonly hideLocale?: boolean
   readonly htmlFor?: string
   readonly label?: StaticLabel
+  readonly localized?: boolean
   readonly path?: string
   readonly required?: boolean
   readonly unstyled?: boolean

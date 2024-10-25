@@ -55,22 +55,22 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
       const errorPaths: { fieldErrorPath: string; parentPath: string }[] = []
 
-      action.errors.forEach(({ field, message }) => {
-        newState[field] = {
-          ...(newState[field] || {
+      action.errors.forEach(({ fieldPath, fieldSchemaPath, message }) => {
+        newState[fieldPath.join('.')] = {
+          ...(newState[fieldPath.join('.')] || {
             initialValue: null,
+            schemaPath: fieldSchemaPath,
             value: null,
           }),
           errorMessage: message,
-          Field: undefined,
+
           valid: false,
         }
 
-        const segments = field.split('.')
-        if (segments.length > 1) {
+        if (fieldPath.length > 1) {
           errorPaths.push({
-            fieldErrorPath: field,
-            parentPath: segments.slice(0, segments.length - 1).join('.'),
+            fieldErrorPath: fieldPath.join('.'),
+            parentPath: fieldPath.slice(0, fieldPath.length - 1).join('.'),
           })
         }
       })
@@ -190,15 +190,12 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         id: (subFieldState?.id?.value as string) || new ObjectId().toHexString(),
         blockType: blockType || undefined,
         collapsed: false,
-        fields: undefined,
-        RowLabel: undefined,
       }
 
       withNewRow.splice(rowIndex, 0, newRow)
 
       if (blockType) {
         subFieldState.blockType = {
-          Field: undefined,
           initialValue: blockType,
           valid: true,
           value: blockType,
@@ -234,13 +231,10 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         id: new ObjectId().toHexString(),
         blockType: blockType || undefined,
         collapsed: false,
-        fields: undefined,
-        RowLabel: undefined,
       }
 
       if (blockType) {
         subFieldState.blockType = {
-          Field: undefined,
           initialValue: blockType,
           valid: true,
           value: blockType,
@@ -278,6 +272,15 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       if (duplicateRowState.id) {
         duplicateRowState.id.value = new ObjectId().toHexString()
         duplicateRowState.id.initialValue = new ObjectId().toHexString()
+      }
+
+      for (const key of Object.keys(duplicateRowState).filter((key) => key.endsWith('.id'))) {
+        const idState = duplicateRowState[key]
+
+        if (idState && typeof idState.value === 'string' && ObjectId.isValid(idState.value)) {
+          duplicateRowState[key].value = new ObjectId().toHexString()
+          duplicateRowState[key].initialValue = new ObjectId().toHexString()
+        }
       }
 
       // If there are subfields

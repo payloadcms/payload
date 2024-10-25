@@ -23,6 +23,7 @@ export type TextInputProps = {
   readonly inputRef?: React.RefObject<HTMLInputElement>
   readonly Label?: React.ReactNode
   readonly label?: StaticLabel
+  readonly localized?: boolean
   readonly maxRows?: number
   readonly minRows?: number
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>

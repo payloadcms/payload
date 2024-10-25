@@ -16,6 +16,7 @@ export type CheckboxInputProps = {
   readonly inputRef?: React.RefObject<HTMLInputElement | null>
   readonly Label?: React.ReactNode
   readonly label?: StaticLabel
+  readonly localized?: boolean
   readonly name?: string
   readonly onToggle: (event: React.ChangeEvent<HTMLInputElement>) => void
   readonly partialChecked?: boolean
@@ -35,6 +36,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   inputRef,
   Label,
   label,
+  localized,
   onToggle,
   partialChecked,
   readOnly,
@@ -74,7 +76,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
         </span>
         {AfterInput}
       </div>
-      {Label || <FieldLabel label={label} required={required} />}
+      {Label || <FieldLabel label={label} localized={localized} required={required} />}
     </div>
   )
 }

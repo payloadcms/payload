@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken'
+import { jwtVerify } from 'jose'
 
 import type { Payload, Where } from '../../types/index.js'
 import type { AuthStrategyFunction, User } from '../index.js'
@@ -81,8 +81,8 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
       return { user: null }
     }
 
-    const decodedPayload = jwt.verify(token, payload.secret) as jwt.JwtPayload & JWTToken
-
+    const secretKey = new TextEncoder().encode(payload.secret)
+    const { payload: decodedPayload } = await jwtVerify<JWTToken>(token, secretKey)
     const collection = payload.collections[decodedPayload.collection]
 
     const user = await payload.findByID({

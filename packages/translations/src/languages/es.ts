@@ -190,7 +190,7 @@ export const esTranslations: DefaultTranslationsObject = {
     cancel: 'Cancelar',
     changesNotSaved:
       'Tus cambios no han sido guardados. Si te sales ahora, se perderán tus cambios.',
-    clearAll: undefined,
+    clearAll: 'Borrar todo',
     close: 'Cerrar',
     collapse: 'Colapsar',
     collections: 'Colecciones',
@@ -418,7 +418,7 @@ export const esTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Guardado por última vez hace {{distance}}',
     noFurtherVersionsFound: 'No se encontraron más versiones',
     noRowsFound: 'No encontramos {{label}}',
-    noRowsSelected: undefined,
+    noRowsSelected: 'No se ha seleccionado ninguna {{etiqueta}}',
     preview: 'Previsualizar',
     previouslyPublished: 'Publicado Anteriormente',
     problemRestoringVersion: 'Ocurrió un problema al restaurar esta versión',

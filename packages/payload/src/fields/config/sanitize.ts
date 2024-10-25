@@ -12,9 +12,9 @@ import {
   MissingFieldType,
 } from '../../errors/index.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
-import { generatePath } from '../../utilities/generatePath.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
+import { getFieldPaths } from '../getFieldPaths.js'
 import { setDefaultBeforeDuplicate } from '../setDefaultBeforeDuplicate.js'
 import validations from '../validations.js'
 import { sanitizeJoinField } from './sanitizeJoinField.js'
@@ -42,12 +42,19 @@ type Args = {
    * so that you can sanitize them together, after the config has been sanitized.
    */
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>
-  schemaPath?: string
+  schemaPath?: string[]
   /**
    * If not null, will validate that upload and relationship fields do not relate to a collection that is not in this array.
    * This validation will be skipped if validRelationships is null.
    */
   validRelationships: null | string[]
+}
+
+function generateSchemaPath({ name, path = '' }: { name?: string; path?: string }): string {
+  if (!name) {
+    return path
+  }
+  return path ? `${path}.${name}` : name
 }
 
 export const sanitizeFields = async ({
@@ -58,14 +65,12 @@ export const sanitizeFields = async ({
   parentIsLocalized,
   requireFieldLevelRichTextEditor = false,
   richTextSanitizationPromises,
-  schemaPath: schemaPathArg,
+  schemaPath = [],
   validRelationships,
 }: Args): Promise<Field[]> => {
   if (!fields) {
     return []
   }
-
-  const schemaPath = schemaPathArg
 
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]
@@ -235,7 +240,6 @@ export const sanitizeFields = async ({
         block._sanitized = true
         block.fields = block.fields.concat(baseBlockFields)
         block.labels = !block.labels ? formatLabels(block.slug) : block.labels
-
         block.fields = await sanitizeFields({
           config,
           existingFieldNames: new Set(),
@@ -257,12 +261,12 @@ export const sanitizeFields = async ({
         parentIsLocalized: parentIsLocalized || field.localized,
         requireFieldLevelRichTextEditor,
         richTextSanitizationPromises,
-        schemaPath: generatePath({
-          name: 'name' in field ? field.name : undefined,
-          fieldType: field.type,
-          parentPath: schemaPath,
+        schemaPath: getFieldPaths({
+          field,
+          parentPath: [],
+          parentSchemaPath: schemaPath,
           schemaIndex: i,
-        }),
+        }).schemaPath,
         validRelationships,
       })
     }
@@ -282,12 +286,15 @@ export const sanitizeFields = async ({
           parentIsLocalized: parentIsLocalized || (tabHasName(tab) && tab.localized),
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
-          schemaPath: generatePath({
-            name: 'name' in tab ? tab.name : undefined,
-            fieldType: field.type,
-            parentPath: schemaPath,
-            schemaIndex: i,
-          }),
+          schemaPath: getFieldPaths({
+            field: {
+              ...tab,
+              type: 'tab',
+            },
+            parentPath: [],
+            parentSchemaPath: schemaPath,
+            schemaIndex: j,
+          }).schemaPath,
           validRelationships,
         })
         field.tabs[j] = tab

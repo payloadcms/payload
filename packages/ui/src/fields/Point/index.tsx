@@ -24,6 +24,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
       name,
       admin: { className, placeholder, readOnly: readOnlyFromAdmin, step, style, width } = {},
       label,
+      localized,
       required,
     },
     Label,
@@ -95,7 +96,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
     >
       <ul className={`${baseClass}__wrap`}>
         <li>
-          {Label || <FieldLabel label={label} required={required} />}
+          {Label || <FieldLabel label={label} localized={localized} required={required} />}
           <div className="input-wrapper">
             {BeforeInput}
             {/* disable eslint rule because the label is dynamic */}

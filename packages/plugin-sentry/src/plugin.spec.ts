@@ -1,47 +1,96 @@
-import type { Config } from 'payload'
+import type { AfterErrorHook, AfterErrorHookArgs, Config, PayloadRequest } from 'payload'
 
-import { defaults } from 'payload'
+import { APIError, defaults } from 'payload'
 
-import { sentryPlugin } from './plugin'
+import { sentryPlugin } from './index'
+import { randomUUID } from 'crypto'
 
-describe('plugin', () => {
+const mockExceptionID = randomUUID()
+
+const mockSentry = {
+  captureException() {
+    return mockExceptionID
+  },
+}
+
+describe('@payloadcms/plugin-sentry - unit', () => {
   it('should run the plugin', () => {
-    const plugin = sentryPlugin({ dsn: 'asdf', enabled: true })
+    const plugin = sentryPlugin({ Sentry: mockSentry, enabled: true })
     const config = plugin(createConfig())
 
     assertPluginRan(config)
   })
 
-  it('should default enable: true', () => {
-    const plugin = sentryPlugin({ dsn: 'asdf' })
+  it('should default enabled: true', () => {
+    const plugin = sentryPlugin({ Sentry: mockSentry })
     const config = plugin(createConfig())
 
     assertPluginRan(config)
   })
 
-  it('should not run if dsn is not provided', () => {
-    const plugin = sentryPlugin({ dsn: null, enabled: true })
+  it('should not run if Sentry is not provided', () => {
+    const plugin = sentryPlugin({ enabled: true })
     const config = plugin(createConfig())
 
     assertPluginDidNotRun(config)
   })
 
   it('should respect enabled: false', () => {
-    const plugin = sentryPlugin({ dsn: null, enabled: false })
+    const plugin = sentryPlugin({ Sentry: mockSentry, enabled: false })
     const config = plugin(createConfig())
 
     assertPluginDidNotRun(config)
   })
+
+  it('should execute Sentry.captureException with correct errors / args', async () => {
+    const hintTimestamp = Date.now()
+
+    const plugin = sentryPlugin({
+      Sentry: mockSentry,
+      options: {
+        context: ({ defaultContext }) => ({
+          ...defaultContext,
+          extra: {
+            ...defaultContext.extra,
+            hintTimestamp,
+          },
+        }),
+      },
+    })
+    const config = plugin(createConfig())
+
+    const hook = config.hooks?.afterError?.[0] as AfterErrorHook
+
+    const error = new APIError('ApiError', 500)
+
+    const afterErrorHookArgs: AfterErrorHookArgs = {
+      req: {} as PayloadRequest,
+      context: {},
+      error,
+      collection: { slug: 'mock-slug' } as any,
+    }
+
+    const captureExceptionSpy = jest.spyOn(mockSentry, 'captureException')
+
+    await hook(afterErrorHookArgs)
+
+    expect(captureExceptionSpy).toHaveBeenCalledTimes(1)
+    expect(captureExceptionSpy).toHaveBeenCalledWith(error, {
+      extra: {
+        errorCollectionSlug: 'mock-slug',
+        hintTimestamp,
+      },
+    })
+    expect(captureExceptionSpy).toHaveReturnedWith(mockExceptionID)
+  })
 })
 
 function assertPluginRan(config: Config) {
-  expect(config.hooks?.afterError).toBeDefined()
-  expect(config.onInit).toBeDefined()
+  expect(config.hooks?.afterError?.[0]).toBeDefined()
 }
 
 function assertPluginDidNotRun(config: Config) {
-  expect(config.hooks?.afterError).toBeUndefined()
-  expect(config.onInit).toBeUndefined()
+  expect(config.hooks?.afterError?.[0]).toBeUndefined()
 }
 
 function createConfig(overrides?: Partial<Config>): Config {

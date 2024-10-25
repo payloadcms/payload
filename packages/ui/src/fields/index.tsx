@@ -1,11 +1,13 @@
 'use client'
 import type {
+  ClientFieldBase,
   FieldTypes,
   GenericDescriptionProps,
   GenericErrorProps,
   GenericLabelProps,
 } from 'payload'
 import type React from 'react'
+import type { DeepPartial, MarkOptional } from 'ts-essentials'
 
 import { RowLabel } from '../forms/RowLabel/index.js'
 import { ArrayField } from './Array/index.js'
@@ -40,7 +42,7 @@ import { UploadField } from './Upload/index.js'
 export * from './shared/index.js'
 
 export type FieldTypesComponents = {
-  [K in 'confirmPassword' | 'hidden' | 'password' | FieldTypes]: React.FC
+  [K in 'confirmPassword' | 'hidden' | 'password' | FieldTypes]: React.FC<Partial<ClientFieldBase>>
 }
 
 export const fieldComponents: FieldTypesComponents = {

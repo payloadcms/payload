@@ -134,7 +134,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
           collectionSlug: slug,
           data: {},
           operation: 'update',
-          schemaAccessor: { schemaPath: slug },
+          schemaPath: [slug],
         })
 
         setInitialState(result)
@@ -151,9 +151,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
         collectionSlug: slug,
         formState: prevFormState,
         operation: 'update',
-        schemaAccessor: {
-          schemaPath: slug,
-        },
+        schemaPath: [slug],
       })
 
       return state
@@ -213,7 +211,12 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
               >
                 <FieldSelect fields={fields} setSelected={setSelected} />
                 {selected.length === 0 ? null : (
-                  <RenderFields fields={selected} path="" readOnly={false} schemaPath={slug} />
+                  <RenderFields
+                    fields={selected}
+                    parentPath={[]}
+                    readOnly={false}
+                    schemaPath={slug}
+                  />
                 )}
                 <div className={`${baseClass}__sidebar-wrap`}>
                   <div className={`${baseClass}__sidebar`}>

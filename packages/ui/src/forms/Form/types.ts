@@ -3,10 +3,9 @@ import type {
   Data,
   FormField,
   FormState,
-  RenderedFieldMap,
   Row,
-  SchemaAccessor,
   User,
+  ValidationFieldError,
 } from 'payload'
 import type React from 'react'
 import type { Dispatch } from 'react'
@@ -44,7 +43,6 @@ export type FormProps = {
   onSubmit?: (fields: FormState, data: Data) => void
   onSuccess?: (json: unknown) => Promise<void> | void
   redirect?: string
-  renderedFieldMap?: RenderedFieldMap
   submitted?: boolean
   uuid?: string
   validationOperation?: 'create' | 'update'
@@ -148,10 +146,7 @@ export type MOVE_ROW = {
 }
 
 export type ADD_SERVER_ERRORS = {
-  errors: {
-    field: string
-    message: string
-  }[]
+  errors: ValidationFieldError[]
   type: 'ADD_SERVER_ERRORS'
 }
 
@@ -188,11 +183,11 @@ export type Context = {
   addFieldRow: ({
     data,
     path,
-    schemaAccessor,
+    schemaPath,
   }: {
     data?: Data
     path: string
-    schemaAccessor: SchemaAccessor
+    schemaPath: string
   }) => Promise<void>
   buildRowErrors: () => void
   createFormData: CreateFormData
@@ -214,12 +209,12 @@ export type Context = {
     data,
     path,
     rowIndex,
-    schemaAccessor,
+    schemaPath,
   }: {
     data?: Data
     path: string
     rowIndex: number
-    schemaAccessor: SchemaAccessor
+    schemaPath: string
   }) => Promise<void>
   replaceState: (state: FormState) => void
   reset: Reset

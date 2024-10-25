@@ -18,6 +18,7 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
   const {
     Description,
+    disableModifyingForm: disableModifyingFormFromProps,
     Error,
     field: {
       name,
@@ -29,6 +30,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
         width,
       } = {} as RadioFieldClientProps['field']['admin'],
       label,
+      localized,
       options = [],
       required,
     } = {} as RadioFieldClientProps['field'],
@@ -88,7 +90,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
       }}
     >
       {Error}
-      {Label || <FieldLabel label={label} required={required} />}
+      {Label || <FieldLabel label={label} localized={localized} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
         <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
           {options.map((option) => {
@@ -115,7 +117,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
                     }
 
                     if (!disabled) {
-                      setValue(optionValue)
+                      setValue(optionValue, !!disableModifyingFormFromProps)
                     }
                   }}
                   option={optionIsObject(option) ? option : { label: option, value: option }}

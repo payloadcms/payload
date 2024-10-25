@@ -1,6 +1,10 @@
 import type { UIField } from 'payload'
 
 interface FieldFunctionProps {
+  descriptionOverrides?: {
+    maxLength?: number
+    minLength?: number
+  }
   /**
    * Path to the description field to use for the preview
    *
@@ -14,6 +18,10 @@ interface FieldFunctionProps {
    */
   imagePath?: string
   overrides?: Partial<UIField>
+  titleOverrides?: {
+    maxLength?: number
+    minLength?: number
+  }
   /**
    * Path to the title field to use for the preview
    *
@@ -25,9 +33,11 @@ interface FieldFunctionProps {
 type FieldFunction = ({ overrides }: FieldFunctionProps) => UIField
 
 export const OverviewField: FieldFunction = ({
+  descriptionOverrides,
   descriptionPath,
   imagePath,
   overrides,
+  titleOverrides,
   titlePath,
 }) => {
   return {
@@ -37,8 +47,10 @@ export const OverviewField: FieldFunction = ({
       components: {
         Field: {
           clientProps: {
+            descriptionOverrides,
             descriptionPath,
             imagePath,
+            titleOverrides,
             titlePath,
           },
           path: '@payloadcms/plugin-seo/client#OverviewComponent',

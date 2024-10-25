@@ -45,6 +45,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       } = {} as SelectFieldClientProps['field']['admin'],
       hasMany = false,
       label,
+      localized,
       options: optionsFromProps = [],
       required,
     },
@@ -113,6 +114,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       isSortable={isSortable}
       Label={Label}
       label={label}
+      localized={localized}
       name={name}
       onChange={onChange}
       options={options}

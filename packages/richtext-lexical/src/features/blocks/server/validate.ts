@@ -1,6 +1,6 @@
 import type { Block } from 'payload'
 
-import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
+import { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
 
 import type { NodeValidation } from '../../typesServer.js'
 import type { SerializedInlineBlockNode } from '../client/nodes/InlineBlocksNode.js'
@@ -25,10 +25,10 @@ export const blockValidationHOC = (
     }
 
     /**
-     * Run buildStateFromSchema as that properly validates block and block sub-fields
+     * Run fieldSchemasToFormState as that properly validates block and block sub-fields
      */
 
-    const result = await buildStateFromSchema({
+    const result = await fieldSchemasToFormState({
       id,
       collectionSlug,
       data: blockFieldData,

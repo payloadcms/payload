@@ -77,6 +77,7 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
       Error={Error}
       Label={Label}
       label={label}
+      localized={localized}
       onChange={(e) => {
         setValue(e.target.value)
       }}

@@ -11,6 +11,7 @@ import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { Pill } from '../../elements/Pill/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { RowActions } from './RowActions.js'
 import { SectionTitle } from './SectionTitle/index.js'
@@ -65,6 +66,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   const path = `${parentPath}.${rowIndex}`
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
+  const { docPermissions } = useDocumentInfo()
 
   const fieldHasErrors = hasSubmitted && errorCount > 0
 
@@ -135,7 +137,12 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
         key={row.id}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        <RenderFields fields={fields} path={path} />
+        <RenderFields
+          fields={fields}
+          parentPath={path.split('.')}
+          permissions={docPermissions.fields}
+          readOnly={readOnly}
+        />
       </Collapsible>
     </div>
   )

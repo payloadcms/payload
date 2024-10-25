@@ -74,7 +74,7 @@ export const Auth: React.FC<Props> = (props) => {
     (showPasswordFields: boolean) => {
       if (showPasswordFields) {
         setValidateBeforeSubmit(true)
-        setSchemaPath(`_${collectionSlug}.auth`)
+        setSchemaPath([`_${collectionSlug}`, 'auth'])
         dispatchFields({
           type: 'UPDATE',
           errorMessage: t('validation:required'),
@@ -89,7 +89,7 @@ export const Auth: React.FC<Props> = (props) => {
         })
       } else {
         setValidateBeforeSubmit(false)
-        setSchemaPath(collectionSlug)
+        setSchemaPath([collectionSlug])
         dispatchFields({ type: 'REMOVE', path: 'password' })
         dispatchFields({ type: 'REMOVE', path: 'confirm-password' })
       }
@@ -150,13 +150,15 @@ export const Auth: React.FC<Props> = (props) => {
                 autoComplete="new-password"
                 field={{
                   name: 'password',
-                  _path: 'password',
+                  _schemaPath: ['password'],
                   admin: {
                     disabled,
                   },
                   label: t('authentication:newPassword'),
                   required: true,
                 }}
+                path="password"
+                schemaPath="password"
               />
               <ConfirmPasswordField disabled={readOnly} />
             </div>

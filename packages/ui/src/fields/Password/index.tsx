@@ -34,6 +34,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
         width,
       } = {} as PasswordFieldProps['field']['admin'],
       label,
+      localized,
       required,
     } = {} as PasswordFieldProps['field'],
     inputRef,
@@ -69,8 +70,9 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
     [validate, config, t, required],
   )
 
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
-    path: pathFromProps || name,
+  const path = pathFromProps || name
+  const { formInitializing, formProcessing, setValue, showError, value } = useField({
+    path,
     validate: memoizedValidate,
   })
 
@@ -94,6 +96,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       inputRef={inputRef}
       Label={Label}
       label={label}
+      localized={localized}
       onChange={(e) => {
         setValue(e.target.value)
       }}

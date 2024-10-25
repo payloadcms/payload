@@ -3,6 +3,7 @@ import type { InitPageResult, Locale, VisibleEntities } from 'payload'
 
 import { findLocaleFromCode } from '@payloadcms/ui/shared'
 import { headers as getHeaders } from 'next/headers.js'
+import { notFound } from 'next/navigation.js'
 import { createLocalReq, isEntityHidden, parseCookies } from 'payload'
 import * as qs from 'qs-esm'
 
@@ -10,13 +11,13 @@ import type { Args } from './types.js'
 
 import { getPayloadHMR } from '../getPayloadHMR.js'
 import { initReq } from '../initReq.js'
-import { handleAdminPage } from './handleAdminPage.js'
+import { getRouteInfo } from './handleAdminPage.js'
 import { handleAuthRedirect } from './handleAuthRedirect.js'
+import { isPublicAdminRoute } from './shared.js'
 
 export const initPage = async ({
   config: configPromise,
   importMap,
-  redirectUnauthenticatedUser = false,
   route,
   searchParams,
 }: Args): Promise<InitPageResult> => {
@@ -129,21 +130,30 @@ export const initPage = async ({
       .filter(Boolean),
   }
 
-  if (redirectUnauthenticatedUser && !user) {
-    handleAuthRedirect({
+  let redirectTo = null
+
+  if (
+    !permissions.canAccessAdmin &&
+    !isPublicAdminRoute({ adminRoute, config: payload.config, route })
+  ) {
+    redirectTo = handleAuthRedirect({
       config: payload.config,
-      redirectUnauthenticatedUser,
       route,
       searchParams,
+      user,
     })
   }
 
-  const { collectionConfig, docID, globalConfig } = handleAdminPage({
+  const { collectionConfig, collectionSlug, docID, globalConfig, globalSlug } = getRouteInfo({
     adminRoute,
     config: payload.config,
-    permissions,
+    defaultIDType: payload.db.defaultIDType,
     route,
   })
+
+  if ((collectionSlug && !collectionConfig) || (globalSlug && !globalConfig)) {
+    return notFound()
+  }
 
   return {
     collectionConfig,
@@ -153,6 +163,7 @@ export const initPage = async ({
     languageOptions,
     locale,
     permissions,
+    redirectTo,
     req,
     translations: i18n.translations,
     visibleEntities,

@@ -20,6 +20,7 @@ type Args = {
   draft: boolean
   fallbackLocale: null | string
   field: Field | TabAsField
+  fieldIndex: number
   /**
    * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
    */
@@ -62,6 +63,7 @@ export const promise = async ({
   draft,
   fallbackLocale,
   field,
+  fieldIndex,
   fieldPromises,
   findMany,
   flattenLocales,
@@ -81,6 +83,7 @@ export const promise = async ({
     field,
     parentPath,
     parentSchemaPath,
+    schemaIndex: fieldIndex,
   })
 
   if (

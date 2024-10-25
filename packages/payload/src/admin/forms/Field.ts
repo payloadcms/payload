@@ -4,10 +4,10 @@ import type { User } from '../../auth/types.js'
 import type { Locale, ServerProps } from '../../config/types.js'
 import type { ClientField, Field, Validate } from '../../fields/config/types.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { FieldSlots, RenderedFieldMap } from '../types.js'
+import type { FieldSlots } from '../types.js'
 import type { FieldDescriptionServerProps } from './Description.js'
 import type { FieldErrorServerProps } from './Error.js'
-import type { FormField } from './Form.js'
+import type { FieldState } from './Form.js'
 import type { FieldLabelServerProps } from './Label.js'
 
 export type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
@@ -27,26 +27,10 @@ export type ServerFieldBase<
   readonly descriptionProps?: FieldDescriptionServerProps<TFieldServer, TFieldClient>
   readonly errorProps?: FieldErrorServerProps<TFieldServer, TFieldClient>
   readonly field: TFieldServer
-  readonly fieldState?: FormField
+  readonly fieldState?: FieldState
   readonly labelProps?: FieldLabelServerProps<TFieldServer, TFieldClient>
-  readonly renderedFieldMap?: RenderedFieldMap
 } & FormFieldBase &
   Partial<ServerProps>
-
-export type SchemaAccessor = {
-  /**
-   * The dot-notated index path to the field in the schema, e.g. `0.1.2`
-   */
-  indexPath: string
-  /**
-   * The path by which the index path is in related to, e.g. `my-posts`
-   */
-  initialSchemaPath: string
-  /**
-   * The dot-notated path to the field in the schema, e.g. `my-posts.my-array.text`
-   */
-  schemaPath: string
-}
 
 export type FormFieldBase = {
   readonly Blocks?: React.ReactNode[]
@@ -56,11 +40,12 @@ export type FormFieldBase = {
    */
   readonly forceRender?: boolean
   readonly locale?: Locale
+  readonly path: string
   /**
    * `readOnly` is added by RenderField automatically. This should be used instead of `field.admin.readOnly`.
    */
   readonly readOnly?: boolean
-  readonly schemaAccessor: SchemaAccessor
+  readonly schemaPath: string
   readonly user?: User
   readonly validate?: Validate
 }

@@ -197,9 +197,7 @@ const PreviewView: React.FC<Props> = ({
         globalSlug,
         operation,
         returnLockStatus: isLockingEnabled ? true : false,
-        schemaAccessor: {
-          schemaPath,
-        },
+        schemaPath: schemaPath ? schemaPath.split('.') : [],
         signal: abortController.signal,
         updateLastEdited,
       })
@@ -421,9 +419,10 @@ const PreviewView: React.FC<Props> = ({
             <DocumentFields
               AfterFields={AfterFields}
               BeforeFields={BeforeFields}
+              docPermissions={docPermissions}
               fields={fields}
               forceSidebarWrap
-              formState={initialState}
+              readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
             />
             {AfterDocument}
           </div>

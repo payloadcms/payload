@@ -188,7 +188,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     cancel: 'Annuleren',
     changesNotSaved:
       'Uw wijzigingen zijn niet bewaard. Als u weggaat zullen de wijzigingen verloren gaan.',
-    clearAll: undefined,
+    clearAll: 'Alles wissen',
     close: 'Dichtbij',
     collapse: 'Samenvouwen',
     collections: 'Collecties',
@@ -417,7 +417,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Laatst opgeslagen {{distance}} geleden',
     noFurtherVersionsFound: 'Geen verdere versies gevonden',
     noRowsFound: 'Geen {{label}} gevonden',
-    noRowsSelected: undefined,
+    noRowsSelected: 'Geen {{label}} geselecteerd',
     preview: 'Voorbeeld',
     previouslyPublished: 'Eerder gepubliceerd',
     problemRestoringVersion: 'Er was een probleem bij het herstellen van deze versie',

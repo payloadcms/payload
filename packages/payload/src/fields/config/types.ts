@@ -11,11 +11,7 @@ import type {
   JoinFieldLabelClientComponent,
   JoinFieldLabelServerComponent,
 } from '../../admin/fields/Join.js'
-import type {
-  FieldClientComponent,
-  FieldServerComponent,
-  SchemaAccessor,
-} from '../../admin/forms/Field.js'
+import type { FieldClientComponent, FieldServerComponent } from '../../admin/forms/Field.js'
 import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
 import type {
   ArrayFieldClientProps,
@@ -417,14 +413,14 @@ export interface FieldBase {
   /**
    * Pass `true` to disable field in the DB
    * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges):
+   * A virtual field cannot be used in `admin.useAsTitle`
    */
   virtual?: boolean
 }
 
 export interface FieldBaseClient {
   _isPresentational?: undefined
-  _path?: string
-  _schemaAccessor: SchemaAccessor
+  _schemaPath: string[]
   admin?: AdminClient
   hidden?: boolean
   index?: boolean
@@ -1298,6 +1294,10 @@ export type JoinField = {
    */
   collection: CollectionSlug
   defaultValue?: never
+  /**
+   * This does not need to be set and will be overridden by the relationship field's hasMany property.
+   */
+  hasMany?: boolean
   hidden?: false
   index?: never
   /**

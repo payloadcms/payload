@@ -17,6 +17,7 @@ import type {
 } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { isMongoose } from '../helpers/isMongoose.js'
 import {
   chainedRelSlug,
   customIdNumberSlug,
@@ -395,6 +396,52 @@ describe('Relationships', () => {
 
           expect(query1.totalDocs).toStrictEqual(1)
           expect(query2.totalDocs).toStrictEqual(2)
+        })
+
+        it('should sort by a property of a hasMany relationship', async () => {
+          // no support for sort by relation in mongodb
+          if (isMongoose(payload)) {
+            return
+          }
+
+          const movie1 = await payload.create({
+            collection: 'movies',
+            data: {
+              name: 'Pulp Fiction',
+            },
+          })
+
+          const movie2 = await payload.create({
+            collection: 'movies',
+            data: {
+              name: 'Inception',
+            },
+          })
+
+          await payload.delete({ collection: 'directors', where: {} })
+
+          const director1 = await payload.create({
+            collection: 'directors',
+            data: {
+              name: 'Quentin Tarantino',
+              movies: [movie1.id],
+            },
+          })
+          const director2 = await payload.create({
+            collection: 'directors',
+            data: {
+              name: 'Christopher Nolan',
+              movies: [movie2.id],
+            },
+          })
+
+          const result = await payload.find({
+            collection: 'directors',
+            depth: 0,
+            sort: '-movies.name',
+          })
+
+          expect(result.docs[0].id).toStrictEqual(director1.id)
         })
 
         it('should query using "in" by hasMany relationship field', async () => {

@@ -33,6 +33,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
       } = {} as NumberFieldClientProps['field']['admin'],
       hasMany = false,
       label,
+      localized,
       max = Infinity,
       maxRows = Infinity,
       min = -Infinity,
@@ -144,7 +145,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Label || <FieldLabel label={label} required={required} />}
+      {Label || <FieldLabel label={label} localized={localized} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
         {Error}
         {hasMany ? (

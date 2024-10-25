@@ -1,5 +1,5 @@
 'use client'
-import type { ClientField, Description } from 'payload'
+import type { ClientField, Description, DocumentPermissions } from 'payload'
 
 import { fieldIsSidebar } from 'payload/shared'
 import React from 'react'
@@ -17,16 +17,20 @@ type Args = {
   readonly AfterFields?: React.ReactNode
   readonly BeforeFields?: React.ReactNode
   readonly description?: Description
+  readonly docPermissions: DocumentPermissions
   readonly fields: ClientField[]
   readonly forceSidebarWrap?: boolean
+  readonly readOnly?: boolean
 }
 
 export const DocumentFields: React.FC<Args> = ({
   AfterFields,
   BeforeFields,
   description,
+  docPermissions,
   fields,
   forceSidebarWrap,
+  readOnly,
 }) => {
   if (!fields) {
     return 'No fields to render'
@@ -79,7 +83,14 @@ export const DocumentFields: React.FC<Args> = ({
               .filter(Boolean)
               .join(' ')}
           >
-            <RenderFields className={`${baseClass}__fields`} fields={mainFields} forceRender />
+            <RenderFields
+              className={`${baseClass}__fields`}
+              fields={mainFields}
+              forceRender
+              parentPath={[]}
+              permissions={docPermissions.fields}
+              readOnly={readOnly}
+            />
           </RenderIfInViewport>
           {AfterFields}
         </Gutter>
@@ -98,7 +109,13 @@ export const DocumentFields: React.FC<Args> = ({
                   .filter(Boolean)
                   .join(' ')}
               >
-                <RenderFields fields={sidebarFields} forceRender />
+                <RenderFields
+                  fields={sidebarFields}
+                  forceRender
+                  parentPath={[]}
+                  permissions={docPermissions.fields}
+                  readOnly={readOnly}
+                />
               </RenderIfInViewport>
             </div>
           </div>

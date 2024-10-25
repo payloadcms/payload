@@ -1,13 +1,16 @@
 'use client'
 
-import { generatePath } from 'payload/shared'
-import React, { Fragment } from 'react'
+import { getFieldPaths } from 'payload/shared'
+import React, { Fragment, useState } from 'react'
 
 import type { Props } from './types.js'
 
+import { HiddenField } from '../../fields/Hidden/index.js'
+import { useForm } from '../../forms/Form/context.js'
 import { useIntersect } from '../../hooks/useIntersect.js'
+import { useFieldComponents } from '../../providers/FieldComponents/index.js'
+import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { useFieldSlots } from '../Form/context.js'
 import './index.scss'
 
 const baseClass = 'render-fields'
@@ -15,9 +18,20 @@ const baseClass = 'render-fields'
 export { Props }
 
 export const RenderFields: React.FC<Props> = (props) => {
-  const { className, fields, forceRender, margins, path: parentPath } = props
+  const {
+    className,
+    fields,
+    forceRender,
+    margins,
+    parentPath,
+    permissions,
+    readOnly: readOnlyFromParent,
+  } = props
 
-  const { fieldSlots } = useFieldSlots()
+  const { getFields } = useForm()
+
+  const [formFields] = useState(() => getFields())
+  const operation = useOperation()
 
   const { i18n } = useTranslation()
 
@@ -33,6 +47,7 @@ export const RenderFields: React.FC<Props> = (props) => {
   const isIntersecting = Boolean(entry?.isIntersecting)
   const isAboveViewport = entry?.boundingClientRect?.top < 0
   const shouldRender = forceRender || isIntersecting || isAboveViewport
+  const fieldComponents = useFieldComponents()
 
   React.useEffect(() => {
     if (shouldRender && !hasRendered) {
@@ -40,8 +55,12 @@ export const RenderFields: React.FC<Props> = (props) => {
     }
   }, [shouldRender, hasRendered])
 
-  if (!fieldSlots || fieldSlots.size === 0) {
+  if (!formFields) {
     return <p>No fields to render</p>
+  }
+
+  if (!fieldComponents) {
+    throw new Error('Field components not found')
   }
 
   if (!i18n) {
@@ -62,20 +81,65 @@ export const RenderFields: React.FC<Props> = (props) => {
         ref={intersectionRef}
       >
         {fields.map((field, i) => {
-          const path = generatePath({
-            name: 'name' in field ? field.name : undefined,
-            fieldType: field.type,
+          const fieldPermissions = 'name' in field ? permissions?.[field.name] : null
+          const { path } = getFieldPaths({
+            field,
             parentPath,
+            parentSchemaPath: [],
             schemaIndex: i,
           })
 
-          const Field = fieldSlots.get(path)?.Field
+          const CustomField = formFields[path.join('.')]?.customComponents?.Field
+
+          const DefaultField = fieldComponents?.[field?.type]
+
+          // if the user cannot read the field, then filter it out
+          // this is different from `admin.readOnly` which is executed based on `operation`
+          if (fieldPermissions?.read?.permission === false || field?.admin?.disabled) {
+            return null
+          }
+
+          // `admin.readOnly` displays the value but prevents the field from being edited
+          let isReadOnly = readOnlyFromParent || field?.admin?.readOnly
+
+          // if parent field is `readOnly: true`, but this field is `readOnly: false`, the field should still be editable
+          if (isReadOnly && field.admin?.readOnly === false) {
+            isReadOnly = false
+          }
+
+          // if the user does not have access control to begin with, force it to be read-only
+          if (fieldPermissions?.[operation]?.permission === false) {
+            isReadOnly = true
+          }
+
+          // if the field is hidden, then filter it out
+          if (field.admin?.hidden) {
+            return (
+              <HiddenField
+                field={field}
+                forceRender={forceRender}
+                key={i}
+                path={path.join('.')}
+                readOnly={isReadOnly}
+                schemaPath={field._schemaPath.join('.')}
+              />
+            )
+          }
 
           return (
             <Fragment key={i}>
-              <p>{`path: ${path}`}</p>
-              <p>{JSON.stringify(field._schemaAccessor, null, 2)}</p>
-              {Field}
+              {/* @TODO make sure that we set false components to null on the server */}
+              {CustomField ?? (
+                // TODO: Pass other properties
+                <DefaultField
+                  field={field}
+                  forceRender={forceRender}
+                  key={i}
+                  path={path.join('.')}
+                  readOnly
+                  schemaPath={field._schemaPath.join('.')}
+                />
+              )}
             </Fragment>
           )
         })}

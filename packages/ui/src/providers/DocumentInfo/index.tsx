@@ -361,6 +361,11 @@ const DocumentInfo: React.FC<
               and: [
                 ...versionParams.where.and,
                 {
+                  'version._status': {
+                    equals: 'draft',
+                  },
+                },
+                {
                   updatedAt: {
                     greater_than: publishedJSON.updatedAt,
                   },
@@ -531,7 +536,7 @@ const DocumentInfo: React.FC<
         globalSlug,
         locale,
         operation,
-        schemaPath: collectionSlug || globalSlug,
+        schemaPath: collectionSlug ? [collectionSlug] : [globalSlug],
         signal: abortController.signal,
       })
 
@@ -577,9 +582,7 @@ const DocumentInfo: React.FC<
             globalSlug,
             locale,
             operation,
-            schemaAccessor: {
-              schemaPath: collectionSlug || globalSlug,
-            },
+            schemaPath: collectionSlug ? [collectionSlug] : [globalSlug],
             signal: abortController.signal,
           })
 

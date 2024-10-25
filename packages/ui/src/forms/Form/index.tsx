@@ -30,7 +30,6 @@ import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import {
-  FieldSlotsContext,
   FormContext,
   FormFieldsContext,
   FormWatchContext,
@@ -41,7 +40,6 @@ import {
 } from './context.js'
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
-import { fieldSlotReducer } from './fieldSlotReducer.js'
 import { initContextState } from './initContextState.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
 import { prepareFields } from './prepareFields.js'
@@ -67,13 +65,10 @@ export const Form: React.FC<FormProps> = (props) => {
     onSubmit,
     onSuccess,
     redirect,
-    renderedFieldMap,
     submitted: submittedFromProps,
     uuid,
     waitForAutocomplete,
   } = props
-
-  const [fieldSlots, setFieldSlots] = useReducer(fieldSlotReducer, renderedFieldMap)
 
   const method = 'method' in props ? props?.method : undefined
 
@@ -237,7 +232,7 @@ export const Form: React.FC<FormProps> = (props) => {
           await priorOnChange
 
           const result = await beforeSubmitFn({
-            formState: prepareFields(fields) as FormState,
+            formState: fields,
           })
 
           revalidatedFormState = result
@@ -265,14 +260,16 @@ export const Form: React.FC<FormProps> = (props) => {
         return
       }
 
+      const preparedFields = prepareFields(fields)
+
       // If submit handler comes through via props, run that
       if (onSubmit) {
         const data = {
-          ...reduceFieldsToValues(fields, true),
+          ...reduceFieldsToValues(preparedFields, true),
           ...overrides,
         }
 
-        onSubmit(fields, data)
+        onSubmit(preparedFields, data)
       }
 
       if (!hasFormSubmitAction) {
@@ -352,7 +349,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
                 if (Array.isArray(err?.data?.errors)) {
                   err.data?.errors.forEach((dataError) => {
-                    if (dataError?.field) {
+                    if (dataError?.fieldPath) {
                       newFieldErrs.push(dataError)
                     } else {
                       newNonFieldErrs.push(dataError)
@@ -430,7 +427,8 @@ export const Form: React.FC<FormProps> = (props) => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const createFormData = useCallback((overrides: any = {}) => {
-    const data = reduceFieldsToValues(contextRef.current.fields, true)
+    const preparedFields = prepareFields(contextRef.current.fields)
+    const data = reduceFieldsToValues(preparedFields, true)
 
     const file = data?.file
 
@@ -474,11 +472,7 @@ export const Form: React.FC<FormProps> = (props) => {
         globalSlug,
         operation,
         renderFields: true,
-        schemaAccessor: {
-          indexPath: '',
-          initialSchemaPath: collectionSlug || globalSlug,
-          schemaPath: collectionSlug || globalSlug,
-        },
+        schemaPath: collectionSlug ? [collectionSlug] : [globalSlug],
         signal: abortController.signal,
       })
 
@@ -499,7 +493,19 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const getFieldStateBySchemaPath = useCallback(
-    async ({ data, path, schemaAccessor }) => {
+    async ({
+      collectionSlug,
+      data,
+      globalSlug,
+      path,
+      schemaPath,
+    }: {
+      collectionSlug: string
+      data: unknown
+      globalSlug: string
+      path: string
+      schemaPath: string
+    }) => {
       if (abortControllerRef2.current) {
         try {
           abortControllerRef2.current.abort()
@@ -512,39 +518,38 @@ export const Form: React.FC<FormProps> = (props) => {
       abortControllerRef2.current = abortController
       const docPreferences = await getDocPreferences()
 
-      const { renderedFieldMap, state: formState } = await getFormState({
+      const { state: formState } = await getFormState({
+        collectionSlug,
         data,
         docPreferences,
-        path,
+        globalSlug,
+        path: path ? path.split('.') : [],
         renderFields: true,
-        schemaAccessor,
+        schemaPath: schemaPath ? schemaPath.split('.') : [],
         signal: abortController.signal,
       })
 
-      return { formState, renderedFieldMap }
+      return { formState }
     },
     [getFormState, getDocPreferences],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
-    async ({ data, path, schemaAccessor }) => {
-      const { formState: newFormState, renderedFieldMap } = await getFieldStateBySchemaPath({
+    async ({ data, path, schemaPath }) => {
+      const { formState: newFormState } = await getFieldStateBySchemaPath({
+        collectionSlug,
         data,
+        globalSlug,
         path,
-        schemaAccessor,
+        schemaPath,
       })
 
       dispatchFields({
         type: 'UPDATE_MANY',
         formState: newFormState,
       })
-
-      setFieldSlots({
-        type: 'UPDATE_MANY',
-        renderedFieldMap,
-      })
     },
-    [getFieldStateBySchemaPath, dispatchFields],
+    [getFieldStateBySchemaPath, dispatchFields, collectionSlug, globalSlug],
   )
 
   const removeFieldRow: FormContextType['removeFieldRow'] = useCallback(
@@ -555,11 +560,13 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const replaceFieldRow: FormContextType['replaceFieldRow'] = useCallback(
-    async ({ data, path, rowIndex, schemaAccessor }) => {
+    async ({ data, path, rowIndex, schemaPath }) => {
       const { formState: subFieldState } = await getFieldStateBySchemaPath({
+        collectionSlug,
         data,
+        globalSlug,
         path,
-        schemaAccessor,
+        schemaPath,
       })
 
       dispatchFields({
@@ -570,7 +577,7 @@ export const Form: React.FC<FormProps> = (props) => {
         subFieldState,
       })
     },
-    [getFieldStateBySchemaPath, dispatchFields],
+    [getFieldStateBySchemaPath, dispatchFields, collectionSlug, globalSlug],
   )
 
   // clean on unmount
@@ -671,8 +678,9 @@ export const Form: React.FC<FormProps> = (props) => {
           let revalidatedFormState: FormState = contextRef.current.fields
 
           for (const onChangeFn of onChange) {
+            const prepared = prepareFields(revalidatedFormState, true)
             revalidatedFormState = await onChangeFn({
-              formState: prepareFields(revalidatedFormState) as FormState,
+              formState: prepared as FormState,
             })
           }
 
@@ -722,9 +730,7 @@ export const Form: React.FC<FormProps> = (props) => {
               <ProcessingContext.Provider value={processing}>
                 <ModifiedContext.Provider value={modified}>
                   <FormFieldsContext.Provider value={fieldsReducer}>
-                    <FieldSlotsContext.Provider value={{ fieldSlots, setFieldSlots }}>
-                      {children}
-                    </FieldSlotsContext.Provider>
+                    {children}
                   </FormFieldsContext.Provider>
                 </ModifiedContext.Provider>
               </ProcessingContext.Provider>

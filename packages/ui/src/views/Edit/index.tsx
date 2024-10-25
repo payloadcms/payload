@@ -44,7 +44,6 @@ const baseClass = 'collection-edit'
 export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   PreviewButton,
   PublishButton,
-  renderedFieldMap,
   SaveButton,
   SaveDraftButton,
 }) => {
@@ -164,10 +163,10 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
 
   const [schemaPath, setSchemaPath] = useState(() => {
     if (operation === 'create' && auth && !auth.disableLocalStrategy) {
-      return `_${entitySlug}.auth`
+      return [`_${entitySlug}`, 'auth']
     }
 
-    return entitySlug
+    return [entitySlug]
   })
 
   const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(() => {
@@ -272,9 +271,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
         operation,
         renderFields: true,
         returnLockStatus: isLockingEnabled ? true : false,
-        schemaAccessor: {
-          schemaPath,
-        },
+        schemaPath,
         // signal: abortController.signal,
         updateLastEdited,
       })
@@ -378,7 +375,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   const shouldShowDocumentLockedModal =
     documentIsLocked &&
     currentEditor &&
-    currentEditor.id !== user.id &&
+    currentEditor.id !== user?.id &&
     !isReadOnlyForIncomingUser &&
     !showTakeOverModal &&
     !documentLockStateRef.current?.hasShownLockedModal
@@ -396,7 +393,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
           method={id ? 'PATCH' : 'POST'}
           onChange={[onChange]}
           onSuccess={onSave}
-          renderedFieldMap={renderedFieldMap}
         >
           {BeforeDocument}
           {/* {isLockingEnabled && shouldShowDocumentLockedModal && !isReadOnlyForIncomingUser && (
@@ -528,7 +524,9 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
                 </Fragment>
               )
             }
+            docPermissions={docPermissions}
             fields={docConfig.fields}
+            readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
           />
           {AfterDocument}
         </Form>

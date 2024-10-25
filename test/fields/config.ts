@@ -46,6 +46,7 @@ export const collectionSlugs: CollectionConfig[] = [
   // LexicalFields,
   // LexicalMigrateFields,
   // LexicalLocalizedFields,
+  // LexicalObjectReferenceBugCollection
   {
     slug: 'users',
     admin: {

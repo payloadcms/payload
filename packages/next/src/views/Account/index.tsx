@@ -69,7 +69,7 @@ export const Account: React.FC<AdminViewProps> = async ({
         docPermissions={docPermissions}
         hasPublishPermission={hasPublishPermission}
         hasSavePermission={hasSavePermission}
-        id={user?.id.toString()}
+        id={user?.id}
         initialData={data}
         initialState={formState}
         isEditing

@@ -40,7 +40,7 @@ export const traverseFields = async ({
 }: Args): Promise<void> => {
   const promises = []
 
-  fields.forEach((field) => {
+  fields.forEach((field, fieldIndex) => {
     promises.push(
       promise({
         collection,
@@ -48,6 +48,7 @@ export const traverseFields = async ({
         data,
         doc,
         field,
+        fieldIndex,
         global,
         operation,
         parentPath: path,
