@@ -5,7 +5,7 @@
   "description": "Payload test suite",
   "type": "module",
   "scripts": {
-    "prebuild": "node --no-deprecation --import @swc-node/register/esm-register generateDatabaseAdapter.ts mongodb",
+    "prebuild": "node --no-deprecation --import @swc-node/register/esm-register generateDatabaseAdapter.ts --writeDefaultAdapter",
     "build": "tsc --project tsconfig.typecheck.json",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation node ./dev.js",
     "test": "pnpm -C \"../\" run test",
