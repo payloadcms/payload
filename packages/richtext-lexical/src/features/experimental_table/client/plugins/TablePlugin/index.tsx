@@ -16,6 +16,7 @@ import { INSERT_TABLE_COMMAND, TableNode } from '@lexical/table'
 import { mergeRegister } from '@lexical/utils'
 import { formatDrawerSlug, useEditDepth, useModal } from '@payloadcms/ui'
 import { $getSelection, $isRangeSelection, COMMAND_PRIORITY_EDITOR, createCommand } from 'lexical'
+import { useLexicalDrawer } from 'packages/richtext-lexical/src/utilities/fieldsDrawer/useLexicalDrawer.js'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import * as React from 'react'
 
@@ -83,7 +84,6 @@ export function TableContext({ children }: { children: JSX.Element }) {
 export const TablePlugin: PluginComponent = () => {
   const [editor] = useLexicalComposerContext()
   const cellContext = useContext(CellContext)
-  const { closeModal, toggleModal } = useModal()
   const editDepth = useEditDepth()
   const { uuid } = useEditorConfigContext()
 
@@ -91,6 +91,7 @@ export const TablePlugin: PluginComponent = () => {
     slug: 'lexical-table-create-' + uuid,
     depth: editDepth,
   })
+  const { toggleDrawer } = useLexicalDrawer(drawerSlug)
 
   useEffect(() => {
     if (!editor.hasNodes([TableNode])) {
@@ -111,14 +112,14 @@ export const TablePlugin: PluginComponent = () => {
           })
 
           if (rangeSelection) {
-            toggleModal(drawerSlug)
+            toggleDrawer()
           }
           return true
         },
         COMMAND_PRIORITY_EDITOR,
       ),
     )
-  }, [cellContext, drawerSlug, editor, toggleModal])
+  }, [cellContext, editor, toggleDrawer])
 
   return (
     <React.Fragment>
@@ -127,8 +128,6 @@ export const TablePlugin: PluginComponent = () => {
         drawerTitle="Create Table"
         featureKey="experimental_table"
         handleDrawerSubmit={(_fields, data) => {
-          closeModal(drawerSlug)
-
           if (!data.columns || !data.rows) {
             return
           }
