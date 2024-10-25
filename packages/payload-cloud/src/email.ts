@@ -22,6 +22,7 @@ export const payloadCloudEmail = async (
   // Check if already has email configuration
 
   if (args.config.email) {
+    // eslint-disable-next-line no-console
     console.log(
       'Payload Cloud Email is enabled but email configuration is already provided in Payload config. If this is intentional, set `email: false` in the Payload Cloud plugin options.',
     )
@@ -37,6 +38,7 @@ export const payloadCloudEmail = async (
   const customDomains = customDomainEnvs.map((e) => process.env[e]).filter(Boolean)
 
   if (customDomains.length) {
+    // eslint-disable-next-line no-console
     console.log(
       `Configuring Payload Cloud Email for ${[defaultDomain, ...(customDomains || [])].join(', ')}`,
     )

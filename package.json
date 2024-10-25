@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-beta.116",
+  "version": "3.0.0-beta.119",
   "private": true,
   "type": "module",
   "scripts": {
@@ -29,7 +29,7 @@
     "build:live-preview-vue": "turbo build --filter \"@payloadcms/live-preview-vue\"",
     "build:next": "turbo build --filter \"@payloadcms/next\"",
     "build:payload": "turbo build --filter payload",
-    "build:plugin-cloud": "turbo build --filter \"@payloadcms/plugin-cloud\"",
+    "build:payload-cloud": "turbo build --filter \"@payloadcms/payload-cloud\"",
     "build:plugin-cloud-storage": "turbo build --filter \"@payloadcms/plugin-cloud-storage\"",
     "build:plugin-form-builder": "turbo build --filter \"@payloadcms/plugin-form-builder\"",
     "build:plugin-nested-docs": "turbo build --filter \"@payloadcms/plugin-nested-docs\"",
@@ -105,7 +105,7 @@
   "devDependencies": {
     "@jest/globals": "29.7.0",
     "@libsql/client": "0.14.0",
-    "@next/bundle-analyzer": "15.0.0-canary.173",
+    "@next/bundle-analyzer": "15.0.0",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/eslint-plugin": "workspace:*",
@@ -145,15 +145,15 @@
     "lint-staged": "15.2.7",
     "minimist": "1.2.8",
     "mongodb-memory-server": "^9.0",
-    "next": "15.0.0-canary.173",
+    "next": "15.0.0",
     "open": "^10.1.0",
     "p-limit": "^5.0.0",
     "playwright": "1.48.1",
     "playwright-core": "1.48.1",
     "prettier": "3.3.3",
     "prompts": "2.4.2",
-    "react": "19.0.0-rc-3edc000d-20240926",
-    "react-dom": "19.0.0-rc-3edc000d-20240926",
+    "react": "19.0.0-rc-65a56d0e-20241020",
+    "react-dom": "19.0.0-rc-65a56d0e-20241020",
     "rimraf": "3.0.2",
     "semver": "^7.5.4",
     "sharp": "0.32.6",
@@ -167,8 +167,8 @@
     "typescript": "5.6.3"
   },
   "peerDependencies": {
-    "react": "^19.0.0 || ^19.0.0-rc-3edc000d-20240926",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-3edc000d-20240926"
+    "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020"
   },
   "packageManager": "pnpm@9.7.1",
   "engines": {

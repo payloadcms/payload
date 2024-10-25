@@ -30,7 +30,7 @@ export const authAsCognitoUser = async (
 
   const result: CognitoUserSession = await new Promise((resolve, reject) => {
     cognitoUser.authenticateUser(authenticationDetails, {
-      onFailure: (err) => {
+      onFailure: (err: Error) => {
         reject(err)
       },
       onSuccess: (res) => {

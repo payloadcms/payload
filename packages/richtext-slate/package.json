@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-slate",
-  "version": "3.0.0-beta.116",
+  "version": "3.0.0-beta.119",
   "description": "The officially supported Slate richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -58,7 +58,7 @@
   },
   "peerDependencies": {
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-3edc000d-20240926"
+    "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"

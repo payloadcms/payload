@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-postgres",
-  "version": "3.0.0-beta.116",
+  "version": "3.0.0-beta.119",
   "description": "The officially supported Postgres database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -43,7 +43,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepack": "pnpm clean && pnpm turbo build",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
+    "prepublishOnly": "pnpm clean && pnpm turbo build --filter=./",
     "renamePredefinedMigrations": "node --no-deprecation --import @swc-node/register/esm-register ./scripts/renamePredefinedMigrations.ts"
   },
   "dependencies": {

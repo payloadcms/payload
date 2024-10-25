@@ -43,7 +43,7 @@ export const getStorageClient: GetStorageClient = async () => {
 
   const credentials = await cognitoIdentity.config.credentials()
 
-  // @ts-expect-error
+  // @ts-expect-error - Incorrect AWS types
   identityID = credentials.identityId
 
   storageClient = new AWS.S3({
