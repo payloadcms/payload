@@ -8,9 +8,11 @@ import type {
   SanitizedConfig,
 } from 'payload'
 
+import { dequal } from 'dequal'
 import { createClientConfig, formatErrors } from 'payload'
 
 import type { Column } from '../elements/Table/index.js'
+import type { ListPreferences } from '../elements/TableColumns/index.js'
 
 import { renderFilters, renderTable } from './renderTable.js'
 
@@ -41,6 +43,7 @@ export const getClientConfig = (args: {
 type BuildTableStateSuccessResult = {
   clientConfig?: ClientConfig
   errors?: never
+  preferences: ListPreferences
   renderedFilters: Map<string, React.ReactNode>
   state: Column[]
   Table: React.ReactNode
@@ -90,7 +93,7 @@ export const buildTableStateFn = async (
   const {
     collectionSlug,
     columns,
-    docs: docsFromArgs,
+    docs,
     req,
     req: {
       i18n,
@@ -148,22 +151,62 @@ export const buildTableStateFn = async (
     )
   }
 
+  // get prefs, then set update them using the columns that we just received
+  const preferencesKey = `${collectionSlug}-list`
+
+  const preferencesResult = await payload
+    .find({
+      collection: 'payload-preferences',
+      depth: 0,
+      limit: 1,
+      where: {
+        and: [
+          {
+            key: {
+              equals: preferencesKey,
+            },
+          },
+          {
+            'user.relationTo': {
+              equals: user.collection,
+            },
+          },
+          {
+            'user.value': {
+              equals: user.id,
+            },
+          },
+        ],
+      },
+    })
+    .then((res) => res.docs[0]?.value as ListPreferences)
+
+  let newPrefs = preferencesResult
+
+  if (!preferencesResult || !dequal(columns, preferencesResult?.columns)) {
+    const mergedPrefs = {
+      ...(preferencesResult || {}),
+      columns,
+    }
+
+    newPrefs = await payload
+      .create({
+        collection: 'payload-preferences',
+        data: {
+          key: preferencesKey,
+          user: {
+            collection: user.collection,
+            value: user.id,
+          },
+          value: mergedPrefs,
+        },
+        req,
+      })
+      ?.then((res) => res.value as ListPreferences)
+  }
+
   const fields = collectionConfig.fields
   const clientFields = clientCollectionConfig?.fields || []
-
-  let docs = docsFromArgs
-
-  if (!docs) {
-    docs = await payload
-      .find({
-        collection: collectionSlug,
-        depth: 0,
-        limit: 100,
-        pagination: false,
-        // where: {} TODO: pass where through args
-      })
-      ?.then((res) => res.docs)
-  }
 
   const { columnState, Table } = renderTable({
     clientFields,
@@ -177,9 +220,10 @@ export const buildTableStateFn = async (
     useAsTitle: collectionConfig.admin.useAsTitle,
   })
 
-  const renderedFilters = renderFilters(fields)
+  const renderedFilters = renderFilters(fields, req.payload.importMap)
 
   return {
+    preferences: newPrefs,
     renderedFilters,
     state: columnState,
     Table,

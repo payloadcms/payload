@@ -18,8 +18,8 @@ export interface ITableColumns {
   cellProps?: Partial<CellComponentProps>[]
   columns: Column[]
   moveColumn: (args: { fromIndex: number; toIndex: number }) => Promise<void>
-  resetColumnsState: () => void
-  setActiveColumns: (columns: string[]) => void
+  resetColumnsState: () => Promise<void>
+  setActiveColumns: (columns: string[]) => Promise<void>
   toggleColumn: (column: string) => Promise<void>
 }
 
@@ -89,18 +89,6 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
   const [tableColumns, setTableColumns] = React.useState(columnState)
 
-  const updateColumnPreferences = React.useCallback(
-    (newColumns: Column[]) => {
-      const columns = newColumns.map((c) => ({
-        accessor: c?.accessor,
-        active: c?.active,
-      }))
-
-      void setPreference(preferenceKey, { columns }, true)
-    },
-    [preferenceKey, setPreference],
-  )
-
   const moveColumn = useCallback(
     async (args: { fromIndex: number; toIndex: number }) => {
       const { fromIndex, toIndex } = args
@@ -114,7 +102,6 @@ export const TableColumnsProvider: React.FC<Props> = ({
         docs,
       })
 
-      // updateColumnPreferences(withMovedColumn)
       setTableColumns(columnState)
       setTable(Table)
     },
@@ -123,20 +110,18 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
   const toggleColumn = useCallback(
     async (column: string) => {
-      const toggledColumns = tableColumns.map((col) => {
+      const toggledColumns: Pick<Column, 'accessor' | 'active'>[] = tableColumns.map((col) => {
         return {
-          ...col,
+          accessor: col.accessor,
           active: col.accessor === column ? !col.active : col.active,
         }
       })
 
       const { state: columnState, Table } = await getTableState({
         collectionSlug,
-        columns: sanitizeColumns(toggledColumns),
+        columns: toggledColumns,
         docs,
       })
-
-      // updateColumnPreferences(toggledColumns)
 
       setTableColumns(columnState)
       setTable(Table)
@@ -145,11 +130,11 @@ export const TableColumnsProvider: React.FC<Props> = ({
   )
 
   const setActiveColumns = React.useCallback(
-    (activeColumnAccessors: string[]) => {
-      const activeColumns = tableColumns
+    async (activeColumnAccessors: string[]) => {
+      const activeColumns: Pick<Column, 'accessor' | 'active'>[] = tableColumns
         .map((col) => {
           return {
-            ...col,
+            accessor: col.accessor,
             active: activeColumnAccessors.includes(col.accessor),
           }
         })
@@ -164,14 +149,20 @@ export const TableColumnsProvider: React.FC<Props> = ({
           return indexOfFirst > indexOfSecond ? 1 : -1
         })
 
-      setTableColumns(activeColumns)
-      updateColumnPreferences(activeColumns)
+      const { state: columnState, Table } = await getTableState({
+        collectionSlug,
+        columns: activeColumns,
+        docs,
+      })
+
+      setTableColumns(columnState)
+      setTable(Table)
     },
-    [tableColumns, updateColumnPreferences],
+    [tableColumns, getTableState, setTable, collectionSlug, docs],
   )
 
-  const resetColumnsState = React.useCallback(() => {
-    setActiveColumns(defaultColumns)
+  const resetColumnsState = React.useCallback(async () => {
+    await setActiveColumns(defaultColumns)
   }, [defaultColumns, setActiveColumns])
 
   // //////////////////////////////////////////////
@@ -186,6 +177,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
         const currentPreferences = await getPreference<{
           columns: ColumnPreferences
         }>(preferenceKey)
+
         prevCollection.current = collectionSlug
 
         if (currentPreferences?.columns) {
