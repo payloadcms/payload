@@ -19,9 +19,9 @@ export type Props = {
   readonly collectionSlug: SanitizedCollectionConfig['slug']
 }
 
-const filterColumnFields = (fields: Column[]): Column[] => {
-  return fields.filter((field) => {
-    return !field.cellProps?.field?.admin?.disableListColumn
+const filterColumnFields = (columns: Column[]): Column[] => {
+  return columns.filter((c) => {
+    return !c?.field?.admin?.disableListColumn
   })
 }
 
@@ -80,7 +80,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
             draggable
             icon={active ? <XIcon /> : <PlusIcon />}
             id={accessor}
-            key={`${collectionSlug}-${col.cellProps?.field && 'name' in col.cellProps.field ? col.cellProps?.field?.name : i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
+            key={`${collectionSlug}-${col?.field && 'name' in col.field ? col?.field?.name : i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
             onClick={() => {
               toggleColumn(accessor)
             }}
