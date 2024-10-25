@@ -123,6 +123,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
       inputRef={inputRef}
       Label={Label}
       label={label}
+      localized={localized}
       maxRows={maxRows}
       minRows={minRows}
       onChange={

@@ -34,6 +34,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
         width,
       } = {} as PasswordFieldProps['field']['admin'],
       label,
+      localized,
       required,
     } = {} as PasswordFieldProps['field'],
     inputRef,
@@ -95,6 +96,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       inputRef={inputRef}
       Label={Label}
       label={label}
+      localized={localized}
       onChange={(e) => {
         setValue(e.target.value)
       }}

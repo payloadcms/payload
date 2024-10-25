@@ -22,6 +22,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
     inputRef,
     Label,
     label,
+    localized,
     onChange,
     onKeyDown,
     path,
@@ -53,7 +54,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
         width,
       }}
     >
-      {Label || <FieldLabel label={label} required={required} />}
+      {Label || <FieldLabel label={label} localized={localized} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
         {Error}
         <div>

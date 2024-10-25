@@ -54,6 +54,7 @@ export type UploadInputProps = {
   readonly Label?: React.ReactNode
   readonly label?: StaticLabel
   readonly labelProps?: FieldLabelClientProps<MarkOptional<UploadFieldClient, 'type'>>
+  readonly localized?: boolean
   readonly maxRows?: number
   readonly onChange?: (e) => void
   readonly path: string
@@ -78,6 +79,7 @@ export function UploadInput(props: UploadInputProps) {
     isSortable,
     Label,
     label,
+    localized,
     maxRows,
     onChange: onChangeFromProps,
     path,
@@ -90,7 +92,6 @@ export function UploadInput(props: UploadInputProps) {
     value,
     width,
   } = props
-  const allowCreate = field?.admin?.allowCreate !== false
 
   const [populatedDocs, setPopulatedDocs] = React.useState<
     {
@@ -144,7 +145,7 @@ export function UploadInput(props: UploadInputProps) {
   const loadedValueDocsRef = React.useRef<boolean>(false)
 
   const canCreate = useMemo(() => {
-    if (readOnly || !allowCreate) {
+    if (readOnly) {
       return false
     }
 
@@ -157,7 +158,7 @@ export function UploadInput(props: UploadInputProps) {
     }
 
     return false
-  }, [activeRelationTo, permissions, readOnly, allowCreate])
+  }, [activeRelationTo, permissions, readOnly])
 
   const onChange = React.useCallback(
     (newValue) => {
@@ -423,7 +424,7 @@ export function UploadInput(props: UploadInputProps) {
         width,
       }}
     >
-      {Label || <FieldLabel label={label} required={required} />}
+      {Label || <FieldLabel label={label} localized={localized} required={required} />}
       <div className={`${baseClass}__wrap`}>{Error}</div>
       <div className={`${baseClass}__dropzoneAndUpload`}>
         {hasMany && Array.isArray(value) && value.length > 0 ? (

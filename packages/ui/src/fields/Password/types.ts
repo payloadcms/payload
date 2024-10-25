@@ -28,6 +28,7 @@ export type PasswordInputProps = {
   readonly inputRef?: React.RefObject<HTMLInputElement>
   readonly Label?: React.ReactNode
   readonly label: FieldBaseClient['label']
+  readonly localized?: boolean
   readonly onChange?: (e: ChangeEvent<HTMLInputElement>) => void
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   readonly path: string

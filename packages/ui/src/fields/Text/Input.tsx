@@ -23,6 +23,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
     inputRef,
     Label,
     label,
+    localized,
     maxRows,
     onChange,
     onKeyDown,
@@ -57,7 +58,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
         width,
       }}
     >
-      {Label || <FieldLabel label={label} required={required} />}
+      {Label || <FieldLabel label={label} localized={localized} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
         {Error}
         {BeforeInput}

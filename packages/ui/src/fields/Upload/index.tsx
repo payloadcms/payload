@@ -21,9 +21,10 @@ export function UploadComponent(props: UploadFieldClientProps) {
     Error,
     field: {
       _path: path,
-      admin: { className, isSortable, readOnly: readOnlyFromAdmin, style, width } = {},
+      admin: { allowCreate, className, isSortable, readOnly: readOnlyFromAdmin, style, width } = {},
       hasMany,
       label,
+      localized,
       maxRows,
       relationTo,
       required,
@@ -32,7 +33,6 @@ export function UploadComponent(props: UploadFieldClientProps) {
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { config } = useConfig()
 
@@ -58,7 +58,13 @@ export function UploadComponent(props: UploadFieldClientProps) {
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromField || formProcessing || formInitializing
+  const disabled =
+    readOnlyFromTopLevelProps ||
+    readOnlyFromAdmin ||
+    readOnlyFromField ||
+    formProcessing ||
+    formInitializing ||
+    !allowCreate
 
   return (
     <UploadInput
@@ -71,6 +77,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
       isSortable={isSortable}
       label={label}
       Label={Label}
+      localized={localized}
       maxRows={maxRows}
       onChange={setValue}
       path={path}

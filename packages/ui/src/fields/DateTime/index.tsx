@@ -32,6 +32,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
         width,
       } = {},
       label,
+      localized,
       required,
     },
     Label,
@@ -78,7 +79,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Label || <FieldLabel label={label} required={required} />}
+      {Label || <FieldLabel label={label} localized={localized} required={required} />}
       <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
         {Error}
         {BeforeInput}

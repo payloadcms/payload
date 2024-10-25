@@ -51,6 +51,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       } = {},
       hasMany,
       label,
+      localized,
       relationTo,
       required,
     },
@@ -598,7 +599,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         width,
       }}
     >
-      {Label || <FieldLabel label={label} required={required} />}
+      {Label || <FieldLabel label={label} localized={localized} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
         {Error}
         {!errorLoading && (
