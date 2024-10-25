@@ -4,7 +4,7 @@ import type { ClientCollectionConfig, ClientField, FormState } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
 
@@ -122,6 +122,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   const [initialState, setInitialState] = useState<FormState>()
   const hasInitializedState = React.useRef(false)
   const { clearRouteCache } = useRouteCache()
+  const abortControllerRef = useRef(new AbortController())
 
   const collectionPermissions = permissions?.collections?.[slug]
   const hasUpdatePermission = collectionPermissions?.update?.permission
@@ -136,6 +137,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
           data: {},
           operation: 'update',
           schemaPath: slug,
+          signal: abortControllerRef.current.signal,
         })
 
         setInitialState(result)
@@ -153,12 +155,26 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
         formState: prevFormState,
         operation: 'update',
         schemaPath: slug,
+        signal: abortControllerRef.current.signal,
       })
 
       return state
     },
     [slug, getFormState],
   )
+
+  useEffect(() => {
+    const ref = abortControllerRef.current
+    return () => {
+      if (ref) {
+        try {
+          ref.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+    }
+  }, [])
 
   if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {
     return null
