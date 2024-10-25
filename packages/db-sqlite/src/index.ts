@@ -133,6 +133,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       findGlobalVersions,
       findOne,
       findVersions,
+      indexes: new Set<string>(),
       init,
       insert,
       migrate,

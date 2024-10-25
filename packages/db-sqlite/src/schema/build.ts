@@ -1,3 +1,4 @@
+import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { Relation } from 'drizzle-orm'
 import type {
   AnySQLiteColumn,
@@ -9,7 +10,7 @@ import type {
 } from 'drizzle-orm/sqlite-core'
 import type { Field, SanitizedJoins } from 'payload'
 
-import { createTableName } from '@payloadcms/drizzle'
+import { buildIndexName, createTableName } from '@payloadcms/drizzle'
 import { relations, sql } from 'drizzle-orm'
 import {
   foreignKey,
@@ -24,6 +25,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, GenericTable, IDType, SQLiteAdapter } from '../types.js'
 
+import { createIndex } from './createIndex.js'
 import { getIDColumn } from './getIDColumn.js'
 import { setColumnID } from './setColumnID.js'
 import { traverseFields } from './traverseFields.js'
@@ -56,14 +58,15 @@ type Args = {
   buildNumbers?: boolean
   buildRelationships?: boolean
   disableNotNull: boolean
+  disableRelsTableUnique?: boolean
   disableUnique: boolean
   fields: Field[]
-  joins?: SanitizedJoins
   locales?: [string, ...string[]]
   rootRelationships?: Set<string>
   rootRelationsToBuild?: RelationMap
   rootTableIDColType?: IDType
   rootTableName?: string
+  rootUniqueRelationships?: Set<string>
   tableName: string
   timestamps?: boolean
   versions: boolean
@@ -88,14 +91,15 @@ export const buildTable = ({
   baseColumns = {},
   baseExtraConfig = {},
   disableNotNull,
+  disableRelsTableUnique,
   disableUnique = false,
   fields,
-  joins,
   locales,
   rootRelationships,
   rootRelationsToBuild,
   rootTableIDColType,
   rootTableName: incomingRootTableName,
+  rootUniqueRelationships,
   tableName,
   timestamps,
   versions,
@@ -114,6 +118,7 @@ export const buildTable = ({
 
   // Relationships to the base collection
   const relationships: Set<string> = rootRelationships || new Set()
+  const uniqueRelationships: Set<string> = rootUniqueRelationships || new Set()
 
   let relationshipsTable: GenericTable | SQLiteTableWithColumns<any>
 
@@ -133,10 +138,10 @@ export const buildTable = ({
     adapter,
     columns,
     disableNotNull,
+    disableRelsTableUnique,
     disableUnique,
     fields,
     indexes,
-    joins,
     locales,
     localesColumns,
     localesIndexes,
@@ -147,6 +152,7 @@ export const buildTable = ({
     rootRelationsToBuild: rootRelationsToBuild || relationsToBuild,
     rootTableIDColType: rootTableIDColType || idColType,
     rootTableName,
+    uniqueRelationships,
     versions,
     withinLocalizedArrayOrBlock,
   })
@@ -393,7 +399,9 @@ export const buildTable = ({
           colType = 'text'
         }
 
-        relationshipColumns[`${relationTo}ID`] = getIDColumn({
+        const colName = `${relationTo}ID`
+
+        relationshipColumns[colName] = getIDColumn({
           name: `${formattedRelationTo}_id`,
           type: colType,
           primaryKey: false,
@@ -402,9 +410,31 @@ export const buildTable = ({
         relationExtraConfig[`${relationTo}IdFk`] = (cols) =>
           foreignKey({
             name: `${relationshipsTableName}_${toSnakeCase(relationTo)}_fk`,
-            columns: [cols[`${relationTo}ID`]],
+            columns: [cols[colName]],
             foreignColumns: [adapter.tables[formattedRelationTo].id],
           }).onDelete('cascade')
+
+        const indexColumns = [colName]
+
+        const unique = !disableUnique && uniqueRelationships.has(relationTo)
+
+        if (unique) {
+          indexColumns.push('path')
+        }
+        if (hasLocalizedRelationshipField) {
+          indexColumns.push('locale')
+        }
+
+        const indexName = buildIndexName({
+          name: `${relationshipsTableName}_${formattedRelationTo}_id`,
+          adapter: adapter as unknown as DrizzleAdapter,
+        })
+
+        relationExtraConfig[indexName] = createIndex({
+          name: indexColumns,
+          indexName,
+          unique,
+        })
       })
 
       relationshipsTable = sqliteTable(relationshipsTableName, relationshipColumns, (cols) => {

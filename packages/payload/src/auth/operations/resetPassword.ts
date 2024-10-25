@@ -1,5 +1,4 @@
 import httpStatus from 'http-status'
-import jwt from 'jsonwebtoken'
 
 import type { Collection } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
@@ -9,6 +8,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
+import { jwtSign } from '../jwt.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash.js'
 
@@ -83,6 +83,25 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
     if (collectionConfig.auth.verify) {
       user._verified = Boolean(user._verified)
     }
+    // /////////////////////////////////////
+    // beforeValidate - Collection
+    // /////////////////////////////////////
+
+    await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
+      await priorHook
+
+      await hook({
+        collection: args.collection?.config,
+        context: req.context,
+        data: user,
+        operation: 'update',
+        req,
+      })
+    }, Promise.resolve())
+
+    // /////////////////////////////////////
+    // Update new password
+    // /////////////////////////////////////
 
     const doc = await payload.db.updateOne({
       id: user.id,
@@ -99,8 +118,10 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
       user,
     })
 
-    const token = jwt.sign(fieldsToSign, secret, {
-      expiresIn: collectionConfig.auth.tokenExpiration,
+    const { token } = await jwtSign({
+      fieldsToSign,
+      secret,
+      tokenExpiration: collectionConfig.auth.tokenExpiration,
     })
 
     const fullUser = await payload.findByID({

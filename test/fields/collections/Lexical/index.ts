@@ -124,6 +124,10 @@ export const LexicalFields: CollectionConfig = {
       required: true,
     },
     {
+      name: 'lexicalRootEditor',
+      type: 'richText',
+    },
+    {
       name: 'lexicalSimple',
       type: 'richText',
       editor: lexicalEditor({

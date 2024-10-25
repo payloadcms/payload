@@ -11,4 +11,5 @@ export const defaultDrizzleSnapshot: DrizzleSQLiteSnapshotJSON = {
   prevId: '00000000-0000-0000-0000-00000000000',
   tables: {},
   version: '6',
+  views: {},
 }

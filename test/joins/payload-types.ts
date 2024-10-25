@@ -14,6 +14,8 @@ export interface Config {
     posts: Post;
     categories: Category;
     uploads: Upload;
+    versions: Version;
+    'categories-versions': CategoriesVersion;
     'localized-posts': LocalizedPost;
     'localized-categories': LocalizedCategory;
     users: User;
@@ -122,6 +124,32 @@ export interface Category {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versions".
+ */
+export interface Version {
+  id: string;
+  category?: (string | null) | Category;
+  categoryVersion?: (string | null) | CategoriesVersion;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories-versions".
+ */
+export interface CategoriesVersion {
+  id: string;
+  relatedVersions?: {
+    docs?: (string | Version)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "localized-posts".
  */
 export interface LocalizedPost {
@@ -180,6 +208,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'uploads';
         value: string | Upload;
+      } | null)
+    | ({
+        relationTo: 'versions';
+        value: string | Version;
+      } | null)
+    | ({
+        relationTo: 'categories-versions';
+        value: string | CategoriesVersion;
       } | null)
     | ({
         relationTo: 'localized-posts';

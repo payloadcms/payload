@@ -28,6 +28,7 @@ import { buildAfterOperation } from './utils.js'
 export type Arguments = {
   collection: Collection
   depth?: number
+  disableTransaction?: boolean
   draft?: boolean
   id: number | string
   overrideAccess?: boolean
@@ -42,7 +43,7 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
   const operation = 'create'
 
   try {
-    const shouldCommit = await initTransaction(args.req)
+    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -267,10 +268,7 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
       result = await saveVersion({
         id: versionDoc.id,
         collection: collectionConfig,
-        docWithLocales: {
-          ...versionDoc,
-          createdAt: result.createdAt,
-        },
+        docWithLocales: versionDoc,
         draft: shouldSaveDraft,
         payload,
         req,

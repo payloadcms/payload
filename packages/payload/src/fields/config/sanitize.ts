@@ -49,6 +49,13 @@ type Args = {
   validRelationships: null | string[]
 }
 
+function generateSchemaPath({ name, path = '' }: { name?: string; path?: string }): string {
+  if (!name) {
+    return path
+  }
+  return path ? `${path}.${name}` : name
+}
+
 export const sanitizeFields = async ({
   config,
   existingFieldNames = new Set(),
@@ -57,14 +64,12 @@ export const sanitizeFields = async ({
   parentIsLocalized,
   requireFieldLevelRichTextEditor = false,
   richTextSanitizationPromises,
-  schemaPath: schemaPathArg,
+  schemaPath = '',
   validRelationships,
 }: Args): Promise<Field[]> => {
   if (!fields) {
     return []
   }
-
-  let schemaPath = schemaPathArg
 
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]
@@ -234,7 +239,6 @@ export const sanitizeFields = async ({
         block._sanitized = true
         block.fields = block.fields.concat(baseBlockFields)
         block.labels = !block.labels ? formatLabels(block.slug) : block.labels
-
         block.fields = await sanitizeFields({
           config,
           existingFieldNames: new Set(),
@@ -248,9 +252,6 @@ export const sanitizeFields = async ({
     }
 
     if ('fields' in field && field.fields) {
-      if ('name' in field && field.name) {
-        schemaPath = `${schemaPath || ''}${schemaPath ? '.' : ''}${field.name}`
-      }
       field.fields = await sanitizeFields({
         config,
         existingFieldNames: fieldAffectsData(field) ? new Set() : existingFieldNames,
@@ -259,7 +260,10 @@ export const sanitizeFields = async ({
         parentIsLocalized: parentIsLocalized || field.localized,
         requireFieldLevelRichTextEditor,
         richTextSanitizationPromises,
-        schemaPath,
+        schemaPath: generateSchemaPath({
+          name: 'name' in field ? field.name : undefined,
+          path: schemaPath,
+        }),
         validRelationships,
       })
     }
@@ -268,7 +272,6 @@ export const sanitizeFields = async ({
       for (let j = 0; j < field.tabs.length; j++) {
         const tab = field.tabs[j]
         if (tabHasName(tab)) {
-          schemaPath = `${schemaPath || ''}${schemaPath ? '.' : ''}${tab.name}`
           if (typeof tab.label === 'undefined') {
             tab.label = toWords(tab.name)
           }
@@ -282,7 +285,10 @@ export const sanitizeFields = async ({
           parentIsLocalized: parentIsLocalized || (tabHasName(tab) && tab.localized),
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
-          schemaPath,
+          schemaPath: generateSchemaPath({
+            name: 'name' in tab ? tab.name : undefined,
+            path: schemaPath,
+          }),
           validRelationships,
         })
         field.tabs[j] = tab

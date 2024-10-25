@@ -16,6 +16,7 @@ type BuildFindQueryArgs = {
   joins?: BuildQueryJoinAliases
   locale?: string
   tableName: string
+  versions?: boolean
 }
 
 export type Result = {
@@ -34,6 +35,7 @@ export const buildFindManyArgs = ({
   joins = [],
   locale,
   tableName,
+  versions,
 }: BuildFindQueryArgs): Record<string, unknown> => {
   const result: Result = {
     extras: {},
@@ -97,6 +99,7 @@ export const buildFindManyArgs = ({
     tablePath: '',
     topLevelArgs: result,
     topLevelTableName: tableName,
+    versions,
   })
 
   return result

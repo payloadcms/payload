@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { Payload, TypeWithID } from 'payload'
 
 import path from 'path'
 import { getFileByPath } from 'payload'
@@ -370,6 +370,42 @@ describe('Joins Field', () => {
       })
       expect(enCategory.relatedPosts.docs).toHaveLength(2)
       expect(esCategory.relatedPosts.docs).toHaveLength(1)
+    })
+  })
+
+  describe('Joins with versions', () => {
+    afterEach(async () => {
+      await payload.delete({ collection: 'versions', where: {} })
+      await payload.delete({ collection: 'categories-versions', where: {} })
+    })
+
+    it('should populate joins when versions on both sides draft false', async () => {
+      const category = await payload.create({ collection: 'categories-versions', data: {} })
+
+      const version = await payload.create({
+        collection: 'versions',
+        data: { categoryVersion: category.id },
+      })
+
+      const res = await payload.find({ collection: 'categories-versions', draft: false })
+
+      expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
+    })
+
+    it('should populate joins when versions on both sides draft true payload.db.queryDrafts', async () => {
+      const category = await payload.create({ collection: 'categories-versions', data: {} })
+
+      const version = await payload.create({
+        collection: 'versions',
+        data: { categoryVersion: category.id },
+      })
+
+      const res = await payload.find({
+        collection: 'categories-versions',
+        draft: true,
+      })
+
+      expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
     })
   })
 

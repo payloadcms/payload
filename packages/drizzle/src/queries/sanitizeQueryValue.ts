@@ -223,8 +223,11 @@ export const sanitizeQueryValue = ({
   }
 
   if (operator === 'exists') {
-    formattedValue = formattedValue === 'true' || formattedValue === true
-    if (formattedValue === false) {
+    formattedValue = val === 'true' || val === true
+
+    if (formattedValue) {
+      operator = 'exists'
+    } else {
       operator = 'isNull'
     }
   }
