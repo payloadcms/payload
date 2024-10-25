@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { JsonObject, Payload } from '../../../index.js'
-import type { PayloadRequest, Where } from '../../../types/index.js'
+import type { PayloadRequest, SelectType, Where } from '../../../types/index.js'
 
 import { ValidationError } from '../../../errors/index.js'
 import { generatePasswordSaltHash } from './generatePasswordSaltHash.js'
@@ -11,6 +11,7 @@ type Args = {
   password: string
   payload: Payload
   req: PayloadRequest
+  select?: SelectType
 }
 
 export const registerLocalStrategy = async ({
@@ -19,6 +20,7 @@ export const registerLocalStrategy = async ({
   password,
   payload,
   req,
+  select,
 }: Args): Promise<Record<string, unknown>> => {
   const loginWithUsername = collection?.auth?.loginWithUsername
 
@@ -90,5 +92,6 @@ export const registerLocalStrategy = async ({
       salt,
     },
     req,
+    select,
   })
 }

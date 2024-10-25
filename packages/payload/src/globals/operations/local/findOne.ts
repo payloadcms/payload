@@ -1,12 +1,17 @@
 import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
-import type { Document, PayloadRequest } from '../../../types/index.js'
-import type { DataFromGlobalSlug } from '../../config/types.js'
+import type {
+  Document,
+  PayloadRequest,
+  SelectType,
+  TransformGlobalWithSelect,
+} from '../../../types/index.js'
+import type { SelectFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findOneOperation } from '../findOne.js'
 
-export type Options<TSlug extends GlobalSlug> = {
+export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   context?: RequestContext
   depth?: number
   draft?: boolean
@@ -15,21 +20,26 @@ export type Options<TSlug extends GlobalSlug> = {
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   req?: PayloadRequest
+  select?: TSelect
   showHiddenFields?: boolean
   slug: TSlug
   user?: Document
 }
 
-export default async function findOneLocal<TSlug extends GlobalSlug>(
+export default async function findOneLocal<
+  TSlug extends GlobalSlug,
+  TSelect extends SelectFromGlobalSlug<TSlug>,
+>(
   payload: Payload,
-  options: Options<TSlug>,
-): Promise<DataFromGlobalSlug<TSlug>> {
+  options: Options<TSlug, TSelect>,
+): Promise<TransformGlobalWithSelect<TSlug, TSelect>> {
   const {
     slug: globalSlug,
     depth,
     draft = false,
     includeLockStatus,
     overrideAccess = true,
+    select,
     showHiddenFields,
   } = options
 
@@ -47,6 +57,7 @@ export default async function findOneLocal<TSlug extends GlobalSlug>(
     includeLockStatus,
     overrideAccess,
     req: await createLocalReq(options, payload),
+    select,
     showHiddenFields,
   })
 }

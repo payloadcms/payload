@@ -6,6 +6,7 @@ import type { CollectionRouteHandlerWithID } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { sanitizeCollectionID } from '../utilities/sanitizeCollectionID.js'
+import { sanitizeSelect } from '../utilities/sanitizeSelect.js'
 
 export const updateByID: CollectionRouteHandlerWithID = async ({
   id: incomingID,
@@ -35,6 +36,7 @@ export const updateByID: CollectionRouteHandlerWithID = async ({
     overrideLock: Boolean(overrideLock === 'true'),
     publishSpecificLocale,
     req,
+    select: sanitizeSelect(req.query.select),
   })
 
   let message = req.t('general:updatedSuccessfully')

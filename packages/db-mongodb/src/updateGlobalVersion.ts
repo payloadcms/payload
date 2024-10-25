@@ -7,6 +7,7 @@ import {
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
 import { withSession } from './withSession.js'
 
@@ -17,16 +18,23 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     global: globalSlug,
     locale,
     req = {} as PayloadRequest,
+    select,
     versionData,
     where,
   }: UpdateGlobalVersionArgs<T>,
 ) {
   const VersionModel = this.versions[globalSlug]
   const whereToUse = where || { id: { equals: id } }
+  const fields = buildVersionGlobalFields(
+    this.payload.config,
+    this.payload.config.globals.find((global) => global.slug === globalSlug),
+  )
+
   const options = {
     ...(await withSession(this, req)),
     lean: true,
     new: true,
+    projection: buildProjectionFromSelect({ adapter: this, fields, select }),
   }
 
   const query = await VersionModel.buildQuery({
@@ -38,10 +46,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
   const sanitizedData = sanitizeRelationshipIDs({
     config: this.payload.config,
     data: versionData,
-    fields: buildVersionGlobalFields(
-      this.payload.config,
-      this.payload.config.globals.find((global) => global.slug === globalSlug),
-    ),
+    fields,
   })
 
   const doc = await VersionModel.findOneAndUpdate(query, sanitizedData, options)
