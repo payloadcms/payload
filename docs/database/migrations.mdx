@@ -53,7 +53,8 @@ export async function down({ payload, req }: MigrateDownArgs): Promise<void> {
 
 When migrations are run, each migration is performed in a new [transactions](/docs/database/transactions) for you. All
 you need to do is pass the `req` object to any [local API](/docs/local-api/overview) or direct database calls, such as
-`payload.db.updateMany()`, to make database changes inside the transaction. Assuming no errors were thrown, the transaction is committed
+`payload.db.updateMany()`, to make database changes inside the transaction. Assuming no errors were thrown, the
+transaction is committed
 after your `up` or `down` function runs. If the migration errors at any point or fails to commit, it is caught and the
 transaction gets aborted. This way no change is made to the database if the migration fails.
 
@@ -133,35 +134,50 @@ npm run payload migrate:fresh
 
 Depending on which Database Adapter you use, your migration workflow might differ subtly.
 
-In relational databases, migrations will be **required** for non-development database environments. But with MongoDB, you might only need to run migrations once in a while (or never even need them).
+In relational databases, migrations will be **required** for non-development database environments. But with MongoDB,
+you might only need to run migrations once in a while (or never even need them).
 
 #### MongoDB
 
-In MongoDB, you'll only ever really need to run migrations for times where you change your database shape, and you have lots of existing data that you'd like to transform from Shape A to Shape B.
+In MongoDB, you'll only ever really need to run migrations for times where you change your database shape, and you have
+lots of existing data that you'd like to transform from Shape A to Shape B.
 
-In this case, you can create a migration by running `pnpm payload migrate:create`, and then write the logic that you need to perform to migrate your documents to their new shape. You can then either run your migrations in CI before you build / deploy, or you can run them locally, against your production database, by using your production database connection string on your local computer and running the `pnpm payload migrate` command.
+In this case, you can create a migration by running `pnpm payload migrate:create`, and then write the logic that you
+need to perform to migrate your documents to their new shape. You can then either run your migrations in CI before you
+build / deploy, or you can run them locally, against your production database, by using your production database
+connection string on your local computer and running the `pnpm payload migrate` command.
 
 #### Postgres
 
-In relational databases like Postgres, migrations are a bit more important, because each time you add a new field or a new collection, you'll need to update the shape of your database to match your Payload Config (otherwise you'll see errors upon trying to read / write your data).
+In relational databases like Postgres, migrations are a bit more important, because each time you add a new field or a
+new collection, you'll need to update the shape of your database to match your Payload Config (otherwise you'll see
+errors upon trying to read / write your data).
 
 That means that Postgres users of Payload should become familiar with the entire migration workflow from top to bottom.
 
-Here is an overview of a common workflow for working locally against a development database, creating migrations, and then running migrations against your production database before deploying.
+Here is an overview of a common workflow for working locally against a development database, creating migrations, and
+then running migrations against your production database before deploying.
 
 **1 - work locally using push mode**
 
-Payload uses Drizzle ORM's powerful `push` mode to automatically sync data changes to your database for you while in development mode. By default, this is enabled and is the suggested workflow to using Postgres and Payload while doing local development.
+Payload uses Drizzle ORM's powerful `push` mode to automatically sync data changes to your database for you while in
+development mode. By default, this is enabled and is the suggested workflow to using Postgres and Payload while doing
+local development.
 
-You can disable this setting and solely use migrations to manage your local development database (pass `push: false` to your Postgres adapter), but if you do disable it, you may see frequent errors while running development mode. This is because Payload will have updated to your new data shape, but your local database will not have updated.
+You can disable this setting and solely use migrations to manage your local development database (pass `push: false` to
+your Postgres adapter), but if you do disable it, you may see frequent errors while running development mode. This is
+because Payload will have updated to your new data shape, but your local database will not have updated.
 
 For this reason, we suggest that you leave `push` as its default setting and treat your local dev database as a sandbox.
 
 For more information about push mode and prototyping in development, [click here](./postgres#prototyping-in-dev-mode).
 
-The typical workflow in Payload is to build out your Payload configs, install plugins, and make progress in development mode - allowing Drizzle to push your changes to your local database for you. Once you're finished, you can create a migration.
+The typical workflow in Payload is to build out your Payload configs, install plugins, and make progress in development
+mode - allowing Drizzle to push your changes to your local database for you. Once you're finished, you can create a
+migration.
 
-But importantly, you do not need to run migrations against your development database, because Drizzle will have already pushed your changes to your database for you.
+But importantly, you do not need to run migrations against your development database, because Drizzle will have already
+pushed your changes to your database for you.
 
 <Banner type="warning">
   Warning: do not mix "push" and migrations with your local development database. If you use "push"
@@ -171,11 +187,13 @@ But importantly, you do not need to run migrations against your development data
 
 **2 - create a migration**
 
-Once you're done with working in your Payload Config, you can create a migration. It's best practice to try and complete a specific task or fully build out a feature before you create a migration.
+Once you're done with working in your Payload Config, you can create a migration. It's best practice to try and complete
+a specific task or fully build out a feature before you create a migration.
 
 But once you're ready, you can run `pnpm payload migrate:create`, which will perform the following steps for you:
 
-- We will look for any existing migrations, and automatically generate SQL changes necessary to convert your schema from its prior state to the new state of your Payload Config
+- We will look for any existing migrations, and automatically generate SQL changes necessary to convert your schema from
+  its prior state to the new state of your Payload Config
 - We will then create a new migration file in your `/migrations` folder that contains all the SQL necessary to be run
 
 We won't immediately run this migration for you, however.
@@ -186,43 +204,65 @@ We won't immediately run this migration for you, however.
 
 **3 - set up your build process to run migrations**
 
-Generally, you want to run migrations before you build Payload for production. This typically happens in your CI pipeline and can usually be configured on platforms like Payload Cloud, Vercel, or Netlify by specifying your build script.
+Generally, you want to run migrations before you build Payload for production. This typically happens in your CI
+pipeline and can usually be configured on platforms like Payload Cloud, Vercel, or Netlify by specifying your build
+script.
 
 A common set of scripts in a `package.json`, set up to run migrations in CI, might look like this:
 
 ```js
-  "scripts": {
-    // For running in dev mode
-    "dev": "next dev --turbo",
+  "scripts"
+:
+{
+  // For running in dev mode
+  "dev"
+:
+  "next dev --turbo",
 
     // To build your Next + Payload app for production
-    "build": "next build",
+    "build"
+:
+  "next build",
 
     // A "tie-in" to Payload's CLI for convenience
     // this helps you run `pnpm payload migrate:create` and similar
-    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "payload"
+:
+  "cross-env NODE_OPTIONS=--no-deprecation payload",
 
     // This command is what you'd set your `build script` to.
     // Notice how it runs `payload migrate` and then `pnpm build`?
     // This will run all migrations for you before building, in your CI,
     // against your production database
-    "ci": "payload migrate && pnpm build",
-  },
+    "ci"
+:
+  "payload migrate && pnpm build",
+}
+,
 ```
 
-In the example above, we've specified a `ci` script which we can use as our "build script" in the platform that we are deploying to production with.
+In the example above, we've specified a `ci` script which we can use as our "build script" in the platform that we are
+deploying to production with.
 
-This will require that your build pipeline can connect to your database, and it will simply run the `payload migrate` command prior to starting the build process. By calling `payload migrate`, Payload will automatically execute any migrations in your `/migrations` folder that have not yet been executed against your production database, in the order that they were created.
+This will require that your build pipeline can connect to your database, and it will simply run the `payload migrate`
+command prior to starting the build process. By calling `payload migrate`, Payload will automatically execute any
+migrations in your `/migrations` folder that have not yet been executed against your production database, in the order
+that they were created.
 
-If it fails, the deployment will be rejected. But now, with your build script set up to run your migrations, you will be all set! Next time you deploy, your CI will execute the required migrations for you, and your database will be caught up with the shape that your Payload Config requires.
+If it fails, the deployment will be rejected. But now, with your build script set up to run your migrations, you will be
+all set! Next time you deploy, your CI will execute the required migrations for you, and your database will be caught up
+with the shape that your Payload Config requires.
 
 ## Running migrations in production
 
-In certain cases, you might want to run migrations at runtime when the server starts. Running them during build time may be impossible due to not having access to your database connection while building or similar reasoning.
+In certain cases, you might want to run migrations at runtime when the server starts. Running them during build time may
+be impossible due to not having access to your database connection while building or similar reasoning.
 
-If you're using a long-running server or container where your Node server starts up one time and then stays initialized, you might prefer to run migrations on server startup instead of within your CI.
+If you're using a long-running server or container where your Node server starts up one time and then stays initialized,
+you might prefer to run migrations on server startup instead of within your CI.
 
-In order to run migrations at runtime, on initialization, you can pass your migrations to your database adapter under the `prodMigrations` key as follows:
+In order to run migrations at runtime, on initialization, you can pass your migrations to your database adapter under
+the `prodMigrations` key as follows:
 
 ```ts
 // Import your migrations from the `index.ts` file
@@ -239,8 +279,73 @@ export default buildConfig({
 })
 ```
 
-Passing your migrations as shown above will tell Payload, in production only, to execute any migrations that need to be run prior to completing the initialization of Payload. This is ideal for long-running services where Payload will only be initialized at startup.
+Passing your migrations as shown above will tell Payload, in production only, to execute any migrations that need to be
+run prior to completing the initialization of Payload. This is ideal for long-running services where Payload will only
+be initialized at startup.
 
 <Banner type="warning">
   Warning - if Payload is instructed to run migrations in production, this may slow down serverless cold starts on platforms such as Vercel. Generally, this option should only be used for long-running servers / containers.
 </Banner>
+
+## Change Management
+
+Making changes to your Payload configuration impact how the database interprets and builds the structure of your
+data. Depending on the change, after you have data, Payload may no longer be able to access data that has been saved. If
+you're using MongoDB the data will still be in your database, though it might not be under the same collection or
+properties as it was originally saved as. By contrast, Postgres or SQLite has to adjust structures as you make your
+changes. Because the SQL based database adapters use Drizzle, is called on and will ask prompting questions for you to
+help with both DDL (Data Definition Language) controlling the structure and data migration. That said it cannot account
+for all changes that may occur and may warn you of data loss.
+
+No matter what data you have and what changes you make to your configuration there are ways to work around changes to
+not suffer data loss.
+
+The simplest way to avoid breaking changes to your configuration is to plan ahead for them. For example, if you think
+you might want to support multiple locales in the future, you can
+enable [localization](/docs/configuration/localizatoin) before editors begin saving content and set fields
+to `localization: true` so that data can be keyed under one language so that when enabled later the structure of data
+doesn't need to change. Enabling [versions](/docs/versions/overview) is another feature that is better to enable up
+front if you intend to use it later.
+
+Below is a list of properties that change the structure of your data and brief description on how they impact the
+underlying data and will require a migration to prevent data loss.
+
+#### Collection Slugs
+
+The MongoDB collection or SQL table(s) holding these documents will need to be renamed. Drizzle will ask to rename
+tables. In MongoDB, you can use `payload.db.collection('old-slug').rename('new-slug')`. To keep version history for
+version enabled collections, you will rename the `_versions_old-slug` DB collection to `_versions_new-slug`.
+
+#### Globals Slugs
+
+Renaming global slugs cause table name changes for SQL adapters, which drizzle can handle. In MongoDB all globals saved
+in the `globals` collection. To migrate you need to update any existing globals documents by updating the `globalType`
+properties to equal the new slug. For example:
+
+```ts
+  const options = { session: db.sessions[req.transactionID] }
+await payload.db.collection('globals')
+  .findOneAndUpdate({ globalType: 'old-slug' }, { globalType: 'new-slug' }, options)
+```
+
+In MongoDB, to keep history for a versions enabled globals, you will rename the `_versions_old-slug` DB collection
+to `_versions_new-slug`.
+
+#### Block Slugs
+
+#### Localization
+
+Adding `localization: true` to a field impact MongoDB and SQL adapters differently. In SQL the a collection with
+localized fields will have a new table added or a column is added to one that already exists. For example a `posts`
+collection will have a `posts_locales` table and all localized fields will be moved to the locales table.
+
+#### `hasMany`
+
+Fields that support the `hasMany` property will also force SQL adapters to create an additional table in which to store
+ordered items in aside from relationships that need to be in a collection's `_rels` table such as those that are
+polymorphic where the `relationTo` also needs to be stored in a separate column. In MongoDB, the difference is to move
+the value of the field into an array.
+
+#### Field Names
+
+TODO: WIP
