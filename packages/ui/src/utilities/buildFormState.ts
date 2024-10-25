@@ -203,9 +203,11 @@ export const buildFormStateFn = async (
   }
 
   if (
-    !('fields' in fieldOrEntityConfig) ||
-    !fieldOrEntityConfig.fields ||
-    !fieldOrEntityConfig.fields.length
+    (!('fields' in fieldOrEntityConfig) ||
+      !fieldOrEntityConfig.fields ||
+      !fieldOrEntityConfig.fields.length) &&
+    'type' in fieldOrEntityConfig &&
+    fieldOrEntityConfig.type !== 'blocks'
   ) {
     throw new Error(
       `The field found in fieldSchemaMap for "${schemaPath.join('.')}" does not contain any subfields.`,
@@ -330,8 +332,13 @@ export const buildFormStateFn = async (
    * - `fields`
    * - `parentSchemaPath`
    * - `parentPath`
+   *
+   * Type assertion is fine because we wrap sub schemas in an array
+   * so we can safely map over them within `fieldSchemasToFormState`
    */
-  const fields = isEntitySchema ? fieldOrEntityConfig.fields : ([fieldOrEntityConfig] as Field[])
+  const fields = (
+    isEntitySchema ? (fieldOrEntityConfig as { fields: Field[] }).fields : [fieldOrEntityConfig]
+  ) as Field[]
   const parentSchemaPath = isEntitySchema ? schemaPath : schemaPath.slice(0, -1)
   const parentPath = isEntitySchema ? path : path.slice(0, -1)
 

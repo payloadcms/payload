@@ -62,7 +62,12 @@ export function attachComponentsToFormState(args: Args): args is OutputArgs {
     const fieldConfig = fieldSchemaMap.get(fieldState.schemaPath.join('.'))
 
     if (!fieldConfig) {
-      throw new Error(`Field config not found for ${fieldState.schemaPath.join('.')}`)
+      // blockType is not an actual field so it wont exist in the fieldSchemaMap
+      if (fieldState.schemaPath[fieldState.schemaPath.length - 1] === 'blockType') {
+        return
+      } else {
+        throw new Error(`Field config not found for ${fieldState.schemaPath.join('.')}`)
+      }
     }
 
     const clientField = createClientField({

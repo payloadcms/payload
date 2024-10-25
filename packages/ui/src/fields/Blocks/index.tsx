@@ -1,5 +1,5 @@
 'use client'
-import type { Block, BlocksFieldClientComponent } from 'payload'
+import type { BlocksFieldClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback } from 'react'
@@ -112,12 +112,11 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const addRow = useCallback(
     async (rowIndex: number, blockType: string): Promise<void> => {
       // TODO add the new row into the currentData array using the incoming rowIndex
-      const newRow = { id: uuid(), blockType }
-
-      const currentData: Block[] = getDataByPath(path)
+      const newRows: unknown[] = getDataByPath(path)
+      newRows.splice(rowIndex, 0, { id: uuid(), blockType })
 
       await addFieldRow({
-        data: { [name]: [...currentData, newRow] },
+        data: { [name]: newRows },
         path,
         schemaPath,
       })

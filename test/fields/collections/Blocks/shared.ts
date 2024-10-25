@@ -5,11 +5,11 @@ export const getBlocksFieldSeedData = (prefix?: string): any => [
     blockName: 'First block',
     blockType: prefix ? `${prefix}Content` : 'content',
     text: 'first block',
-    richText: [
-      {
-        children: [{ text: '' }],
-      },
-    ],
+    // richText: [
+    //   {
+    //     children: [{ text: '' }],
+    //   },
+    // ],
   },
   {
     blockName: 'Second block',
