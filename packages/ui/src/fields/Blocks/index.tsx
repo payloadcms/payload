@@ -111,13 +111,10 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
   const addRow = useCallback(
     async (rowIndex: number, blockType: string): Promise<void> => {
-      // TODO add the new row into the currentData array using the incoming rowIndex
-      const newRows: unknown[] = getDataByPath(path)
-      newRows.splice(rowIndex, 0, { id: uuid(), blockType })
-
       await addFieldRow({
-        data: { [name]: newRows },
+        data: { blockType },
         path,
+        rowIndex,
         schemaPath,
       })
 
@@ -127,7 +124,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, setModified, getDataByPath, name, schemaPath],
+    [addFieldRow, path, schemaPath, setModified],
   )
 
   const duplicateRow = useCallback(

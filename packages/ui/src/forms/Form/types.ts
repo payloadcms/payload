@@ -183,10 +183,12 @@ export type Context = {
   addFieldRow: ({
     data,
     path,
+    rowIndex,
     schemaPath,
   }: {
     data?: Data
     path: string
+    rowIndex?: number
     schemaPath: string
   }) => Promise<void>
   buildRowErrors: () => void

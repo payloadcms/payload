@@ -3,12 +3,10 @@ import type {
   ArrayFieldClientComponent,
   ArrayFieldClientProps,
   ArrayField as ArrayFieldType,
-  Row,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
-import { v4 as uuid } from 'uuid'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -129,14 +127,9 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const addRow = useCallback(
     async (rowIndex: number): Promise<void> => {
-      const newRows: Row[] = getDataByPath(path)
-      newRows.splice(rowIndex, 0, { id: uuid() })
-
-      console.log('newRows', newRows)
-
       await addFieldRow({
-        data: { [name]: newRows },
         path,
+        rowIndex,
         schemaPath,
       })
 
@@ -146,7 +139,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         scrollToID(`${path}-row-${rowIndex}`)
       }, 0)
     },
-    [addFieldRow, path, setModified, getDataByPath, name, schemaPath],
+    [addFieldRow, path, schemaPath, setModified],
   )
 
   const duplicateRow = useCallback(

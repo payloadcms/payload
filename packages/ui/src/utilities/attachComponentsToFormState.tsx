@@ -250,18 +250,18 @@ export function attachComponentsToFormState(args: Args): args is OutputArgs {
             )
           }
         }
-      }
 
-      if (fieldConfig.admin?.components?.Field) {
-        fieldState.customComponents.Field = (
-          <RenderServerComponent
-            clientProps={clientProps}
-            Component={fieldConfig.admin.components.Field}
-            importMap={payload.importMap}
-            key="field.admin.components.Field"
-            serverProps={serverProps}
-          />
-        )
+        if ('Field' in fieldConfig.admin.components) {
+          fieldState.customComponents.Field = (
+            <RenderServerComponent
+              clientProps={clientProps}
+              Component={fieldConfig.admin.components.Field}
+              importMap={payload.importMap}
+              key="field.admin.components.Field"
+              serverProps={serverProps}
+            />
+          )
+        }
       }
     }
   })

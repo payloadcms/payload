@@ -3,16 +3,17 @@
 import { useField, useForm } from '@payloadcms/ui'
 import * as React from 'react'
 
-import { blockFieldsSlug } from '../../../../slugs.js'
 import './index.scss'
 
 const baseClass = 'custom-blocks-field-management'
 
 const blocksPath = 'customBlocks'
 
-export const AddCustomBlocks: React.FC = () => {
+export const AddCustomBlocks: React.FC = (props) => {
   const { addFieldRow, replaceFieldRow } = useForm()
-  const { value } = useField<number>({ path: blocksPath })
+  const field = useField<number>({ path: blocksPath })
+  const { value } = field
+  const schemaPath = props.schemaPath.replace(`.${props.field.name}`, `.${blocksPath}`)
 
   return (
     <div className={baseClass}>
@@ -23,7 +24,7 @@ export const AddCustomBlocks: React.FC = () => {
             await addFieldRow({
               data: { block1Title: 'Block 1: Prefilled Title', blockType: 'block-1' },
               path: blocksPath,
-              schemaPath: `${blockFieldsSlug}.${blocksPath}.block-1`,
+              schemaPath,
             })
           }}
           type="button"
@@ -37,7 +38,7 @@ export const AddCustomBlocks: React.FC = () => {
             await addFieldRow({
               data: { block2Title: 'Block 2: Prefilled Title', blockType: 'block-2' },
               path: blocksPath,
-              schemaPath: `${blockFieldsSlug}.${blocksPath}.block-2`,
+              schemaPath,
             })
           }}
           type="button"
@@ -54,7 +55,7 @@ export const AddCustomBlocks: React.FC = () => {
               data: { block1Title: 'REPLACED BLOCK', blockType: 'block-1' },
               path: blocksPath,
               rowIndex: value - 1,
-              schemaPath: `${blockFieldsSlug}.${blocksPath}.block-1`,
+              schemaPath,
             })
           }
           type="button"

@@ -6,8 +6,6 @@ import type {
   PayloadRequest,
 } from 'payload'
 
-import { fieldIsPresentationalOnly } from 'payload/shared'
-
 import type { AddFieldStatePromiseArgs } from './addFieldStatePromise.js'
 
 import { addFieldStatePromise } from './addFieldStatePromise.js'
@@ -90,42 +88,40 @@ export const iterateFields = async ({
   const promises = []
 
   fields.forEach((field, fieldIndex) => {
-    if (!fieldIsPresentationalOnly(field) && !field?.admin?.disabled) {
-      let passesCondition = true
-      if (!skipConditionChecks) {
-        passesCondition = Boolean(
-          (field?.admin?.condition
-            ? Boolean(field.admin.condition(fullData || {}, data || {}, { user: req.user }))
-            : true) && parentPassesCondition,
-        )
-      }
-
-      promises.push(
-        addFieldStatePromise({
-          id,
-          addErrorPathToParent: addErrorPathToParentArg,
-          anyParentLocalized,
-          collectionSlug,
-          data,
-          field,
-          fieldIndex,
-          filter,
-          forceFullValue,
-          fullData,
-          includeSchema,
-          omitParents,
-          operation,
-          parentPath,
-          parentSchemaPath,
-          passesCondition,
-          preferences,
-          req,
-          skipConditionChecks,
-          skipValidation,
-          state,
-        }),
+    let passesCondition = true
+    if (!skipConditionChecks) {
+      passesCondition = Boolean(
+        (field?.admin?.condition
+          ? Boolean(field.admin.condition(fullData || {}, data || {}, { user: req.user }))
+          : true) && parentPassesCondition,
       )
     }
+
+    promises.push(
+      addFieldStatePromise({
+        id,
+        addErrorPathToParent: addErrorPathToParentArg,
+        anyParentLocalized,
+        collectionSlug,
+        data,
+        field,
+        fieldIndex,
+        filter,
+        forceFullValue,
+        fullData,
+        includeSchema,
+        omitParents,
+        operation,
+        parentPath,
+        parentSchemaPath,
+        passesCondition,
+        preferences,
+        req,
+        skipConditionChecks,
+        skipValidation,
+        state,
+      }),
+    )
   })
 
   await Promise.all(promises)

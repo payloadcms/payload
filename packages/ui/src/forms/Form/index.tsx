@@ -11,6 +11,7 @@ import {
 } from 'payload/shared'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { v4 as uuidv4 } from 'uuid'
 
 import type {
   Context as FormContextType,
@@ -118,7 +119,7 @@ export const Form: React.FC<FormProps> = (props) => {
         if (field.passesCondition !== false) {
           let validationResult: boolean | string = validatedField.valid
 
-          if (typeof field.validate === 'function') {
+          if ('validate' in field && typeof field.validate === 'function') {
             let valueToValidate = field.value
 
             if (field?.rows && Array.isArray(field.rows)) {
@@ -535,10 +536,16 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
-    async ({ data, path, schemaPath }) => {
+    async ({ data, path, rowIndex: rowIndexArg, schemaPath }) => {
+      const newRows: unknown[] = getDataByPath(path)
+      const rowIndex = rowIndexArg === undefined ? newRows.length : rowIndexArg
+      newRows.splice(rowIndex, 0, { id: uuidv4(), ...(data || {}) })
+
       const { formState: newFormState } = await getFieldStateBySchemaPath({
         collectionSlug,
-        data,
+        data: {
+          [path]: newRows,
+        },
         globalSlug,
         path,
         schemaPath,
@@ -549,7 +556,7 @@ export const Form: React.FC<FormProps> = (props) => {
         formState: newFormState,
       })
     },
-    [getFieldStateBySchemaPath, dispatchFields, collectionSlug, globalSlug],
+    [getFieldStateBySchemaPath, dispatchFields, collectionSlug, globalSlug, getDataByPath],
   )
 
   const removeFieldRow: FormContextType['removeFieldRow'] = useCallback(
@@ -560,10 +567,16 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const replaceFieldRow: FormContextType['replaceFieldRow'] = useCallback(
-    async ({ data, path, rowIndex, schemaPath }) => {
+    async ({ data, path, rowIndex: rowIndexArg, schemaPath }) => {
+      const newRows: unknown[] = getDataByPath(path)
+      const rowIndex = rowIndexArg === undefined ? newRows.length : rowIndexArg
+      newRows.splice(rowIndex, 1)
+
       const { formState: subFieldState } = await getFieldStateBySchemaPath({
         collectionSlug,
-        data,
+        data: {
+          [path]: newRows,
+        },
         globalSlug,
         path,
         schemaPath,
@@ -577,7 +590,7 @@ export const Form: React.FC<FormProps> = (props) => {
         subFieldState,
       })
     },
-    [getFieldStateBySchemaPath, dispatchFields, collectionSlug, globalSlug],
+    [getFieldStateBySchemaPath, dispatchFields, collectionSlug, globalSlug, getDataByPath],
   )
 
   // clean on unmount
