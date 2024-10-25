@@ -5,9 +5,11 @@ import React, { Fragment, useState } from 'react'
 
 import type { Props } from './types.js'
 
+import { HiddenField } from '../../fields/Hidden/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useIntersect } from '../../hooks/useIntersect.js'
 import { useFieldComponents } from '../../providers/FieldComponents/index.js'
+import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
@@ -16,11 +18,20 @@ const baseClass = 'render-fields'
 export { Props }
 
 export const RenderFields: React.FC<Props> = (props) => {
-  const { className, fields, forceRender, margins, path: parentPath } = props
+  const {
+    className,
+    fields,
+    forceRender,
+    margins,
+    path: parentPath,
+    permissions,
+    readOnly: readOnlyFromParent,
+  } = props
 
   const { getFields } = useForm()
 
   const [formFields] = useState(() => getFields())
+  const operation = useOperation()
 
   const { i18n } = useTranslation()
 
@@ -70,6 +81,7 @@ export const RenderFields: React.FC<Props> = (props) => {
         ref={intersectionRef}
       >
         {fields.map((field, i) => {
+          const fieldPermissions = 'name' in field ? permissions?.[field.name] : null
           const path = generatePath({
             name: 'name' in field ? field.name : undefined,
             fieldType: field.type,
@@ -81,17 +93,52 @@ export const RenderFields: React.FC<Props> = (props) => {
 
           const DefaultField = fieldComponents?.[field?.type]
 
-          if (field.hidden || field.admin?.hidden) {
+          // if the user cannot read the field, then filter it out
+          // this is different from `admin.readOnly` which is executed based on `operation`
+          if (fieldPermissions?.read?.permission === false || field?.admin?.disabled) {
             return null
+          }
+
+          // `admin.readOnly` displays the value but prevents the field from being edited
+          let isReadOnly = readOnlyFromParent || field?.admin?.readOnly
+
+          // if parent field is `readOnly: true`, but this field is `readOnly: false`, the field should still be editable
+          if (isReadOnly && field.admin?.readOnly === false) {
+            isReadOnly = false
+          }
+
+          // if the user does not have access control to begin with, force it to be read-only
+          if (fieldPermissions?.[operation]?.permission === false) {
+            isReadOnly = true
+          }
+
+          // if the field is hidden, then filter it out
+          if (field.admin?.hidden) {
+            return (
+              <HiddenField
+                field={field}
+                forceRender={forceRender}
+                key={i}
+                path={path}
+                readOnly={isReadOnly}
+                schemaPath={field._schemaPath}
+              />
+            )
           }
 
           return (
             <Fragment key={i}>
-              {CustomField ? (
-                CustomField
-              ) : (
+              {/* @TODO make sure that we set false components to null on the server */}
+              {CustomField ?? (
                 // TODO: Pass other properties
-                <DefaultField field={field} key={i} path={path} schemaPath={field._schemaPath} />
+                <DefaultField
+                  field={field}
+                  forceRender={forceRender}
+                  key={i}
+                  path={path}
+                  readOnly
+                  schemaPath={field._schemaPath}
+                />
               )}
             </Fragment>
           )

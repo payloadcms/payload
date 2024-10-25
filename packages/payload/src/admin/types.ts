@@ -454,7 +454,6 @@ export type FieldSlots = {
 export type DocumentSlots = {
   PreviewButton?: React.ReactNode
   PublishButton?: React.ReactNode
-  renderedFieldMap?: RenderedFieldMap
   SaveButton?: React.ReactNode
   SaveDraftButton?: React.ReactNode
 }

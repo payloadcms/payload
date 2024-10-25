@@ -70,6 +70,8 @@ export const createClientField = ({
   ]
 
   clientField._schemaPath = schemaPath
+  clientField.admin = clientField.admin || {}
+  // clientField.admin.readOnly = true
 
   serverOnlyFieldProperties.forEach((key) => {
     if (key in clientField) {

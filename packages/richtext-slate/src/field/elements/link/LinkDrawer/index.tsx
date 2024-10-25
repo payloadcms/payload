@@ -31,7 +31,7 @@ export const LinkDrawer: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation()
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
-  const { id } = useDocumentInfo()
+  const { id, docPermissions } = useDocumentInfo()
 
   const { getFormState } = useServerFunctions()
 
@@ -59,7 +59,13 @@ export const LinkDrawer: React.FC<Props> = ({
         onChange={[onChange]}
         onSubmit={handleModalSubmit}
       >
-        <RenderFields fields={fields} forceRender path="" readOnly={false} schemaPath="" />
+        <RenderFields
+          fields={fields}
+          forceRender
+          path=""
+          permissions={docPermissions.fields}
+          readOnly={false}
+        />
         <LinkSubmit />
       </Form>
     </Drawer>

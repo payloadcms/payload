@@ -15,6 +15,7 @@ import {
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useRow } from '../Row/provider.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -48,6 +49,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const formInitializing = useFormInitializing()
   const formProcessing = useFormProcessing()
   const submitted = useFormSubmitted()
+  const { docPermissions } = useDocumentInfo()
   const errorCount = errorPaths.length
   const fieldHasErrors = submitted && errorCount > 0
   const disabled = readOnlyFromProps || formProcessing || formInitializing
@@ -91,7 +93,12 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
             )}
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
-          <RenderFields fields={fields} path={path} />
+          <RenderFields
+            fields={fields}
+            path={path}
+            permissions={docPermissions.fields}
+            readOnly={readOnlyFromProps}
+          />
         </div>
       </GroupProvider>
     </div>

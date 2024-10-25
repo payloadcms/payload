@@ -111,12 +111,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const path = pathFromProps ?? name
 
-  console.log({
-    name,
-    path,
-    pathFromProps,
-  })
-
   const {
     errorPaths,
     formInitializing,
@@ -215,7 +209,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const showRequired = disabled && rowsData.length === 0
   const showMinRows = rowsData.length < minRows || (required && rowsData.length === 0)
-
+  console.log({ disabled, path })
   return (
     <div
       className={[
@@ -326,7 +320,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           )}
         </DraggableSortable>
       )}
-      <p>{JSON.stringify(schemaPath, null, 2)}</p>
       {!disabled && !hasMaxRows && (
         <Button
           buttonStyle="icon-label"

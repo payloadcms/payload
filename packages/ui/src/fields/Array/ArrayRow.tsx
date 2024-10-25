@@ -11,6 +11,7 @@ import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
@@ -63,6 +64,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
 }) => {
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
+  const { docPermissions } = useDocumentInfo()
 
   const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowIndex + 1).padStart(
     2,
@@ -77,7 +79,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   ]
     .filter(Boolean)
     .join(' ')
-
+  console.log(fields)
   return (
     <div
       id={`${parentPath.split('.').join('-')}-row-${rowIndex}`}
@@ -124,7 +126,12 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         isCollapsed={row.collapsed}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        <RenderFields fields={fields} path={`${parentPath}.${rowIndex}`} />
+        <RenderFields
+          fields={fields}
+          path={`${parentPath}.${rowIndex}`}
+          permissions={docPermissions.fields}
+          readOnly={readOnly}
+        />
       </Collapsible>
     </div>
   )

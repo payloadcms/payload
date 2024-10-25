@@ -44,7 +44,6 @@ const baseClass = 'collection-edit'
 export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   PreviewButton,
   PublishButton,
-  renderedFieldMap,
   SaveButton,
   SaveDraftButton,
 }) => {
@@ -394,7 +393,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
           method={id ? 'PATCH' : 'POST'}
           onChange={[onChange]}
           onSuccess={onSave}
-          renderedFieldMap={renderedFieldMap}
         >
           {BeforeDocument}
           {/* {isLockingEnabled && shouldShowDocumentLockedModal && !isReadOnlyForIncomingUser && (
@@ -526,6 +524,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
                 </Fragment>
               )
             }
+            docPermissions={docPermissions}
             fields={docConfig.fields}
           />
           {AfterDocument}

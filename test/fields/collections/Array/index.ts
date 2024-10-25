@@ -17,6 +17,12 @@ const ArrayFields: CollectionConfig = {
     {
       name: 'items',
       defaultValue: arrayDefaultValue,
+      access: {
+        read: () => false,
+      },
+      admin: {
+        readOnly: true,
+      },
       fields: [
         {
           name: 'text',
