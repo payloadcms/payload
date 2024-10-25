@@ -57,7 +57,7 @@ body:
     attributes:
       label: Environment Info
       description: Paste output from `pnpm payload info` (>= beta.92) _or_ Payload, Node.js, and Next.js versions.
-      render: bash
+      render: text
       placeholder: |
         Payload:
         Node.js:
