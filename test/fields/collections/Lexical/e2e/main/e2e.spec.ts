@@ -737,6 +737,8 @@ describe('lexicalMain', () => {
     await expect(linkDrawer).toBeHidden()
     await wait(1500)
 
+    // The entire link should be selected now => press arrow right to move cursor to the end of the link node before we type
+    await page.keyboard.press('ArrowRight')
     // Just keep typing - the cursor should not have moved to the beginning of the richtext field
     await page.keyboard.type(' xxx')
 
@@ -758,10 +760,11 @@ describe('lexicalMain', () => {
       ).docs[0] as never
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor
+
       const firstParagraph: SerializedParagraphNode = lexicalField.root
         .children[0] as SerializedParagraphNode
       const secondParagraph: SerializedParagraphNode = lexicalField.root
-        .children[0] as SerializedParagraphNode
+        .children[1] as SerializedParagraphNode
 
       expect(firstParagraph.children).toHaveLength(1)
       expect((firstParagraph.children[0] as SerializedTextNode).text).toBe('Some Text')
