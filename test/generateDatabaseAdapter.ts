@@ -94,3 +94,9 @@ export function generateDatabaseAdapter(dbAdapter) {
   console.log('Wrote', dbAdapter, 'db adapter')
   return databaseAdapter
 }
+
+// Run if called directly, ESM-style. Used in prebuild for test suite build.
+if (import.meta.url === `file://${filename}`) {
+  const dbAdapter = process.argv[2]
+  generateDatabaseAdapter(dbAdapter)
+}
