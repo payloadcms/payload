@@ -126,7 +126,7 @@ function useAddBlockHandle(
   }, [anchorElem, hoveredElement, blockHandleHorizontalOffset])
 
   const handleAddClick = useCallback(
-    (event) => {
+    (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       let hoveredElementToUse = hoveredElement
       if (!hoveredElementToUse?.node) {
         return
@@ -189,6 +189,7 @@ function useAddBlockHandle(
   return createPortal(
     <React.Fragment>
       <button
+        aria-label="Add block"
         className="icon add-block-menu"
         onClick={(event) => {
           handleAddClick(event)

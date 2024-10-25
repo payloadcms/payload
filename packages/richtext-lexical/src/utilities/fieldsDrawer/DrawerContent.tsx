@@ -63,7 +63,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   }, [config.routes.api, config.serverURL, schemaFieldsPath, id, data])
 
   const onChange = useCallback(
-    async ({ formState: prevFormState }) => {
+    async ({ formState: prevFormState }: { formState: FormState }) => {
       const { state } = await getFormState({
         apiRoute: config.routes.api,
         body: {
