@@ -5,11 +5,66 @@
   },
   "exclude": ["dist", "build", "temp", "node_modules"],
   "include": [
-    // "./test/_community/**/*.ts"
-    // "./_community/**/*.ts"
-    "/**/*.ts"
-    // "../packages/**/src/**/*.ts",
-    // "../packages/**/src/**/*.tsx"
+    // Uncomment these as they are able to be compiled
+
+    "./_community/**/*.ts",
+    // "./access-control/**/*.ts",
+    // "./admin/**/*.ts",
+    // "./admin-root/**/*.ts",
+    "./app/**/*.ts",
+    // "./array-update/**/*.ts",
+    // "./auth/**/*.ts",
+    // "./collections-graphql/**/*.ts",
+    // "./collections-rest/**/*.ts",
+    // "./config/**/*.ts",
+    "./create-payload-app/**/*.ts",
+    "./custom-graphql/**/*.ts",
+    // "./database/**/*.ts",
+    // "./dataloader/**/*.ts",
+    "./email/**/*.ts",
+    "./email-nodemailer/**/*.ts",
+    "./email-resend/**/*.ts",
+    "./endpoints/**/*.ts",
+    // "./field-error-states/**/*.ts",
+    // "./field-perf/**/*.ts",
+    // "./fields/**/*.ts",
+    // "./fields-relationship/**/*.ts",
+    // "./globals/**/*.ts",
+    // "./graphql-schema-gen/**/*.ts",
+    // "./helpers/**/*.ts",
+    // "./hooks/**/*.ts",
+    // "./i18n/**/*.ts",
+    // "./import-test/**/*.ts",
+    // "./joins/**/*.ts",
+    // "./live-preview/**/*.ts",
+    // "./loader/**/*.ts",
+    // "./localization/**/*.ts",
+    // "./localization-rtl/**/*.ts",
+    // "./locked-documents/**/*.ts",
+    // "./login-with-username/**/*.ts",
+    // "./migrations-cli/**/*.ts",
+    // "./nested-fields/**/*.ts",
+    // "./node_modules/**/*.ts",
+    // "./payload-cloud/**/*.ts",
+    // "./plugin-cloud-storage/**/*.ts",
+    // "./plugin-form-builder/**/*.ts",
+    // "./plugin-nested-docs/**/*.ts",
+    // "./plugin-redirects/**/*.ts",
+    // "./plugin-search/**/*.ts",
+    "./plugin-sentry/**/*.ts",
+    // "./plugin-seo/**/*.ts",
+    // "./plugin-stripe/**/*.ts",
+    // "./plugins/**/*.ts",
+    // "./relationships/**/*.ts",
+    "./scripts/**/*.ts",
+    // "./sort/**/*.ts",
+    "./storage-azure/**/*.ts",
+    "./storage-gcs/**/*.ts",
+    // "./storage-s3/**/*.ts",
+    "./storage-uploadthing/**/*.ts",
+    "./storage-vercel-blob/**/*.ts"
+    // "./uploads/**/*.ts",
+    // "./versions/**/*.ts"
   ],
   "references": [
     {
@@ -20,6 +75,12 @@
     },
     {
       "path": "../packages/db-postgres"
+    },
+    {
+      "path": "../packages/db-sqlite"
+    },
+    {
+      "path": "../packages/drizzle"
     },
     {
       "path": "../packages/graphql"
