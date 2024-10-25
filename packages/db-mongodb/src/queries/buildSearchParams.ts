@@ -1,11 +1,10 @@
+import type { PipelineStage } from 'mongoose'
 import type { Field, Operator, PathToQuery, Payload } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
 import mongoose from 'mongoose'
 import { getLocalizedPaths } from 'payload'
 import { validOperators } from 'payload/shared'
-
-import type { MongooseAdapter } from '../index.js'
 
 import { operatorMap } from './operatorMap.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
@@ -19,15 +18,10 @@ type SearchParam = {
   value?: unknown
 }
 
-const subQueryOptions = {
-  lean: true,
-  limit: 50,
-}
-
 /**
  * Convert the Payload key / value / operator into a MongoDB query
  */
-export async function buildSearchParam({
+export function buildSearchParam({
   collectionSlug,
   fields,
   globalSlug,
@@ -35,6 +29,8 @@ export async function buildSearchParam({
   locale,
   operator,
   payload,
+  pipeline,
+  projection,
   val,
 }: {
   collectionSlug?: string
@@ -44,8 +40,10 @@ export async function buildSearchParam({
   locale?: string
   operator: string
   payload: Payload
+  pipeline: PipelineStage[]
+  projection?: Record<string, boolean>
   val: unknown
-}): Promise<SearchParam> {
+}): SearchParam {
   // Replace GraphQL nested field double underscore formatting
   let sanitizedPath = incomingPath.replace(/__/g, '.')
   if (sanitizedPath === 'id') {
@@ -76,7 +74,7 @@ export async function buildSearchParam({
       path: '_id',
     })
   } else {
-    paths = await getLocalizedPaths({
+    paths = getLocalizedPaths({
       collectionSlug,
       fields,
       globalSlug,
@@ -86,11 +84,14 @@ export async function buildSearchParam({
     })
   }
 
-  const [{ field, path }] = paths
+  // eslint-disable-next-line prefer-const
+  let [{ field, path }] = paths
 
   if (path) {
-    const {
+    let {
+      // eslint-disable-next-line prefer-const
       operator: formattedOperator,
+      // eslint-disable-next-line prefer-const
       rawQuery,
       val: formattedValue,
     } = sanitizeQueryValue({
@@ -108,90 +109,74 @@ export async function buildSearchParam({
     // If there are multiple collections to search through,
     // Recursively build up a list of query constraints
     if (paths.length > 1) {
+      let isID = false
       // Remove top collection and reverse array
       // to work backwards from top
-      const pathsToQuery = paths.slice(1).reverse()
+      // const pathsToQuery = paths.slice(1).reverse()
 
-      const initialRelationshipQuery = {
-        value: {},
-      } as SearchParam
+      let currentPath: string
 
-      const relationshipQuery = await pathsToQuery.reduce(
-        async (priorQuery, { collectionSlug: slug, path: subPath }, i) => {
-          const priorQueryResult = await priorQuery
+      for (let i = 0; i < paths.length; i++) {
+        const pathToQuery = paths[i]
 
-          const SubModel = (payload.db as MongooseAdapter).collections[slug]
+        if (!currentPath) {
+          currentPath = pathToQuery.path
+        }
 
-          // On the "deepest" collection,
-          // Search on the value passed through the query
-          if (i === 0) {
-            const subQuery = await SubModel.buildQuery({
-              locale,
-              payload,
-              where: {
-                [subPath]: {
-                  [formattedOperator]: val,
-                },
-              },
-            })
+        if (i + 1 === paths.length - 1 && paths[i + 1].path === 'id') {
+          isID = true
+          break
+        }
 
-            const result = await SubModel.find(subQuery, subQueryOptions)
+        if (i === 0) {
+          continue
+        }
 
-            const $in: unknown[] = []
+        pipeline.push({
+          $lookup: {
+            as: `_${currentPath}`,
+            foreignField: '_id',
+            from: pathToQuery.collectionSlug.endsWith('s')
+              ? pathToQuery.collectionSlug
+              : `${pathToQuery.collectionSlug}s`,
+            localField: i === 1 ? currentPath : `_${currentPath}`,
+          },
+        })
 
-            result.forEach((doc) => {
-              const stringID = doc._id.toString()
-              $in.push(stringID)
+        if (i === 1 && typeof projection === 'object') {
+          projection[`_${currentPath}`] = false
+        }
 
-              if (mongoose.Types.ObjectId.isValid(stringID)) {
-                $in.push(doc._id)
-              }
-            })
+        if (!currentPath) {
+          currentPath = pathToQuery.path
+        } else {
+          currentPath = `${currentPath}.${pathToQuery.path}`
+        }
+      }
 
-            if (pathsToQuery.length === 1) {
-              return {
-                path,
-                value: { $in },
-              }
+      if (paths.length === 2 && paths[1].path === 'id') {
+        path = paths[0].path
+      } else {
+        path = `_${paths
+          .map((pathToQuery, i) => {
+            if (i + 1 === paths.length - 1 && paths[i + 1].path === 'id') {
+              return
             }
+            return pathToQuery.path
+          })
+          .filter(Boolean)
+          .join('.')}`
+      }
 
-            const nextSubPath = pathsToQuery[i + 1].path
-
-            return {
-              value: { [nextSubPath]: { $in } },
-            }
-          }
-
-          const subQuery = priorQueryResult.value
-          const result = await SubModel.find(subQuery, subQueryOptions)
-
-          const $in = result.map((doc) => doc._id)
-
-          // If it is the last recursion
-          // then pass through the search param
-          if (i + 1 === pathsToQuery.length) {
-            return {
-              path,
-              value: { $in },
-            }
-          }
-
-          return {
-            value: {
-              _id: { $in },
-            },
-          }
-        },
-        Promise.resolve(initialRelationshipQuery),
-      )
-
-      return relationshipQuery
+      if (isID && typeof formattedValue === 'string') {
+        formattedValue = new ObjectId(formattedValue)
+      }
     }
 
     if (formattedOperator && validOperators.includes(formattedOperator as Operator)) {
       const operatorKey = operatorMap[formattedOperator]
 
-      if (field.type === 'relationship' || field.type === 'upload') {
+      if (paths.length < 2 && (field.type === 'relationship' || field.type === 'upload')) {
         let hasNumberIDRelation
         let multiIDCondition = '$or'
         if (operatorKey === '$ne') {

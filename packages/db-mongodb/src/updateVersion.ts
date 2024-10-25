@@ -1,7 +1,10 @@
+import type { QueryOptions } from 'mongoose'
+
 import { buildVersionCollectionFields, type PayloadRequest, type UpdateVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQueryWithAggregate } from './utilities/buildQueryWithAggregate.js'
 import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
 import { withSession } from './withSession.js'
 
@@ -11,15 +14,17 @@ export const updateVersion: UpdateVersion = async function updateVersion(
 ) {
   const VersionModel = this.versions[collection]
   const whereToUse = where || { id: { equals: id } }
-  const options = {
+  const options: QueryOptions = {
     ...(await withSession(this, req)),
     lean: true,
     new: true,
   }
 
-  const query = await VersionModel.buildQuery({
+  const query = await buildQueryWithAggregate({
     locale,
+    Model: VersionModel,
     payload: this.payload,
+    session: options.session,
     where: whereToUse,
   })
 

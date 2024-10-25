@@ -1,4 +1,4 @@
-import type { PaginateOptions } from 'mongoose'
+import type { AggregatePaginateResult, PaginateOptions, PipelineStage } from 'mongoose'
 import type { FindGlobalVersions, PayloadRequest } from 'payload'
 
 import { buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
@@ -52,10 +52,15 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     })
   }
 
-  const query = await Model.buildQuery({
+  const pipeline: PipelineStage[] = []
+  const projection: Record<string, boolean> = {}
+
+  const query = Model.buildQuery({
     globalSlug: global,
     locale,
     payload: this.payload,
+    pipeline,
+    projection,
     where,
   })
 
@@ -107,7 +112,24 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     }
   }
 
-  const result = await Model.paginate(query, paginationOptions)
+  let result: AggregatePaginateResult<unknown>
+
+  if (pipeline.length) {
+    pipeline.push({ $sort: { createdAt: -1 } })
+
+    if (limit) {
+      pipeline.push({ $limit: limit })
+    }
+
+    if (Object.keys(projection).length > 0) {
+      pipeline.push({ $project: projection })
+    }
+
+    result = await Model.aggregatePaginate(Model.aggregate(pipeline), paginationOptions)
+  } else {
+    result = await Model.paginate(query, paginationOptions)
+  }
+
   const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {

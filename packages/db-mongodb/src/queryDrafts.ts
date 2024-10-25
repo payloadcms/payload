@@ -1,4 +1,4 @@
-import type { PaginateOptions } from 'mongoose'
+import type { PaginateOptions, PipelineStage } from 'mongoose'
 import type { PayloadRequest, QueryDrafts } from 'payload'
 
 import { combineQueries, flattenWhereToOperators } from 'payload'
@@ -6,7 +6,7 @@ import { combineQueries, flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
-import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
+import { buildAggregation } from './utilities/buildJoinAggregation.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
@@ -48,9 +48,14 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   const combinedWhere = combineQueries({ latest: { equals: true } }, where)
 
-  const versionQuery = await VersionModel.buildQuery({
+  const pipeline: PipelineStage[] = []
+  const projection: Record<string, boolean> = {}
+
+  const versionQuery = VersionModel.buildQuery({
     locale,
     payload: this.payload,
+    pipeline,
+    projection,
     where: combinedWhere,
   })
 
@@ -102,13 +107,15 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   let result
 
-  const aggregate = await buildJoinAggregation({
+  const aggregate = buildAggregation({
     adapter: this,
     collection,
     collectionConfig,
     joins,
     limit,
     locale,
+    pipeline,
+    projection,
     query: versionQuery,
     versions: true,
   })

@@ -1,4 +1,4 @@
-import type { PaginateOptions } from 'mongoose'
+import type { PaginateOptions, PipelineStage } from 'mongoose'
 import type { Find, PayloadRequest } from 'payload'
 
 import { flattenWhereToOperators } from 'payload'
@@ -6,7 +6,7 @@ import { flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
-import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
+import { buildAggregation } from './utilities/buildJoinAggregation.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
@@ -19,7 +19,6 @@ export const find: Find = async function find(
     locale,
     page,
     pagination,
-    projection,
     req = {} as PayloadRequest,
     sort: sortArg,
     where,
@@ -47,9 +46,14 @@ export const find: Find = async function find(
     })
   }
 
-  const query = await Model.buildQuery({
+  const pipeline: PipelineStage[] = []
+  const projection: Record<string, boolean> = {}
+
+  const query = Model.buildQuery({
     locale,
     payload: this.payload,
+    pipeline,
+    projection,
     where,
   })
 
@@ -103,13 +107,15 @@ export const find: Find = async function find(
 
   let result
 
-  const aggregate = await buildJoinAggregation({
+  const aggregate = buildAggregation({
     adapter: this,
     collection,
     collectionConfig,
     joins,
     limit,
     locale,
+    pipeline,
+    projection,
     query,
   })
   // build join aggregation

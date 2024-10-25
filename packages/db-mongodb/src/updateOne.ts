@@ -3,6 +3,7 @@ import type { PayloadRequest, UpdateOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQueryWithAggregate } from './utilities/buildQueryWithAggregate.js'
 import { handleError } from './utilities/handleError.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
@@ -29,9 +30,11 @@ export const updateOne: UpdateOne = async function updateOne(
     new: true,
   }
 
-  const query = await Model.buildQuery({
+  const query = await buildQueryWithAggregate({
     locale,
+    Model,
     payload: this.payload,
+    session: options.session,
     where,
   })
 

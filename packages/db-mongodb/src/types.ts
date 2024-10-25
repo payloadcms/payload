@@ -41,7 +41,7 @@ export interface CollectionModel
     PaginateModel<any>,
     AggregatePaginateModel<any> {
   /** buildQuery is used to transform payload's where operator into what can be used by mongoose (e.g. id => _id) */
-  buildQuery: (args: BuildQueryArgs) => Promise<Record<string, unknown>> // TODO: Delete this
+  buildQuery: (args: BuildQueryArgs) => Record<string, unknown> // TODO: Delete this
 }
 
 export interface AuthCollectionModel extends CollectionModel {

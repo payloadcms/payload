@@ -1,9 +1,9 @@
-import type { MongooseQueryOptions } from 'mongoose'
+import type { MongooseQueryOptions, PipelineStage } from 'mongoose'
 import type { Document, FindOne, PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
+import { buildAggregation } from './utilities/buildJoinAggregation.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
@@ -18,19 +18,26 @@ export const findOne: FindOne = async function findOne(
     lean: true,
   }
 
-  const query = await Model.buildQuery({
+  const pipeline: PipelineStage.Lookup[] = []
+  const projection: Record<string, boolean> = {}
+
+  const query = Model.buildQuery({
     locale,
     payload: this.payload,
+    pipeline,
+    projection,
     where,
   })
 
-  const aggregate = await buildJoinAggregation({
+  const aggregate = buildAggregation({
     adapter: this,
     collection,
     collectionConfig,
     joins,
     limit: 1,
     locale,
+    pipeline,
+    projection,
     query,
   })
 

@@ -1,3 +1,4 @@
+import type { PipelineStage } from 'mongoose'
 import type { Field, Payload, Where } from 'payload'
 
 import { QueryError } from 'payload'
@@ -13,6 +14,8 @@ export type BuildQueryArgs = {
   globalSlug?: string
   locale?: string
   payload: Payload
+  pipeline: PipelineStage[]
+  projection?: Record<string, boolean>
   where: Where
 }
 
@@ -24,12 +27,14 @@ export const getBuildQueryPlugin = ({
 }: GetBuildQueryPluginArgs = {}) => {
   return function buildQueryPlugin(schema) {
     const modifiedSchema = schema
-    async function buildQuery({
+    function buildQuery({
       globalSlug,
       locale,
       payload,
+      pipeline,
+      projection,
       where,
-    }: BuildQueryArgs): Promise<Record<string, unknown>> {
+    }: BuildQueryArgs): Record<string, unknown> {
       let fields = versionsFields
       if (!fields) {
         if (globalSlug) {
@@ -42,12 +47,14 @@ export const getBuildQueryPlugin = ({
         }
       }
       const errors = []
-      const result = await parseParams({
+      const result = parseParams({
         collectionSlug,
         fields,
         globalSlug,
         locale,
         payload,
+        pipeline,
+        projection,
         where,
       })
 
