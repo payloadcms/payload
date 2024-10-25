@@ -4,8 +4,8 @@ import type { JSONSchema4 } from 'json-schema'
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { Config, PayloadComponent, SanitizedConfig } from '../config/types.js'
+import type { ValidationFieldError } from '../errors/ValidationError.js'
 import type {
-  Field,
   FieldAffectingData,
   RichTextField,
   RichTextFieldClient,
@@ -89,7 +89,7 @@ export type BeforeChangeRichTextHookArgs<
 
   duplicate?: boolean
 
-  errors?: { field: string; message: string }[]
+  errors?: ValidationFieldError[]
   /** Only available in `beforeChange` field hooks */
   mergeLocaleActions?: (() => Promise<void>)[]
   /** A string relating to which operation the field type is currently executing within. */
@@ -206,7 +206,7 @@ type RichTextAdapterBase<
     field: RichTextField
     i18n: I18n<any, any>
     schemaMap: FieldSchemaMap
-    schemaPath: string
+    schemaPath: string[]
   }) => FieldSchemaMap
   /**
    * Like an afterRead hook, but runs only for the GraphQL resolver. For populating data, this should be used, as afterRead hooks do not have a depth in graphQL.

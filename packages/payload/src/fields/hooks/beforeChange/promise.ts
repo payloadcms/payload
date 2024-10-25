@@ -1,8 +1,9 @@
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { JsonObject, Operation, PayloadRequest, RequestContext } from '../../../types/index.js'
-import type { Field, FieldHookArgs, TabAsField, ValidateOptions } from '../../config/types.js'
+import type { Field, FieldHookArgs, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
@@ -17,8 +18,13 @@ type Args = {
   data: JsonObject
   doc: JsonObject
   docWithLocales: JsonObject
-  errors: { field: string; message: string }[]
+  errors: ValidationFieldError[]
   field: Field | TabAsField
+  /**
+   * The index of the field as it appears in the parent's fields array. This is used to construct the field path / schemaPath
+   * for unnamed fields like rows and collapsibles.
+   */
+  fieldIndex: number
   global: null | SanitizedGlobalConfig
   id?: number | string
   mergeLocaleActions: (() => Promise<void>)[]
@@ -55,6 +61,7 @@ export const promise = async ({
   docWithLocales,
   errors,
   field,
+  fieldIndex,
   global,
   mergeLocaleActions,
   operation,
@@ -78,6 +85,7 @@ export const promise = async ({
     field,
     parentPath,
     parentSchemaPath,
+    schemaIndex: fieldIndex,
   })
 
   if (fieldAffectsData(field)) {
@@ -148,7 +156,8 @@ export const promise = async ({
 
       if (typeof validationResult === 'string') {
         errors.push({
-          field: fieldPath.join('.'),
+          fieldPath,
+          fieldSchemaPath,
           message: validationResult,
         })
       }

@@ -139,7 +139,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
       >
         <RenderFields
           fields={fields}
-          path={path}
+          parentPath={path.split('.')}
           permissions={docPermissions.fields}
           readOnly={readOnly}
         />

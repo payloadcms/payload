@@ -145,7 +145,8 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
               {Description}
               <RenderFields
                 fields={activeTabConfig.fields}
-                path={generateTabPath()}
+                forceRender={forceRender}
+                parentPath={generateTabPath().split('.')}
                 permissions={docPermissions.fields}
                 readOnly={readOnly}
               />

@@ -59,14 +59,17 @@ export function attachComponentsToFormState(args: Args): args is OutputArgs {
   const { config, fieldSchemaMap, formState, i18n, payload, permissions } = args as OutputArgs
 
   Object.entries(formState).forEach(([path, fieldState]) => {
-    const fieldConfig = fieldSchemaMap.get(fieldState.schemaPath)
+    const fieldConfig = fieldSchemaMap.get(fieldState.schemaPath.join('.'))
 
     if (!fieldConfig) {
-      throw new Error(`Field config not found for ${fieldState.schemaPath}`)
+      throw new Error(`Field config not found for ${fieldState.schemaPath.join('.')}`)
     }
 
     const clientField = createClientField({
-      clientField: deepCopyObjectSimple(fieldState),
+      clientField: deepCopyObjectSimple({
+        _schemaPath: fieldState.schemaPath,
+        ...fieldConfig,
+      }),
       defaultIDType: config.db.defaultIDType,
       field: fieldConfig,
       i18n,
@@ -96,10 +99,10 @@ export function attachComponentsToFormState(args: Args): args is OutputArgs {
       const clientProps: ClientComponentProps = {
         field: clientField,
         fieldState,
-        path,
+        path: path ?? '',
         permissions: fieldPermissions,
         readOnly: false, // @TODO fix this
-        schemaPath: fieldState.schemaPath,
+        schemaPath: fieldState.schemaPath.join('.'),
       }
 
       const serverProps: ServerComponentProps = {

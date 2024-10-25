@@ -28,7 +28,6 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
     },
     path,
     readOnly: readOnlyFromTopLevelProps,
-    RowLabel,
     schemaPath,
   } = props
 
@@ -111,7 +110,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
 
   return (
     <Fragment>
-      <WatchChildErrors fields={fields} path={path} setErrorCount={setErrorCount} />
+      <WatchChildErrors fields={fields} path={path.split('.')} setErrorCount={setErrorCount} />
       <div
         className={[
           fieldBaseClass,
@@ -138,7 +137,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
         >
           <RenderFields
             fields={fields}
-            path={path}
+            parentPath={path.split('.')}
             permissions={docPermissions.fields}
             readOnly={readOnlyFromProps}
           />

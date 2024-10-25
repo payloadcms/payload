@@ -34,7 +34,7 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({
     importMap,
     locale,
     req,
-    schemaPath: `_${collectionConfig.slug}.auth`,
+    schemaPath: [`_${collectionConfig.slug}`, 'auth'],
   })
 
   return (

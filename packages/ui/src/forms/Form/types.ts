@@ -1,4 +1,12 @@
-import type { ClientField, Data, FormField, FormState, Row, User } from 'payload'
+import type {
+  ClientField,
+  Data,
+  FormField,
+  FormState,
+  Row,
+  User,
+  ValidationFieldError,
+} from 'payload'
 import type React from 'react'
 import type { Dispatch } from 'react'
 
@@ -138,10 +146,7 @@ export type MOVE_ROW = {
 }
 
 export type ADD_SERVER_ERRORS = {
-  errors: {
-    field: string
-    message: string
-  }[]
+  errors: ValidationFieldError[]
   type: 'ADD_SERVER_ERRORS'
 }
 

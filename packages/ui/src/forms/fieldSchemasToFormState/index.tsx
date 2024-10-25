@@ -15,8 +15,8 @@ type Args = {
   fields: Field[] | undefined
   id?: number | string
   operation?: 'create' | 'update'
-  parentPath?: string
-  parentSchemaPath?: string
+  parentPath?: (number | string)[]
+  parentSchemaPath?: string[]
   preferences: DocumentPreferences
   req: PayloadRequest
   siblingData?: Data
@@ -29,8 +29,8 @@ export const fieldSchemasToFormState = async (args: Args): Promise<FormStateWith
     data = {},
     fields,
     operation,
-    parentPath = '',
-    parentSchemaPath = '',
+    parentPath = [],
+    parentSchemaPath = [],
     preferences,
     req,
   } = args

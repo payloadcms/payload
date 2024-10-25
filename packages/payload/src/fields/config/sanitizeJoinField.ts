@@ -14,7 +14,7 @@ export const sanitizeJoinField = ({
   config: Config
   field: JoinField
   joins?: SanitizedJoins
-  schemaPath?: string
+  schemaPath?: string[]
 }) => {
   // the `joins` arg is not passed for globals or when recursing on fields that do not allow a join field
   if (typeof joins === 'undefined') {
@@ -25,7 +25,7 @@ export const sanitizeJoinField = ({
   }
   const join = {
     field,
-    schemaPath: `${schemaPath || ''}${schemaPath ? '.' : ''}${field.name}`,
+    schemaPath: [...schemaPath, field.name].join('.'),
   }
   const joinCollection = config.collections.find(
     (collection) => collection.slug === field.collection,

@@ -349,7 +349,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
                 if (Array.isArray(err?.data?.errors)) {
                   err.data?.errors.forEach((dataError) => {
-                    if (dataError?.field) {
+                    if (dataError?.fieldPath) {
                       newFieldErrs.push(dataError)
                     } else {
                       newNonFieldErrs.push(dataError)
@@ -472,7 +472,7 @@ export const Form: React.FC<FormProps> = (props) => {
         globalSlug,
         operation,
         renderFields: true,
-        schemaPath: collectionSlug || globalSlug,
+        schemaPath: collectionSlug ? [collectionSlug] : [globalSlug],
         signal: abortController.signal,
       })
 
@@ -493,7 +493,19 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const getFieldStateBySchemaPath = useCallback(
-    async ({ collectionSlug, data, globalSlug, path, schemaPath }) => {
+    async ({
+      collectionSlug,
+      data,
+      globalSlug,
+      path,
+      schemaPath,
+    }: {
+      collectionSlug: string
+      data: unknown
+      globalSlug: string
+      path: string
+      schemaPath: string
+    }) => {
       if (abortControllerRef2.current) {
         try {
           abortControllerRef2.current.abort()
@@ -511,9 +523,9 @@ export const Form: React.FC<FormProps> = (props) => {
         data,
         docPreferences,
         globalSlug,
-        path,
+        path: path ? path.split('.') : [],
         renderFields: true,
-        schemaPath,
+        schemaPath: schemaPath ? schemaPath.split('.') : [],
         signal: abortController.signal,
       })
 

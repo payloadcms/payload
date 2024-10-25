@@ -26,8 +26,9 @@ const RowFieldComponent: RowFieldClientComponent = (props) => {
         <RenderFields
           className={`${baseClass}__fields`}
           fields={fields}
+          forceRender={forceRender}
           margins={false}
-          path={props.path}
+          parentPath={props.path?.split('.')}
           permissions={docPermissions.fields}
           readOnly={readOnly}
         />

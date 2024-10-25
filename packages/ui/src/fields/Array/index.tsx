@@ -132,6 +132,8 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       const newRows: Row[] = getDataByPath(path)
       newRows.splice(rowIndex, 0, { id: uuid() })
 
+      console.log('newRows', newRows)
+
       await addFieldRow({
         data: { [name]: newRows },
         path,

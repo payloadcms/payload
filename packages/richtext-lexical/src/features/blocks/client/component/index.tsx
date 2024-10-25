@@ -67,7 +67,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         id,
         data: formData,
         operation: 'update',
-        schemaPath: schemaFieldsPath,
+        schemaPath: schemaFieldsPath.split('.'),
         signal: abortController.signal,
       })
 
@@ -113,7 +113,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         id,
         formState: prevFormState,
         operation: 'update',
-        schemaPath: schemaFieldsPath,
+        schemaPath: schemaFieldsPath ? schemaFieldsPath.split('.') : [],
         signal: abortController.signal,
       })
 

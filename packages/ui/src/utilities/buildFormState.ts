@@ -138,7 +138,7 @@ export const buildFormStateFn = async (
     globalSlug,
     locale,
     operation,
-    path = '',
+    path = [],
     req,
     req: {
       i18n,
@@ -147,7 +147,7 @@ export const buildFormStateFn = async (
       user,
     },
     returnLockStatus,
-    schemaPath = collectionSlug || globalSlug,
+    schemaPath = collectionSlug ? [collectionSlug] : [globalSlug],
     updateLastEdited,
   } = args
 
@@ -197,10 +197,10 @@ export const buildFormStateFn = async (
 
   const id = collectionSlug ? idFromArgs : undefined
 
-  const fieldOrEntityConfig = fieldSchemaMap.get(schemaPath)
+  const fieldOrEntityConfig = fieldSchemaMap.get(schemaPath.join('.'))
 
   if (!fieldOrEntityConfig) {
-    throw new Error(`Could not find "${schemaPath}" in the fieldSchemaMap`)
+    throw new Error(`Could not find "${schemaPath.join('.')}" in the fieldSchemaMap`)
   }
 
   if (
@@ -209,7 +209,7 @@ export const buildFormStateFn = async (
     !fieldOrEntityConfig.fields.length
   ) {
     throw new Error(
-      `The field found in fieldSchemaMap for "${schemaPath}" does not contain any subfields.`,
+      `The field found in fieldSchemaMap for "${schemaPath.join('.')}" does not contain any subfields.`,
     )
   }
 
@@ -301,7 +301,7 @@ export const buildFormStateFn = async (
         })
       }
 
-      if (globalSlug && schemaPath === globalSlug) {
+      if (globalSlug && schemaPath?.length === 1 && schemaPath[0] === globalSlug) {
         resolvedData = await payload.findGlobal({
           slug: globalSlug,
           depth: 0,
@@ -323,7 +323,8 @@ export const buildFormStateFn = async (
     await Promise.all(Object.values(promises))
   }
 
-  const isEntitySchema = schemaPath === collectionSlug || schemaPath === globalSlug
+  const isEntitySchema =
+    schemaPath.length === 1 && (schemaPath[0] === collectionSlug || schemaPath[0] === globalSlug)
 
   /**
    * When building state for sub schemas we need to adjust:
@@ -332,10 +333,8 @@ export const buildFormStateFn = async (
    * - `parentPath`
    */
   const fields = isEntitySchema ? fieldOrEntityConfig.fields : ([fieldOrEntityConfig] as Field[])
-  const parentSchemaPath = isEntitySchema
-    ? schemaPath
-    : schemaPath.split('.').slice(0, -1).join('.')
-  const parentPath = isEntitySchema ? path : path.split('.').slice(0, -1).join('.')
+  const parentSchemaPath = isEntitySchema ? schemaPath : schemaPath.slice(0, -1)
+  const parentPath = isEntitySchema ? path : path.slice(0, -1)
 
   const formStateResult = await fieldSchemasToFormState({
     id,

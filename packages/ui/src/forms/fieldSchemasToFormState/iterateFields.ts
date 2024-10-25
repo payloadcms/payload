@@ -13,7 +13,7 @@ import type { AddFieldStatePromiseArgs } from './addFieldStatePromise.js'
 import { addFieldStatePromise } from './addFieldStatePromise.js'
 
 type Args = {
-  addErrorPathToParent: (path: string) => void
+  addErrorPathToParent: (fieldPath: (number | string)[]) => void
   /**
    * if any parents is localized, then the field is localized. @default false
    */
@@ -42,13 +42,13 @@ type Args = {
   operation: 'create' | 'update'
   parentPassesCondition?: boolean
   /**
-   * The initial path of the field. @default ''
+   * The initial path of the field. @default []
    */
-  parentPath?: string
+  parentPath?: (number | string)[]
   /**
-   * The initial schema path of the field. @default ''
+   * The initial schema path of the field. @default []
    */
-  parentSchemaPath?: string
+  parentSchemaPath?: string[]
   preferences?: DocumentPreferences
   req: PayloadRequest
   /**
@@ -79,8 +79,8 @@ export const iterateFields = async ({
   omitParents = false,
   operation,
   parentPassesCondition = true,
-  parentPath = '',
-  parentSchemaPath = '',
+  parentPath = [],
+  parentSchemaPath = [],
   preferences,
   req,
   skipConditionChecks = false,

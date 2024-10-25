@@ -128,9 +128,8 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
       >
         <RenderFields
           fields={fields}
-          path={`${parentPath}.${rowIndex}`}
+          parentPath={[...parentPath.split('.'), rowIndex]}
           permissions={docPermissions.fields}
-          readOnly={readOnly}
         />
       </Collapsible>
     </div>

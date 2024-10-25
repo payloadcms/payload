@@ -163,10 +163,10 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
 
   const [schemaPath, setSchemaPath] = useState(() => {
     if (operation === 'create' && auth && !auth.disableLocalStrategy) {
-      return `_${entitySlug}.auth`
+      return [`_${entitySlug}`, 'auth']
     }
 
-    return entitySlug
+    return [entitySlug]
   })
 
   const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(() => {

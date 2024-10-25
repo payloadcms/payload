@@ -21,6 +21,8 @@ export {
   valueIsValueWithRelation,
 } from '../fields/config/types.js'
 
+export { getFieldPaths } from '../fields/getFieldPaths.js'
+
 export * from '../fields/validations.js'
 export { validOperators } from '../types/constants.js'
 
@@ -42,7 +44,6 @@ export {
 
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 
-export { generatePath } from '../utilities/generatePath.js'
 export { getDataByPath } from '../utilities/getDataByPath.js'
 export { getSiblingData } from '../utilities/getSiblingData.js'
 

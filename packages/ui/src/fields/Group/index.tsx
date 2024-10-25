@@ -95,7 +95,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
           </div>
           <RenderFields
             fields={fields}
-            path={path}
+            parentPath={path.split('.')}
             permissions={docPermissions.fields}
             readOnly={readOnlyFromProps}
           />
