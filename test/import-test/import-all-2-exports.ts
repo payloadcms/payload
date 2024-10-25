@@ -342,7 +342,7 @@ import {
 } from '@payloadcms/db-postgres'
 import { handleMessage, mergeData, ready, subscribe, unsubscribe } from '@payloadcms/live-preview'
 import { useLivePreview } from '@payloadcms/live-preview-react'
-import { createKey, getStorageClient, payloadCloud } from '@payloadcms/plugin-cloud'
+import { createKey, getStorageClient, payloadCloud } from '@payloadcms/payload-cloud'
 import { cloudStorage } from '@payloadcms/plugin-cloud-storage'
 import { fields, getPaymentTotal } from '@payloadcms/plugin-form-builder'
 import {
