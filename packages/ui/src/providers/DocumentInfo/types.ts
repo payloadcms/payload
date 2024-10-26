@@ -45,7 +45,6 @@ export type DocumentInfoProps = {
     collectionConfig?: ClientCollectionConfig
     doc: TypeWithID
   }) => Promise<void> | void
-  readonly onLoadError?: (data?: any) => Promise<void> | void
   readonly onSave?: (args: {
     collectionConfig?: ClientCollectionConfig
     doc: TypeWithID
@@ -66,7 +65,6 @@ export type DocumentInfoContext = {
   initialData: Data
   initialState?: FormState
   isInitializing: boolean
-  isLoading: boolean
   preferencesKey?: string
   publishedDoc?: { _status?: string } & TypeWithID & TypeWithTimestamps
   setCurrentEditor?: React.Dispatch<React.SetStateAction<ClientUser>>

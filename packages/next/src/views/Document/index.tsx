@@ -1,5 +1,6 @@
 import type {
   AdminViewProps,
+  Data,
   PayloadComponent,
   ServerProps,
   ServerSideEditViewProps,
@@ -15,6 +16,7 @@ import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 import type { ViewFromConfig } from './getViewsFromConfig.js'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
+import { DrawerHeader } from '../../elements/DrawerHeader/index.js'
 import { renderDocumentSlots } from '../../utilities/renderDocumentSlots.js'
 import { NotFoundView } from '../NotFound/index.js'
 import { getDocumentData } from './getDocumentData.js'
@@ -24,13 +26,16 @@ import { getViewsFromConfig } from './getViewsFromConfig.js'
 
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
 
-export const Document: React.FC<AdminViewProps> = async ({
+export const renderDocument = async ({
+  drawerSlug,
   importMap,
   initPageResult,
   params,
-  payloadServerAction,
   searchParams,
-}) => {
+}: AdminViewProps): Promise<{
+  data: Data
+  Document: React.ReactNode
+}> => {
   const {
     collectionConfig,
     docID: id,
@@ -78,7 +83,7 @@ export const Document: React.FC<AdminViewProps> = async ({
   })
 
   if (!data) {
-    notFound()
+    throw new Error('not-found')
   }
 
   const { docPermissions, hasPublishPermission, hasSavePermission } = await getDocumentPermissions({
@@ -95,7 +100,6 @@ export const Document: React.FC<AdminViewProps> = async ({
     locale,
     params,
     payload,
-    payloadServerAction,
     permissions,
     routeSegments: segments,
     searchParams,
@@ -104,7 +108,7 @@ export const Document: React.FC<AdminViewProps> = async ({
 
   if (collectionConfig) {
     if (!visibleEntities?.collections?.find((visibleSlug) => visibleSlug === collectionSlug)) {
-      notFound()
+      throw new Error('not-found')
     }
 
     const params = new URLSearchParams()
@@ -147,7 +151,7 @@ export const Document: React.FC<AdminViewProps> = async ({
 
   if (globalConfig) {
     if (!visibleEntities?.globals?.find((visibleSlug) => visibleSlug === globalSlug)) {
-      notFound()
+      throw new Error('not-found')
     }
 
     const params = new URLSearchParams({
@@ -200,6 +204,7 @@ export const Document: React.FC<AdminViewProps> = async ({
     hasSavePermission &&
     ((collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
       (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave))
+
   const validateDraftData =
     collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.validate
 
@@ -223,7 +228,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       })
       redirect(redirectURL)
     } else {
-      notFound()
+      throw new Error('not-found')
     }
   }
 
@@ -236,67 +241,89 @@ export const Document: React.FC<AdminViewProps> = async ({
     permissions,
   })
 
-  const clientProps = { formState, payloadServerAction, ...documentSlots }
+  const clientProps = { formState, ...documentSlots }
 
-  return (
-    <DocumentInfoProvider
-      apiURL={apiURL}
-      collectionSlug={collectionConfig?.slug}
-      disableActions={false}
-      docPermissions={docPermissions}
-      globalSlug={globalConfig?.slug}
-      hasPublishPermission={hasPublishPermission}
-      hasSavePermission={hasSavePermission}
-      id={id}
-      initialData={data}
-      initialState={formState}
-      isEditing={isEditing}
-      key={locale?.code}
-    >
-      {!RootViewOverride && (
-        <DocumentHeader
-          collectionConfig={collectionConfig}
-          globalConfig={globalConfig}
-          i18n={i18n}
-          payload={payload}
-          permissions={permissions}
-        />
-      )}
-      <HydrateAuthProvider permissions={permissions} />
-      {/**
-       * After bumping the Next.js canary to 104, and React to 19.0.0-rc-06d0b89e-20240801" we have to deepCopy the permissions object (https://github.com/payloadcms/payload/pull/7541).
-       * If both HydrateClientUser and RenderCustomComponent receive the same permissions object (same object reference), we get a
-       * "TypeError: Cannot read properties of undefined (reading '$$typeof')" error when loading up some version views - for example a versions
-       * view in the draft-posts collection of the versions test suite. RenderCustomComponent is what renders the versions view.
-       *
-       * // TODO: Revisit this in the future and figure out why this is happening. Might be a React/Next.js bug. We don't know why it happens, and a future React/Next version might unbreak this (keep an eye on this and remove deepCopyObjectSimple if that's the case)
-       */}
-      <EditDepthProvider
-        depth={1}
-        key={`${collectionSlug || globalSlug}${locale?.code ? `-${locale?.code}` : ''}`}
+  return {
+    data,
+    Document: (
+      <DocumentInfoProvider
+        apiURL={apiURL}
+        BeforeDocument={
+          drawerSlug ? (
+            <DrawerHeader
+              drawerSlug={drawerSlug}
+              Header={null} // TDO
+            />
+          ) : undefined
+        }
+        collectionSlug={collectionConfig?.slug}
+        disableActions={false}
+        docPermissions={docPermissions}
+        globalSlug={globalConfig?.slug}
+        hasPublishPermission={hasPublishPermission}
+        hasSavePermission={hasSavePermission}
+        id={id}
+        initialData={data}
+        initialState={formState}
+        isEditing={isEditing}
+        key={locale?.code}
       >
-        {ErrorView ? (
-          <RenderServerComponent
-            clientProps={clientProps}
-            Component={ErrorView.ComponentConfig || ErrorView.Component}
-            importMap={importMap}
-            serverProps={serverProps}
-          />
-        ) : (
-          <RenderServerComponent
-            clientProps={clientProps}
-            Component={
-              RootViewOverride
-                ? RootViewOverride
-                : CustomView?.ComponentConfig || CustomView?.Component
-                  ? CustomView?.ComponentConfig || CustomView?.Component
-                  : DefaultView?.ComponentConfig || DefaultView?.Component
-            }
-            importMap={importMap}
-            serverProps={serverProps}
+        {!RootViewOverride && !drawerSlug && (
+          <DocumentHeader
+            collectionConfig={collectionConfig}
+            globalConfig={globalConfig}
+            i18n={i18n}
+            payload={payload}
+            permissions={permissions}
           />
         )}
-      </EditDepthProvider>
-    </DocumentInfoProvider>
-  )
+        <HydrateAuthProvider permissions={permissions} />
+        {/**
+         * After bumping the Next.js canary to 104, and React to 19.0.0-rc-06d0b89e-20240801" we have to deepCopy the permissions object (https://github.com/payloadcms/payload/pull/7541).
+         * If both HydrateClientUser and RenderCustomComponent receive the same permissions object (same object reference), we get a
+         * "TypeError: Cannot read properties of undefined (reading '$$typeof')" error when loading up some version views - for example a versions
+         * view in the draft-posts collection of the versions test suite. RenderCustomComponent is what renders the versions view.
+         *
+         * // TODO: Revisit this in the future and figure out why this is happening. Might be a React/Next.js bug. We don't know why it happens, and a future React/Next version might unbreak this (keep an eye on this and remove deepCopyObjectSimple if that's the case)
+         */}
+        <EditDepthProvider
+          depth={1} // TODO
+          key={`${collectionSlug || globalSlug}${locale?.code ? `-${locale?.code}` : ''}`}
+        >
+          {ErrorView ? (
+            <RenderServerComponent
+              clientProps={clientProps}
+              Component={ErrorView.ComponentConfig || ErrorView.Component}
+              importMap={importMap}
+              serverProps={serverProps}
+            />
+          ) : (
+            <RenderServerComponent
+              clientProps={clientProps}
+              Component={
+                RootViewOverride
+                  ? RootViewOverride
+                  : CustomView?.ComponentConfig || CustomView?.Component
+                    ? CustomView?.ComponentConfig || CustomView?.Component
+                    : DefaultView?.ComponentConfig || DefaultView?.Component
+              }
+              importMap={importMap}
+              serverProps={serverProps}
+            />
+          )}
+        </EditDepthProvider>
+      </DocumentInfoProvider>
+    ),
+  }
+}
+
+export const Document: React.FC<AdminViewProps> = async (args) => {
+  try {
+    const { Document: RenderedDocument } = await renderDocument(args)
+    return RenderedDocument
+  } catch (error) {
+    if (error.message === 'not-found') {
+      notFound()
+    }
+  }
 }

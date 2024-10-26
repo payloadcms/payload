@@ -14,8 +14,6 @@ import type {
   Where,
 } from 'payload'
 
-import { notFound } from 'next/navigation.js'
-import { reduceFieldsToValues } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
@@ -53,7 +51,6 @@ const DocumentInfo: React.FC<
     hasSavePermission: hasSavePermissionFromProps,
     initialData: initialDataFromProps,
     initialState: initialStateFromProps,
-    onLoadError,
     onSave: onSaveFromProps,
   } = props
 
@@ -83,24 +80,19 @@ const DocumentInfo: React.FC<
 
   const { uploadEdits } = useUploadEdits()
 
-  const [documentTitle, setDocumentTitle] = useState(() => {
-    if (!initialDataFromProps) {
-      return ''
-    }
+  const [data, setData] = useState<Data>(initialDataFromProps)
 
-    return formatDocTitle({
+  const [documentTitle, setDocumentTitle] = useState(() =>
+    formatDocTitle({
       collectionConfig,
       data: { ...initialDataFromProps, id },
       dateFormat,
       fallback: id?.toString(),
       globalConfig,
       i18n,
-    })
-  })
+    }),
+  )
 
-  const [isLoading, setIsLoading] = useState(false)
-  const [isError, setIsError] = useState(false)
-  const [data, setData] = useState<Data>(initialDataFromProps)
   const [initialState, setInitialState] = useState<FormState>(initialStateFromProps)
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null)
   const [versions, setVersions] = useState<PaginatedDocs<TypeWithVersion<any>>>(null)
@@ -148,21 +140,6 @@ const DocumentInfo: React.FC<
   const isEditing = getIsEditing({ id, collectionSlug, globalSlug })
   const operation = isEditing ? 'update' : 'create'
   const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions?.permission)
-
-  // useEffect(() => {
-  //   if (!collectionConfig && !globalConfig && initialState) {
-  //     const getNewConfig = async () => {
-  //       // @ts-expect-error eslint-disable-next-line
-  //       const res = (await serverFunction('render-config', {
-  //         collectionSlug,
-  //         formState: initialState,
-  //         globalSlug,
-  //         languageCode: i18n.language,
-  //       })) as any as ClientCollectionConfig | ClientGlobalConfig
-  //     }
-  //     void getNewConfig()
-  //   }
-  // }, [collectionSlug, initialState, i18n.language, globalSlug, collectionConfig, globalConfig])
 
   const unlockDocument = useCallback(
     async (docId: number | string, slug: string) => {
@@ -559,85 +536,6 @@ const DocumentInfo: React.FC<
   )
 
   useEffect(() => {
-    const abortController = new AbortController()
-    const localeChanged = locale !== prevLocale.current
-
-    if (
-      initialStateFromProps === undefined ||
-      initialDataFromProps === undefined ||
-      localeChanged
-    ) {
-      if (localeChanged) {
-        prevLocale.current = locale
-      }
-
-      const getInitialState = async () => {
-        setIsError(false)
-        setIsLoading(true)
-
-        try {
-          const result = await getFormState({
-            id,
-            collectionSlug,
-            globalSlug,
-            locale,
-            operation,
-            renderFields: true,
-            schemaPath: collectionSlug ? [collectionSlug] : [globalSlug],
-            signal: abortController.signal,
-          })
-
-          if ('errors' in result) {
-            await onLoadError(result.errors)
-            return
-          }
-
-          const data = reduceFieldsToValues(result.state, true)
-          setData(data)
-
-          if (localeChanged) {
-            void getDocPermissions(data)
-          }
-
-          setInitialState(result.state)
-        } catch (_err) {
-          if (!abortController.signal.aborted) {
-            if (typeof onLoadError === 'function') {
-              void onLoadError()
-            }
-            setIsError(true)
-            setIsLoading(false)
-          }
-        }
-        setIsLoading(false)
-      }
-
-      void getInitialState()
-    }
-
-    return () => {
-      try {
-        abortController.abort()
-      } catch (_err) {
-        // swallow error
-      }
-    }
-  }, [
-    api,
-    operation,
-    collectionSlug,
-    serverURL,
-    id,
-    globalSlug,
-    locale,
-    onLoadError,
-    initialDataFromProps,
-    initialStateFromProps,
-    getDocPermissions,
-    getFormState,
-  ])
-
-  useEffect(() => {
     void getVersions()
   }, [getVersions])
 
@@ -711,10 +609,6 @@ const DocumentInfo: React.FC<
     })}`
   }, [baseURL, locale, pluralType, id, slug, uploadEdits])
 
-  if (isError) {
-    notFound()
-  }
-
   const value: DocumentInfoContext = {
     ...props,
     action,
@@ -730,7 +624,6 @@ const DocumentInfo: React.FC<
     initialData: data,
     initialState,
     isInitializing,
-    isLoading,
     onSave,
     preferencesKey,
     publishedDoc,

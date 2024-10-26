@@ -22,10 +22,10 @@ export type AdminViewConfig = {
 
 export type AdminViewProps = {
   readonly clientConfig: ClientConfig
+  readonly drawerSlug?: string
   readonly importMap: ImportMap
   readonly initPageResult: InitPageResult
   readonly params?: { [key: string]: string | string[] | undefined }
-  readonly payloadServerAction: PayloadServerAction
   readonly searchParams: { [key: string]: string | string[] | undefined }
 }
 
