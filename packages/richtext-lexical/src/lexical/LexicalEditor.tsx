@@ -4,8 +4,7 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary.js'
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin.js'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin.js'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin.js'
-import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin.js'
-import { BLUR_COMMAND, COMMAND_PRIORITY_LOW, FOCUS_COMMAND, KEY_ESCAPE_COMMAND } from 'lexical'
+import { BLUR_COMMAND, COMMAND_PRIORITY_LOW, FOCUS_COMMAND } from 'lexical'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
 
@@ -46,18 +45,11 @@ export const LexicalEditor: React.FC<
     }
 
     const handleFocus = () => {
-      // Ensure the tab indent plugin is enabled on first visit to the editor
-      setTabIndentEnabled(true)
-
       editorConfigContext.focusEditor(editorConfigContext)
     }
 
     const handleBlur = () => {
       editorConfigContext.blurEditor(editorConfigContext)
-    }
-
-    const handleEscape = () => {
-      setTabIndentEnabled(false)
     }
 
     const unregisterFocus = editor.registerCommand<MouseEvent>(
@@ -78,55 +70,12 @@ export const LexicalEditor: React.FC<
       COMMAND_PRIORITY_LOW,
     )
 
-    const unregisterEscape = editor.registerCommand<KeyboardEvent>(
-      KEY_ESCAPE_COMMAND,
-      () => {
-        handleEscape()
-        return true
-      },
-      COMMAND_PRIORITY_LOW,
-    )
-
     return () => {
       unregisterFocus()
       unregisterBlur()
-      unregisterEscape()
       editorConfigContext.parentEditor?.unregisterChild?.(editorConfigContext.uuid)
     }
   }, [editor, editorConfigContext])
-
-  const [tabIndentEnabled, setTabIndentEnabled] = useState<boolean>(true)
-
-  useEffect(() => {
-    if (tabIndentEnabled) {
-      return
-    }
-
-    const rootElement = editorConfigContext.editor.getRootElement()
-
-    // Manually blur the editor when the escape key is pressed
-    rootElement?.blur()
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (tabIndentEnabled || ['Escape', 'Shift'].includes(e.key)) {
-        return
-      }
-
-      // Pressing shift + tab after blurring the editor leads to the editor being re-focused
-      // This manually sets the focus to the parent element to allow backwards tabbing to work as expected
-      if (e.shiftKey && e.key === 'Tab') {
-        rootElement?.parentElement?.focus()
-      }
-
-      setTabIndentEnabled(true)
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [editorConfigContext.editor, tabIndentEnabled])
 
   const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false)
 
@@ -220,10 +169,6 @@ export const LexicalEditor: React.FC<
             <HistoryPlugin />
             {editorConfig?.features?.markdownTransformers?.length > 0 && <MarkdownShortcutPlugin />}
           </React.Fragment>
-        )}
-
-        {editorConfig.features.enabledFeatures.includes('indent') && tabIndentEnabled && (
-          <TabIndentationPlugin />
         )}
         {editorConfig.features.plugins?.map((plugin) => {
           if (plugin.position === 'normal') {
