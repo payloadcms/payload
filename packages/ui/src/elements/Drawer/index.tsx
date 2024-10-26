@@ -103,29 +103,27 @@ export const Drawer: React.FC<Props> = ({
         >
           <div className={`${baseClass}__blur-bg-content`} />
           <Gutter className={`${baseClass}__content-children`} left={gutter} right={gutter}>
-            <EditDepthContext.Provider value={drawerDepth + 1}>
-              {Header}
-              {Header === undefined && (
-                <div className={`${baseClass}__header`}>
-                  <h2 className={`${baseClass}__header__title`} title={hoverTitle ? title : null}>
-                    {title}
-                  </h2>
-                  {/* TODO: the `button` HTML element breaks CSS transitions on the drawer for some reason...
+            {Header}
+            {Header === undefined && (
+              <div className={`${baseClass}__header`}>
+                <h2 className={`${baseClass}__header__title`} title={hoverTitle ? title : null}>
+                  {title}
+                </h2>
+                {/* TODO: the `button` HTML element breaks CSS transitions on the drawer for some reason...
                     i.e. changing to a `div` element will fix the animation issue but will break accessibility
                   */}
-                  <button
-                    aria-label={t('general:close')}
-                    className={`${baseClass}__header__close`}
-                    id={`close-drawer__${slug}`}
-                    onClick={() => closeModal(slug)}
-                    type="button"
-                  >
-                    <XIcon />
-                  </button>
-                </div>
-              )}
-              {children}
-            </EditDepthContext.Provider>
+                <button
+                  aria-label={t('general:close')}
+                  className={`${baseClass}__header__close`}
+                  id={`close-drawer__${slug}`}
+                  onClick={() => closeModal(slug)}
+                  type="button"
+                >
+                  <XIcon />
+                </button>
+              </div>
+            )}
+            {children}
           </Gutter>
         </div>
       </Modal>

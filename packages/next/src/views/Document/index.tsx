@@ -27,8 +27,10 @@ import { getViewsFromConfig } from './getViewsFromConfig.js'
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
 
 export const renderDocument = async ({
+  disableActions,
   drawerSlug,
   importMap,
+  initialData,
   initPageResult,
   params,
   searchParams,
@@ -211,7 +213,7 @@ export const renderDocument = async ({
   if (shouldAutosave && !validateDraftData && !id && collectionSlug) {
     const doc = await payload.create({
       collection: collectionSlug,
-      data: {},
+      data: initialData || {},
       depth: 0,
       draft: true,
       fallbackLocale: null,
@@ -257,7 +259,7 @@ export const renderDocument = async ({
           ) : undefined
         }
         collectionSlug={collectionConfig?.slug}
-        disableActions={false}
+        disableActions={disableActions ?? false}
         docPermissions={docPermissions}
         globalSlug={globalConfig?.slug}
         hasPublishPermission={hasPublishPermission}
@@ -278,18 +280,7 @@ export const renderDocument = async ({
           />
         )}
         <HydrateAuthProvider permissions={permissions} />
-        {/**
-         * After bumping the Next.js canary to 104, and React to 19.0.0-rc-06d0b89e-20240801" we have to deepCopy the permissions object (https://github.com/payloadcms/payload/pull/7541).
-         * If both HydrateClientUser and RenderCustomComponent receive the same permissions object (same object reference), we get a
-         * "TypeError: Cannot read properties of undefined (reading '$$typeof')" error when loading up some version views - for example a versions
-         * view in the draft-posts collection of the versions test suite. RenderCustomComponent is what renders the versions view.
-         *
-         * // TODO: Revisit this in the future and figure out why this is happening. Might be a React/Next.js bug. We don't know why it happens, and a future React/Next version might unbreak this (keep an eye on this and remove deepCopyObjectSimple if that's the case)
-         */}
-        <EditDepthProvider
-          depth={1} // TODO
-          key={`${collectionSlug || globalSlug}${locale?.code ? `-${locale?.code}` : ''}`}
-        >
+        <EditDepthProvider>
           {ErrorView ? (
             <RenderServerComponent
               clientProps={clientProps}

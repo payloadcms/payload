@@ -31,11 +31,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 }) => {
   const { config } = useConfig()
 
-  const {
-    routes: { api: apiRoute },
-    serverURL,
-  } = config
-
   const { closeModal, modalState, toggleModal } = useModal()
   const locale = useLocale()
   const { t } = useTranslation()
@@ -55,8 +50,10 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
             name: 'render-document',
             args: {
               collectionSlug,
+              disableActions,
               docID,
               drawerSlug,
+              initialData,
             },
           })) as { docID: string; Document: React.ReactNode }
 
@@ -74,7 +71,18 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
       void getDocumentView()
     }
-  }, [serverFunction, collectionSlug, docID, DocumentView, closeModal, drawerSlug, isOpen, t])
+  }, [
+    serverFunction,
+    collectionSlug,
+    docID,
+    DocumentView,
+    closeModal,
+    drawerSlug,
+    isOpen,
+    t,
+    disableActions,
+    initialData,
+  ])
 
   // const isEditing = Boolean(docID)
   // const apiURL = docID

@@ -1,7 +1,9 @@
 'use client'
 import { Gutter, RenderTitle, useModal, useTranslation, XIcon } from '@payloadcms/ui'
 
-const baseClass = 'document-drawer'
+import './index.scss'
+
+const baseClass = 'doc-drawer'
 
 export const DrawerHeader: React.FC<{
   drawerSlug?: string

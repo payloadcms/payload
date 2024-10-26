@@ -113,7 +113,6 @@ const DocumentInfo: React.FC<
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
   const prevLocale = useRef(locale)
-  const hasInitializedDocPermissions = useRef(false)
 
   const versionsConfig = docConfig?.versions
 
@@ -551,34 +550,6 @@ const DocumentInfo: React.FC<
       }),
     )
   }, [collectionConfig, globalConfig, data, dateFormat, i18n, id])
-
-  useEffect(() => {
-    if (data && (collectionSlug || globalSlug)) {
-      if (
-        hasInitializedDocPermissions.current === false &&
-        (!docPermissions ||
-          hasSavePermission === undefined ||
-          hasSavePermission === null ||
-          hasPublishPermission === undefined ||
-          hasPublishPermission === null)
-      ) {
-        hasInitializedDocPermissions.current = true
-        void getDocPermissions(data)
-      }
-    }
-  }, [
-    getDocPermissions,
-    docPermissionsFromProps,
-    hasSavePermissionFromProps,
-    hasPublishPermissionFromProps,
-    setDocPermissions,
-    collectionSlug,
-    globalSlug,
-    data,
-    docPermissions,
-    hasSavePermission,
-    hasPublishPermission,
-  ])
 
   // clean on unmount
   useEffect(() => {

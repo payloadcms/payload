@@ -1,6 +1,7 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientConfig,
+  Data,
   DocumentPreferences,
   PayloadRequest,
   SanitizedConfig,
@@ -44,14 +45,18 @@ type RenderDocumentResult = {
 
 export const renderDocumentFn = async (args: {
   collectionSlug: string
+  disableActions?: boolean
   docID: string
   drawerSlug?: string
+  initialData?: Data
   req: PayloadRequest
 }): Promise<RenderDocumentResult> => {
   const {
     collectionSlug,
+    disableActions,
     docID,
     drawerSlug,
+    initialData,
     req,
     req: {
       i18n,
@@ -160,8 +165,10 @@ export const renderDocumentFn = async (args: {
 
   const { data, Document } = await renderDocument({
     clientConfig,
+    disableActions,
     drawerSlug,
     importMap: payload.importMap,
+    initialData,
     initPageResult: {
       collectionConfig: payload.config.collections.find(
         (collection) => collection.slug === collectionSlug,

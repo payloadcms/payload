@@ -74,7 +74,7 @@ export const Account: React.FC<AdminViewProps> = async ({
         initialState={formState}
         isEditing
       >
-        <EditDepthProvider depth={1}>
+        <EditDepthProvider>
           <DocumentHeader
             collectionConfig={collectionConfig}
             hideTabs

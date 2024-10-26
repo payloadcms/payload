@@ -63,11 +63,10 @@ export type BulkUploadProps = {
 }
 
 export function BulkUploadDrawer() {
-  const currentDepth = useEditDepth()
   const { drawerSlug } = useBulkUpload()
 
   return (
-    <EditDepthProvider depth={currentDepth || 1}>
+    <EditDepthProvider>
       <Drawer gutter={false} Header={null} slug={drawerSlug}>
         <FormsManagerProvider>
           <DrawerContent />
