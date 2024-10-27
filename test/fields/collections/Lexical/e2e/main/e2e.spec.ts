@@ -684,6 +684,35 @@ describe('lexicalMain', () => {
     })
   })
 
+  /**
+   * A fix was implemented to resolve a limitation in Firefox where the escape key resets the active element to the beginning of the page
+   */
+  test('ensure escape key can be used to move focus away from editor', async () => {
+    await navigateToLexicalFields()
+
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+
+    const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
+    await paragraph.scrollIntoViewIfNeeded()
+    await expect(paragraph).toBeVisible()
+
+    const textField = page.locator('#field-title')
+
+    // Pressing 'Escape' allows focus to be moved to the previous element
+    await paragraph.click()
+    await page.keyboard.press('Tab')
+    await page.keyboard.press('Escape')
+    await page.keyboard.press('Shift+Tab')
+    await expect(textField).toBeFocused()
+
+    // Focus is not moved to the previous element if 'Escape' is not pressed
+    await paragraph.click()
+    await paragraph.press('Shift+Tab')
+    await expect(textField).not.toBeFocused()
+  })
+
   describe('localization', () => {
     test.skip('ensure simple localized lexical field works', async () => {
       await navigateToLexicalFields(true, true)
