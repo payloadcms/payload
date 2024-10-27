@@ -42,6 +42,7 @@ jobs:
               'PatrikKozak',
               'tylandavis',
               'paulpopus',
+              'GermanJablo',
             ];
 
             const type = context.payload.pull_request ? 'pull_request' : 'issue';
