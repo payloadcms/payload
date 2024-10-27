@@ -78,13 +78,13 @@ const UploadDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }) => {
 
   const onSelect = useCallback(
     ({ collectionSlug, docID }) => {
+      closeListDrawer()
       insertUpload({
         editor,
         relationTo: collectionSlug,
         replaceNodeKey,
         value: docID,
       })
-      closeListDrawer()
     },
     [editor, closeListDrawer, replaceNodeKey],
   )

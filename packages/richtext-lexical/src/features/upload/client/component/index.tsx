@@ -241,6 +241,7 @@ const Component: React.FC<ElementProps> = (props) => {
 
                 <Button
                   buttonStyle="icon-label"
+                  className={`${baseClass}__swap-drawer-toggler`}
                   disabled={field?.admin?.readOnly}
                   el="button"
                   icon="swap"

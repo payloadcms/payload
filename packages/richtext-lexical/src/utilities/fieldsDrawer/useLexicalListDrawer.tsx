@@ -38,12 +38,12 @@ export const useLexicalListDrawer = (
   ] = useListDrawer(args)
   const { modalState } = useModal()
 
-  const storeSelection = useCallback(() => {
-    editor.read(() => {
-      const selection = $getSelection() ?? $getPreviousSelection()
-      setSelectionState(selection)
-    })
-  }, [editor])
+  const $storeSelection = useCallback(() => {
+    // editor.read() causes an error here when creating a new upload node from the slash menu. It seems like we can omit it here though, as all
+    // invocations of that functions are wrapped in editor.read() or editor.update() somewhere in the call stack.
+    const selection = $getSelection() ?? $getPreviousSelection()
+    setSelectionState(selection)
+  }, [])
 
   const restoreSelection = useCallback(() => {
     if (selectionState) {
@@ -87,12 +87,12 @@ export const useLexicalListDrawer = (
       <BaseListDrawerToggler
         {...props}
         onClick={() => {
-          storeSelection()
+          $storeSelection()
         }}
       />
     ),
     openListDrawer: () => {
-      storeSelection()
+      $storeSelection()
       baseOpenDrawer()
       setWasOpen(true)
     },

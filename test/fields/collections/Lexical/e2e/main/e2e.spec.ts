@@ -1,4 +1,4 @@
-import type { SerializedLinkNode } from '@payloadcms/richtext-lexical'
+import type { SerializedLinkNode, SerializedUploadNode } from '@payloadcms/richtext-lexical'
 import type { BrowserContext, Page } from '@playwright/test'
 import type { SerializedEditorState, SerializedParagraphNode, SerializedTextNode } from 'lexical'
 
@@ -778,6 +778,118 @@ describe('lexicalMain', () => {
           .text,
       ).toBe('there')
       expect((secondParagraph.children[2] as SerializedTextNode).text).toBe(' xxx')
+    }).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+  })
+
+  test('lexical cursor / selection should be preserved when swapping upload field and clicking within with its list drawer', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+
+    const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
+    await paragraph.scrollIntoViewIfNeeded()
+    await expect(paragraph).toBeVisible()
+
+    /**
+     * Type some text
+     */
+    await paragraph.click()
+    await page.keyboard.type('Some Text')
+
+    await page.keyboard.press('Enter')
+
+    await page.keyboard.press('/')
+    await page.keyboard.type('Upload')
+
+    // Create Upload node
+    const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+    await expect(slashMenuPopover).toBeVisible()
+
+    const uploadSelectButton = slashMenuPopover.locator('button').first()
+    await expect(uploadSelectButton).toBeVisible()
+    await expect(uploadSelectButton).toContainText('Upload')
+    await uploadSelectButton.click()
+    await expect(slashMenuPopover).toBeHidden()
+
+    await wait(500) // wait for drawer form state to initialize (it's a flake)
+    const uploadListDrawer = page.locator('dialog[id^=list-drawer_1_]').first() // IDs starting with list-drawer_1_ (there's some other symbol after the underscore)
+    await expect(uploadListDrawer).toBeVisible()
+    await wait(500)
+
+    await uploadListDrawer.locator('button').getByText('payload.png').first().click()
+    await expect(uploadListDrawer).toBeHidden()
+
+    const newUploadNode = richTextField.locator('.lexical-upload').first()
+    await newUploadNode.scrollIntoViewIfNeeded()
+    await expect(newUploadNode).toBeVisible()
+
+    await expect(newUploadNode.locator('.lexical-upload__bottomRow')).toContainText('payload.png')
+
+    await page.keyboard.press('ArrowLeft')
+    // Select "there" by pressing shift + arrow left
+    for (let i = 0; i < 4; i++) {
+      await page.keyboard.press('Shift+ArrowLeft')
+    }
+
+    await newUploadNode.locator('.lexical-upload__swap-drawer-toggler').first().click()
+
+    const uploadSwapDrawer = page.locator('dialog[id^=list-drawer_1_]').first()
+    await expect(uploadSwapDrawer).toBeVisible()
+    await wait(500)
+
+    // Click anywhere in the drawer to make sure the cursor position is preserved
+    await uploadSwapDrawer.locator('.drawer__content').first().click()
+
+    // click button with text content "payload.jpg"
+    await uploadSwapDrawer.locator('button').getByText('payload.jpg').first().click()
+
+    await expect(uploadSwapDrawer).toBeHidden()
+    await wait(500)
+
+    // press ctrl+B to bold the text previously selected (assuming it is still selected now, which it should be)
+    await page.keyboard.press('Meta+B')
+    // In case this is mac or windows
+    await page.keyboard.press('Control+B')
+
+    await wait(500)
+
+    await saveDocAndAssert(page)
+
+    // Check if the text is bold. It's a self-relationship, so no need to follow relationship
+    await expect(async () => {
+      const lexicalDoc: LexicalField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          depth: 0,
+          overrideAccess: true,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor
+
+      const firstParagraph: SerializedParagraphNode = lexicalField.root
+        .children[0] as SerializedParagraphNode
+      const secondParagraph: SerializedParagraphNode = lexicalField.root
+        .children[1] as SerializedParagraphNode
+      const uploadNode: SerializedUploadNode = lexicalField.root.children[2] as SerializedUploadNode
+
+      expect(firstParagraph.children).toHaveLength(2)
+      expect((firstParagraph.children[0] as SerializedTextNode).text).toBe('Some ')
+      expect((firstParagraph.children[0] as SerializedTextNode).format).toBe(0)
+      expect((firstParagraph.children[1] as SerializedTextNode).text).toBe('Text')
+      expect((firstParagraph.children[1] as SerializedTextNode).format).toBe(1)
+
+      expect(secondParagraph.children).toHaveLength(0)
+
+      expect(uploadNode.relationTo).toBe('uploads')
     }).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
