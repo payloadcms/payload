@@ -102,6 +102,9 @@ export default buildConfig({
           secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
         },
         region: process.env.S3_REGION,
+        // Set to true if you are using a custom endpoint.
+        // forcePathStyle: true,
+
         // ... Other S3 configuration
       },
     }),
