@@ -1,7 +1,7 @@
 'use client'
 import type { ClientField, Data, FormState, JsonObject } from 'payload'
 
-import { Drawer } from '@payloadcms/ui'
+import { Drawer, useModal } from '@payloadcms/ui'
 import React from 'react'
 
 import { DrawerContent } from './DrawerContent.js'
@@ -34,6 +34,7 @@ export const FieldsDrawer: React.FC<FieldsDrawerProps> = ({
   schemaFieldsPathOverride,
   schemaPathSuffix,
 }) => {
+  const { closeModal } = useModal()
   // The Drawer only renders its children (and itself) if it's open. Thus, by extracting the main content
   // to DrawerContent, this should be faster
   return (
@@ -42,7 +43,19 @@ export const FieldsDrawer: React.FC<FieldsDrawerProps> = ({
         data={data}
         featureKey={featureKey}
         fieldMapOverride={fieldMapOverride}
-        handleDrawerSubmit={handleDrawerSubmit}
+        handleDrawerSubmit={(args, args2) => {
+          // Simply close drawer - no need for useLexicalDrawer here as at this point,
+          // we don't need to restore the cursor position. This is handled by the useEffect in useLexicalDrawer.
+          closeModal(drawerSlug)
+
+          // Actual drawer submit logic needs to be triggered after the drawer is closed.
+          // That's because the lexical selection / cursor restore logic that is striggerer by
+          // `useLexicalDrawer` neeeds to be triggered before any editor.update calls that may happen
+          // in the `handleDrawerSubmit` function.
+          setTimeout(() => {
+            handleDrawerSubmit(args, args2)
+          }, 1)
+        }}
         schemaFieldsPathOverride={schemaFieldsPathOverride}
         schemaPathSuffix={schemaPathSuffix}
       />

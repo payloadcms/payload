@@ -35,7 +35,7 @@ export type UseListDrawer = (args: {
   React.FC<
     Pick<ListDrawerProps, 'allowCreate' | 'enableRowSelections' | 'onBulkSelect' | 'onSelect'>
   >, // drawer
-  React.FC<Pick<ListTogglerProps, 'children' | 'className' | 'disabled'>>, // toggler
+  React.FC<Pick<ListTogglerProps, 'children' | 'className' | 'disabled' | 'onClick'>>, // toggler
   {
     closeDrawer: () => void
     collectionSlugs: SanitizedCollectionConfig['slug'][]
