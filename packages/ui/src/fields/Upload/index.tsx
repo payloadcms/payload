@@ -17,8 +17,6 @@ export const baseClass = 'upload'
 
 export function UploadComponent(props: UploadFieldClientProps) {
   const {
-    Description,
-    Error,
     field: {
       admin: { allowCreate, className, isSortable, readOnly: readOnlyFromAdmin, style, width } = {},
       hasMany,
@@ -28,7 +26,9 @@ export function UploadComponent(props: UploadFieldClientProps) {
       relationTo,
       required,
     },
-    Label,
+    fieldState: {
+      customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    } = {},
     path,
     readOnly: readOnlyFromTopLevelProps,
     validate,
@@ -68,7 +68,9 @@ export function UploadComponent(props: UploadFieldClientProps) {
 
   return (
     <UploadInput
+      AfterInput={AfterInput}
       api={config.routes.api}
+      BeforeInput={BeforeInput}
       className={className}
       Description={Description}
       Error={Error}

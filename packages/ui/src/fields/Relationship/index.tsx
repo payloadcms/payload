@@ -35,8 +35,6 @@ const baseClass = 'relationship'
 
 const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => {
   const {
-    Description,
-    Error,
     field: {
       name,
       admin: {
@@ -55,7 +53,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       relationTo,
       required,
     },
-    Label,
+    fieldState: { customComponents: { Description, Error, Label } = {} } = {},
     path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
     validate,

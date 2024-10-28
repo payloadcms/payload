@@ -9,6 +9,7 @@ import type { TextAreaInputProps } from './types.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { isFieldRTL } from '../shared/index.js'
 import './index.scss'
@@ -18,10 +19,6 @@ export { TextareaInput, TextAreaInputProps }
 
 const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
   const {
-    AfterInput,
-    BeforeInput,
-    Description,
-    Error,
     field: {
       admin: { className, placeholder, readOnly: readOnlyFromAdmin, rows, rtl, style, width } = {},
       label,
@@ -30,8 +27,9 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
       minLength,
       required,
     },
-    Label,
-    locale,
+    fieldState: {
+      customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    } = {},
     path,
     readOnly: readOnlyFromTopLevelProps,
     validate,
@@ -44,6 +42,8 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
   const {
     config: { localization },
   } = useConfig()
+
+  const locale = useLocale()
 
   const isRTL = isFieldRTL({
     fieldLocalized: localized,

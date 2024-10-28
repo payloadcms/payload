@@ -17,10 +17,6 @@ import './index.scss'
 
 const NumberFieldComponent: NumberFieldClientComponent = (props) => {
   const {
-    AfterInput,
-    BeforeInput,
-    Description,
-    Error,
     field: {
       name,
       admin: {
@@ -39,7 +35,9 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
       min = -Infinity,
       required,
     },
-    Label,
+    fieldState: {
+      customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    } = {},
     onChange: onChangeFromProps,
     path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,

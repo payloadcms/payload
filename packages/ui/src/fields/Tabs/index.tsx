@@ -11,6 +11,7 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 import { TabsProvider } from './provider.js'
@@ -22,8 +23,8 @@ export { TabsProvider }
 
 const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const {
-    Description,
     field: { admin: { className, readOnly: readOnlyFromAdmin } = {}, tabs = [] },
+    fieldState: { customComponents: { AfterInput, BeforeInput, Description } = {} } = {},
     forceRender = false,
     indexPath,
     path,
@@ -147,7 +148,13 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
                 .filter(Boolean)
                 .join(' ')}
             >
-              {Description}
+              {Description ?? (
+                <FieldDescription
+                  description={activeTabStaticDescription}
+                  path={generateTabPath()}
+                />
+              )}
+              {BeforeInput}
               <RenderFields
                 fields={activeTabConfig.fields}
                 forceRender={forceRender}
@@ -155,6 +162,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
                 permissions={docPermissions.fields}
                 readOnly={readOnly}
               />
+              {AfterInput}
             </div>
           )}
         </div>

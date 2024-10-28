@@ -17,9 +17,7 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 
 const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
   const {
-    Description,
     disableModifyingForm: disableModifyingFormFromProps,
-    Error,
     field: {
       name,
       admin: {
@@ -34,7 +32,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
       options = [],
       required,
     } = {} as RadioFieldClientProps['field'],
-    Label,
+    fieldState: { customComponents: { Description, Error, Label } = {} } = {},
     onChange: onChangeFromProps,
     path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,

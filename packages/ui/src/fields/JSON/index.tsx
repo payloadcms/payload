@@ -13,17 +13,15 @@ const baseClass = 'json-field'
 
 const JSONFieldComponent: JSONFieldClientComponent = (props) => {
   const {
-    AfterInput,
-    BeforeInput,
-    Description,
-    Error,
     field: {
       name,
       admin: { className, editorOptions, readOnly: readOnlyFromAdmin, style, width } = {},
       jsonSchema,
       required,
     },
-    Label,
+    fieldState: {
+      customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    } = {},
     path,
     readOnly: readOnlyFromTopLevelProps,
     validate,

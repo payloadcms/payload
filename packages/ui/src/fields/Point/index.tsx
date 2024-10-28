@@ -16,10 +16,6 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 
 export const PointFieldComponent: PointFieldClientComponent = (props) => {
   const {
-    AfterInput,
-    BeforeInput,
-    Description,
-    Error,
     field: {
       name,
       admin: { className, placeholder, readOnly: readOnlyFromAdmin, step, style, width } = {},
@@ -27,7 +23,9 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
       localized,
       required,
     },
-    Label,
+    fieldState: {
+      customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    } = {},
     path,
     readOnly: readOnlyFromTopLevelProps,
     validate,

@@ -39,10 +39,12 @@ export const baseClass = 'upload'
 type PopulatedDocs = { relationTo: string; value: JsonObject }[]
 
 export type UploadInputProps = {
+  readonly AfterInput?: React.ReactNode
   /**
    * Controls the visibility of the "Create new collection" button
    */
   readonly api?: string
+  readonly BeforeInput?: React.ReactNode
   readonly className?: string
   readonly collection?: ClientCollectionConfig
   readonly customUploadActions?: React.ReactNode[]
@@ -70,7 +72,9 @@ export type UploadInputProps = {
 
 export function UploadInput(props: UploadInputProps) {
   const {
+    AfterInput,
     api,
+    BeforeInput,
     className,
     Description,
     Error,
@@ -427,6 +431,7 @@ export function UploadInput(props: UploadInputProps) {
     >
       {Label || <FieldLabel label={label} localized={localized} required={required} />}
       <div className={`${baseClass}__wrap`}>{Error}</div>
+      {BeforeInput}
       <div className={`${baseClass}__dropzoneAndUpload`}>
         {hasMany && Array.isArray(value) && value.length > 0 ? (
           <>

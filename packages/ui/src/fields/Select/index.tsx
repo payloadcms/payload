@@ -29,10 +29,6 @@ const formatOptions = (options: Option[]): OptionObject[] =>
 
 const SelectFieldComponent: SelectFieldClientComponent = (props) => {
   const {
-    AfterInput,
-    BeforeInput,
-    Description,
-    Error,
     field: {
       name,
       admin: {
@@ -49,7 +45,9 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       options: optionsFromProps = [],
       required,
     },
-    Label,
+    fieldState: {
+      customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    } = {},
     onChange: onChangeFromProps,
     path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,

@@ -13,8 +13,10 @@ import { fieldBaseClass } from '../index.js'
 const JoinFieldComponent: JoinFieldClientComponent = (props) => {
   const {
     field,
-    field: { name, collection, on },
-    Label,
+    field: { name, _schemaPath, collection, on },
+    fieldState: {
+      customComponents: { AfterInput, BeforeInput, Label },
+    },
     path,
   } = props
 
@@ -35,6 +37,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
 
   return (
     <div className={[fieldBaseClass, 'join'].filter(Boolean).join(' ')}>
+      {BeforeInput}
       <RelationshipTable
         field={field as JoinFieldClient}
         filterOptions={filterOptions}
@@ -42,6 +45,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
         initialDrawerState={{
           [on]: {
             initialValue: docID,
+            schemaPath: _schemaPath,
             valid: true,
             value: docID,
           },
@@ -49,6 +53,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
         Label={<h4 style={{ margin: 0 }}>{Label}</h4>}
         relationTo={collection}
       />
+      {AfterInput}
     </div>
   )
 }
