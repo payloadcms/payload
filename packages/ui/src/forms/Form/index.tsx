@@ -570,9 +570,9 @@ export const Form: React.FC<FormProps> = (props) => {
     async ({ data, path, rowIndex: rowIndexArg, schemaPath }) => {
       const newRows: unknown[] = getDataByPath(path)
       const rowIndex = rowIndexArg === undefined ? newRows.length : rowIndexArg
-      newRows.splice(rowIndex, 1)
+      newRows[rowIndex] = { id: uuidv4(), ...(data || {}) }
 
-      const { formState: subFieldState } = await getFieldStateBySchemaPath({
+      const { formState: newFormState } = await getFieldStateBySchemaPath({
         collectionSlug,
         data: {
           [path]: newRows,
@@ -583,11 +583,8 @@ export const Form: React.FC<FormProps> = (props) => {
       })
 
       dispatchFields({
-        type: 'REPLACE_ROW',
-        blockType: data?.blockType,
-        path,
-        rowIndex,
-        subFieldState,
+        type: 'UPDATE_MANY',
+        formState: newFormState,
       })
     },
     [getFieldStateBySchemaPath, dispatchFields, collectionSlug, globalSlug, getDataByPath],
