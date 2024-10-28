@@ -5,7 +5,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection.js'
 import { mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
-import { Button, useConfig, useDocumentDrawer, usePayloadAPI, useTranslation } from '@payloadcms/ui'
+import { Button, useConfig, usePayloadAPI, useTranslation } from '@payloadcms/ui'
 import {
   $getNodeByKey,
   $getSelection,
@@ -20,6 +20,7 @@ import React, { useCallback, useEffect, useReducer, useRef, useState } from 'rea
 import type { RelationshipData } from '../../server/nodes/RelationshipNode.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
+import { useLexicalDocumentDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
 import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
 import { $isRelationshipNode } from '../nodes/RelationshipNode.js'
 import './index.scss'
@@ -73,7 +74,7 @@ const Component: React.FC<Props> = (props) => {
     { initialParams },
   )
 
-  const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
+  const { closeDocumentDrawer, DocumentDrawer, DocumentDrawerToggler } = useLexicalDocumentDrawer({
     id: value,
     collectionSlug: relatedCollection.slug,
   })
@@ -91,10 +92,10 @@ const Component: React.FC<Props> = (props) => {
         cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
       })
 
-      closeDrawer()
+      closeDocumentDrawer()
       dispatchCacheBust()
     },
-    [cacheBust, setParams, closeDrawer],
+    [cacheBust, setParams, closeDocumentDrawer],
   )
 
   const $onDelete = useCallback(
@@ -172,7 +173,7 @@ const Component: React.FC<Props> = (props) => {
             buttonStyle="icon-label"
             className={`${baseClass}__swapButton`}
             disabled={field?.admin?.readOnly}
-            el="div"
+            el="button"
             icon="swap"
             onClick={() => {
               if (nodeKey) {

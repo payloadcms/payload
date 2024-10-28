@@ -42,6 +42,12 @@ export { DeleteMany } from '../../elements/DeleteMany/index.js'
 export { DocumentControls } from '../../elements/DocumentControls/index.js'
 export { Dropzone } from '../../elements/Dropzone/index.js'
 export { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
+export type {
+  DocumentDrawerProps,
+  DocumentTogglerProps,
+  UseDocumentDrawer,
+} from '../../elements/DocumentDrawer/types.js'
+
 export { DocumentFields } from '../../elements/DocumentFields/index.js'
 export { Drawer, DrawerToggler, formatDrawerSlug } from '../../elements/Drawer/index.js'
 export { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
@@ -55,6 +61,11 @@ export { HydrateAuthProvider } from '../../elements/HydrateAuthProvider/index.js
 export { Locked } from '../../elements/Locked/index.js'
 export { ListControls } from '../../elements/ListControls/index.js'
 export { useListDrawer } from '../../elements/ListDrawer/index.js'
+export type {
+  ListDrawerProps,
+  ListTogglerProps,
+  UseListDrawer,
+} from '../../elements/ListDrawer/types.js'
 export { ListSelection } from '../../elements/ListSelection/index.js'
 export { ListHeader } from '../../elements/ListHeader/index.js'
 export { LoadingOverlayToggle } from '../../elements/Loading/index.js'
