@@ -129,7 +129,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
       if (field.type === 'json' && typeof data[field.name] === 'string') {
         try {
-          JSON.parse(data[field.name] as string)
+          JSON.parse(data[field.name])
         } catch (e) {
           jsonError = e
         }

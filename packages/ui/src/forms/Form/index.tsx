@@ -537,14 +537,15 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
     async ({ data, path, rowIndex: rowIndexArg, schemaPath }) => {
-      const newRows: unknown[] = getDataByPath(path)
+      const newRows: unknown[] = getDataByPath(path) || []
       const rowIndex = rowIndexArg === undefined ? newRows.length : rowIndexArg
       newRows.splice(rowIndex, 0, { id: uuidv4(), ...(data || {}) })
+      const fieldName = path.split('.').pop()
 
       const { formState: newFormState } = await getFieldStateBySchemaPath({
         collectionSlug,
         data: {
-          [path]: newRows,
+          [fieldName]: newRows,
         },
         globalSlug,
         path,
@@ -571,11 +572,12 @@ export const Form: React.FC<FormProps> = (props) => {
       const newRows: unknown[] = getDataByPath(path)
       const rowIndex = rowIndexArg === undefined ? newRows.length : rowIndexArg
       newRows[rowIndex] = { id: uuidv4(), ...(data || {}) }
+      const fieldName = path.split('.').pop()
 
       const { formState: newFormState } = await getFieldStateBySchemaPath({
         collectionSlug,
         data: {
-          [path]: newRows,
+          [fieldName]: newRows,
         },
         globalSlug,
         path,
