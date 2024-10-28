@@ -238,8 +238,8 @@ export const traverseFields = ({
           }
 
           const {
-            limit: limitArg = 10,
-            sort,
+            limit: limitArg = field.defaultLimit ?? 10,
+            sort = field.defaultSort,
             where,
           } = joinQuery[`${path.replaceAll('_', '.')}${field.name}`] || {}
           let limit = limitArg
@@ -285,7 +285,9 @@ export const traverseFields = ({
             let columnReferenceToCurrentID: string
 
             if (versions) {
-              columnReferenceToCurrentID = `${topLevelTableName.replace('_', '').replace(new RegExp(`${adapter.versionsSuffix}$`), '')}_id`
+              columnReferenceToCurrentID = `${topLevelTableName
+                .replace('_', '')
+                .replace(new RegExp(`${adapter.versionsSuffix}$`), '')}_id`
             } else {
               columnReferenceToCurrentID = `${topLevelTableName}_id`
             }
@@ -387,20 +389,39 @@ export const traverseFields = ({
           if (adapter.name === 'sqlite') {
             currentArgs.extras[columnName] = sql`
               COALESCE((
-                SELECT json_group_array(json_object(${jsonObjectSelect}))
-                FROM (
-                  ${subQuery}
-                ) AS ${sql.raw(`${columnName}_sub`)}
-              ), '[]')
+                SELECT json_group_array(json_object(
+              ${jsonObjectSelect}
+              )
+              )
+              FROM
+              (
+              ${subQuery}
+              )
+              AS
+              ${sql.raw(`${columnName}_sub`)}
+              ),
+              '[]'
+              )
             `.as(columnName)
           } else {
             currentArgs.extras[columnName] = sql`
               COALESCE((
-                SELECT json_agg(json_build_object(${jsonObjectSelect}))
-                FROM (
-                  ${subQuery}
-                ) AS ${sql.raw(`${columnName}_sub`)}
-              ), '[]'::json)
+                SELECT json_agg(json_build_object(
+              ${jsonObjectSelect}
+              )
+              )
+              FROM
+              (
+              ${subQuery}
+              )
+              AS
+              ${sql.raw(`${columnName}_sub`)}
+              ),
+              '[]'
+              :
+              :
+              json
+              )
             `.as(columnName)
           }
 
