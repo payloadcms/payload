@@ -82,6 +82,8 @@ export const saveVersion = async ({
 
         const data: Record<string, unknown> = {
           createdAt: new Date(latestVersion.createdAt).toISOString(),
+          latest: true,
+          parent: id,
           updatedAt: now,
           version: {
             ...versionData,
