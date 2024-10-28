@@ -131,6 +131,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
           forceRender={forceRender}
           parentPath={[...parentPath.split('.'), rowIndex]}
           permissions={docPermissions.fields}
+          readOnly={readOnly}
         />
       </Collapsible>
     </div>

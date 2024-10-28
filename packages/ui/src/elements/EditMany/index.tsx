@@ -214,8 +214,8 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                   <RenderFields
                     fields={selected}
                     parentPath={[]}
+                    permissions={permissions?.collections?.[slug]?.fields}
                     readOnly={false}
-                    schemaPath={slug}
                   />
                 )}
                 <div className={`${baseClass}__sidebar-wrap`}>
