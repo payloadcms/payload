@@ -46,7 +46,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
     if (!DocumentView) {
       const getDocumentView = async () => {
         try {
-          const { docID: newDocID, Document: DocResult } = (await serverFunction({
+          const { docID: newDocID, Document: ViewResult } = (await serverFunction({
             name: 'render-document',
             args: {
               collectionSlug,
@@ -54,10 +54,12 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
               docID,
               drawerSlug,
               initialData,
+              redirectAfterDelete,
+              redirectAfterDuplicate,
             },
           })) as { docID: string; Document: React.ReactNode }
 
-          setDocumentView(DocResult)
+          setDocumentView(ViewResult)
           setDocID(newDocID)
           setIsLoading(false)
         } catch (error) {
@@ -82,6 +84,8 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
     t,
     disableActions,
     initialData,
+    redirectAfterDelete,
+    redirectAfterDuplicate,
   ])
 
   // const isEditing = Boolean(docID)

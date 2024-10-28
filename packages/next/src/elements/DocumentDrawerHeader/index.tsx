@@ -5,7 +5,7 @@ import './index.scss'
 
 const baseClass = 'doc-drawer'
 
-export const DrawerHeader: React.FC<{
+export const DocumentDrawerHeader: React.FC<{
   drawerSlug?: string
   Header?: React.ReactNode
 }> = ({ drawerSlug, Header }) => {

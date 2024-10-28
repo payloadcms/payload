@@ -17,16 +17,17 @@ import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { RenderServerComponent } from '../../../../ui/src/elements/RenderServerComponent/index.js'
+import { ListDrawerHeader } from '../../elements/ListDrawerHeader/index.js'
 
 export { generateListMetadata } from './meta.js'
 
-export const ListView: React.FC<AdminViewProps> = async ({
-  initPageResult,
-  params,
-  // payloadServerAction,
-  clientConfig,
-  searchParams,
-}) => {
+export const renderListView = async (
+  args: AdminViewProps,
+): Promise<{
+  List: React.ReactNode
+}> => {
+  const { clientConfig, drawerSlug, initPageResult, params, searchParams } = args
+
   const {
     collectionConfig,
     collectionConfig: {
@@ -50,7 +51,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
   } = initPageResult
 
   if (!permissions?.collections?.[collectionSlug]?.read?.permission) {
-    notFound()
+    throw new Error('not-found')
   }
 
   let listPreferences: ListPreferences
@@ -93,7 +94,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
 
   if (collectionConfig) {
     if (!visibleEntities.collections.includes(collectionSlug)) {
-      return notFound()
+      throw new Error('not-found')
     }
 
     const page = isNumber(query?.page) ? Number(query.page) : 0
@@ -157,55 +158,70 @@ export const ListView: React.FC<AdminViewProps> = async ({
       Table,
     }
 
-    return (
-      <Fragment>
-        <HydrateAuthProvider permissions={permissions} />
-        <ListInfoProvider
-          collectionSlug={collectionSlug}
-          hasCreatePermission={permissions?.collections?.[collectionSlug]?.create?.permission}
-          newDocumentURL={formatAdminURL({
-            adminRoute,
-            path: `/collections/${collectionSlug}/create`,
-          })}
-        >
-          <ListQueryProvider
-            data={data}
-            defaultLimit={limit || collectionConfig?.admin?.pagination?.defaultLimit}
-            defaultSort={sort}
-            modifySearchParams
-            preferenceKey={preferenceKey}
+    return {
+      List: (
+        <Fragment>
+          <HydrateAuthProvider permissions={permissions} />
+          <ListInfoProvider
+            collectionSlug={collectionSlug}
+            hasCreatePermission={permissions?.collections?.[collectionSlug]?.create?.permission}
+            Header={drawerSlug ? <ListDrawerHeader drawerSlug={drawerSlug} /> : null}
+            newDocumentURL={formatAdminURL({
+              adminRoute,
+              path: `/collections/${collectionSlug}/create`,
+            })}
           >
-            <RenderServerComponent
-              clientProps={clientProps}
-              Component={collectionConfig?.admin?.components?.views?.list.Component}
-              Fallback={DefaultListView}
-              importMap={payload.importMap}
-              serverProps={{
-                collectionConfig,
-                collectionSlug,
-                data,
-                hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
-                i18n,
-                limit,
-                listPreferences,
-                listSearchableFields: collectionConfig.admin.listSearchableFields,
-                locale: fullLocale,
-                newDocumentURL: formatAdminURL({
-                  adminRoute,
-                  path: `/collections/${collectionSlug}/create`,
-                }),
-                params,
-                payload,
-                permissions,
-                searchParams,
-                user,
-              }}
-            />
-          </ListQueryProvider>
-        </ListInfoProvider>
-      </Fragment>
-    )
+            <ListQueryProvider
+              data={data}
+              defaultLimit={limit || collectionConfig?.admin?.pagination?.defaultLimit}
+              defaultSort={sort}
+              modifySearchParams
+              preferenceKey={preferenceKey}
+            >
+              <RenderServerComponent
+                clientProps={clientProps}
+                Component={collectionConfig?.admin?.components?.views?.list.Component}
+                Fallback={DefaultListView}
+                importMap={payload.importMap}
+                serverProps={{
+                  collectionConfig,
+                  collectionSlug,
+                  data,
+                  hasCreatePermission:
+                    permissions?.collections?.[collectionSlug]?.create?.permission,
+                  i18n,
+                  limit,
+                  listPreferences,
+                  listSearchableFields: collectionConfig.admin.listSearchableFields,
+                  locale: fullLocale,
+                  newDocumentURL: formatAdminURL({
+                    adminRoute,
+                    path: `/collections/${collectionSlug}/create`,
+                  }),
+                  params,
+                  payload,
+                  permissions,
+                  searchParams,
+                  user,
+                }}
+              />
+            </ListQueryProvider>
+          </ListInfoProvider>
+        </Fragment>
+      ),
+    }
   }
 
-  return notFound()
+  throw new Error('not-found')
+}
+
+export const ListView: React.FC<AdminViewProps> = async (args) => {
+  try {
+    const { List: RenderedList } = await renderListView(args)
+    return RenderedList
+  } catch (error) {
+    if (error.message === 'not-found') {
+      notFound()
+    }
+  }
 }

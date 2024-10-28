@@ -29,6 +29,8 @@ export type AdminViewProps = {
   readonly initPageResult: InitPageResult
   readonly params?: { [key: string]: string | string[] | undefined }
   readonly searchParams: { [key: string]: string | string[] | undefined }
+  readonly redirectAfterDelete?: boolean
+  readonly redirectAfterDuplicate?: boolean
 }
 
 export type AdminViewComponent = PayloadComponent<AdminViewProps>

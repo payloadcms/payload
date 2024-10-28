@@ -20,7 +20,6 @@ export function UploadComponent(props: UploadFieldClientProps) {
     Description,
     Error,
     field: {
-      _path: path,
       admin: { allowCreate, className, isSortable, readOnly: readOnlyFromAdmin, style, width } = {},
       hasMany,
       label,
@@ -30,6 +29,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
       required,
     },
     Label,
+    path,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
