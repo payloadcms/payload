@@ -17,11 +17,7 @@ import './index.scss'
 
 const EmailFieldComponent: EmailFieldClientComponent = (props) => {
   const {
-    AfterInput,
     autoComplete,
-    BeforeInput,
-    Description,
-    Error,
     field: {
       name,
       admin: {
@@ -35,7 +31,9 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
       localized,
       required,
     } = {} as EmailFieldClientProps['field'],
-    Label,
+    fieldState: {
+      customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    } = {},
     path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
     validate,

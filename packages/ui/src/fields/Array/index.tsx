@@ -31,8 +31,6 @@ const baseClass = 'array-field'
 
 export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const {
-    Description,
-    Error,
     field: {
       name,
       admin: { className, isSortable = true, readOnly: readOnlyFromAdmin } = {},
@@ -42,8 +40,8 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       minRows: minRowsProp,
       required,
     },
+    fieldState: { customComponents: { Description, Error, Label } = {} } = {},
     forceRender = false,
-    Label,
     path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
     rowLabels,
