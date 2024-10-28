@@ -389,39 +389,20 @@ export const traverseFields = ({
           if (adapter.name === 'sqlite') {
             currentArgs.extras[columnName] = sql`
               COALESCE((
-                SELECT json_group_array(json_object(
-              ${jsonObjectSelect}
-              )
-              )
-              FROM
-              (
-              ${subQuery}
-              )
-              AS
-              ${sql.raw(`${columnName}_sub`)}
-              ),
-              '[]'
-              )
+                SELECT json_group_array(json_object(${jsonObjectSelect}))
+                FROM (
+                  ${subQuery}
+                ) AS ${sql.raw(`${columnName}_sub`)}
+              ), '[]')
             `.as(columnName)
           } else {
             currentArgs.extras[columnName] = sql`
               COALESCE((
-                SELECT json_agg(json_build_object(
-              ${jsonObjectSelect}
-              )
-              )
-              FROM
-              (
-              ${subQuery}
-              )
-              AS
-              ${sql.raw(`${columnName}_sub`)}
-              ),
-              '[]'
-              :
-              :
-              json
-              )
+                SELECT json_agg(json_build_object(${jsonObjectSelect}))
+                FROM (
+                  ${subQuery}
+                ) AS ${sql.raw(`${columnName}_sub`)}
+              ), '[]'::json)
             `.as(columnName)
           }
 
