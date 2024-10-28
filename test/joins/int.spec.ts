@@ -609,6 +609,24 @@ describe('Joins Field', () => {
       expect(response.data.Category.relatedPosts.docs[0].title).toStrictEqual('test 3')
     })
   })
+
+  it('should work id.in command delimited querying with joins', async () => {
+    const allCategories = await payload.find({ collection: 'categories', pagination: false })
+
+    const allCategoriesByIds = await restClient
+      .GET(`/categories`, {
+        query: {
+          where: {
+            id: {
+              in: allCategories.docs.map((each) => each.id).join(','),
+            },
+          },
+        },
+      })
+      .then((res) => res.json())
+
+    expect(allCategories.totalDocs).toBe(allCategoriesByIds.totalDocs)
+  })
 })
 
 async function createPost(overrides?: Partial<Post>, locale?: Config['locale']) {
