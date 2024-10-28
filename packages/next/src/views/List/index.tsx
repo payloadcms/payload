@@ -21,15 +21,29 @@ import { ListDrawerHeader } from '../../elements/ListDrawerHeader/index.js'
 
 export { generateListMetadata } from './meta.js'
 
+type ListViewArgs = {
+  disableBulkDelete?: boolean
+  disableBulkEdit?: boolean
+  documentDrawerSlug: string
+  enableRowSelections: boolean
+} & AdminViewProps
+
 export const renderListView = async (
-  args: {
-    enableRowSelections: boolean
-  } & AdminViewProps,
+  args: ListViewArgs,
 ): Promise<{
   List: React.ReactNode
 }> => {
-  const { clientConfig, drawerSlug, enableRowSelections, initPageResult, params, searchParams } =
-    args
+  const {
+    clientConfig,
+    disableBulkDelete,
+    disableBulkEdit,
+    documentDrawerSlug,
+    drawerSlug,
+    enableRowSelections,
+    initPageResult,
+    params,
+    searchParams,
+  } = args
 
   const {
     collectionConfig,
@@ -177,6 +191,8 @@ export const renderListView = async (
             //     : undefined
             // }
             collectionSlug={collectionSlug}
+            disableBulkDelete={disableBulkDelete}
+            disableBulkEdit={disableBulkEdit}
             hasCreatePermission={hasCreatePermission}
             Header={
               drawerSlug ? (
@@ -190,6 +206,7 @@ export const renderListView = async (
                     ) : undefined
                   }
                   description={clientCollectionConfig?.admin?.description}
+                  documentDrawerSlug={documentDrawerSlug}
                   drawerSlug={drawerSlug}
                   hasCreatePermission={hasCreatePermission}
                   pluralLabel={clientCollectionConfig?.labels?.plural}
@@ -245,13 +262,9 @@ export const renderListView = async (
   throw new Error('not-found')
 }
 
-export const ListView: React.FC<
-  {
-    enableRowSelections: boolean
-  } & AdminViewProps
-> = async (args) => {
+export const ListView: React.FC<ListViewArgs> = async (args) => {
   try {
-    const { List: RenderedList } = await renderListView({ ...args, enableRowSelections: true })
+    const { List: RenderedList } = await renderListView(args)
     return RenderedList
   } catch (error) {
     if (error.message === 'not-found') {

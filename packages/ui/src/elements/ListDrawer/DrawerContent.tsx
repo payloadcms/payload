@@ -2,19 +2,21 @@
 import type { ClientCollectionConfig, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { ListDrawerProps } from './types.js'
 
+import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { ListViewCallbacksProvider } from '../../views/List/CallbacksProvider.js'
 import { LoadingOverlay } from '../Loading/index.js'
 import { type Option } from '../ReactSelect/index.js'
+import { ListDrawerContextProvider } from './Provider.js'
 
 export const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
   if ('and' in where) {
@@ -94,6 +96,10 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       : undefined
   })
 
+  const [DocumentDrawer, , { drawerSlug: documentDrawerSlug }] = useDocumentDrawer({
+    collectionSlug: selectedOption.value,
+  })
+
   useEffect(() => {
     if (selectedCollectionFromProps && selectedCollectionFromProps !== selectedOption?.value) {
       setSelectedOption({
@@ -111,6 +117,9 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
             name: 'render-list',
             args: {
               collectionSlug: selectedOption.value,
+              disableBulkDelete: true,
+              disableBulkEdit: true,
+              documentDrawerSlug,
               drawerSlug,
               enableRowSelections,
             },
@@ -135,6 +144,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     isOpen,
     enableRowSelections,
     selectedOption,
+    documentDrawerSlug,
   ])
 
   const preferencesKey = selectedOption.value ? `${selectedOption.value}-list` : null
@@ -288,13 +298,35 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   //   return <LoadingOverlay />
   // }
 
+  const onCreateNew = useCallback(
+    ({ doc }) => {
+      if (typeof onSelect === 'function') {
+        onSelect({
+          collectionSlug: selectedOption.value,
+          docID: doc.id,
+        })
+      }
+      // dispatchCacheBust()
+      closeModal(documentDrawerSlug)
+      closeModal(drawerSlug)
+    },
+    [closeModal, documentDrawerSlug, drawerSlug, onSelect, selectedOption.value],
+  )
+
   if (isLoading) {
     return <LoadingOverlay />
   }
 
   return (
-    <ListViewCallbacksProvider onBulkSelect={onBulkSelect} onSelect={onSelect}>
-      {ListView}
-    </ListViewCallbacksProvider>
+    <EditDepthProvider>
+      <ListDrawerContextProvider
+        drawerSlug={drawerSlug}
+        onBulkSelect={onBulkSelect}
+        onSelect={onSelect}
+      >
+        {ListView}
+        <DocumentDrawer onSave={onCreateNew} />
+      </ListDrawerContextProvider>
+    </EditDepthProvider>
   )
 }

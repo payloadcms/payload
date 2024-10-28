@@ -21,6 +21,7 @@ export const ListDrawerHeader: React.FC<{
   CustomDescription?: React.ReactNode
   customHeader?: string
   description?: StaticDescription
+  documentDrawerSlug: string
   drawerSlug: string
   hasCreatePermission: boolean
   pluralLabel: StaticLabel
@@ -28,12 +29,13 @@ export const ListDrawerHeader: React.FC<{
   CustomDescription,
   customHeader,
   description,
+  documentDrawerSlug,
   drawerSlug,
   hasCreatePermission,
   pluralLabel,
 }) => {
   const { i18n, t } = useTranslation()
-  const { closeModal } = useModal()
+  const { closeModal, openModal } = useModal()
 
   return (
     <header className={`${baseClass}__header`}>
@@ -45,7 +47,7 @@ export const ListDrawerHeader: React.FC<{
           {hasCreatePermission && (
             <button
               className={`${baseClass}__create-new-button`}
-              onClick={() => closeModal(drawerSlug)}
+              onClick={() => openModal(documentDrawerSlug)}
               type="button"
             >
               <Pill>{t('general:createNew')}</Pill>

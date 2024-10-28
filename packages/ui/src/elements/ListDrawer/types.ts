@@ -2,7 +2,7 @@ import type { FilterOptionsResult, SanitizedCollectionConfig } from 'payload'
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 
-import type { ListViewCallbacks } from '../../views/List/CallbacksProvider.js'
+import type { ListDrawerContextProps } from './Provider.js'
 
 export type ListDrawerProps = {
   readonly allowCreate?: boolean
@@ -11,7 +11,7 @@ export type ListDrawerProps = {
   readonly enableRowSelections?: boolean
   readonly filterOptions?: FilterOptionsResult
   readonly selectedCollection?: string
-} & ListViewCallbacks
+} & ListDrawerContextProps
 
 export type ListTogglerProps = {
   children?: React.ReactNode

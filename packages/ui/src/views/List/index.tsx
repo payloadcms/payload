@@ -3,7 +3,6 @@
 import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import LinkImport from 'next/link.js'
 import { useRouter } from 'next/navigation.js'
 import { formatFilesize, isNumber } from 'payload/shared'
@@ -20,6 +19,7 @@ import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { EditMany } from '../../elements/EditMany/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
+import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { ListHeader } from '../../elements/ListHeader/index.js'
 import { ListSelection } from '../../elements/ListSelection/index.js'
 import { useModal } from '../../elements/Modal/index.js'
@@ -31,6 +31,7 @@ import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../../elements/TableColumns/index.js'
 import { UnpublishMany } from '../../elements/UnpublishMany/index.js'
+import { ViewDescription } from '../../elements/ViewDescription/index.js'
 // import { SetViewActions } from '../../providers/Actions/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -41,7 +42,6 @@ import { SelectionProvider } from '../../providers/Selection/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
-import { useListViewCallbacks } from './CallbacksProvider.js'
 import './index.scss'
 
 const baseClass = 'collection-list'
@@ -77,7 +77,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
 
   const [Table, setTable] = useState(InitialTable)
 
-  const { onSelect } = useListViewCallbacks()
+  const { onSelect } = useListDrawerContext()
 
   useEffect(() => {
     if (InitialTable) {
@@ -98,10 +98,6 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     Header,
     newDocumentURL,
   } = useListInfo()
-
-  const [DocumentDrawer, , { drawerSlug: documentDrawerSlug }] = useDocumentDrawer({
-    collectionSlug,
-  })
 
   const { getEntityConfig } = useConfig()
   const router = useRouter()
@@ -169,21 +165,6 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
       ])
     }
   }, [setStepNav, labels, drawerDepth])
-
-  const onCreateNew = useCallback(
-    ({ doc }) => {
-      if (typeof onSelect === 'function') {
-        onSelect({
-          collectionSlug,
-          docID: doc.id,
-        })
-      }
-      // dispatchCacheBust()
-      closeModal(documentDrawerSlug)
-      closeModal(drawerSlug)
-    },
-    [closeModal, documentDrawerSlug, drawerSlug, onSelect, collectionSlug],
-  )
 
   const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
 
@@ -323,7 +304,6 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
           </SelectionProvider>
         </div>
       </TableColumnsProvider>
-      <DocumentDrawer onSave={onCreateNew} />
     </Fragment>
   )
 }
