@@ -22,11 +22,14 @@ import { ListDrawerHeader } from '../../elements/ListDrawerHeader/index.js'
 export { generateListMetadata } from './meta.js'
 
 export const renderListView = async (
-  args: AdminViewProps,
+  args: {
+    enableRowSelections: boolean
+  } & AdminViewProps,
 ): Promise<{
   List: React.ReactNode
 }> => {
-  const { clientConfig, drawerSlug, initPageResult, params, searchParams } = args
+  const { clientConfig, drawerSlug, enableRowSelections, initPageResult, params, searchParams } =
+    args
 
   const {
     collectionConfig,
@@ -136,13 +139,16 @@ export const renderListView = async (
 
     const initialColumns = getInitialColumns(filterFields(fields), useAsTitle, defaultColumns)
 
+    const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
+
     const { columnState, Table } = renderTable({
-      clientFields: clientConfig.collections.find((c) => c.slug === collectionSlug)?.fields,
+      clientFields: clientCollectionConfig?.fields,
       collectionSlug,
       columnPreferences: listPreferences?.columns,
       columns: initialColumns,
       docs: data.docs,
-      enableRowSelections: true,
+      drawerSlug,
+      enableRowSelections,
       fields,
       importMap: payload.importMap,
       useAsTitle,
@@ -158,14 +164,38 @@ export const renderListView = async (
       Table,
     }
 
+    const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create?.permission
+
     return {
       List: (
         <Fragment>
           <HydrateAuthProvider permissions={permissions} />
           <ListInfoProvider
+            // beforeActions={
+            //   enableRowSelections
+            //     ? [<SelectMany key="select-many" onClick={onBulkSelect} />]
+            //     : undefined
+            // }
             collectionSlug={collectionSlug}
-            hasCreatePermission={permissions?.collections?.[collectionSlug]?.create?.permission}
-            Header={drawerSlug ? <ListDrawerHeader drawerSlug={drawerSlug} /> : null}
+            hasCreatePermission={hasCreatePermission}
+            Header={
+              drawerSlug ? (
+                <ListDrawerHeader
+                  CustomDescription={
+                    collectionConfig?.admin?.components?.Description ? (
+                      <RenderServerComponent
+                        Component={collectionConfig.admin.components.Description}
+                        importMap={payload.importMap}
+                      />
+                    ) : undefined
+                  }
+                  description={clientCollectionConfig?.admin?.description}
+                  drawerSlug={drawerSlug}
+                  hasCreatePermission={hasCreatePermission}
+                  pluralLabel={clientCollectionConfig?.labels?.plural}
+                />
+              ) : null
+            }
             newDocumentURL={formatAdminURL({
               adminRoute,
               path: `/collections/${collectionSlug}/create`,
@@ -215,9 +245,13 @@ export const renderListView = async (
   throw new Error('not-found')
 }
 
-export const ListView: React.FC<AdminViewProps> = async (args) => {
+export const ListView: React.FC<
+  {
+    enableRowSelections: boolean
+  } & AdminViewProps
+> = async (args) => {
   try {
-    const { List: RenderedList } = await renderListView(args)
+    const { List: RenderedList } = await renderListView({ ...args, enableRowSelections: true })
     return RenderedList
   } catch (error) {
     if (error.message === 'not-found') {

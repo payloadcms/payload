@@ -20,7 +20,7 @@ import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import { SelectAll } from '../SelectAll/index.js'
 import { SelectRow } from '../SelectRow/index.js'
 import { SortColumn } from '../SortColumn/index.js'
-import { DefaultCell } from '../Table/DefaultCell/index.js'
+import { RenderDefaultCell } from './RenderDefaultCell/index.js'
 
 type Args = {
   beforeRows?: Column[]
@@ -29,6 +29,7 @@ type Args = {
   columnPreferences: ColumnPreferences
   columns?: ColumnPreferences
   docs: PaginatedDocs['docs']
+  drawerSlug: string
   enableRowSelections: boolean
   enableRowTypes?: boolean
   fields: Field[]
@@ -46,7 +47,8 @@ export const buildColumnState = (args: Args): Column[] => {
     columns,
     docs,
     enableRowSelections,
-    fields,
+    // fields,
+    drawerSlug,
     importMap,
     sortColumnProps,
     useAsTitle,
@@ -164,24 +166,39 @@ export const buildColumnState = (args: Args): Column[] => {
         Label: CustomLabel,
         renderedCells: active
           ? docs.map((doc, i) => {
+              const isLinkedColumn = index === activeColumnsIndices[0]
+
               const cellClientProps: DefaultCellComponentProps = {
                 ...baseCellClientProps,
                 cellData: 'name' in field ? doc[field.name] : undefined,
-                link: index === activeColumnsIndices[0],
+                link: isLinkedColumn,
                 rowData: doc,
               }
 
+              const CustomCell =
+                field?.admin && 'components' in field.admin && field.admin.components?.Cell ? (
+                  <RenderServerComponent
+                    clientProps={cellClientProps}
+                    Component={
+                      field?.admin && 'components' in field.admin && field.admin.components?.Cell
+                    }
+                    importMap={importMap}
+                    key={i}
+                    serverProps={serverProps}
+                  />
+                ) : undefined
+
               return (
-                <RenderServerComponent
-                  clientProps={cellClientProps}
-                  Component={
-                    field?.admin && 'components' in field.admin && field.admin.components?.Cell
-                  }
-                  Fallback={DefaultCell}
-                  importMap={importMap}
-                  key={i}
-                  serverProps={serverProps}
-                />
+                CustomCell ?? (
+                  <RenderDefaultCell
+                    addOnClick={Boolean(drawerSlug)}
+                    clientProps={cellClientProps}
+                    enableRowSelections={enableRowSelections}
+                    index={index}
+                    isLinkedColumn={isLinkedColumn}
+                    key={i}
+                  />
+                )
               )
             })
           : [],

@@ -1,7 +1,7 @@
-@import '../../scss/styles.scss';
+@import '../../../scss/styles.scss';
 
 @layer payload-default {
-  .list-drawer {
+  .default-cell {
     &__first-cell {
       border: 0;
       background-color: transparent;

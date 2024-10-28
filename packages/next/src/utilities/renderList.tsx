@@ -47,6 +47,7 @@ export const renderListFn = async (args: {
   collectionSlug: string
   disableActions?: boolean
   drawerSlug?: string
+  enableRowSelections: boolean
   redirectAfterDelete: boolean
   redirectAfterDuplicate: boolean
   req: PayloadRequest
@@ -55,6 +56,7 @@ export const renderListFn = async (args: {
     collectionSlug,
     disableActions,
     drawerSlug,
+    enableRowSelections,
     redirectAfterDelete,
     redirectAfterDuplicate,
     req,
@@ -154,6 +156,7 @@ export const renderListFn = async (args: {
     clientConfig,
     disableActions,
     drawerSlug,
+    enableRowSelections,
     importMap: payload.importMap,
     initPageResult: {
       collectionConfig: payload.config.collections.find(

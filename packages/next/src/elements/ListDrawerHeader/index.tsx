@@ -1,4 +1,6 @@
 'use client'
+import type { StaticDescription, StaticLabel } from 'payload'
+
 import { getTranslation } from '@payloadcms/translations'
 import {
   FieldLabel,
@@ -11,11 +13,25 @@ import {
 } from '@payloadcms/ui'
 import React from 'react'
 
+import './index.scss'
+
 const baseClass = 'list-drawer'
 
 export const ListDrawerHeader: React.FC<{
+  CustomDescription?: React.ReactNode
+  customHeader?: string
+  description?: StaticDescription
   drawerSlug: string
-}> = ({ drawerSlug }) => {
+  hasCreatePermission: boolean
+  pluralLabel: StaticLabel
+}> = ({
+  CustomDescription,
+  customHeader,
+  description,
+  drawerSlug,
+  hasCreatePermission,
+  pluralLabel,
+}) => {
   const { i18n, t } = useTranslation()
   const { closeModal } = useModal()
 
@@ -24,9 +40,7 @@ export const ListDrawerHeader: React.FC<{
       <div className={`${baseClass}__header-wrap`}>
         <div className={`${baseClass}__header-content`}>
           <h2 className={`${baseClass}__header-text`}>
-            {!customHeader
-              ? getTranslation(selectedCollectionConfig?.labels?.plural, i18n)
-              : customHeader}
+            {!customHeader ? getTranslation(pluralLabel, i18n) : customHeader}
           </h2>
           {hasCreatePermission && (
             <button
@@ -49,16 +63,12 @@ export const ListDrawerHeader: React.FC<{
           <XIcon />
         </button>
       </div>
-      {(selectedCollectionConfig?.admin?.description ||
-        selectedCollectionConfig?.admin?.components?.Description) && (
+      {description || CustomDescription ? (
         <div className={`${baseClass}__sub-header`}>
-          <ViewDescription
-            Description={selectedCollectionConfig.admin?.components?.Description}
-            description={selectedCollectionConfig.admin?.description}
-          />
+          {CustomDescription ?? <ViewDescription description={description} />}
         </div>
-      )}
-      {moreThanOneAvailableCollection && (
+      ) : null}
+      {/* {moreThanOneAvailableCollection && (
         <div className={`${baseClass}__select-collection-wrap`}>
           <FieldLabel label={t('upload:selectCollectionToBrowse')} />
           <ReactSelect
@@ -71,7 +81,7 @@ export const ListDrawerHeader: React.FC<{
             value={selectedOption}
           />
         </div>
-      )}
+      )} */}
     </header>
   )
 }
