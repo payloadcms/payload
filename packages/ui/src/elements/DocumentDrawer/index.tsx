@@ -32,6 +32,7 @@ export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
   collectionSlug,
   disabled,
   drawerSlug,
+  onClick,
   ...rest
 }) => {
   const { t } = useTranslation()
@@ -44,6 +45,7 @@ export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
       })}
       className={[className, `${baseClass}__toggler`].filter(Boolean).join(' ')}
       disabled={disabled}
+      onClick={onClick}
       slug={drawerSlug}
       {...rest}
     >

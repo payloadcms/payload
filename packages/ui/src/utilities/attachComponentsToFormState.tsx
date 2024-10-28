@@ -1,20 +1,15 @@
-import { getTranslation, type I18n, type I18nClient } from '@payloadcms/translations'
+import { getTranslation, type I18n } from '@payloadcms/translations'
 import {
-  type ClientBlock,
-  type ClientField,
-  type ClientTab,
+  type ClientComponentProps,
   createClientField,
   deepCopyObjectSimple,
-  type Field,
-  type FieldPermissions,
   type FieldSchemaMap,
-  type FormField,
   type FormState,
   type FormStateWithoutComponents,
   type Payload,
   type Permissions,
-  type RenderedField,
   type SanitizedConfig,
+  type ServerComponentProps,
 } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
 
@@ -22,25 +17,6 @@ import { RenderServerComponent } from '../elements/RenderServerComponent/index.j
 import { FieldDescription } from '../fields/FieldDescription/index.js'
 import { FieldLabel } from '../fields/FieldLabel/index.js'
 import { RowLabel as DefaultRowLabel } from '../forms/RowLabel/index.js'
-
-export type ClientComponentProps = {
-  field: ClientBlock | ClientField | ClientTab
-  fieldState: FormField
-  path: string
-  permissions: FieldPermissions
-  readOnly?: boolean
-  renderedBlocks?: RenderedField[]
-  rowLabels?: React.ReactNode[]
-  schemaPath: string
-}
-
-export type ServerComponentProps = {
-  clientField: ClientBlock | ClientField | ClientTab
-  config: SanitizedConfig
-  field: Field
-  i18n: I18nClient
-  payload: Payload
-}
 
 type Args = {
   config: SanitizedConfig
