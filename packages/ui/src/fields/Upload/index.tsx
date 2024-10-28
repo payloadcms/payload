@@ -64,7 +64,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
     readOnlyFromField ||
     formProcessing ||
     formInitializing ||
-    !allowCreate
+    allowCreate === false
 
   return (
     <UploadInput
