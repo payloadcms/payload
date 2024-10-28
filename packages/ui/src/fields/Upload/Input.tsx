@@ -99,6 +99,7 @@ export function UploadInput(props: UploadInputProps) {
       value: JsonObject
     }[]
   >()
+
   const [activeRelationTo, setActiveRelationTo] = React.useState<string>(
     Array.isArray(relationTo) ? relationTo[0] : relationTo,
   )
@@ -418,7 +419,7 @@ export function UploadInput(props: UploadInputProps) {
       ]
         .filter(Boolean)
         .join(' ')}
-      id={`field-${path.replace(/\./g, '__')}`}
+      id={`field-${path?.replace(/\./g, '__')}`}
       style={{
         ...style,
         width,
@@ -447,7 +448,6 @@ export function UploadInput(props: UploadInputProps) {
             )}
           </>
         ) : null}
-
         {!hasMany && value ? (
           <>
             {populatedDocs && populatedDocs?.length > 0 && populatedDocs[0].value ? (
@@ -466,7 +466,6 @@ export function UploadInput(props: UploadInputProps) {
             )}
           </>
         ) : null}
-
         {showDropzone ? (
           <Dropzone
             disabled={readOnly || !canCreate}
@@ -508,7 +507,6 @@ export function UploadInput(props: UploadInputProps) {
                 >
                   {t('fields:chooseFromExisting')}
                 </Button>
-
                 <CreateDocDrawer onSave={onDocCreate} />
                 <ListDrawer
                   allowCreate={canCreate}

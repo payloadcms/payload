@@ -15,8 +15,8 @@ import React from 'react'
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 import type { ViewFromConfig } from './getViewsFromConfig.js'
 
+import { DocumentDrawerHeader } from '../../elements/DocumentDrawerHeader/index.js'
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
-import { DrawerHeader } from '../../elements/DrawerHeader/index.js'
 import { renderDocumentSlots } from '../../utilities/renderDocumentSlots.js'
 import { NotFoundView } from '../NotFound/index.js'
 import { getDocumentData } from './getDocumentData.js'
@@ -33,6 +33,8 @@ export const renderDocument = async ({
   initialData,
   initPageResult,
   params,
+  redirectAfterDelete,
+  redirectAfterDuplicate,
   searchParams,
 }: AdminViewProps): Promise<{
   data: Data
@@ -252,9 +254,9 @@ export const renderDocument = async ({
         apiURL={apiURL}
         BeforeDocument={
           drawerSlug ? (
-            <DrawerHeader
+            <DocumentDrawerHeader
               drawerSlug={drawerSlug}
-              Header={null} // TDO
+              Header={null} // TODO
             />
           ) : undefined
         }
@@ -269,6 +271,8 @@ export const renderDocument = async ({
         initialState={formState}
         isEditing={isEditing}
         key={locale?.code}
+        redirectAfterDelete={redirectAfterDelete}
+        redirectAfterDuplicate={redirectAfterDuplicate}
       >
         {!RootViewOverride && !drawerSlug && (
           <DocumentHeader

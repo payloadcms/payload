@@ -2,27 +2,20 @@
 import type { ClientCollectionConfig, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { getTranslation } from '@payloadcms/translations'
+import { useServerFunctions } from '@payloadcms/ui'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 
 import type { ListDrawerProps } from './types.js'
 
-import { SelectMany } from '../../elements/SelectMany/index.js'
-import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
-import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { ListInfoProvider } from '../../providers/ListInfo/index.js'
-import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { LoadingOverlay } from '../Loading/index.js'
-import { Pill } from '../Pill/index.js'
-import { type Option, ReactSelect } from '../ReactSelect/index.js'
-import { TableColumnsProvider } from '../TableColumns/index.js'
+import { type Option } from '../ReactSelect/index.js'
 // import { ViewDescription } from '../ViewDescription/index.js'
 import { baseClass } from './index.js'
 
@@ -67,6 +60,10 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const [showLoadingOverlay, setShowLoadingOverlay] = useState<boolean>(true)
   const hasInitialised = useRef(false)
 
+  const { serverFunction } = useServerFunctions()
+  const [ListView, setListView] = useState<React.ReactNode>(undefined)
+  const [isLoading, setIsLoading] = useState(true)
+
   const params = {
     limit,
     page,
@@ -83,6 +80,8 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     },
     getEntityConfig,
   } = useConfig()
+
+  const isOpen = isModalOpen(drawerSlug)
 
   const enabledCollections = collections.filter(({ slug }) => {
     return collectionSlugs.includes(slug)
@@ -109,6 +108,30 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     }
   }, [selectedCollectionFromProps, collections, selectedOption])
 
+  useEffect(() => {
+    if (!ListView) {
+      const getListView = async () => {
+        try {
+          const { List: ViewResult } = (await serverFunction({
+            name: 'render-list',
+            args: {
+              drawerSlug,
+            },
+          })) as { docID: string; List: React.ReactNode }
+
+          setListView(ViewResult)
+          setIsLoading(false)
+        } catch (_err) {
+          if (isOpen) {
+            closeModal(drawerSlug)
+          }
+        }
+      }
+
+      void getListView()
+    }
+  }, [serverFunction, ListView, closeModal, drawerSlug, isOpen])
+
   const preferencesKey = selectedOption.value ? `${selectedOption.value}-list` : null
 
   // this is the 'create new' drawer
@@ -120,8 +143,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const collectionPermissions = permissions?.collections?.[selectedOption.value]
   const hasCreatePermission = collectionPermissions?.create?.permission && allowCreate
 
-  // If modal is open, get active page of upload gallery
-  const isOpen = isModalOpen(drawerSlug)
   const apiURL = isOpen ? `${serverURL}${api}/${selectedOption?.value}` : null
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0) // used to force a re-fetch even when apiURL is unchanged
   const [{ data, isError, isLoading: isLoadingList }, { setParams }] = usePayloadAPI(apiURL, {
@@ -329,97 +350,9 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     tableColumnCellProps.unshift(undefined)
   }
 
-  return (
-    <>
-      {showLoadingOverlay && <LoadingOverlay />}
-      <ListInfoProvider
-        beforeActions={
-          enableRowSelections
-            ? [<SelectMany key="select-many" onClick={onBulkSelect} />]
-            : undefined
-        }
-        collectionSlug={selectedOption.value}
-        disableBulkDelete
-        disableBulkEdit
-        hasCreatePermission={hasCreatePermission}
-        Header={
-          <header className={`${baseClass}__header`}>
-            <div className={`${baseClass}__header-wrap`}>
-              <div className={`${baseClass}__header-content`}>
-                <h2 className={`${baseClass}__header-text`}>
-                  {!customHeader
-                    ? getTranslation(selectedCollectionConfig?.labels?.plural, i18n)
-                    : customHeader}
-                </h2>
-                {hasCreatePermission && (
-                  <DocumentDrawerToggler className={`${baseClass}__create-new-button`}>
-                    <Pill>{t('general:createNew')}</Pill>
-                  </DocumentDrawerToggler>
-                )}
-              </div>
-              <button
-                aria-label={t('general:close')}
-                className={`${baseClass}__header-close`}
-                onClick={() => {
-                  closeModal(drawerSlug)
-                }}
-                type="button"
-              >
-                <XIcon />
-              </button>
-            </div>
-            {/* {(selectedCollectionConfig?.admin?.description ||
-              selectedCollectionConfig?.admin?.components?.Description) && (
-              <div className={`${baseClass}__sub-header`}>
-                <ViewDescription
-                  Description={selectedCollectionConfig.admin?.components?.Description}
-                  description={selectedCollectionConfig.admin?.description}
-                />
-              </div>
-            )} */}
-            {moreThanOneAvailableCollection && (
-              <div className={`${baseClass}__select-collection-wrap`}>
-                <FieldLabel label={t('upload:selectCollectionToBrowse')} />
-                <ReactSelect
-                  className={`${baseClass}__select-collection`}
-                  onChange={setSelectedOption as (option: Option<string>) => void}
-                  options={enabledCollections.map((coll) => ({
-                    label: coll.labels,
-                    value: coll.slug,
-                  }))}
-                  value={selectedOption}
-                />
-              </div>
-            )}
-          </header>
-        }
-        newDocumentURL={null}
-      >
-        <ListQueryProvider
-          data={data}
-          defaultLimit={limit || selectedCollectionConfig?.admin?.pagination?.defaultLimit}
-          defaultSort={sort}
-          handlePageChange={setPage}
-          handlePerPageChange={setLimit}
-          handleSearchChange={setSearch}
-          handleSortChange={setSort}
-          handleWhereChange={setWhere}
-          modifySearchParams={false}
-          // @ts-expect-error todo: fix types
-          params={params}
-          preferenceKey={preferencesKey}
-        >
-          <TableColumnsProvider
-            cellProps={tableColumnCellProps}
-            collectionSlug={selectedCollectionConfig.slug}
-            enableRowSelections={enableRowSelections}
-            preferenceKey={preferencesKey}
-          >
-            {/* <ListViewHandler preferenceKey={preferencesKey} /> */}
-            <DocumentDrawer onSave={onCreateNew} />
-          </TableColumnsProvider>
-        </ListQueryProvider>
-      </ListInfoProvider>
-    </>
-  )
+  if (isLoading) {
+    return <LoadingOverlay />
+  }
+
+  return ListView
 }

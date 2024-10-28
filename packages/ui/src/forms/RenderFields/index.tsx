@@ -81,6 +81,7 @@ export const RenderFields: React.FC<Props> = (props) => {
       >
         {fields.map((field, i) => {
           const fieldPermissions = 'name' in field ? permissions?.[field.name] : null
+
           const { path } = getFieldPaths({
             field,
             parentPath,

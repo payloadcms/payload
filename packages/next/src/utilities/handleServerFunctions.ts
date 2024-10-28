@@ -5,10 +5,12 @@ import { buildTableState } from '@payloadcms/ui/utilities/buildTableState'
 
 import { initReq } from './initReq.js'
 import { renderDocumentFn } from './renderDocument.js'
+import { renderListFn } from './renderList.js'
 
 const defaultFunctions = {
   'form-state': buildFormState as any as ServerFunction,
   'render-document': renderDocumentFn as any as ServerFunction,
+  'render-list': renderListFn as any as ServerFunction,
   'table-state': buildTableState as any as ServerFunction,
 }
 

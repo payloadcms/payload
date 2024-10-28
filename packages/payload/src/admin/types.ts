@@ -453,6 +453,7 @@ export type DocumentSlots = {
   PublishButton?: React.ReactNode
   SaveButton?: React.ReactNode
   SaveDraftButton?: React.ReactNode
+  Upload?: React.ReactNode
 }
 
 export type {

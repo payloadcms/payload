@@ -17,6 +17,7 @@ import { DocumentFields } from '../../elements/DocumentFields/index.js'
 // import { LoadingOverlay } from '../../elements/Loading/index.js'
 // import { RenderComponent } from '../../elements/RenderComponent/index.js'
 // import { DocumentLocked } from '../../../elements/DocumentLocked/index.js'
+import { Upload } from '../../elements/Upload/index.js'
 // import { Upload } from '../../elements/Upload/index.js'
 import { Form } from '../../forms/Form/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
@@ -46,6 +47,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   PublishButton,
   SaveButton,
   SaveDraftButton,
+  Upload: CustomUpload,
 }) => {
   const {
     id,
@@ -509,18 +511,13 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
                   )}
                   {upload && (
                     <React.Fragment>
-                      TODO: Upload
-                      {/* {collectionConfig?.admin?.components?.edit?.Upload ? (
-                        <RenderComponent
-                          mappedComponent={collectionConfig.admin.components.edit.Upload}
-                        />
-                      ) : (
+                      {CustomUpload || (
                         <Upload
                           collectionSlug={collectionConfig.slug}
                           initialState={initialState}
                           uploadConfig={upload}
                         />
-                      )} */}
+                      )}
                     </React.Fragment>
                   )}
                 </Fragment>
