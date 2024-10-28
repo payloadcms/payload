@@ -86,23 +86,15 @@ export default buildConfigWithDefaults({
           strict: true,
         },
         ProtectedCustomNestedView: {
-          Component: '/components/views/CustomViewNested/index.js#CustomNestedView',
+          Component: '/components/views/CustomProtectedView/index.js#CustomProtectedView',
           exact: true,
           path: protectedCustomNestedViewPath,
-          access: async ({ req }) => {
-            const settings = await req.payload.findGlobal({
-              slug: settingsGlobalSlug,
-            })
-
-            return Boolean(settings?.canAccessProtected)
-          },
         },
         PublicCustomView: {
           Component: '/components/views/CustomView/index.js#CustomView',
           exact: true,
           path: publicCustomViewPath,
           strict: true,
-          access: () => true,
         },
         CustomViewWithParam: {
           Component: '/components/views/CustomViewWithParam/index.js#CustomViewWithParam',
