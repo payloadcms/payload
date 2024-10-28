@@ -19,10 +19,6 @@ const baseClass = 'code-field'
 
 const CodeFieldComponent: CodeFieldClientComponent = (props) => {
   const {
-    AfterInput,
-    BeforeInput,
-    Description,
-    Error,
     field: {
       name,
       admin: {
@@ -37,7 +33,9 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
       localized,
       required,
     },
-    Label,
+    fieldState: {
+      customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    } = {},
     path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
     validate,

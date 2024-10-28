@@ -20,12 +20,12 @@ import { RenderFields } from '../../forms/RenderFields/index.js'
 
 const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
   const {
-    Description,
     field,
     field: {
       admin: { className, initCollapsed = false, readOnly: readOnlyFromAdmin } = {},
       fields,
     },
+    fieldState: { customComponents: { Description } = {} } = {},
     path,
     readOnly: readOnlyFromTopLevelProps,
     schemaPath,

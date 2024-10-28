@@ -27,13 +27,12 @@ const baseClass = 'group-field'
 
 export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const {
-    Description,
     field: {
       admin: { className, hideGutter, readOnly: readOnlyFromAdmin, style, width } = {},
       fields,
       label,
     },
-    Label,
+    fieldState: { customComponents: { Description, Label } = {} } = {},
     path,
     readOnly: readOnlyFromTopLevelProps,
   } = props

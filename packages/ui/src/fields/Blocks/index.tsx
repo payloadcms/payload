@@ -3,7 +3,6 @@ import type { BlocksFieldClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback } from 'react'
-import { v4 as uuid } from 'uuid'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -33,8 +32,6 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
-    Description,
-    Error,
     field: {
       name,
       admin: { className, isSortable = true, readOnly: readOnlyFromAdmin } = {},
@@ -45,7 +42,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       minRows: minRowsProp,
       required,
     },
-    Label,
+    fieldState: { customComponents: { Description, Error, Label } = {} } = {},
     path,
     readOnly: readOnlyFromTopLevelProps,
     schemaPath,
@@ -57,7 +54,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const minRows = (minRowsProp ?? required) ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const { addFieldRow, dispatchFields, getDataByPath, setModified } = useForm()
+  const { addFieldRow, dispatchFields, setModified } = useForm()
   const { code: locale } = useLocale()
   const {
     config: { localization },

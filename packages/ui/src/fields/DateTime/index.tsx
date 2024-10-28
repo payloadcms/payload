@@ -17,10 +17,6 @@ import { withCondition } from '../../forms/withCondition/index.js'
 
 const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
   const {
-    AfterInput,
-    BeforeInput,
-    Description,
-    Error,
     field: {
       name,
       admin: {
@@ -35,7 +31,9 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
       localized,
       required,
     },
-    Label,
+    fieldState: {
+      customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    } = {},
     path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
     validate,
