@@ -67,7 +67,7 @@ export const NotFoundPage = async ({
 
   const params = await paramsPromise
 
-  if (!initPageResult.req.user) {
+  if (!initPageResult.req.user || !initPageResult.permissions.canAccessAdmin) {
     return <NotFoundClient />
   }
 
