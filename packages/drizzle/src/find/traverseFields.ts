@@ -238,8 +238,8 @@ export const traverseFields = ({
           }
 
           const {
-            limit: limitArg = 10,
-            sort,
+            limit: limitArg = field.defaultLimit ?? 10,
+            sort = field.defaultSort,
             where,
           } = joinQuery[`${path.replaceAll('_', '.')}${field.name}`] || {}
           let limit = limitArg
@@ -285,7 +285,9 @@ export const traverseFields = ({
             let columnReferenceToCurrentID: string
 
             if (versions) {
-              columnReferenceToCurrentID = `${topLevelTableName.replace('_', '').replace(new RegExp(`${adapter.versionsSuffix}$`), '')}_id`
+              columnReferenceToCurrentID = `${topLevelTableName
+                .replace('_', '')
+                .replace(new RegExp(`${adapter.versionsSuffix}$`), '')}_id`
             } else {
               columnReferenceToCurrentID = `${topLevelTableName}_id`
             }

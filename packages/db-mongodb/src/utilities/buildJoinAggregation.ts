@@ -57,8 +57,8 @@ export const buildJoinAggregation = async ({
       const joinModel = adapter.collections[join.field.collection]
 
       const {
-        limit: limitJoin = 10,
-        sort: sortJoin,
+        limit: limitJoin = join.field.defaultLimit ?? 10,
+        sort: sortJoin = join.field.defaultSort || collectionConfig.defaultSort,
         where: whereJoin,
       } = joins?.[join.schemaPath] || {}
 
@@ -66,7 +66,7 @@ export const buildJoinAggregation = async ({
         config: adapter.payload.config,
         fields: adapter.payload.collections[slug].config.fields,
         locale,
-        sort: sortJoin || collectionConfig.defaultSort,
+        sort: sortJoin,
         timestamps: true,
       })
       const sortProperty = Object.keys(sort)[0]
