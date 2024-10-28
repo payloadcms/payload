@@ -53,6 +53,7 @@ if (args.o) {
 
 const port = process.env.PORT ? Number(process.env.PORT) : 3000
 
+// @ts-expect-error the same as in test/helpers/initPayloadE2E.ts
 const app = nextImport({
   dev: true,
   hostname: 'localhost',
