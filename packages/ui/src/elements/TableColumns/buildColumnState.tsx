@@ -15,7 +15,6 @@ import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
 import type { SortColumnProps } from '../SortColumn/index.js'
 import type { Column } from '../Table/index.js'
 
-import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { flattenFieldMap } from '../../utilities/flattenFieldMap.js'
 import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import { SelectAll } from '../SelectAll/index.js'
@@ -126,15 +125,7 @@ export const buildColumnState = (args: Args): Column[] => {
     //   ? field.admin.components.Label
     //   : undefined
 
-    const Label = CustomLabelToRender ? (
-      <CustomLabelToRender field={field} />
-    ) : (
-      <FieldLabel
-        hideLocale
-        label={'label' in field ? (field.label as StaticLabel) : undefined}
-        unstyled
-      />
-    )
+    const CustomLabel = CustomLabelToRender ? <CustomLabelToRender field={field} /> : undefined
 
     const fieldAffectsDataSubFields =
       field &&
@@ -144,7 +135,7 @@ export const buildColumnState = (args: Args): Column[] => {
     const Heading = (
       <SortColumn
         disable={fieldAffectsDataSubFields || fieldIsPresentationalOnly(field) || undefined}
-        Label={Label}
+        Label={CustomLabel}
         label={'label' in field ? (field.label as StaticLabel) : undefined}
         name={'name' in field ? field.name : undefined}
         {...(sortColumnProps || {})}
@@ -170,7 +161,7 @@ export const buildColumnState = (args: Args): Column[] => {
         active,
         field,
         Heading,
-        Label,
+        Label: CustomLabel,
         renderedCells: active
           ? docs.map((doc, i) => {
               const cellClientProps: DefaultCellComponentProps = {

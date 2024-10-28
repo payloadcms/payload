@@ -6,6 +6,7 @@ import type {
   FilterOptionsResult,
   JsonObject,
   PaginatedDocs,
+  StaticDescription,
   StaticLabel,
   UploadFieldClient,
   UploadField as UploadFieldType,
@@ -25,6 +26,8 @@ import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { Dropzone } from '../../elements/Dropzone/index.js'
 import { useListDrawer } from '../../elements/ListDrawer/index.js'
 import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -49,6 +52,7 @@ export type UploadInputProps = {
   readonly collection?: ClientCollectionConfig
   readonly customUploadActions?: React.ReactNode[]
   readonly Description?: React.ReactNode
+  readonly description?: StaticDescription
   readonly Error?: React.ReactNode
   readonly filterOptions?: FilterOptionsResult
   readonly hasMany?: boolean
@@ -77,6 +81,7 @@ export function UploadInput(props: UploadInputProps) {
     BeforeInput,
     className,
     Description,
+    description,
     Error,
     filterOptions: filterOptionsFromProps,
     hasMany,
@@ -429,8 +434,10 @@ export function UploadInput(props: UploadInputProps) {
         width,
       }}
     >
-      {Label || <FieldLabel label={label} localized={localized} required={required} />}
-      <div className={`${baseClass}__wrap`}>{Error}</div>
+      {Label ?? <FieldLabel label={label} localized={localized} path={path} required={required} />}
+      <div className={`${baseClass}__wrap`}>
+        {Error ?? <FieldError path={path} showError={showError} />}
+      </div>
       {BeforeInput}
       <div className={`${baseClass}__dropzoneAndUpload`}>
         {hasMany && Array.isArray(value) && value.length > 0 ? (
@@ -540,7 +547,8 @@ export function UploadInput(props: UploadInputProps) {
           </>
         )}
       </div>
-      {Description}
+      {AfterInput}
+      {Description ?? <FieldDescription description={description} path={path} />}
     </div>
   )
 }

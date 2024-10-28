@@ -76,7 +76,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
         </span>
         {AfterInput}
       </div>
-      {Label || <FieldLabel label={label} localized={localized} required={required} />}
+      {Label ?? <FieldLabel label={label} localized={localized} required={required} />}
     </div>
   )
 }

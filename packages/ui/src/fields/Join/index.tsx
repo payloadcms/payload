@@ -8,12 +8,13 @@ import { RelationshipTable } from '../../elements/RelationshipTable/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../index.js'
 
 const JoinFieldComponent: JoinFieldClientComponent = (props) => {
   const {
     field,
-    field: { name, _schemaPath, collection, on },
+    field: { name, _schemaPath, collection, label, localized, on, required },
     fieldState: {
       customComponents: { AfterInput, BeforeInput, Label },
     },
@@ -50,7 +51,13 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
             value: docID,
           },
         }}
-        Label={<h4 style={{ margin: 0 }}>{Label}</h4>}
+        Label={
+          <h4 style={{ margin: 0 }}>
+            {Label ?? (
+              <FieldLabel label={label} localized={localized} path={path} required={required} />
+            )}
+          </h4>
+        }
         relationTo={collection}
       />
       {AfterInput}

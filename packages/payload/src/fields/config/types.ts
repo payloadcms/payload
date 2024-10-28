@@ -34,6 +34,8 @@ import type {
   CodeFieldLabelClientComponent,
   CodeFieldLabelServerComponent,
   CollapsibleFieldClientProps,
+  CollapsibleFieldLabelClientComponent,
+  CollapsibleFieldLabelServerComponent,
   ConditionalDateProps,
   DateFieldClientProps,
   DateFieldErrorClientComponent,
@@ -656,12 +658,23 @@ export type CollapsibleField = {
 } & (
   | {
       admin: {
+        components: {
+          Label?: CustomComponent<
+            CollapsibleFieldLabelClientComponent | CollapsibleFieldLabelServerComponent
+          >
+          RowLabel: RowLabelComponent
+        } & Admin['components']
         initCollapsed?: boolean
       } & Admin
       label?: Required<FieldBase['label']>
     }
   | {
       admin?: {
+        components?: {
+          Label?: CustomComponent<
+            CollapsibleFieldLabelClientComponent | CollapsibleFieldLabelServerComponent
+          >
+        } & Admin['components']
         initCollapsed?: boolean
       } & Admin
       label: Required<FieldBase['label']>
@@ -670,11 +683,11 @@ export type CollapsibleField = {
   Omit<FieldBase, 'label' | 'name' | 'validate' | 'virtual'>
 
 export type CollapsibleFieldClient = {
-  admin: {
+  admin?: {
     initCollapsed?: boolean
-  } & Admin
+  } & AdminClient
   fields: ClientField[]
-  label?: Required<FieldBase['label']>
+  label: StaticLabel
 } & Omit<FieldBaseClient, 'label' | 'name' | 'validate'> &
   Pick<CollapsibleField, 'type'>
 

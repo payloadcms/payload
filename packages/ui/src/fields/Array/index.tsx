@@ -13,6 +13,9 @@ import { Button } from '../../elements/Button/index.js'
 import { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
@@ -33,8 +36,9 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const {
     field: {
       name,
-      admin: { className, isSortable = true, readOnly: readOnlyFromAdmin } = {},
+      admin: { className, description, isSortable = true } = {},
       fields,
+      label,
       localized,
       maxRows,
       minRows: minRowsProp,
@@ -43,18 +47,16 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     fieldState: { customComponents: { Description, Error, Label } = {} } = {},
     forceRender = false,
     path: pathFromProps,
-    readOnly: readOnlyFromTopLevelProps,
+    readOnly,
     rowLabels,
     schemaPath,
     validate,
   } = props
 
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
-
   const minRows = (minRowsProp ?? required) ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const { addFieldRow, dispatchFields, getDataByPath, setModified } = useForm()
+  const { addFieldRow, dispatchFields, setModified } = useForm()
   const submitted = useFormSubmitted()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
@@ -109,8 +111,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const {
     errorPaths,
-    formInitializing,
-    formProcessing,
     rows: rowsData = [],
     showError,
     valid,
@@ -120,8 +120,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     path,
     validate: memoizedValidate,
   })
-
-  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const addRow = useCallback(
     async (rowIndex: number): Promise<void> => {
@@ -200,7 +198,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const fieldErrorCount = errorPaths.length
   const fieldHasErrors = submitted && errorPaths.length > 0
 
-  const showRequired = disabled && rowsData.length === 0
+  const showRequired = readOnly && rowsData.length === 0
   const showMinRows = rowsData.length < minRows || (required && rowsData.length === 0)
 
   return (
@@ -215,11 +213,15 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
     >
-      {showError && Error}
+      {showError && (Error ?? <FieldError path={path} showError={showError} />)}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__header-content`}>
-            <h3 className={`${baseClass}__title`}>{Label}</h3>
+            <h3 className={`${baseClass}__title`}>
+              {Label ?? (
+                <FieldLabel label={label} localized={localized} path={path} required={required} />
+              )}
+            </h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
             )}
@@ -247,7 +249,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
             </ul>
           )}
         </div>
-        {Description}
+        {Description ?? <FieldDescription description={description} path={path} />}
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rowsData?.length > 0 || (!valid && (showRequired || showMinRows))) && (
@@ -266,7 +268,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
             ).length
 
             return (
-              <DraggableSortableItem disabled={disabled || !isSortable} id={rowID} key={rowID}>
+              <DraggableSortableItem disabled={readOnly || !isSortable} id={rowID} key={rowID}>
                 {(draggableSortableItemProps) => (
                   <ArrayRow
                     {...draggableSortableItemProps}
@@ -280,7 +282,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     labels={labels}
                     moveRow={moveRow}
                     path={path}
-                    readOnly={disabled}
+                    readOnly={readOnly}
                     removeRow={removeRow}
                     row={rowData}
                     rowCount={rowsData?.length}
@@ -313,7 +315,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!disabled && !hasMaxRows && (
+      {!readOnly && !hasMaxRows && (
         <Button
           buttonStyle="icon-label"
           className={`${baseClass}__add-row`}

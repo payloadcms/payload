@@ -14,8 +14,9 @@ const baseClass = 'row'
 
 const RowFieldComponent: RowFieldClientComponent = (props) => {
   const {
-    field: { admin: { className, readOnly } = {}, fields },
+    field: { admin: { className } = {}, fields },
     forceRender = false,
+    readOnly,
   } = props
 
   const { docPermissions } = useDocumentInfo()

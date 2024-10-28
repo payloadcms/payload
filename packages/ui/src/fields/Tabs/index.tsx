@@ -23,15 +23,13 @@ export { TabsProvider }
 
 const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const {
-    field: { admin: { className, readOnly: readOnlyFromAdmin } = {}, tabs = [] },
+    field: { admin: { className } = {}, tabs = [] },
     fieldState: { customComponents: { AfterInput, BeforeInput, Description } = {} } = {},
     forceRender = false,
     indexPath,
     path,
-    readOnly: readOnlyFromTopLevelProps,
+    readOnly,
   } = props
-
-  const readOnly = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { getPreference, setPreference } = usePreferences()
   const { docPermissions, preferencesKey } = useDocumentInfo()

@@ -4,6 +4,9 @@ import type { PointFieldClientComponent, PointFieldValidation } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -12,13 +15,11 @@ import './index.scss'
 
 const baseClass = 'point'
 
-import { FieldLabel } from '../../fields/FieldLabel/index.js'
-
 export const PointFieldComponent: PointFieldClientComponent = (props) => {
   const {
     field: {
       name,
-      admin: { className, placeholder, readOnly: readOnlyFromAdmin, step, style, width } = {},
+      admin: { className, description, placeholder, step, style, width } = {},
       label,
       localized,
       required,
@@ -27,11 +28,9 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
       customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     } = {},
     path,
-    readOnly: readOnlyFromTopLevelProps,
+    readOnly,
     validate,
   } = props
-
-  const readOnly = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n, t } = useTranslation()
 
@@ -66,15 +65,12 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
     [setValue, value],
   )
 
-  // const getCoordinateFieldLabel = (type: 'latitude' | 'longitude') => {
-  //   const suffix = type === 'longitude' ? t('fields:longitude') : t('fields:latitude')
-  //   const fieldLabel = label ? getTranslation(label, i18n) : ''
+  const getCoordinateFieldLabel = (type: 'latitude' | 'longitude') => {
+    const suffix = type === 'longitude' ? t('fields:longitude') : t('fields:latitude')
+    const fieldLabel = label ? getTranslation(label, i18n) : ''
 
-  //   return {
-  //     ...labelProps,
-  //     label: `${fieldLabel}${fieldLabel ? ' - ' : ''}${suffix}`,
-  //   }
-  // }
+    return `${fieldLabel}${fieldLabel ? ' - ' : ''}${suffix}`
+  }
 
   return (
     <div
@@ -94,7 +90,14 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
     >
       <ul className={`${baseClass}__wrap`}>
         <li>
-          {Label || <FieldLabel label={label} localized={localized} required={required} />}
+          {Label ?? (
+            <FieldLabel
+              label={getCoordinateFieldLabel('longitude')}
+              localized={localized}
+              path={path}
+              required={required}
+            />
+          )}
           <div className="input-wrapper">
             {BeforeInput}
             {/* disable eslint rule because the label is dynamic */}
@@ -113,9 +116,16 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
           </div>
         </li>
         <li>
-          {Label}
+          {Label ?? (
+            <FieldLabel
+              label={getCoordinateFieldLabel('latitude')}
+              localized={localized}
+              path={path}
+              required={required}
+            />
+          )}
           <div className="input-wrapper">
-            {Error}
+            {Error ?? <FieldError path={path} showError={showError} />}
             {BeforeInput}
             {/* disable eslint rule because the label is dynamic */}
             {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
@@ -133,7 +143,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
           </div>
         </li>
       </ul>
-      {Description}
+      {Description ?? <FieldDescription description={description} path={path} />}
     </div>
   )
 }

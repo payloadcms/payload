@@ -20,7 +20,7 @@ export { TextareaInput, TextAreaInputProps }
 const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
   const {
     field: {
-      admin: { className, placeholder, readOnly: readOnlyFromAdmin, rows, rtl, style, width } = {},
+      admin: { className, description, placeholder, rows, rtl, style, width } = {},
       label,
       localized,
       maxLength,
@@ -31,11 +31,9 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
       customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     } = {},
     path,
-    readOnly: readOnlyFromTopLevelProps,
+    readOnly,
     validate,
   } = props
-
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n } = useTranslation()
 
@@ -61,12 +59,10 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
     [validate, required, maxLength, minLength],
   )
 
-  const { formInitializing, formProcessing, setValue, showError, value } = useField<string>({
+  const { setValue, showError, value } = useField<string>({
     path,
     validate: memoizedValidate,
   })
-
-  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   return (
     <TextareaInput
@@ -74,6 +70,7 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
       BeforeInput={BeforeInput}
       className={className}
       Description={Description}
+      description={description}
       Error={Error}
       Label={Label}
       label={label}
@@ -83,7 +80,7 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
       }}
       path={path}
       placeholder={getTranslation(placeholder, i18n)}
-      readOnly={disabled}
+      readOnly={readOnly}
       required={required}
       rows={rows}
       rtl={isRTL}

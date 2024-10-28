@@ -7,11 +7,9 @@ import React from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import {
-  useFormInitializing,
-  useFormProcessing,
-  useFormSubmitted,
-} from '../../forms/Form/context.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
+import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
@@ -27,17 +25,11 @@ const baseClass = 'group-field'
 
 export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const {
-    field: {
-      admin: { className, hideGutter, readOnly: readOnlyFromAdmin, style, width } = {},
-      fields,
-      label,
-    },
+    field: { admin: { className, description, hideGutter, style, width } = {}, fields, label },
     fieldState: { customComponents: { Description, Label } = {} } = {},
     path,
-    readOnly: readOnlyFromTopLevelProps,
+    readOnly,
   } = props
-
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n } = useTranslation()
   const { isWithinCollapsible } = useCollapsible()
@@ -45,13 +37,10 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const isWithinRow = useRow()
   const isWithinTab = useTabs()
   const { errorPaths } = useField({ path })
-  const formInitializing = useFormInitializing()
-  const formProcessing = useFormProcessing()
   const submitted = useFormSubmitted()
   const { docPermissions } = useDocumentInfo()
   const errorCount = errorPaths.length
   const fieldHasErrors = submitted && errorCount > 0
-  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const isTopLevel = !(isWithinCollapsible || isWithinGroup || isWithinRow)
 
@@ -82,12 +71,17 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
           <div className={`${baseClass}__header`}>
             {Boolean(Label || Description || label) && (
               <header>
-                {Label ? (
-                  Label
-                ) : label ? (
-                  <h3 className={`${baseClass}__title`}>{getTranslation(label, i18n)}</h3>
-                ) : null}
-                {Description}
+                {Label ?? (
+                  <h3 className={`${baseClass}__title`}>
+                    <FieldLabel
+                      label={getTranslation(label, i18n)}
+                      localized={false}
+                      path={path}
+                      required={false}
+                    />
+                  </h3>
+                )}
+                {Description ?? <FieldDescription description={description} path={path} />}
               </header>
             )}
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
@@ -96,7 +90,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
             fields={fields}
             parentPath={path.split('.')}
             permissions={docPermissions.fields}
-            readOnly={readOnlyFromProps}
+            readOnly={readOnly}
           />
         </div>
       </GroupProvider>

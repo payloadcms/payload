@@ -5,6 +5,9 @@ import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import { Collapsible as CollapsibleElement } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { RenderFields } from '../../forms/RenderFields/index.js'
+import { RowLabel } from '../../forms/RowLabel/index.js'
 import { WatchChildErrors } from '../../forms/WatchChildErrors/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -15,26 +18,15 @@ import './index.scss'
 
 const baseClass = 'collapsible-field'
 
-import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
-import { RenderFields } from '../../forms/RenderFields/index.js'
-
 const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
   const {
     field,
-    field: {
-      admin: { className, initCollapsed = false, readOnly: readOnlyFromAdmin } = {},
-      fields,
-    },
-    fieldState: { customComponents: { Description } = {} } = {},
+    field: { admin: { className, description, initCollapsed = false } = {}, fields, label } = {},
+    fieldState: { customComponents: { Description, Label } = {} } = {},
     path,
-    readOnly: readOnlyFromTopLevelProps,
+    readOnly,
     schemaPath,
   } = props
-
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
-
-  const formInitializing = useFormInitializing()
-  const formProcessing = useFormProcessing()
 
   const { i18n } = useTranslation()
   const { getPreference, setPreference } = usePreferences()
@@ -101,8 +93,6 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
     return null
   }
 
-  const disabled = readOnlyFromProps || formProcessing || formInitializing
-
   const style: AdminClient['style'] = {
     ...field.admin?.style,
     '--field-width': field.admin.width,
@@ -128,7 +118,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
           collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
           header={
             <div className={`${baseClass}__row-label-wrap`}>
-              {/* {RowLabel} */}
+              {Label ?? <RowLabel rowLabel={label} />}
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
           }
@@ -139,10 +129,10 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
             fields={fields}
             parentPath={path.split('.')}
             permissions={docPermissions.fields}
-            readOnly={readOnlyFromProps}
+            readOnly={readOnly}
           />
         </CollapsibleElement>
-        {Description}
+        {Description ?? <FieldDescription description={description} path={path} />}
       </div>
     </Fragment>
   )

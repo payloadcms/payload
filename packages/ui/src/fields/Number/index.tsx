@@ -11,6 +11,8 @@ import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
@@ -21,8 +23,8 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
       name,
       admin: {
         className,
+        description,
         placeholder,
-        readOnly: readOnlyFromAdmin,
         step = 1,
         style,
         width,
@@ -40,11 +42,9 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
     } = {},
     onChange: onChangeFromProps,
     path: pathFromProps,
-    readOnly: readOnlyFromTopLevelProps,
+    readOnly,
     validate,
   } = props
-
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n, t } = useTranslation()
 
@@ -59,14 +59,10 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
 
   const path = pathFromProps ?? name
 
-  const { formInitializing, formProcessing, setValue, showError, value } = useField<
-    number | number[]
-  >({
+  const { setValue, showError, value } = useField<number | number[]>({
     path,
     validate: memoizedValidate,
   })
-
-  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const handleChange = useCallback(
     (e) => {
@@ -92,7 +88,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
 
   const handleHasManyChange = useCallback(
     (selectedOption) => {
-      if (!disabled) {
+      if (!readOnly) {
         let newValue
         if (!selectedOption) {
           newValue = []
@@ -105,7 +101,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
         setValue(newValue)
       }
     },
-    [disabled, setValue],
+    [readOnly, setValue],
   )
 
   // useEffect update valueToRender:
@@ -133,7 +129,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
         'number',
         className,
         showError && 'error',
-        disabled && 'read-only',
+        readOnly && 'read-only',
         hasMany && 'has-many',
       ]
         .filter(Boolean)
@@ -143,13 +139,13 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Label || <FieldLabel label={label} localized={localized} required={required} />}
+      {Label ?? <FieldLabel label={label} localized={localized} path={path} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
-        {Error}
+        {Error ?? <FieldError path={path} showError={showError} />}
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
-            disabled={disabled}
+            disabled={readOnly}
             filterOption={(_, rawInput) => {
               const isOverHasMany = Array.isArray(value) && value.length >= maxRows
               return isNumber(rawInput) && !isOverHasMany
@@ -176,7 +172,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
           <div>
             {BeforeInput}
             <input
-              disabled={disabled}
+              disabled={readOnly}
               id={`field-${path.replace(/\./g, '__')}`}
               max={max}
               min={min}
@@ -194,7 +190,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
             {AfterInput}
           </div>
         )}
-        {Description}
+        {Description ?? <FieldDescription description={description} path={path} />}
       </div>
     </div>
   )

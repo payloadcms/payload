@@ -4,6 +4,8 @@ import type { CodeFieldClientComponent } from 'payload'
 import React, { useCallback } from 'react'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
@@ -20,12 +22,11 @@ const baseClass = 'code-field'
 const CodeFieldComponent: CodeFieldClientComponent = (props) => {
   const {
     field: {
-      name,
       admin: {
         className,
+        description,
         editorOptions = {},
         language = 'javascript',
-        readOnly: readOnlyFromAdmin,
         style,
         width,
       } = {},
@@ -36,12 +37,10 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
     fieldState: {
       customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     } = {},
-    path: pathFromProps,
-    readOnly: readOnlyFromTopLevelProps,
+    path,
+    readOnly,
     validate,
   } = props
-
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -52,14 +51,10 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
     [validate, required],
   )
 
-  const path = pathFromProps ?? name
-
-  const { formInitializing, formProcessing, setValue, showError, value } = useField({
+  const { setValue, showError, value } = useField({
     path,
     validate: memoizedValidate,
   })
-
-  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   return (
     <div
@@ -68,7 +63,7 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
         baseClass,
         className,
         showError && 'error',
-        disabled && 'read-only',
+        readOnly && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -77,20 +72,20 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Label || <FieldLabel label={label} localized={localized} required={required} />}
+      {Label ?? <FieldLabel label={label} localized={localized} path={path} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
-        {Error}
+        {Error ?? <FieldError path={path} showError={showError} />}
         {BeforeInput}
         <CodeEditor
           defaultLanguage={prismToMonacoLanguageMap[language] || language}
-          onChange={disabled ? () => null : (val) => setValue(val)}
+          onChange={readOnly ? () => null : (val) => setValue(val)}
           options={editorOptions}
-          readOnly={disabled}
+          readOnly={readOnly}
           value={(value as string) || ''}
         />
         {AfterInput}
       </div>
-      {Description}
+      {Description ?? <FieldDescription description={description} path={path} />}
     </div>
   )
 }

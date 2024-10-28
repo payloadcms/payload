@@ -9,6 +9,8 @@ import React, { useCallback } from 'react'
 
 import type { CheckboxInputProps } from './Input.js'
 
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
@@ -31,7 +33,7 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
       name,
       admin: {
         className,
-        readOnly: readOnlyFromAdmin,
+        description,
         style,
         width,
       } = {} as CheckboxFieldClientProps['field']['admin'],
@@ -42,10 +44,9 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
     onChange: onChangeFromProps,
     partialChecked,
     path: pathFromProps,
-    readOnly: readOnlyFromTopLevelProps,
+    readOnly,
     validate,
   } = props
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { uuid } = useForm()
 
@@ -62,22 +63,20 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
 
   const path = pathFromProps ?? name
 
-  const { formInitializing, formProcessing, setValue, showError, value } = useField({
+  const { setValue, showError, value } = useField({
     disableFormData,
     path,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || formProcessing || formInitializing
-
   const onToggle = useCallback(() => {
-    if (!disabled) {
+    if (!readOnly) {
       setValue(!value)
       if (typeof onChangeFromProps === 'function') {
         onChangeFromProps(!value)
       }
     }
-  }, [onChangeFromProps, disabled, setValue, value])
+  }, [onChangeFromProps, readOnly, setValue, value])
 
   const checked = checkedFromProps || Boolean(value)
 
@@ -91,7 +90,7 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
         showError && 'error',
         className,
         value && `${baseClass}--checked`,
-        disabled && `${baseClass}--read-only`,
+        readOnly && `${baseClass}--read-only`,
       ]
         .filter(Boolean)
         .join(' ')}
@@ -100,7 +99,7 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Error}
+      {Error ?? <FieldError path={path} showError={showError} />}
       <CheckboxInput
         AfterInput={AfterInput}
         BeforeInput={BeforeInput}
@@ -112,10 +111,10 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
         name={path}
         onToggle={onToggle}
         partialChecked={partialChecked}
-        readOnly={disabled}
+        readOnly={readOnly}
         required={required}
       />
-      {Description}
+      {Description ?? <FieldDescription description={description} path={path} />}
     </div>
   )
 }

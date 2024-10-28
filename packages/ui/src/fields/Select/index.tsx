@@ -33,9 +33,9 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       name,
       admin: {
         className,
+        description,
         isClearable = true,
         isSortable = true,
-        readOnly: readOnlyFromAdmin,
         style,
         width,
       } = {} as SelectFieldClientProps['field']['admin'],
@@ -50,11 +50,9 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
     } = {},
     onChange: onChangeFromProps,
     path: pathFromProps,
-    readOnly: readOnlyFromTopLevelProps,
+    readOnly,
     validate,
   } = props
-
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const options = React.useMemo(() => formatOptions(optionsFromProps), [optionsFromProps])
 
@@ -69,16 +67,14 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
 
   const path = pathFromProps ?? name
 
-  const { formInitializing, formProcessing, setValue, showError, value } = useField({
+  const { setValue, showError, value } = useField({
     path,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || formProcessing || formInitializing
-
   const onChange: ReactSelectAdapterProps['onChange'] = useCallback(
     (selectedOption: OptionObject | OptionObject[]) => {
-      if (!disabled) {
+      if (!readOnly) {
         let newValue: string | string[] = null
         if (selectedOption && hasMany) {
           if (Array.isArray(selectedOption)) {
@@ -97,7 +93,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
         setValue(newValue)
       }
     },
-    [disabled, hasMany, setValue, onChangeFromProps],
+    [readOnly, hasMany, setValue, onChangeFromProps],
   )
 
   return (
@@ -106,6 +102,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       BeforeInput={BeforeInput}
       className={className}
       Description={Description}
+      description={description}
       Error={Error}
       hasMany={hasMany}
       isClearable={isClearable}
@@ -117,7 +114,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       onChange={onChange}
       options={options}
       path={path}
-      readOnly={disabled}
+      readOnly={readOnly}
       showError={showError}
       style={style}
       value={value as string | string[]}

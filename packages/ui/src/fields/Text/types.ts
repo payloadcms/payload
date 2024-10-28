@@ -1,4 +1,4 @@
-import type { StaticLabel } from 'payload'
+import type { StaticDescription, StaticLabel } from 'payload'
 import type { ChangeEvent } from 'react'
 import type React from 'react'
 
@@ -19,6 +19,7 @@ export type TextInputProps = {
   readonly BeforeInput?: React.ReactNode
   readonly className?: string
   readonly Description?: React.ReactNode
+  readonly description?: StaticDescription
   readonly Error?: React.ReactNode
   readonly inputRef?: React.RefObject<HTMLInputElement>
   readonly Label?: React.ReactNode

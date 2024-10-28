@@ -5,28 +5,22 @@ import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
 import { DatePickerField } from '../../elements/DatePicker/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
+import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 const baseClass = 'date-time-field'
 
-import { FieldLabel } from '../../fields/FieldLabel/index.js'
-import { withCondition } from '../../forms/withCondition/index.js'
-
 const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
   const {
     field: {
       name,
-      admin: {
-        className,
-        date: datePickerProps,
-        placeholder,
-        readOnly: readOnlyFromAdmin,
-        style,
-        width,
-      } = {},
+      admin: { className, date: datePickerProps, description, placeholder, style, width } = {},
       label,
       localized,
       required,
@@ -35,11 +29,9 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
       customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     } = {},
     path: pathFromProps,
-    readOnly: readOnlyFromTopLevelProps,
+    readOnly,
     validate,
   } = props
-
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n } = useTranslation()
 
@@ -54,12 +46,10 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
 
   const path = pathFromProps ?? name
 
-  const { formInitializing, formProcessing, setValue, showError, value } = useField<Date>({
+  const { setValue, showError, value } = useField<Date>({
     path,
     validate: memoizedValidate,
   })
-
-  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   return (
     <div
@@ -68,7 +58,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
         baseClass,
         className,
         showError && `${baseClass}--has-error`,
-        disabled && 'read-only',
+        readOnly && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -77,24 +67,24 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Label || <FieldLabel label={label} localized={localized} required={required} />}
+      {Label ?? <FieldLabel label={label} localized={localized} required={required} />}
       <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
-        {Error}
+        {Error ?? <FieldError path={path} showError={showError} />}
         {BeforeInput}
         <DatePickerField
           {...datePickerProps}
           onChange={(incomingDate) => {
-            if (!disabled) {
+            if (!readOnly) {
               setValue(incomingDate?.toISOString() || null)
             }
           }}
           placeholder={getTranslation(placeholder, i18n)}
-          readOnly={disabled}
+          readOnly={readOnly}
           value={value}
         />
         {AfterInput}
       </div>
-      {Description}
+      {Description ?? <FieldDescription description={description} path={path} />}
     </div>
   )
 }

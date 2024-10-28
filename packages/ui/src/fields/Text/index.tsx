@@ -19,7 +19,7 @@ export { TextInput, TextInputProps }
 const TextFieldComponent: TextFieldClientComponent = (props) => {
   const {
     field: {
-      admin: { className, placeholder, readOnly: readOnlyFromAdmin, rtl, style, width } = {},
+      admin: { className, description, placeholder, rtl, style, width } = {},
       hasMany,
       label,
       localized,
@@ -34,11 +34,9 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
     } = {},
     inputRef,
     path,
-    readOnly: readOnlyFromTopLevelProps,
+    readOnly,
     validate,
   } = props
-
-  const readOnly = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const locale = useLocale()
 
@@ -55,12 +53,10 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
     [validate, minLength, maxLength, required],
   )
 
-  const { formInitializing, formProcessing, setValue, showError, value } = useField({
+  const { setValue, showError, value } = useField({
     path,
     validate: memoizedValidate,
   })
-
-  const disabled = readOnly || formProcessing || formInitializing
 
   const renderRTL = isFieldRTL({
     fieldLocalized: localized,
@@ -75,7 +71,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
 
   const handleHasManyChange = useCallback(
     (selectedOption) => {
-      if (!disabled) {
+      if (!readOnly) {
         let newValue
         if (!selectedOption) {
           newValue = []
@@ -88,7 +84,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
         setValue(newValue)
       }
     },
-    [disabled, setValue],
+    [readOnly, setValue],
   )
 
   // useEffect update valueToRender:
@@ -116,6 +112,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
       BeforeInput={BeforeInput}
       className={className}
       Description={Description}
+      description={description}
       Error={Error}
       hasMany={hasMany}
       inputRef={inputRef}
@@ -133,7 +130,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
       }
       path={path}
       placeholder={placeholder}
-      readOnly={disabled}
+      readOnly={readOnly}
       required={required}
       rtl={renderRTL}
       showError={showError}

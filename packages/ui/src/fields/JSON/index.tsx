@@ -6,6 +6,9 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
@@ -15,19 +18,19 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
   const {
     field: {
       name,
-      admin: { className, editorOptions, readOnly: readOnlyFromAdmin, style, width } = {},
+      admin: { className, description, editorOptions, style, width } = {},
       jsonSchema,
+      label,
+      localized,
       required,
     },
     fieldState: {
       customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     } = {},
     path,
-    readOnly: readOnlyFromTopLevelProps,
+    readOnly,
     validate,
   } = props
-
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const [stringValue, setStringValue] = useState<string>()
   const [jsonError, setJsonError] = useState<string>()
@@ -42,13 +45,10 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     [validate, required, jsonError],
   )
 
-  const { formInitializing, formProcessing, initialValue, setValue, showError, value } =
-    useField<string>({
-      path: path ?? name,
-      validate: memoizedValidate,
-    })
-
-  const disabled = readOnlyFromProps || formProcessing || formInitializing
+  const { initialValue, setValue, showError, value } = useField<string>({
+    path: path ?? name,
+    validate: memoizedValidate,
+  })
 
   const handleMount = useCallback(
     (editor, monaco) => {
@@ -73,7 +73,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
 
   const handleChange = useCallback(
     (val) => {
-      if (disabled) {
+      if (readOnly) {
         return
       }
       setStringValue(val)
@@ -86,7 +86,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         setJsonError(e)
       }
     },
-    [disabled, setValue, setStringValue],
+    [readOnly, setValue, setStringValue],
   )
 
   useEffect(() => {
@@ -108,7 +108,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         baseClass,
         className,
         showError && 'error',
-        disabled && 'read-only',
+        readOnly && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -117,21 +117,21 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Label}
+      {Label ?? <FieldLabel label={label} localized={localized} path={path} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
-        {Error}
+        {Error ?? <FieldError message={jsonError} path={path} showError={showError} />}
         {BeforeInput}
         <CodeEditor
           defaultLanguage="json"
           onChange={handleChange}
           onMount={handleMount}
           options={editorOptions}
-          readOnly={disabled}
+          readOnly={readOnly}
           value={stringValue}
         />
         {AfterInput}
       </div>
-      {Description}
+      {Description ?? <FieldDescription description={description} path={path} />}
     </div>
   )
 }

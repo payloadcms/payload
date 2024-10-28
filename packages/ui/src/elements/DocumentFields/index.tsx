@@ -4,6 +4,7 @@ import type { ClientField, Description, DocumentPermissions } from 'payload'
 import { fieldIsSidebar } from 'payload/shared'
 import React from 'react'
 
+import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { Gutter } from '../Gutter/index.js'
 import { RenderIfInViewport } from '../RenderIfInViewport/index.js'
@@ -30,8 +31,11 @@ export const DocumentFields: React.FC<Args> = ({
   docPermissions,
   fields,
   forceSidebarWrap,
-  readOnly,
+  readOnly: readOnlyProp,
 }) => {
+  const formInitializing = useFormInitializing()
+  const formProcessing = useFormProcessing()
+
   if (!fields) {
     return 'No fields to render'
   }
@@ -52,6 +56,8 @@ export const DocumentFields: React.FC<Args> = ({
   )
 
   const hasSidebarFields = sidebarFields && sidebarFields.length > 0
+
+  const readOnly = readOnlyProp || formInitializing || formProcessing
 
   return (
     <div

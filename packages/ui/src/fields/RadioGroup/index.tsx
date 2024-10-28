@@ -4,6 +4,9 @@ import type { RadioFieldClientComponent, RadioFieldClientProps } from 'payload'
 import { optionIsObject } from 'payload/shared'
 import React, { useCallback } from 'react'
 
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
@@ -13,8 +16,6 @@ import { Radio } from './Radio/index.js'
 
 const baseClass = 'radio-group'
 
-import { FieldLabel } from '../../fields/FieldLabel/index.js'
-
 const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
   const {
     disableModifyingForm: disableModifyingFormFromProps,
@@ -22,8 +23,8 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
       name,
       admin: {
         className,
+        description,
         layout = 'horizontal',
-        readOnly: readOnlyFromAdmin,
         style,
         width,
       } = {} as RadioFieldClientProps['field']['admin'],
@@ -35,12 +36,10 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
     fieldState: { customComponents: { Description, Error, Label } = {} } = {},
     onChange: onChangeFromProps,
     path: pathFromProps,
-    readOnly: readOnlyFromTopLevelProps,
+    readOnly,
     validate,
     value: valueFromProps,
   } = props
-
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { uuid } = useForm()
 
@@ -56,8 +55,6 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
   const path = pathFromProps ?? name
 
   const {
-    formInitializing,
-    formProcessing,
     setValue,
     showError,
     value: valueFromContext,
@@ -65,8 +62,6 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
     path,
     validate: memoizedValidate,
   })
-
-  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const value = valueFromContext || valueFromProps
 
@@ -78,7 +73,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
         className,
         `${baseClass}--layout-${layout}`,
         showError && 'error',
-        disabled && `${baseClass}--read-only`,
+        readOnly && `${baseClass}--read-only`,
       ]
         .filter(Boolean)
         .join(' ')}
@@ -87,8 +82,8 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Error}
-      {Label || <FieldLabel label={label} localized={localized} required={required} />}
+      {Error ?? <FieldError path={path} showError={showError} />}
+      {Label ?? <FieldLabel label={label} localized={localized} path={path} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
         <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
           {options.map((option) => {
@@ -114,20 +109,20 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
                       onChangeFromProps(optionValue)
                     }
 
-                    if (!disabled) {
+                    if (!readOnly) {
                       setValue(optionValue, !!disableModifyingFormFromProps)
                     }
                   }}
                   option={optionIsObject(option) ? option : { label: option, value: option }}
                   path={path}
-                  readOnly={disabled}
+                  readOnly={readOnly}
                   uuid={uuid}
                 />
               </li>
             )
           })}
         </ul>
-        {Description}
+        {Description ?? <FieldDescription description={description} path={path} />}
       </div>
     </div>
   )

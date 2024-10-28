@@ -44,8 +44,6 @@ export const ConfirmPasswordField: React.FC<ConfirmPasswordFieldProps> = (props)
       />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError path={path} />
-        {/* disable eslint here because the label is dynamic */}
-        {}
         <input
           aria-label={t('authentication:confirmPassword')}
           autoComplete="off"

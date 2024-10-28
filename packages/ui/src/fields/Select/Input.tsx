@@ -1,5 +1,5 @@
 'use client'
-import type { OptionObject, StaticLabel } from 'payload'
+import type { OptionObject, StaticDescription, StaticLabel } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -7,6 +7,8 @@ import React from 'react'
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -17,7 +19,9 @@ export type SelectInputProps = {
   readonly BeforeInput?: React.ReactNode
   readonly className?: string
   readonly Description?: React.ReactNode
+  readonly description?: StaticDescription
   readonly Error?: React.ReactNode
+  readonly errorMessage?: string
   readonly hasMany?: boolean
   readonly isClearable?: boolean
   readonly isSortable?: boolean
@@ -41,7 +45,9 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     BeforeInput,
     className,
     Description,
+    description,
     Error,
+    errorMessage,
     hasMany = false,
     isClearable = true,
     isSortable = true,
@@ -95,9 +101,9 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         width,
       }}
     >
-      {Label || <FieldLabel label={label} localized={localized} required={false} />}
+      {Label ?? <FieldLabel label={label} localized={localized} path={path} required={false} />}
       <div className={`${fieldBaseClass}__wrap`}>
-        {Error}
+        {Error ?? <FieldError message={errorMessage} path={path} showError={showError} />}
         {BeforeInput}
         <ReactSelect
           disabled={readOnly}
@@ -114,7 +120,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         />
         {AfterInput}
       </div>
-      {Description}
+      {Description ?? <FieldDescription description={description} path={path} />}
     </div>
   )
 }

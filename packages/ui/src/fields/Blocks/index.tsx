@@ -21,6 +21,9 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { BlockRow } from './BlockRow.js'
 import { BlocksDrawer } from './BlocksDrawer/index.js'
@@ -34,8 +37,9 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const {
     field: {
       name,
-      admin: { className, isSortable = true, readOnly: readOnlyFromAdmin } = {},
+      admin: { className, description, isSortable = true } = {},
       blocks,
+      label,
       labels: labelsFromProps,
       localized,
       maxRows,
@@ -44,12 +48,10 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     },
     fieldState: { customComponents: { Description, Error, Label } = {} } = {},
     path,
-    readOnly: readOnlyFromTopLevelProps,
+    readOnly,
     schemaPath,
     validate,
   } = props
-
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const minRows = (minRowsProp ?? required) ? 1 : 0
 
@@ -92,8 +94,6 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
   const {
     errorPaths,
-    formInitializing,
-    formProcessing,
     rows = [],
     showError,
     valid,
@@ -103,8 +103,6 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     path: path ?? name,
     validate: memoizedValidate,
   })
-
-  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const addRow = useCallback(
     async (rowIndex: number, blockType: string): Promise<void> => {
@@ -188,7 +186,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const fieldHasErrors = submitted && fieldErrorCount + (valid ? 0 : 1) > 0
 
   const showMinRows = rows.length < minRows || (required && rows.length === 0)
-  const showRequired = disabled && rows.length === 0
+  const showRequired = readOnly && rows.length === 0
 
   return (
     <div
@@ -202,11 +200,15 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         .join(' ')}
       id={`field-${path?.replace(/\./g, '__')}`}
     >
-      {showError && Error}
+      {showError && (Error ?? <FieldError path={path} showError={showError} />)}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__heading-with-error`}>
-            <h3>{Label}</h3>
+            <h3>
+              {Label ?? (
+                <FieldLabel label={label} localized={localized} path={path} required={required} />
+              )}
+            </h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
             )}
@@ -234,7 +236,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
             </ul>
           )}
         </div>
-        {Description}
+        {Description ?? <FieldDescription description={description} path={path} />}
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
@@ -253,7 +255,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
               ).length
 
               return (
-                <DraggableSortableItem disabled={disabled || !isSortable} id={row.id} key={row.id}>
+                <DraggableSortableItem disabled={readOnly || !isSortable} id={row.id} key={row.id}>
                   {(draggableSortableItemProps) => (
                     <BlockRow
                       {...draggableSortableItemProps}
@@ -269,7 +271,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       labels={labels}
                       moveRow={moveRow}
                       path={path}
-                      readOnly={disabled}
+                      readOnly={readOnly}
                       removeRow={removeRow}
                       row={row}
                       rowCount={rows.length}
@@ -304,7 +306,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!disabled && !hasMaxRows && (
+      {!readOnly && !hasMaxRows && (
         <Fragment>
           <DrawerToggler className={`${baseClass}__drawer-toggler`} slug={drawerSlug}>
             <Button

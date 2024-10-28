@@ -4,6 +4,8 @@ import React from 'react'
 
 import type { TextAreaInputProps } from './types.js'
 
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -15,6 +17,7 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
     BeforeInput,
     className,
     Description,
+    description,
     Error,
     Label,
     label,
@@ -50,9 +53,9 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
         width,
       }}
     >
-      {Label || <FieldLabel label={label} localized={localized} required={required} />}
+      {Label ?? <FieldLabel label={label} localized={localized} path={path} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
-        {Error}
+        {Error ?? <FieldError path={path} showError={showError} />}
         {BeforeInput}
         <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
           <div className="textarea-inner">
@@ -71,7 +74,7 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
           </div>
         </label>
         {AfterInput}
-        {Description}
+        {Description ?? <FieldDescription description={description} path={path} />}
       </div>
     </div>
   )

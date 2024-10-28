@@ -9,7 +9,6 @@ import {
   useConfig,
   useDocumentInfo,
   useField,
-  useFieldProps,
   useForm,
   useLocale,
   useTranslation,
@@ -31,20 +30,11 @@ type MetaTitleProps = {
 
 export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const {
-    field: {
-      admin: {
-        components: { Label },
-      },
-      label,
-      maxLength: maxLengthFromProps,
-      minLength: minLengthFromProps,
-      required,
-    },
-    field: fieldFromProps,
+    field: { label, maxLength: maxLengthFromProps, minLength: minLengthFromProps, required },
+    fieldState: { customComponents: { Label } = {} } = {},
     hasGenerateTitleFn,
-    labelProps,
+    path,
   } = props || {}
-  const { path: pathFromContext } = useFieldProps()
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
   const {
@@ -54,9 +44,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
     },
   } = useConfig()
 
-  const field: FieldType<string> = useField({
-    path: pathFromContext,
-  } as Options)
+  const field: FieldType<string> = useField({ path } as Options)
 
   const locale = useLocale()
   const { getData } = useForm()
@@ -129,13 +117,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel
-            field={fieldFromProps}
-            Label={Label}
-            label={label}
-            required={required}
-            {...(labelProps || {})}
-          />
+          {Label ?? <FieldLabel label={label} path={path} required={required} />}
           {hasGenerateTitleFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
@@ -188,7 +170,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
             RenderedComponent: errorMessage,
           }}
           onChange={setValue}
-          path={pathFromContext}
+          path={path}
           required={required}
           showError={showError}
           style={{

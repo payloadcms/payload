@@ -8,6 +8,8 @@ import type {
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -22,8 +24,8 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
       name,
       admin: {
         className,
+        description,
         placeholder,
-        readOnly: readOnlyFromAdmin,
         style,
         width,
       } = {} as EmailFieldClientProps['field']['admin'],
@@ -35,11 +37,9 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
       customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     } = {},
     path: pathFromProps,
-    readOnly: readOnlyFromTopLevelProps,
+    readOnly,
     validate,
   } = props
-
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n } = useTranslation()
 
@@ -54,16 +54,14 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
 
   const path = pathFromProps ?? name
 
-  const { formInitializing, formProcessing, setValue, showError, value } = useField({
+  const { setValue, showError, value } = useField({
     path,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || formProcessing || formInitializing
-
   return (
     <div
-      className={[fieldBaseClass, 'email', className, showError && 'error', disabled && 'read-only']
+      className={[fieldBaseClass, 'email', className, showError && 'error', readOnly && 'read-only']
         .filter(Boolean)
         .join(' ')}
       style={{
@@ -71,15 +69,15 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Label || <FieldLabel label={label} localized={localized} required={required} />}
+      {Label ?? <FieldLabel label={label} localized={localized} path={path} required={required} />}
       <div className={`${fieldBaseClass}__wrap`}>
-        {Error}
+        {Error ?? <FieldError path={path} showError={showError} />}
         {BeforeInput}
         {/* disable eslint here because the label is dynamic */}
         {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
         <input
           autoComplete={autoComplete}
-          disabled={disabled}
+          disabled={readOnly}
           id={`field-${path.replace(/\./g, '__')}`}
           name={path}
           onChange={setValue}
@@ -90,7 +88,7 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
         />
         {AfterInput}
       </div>
-      {Description}
+      {Description ?? <FieldDescription description={description} path={path} />}
     </div>
   )
 }

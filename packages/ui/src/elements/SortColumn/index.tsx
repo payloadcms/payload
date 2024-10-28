@@ -1,8 +1,9 @@
 'use client'
-import type { FieldBase } from 'payload'
+import type { StaticLabel } from 'payload'
 
 import React from 'react'
 
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -12,7 +13,7 @@ export type SortColumnProps = {
   readonly appearance?: 'condensed' | 'default'
   readonly disable?: boolean
   readonly Label: React.ReactNode
-  readonly label?: FieldBase['label']
+  readonly label?: StaticLabel
   readonly name: string
 }
 
@@ -44,7 +45,9 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
         .filter(Boolean)
         .join(' ')}
     >
-      <span className={`${baseClass}__label`}>{Label}</span>
+      <span className={`${baseClass}__label`}>
+        {Label ?? <FieldLabel hideLocale label={label} unstyled />}
+      </span>
       {!disable && (
         <div className={`${baseClass}__buttons`}>
           <button
