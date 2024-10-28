@@ -23,7 +23,7 @@ export const findVersions: GlobalRouteHandler = async ({ globalConfig, req }) =>
     limit: isNumber(limit) ? Number(limit) : undefined,
     page: isNumber(page) ? Number(page) : undefined,
     req,
-    sort,
+    sort: typeof sort === 'string' ? sort.split(',') : undefined,
     where,
   })
 

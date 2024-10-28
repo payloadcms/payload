@@ -18,7 +18,7 @@
   "dependencies": {
     "@payloadcms/db-vercel-postgres": "beta",
     "@payloadcms/next": "beta",
-    "@payloadcms/plugin-cloud": "beta",
+    "@payloadcms/payload-cloud": "beta",
     "@payloadcms/richtext-lexical": "beta",
     "@payloadcms/storage-vercel-blob": "beta",
     "cross-env": "^7.0.3",

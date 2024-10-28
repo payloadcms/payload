@@ -925,7 +925,7 @@ importers:
         specifier: 0.32.6
         version: 0.32.6
 
-  packages/plugin-cloud:
+  packages/payload-cloud:
     dependencies:
       '@aws-sdk/client-cognito-identity':
         specifier: ^3.614.0
@@ -1645,9 +1645,9 @@ importers:
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../packages/next
-      '@payloadcms/plugin-cloud':
+      '@payloadcms/payload-cloud':
         specifier: workspace:*
-        version: link:../packages/plugin-cloud
+        version: link:../packages/payload-cloud
       '@payloadcms/plugin-cloud-storage':
         specifier: workspace:*
         version: link:../packages/plugin-cloud-storage
