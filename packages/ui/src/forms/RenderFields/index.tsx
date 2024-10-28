@@ -89,7 +89,9 @@ export const RenderFields: React.FC<Props> = (props) => {
             schemaIndex: i,
           })
 
-          const CustomField = formFields[path.join('.')]?.customComponents?.Field
+          const formState = formFields[path.join('.')]
+
+          const CustomField = formState?.customComponents?.Field
 
           const DefaultField = fieldComponents?.[field?.type]
 
@@ -133,9 +135,10 @@ export const RenderFields: React.FC<Props> = (props) => {
                 // TODO: Pass other properties
                 <DefaultField
                   field={field}
-                  forceRender={forceRender}
+                  fieldState={formState}
                   key={i}
                   path={path.join('.')}
+                  permissions={fieldPermissions}
                   readOnly={isReadOnly}
                   schemaPath={field._schemaPath.join('.')}
                 />

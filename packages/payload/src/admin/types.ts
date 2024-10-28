@@ -333,7 +333,15 @@ export type {
   GenericErrorProps,
 } from './forms/Error.js'
 
-export type { ClientFieldBase, FormFieldBase, ServerFieldBase } from './forms/Field.js'
+export type {
+  ClientComponentProps,
+  ClientFieldBase,
+  ClientFieldWithOptionalType,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerComponentProps,
+  ServerFieldBase,
+} from './forms/Field.js'
 
 export type {
   BuildFormStateArgs,
@@ -438,14 +446,6 @@ export type RenderedField = {
 
 export type FieldRow = {
   RowLabel?: React.ReactNode
-}
-
-export type FieldSlots = {
-  AfterInput?: React.ReactNode
-  BeforeInput?: React.ReactNode
-  Description?: React.ReactNode
-  Error?: React.ReactNode
-  Label?: React.ReactNode
 }
 
 export type DocumentSlots = {
