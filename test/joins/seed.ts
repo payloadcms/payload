@@ -6,7 +6,14 @@ import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'
 import { seedDB } from '../helpers/seed.js'
-import { categoriesSlug, collectionSlugs, postsSlug, uploadsSlug } from './shared.js'
+import {
+  categoriesSlug,
+  collectionSlugs,
+  joinDocsSlug,
+  postsSlug,
+  relationshipDocsSlug,
+  uploadsSlug,
+} from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -28,36 +35,66 @@ export const seed = async (_payload) => {
     },
   })
 
-  await _payload.create({
-    collection: postsSlug,
+  // await _payload.create({
+  //   collection: postsSlug,
+  //   data: {
+  //     category: category.id,
+  //     group: {
+  //       category: category.id,
+  //     },
+  //     title: 'Test Post 1',
+  //   },
+  // })
+
+  // await _payload.create({
+  //   collection: postsSlug,
+  //   data: {
+  //     category: category.id,
+  //     group: {
+  //       category: category.id,
+  //     },
+  //     title: 'Test Post 2',
+  //   },
+  // })
+
+  // await _payload.create({
+  //   collection: postsSlug,
+  //   data: {
+  //     category: category.id,
+  //     group: {
+  //       category: category.id,
+  //     },
+  //     title: 'Test Post 3',
+  //   },
+  // })
+
+  const { id: joinID1 } = await _payload.create({
+    collection: joinDocsSlug,
     data: {
-      category: category.id,
-      group: {
-        category: category.id,
-      },
-      title: 'Test Post 1',
+      title: '1',
+    },
+  })
+
+  const { id: joinID2 } = await _payload.create({
+    collection: joinDocsSlug,
+    data: {
+      title: '2',
     },
   })
 
   await _payload.create({
-    collection: postsSlug,
+    collection: relationshipDocsSlug,
     data: {
-      category: category.id,
-      group: {
-        category: category.id,
-      },
-      title: 'Test Post 2',
+      title: '1',
+      joinRelationship: joinID1,
     },
   })
 
   await _payload.create({
-    collection: postsSlug,
+    collection: relationshipDocsSlug,
     data: {
-      category: category.id,
-      group: {
-        category: category.id,
-      },
-      title: 'Test Post 3',
+      title: '2',
+      joinRelationship: joinID2,
     },
   })
 

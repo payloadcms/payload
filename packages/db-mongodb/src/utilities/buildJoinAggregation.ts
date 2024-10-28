@@ -99,9 +99,9 @@ export const buildJoinAggregation = async ({
             {
               $lookup: {
                 as: `${as}.docs`,
-                foreignField: `${join.field.on}${code}`,
+                // foreignField: `${join.field.on}${code}`,
                 from: slug,
-                localField: versions ? 'parent' : '_id',
+                // localField: versions ? 'parent' : '_id',
                 pipeline,
               },
             },
@@ -140,9 +140,9 @@ export const buildJoinAggregation = async ({
           {
             $lookup: {
               as: `${as}.docs`,
-              foreignField: `${join.field.on}${localeSuffix}`,
+              // foreignField: `${join.field.on}${localeSuffix}`,
               from: slug,
-              localField: versions ? 'parent' : '_id',
+              // localField: versions ? 'parent' : '_id',
               pipeline,
             },
           },
