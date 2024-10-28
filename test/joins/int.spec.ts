@@ -618,7 +618,7 @@ describe('Joins Field', () => {
     })
   })
 
-  it('should work id.in querying with joins', async () => {
+  it('should work id.in command delimited querying with joins', async () => {
     const allCategories = await payload.find({ collection: 'categories', pagination: false })
 
     const allCategoriesByIds = await restClient
@@ -626,7 +626,7 @@ describe('Joins Field', () => {
         query: {
           where: {
             id: {
-              in: allCategories.docs.map((each) => each.id),
+              in: allCategories.docs.map((each) => each.id).join(','),
             },
           },
         },
