@@ -57,7 +57,7 @@ export function attachComponentsToFormState(args: Args): args is OutputArgs {
       schemaPath: fieldState.schemaPath,
     })
 
-    if ('type' in fieldConfig && fieldConfig.admin?.components?.Field) {
+    if ('type' in fieldConfig && fieldConfig.admin?.components) {
       const name = 'name' in fieldConfig ? fieldConfig.name : undefined
 
       const isHiddenField = 'hidden' in fieldConfig && fieldConfig?.hidden

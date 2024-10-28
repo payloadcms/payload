@@ -128,6 +128,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
       >
         <RenderFields
           fields={fields}
+          forceRender={forceRender}
           parentPath={[...parentPath.split('.'), rowIndex]}
           permissions={docPermissions.fields}
         />

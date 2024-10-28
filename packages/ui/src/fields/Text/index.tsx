@@ -18,10 +18,6 @@ export { TextInput, TextInputProps }
 
 const TextFieldComponent: TextFieldClientComponent = (props) => {
   const {
-    AfterInput,
-    BeforeInput,
-    Description,
-    Error,
     field: {
       admin: { className, placeholder, readOnly: readOnlyFromAdmin, rtl, style, width } = {},
       hasMany,
@@ -33,8 +29,10 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
       minRows,
       required,
     },
+    fieldState: {
+      customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    } = {},
     inputRef,
-    Label,
     path,
     readOnly: readOnlyFromTopLevelProps,
     validate,

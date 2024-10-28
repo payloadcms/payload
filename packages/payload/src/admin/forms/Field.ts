@@ -12,6 +12,7 @@ export type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
 export type ClientComponentProps = {
   field: ClientBlock | ClientField | ClientTab
   fieldState: FormField
+  forceRender?: boolean
   path: string
   permissions: FieldPermissions
   readOnly?: boolean

@@ -136,6 +136,7 @@ export const RenderFields: React.FC<Props> = (props) => {
                 <DefaultField
                   field={field}
                   fieldState={formState}
+                  forceRender={forceRender}
                   key={i}
                   path={path.join('.')}
                   permissions={fieldPermissions}
