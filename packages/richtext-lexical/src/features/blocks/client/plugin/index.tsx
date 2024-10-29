@@ -32,6 +32,7 @@ import type { BlocksFeatureClientProps } from '../index.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { FieldsDrawer } from '../../../../utilities/fieldsDrawer/Drawer.js'
+import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { $createBlockNode, BlockNode } from '../nodes/BlocksNode.js'
 import { $createInlineBlockNode, $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
 import {
@@ -44,7 +45,6 @@ export type InsertBlockPayload = BlockFieldsOptionalID
 
 export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   const [editor] = useLexicalComposerContext()
-  const { closeModal, toggleModal } = useModal()
   const [blockFields, setBlockFields] = useState<BlockFields | null>(null)
   const [blockType, setBlockType] = useState<string>('' as any)
   const [targetNodeKey, setTargetNodeKey] = useState<null | string>(null)
@@ -57,6 +57,8 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
     slug: `lexical-inlineBlocks-create-` + uuid,
     depth: editDepth,
   })
+
+  const { toggleDrawer } = useLexicalDrawer(drawerSlug)
 
   const {
     field: { richTextComponentMap },
@@ -135,7 +137,7 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
           setBlockType(fields?.blockType ?? ('' as any))
 
           if (nodeKey) {
-            toggleModal(drawerSlug)
+            toggleDrawer()
             return true
           }
 
@@ -150,14 +152,14 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
 
           if (rangeSelection) {
             //setLastSelection(rangeSelection)
-            toggleModal(drawerSlug)
+            toggleDrawer()
           }
           return true
         },
         COMMAND_PRIORITY_EDITOR,
       ),
     )
-  }, [editor, targetNodeKey, toggleModal, drawerSlug])
+  }, [editor, targetNodeKey, toggleDrawer])
 
   if (!blockFields) {
     return null
@@ -192,7 +194,6 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
       featureKey="blocks"
       fieldMapOverride={clientBlock?.fields}
       handleDrawerSubmit={(_fields, data) => {
-        closeModal(drawerSlug)
         if (!data) {
           return
         }

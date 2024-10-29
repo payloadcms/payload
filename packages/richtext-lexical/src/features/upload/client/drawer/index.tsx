@@ -2,10 +2,10 @@
 import type { LexicalEditor } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { useListDrawer } from '@payloadcms/ui'
 import { $getNodeByKey, COMMAND_PRIORITY_EDITOR } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
 
+import { useLexicalListDrawer } from '../../../../utilities/fieldsDrawer/useLexicalListDrawer.js'
 import { EnabledRelationshipsCondition } from '../../../relationship/client/utils/EnabledRelationshipsCondition.js'
 import { $createUploadNode } from '../nodes/UploadNode.js'
 import { INSERT_UPLOAD_COMMAND } from '../plugin/index.js'
@@ -57,7 +57,7 @@ const UploadDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }) => {
 
   const [replaceNodeKey, setReplaceNodeKey] = useState<null | string>(null)
 
-  const [ListDrawer, ListDrawerToggler, { closeDrawer, openDrawer }] = useListDrawer({
+  const { closeListDrawer, ListDrawer, openListDrawer } = useLexicalListDrawer({
     collectionSlugs: enabledCollectionSlugs,
     uploads: true,
   })
@@ -69,24 +69,24 @@ const UploadDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }) => {
       INSERT_UPLOAD_WITH_DRAWER_COMMAND,
       (payload) => {
         setReplaceNodeKey(payload?.replace ? payload?.replace.nodeKey : null)
-        openDrawer()
+        openListDrawer()
         return true
       },
       COMMAND_PRIORITY_EDITOR,
     )
-  }, [editor, openDrawer])
+  }, [editor, openListDrawer])
 
   const onSelect = useCallback(
     ({ collectionSlug, docID }) => {
+      closeListDrawer()
       insertUpload({
         editor,
         relationTo: collectionSlug,
         replaceNodeKey,
         value: docID,
       })
-      closeDrawer()
     },
-    [editor, closeDrawer, replaceNodeKey],
+    [editor, closeListDrawer, replaceNodeKey],
   )
 
   return <ListDrawer onSelect={onSelect} />

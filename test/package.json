@@ -38,7 +38,7 @@
     "@payloadcms/live-preview": "workspace:*",
     "@payloadcms/live-preview-react": "workspace:*",
     "@payloadcms/next": "workspace:*",
-    "@payloadcms/plugin-cloud": "workspace:*",
+    "@payloadcms/payload-cloud": "workspace:*",
     "@payloadcms/plugin-cloud-storage": "workspace:*",
     "@payloadcms/plugin-form-builder": "workspace:*",
     "@payloadcms/plugin-nested-docs": "workspace:*",

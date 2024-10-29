@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-beta.118",
+  "version": "3.0.0-beta.120",
   "private": true,
   "type": "module",
   "scripts": {
@@ -29,7 +29,7 @@
     "build:live-preview-vue": "turbo build --filter \"@payloadcms/live-preview-vue\"",
     "build:next": "turbo build --filter \"@payloadcms/next\"",
     "build:payload": "turbo build --filter payload",
-    "build:plugin-cloud": "turbo build --filter \"@payloadcms/plugin-cloud\"",
+    "build:payload-cloud": "turbo build --filter \"@payloadcms/payload-cloud\"",
     "build:plugin-cloud-storage": "turbo build --filter \"@payloadcms/plugin-cloud-storage\"",
     "build:plugin-form-builder": "turbo build --filter \"@payloadcms/plugin-form-builder\"",
     "build:plugin-nested-docs": "turbo build --filter \"@payloadcms/plugin-nested-docs\"",
