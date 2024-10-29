@@ -5,7 +5,9 @@ body:
 
   - type: textarea
     attributes:
-      label: Describe the Bug
+      label: Describe the Bug.
+      description: >-
+        _REQUIRED:_ Please a screenshot/video of the issue along with a detailed description of the problem.
     validations:
       required: true
 
