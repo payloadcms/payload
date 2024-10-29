@@ -264,7 +264,7 @@ export const renderListView = async (
 
 export const ListView: React.FC<ListViewArgs> = async (args) => {
   try {
-    const { List: RenderedList } = await renderListView(args)
+    const { List: RenderedList } = await renderListView({ ...args, enableRowSelections: true })
     return RenderedList
   } catch (error) {
     if (error.message === 'not-found') {
