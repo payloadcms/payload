@@ -1,6 +1,6 @@
-name: Bug Report v3
-description: Create a bug report for Payload v3 (beta)
-labels: ['status: needs-triage', 'v3']
+name: Functionality Bug
+description: '[REPRODUCTION REQUIRED] - Create a bug report'
+labels: ['status: needs-triage', 'v3', 'validate-reproduction']
 body:
 
   - type: textarea
@@ -14,8 +14,8 @@ body:
     attributes:
       label: Link to the code that reproduces this issue
       description: >-
-        Required: Please provide a link to your reproduction. Note, if the URL is invalid (404 or a private repository), we may close the issue.
-        Either use `npx create-payload-app@beta -t blank` or follow the [reproduction-guide](https://github.com/payloadcms/payload/blob/main/.github/reproduction-guide.md) for more information.
+        _REQUIRED_: Please provide a link to your reproduction. Note, if the URL is invalid (404 or a private repository), we may close the issue.
+        Either use `npx create-payload-app@beta -t blank` then push to a repo or follow the [reproduction-guide](https://github.com/payloadcms/payload/blob/main/.github/reproduction-guide.md) for more information.
     validations:
       required: true
 
@@ -33,6 +33,7 @@ body:
       options:
         - 'Not sure'
         - 'area: core'
+        - 'area: docs'
         - 'area: templates'
         - 'area: ui'
         - 'db-mongodb'
