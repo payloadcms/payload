@@ -16,9 +16,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
   const {
     field,
     field: { name, _schemaPath, collection, label, localized, on, required },
-    fieldState: {
-      customComponents: { AfterInput, BeforeInput, Label },
-    },
+    fieldState: { customComponents: { AfterInput, BeforeInput, Label } } = {},
     path: pathFromProps,
   } = props
   const path = pathFromProps || name

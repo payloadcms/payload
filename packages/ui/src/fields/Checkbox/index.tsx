@@ -41,7 +41,9 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
       label,
       required,
     } = {} as CheckboxFieldClientProps['field'],
-    fieldState: { customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {} },
+    fieldState: {
+      customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    } = {},
     onChange: onChangeFromProps,
     partialChecked,
     path: pathFromProps,
