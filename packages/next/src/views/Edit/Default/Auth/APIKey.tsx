@@ -28,7 +28,7 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
   const [highlightedField, setHighlightedField] = useState(false)
   const { i18n, t } = useTranslation()
   const { config } = useConfig()
-  const { collectionSlug, docPermissions } = useDocumentInfo()
+  const { collectionSlug } = useDocumentInfo()
 
   const apiKey = useFormFields(([fields]) => (fields && fields[path]) || null)
 
@@ -76,12 +76,6 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
     ),
     [apiKeyLabel, apiKeyValue],
   )
-
-  const canUpdateAPIKey = useMemo(() => {
-    if (docPermissions && docPermissions?.fields?.apiKey) {
-      return docPermissions.fields.apiKey.update.permission
-    }
-  }, [docPermissions])
 
   const fieldType = useField({
     path: 'apiKey',
@@ -142,7 +136,7 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
           value={(value as string) || ''}
         />
       </div>
-      {!readOnly && canUpdateAPIKey && (
+      {!readOnly && (
         <GenerateConfirmation highlightField={highlightField} setKey={() => setValue(uuidv4())} />
       )}
     </React.Fragment>

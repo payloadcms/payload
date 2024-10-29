@@ -73,6 +73,12 @@ export const Auth: React.FC<Props> = (props) => {
     return false
   }, [permissions, collectionSlug])
 
+  const apiKeyReadOnly = readOnly || !docPermissions?.fields?.apiKey?.update?.permission
+  const enableAPIKeyReadOnly = readOnly || !docPermissions?.fields?.enableAPIKey?.update?.permission
+
+  const canReadApiKey = docPermissions?.fields?.apiKey?.read?.permission
+  const canReadEnableAPIKey = docPermissions?.fields?.enableAPIKey?.read?.permission
+
   const handleChangePassword = useCallback(
     (showPasswordFields: boolean) => {
       if (showPasswordFields) {
@@ -200,14 +206,16 @@ export const Auth: React.FC<Props> = (props) => {
       )}
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
-          <CheckboxField
-            field={{
-              name: 'enableAPIKey',
-              admin: { disabled, readOnly },
-              label: t('authentication:enableAPIKey'),
-            }}
-          />
-          <APIKey enabled={!!enableAPIKey?.value} readOnly={readOnly} />
+          {canReadEnableAPIKey && (
+            <CheckboxField
+              field={{
+                name: 'enableAPIKey',
+                admin: { disabled, readOnly: enableAPIKeyReadOnly },
+                label: t('authentication:enableAPIKey'),
+              }}
+            />
+          )}
+          {canReadApiKey && <APIKey enabled={!!enableAPIKey?.value} readOnly={apiKeyReadOnly} />}
         </div>
       )}
       {verify && (
