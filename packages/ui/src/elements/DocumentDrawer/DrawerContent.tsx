@@ -30,7 +30,13 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   redirectAfterDelete,
   redirectAfterDuplicate,
 }) => {
-  const { config } = useConfig()
+  const {
+    config: { collections },
+  } = useConfig()
+
+  const [collectionConfig] = useState(() =>
+    collections.find((collection) => collection.slug === collectionSlug),
+  )
 
   const { closeModal, modalState, toggleModal } = useModal()
   const locale = useLocale()
@@ -89,11 +95,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
     redirectAfterDuplicate,
   ])
 
-  // const isEditing = Boolean(docID)
-  // const apiURL = docID
-  //   ? `${serverURL}${apiRoute}/${collectionSlug}/${docID}${locale?.code ? `?locale=${locale.code}` : ''}`
-  //   : null
-
   useEffect(() => {
     setIsOpen(Boolean(modalState[drawerSlug]?.isOpen))
   }, [modalState, drawerSlug])
@@ -104,11 +105,11 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       if (typeof onSaveFromProps === 'function') {
         void onSaveFromProps({
           ...args,
-          // collectionConfig,
+          collectionConfig,
         })
       }
     },
-    [onSaveFromProps],
+    [onSaveFromProps, collectionConfig],
   )
 
   const onDuplicate = useCallback<DocumentDrawerProps['onSave']>(
@@ -118,11 +119,11 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       if (typeof onDuplicateFromProps === 'function') {
         void onDuplicateFromProps({
           ...args,
-          // collectionConfig,
+          collectionConfig,
         })
       }
     },
-    [onDuplicateFromProps],
+    [onDuplicateFromProps, collectionConfig],
   )
 
   const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
@@ -130,13 +131,13 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       if (typeof onDeleteFromProps === 'function') {
         void onDeleteFromProps({
           ...args,
-          // collectionConfig,
+          collectionConfig,
         })
       }
 
       closeModal(drawerSlug)
     },
-    [onDeleteFromProps, closeModal, drawerSlug],
+    [onDeleteFromProps, closeModal, drawerSlug, collectionConfig],
   )
 
   if (isLoading) {
