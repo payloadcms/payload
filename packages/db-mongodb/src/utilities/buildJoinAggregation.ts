@@ -13,6 +13,7 @@ type BuildJoinAggregationArgs = {
   // the number of docs to get at the top collection level
   limit?: number
   locale: string
+  projection?: Record<string, true>
   // the where clause for the top collection
   query?: Where
   /** whether the query is from drafts */
@@ -26,6 +27,7 @@ export const buildJoinAggregation = async ({
   joins,
   limit,
   locale,
+  projection,
   query,
   versions,
 }: BuildJoinAggregationArgs): Promise<PipelineStage[] | undefined> => {
@@ -55,6 +57,10 @@ export const buildJoinAggregation = async ({
   for (const slug of Object.keys(joinConfig)) {
     for (const join of joinConfig[slug]) {
       const joinModel = adapter.collections[join.field.collection]
+
+      if (projection && !projection[join.schemaPath]) {
+        continue
+      }
 
       const {
         limit: limitJoin = join.field.defaultLimit ?? 10,
@@ -172,6 +178,10 @@ export const buildJoinAggregation = async ({
         }
       }
     }
+  }
+
+  if (projection) {
+    aggregate.push({ $project: projection })
   }
 
   return aggregate

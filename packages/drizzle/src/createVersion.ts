@@ -17,6 +17,7 @@ export async function createVersion<T extends TypeWithID>(
     parent,
     publishedLocale,
     req = {} as PayloadRequest,
+    select,
     snapshot,
     updatedAt,
     versionData,
@@ -51,6 +52,7 @@ export async function createVersion<T extends TypeWithID>(
     fields: buildVersionCollectionFields(this.payload.config, collection),
     operation: 'create',
     req,
+    select,
     tableName,
   })
 

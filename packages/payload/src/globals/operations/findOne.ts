@@ -1,9 +1,10 @@
 import type { AccessResult } from '../../config/types.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
+import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 
@@ -14,6 +15,7 @@ type Args = {
   includeLockStatus?: boolean
   overrideAccess?: boolean
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
   slug: string
 }
@@ -30,6 +32,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     overrideAccess = false,
     req: { fallbackLocale, locale },
     req,
+    select,
     showHiddenFields,
   } = args
 
@@ -52,6 +55,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
       slug,
       locale,
       req,
+      select,
       where: overrideAccess ? undefined : (accessResult as Where),
     })
     if (!doc) {
@@ -103,6 +107,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
         entityType: 'global',
         overrideAccess,
         req,
+        select,
       })
     }
 
@@ -123,6 +128,19 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     }, Promise.resolve())
 
     // /////////////////////////////////////
+    // Execute globalType field if not selected
+    // /////////////////////////////////////
+    if (select && doc.globalType) {
+      const selectMode = getSelectMode(select)
+      if (
+        (selectMode === 'include' && !select['globalType']) ||
+        (selectMode === 'exclude' && select['globalType'] === false)
+      ) {
+        delete doc['globalType']
+      }
+    }
+
+    // /////////////////////////////////////
     // Execute field-level hooks and access
     // /////////////////////////////////////
 
@@ -137,6 +155,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
       locale,
       overrideAccess,
       req,
+      select,
       showHiddenFields,
     })
 
