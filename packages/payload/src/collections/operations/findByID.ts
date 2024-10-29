@@ -155,6 +155,7 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
       }
 
       result._isLocked = !!lockStatus
+      result._lastEditedAt = lockStatus?.updatedAt ?? null
       result._userEditing = lockStatus?.user?.value ?? null
     }
 

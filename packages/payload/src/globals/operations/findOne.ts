@@ -87,6 +87,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
       }
 
       doc._isLocked = !!lockStatus
+      doc._lastEditedAt = lockStatus?.updatedAt ?? null
       doc._userEditing = lockStatus?.user?.value ?? null
     }
 

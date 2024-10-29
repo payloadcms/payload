@@ -39,7 +39,7 @@ export const buildFormState = async ({
 }: {
   req: PayloadRequest
 }): Promise<{
-  lockedState?: { isLocked: boolean; user: ClientUser | number | string }
+  lockedState?: { isLocked: boolean; lastEditedAt: string; user: ClientUser | number | string }
   state: FormState
 }> => {
   const reqData: BuildFormStateArgs = (req.data || {}) as BuildFormStateArgs
@@ -242,7 +242,7 @@ export const buildFormState = async ({
       }
     } else if (globalSlug) {
       lockedDocumentQuery = {
-        globalSlug: { equals: globalSlug },
+        and: [{ globalSlug: { equals: globalSlug } }],
       }
     }
 
@@ -275,6 +275,7 @@ export const buildFormState = async ({
       if (lockedDocument.docs && lockedDocument.docs.length > 0) {
         const lockedState = {
           isLocked: true,
+          lastEditedAt: lockedDocument.docs[0]?.updatedAt,
           user: lockedDocument.docs[0]?.user?.value,
         }
 
@@ -289,19 +290,32 @@ export const buildFormState = async ({
 
         return { lockedState, state: result }
       } else {
-        // Delete Many Locks that are older than their updatedAt + lockDuration
         // If NO ACTIVE lock document exists, first delete any expired locks and then create a fresh lock
         // Where updatedAt is older than the duration that is specified in the config
-        const deleteExpiredLocksQuery = {
-          and: [
-            { 'document.relationTo': { equals: collectionSlug } },
-            { 'document.value': { equals: id } },
-            {
-              updatedAt: {
-                less_than: new Date(now - lockDurationInMilliseconds).toISOString(),
+        let deleteExpiredLocksQuery
+
+        if (collectionSlug) {
+          deleteExpiredLocksQuery = {
+            and: [
+              { 'document.relationTo': { equals: collectionSlug } },
+              {
+                updatedAt: {
+                  less_than: new Date(now - lockDurationInMilliseconds).toISOString(),
+                },
               },
-            },
-          ],
+            ],
+          }
+        } else if (globalSlug) {
+          deleteExpiredLocksQuery = {
+            and: [
+              { globalSlug: { equals: globalSlug } },
+              {
+                updatedAt: {
+                  less_than: new Date(now - lockDurationInMilliseconds).toISOString(),
+                },
+              },
+            ],
+          }
         }
 
         await req.payload.db.deleteMany({
@@ -330,6 +344,7 @@ export const buildFormState = async ({
 
         const lockedState = {
           isLocked: true,
+          lastEditedAt: new Date().toISOString(),
           user: req.user,
         }
 
