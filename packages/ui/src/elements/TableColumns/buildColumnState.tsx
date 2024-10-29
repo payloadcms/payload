@@ -1,4 +1,5 @@
 import type {
+  ClientCollectionConfig,
   ClientField,
   DefaultCellComponentProps,
   Field,
@@ -25,7 +26,7 @@ import { RenderDefaultCell } from './RenderDefaultCell/index.js'
 type Args = {
   beforeRows?: Column[]
   clientFields: ClientField[]
-  collectionSlug: string
+  collectionConfig: ClientCollectionConfig
   columnPreferences: ColumnPreferences
   columns?: ColumnPreferences
   docs: PaginatedDocs['docs']
@@ -42,7 +43,7 @@ export const buildColumnState = (args: Args): Column[] => {
   const {
     beforeRows,
     clientFields,
-    collectionSlug,
+    collectionConfig,
     columnPreferences,
     columns,
     docs,
@@ -148,7 +149,8 @@ export const buildColumnState = (args: Args): Column[] => {
       const baseCellClientProps: DefaultCellComponentProps = {
         cellData: undefined,
         customCellContext: {
-          collectionSlug,
+          collectionSlug: collectionConfig.slug,
+          uploadConfig: collectionConfig?.upload,
         },
         field,
         rowData: undefined,

@@ -157,7 +157,7 @@ export const renderListView = async (
 
     const { columnState, Table } = renderTable({
       clientFields: clientCollectionConfig?.fields,
-      collectionSlug,
+      collectionConfig: clientCollectionConfig,
       columnPreferences: listPreferences?.columns,
       columns: initialColumns,
       docs: data.docs,
@@ -269,6 +269,8 @@ export const ListView: React.FC<ListViewArgs> = async (args) => {
   } catch (error) {
     if (error.message === 'not-found') {
       notFound()
+    } else {
+      console.error(error) // eslint-disable-line no-console
     }
   }
 }
