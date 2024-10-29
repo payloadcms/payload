@@ -91,6 +91,7 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
       descriptionProps={descriptionProps}
       Error={field?.admin?.components?.Error}
       errorProps={errorProps}
+      field={field}
       label={label}
       Label={field?.admin?.components?.Label}
       labelProps={labelProps}
