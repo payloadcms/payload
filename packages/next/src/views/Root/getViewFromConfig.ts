@@ -276,12 +276,13 @@ export const getViewFromConfig = ({
             }
 
             // add default view actions
-            viewActions.push(
+            viewActions = [
+              ...viewActions,
               ...getViewActions({
                 editConfig: matchedCollection.admin.components.views.edit,
                 viewKey: 'default',
               }),
-            )
+            ]
           }
         }
       } else if (isGlobal && matchedGlobal) {
