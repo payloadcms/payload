@@ -1165,7 +1165,8 @@ describe('locked documents', () => {
 
   describe('dashboard - globals', () => {
     let user2
-    let lockedGlobal
+    let lockedMenuGlobal
+    let lockedAdminGlobal
 
     beforeAll(async () => {
       user2 = await payload.create({
@@ -1176,11 +1177,23 @@ describe('locked documents', () => {
         },
       })
 
-      lockedGlobal = await payload.create({
+      lockedMenuGlobal = await payload.create({
         collection: lockedDocumentCollection,
         data: {
           document: undefined,
           globalSlug: 'menu',
+          user: {
+            relationTo: 'users',
+            value: user2.id,
+          },
+        },
+      })
+
+      lockedAdminGlobal = await payload.create({
+        collection: lockedDocumentCollection,
+        data: {
+          document: undefined,
+          globalSlug: 'admin',
           user: {
             relationTo: 'users',
             value: user2.id,
@@ -1200,14 +1213,13 @@ describe('locked documents', () => {
       await page.goto(postsUrl.admin)
       await page.waitForURL(new RegExp(postsUrl.admin))
 
-      const globalCardList = page.locator('.dashboard__group').nth(1)
-      await expect(globalCardList.locator('#card-menu .locked svg')).toBeVisible()
+      await expect(page.locator('.dashboard__card-list #card-menu .locked svg')).toBeVisible()
     })
 
     test('should not show lock on document card in dashboard view if unlocked', async () => {
       await payload.delete({
         collection: lockedDocumentCollection,
-        id: lockedGlobal.id,
+        id: lockedMenuGlobal.id,
       })
 
       // eslint-disable-next-line payload/no-wait-function
@@ -1216,8 +1228,7 @@ describe('locked documents', () => {
       await page.goto(postsUrl.admin)
       await page.waitForURL(new RegExp(postsUrl.admin))
 
-      const globalCardList = page.locator('.dashboard__group').nth(1)
-      await expect(globalCardList.locator('#card-menu .locked')).toBeHidden()
+      await expect(page.locator('.dashboard__card-list #card-menu .locked')).toBeHidden()
     })
 
     test('should not show lock on document card in dashboard view if locked by current user', async () => {
@@ -1232,8 +1243,59 @@ describe('locked documents', () => {
       await page.goto(postsUrl.admin)
       await page.waitForURL(new RegExp(postsUrl.admin))
 
-      const globalCardList = page.locator('.dashboard__group').nth(1)
-      await expect(globalCardList.locator('#card-menu .locked')).toBeHidden()
+      await expect(page.locator('.dashboard__card-list #card-menu .locked')).toBeHidden()
+    })
+
+    test('should not show lock on document card in dashboard view if lock expired', async () => {
+      await page.goto(postsUrl.admin)
+      await page.waitForURL(new RegExp(postsUrl.admin))
+
+      await expect(page.locator('.dashboard__card-list #card-admin .locked svg')).toBeVisible()
+
+      // Need to wait for lock duration to expire (lockDuration: 10 seconds)
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(10000)
+
+      await page.reload()
+
+      await expect(page.locator('.dashboard__card-list #card-admin .locked')).toBeHidden()
+
+      await payload.delete({
+        collection: lockedDocumentCollection,
+        id: lockedAdminGlobal.id,
+      })
+    })
+
+    test('should not show Document Locked modal when entering global with an expired lock', async () => {
+      await payload.create({
+        collection: lockedDocumentCollection,
+        data: {
+          document: undefined,
+          globalSlug: 'admin',
+          user: {
+            relationTo: 'users',
+            value: user2.id,
+          },
+        },
+      })
+
+      await page.goto(postsUrl.admin)
+      await page.waitForURL(new RegExp(postsUrl.admin))
+
+      await expect(page.locator('.dashboard__card-list #card-admin .locked svg')).toBeVisible()
+
+      // Need to wait for lock duration to expire (lockDuration: 10 seconds)
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(10000)
+
+      await page.reload()
+
+      await expect(page.locator('.dashboard__card-list #card-admin .locked')).toBeHidden()
+
+      await page.locator('.card-admin a').click()
+
+      const modalContainer = page.locator('.payload__modal-container')
+      await expect(modalContainer).toBeHidden()
     })
   })
 })
