@@ -112,6 +112,13 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
       let lockStatus = null
 
       try {
+        const lockDocumentsProp = collectionConfig?.lockDocuments
+
+        const lockDurationDefault = 300 // Default 5 minutes in seconds
+        const lockDuration =
+          typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
+        const lockDurationInMilliseconds = lockDuration * 1000
+
         const lockedDocument = await req.payload.find({
           collection: 'payload-locked-documents',
           depth: 1,
@@ -128,6 +135,12 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
               {
                 'document.value': {
                   equals: id,
+                },
+              },
+              // Query where the lock is newer than the current time minus lock time
+              {
+                updatedAt: {
+                  greater_than: new Date(new Date().getTime() - lockDurationInMilliseconds),
                 },
               },
             ],

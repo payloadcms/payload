@@ -85,6 +85,7 @@ const PreviewView: React.FC<Props> = ({
     initialState,
     isEditing,
     isInitializing,
+    lastUpdateTime,
     onSave: onSaveFromProps,
     setCurrentEditor,
     setDocumentIsLocked,
@@ -109,11 +110,21 @@ const PreviewView: React.FC<Props> = ({
   const docConfig = collectionConfig || globalConfig
 
   const lockDocumentsProp = docConfig?.lockDocuments !== undefined ? docConfig?.lockDocuments : true
-
   const isLockingEnabled = lockDocumentsProp !== false
+
+  const lockDurationDefault = 300 // Default 5 minutes in seconds
+  const lockDuration =
+    typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
+  const lockDurationInMilliseconds = lockDuration * 1000
 
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
+
+  const [editSessionStartTime, setEditSessionStartTime] = useState(Date.now())
+
+  const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
+
+  const isLockExpired = Date.now() > lockExpiryTime
 
   const documentLockStateRef = useRef<{
     hasShownLockedModal: boolean
@@ -124,8 +135,6 @@ const PreviewView: React.FC<Props> = ({
     isLocked: false,
     user: null,
   })
-
-  const [lastUpdateTime, setLastUpdateTime] = useState(Date.now())
 
   const onSave = useCallback(
     (json) => {
@@ -170,12 +179,12 @@ const PreviewView: React.FC<Props> = ({
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
       const currentTime = Date.now()
-      const timeSinceLastUpdate = currentTime - lastUpdateTime
+      const timeSinceLastUpdate = currentTime - editSessionStartTime
 
       const updateLastEdited = isLockingEnabled && timeSinceLastUpdate >= 10000 // 10 seconds
 
       if (updateLastEdited) {
-        setLastUpdateTime(currentTime)
+        setEditSessionStartTime(currentTime)
       }
 
       const docPreferences = await getDocPreferences()
@@ -222,12 +231,12 @@ const PreviewView: React.FC<Props> = ({
     },
     [
       collectionSlug,
+      editSessionStartTime,
       globalSlug,
       serverURL,
       apiRoute,
       id,
       isLockingEnabled,
-      lastUpdateTime,
       operation,
       schemaPath,
       getDocPreferences,
@@ -286,7 +295,8 @@ const PreviewView: React.FC<Props> = ({
     !isReadOnlyForIncomingUser &&
     !showTakeOverModal &&
     // eslint-disable-next-line react-compiler/react-compiler
-    !documentLockStateRef.current?.hasShownLockedModal
+    !documentLockStateRef.current?.hasShownLockedModal &&
+    !isLockExpired
 
   return (
     <OperationProvider operation={operation}>
