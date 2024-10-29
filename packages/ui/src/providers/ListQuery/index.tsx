@@ -98,7 +98,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       let updatePreferences = false
 
       if ('limit' in query) {
-        updatedPreferences.limit = query.limit
+        updatedPreferences.limit = Number(query.limit)
         updatePreferences = true
       }
 
