@@ -105,15 +105,6 @@ describe('Joins Field', () => {
       },
       collection: 'categories',
     })
-    // const sortCategoryWithPosts = await payload.findByID({
-    //   id: category.id,
-    //   joins: {
-    //     'group.relatedPosts': {
-    //       sort: 'title',
-    //     },
-    //   },
-    //   collection: 'categories',
-    // })
 
     expect(categoryWithPosts.group.relatedPosts.docs).toHaveLength(10)
     expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('id')
@@ -125,11 +116,12 @@ describe('Joins Field', () => {
     const { docs } = await payload.find({
       limit: 1,
       collection: 'posts',
+      depth: 2,
     })
 
     expect(docs[0].category.id).toBeDefined()
     expect(docs[0].category.name).toBeDefined()
-    expect(docs[0].category.relatedPosts.docs).toHaveLength(10)
+    expect(docs[0].category.relatedPosts.docs).toHaveLength(5) // uses defaultLimit
   })
 
   it('should populate relationships in joins with camelCase names', async () => {
@@ -616,6 +608,24 @@ describe('Joins Field', () => {
         .then((res) => res.json())
       expect(response.data.Category.relatedPosts.docs[0].title).toStrictEqual('test 3')
     })
+  })
+
+  it('should work id.in command delimited querying with joins', async () => {
+    const allCategories = await payload.find({ collection: 'categories', pagination: false })
+
+    const allCategoriesByIds = await restClient
+      .GET(`/categories`, {
+        query: {
+          where: {
+            id: {
+              in: allCategories.docs.map((each) => each.id).join(','),
+            },
+          },
+        },
+      })
+      .then((res) => res.json())
+
+    expect(allCategories.totalDocs).toBe(allCategoriesByIds.totalDocs)
   })
 })
 

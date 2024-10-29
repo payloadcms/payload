@@ -121,6 +121,7 @@ import type {
   JSONFieldValidation,
   PointFieldValidation,
   RadioFieldValidation,
+  Sort,
   TextareaFieldValidation,
 } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
@@ -1452,6 +1453,8 @@ export type JoinField = {
    * The slug of the collection to relate with.
    */
   collection: CollectionSlug
+  defaultLimit?: number
+  defaultSort?: Sort
   defaultValue?: never
   /**
    * This does not need to be set and will be overridden by the relationship field's hasMany property.
