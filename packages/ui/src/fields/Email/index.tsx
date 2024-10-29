@@ -8,6 +8,7 @@ import type {
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { useField } from '../../forms/useField/index.js'
@@ -40,6 +41,7 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
     readOnly,
     validate,
   } = props
+  const path = pathFromProps || name
 
   const { i18n } = useTranslation()
 
@@ -51,8 +53,6 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
     },
     [validate, required],
   )
-
-  const path = pathFromProps ?? name
 
   const { setValue, showError, value } = useField({
     path,
@@ -69,9 +69,17 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Label ?? <FieldLabel label={label} localized={localized} path={path} required={required} />}
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
+      />
       <div className={`${fieldBaseClass}__wrap`}>
-        {Error ?? <FieldError path={path} showError={showError} />}
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
+        />
         {BeforeInput}
         {/* disable eslint here because the label is dynamic */}
         {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
@@ -88,7 +96,10 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
         />
         {AfterInput}
       </div>
-      {Description ?? <FieldDescription description={description} path={path} />}
+      <RenderCustomComponent
+        CustomComponent={Description}
+        Fallback={<FieldDescription description={description} path={path} />}
+      />
     </div>
   )
 }

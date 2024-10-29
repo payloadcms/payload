@@ -5,6 +5,7 @@ import type { JoinFieldClient, JoinFieldClientComponent, PaginatedDocs, Where } 
 import React, { useMemo } from 'react'
 
 import { RelationshipTable } from '../../elements/RelationshipTable/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -18,13 +19,14 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
     fieldState: {
       customComponents: { AfterInput, BeforeInput, Label },
     },
-    path,
+    path: pathFromProps,
   } = props
+  const path = pathFromProps || name
 
   const { id: docID } = useDocumentInfo()
 
   const { value } = useField<PaginatedDocs>({
-    path: path ?? name,
+    path,
   })
 
   const filterOptions: Where = useMemo(
@@ -53,9 +55,12 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
         }}
         Label={
           <h4 style={{ margin: 0 }}>
-            {Label ?? (
-              <FieldLabel label={label} localized={localized} path={path} required={required} />
-            )}
+            <RenderCustomComponent
+              CustomComponent={Label}
+              Fallback={
+                <FieldLabel label={label} localized={localized} path={path} required={required} />
+              }
+            />
           </h4>
         }
         relationTo={collection}

@@ -12,6 +12,7 @@ import type { GetResults, Option, Value } from './types.js'
 import { AddNewRelation } from '../../elements/AddNewRelation/index.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
@@ -60,6 +61,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     readOnly,
     validate,
   } = props
+  const path = pathFromProps || name
 
   const { config } = useConfig()
 
@@ -99,8 +101,6 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     },
     [validate, required],
   )
-
-  const path = pathFromProps ?? name
 
   const { filterOptions, initialValue, setValue, showError, value } = useField<Value | Value[]>({
     path,
@@ -588,9 +588,17 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         width,
       }}
     >
-      {Label ?? <FieldLabel label={label} localized={localized} path={path} required={required} />}
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
+      />
       <div className={`${fieldBaseClass}__wrap`}>
-        {Error ?? <FieldError path={path} showError={showError} />}
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
+        />
         {!errorLoading && (
           <div className={`${baseClass}__wrap`}>
             <ReactSelect
@@ -695,7 +703,10 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
           </div>
         )}
         {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
-        {Description ?? <FieldDescription description={description} path={path} />}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
+        />
       </div>
       {currentlyOpenRelationship.collectionSlug && currentlyOpenRelationship.hasReadPermission && (
         <DocumentDrawer onDelete={onDelete} onDuplicate={onDuplicate} onSave={onSave} />

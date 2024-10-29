@@ -7,6 +7,7 @@ import React from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
@@ -25,11 +26,17 @@ const baseClass = 'group-field'
 
 export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const {
-    field: { admin: { className, description, hideGutter, style, width } = {}, fields, label },
+    field: {
+      name,
+      admin: { className, description, hideGutter, style, width } = {},
+      fields,
+      label,
+    },
     fieldState: { customComponents: { Description, Label } = {} } = {},
-    path,
+    path: pathFromProps,
     readOnly,
   } = props
+  const path = pathFromProps || name
 
   const { i18n } = useTranslation()
   const { isWithinCollapsible } = useCollapsible()
@@ -71,17 +78,23 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
           <div className={`${baseClass}__header`}>
             {Boolean(Label || Description || label) && (
               <header>
-                {Label ?? (
-                  <h3 className={`${baseClass}__title`}>
-                    <FieldLabel
-                      label={getTranslation(label, i18n)}
-                      localized={false}
-                      path={path}
-                      required={false}
-                    />
-                  </h3>
-                )}
-                {Description ?? <FieldDescription description={description} path={path} />}
+                <RenderCustomComponent
+                  CustomComponent={Label}
+                  Fallback={
+                    <h3 className={`${baseClass}__title`}>
+                      <FieldLabel
+                        label={getTranslation(label, i18n)}
+                        localized={false}
+                        path={path}
+                        required={false}
+                      />
+                    </h3>
+                  }
+                />
+                <RenderCustomComponent
+                  CustomComponent={Description}
+                  Fallback={<FieldDescription description={description} path={path} />}
+                />
               </header>
             )}
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}

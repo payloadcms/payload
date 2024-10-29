@@ -1,13 +1,14 @@
 import type { AdminViewProps } from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 
-import { RenderServerComponent } from '../../../../ui/src/elements/RenderServerComponent/index.js'
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { getDocumentData } from '../Document/getDocumentData.js'
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
+import { EditView } from '../Edit/index.js'
 import { AccountClient } from './index.client.js'
 import { Settings } from './Settings/index.js'
 
@@ -85,7 +86,6 @@ export const Account: React.FC<AdminViewProps> = async ({
           <HydrateAuthProvider permissions={permissions} />
           <RenderServerComponent
             Component={CustomAccountComponent}
-            Fallback={AccountClient}
             importMap={payload.importMap}
             serverProps={{
               i18n,
@@ -99,6 +99,7 @@ export const Account: React.FC<AdminViewProps> = async ({
               user,
             }}
           />
+          <EditView />
           <AccountClient />
         </EditDepthProvider>
       </DocumentInfoProvider>

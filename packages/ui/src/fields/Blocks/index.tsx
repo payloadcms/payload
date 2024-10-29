@@ -11,6 +11,7 @@ import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { DrawerToggler } from '../../elements/Drawer/index.js'
 import { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
@@ -47,11 +48,12 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       required,
     },
     fieldState: { customComponents: { Description, Error, Label } = {} } = {},
-    path,
+    path: pathFromProps,
     readOnly,
     schemaPath,
     validate,
   } = props
+  const path = pathFromProps || name
 
   const minRows = (minRowsProp ?? required) ? 1 : 0
 
@@ -100,7 +102,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     value,
   } = useField<number>({
     hasRows: true,
-    path: path ?? name,
+    path,
     validate: memoizedValidate,
   })
 
@@ -200,14 +202,22 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         .join(' ')}
       id={`field-${path?.replace(/\./g, '__')}`}
     >
-      {showError && (Error ?? <FieldError path={path} showError={showError} />)}
+      {showError && (
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
+        />
+      )}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__heading-with-error`}>
             <h3>
-              {Label ?? (
-                <FieldLabel label={label} localized={localized} path={path} required={required} />
-              )}
+              <RenderCustomComponent
+                CustomComponent={Label}
+                Fallback={
+                  <FieldLabel label={label} localized={localized} path={path} required={required} />
+                }
+              />
             </h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
@@ -236,7 +246,10 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
             </ul>
           )}
         </div>
-        {Description ?? <FieldDescription description={description} path={path} />}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
+        />
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (

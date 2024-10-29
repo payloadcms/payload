@@ -1,10 +1,11 @@
 'use client'
 
 import { getFieldPaths } from 'payload/shared'
-import React, { Fragment } from 'react'
+import React from 'react'
 
 import type { Props } from './types.js'
 
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { HiddenField } from '../../fields/Hidden/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useIntersect } from '../../hooks/useIntersect.js'
@@ -66,6 +67,8 @@ export const RenderFields: React.FC<Props> = (props) => {
     console.error('Need to implement i18n when calling RenderFields') // eslint-disable-line no-console
   }
 
+  const test = false
+
   if (fields && fields.length > 0) {
     return (
       <div
@@ -92,6 +95,8 @@ export const RenderFields: React.FC<Props> = (props) => {
           const formState = formFields[path.join('.')]
 
           const CustomField = formState?.customComponents?.Field
+
+          console.log({ CustomField })
 
           const DefaultField = fieldComponents?.[field?.type]
 
@@ -129,10 +134,9 @@ export const RenderFields: React.FC<Props> = (props) => {
           }
 
           return (
-            <Fragment key={i}>
-              {/* @TODO make sure that we set false components to null on the server */}
-              {CustomField ?? (
-                // TODO: Pass other properties
+            <RenderCustomComponent
+              CustomComponent={CustomField}
+              Fallback={
                 <DefaultField
                   field={field}
                   fieldState={formState}
@@ -143,8 +147,9 @@ export const RenderFields: React.FC<Props> = (props) => {
                   readOnly={isReadOnly}
                   schemaPath={field._schemaPath.join('.')}
                 />
-              )}
-            </Fragment>
+              }
+              key={i}
+            />
           )
         })}
       </div>

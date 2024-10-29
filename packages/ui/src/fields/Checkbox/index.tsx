@@ -9,6 +9,7 @@ import React, { useCallback } from 'react'
 
 import type { CheckboxInputProps } from './Input.js'
 
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { useForm } from '../../forms/Form/context.js'
@@ -47,6 +48,7 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
     readOnly,
     validate,
   } = props
+  const path = pathFromProps || name
 
   const { uuid } = useForm()
 
@@ -60,8 +62,6 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
     },
     [validate, required],
   )
-
-  const path = pathFromProps ?? name
 
   const { setValue, showError, value } = useField({
     disableFormData,
@@ -99,7 +99,10 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Error ?? <FieldError path={path} showError={showError} />}
+      <RenderCustomComponent
+        CustomComponent={Error}
+        Fallback={<FieldError path={path} showError={showError} />}
+      />
       <CheckboxInput
         AfterInput={AfterInput}
         BeforeInput={BeforeInput}
@@ -114,7 +117,10 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
         readOnly={readOnly}
         required={required}
       />
-      {Description ?? <FieldDescription description={description} path={path} />}
+      <RenderCustomComponent
+        CustomComponent={Description}
+        Fallback={<FieldDescription description={description} path={path} />}
+      />
     </div>
   )
 }

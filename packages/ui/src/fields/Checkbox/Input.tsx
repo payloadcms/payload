@@ -3,6 +3,7 @@ import type { StaticLabel } from 'payload'
 
 import React from 'react'
 
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { CheckIcon } from '../../icons/Check/index.js'
 import { LineIcon } from '../../icons/Line/index.js'
@@ -76,7 +77,10 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
         </span>
         {AfterInput}
       </div>
-      {Label ?? <FieldLabel label={label} localized={localized} required={required} />}
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={<FieldLabel label={label} localized={localized} required={required} />}
+      />
     </div>
   )
 }

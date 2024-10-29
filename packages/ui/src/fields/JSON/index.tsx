@@ -4,6 +4,7 @@ import type { JSONFieldClientComponent } from 'payload'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
@@ -27,10 +28,11 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     fieldState: {
       customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     } = {},
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
+  const path = pathFromProps || name
 
   const [stringValue, setStringValue] = useState<string>()
   const [jsonError, setJsonError] = useState<string>()
@@ -46,7 +48,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
   )
 
   const { initialValue, setValue, showError, value } = useField<string>({
-    path: path ?? name,
+    path,
     validate: memoizedValidate,
   })
 
@@ -117,9 +119,17 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Label ?? <FieldLabel label={label} localized={localized} path={path} required={required} />}
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
+      />
       <div className={`${fieldBaseClass}__wrap`}>
-        {Error ?? <FieldError message={jsonError} path={path} showError={showError} />}
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError message={jsonError} path={path} showError={showError} />}
+        />
         {BeforeInput}
         <CodeEditor
           defaultLanguage="json"
@@ -131,7 +141,10 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         />
         {AfterInput}
       </div>
-      {Description ?? <FieldDescription description={description} path={path} />}
+      <RenderCustomComponent
+        CustomComponent={Description}
+        Fallback={<FieldDescription description={description} path={path} />}
+      />
     </div>
   )
 }

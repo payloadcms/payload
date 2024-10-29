@@ -25,6 +25,7 @@ import { Button } from '../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { Dropzone } from '../../elements/Dropzone/index.js'
 import { useListDrawer } from '../../elements/ListDrawer/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
@@ -434,9 +435,17 @@ export function UploadInput(props: UploadInputProps) {
         width,
       }}
     >
-      {Label ?? <FieldLabel label={label} localized={localized} path={path} required={required} />}
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
+      />
       <div className={`${baseClass}__wrap`}>
-        {Error ?? <FieldError path={path} showError={showError} />}
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
+        />
       </div>
       {BeforeInput}
       <div className={`${baseClass}__dropzoneAndUpload`}>
@@ -548,7 +557,10 @@ export function UploadInput(props: UploadInputProps) {
         )}
       </div>
       {AfterInput}
-      {Description ?? <FieldDescription description={description} path={path} />}
+      <RenderCustomComponent
+        CustomComponent={Description}
+        Fallback={<FieldDescription description={description} path={path} />}
+      />
     </div>
   )
 }

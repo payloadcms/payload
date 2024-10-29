@@ -3,6 +3,7 @@ import type {
   FieldSlots,
   FormFieldBase,
   PasswordFieldValidation,
+  StaticDescription,
   TextFieldClient,
 } from 'payload'
 import type { ChangeEvent, CSSProperties } from 'react'
@@ -22,6 +23,7 @@ export type PasswordInputProps = {
   readonly autoComplete?: string
   readonly BeforeInput?: React.ReactNode
   readonly className?: string
+  readonly description?: StaticDescription
   readonly Description?: React.ReactNode
   readonly Error?: React.ReactNode
   readonly field?: MarkOptional<TextFieldClient, 'type'>

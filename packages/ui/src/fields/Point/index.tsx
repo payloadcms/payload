@@ -4,6 +4,7 @@ import type { PointFieldClientComponent, PointFieldValidation } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
@@ -27,10 +28,11 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
     fieldState: {
       customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     } = {},
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
+  const path = pathFromProps || name
 
   const { i18n, t } = useTranslation()
 
@@ -48,7 +50,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
     showError,
     value = [null, null],
   } = useField<[number, number]>({
-    path: path ?? name,
+    path,
     validate: memoizedValidate,
   })
 
@@ -90,14 +92,17 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
     >
       <ul className={`${baseClass}__wrap`}>
         <li>
-          {Label ?? (
-            <FieldLabel
-              label={getCoordinateFieldLabel('longitude')}
-              localized={localized}
-              path={path}
-              required={required}
-            />
-          )}
+          <RenderCustomComponent
+            CustomComponent={Label}
+            Fallback={
+              <FieldLabel
+                label={getCoordinateFieldLabel('longitude')}
+                localized={localized}
+                path={path}
+                required={required}
+              />
+            }
+          />
           <div className="input-wrapper">
             {BeforeInput}
             {/* disable eslint rule because the label is dynamic */}
@@ -116,16 +121,22 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
           </div>
         </li>
         <li>
-          {Label ?? (
-            <FieldLabel
-              label={getCoordinateFieldLabel('latitude')}
-              localized={localized}
-              path={path}
-              required={required}
-            />
-          )}
+          <RenderCustomComponent
+            CustomComponent={Label}
+            Fallback={
+              <FieldLabel
+                label={getCoordinateFieldLabel('latitude')}
+                localized={localized}
+                path={path}
+                required={required}
+              />
+            }
+          />
           <div className="input-wrapper">
-            {Error ?? <FieldError path={path} showError={showError} />}
+            <RenderCustomComponent
+              CustomComponent={Error}
+              Fallback={<FieldError path={path} showError={showError} />}
+            />
             {BeforeInput}
             {/* disable eslint rule because the label is dynamic */}
             {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
@@ -143,7 +154,10 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
           </div>
         </li>
       </ul>
-      {Description ?? <FieldDescription description={description} path={path} />}
+      <RenderCustomComponent
+        CustomComponent={Description}
+        Fallback={<FieldDescription description={description} path={path} />}
+      />
     </div>
   )
 }

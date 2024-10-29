@@ -6,6 +6,9 @@ import React from 'react'
 
 import type { PasswordInputProps } from './types.js'
 
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -17,6 +20,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
     autoComplete = 'off',
     BeforeInput,
     className,
+    description,
     Description,
     Error,
     inputRef,
@@ -54,9 +58,17 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
         width,
       }}
     >
-      {Label || <FieldLabel label={label} localized={localized} required={required} />}
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
+      />
       <div className={`${fieldBaseClass}__wrap`}>
-        {Error}
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
+        />
         <div>
           {BeforeInput}
           <input
@@ -75,7 +87,10 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
           />
           {AfterInput}
         </div>
-        {Description}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
+        />
       </div>
     </div>
   )

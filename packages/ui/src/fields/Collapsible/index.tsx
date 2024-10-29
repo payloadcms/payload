@@ -5,6 +5,7 @@ import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import { Collapsible as CollapsibleElement } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { RowLabel } from '../../forms/RowLabel/index.js'
@@ -118,7 +119,10 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
           collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
           header={
             <div className={`${baseClass}__row-label-wrap`}>
-              {Label ?? <RowLabel rowLabel={label} />}
+              <RenderCustomComponent
+                CustomComponent={Label}
+                Fallback={<RowLabel rowLabel={label} />}
+              />
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
           }
@@ -132,7 +136,10 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
             readOnly={readOnly}
           />
         </CollapsibleElement>
-        {Description ?? <FieldDescription description={description} path={path} />}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
+        />
       </div>
     </Fragment>
   )

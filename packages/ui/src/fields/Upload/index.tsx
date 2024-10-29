@@ -18,6 +18,7 @@ export const baseClass = 'upload'
 export function UploadComponent(props: UploadFieldClientProps) {
   const {
     field: {
+      name,
       admin: { allowCreate, className, description, isSortable, style, width } = {},
       hasMany,
       label,
@@ -29,10 +30,11 @@ export function UploadComponent(props: UploadFieldClientProps) {
     fieldState: {
       customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     } = {},
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
+  const path = pathFromProps || name
 
   const { config } = useConfig()
 

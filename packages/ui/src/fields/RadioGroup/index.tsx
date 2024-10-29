@@ -4,6 +4,7 @@ import type { RadioFieldClientComponent, RadioFieldClientProps } from 'payload'
 import { optionIsObject } from 'payload/shared'
 import React, { useCallback } from 'react'
 
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
@@ -40,6 +41,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
     validate,
     value: valueFromProps,
   } = props
+  const path = pathFromProps || name
 
   const { uuid } = useForm()
 
@@ -51,8 +53,6 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
     },
     [validate, options, required],
   )
-
-  const path = pathFromProps ?? name
 
   const {
     setValue,
@@ -82,8 +82,16 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Error ?? <FieldError path={path} showError={showError} />}
-      {Label ?? <FieldLabel label={label} localized={localized} path={path} required={required} />}
+      <RenderCustomComponent
+        CustomComponent={Error}
+        Fallback={<FieldError path={path} showError={showError} />}
+      />
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
+      />
       <div className={`${fieldBaseClass}__wrap`}>
         <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
           {options.map((option) => {
@@ -122,7 +130,10 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
             )
           })}
         </ul>
-        {Description ?? <FieldDescription description={description} path={path} />}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
+        />
       </div>
     </div>
   )

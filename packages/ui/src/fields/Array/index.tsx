@@ -13,6 +13,7 @@ import { Button } from '../../elements/Button/index.js'
 import { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
@@ -52,6 +53,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     schemaPath,
     validate,
   } = props
+  const path = pathFromProps || name
 
   const minRows = (minRowsProp ?? required) ? 1 : 0
 
@@ -106,8 +108,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     },
     [maxRows, minRows, required, validate, editingDefaultLocale],
   )
-
-  const path = pathFromProps ?? name
 
   const {
     errorPaths,
@@ -213,14 +213,22 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
     >
-      {showError && (Error ?? <FieldError path={path} showError={showError} />)}
+      {showError && (
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
+        />
+      )}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__header-content`}>
             <h3 className={`${baseClass}__title`}>
-              {Label ?? (
-                <FieldLabel label={label} localized={localized} path={path} required={required} />
-              )}
+              <RenderCustomComponent
+                CustomComponent={Label}
+                Fallback={
+                  <FieldLabel label={label} localized={localized} path={path} required={required} />
+                }
+              />
             </h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
@@ -249,7 +257,10 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
             </ul>
           )}
         </div>
-        {Description ?? <FieldDescription description={description} path={path} />}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
+        />
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rowsData?.length > 0 || (!valid && (showRequired || showMinRows))) && (

@@ -4,6 +4,7 @@ import type { CodeFieldClientComponent } from 'payload'
 import React, { useCallback } from 'react'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
@@ -22,6 +23,7 @@ const baseClass = 'code-field'
 const CodeFieldComponent: CodeFieldClientComponent = (props) => {
   const {
     field: {
+      name,
       admin: {
         className,
         description,
@@ -37,10 +39,11 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
     fieldState: {
       customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     } = {},
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
+  const path = pathFromProps || name
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -72,9 +75,17 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Label ?? <FieldLabel label={label} localized={localized} path={path} required={required} />}
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
+      />
       <div className={`${fieldBaseClass}__wrap`}>
-        {Error ?? <FieldError path={path} showError={showError} />}
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
+        />
         {BeforeInput}
         <CodeEditor
           defaultLanguage={prismToMonacoLanguageMap[language] || language}
@@ -85,7 +96,10 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
         />
         {AfterInput}
       </div>
-      {Description ?? <FieldDescription description={description} path={path} />}
+      <RenderCustomComponent
+        CustomComponent={Description}
+        Fallback={<FieldDescription description={description} path={path} />}
+      />
     </div>
   )
 }

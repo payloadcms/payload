@@ -41,6 +41,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
     Label,
     validate,
   } = props
+  const path = pathFromProps || name
 
   const { t } = useTranslation()
   const locale = useLocale()
@@ -70,7 +71,6 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
     [validate, config, t, required],
   )
 
-  const path = pathFromProps || name
   const { formInitializing, formProcessing, setValue, showError, value } = useField({
     path,
     validate: memoizedValidate,

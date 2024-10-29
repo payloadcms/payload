@@ -5,6 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
 import { DatePickerField } from '../../elements/DatePicker/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
@@ -32,6 +33,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
     readOnly,
     validate,
   } = props
+  const path = pathFromProps || name
 
   const { i18n } = useTranslation()
 
@@ -43,8 +45,6 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
     },
     [validate, required],
   )
-
-  const path = pathFromProps ?? name
 
   const { setValue, showError, value } = useField<Date>({
     path,
@@ -67,9 +67,15 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Label ?? <FieldLabel label={label} localized={localized} required={required} />}
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={<FieldLabel label={label} localized={localized} required={required} />}
+      />
       <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
-        {Error ?? <FieldError path={path} showError={showError} />}
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
+        />
         {BeforeInput}
         <DatePickerField
           {...datePickerProps}
@@ -84,7 +90,10 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
         />
         {AfterInput}
       </div>
-      {Description ?? <FieldDescription description={description} path={path} />}
+      <RenderCustomComponent
+        CustomComponent={Description}
+        Fallback={<FieldDescription description={description} path={path} />}
+      />
     </div>
   )
 }

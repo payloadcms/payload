@@ -53,6 +53,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
     readOnly,
     validate,
   } = props
+  const path = pathFromProps || name
 
   const options = React.useMemo(() => formatOptions(optionsFromProps), [optionsFromProps])
 
@@ -64,8 +65,6 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
     },
     [validate, required, hasMany, options],
   )
-
-  const path = pathFromProps ?? name
 
   const { setValue, showError, value } = useField({
     path,

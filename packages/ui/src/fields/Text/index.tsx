@@ -19,6 +19,7 @@ export { TextInput, TextInputProps }
 const TextFieldComponent: TextFieldClientComponent = (props) => {
   const {
     field: {
+      name,
       admin: { className, description, placeholder, rtl, style, width } = {},
       hasMany,
       label,
@@ -33,10 +34,11 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
       customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     } = {},
     inputRef,
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
+  const path = pathFromProps || name
 
   const locale = useLocale()
 

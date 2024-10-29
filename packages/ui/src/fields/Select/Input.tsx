@@ -7,6 +7,7 @@ import React from 'react'
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
@@ -21,7 +22,6 @@ export type SelectInputProps = {
   readonly Description?: React.ReactNode
   readonly description?: StaticDescription
   readonly Error?: React.ReactNode
-  readonly errorMessage?: string
   readonly hasMany?: boolean
   readonly isClearable?: boolean
   readonly isSortable?: boolean
@@ -47,7 +47,6 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     Description,
     description,
     Error,
-    errorMessage,
     hasMany = false,
     isClearable = true,
     isSortable = true,
@@ -101,9 +100,15 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         width,
       }}
     >
-      {Label ?? <FieldLabel label={label} localized={localized} path={path} required={false} />}
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={<FieldLabel label={label} localized={localized} path={path} required={false} />}
+      />
       <div className={`${fieldBaseClass}__wrap`}>
-        {Error ?? <FieldError message={errorMessage} path={path} showError={showError} />}
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
+        />
         {BeforeInput}
         <ReactSelect
           disabled={readOnly}
@@ -120,7 +125,10 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         />
         {AfterInput}
       </div>
-      {Description ?? <FieldDescription description={description} path={path} />}
+      <RenderCustomComponent
+        CustomComponent={Description}
+        Fallback={<FieldDescription description={description} path={path} />}
+      />
     </div>
   )
 }

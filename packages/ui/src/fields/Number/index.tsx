@@ -8,6 +8,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import type { Option } from '../../elements/ReactSelect/types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -45,6 +46,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
     readOnly,
     validate,
   } = props
+  const path = pathFromProps || name
 
   const { i18n, t } = useTranslation()
 
@@ -56,8 +58,6 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
     },
     [validate, min, max, required],
   )
-
-  const path = pathFromProps ?? name
 
   const { setValue, showError, value } = useField<number | number[]>({
     path,
@@ -139,9 +139,17 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
         width,
       }}
     >
-      {Label ?? <FieldLabel label={label} localized={localized} path={path} required={required} />}
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
+      />
       <div className={`${fieldBaseClass}__wrap`}>
-        {Error ?? <FieldError path={path} showError={showError} />}
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
+        />
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
@@ -190,7 +198,10 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
             {AfterInput}
           </div>
         )}
-        {Description ?? <FieldDescription description={description} path={path} />}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
+        />
       </div>
     </div>
   )
