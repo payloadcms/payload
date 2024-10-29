@@ -35,22 +35,6 @@ export type DocumentInfoProps = {
   readonly initialData?: Data
   readonly initialState?: FormState
   readonly isEditing?: boolean
-  readonly onDelete?: (args: {
-    collectionConfig?: ClientCollectionConfig
-    id: string
-  }) => Promise<void> | void
-  readonly onDrawerCreate?: () => void
-  /* only available if `redirectAfterDuplicate` is `false` */
-  readonly onDuplicate?: (args: {
-    collectionConfig?: ClientCollectionConfig
-    doc: TypeWithID
-  }) => Promise<void> | void
-  readonly onSave?: (args: {
-    collectionConfig?: ClientCollectionConfig
-    doc: TypeWithID
-    operation: 'create' | 'update'
-    result: Data
-  }) => Promise<void> | void
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
 }

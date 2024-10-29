@@ -46,7 +46,11 @@ type RenderListResult = {
 export const renderListFn = async (args: {
   collectionSlug: string
   disableActions?: boolean
+  disableBulkDelete?: boolean
+  disableBulkEdit?: boolean
+  documentDrawerSlug: string
   drawerSlug?: string
+  enableRowSelections: boolean
   redirectAfterDelete: boolean
   redirectAfterDuplicate: boolean
   req: PayloadRequest
@@ -54,7 +58,11 @@ export const renderListFn = async (args: {
   const {
     collectionSlug,
     disableActions,
+    disableBulkDelete,
+    disableBulkEdit,
+    documentDrawerSlug,
     drawerSlug,
+    enableRowSelections,
     redirectAfterDelete,
     redirectAfterDuplicate,
     req,
@@ -153,7 +161,11 @@ export const renderListFn = async (args: {
   const { List } = await renderListView({
     clientConfig,
     disableActions,
+    disableBulkDelete,
+    disableBulkEdit,
+    documentDrawerSlug,
     drawerSlug,
+    enableRowSelections,
     importMap: payload.importMap,
     initPageResult: {
       collectionConfig: payload.config.collections.find(

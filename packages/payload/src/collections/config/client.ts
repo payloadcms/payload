@@ -1,7 +1,11 @@
 import type { I18nClient } from '@payloadcms/translations'
 
 import type { StaticDescription } from '../../admin/types.js'
-import type { LivePreviewConfig, ServerOnlyLivePreviewProperties } from '../../config/types.js'
+import type {
+  LivePreviewConfig,
+  ServerOnlyLivePreviewProperties,
+  StaticLabel,
+} from '../../config/types.js'
 import type { ClientField } from '../../fields/config/client.js'
 import type { Payload } from '../../types/index.js'
 import type { SanitizedCollectionConfig } from './types.js'
@@ -39,7 +43,11 @@ export type ClientCollectionConfig = {
     'components' | 'description' | 'joins' | 'livePreview' | ServerOnlyCollectionAdminProperties
   >
   fields: ClientField[]
-} & Omit<SanitizedCollectionConfig, 'admin' | 'fields' | ServerOnlyCollectionProperties>
+  labels?: {
+    plural: StaticLabel
+    singular: StaticLabel
+  }
+} & Omit<SanitizedCollectionConfig, 'admin' | 'fields' | 'labels' | ServerOnlyCollectionProperties>
 
 const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
   'hooks',

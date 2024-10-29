@@ -1,7 +1,7 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { DocumentDrawerProps } from './types.js'
@@ -13,6 +13,7 @@ import { useLocale } from '../../providers/Locale/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { IDLabel } from '../IDLabel/index.js'
+import { DocumentDrawerContextProvider } from './Provider.js'
 
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   id: existingDocID,
@@ -29,7 +30,13 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   redirectAfterDelete,
   redirectAfterDuplicate,
 }) => {
-  const { config } = useConfig()
+  const {
+    config: { collections },
+  } = useConfig()
+
+  const [collectionConfig] = useState(() =>
+    collections.find((collection) => collection.slug === collectionSlug),
+  )
 
   const { closeModal, modalState, toggleModal } = useModal()
   const locale = useLocale()
@@ -88,61 +95,65 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
     redirectAfterDuplicate,
   ])
 
-  // const isEditing = Boolean(docID)
-  // const apiURL = docID
-  //   ? `${serverURL}${apiRoute}/${collectionSlug}/${docID}${locale?.code ? `?locale=${locale.code}` : ''}`
-  //   : null
-
   useEffect(() => {
     setIsOpen(Boolean(modalState[drawerSlug]?.isOpen))
   }, [modalState, drawerSlug])
 
-  // const onSave = useCallback<DocumentDrawerProps['onSave']>(
-  //   (args) => {
-  //     setDocID(args.doc.id)
-  //     if (typeof onSaveFromProps === 'function') {
-  //       void onSaveFromProps({
-  //         ...args,
-  //         // collectionConfig,
-  //       })
-  //     }
-  //   },
-  //   [onSaveFromProps],
-  // )
+  const onSave = useCallback<DocumentDrawerProps['onSave']>(
+    (args) => {
+      setDocID(args.doc.id)
+      if (typeof onSaveFromProps === 'function') {
+        void onSaveFromProps({
+          ...args,
+          collectionConfig,
+        })
+      }
+    },
+    [onSaveFromProps, collectionConfig],
+  )
 
-  // const onDuplicate = useCallback<DocumentDrawerProps['onSave']>(
-  //   (args) => {
-  //     setDocID(args.doc.id)
+  const onDuplicate = useCallback<DocumentDrawerProps['onSave']>(
+    (args) => {
+      setDocID(args.doc.id)
 
-  //     if (typeof onDuplicateFromProps === 'function') {
-  //       void onDuplicateFromProps({
-  //         ...args,
-  //         // collectionConfig,
-  //       })
-  //     }
-  //   },
-  //   [onDuplicateFromProps],
-  // )
+      if (typeof onDuplicateFromProps === 'function') {
+        void onDuplicateFromProps({
+          ...args,
+          collectionConfig,
+        })
+      }
+    },
+    [onDuplicateFromProps, collectionConfig],
+  )
 
-  // const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
-  //   (args) => {
-  //     if (typeof onDeleteFromProps === 'function') {
-  //       void onDeleteFromProps({
-  //         ...args,
-  //         // collectionConfig,
-  //       })
-  //     }
+  const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
+    (args) => {
+      if (typeof onDeleteFromProps === 'function') {
+        void onDeleteFromProps({
+          ...args,
+          collectionConfig,
+        })
+      }
 
-  //     closeModal(drawerSlug)
-  //   },
-  //   [onDeleteFromProps, closeModal, drawerSlug],
-  // )
+      closeModal(drawerSlug)
+    },
+    [onDeleteFromProps, closeModal, drawerSlug, collectionConfig],
+  )
 
   if (isLoading) {
     return <LoadingOverlay />
   }
 
-  return DocumentView
+  return (
+    <DocumentDrawerContextProvider
+      drawerSlug={drawerSlug}
+      onDelete={onDelete}
+      onDuplicate={onDuplicate}
+      onSave={onSave}
+    >
+      {DocumentView}
+    </DocumentDrawerContextProvider>
+  )
 }
 
 const DocumentTitle: React.FC = () => {

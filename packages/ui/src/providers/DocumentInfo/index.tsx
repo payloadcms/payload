@@ -17,8 +17,10 @@ import type {
 import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
+import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
+import { useDocumentDrawerContext } from '../../elements/DocumentDrawer/Provider.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
@@ -51,7 +53,6 @@ const DocumentInfo: React.FC<
     hasSavePermission: hasSavePermissionFromProps,
     initialData: initialDataFromProps,
     initialState: initialStateFromProps,
-    onSave: onSaveFromProps,
   } = props
 
   const {
@@ -62,6 +63,8 @@ const DocumentInfo: React.FC<
     },
     getEntityConfig,
   } = useConfig()
+
+  const { onSave: onSaveFromContext } = useDocumentDrawerContext()
 
   const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
@@ -483,7 +486,7 @@ const DocumentInfo: React.FC<
     [setPreference, preferencesKey, getDocPreferences],
   )
 
-  const onSave = React.useCallback<DocumentInfoContext['onSave']>(
+  const onSave = React.useCallback<DocumentDrawerProps['onSave']>(
     async (json) => {
       if (abortControllerRef.current) {
         try {
@@ -496,8 +499,8 @@ const DocumentInfo: React.FC<
       const abortController = new AbortController()
       abortControllerRef.current = abortController
 
-      if (typeof onSaveFromProps === 'function') {
-        void onSaveFromProps(json)
+      if (typeof onSaveFromContext === 'function') {
+        void onSaveFromContext(json)
       }
 
       const docPreferences = await getDocPreferences()
@@ -528,7 +531,7 @@ const DocumentInfo: React.FC<
       id,
       operation,
       locale,
-      onSaveFromProps,
+      onSaveFromContext,
       getDocPermissions,
       getFormState,
     ],
@@ -595,7 +598,6 @@ const DocumentInfo: React.FC<
     initialData: data,
     initialState,
     isInitializing,
-    onSave,
     preferencesKey,
     publishedDoc,
     setCurrentEditor,

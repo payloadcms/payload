@@ -16,6 +16,7 @@ import { DocumentControls } from '../../elements/DocumentControls/index.js'
 import { DocumentFields } from '../../elements/DocumentFields/index.js'
 // import { LoadingOverlay } from '../../elements/Loading/index.js'
 // import { RenderComponent } from '../../elements/RenderComponent/index.js'
+import { useDocumentDrawerContext } from '../../elements/DocumentDrawer/Provider.js'
 // import { DocumentLocked } from '../../../elements/DocumentLocked/index.js'
 import { Upload } from '../../elements/Upload/index.js'
 // import { Upload } from '../../elements/Upload/index.js'
@@ -73,10 +74,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     initialState,
     isEditing,
     isInitializing,
-    onDelete,
-    onDrawerCreate,
-    onDuplicate,
-    onSave: onSaveFromContext,
     redirectAfterDelete,
     redirectAfterDuplicate,
     setCurrentEditor,
@@ -84,6 +81,13 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     unlockDocument,
     updateDocumentEditor,
   } = useDocumentInfo()
+
+  const {
+    onCreate: onDrawerCreate,
+    onDelete,
+    onDuplicate,
+    onSave: onSaveFromContext,
+  } = useDocumentDrawerContext()
 
   const { refreshCookieAsync, user } = useAuth()
 

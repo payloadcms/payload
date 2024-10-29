@@ -2,12 +2,7 @@
 import LinkImport from 'next/link.js'
 import React from 'react' // TODO: abstract this out to support all routers
 
-import type {
-  CellComponentProps,
-  CodeFieldClient,
-  DefaultCellComponentProps,
-  UploadFieldClient,
-} from 'payload'
+import type { CellComponentProps, DefaultCellComponentProps, UploadFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { fieldAffectsData } from 'payload/shared'
@@ -24,14 +19,12 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
   const {
     cellData,
     className: classNameFromProps,
-    className: classNameFromContext,
     columnIndex,
     customCellContext,
     field,
     field: { admin },
     link,
     onClick: onClickFromProps,
-    onClick: onClickFromContext,
     rowData,
   } = props
 
@@ -48,10 +41,9 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
   const className =
     classNameFromProps ||
     (field.admin && 'className' in field.admin ? field.admin.className : null) ||
-    classNameFromContext ||
     classNameFromConfigContext
 
-  const onClick = onClickFromProps || onClickFromContext
+  const onClick = onClickFromProps
 
   let WrapElement: React.ComponentType<any> | string = 'span'
 

@@ -39,6 +39,11 @@
       flex-shrink: 0;
     }
 
+    &__create-new-button {
+      all: unset;
+      cursor: pointer;
+    }
+
     &__toggler {
       background: transparent;
       border: 0;

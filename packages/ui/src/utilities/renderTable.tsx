@@ -34,6 +34,7 @@ export const renderTable = ({
   columnPreferences,
   columns,
   docs,
+  drawerSlug,
   enableRowSelections,
   fields,
   importMap,
@@ -44,6 +45,7 @@ export const renderTable = ({
   columnPreferences: ColumnPreferences
   columns: ColumnPreferences
   docs: PaginatedDocs['docs']
+  drawerSlug?: string
   enableRowSelections: boolean
   fields: Field[]
   importMap: ImportMap
@@ -62,6 +64,7 @@ export const renderTable = ({
     fields,
     // sortColumnProps,
     docs,
+    drawerSlug,
     importMap,
     useAsTitle,
   })
