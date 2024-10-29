@@ -5,6 +5,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Categories } from './collections/Categories.js'
 import { CategoriesVersions } from './collections/CategoriesVersions.js'
 import { Posts } from './collections/Posts.js'
+import { Singular } from './collections/Singular.js'
 import { Uploads } from './collections/Uploads.js'
 import { Versions } from './collections/Versions.js'
 import { seed } from './seed.js'
@@ -20,6 +21,7 @@ export default buildConfigWithDefaults({
     Uploads,
     Versions,
     CategoriesVersions,
+    Singular,
     {
       slug: localizedPostsSlug,
       admin: {

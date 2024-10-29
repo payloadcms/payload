@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { categoriesSlug, postsSlug } from '../shared.js'
+import { singularSlug } from './Singular.js'
 
 export const Categories: CollectionConfig = {
   slug: categoriesSlug,
@@ -82,6 +83,12 @@ export const Categories: CollectionConfig = {
           on: 'group.camelCaseCategory',
         },
       ],
+    },
+    {
+      name: 'singulars',
+      type: 'join',
+      collection: singularSlug,
+      on: 'category',
     },
   ],
 }
