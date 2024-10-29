@@ -207,7 +207,6 @@ export const findOperation = async <TSlug extends CollectionSlug>(
           return {
             ...doc,
             _isLocked: !!lockedDoc,
-            _lastEditedAt: lockedDoc ? lockedDoc?.updatedAt : null,
             _userEditing: lockedDoc ? lockedDoc?.user?.value : null,
           }
         })
@@ -215,7 +214,6 @@ export const findOperation = async <TSlug extends CollectionSlug>(
         result.docs = result.docs.map((doc) => ({
           ...doc,
           _isLocked: false,
-          _lastEditedAt: null,
           _userEditing: null,
         }))
       }
