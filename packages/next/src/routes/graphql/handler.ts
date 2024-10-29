@@ -1,15 +1,9 @@
 import type { GraphQLError, GraphQLFormattedError } from 'graphql'
+import type { APIError, Payload, PayloadRequest, SanitizedConfig } from 'payload'
 
 import { configToSchema } from '@payloadcms/graphql'
 import { createHandler } from 'graphql-http/lib/use/fetch'
 import httpStatus from 'http-status'
-import {
-  type APIError,
-  deepCopyObject,
-  type Payload,
-  type PayloadRequest,
-  type SanitizedConfig,
-} from 'payload'
 
 import { addDataAndFileToRequest } from '../../utilities/addDataAndFileToRequest.js'
 import { addLocalesToRequestFromData } from '../../utilities/addLocalesToRequest.js'
@@ -82,7 +76,7 @@ export const getGraphql = async (config: Promise<SanitizedConfig> | SanitizedCon
   }
 
   if (!cached.promise) {
-    const resolvedConfig = deepCopyObject(await config)
+    const resolvedConfig = await config
     cached.promise = new Promise((resolve) => {
       const schema = configToSchema(resolvedConfig)
       resolve(cached.graphql || schema)
