@@ -2,11 +2,11 @@ import type { groupNavItems } from '@payloadcms/ui/shared'
 import type { ClientUser, Permissions, ServerProps, VisibleEntities } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { Button, Card, Gutter, Locked, SetStepNav, SetViewActions } from '@payloadcms/ui'
+import { Button, Card, Gutter, Locked } from '@payloadcms/ui'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { EntityType, formatAdminURL } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
-import { RenderServerComponent } from '../../../../../ui/src/elements/RenderServerComponent/index.js'
 import './index.scss'
 
 const baseClass = 'dashboard'
@@ -44,8 +44,6 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
 
   return (
     <div className={baseClass}>
-      <SetStepNav nav={[]} />
-      <SetViewActions actions={[]} />
       <Gutter className={`${baseClass}__wrap`}>
         {beforeDashboard && (
           <RenderServerComponent

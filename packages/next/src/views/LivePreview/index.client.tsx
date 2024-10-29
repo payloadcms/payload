@@ -17,7 +17,6 @@ import {
   OperationProvider,
   SetDocumentStepNav,
   SetDocumentTitle,
-  SetViewActions,
   useAuth,
   useConfig,
   useDocumentEvents,
@@ -463,11 +462,6 @@ export const LivePreviewClient: React.FC<{
 
   return (
     <Fragment>
-      <SetViewActions
-        actions={
-          (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.livePreview?.actions
-        }
-      />
       <LivePreviewProvider
         breakpoints={breakpoints}
         fieldSchema={collectionConfig?.fields || globalConfig?.fields}

@@ -10,7 +10,6 @@ import {
   MinimizeMaximizeIcon,
   NumberField,
   SetDocumentStepNav,
-  SetViewActions,
   useConfig,
   useDocumentInfo,
   useLocale,
@@ -118,9 +117,6 @@ export const APIViewClient: React.FC = () => {
         useAsTitle={collectionConfig ? collectionConfig?.admin?.useAsTitle : undefined}
         view="API"
       />
-      {/* <SetViewActions
-        actions={(collectionConfig || globalConfig)?.admin?.components?.views?.edit?.api?.actions}
-      /> */}
       <div className={`${baseClass}__configuration`}>
         <div className={`${baseClass}__api-url`}>
           <span className={`${baseClass}__label`}>

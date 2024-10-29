@@ -6,7 +6,7 @@ import { getTranslation } from '@payloadcms/translations'
 import LinkImport from 'next/link.js'
 import { useRouter } from 'next/navigation.js'
 import { formatFilesize, isNumber } from 'payload/shared'
-import React, { Fragment, useCallback, useEffect, useState } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 
 // import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import type { Column } from '../../elements/Table/index.js'
@@ -32,7 +32,6 @@ import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/
 import { TableColumnsProvider } from '../../elements/TableColumns/index.js'
 import { UnpublishMany } from '../../elements/UnpublishMany/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
-// import { SetViewActions } from '../../providers/Actions/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
@@ -180,7 +179,6 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
         setTable={setTable}
       >
         <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
-          {/* <SetViewActions actions={actions} /> */}
           <SelectionProvider docs={data.docs} totalDocs={data.totalDocs} user={user}>
             {BeforeList}
             <Gutter className={`${baseClass}__wrap`}>
