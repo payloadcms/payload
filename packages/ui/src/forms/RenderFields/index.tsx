@@ -96,8 +96,6 @@ export const RenderFields: React.FC<Props> = (props) => {
 
           const CustomField = formState?.customComponents?.Field
 
-          console.log({ CustomField })
-
           const DefaultField = fieldComponents?.[field?.type]
 
           // if the user cannot read the field, then filter it out
