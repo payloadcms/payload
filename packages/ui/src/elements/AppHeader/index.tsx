@@ -3,7 +3,6 @@ import LinkWithDefault from 'next/link.js'
 import React, { useEffect, useRef, useState } from 'react'
 
 import { Account } from '../../graphics/Account/index.js'
-import { useActions } from '../../providers/Actions/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
@@ -12,13 +11,15 @@ import { Localizer } from '../Localizer/index.js'
 import { LocalizerLabel } from '../Localizer/LocalizerLabel/index.js'
 import { useNav } from '../Nav/context.js'
 import { NavToggler } from '../Nav/NavToggler/index.js'
-import { RenderComponent } from '../RenderComponent/index.js'
 import { StepNav } from '../StepNav/index.js'
 import './index.scss'
 
 const baseClass = 'app-header'
 
-export const AppHeader: React.FC = () => {
+type Args = {
+  Actions?: React.ReactNode[]
+}
+export const AppHeader: React.FC = ({ Actions }: Args) => {
   const { t } = useTranslation()
 
   const {
@@ -30,8 +31,6 @@ export const AppHeader: React.FC = () => {
       routes: { admin: adminRoute },
     },
   } = useConfig()
-
-  const { actions } = useActions()
 
   const { navOpen } = useNav()
 
@@ -53,7 +52,7 @@ export const AppHeader: React.FC = () => {
     return () => {
       window.removeEventListener('resize', checkIsScrollable)
     }
-  }, [actions])
+  }, [Actions])
 
   const Link = LinkWithDefault.default
 
@@ -73,15 +72,15 @@ export const AppHeader: React.FC = () => {
             </div>
             <div className={`${baseClass}__actions-wrapper`}>
               <div className={`${baseClass}__actions`} ref={customControlsRef}>
-                {Array.isArray(actions) &&
-                  actions.map((Action, i) => (
+                {Array.isArray(Actions) &&
+                  Actions.map((Action, i) => (
                     <div
                       className={
-                        isScrollable && i === actions.length - 1 ? `${baseClass}__last-action` : ''
+                        isScrollable && i === Actions.length - 1 ? `${baseClass}__last-action` : ''
                       }
                       key={i}
                     >
-                      <RenderComponent mappedComponent={Action} />
+                      {Action}
                     </div>
                   ))}
               </div>

@@ -1087,44 +1087,43 @@ export type SanitizedConfig = {
   'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
 >
 
-export type EditConfig =
-  | {
-      [key: string]: EditViewConfig
-      /**
-       * Replace or modify individual nested routes, or add new ones:
-       * + `default` - `/admin/collections/:collection/:id`
-       * + `api` - `/admin/collections/:collection/:id/api`
-       * + `livePreview` - `/admin/collections/:collection/:id/preview`
-       * + `references` - `/admin/collections/:collection/:id/references`
-       * + `relationships` - `/admin/collections/:collection/:id/relationships`
-       * + `versions` - `/admin/collections/:collection/:id/versions`
-       * + `version` - `/admin/collections/:collection/:id/versions/:version`
-       * + `customView` - `/admin/collections/:collection/:id/:path`
-       *
-       * To override the entire Edit View including all nested views, use the `root` key.
-       */
-      api?: Partial<EditViewConfig>
-      default?: Partial<EditViewConfig>
-      livePreview?: Partial<EditViewConfig>
-      root?: never
-      version?: Partial<EditViewConfig>
-      versions?: Partial<EditViewConfig>
-      // TODO: uncomment these as they are built
-      // references?: EditView
-      // relationships?: EditView
-    }
-  | {
-      api?: never
-      default?: never
-      livePreview?: never
-      /**
-       * Replace or modify _all_ nested document views and routes, including the document header, controls, and tabs. This cannot be used in conjunction with other nested views.
-       * + `root` - `/admin/collections/:collection/:id/**\/*`
-       */
-      root: Partial<EditViewConfig>
-      version?: never
-      versions?: never
-    }
+export type EditConfig = EditConfigWithoutRoot | EditConfigWithRoot
+
+export type EditConfigWithRoot = {
+  api?: never
+  default?: never
+  livePreview?: never
+  /**
+   * Replace or modify _all_ nested document views and routes, including the document header, controls, and tabs. This cannot be used in conjunction with other nested views.
+   * + `root` - `/admin/collections/:collection/:id/**\/*`
+   */
+  root: Partial<EditViewConfig>
+  version?: never
+  versions?: never
+}
+
+export type EditConfigWithoutRoot = {
+  [key: string]: EditViewConfig
+  /**
+   * Replace or modify individual nested routes, or add new ones:
+   * + `default` - `/admin/collections/:collection/:id`
+   * + `api` - `/admin/collections/:collection/:id/api`
+   * + `livePreview` - `/admin/collections/:collection/:id/preview`
+   * + `references` - `/admin/collections/:collection/:id/references`
+   * + `relationships` - `/admin/collections/:collection/:id/relationships`
+   * + `versions` - `/admin/collections/:collection/:id/versions`
+   * + `version` - `/admin/collections/:collection/:id/versions/:version`
+   * + `customView` - `/admin/collections/:collection/:id/:path`
+   *
+   * To override the entire Edit View including all nested views, use the `root` key.
+   */
+  api?: Partial<EditViewConfig>
+  default?: Partial<EditViewConfig>
+  livePreview?: Partial<EditViewConfig>
+  root?: never
+  version?: Partial<EditViewConfig>
+  versions?: Partial<EditViewConfig>
+}
 
 export type EntityDescriptionComponent = CustomComponent
 

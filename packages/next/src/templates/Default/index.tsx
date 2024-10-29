@@ -1,9 +1,9 @@
-import type { ServerProps, VisibleEntities } from 'payload'
+import type { CustomComponent, ServerProps, VisibleEntities } from 'payload'
 
 import { AppHeader, BulkUploadProvider, EntityVisibilityProvider, NavToggler } from '@payloadcms/ui'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
-import { RenderServerComponent } from '../../../../ui/src/elements/RenderServerComponent/index.js'
 import { DefaultNav } from '../../elements/Nav/index.js'
 import './index.scss'
 import { NavHamburger } from './NavHamburger/index.js'
@@ -14,6 +14,7 @@ const baseClass = 'template-default'
 export type DefaultTemplateProps = {
   children?: React.ReactNode
   className?: string
+  viewActions?: CustomComponent[]
   visibleEntities: VisibleEntities
 } & ServerProps
 
@@ -27,6 +28,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   permissions,
   searchParams,
   user,
+  viewActions,
   visibleEntities,
 }) => {
   const {
@@ -82,7 +84,19 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
               }}
             />
             <div className={`${baseClass}__wrap`}>
-              <AppHeader />
+              <AppHeader
+                Actions={
+                  viewActions
+                    ? viewActions.map((action, i) => (
+                        <RenderServerComponent
+                          Component={action}
+                          importMap={payload.importMap}
+                          key={i}
+                        />
+                      ))
+                    : undefined
+                }
+              />
               {children}
             </div>
           </Wrapper>

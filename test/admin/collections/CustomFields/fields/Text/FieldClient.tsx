@@ -4,7 +4,7 @@ import type { TextFieldClientComponent } from 'payload'
 import { TextField, useServerFunctions } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
 
-export const CustomClientField: TextFieldClientComponent = ({ field }) => {
+export const CustomClientField: TextFieldClientComponent = (props) => {
   const { serverFunction } = useServerFunctions()
 
   const [result, setResult] = useState<null | string>(null)
@@ -29,7 +29,7 @@ export const CustomClientField: TextFieldClientComponent = ({ field }) => {
       <div id="server-function-result">
         {!result ? 'Executing Server Function...' : `Server Function result: ${result}`}
       </div>
-      <TextField field={field} />
+      <TextField {...props} />
     </div>
   )
 }

@@ -2,11 +2,11 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { ImportMap, SanitizedConfig } from 'payload'
 
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
-import { RenderServerComponent } from '../../../../ui/src/elements/RenderServerComponent/index.js'
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
@@ -57,15 +57,21 @@ export const RootPage = async ({
 
   const searchParams = await searchParamsPromise
 
-  const { DefaultView, initPageOptions, serverProps, templateClassName, templateType } =
-    getViewFromConfig({
-      adminRoute,
-      config,
-      currentRoute,
-      importMap,
-      searchParams,
-      segments,
-    })
+  const {
+    DefaultView,
+    initPageOptions,
+    serverProps,
+    templateClassName,
+    templateType,
+    viewActions,
+  } = getViewFromConfig({
+    adminRoute,
+    config,
+    currentRoute,
+    importMap,
+    searchParams,
+    segments,
+  })
 
   let dbHasUser = false
 
@@ -144,6 +150,7 @@ export const RootPage = async ({
           permissions={initPageResult?.permissions}
           searchParams={searchParams}
           user={initPageResult?.req.user}
+          viewActions={viewActions}
           visibleEntities={{
             // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
             // which this caused as soon as initPageResult.visibleEntities is passed in

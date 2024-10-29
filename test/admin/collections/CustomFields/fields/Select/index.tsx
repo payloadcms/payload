@@ -5,7 +5,8 @@ import type { Option, SelectFieldClientComponent } from 'payload'
 import { SelectField, useField } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomSelect: SelectFieldClientComponent = ({ field: { _path: path } }) => {
+export const CustomSelect: SelectFieldClientComponent = (props) => {
+  const { path } = props
   const { setValue, value } = useField<string>({ path })
   const [options, setOptions] = React.useState<{ label: string; value: string }[]>([])
 
@@ -34,7 +35,9 @@ export const CustomSelect: SelectFieldClientComponent = ({ field: { _path: path 
   return (
     <div>
       <SelectField
+        {...props}
         field={{
+          ...props.field,
           name: path,
           hasMany: true,
           options,
