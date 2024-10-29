@@ -5,6 +5,7 @@ import React, { useId } from 'react'
 
 import type { Column } from '../Table/index.js'
 
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
@@ -42,7 +43,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
       className={baseClass}
       ids={filteredColumns.map((col) => col?.accessor)}
       onDragEnd={({ moveFromIndex, moveToIndex }) => {
-        moveColumn({
+        void moveColumn({
           fromIndex: moveFromIndex,
           toIndex: moveToIndex,
         })
@@ -82,10 +83,12 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
             id={accessor}
             key={`${collectionSlug}-${col?.field && 'name' in col.field ? col?.field?.name : i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
             onClick={() => {
-              toggleColumn(accessor)
+              void toggleColumn(accessor)
             }}
           >
-            {col.Label}
+            {col.CustomLabel || (
+              <FieldLabel label={'label' in col.field ? col?.field?.label : undefined} unstyled />
+            )}
           </Pill>
         )
       })}
