@@ -58,8 +58,9 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
 
         if (
           col.accessor === '_select' ||
-          !('label' in field) ||
-          ('label' in field && !field.label)
+          !field ||
+          col.CustomLabel === null ||
+          (col.CustomLabel === undefined && !('label' in field))
         ) {
           return null
         }
@@ -79,7 +80,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
               void toggleColumn(accessor)
             }}
           >
-            {col.CustomLabel || <FieldLabel label={field.label} unstyled />}
+            {col.CustomLabel ?? <FieldLabel label={'label' in field && field.label} unstyled />}
           </Pill>
         )
       })}
