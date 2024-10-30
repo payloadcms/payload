@@ -1662,7 +1662,7 @@ describe('Select', () => {
       expect(richTextSlateRel.value).toStrictEqual(expectedHomePage)
     })
 
-    it('rEST API - should populate with the defaultPopulate select shape', async () => {
+    it('REST API - should populate with the defaultPopulate select shape', async () => {
       const restResult = await (
         await restClient.GET(`/pages/${aboutPage.id}`, { query: { depth: 1 } })
       ).json()
