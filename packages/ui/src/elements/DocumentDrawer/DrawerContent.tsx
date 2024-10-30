@@ -43,7 +43,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const prevDocID = useRef(existingDocID)
   const [isOpen, setIsOpen] = useState(false)
 
-  const { serverFunction } = useServerFunctions()
+  const { getDrawerDocument, serverFunction } = useServerFunctions()
 
   const [DocumentView, setDocumentView] = useState<React.ReactNode>(undefined)
   const [isLoading, setIsLoading] = useState(true)
@@ -51,27 +51,26 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   useEffect(() => {
     const docIDChanged = docID !== prevDocID.current
 
-    if (!DocumentView || docIDChanged) {
+    if ((!DocumentView || docIDChanged) && isOpen) {
       const getDocumentView = async () => {
         setIsLoading(true)
 
         try {
-          const { Document: ViewResult } = (await serverFunction({
-            name: 'render-document',
-            args: {
-              collectionSlug,
-              disableActions,
-              docID,
-              drawerSlug,
-              initialData,
-              redirectAfterDelete: redirectAfterDelete !== undefined ? redirectAfterDelete : false,
-              redirectAfterDuplicate:
-                redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false,
-            },
-          })) as { docID: string; Document: React.ReactNode }
+          const result = await getDrawerDocument({
+            collectionSlug,
+            disableActions,
+            docID,
+            drawerSlug,
+            initialData,
+            redirectAfterDelete: redirectAfterDelete !== undefined ? redirectAfterDelete : false,
+            redirectAfterDuplicate:
+              redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false,
+          })
 
-          setDocumentView(ViewResult)
-          setIsLoading(false)
+          if (result?.Document) {
+            setDocumentView(result.Document)
+            setIsLoading(false)
+          }
         } catch (error) {
           if (isOpen) {
             closeModal(drawerSlug)
@@ -98,6 +97,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
     initialData,
     redirectAfterDelete,
     redirectAfterDuplicate,
+    getDrawerDocument,
   ])
 
   useEffect(() => {

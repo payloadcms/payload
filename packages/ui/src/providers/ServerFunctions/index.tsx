@@ -1,4 +1,4 @@
-import type { BuildFormStateArgs, BuildTableStateArgs, ServerFunctionClient } from 'payload'
+import type { BuildFormStateArgs, BuildTableStateArgs, Data, ServerFunctionClient } from 'payload'
 
 import React, { createContext, useCallback, useEffect, useRef } from 'react'
 
@@ -17,7 +17,19 @@ type GetTableStateClient = (
   } & Omit<BuildTableStateArgs, 'clientConfig' | 'req'>,
 ) => ReturnType<typeof buildTableState>
 
+type GetDrawerDocumentView = (args: {
+  collectionSlug: string
+  disableActions?: boolean
+  docID?: number | string
+  drawerSlug?: string
+  initialData?: Data
+  redirectAfterDelete?: boolean
+  redirectAfterDuplicate?: boolean
+  signal?: AbortSignal
+}) => Promise<{ docID: string; Document: React.ReactNode }>
+
 type ServerFunctionsContextType = {
+  getDrawerDocument: GetDrawerDocumentView
   getFormState: GetFormStateClient
   getTableState: GetTableStateClient
   serverFunction: ServerFunctionClient
@@ -99,6 +111,36 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
+  const getDrawerDocument = useCallback<GetDrawerDocumentView>(
+    async (args) => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+      const localSignal = abortController.signal
+
+      const { signal: remoteSignal, ...rest } = args || {}
+
+      try {
+        if (!remoteSignal?.aborted && !localSignal?.aborted) {
+          const result = (await serverFunction({
+            name: 'render-document',
+            args: rest,
+          })) as { docID: string; Document: React.ReactNode }
+
+          if (!remoteSignal?.aborted && !localSignal?.aborted) {
+            return result
+          }
+        }
+      } catch (_err) {
+        console.error(_err) // eslint-disable-line no-console
+      }
+    },
+    [serverFunction],
+  )
+
   useEffect(() => {
     const controller = abortControllerRef.current
 
@@ -114,7 +156,9 @@ export const ServerFunctionsProvider: React.FC<{
   }, [])
 
   return (
-    <ServerFunctionsContext.Provider value={{ getFormState, getTableState, serverFunction }}>
+    <ServerFunctionsContext.Provider
+      value={{ getDrawerDocument, getFormState, getTableState, serverFunction }}
+    >
       {children}
     </ServerFunctionsContext.Provider>
   )
