@@ -78,7 +78,11 @@ export const sanitizeQueryValue = ({
           return { operator: formattedOperator, val: undefined }
         }
       }
-    } else if (Array.isArray(val)) {
+    } else if (Array.isArray(val) || (typeof val === 'string' && val.split(',').length > 1)) {
+      if (typeof val === 'string') {
+        formattedValue = createArrayFromCommaDelineated(val)
+      }
+
       formattedValue = formattedValue.reduce((formattedValues, inVal) => {
         const newValues = [inVal]
         if (!hasCustomID) {

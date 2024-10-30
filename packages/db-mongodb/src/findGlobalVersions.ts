@@ -6,6 +6,7 @@ import { buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
@@ -18,6 +19,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     page,
     pagination,
     req = {} as PayloadRequest,
+    select,
     skip,
     sort: sortArg,
     where,
@@ -69,6 +71,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     options,
     page,
     pagination,
+    projection: buildProjectionFromSelect({ adapter: this, fields: versionFields, select }),
     sort,
     useEstimatedCount,
   }

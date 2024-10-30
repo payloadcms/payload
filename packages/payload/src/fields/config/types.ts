@@ -121,6 +121,7 @@ import type {
   JSONFieldValidation,
   PointFieldValidation,
   RadioFieldValidation,
+  Sort,
   TextareaFieldValidation,
 } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
@@ -1441,6 +1442,7 @@ export type JoinField = {
     update?: never
   }
   admin?: {
+    allowCreate?: boolean
     components?: {
       Error?: CustomComponent<JoinFieldErrorClientComponent | JoinFieldErrorServerComponent>
       Label?: CustomComponent<JoinFieldLabelClientComponent | JoinFieldLabelServerComponent>
@@ -1452,6 +1454,8 @@ export type JoinField = {
    * The slug of the collection to relate with.
    */
   collection: CollectionSlug
+  defaultLimit?: number
+  defaultSort?: Sort
   defaultValue?: never
   /**
    * This does not need to be set and will be overridden by the relationship field's hasMany property.
@@ -1474,6 +1478,7 @@ export type JoinField = {
 
 export type JoinFieldClient = {
   admin?: {
+    allowCreate?: boolean
     components?: {
       Label?: MappedComponent
     } & AdminClient['components']

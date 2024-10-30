@@ -47,7 +47,10 @@ export const Categories: CollectionConfig = {
       label: 'Related Posts',
       type: 'join',
       collection: postsSlug,
+      defaultSort: '-title',
+      defaultLimit: 5,
       on: 'category',
+      maxDepth: 1,
     },
     {
       name: 'hasManyPosts',
