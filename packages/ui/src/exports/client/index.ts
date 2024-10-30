@@ -67,7 +67,7 @@ export type {
   UseListDrawer,
 } from '../../elements/ListDrawer/types.js'
 export { ListSelection } from '../../elements/ListSelection/index.js'
-export { ListHeader } from '../../elements/ListHeader/index.js'
+export { ListHeader } from '../../views/List/ListHeader/index.js'
 export { LoadingOverlayToggle } from '../../elements/Loading/index.js'
 export { FormLoadingOverlayToggle } from '../../elements/Loading/index.js'
 export { LoadingOverlay } from '../../elements/Loading/index.js'

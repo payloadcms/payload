@@ -1,7 +1,18 @@
-@import '../../scss/styles.scss';
+@import '../../../scss/styles.scss';
 
 @layer payload-default {
-  .list-drawer {
+  .list-header {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: calc(var(--base) * 0.8);
+
+    h1 {
+      margin: 0;
+    }
+  }
+
+  .list-drawer-header {
     &__header {
       margin-top: base(2.5);
       width: 100%;
@@ -14,6 +25,11 @@
     &__header-wrap {
       display: flex;
       gap: base(1);
+    }
+
+    &__create-new-button {
+      all: unset;
+      cursor: pointer;
     }
 
     &__header-content {
@@ -37,11 +53,6 @@
 
     &__header-close {
       flex-shrink: 0;
-    }
-
-    &__create-new-button {
-      all: unset;
-      cursor: pointer;
     }
 
     &__toggler {
@@ -93,6 +104,16 @@
 
     &__select-collection-wrap {
       margin-top: base(1);
+    }
+
+    &__first-cell {
+      border: 0;
+      background-color: transparent;
+      padding: 0;
+      cursor: pointer;
+      text-decoration: underline;
+      text-align: left;
+      white-space: nowrap;
     }
 
     @include mid-break {

@@ -15,7 +15,6 @@ import React from 'react'
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 import type { ViewFromConfig } from './getViewsFromConfig.js'
 
-import { DocumentDrawerHeader } from '../../elements/DocumentDrawerHeader/index.js'
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { renderDocumentSlots } from '../../utilities/renderDocumentSlots.js'
 import { NotFoundView } from '../NotFound/index.js'
@@ -252,14 +251,6 @@ export const renderDocument = async ({
     Document: (
       <DocumentInfoProvider
         apiURL={apiURL}
-        BeforeDocument={
-          drawerSlug ? (
-            <DocumentDrawerHeader
-              drawerSlug={drawerSlug}
-              Header={null} // TODO
-            />
-          ) : undefined
-        }
         collectionSlug={collectionConfig?.slug}
         disableActions={disableActions ?? false}
         docPermissions={docPermissions}

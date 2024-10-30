@@ -15,12 +15,10 @@ import type { ListPreferences } from './types.js'
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
 import { DeleteMany } from '../../elements/DeleteMany/index.js'
-import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { EditMany } from '../../elements/EditMany/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
-import { ListHeader } from '../../elements/ListHeader/index.js'
 import { ListSelection } from '../../elements/ListSelection/index.js'
 import { useModal } from '../../elements/Modal/index.js'
 import { Pagination } from '../../elements/Pagination/index.js'
@@ -31,7 +29,6 @@ import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../../elements/TableColumns/index.js'
 import { UnpublishMany } from '../../elements/UnpublishMany/index.js'
-import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
@@ -42,6 +39,7 @@ import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import './index.scss'
+import { ListHeader } from './ListHeader/index.js'
 
 const baseClass = 'collection-list'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
@@ -94,7 +92,6 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     disableBulkDelete,
     disableBulkEdit,
     hasCreatePermission,
-    Header,
     newDocumentURL,
   } = useListInfo()
 
@@ -106,13 +103,25 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
   const { setCollectionSlug, setOnSuccess } = useBulkUpload()
   const { drawerSlug: bulkUploadDrawerSlug } = useBulkUpload()
 
-  const [collectionConfig] = useState(
-    () => getEntityConfig({ collectionSlug }) as ClientCollectionConfig,
-  )
+  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
-  const { admin: { description } = {}, fields, labels } = collectionConfig
+  const { labels, upload } = collectionConfig
+
+  const isUploadCollection = Boolean(upload)
+
+  const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
+
+  const isInDrawer = Boolean(listDrawerSlug)
 
   const { i18n, t } = useTranslation()
+
+  const drawerDepth = useEditDepth()
+
+  const { setStepNav } = useStepNav()
+
+  const {
+    breakpoints: { s: smallBreak },
+  } = useWindowInfo()
 
   useEffect(() => {
     if (!collectionConfig) {
@@ -128,17 +137,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     }
   }, [payloadServerAction, collectionConfig, collectionSlug, data, i18n])
 
-  const drawerDepth = useEditDepth()
-
-  const { setStepNav } = useStepNav()
-
-  const {
-    breakpoints: { s: smallBreak },
-  } = useWindowInfo()
-
   let docs = data.docs || []
-
-  const isUploadCollection = Boolean(collectionConfig?.upload)
 
   if (isUploadCollection) {
     docs = docs?.map((doc) => {
@@ -165,10 +164,6 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     }
   }, [setStepNav, labels, drawerDepth])
 
-  const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
-
-  const isInDrawer = Boolean(listDrawerSlug)
-
   return (
     <Fragment>
       <TableColumnsProvider
@@ -184,44 +179,17 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
           <SelectionProvider docs={data.docs} totalDocs={data.totalDocs} user={user}>
             {BeforeList}
             <Gutter className={`${baseClass}__wrap`}>
-              {Header || (
-                <ListHeader heading={getTranslation(labels?.plural, i18n)}>
-                  {hasCreatePermission && (
-                    <>
-                      <Button
-                        aria-label={i18n.t('general:createNewLabel', {
-                          label: getTranslation(labels?.singular, i18n),
-                        })}
-                        buttonStyle="pill"
-                        el={'link'}
-                        Link={Link}
-                        size="small"
-                        to={newDocumentURL}
-                      >
-                        {i18n.t('general:createNew')}
-                      </Button>
-                      {isBulkUploadEnabled && (
-                        <Button
-                          aria-label={t('upload:bulkUpload')}
-                          buttonStyle="pill"
-                          onClick={openBulkUpload}
-                          size="small"
-                        >
-                          {t('upload:bulkUpload')}
-                        </Button>
-                      )}
-                    </>
-                  )}
-                  {!smallBreak && (
-                    <ListSelection label={getTranslation(collectionConfig?.labels?.plural, i18n)} />
-                  )}
-                  {description || Description ? (
-                    <div className={`${baseClass}__sub-header`}>
-                      {Description ?? <ViewDescription description={description} />}
-                    </div>
-                  ) : null}
-                </ListHeader>
-              )}
+              <ListHeader
+                collectionConfig={collectionConfig}
+                Description={Description}
+                hasCreatePermission={hasCreatePermission}
+                i18n={i18n}
+                isBulkUploadEnabled={isBulkUploadEnabled}
+                newDocumentURL={newDocumentURL}
+                openBulkUpload={openBulkUpload}
+                smallBreak={smallBreak}
+                t={t}
+              />
               <ListControls collectionConfig={collectionConfig} renderedFilters={renderedFilters} />
               {BeforeListTable}
               {!data.docs && (

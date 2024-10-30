@@ -18,6 +18,7 @@ import { OperationProvider } from '../../../providers/Operation/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useUploadEdits } from '../../../providers/UploadEdits/index.js'
 import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
+import { useDocumentDrawerContext } from '../../DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
 import { RenderComponent } from '../../RenderComponent/index.js'
 import { Upload } from '../../Upload/index.js'
@@ -36,7 +37,6 @@ export function EditForm({ submitted }: EditFormProps) {
     action,
     AfterDocument,
     AfterFields,
-    BeforeDocument,
     BeforeFields,
     collectionSlug: docSlug,
     docPermissions,
@@ -46,8 +46,9 @@ export function EditForm({ submitted }: EditFormProps) {
     initialState,
     isEditing,
     isInitializing,
-    onSave: onSaveFromContext,
   } = useDocumentInfo()
+
+  const { onSave: onSaveFromContext } = useDocumentDrawerContext()
 
   const { getFormState } = useServerFunctions()
 
@@ -132,7 +133,6 @@ export function EditForm({ submitted }: EditFormProps) {
   return (
     <OperationProvider operation="create">
       <BulkUploadProvider>
-        {BeforeDocument}
         <Form
           action={action}
           className={`${baseClass}__form`}

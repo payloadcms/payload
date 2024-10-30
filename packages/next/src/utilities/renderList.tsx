@@ -60,7 +60,6 @@ export const renderListFn = async (args: {
     disableActions,
     disableBulkDelete,
     disableBulkEdit,
-    documentDrawerSlug,
     drawerSlug,
     enableRowSelections,
     redirectAfterDelete,
@@ -73,6 +72,8 @@ export const renderListFn = async (args: {
       user,
     },
   } = args
+
+  console.log('renderListFn', collectionSlug)
 
   const headers = await getHeaders()
 
@@ -163,7 +164,6 @@ export const renderListFn = async (args: {
     disableActions,
     disableBulkDelete,
     disableBulkEdit,
-    documentDrawerSlug,
     drawerSlug,
     enableRowSelections,
     importMap: payload.importMap,

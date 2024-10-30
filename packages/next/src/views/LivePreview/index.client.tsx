@@ -62,7 +62,6 @@ const PreviewView: React.FC<Props> = ({
     AfterDocument,
     AfterFields,
     apiURL,
-    BeforeDocument,
     BeforeFields,
     collectionSlug,
     currentEditor,
@@ -414,7 +413,6 @@ const PreviewView: React.FC<Props> = ({
               .filter(Boolean)
               .join(' ')}
           >
-            {BeforeDocument}
             <DocumentFields
               AfterFields={AfterFields}
               BeforeFields={BeforeFields}

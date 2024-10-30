@@ -29,7 +29,6 @@ export type ListInfoContext = {
   readonly disableBulkDelete?: boolean
   readonly disableBulkEdit?: boolean
   readonly hasCreatePermission: boolean
-  readonly Header?: React.ReactNode
   readonly newDocumentURL: string
 } & ListInfoProps
 
@@ -47,24 +46,6 @@ export const ListInfoProvider: React.FC<
   const { getEntityConfig } = useConfig()
 
   const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
-
-  // const payloadServeFunctions = useServerFunctions()
-
-  // const { i18n } = useTranslation()
-
-  // useEffect(() => {
-  //   // TODO: rewrite this to use the new pattern
-  //   if (!collectionConfig) {
-  //     const getNewConfig = async () => {
-  //       // @ts-expect-error eslint-disable-next-line
-  //       const res = (await payloadServerAction('render-config', {
-  //         collectionSlug,
-  //         languageCode: i18n.language,
-  //       })) as any as ClientCollectionConfig
-  //     }
-  //     void getNewConfig()
-  //   }
-  // }, [payloadServerAction, collectionSlug, i18n.language, collectionConfig])
 
   return (
     <Context.Provider

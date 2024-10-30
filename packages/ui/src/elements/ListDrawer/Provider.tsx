@@ -4,11 +4,16 @@ import { createContext, useContext } from 'react'
 
 import type { useSelection } from '../../providers/Selection/index.js'
 
+import { type Option } from '../ReactSelect/index.js'
+
 export type ListDrawerContextProps = {
   readonly createNewDrawerSlug?: string
   readonly drawerSlug: string
+  readonly enabledCollections: CollectionSlug[]
   readonly onBulkSelect?: (selected: ReturnType<typeof useSelection>['selected']) => void
   readonly onSelect?: (args: { collectionSlug: CollectionSlug; docID: string }) => void
+  readonly setSelectedOption: (option: Option<string>) => void
+  readonly selectedOption: Option<string>
 }
 
 export type ListDrawerContextType = ListDrawerContextProps

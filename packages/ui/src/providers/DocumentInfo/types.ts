@@ -21,7 +21,6 @@ export type DocumentInfoProps = {
   readonly AfterDocument?: React.ReactNode
   readonly AfterFields?: React.ReactNode
   readonly apiURL?: string
-  readonly BeforeDocument?: React.ReactNode
   readonly BeforeFields?: React.ReactNode
   readonly collectionSlug?: SanitizedCollectionConfig['slug']
   readonly disableActions?: boolean

@@ -1,5 +1,7 @@
 'use client'
 
+// import { LoadingOverlay } from '../../elements/Loading/index.js'
+import { useModal } from '@faceless-ui/modal'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import {
   type ClientCollectionConfig,
@@ -7,20 +9,22 @@ import {
   type ClientSideEditViewProps,
   type ClientUser,
 } from 'payload'
-import { deepCopyObjectSimple } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
 
 import { DocumentControls } from '../../elements/DocumentControls/index.js'
-import { DocumentFields } from '../../elements/DocumentFields/index.js'
-// import { LoadingOverlay } from '../../elements/Loading/index.js'
 // import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { useDocumentDrawerContext } from '../../elements/DocumentDrawer/Provider.js'
+import { DocumentFields } from '../../elements/DocumentFields/index.js'
+import { Gutter } from '../../elements/Gutter/index.js'
+import { IDLabel } from '../../elements/IDLabel/index.js'
+import { RenderTitle } from '../../elements/RenderTitle/index.js'
 // import { DocumentLocked } from '../../../elements/DocumentLocked/index.js'
 import { Upload } from '../../elements/Upload/index.js'
 // import { Upload } from '../../elements/Upload/index.js'
 import { Form } from '../../forms/Form/index.js'
+import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
@@ -29,6 +33,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 // import { DocumentTakeOver } from '../../../elements/DocumentTakeOver/index.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { handleTakeOver } from '../../utilities/handleTakeOver.js'
@@ -56,7 +61,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     AfterDocument,
     AfterFields,
     apiURL,
-    BeforeDocument,
     BeforeFields,
     collectionSlug,
     currentEditor,
@@ -83,11 +87,14 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   } = useDocumentInfo()
 
   const {
+    drawerSlug,
     onCreate: onDrawerCreate,
     onDelete,
     onDuplicate,
     onSave: onSaveFromContext,
   } = useDocumentDrawerContext()
+
+  const isInDrawer = Boolean(drawerSlug)
 
   const { refreshCookieAsync, user } = useAuth()
 
@@ -99,6 +106,9 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     },
     getEntityConfig,
   } = useConfig()
+
+  const { t } = useTranslation()
+  const { closeModal } = useModal()
 
   const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
   const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
@@ -402,7 +412,25 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
           onChange={[onChange]}
           onSuccess={onSave}
         >
-          {BeforeDocument}
+          {isInDrawer && (
+            <Gutter className={`doc-drawer-header`}>
+              <div className={`doc-drawer-header__content`}>
+                <h2 className={`doc-drawer-header__text`}>{<RenderTitle element="span" />}</h2>
+                {/* TODO: the `button` HTML element breaks CSS transitions on the drawer for some reason...
+              i.e. changing to a `div` element will fix the animation issue but will break accessibility
+            */}
+                <button
+                  aria-label={t('general:close')}
+                  className={`doc-drawer-header__close`}
+                  onClick={() => closeModal(drawerSlug)}
+                  type="button"
+                >
+                  <XIcon />
+                </button>
+              </div>
+              <DocumentTitle />
+            </Gutter>
+          )}
           {/* {isLockingEnabled && shouldShowDocumentLockedModal && !isReadOnlyForIncomingUser && (
             <DocumentLocked
               handleGoBack={() => handleGoBack({ adminRoute, collectionSlug, router })}
@@ -538,4 +566,9 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       </OperationProvider>
     </main>
   )
+}
+
+const DocumentTitle: React.FC = () => {
+  const { id, title } = useDocumentInfo()
+  return id && id !== title ? <IDLabel id={id.toString()} /> : null
 }

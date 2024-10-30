@@ -8,11 +8,9 @@ import type { DocumentDrawerProps } from './types.js'
 
 import { LoadingOverlay } from '../../elements/Loading/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { IDLabel } from '../IDLabel/index.js'
 import { DocumentDrawerContextProvider } from './Provider.js'
 
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
@@ -154,9 +152,4 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       {DocumentView}
     </DocumentDrawerContextProvider>
   )
-}
-
-const DocumentTitle: React.FC = () => {
-  const { id, title } = useDocumentInfo()
-  return id && id !== title ? <IDLabel id={id.toString()} /> : null
 }

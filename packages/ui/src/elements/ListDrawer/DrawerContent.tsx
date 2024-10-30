@@ -7,7 +7,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import type { ListDrawerProps } from './types.js'
 
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
-import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
@@ -70,11 +69,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   }
 
   const {
-    config: {
-      collections,
-      routes: { api },
-      serverURL,
-    },
+    config: { collections },
     getEntityConfig,
   } = useConfig()
 
@@ -96,6 +91,8 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       : undefined
   })
 
+  const prevSelectedOption = useRef(selectedOption)
+
   const [DocumentDrawer, , { drawerSlug: documentDrawerSlug }] = useDocumentDrawer({
     collectionSlug: selectedOption.value,
   })
@@ -110,7 +107,11 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   }, [selectedCollectionFromProps, collections, selectedOption])
 
   useEffect(() => {
-    if (!ListView) {
+    const optionHasChanged = prevSelectedOption.current?.value !== selectedOption.value
+
+    if (!ListView || optionHasChanged) {
+      prevSelectedOption.current = selectedOption
+
       const getListView = async () => {
         try {
           const { List: ViewResult } = (await serverFunction({
@@ -119,11 +120,10 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
               collectionSlug: selectedOption.value,
               disableBulkDelete: true,
               disableBulkEdit: true,
-              documentDrawerSlug,
               drawerSlug,
               enableRowSelections,
             },
-          })) as { docID: string; List: React.ReactNode }
+          })) as { List: React.ReactNode }
 
           setListView(ViewResult)
           setIsLoading(false)
@@ -322,8 +322,11 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       <ListDrawerContextProvider
         createNewDrawerSlug={documentDrawerSlug}
         drawerSlug={drawerSlug}
+        enabledCollections={collectionSlugs}
         onBulkSelect={onBulkSelect}
         onSelect={onSelect}
+        selectedOption={selectedOption}
+        setSelectedOption={setSelectedOption}
       >
         {ListView}
         <DocumentDrawer onSave={onCreateNew} />

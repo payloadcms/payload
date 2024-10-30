@@ -17,14 +17,12 @@ import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { RenderServerComponent } from '../../../../ui/src/elements/RenderServerComponent/index.js'
-import { ListDrawerHeader } from '../../elements/ListDrawerHeader/index.js'
 
 export { generateListMetadata } from './meta.js'
 
 type ListViewArgs = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
-  documentDrawerSlug: string
   enableRowSelections: boolean
 } & AdminViewProps
 
@@ -37,7 +35,6 @@ export const renderListView = async (
     clientConfig,
     disableBulkDelete,
     disableBulkEdit,
-    documentDrawerSlug,
     drawerSlug,
     enableRowSelections,
     initPageResult,
@@ -194,25 +191,6 @@ export const renderListView = async (
             disableBulkDelete={disableBulkDelete}
             disableBulkEdit={disableBulkEdit}
             hasCreatePermission={hasCreatePermission}
-            Header={
-              drawerSlug ? (
-                <ListDrawerHeader
-                  CustomDescription={
-                    collectionConfig?.admin?.components?.Description ? (
-                      <RenderServerComponent
-                        Component={collectionConfig.admin.components.Description}
-                        importMap={payload.importMap}
-                      />
-                    ) : undefined
-                  }
-                  description={clientCollectionConfig?.admin?.description}
-                  documentDrawerSlug={documentDrawerSlug}
-                  drawerSlug={drawerSlug}
-                  hasCreatePermission={hasCreatePermission}
-                  pluralLabel={clientCollectionConfig?.labels?.plural}
-                />
-              ) : null
-            }
             newDocumentURL={formatAdminURL({
               adminRoute,
               path: `/collections/${collectionSlug}/create`,
