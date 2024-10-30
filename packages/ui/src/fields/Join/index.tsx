@@ -15,7 +15,16 @@ import { fieldBaseClass } from '../index.js'
 const JoinFieldComponent: JoinFieldClientComponent = (props) => {
   const {
     field,
-    field: { name, _schemaPath, collection, label, localized, on, required },
+    field: {
+      name,
+      _schemaPath,
+      admin: { allowCreate },
+      collection,
+      label,
+      localized,
+      on,
+      required,
+    },
     fieldState: { customComponents: { AfterInput, BeforeInput, Label } } = {},
     path: pathFromProps,
   } = props
@@ -40,6 +49,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
     <div className={[fieldBaseClass, 'join'].filter(Boolean).join(' ')}>
       {BeforeInput}
       <RelationshipTable
+        allowCreate={typeof docID !== 'undefined' && allowCreate}
         field={field as JoinFieldClient}
         filterOptions={filterOptions}
         initialData={docID && value ? value : ({ docs: [] } as PaginatedDocs)}

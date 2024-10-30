@@ -30,7 +30,7 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
       docToSyncWith = await payload.findByID({
         id,
         collection,
-        locale: 'all',
+        locale: req.locale,
         req,
       })
     }
@@ -71,6 +71,7 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
             ...dataToSave,
             priority: defaultPriority,
           },
+          locale: req.locale,
           req,
         })
       }
@@ -82,6 +83,7 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
         const searchDocQuery = await payload.find({
           collection: searchSlug,
           depth: 0,
+          locale: req.locale,
           req,
           where: {
             'doc.relationTo': {
@@ -128,6 +130,7 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
                   ...dataToSave,
                   priority: foundDoc.priority || defaultPriority,
                 },
+                locale: req.locale,
                 req,
               })
             } catch (err: unknown) {
@@ -154,6 +157,7 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
                 ...dataToSave,
                 priority: defaultPriority,
               },
+              locale: req.locale,
               req,
             })
           } catch (err: unknown) {

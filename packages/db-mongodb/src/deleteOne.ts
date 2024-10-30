@@ -2,12 +2,13 @@ import type { DeleteOne, Document, PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: MongooseAdapter,
-  { collection, req = {} as PayloadRequest, where },
+  { collection, req = {} as PayloadRequest, select, where },
 ) {
   const Model = this.collections[collection]
   const options = await withSession(this, req)
@@ -17,7 +18,14 @@ export const deleteOne: DeleteOne = async function deleteOne(
     where,
   })
 
-  const doc = await Model.findOneAndDelete(query, options).lean()
+  const doc = await Model.findOneAndDelete(query, {
+    ...options,
+    projection: buildProjectionFromSelect({
+      adapter: this,
+      fields: this.payload.collections[collection].config.fields,
+      select,
+    }),
+  }).lean()
 
   let result: Document = JSON.parse(JSON.stringify(doc))
 

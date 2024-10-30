@@ -13,6 +13,7 @@ type BuildJoinAggregationArgs = {
   // the number of docs to get at the top collection level
   limit?: number
   locale: string
+  projection?: Record<string, true>
   // the where clause for the top collection
   query?: Where
   /** whether the query is from drafts */
@@ -26,6 +27,7 @@ export const buildJoinAggregation = async ({
   joins,
   limit,
   locale,
+  projection,
   query,
   versions,
 }: BuildJoinAggregationArgs): Promise<PipelineStage[] | undefined> => {
@@ -56,9 +58,13 @@ export const buildJoinAggregation = async ({
     for (const join of joinConfig[slug]) {
       const joinModel = adapter.collections[join.field.collection]
 
+      if (projection && !projection[join.schemaPath]) {
+        continue
+      }
+
       const {
-        limit: limitJoin = 10,
-        sort: sortJoin,
+        limit: limitJoin = join.field.defaultLimit ?? 10,
+        sort: sortJoin = join.field.defaultSort || collectionConfig.defaultSort,
         where: whereJoin,
       } = joins?.[join.schemaPath] || {}
 
@@ -66,7 +72,7 @@ export const buildJoinAggregation = async ({
         config: adapter.payload.config,
         fields: adapter.payload.collections[slug].config.fields,
         locale,
-        sort: sortJoin || collectionConfig.defaultSort,
+        sort: sortJoin,
         timestamps: true,
       })
       const sortProperty = Object.keys(sort)[0]
@@ -100,7 +106,7 @@ export const buildJoinAggregation = async ({
               $lookup: {
                 as: `${as}.docs`,
                 foreignField: `${join.field.on}${code}`,
-                from: slug,
+                from: adapter.collections[slug].collection.name,
                 localField: versions ? 'parent' : '_id',
                 pipeline,
               },
@@ -141,7 +147,7 @@ export const buildJoinAggregation = async ({
             $lookup: {
               as: `${as}.docs`,
               foreignField: `${join.field.on}${localeSuffix}`,
-              from: slug,
+              from: adapter.collections[slug].collection.name,
               localField: versions ? 'parent' : '_id',
               pipeline,
             },
@@ -172,6 +178,10 @@ export const buildJoinAggregation = async ({
         }
       }
     }
+  }
+
+  if (projection) {
+    aggregate.push({ $project: projection })
   }
 
   return aggregate

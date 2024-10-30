@@ -78,6 +78,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     initialState,
     isEditing,
     isInitializing,
+    lastUpdateTime,
     redirectAfterDelete,
     redirectAfterDuplicate,
     setCurrentEditor,
@@ -135,8 +136,12 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   const docConfig = collectionConfig || globalConfig
 
   const lockDocumentsProp = docConfig?.lockDocuments !== undefined ? docConfig?.lockDocuments : true
-
   const isLockingEnabled = lockDocumentsProp !== false
+
+  const lockDurationDefault = 300 // Default 5 minutes in seconds
+  const lockDuration =
+    typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
+  const lockDurationInMilliseconds = lockDuration * 1000
 
   let preventLeaveWithoutSaving = true
 
@@ -155,6 +160,12 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
 
+  const [editSessionStartTime, setEditSessionStartTime] = useState(Date.now())
+
+  const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
+
+  const isLockExpired = Date.now() > lockExpiryTime
+
   const documentLockStateRef = useRef<{
     hasShownLockedModal: boolean
     isLocked: boolean
@@ -164,8 +175,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     isLocked: false,
     user: null,
   })
-
-  const [lastUpdateTime, setLastUpdateTime] = useState(Date.now())
 
   const classes = [baseClass, (id || globalSlug) && `${baseClass}--is-editing`]
 
@@ -268,12 +277,12 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       abortControllerRef.current = abortController
 
       const currentTime = Date.now()
-      const timeSinceLastUpdate = currentTime - lastUpdateTime
+      const timeSinceLastUpdate = currentTime - editSessionStartTime
 
       const updateLastEdited = isLockingEnabled && timeSinceLastUpdate >= 10000 // 10 seconds
 
       if (updateLastEdited) {
-        setLastUpdateTime(currentTime)
+        setEditSessionStartTime(currentTime)
       }
 
       const docPreferences = await getDocPreferences()
@@ -325,6 +334,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     },
     [
       collectionSlug,
+      editSessionStartTime,
       schemaPath,
       getDocPreferences,
       globalSlug,
@@ -335,7 +345,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       setCurrentEditor,
       isLockingEnabled,
       setDocumentIsLocked,
-      lastUpdateTime,
       getFormState,
     ],
   )
@@ -396,7 +405,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     currentEditor.id !== user?.id &&
     !isReadOnlyForIncomingUser &&
     !showTakeOverModal &&
-    !documentLockStateRef.current?.hasShownLockedModal
+    !documentLockStateRef.current?.hasShownLockedModal &&
+    !isLockExpired
 
   return (
     <main className={classes.filter(Boolean).join(' ')}>

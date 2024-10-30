@@ -1,7 +1,13 @@
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type {
+  JsonObject,
+  PayloadRequest,
+  RequestContext,
+  SelectMode,
+  SelectType,
+} from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
@@ -40,6 +46,8 @@ type Args = {
   parentSchemaPath: string[]
   populationPromises: Promise<void>[]
   req: PayloadRequest
+  select?: SelectType
+  selectMode?: SelectMode
   showHiddenFields: boolean
   siblingDoc: JsonObject
   triggerAccessControl?: boolean
@@ -74,6 +82,8 @@ export const promise = async ({
   parentSchemaPath,
   populationPromises,
   req,
+  select,
+  selectMode,
   showHiddenFields,
   siblingDoc,
   triggerAccessControl = true,
@@ -93,6 +103,22 @@ export const promise = async ({
     !showHiddenFields
   ) {
     delete siblingDoc[field.name]
+  }
+
+  if (fieldAffectsData(field) && select && selectMode) {
+    if (selectMode === 'include') {
+      if (!select[field.name]) {
+        delete siblingDoc[field.name]
+        return
+      }
+    }
+
+    if (selectMode === 'exclude') {
+      if (select[field.name] === false) {
+        delete siblingDoc[field.name]
+        return
+      }
+    }
   }
 
   const shouldHoistLocalizedValue =
@@ -320,6 +346,8 @@ export const promise = async ({
         groupDoc = {}
       }
 
+      const groupSelect = select?.[field.name]
+
       traverseFields({
         collection,
         context,
@@ -339,6 +367,8 @@ export const promise = async ({
         populationPromises,
         req,
         schemaPath: fieldSchemaPath,
+        select: typeof groupSelect === 'object' ? groupSelect : undefined,
+        selectMode,
         showHiddenFields,
         siblingDoc: groupDoc,
         triggerAccessControl,
@@ -350,6 +380,12 @@ export const promise = async ({
 
     case 'array': {
       const rows = siblingDoc[field.name] as JsonObject
+
+      const arraySelect = select?.[field.name]
+
+      if (selectMode === 'include' && typeof arraySelect === 'object') {
+        arraySelect.id = true
+      }
 
       if (Array.isArray(rows)) {
         rows.forEach((row, i) => {
@@ -372,6 +408,8 @@ export const promise = async ({
             populationPromises,
             req,
             schemaPath: fieldSchemaPath,
+            select: typeof arraySelect === 'object' ? arraySelect : undefined,
+            selectMode,
             showHiddenFields,
             siblingDoc: row || {},
             triggerAccessControl,
@@ -418,11 +456,37 @@ export const promise = async ({
     case 'blocks': {
       const rows = siblingDoc[field.name]
 
+      const blocksSelect = select?.[field.name]
+
       if (Array.isArray(rows)) {
         rows.forEach((row, i) => {
           const block = field.blocks.find(
             (blockType) => blockType.slug === (row as JsonObject).blockType,
           )
+
+          let blockSelectMode = selectMode
+
+          if (typeof blocksSelect === 'object') {
+            // sanitize blocks: {cta: false} to blocks: {cta: {id: true, blockType: true}}
+            if (selectMode === 'exclude' && blocksSelect[block.slug] === false) {
+              blockSelectMode = 'include'
+              blocksSelect[block.slug] = {
+                id: true,
+                blockType: true,
+              }
+            } else if (selectMode === 'include') {
+              if (!blocksSelect[block.slug]) {
+                blocksSelect[block.slug] = {}
+              }
+
+              if (typeof blocksSelect[block.slug] === 'object') {
+                blocksSelect[block.slug]['id'] = true
+                blocksSelect[block.slug]['blockType'] = true
+              }
+            }
+          }
+
+          const blockSelect = blocksSelect?.[block.slug]
 
           if (block) {
             traverseFields({
@@ -444,6 +508,8 @@ export const promise = async ({
               populationPromises,
               req,
               schemaPath: fieldSchemaPath,
+              select: typeof blockSelect === 'object' ? blockSelect : undefined,
+              selectMode: blockSelectMode,
               showHiddenFields,
               siblingDoc: (row as JsonObject) || {},
               triggerAccessControl,
@@ -516,6 +582,8 @@ export const promise = async ({
         populationPromises,
         req,
         schemaPath: fieldSchemaPath,
+        select,
+        selectMode,
         showHiddenFields,
         siblingDoc,
         triggerAccessControl,
@@ -527,11 +595,18 @@ export const promise = async ({
 
     case 'tab': {
       let tabDoc = siblingDoc
+      let tabSelect: SelectType | undefined
       if (tabHasName(field)) {
         tabDoc = siblingDoc[field.name] as JsonObject
         if (typeof siblingDoc[field.name] !== 'object') {
           tabDoc = {}
         }
+
+        if (typeof select?.[field.name] === 'object') {
+          tabSelect = select?.[field.name] as SelectType
+        }
+      } else {
+        tabSelect = select
       }
 
       traverseFields({
@@ -553,6 +628,8 @@ export const promise = async ({
         populationPromises,
         req,
         schemaPath: fieldSchemaPath,
+        select: tabSelect,
+        selectMode,
         showHiddenFields,
         siblingDoc: tabDoc,
         triggerAccessControl,
@@ -582,6 +659,8 @@ export const promise = async ({
         populationPromises,
         req,
         schemaPath: fieldSchemaPath,
+        select,
+        selectMode,
         showHiddenFields,
         siblingDoc,
         triggerAccessControl,

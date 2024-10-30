@@ -1,8 +1,18 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { GlobalSlug, JsonObject } from '../../index.js'
-import type { Operation, PayloadRequest, Where } from '../../types/index.js'
-import type { DataFromGlobalSlug, SanitizedGlobalConfig } from '../config/types.js'
+import type {
+  Operation,
+  PayloadRequest,
+  SelectType,
+  TransformGlobalWithSelect,
+  Where,
+} from '../../types/index.js'
+import type {
+  DataFromGlobalSlug,
+  SanitizedGlobalConfig,
+  SelectFromGlobalSlug,
+} from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
@@ -12,6 +22,7 @@ import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple } from '../../index.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
@@ -28,13 +39,17 @@ type Args<TSlug extends GlobalSlug> = {
   overrideLock?: boolean
   publishSpecificLocale?: string
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
   slug: string
 }
 
-export const updateOperation = async <TSlug extends GlobalSlug>(
+export const updateOperation = async <
+  TSlug extends GlobalSlug,
+  TSelect extends SelectFromGlobalSlug<TSlug>,
+>(
   args: Args<TSlug>,
-): Promise<DataFromGlobalSlug<TSlug>> => {
+): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
   if (args.publishSpecificLocale) {
     args.req.locale = args.publishSpecificLocale
   }
@@ -51,6 +66,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
     publishSpecificLocale,
     req: { fallbackLocale, locale, payload },
     req,
+    select,
     showHiddenFields,
   } = args
 
@@ -230,6 +246,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
           slug,
           data: result,
           req,
+          select,
         })
       } else {
         result = await payload.db.createGlobal({
@@ -253,12 +270,26 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
         payload,
         publishSpecificLocale,
         req,
+        select,
         snapshot: versionSnapshotResult,
       })
 
       result = {
         ...result,
         globalType,
+      }
+    }
+
+    // /////////////////////////////////////
+    // Execute globalType field if not selected
+    // /////////////////////////////////////
+    if (select && result.globalType) {
+      const selectMode = getSelectMode(select)
+      if (
+        (selectMode === 'include' && !select['globalType']) ||
+        (selectMode === 'exclude' && select['globalType'] === false)
+      ) {
+        delete result['globalType']
       }
     }
 
@@ -277,6 +308,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
       locale,
       overrideAccess,
       req,
+      select,
       showHiddenFields,
     })
 
@@ -336,7 +368,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
       await commitTransaction(req)
     }
 
-    return result
+    return result as TransformGlobalWithSelect<TSlug, TSelect>
   } catch (error: unknown) {
     await killTransaction(req)
     throw error
