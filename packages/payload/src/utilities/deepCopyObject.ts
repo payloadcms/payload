@@ -131,6 +131,11 @@ export function deepCopyObjectComplex<T>(object: T, cache: WeakMap<any, any> = n
     return cache.get(object)
   }
 
+  // Handle File
+  if (object instanceof File) {
+    return object as unknown as T
+  }
+
   // Handle Date
   if (object instanceof Date) {
     return new Date(object.getTime()) as unknown as T
