@@ -38,7 +38,7 @@ export const getClientConfig = (args: {
 }
 
 type RenderDocumentResult = {
-  docID: string
+  data: any
   Document: React.ReactNode
   preferences: DocumentPreferences
 }
@@ -183,7 +183,7 @@ export const renderDocumentFn = async (args: {
   })
 
   return {
-    docID: data.id,
+    data,
     Document,
     preferences,
   }

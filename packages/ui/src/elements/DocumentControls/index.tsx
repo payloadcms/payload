@@ -11,7 +11,7 @@ import type {
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useEffect } from 'react'
 
-import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
+import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
@@ -50,11 +50,11 @@ export const DocumentControls: React.FC<{
   id?: number | string
   readonly isAccountView?: boolean
   readonly isEditing?: boolean
-  readonly onDelete?: DocumentInfoContext['onDelete']
+  readonly onDelete?: DocumentDrawerContextType['onDelete']
   readonly onDrawerCreate?: () => void
   /* Only available if `redirectAfterDuplicate` is `false` */
-  readonly onDuplicate?: DocumentInfoContext['onDuplicate']
-  readonly onSave?: DocumentInfoContext['onSave']
+  readonly onDuplicate?: DocumentDrawerContextType['onDuplicate']
+  readonly onSave?: DocumentDrawerContextType['onSave']
   readonly onTakeOver?: () => void
   readonly permissions: CollectionPermission | GlobalPermission | null
   readonly readOnlyForIncomingUser?: boolean

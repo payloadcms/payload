@@ -1,7 +1,7 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { DocumentDrawerProps } from './types.js'
@@ -36,10 +36,11 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
     collections.find((collection) => collection.slug === collectionSlug),
   )
 
-  const { closeModal, modalState, toggleModal } = useModal()
+  const { closeModal, modalState } = useModal()
   const locale = useLocale()
   const { t } = useTranslation()
   const [docID, setDocID] = useState(existingDocID)
+  const prevDocID = useRef(existingDocID)
   const [isOpen, setIsOpen] = useState(false)
 
   const { serverFunction } = useServerFunctions()
@@ -48,10 +49,14 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (!DocumentView) {
+    const docIDChanged = docID !== prevDocID.current
+
+    if (!DocumentView || docIDChanged) {
       const getDocumentView = async () => {
+        setIsLoading(true)
+
         try {
-          const { docID: newDocID, Document: ViewResult } = (await serverFunction({
+          const { Document: ViewResult } = (await serverFunction({
             name: 'render-document',
             args: {
               collectionSlug,
@@ -59,13 +64,13 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
               docID,
               drawerSlug,
               initialData,
-              redirectAfterDelete,
-              redirectAfterDuplicate,
+              redirectAfterDelete: redirectAfterDelete !== undefined ? redirectAfterDelete : false,
+              redirectAfterDuplicate:
+                redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false,
             },
           })) as { docID: string; Document: React.ReactNode }
 
           setDocumentView(ViewResult)
-          setDocID(newDocID)
           setIsLoading(false)
         } catch (error) {
           if (isOpen) {
@@ -77,6 +82,8 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       }
 
       void getDocumentView()
+
+      prevDocID.current = docID
     }
   }, [
     serverFunction,
@@ -112,6 +119,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   const onDuplicate = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
+      console.log('?!')
       setDocID(args.doc.id)
 
       if (typeof onDuplicateFromProps === 'function') {
@@ -145,6 +153,9 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   return (
     <DocumentDrawerContextProvider
       drawerSlug={drawerSlug}
+      onCreate={() => {
+        setDocID(null)
+      }}
       onDelete={onDelete}
       onDuplicate={onDuplicate}
       onSave={onSave}
