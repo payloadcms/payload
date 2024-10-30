@@ -15,7 +15,7 @@ import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { LoadingOverlay } from '../Loading/index.js'
 import { type Option } from '../ReactSelect/index.js'
-import { ListDrawerContextProvider } from './Provider.js'
+import { ListInfoProvider } from '../../providers/ListInfo/index.js'
 
 export const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
   if ('and' in where) {
@@ -319,7 +319,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   return (
     <EditDepthProvider>
-      <ListDrawerContextProvider
+      <ListInfoProvider
         createNewDrawerSlug={documentDrawerSlug}
         drawerSlug={drawerSlug}
         enabledCollections={collectionSlugs}
@@ -330,7 +330,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       >
         {ListView}
         <DocumentDrawer onSave={onCreateNew} />
-      </ListDrawerContextProvider>
+      </ListInfoProvider>
     </EditDepthProvider>
   )
 }

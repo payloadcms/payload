@@ -3,7 +3,7 @@ import type { DefaultCellComponentProps } from 'payload'
 
 import React from 'react'
 
-import { useListDrawerContext } from '../../ListDrawer/Provider.js'
+import { useListInfo } from '../../../providers/ListInfo/index.js'
 import { DefaultCell } from '../../Table/DefaultCell/index.js'
 import './index.scss'
 
@@ -16,7 +16,7 @@ export const RenderDefaultCell: React.FC<{
   index: number
   isLinkedColumn?: boolean
 }> = ({ addOnClick, clientProps, isLinkedColumn }) => {
-  const { onSelect } = useListDrawerContext()
+  const { onSelect } = useListInfo()
 
   const propsToPass = { ...clientProps }
 

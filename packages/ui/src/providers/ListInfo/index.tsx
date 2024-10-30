@@ -1,60 +1,45 @@
-'use client'
-import type { ClientCollectionConfig, FieldAffectingData, SanitizedCollectionConfig } from 'payload'
+import type { CollectionSlug } from 'payload'
 
-import React, { createContext, useContext } from 'react'
+import { createContext, useContext } from 'react'
 
-import type { Column } from '../../elements/Table/index.js'
+import type { useSelection } from '../../providers/Selection/index.js'
 
-import { useConfig } from '../Config/index.js'
-// import { useServerFunctions } from '../ServerActions/index.js'
-// import { useTranslation } from '../Translation/index.js'
-
-export type ColumnPreferences = Pick<Column, 'accessor' | 'active'>[]
+import { type Option } from '../../elements/ReactSelect/index.js'
 
 export type ListInfoProps = {
-  readonly beforeActions?: React.ReactNode[]
-  readonly collectionSlug: SanitizedCollectionConfig['slug']
-  readonly disableBulkDelete?: boolean
-  readonly disableBulkEdit?: boolean
-  readonly hasCreatePermission: boolean
-  readonly Header?: React.ReactNode
-  readonly newDocumentURL: string
-  readonly titleField?: FieldAffectingData
+  readonly createNewDrawerSlug?: string
+  readonly drawerSlug: string
+  readonly enabledCollections: CollectionSlug[]
+  readonly onBulkSelect?: (selected: ReturnType<typeof useSelection>['selected']) => void
+  readonly onSelect?: (args: { collectionSlug: CollectionSlug; docID: string }) => void
+  readonly selectedOption: Option<string>
+  readonly setSelectedOption: (option: Option<string>) => void
 }
 
-export type ListInfoContext = {
-  readonly beforeActions?: React.ReactNode[]
-  readonly collectionConfig?: ClientCollectionConfig
-  readonly collectionSlug: string
-  readonly disableBulkDelete?: boolean
-  readonly disableBulkEdit?: boolean
-  readonly hasCreatePermission: boolean
-  readonly newDocumentURL: string
-} & ListInfoProps
+export type ListInfoType = ListInfoProps & {
+  isInDrawer: boolean
+}
 
-const Context = createContext({} as ListInfoContext)
-
-export const useListInfo = (): ListInfoContext => useContext(Context)
+export const ListInfo = createContext({} as ListInfoType)
 
 export const ListInfoProvider: React.FC<
   {
-    readonly children: React.ReactNode
+    children: React.ReactNode
   } & ListInfoProps
-> = ({ children, ...props }) => {
-  const { collectionSlug } = props
-
-  const { getEntityConfig } = useConfig()
-
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
-
+> = ({ children, ...rest }) => {
   return (
-    <Context.Provider
-      value={{
-        ...props,
-        collectionConfig,
-      }}
-    >
+    <ListInfo.Provider value={{ isInDrawer: Boolean(rest.drawerSlug), ...rest }}>
       {children}
-    </Context.Provider>
+    </ListInfo.Provider>
   )
+}
+
+export const useListInfo = (): ListInfoType => {
+  const context = useContext(ListInfo)
+
+  if (!context) {
+    throw new Error('useListInfo must be used within a ListInfoProvider')
+  }
+
+  return context
 }

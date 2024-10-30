@@ -18,7 +18,6 @@ import { DeleteMany } from '../../elements/DeleteMany/index.js'
 import { EditMany } from '../../elements/EditMany/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
-import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { ListSelection } from '../../elements/ListSelection/index.js'
 import { useModal } from '../../elements/Modal/index.js'
 import { Pagination } from '../../elements/Pagination/index.js'
@@ -47,12 +46,17 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 export type ListViewClientProps = {
   AfterList?: React.ReactNode
   AfterListTable?: React.ReactNode
+  beforeActions?: React.ReactNode[]
   BeforeList?: React.ReactNode
   BeforeListTable?: React.ReactNode
   collectionSlug: string
   columnState: Column[]
   Description?: React.ReactNode
+  disableBulkDelete?: boolean
+  disableBulkEdit?: boolean
+  hasCreatePermission: boolean
   listPreferences?: ListPreferences
+  newDocumentURL: string
   preferenceKey?: string
   renderedFilters?: Map<string, React.ReactNode>
   Table: React.ReactNode
@@ -62,11 +66,17 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
   const {
     AfterList,
     AfterListTable,
+    beforeActions,
     BeforeList,
     BeforeListTable,
+    collectionSlug,
     columnState,
     Description,
+    disableBulkDelete,
+    disableBulkEdit,
+    hasCreatePermission,
     listPreferences,
+    newDocumentURL,
     preferenceKey,
     renderedFilters,
     Table: InitialTable,
@@ -74,7 +84,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
 
   const [Table, setTable] = useState(InitialTable)
 
-  const { createNewDrawerSlug, drawerSlug: listDrawerSlug } = useListDrawerContext()
+  const { createNewDrawerSlug, drawerSlug: listDrawerSlug } = useListInfo()
 
   useEffect(() => {
     if (InitialTable) {
@@ -85,15 +95,6 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
   const payloadServerAction = useServerFunctions()
 
   const { user } = useAuth()
-
-  const {
-    beforeActions,
-    collectionSlug,
-    disableBulkDelete,
-    disableBulkEdit,
-    hasCreatePermission,
-    newDocumentURL,
-  } = useListInfo()
 
   const { getEntityConfig } = useConfig()
   const router = useRouter()

@@ -7,7 +7,6 @@ import { useModal } from '@faceless-ui/modal'
 import React from 'react'
 
 import { Button } from '../../../elements/Button/index.js'
-import { useListDrawerContext } from '../../../elements/ListDrawer/Provider.js'
 import { ListSelection } from '../../../elements/ListSelection/index.js'
 import { Pill } from '../../../elements/Pill/index.js'
 import { ReactSelect } from '../../../elements/ReactSelect/index.js'
@@ -15,6 +14,7 @@ import { ViewDescription } from '../../../elements/ViewDescription/index.js'
 import { FieldLabel } from '../../../fields/FieldLabel/index.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
+import { useListInfo } from '../../../providers/ListInfo/index.js'
 import './index.scss'
 
 const baseClass = 'list-header'
@@ -94,7 +94,7 @@ const ListDrawerHeader: React.FC<Props> = ({ Description, hasCreatePermission, i
   const { closeModal, openModal } = useModal()
 
   const { createNewDrawerSlug, drawerSlug, enabledCollections, selectedOption, setSelectedOption } =
-    useListDrawerContext()
+    useListInfo()
 
   const collectionConfig = collections.find(({ slug }) => slug === selectedOption.value)
 
@@ -159,9 +159,7 @@ const ListDrawerHeader: React.FC<Props> = ({ Description, hasCreatePermission, i
 }
 
 export const ListHeader: React.FC<Props> = (props) => {
-  const { drawerSlug } = useListDrawerContext()
-
-  const isInDrawer = Boolean(drawerSlug)
+  const { isInDrawer } = useListInfo()
 
   if (isInDrawer) {
     return <ListDrawerHeader {...props} />

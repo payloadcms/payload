@@ -1,12 +1,7 @@
 import type { ListPreferences, ListViewClientProps } from '@payloadcms/ui'
 import type { AdminViewProps, Where } from 'payload'
 
-import {
-  DefaultListView,
-  HydrateAuthProvider,
-  ListInfoProvider,
-  ListQueryProvider,
-} from '@payloadcms/ui'
+import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import { filterFields } from 'packages/ui/src/elements/TableColumns/filterFields.js'
@@ -170,68 +165,51 @@ export const renderListView = async (
     const clientProps: ListViewClientProps = {
       collectionSlug,
       columnState,
+      disableBulkDelete,
+      disableBulkEdit,
+      hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
       listPreferences,
+      newDocumentURL: formatAdminURL({
+        adminRoute,
+        path: `/collections/${collectionSlug}/create`,
+      }),
       renderedFilters,
       Table,
     }
-
-    const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create?.permission
 
     return {
       List: (
         <Fragment>
           <HydrateAuthProvider permissions={permissions} />
-          <ListInfoProvider
-            // beforeActions={
-            //   enableRowSelections
-            //     ? [<SelectMany key="select-many" onClick={onBulkSelect} />]
-            //     : undefined
-            // }
-            collectionSlug={collectionSlug}
-            disableBulkDelete={disableBulkDelete}
-            disableBulkEdit={disableBulkEdit}
-            hasCreatePermission={hasCreatePermission}
-            newDocumentURL={formatAdminURL({
-              adminRoute,
-              path: `/collections/${collectionSlug}/create`,
-            })}
+          <ListQueryProvider
+            data={data}
+            defaultLimit={limit || collectionConfig?.admin?.pagination?.defaultLimit}
+            defaultSort={sort}
+            modifySearchParams
+            preferenceKey={preferenceKey}
           >
-            <ListQueryProvider
-              data={data}
-              defaultLimit={limit || collectionConfig?.admin?.pagination?.defaultLimit}
-              defaultSort={sort}
-              modifySearchParams
-              preferenceKey={preferenceKey}
-            >
-              <RenderServerComponent
-                clientProps={clientProps}
-                Component={collectionConfig?.admin?.components?.views?.list.Component}
-                Fallback={DefaultListView}
-                importMap={payload.importMap}
-                serverProps={{
-                  collectionConfig,
-                  collectionSlug,
-                  data,
-                  hasCreatePermission:
-                    permissions?.collections?.[collectionSlug]?.create?.permission,
-                  i18n,
-                  limit,
-                  listPreferences,
-                  listSearchableFields: collectionConfig.admin.listSearchableFields,
-                  locale: fullLocale,
-                  newDocumentURL: formatAdminURL({
-                    adminRoute,
-                    path: `/collections/${collectionSlug}/create`,
-                  }),
-                  params,
-                  payload,
-                  permissions,
-                  searchParams,
-                  user,
-                }}
-              />
-            </ListQueryProvider>
-          </ListInfoProvider>
+            <RenderServerComponent
+              clientProps={clientProps}
+              Component={collectionConfig?.admin?.components?.views?.list.Component}
+              Fallback={DefaultListView}
+              importMap={payload.importMap}
+              serverProps={{
+                collectionConfig,
+                collectionSlug,
+                data,
+                i18n,
+                limit,
+                listPreferences,
+                listSearchableFields: collectionConfig.admin.listSearchableFields,
+                locale: fullLocale,
+                params,
+                payload,
+                permissions,
+                searchParams,
+                user,
+              }}
+            />
+          </ListQueryProvider>
         </Fragment>
       ),
     }
