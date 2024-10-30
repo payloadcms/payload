@@ -261,6 +261,7 @@ export const UploadFeature = createServerFeature<
                     key: 'value',
                     overrideAccess,
                     req,
+                    select: collection.config.defaultPopulate,
                     showHiddenFields,
                   }),
                 )

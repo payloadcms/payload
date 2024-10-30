@@ -69,6 +69,7 @@ const populate = async ({
           fallbackLocale,
           locale,
           overrideAccess,
+          select: relatedCollection.config.defaultPopulate,
           showHiddenFields,
           transactionID: req.transactionID,
         }),

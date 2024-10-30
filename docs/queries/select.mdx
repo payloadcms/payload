@@ -97,3 +97,33 @@ const getPosts = async () => {
   <strong>Reminder:</strong>
   This is the same for [Globals](../configuration/globals) using the `/api/globals` endpoint.
 </Banner>
+```
+
+
+## `defaultSelect` collection config property
+
+The `defaultSelect` property allows you specify which fields to select when populating the collection from another document.
+This is especially useful for links where only the `slug` is needed instead of the entire document.
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+import { lexicalEditor, LinkFeature } from '@payloadcms/richtext-lexical'
+import { slateEditor } from '@payloadcms/richtext-slate'
+
+// The TSlug generic needs to be passed to defaultPopulate type safety.
+export const Pages: CollectionConfig<'pages'> = {
+  slug: 'pages',
+  // Specify `select`.
+  defaultPopulate: {
+    slug: true,
+  },
+  fields: [
+    {
+      name: 'slug',
+      type: 'text',
+      required: true,
+    },
+  ],
+}
+```
