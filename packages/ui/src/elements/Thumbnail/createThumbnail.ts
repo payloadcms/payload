@@ -7,35 +7,32 @@ export const createThumbnail = (file: File): Promise<string> => {
     img.src = URL.createObjectURL(file) // Use Object URL directly
 
     img.onload = () => {
-      const canvasSize = 24
-      const canvas = new OffscreenCanvas(canvasSize, canvasSize) // Create an OffscreenCanvas
-      const ctx = canvas.getContext('2d')
+      const maxDimension = 280
+      let drawHeight: number, drawWidth: number
 
       // Calculate aspect ratio
       const aspectRatio = img.width / img.height
-      let drawHeight: number, drawWidth: number, offsetX: number, offsetY: number
 
-      // Determine dimensions to fill the canvas while maintaining aspect ratio
+      // Determine dimensions to fit within maxDimension while maintaining aspect ratio
       if (aspectRatio > 1) {
         // Image is wider than tall
-        drawWidth = canvasSize
-        drawHeight = canvasSize / aspectRatio
-        offsetX = 0
-        offsetY = (canvasSize - drawHeight) / 2
+        drawWidth = maxDimension
+        drawHeight = maxDimension / aspectRatio
       } else {
         // Image is taller than wide, or square
-        drawWidth = canvasSize * aspectRatio
-        drawHeight = canvasSize
-        offsetX = (canvasSize - drawWidth) / 2
-        offsetY = 0
+        drawWidth = maxDimension * aspectRatio
+        drawHeight = maxDimension
       }
 
-      // Draw the image onto the OffscreenCanvas with calculated dimensions and offsets
-      ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight)
+      const canvas = new OffscreenCanvas(drawWidth, drawHeight) // Create an OffscreenCanvas
+      const ctx = canvas.getContext('2d')
+
+      // Draw the image onto the OffscreenCanvas with calculated dimensions
+      ctx.drawImage(img, 0, 0, drawWidth, drawHeight)
 
       // Convert the OffscreenCanvas to a Blob and free up memory
       canvas
-        .convertToBlob({ type: 'image/jpg', quality: 0.25 })
+        .convertToBlob({ type: 'image/jpeg', quality: 0.25 })
         .then((blob) => {
           URL.revokeObjectURL(img.src) // Release the Object URL
           const reader = new FileReader()
