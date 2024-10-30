@@ -48,6 +48,7 @@ export const recurseNestedFields = ({
                     key: i,
                     overrideAccess,
                     req,
+                    select: collection.config.defaultPopulate,
                     showHiddenFields,
                   }),
                 )
@@ -69,6 +70,7 @@ export const recurseNestedFields = ({
                     key: i,
                     overrideAccess,
                     req,
+                    select: collection.config.defaultPopulate,
                     showHiddenFields,
                   }),
                 )
@@ -94,6 +96,7 @@ export const recurseNestedFields = ({
                 key: 'value',
                 overrideAccess,
                 req,
+                select: collection.config.defaultPopulate,
                 showHiddenFields,
               }),
             )
@@ -114,6 +117,7 @@ export const recurseNestedFields = ({
             key: field.name,
             overrideAccess,
             req,
+            select: collection.config.defaultPopulate,
             showHiddenFields,
           }),
         )

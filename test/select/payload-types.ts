@@ -15,6 +15,7 @@ export interface Config {
     'localized-posts': LocalizedPost;
     'versioned-posts': VersionedPost;
     'deep-posts': DeepPost;
+    pages: Page;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -25,6 +26,7 @@ export interface Config {
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'versioned-posts': VersionedPostsSelect<false> | VersionedPostsSelect<true>;
     'deep-posts': DeepPostsSelect<false> | DeepPostsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -241,6 +243,59 @@ export interface DeepPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: string;
+  content?:
+    | {
+        title: string;
+        link: {
+          docPoly?: {
+            relationTo: 'pages';
+            value: string | Page;
+          } | null;
+          doc?: (string | null) | Page;
+          docMany?: (string | Page)[] | null;
+          docHasManyPoly?:
+            | {
+                relationTo: 'pages';
+                value: string | Page;
+              }[]
+            | null;
+          label: string;
+        };
+        richTextLexical?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        richTextSlate?:
+          | {
+              [k: string]: unknown;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'cta';
+      }[]
+    | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -278,6 +333,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'deep-posts';
         value: string | DeepPost;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: string | Page;
       } | null)
     | ({
         relationTo: 'users';
@@ -517,6 +576,37 @@ export interface DeepPostsSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  content?:
+    | T
+    | {
+        cta?:
+          | T
+          | {
+              title?: T;
+              link?:
+                | T
+                | {
+                    docPoly?: T;
+                    doc?: T;
+                    docMany?: T;
+                    docHasManyPoly?: T;
+                    label?: T;
+                  };
+              richTextLexical?: T;
+              richTextSlate?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  slug?: T;
   updatedAt?: T;
   createdAt?: T;
 }
