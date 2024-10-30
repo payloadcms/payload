@@ -60,7 +60,7 @@ function getViewActions({
   editConfig: EditConfig
   viewKey: keyof EditConfig
 }): CustomComponent[] | undefined {
-  if (viewKey in editConfig && 'actions' in editConfig[viewKey]) {
+  if (editConfig && viewKey in editConfig && 'actions' in editConfig[viewKey]) {
     return editConfig[viewKey].actions
   }
 
@@ -212,7 +212,7 @@ export const getViewFromConfig = ({
         // add default view actions
         viewActions = viewActions.concat(
           getViewActions({
-            editConfig: matchedGlobal.admin.components.views.edit,
+            editConfig: matchedGlobal.admin?.components?.views?.edit,
             viewKey: 'default',
           }),
         )
@@ -248,7 +248,7 @@ export const getViewFromConfig = ({
           if ('root' in matchedCollection.admin.components.views.edit) {
             viewActions = viewActions.concat(
               getViewActions({
-                editConfig: matchedCollection.admin.components.views.edit,
+                editConfig: matchedCollection.admin?.components?.views?.edit,
                 viewKey: 'root',
               }),
             )
@@ -258,7 +258,7 @@ export const getViewFromConfig = ({
                 // add version view actions
                 viewActions = viewActions.concat(
                   getViewActions({
-                    editConfig: matchedCollection.admin.components.views.edit,
+                    editConfig: matchedCollection.admin?.components?.views?.edit,
                     viewKey: 'version',
                   }),
                 )
@@ -268,7 +268,7 @@ export const getViewFromConfig = ({
                 // add versions view actions
                 viewActions = viewActions.concat(
                   getViewActions({
-                    editConfig: matchedCollection.admin.components.views.edit,
+                    editConfig: matchedCollection.admin?.components?.views.edit,
                     viewKey: 'versions',
                   }),
                 )
@@ -276,7 +276,7 @@ export const getViewFromConfig = ({
                 // add livePreview view actions
                 viewActions = viewActions.concat(
                   getViewActions({
-                    editConfig: matchedCollection.admin.components.views.edit,
+                    editConfig: matchedCollection.admin?.components?.views.edit,
                     viewKey: 'livePreview',
                   }),
                 )
@@ -284,7 +284,7 @@ export const getViewFromConfig = ({
                 // add api view actions
                 viewActions = viewActions.concat(
                   getViewActions({
-                    editConfig: matchedCollection.admin.components.views.edit,
+                    editConfig: matchedCollection.admin?.components?.views.edit,
                     viewKey: 'api',
                   }),
                 )
@@ -293,7 +293,7 @@ export const getViewFromConfig = ({
               // add default view actions
               viewActions = viewActions.concat(
                 getViewActions({
-                  editConfig: matchedCollection.admin.components.views.edit,
+                  editConfig: matchedCollection.admin?.components?.views.edit,
                   viewKey: 'default',
                 }),
               )
@@ -319,7 +319,7 @@ export const getViewFromConfig = ({
           if ('root' in matchedGlobal.admin.components.views.edit) {
             viewActions = viewActions.concat(
               getViewActions({
-                editConfig: matchedGlobal.admin.components.views.edit,
+                editConfig: matchedGlobal.admin.components?.views?.edit,
                 viewKey: 'root',
               }),
             )
@@ -329,7 +329,7 @@ export const getViewFromConfig = ({
                 // add version view actions
                 viewActions = viewActions.concat(
                   getViewActions({
-                    editConfig: matchedGlobal.admin.components.views.edit,
+                    editConfig: matchedGlobal.admin?.components?.views?.edit,
                     viewKey: 'version',
                   }),
                 )
@@ -339,7 +339,7 @@ export const getViewFromConfig = ({
                 // add versions view actions
                 viewActions = viewActions.concat(
                   getViewActions({
-                    editConfig: matchedGlobal.admin.components.views.edit,
+                    editConfig: matchedGlobal.admin?.components?.views?.edit,
                     viewKey: 'versions',
                   }),
                 )
@@ -347,7 +347,7 @@ export const getViewFromConfig = ({
                 // add livePreview view actions
                 viewActions = viewActions.concat(
                   getViewActions({
-                    editConfig: matchedGlobal.admin.components.views.edit,
+                    editConfig: matchedGlobal.admin?.components?.views?.edit,
                     viewKey: 'livePreview',
                   }),
                 )
@@ -355,7 +355,7 @@ export const getViewFromConfig = ({
                 // add api view actions
                 viewActions = viewActions.concat(
                   getViewActions({
-                    editConfig: matchedGlobal.admin.components.views.edit,
+                    editConfig: matchedGlobal.admin?.components?.views?.edit,
                     viewKey: 'api',
                   }),
                 )
