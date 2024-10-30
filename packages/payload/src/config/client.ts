@@ -43,7 +43,11 @@ export type ClientConfig = {
     components: null
     dependencies?: Record<string, React.ReactNode>
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
-  } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
+    serverFunctions?: Array<{ name: string }>
+  } & Omit<
+    SanitizedConfig['admin'],
+    'components' | 'dependencies' | 'livePreview' | 'serverFunctions'
+  >
   collections: ClientCollectionConfig[]
   custom?: Record<string, any>
   globals: ClientGlobalConfig[]
@@ -107,6 +111,17 @@ export const createClientConfig = ({
     'url' in clientConfig.admin.livePreview
   ) {
     delete clientConfig.admin.livePreview.url
+  }
+
+  if ('serverFunctions' in clientConfig.admin) {
+    if (Array.isArray(clientConfig.admin.serverFunctions)) {
+      clientConfig.admin.serverFunctions = clientConfig.admin.serverFunctions.map(
+        (serverFunction) => {
+          const { name } = serverFunction
+          return { name }
+        },
+      )
+    }
   }
 
   clientConfig.collections = createClientCollectionConfigs({
