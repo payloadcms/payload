@@ -1,4 +1,7 @@
+import type { JobsConfig } from '../queues/config/types/index.js'
 import type { Config } from './types.js'
+
+import defaultAccess from '../auth/defaultAccess.js'
 
 export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   admin: {
@@ -44,6 +47,13 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   },
   hooks: {},
   i18n: {},
+  jobs: {
+    access: {
+      run: defaultAccess,
+    },
+    deleteJobOnComplete: true,
+    depth: 0,
+  } as JobsConfig,
   localization: false,
   maxDepth: 10,
   routes: {
