@@ -89,10 +89,6 @@ export const runJobs = async ({
     })
   }
 
-  req.payload.logger.info({
-    msg: `Querying for ${limit} jobs.`,
-  })
-
   // Find all jobs and ensure we set job to processing: true as early as possible to reduce the chance of
   // the same job being picked up by another worker
   const jobsQuery = (await req.payload.update({
@@ -132,9 +128,7 @@ export const runJobs = async ({
   }
 
   if (jobsQuery?.docs?.length) {
-    req.payload.logger.info(
-      `${jobsQuery.docs.length} job(s) found, ${newJobs.length} of which are new. Running ${limit} job(s).`,
-    )
+    req.payload.logger.info(`Running ${jobsQuery.docs.length} jobs.`)
   }
 
   const jobPromises = jobsQuery.docs.map(async (job) => {
