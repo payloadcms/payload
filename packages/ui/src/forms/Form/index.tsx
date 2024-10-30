@@ -262,13 +262,15 @@ export const Form: React.FC<FormProps> = (props) => {
         return
       }
 
-      const preparedFields = prepareFields(fields)
-
       // If submit handler comes through via props, run that
       if (onSubmit) {
-        const data = {
-          ...reduceFieldsToValues(preparedFields, true),
-          ...overrides,
+        const preparedFields = prepareFields(deepCopyObjectComplex(fields))
+        const data = reduceFieldsToValues(preparedFields, true)
+
+        if (overrides) {
+          for (const [key, value] of Object.entries(overrides)) {
+            data[key] = value
+          }
         }
 
         onSubmit(preparedFields, data)
@@ -429,7 +431,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const createFormData = useCallback((overrides: any = {}) => {
-    const preparedFields = prepareFields(contextRef.current.fields)
+    const preparedFields = prepareFields(deepCopyObjectComplex(contextRef.current.fields))
     const data = reduceFieldsToValues(preparedFields, true)
 
     const file = data?.file
