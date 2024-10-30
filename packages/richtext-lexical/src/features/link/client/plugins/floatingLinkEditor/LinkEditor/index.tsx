@@ -33,6 +33,7 @@ import { useEditorConfigContext } from '../../../../../../lexical/config/client/
 import { getSelectedNode } from '../../../../../../lexical/utils/getSelectedNode.js'
 import { setFloatingElemPositionForLinkEditor } from '../../../../../../lexical/utils/setFloatingElemPositionForLinkEditor.js'
 import { FieldsDrawer } from '../../../../../../utilities/fieldsDrawer/Drawer.js'
+import { useLexicalDrawer } from '../../../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { $isAutoLinkNode } from '../../../../nodes/AutoLinkNode.js'
 import { $createLinkNode, $isLinkNode, TOGGLE_LINK_COMMAND } from '../../../../nodes/LinkNode.js'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './commands.js'
@@ -54,7 +55,6 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     ({ id?: string; text: string } & LinkFields) | undefined
   >()
 
-  const { closeModal, toggleModal } = useModal()
   const editDepth = useEditDepth()
   const [isLink, setIsLink] = useState(false)
   const [selectedNodes, setSelectedNodes] = useState<LexicalNode[]>([])
@@ -65,6 +65,8 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     slug: `lexical-rich-text-link-` + uuid,
     depth: editDepth,
   })
+
+  const { toggleDrawer } = useLexicalDrawer(drawerSlug)
 
   const setNotLink = useCallback(() => {
     setIsLink(false)
@@ -204,14 +206,14 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
           // Now, open the modal
           $updateLinkEditor()
-          toggleModal(drawerSlug)
+          toggleDrawer()
 
           return true
         },
         COMMAND_PRIORITY_LOW,
       ),
     )
-  }, [editor, $updateLinkEditor, toggleModal, drawerSlug])
+  }, [editor, $updateLinkEditor, toggleDrawer, drawerSlug])
 
   useEffect(() => {
     const scrollerElem = anchorElem.parentElement
@@ -292,7 +294,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
                 aria-label="Edit link"
                 className="link-edit"
                 onClick={() => {
-                  toggleModal(drawerSlug)
+                  toggleDrawer()
                 }}
                 onMouseDown={(event) => {
                   event.preventDefault()
@@ -329,8 +331,6 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         drawerTitle={t('fields:editLink')}
         featureKey="link"
         handleDrawerSubmit={(fields: FormState, data: Data) => {
-          closeModal(drawerSlug)
-
           const newLinkPayload = data as { text: string } & LinkFields
 
           const bareLinkFields: LinkFields = {

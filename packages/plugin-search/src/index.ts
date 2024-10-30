@@ -14,6 +14,14 @@ export const searchPlugin =
   (config: Config): Config => {
     const { collections } = config
 
+    // If the user defines `localize` to either true or false, use that
+    // Otherwise, set it based on if their config has localization enabled or disabled
+    const shouldLocalize =
+      typeof incomingPluginConfig.localize === 'boolean'
+        ? incomingPluginConfig.localize
+        : Boolean(config.localization)
+    incomingPluginConfig.localize = shouldLocalize
+
     if (collections) {
       const pluginConfig: SearchPluginConfig = {
         // write any config defaults here

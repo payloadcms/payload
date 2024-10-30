@@ -7,6 +7,7 @@ import type { CollectionRouteHandlerWithID } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { sanitizeCollectionID } from '../utilities/sanitizeCollectionID.js'
+import { sanitizeSelect } from '../utilities/sanitizeSelect.js'
 
 export const duplicate: CollectionRouteHandlerWithID = async ({
   id: incomingID,
@@ -30,6 +31,7 @@ export const duplicate: CollectionRouteHandlerWithID = async ({
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft,
     req,
+    select: sanitizeSelect(req.query.select),
   })
 
   const message = req.t('general:successfullyDuplicated', {

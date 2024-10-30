@@ -180,6 +180,7 @@ export class Main {
 
         await writeEnvFile({
           cliArgs: this.args,
+          databaseType: dbDetails.type,
           databaseUri: dbDetails.dbUri,
           payloadSecret: generateSecret(),
           projectDir,
@@ -222,6 +223,7 @@ export class Main {
           })
           await writeEnvFile({
             cliArgs: this.args,
+            databaseType: dbDetails.type,
             databaseUri: dbDetails.dbUri,
             payloadSecret,
             projectDir,

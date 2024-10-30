@@ -1,6 +1,12 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type {
+  JsonObject,
+  PayloadRequest,
+  RequestContext,
+  SelectMode,
+  SelectType,
+} from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { promise } from './promise.js'
@@ -27,6 +33,8 @@ type Args = {
   populationPromises: Promise<void>[]
   req: PayloadRequest
   schemaPath: string[]
+  select?: SelectType
+  selectMode?: SelectMode
   showHiddenFields: boolean
   siblingDoc: JsonObject
   triggerAccessControl?: boolean
@@ -52,6 +60,8 @@ export const traverseFields = ({
   populationPromises,
   req,
   schemaPath,
+  select,
+  selectMode,
   showHiddenFields,
   siblingDoc,
   triggerAccessControl = true,
@@ -78,6 +88,8 @@ export const traverseFields = ({
         parentSchemaPath: schemaPath,
         populationPromises,
         req,
+        select,
+        selectMode,
         showHiddenFields,
         siblingDoc,
         triggerAccessControl,
