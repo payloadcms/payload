@@ -20,7 +20,6 @@ import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
 import { StepNavProvider } from '../../elements/StepNav/index.js'
 import { fieldComponents } from '../../fields/index.js'
 import { WindowInfoProvider } from '../../providers/WindowInfo/index.js'
-import { ActionsProvider } from '../Actions/index.js'
 import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ConfigProvider } from '../Config/index.js'
@@ -104,11 +103,9 @@ export const RootProvider: React.FC<Props> = ({
                                     <StepNavProvider>
                                       <LoadingOverlayProvider>
                                         <DocumentEventsProvider>
-                                          <ActionsProvider>
-                                            <NavProvider initialIsOpen={isNavOpen}>
-                                              {children}
-                                            </NavProvider>
-                                          </ActionsProvider>
+                                          <NavProvider initialIsOpen={isNavOpen}>
+                                            {children}
+                                          </NavProvider>
                                         </DocumentEventsProvider>
                                       </LoadingOverlayProvider>
                                     </StepNavProvider>

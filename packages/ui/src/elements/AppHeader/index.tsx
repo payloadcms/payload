@@ -3,6 +3,7 @@ import LinkWithDefault from 'next/link.js'
 import React, { useEffect, useRef, useState } from 'react'
 
 import { Account } from '../../graphics/Account/index.js'
+import { useActions } from '../../providers/Actions/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
@@ -16,11 +17,10 @@ import './index.scss'
 
 const baseClass = 'app-header'
 
-type Args = {
-  Actions?: React.ReactNode[]
-}
-export const AppHeader: React.FC = ({ Actions }: Args) => {
+export function AppHeader() {
   const { t } = useTranslation()
+
+  const { Actions } = useActions()
 
   const {
     config: {
@@ -58,6 +58,8 @@ export const AppHeader: React.FC = ({ Actions }: Args) => {
 
   const LinkElement = Link || 'a'
 
+  const ActionComponents = Actions ? Object.values(Actions) : []
+
   return (
     <header className={[baseClass, navOpen && `${baseClass}--nav-open`].filter(Boolean).join(' ')}>
       <div className={`${baseClass}__bg`} />
@@ -72,17 +74,18 @@ export const AppHeader: React.FC = ({ Actions }: Args) => {
             </div>
             <div className={`${baseClass}__actions-wrapper`}>
               <div className={`${baseClass}__actions`} ref={customControlsRef}>
-                {Array.isArray(Actions) &&
-                  Actions.map((Action, i) => (
-                    <div
-                      className={
-                        isScrollable && i === Actions.length - 1 ? `${baseClass}__last-action` : ''
-                      }
-                      key={i}
-                    >
-                      {Action}
-                    </div>
-                  ))}
+                {ActionComponents.map((Action, i) => (
+                  <div
+                    className={
+                      isScrollable && i === ActionComponents.length - 1
+                        ? `${baseClass}__last-action`
+                        : ''
+                    }
+                    key={i}
+                  >
+                    {Action}
+                  </div>
+                ))}
               </div>
               {isScrollable && <div className={`${baseClass}__gradient-placeholder`} />}
             </div>

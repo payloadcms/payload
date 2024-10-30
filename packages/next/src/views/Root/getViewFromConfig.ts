@@ -94,7 +94,6 @@ export const getViewFromConfig = ({
   let ViewToRender: ViewFromConfig = null
   let templateClassName: string
   let templateType: 'default' | 'minimal' | undefined
-  let viewActions: CustomComponent[] = []
 
   const initPageOptions: Parameters<typeof initPage>[0] = {
     config,
@@ -102,6 +101,8 @@ export const getViewFromConfig = ({
     route: currentRoute,
     searchParams,
   }
+
+  const viewActions: CustomComponent[] = config?.admin?.components?.actions || []
 
   const [segmentOne, segmentTwo, segmentThree, segmentFour, segmentFive] = segments
 
@@ -134,7 +135,6 @@ export const getViewFromConfig = ({
         }
         templateClassName = 'dashboard'
         templateType = 'default'
-        viewActions = config.admin.components?.actions
       }
       break
     }
@@ -175,7 +175,6 @@ export const getViewFromConfig = ({
 
         if (viewKey === 'account') {
           templateType = 'default'
-          viewActions = config.admin.components?.actions
         }
       }
       break
@@ -199,7 +198,7 @@ export const getViewFromConfig = ({
 
         templateClassName = `${segmentTwo}-list`
         templateType = 'default'
-        viewActions = matchedCollection.admin.components?.views?.list?.actions
+        viewActions.unshift(...(matchedCollection.admin.components?.views?.list?.actions || []))
       } else if (isGlobal && matchedGlobal) {
         // --> /globals/:globalSlug
 
@@ -209,7 +208,6 @@ export const getViewFromConfig = ({
 
         templateClassName = 'global-edit'
         templateType = 'default'
-        // viewActions = matchedGlobal.admin.components?.views?.edit?.actions
       }
       break
     }
@@ -240,49 +238,58 @@ export const getViewFromConfig = ({
         // Adds view actions to the current collection view
         if (matchedCollection.admin?.components?.views?.edit) {
           if ('root' in matchedCollection.admin.components.views.edit) {
-            viewActions = getViewActions({
-              editConfig: matchedCollection.admin.components.views.edit,
-              viewKey: 'root',
-            })
+            viewActions.unshift(
+              ...getViewActions({
+                editConfig: matchedCollection.admin.components.views.edit,
+                viewKey: 'root',
+              }),
+            )
           } else {
             if (segmentFive) {
               if (segmentFour === 'versions') {
                 // add version view actions
-                viewActions = getViewActions({
-                  editConfig: matchedCollection.admin.components.views.edit,
-                  viewKey: 'version',
-                })
+                viewActions.unshift(
+                  ...getViewActions({
+                    editConfig: matchedCollection.admin.components.views.edit,
+                    viewKey: 'version',
+                  }),
+                )
               }
             } else if (segmentFour) {
               if (segmentFour === 'versions') {
                 // add versions view actions
-                viewActions = getViewActions({
-                  editConfig: matchedCollection.admin.components.views.edit,
-                  viewKey: 'versions',
-                })
+                viewActions.unshift(
+                  ...getViewActions({
+                    editConfig: matchedCollection.admin.components.views.edit,
+                    viewKey: 'versions',
+                  }),
+                )
               } else if (segmentFour === 'preview') {
                 // add livePreview view actions
-                viewActions = getViewActions({
-                  editConfig: matchedCollection.admin.components.views.edit,
-                  viewKey: 'livePreview',
-                })
+                viewActions.unshift(
+                  ...getViewActions({
+                    editConfig: matchedCollection.admin.components.views.edit,
+                    viewKey: 'livePreview',
+                  }),
+                )
               } else if (segmentFour === 'api') {
                 // add api view actions
-                viewActions = getViewActions({
-                  editConfig: matchedCollection.admin.components.views.edit,
-                  viewKey: 'api',
-                })
+                viewActions.unshift(
+                  ...getViewActions({
+                    editConfig: matchedCollection.admin.components.views.edit,
+                    viewKey: 'api',
+                  }),
+                )
               }
+            } else if (segmentThree) {
+              // add default view actions
+              viewActions.unshift(
+                ...getViewActions({
+                  editConfig: matchedCollection.admin.components.views.edit,
+                  viewKey: 'default',
+                }),
+              )
             }
-
-            // add default view actions
-            viewActions = [
-              ...viewActions,
-              ...getViewActions({
-                editConfig: matchedCollection.admin.components.views.edit,
-                viewKey: 'default',
-              }),
-            ]
           }
         }
       } else if (isGlobal && matchedGlobal) {
@@ -302,48 +309,58 @@ export const getViewFromConfig = ({
         // Adds view actions to the current global view
         if (matchedGlobal.admin?.components?.views?.edit) {
           if ('root' in matchedGlobal.admin.components.views.edit) {
-            viewActions = getViewActions({
-              editConfig: matchedGlobal.admin.components.views.edit,
-              viewKey: 'root',
-            })
+            viewActions.unshift(
+              ...getViewActions({
+                editConfig: matchedGlobal.admin.components.views.edit,
+                viewKey: 'root',
+              }),
+            )
           } else {
             if (segmentFour) {
               if (segmentThree === 'versions') {
                 // add version view actions
-                viewActions = getViewActions({
-                  editConfig: matchedGlobal.admin.components.views.edit,
-                  viewKey: 'version',
-                })
+                viewActions.unshift(
+                  ...getViewActions({
+                    editConfig: matchedGlobal.admin.components.views.edit,
+                    viewKey: 'version',
+                  }),
+                )
               }
             } else if (segmentThree) {
               if (segmentThree === 'versions') {
                 // add versions view actions
-                viewActions = getViewActions({
-                  editConfig: matchedGlobal.admin.components.views.edit,
-                  viewKey: 'versions',
-                })
+                viewActions.unshift(
+                  ...getViewActions({
+                    editConfig: matchedGlobal.admin.components.views.edit,
+                    viewKey: 'versions',
+                  }),
+                )
               } else if (segmentThree === 'preview') {
                 // add livePreview view actions
-                viewActions = getViewActions({
-                  editConfig: matchedGlobal.admin.components.views.edit,
-                  viewKey: 'livePreview',
-                })
+                viewActions.unshift(
+                  ...getViewActions({
+                    editConfig: matchedGlobal.admin.components.views.edit,
+                    viewKey: 'livePreview',
+                  }),
+                )
               } else if (segmentThree === 'api') {
                 // add api view actions
-                viewActions = getViewActions({
-                  editConfig: matchedGlobal.admin.components.views.edit,
-                  viewKey: 'api',
-                })
+                viewActions.unshift(
+                  ...getViewActions({
+                    editConfig: matchedGlobal.admin.components.views.edit,
+                    viewKey: 'api',
+                  }),
+                )
+              } else if (segmentTwo) {
+                // add default view actions
+                viewActions.unshift(
+                  ...getViewActions({
+                    editConfig: matchedGlobal.admin.components.views.edit,
+                    viewKey: 'default',
+                  }),
+                )
               }
             }
-
-            // add default view actions
-            viewActions.push(
-              ...getViewActions({
-                editConfig: matchedGlobal.admin.components.views.edit,
-                viewKey: 'default',
-              }),
-            )
           }
         }
       }

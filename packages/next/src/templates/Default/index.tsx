@@ -1,6 +1,12 @@
 import type { CustomComponent, ServerProps, VisibleEntities } from 'payload'
 
-import { AppHeader, BulkUploadProvider, EntityVisibilityProvider, NavToggler } from '@payloadcms/ui'
+import {
+  ActionsProvider,
+  AppHeader,
+  BulkUploadProvider,
+  EntityVisibilityProvider,
+  NavToggler,
+} from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
@@ -43,64 +49,74 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
       <BulkUploadProvider>
-        <RenderServerComponent
-          clientProps={{ clientProps: { visibleEntities } }}
-          Component={CustomHeader}
-          importMap={payload.importMap}
-          serverProps={{
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-            visibleEntities,
-          }}
-        />
-        <div style={{ position: 'relative' }}>
-          <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
-            <div className={`${baseClass}__nav-toggler-container`} id="nav-toggler">
-              <NavToggler className={`${baseClass}__nav-toggler`}>
-                <NavHamburger />
-              </NavToggler>
+        <ActionsProvider
+          Actions={
+            viewActions
+              ? viewActions.reduce((acc, action, i) => {
+                  if (action) {
+                    if (typeof action === 'object') {
+                      acc[action.path] = (
+                        <RenderServerComponent Component={action} importMap={payload.importMap} />
+                      )
+                    } else {
+                      acc[action] = (
+                        <RenderServerComponent Component={action} importMap={payload.importMap} />
+                      )
+                    }
+                  }
+
+                  return acc
+                }, {})
+              : undefined
+          }
+        >
+          <RenderServerComponent
+            clientProps={{ clientProps: { visibleEntities } }}
+            Component={CustomHeader}
+            importMap={payload.importMap}
+            serverProps={{
+              i18n,
+              locale,
+              params,
+              payload,
+              permissions,
+              searchParams,
+              user,
+              visibleEntities,
+            }}
+          />
+          <div style={{ position: 'relative' }}>
+            <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
+              <div className={`${baseClass}__nav-toggler-container`} id="nav-toggler">
+                <NavToggler className={`${baseClass}__nav-toggler`}>
+                  <NavHamburger />
+                </NavToggler>
+              </div>
             </div>
-          </div>
-          <Wrapper baseClass={baseClass} className={className}>
-            <RenderServerComponent
-              clientProps={{ clientProps: { visibleEntities } }}
-              Component={CustomNav}
-              Fallback={DefaultNav}
-              importMap={payload.importMap}
-              serverProps={{
-                i18n,
-                locale,
-                params,
-                payload,
-                permissions,
-                searchParams,
-                user,
-                visibleEntities,
-              }}
-            />
-            <div className={`${baseClass}__wrap`}>
-              <AppHeader
-                Actions={
-                  viewActions
-                    ? viewActions.map((action, i) => (
-                        <RenderServerComponent
-                          Component={action}
-                          importMap={payload.importMap}
-                          key={i}
-                        />
-                      ))
-                    : undefined
-                }
+            <Wrapper baseClass={baseClass} className={className}>
+              <RenderServerComponent
+                clientProps={{ clientProps: { visibleEntities } }}
+                Component={CustomNav}
+                Fallback={DefaultNav}
+                importMap={payload.importMap}
+                serverProps={{
+                  i18n,
+                  locale,
+                  params,
+                  payload,
+                  permissions,
+                  searchParams,
+                  user,
+                  visibleEntities,
+                }}
               />
-              {children}
-            </div>
-          </Wrapper>
-        </div>
+              <div className={`${baseClass}__wrap`}>
+                <AppHeader />
+                {children}
+              </div>
+            </Wrapper>
+          </div>
+        </ActionsProvider>
       </BulkUploadProvider>
     </EntityVisibilityProvider>
   )

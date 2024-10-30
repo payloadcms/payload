@@ -6,7 +6,6 @@ import {
   LoadingOverlayToggle,
   Pagination,
   PerPage,
-  SetViewActions,
   Table,
   useConfig,
   useDocumentInfo,
@@ -41,11 +40,6 @@ export const VersionsViewClient: React.FC<{
 
   return (
     <React.Fragment>
-      <SetViewActions
-        actions={
-          (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.versions?.actions
-        }
-      />
       <LoadingOverlayToggle name="versions" show={!data} />
       {versionCount === 0 && (
         <div className={`${baseClass}__no-versions`}>
