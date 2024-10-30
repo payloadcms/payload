@@ -34,7 +34,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     setReducedColumns(reduceClientFields({ fields, i18n }))
   }, [fields, i18n])
 
-  const { handleWhereChange, params } = useListQuery()
+  const { handleWhereChange, query } = useListQuery()
   const [shouldUpdateQuery, setShouldUpdateQuery] = React.useState(false)
 
   // This handles initializing the where conditions from the search query (URL). That way, if you pass in
@@ -66,7 +66,8 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   */
 
   const [conditions, setConditions] = React.useState(() => {
-    const whereFromSearch = params.where
+    const whereFromSearch = query.where
+
     if (whereFromSearch) {
       if (validateWhereQuery(whereFromSearch)) {
         return whereFromSearch.or

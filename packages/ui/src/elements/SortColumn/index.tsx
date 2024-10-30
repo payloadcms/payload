@@ -21,10 +21,10 @@ const baseClass = 'sort-column'
 
 export const SortColumn: React.FC<SortColumnProps> = (props) => {
   const { name, appearance, disable = false, Label, label } = props
-  const { handleSortChange, params } = useListQuery()
+  const { handleSortChange, query } = useListQuery()
   const { t } = useTranslation()
 
-  const { sort } = params
+  const { sort } = query
 
   const desc = `-${name}`
   const asc = name

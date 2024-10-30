@@ -1,13 +1,7 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { ListPreferences } from '@payloadcms/ui'
-import type {
-  ClientConfig,
-  Data,
-  DocumentPreferences,
-  PayloadRequest,
-  SanitizedConfig,
-  VisibleEntities,
-} from 'payload'
+import type { ListQuery } from 'packages/ui/src/providers/ListQuery/index.js'
+import type { ClientConfig, PayloadRequest, SanitizedConfig, VisibleEntities } from 'payload'
 
 import { headers as getHeaders } from 'next/headers.js'
 import { createClientConfig, getAccessResults, isEntityHidden, parseCookies } from 'payload'
@@ -51,6 +45,7 @@ export const renderListFn = async (args: {
   documentDrawerSlug: string
   drawerSlug?: string
   enableRowSelections: boolean
+  query: ListQuery
   redirectAfterDelete: boolean
   redirectAfterDuplicate: boolean
   req: PayloadRequest
@@ -62,6 +57,7 @@ export const renderListFn = async (args: {
     disableBulkEdit,
     drawerSlug,
     enableRowSelections,
+    query,
     redirectAfterDelete,
     redirectAfterDuplicate,
     req,
@@ -72,8 +68,6 @@ export const renderListFn = async (args: {
       user,
     },
   } = args
-
-  console.log('renderListFn', collectionSlug)
 
   const headers = await getHeaders()
 
@@ -182,6 +176,7 @@ export const renderListFn = async (args: {
     params: {
       segments: ['collections', collectionSlug],
     },
+    query,
     redirectAfterDelete,
     redirectAfterDuplicate,
     searchParams: {},

@@ -99,7 +99,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
   const { getEntityConfig } = useConfig()
   const router = useRouter()
 
-  const { data, defaultLimit, handlePageChange, handlePerPageChange, params } = useListQuery()
+  const { data, handlePageChange, handlePerPageChange, initialLimit, query } = useListQuery()
   const { openModal } = useModal()
   const { setCollectionSlug, setOnSuccess } = useBulkUpload()
   const { drawerSlug: bulkUploadDrawerSlug } = useBulkUpload()
@@ -191,7 +191,14 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                 smallBreak={smallBreak}
                 t={t}
               />
-              <ListControls collectionConfig={collectionConfig} renderedFilters={renderedFilters} />
+              <ListControls
+                beforeActions={beforeActions}
+                collectionConfig={collectionConfig}
+                collectionSlug={collectionSlug}
+                disableBulkDelete={disableBulkDelete}
+                disableBulkEdit={disableBulkEdit}
+                renderedFilters={renderedFilters}
+              />
               {BeforeListTable}
               {!data.docs && (
                 <StaggeredShimmers
@@ -251,7 +258,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                       </div>
                       <PerPage
                         handleChange={(limit) => void handlePerPageChange(limit)}
-                        limit={isNumber(params?.limit) ? Number(params.limit) : defaultLimit}
+                        limit={isNumber(query?.limit) ? Number(query.limit) : initialLimit}
                         limits={collectionConfig?.admin?.pagination?.limits}
                         resetPage={data.totalDocs <= data.pagingCounter}
                       />

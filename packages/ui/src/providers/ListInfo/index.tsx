@@ -3,6 +3,7 @@ import type { CollectionSlug } from 'payload'
 import { createContext, useContext } from 'react'
 
 import type { useSelection } from '../../providers/Selection/index.js'
+import type { ListQuery } from '../ListQuery/index.js'
 
 import { type Option } from '../../elements/ReactSelect/index.js'
 
@@ -11,6 +12,7 @@ export type ListInfoProps = {
   readonly drawerSlug?: string
   readonly enabledCollections?: CollectionSlug[]
   readonly onBulkSelect?: (selected: ReturnType<typeof useSelection>['selected']) => void
+  readonly onQueryChange?: (query: ListQuery) => void
   readonly onSelect?: (args: { collectionSlug: CollectionSlug; docID: string }) => void
   readonly selectedOption?: Option<string>
   readonly setSelectedOption?: (option: Option<string>) => void

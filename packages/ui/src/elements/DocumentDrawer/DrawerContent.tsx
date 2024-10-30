@@ -107,6 +107,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
       setDocID(args.doc.id)
+
       if (typeof onSaveFromProps === 'function') {
         void onSaveFromProps({
           ...args,
@@ -119,7 +120,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   const onDuplicate = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
-      console.log('?!')
       setDocID(args.doc.id)
 
       if (typeof onDuplicateFromProps === 'function') {

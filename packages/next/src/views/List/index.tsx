@@ -1,4 +1,5 @@
 import type { ListPreferences, ListViewClientProps } from '@payloadcms/ui'
+import type { ListQuery } from 'packages/ui/src/providers/ListQuery/index.js'
 import type { AdminViewProps, Where } from 'payload'
 
 import {
@@ -24,6 +25,7 @@ type ListViewArgs = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   enableRowSelections: boolean
+  query: ListQuery
 } & AdminViewProps
 
 export const renderListView = async (
@@ -39,6 +41,7 @@ export const renderListView = async (
     enableRowSelections,
     initPageResult,
     params,
+    query: queryFromArgs,
     searchParams,
   } = args
 
@@ -58,7 +61,7 @@ export const renderListView = async (
       locale,
       payload,
       payload: { config },
-      query,
+      query: queryFromReq,
       user,
     },
     visibleEntities,
@@ -67,6 +70,8 @@ export const renderListView = async (
   if (!permissions?.collections?.[collectionSlug]?.read?.permission) {
     throw new Error('not-found')
   }
+
+  const query = queryFromArgs || queryFromReq
 
   let listPreferences: ListPreferences
   const preferenceKey = `${collectionSlug}-list`
@@ -112,6 +117,7 @@ export const renderListView = async (
     }
 
     const page = isNumber(query?.page) ? Number(query.page) : 0
+
     const whereQuery = mergeListSearchAndWhere({
       collectionConfig,
       query: {
@@ -182,15 +188,17 @@ export const renderListView = async (
       Table,
     }
 
+    const isInDrawer = Boolean(drawerSlug)
+
     return {
       List: (
         <Fragment>
           <HydrateAuthProvider permissions={permissions} />
           <ListQueryProvider
             data={data}
-            defaultLimit={limit || collectionConfig?.admin?.pagination?.defaultLimit}
-            defaultSort={sort}
-            modifySearchParams
+            initialLimit={limit}
+            initialSort={sort}
+            modifySearchParams={!isInDrawer}
             preferenceKey={preferenceKey}
           >
             <RenderServerComponent

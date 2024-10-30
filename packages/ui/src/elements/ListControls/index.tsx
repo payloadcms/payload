@@ -12,7 +12,6 @@ const AnimateHeight = (AnimateHeightImport.default ||
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { SearchIcon } from '../../icons/Search/index.js'
-import { useListInfo } from '../../providers/ListInfo/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
@@ -30,7 +29,11 @@ import './index.scss'
 const baseClass = 'list-controls'
 
 export type ListControlsProps = {
+  readonly beforeActions?: React.ReactNode[]
   readonly collectionConfig: ClientCollectionConfig
+  readonly collectionSlug: string
+  readonly disableBulkDelete?: boolean
+  readonly disableBulkEdit?: boolean
   readonly enableColumns?: boolean
   readonly enableSort?: boolean
   readonly handleSearchChange?: (search: string) => void
@@ -45,10 +48,18 @@ export type ListControlsProps = {
  * the collection's documents.
  */
 export const ListControls: React.FC<ListControlsProps> = (props) => {
-  const { collectionConfig, enableColumns = true, enableSort = false, renderedFilters } = props
+  const {
+    beforeActions,
+    collectionConfig,
+    collectionSlug,
+    disableBulkDelete,
+    disableBulkEdit,
+    enableColumns = true,
+    enableSort = false,
+    renderedFilters,
+  } = props
 
-  const { handleSearchChange, params } = useListQuery()
-  const { beforeActions, collectionSlug, disableBulkDelete, disableBulkEdit } = useListInfo()
+  const { handleSearchChange, query } = useListQuery()
   const titleField = useUseTitleField(collectionConfig)
   const { i18n, t } = useTranslation()
   const {
@@ -76,21 +87,21 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     t('general:searchBy', { label: getTranslation(searchLabel, i18n) }),
   )
 
-  const hasWhereParam = useRef(Boolean(params?.where))
+  const hasWhereParam = useRef(Boolean(query?.where))
 
-  const shouldInitializeWhereOpened = validateWhereQuery(params?.where)
+  const shouldInitializeWhereOpened = validateWhereQuery(query?.where)
   const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(
     shouldInitializeWhereOpened ? 'where' : undefined,
   )
 
   useEffect(() => {
-    if (hasWhereParam.current && !params?.where) {
+    if (hasWhereParam.current && !query?.where) {
       setVisibleDrawer(undefined)
       hasWhereParam.current = false
-    } else if (params?.where) {
+    } else if (query?.where) {
       hasWhereParam.current = true
     }
-  }, [setVisibleDrawer, params?.where])
+  }, [setVisibleDrawer, query?.where])
 
   useEffect(() => {
     if (listSearchableFields?.length > 0) {
@@ -130,7 +141,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             return void handleSearchChange(search)
           }}
           // @ts-expect-error @todo: fix types
-          initialParams={params}
+          initialParams={query}
           key={collectionSlug}
           label={searchLabelTranslated.current}
         />
@@ -206,7 +217,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           collectionPluralLabel={collectionConfig?.labels?.plural}
           collectionSlug={collectionConfig.slug}
           fields={collectionConfig?.fields}
-          key={String(hasWhereParam.current && !params?.where)}
+          key={String(hasWhereParam.current && !query?.where)}
           renderedFilters={renderedFilters}
         />
       </AnimateHeight>
