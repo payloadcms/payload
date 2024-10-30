@@ -137,7 +137,7 @@
       "path": "./packages/plugin-cloud-storage"
     },
     {
-      "path": "./packages/plugin-cloud"
+      "path": "./packages/payload-cloud"
     },
     {
       "path": "./packages/plugin-form-builder"

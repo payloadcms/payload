@@ -37,6 +37,7 @@ import { RelationshipTableWrapper } from './TableWrapper.js'
 const baseClass = 'relationship-table'
 
 type RelationshipTableComponentProps = {
+  readonly allowCreate?: boolean
   readonly field: JoinFieldClient
   readonly filterOptions?: boolean | Where
   readonly initialData?: PaginatedDocs
@@ -47,6 +48,7 @@ type RelationshipTableComponentProps = {
 
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
   const {
+    allowCreate = true,
     field,
     filterOptions,
     initialData: initialDataFromProps,
@@ -202,16 +204,15 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const preferenceKey = `${relationTo}-list`
 
-  const hasCreatePermission = permissions?.collections?.[relationTo]?.create?.permission
+  const canCreate =
+    allowCreate !== false && permissions?.collections?.[relationTo]?.create?.permission
 
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__header`}>
         {Label}
         <div className={`${baseClass}__actions`}>
-          {hasCreatePermission && (
-            <DocumentDrawerToggler>{i18n.t('fields:addNew')}</DocumentDrawerToggler>
-          )}
+          {canCreate && <DocumentDrawerToggler>{i18n.t('fields:addNew')}</DocumentDrawerToggler>}
           <Pill
             aria-controls={`${baseClass}-columns`}
             aria-expanded={openColumnSelector}
@@ -233,7 +234,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
               label: getTranslation(collectionConfig?.labels?.plural, i18n),
             })}
           </p>
-          {hasCreatePermission && (
+          {canCreate && (
             <Button onClick={openDrawer}>
               {i18n.t('general:createNewLabel', {
                 label: getTranslation(collectionConfig?.labels?.singular, i18n),

@@ -39,7 +39,7 @@ export const buildFormState = async ({
 }: {
   req: PayloadRequest
 }): Promise<{
-  lockedState?: { isLocked: boolean; user: ClientUser | number | string }
+  lockedState?: { isLocked: boolean; lastEditedAt: string; user: ClientUser | number | string }
   state: FormState
 }> => {
   const reqData: BuildFormStateArgs = (req.data || {}) as BuildFormStateArgs
@@ -242,11 +242,28 @@ export const buildFormState = async ({
       }
     } else if (globalSlug) {
       lockedDocumentQuery = {
-        globalSlug: { equals: globalSlug },
+        and: [{ globalSlug: { equals: globalSlug } }],
       }
     }
 
+    const lockDurationDefault = 300 // Default 5 minutes in seconds
+    const lockDocumentsProp = collectionSlug
+      ? req.payload.config.collections.find((c) => c.slug === collectionSlug)?.lockDocuments
+      : req.payload.config.globals.find((g) => g.slug === globalSlug)?.lockDocuments
+
+    const lockDuration =
+      typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
+    const lockDurationInMilliseconds = lockDuration * 1000
+    const now = new Date().getTime()
+
     if (lockedDocumentQuery) {
+      // Query where the lock is newer than the current time minus the lock duration
+      lockedDocumentQuery.and.push({
+        updatedAt: {
+          greater_than: new Date(now - lockDurationInMilliseconds).toISOString(),
+        },
+      })
+
       const lockedDocument = await req.payload.find({
         collection: 'payload-locked-documents',
         depth: 1,
@@ -258,6 +275,7 @@ export const buildFormState = async ({
       if (lockedDocument.docs && lockedDocument.docs.length > 0) {
         const lockedState = {
           isLocked: true,
+          lastEditedAt: lockedDocument.docs[0]?.updatedAt,
           user: lockedDocument.docs[0]?.user?.value,
         }
 
@@ -272,7 +290,40 @@ export const buildFormState = async ({
 
         return { lockedState, state: result }
       } else {
-        // If no lock document exists, create it
+        // If NO ACTIVE lock document exists, first delete any expired locks and then create a fresh lock
+        // Where updatedAt is older than the duration that is specified in the config
+        let deleteExpiredLocksQuery
+
+        if (collectionSlug) {
+          deleteExpiredLocksQuery = {
+            and: [
+              { 'document.relationTo': { equals: collectionSlug } },
+              {
+                updatedAt: {
+                  less_than: new Date(now - lockDurationInMilliseconds).toISOString(),
+                },
+              },
+            ],
+          }
+        } else if (globalSlug) {
+          deleteExpiredLocksQuery = {
+            and: [
+              { globalSlug: { equals: globalSlug } },
+              {
+                updatedAt: {
+                  less_than: new Date(now - lockDurationInMilliseconds).toISOString(),
+                },
+              },
+            ],
+          }
+        }
+
+        await req.payload.db.deleteMany({
+          collection: 'payload-locked-documents',
+          req,
+          where: deleteExpiredLocksQuery,
+        })
+
         await req.payload.db.create({
           collection: 'payload-locked-documents',
           data: {
@@ -293,6 +344,7 @@ export const buildFormState = async ({
 
         const lockedState = {
           isLocked: true,
+          lastEditedAt: new Date().toISOString(),
           user: req.user,
         }
 

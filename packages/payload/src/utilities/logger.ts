@@ -1,5 +1,5 @@
 import { type Logger, pino } from 'pino'
-import { build, type PrettyOptions } from 'pino-pretty'
+import { build, type PinoPretty, type PrettyOptions } from 'pino-pretty'
 
 import type { Config } from '../config/types.js'
 
@@ -15,13 +15,13 @@ const prettyOptions: PrettyOptions = {
   translateTime: 'SYS:HH:MM:ss',
 }
 
-export const prettySyncLoggerDestination = build({
+export const prettySyncLoggerDestination: PinoPretty.PrettyStream = build({
   ...prettyOptions,
   destination: 1, // stdout
   sync: true,
 })
 
-export const defaultLoggerOptions = build(prettyOptions)
+export const defaultLoggerOptions: PinoPretty.PrettyStream = build(prettyOptions)
 
 export const getLogger = (name = 'payload', logger?: Config['logger']): PayloadLogger => {
   if (!logger) {

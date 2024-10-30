@@ -1,12 +1,19 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
-import type { Document, PayloadRequest, RequestContext, Where } from '../../../types/index.js'
+import type {
+  Document,
+  PayloadRequest,
+  RequestContext,
+  SelectType,
+  TransformCollectionWithSelect,
+  Where,
+} from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'
 import type {
   BulkOperationResult,
-  DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
+  SelectFromCollectionSlug,
 } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -15,7 +22,7 @@ import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { updateOperation } from '../update.js'
 import { updateByIDOperation } from '../updateByID.js'
 
-export type BaseOptions<TSlug extends CollectionSlug> = {
+export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   autosave?: boolean
   collection: TSlug
   /**
@@ -35,40 +42,62 @@ export type BaseOptions<TSlug extends CollectionSlug> = {
   overwriteExistingFiles?: boolean
   publishSpecificLocale?: string
   req?: PayloadRequest
+  select?: TSelect
   showHiddenFields?: boolean
   user?: Document
 }
 
-export type ByIDOptions<TSlug extends CollectionSlug> = {
+export type ByIDOptions<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+> = {
   id: number | string
   limit?: never
   where?: never
-} & BaseOptions<TSlug>
+} & BaseOptions<TSlug, TSelect>
 
-export type ManyOptions<TSlug extends CollectionSlug> = {
+export type ManyOptions<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+> = {
   id?: never
   limit?: number
   where: Where
-} & BaseOptions<TSlug>
+} & BaseOptions<TSlug, TSelect>
 
-export type Options<TSlug extends CollectionSlug> = ByIDOptions<TSlug> | ManyOptions<TSlug>
+export type Options<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+> = ByIDOptions<TSlug, TSelect> | ManyOptions<TSlug, TSelect>
 
-async function updateLocal<TSlug extends CollectionSlug>(
+async function updateLocal<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   payload: Payload,
-  options: ByIDOptions<TSlug>,
-): Promise<DataFromCollectionSlug<TSlug>>
-async function updateLocal<TSlug extends CollectionSlug>(
+  options: ByIDOptions<TSlug, TSelect>,
+): Promise<TransformCollectionWithSelect<TSlug, TSelect>>
+async function updateLocal<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   payload: Payload,
-  options: ManyOptions<TSlug>,
-): Promise<BulkOperationResult<TSlug>>
-async function updateLocal<TSlug extends CollectionSlug>(
+  options: ManyOptions<TSlug, TSelect>,
+): Promise<BulkOperationResult<TSlug, TSelect>>
+async function updateLocal<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   payload: Payload,
-  options: Options<TSlug>,
-): Promise<BulkOperationResult<TSlug> | DataFromCollectionSlug<TSlug>>
-async function updateLocal<TSlug extends CollectionSlug>(
+  options: Options<TSlug, TSelect>,
+): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>>
+async function updateLocal<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   payload: Payload,
-  options: Options<TSlug>,
-): Promise<BulkOperationResult<TSlug> | DataFromCollectionSlug<TSlug>> {
+  options: Options<TSlug, TSelect>,
+): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>> {
   const {
     id,
     autosave,
@@ -84,6 +113,7 @@ async function updateLocal<TSlug extends CollectionSlug>(
     overrideLock,
     overwriteExistingFiles = false,
     publishSpecificLocale,
+    select,
     showHiddenFields,
     where,
   } = options
@@ -114,14 +144,15 @@ async function updateLocal<TSlug extends CollectionSlug>(
     payload,
     publishSpecificLocale,
     req,
+    select,
     showHiddenFields,
     where,
   }
 
   if (options.id) {
-    return updateByIDOperation<TSlug>(args)
+    return updateByIDOperation<TSlug, TSelect>(args)
   }
-  return updateOperation<TSlug>(args)
+  return updateOperation<TSlug, TSelect>(args)
 }
 
 export default updateLocal

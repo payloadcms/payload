@@ -1,11 +1,11 @@
-import type { Payload } from 'payload'
+import type { Payload, TypeWithID } from 'payload'
 
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { Category, Config, Post } from './payload-types.js'
+import type { Category, Config, Post, Singular } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { idToString } from '../helpers/idToString.js'
@@ -105,15 +105,45 @@ describe('Joins Field', () => {
       },
       collection: 'categories',
     })
-    // const sortCategoryWithPosts = await payload.findByID({
-    //   id: category.id,
-    //   joins: {
-    //     'group.relatedPosts': {
-    //       sort: 'title',
-    //     },
-    //   },
-    //   collection: 'categories',
-    // })
+
+    expect(categoryWithPosts.group.relatedPosts.docs).toHaveLength(10)
+    expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('id')
+    expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('title')
+    expect(categoryWithPosts.group.relatedPosts.docs[0].title).toStrictEqual('test 9')
+  })
+
+  it('should not populate joins if not selected', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      joins: {
+        'group.relatedPosts': {
+          sort: '-title',
+        },
+      },
+      select: {},
+      collection: 'categories',
+    })
+
+    expect(Object.keys(categoryWithPosts)).toStrictEqual(['id'])
+  })
+
+  it('should populate joins if selected', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      joins: {
+        'group.relatedPosts': {
+          sort: '-title',
+        },
+      },
+      select: {
+        group: {
+          relatedPosts: true,
+        },
+      },
+      collection: 'categories',
+    })
+
+    expect(Object.keys(categoryWithPosts)).toStrictEqual(['id', 'group'])
 
     expect(categoryWithPosts.group.relatedPosts.docs).toHaveLength(10)
     expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('id')
@@ -125,11 +155,12 @@ describe('Joins Field', () => {
     const { docs } = await payload.find({
       limit: 1,
       collection: 'posts',
+      depth: 2,
     })
 
     expect(docs[0].category.id).toBeDefined()
     expect(docs[0].category.name).toBeDefined()
-    expect(docs[0].category.relatedPosts.docs).toHaveLength(10)
+    expect(docs[0].category.relatedPosts.docs).toHaveLength(5) // uses defaultLimit
   })
 
   it('should populate relationships in joins with camelCase names', async () => {
@@ -373,6 +404,42 @@ describe('Joins Field', () => {
     })
   })
 
+  describe('Joins with versions', () => {
+    afterEach(async () => {
+      await payload.delete({ collection: 'versions', where: {} })
+      await payload.delete({ collection: 'categories-versions', where: {} })
+    })
+
+    it('should populate joins when versions on both sides draft false', async () => {
+      const category = await payload.create({ collection: 'categories-versions', data: {} })
+
+      const version = await payload.create({
+        collection: 'versions',
+        data: { categoryVersion: category.id },
+      })
+
+      const res = await payload.find({ collection: 'categories-versions', draft: false })
+
+      expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
+    })
+
+    it('should populate joins when versions on both sides draft true payload.db.queryDrafts', async () => {
+      const category = await payload.create({ collection: 'categories-versions', data: {} })
+
+      const version = await payload.create({
+        collection: 'versions',
+        data: { categoryVersion: category.id },
+      })
+
+      const res = await payload.find({
+        collection: 'categories-versions',
+        draft: true,
+      })
+
+      expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
+    })
+  })
+
   describe('REST', () => {
     it('should have simple paginate for joins', async () => {
       const query = {
@@ -575,11 +642,46 @@ describe('Joins Field', () => {
           }
         }
       }`
+
+      expect(true).toBeTruthy()
       const response = await restClient
         .GRAPHQL_POST({ body: JSON.stringify({ query }) })
         .then((res) => res.json())
       expect(response.data.Category.relatedPosts.docs[0].title).toStrictEqual('test 3')
     })
+  })
+
+  it('should work id.in command delimited querying with joins', async () => {
+    const allCategories = await payload.find({ collection: 'categories', pagination: false })
+
+    const allCategoriesByIds = await restClient
+      .GET(`/categories`, {
+        query: {
+          where: {
+            id: {
+              in: allCategories.docs.map((each) => each.id).join(','),
+            },
+          },
+        },
+      })
+      .then((res) => res.json())
+
+    expect(allCategories.totalDocs).toBe(allCategoriesByIds.totalDocs)
+  })
+
+  it('should join with singular collection name', async () => {
+    const {
+      docs: [category],
+    } = await payload.find({ collection: 'categories', limit: 1, depth: 0 })
+
+    const singular = await payload.create({
+      collection: 'singular',
+      data: { category: category.id },
+    })
+
+    const categoryWithJoins = await payload.findByID({ collection: 'categories', id: category.id })
+
+    expect((categoryWithJoins.singulars.docs[0] as Singular).id).toBe(singular.id)
   })
 })
 

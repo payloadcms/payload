@@ -1,5 +1,5 @@
 import type { FindGlobalVersionsArgs } from '../../database/types.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequest, SelectType } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
@@ -8,6 +8,7 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
+import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 
 export type Arguments = {
@@ -18,6 +19,7 @@ export type Arguments = {
   id: number | string
   overrideAccess?: boolean
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
 }
 
@@ -33,6 +35,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     overrideAccess,
     req: { fallbackLocale, locale, payload },
     req,
+    select,
     showHiddenFields,
   } = args
 
@@ -57,6 +60,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
       limit: 1,
       locale,
       req,
+      select,
       where: combineQueries({ id: { equals: id } }, accessResults),
     }
 
@@ -120,6 +124,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
       locale,
       overrideAccess,
       req,
+      select: typeof select?.version === 'object' ? select.version : undefined,
       showHiddenFields,
     })
 

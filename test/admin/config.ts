@@ -26,6 +26,7 @@ import { GlobalGroup1A } from './globals/Group1A.js'
 import { GlobalGroup1B } from './globals/Group1B.js'
 import { GlobalHidden } from './globals/Hidden.js'
 import { GlobalNoApiView } from './globals/NoApiView.js'
+import { Settings } from './globals/Settings.js'
 import { seed } from './seed.js'
 import {
   customAdminRoutes,
@@ -33,7 +34,11 @@ import {
   customParamViewPath,
   customRootViewMetaTitle,
   customViewPath,
+  protectedCustomNestedViewPath,
+  publicCustomViewPath,
 } from './shared.js'
+import { settingsGlobalSlug } from './slugs.js'
+
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
@@ -78,6 +83,17 @@ export default buildConfigWithDefaults({
           Component: '/components/views/CustomView/index.js#CustomView',
           exact: true,
           path: customViewPath,
+          strict: true,
+        },
+        ProtectedCustomNestedView: {
+          Component: '/components/views/CustomProtectedView/index.js#CustomProtectedView',
+          exact: true,
+          path: protectedCustomNestedViewPath,
+        },
+        PublicCustomView: {
+          Component: '/components/views/CustomView/index.js#CustomView',
+          exact: true,
+          path: publicCustomViewPath,
           strict: true,
         },
         CustomViewWithParam: {
@@ -144,6 +160,7 @@ export default buildConfigWithDefaults({
     CustomGlobalViews2,
     GlobalGroup1A,
     GlobalGroup1B,
+    Settings,
   ],
   i18n: {
     translations: {

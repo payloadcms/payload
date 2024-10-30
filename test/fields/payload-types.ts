@@ -33,6 +33,7 @@ export interface Config {
     'lexical-fields': LexicalField;
     'lexical-migrate-fields': LexicalMigrateField;
     'lexical-localized-fields': LexicalLocalizedField;
+    lexicalObjectReferenceBug: LexicalObjectReferenceBug;
     users: User;
     'array-fields': ArrayField;
     'block-fields': BlockField;
@@ -108,6 +109,21 @@ export interface UserAuthOperations {
 export interface LexicalField {
   id: string;
   title: string;
+  lexicalRootEditor?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   lexicalSimple?: {
     root: {
       type: string;
@@ -279,6 +295,45 @@ export interface LexicalLocalizedField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexicalObjectReferenceBug".
+ */
+export interface LexicalObjectReferenceBug {
+  id: string;
+  lexicalDefault?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  lexicalEditor?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -304,6 +359,7 @@ export interface ArrayField {
   title?: string | null;
   items: {
     text: string;
+    anotherText?: string | null;
     localizedText?: string | null;
     subArray?:
       | {
@@ -1683,6 +1739,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'lexical-localized-fields';
         value: string | LexicalLocalizedField;
+      } | null)
+    | ({
+        relationTo: 'lexicalObjectReferenceBug';
+        value: string | LexicalObjectReferenceBug;
       } | null)
     | ({
         relationTo: 'users';

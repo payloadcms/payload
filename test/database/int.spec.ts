@@ -810,6 +810,21 @@ describe('database', () => {
 
       expect(resLocal.textHooked).toBe('hooked')
     })
+
+    it('should not save a nested field to tabs/row/collapsible with virtual: true to the db', async () => {
+      const res = await payload.create({
+        data: {
+          textWithinCollapsible: '1',
+          textWithinRow: '2',
+          textWithinTabs: '3',
+        },
+        collection: 'fields-persistance',
+      })
+
+      expect(res.textWithinCollapsible).toBeUndefined()
+      expect(res.textWithinRow).toBeUndefined()
+      expect(res.textWithinTabs).toBeUndefined()
+    })
   })
 
   it('should not allow to query by a field with `virtual: true`', async () => {

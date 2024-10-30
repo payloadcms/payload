@@ -27,8 +27,9 @@ type Args = {
   schemaName?: string
 }
 export const createDatabase = async function (this: BasePostgresAdapter, args: Args = {}) {
-  // DATABASE_URL - default Vercel env
-  const connectionString = this.poolOptions?.connectionString ?? process.env.DATABASE_URL
+  // POSTGRES_URL - default Vercel env
+  const connectionString =
+    this.poolOptions?.connectionString ?? process.env.POSTGRES_URL ?? process.env.DATABASE_URL
   let managementClientConfig: ClientConfig = {}
   let dbName = args.name
   const schemaName = this.schemaName || 'public'
@@ -54,7 +55,7 @@ export const createDatabase = async function (this: BasePostgresAdapter, args: A
   }
 
   // import pg only when createDatabase is used
-  const pg = await import('pg')
+  const pg = await import('pg').then((mod) => mod.default)
 
   const managementClient = new pg.Client(managementClientConfig)
 

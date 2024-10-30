@@ -1,5 +1,5 @@
 import type { PaginatedDocs } from '../../database/types.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
+import type { PayloadRequest, SelectType, Sort, Where } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { Collection } from '../config/types.js'
 
@@ -19,8 +19,9 @@ export type Arguments = {
   page?: number
   pagination?: boolean
   req?: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
-  sort?: string
+  sort?: Sort
   where?: Where
 }
 
@@ -36,6 +37,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     pagination = true,
     req: { fallbackLocale, locale, payload },
     req,
+    select,
     showHiddenFields,
     sort,
     where,
@@ -75,6 +77,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
       page: page || 1,
       pagination,
       req,
+      select,
       sort,
       where: fullWhere,
     })
@@ -127,6 +130,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
             locale,
             overrideAccess,
             req,
+            select: typeof select?.version === 'object' ? select.version : undefined,
             showHiddenFields,
           }),
         })),

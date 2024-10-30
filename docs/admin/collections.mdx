@@ -11,7 +11,7 @@ The behavior of [Collections](../configuration/collections) within the [Admin Pa
 To configure Admin Options for Collections, use the `admin` property in your Collection Config:
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const MyCollection: CollectionConfig = {
   // ...
@@ -89,7 +89,7 @@ It is possible to display a Preview Button within the Edit View of the Admin Pan
 To configure the Preview Button, set the `admin.preview` property to a function in your [Collection Config](../configuration/collections):
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const Posts: CollectionConfig = {
   // ...
@@ -126,7 +126,7 @@ All Collections receive their own List View which displays a paginated list of d
 To configure pagination options, use the `admin.pagination` property in your [Collection Config](../configuration/collections):
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const Posts: CollectionConfig = {
   // ...
@@ -155,7 +155,7 @@ In the List View, there is a "search" box that allows you to quickly find a docu
 To define which fields should be searched, use the `admin.listSearchableFields` property in your [Collection Config](../configuration/collections):
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const Posts: CollectionConfig = {
   // ...

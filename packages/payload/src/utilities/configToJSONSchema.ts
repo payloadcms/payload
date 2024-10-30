@@ -74,6 +74,25 @@ function generateEntitySchemas(
   }
 }
 
+function generateEntitySelectSchemas(
+  entities: (SanitizedCollectionConfig | SanitizedGlobalConfig)[],
+): JSONSchema4 {
+  const properties = [...entities].reduce((acc, { slug }) => {
+    acc[slug] = {
+      $ref: `#/definitions/${slug}_select`,
+    }
+
+    return acc
+  }, {})
+
+  return {
+    type: 'object',
+    additionalProperties: false,
+    properties,
+    required: Object.keys(properties),
+  }
+}
+
 function generateLocaleEntitySchemas(localization: SanitizedConfig['localization']): JSONSchema4 {
   if (localization && 'locales' in localization && localization?.locales) {
     const localesFromConfig = localization?.locales
@@ -639,6 +658,98 @@ export function entityToJSONSchema(
   }
 }
 
+export function fieldsToSelectJSONSchema({ fields }: { fields: Field[] }): JSONSchema4 {
+  const schema: JSONSchema4 = {
+    type: 'object',
+    additionalProperties: false,
+    properties: {},
+  }
+
+  for (const field of fields) {
+    switch (field.type) {
+      case 'row':
+      case 'collapsible':
+        schema.properties = {
+          ...schema.properties,
+          ...fieldsToSelectJSONSchema({ fields: field.fields }).properties,
+        }
+
+        break
+
+      case 'array':
+      case 'group':
+        schema.properties[field.name] = {
+          oneOf: [
+            {
+              type: 'boolean',
+            },
+            fieldsToSelectJSONSchema({ fields: field.fields }),
+          ],
+        }
+        break
+
+      case 'tabs':
+        for (const tab of field.tabs) {
+          if (tabHasName(tab)) {
+            schema.properties[tab.name] = {
+              oneOf: [
+                {
+                  type: 'boolean',
+                },
+                fieldsToSelectJSONSchema({ fields: tab.fields }),
+              ],
+            }
+            continue
+          }
+
+          schema.properties = {
+            ...schema.properties,
+            ...fieldsToSelectJSONSchema({ fields: tab.fields }).properties,
+          }
+        }
+        break
+
+      case 'blocks': {
+        const blocksSchema: JSONSchema4 = {
+          type: 'object',
+          additionalProperties: false,
+          properties: {},
+        }
+
+        for (const block of field.blocks) {
+          blocksSchema.properties[block.slug] = {
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              fieldsToSelectJSONSchema({ fields: block.fields }),
+            ],
+          }
+        }
+
+        schema.properties[field.name] = {
+          oneOf: [
+            {
+              type: 'boolean',
+            },
+            blocksSchema,
+          ],
+        }
+
+        break
+      }
+
+      default:
+        schema.properties[field.name] = {
+          type: 'boolean',
+        }
+        break
+    }
+  }
+
+  return schema
+}
+
 const fieldType: JSONSchema4 = {
   type: 'string',
   required: false,
@@ -812,19 +923,45 @@ export function configToJSONSchema(
 
   // Collections and Globals have to be moved to the top-level definitions as well. Reason: The top-level type will be the `Config` type - we don't want all collection and global
   // types to be inlined inside the `Config` type
-  const entityDefinitions: { [k: string]: JSONSchema4 } = [
-    ...config.globals,
-    ...config.collections,
-  ].reduce((acc, entity) => {
-    acc[entity.slug] = entityToJSONSchema(
-      config,
-      entity,
-      interfaceNameDefinitions,
-      defaultIDType,
-      collectionIDFieldTypes,
-    )
-    return acc
-  }, {})
+
+  const entities: {
+    entity: SanitizedCollectionConfig | SanitizedGlobalConfig
+    type: 'collection' | 'global'
+  }[] = [
+    ...config.globals.map((global) => ({ type: 'global' as const, entity: global })),
+    ...config.collections.map((collection) => ({
+      type: 'collection' as const,
+      entity: collection,
+    })),
+  ]
+
+  const entityDefinitions: { [k: string]: JSONSchema4 } = entities.reduce(
+    (acc, { type, entity }) => {
+      acc[entity.slug] = entityToJSONSchema(
+        config,
+        entity,
+        interfaceNameDefinitions,
+        defaultIDType,
+        collectionIDFieldTypes,
+      )
+      const select = fieldsToSelectJSONSchema({ fields: entity.fields })
+
+      if (type === 'global') {
+        select.properties.globalType = {
+          type: 'boolean',
+        }
+      }
+
+      acc[`${entity.slug}_select`] = {
+        type: 'object',
+        additionalProperties: false,
+        ...select,
+      }
+
+      return acc
+    },
+    {},
+  )
 
   const authOperationDefinitions = [...config.collections]
     .filter(({ auth }) => Boolean(auth))
@@ -852,8 +989,10 @@ export function configToJSONSchema(
     properties: {
       auth: generateAuthOperationSchemas(config.collections),
       collections: generateEntitySchemas(config.collections || []),
+      collectionsSelect: generateEntitySelectSchemas(config.collections || []),
       db: generateDbEntitySchema(config),
       globals: generateEntitySchemas(config.globals || []),
+      globalsSelect: generateEntitySelectSchemas(config.globals || []),
       locale: generateLocaleEntitySchemas(config.localization),
       user: generateAuthEntitySchemas(config.collections),
     },

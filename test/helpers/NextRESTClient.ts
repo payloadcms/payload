@@ -1,4 +1,4 @@
-import type { JoinQuery, SanitizedConfig, Where } from 'payload'
+import type { JoinQuery, SanitizedConfig, SelectType, Where } from 'payload'
 import type { ParsedQs } from 'qs-esm'
 
 import {
@@ -22,6 +22,7 @@ type RequestOptions = {
     limit?: number
     locale?: string
     page?: number
+    select?: SelectType
     sort?: string
     where?: Where
   }
@@ -44,15 +45,27 @@ function generateQueryString(query: RequestOptions['query'], params: ParsedQs): 
 }
 
 export class NextRESTClient {
-  private _DELETE: (request: Request, args: { params: { slug: string[] } }) => Promise<Response>
+  private _DELETE: (
+    request: Request,
+    args: { params: Promise<{ slug: string[] }> },
+  ) => Promise<Response>
 
-  private _GET: (request: Request, args: { params: { slug: string[] } }) => Promise<Response>
+  private _GET: (
+    request: Request,
+    args: { params: Promise<{ slug: string[] }> },
+  ) => Promise<Response>
 
   private _GRAPHQL_POST: (request: Request) => Promise<Response>
 
-  private _PATCH: (request: Request, args: { params: { slug: string[] } }) => Promise<Response>
+  private _PATCH: (
+    request: Request,
+    args: { params: Promise<{ slug: string[] }> },
+  ) => Promise<Response>
 
-  private _POST: (request: Request, args: { params: { slug: string[] } }) => Promise<Response>
+  private _POST: (
+    request: Request,
+    args: { params: Promise<{ slug: string[] }> },
+  ) => Promise<Response>
 
   private readonly config: SanitizedConfig
 
@@ -120,7 +133,7 @@ export class NextRESTClient {
       headers: this.buildHeaders(options),
       method: 'DELETE',
     })
-    return this._DELETE(request, { params: { slug } })
+    return this._DELETE(request, { params: Promise.resolve({ slug }) })
   }
 
   async GET(
@@ -136,7 +149,7 @@ export class NextRESTClient {
       headers: this.buildHeaders(options),
       method: 'GET',
     })
-    return this._GET(request, { params: { slug } })
+    return this._GET(request, { params: Promise.resolve({ slug }) })
   }
 
   async GRAPHQL_POST(options: RequestInit & RequestOptions): Promise<Response> {
@@ -192,7 +205,7 @@ export class NextRESTClient {
       headers: this.buildHeaders(options),
       method: 'PATCH',
     })
-    return this._PATCH(request, { params: { slug } })
+    return this._PATCH(request, { params: Promise.resolve({ slug }) })
   }
 
   async POST(
@@ -206,6 +219,6 @@ export class NextRESTClient {
       headers: this.buildHeaders(options),
       method: 'POST',
     })
-    return this._POST(request, { params: { slug } })
+    return this._POST(request, { params: Promise.resolve({ slug }) })
   }
 }
