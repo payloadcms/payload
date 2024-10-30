@@ -49,6 +49,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     },
     fieldState: { customComponents: { Description, Error, Label } = {} } = {},
     path: pathFromProps,
+    permissions,
     readOnly,
     schemaPath,
     validate,
@@ -107,8 +108,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   })
 
   const addRow = useCallback(
-    async (rowIndex: number, blockType: string): Promise<void> => {
-      await addFieldRow({
+    (rowIndex: number, blockType: string) => {
+      addFieldRow({
         data: { blockType },
         path,
         rowIndex,
@@ -284,6 +285,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       labels={labels}
                       moveRow={moveRow}
                       path={path}
+                      permissions={permissions}
                       readOnly={readOnly}
                       removeRow={removeRow}
                       row={row}

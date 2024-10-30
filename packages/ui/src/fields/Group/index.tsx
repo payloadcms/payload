@@ -14,7 +14,6 @@ import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useRow } from '../Row/provider.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -34,6 +33,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
     },
     fieldState: { customComponents: { Description, Label } = {} } = {},
     path: pathFromProps,
+    permissions,
     readOnly,
   } = props
   const path = pathFromProps || name
@@ -45,7 +45,6 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const isWithinTab = useTabs()
   const { errorPaths } = useField({ path })
   const submitted = useFormSubmitted()
-  const { docPermissions } = useDocumentInfo()
   const errorCount = errorPaths.length
   const fieldHasErrors = submitted && errorCount > 0
 
@@ -101,8 +100,9 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
           </div>
           <RenderFields
             fields={fields}
+            margins="small"
             parentPath={path.split('.')}
-            permissions={docPermissions.fields}
+            permissions={permissions.fields}
             readOnly={readOnly}
           />
         </div>

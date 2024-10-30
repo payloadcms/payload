@@ -48,6 +48,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     fieldState: { customComponents: { Description, Error, Label } = {} } = {},
     forceRender = false,
     path: pathFromProps,
+    permissions,
     readOnly,
     rowLabels,
     schemaPath,
@@ -122,8 +123,8 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   })
 
   const addRow = useCallback(
-    async (rowIndex: number): Promise<void> => {
-      await addFieldRow({
+    (rowIndex: number) => {
+      addFieldRow({
         path,
         rowIndex,
         schemaPath,
@@ -293,6 +294,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     labels={labels}
                     moveRow={moveRow}
                     path={path}
+                    permissions={permissions}
                     readOnly={readOnly}
                     removeRow={removeRow}
                     row={rowData}

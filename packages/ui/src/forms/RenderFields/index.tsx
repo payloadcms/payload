@@ -81,7 +81,7 @@ export const RenderFields: React.FC<Props> = (props) => {
         ref={intersectionRef}
       >
         {fields.map((field, i) => {
-          const fieldPermissions = 'name' in field ? permissions?.[field.name] : null
+          const fieldPermissions = 'name' in field ? permissions?.[field.name] : permissions
 
           const { path } = getFieldPaths({
             field,
@@ -120,9 +120,11 @@ export const RenderFields: React.FC<Props> = (props) => {
             return (
               <HiddenField
                 field={field}
+                fieldState={formState}
                 forceRender={forceRender}
                 key={i}
                 path={path.join('.')}
+                permissions={fieldPermissions}
                 readOnly={isReadOnly}
                 schemaPath={field._schemaPath.join('.')}
               />

@@ -1,5 +1,5 @@
 'use client'
-import type { ClientBlock, ClientField, Labels, Row } from 'payload'
+import type { ClientBlock, ClientField, FieldPermissions, Labels, Row } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -11,7 +11,6 @@ import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { Pill } from '../../elements/Pill/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
-import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { RowActions } from './RowActions.js'
 import { SectionTitle } from './SectionTitle/index.js'
@@ -31,6 +30,7 @@ type BlocksFieldProps = {
   labels: Labels
   moveRow: (fromIndex: number, toIndex: number) => void
   path: string
+  permissions: FieldPermissions
   readOnly: boolean
   removeRow: (rowIndex: number) => void
   row: Row
@@ -54,6 +54,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   listeners,
   moveRow,
   path: parentPath,
+  permissions,
   readOnly,
   removeRow,
   row,
@@ -66,7 +67,6 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   const path = `${parentPath}.${rowIndex}`
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
-  const { docPermissions } = useDocumentInfo()
 
   const fieldHasErrors = hasSubmitted && errorCount > 0
 
@@ -138,9 +138,11 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
         <RenderFields
+          className={`${baseClass}__fields`}
           fields={fields}
+          margins="small"
           parentPath={path.split('.')}
-          permissions={docPermissions.fields}
+          permissions={permissions?.blocks?.[block.slug]?.fields}
           readOnly={readOnly}
         />
       </Collapsible>

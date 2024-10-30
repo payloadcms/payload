@@ -25,13 +25,14 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
     field: { admin: { className, description, initCollapsed = false } = {}, fields, label } = {},
     fieldState: { customComponents: { Description, Label } = {} } = {},
     path,
+    permissions,
     readOnly,
     schemaPath,
   } = props
 
   const { i18n } = useTranslation()
   const { getPreference, setPreference } = usePreferences()
-  const { docPermissions, preferencesKey } = useDocumentInfo()
+  const { preferencesKey } = useDocumentInfo()
   const [collapsedOnMount, setCollapsedOnMount] = useState<boolean>()
   const fieldPreferencesKey = `collapsible-${schemaPath?.replace(/\./g, '__')}`
   const [errorCount, setErrorCount] = useState(0)
@@ -131,8 +132,9 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
         >
           <RenderFields
             fields={fields}
+            margins="small"
             parentPath={path.split('.')}
-            permissions={docPermissions.fields}
+            permissions={permissions}
             readOnly={readOnly}
           />
         </CollapsibleElement>

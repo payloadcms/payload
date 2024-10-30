@@ -5,7 +5,6 @@ import React from 'react'
 
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 import { RowProvider } from './provider.js'
@@ -16,10 +15,9 @@ const RowFieldComponent: RowFieldClientComponent = (props) => {
   const {
     field: { admin: { className } = {}, fields },
     forceRender = false,
+    permissions,
     readOnly,
   } = props
-
-  const { docPermissions } = useDocumentInfo()
 
   return (
     <RowProvider>
@@ -30,7 +28,7 @@ const RowFieldComponent: RowFieldClientComponent = (props) => {
           forceRender={forceRender}
           margins={false}
           parentPath={props.path?.split('.')}
-          permissions={docPermissions.fields}
+          permissions={permissions}
           readOnly={readOnly}
         />
       </div>

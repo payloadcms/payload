@@ -29,11 +29,12 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
     forceRender = false,
     indexPath,
     path,
+    permissions,
     readOnly,
   } = props
 
   const { getPreference, setPreference } = usePreferences()
-  const { docPermissions, preferencesKey } = useDocumentInfo()
+  const { preferencesKey } = useDocumentInfo()
   const { i18n } = useTranslation()
   const { isWithinCollapsible } = useCollapsible()
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0)
@@ -161,7 +162,11 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
                 fields={activeTabConfig.fields}
                 forceRender={forceRender}
                 parentPath={generateTabPath().split('.')}
-                permissions={docPermissions.fields}
+                permissions={
+                  'name' in activeTabConfig && permissions?.[activeTabConfig.name]?.fields
+                    ? permissions[activeTabConfig.name].fields
+                    : permissions
+                }
                 readOnly={readOnly}
               />
               {AfterInput}

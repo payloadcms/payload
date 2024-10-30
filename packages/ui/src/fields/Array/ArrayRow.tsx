@@ -1,5 +1,5 @@
 'use client'
-import type { ArrayField, ClientField, Row } from 'payload'
+import type { ArrayField, ClientField, FieldPermissions, Row } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -11,7 +11,6 @@ import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
-import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
@@ -28,6 +27,7 @@ type ArrayRowProps = {
   readonly labels: Partial<ArrayField['labels']>
   readonly moveRow: (fromIndex: number, toIndex: number) => void
   readonly path: string
+  readonly permissions: FieldPermissions
   readonly readOnly?: boolean
   readonly removeRow: (rowIndex: number) => void
   readonly row: Row
@@ -51,6 +51,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   listeners,
   moveRow,
   path: parentPath,
+  permissions,
   readOnly,
   removeRow,
   row,
@@ -64,7 +65,6 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
 }) => {
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
-  const { docPermissions } = useDocumentInfo()
 
   const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowIndex + 1).padStart(
     2,
@@ -127,10 +127,12 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
         <RenderFields
+          className={`${baseClass}__fields`}
           fields={fields}
           forceRender={forceRender}
+          margins="small"
           parentPath={[...parentPath.split('.'), rowIndex]}
-          permissions={docPermissions.fields}
+          permissions={permissions.fields}
           readOnly={readOnly}
         />
       </Collapsible>
