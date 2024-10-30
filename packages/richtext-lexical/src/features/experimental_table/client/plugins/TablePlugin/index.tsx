@@ -16,7 +16,6 @@ import { INSERT_TABLE_COMMAND, TableNode } from '@lexical/table'
 import { mergeRegister } from '@lexical/utils'
 import { formatDrawerSlug, useEditDepth, useModal } from '@payloadcms/ui'
 import { $getSelection, $isRangeSelection, COMMAND_PRIORITY_EDITOR, createCommand } from 'lexical'
-import { useLexicalDrawer } from 'packages/richtext-lexical/src/utilities/fieldsDrawer/useLexicalDrawer.js'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import * as React from 'react'
 
@@ -24,6 +23,7 @@ import type { PluginComponent } from '../../../../typesClient.js'
 
 import { useEditorConfigContext } from '../../../../../lexical/config/client/EditorConfigProvider.js'
 import { FieldsDrawer } from '../../../../../utilities/fieldsDrawer/Drawer.js'
+import { useLexicalDrawer } from '../../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import './index.scss'
 
 export type CellContextShape = {

@@ -7,6 +7,7 @@ import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
@@ -21,6 +22,7 @@ export const find: Find = async function find(
     pagination,
     projection,
     req = {} as PayloadRequest,
+    select,
     sort: sortArg,
     where,
   },
@@ -65,6 +67,14 @@ export const find: Find = async function find(
     projection,
     sort,
     useEstimatedCount,
+  }
+
+  if (select) {
+    paginationOptions.projection = buildProjectionFromSelect({
+      adapter: this,
+      fields: collectionConfig.fields,
+      select,
+    })
   }
 
   if (this.collation) {

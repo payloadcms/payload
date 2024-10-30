@@ -26,6 +26,7 @@ import {
 } from '@payloadcms/ui'
 import { handleBackToDashboard, handleGoBack, handleTakeOver } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
+import { useDocumentDrawerContext } from 'packages/ui/src/elements/DocumentDrawer/Provider.js'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
 import { DocumentLocked } from '../../elements/DocumentLocked/index.js'
@@ -77,7 +78,7 @@ const PreviewView: React.FC<Props> = ({
     initialState,
     isEditing,
     isInitializing,
-    onSave: onSaveFromProps,
+    lastUpdateTime,
     setCurrentEditor,
     setDocumentIsLocked,
     unlockDocument,
@@ -85,6 +86,8 @@ const PreviewView: React.FC<Props> = ({
   } = useDocumentInfo()
 
   const { getFormState } = useServerFunctions()
+
+  const { onSave: onSaveFromProps } = useDocumentDrawerContext()
 
   const operation = id ? 'update' : 'create'
 
@@ -103,13 +106,23 @@ const PreviewView: React.FC<Props> = ({
   const docConfig = collectionConfig || globalConfig
 
   const lockDocumentsProp = docConfig?.lockDocuments !== undefined ? docConfig?.lockDocuments : true
-
   const isLockingEnabled = lockDocumentsProp !== false
+
+  const lockDurationDefault = 300 // Default 5 minutes in seconds
+  const lockDuration =
+    typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
+  const lockDurationInMilliseconds = lockDuration * 1000
 
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
 
   const abortControllerRef = useRef(new AbortController())
+
+  const [editSessionStartTime, setEditSessionStartTime] = useState(Date.now())
+
+  const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
+
+  const isLockExpired = Date.now() > lockExpiryTime
 
   const documentLockStateRef = useRef<{
     hasShownLockedModal: boolean
@@ -120,8 +133,6 @@ const PreviewView: React.FC<Props> = ({
     isLocked: false,
     user: null,
   })
-
-  const [lastUpdateTime, setLastUpdateTime] = useState(Date.now())
 
   const onSave = useCallback(
     (json) => {
@@ -177,12 +188,12 @@ const PreviewView: React.FC<Props> = ({
       abortControllerRef.current = abortController
 
       const currentTime = Date.now()
-      const timeSinceLastUpdate = currentTime - lastUpdateTime
+      const timeSinceLastUpdate = currentTime - editSessionStartTime
 
       const updateLastEdited = isLockingEnabled && timeSinceLastUpdate >= 10000 // 10 seconds
 
       if (updateLastEdited) {
-        setLastUpdateTime(currentTime)
+        setEditSessionStartTime(currentTime)
       }
 
       const docPreferences = await getDocPreferences()
@@ -232,10 +243,10 @@ const PreviewView: React.FC<Props> = ({
     },
     [
       collectionSlug,
+      editSessionStartTime,
       globalSlug,
       id,
       isLockingEnabled,
-      lastUpdateTime,
       operation,
       schemaPath,
       getDocPreferences,
@@ -303,7 +314,8 @@ const PreviewView: React.FC<Props> = ({
     !isReadOnlyForIncomingUser &&
     !showTakeOverModal &&
     // eslint-disable-next-line react-compiler/react-compiler
-    !documentLockStateRef.current?.hasShownLockedModal
+    !documentLockStateRef.current?.hasShownLockedModal &&
+    !isLockExpired
 
   return (
     <OperationProvider operation={operation}>

@@ -12,7 +12,11 @@ import './index.scss'
 const baseClass = 'dashboard'
 
 export type DashboardProps = {
-  globalData: Array<{ data: { _isLocked: boolean; _userEditing: ClientUser | null }; slug: string }>
+  globalData: Array<{
+    data: { _isLocked: boolean; _lastEditedAt: string; _userEditing: ClientUser | null }
+    lockDuration?: number
+    slug: string
+  }>
   Link: React.ComponentType<any>
   navGroups?: ReturnType<typeof groupNavItems>
   permissions: Permissions
@@ -69,42 +73,64 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                 <div className={`${baseClass}__group`} key={groupIndex}>
                   <h2 className={`${baseClass}__label`}>{label}</h2>
                   <ul className={`${baseClass}__card-list`}>
-                    {entities.map(({ slug, type, label }, entityIndex) => {
+                    {entities.map(({ type, entity }, entityIndex) => {
+                      let title: string
                       let buttonAriaLabel: string
                       let createHREF: string
                       let href: string
                       let hasCreatePermission: boolean
-                      let lockStatus = null
+                      let isLocked = null
                       let userEditing = null
 
                       if (type === EntityType.collection) {
-                        buttonAriaLabel = t('general:showAllLabel', { label })
+                        title = getTranslation(entity.labels.plural, i18n)
 
-                        href = formatAdminURL({ adminRoute, path: `/collections/${slug}` })
+                        buttonAriaLabel = t('general:showAllLabel', { label: title })
+
+                        href = formatAdminURL({ adminRoute, path: `/collections/${entity.slug}` })
 
                         createHREF = formatAdminURL({
                           adminRoute,
-                          path: `/collections/${slug}/create`,
+                          path: `/collections/${entity.slug}/create`,
                         })
 
-                        hasCreatePermission = permissions?.collections?.[slug]?.create?.permission
+                        hasCreatePermission =
+                          permissions?.collections?.[entity.slug]?.create?.permission
                       }
 
                       if (type === EntityType.global) {
+                        title = getTranslation(entity.label, i18n)
+
                         buttonAriaLabel = t('general:editLabel', {
-                          label: getTranslation(label, i18n),
+                          label: getTranslation(entity.label, i18n),
                         })
 
                         href = formatAdminURL({
                           adminRoute,
-                          path: `/globals/${slug}`,
+                          path: `/globals/${entity.slug}`,
                         })
 
                         // Find the lock status for the global
-                        const globalLockData = globalData.find((global) => global.slug === slug)
+                        const globalLockData = globalData.find(
+                          (global) => global.slug === entity.slug,
+                        )
                         if (globalLockData) {
-                          lockStatus = globalLockData.data._isLocked
+                          isLocked = globalLockData.data._isLocked
                           userEditing = globalLockData.data._userEditing
+
+                          // Check if the lock is expired
+                          const lockDuration = globalLockData?.lockDuration
+                          const lastEditedAt = new Date(
+                            globalLockData.data?._lastEditedAt,
+                          ).getTime()
+
+                          const lockDurationInMilliseconds = lockDuration * 1000
+                          const lockExpirationTime = lastEditedAt + lockDurationInMilliseconds
+
+                          if (new Date().getTime() > lockExpirationTime) {
+                            isLocked = false
+                            userEditing = null
+                          }
                         }
                       }
 
@@ -112,7 +138,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                         <li key={entityIndex}>
                           <Card
                             actions={
-                              lockStatus && user?.id !== userEditing?.id ? (
+                              isLocked && user?.id !== userEditing?.id ? (
                                 <Locked className={`${baseClass}__locked`} user={userEditing} />
                               ) : hasCreatePermission && type === EntityType.collection ? (
                                 <Button

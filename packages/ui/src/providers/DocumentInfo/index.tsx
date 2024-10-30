@@ -96,6 +96,7 @@ const DocumentInfo: React.FC<
 
   const [documentIsLocked, setDocumentIsLocked] = useState<boolean | undefined>(false)
   const [currentEditor, setCurrentEditor] = useState<ClientUser | null>(null)
+  const [lastUpdateTime, setLastUpdateTime] = useState<number>(null)
 
   const isInitializing = initialState === undefined || data === undefined
   const [unpublishedVersions, setUnpublishedVersions] =
@@ -217,9 +218,11 @@ const DocumentInfo: React.FC<
 
           if (docs.length > 0) {
             const newEditor = docs[0].user?.value
+            const lastUpdatedAt = new Date(docs[0].updatedAt).getTime()
             if (newEditor && newEditor.id !== currentEditor?.id) {
               setCurrentEditor(newEditor)
               setDocumentIsLocked(true)
+              setLastUpdateTime(lastUpdatedAt)
             }
           } else {
             setDocumentIsLocked(false)
@@ -536,6 +539,7 @@ const DocumentInfo: React.FC<
     initialData: data,
     initialState,
     isInitializing,
+    lastUpdateTime,
     preferencesKey,
     publishedDoc,
     setCurrentEditor,

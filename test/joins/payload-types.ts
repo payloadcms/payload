@@ -16,6 +16,7 @@ export interface Config {
     uploads: Upload;
     versions: Version;
     'categories-versions': CategoriesVersion;
+    singular: Singular;
     'localized-posts': LocalizedPost;
     'localized-categories': LocalizedCategory;
     users: User;
@@ -23,10 +24,24 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
+  collectionsSelect?: {
+    posts: PostsSelect<false> | PostsSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    uploads: UploadsSelect<false> | UploadsSelect<true>;
+    versions: VersionsSelect<false> | VersionsSelect<true>;
+    'categories-versions': CategoriesVersionsSelect<false> | CategoriesVersionsSelect<true>;
+    'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
+    'localized-categories': LocalizedCategoriesSelect<false> | LocalizedCategoriesSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+  };
   db: {
     defaultIDType: string;
   };
   globals: {};
+  globalsSelect?: {};
   locale: 'en' | 'es';
   user: User & {
     collection: 'users';
@@ -119,6 +134,20 @@ export interface Category {
       hasNextPage?: boolean | null;
     } | null;
   };
+  singulars?: {
+    docs?: (string | Singular)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "singular".
+ */
+export interface Singular {
+  id: string;
+  category?: (string | null) | Category;
   updatedAt: string;
   createdAt: string;
 }
@@ -218,6 +247,10 @@ export interface PayloadLockedDocument {
         value: string | CategoriesVersion;
       } | null)
     | ({
+        relationTo: 'singular';
+        value: string | Singular;
+      } | null)
+    | ({
         relationTo: 'localized-posts';
         value: string | LocalizedPost;
       } | null)
@@ -270,6 +303,149 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  upload?: T;
+  category?: T;
+  categories?: T;
+  categoriesLocalized?: T;
+  group?:
+    | T
+    | {
+        category?: T;
+        camelCaseCategory?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  name?: T;
+  relatedPosts?: T;
+  hasManyPosts?: T;
+  hasManyPostsLocalized?: T;
+  group?:
+    | T
+    | {
+        relatedPosts?: T;
+        camelCasePosts?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads_select".
+ */
+export interface UploadsSelect<T extends boolean = true> {
+  relatedPosts?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versions_select".
+ */
+export interface VersionsSelect<T extends boolean = true> {
+  category?: T;
+  categoryVersion?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories-versions_select".
+ */
+export interface CategoriesVersionsSelect<T extends boolean = true> {
+  relatedVersions?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-posts_select".
+ */
+export interface LocalizedPostsSelect<T extends boolean = true> {
+  title?: T;
+  category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-categories_select".
+ */
+export interface LocalizedCategoriesSelect<T extends boolean = true> {
+  name?: T;
+  relatedPosts?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_select".
+ */
+export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_select".
+ */
+export interface PayloadPreferencesSelect<T extends boolean = true> {
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select".
+ */
+export interface PayloadMigrationsSelect<T extends boolean = true> {
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

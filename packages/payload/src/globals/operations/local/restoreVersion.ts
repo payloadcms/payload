@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-exports */
 import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequest } from '../../../types/index.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'

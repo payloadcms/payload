@@ -1,8 +1,14 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type {
+  JsonObject,
+  PayloadRequest,
+  RequestContext,
+  SelectType,
+} from '../../../types/index.js'
 
 import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
+import { getSelectMode } from '../../../utilities/getSelectMode.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T extends JsonObject> = {
@@ -19,6 +25,7 @@ type Args<T extends JsonObject> = {
   locale: string
   overrideAccess: boolean
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields: boolean
 }
 
@@ -47,6 +54,7 @@ export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T>
     locale,
     overrideAccess,
     req,
+    select,
     showHiddenFields,
   } = args
 
@@ -83,6 +91,8 @@ export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T>
     populationPromises,
     req,
     schemaPath: [],
+    select,
+    selectMode: select ? getSelectMode(select) : undefined,
     showHiddenFields,
     siblingDoc: doc,
   })

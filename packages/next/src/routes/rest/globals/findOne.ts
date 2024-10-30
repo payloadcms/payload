@@ -5,6 +5,7 @@ import { isNumber } from 'payload/shared'
 import type { GlobalRouteHandler } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
+import { sanitizeSelect } from '../utilities/sanitizeSelect.js'
 
 export const findOne: GlobalRouteHandler = async ({ globalConfig, req }) => {
   const { searchParams } = req
@@ -16,6 +17,7 @@ export const findOne: GlobalRouteHandler = async ({ globalConfig, req }) => {
     draft: searchParams.get('draft') === 'true',
     globalConfig,
     req,
+    select: sanitizeSelect(req.query.select),
   })
 
   return Response.json(result, {

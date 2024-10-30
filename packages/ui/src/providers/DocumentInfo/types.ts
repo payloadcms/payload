@@ -48,6 +48,7 @@ export type DocumentInfoContext = {
   initialData: Data
   initialState?: FormState
   isInitializing: boolean
+  lastUpdateTime?: number
   preferencesKey?: string
   publishedDoc?: { _status?: string } & TypeWithID & TypeWithTimestamps
   setCurrentEditor?: React.Dispatch<React.SetStateAction<ClientUser>>

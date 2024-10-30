@@ -1,14 +1,19 @@
 import crypto from 'crypto'
 
 import type { CollectionSlug, JsonObject } from '../../index.js'
-import type { Document, PayloadRequest } from '../../types/index.js'
+import type {
+  Document,
+  PayloadRequest,
+  SelectType,
+  TransformCollectionWithSelect,
+} from '../../types/index.js'
 import type {
   AfterChangeHook,
   BeforeOperationHook,
   BeforeValidateHook,
   Collection,
-  DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
+  SelectFromCollectionSlug,
 } from '../config/types.js'
 
 import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
@@ -40,12 +45,16 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
 }
 
-export const createOperation = async <TSlug extends CollectionSlug>(
+export const createOperation = async <
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   incomingArgs: Arguments<TSlug>,
-): Promise<DataFromCollectionSlug<TSlug>> => {
+): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
 
   try {
@@ -95,6 +104,7 @@ export const createOperation = async <TSlug extends CollectionSlug>(
         payload: { config, email },
       },
       req,
+      select,
       showHiddenFields,
     } = args
 
@@ -235,12 +245,14 @@ export const createOperation = async <TSlug extends CollectionSlug>(
         password: data.password as string,
         payload: req.payload,
         req,
+        select,
       })
     } else {
       doc = await payload.db.create({
         collection: collectionConfig.slug,
         data: resultWithLocales,
         req,
+        select,
       })
     }
 
@@ -293,6 +305,7 @@ export const createOperation = async <TSlug extends CollectionSlug>(
       locale,
       overrideAccess,
       req,
+      select,
       showHiddenFields,
     })
 
