@@ -114,7 +114,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     schemaPathsToRender &&
     (schemaPathsToRender === true || schemaPathsToRender.includes(fieldSchemaPath.join('.')))
 
-  if (fieldAffectsData(field)) {
+  const isHiddenField = 'hidden' in field && field?.hidden
+  const disabledFromAdmin = field?.admin && 'disabled' in field.admin && field.admin.disabled
+  if (fieldAffectsData(field) && !(isHiddenField || disabledFromAdmin)) {
     const validate = field.validate
 
     const fieldState: FormFieldWithoutComponents = {
