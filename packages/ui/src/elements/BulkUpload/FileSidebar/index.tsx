@@ -36,6 +36,7 @@ export function FileSidebar() {
     isInitializing,
     removeFile,
     setActiveIndex,
+    thumbnailUrls,
     totalErrorCount,
   } = useFormsManager()
   const { initialFiles, maxFiles } = useBulkUpload()
@@ -156,9 +157,7 @@ export function FileSidebar() {
                   >
                     <Thumbnail
                       className={`${baseClass}__thumbnail`}
-                      fileSrc={
-                        isImage(currentFile.type) ? URL.createObjectURL(currentFile) : undefined
-                      }
+                      fileSrc={isImage(currentFile.type) ? thumbnailUrls[index] : undefined}
                     />
                     <div className={`${baseClass}__fileDetails`}>
                       <p className={`${baseClass}__fileName`} title={currentFile.name}>
