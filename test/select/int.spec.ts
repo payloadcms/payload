@@ -1661,6 +1661,41 @@ describe('Select', () => {
       expect(richTextLexicalRel.value).toStrictEqual(expectedHomePage)
       expect(richTextSlateRel.value).toStrictEqual(expectedHomePage)
     })
+
+    it('rEST API - should populate with the defaultPopulate select shape', async () => {
+      const restResult = await (
+        await restClient.GET(`/pages/${aboutPage.id}`, { query: { depth: 1 } })
+      ).json()
+
+      const {
+        content: [
+          {
+            link: { doc, docHasManyPoly, docMany, docPoly },
+            richTextSlate: [richTextSlateRel],
+            richTextLexical: {
+              root: {
+                children: [richTextLexicalRel],
+              },
+            },
+          },
+        ],
+      } = restResult
+
+      expect(doc).toMatchObject(expectedHomePage)
+      expect(docMany).toMatchObject([expectedHomePage])
+      expect(docPoly).toMatchObject({
+        relationTo: 'pages',
+        value: expectedHomePage,
+      })
+      expect(docHasManyPoly).toMatchObject([
+        {
+          relationTo: 'pages',
+          value: expectedHomePage,
+        },
+      ])
+      expect(richTextLexicalRel.value).toMatchObject(expectedHomePage)
+      expect(richTextSlateRel.value).toMatchObject(expectedHomePage)
+    })
   })
 })
 
