@@ -66,8 +66,8 @@ export default buildConfig({
   admin: {
     bundler: webpackBundler(), // or viteBundler()
   },
-  db: mongooseAdapter({}) // or postgresAdapter({}),
-  editor: lexicalEditor({}) // or slateEditor({})
+  db: mongooseAdapter({}), // or postgresAdapter({})
+  editor: lexicalEditor({}), // or slateEditor({})
   collections: [
     {
       slug: 'pages',
