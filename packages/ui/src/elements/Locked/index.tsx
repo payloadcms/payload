@@ -3,20 +3,22 @@ import type { ClientUser } from 'payload'
 
 import React, { useState } from 'react'
 
-import { useTableCell } from '../../elements/Table/TableCellProvider/index.js'
 import { LockIcon } from '../../icons/Lock/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { isClientUserObject } from '../../utilities/isClientUserObject.js'
 import { Tooltip } from '../Tooltip/index.js'
 import './index.scss'
 
 const baseClass = 'locked'
 
-export const Locked: React.FC<{ className?: string; user: ClientUser }> = ({ className, user }) => {
-  const { rowData } = useTableCell()
+export const Locked: React.FC<{ className?: string; user: ClientUser | number | string }> = ({
+  className,
+  user,
+}) => {
   const [hovered, setHovered] = useState(false)
   const { t } = useTranslation()
 
-  const userToUse = user ? (user?.email ?? user?.id) : rowData?.id
+  const userToUse = isClientUserObject(user) ? (user.email ?? user.id) : t('general:anotherUser')
 
   return (
     <div

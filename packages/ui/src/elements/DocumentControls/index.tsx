@@ -55,7 +55,7 @@ export const DocumentControls: React.FC<{
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
   readonly slug: SanitizedCollectionConfig['slug']
-  readonly user?: ClientUser
+  readonly user?: ClientUser | number | string
 }> = (props) => {
   const {
     id,

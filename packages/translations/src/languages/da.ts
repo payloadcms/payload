@@ -177,6 +177,7 @@ export const daTranslations: DefaultTranslationsObject = {
     addFilter: 'Tilføj filter',
     adminTheme: 'Admin tema',
     and: 'Og',
+    anotherUser: 'En anden bruger',
     anotherUserTakenOver: 'En anden bruger har overtaget denne ressource.',
     applyChanges: 'Tilføj ændringer',
     ascending: 'Stigende',

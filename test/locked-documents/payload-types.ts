@@ -89,6 +89,7 @@ export interface Test {
 export interface User {
   id: string;
   name?: string | null;
+  roles?: ('is_user' | 'is_admin')[] | null;
   updatedAt: string;
   createdAt: string;
   email: string;

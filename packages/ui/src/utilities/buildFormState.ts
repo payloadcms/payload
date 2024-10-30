@@ -39,7 +39,7 @@ export const buildFormState = async ({
 }: {
   req: PayloadRequest
 }): Promise<{
-  lockedState?: { isLocked: boolean; lastEditedAt: string; user: ClientUser | number | string }
+  lockedState?: { isLocked: boolean; user: ClientUser | number | string }
   state: FormState
 }> => {
   const reqData: BuildFormStateArgs = (req.data || {}) as BuildFormStateArgs
@@ -275,7 +275,6 @@ export const buildFormState = async ({
       if (lockedDocument.docs && lockedDocument.docs.length > 0) {
         const lockedState = {
           isLocked: true,
-          lastEditedAt: lockedDocument.docs[0]?.updatedAt,
           user: lockedDocument.docs[0]?.user?.value,
         }
 
@@ -344,7 +343,6 @@ export const buildFormState = async ({
 
         const lockedState = {
           isLocked: true,
-          lastEditedAt: new Date().toISOString(),
           user: req.user,
         }
 

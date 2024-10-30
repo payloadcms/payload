@@ -182,6 +182,7 @@ export const roTranslations: DefaultTranslationsObject = {
     addFilter: 'Adaugă filtru',
     adminTheme: 'Tema Admin',
     and: 'Şi',
+    anotherUser: 'Un alt utilizator',
     anotherUserTakenOver: 'Un alt utilizator a preluat editarea acestui document.',
     applyChanges: 'Aplicați modificările',
     ascending: 'Ascendant',

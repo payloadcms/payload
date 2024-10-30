@@ -31,10 +31,9 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
       payload,
       user,
     },
+    req,
     visibleEntities,
   } = initPageResult
-
-  const lockDurationDefault = 300 // Default 5 minutes in seconds
 
   const CustomDashboardComponent = config.admin.components?.views?.Dashboard
 
@@ -50,39 +49,44 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
       visibleEntities.globals.includes(global.slug),
   )
 
-  const globalConfigs = config.globals.map((global) => ({
-    slug: global.slug,
-    lockDuration:
-      global.lockDocuments === false
-        ? null // Set lockDuration to null if locking is disabled
-        : typeof global.lockDocuments === 'object'
+  // Query locked global documents only if there are globals in the config
+  let globalData = []
+
+  if (config.globals.length > 0) {
+    const lockedDocuments = await payload.find({
+      collection: 'payload-locked-documents',
+      depth: 1,
+      overrideAccess: false,
+      pagination: false,
+      req,
+      where: {
+        globalSlug: {
+          exists: true,
+        },
+      },
+    })
+
+    // Map over globals to include `lockDuration` and lock data for each global slug
+    globalData = config.globals.map((global) => {
+      const lockDurationDefault = 300
+      const lockDuration =
+        typeof global.lockDocuments === 'object'
           ? global.lockDocuments.duration
-          : lockDurationDefault,
-  }))
+          : lockDurationDefault
 
-  // Filter the slugs based on permissions and visibility
-  const filteredGlobalConfigs = globalConfigs.filter(
-    ({ slug, lockDuration }) =>
-      lockDuration !== null && // Ensure lockDuration is valid
-      permissions?.globals?.[slug]?.read?.permission &&
-      visibleEntities.globals.includes(slug),
-  )
-
-  const globalData = await Promise.all(
-    filteredGlobalConfigs.map(async ({ slug, lockDuration }) => {
-      const data = await payload.findGlobal({
-        slug,
-        depth: 0,
-        includeLockStatus: true,
-      })
+      const lockedDoc = lockedDocuments.docs.find((doc) => doc.globalSlug === global.slug)
 
       return {
-        slug,
-        data,
+        slug: global.slug,
+        data: {
+          _isLocked: !!lockedDoc,
+          _lastEditedAt: lockedDoc?.updatedAt ?? null,
+          _userEditing: lockedDoc?.user?.value ?? null,
+        },
         lockDuration,
       }
-    }),
-  )
+    })
+  }
 
   const navGroups = groupNavItems(
     [

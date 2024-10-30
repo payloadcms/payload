@@ -123,6 +123,7 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
           collection: 'payload-locked-documents',
           depth: 1,
           limit: 1,
+          overrideAccess: false,
           pagination: false,
           req,
           where: {

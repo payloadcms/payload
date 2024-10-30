@@ -169,6 +169,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
           collection: 'payload-locked-documents',
           depth: 1,
           limit: sanitizedLimit,
+          overrideAccess: false,
           pagination: false,
           req,
           where: {
