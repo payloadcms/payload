@@ -10,14 +10,12 @@ import {
   type Payload,
   type PayloadComponent,
   type Permissions,
-  type RichTextFieldClient,
-  type RichTextGenerateClientProps,
   type SanitizedConfig,
   type ServerComponentProps,
 } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
 
-import { getFromImportMap, RenderServerComponent } from '../elements/RenderServerComponent/index.js'
+import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { FieldDescription } from '../fields/FieldDescription/index.js'
 import { FieldLabel } from '../fields/FieldLabel/index.js'
 import { RowLabel as DefaultRowLabel } from '../forms/RowLabel/index.js'
@@ -114,11 +112,10 @@ export function attachComponentsToFormState(args: Args): args is OutputArgs {
       }
 
       const serverProps: ServerComponentProps = {
-        clientField,
         config,
-        field: fieldConfig,
         i18n,
         payload,
+        serverField: fieldConfig,
       }
 
       if (!fieldState?.customComponents) {
@@ -183,36 +180,6 @@ export function attachComponentsToFormState(args: Args): args is OutputArgs {
             fieldConfig.admin.components = {}
           }
 
-          let additionalClientProps = {}
-          if (fieldConfig.editor.generateClientProps) {
-            const getGenerateClientProps = getFromImportMap<
-              (args: unknown) => RichTextGenerateClientProps
-            >({
-              PayloadComponent: fieldConfig.editor.generateClientProps,
-              schemaPath: 'richText-generateClientProps',
-
-              importMap: payload.importMap,
-              silent: true,
-            })
-
-            if (getGenerateClientProps) {
-              const generateClientProps = getGenerateClientProps(
-                typeof fieldConfig.editor.generateClientProps === 'object'
-                  ? fieldConfig.editor.generateClientProps.serverProps
-                  : {},
-              )
-
-              additionalClientProps = generateClientProps({
-                clientField: clientField as RichTextFieldClient,
-                field: fieldConfig,
-                i18n,
-                importMap: payload.importMap,
-                payload,
-                schemaPath: fieldState.schemaPath,
-              })
-            }
-          }
-
           /**
            * We have to deep copy all the props we send to the client (= FieldComponent.clientProps).
            * That way, every editor's field / cell props we send to the client have their own object references.
@@ -232,7 +199,6 @@ export function attachComponentsToFormState(args: Args): args is OutputArgs {
             <RenderServerComponent
               clientProps={{
                 ...clientProps,
-                ...additionalClientProps,
               }}
               Component={FieldComponent}
               Fallback={undefined}
@@ -251,7 +217,6 @@ export function attachComponentsToFormState(args: Args): args is OutputArgs {
             <RenderServerComponent
               clientProps={{
                 ...clientProps,
-                ...additionalClientProps,
               }}
               Component={CellComponent}
               Fallback={undefined}

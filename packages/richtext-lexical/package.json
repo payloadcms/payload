@@ -23,12 +23,16 @@
       "types": "./src/exports/client/index.ts",
       "default": "./src/exports/client/index.ts"
     },
+    "./rscs": {
+      "import": "./src/exports/server/rscs.ts",
+      "types": "./src/exports/server/rscs.ts",
+      "default": "./src/exports/server/rscs.ts"
+    },
     "./migrate": {
       "import": "./src/exports/server/migrate.ts",
       "types": "./src/exports/server/migrate.ts",
       "default": "./src/exports/server/migrate.ts"
-    },
-    "./generateClientProps": "./src/utilities/generateClientProps.tsx"
+    }
   },
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -126,15 +130,15 @@
         "types": "./dist/exports/client/index.d.ts",
         "default": "./dist/exports/client/index.js"
       },
+      "./rscs": {
+        "import": "./dist/exports/server/rscs.js",
+        "types": "./dist/exports/server/rscs.d.ts",
+        "default": "./dist/exports/server/rscs.js"
+      },
       "./migrate": {
         "import": "./dist/exports/server/migrate.js",
         "types": "./dist/exports/server/migrate.d.ts",
         "default": "./dist/exports/server/migrate.js"
-      },
-      "./generateClientProps": {
-        "import": "./dist/utilities/generateClientProps.js",
-        "types": "./dist/utilities/generateClientProps.d.ts",
-        "default": "./dist/utilities/generateClientProps.js"
       }
     },
     "main": "./dist/index.js",

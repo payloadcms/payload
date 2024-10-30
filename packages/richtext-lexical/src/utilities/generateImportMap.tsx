@@ -8,8 +8,7 @@ export const getGenerateImportMap =
   (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): RichTextAdapter['generateImportMap'] =>
   ({ addToImportMap, baseDir, config, importMap, imports }) => {
     addToImportMap('@payloadcms/richtext-lexical/client#RichTextCell')
-    addToImportMap('@payloadcms/richtext-lexical/client#RichTextField')
-    addToImportMap('@payloadcms/richtext-lexical/generateClientProps#getGenerateClientProps')
+    addToImportMap('@payloadcms/richtext-lexical/rscs#RscEntryLexicalField')
 
     // iterate just through args.resolvedFeatureMap.values()
     for (const resolvedFeature of args.resolvedFeatureMap.values()) {

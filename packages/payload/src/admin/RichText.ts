@@ -182,26 +182,11 @@ export type RichTextHooks = {
   beforeChange?: BeforeChangeRichTextHook[]
   beforeValidate?: BeforeValidateRichTextHook[]
 }
-
-export type RichTextGenerateClientProps = (args: {
-  clientField: RichTextFieldClient
-  field: RichTextField
-  i18n: I18nClient
-  importMap: ImportMap
-  payload: Payload
-  schemaPath: string[]
-}) => object
-
 type RichTextAdapterBase<
   Value extends object = object,
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
-  /**
-   * Function that will run in attachComponentsToState when form state is built, to attach extra client props to RichText field.
-   * // TODO: Cell
-   */
-  generateClientProps: PayloadComponent<any, never>
   generateImportMap?: Config['admin']['importMap']['generators'][0]
   generateSchemaMap?: (args: {
     config: SanitizedConfig

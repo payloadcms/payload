@@ -79,7 +79,7 @@ export type LexicalRichTextAdapterProvider =
 
 export type LexicalRichTextFieldProps = {
   admin: LexicalFieldAdminProps
-  // clientFeatures is added through generateClientProps
+  // clientFeatures is added through the rsc field
   clientFeatures: {
     [featureKey: string]: {
       clientFeatureProps: object

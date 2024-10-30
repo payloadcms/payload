@@ -147,10 +147,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           admin: props?.admin,
           lexicalEditorConfig: finalSanitizedEditorConfig.lexical,
         },
-        path: '@payloadcms/richtext-lexical/client#RichTextField',
-      },
-      generateClientProps: {
-        path: '@payloadcms/richtext-lexical/generateClientProps#getGenerateClientProps',
+        path: '@payloadcms/richtext-lexical/rscs#RscEntryLexicalField',
         serverProps: {
           resolvedFeatureMap,
         },

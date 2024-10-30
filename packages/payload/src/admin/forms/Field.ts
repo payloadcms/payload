@@ -22,11 +22,10 @@ export type ClientComponentProps = {
 }
 
 export type ServerComponentProps = {
-  clientField: ClientBlock | ClientField | ClientTab
   config: SanitizedConfig
-  field: Field
   i18n: I18nClient
   payload: Payload
+  serverField: Field
 }
 
 export type ClientFieldBase<

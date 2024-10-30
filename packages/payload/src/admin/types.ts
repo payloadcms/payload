@@ -456,12 +456,7 @@ export type DocumentSlots = {
   Upload?: React.ReactNode
 }
 
-export type {
-  RichTextAdapter,
-  RichTextAdapterProvider,
-  RichTextGenerateClientProps,
-  RichTextHooks,
-} from './RichText.js'
+export type { RichTextAdapter, RichTextAdapterProvider, RichTextHooks } from './RichText.js'
 
 export type {
   AdminViewComponent,
