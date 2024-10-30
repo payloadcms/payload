@@ -57,8 +57,8 @@ export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 export { sql } from 'drizzle-orm'
 
 export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
-  const postgresIDType = args.idType || 'serial'
-  const payloadIDType = postgresIDType === 'serial' ? 'number' : 'text'
+  const sqliteIDType = args.idType || 'serial'
+  const payloadIDType = sqliteIDType === 'serial' ? 'number' : 'text'
 
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(args.migrationDir)
@@ -90,7 +90,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       },
       fieldConstraints: {},
       getMigrationTemplate,
-      idType: postgresIDType,
+      idType: sqliteIDType,
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
