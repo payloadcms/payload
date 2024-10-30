@@ -2,6 +2,32 @@ import type { ArrayField, BlocksField, Field, TabAsField } from '../fields/confi
 
 import { fieldHasSubFields } from '../fields/config/types.js'
 
+const traverseArrayOrBlocksField = ({
+  callback,
+  data,
+  field,
+  parentRef,
+}: {
+  callback: TraverseFieldsCallback
+  data: Record<string, unknown>[]
+  field: ArrayField | BlocksField
+  parentRef?: unknown
+}) => {
+  for (const ref of data) {
+    let fields: Field[]
+    if (field.type === 'blocks' && typeof ref?.blockType === 'string') {
+      const block = field.blocks.find((block) => block.slug === ref.blockType)
+      fields = block?.fields
+    } else if (field.type === 'array') {
+      fields = field.fields
+    }
+
+    if (fields) {
+      traverseFields({ callback, fields, parentRef, ref })
+    }
+  }
+}
+
 export type TraverseFieldsCallback = (args: {
   /**
    * The current field
@@ -87,28 +113,6 @@ export const traverseFields = ({
       }
 
       if (field.type === 'blocks' || field.type === 'array') {
-        const traverseArrayOrBlocksField = ({
-          data,
-          field,
-        }: {
-          data: Record<string, unknown>[]
-          field: ArrayField | BlocksField
-        }) => {
-          for (const ref of data) {
-            let fields: Field[]
-            if (field.type === 'blocks' && typeof ref?.blockType === 'string') {
-              const block = field.blocks.find((block) => block.slug === ref.blockType)
-              fields = block?.fields
-            } else if (field.type === 'array') {
-              fields = field.fields
-            }
-
-            if (fields) {
-              traverseFields({ callback, fields, parentRef, ref })
-            }
-          }
-        }
-
         if (field.localized) {
           for (const key in (ref ?? {}) as Record<string, unknown>) {
             const localeData = ref[key]
@@ -117,14 +121,18 @@ export const traverseFields = ({
             }
 
             traverseArrayOrBlocksField({
+              callback,
               data: localeData,
               field,
+              parentRef,
             })
           }
         } else if (Array.isArray(ref)) {
           traverseArrayOrBlocksField({
+            callback,
             data: ref,
             field,
+            parentRef,
           })
         }
       } else {
