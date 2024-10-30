@@ -1,6 +1,6 @@
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { SanitizedConfig } from '../../config/types.js'
-import { PaginatedDocs } from '../../database/types.js'
+import type { PaginatedDocs } from '../../database/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 
 export type DefaultServerFunctionArgs = {
@@ -40,5 +40,6 @@ export type BuildTableStateArgs = {
   collectionSlug: string
   columns?: any[] // TODO: type this (comes from ui pkg)
   docs: PaginatedDocs['docs']
+  enableRowSelections?: boolean
   req: PayloadRequest
 }

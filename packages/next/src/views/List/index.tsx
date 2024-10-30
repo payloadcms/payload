@@ -178,6 +178,7 @@ export const renderListView = async (
       columnState,
       disableBulkDelete,
       disableBulkEdit,
+      enableRowSelections,
       hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
       listPreferences,
       newDocumentURL: formatAdminURL({

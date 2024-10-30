@@ -54,6 +54,7 @@ export type ListViewClientProps = {
   Description?: React.ReactNode
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
+  enableRowSelections?: boolean
   hasCreatePermission: boolean
   listPreferences?: ListPreferences
   newDocumentURL: string
@@ -74,6 +75,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     Description,
     disableBulkDelete,
     disableBulkEdit,
+    enableRowSelections,
     hasCreatePermission,
     listPreferences,
     newDocumentURL,
@@ -171,7 +173,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
         collectionSlug={collectionSlug}
         columnState={columnState}
         docs={data.docs}
-        enableRowSelections
+        enableRowSelections={enableRowSelections}
         listPreferences={listPreferences}
         preferenceKey={preferenceKey}
         setTable={setTable}

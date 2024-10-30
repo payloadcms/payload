@@ -94,6 +94,7 @@ export const buildTableStateFn = async (
     collectionSlug,
     columns,
     docs,
+    enableRowSelections,
     req,
     req: {
       i18n,
@@ -214,7 +215,7 @@ export const buildTableStateFn = async (
     columnPreferences: undefined, // TODO, might not be needed
     columns,
     docs,
-    enableRowSelections: true,
+    enableRowSelections,
     fields,
     importMap: payload.importMap,
     useAsTitle: collectionConfig.admin.useAsTitle,

@@ -60,7 +60,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
   collectionSlug,
   columnState,
   docs,
-  enableRowSelections = false,
+  enableRowSelections,
   listPreferences,
   preferenceKey,
   setTable,
@@ -100,12 +100,13 @@ export const TableColumnsProvider: React.FC<Props> = ({
         collectionSlug,
         columns: sanitizeColumns(withMovedColumn),
         docs,
+        enableRowSelections,
       })
 
       setTableColumns(columnState)
       setTable(Table)
     },
-    [tableColumns, collectionSlug, docs, getTableState, setTable],
+    [tableColumns, collectionSlug, docs, getTableState, setTable, enableRowSelections],
   )
 
   const toggleColumn = useCallback(
@@ -121,12 +122,13 @@ export const TableColumnsProvider: React.FC<Props> = ({
         collectionSlug,
         columns: toggledColumns,
         docs,
+        enableRowSelections,
       })
 
       setTableColumns(columnState)
       setTable(Table)
     },
-    [tableColumns, getTableState, setTable, collectionSlug, docs],
+    [tableColumns, getTableState, setTable, collectionSlug, docs, enableRowSelections],
   )
 
   const setActiveColumns = React.useCallback(
@@ -153,12 +155,13 @@ export const TableColumnsProvider: React.FC<Props> = ({
         collectionSlug,
         columns: activeColumns,
         docs,
+        enableRowSelections,
       })
 
       setTableColumns(columnState)
       setTable(Table)
     },
-    [tableColumns, getTableState, setTable, collectionSlug, docs],
+    [tableColumns, getTableState, setTable, collectionSlug, docs, enableRowSelections],
   )
 
   const resetColumnsState = React.useCallback(async () => {
