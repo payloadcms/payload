@@ -46,6 +46,7 @@ jobs:
             live-preview
             live-preview-react
             next
+            payload-cloud
             plugin-cloud
             plugin-cloud-storage
             plugin-form-builder

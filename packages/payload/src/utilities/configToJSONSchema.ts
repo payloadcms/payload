@@ -11,6 +11,7 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 
 import { MissingEditorProp } from '../errors/MissingEditorProp.js'
 import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
+import { generateJobsJSONSchemas } from '../queues/config/generateJobsJSONSchemas.js'
 import { deepCopyObject } from './deepCopyObject.js'
 import { toWords } from './formatLabels.js'
 import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
@@ -60,6 +61,25 @@ function generateEntitySchemas(
   const properties = [...entities].reduce((acc, { slug }) => {
     acc[slug] = {
       $ref: `#/definitions/${slug}`,
+    }
+
+    return acc
+  }, {})
+
+  return {
+    type: 'object',
+    additionalProperties: false,
+    properties,
+    required: Object.keys(properties),
+  }
+}
+
+function generateEntitySelectSchemas(
+  entities: (SanitizedCollectionConfig | SanitizedGlobalConfig)[],
+): JSONSchema4 {
+  const properties = [...entities].reduce((acc, { slug }) => {
+    acc[slug] = {
+      $ref: `#/definitions/${slug}_select`,
     }
 
     return acc
@@ -269,13 +289,17 @@ export function fieldsToJSONSchema(
                 type: withNullableJSONSchemaType('array', isRequired),
                 items: {
                   type: 'string',
-                  enum: optionEnums,
                 },
+              }
+              if (optionEnums?.length) {
+                ;(fieldSchema.items as JSONSchema4).enum = optionEnums
               }
             } else {
               fieldSchema = {
                 type: withNullableJSONSchemaType('string', isRequired),
-                enum: optionEnums,
+              }
+              if (optionEnums?.length) {
+                fieldSchema.enum = optionEnums
               }
             }
 
@@ -585,7 +609,11 @@ export function entityToJSONSchema(
   incomingEntity: SanitizedCollectionConfig | SanitizedGlobalConfig,
   interfaceNameDefinitions: Map<string, JSONSchema4>,
   defaultIDType: 'number' | 'text',
+  collectionIDFieldTypes?: { [key: string]: 'number' | 'string' },
 ): JSONSchema4 {
+  if (!collectionIDFieldTypes) {
+    collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
+  }
   const entity: SanitizedCollectionConfig | SanitizedGlobalConfig = deepCopyObject(incomingEntity)
   const title = entity.typescript?.interface
     ? entity.typescript.interface
@@ -622,15 +650,104 @@ export function entityToJSONSchema(
     })
   }
 
-  //  Used for relationship fields, to determine whether to use a string or number type for the ID.
-  const collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
-
   return {
     type: 'object',
     additionalProperties: false,
     title,
     ...fieldsToJSONSchema(collectionIDFieldTypes, entity.fields, interfaceNameDefinitions, config),
   }
+}
+
+export function fieldsToSelectJSONSchema({ fields }: { fields: Field[] }): JSONSchema4 {
+  const schema: JSONSchema4 = {
+    type: 'object',
+    additionalProperties: false,
+    properties: {},
+  }
+
+  for (const field of fields) {
+    switch (field.type) {
+      case 'row':
+      case 'collapsible':
+        schema.properties = {
+          ...schema.properties,
+          ...fieldsToSelectJSONSchema({ fields: field.fields }).properties,
+        }
+
+        break
+
+      case 'array':
+      case 'group':
+        schema.properties[field.name] = {
+          oneOf: [
+            {
+              type: 'boolean',
+            },
+            fieldsToSelectJSONSchema({ fields: field.fields }),
+          ],
+        }
+        break
+
+      case 'tabs':
+        for (const tab of field.tabs) {
+          if (tabHasName(tab)) {
+            schema.properties[tab.name] = {
+              oneOf: [
+                {
+                  type: 'boolean',
+                },
+                fieldsToSelectJSONSchema({ fields: tab.fields }),
+              ],
+            }
+            continue
+          }
+
+          schema.properties = {
+            ...schema.properties,
+            ...fieldsToSelectJSONSchema({ fields: tab.fields }).properties,
+          }
+        }
+        break
+
+      case 'blocks': {
+        const blocksSchema: JSONSchema4 = {
+          type: 'object',
+          additionalProperties: false,
+          properties: {},
+        }
+
+        for (const block of field.blocks) {
+          blocksSchema.properties[block.slug] = {
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              fieldsToSelectJSONSchema({ fields: block.fields }),
+            ],
+          }
+        }
+
+        schema.properties[field.name] = {
+          oneOf: [
+            {
+              type: 'boolean',
+            },
+            blocksSchema,
+          ],
+        }
+
+        break
+      }
+
+      default:
+        schema.properties[field.name] = {
+          type: 'boolean',
+        }
+        break
+    }
+  }
+
+  return schema
 }
 
 const fieldType: JSONSchema4 = {
@@ -801,15 +918,50 @@ export function configToJSONSchema(
   // a mutable Map to store custom top-level `interfaceName` types. Fields with an `interfaceName` property will be moved to the top-level definitions here
   const interfaceNameDefinitions: Map<string, JSONSchema4> = new Map()
 
+  //  Used for relationship fields, to determine whether to use a string or number type for the ID.
+  const collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
+
   // Collections and Globals have to be moved to the top-level definitions as well. Reason: The top-level type will be the `Config` type - we don't want all collection and global
   // types to be inlined inside the `Config` type
-  const entityDefinitions: { [k: string]: JSONSchema4 } = [
-    ...config.globals,
-    ...config.collections,
-  ].reduce((acc, entity) => {
-    acc[entity.slug] = entityToJSONSchema(config, entity, interfaceNameDefinitions, defaultIDType)
-    return acc
-  }, {})
+
+  const entities: {
+    entity: SanitizedCollectionConfig | SanitizedGlobalConfig
+    type: 'collection' | 'global'
+  }[] = [
+    ...config.globals.map((global) => ({ type: 'global' as const, entity: global })),
+    ...config.collections.map((collection) => ({
+      type: 'collection' as const,
+      entity: collection,
+    })),
+  ]
+
+  const entityDefinitions: { [k: string]: JSONSchema4 } = entities.reduce(
+    (acc, { type, entity }) => {
+      acc[entity.slug] = entityToJSONSchema(
+        config,
+        entity,
+        interfaceNameDefinitions,
+        defaultIDType,
+        collectionIDFieldTypes,
+      )
+      const select = fieldsToSelectJSONSchema({ fields: entity.fields })
+
+      if (type === 'global') {
+        select.properties.globalType = {
+          type: 'boolean',
+        }
+      }
+
+      acc[`${entity.slug}_select`] = {
+        type: 'object',
+        additionalProperties: false,
+        ...select,
+      }
+
+      return acc
+    },
+    {},
+  )
 
   const authOperationDefinitions = [...config.collections]
     .filter(({ auth }) => Boolean(auth))
@@ -820,6 +972,10 @@ export function configToJSONSchema(
       },
       { auth: {} },
     )
+
+  const jobsSchemas = config.jobs
+    ? generateJobsJSONSchemas(config, config.jobs, interfaceNameDefinitions, collectionIDFieldTypes)
+    : {}
 
   let jsonSchema: JSONSchema4 = {
     additionalProperties: false,
@@ -833,13 +989,28 @@ export function configToJSONSchema(
     properties: {
       auth: generateAuthOperationSchemas(config.collections),
       collections: generateEntitySchemas(config.collections || []),
+      collectionsSelect: generateEntitySelectSchemas(config.collections || []),
       db: generateDbEntitySchema(config),
       globals: generateEntitySchemas(config.globals || []),
+      globalsSelect: generateEntitySelectSchemas(config.globals || []),
       locale: generateLocaleEntitySchemas(config.localization),
       user: generateAuthEntitySchemas(config.collections),
     },
     required: ['user', 'locale', 'collections', 'globals', 'auth', 'db'],
     title: 'Config',
+  }
+  if (jobsSchemas.definitions?.size) {
+    for (const [key, value] of jobsSchemas.definitions) {
+      jsonSchema.definitions[key] = value
+    }
+  }
+  if (jobsSchemas.properties) {
+    jsonSchema.properties.jobs = {
+      type: 'object',
+      additionalProperties: false,
+      properties: jobsSchemas.properties,
+      required: ['tasks'],
+    }
   }
 
   if (config?.typescript?.schema?.length) {

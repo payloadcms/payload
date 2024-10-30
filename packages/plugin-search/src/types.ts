@@ -34,6 +34,7 @@ export type SearchPluginConfig = {
     [collection: string]: ((doc: any) => number | Promise<number>) | number
   }
   deleteDrafts?: boolean
+  localize?: boolean
   searchOverrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   syncDrafts?: boolean
 }

@@ -6,6 +6,7 @@ import { isNumber } from 'payload/shared'
 import type { CollectionRouteHandler } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
+import { sanitizeSelect } from '../utilities/sanitizeSelect.js'
 
 export const create: CollectionRouteHandler = async ({ collection, req }) => {
   const { searchParams } = req
@@ -20,6 +21,7 @@ export const create: CollectionRouteHandler = async ({ collection, req }) => {
     depth: isNumber(depth) ? depth : undefined,
     draft,
     req,
+    select: sanitizeSelect(req.query.select),
   })
 
   return Response.json(

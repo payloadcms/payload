@@ -22,6 +22,7 @@ import type {
   BulkOperationResult,
   Collection,
   DataFromCollectionSlug,
+  SelectFromCollectionSlug,
   TypeWithID,
 } from './collections/config/types.js'
 export type * from './admin/types.js'
@@ -33,6 +34,7 @@ import type {
   Options as DeleteOptions,
 } from './collections/operations/local/delete.js'
 export type { MappedView } from './admin/views/types.js'
+
 import type { Options as DuplicateOptions } from './collections/operations/local/duplicate.js'
 import type { Options as FindOptions } from './collections/operations/local/find.js'
 import type { Options as FindByIDOptions } from './collections/operations/local/findByID.js'
@@ -47,13 +49,19 @@ import type {
 import type { InitOptions, SanitizedConfig } from './config/types.js'
 import type { BaseDatabaseAdapter, PaginatedDocs } from './database/types.js'
 import type { InitializedEmailAdapter } from './email/types.js'
-import type { DataFromGlobalSlug, Globals } from './globals/config/types.js'
+import type { DataFromGlobalSlug, Globals, SelectFromGlobalSlug } from './globals/config/types.js'
 import type { Options as FindGlobalOptions } from './globals/operations/local/findOne.js'
 import type { Options as FindGlobalVersionByIDOptions } from './globals/operations/local/findVersionByID.js'
 import type { Options as FindGlobalVersionsOptions } from './globals/operations/local/findVersions.js'
 import type { Options as RestoreGlobalVersionOptions } from './globals/operations/local/restoreVersion.js'
 import type { Options as UpdateGlobalOptions } from './globals/operations/local/update.js'
-import type { JsonObject } from './types/index.js'
+import type {
+  ApplyDisableErrors,
+  JsonObject,
+  SelectType,
+  TransformCollectionWithSelect,
+  TransformGlobalWithSelect,
+} from './types/index.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 import type { TypeWithVersion } from './versions/types.js'
 
@@ -65,6 +73,7 @@ import localOperations from './collections/operations/local/index.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
+import { getJobsLocalAPI } from './queues/localAPI.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
@@ -88,14 +97,35 @@ export interface GeneratedTypes {
       }
     }
   }
+  collectionsSelectUntyped: {
+    [slug: string]: SelectType
+  }
+
   collectionsUntyped: {
     [slug: string]: JsonObject & TypeWithID
   }
   dbUntyped: {
     defaultIDType: number | string
   }
+  globalsSelectUntyped: {
+    [slug: string]: SelectType
+  }
+
   globalsUntyped: {
     [slug: string]: JsonObject
+  }
+  jobsUntyped: {
+    tasks: {
+      [slug: string]: {
+        input?: JsonObject
+        output?: JsonObject
+      }
+    }
+    workflows: {
+      [slug: string]: {
+        input: JsonObject
+      }
+    }
   }
   localeUntyped: null | string
   userUntyped: User
@@ -106,15 +136,31 @@ type ResolveCollectionType<T> = 'collections' extends keyof T
   ? T['collections']
   : // @ts-expect-error
     T['collectionsUntyped']
-// @ts-expect-error
-type ResolveGlobalType<T> = 'globals' extends keyof T ? T['globals'] : T['globalsUntyped']
+
+type ResolveCollectionSelectType<T> = 'collectionsSelect' extends keyof T
+  ? T['collectionsSelect']
+  : // @ts-expect-error
+    T['collectionsSelectUntyped']
+type ResolveGlobalType<T> = 'globals' extends keyof T
+  ? T['globals']
+  : // @ts-expect-error
+    T['globalsUntyped']
+
+type ResolveGlobalSelectType<T> = 'globalsSelect' extends keyof T
+  ? T['globalsSelect']
+  : // @ts-expect-error
+    T['globalsSelectUntyped']
 
 // Applying helper types to GeneratedTypes
 export type TypedCollection = ResolveCollectionType<GeneratedTypes>
+
+export type TypedCollectionSelect = ResolveCollectionSelectType<GeneratedTypes>
 export type TypedGlobal = ResolveGlobalType<GeneratedTypes>
 
+export type TypedGlobalSelect = ResolveGlobalSelectType<GeneratedTypes>
+
 // Extract string keys from the type
-type StringKeyOf<T> = Extract<keyof T, string>
+export type StringKeyOf<T> = Extract<keyof T, string>
 
 // Define the types for slugs using the appropriate collections and globals
 export type CollectionSlug = StringKeyOf<TypedCollection>
@@ -140,6 +186,10 @@ export type TypedUser = ResolveUserType<GeneratedTypes>
 // @ts-expect-error
 type ResolveAuthOperationsType<T> = 'auth' extends keyof T ? T['auth'] : T['authUntyped']
 export type TypedAuthOperations = ResolveAuthOperationsType<GeneratedTypes>
+
+// @ts-expect-error
+type ResolveJobOperationsType<T> = 'jobs' extends keyof T ? T['jobs'] : T['jobsUntyped']
+export type TypedJobs = ResolveJobOperationsType<GeneratedTypes>
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -184,21 +234,21 @@ export class BasePayload {
    * @param options
    * @returns created document
    */
-  create = async <TSlug extends CollectionSlug>(
-    options: CreateOptions<TSlug>,
-  ): Promise<DataFromCollectionSlug<TSlug>> => {
+  create = async <TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
+    options: CreateOptions<TSlug, TSelect>,
+  ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
     const { create } = localOperations
-    return create<TSlug>(this, options)
+    return create<TSlug, TSelect>(this, options)
   }
 
   db: DatabaseAdapter
   decrypt = decrypt
 
-  duplicate = async <TSlug extends CollectionSlug>(
-    options: DuplicateOptions<TSlug>,
-  ): Promise<DataFromCollectionSlug<TSlug>> => {
+  duplicate = async <TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
+    options: DuplicateOptions<TSlug, TSelect>,
+  ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
     const { duplicate } = localOperations
-    return duplicate<TSlug>(this, options)
+    return duplicate<TSlug, TSelect>(this, options)
   }
 
   email: InitializedEmailAdapter
@@ -219,11 +269,11 @@ export class BasePayload {
    * @param options
    * @returns documents satisfying query
    */
-  find = async <TSlug extends CollectionSlug>(
-    options: FindOptions<TSlug>,
-  ): Promise<PaginatedDocs<DataFromCollectionSlug<TSlug>>> => {
+  find = async <TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
+    options: FindOptions<TSlug, TSelect>,
+  ): Promise<PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>> => {
     const { find } = localOperations
-    return find<TSlug>(this, options)
+    return find<TSlug, TSelect>(this, options)
   }
 
   /**
@@ -231,22 +281,22 @@ export class BasePayload {
    * @param options
    * @returns document with specified ID
    */
-  findByID = async <TOptions extends FindByIDOptions>(
-    options: TOptions,
-  ): Promise<
-    TOptions['disableErrors'] extends true
-      ? DataFromCollectionSlug<TOptions['collection']> | null
-      : DataFromCollectionSlug<TOptions['collection']>
-  > => {
+  findByID = async <
+    TSlug extends CollectionSlug,
+    TDisableErrors extends boolean,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+  >(
+    options: FindByIDOptions<TSlug, TDisableErrors, TSelect>,
+  ): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> => {
     const { findByID } = localOperations
-    return findByID<TOptions>(this, options)
+    return findByID<TSlug, TDisableErrors, TSelect>(this, options)
   }
 
-  findGlobal = async <TSlug extends GlobalSlug>(
-    options: FindGlobalOptions<TSlug>,
-  ): Promise<DataFromGlobalSlug<TSlug>> => {
+  findGlobal = async <TSlug extends GlobalSlug, TSelect extends SelectFromGlobalSlug<TSlug>>(
+    options: FindGlobalOptions<TSlug, TSelect>,
+  ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
     const { findOne } = localGlobalOperations
-    return findOne<TSlug>(this, options)
+    return findOne<TSlug, TSelect>(this, options)
   }
 
   /**
@@ -312,6 +362,8 @@ export class BasePayload {
 
   importMap: ImportMap
 
+  jobs = getJobsLocalAPI(this)
+
   logger: Logger
 
   login = async <TSlug extends CollectionSlug>(
@@ -375,11 +427,11 @@ export class BasePayload {
     return unlock<TSlug>(this, options)
   }
 
-  updateGlobal = async <TSlug extends GlobalSlug>(
-    options: UpdateGlobalOptions<TSlug>,
-  ): Promise<DataFromGlobalSlug<TSlug>> => {
+  updateGlobal = async <TSlug extends GlobalSlug, TSelect extends SelectFromGlobalSlug<TSlug>>(
+    options: UpdateGlobalOptions<TSlug, TSelect>,
+  ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
     const { update } = localGlobalOperations
-    return update<TSlug>(this, options)
+    return update<TSlug, TSelect>(this, options)
   }
 
   validationRules: (args: OperationArgs<any>) => ValidationRule[]
@@ -425,19 +477,19 @@ export class BasePayload {
    * @param options
    * @returns Updated document(s)
    */
-  delete<TSlug extends CollectionSlug>(
-    options: DeleteByIDOptions<TSlug>,
-  ): Promise<DataFromCollectionSlug<TSlug>>
+  delete<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
+    options: DeleteByIDOptions<TSlug, TSelect>,
+  ): Promise<TransformCollectionWithSelect<TSlug, TSelect>>
 
-  delete<TSlug extends CollectionSlug>(
-    options: DeleteManyOptions<TSlug>,
-  ): Promise<BulkOperationResult<TSlug>>
+  delete<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
+    options: DeleteManyOptions<TSlug, TSelect>,
+  ): Promise<BulkOperationResult<TSlug, TSelect>>
 
-  delete<TSlug extends CollectionSlug>(
-    options: DeleteOptions<TSlug>,
-  ): Promise<BulkOperationResult<TSlug> | DataFromCollectionSlug<TSlug>> {
+  delete<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
+    options: DeleteOptions<TSlug, TSelect>,
+  ): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>> {
     const { deleteLocal } = localOperations
-    return deleteLocal<TSlug>(this, options)
+    return deleteLocal<TSlug, TSelect>(this, options)
   }
 
   /**
@@ -593,24 +645,24 @@ export class BasePayload {
     return this
   }
 
-  update<TSlug extends CollectionSlug>(
-    options: UpdateManyOptions<TSlug>,
-  ): Promise<BulkOperationResult<TSlug>>
+  update<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
+    options: UpdateManyOptions<TSlug, TSelect>,
+  ): Promise<BulkOperationResult<TSlug, TSelect>>
 
   /**
    * @description Update one or more documents
    * @param options
    * @returns Updated document(s)
    */
-  update<TSlug extends CollectionSlug>(
-    options: UpdateByIDOptions<TSlug>,
-  ): Promise<DataFromCollectionSlug<TSlug>>
+  update<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
+    options: UpdateByIDOptions<TSlug, TSelect>,
+  ): Promise<TransformCollectionWithSelect<TSlug, TSelect>>
 
-  update<TSlug extends CollectionSlug>(
-    options: UpdateOptions<TSlug>,
-  ): Promise<BulkOperationResult<TSlug> | DataFromCollectionSlug<TSlug>> {
+  update<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
+    options: UpdateOptions<TSlug, TSelect>,
+  ): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>> {
     const { update } = localOperations
-    return update<TSlug>(this, options)
+    return update<TSlug, TSelect>(this, options)
   }
 }
 
@@ -1020,6 +1072,27 @@ export type {
   PreferenceUpdateRequest,
   TabsPreferences,
 } from './preferences/types.js'
+export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
+export type {
+  RunTaskFunction,
+  TaskConfig,
+  TaskHandler,
+  TaskHandlerArgs,
+  TaskHandlerResult,
+  TaskHandlerResults,
+  TaskInput,
+  TaskOutput,
+  TaskType,
+} from './queues/config/types/taskTypes.js'
+export type {
+  BaseJob,
+  JobTaskStatus,
+  RunningJob,
+  SingleTaskStatus,
+  WorkflowConfig,
+  WorkflowHandler,
+  WorkflowTypes,
+} from './queues/config/types/workflowTypes.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'

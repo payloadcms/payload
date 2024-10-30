@@ -170,6 +170,9 @@ export const getViewsFromConfig = ({
                 DefaultView = {
                   Component: DefaultLivePreviewView,
                 }
+                CustomView = {
+                  payloadComponent: getCustomViewByKey(views, 'livePreview'),
+                }
               }
               break
             }
@@ -313,6 +316,9 @@ export const getViewsFromConfig = ({
               if (livePreviewEnabled) {
                 DefaultView = {
                   Component: DefaultLivePreviewView,
+                }
+                CustomView = {
+                  payloadComponent: getCustomViewByKey(views, 'livePreview'),
                 }
               }
               break

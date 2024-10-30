@@ -3,7 +3,11 @@ import type { loginOperation } from '../../auth/operations/login.js'
 import type { refreshOperation } from '../../auth/operations/refresh.js'
 import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
-import type { AfterOperationHook, SanitizedCollectionConfig } from '../config/types.js'
+import type {
+  AfterOperationHook,
+  SanitizedCollectionConfig,
+  SelectFromCollectionSlug,
+} from '../config/types.js'
 import type { countOperation } from './count.js'
 import type { createOperation } from './create.js'
 import type { deleteOperation } from './delete.js'
@@ -15,16 +19,26 @@ import type { updateByIDOperation } from './updateByID.js'
 
 export type AfterOperationMap<TOperationGeneric extends CollectionSlug> = {
   count: typeof countOperation<TOperationGeneric>
-  create: typeof createOperation<TOperationGeneric>
-  delete: typeof deleteOperation<TOperationGeneric>
-  deleteByID: typeof deleteByIDOperation<TOperationGeneric>
-  find: typeof findOperation<TOperationGeneric>
-  findByID: typeof findByIDOperation<TOperationGeneric>
+  create: typeof createOperation<TOperationGeneric, SelectFromCollectionSlug<TOperationGeneric>>
+  delete: typeof deleteOperation<TOperationGeneric, SelectFromCollectionSlug<TOperationGeneric>>
+  deleteByID: typeof deleteByIDOperation<
+    TOperationGeneric,
+    SelectFromCollectionSlug<TOperationGeneric>
+  >
+  find: typeof findOperation<TOperationGeneric, SelectFromCollectionSlug<TOperationGeneric>>
+  findByID: typeof findByIDOperation<
+    TOperationGeneric,
+    boolean,
+    SelectFromCollectionSlug<TOperationGeneric>
+  >
   forgotPassword: typeof forgotPasswordOperation
   login: typeof loginOperation<TOperationGeneric>
   refresh: typeof refreshOperation
-  update: typeof updateOperation<TOperationGeneric>
-  updateByID: typeof updateByIDOperation<TOperationGeneric>
+  update: typeof updateOperation<TOperationGeneric, SelectFromCollectionSlug<TOperationGeneric>>
+  updateByID: typeof updateByIDOperation<
+    TOperationGeneric,
+    SelectFromCollectionSlug<TOperationGeneric>
+  >
 }
 
 export type AfterOperationArg<TOperationGeneric extends CollectionSlug> = {

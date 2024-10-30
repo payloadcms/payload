@@ -5,7 +5,7 @@ import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { Category, Config, Post } from './payload-types.js'
+import type { Category, Config, Post, Singular } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { idToString } from '../helpers/idToString.js'
@@ -105,6 +105,45 @@ describe('Joins Field', () => {
       },
       collection: 'categories',
     })
+
+    expect(categoryWithPosts.group.relatedPosts.docs).toHaveLength(10)
+    expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('id')
+    expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('title')
+    expect(categoryWithPosts.group.relatedPosts.docs[0].title).toStrictEqual('test 9')
+  })
+
+  it('should not populate joins if not selected', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      joins: {
+        'group.relatedPosts': {
+          sort: '-title',
+        },
+      },
+      select: {},
+      collection: 'categories',
+    })
+
+    expect(Object.keys(categoryWithPosts)).toStrictEqual(['id'])
+  })
+
+  it('should populate joins if selected', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      joins: {
+        'group.relatedPosts': {
+          sort: '-title',
+        },
+      },
+      select: {
+        group: {
+          relatedPosts: true,
+        },
+      },
+      collection: 'categories',
+    })
+
+    expect(Object.keys(categoryWithPosts)).toStrictEqual(['id', 'group'])
 
     expect(categoryWithPosts.group.relatedPosts.docs).toHaveLength(10)
     expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('id')
@@ -603,6 +642,7 @@ describe('Joins Field', () => {
           }
         }
       }`
+
       const response = await restClient
         .GRAPHQL_POST({ body: JSON.stringify({ query }) })
         .then((res) => res.json())
@@ -626,6 +666,21 @@ describe('Joins Field', () => {
       .then((res) => res.json())
 
     expect(allCategories.totalDocs).toBe(allCategoriesByIds.totalDocs)
+  })
+
+  it('should join with singular collection name', async () => {
+    const {
+      docs: [category],
+    } = await payload.find({ collection: 'categories', limit: 1, depth: 0 })
+
+    const singular = await payload.create({
+      collection: 'singular',
+      data: { category: category.id },
+    })
+
+    const categoryWithJoins = await payload.findByID({ collection: 'categories', id: category.id })
+
+    expect((categoryWithJoins.singulars.docs[0] as Singular).id).toBe(singular.id)
   })
 })
 

@@ -1,8 +1,18 @@
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { CollectionSlug, JoinQuery } from '../../index.js'
-import type { PayloadRequest, Sort, Where } from '../../types/index.js'
-import type { Collection, DataFromCollectionSlug } from '../config/types.js'
+import type {
+  PayloadRequest,
+  SelectType,
+  Sort,
+  TransformCollectionWithSelect,
+  Where,
+} from '../../types/index.js'
+import type {
+  Collection,
+  DataFromCollectionSlug,
+  SelectFromCollectionSlug,
+} from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
@@ -11,6 +21,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
+import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
 import { buildAfterOperation } from './utils.js'
 
@@ -27,14 +38,18 @@ export type Arguments = {
   page?: number
   pagination?: boolean
   req?: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
   sort?: Sort
   where?: Where
 }
 
-export const findOperation = async <TSlug extends CollectionSlug>(
+export const findOperation = async <
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   incomingArgs: Arguments,
-): Promise<PaginatedDocs<DataFromCollectionSlug<TSlug>>> => {
+): Promise<PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>> => {
   let args = incomingArgs
 
   try {
@@ -70,6 +85,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
       pagination = true,
       req: { fallbackLocale, locale, payload },
       req,
+      select,
       showHiddenFields,
       sort,
       where,
@@ -132,6 +148,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
         page: sanitizedPage,
         pagination: usePagination,
         req,
+        select: getQueryDraftsSelect({ select }),
         sort: getQueryDraftsSort({ collectionConfig, sort }),
         where: fullWhere,
       })
@@ -151,6 +168,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
         page: sanitizedPage,
         pagination,
         req,
+        select,
         sort,
         where: fullWhere,
       })
@@ -269,6 +287,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
             locale,
             overrideAccess,
             req,
+            select,
             showHiddenFields,
           }),
         ),
@@ -319,7 +338,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
     // Return results
     // /////////////////////////////////////
 
-    return result
+    return result as PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>
   } catch (error: unknown) {
     await killTransaction(args.req)
     throw error

@@ -1,4 +1,4 @@
-import type { JoinQuery, PayloadRequest, QueryDrafts, SanitizedCollectionConfig } from 'payload'
+import type { PayloadRequest, QueryDrafts, SanitizedCollectionConfig } from 'payload'
 
 import { buildVersionCollectionFields, combineQueries } from 'payload'
 import toSnakeCase from 'to-snake-case'
@@ -17,6 +17,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     page = 1,
     pagination,
     req = {} as PayloadRequest,
+    select,
     sort,
     where,
   },
@@ -38,6 +39,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     page,
     pagination,
     req,
+    select,
     sort,
     tableName,
     versions: true,

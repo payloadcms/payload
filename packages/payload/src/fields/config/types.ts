@@ -1442,6 +1442,7 @@ export type JoinField = {
     update?: never
   }
   admin?: {
+    allowCreate?: boolean
     components?: {
       Error?: CustomComponent<JoinFieldErrorClientComponent | JoinFieldErrorServerComponent>
       Label?: CustomComponent<JoinFieldLabelClientComponent | JoinFieldLabelServerComponent>
@@ -1477,6 +1478,7 @@ export type JoinField = {
 
 export type JoinFieldClient = {
   admin?: {
+    allowCreate?: boolean
     components?: {
       Label?: MappedComponent
     } & AdminClient['components']

@@ -54,6 +54,7 @@ export const recurseRichText = ({
               key: 'value',
               overrideAccess,
               req,
+              select: collection.config.defaultPopulate,
               showHiddenFields,
             }),
           )
@@ -93,6 +94,7 @@ export const recurseRichText = ({
                 key: 'value',
                 overrideAccess,
                 req,
+                select: collection.config.defaultPopulate,
                 showHiddenFields,
               }),
             )
