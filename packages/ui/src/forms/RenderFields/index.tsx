@@ -67,8 +67,6 @@ export const RenderFields: React.FC<Props> = (props) => {
     console.error('Need to implement i18n when calling RenderFields') // eslint-disable-line no-console
   }
 
-  const test = false
-
   if (fields && fields.length > 0) {
     return (
       <div

@@ -6,14 +6,18 @@ import {
   type FieldSchemaMap,
   type FormState,
   type FormStateWithoutComponents,
+  MissingEditorProp,
   type Payload,
+  type PayloadComponent,
   type Permissions,
+  type RichTextFieldClient,
+  type RichTextGenerateClientProps,
   type SanitizedConfig,
   type ServerComponentProps,
 } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
 
-import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
+import { getFromImportMap, RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { FieldDescription } from '../fields/FieldDescription/index.js'
 import { FieldLabel } from '../fields/FieldLabel/index.js'
 import { RowLabel as DefaultRowLabel } from '../forms/RowLabel/index.js'
@@ -25,6 +29,10 @@ type Args = {
   i18n: I18n
   payload: Payload
   permissions: Permissions
+  /**
+   * If passed, only fields with these schema paths will be handled by this function.
+   */
+  schemaPathsToRender?: string[]
 }
 
 type OutputArgs = {
@@ -32,17 +40,35 @@ type OutputArgs = {
 } & Omit<Args, 'formState'>
 
 export function attachComponentsToFormState(args: Args): args is OutputArgs {
-  const { config, fieldSchemaMap, formState, i18n, payload, permissions } = args as OutputArgs
+  const { config, fieldSchemaMap, formState, i18n, payload, permissions, schemaPathsToRender } =
+    args as OutputArgs
+
+  if (
+    schemaPathsToRender !== undefined &&
+    schemaPathsToRender !== null &&
+    schemaPathsToRender.length === 0
+  ) {
+    return
+  }
 
   Object.entries(formState).forEach(([path, fieldState]) => {
-    const fieldConfig = fieldSchemaMap.get(fieldState.schemaPath.join('.'))
+    const schemaPathString = fieldState.schemaPath.join('.')
+    if (
+      schemaPathsToRender &&
+      schemaPathsToRender.length > 0 &&
+      !schemaPathsToRender.includes(schemaPathString)
+    ) {
+      return
+    }
+
+    const fieldConfig = fieldSchemaMap.get(schemaPathString)
 
     if (!fieldConfig) {
       // blockType is not an actual field so it wont exist in the fieldSchemaMap
       if (fieldState.schemaPath[fieldState.schemaPath.length - 1] === 'blockType') {
         return
       } else {
-        throw new Error(`Field config not found for ${fieldState.schemaPath.join('.')}`)
+        throw new Error(`Field config not found for ${schemaPathString}`)
       }
     }
 
@@ -57,7 +83,7 @@ export function attachComponentsToFormState(args: Args): args is OutputArgs {
       schemaPath: fieldState.schemaPath,
     })
 
-    if ('type' in fieldConfig && fieldConfig.admin?.components) {
+    if ('type' in fieldConfig) {
       const name = 'name' in fieldConfig ? fieldConfig.name : undefined
 
       const isHiddenField = 'hidden' in fieldConfig && fieldConfig?.hidden
@@ -83,7 +109,7 @@ export function attachComponentsToFormState(args: Args): args is OutputArgs {
         path: path ?? '',
         permissions: fieldPermissions,
         readOnly: false, // @TODO fix this
-        schemaPath: fieldState.schemaPath.join('.'),
+        schemaPath: schemaPathString,
       }
 
       const serverProps: ServerComponentProps = {
@@ -136,6 +162,102 @@ export function attachComponentsToFormState(args: Args): args is OutputArgs {
             }
             clientProps.rowLabels[rowIndex] = RowLabel
           })
+
+          break
+        }
+        case 'richText': {
+          if (!fieldConfig?.editor) {
+            throw new MissingEditorProp(fieldConfig) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+          }
+
+          if (typeof fieldConfig?.editor === 'function') {
+            throw new Error('Attempted to access unsanitized rich text editor.')
+          }
+
+          if (!fieldConfig.admin) {
+            fieldConfig.admin = {}
+          }
+
+          if (!fieldConfig.admin.components) {
+            fieldConfig.admin.components = {}
+          }
+
+          let additionalClientProps = {}
+          if (fieldConfig.editor.generateClientProps) {
+            const getGenerateClientProps = getFromImportMap<
+              (args: unknown) => RichTextGenerateClientProps
+            >({
+              PayloadComponent: fieldConfig.editor.generateClientProps,
+              schemaPath: 'richText-generateClientProps',
+
+              importMap: payload.importMap,
+              silent: true,
+            })
+
+            if (getGenerateClientProps) {
+              const generateClientProps = getGenerateClientProps(
+                typeof fieldConfig.editor.generateClientProps === 'object'
+                  ? fieldConfig.editor.generateClientProps.serverProps
+                  : {},
+              )
+
+              additionalClientProps = generateClientProps({
+                clientField: clientField as RichTextFieldClient,
+                field: fieldConfig,
+                i18n,
+                importMap: payload.importMap,
+                payload,
+                schemaPath: fieldState.schemaPath,
+              })
+            }
+          }
+
+          /**
+           * We have to deep copy all the props we send to the client (= FieldComponent.clientProps).
+           * That way, every editor's field / cell props we send to the client have their own object references.
+           *
+           * If we send the same object reference to the client twice (e.g. through some configurations where 2 or more fields
+           * reference the same editor object, like the root editor), the admin panel may hang indefinitely. This has been happening since
+           * a newer Next.js update that made it break when sending the same object reference to the client twice.
+           *
+           * We can use deepCopyObjectSimple as client props should be JSON-serializable.
+           */
+          const FieldComponent: PayloadComponent = fieldConfig.editor.FieldComponent
+          if (typeof FieldComponent === 'object' && FieldComponent.clientProps) {
+            FieldComponent.clientProps = deepCopyObjectSimple(FieldComponent.clientProps)
+          }
+
+          fieldState.customComponents.Field = (
+            <RenderServerComponent
+              clientProps={{
+                ...clientProps,
+                ...additionalClientProps,
+              }}
+              Component={FieldComponent}
+              Fallback={undefined}
+              importMap={payload.importMap}
+              serverProps={serverProps}
+            />
+          )
+
+          const CellComponent: PayloadComponent = fieldConfig.editor.CellComponent
+          if (typeof CellComponent === 'object' && CellComponent.clientProps) {
+            CellComponent.clientProps = deepCopyObjectSimple(CellComponent.clientProps)
+          }
+
+          // TODO: Move to wherever Jacob handles table cell components
+          fieldState.customComponents.Cell = (
+            <RenderServerComponent
+              clientProps={{
+                ...clientProps,
+                ...additionalClientProps,
+              }}
+              Component={CellComponent}
+              Fallback={undefined}
+              importMap={payload.importMap}
+              serverProps={serverProps}
+            />
+          )
 
           break
         }
@@ -225,18 +347,18 @@ export function attachComponentsToFormState(args: Args): args is OutputArgs {
               />
             )
           }
-        }
 
-        if ('Field' in fieldConfig.admin.components) {
-          fieldState.customComponents.Field = (
-            <RenderServerComponent
-              clientProps={clientProps}
-              Component={fieldConfig.admin.components.Field}
-              importMap={payload.importMap}
-              key="field.admin.components.Field"
-              serverProps={serverProps}
-            />
-          )
+          if ('Field' in fieldConfig.admin.components) {
+            fieldState.customComponents.Field = (
+              <RenderServerComponent
+                clientProps={clientProps}
+                Component={fieldConfig.admin.components.Field}
+                importMap={payload.importMap}
+                key="field.admin.components.Field"
+                serverProps={serverProps}
+              />
+            )
+          }
         }
       }
     }

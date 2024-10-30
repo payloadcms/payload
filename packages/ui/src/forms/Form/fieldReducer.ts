@@ -197,6 +197,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       if (blockType) {
         subFieldState.blockType = {
           initialValue: blockType,
+          schemaPath: [...state[path].schemaPath, 'blockType'],
           valid: true,
           value: blockType,
         }
@@ -209,9 +210,18 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       const newState: FormState = {
         ...remainingFields,
         ...flattenRows(path, siblingRows),
+        [`${path}.${rowIndex}.id`]: {
+          initialValue: newRow.id,
+          passesCondition: true,
+          requiresRender: true,
+          schemaPath: [...state[path].schemaPath, 'id'],
+          valid: true,
+          value: newRow.id,
+        },
         [path]: {
           ...state[path],
           disableFormData: true,
+          requiresRender: true,
           rows: withNewRow,
           value: siblingRows.length,
         },
@@ -236,6 +246,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       if (blockType) {
         subFieldState.blockType = {
           initialValue: blockType,
+          schemaPath: [...state[path].schemaPath, 'blockType'],
           valid: true,
           value: blockType,
         }

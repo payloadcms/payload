@@ -54,13 +54,17 @@ export const mergeServerFormState = (
       }
 
       /**
-       * Handle the rest which is in serverPropsToAccept
+       * Handle adding all the remaining props that should be updated in the local form state from the server form state
        */
       serverPropsToAccept.forEach((prop) => {
         if (!dequal(incomingState[path]?.[prop], newFieldState[prop])) {
           changed = true
           if (!(prop in incomingState[path])) {
-            delete newFieldState[prop]
+            // Regarding excluding the customComponents prop from being deleted: the incoming state might not have been rendered, as rendering components for every form onchange is expensive.
+            // Thus, we simply re-use the initial render state
+            if (prop !== 'customComponents') {
+              delete newFieldState[prop]
+            }
           } else {
             newFieldState[prop] = incomingState[path][prop]
           }

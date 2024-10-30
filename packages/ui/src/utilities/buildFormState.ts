@@ -138,6 +138,7 @@ export const buildFormStateFn = async (
     locale,
     operation,
     path = [],
+    renderFields = false,
     req,
     req: {
       i18n,
@@ -193,6 +194,19 @@ export const buildFormStateFn = async (
     globalSlug,
     i18n,
   })
+
+  const schemaPathsToRender = []
+  if (renderFields) {
+    schemaPathsToRender.push(...fieldSchemaMap.keys())
+  } else if (formState) {
+    for (const key in formState) {
+      const field = formState[key]
+
+      if (field?.requiresRender) {
+        schemaPathsToRender.push(field.schemaPath.join('.'))
+      }
+    }
+  }
 
   const id = collectionSlug ? idFromArgs : undefined
 
@@ -441,6 +455,7 @@ export const buildFormStateFn = async (
     i18n,
     payload: req.payload,
     permissions,
+    schemaPathsToRender,
   })
 
   return {

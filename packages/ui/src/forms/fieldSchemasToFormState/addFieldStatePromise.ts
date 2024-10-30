@@ -176,7 +176,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         const arrayValue = Array.isArray(data[field.name]) ? data[field.name] : []
 
         const { promises, rows } = arrayValue.reduce(
-          (acc, row, i) => {
+          (acc, row, i: number) => {
             const parentPath = [...fieldPath, i]
             row.id = row?.id || new ObjectId().toHexString()
 
@@ -264,7 +264,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         const blocksValue = Array.isArray(data[field.name]) ? data[field.name] : []
 
         const { promises, rowMetadata } = blocksValue.reduce(
-          (acc, row, i) => {
+          (acc, row, i: number) => {
             const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
             if (!block) {
               throw new Error(
