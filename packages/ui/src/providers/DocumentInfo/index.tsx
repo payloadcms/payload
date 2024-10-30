@@ -6,7 +6,6 @@ import type {
   Data,
   DocumentPermissions,
   DocumentPreferences,
-  FormState,
   PaginatedDocs,
   TypeWithID,
   TypeWithTimestamps,
@@ -17,11 +16,8 @@ import type {
 import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
-import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
-import { useDocumentDrawerContext } from '../../elements/DocumentDrawer/Provider.js'
-import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
 import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
@@ -51,8 +47,8 @@ const DocumentInfo: React.FC<
     globalSlug,
     hasPublishPermission: hasPublishPermissionFromProps,
     hasSavePermission: hasSavePermissionFromProps,
-    initialData: initialDataFromProps,
-    initialState: initialStateFromProps,
+    initialData: data,
+    initialState,
   } = props
 
   const {
@@ -64,13 +60,9 @@ const DocumentInfo: React.FC<
     getEntityConfig,
   } = useConfig()
 
-  const { onSave: onSaveFromContext } = useDocumentDrawerContext()
-
   const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
   const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
-
-  const { getFormState } = useServerFunctions()
 
   const abortControllerRef = useRef(new AbortController())
   const docConfig = collectionConfig || globalConfig
@@ -83,12 +75,10 @@ const DocumentInfo: React.FC<
 
   const { uploadEdits } = useUploadEdits()
 
-  const [data, setData] = useState<Data>(initialDataFromProps)
-
   const [documentTitle, setDocumentTitle] = useState(() =>
     formatDocTitle({
       collectionConfig,
-      data: { ...initialDataFromProps, id },
+      data: { ...data, id },
       dateFormat,
       fallback: id?.toString(),
       globalConfig,
@@ -96,7 +86,6 @@ const DocumentInfo: React.FC<
     }),
   )
 
-  const [initialState, setInitialState] = useState<FormState>(initialStateFromProps)
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null)
   const [versions, setVersions] = useState<PaginatedDocs<TypeWithVersion<any>>>(null)
   const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(docPermissionsFromProps)
@@ -484,57 +473,6 @@ const DocumentInfo: React.FC<
       }
     },
     [setPreference, preferencesKey, getDocPreferences],
-  )
-
-  const onSave = React.useCallback<DocumentDrawerProps['onSave']>(
-    async (json) => {
-      if (abortControllerRef.current) {
-        try {
-          abortControllerRef.current.abort()
-        } catch (_err) {
-          // swallow error
-        }
-      }
-
-      const abortController = new AbortController()
-      abortControllerRef.current = abortController
-
-      if (typeof onSaveFromContext === 'function') {
-        void onSaveFromContext(json)
-      }
-
-      const docPreferences = await getDocPreferences()
-
-      const newData = collectionSlug ? json.doc : json.result
-
-      const { state: newState } = await getFormState({
-        id,
-        collectionSlug,
-        data: newData,
-        docPreferences,
-        globalSlug,
-        locale,
-        operation,
-        schemaPath: collectionSlug ? [collectionSlug] : [globalSlug],
-        signal: abortController.signal,
-      })
-
-      setInitialState(newState)
-      setData(newData)
-
-      await getDocPermissions(newData)
-    },
-    [
-      collectionSlug,
-      getDocPreferences,
-      globalSlug,
-      id,
-      operation,
-      locale,
-      onSaveFromContext,
-      getDocPermissions,
-      getFormState,
-    ],
   )
 
   useEffect(() => {

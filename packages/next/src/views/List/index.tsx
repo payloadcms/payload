@@ -1,7 +1,12 @@
 import type { ListPreferences, ListViewClientProps } from '@payloadcms/ui'
 import type { AdminViewProps, Where } from 'payload'
 
-import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
+import {
+  DefaultListView,
+  HydrateAuthProvider,
+  ListInfoProvider,
+  ListQueryProvider,
+} from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import { filterFields } from 'packages/ui/src/elements/TableColumns/filterFields.js'
@@ -221,7 +226,7 @@ export const renderListView = async (
 export const ListView: React.FC<ListViewArgs> = async (args) => {
   try {
     const { List: RenderedList } = await renderListView({ ...args, enableRowSelections: true })
-    return RenderedList
+    return <ListInfoProvider>{RenderedList}</ListInfoProvider>
   } catch (error) {
     if (error.message === 'not-found') {
       notFound()

@@ -8,17 +8,17 @@ import { type Option } from '../../elements/ReactSelect/index.js'
 
 export type ListInfoProps = {
   readonly createNewDrawerSlug?: string
-  readonly drawerSlug: string
-  readonly enabledCollections: CollectionSlug[]
+  readonly drawerSlug?: string
+  readonly enabledCollections?: CollectionSlug[]
   readonly onBulkSelect?: (selected: ReturnType<typeof useSelection>['selected']) => void
   readonly onSelect?: (args: { collectionSlug: CollectionSlug; docID: string }) => void
-  readonly selectedOption: Option<string>
-  readonly setSelectedOption: (option: Option<string>) => void
+  readonly selectedOption?: Option<string>
+  readonly setSelectedOption?: (option: Option<string>) => void
 }
 
-export type ListInfoType = ListInfoProps & {
+export type ListInfoType = {
   isInDrawer: boolean
-}
+} & ListInfoProps
 
 export const ListInfo = createContext({} as ListInfoType)
 
