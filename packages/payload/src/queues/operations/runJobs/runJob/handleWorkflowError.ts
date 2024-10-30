@@ -5,7 +5,7 @@ import type { RunTaskFunctionState } from './getRunTaskFunction.js'
 import { calculateBackoffWaitUntil } from './calculateBackoffWaitUntil.js'
 
 /**
- * This is called if a workflow catched an error. It determines if it's a final error
+ * This is called if a workflow catches an error. It determines if it's a final error
  * or not and handles logging.
  */
 export function handleWorkflowError({
@@ -24,12 +24,12 @@ export function handleWorkflowError({
   hasFinalError: boolean
 } {
   let hasFinalError = state.reachedMaxRetries // If any TASK reached max retries, the job has an error
+  const maxRetries =
+    typeof workflowConfig.retries === 'object'
+      ? workflowConfig.retries.attempts
+      : workflowConfig.retries
   // Now let's handle workflow retries
   if (!hasFinalError && workflowConfig.retries) {
-    const maxRetries =
-      typeof workflowConfig.retries === 'object'
-        ? workflowConfig.retries.attempts
-        : workflowConfig.retries
     if (job.waitUntil) {
       // Check if waitUntil is in the past
       const waitUntil = new Date(job.waitUntil)
@@ -41,10 +41,6 @@ export function handleWorkflowError({
     if (job.totalTried >= maxRetries) {
       state.reachedMaxRetries = true
       hasFinalError = true
-
-      req.payload.logger.error({
-        msg: 'Job has reached the maximum amount of retries determined by the workflow configuration.',
-      })
     } else {
       // Job will retry. Let's determine when!
       const waitUntil: Date = calculateBackoffWaitUntil({
@@ -59,7 +55,10 @@ export function handleWorkflowError({
     }
   }
 
-  req.payload.logger.error({ err: error, job, msg: 'Error running job' })
+  req.payload.logger.error({
+    err: error,
+    msg: `Error running job ${job.workflowSlug} ${job.taskSlug} id: ${job.id} attempt ${job.totalTried}/${maxRetries}`,
+  })
 
   return {
     hasFinalError,
