@@ -5,7 +5,7 @@ import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { Category, Config, Post } from './payload-types.js'
+import type { Category, Config, Post, Singular } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { idToString } from '../helpers/idToString.js'
@@ -642,6 +642,8 @@ describe('Joins Field', () => {
           }
         }
       }`
+
+      expect(true).toBeTruthy()
       const response = await restClient
         .GRAPHQL_POST({ body: JSON.stringify({ query }) })
         .then((res) => res.json())
@@ -665,6 +667,21 @@ describe('Joins Field', () => {
       .then((res) => res.json())
 
     expect(allCategories.totalDocs).toBe(allCategoriesByIds.totalDocs)
+  })
+
+  it('should join with singular collection name', async () => {
+    const {
+      docs: [category],
+    } = await payload.find({ collection: 'categories', limit: 1, depth: 0 })
+
+    const singular = await payload.create({
+      collection: 'singular',
+      data: { category: category.id },
+    })
+
+    const categoryWithJoins = await payload.findByID({ collection: 'categories', id: category.id })
+
+    expect((categoryWithJoins.singulars.docs[0] as Singular).id).toBe(singular.id)
   })
 })
 

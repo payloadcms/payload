@@ -16,6 +16,7 @@ export interface Config {
     uploads: Upload;
     versions: Version;
     'categories-versions': CategoriesVersion;
+    singular: Singular;
     'localized-posts': LocalizedPost;
     'localized-categories': LocalizedCategory;
     users: User;
@@ -133,6 +134,20 @@ export interface Category {
       hasNextPage?: boolean | null;
     } | null;
   };
+  singulars?: {
+    docs?: (string | Singular)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "singular".
+ */
+export interface Singular {
+  id: string;
+  category?: (string | null) | Category;
   updatedAt: string;
   createdAt: string;
 }
@@ -230,6 +245,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'categories-versions';
         value: string | CategoriesVersion;
+      } | null)
+    | ({
+        relationTo: 'singular';
+        value: string | Singular;
       } | null)
     | ({
         relationTo: 'localized-posts';
