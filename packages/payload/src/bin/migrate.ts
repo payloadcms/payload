@@ -34,7 +34,7 @@ type Args = {
 export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
   const { _: args, file, forceAcceptWarning: forceAcceptFromProps, help } = parsedArgs
 
-  const formattedArgs = Object.keys(parsedArgs || {})
+  const formattedArgs = Object.keys(parsedArgs)
     .map((key) => {
       const formattedKey = key.replace(/^[-_]+/, '')
       if (!formattedKey) {
@@ -50,8 +50,8 @@ export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
     })
     .filter(Boolean)
 
-  const forceAcceptWarning = forceAcceptFromProps || formattedArgs?.includes('forceAcceptWarning')
-  const skipVerify = formattedArgs?.includes('skipVerify')
+  const forceAcceptWarning = forceAcceptFromProps || formattedArgs.includes('forceAcceptWarning')
+  const skipEmpty = formattedArgs.includes('skipEmpty')
 
   if (help) {
     // eslint-disable-next-line no-console
@@ -107,7 +107,7 @@ export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
           forceAcceptWarning,
           migrationName: args[1],
           payload,
-          skipVerify,
+          skipEmpty,
         })
       } catch (err) {
         throw new Error(`Error creating migration: ${err.message}`)

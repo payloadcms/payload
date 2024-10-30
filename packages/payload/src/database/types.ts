@@ -157,7 +157,7 @@ export type CreateMigration = (args: {
   forceAcceptWarning?: boolean
   migrationName?: string
   payload: Payload
-  skipVerify?: boolean
+  skipEmpty?: boolean
 }) => Promise<void> | void
 
 export type Transaction = (
