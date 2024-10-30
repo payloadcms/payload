@@ -11,6 +11,7 @@ export const generateSearchCollection = (pluginConfig: SearchPluginConfig): Coll
       admin: {
         readOnly: true,
       },
+      localized: pluginConfig.localize,
     },
     {
       name: 'priority',
