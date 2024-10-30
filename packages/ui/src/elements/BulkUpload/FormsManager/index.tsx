@@ -16,6 +16,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { getFormState } from '../../../utilities/getFormState.js'
 import { hasSavePermission as getHasSavePermission } from '../../../utilities/hasSavePermission.js'
 import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
+import { createThumbnail } from '../../Thumbnail/createThumbnail.js'
 import { useBulkUpload } from '../index.js'
 import { createFormData } from './createFormData.js'
 import { formsManagementReducer } from './reducer.js'
@@ -41,6 +42,7 @@ type FormsManagerContext = {
     errorCount: number
     index: number
   }) => void
+  readonly thumbnailUrls: string[]
   readonly totalErrorCount?: number
 }
 
@@ -59,6 +61,7 @@ const Context = React.createContext<FormsManagerContext>({
   saveAllDocs: () => Promise.resolve(),
   setActiveIndex: () => 0,
   setFormTotalErrorCount: () => {},
+  thumbnailUrls: [],
   totalErrorCount: 0,
 })
 
@@ -89,6 +92,40 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const [isInitializing, setIsInitializing] = React.useState(false)
   const [state, dispatch] = React.useReducer(formsManagementReducer, initialState)
   const { activeIndex, forms, totalErrorCount } = state
+
+  const formsRef = React.useRef(forms)
+  formsRef.current = forms
+  const formsCount = forms.length
+
+  const thumbnailUrlsRef = React.useRef<string[]>([])
+  const processedFiles = React.useRef(new Set()) // Track already-processed files
+  const [renderedThumbnails, setRenderedThumbnails] = React.useState<string[]>([])
+
+  React.useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    ;(async () => {
+      const newThumbnails = [...thumbnailUrlsRef.current]
+
+      for (let i = 0; i < formsCount; i++) {
+        const file = formsRef.current[i].formState.file.value as File
+
+        // Skip if already processed
+        if (processedFiles.current.has(file) || !file) {
+          continue
+        }
+        processedFiles.current.add(file)
+
+        // Generate thumbnail and update ref
+        const thumbnailUrl = await createThumbnail(file)
+        newThumbnails[i] = thumbnailUrl
+        thumbnailUrlsRef.current = newThumbnails
+
+        // Trigger re-render in batches
+        setRenderedThumbnails([...newThumbnails])
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
+    })()
+  }, [formsCount, createThumbnail])
 
   const { toggleLoadingOverlay } = useLoadingOverlay()
   const { closeModal } = useModal()
@@ -378,6 +415,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         saveAllDocs,
         setActiveIndex,
         setFormTotalErrorCount,
+        thumbnailUrls: renderedThumbnails,
         totalErrorCount,
       }}
     >
