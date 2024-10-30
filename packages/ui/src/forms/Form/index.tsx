@@ -539,7 +539,7 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
-    async ({ data, path, rowIndex: rowIndexArg }) => {
+    ({ data, path, rowIndex: rowIndexArg }) => {
       const newRows: unknown[] = getDataByPath(path) || []
       const rowIndex = rowIndexArg === undefined ? newRows.length : rowIndexArg
 
@@ -688,7 +688,7 @@ export const Form: React.FC<FormProps> = (props) => {
             const prepared = prepareFields(revalidatedFormState, true)
             // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
             revalidatedFormState = await onChangeFn({
-              formState: prepared as FormState,
+              formState: prepared,
             })
           }
 

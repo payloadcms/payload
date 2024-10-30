@@ -52,11 +52,12 @@ export function attachComponentsToFormState(args: Args): args is OutputArgs {
   }
 
   Object.entries(formState).forEach(([path, fieldState]) => {
-    const schemaPathString = fieldState.schemaPath.join('.')
+    const schemaPathString = fieldState?.schemaPath?.join('.')
     if (
-      schemaPathsToRender &&
-      schemaPathsToRender.length > 0 &&
-      !schemaPathsToRender.includes(schemaPathString)
+      !schemaPathString ||
+      (schemaPathsToRender &&
+        schemaPathsToRender.length > 0 &&
+        !schemaPathsToRender.includes(schemaPathString))
     ) {
       return
     }

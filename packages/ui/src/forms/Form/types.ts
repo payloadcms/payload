@@ -190,7 +190,7 @@ export type Context = {
     path: string
     rowIndex?: number
     schemaPath: string
-  }) => Promise<void>
+  }) => void
   buildRowErrors: () => void
   createFormData: CreateFormData
   disabled: boolean
