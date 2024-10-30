@@ -5,13 +5,7 @@ import type { BlocksFieldClient } from 'payload'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $insertNodeToNearestRoot, $wrapNodeInElement, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
-import {
-  formatDrawerSlug,
-  useEditDepth,
-  useFieldProps,
-  useModal,
-  useTranslation,
-} from '@payloadcms/ui'
+import { formatDrawerSlug, useEditDepth, useTranslation } from '@payloadcms/ui'
 import {
   $createParagraphNode,
   $getNodeByKey,
@@ -49,7 +43,12 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   const [blockType, setBlockType] = useState<string>('' as any)
   const [targetNodeKey, setTargetNodeKey] = useState<null | string>(null)
   const { i18n, t } = useTranslation<string, any>()
-  const { schemaPath } = useFieldProps()
+  const {
+    fieldProps: {
+      field: { richTextComponentMap },
+      schemaPath,
+    },
+  } = useEditorConfigContext()
   const { uuid } = useEditorConfigContext()
   const editDepth = useEditDepth()
 
@@ -59,10 +58,6 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   })
 
   const { toggleDrawer } = useLexicalDrawer(drawerSlug)
-
-  const {
-    field: { richTextComponentMap },
-  } = useEditorConfigContext()
 
   useEffect(() => {
     if (!editor.hasNodes([BlockNode])) {

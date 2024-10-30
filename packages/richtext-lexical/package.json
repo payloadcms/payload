@@ -28,7 +28,7 @@
       "types": "./src/exports/server/migrate.ts",
       "default": "./src/exports/server/migrate.ts"
     },
-    "./generateComponentMap": "./src/utilities/generateComponentMap.tsx"
+    "./generateClientProps": "./src/utilities/generateClientProps.tsx"
   },
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -131,10 +131,10 @@
         "types": "./dist/exports/server/migrate.d.ts",
         "default": "./dist/exports/server/migrate.js"
       },
-      "./generateComponentMap": {
-        "import": "./dist/utilities/generateComponentMap.js",
-        "types": "./dist/utilities/generateComponentMap.d.ts",
-        "default": "./dist/utilities/generateComponentMap.js"
+      "./generateClientProps": {
+        "import": "./dist/utilities/generateClientProps.js",
+        "types": "./dist/utilities/generateClientProps.d.ts",
+        "default": "./dist/utilities/generateClientProps.js"
       }
     },
     "main": "./dist/index.js",

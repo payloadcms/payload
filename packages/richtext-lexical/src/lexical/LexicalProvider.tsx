@@ -19,7 +19,7 @@ import { getEnabledNodes } from './nodes/index.js'
 export type LexicalProviderProps = {
   composerKey: string
   editorConfig: SanitizedClientEditorConfig
-  field: LexicalRichTextFieldProps['field']
+  fieldProps: LexicalRichTextFieldProps
   onChange: (editorState: EditorState, editor: LexicalEditor, tags: Set<string>) => void
   readOnly: boolean
   value: SerializedEditorState
@@ -41,7 +41,7 @@ const NestProviders = ({ children, providers }) => {
 }
 
 export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
-  const { composerKey, editorConfig, field, onChange, readOnly, value } = props
+  const { composerKey, editorConfig, fieldProps, onChange, readOnly, value } = props
 
   const parentContext = useEditorConfigContext()
 
@@ -101,7 +101,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
       <EditorConfigProvider
         editorConfig={editorConfig}
         editorContainerRef={editorContainerRef}
-        field={field}
+        fieldProps={fieldProps}
         parentContext={parentContext}
       >
         <NestProviders providers={editorConfig.features.providers}>

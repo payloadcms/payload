@@ -9,7 +9,7 @@ export const getGenerateImportMap =
   ({ addToImportMap, baseDir, config, importMap, imports }) => {
     addToImportMap('@payloadcms/richtext-lexical/client#RichTextCell')
     addToImportMap('@payloadcms/richtext-lexical/client#RichTextField')
-    addToImportMap('@payloadcms/richtext-lexical/generateComponentMap#getGenerateComponentMap')
+    addToImportMap('@payloadcms/richtext-lexical/generateClientProps#getGenerateClientProps')
 
     // iterate just through args.resolvedFeatureMap.values()
     for (const resolvedFeature of args.resolvedFeatureMap.values()) {

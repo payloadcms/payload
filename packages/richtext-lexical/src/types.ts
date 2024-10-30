@@ -1,5 +1,11 @@
 import type { EditorConfig as LexicalEditorConfig, SerializedEditorState } from 'lexical'
-import type { RichTextAdapter, RichTextFieldClientProps, SanitizedConfig } from 'payload'
+import type {
+  DefaultCellComponentProps,
+  RichTextAdapter,
+  RichTextFieldClient,
+  RichTextFieldClientProps,
+  SanitizedConfig,
+} from 'payload'
 
 import type {
   BaseClientFeatureProps,
@@ -73,8 +79,20 @@ export type LexicalRichTextAdapterProvider =
 
 export type LexicalRichTextFieldProps = {
   admin: LexicalFieldAdminProps
+  // clientFeatures is added through generateClientProps
+  clientFeatures: {
+    [featureKey: string]: {
+      clientFeatureProps: object
+      clientFeatureProvider: FeatureProviderProviderClient<any, any>
+    }
+  }
   lexicalEditorConfig: LexicalEditorConfig
 } & RichTextFieldClientProps<SerializedEditorState, AdapterProps, object>
+
+export type LexicalRichTextCellProps = DefaultCellComponentProps<
+  SerializedEditorState,
+  RichTextFieldClient<SerializedEditorState, AdapterProps, object>
+>
 
 export type AdapterProps = {
   editorConfig: SanitizedServerEditorConfig

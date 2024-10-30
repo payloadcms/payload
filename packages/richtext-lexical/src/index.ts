@@ -149,8 +149,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         },
         path: '@payloadcms/richtext-lexical/client#RichTextField',
       },
-      generateComponentMap: {
-        path: '@payloadcms/richtext-lexical/generateComponentMap#getGenerateComponentMap',
+      generateClientProps: {
+        path: '@payloadcms/richtext-lexical/generateClientProps#getGenerateClientProps',
         serverProps: {
           resolvedFeatureMap,
         },

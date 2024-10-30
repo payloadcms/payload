@@ -1111,9 +1111,7 @@ export type RichTextFieldClient<
   TValue extends object = any,
   TAdapterProps = any,
   TExtraProperties = object,
-> = {
-  richTextComponentMap?: Map<string, any>
-} & FieldBaseClient &
+> = FieldBaseClient &
   Pick<RichTextField<TValue, TAdapterProps, TExtraProperties>, 'maxDepth' | 'type'> &
   TExtraProperties
 
