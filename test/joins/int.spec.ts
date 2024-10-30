@@ -643,7 +643,6 @@ describe('Joins Field', () => {
         }
       }`
 
-      expect(true).toBeTruthy()
       const response = await restClient
         .GRAPHQL_POST({ body: JSON.stringify({ query }) })
         .then((res) => res.json())
