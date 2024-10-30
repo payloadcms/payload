@@ -459,7 +459,7 @@ export type DocumentSlots = {
 export type {
   RichTextAdapter,
   RichTextAdapterProvider,
-  RichTextGenerateComponentMap,
+  RichTextGenerateClientProps,
   RichTextHooks,
 } from './RichText.js'
 

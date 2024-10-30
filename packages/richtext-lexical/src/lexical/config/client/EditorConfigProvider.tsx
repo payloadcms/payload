@@ -21,7 +21,7 @@ export interface EditorConfigContextType {
   editor: LexicalEditor
   editorConfig: SanitizedClientEditorConfig
   editorContainerRef: React.RefObject<HTMLDivElement>
-  field: LexicalRichTextFieldProps['field']
+  fieldProps: LexicalRichTextFieldProps
   focusedEditor: EditorConfigContextType | null
   // Editor focus handling
   focusEditor: (editorContext: EditorConfigContextType) => void
@@ -34,7 +34,7 @@ export interface EditorConfigContextType {
 // @ts-expect-error: TODO: Fix this
 const Context: React.Context<EditorConfigContextType> = createContext({
   editorConfig: null,
-  field: null,
+  fieldProps: null,
   uuid: null,
 })
 
@@ -42,13 +42,13 @@ export const EditorConfigProvider = ({
   children,
   editorConfig,
   editorContainerRef,
-  field,
+  fieldProps,
   parentContext,
 }: {
   children: React.ReactNode
   editorConfig: SanitizedClientEditorConfig
   editorContainerRef: React.RefObject<HTMLDivElement | null>
-  field: LexicalRichTextFieldProps['field']
+  fieldProps: LexicalRichTextFieldProps
   parentContext?: EditorConfigContextType
 }): React.ReactNode => {
   const [editor] = useLexicalComposerContext()
@@ -70,7 +70,7 @@ export const EditorConfigProvider = ({
         editor,
         editorConfig,
         editorContainerRef,
-        field,
+        fieldProps,
         focusedEditor,
         focusEditor: (editorContext: EditorConfigContextType) => {
           const editorUUID = editorContext.uuid
@@ -117,7 +117,7 @@ export const EditorConfigProvider = ({
       childrenEditors,
       editorConfig,
       editorContainerRef,
-      field,
+      fieldProps,
       focusedEditor,
       parentContext,
       uuid,

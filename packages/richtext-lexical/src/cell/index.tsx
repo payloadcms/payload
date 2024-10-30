@@ -1,6 +1,5 @@
 'use client'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical'
-import type { CellComponentProps, RichTextFieldClient } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
 import { useConfig, useTableCell } from '@payloadcms/ui'
@@ -11,7 +10,11 @@ import React, { useEffect, useMemo } from 'react'
 
 import type { FeatureProviderClient } from '../features/typesClient.js'
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
-import type { GeneratedFeatureProviderComponent, LexicalFieldAdminProps } from '../types.js'
+import type {
+  GeneratedFeatureProviderComponent,
+  LexicalFieldAdminProps,
+  LexicalRichTextCellProps,
+} from '../types.js'
 
 import { defaultEditorLexicalConfig } from '../lexical/config/client/default.js'
 import { loadClientFeatures } from '../lexical/config/client/loader.js'
@@ -24,7 +27,7 @@ export const RichTextCell: React.FC<
   {
     readonly admin?: LexicalFieldAdminProps
     readonly lexicalEditorConfig: LexicalEditorConfig
-  } & CellComponentProps<RichTextFieldClient>
+  } & LexicalRichTextCellProps
 > = (props) => {
   const {
     admin,

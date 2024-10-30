@@ -2,24 +2,24 @@ import { type ImportMap, isPlainObject, type PayloadComponent } from 'payload'
 import { isReactServerComponentOrFunction, parsePayloadComponent } from 'payload/shared'
 import React from 'react'
 
-const getComponent = (args: {
+export const getFromImportMap = <TOutput,>(args: {
   importMap: ImportMap
   PayloadComponent: PayloadComponent
   schemaPath?: string
   silent?: boolean
-}): React.ComponentType => {
+}): TOutput => {
   const { importMap, PayloadComponent, schemaPath, silent } = args
 
   const { exportName, path } = parsePayloadComponent(PayloadComponent)
 
   const key = path + '#' + exportName
 
-  const Component = importMap[key]
+  const importMapEntry = importMap[key]
 
-  if (!Component && !silent) {
+  if (!importMapEntry && !silent) {
     // eslint-disable-next-line no-console
     console.error(
-      `getComponent: PayloadComponent not found in importMap`,
+      `getFromImportMap: PayloadComponent not found in importMap`,
       {
         key,
         PayloadComponent,
@@ -29,7 +29,7 @@ const getComponent = (args: {
     )
   }
 
-  return Component
+  return importMapEntry
 }
 
 /**
@@ -68,7 +68,7 @@ export const RenderServerComponent: React.FC<{
   }
 
   if (typeof Component === 'string' || isPlainObject(Component)) {
-    const ResolvedComponent = getComponent({
+    const ResolvedComponent = getFromImportMap<React.ComponentType>({
       importMap,
       PayloadComponent: Component,
       schemaPath: '',

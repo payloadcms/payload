@@ -30,11 +30,12 @@ export type FieldState = {
   disableFormData?: boolean
   errorMessage?: string
   errorPaths?: string[]
-  fieldSchema?: Field
+  fieldSchema?: Field // TODO: Client doesnt have this right
   filterOptions?: FilterOptionsResult
   initialValue: unknown
   isSidebar?: boolean
   passesCondition?: boolean
+  requiresRender?: boolean
   rows?: Row[]
   schemaPath: string[]
   valid: boolean

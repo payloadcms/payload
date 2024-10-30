@@ -14,7 +14,7 @@ import type {
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { JsonObject, Payload, PayloadRequest, RequestContext } from '../types/index.js'
 import type { RichTextFieldClientProps } from './fields/RichText.js'
-import type { CreateMappedComponent, FieldSchemaMap } from './types.js'
+import type { FieldSchemaMap } from './types.js'
 
 export type AfterReadRichTextHookArgs<
   TData extends TypeWithID = any,
@@ -183,23 +183,25 @@ export type RichTextHooks = {
   beforeValidate?: BeforeValidateRichTextHook[]
 }
 
-export type RichTextGenerateComponentMap = (args: {
+export type RichTextGenerateClientProps = (args: {
   clientField: RichTextFieldClient
-  createMappedComponent: CreateMappedComponent
   field: RichTextField
   i18n: I18nClient
-
   importMap: ImportMap
   payload: Payload
-  schemaPath: string
-}) => Map<string, unknown>
+  schemaPath: string[]
+}) => object
 
 type RichTextAdapterBase<
   Value extends object = object,
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
-  generateComponentMap: PayloadComponent<any, never>
+  /**
+   * Function that will run in attachComponentsToState when form state is built, to attach extra client props to RichText field.
+   * // TODO: Cell
+   */
+  generateClientProps: PayloadComponent<any, never>
   generateImportMap?: Config['admin']['importMap']['generators'][0]
   generateSchemaMap?: (args: {
     config: SanitizedConfig

@@ -1,4 +1,5 @@
 import type {
+  ClientCollectionConfig,
   ClientField,
   DefaultCellComponentProps,
   Field,
@@ -25,7 +26,7 @@ import { RenderDefaultCell } from './RenderDefaultCell/index.js'
 type Args = {
   beforeRows?: Column[]
   clientFields: ClientField[]
-  collectionSlug: string
+  collectionConfig: ClientCollectionConfig
   columnPreferences: ColumnPreferences
   columns?: ColumnPreferences
   docs: PaginatedDocs['docs']
@@ -42,19 +43,21 @@ export const buildColumnState = (args: Args): Column[] => {
   const {
     beforeRows,
     clientFields,
-    collectionSlug,
+    collectionConfig,
     columnPreferences,
     columns,
     docs,
-    enableRowSelections,
-    // fields,
     drawerSlug,
+    enableRowSelections,
+    fields,
     importMap,
     sortColumnProps,
     useAsTitle,
   } = args
 
+  // clientFields contains the fake `id` column
   let sortedFieldMap = flattenFieldMap(clientFields)
+  let _sortedFieldMap = flattenFieldMap(fields) // TODO: think of a way to avoid this additional flatten
 
   // place the `ID` field first, if it exists
   // do the same for the `useAsTitle` field with precedence over the `ID` field
@@ -77,29 +80,41 @@ export const buildColumnState = (args: Args): Column[] => {
 
   const sortTo = columnPreferences || columns
 
-  if (sortTo) {
-    // sort the fields to the order of `defaultColumns` or `columnPreferences`
-    sortedFieldMap = sortedFieldMap?.sort((a, b) => {
+  const sortFieldMap = (fieldMap, sortTo) =>
+    fieldMap?.sort((a, b) => {
       const aIndex = sortTo.findIndex((column) => 'name' in a && column.accessor === a.name)
       const bIndex = sortTo.findIndex((column) => 'name' in b && column.accessor === b.name)
+
       if (aIndex === -1 && bIndex === -1) {
         return 0
       }
+
       if (aIndex === -1) {
         return 1
       }
+
       if (bIndex === -1) {
         return -1
       }
+
       return aIndex - bIndex
     })
+
+  if (sortTo) {
+    // sort the fields to the order of `defaultColumns` or `columnPreferences`
+    sortedFieldMap = sortFieldMap(sortedFieldMap, sortTo)
+    _sortedFieldMap = sortFieldMap(_sortedFieldMap, sortTo) // TODO: think of a way to avoid this additional sort
   }
 
   const activeColumnsIndices = []
 
   const sorted: Column[] = sortedFieldMap?.reduce((acc, field, index) => {
+    const _field = _sortedFieldMap.find(
+      (f) => 'name' in field && 'name' in f && f.name === field.name,
+    )
+
     const columnPreference = columnPreferences?.find(
-      (preference) => 'name' in field && preference.accessor === field.name,
+      (preference) => field && 'name' in field && preference.accessor === field.name,
     )
 
     let active = false
@@ -107,7 +122,9 @@ export const buildColumnState = (args: Args): Column[] => {
     if (columnPreference) {
       active = columnPreference.active
     } else if (columns && Array.isArray(columns) && columns.length > 0) {
-      active = columns.find((column) => 'name' in field && column.accessor === field.name)?.active
+      active = columns.find(
+        (column) => field && 'name' in field && column.accessor === field.name,
+      )?.active
     } else if (activeColumnsIndices.length < 4) {
       active = true
     }
@@ -116,18 +133,18 @@ export const buildColumnState = (args: Args): Column[] => {
       activeColumnsIndices.push(index)
     }
 
-    // TODO: get label from raw field config
-    const CustomLabelToRender = null
-    // const CustomLabelToRender =
-    // field &&
-    // 'admin' in field &&
-    // 'components' in field.admin &&
-    // 'Label' in field.admin.components &&
-    // field.admin.components.Label !== undefined // let it return `null`
-    //   ? field.admin.components.Label
-    //   : undefined
+    const CustomLabelToRender =
+      _field &&
+      'admin' in _field &&
+      'components' in _field.admin &&
+      'Label' in _field.admin.components &&
+      _field.admin.components.Label !== undefined // let it return `null`
+        ? _field.admin.components.Label
+        : undefined
 
-    const CustomLabel = CustomLabelToRender ? <CustomLabelToRender field={field} /> : undefined
+    const CustomLabel = CustomLabelToRender ? (
+      <RenderServerComponent Component={CustomLabelToRender} importMap={importMap} />
+    ) : undefined
 
     const fieldAffectsDataSubFields =
       field &&
@@ -138,74 +155,73 @@ export const buildColumnState = (args: Args): Column[] => {
       <SortColumn
         disable={fieldAffectsDataSubFields || fieldIsPresentationalOnly(field) || undefined}
         Label={CustomLabel}
-        label={'label' in field ? (field.label as StaticLabel) : undefined}
+        label={field && 'label' in field ? (field.label as StaticLabel) : undefined}
         name={'name' in field ? field.name : undefined}
         {...(sortColumnProps || {})}
       />
     )
 
-    if (field) {
-      const baseCellClientProps: DefaultCellComponentProps = {
-        cellData: undefined,
-        customCellContext: {
-          collectionSlug,
-        },
-        field,
-        rowData: undefined,
-      }
-
-      const serverProps = {
-        field, // TODO get the server field
-      }
-
-      const column: Column = {
-        accessor: 'name' in field ? field.name : undefined,
-        active,
-        CustomLabel,
-        field,
-        Heading,
-        renderedCells: active
-          ? docs.map((doc, i) => {
-              const isLinkedColumn = index === activeColumnsIndices[0]
-
-              const cellClientProps: DefaultCellComponentProps = {
-                ...baseCellClientProps,
-                cellData: 'name' in field ? doc[field.name] : undefined,
-                link: isLinkedColumn,
-                rowData: doc,
-              }
-
-              const CustomCell =
-                field?.admin && 'components' in field.admin && field.admin.components?.Cell ? (
-                  <RenderServerComponent
-                    clientProps={cellClientProps}
-                    Component={
-                      field?.admin && 'components' in field.admin && field.admin.components?.Cell
-                    }
-                    importMap={importMap}
-                    key={i}
-                    serverProps={serverProps}
-                  />
-                ) : undefined
-
-              return (
-                CustomCell ?? (
-                  <RenderDefaultCell
-                    addOnClick={Boolean(drawerSlug)}
-                    clientProps={cellClientProps}
-                    enableRowSelections={enableRowSelections}
-                    index={index}
-                    isLinkedColumn={isLinkedColumn}
-                    key={i}
-                  />
-                )
-              )
-            })
-          : [],
-      }
-
-      acc.push(column)
+    const baseCellClientProps: DefaultCellComponentProps = {
+      cellData: undefined,
+      customCellContext: {
+        collectionSlug: collectionConfig.slug,
+        uploadConfig: collectionConfig?.upload,
+      },
+      field,
+      rowData: undefined,
     }
+
+    const serverProps = {
+      field: _field,
+    }
+
+    const column: Column = {
+      accessor: 'name' in field ? field.name : undefined,
+      active,
+      CustomLabel,
+      field,
+      Heading,
+      renderedCells: active
+        ? docs.map((doc, i) => {
+            const isLinkedColumn = index === activeColumnsIndices[0]
+
+            const cellClientProps: DefaultCellComponentProps = {
+              ...baseCellClientProps,
+              cellData: 'name' in field ? doc[field.name] : undefined,
+              link: isLinkedColumn,
+              rowData: doc,
+            }
+
+            const CustomCell =
+              _field?.admin && 'components' in _field.admin && _field.admin.components?.Cell ? (
+                <RenderServerComponent
+                  clientProps={cellClientProps}
+                  Component={
+                    _field?.admin && 'components' in _field.admin && _field.admin.components?.Cell
+                  }
+                  importMap={importMap}
+                  key={i}
+                  serverProps={serverProps}
+                />
+              ) : undefined
+
+            return (
+              CustomCell ?? (
+                <RenderDefaultCell
+                  addOnClick={Boolean(drawerSlug)}
+                  clientProps={cellClientProps}
+                  enableRowSelections={enableRowSelections}
+                  index={index}
+                  isLinkedColumn={isLinkedColumn}
+                  key={i}
+                />
+              )
+            )
+          })
+        : [],
+    }
+
+    acc.push(column)
 
     return acc
   }, [])

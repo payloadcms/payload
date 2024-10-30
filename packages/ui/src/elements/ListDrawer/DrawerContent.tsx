@@ -320,6 +320,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   return (
     <EditDepthProvider>
       <ListDrawerContextProvider
+        createNewDrawerSlug={documentDrawerSlug}
         drawerSlug={drawerSlug}
         onBulkSelect={onBulkSelect}
         onSelect={onSelect}

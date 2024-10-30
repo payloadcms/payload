@@ -49,6 +49,7 @@ type Args = {
   parentSchemaPath?: string[]
   preferences?: DocumentPreferences
   req: PayloadRequest
+  schemaPathsToRender?: string[] | true
   /**
    * Whether to skip checking the field's condition. @default false
    */
@@ -81,6 +82,7 @@ export const iterateFields = async ({
   parentSchemaPath = [],
   preferences,
   req,
+  schemaPathsToRender,
   skipConditionChecks = false,
   skipValidation = false,
   state = {},
@@ -117,6 +119,7 @@ export const iterateFields = async ({
         passesCondition,
         preferences,
         req,
+        schemaPathsToRender,
         skipConditionChecks,
         skipValidation,
         state,

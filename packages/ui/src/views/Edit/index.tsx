@@ -1,13 +1,13 @@
 'use client'
 
-import type {
-  ClientCollectionConfig,
-  ClientGlobalConfig,
-  ClientSideEditViewProps,
-  ClientUser,
-} from 'payload'
-
 import { useRouter, useSearchParams } from 'next/navigation.js'
+import {
+  type ClientCollectionConfig,
+  type ClientGlobalConfig,
+  type ClientSideEditViewProps,
+  type ClientUser,
+} from 'payload'
+import { deepCopyObjectSimple } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
@@ -275,7 +275,9 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
         formState: prevFormState,
         globalSlug,
         operation,
-        renderFields: true,
+        // Performance optimization: Setting it to false ensure that only fields that have explicit requireRender set in the form state will be rendered (e.g. new array rows).
+        // We only wanna render ALL fields on initial render, not in onChange.
+        renderFields: false,
         returnLockStatus: isLockingEnabled ? true : false,
         schemaPath,
         // signal: abortController.signal,

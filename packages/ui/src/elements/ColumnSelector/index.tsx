@@ -54,20 +54,14 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
           return null
         }
 
-        const {
-          accessor,
-          active,
-          // cellProps: {
-          // field: {
-          // admin: {
-          //   // @ts-expect-error // TODO: `Label` does not exist on the UI field
-          //   components: { Label } = {},
-          // } = {},
-          // } = {},
-          // },
-        } = col
+        const { accessor, active, field } = col
 
-        if (col.accessor === '_select') {
+        if (
+          col.accessor === '_select' ||
+          !field ||
+          col.CustomLabel === null ||
+          (col.CustomLabel === undefined && !('label' in field))
+        ) {
           return null
         }
 
@@ -81,14 +75,12 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
             draggable
             icon={active ? <XIcon /> : <PlusIcon />}
             id={accessor}
-            key={`${collectionSlug}-${col?.field && 'name' in col.field ? col?.field?.name : i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
+            key={`${collectionSlug}-${field && 'name' in field ? field?.name : i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
             onClick={() => {
               void toggleColumn(accessor)
             }}
           >
-            {col.CustomLabel || (
-              <FieldLabel label={'label' in col.field ? col?.field?.label : undefined} unstyled />
-            )}
+            {col.CustomLabel ?? <FieldLabel label={'label' in field && field.label} unstyled />}
           </Pill>
         )
       })}

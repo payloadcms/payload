@@ -1,4 +1,11 @@
-import type { ClientField, CollectionConfig, Field, ImportMap, PaginatedDocs } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ClientField,
+  CollectionConfig,
+  Field,
+  ImportMap,
+  PaginatedDocs,
+} from 'payload'
 
 import type { Column } from '../elements/Table/index.js'
 import type { ColumnPreferences } from '../providers/ListInfo/index.js'
@@ -30,7 +37,7 @@ export const renderFilters = (
 
 export const renderTable = ({
   clientFields,
-  collectionSlug,
+  collectionConfig,
   columnPreferences,
   columns,
   docs,
@@ -41,7 +48,7 @@ export const renderTable = ({
   useAsTitle,
 }: {
   clientFields: ClientField[]
-  collectionSlug: string
+  collectionConfig: ClientCollectionConfig
   columnPreferences: ColumnPreferences
   columns: ColumnPreferences
   docs: PaginatedDocs['docs']
@@ -57,7 +64,7 @@ export const renderTable = ({
   const columnState = buildColumnState({
     // beforeRows,
     clientFields,
-    collectionSlug,
+    collectionConfig,
     columnPreferences,
     columns,
     enableRowSelections,

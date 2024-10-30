@@ -76,7 +76,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
 
   const [Table, setTable] = useState(InitialTable)
 
-  const { onSelect } = useListDrawerContext()
+  const { createNewDrawerSlug, drawerSlug: listDrawerSlug } = useListDrawerContext()
 
   useEffect(() => {
     if (InitialTable) {
@@ -102,9 +102,9 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
   const router = useRouter()
 
   const { data, defaultLimit, handlePageChange, handlePerPageChange, params } = useListQuery()
-  const { closeModal, openModal } = useModal()
+  const { openModal } = useModal()
   const { setCollectionSlug, setOnSuccess } = useBulkUpload()
-  const { drawerSlug } = useBulkUpload()
+  const { drawerSlug: bulkUploadDrawerSlug } = useBulkUpload()
 
   const [collectionConfig] = useState(
     () => getEntityConfig({ collectionSlug }) as ClientCollectionConfig,
@@ -151,9 +151,9 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
 
   const openBulkUpload = React.useCallback(() => {
     setCollectionSlug(collectionSlug)
-    openModal(drawerSlug)
+    openModal(bulkUploadDrawerSlug)
     setOnSuccess(() => router.refresh())
-  }, [router, collectionSlug, drawerSlug, openModal, setCollectionSlug, setOnSuccess])
+  }, [router, collectionSlug, bulkUploadDrawerSlug, openModal, setCollectionSlug, setOnSuccess])
 
   useEffect(() => {
     if (drawerDepth <= 1) {
@@ -166,6 +166,8 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
   }, [setStepNav, labels, drawerDepth])
 
   const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
+
+  const isInDrawer = Boolean(listDrawerSlug)
 
   return (
     <Fragment>
@@ -198,7 +200,6 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                       >
                         {i18n.t('general:createNew')}
                       </Button>
-
                       {isBulkUploadEnabled && (
                         <Button
                           aria-label={t('upload:bulkUpload')}
@@ -238,11 +239,21 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                     {i18n.t('general:noResults', { label: getTranslation(labels?.plural, i18n) })}
                   </p>
                   {hasCreatePermission && newDocumentURL && (
-                    <Button el="link" Link={Link} to={newDocumentURL}>
-                      {i18n.t('general:createNewLabel', {
-                        label: getTranslation(labels?.singular, i18n),
-                      })}
-                    </Button>
+                    <Fragment>
+                      {isInDrawer ? (
+                        <Button el="button" onClick={() => openModal(createNewDrawerSlug)}>
+                          {i18n.t('general:createNewLabel', {
+                            label: getTranslation(labels?.singular, i18n),
+                          })}
+                        </Button>
+                      ) : (
+                        <Button el="link" Link={Link} to={newDocumentURL}>
+                          {i18n.t('general:createNewLabel', {
+                            label: getTranslation(labels?.singular, i18n),
+                          })}
+                        </Button>
+                      )}
+                    </Fragment>
                   )}
                 </div>
               )}

@@ -2,7 +2,7 @@
 import type { TextNode } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { useFieldProps, useTranslation } from '@payloadcms/ui'
+import { useTranslation } from '@payloadcms/ui'
 import { useCallback, useMemo, useState } from 'react'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
@@ -34,9 +34,11 @@ function SlashMenuItem({
   onMouseEnter: () => void
 }) {
   const {
-    field: { richTextComponentMap },
+    fieldProps: {
+      field: { richTextComponentMap },
+      schemaPath,
+    },
   } = useEditorConfigContext()
-  const { schemaPath } = useFieldProps()
 
   const { i18n } = useTranslation()
 
@@ -89,9 +91,11 @@ export function SlashMenuPlugin({
   const { editorConfig } = useEditorConfigContext()
   const { i18n } = useTranslation()
   const {
-    field: { richTextComponentMap },
+    fieldProps: {
+      field: { richTextComponentMap },
+      schemaPath,
+    },
   } = useEditorConfigContext()
-  const { schemaPath } = useFieldProps()
 
   const checkForTriggerMatch = useMenuTriggerMatch('/', {
     minLength: 0,

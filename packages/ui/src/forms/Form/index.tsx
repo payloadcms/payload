@@ -1,9 +1,10 @@
 'use client'
-import { dequal } from 'dequal/lite'
-import { type FormState, type PayloadRequest } from 'payload' // lite: no need for Map and Set support
+import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
+import { type FormState, type PayloadRequest } from 'payload'
 import {
+  deepCopyObjectComplex,
   getDataByPath as getDataByPathFunc,
   getSiblingData as getSiblingDataFunc,
   reduceFieldsToValues,
@@ -261,13 +262,15 @@ export const Form: React.FC<FormProps> = (props) => {
         return
       }
 
-      const preparedFields = prepareFields(fields)
-
       // If submit handler comes through via props, run that
       if (onSubmit) {
-        const data = {
-          ...reduceFieldsToValues(preparedFields, true),
-          ...overrides,
+        const preparedFields = prepareFields(deepCopyObjectComplex(fields))
+        const data = reduceFieldsToValues(preparedFields, true)
+
+        if (overrides) {
+          for (const [key, value] of Object.entries(overrides)) {
+            data[key] = value
+          }
         }
 
         onSubmit(preparedFields, data)
@@ -428,7 +431,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const createFormData = useCallback((overrides: any = {}) => {
-    const preparedFields = prepareFields(contextRef.current.fields)
+    const preparedFields = prepareFields(deepCopyObjectComplex(contextRef.current.fields))
     const data = reduceFieldsToValues(preparedFields, true)
 
     const file = data?.file
@@ -536,28 +539,20 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
-    async ({ data, path, rowIndex: rowIndexArg, schemaPath }) => {
+    async ({ data, path, rowIndex: rowIndexArg }) => {
       const newRows: unknown[] = getDataByPath(path) || []
       const rowIndex = rowIndexArg === undefined ? newRows.length : rowIndexArg
-      newRows.splice(rowIndex, 0, { id: uuidv4(), ...(data || {}) })
-      const fieldName = path.split('.').pop()
 
-      const { formState: newFormState } = await getFieldStateBySchemaPath({
-        collectionSlug,
-        data: {
-          [fieldName]: newRows,
-        },
-        globalSlug,
-        path,
-        schemaPath,
-      })
-
+      // dispatch ADD_ROW that sets requiresRender: true and adds a blank row to local form state.
+      // This performs no form state request, as the debounced onChange effect will do that for us.
       dispatchFields({
-        type: 'UPDATE_MANY',
-        formState: newFormState,
+        type: 'ADD_ROW',
+        blockType: data?.blockType,
+        path,
+        rowIndex,
       })
     },
-    [getFieldStateBySchemaPath, dispatchFields, collectionSlug, globalSlug, getDataByPath],
+    [dispatchFields, getDataByPath],
   )
 
   const removeFieldRow: FormContextType['removeFieldRow'] = useCallback(
@@ -687,10 +682,11 @@ export const Form: React.FC<FormProps> = (props) => {
     () => {
       const executeOnChange = async () => {
         if (Array.isArray(onChange)) {
-          let revalidatedFormState: FormState = contextRef.current.fields
+          let revalidatedFormState: FormState = deepCopyObjectComplex(contextRef.current.fields) // deep copy, as we do not want prepareFields to mutate the original state. Complex, to avoid maximum call stack exceeded errors
 
           for (const onChangeFn of onChange) {
             const prepared = prepareFields(revalidatedFormState, true)
+            // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
             revalidatedFormState = await onChangeFn({
               formState: prepared as FormState,
             })
@@ -715,12 +711,12 @@ export const Form: React.FC<FormProps> = (props) => {
         void executeOnChange()
       }
     },
-    /* 
+    /*
       Make sure we trigger this whenever modified changes (not just when `fields` changes),
       otherwise we will miss merging server form state for the first form update/onChange.
 
       Here's why:
-        `fields` updates before `modified`, because setModified is in a setTimeout. 
+        `fields` updates before `modified`, because setModified is in a setTimeout.
         So on the first change, modified is false, so we don't trigger the effect even though we should.
     **/
     [contextRef.current.fields, modified],

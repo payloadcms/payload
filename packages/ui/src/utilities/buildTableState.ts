@@ -210,7 +210,7 @@ export const buildTableStateFn = async (
 
   const { columnState, Table } = renderTable({
     clientFields,
-    collectionSlug,
+    collectionConfig: clientCollectionConfig,
     columnPreferences: undefined, // TODO, might not be needed
     columns,
     docs,

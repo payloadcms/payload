@@ -61,6 +61,7 @@ export type AddFieldStatePromiseArgs = {
    * just create your own req and pass in the locale and the user
    */
   req: PayloadRequest
+  schemaPathsToRender?: string[] | true
   /**
    * Whether to skip checking the field's condition. @default false
    */
@@ -96,6 +97,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     passesCondition,
     preferences,
     req,
+    schemaPathsToRender,
     skipConditionChecks = false,
     skipValidation = false,
     state,
@@ -108,6 +110,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     schemaIndex: fieldIndex,
   })
 
+  const requiresRender =
+    schemaPathsToRender &&
+    (schemaPathsToRender === true || schemaPathsToRender.includes(fieldSchemaPath.join('.')))
+
   if (fieldAffectsData(field)) {
     const validate = field.validate
 
@@ -117,6 +123,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       initialValue: undefined,
       isSidebar: fieldIsSidebar(field),
       passesCondition,
+      requiresRender,
       schemaPath: fieldSchemaPath,
       valid: true,
       value: undefined,
@@ -176,7 +183,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         const arrayValue = Array.isArray(data[field.name]) ? data[field.name] : []
 
         const { promises, rows } = arrayValue.reduce(
-          (acc, row, i) => {
+          (acc, row, i: number) => {
             const parentPath = [...fieldPath, i]
             row.id = row?.id || new ObjectId().toHexString()
 
@@ -197,6 +204,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 id,
                 addErrorPathToParent,
                 anyParentLocalized: field.localized || anyParentLocalized,
+                collectionSlug,
                 data: row,
                 fields: field.fields,
                 filter,
@@ -210,6 +218,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 parentSchemaPath: fieldSchemaPath,
                 preferences,
                 req,
+                // If parent field requires render, all children should render
+                schemaPathsToRender: requiresRender ? true : schemaPathsToRender,
                 skipConditionChecks,
                 skipValidation,
                 state,
@@ -264,7 +274,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         const blocksValue = Array.isArray(data[field.name]) ? data[field.name] : []
 
         const { promises, rowMetadata } = blocksValue.reduce(
-          (acc, row, i) => {
+          (acc, row, i: number) => {
             const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
             if (!block) {
               throw new Error(
@@ -321,6 +331,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   id,
                   addErrorPathToParent,
                   anyParentLocalized: field.localized || anyParentLocalized,
+                  collectionSlug,
                   data: row,
                   fields: block.fields,
                   filter,
@@ -334,6 +345,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   parentSchemaPath: rowSchemaPath,
                   preferences,
                   req,
+                  // If parent field requires render, all children should render
+                  schemaPathsToRender: requiresRender ? true : schemaPathsToRender,
                   skipConditionChecks,
                   skipValidation,
                   state,
@@ -395,6 +408,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           id,
           addErrorPathToParent,
           anyParentLocalized: field.localized || anyParentLocalized,
+          collectionSlug,
           data: data?.[field.name] || {},
           fields: field.fields,
           filter,
@@ -408,6 +422,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           parentSchemaPath: fieldSchemaPath,
           preferences,
           req,
+          // If parent field requires render, all children should render
+          schemaPathsToRender: requiresRender ? true : schemaPathsToRender,
           skipConditionChecks,
           skipValidation,
           state,
@@ -522,6 +538,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         errorPaths: [],
         initialValue: undefined,
         passesCondition,
+        requiresRender,
         schemaPath: fieldSchemaPath,
         valid: true,
         value: undefined,
@@ -533,6 +550,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       // passthrough parent functionality
       addErrorPathToParent: addErrorPathToParentArg,
       anyParentLocalized: field.localized || anyParentLocalized,
+      collectionSlug,
       data,
       fields: field.fields,
       filter,
@@ -546,6 +564,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       parentSchemaPath: fieldSchemaPath,
       preferences,
       req,
+      // If parent field requires render, all children should render
+      schemaPathsToRender: requiresRender ? true : schemaPathsToRender,
       skipConditionChecks,
       skipValidation,
       state,
@@ -569,6 +589,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         // passthrough parent functionality
         addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized: tab.localized || anyParentLocalized,
+        collectionSlug,
         data: isNamedTab ? data?.[tab.name] || {} : data,
         fields: tab.fields,
         filter,
@@ -582,6 +603,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         parentSchemaPath: tabPaths.schemaPath,
         preferences,
         req,
+        // If parent field requires render, all children should render
+        schemaPathsToRender: requiresRender ? true : schemaPathsToRender,
         skipConditionChecks,
         skipValidation,
         state,
@@ -598,6 +621,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         initialValue: undefined,
         isSidebar: fieldIsSidebar(field),
         passesCondition,
+        requiresRender,
         schemaPath: fieldSchemaPath,
         valid: true,
         value: undefined,

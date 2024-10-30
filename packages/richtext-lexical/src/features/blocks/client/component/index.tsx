@@ -4,11 +4,10 @@ import {
   Collapsible,
   Form,
   Pill,
-  RenderComponent,
   SectionTitle,
   ShimmerEffect,
   useDocumentInfo,
-  useFieldProps,
+  useForm,
   useFormSubmitted,
   useServerFunctions,
   useTranslation,
@@ -37,17 +36,15 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const { formData, nodeKey } = props
   const submitted = useFormSubmitted()
   const { id } = useDocumentInfo()
-  const { path, schemaPath } = useFieldProps()
-  const { field: parentLexicalRichTextField } = useEditorConfigContext()
+  const {
+    fieldProps: { field: parentLexicalRichTextField, path, schemaPath },
+  } = useEditorConfigContext()
   const abortControllerRef = useRef(new AbortController())
+  const { fields: formFields } = useForm()
 
   const { getFormState } = useServerFunctions()
 
   const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
-
-  const {
-    field: { richTextComponentMap },
-  } = useEditorConfigContext()
 
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.lexical_blocks.${formData.blockType}`
 
@@ -149,6 +146,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const classNames = [`${baseClass}__row`, `${baseClass}__row--no-errors`].filter(Boolean).join(' ')
 
+  const Label = clientBlock?.admin?.components?.Label
+
   // Memoized Form JSX
   const formContent = useMemo(() => {
     return clientBlock && initialState !== false ? (
@@ -177,10 +176,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         collapsibleStyle="default"
         header={
           clientBlock?.admin?.components?.Label ? (
-            <RenderComponent
-              clientProps={{ blockKind: 'lexicalBlock', formData }}
-              mappedComponent={clientBlock.admin.components.Label}
-            />
+            Label
           ) : (
             <div className={`${baseClass}__block-header`}>
               <div>
