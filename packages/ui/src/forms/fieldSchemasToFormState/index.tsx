@@ -19,6 +19,14 @@ type Args = {
   parentSchemaPath?: string[]
   preferences: DocumentPreferences
   req: PayloadRequest
+  /**
+   * If set, fields with these schema paths will have requireRender: true set in their form state.
+   * This is useful for them to be later processed by attachComponentsToFormState, if schemaPathsToRender is
+   * calculated earlier from the existing form state passed to buildFormState.
+   *
+   * If set to true, all fields will have requireRender: true set in their form state.
+   */
+  schemaPathsToRender?: string[] | true
   siblingData?: Data
 }
 
@@ -33,6 +41,7 @@ export const fieldSchemasToFormState = async (args: Args): Promise<FormStateWith
     parentSchemaPath = [],
     preferences,
     req,
+    schemaPathsToRender,
   } = args
 
   if (fields && fields.length) {
@@ -62,6 +71,7 @@ export const fieldSchemasToFormState = async (args: Args): Promise<FormStateWith
       parentSchemaPath,
       preferences,
       req,
+      schemaPathsToRender,
       state,
     })
 

@@ -366,6 +366,7 @@ export const buildFormStateFn = async (
     parentSchemaPath,
     preferences: docPreferences || { fields: {} },
     req,
+    schemaPathsToRender,
   })
 
   let lockedStateResult = undefined

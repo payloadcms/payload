@@ -1,7 +1,6 @@
 'use client'
-import type { FormState } from 'payload'
-
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
+import { type FormState } from 'payload'
 
 import { mergeErrorPaths } from './mergeErrorPaths.js'
 
@@ -74,6 +73,17 @@ export const mergeServerFormState = (
       // Conditions don't work if we don't memcopy the new state, as the object references would otherwise be the same
       newState[path] = { ...newFieldState }
     })
+
+    // Now loop over values that are part of incoming state but not part of existing state, and add them to the new state.
+    // This can happen if a new array row was added. In our local state, we simply add out stubbed `array` and `array.[index].id` entries to the local form state.
+    // However, all other array sub-fields are not added to the local state - those will be added by the server and may be incoming here.
+
+    for (const [path, newFieldState] of Object.entries(incomingState)) {
+      if (!existingState[path]) {
+        changed = true
+        newState[path] = newFieldState
+      }
+    }
   }
 
   return { changed, newState }
