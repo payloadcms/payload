@@ -208,6 +208,14 @@ export const getViewFromConfig = ({
 
         templateClassName = 'global-edit'
         templateType = 'default'
+
+        // add default view actions
+        viewActions = viewActions.concat(
+          getViewActions({
+            editConfig: matchedGlobal.admin.components.views.edit,
+            viewKey: 'default',
+          }),
+        )
       }
       break
     }
@@ -352,14 +360,6 @@ export const getViewFromConfig = ({
                   }),
                 )
               }
-            } else if (segmentTwo) {
-              // add default view actions
-              viewActions = viewActions.concat(
-                getViewActions({
-                  editConfig: matchedGlobal.admin.components.views.edit,
-                  viewKey: 'default',
-                }),
-              )
             }
           }
         }
