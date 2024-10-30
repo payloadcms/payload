@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { lexicalEditor, LinkFeature } from '@payloadcms/richtext-lexical'
 import { slateEditor } from '@payloadcms/richtext-slate'
 
-// the TSlug generic needs to be passed to defaultPopulate type safety.
+// The TSlug generic can be passed to have type safety for `defaultPopulate`. If avoided, the `defaultPopulate` type is `SelectType`.
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
   // I need only slug, NOT the WHOLE CONTENT!
