@@ -68,6 +68,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'error:emailOrPasswordIncorrect',
   'error:usernameOrPasswordIncorrect',
   'error:loadingDocument',
+  'error:invalidFileType',
   'error:logoutFailed',
   'error:noMatchedField',
   'error:notAllowedToAccessPage',
