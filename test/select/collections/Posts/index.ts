@@ -74,5 +74,36 @@ export const PostsCollection: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          name: 'tab',
+          fields: [
+            {
+              type: 'text',
+              name: 'text',
+            },
+            {
+              type: 'number',
+              name: 'number',
+            },
+          ],
+        },
+        {
+          label: 'Tab Unnamed',
+          fields: [
+            {
+              type: 'text',
+              name: 'unnamedTabText',
+            },
+            {
+              type: 'number',
+              name: 'unnamedTabNumber',
+            },
+          ],
+        },
+      ],
+    },
   ],
 }

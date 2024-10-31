@@ -45,6 +45,10 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
+jobs?: {
+    tasks: unknown;
+    workflows?: unknown;
+  };
 }
 export interface UserAuthOperations {
   forgotPassword: {
@@ -101,6 +105,12 @@ export interface Post {
           }
       )[]
     | null;
+  tab?: {
+    text?: string | null;
+    number?: number | null;
+  };
+  unnamedTabText?: string | null;
+  unnamedTabNumber?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -424,6 +434,14 @@ export interface PostsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  tab?:
+    | T
+    | {
+        text?: T;
+        number?: T;
+      };
+  unnamedTabText?: T;
+  unnamedTabNumber?: T;
   updatedAt?: T;
   createdAt?: T;
 }

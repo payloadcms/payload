@@ -129,6 +129,55 @@ describe('Select', () => {
         })
       })
 
+      it('should select all the fields inside of named tab', async () => {
+        const res = await payload.findByID({
+          collection: 'posts',
+          id: postId,
+          select: {
+            tab: true,
+          },
+        })
+
+        expect(res).toStrictEqual({
+          id: postId,
+          tab: post.tab,
+        })
+      })
+
+      it('should select text field inside of named tab', async () => {
+        const res = await payload.findByID({
+          collection: 'posts',
+          id: postId,
+          select: {
+            tab: {
+              text: true,
+            },
+          },
+        })
+
+        expect(res).toStrictEqual({
+          id: postId,
+          tab: {
+            text: post.tab.text,
+          },
+        })
+      })
+
+      it('should select text field inside of unnamed tab', async () => {
+        const res = await payload.findByID({
+          collection: 'posts',
+          id: postId,
+          select: {
+            unnamedTabText: true,
+          },
+        })
+
+        expect(res).toStrictEqual({
+          id: postId,
+          unnamedTabText: post.unnamedTabText,
+        })
+      })
+
       it('should select id as default from array', async () => {
         const res = await payload.findByID({
           collection: 'posts',
@@ -1662,7 +1711,7 @@ describe('Select', () => {
       expect(richTextSlateRel.value).toStrictEqual(expectedHomePage)
     })
 
-    it('REST API - should populate with the defaultPopulate select shape', async () => {
+    it('rEST API - should populate with the defaultPopulate select shape', async () => {
       const restResult = await (
         await restClient.GET(`/pages/${aboutPage.id}`, { query: { depth: 1 } })
       ).json()
@@ -1728,6 +1777,12 @@ function createPost() {
           number: 1,
         },
       ],
+      tab: {
+        text: 'text',
+        number: 1,
+      },
+      unnamedTabNumber: 2,
+      unnamedTabText: 'text2',
     },
   })
 }
