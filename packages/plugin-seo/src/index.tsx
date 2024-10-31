@@ -46,8 +46,8 @@ export const seoPlugin =
         name: 'meta',
         type: 'group',
         fields: [
-          ...(pluginConfig?.fieldOverrides && typeof pluginConfig.fieldOverrides === 'function'
-            ? pluginConfig.fieldOverrides({ defaultFields })
+          ...(pluginConfig?.fields && typeof pluginConfig.fields === 'function'
+            ? pluginConfig.fields({ defaultFields })
             : defaultFields),
         ],
         interfaceName: pluginConfig.interfaceName,

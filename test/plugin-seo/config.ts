@@ -69,7 +69,7 @@ export default buildConfigWithDefaults({
   plugins: [
     seoPlugin({
       collections: ['pages'],
-      fieldOverrides: ({ defaultFields }) => {
+      fields: ({ defaultFields }) => {
         const modifiedFields = defaultFields.map((field) => {
           if ('name' in field && field.name === 'title') {
             return {

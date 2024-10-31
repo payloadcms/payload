@@ -69,7 +69,7 @@ export type SEOPluginConfig = {
    *
    * If you need more flexibility you can insert the fields manually as needed. @link https://payloadcms.com/docs/beta/plugins/seo#direct-use-of-fields
    */
-  fieldOverrides?: FieldsOverride
+  fields?: FieldsOverride
   generateDescription?: GenerateDescription
   generateImage?: GenerateImage
   generateTitle?: GenerateTitle
