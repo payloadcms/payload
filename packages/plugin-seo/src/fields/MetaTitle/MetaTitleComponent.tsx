@@ -33,7 +33,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const {
     field: {
       admin: {
-        components: { Label },
+        components: { afterInput, beforeInput, Label },
       },
       label,
       maxLength: maxLengthFromProps,
@@ -182,6 +182,8 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <TextInput
+          afterInput={afterInput}
+          beforeInput={beforeInput}
           Error={{
             type: 'client',
             Component: null,

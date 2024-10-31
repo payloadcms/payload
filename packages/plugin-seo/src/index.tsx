@@ -1,4 +1,4 @@
-import type { Config, GroupField, TabsField, TextField } from 'payload'
+import type { Config, Field, GroupField, TabsField } from 'payload'
 
 import { deepMergeSimple } from 'payload/shared'
 
@@ -20,33 +20,35 @@ import { translations } from './translations/index.js'
 export const seoPlugin =
   (pluginConfig: SEOPluginConfig) =>
   (config: Config): Config => {
+    const defaultFields: Field[] = [
+      OverviewField({}),
+      MetaTitleField({
+        hasGenerateFn: typeof pluginConfig?.generateTitle === 'function',
+      }),
+      MetaDescriptionField({
+        hasGenerateFn: typeof pluginConfig?.generateDescription === 'function',
+      }),
+      ...(pluginConfig?.uploadsCollection
+        ? [
+            MetaImageField({
+              hasGenerateFn: typeof pluginConfig?.generateImage === 'function',
+              relationTo: pluginConfig.uploadsCollection,
+            }),
+          ]
+        : []),
+      PreviewField({
+        hasGenerateFn: typeof pluginConfig?.generateURL === 'function',
+      }),
+    ]
+
     const seoFields: GroupField[] = [
       {
         name: 'meta',
         type: 'group',
         fields: [
-          OverviewField({}),
-          MetaTitleField({
-            hasGenerateFn: typeof pluginConfig?.generateTitle === 'function',
-            overrides: pluginConfig?.fieldOverrides?.title,
-          }),
-          MetaDescriptionField({
-            hasGenerateFn: typeof pluginConfig?.generateDescription === 'function',
-            overrides: pluginConfig?.fieldOverrides?.description,
-          }),
-          ...(pluginConfig?.uploadsCollection
-            ? [
-                MetaImageField({
-                  hasGenerateFn: typeof pluginConfig?.generateImage === 'function',
-                  overrides: pluginConfig?.fieldOverrides?.image,
-                  relationTo: pluginConfig.uploadsCollection,
-                }),
-              ]
-            : []),
-          ...(pluginConfig?.fields || []),
-          PreviewField({
-            hasGenerateFn: typeof pluginConfig?.generateURL === 'function',
-          }),
+          ...(pluginConfig?.fields && typeof pluginConfig.fields === 'function'
+            ? pluginConfig.fields({ defaultFields })
+            : defaultFields),
         ],
         interfaceName: pluginConfig.interfaceName,
         label: 'SEO',
