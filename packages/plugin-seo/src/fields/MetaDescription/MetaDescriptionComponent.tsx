@@ -32,13 +32,14 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
   const {
     field: {
       admin: {
-        components: { Label },
+        components: { afterInput, beforeInput, Label },
       },
       label,
       maxLength: maxLengthFromProps,
       minLength: minLengthFromProps,
       required,
     },
+    field: fieldFromProps,
     hasGenerateDescriptionFn,
     labelProps,
   } = props
@@ -132,7 +133,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
       >
         <div className="plugin-seo__field">
           <FieldLabel
-            field={null}
+            field={fieldFromProps}
             Label={Label}
             label={label}
             required={required}
@@ -183,6 +184,8 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
         }}
       >
         <TextareaInput
+          afterInput={afterInput}
+          beforeInput={beforeInput}
           Error={{
             type: 'client',
             Component: null,
