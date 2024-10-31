@@ -129,7 +129,7 @@ const PreviewView: React.FC<Props> = ({
   const documentLockStateRef = useRef<{
     hasShownLockedModal: boolean
     isLocked: boolean
-    user: ClientUser
+    user: ClientUser | number | string
   } | null>({
     hasShownLockedModal: false,
     isLocked: false,
@@ -208,7 +208,10 @@ const PreviewView: React.FC<Props> = ({
       setDocumentIsLocked(true)
 
       if (isLockingEnabled) {
-        const previousOwnerId = documentLockStateRef.current?.user?.id
+        const previousOwnerId =
+          typeof documentLockStateRef.current?.user === 'object'
+            ? documentLockStateRef.current?.user?.id
+            : documentLockStateRef.current?.user
 
         if (lockedState) {
           if (!documentLockStateRef.current || lockedState.user.id !== previousOwnerId) {
@@ -267,7 +270,11 @@ const PreviewView: React.FC<Props> = ({
       // Unlock the document only if we're actually navigating away from the document
       if (documentId && documentIsLocked && !isStayingWithinDocument) {
         // Check if this user is still the current editor
-        if (documentLockStateRef.current?.user?.id === user?.id) {
+        if (
+          typeof documentLockStateRef.current?.user === 'object'
+            ? documentLockStateRef.current?.user?.id === user?.id
+            : documentLockStateRef.current?.user === user?.id
+        ) {
           void unlockDocument(id, collectionSlug ?? globalSlug)
           setDocumentIsLocked(false)
           setCurrentEditor(null)
@@ -291,7 +298,9 @@ const PreviewView: React.FC<Props> = ({
   const shouldShowDocumentLockedModal =
     documentIsLocked &&
     currentEditor &&
-    currentEditor.id !== user.id &&
+    (typeof currentEditor === 'object'
+      ? currentEditor.id !== user?.id
+      : currentEditor !== user?.id) &&
     !isReadOnlyForIncomingUser &&
     !showTakeOverModal &&
     // eslint-disable-next-line react-compiler/react-compiler

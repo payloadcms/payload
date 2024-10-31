@@ -178,6 +178,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     addFilter: 'Добави филтър',
     adminTheme: 'Цветова тема',
     and: 'И',
+    anotherUser: 'Друг потребител',
     anotherUserTakenOver: 'Друг потребител пое редактирането на този документ.',
     applyChanges: 'Приложи промените',
     ascending: 'Възходящ',

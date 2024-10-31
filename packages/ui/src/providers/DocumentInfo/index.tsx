@@ -105,7 +105,7 @@ const DocumentInfo: React.FC<
   )
 
   const [documentIsLocked, setDocumentIsLocked] = useState<boolean | undefined>(false)
-  const [currentEditor, setCurrentEditor] = useState<ClientUser | null>(null)
+  const [currentEditor, setCurrentEditor] = useState<ClientUser | null | number | string>(null)
   const [lastUpdateTime, setLastUpdateTime] = useState<number>(null)
 
   const isInitializing = initialState === undefined || data === undefined
@@ -175,7 +175,7 @@ const DocumentInfo: React.FC<
   )
 
   const updateDocumentEditor = useCallback(
-    async (docId: number | string, slug: string, user: ClientUser) => {
+    async (docId: number | string, slug: string, user: ClientUser | number | string) => {
       try {
         const isGlobal = slug === globalSlug
 
@@ -191,10 +191,15 @@ const DocumentInfo: React.FC<
         if (docs.length > 0) {
           const lockId = docs[0].id
 
+          const userData =
+            typeof user === 'object'
+              ? { relationTo: user.collection, value: user.id }
+              : { relationTo: 'users', value: user }
+
           // Send a patch request to update the _lastEdited info
           await requests.patch(`${serverURL}${api}/payload-locked-documents/${lockId}`, {
             body: JSON.stringify({
-              user: { relationTo: user?.collection, value: user?.id },
+              user: userData,
             }),
             headers: {
               'Content-Type': 'application/json',
@@ -230,7 +235,12 @@ const DocumentInfo: React.FC<
           if (docs.length > 0) {
             const newEditor = docs[0].user?.value
             const lastUpdatedAt = new Date(docs[0].updatedAt).getTime()
-            if (newEditor && newEditor.id !== currentEditor?.id) {
+
+            if (
+              newEditor && typeof newEditor === 'object' && typeof currentEditor === 'object'
+                ? newEditor.id !== currentEditor?.id
+                : newEditor !== currentEditor
+            ) {
               setCurrentEditor(newEditor)
               setDocumentIsLocked(true)
               setLastUpdateTime(lastUpdatedAt)
@@ -238,6 +248,7 @@ const DocumentInfo: React.FC<
           } else {
             setDocumentIsLocked(false)
           }
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
           // swallow error
         }

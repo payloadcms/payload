@@ -180,6 +180,7 @@ export const huTranslations: DefaultTranslationsObject = {
     addFilter: 'Szűrő hozzáadása',
     adminTheme: 'Admin téma',
     and: 'És',
+    anotherUser: 'Egy másik felhasználó',
     anotherUserTakenOver: 'Egy másik felhasználó átvette ennek a dokumentumnak a szerkesztését.',
     applyChanges: 'Változtatások alkalmazása',
     ascending: 'Növekvő',

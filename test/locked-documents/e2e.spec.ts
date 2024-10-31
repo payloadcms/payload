@@ -106,6 +106,7 @@ describe('locked documents', () => {
         data: {
           email: 'user2@payloadcms.com',
           password: '1234',
+          roles: ['is_user'],
         },
       })
 
@@ -349,6 +350,7 @@ describe('locked documents', () => {
         data: {
           email: 'user2@payloadcms.com',
           password: '1234',
+          roles: ['is_user'],
         },
       })
 
@@ -650,6 +652,7 @@ describe('locked documents', () => {
         data: {
           email: 'user2@payloadcms.com',
           password: '1234',
+          roles: ['is_user'],
         },
       })
 
@@ -810,6 +813,7 @@ describe('locked documents', () => {
         data: {
           email: 'user2@payloadcms.com',
           password: '1234',
+          roles: ['is_user'],
         },
       })
 
@@ -899,6 +903,7 @@ describe('locked documents', () => {
         data: {
           email: 'user2@payloadcms.com',
           password: '1234',
+          roles: ['is_user'],
         },
       })
 
@@ -989,6 +994,7 @@ describe('locked documents', () => {
         data: {
           email: 'user2@payloadcms.com',
           password: '1234',
+          roles: ['is_user'],
         },
       })
     })
@@ -1174,6 +1180,7 @@ describe('locked documents', () => {
         data: {
           email: 'user2@payloadcms.com',
           password: '1234',
+          roles: ['is_user'],
         },
       })
 

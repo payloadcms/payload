@@ -10,7 +10,7 @@ export const getFormState = async (args: {
   signal?: AbortSignal
   token?: string
 }): Promise<{
-  lockedState?: { isLocked: boolean; lastEditedAt: string; user: ClientUser }
+  lockedState?: { isLocked: boolean; user: ClientUser }
   state: FormState
 }> => {
   const { apiRoute, body, onError, serverURL, signal, token } = args
@@ -27,7 +27,7 @@ export const getFormState = async (args: {
   })
 
   const json = (await res.json()) as {
-    lockedState?: { isLocked: boolean; lastEditedAt: string; user: ClientUser }
+    lockedState?: { isLocked: boolean; user: ClientUser }
     state: FormState
   }
 

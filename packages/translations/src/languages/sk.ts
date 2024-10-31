@@ -180,6 +180,7 @@ export const skTranslations: DefaultTranslationsObject = {
     addFilter: 'Pridať filter',
     adminTheme: 'Motív administračného rozhrania',
     and: 'a',
+    anotherUser: 'Iný používateľ',
     anotherUserTakenOver: 'Iný používateľ prevzal úpravy tohto dokumentu.',
     applyChanges: 'Použiť zmeny',
     ascending: 'Vzostupne',

@@ -181,6 +181,7 @@ export const itTranslations: DefaultTranslationsObject = {
     addFilter: 'Aggiungi Filtro',
     adminTheme: 'Tema Admin',
     and: 'E',
+    anotherUser: 'Un altro utente',
     anotherUserTakenOver:
       'Un altro utente ha preso il controllo della modifica di questo documento.',
     applyChanges: 'Applica modifiche',
