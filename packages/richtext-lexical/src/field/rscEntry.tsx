@@ -1,7 +1,15 @@
 import type { EditorConfig as LexicalEditorConfig } from 'lexical'
-import type { ClientComponentProps, ServerComponentProps } from 'payload'
+import type { FieldState } from 'packages/payload/src/admin/forms/Form.js'
 
 import { getFromImportMap } from '@payloadcms/ui/elements/RenderServerComponent'
+import {
+  type ClientComponentProps,
+  createClientField,
+  createClientFields,
+  deepCopyObjectSimple,
+  type RichTextFieldClient,
+  type ServerComponentProps,
+} from 'payload'
 import React from 'react'
 
 import type { FeatureProviderProviderClient } from '../features/typesClient.js'
@@ -17,58 +25,24 @@ export const RscEntryLexicalField: React.FC<
   } & ClientComponentProps &
     ServerComponentProps
 > = (args) => {
-  const clientProps: {
-    clientFeatures: LexicalRichTextFieldProps['clientFeatures']
-  } = {
-    clientFeatures: {},
-  }
+  const clientFeatures: LexicalRichTextFieldProps['clientFeatures'] = {}
+
+  const fieldSchemaMap = Object.fromEntries(new Map(args.fieldSchemaMap))
+  //&const value = deepCopyObjectSimple(args.fieldState.value)
 
   // turn args.resolvedFeatureMap into an array of [key, value] pairs, ordered by value.order, lowest order first:
   const resolvedFeatureMapArray = Array.from(args.resolvedFeatureMap.entries()).sort(
     (a, b) => a[1].order - b[1].order,
   )
 
+  const featureClientSchemaMap = {}
+
   for (const [featureKey, resolvedFeature] of resolvedFeatureMapArray) {
+    clientFeatures[featureKey] = {}
+
     /**
-     * Handle Feature Component Maps
-
-    if ('componentMap' in resolvedFeature) {
-      const components =
-        typeof resolvedFeature.componentMap === 'function'
-          ? resolvedFeature.componentMap({
-              i18n,
-              payload,
-              props: resolvedFeature.sanitizedServerFeatureProps,
-              schemaPath,
-            })
-          : resolvedFeature.componentMap
-
-      for (const componentKey in components) {
-        const payloadComponent = components[componentKey]
-
-        // @ts-expect-error - TODO: fix this
-        const mappedComponent: MappedComponent = createMappedComponent(
-          payloadComponent,
-          {
-            clientProps: {
-              componentKey,
-              featureKey: resolvedFeature.key,
-              key: `${resolvedFeature.key}-${componentKey}`,
-            },
-          },
-          undefined,
-          'lexical-from-resolvedFeature',
-        )
-
-        if (mappedComponent) {
-          componentMap.set(
-            `lexical_internal_feature.${featureKey}.lexical_internal_components.${componentKey}`,
-            mappedComponent,
-          )
-        }
-      }
-    } */
-
+     * Handle client features
+     */
     const ClientFeaturePayloadComponent = resolvedFeature.ClientFeature
 
     if (ClientFeaturePayloadComponent) {
@@ -94,15 +68,88 @@ export const RscEntryLexicalField: React.FC<
       }
 
       // As clientFeatureProvider is a client function, we cannot execute it on the server here. Thus, the client will have to execute clientFeatureProvider with its props
-      clientProps.clientFeatures[featureKey] = { clientFeatureProps, clientFeatureProvider }
+      clientFeatures[featureKey] = { clientFeatureProps, clientFeatureProvider }
+    }
+
+    /**
+     * Handle sub-fields (formstate of those)ttt
+     */
+    // The args.fieldSchemaMap generated before in buildFormState should contain all of lexical features' sub-field schemas
+    // as well, as it already called feature.generateSchemaMap for each feature.
+    // We will check for the existance resolvedFeature.generateSchemaMap to skip unnecessary loops for constructing featureSchemaMap, but we don't run it here
+    if (resolvedFeature.generateSchemaMap) {
+      const featureSchemaPath = [
+        ...args.schemaPath.split('.'),
+        'lexical_internal_feature',
+        featureKey,
+      ].join('.')
+
+      const featurePath = [...args.path.split('.'), 'lexical_internal_feature', featureKey].join(
+        '.',
+      )
+
+      // Like args.fieldSchemaMap, we only want to include the sub-fields of the current feature
+      const featureSchemaMap: typeof fieldSchemaMap = {}
+      for (const key in fieldSchemaMap) {
+        const state = fieldSchemaMap[key]
+
+        if (key.startsWith(featureSchemaPath)) {
+          featureSchemaMap[key] = state
+        }
+      }
+
+      featureClientSchemaMap[featureKey] = {}
+
+      for (const key in featureSchemaMap) {
+        const state = featureSchemaMap[key]
+
+        if (Array.isArray(state)) {
+          const clientFields = createClientFields({
+            clientFields: deepCopyObjectSimple(state),
+            defaultIDType: args.config.db.defaultIDType,
+            fields: state,
+            i18n: args.i18n,
+            parentSchemaPath: key.split('.'),
+          })
+          featureClientSchemaMap[featureKey][key] = clientFields
+        }
+      }
+
+      /*
+      This is for providing an initial form state. Right now we only want to provide the clientfields though
+      const schemaMap: {
+        [key: string]: FieldState
+      } = {}
+
+      const lexicalDeepIterate = (editorState) => {
+        console.log('STATE', editorState)
+
+        if (
+          editorState &&
+          typeof editorState === 'object' &&
+          'children' in editorState &&
+          Array.isArray(editorState.children)
+        ) {
+          for (const childKey in editorState.children) {
+            const childState = editorState.children[childKey]
+
+            if (childState && typeof childState === 'object') {
+              lexicalDeepIterate(childState)
+            }
+          }
+        }
+      }
+
+      lexicalDeepIterate(value.root)*/
     }
   }
 
   return (
     <RichTextField
       admin={args.admin}
-      clientFeatures={clientProps.clientFeatures}
-      field={args.field}
+      clientFeatures={clientFeatures}
+      featureClientSchemaMap={featureClientSchemaMap}
+      field={args.field as RichTextFieldClient}
       fieldState={args.fieldState}
       forceRender={args.forceRender}
       lexicalEditorConfig={args.lexicalEditorConfig}

@@ -104,6 +104,9 @@ export const BlocksFeature = createServerFeature<
         const schemaMap = new Map<string, Field[]>()
 
         if (props?.blocks?.length) {
+          for (const block of props.blocks) {
+            schemaMap.set(`lexical_blocks.${block.slug}.fields`, block.fields)
+          }
           schemaMap.set('lexical_blocks', [
             {
               name: 'lexical_blocks',
@@ -115,6 +118,9 @@ export const BlocksFeature = createServerFeature<
 
         if (props?.inlineBlocks?.length) {
           // To generate block schemaMap which generates things like the componentMap for admin.Label
+          for (const block of props.inlineBlocks) {
+            schemaMap.set(`lexical_inline_blocks.${block.slug}.fields`, block.fields)
+          }
           schemaMap.set('lexical_inline_blocks', [
             {
               name: 'lexical_inline_blocks',

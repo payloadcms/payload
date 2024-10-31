@@ -5,7 +5,7 @@ import type { FieldPermissions } from '../../auth/types.js'
 import type { SanitizedConfig } from '../../config/types.js'
 import type { ClientBlock, ClientField, Field } from '../../fields/config/types.js'
 import type { Payload } from '../../types/index.js'
-import type { ClientTab, FormField, RenderedField } from '../types.js'
+import type { ClientTab, FieldSchemaMap, FormField, FormState, RenderedField } from '../types.js'
 
 export type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
 
@@ -23,6 +23,15 @@ export type ClientComponentProps = {
 
 export type ServerComponentProps = {
   config: SanitizedConfig
+  /**
+   * The fieldSchemaMap that is created before form state is built is made available here.
+   */
+  fieldSchemaMap: FieldSchemaMap
+  /**
+   * Server Components will also have available to the entire form state.
+   * We cannot add it to ClientComponentProps as that would blow up the size of the props sent to the client.
+   */
+  formState: FormState
   i18n: I18nClient
   payload: Payload
   serverField: Field

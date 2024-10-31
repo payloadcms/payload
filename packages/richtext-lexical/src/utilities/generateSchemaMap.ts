@@ -24,11 +24,6 @@ export const getGenerateSchemaMap =
       })
 
       if (schemas) {
-        const newSchemas = new Map()
-        for (const schema of schemas) {
-          newSchemas.set(schema[0], schema[1])
-        }
-
         for (const [schemaKey, fields] of schemas.entries()) {
           // generate schema map entries for sub-fields using traverseFields
           if (Array.isArray(fields)) {
@@ -36,8 +31,11 @@ export const getGenerateSchemaMap =
               config,
               fields,
               i18n,
-              schemaMap: newSchemas,
-              schemaPath: schemaKey ? schemaKey.split('.') : [],
+              schemaMap,
+              schemaPath:
+                `${schemaPath.join('.')}.lexical_internal_feature.${featureKey}.${schemaKey}`.split(
+                  '.',
+                ),
             })
 
             schemaMap.set(

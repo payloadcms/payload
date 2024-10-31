@@ -66,8 +66,8 @@
       "@payloadcms/richtext-lexical/client": [
         "./packages/richtext-lexical/src/exports/client/index.ts"
       ],
-      "@payloadcms/richtext-lexical/generateComponentMap": [
-        "./packages/richtext-lexical/src/utilities/generateComponentMap.tsx"
+      "@payloadcms/richtext-lexical/rscs": [
+        "./packages/richtext-lexical/src/exports/server/rscs.ts"
       ],
       "@payloadcms/richtext-slate/client": [
         "./packages/richtext-slate/src/exports/client/index.ts"

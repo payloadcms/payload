@@ -35,21 +35,25 @@ type Props = {
 export const BlockComponent: React.FC<Props> = (props) => {
   const { formData, nodeKey } = props
   const submitted = useFormSubmitted()
-  const { id } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const {
-    fieldProps: { field: parentLexicalRichTextField, path, schemaPath },
+    fieldProps: { featureClientSchemaMap, field: parentLexicalRichTextField, path, schemaPath },
   } = useEditorConfigContext()
   const abortControllerRef = useRef(new AbortController())
-  const { fields: formFields } = useForm()
 
   const { getFormState } = useServerFunctions()
 
   const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
 
-  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.lexical_blocks.${formData.blockType}`
+  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${formData.blockType}.fields`
 
-  const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
-  const blocksField: BlocksFieldClient = richTextComponentMap?.get(componentMapRenderedBlockPath)[0]
+  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks`
+
+  const clientSchemaMap = featureClientSchemaMap['blocks']
+
+  const blocksField: BlocksFieldClient = clientSchemaMap[componentMapRenderedBlockPath].find(
+    (field) => field && 'name' in field && field.name === 'lexical_blocks',
+  ) as BlocksFieldClient
 
   const clientBlock = blocksField.blocks.find((block) => block.slug === formData.blockType)
 
@@ -62,8 +66,11 @@ export const BlockComponent: React.FC<Props> = (props) => {
     const awaitInitialState = async () => {
       const { state } = await getFormState({
         id,
+        collectionSlug,
         data: formData,
+        globalSlug,
         operation: 'update',
+        renderFields: true,
         schemaPath: schemaFieldsPath.split('.'),
         signal: abortController.signal,
       })
@@ -91,7 +98,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         // swallow error
       }
     }
-  }, [getFormState, schemaFieldsPath, id]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
+  }, [getFormState, schemaFieldsPath, id, collectionSlug, globalSlug]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
@@ -147,6 +154,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const classNames = [`${baseClass}__row`, `${baseClass}__row--no-errors`].filter(Boolean).join(' ')
 
   const Label = clientBlock?.admin?.components?.Label
+
+  console.log('FORM', { fields: clientBlock?.fields, initialState })
 
   // Memoized Form JSX
   const formContent = useMemo(() => {

@@ -30,7 +30,11 @@ export type FieldState = {
   disableFormData?: boolean
   errorMessage?: string
   errorPaths?: string[]
-  fieldSchema?: Field // TODO: Client doesnt have this right
+  /**
+   * The fieldSchema may be part of the form state if `includeSchema: true` is passed to buildFormState.
+   * This will never be in the form state of the client.
+   */
+  fieldSchema?: Field
   filterOptions?: FilterOptionsResult
   initialValue: unknown
   isSidebar?: boolean

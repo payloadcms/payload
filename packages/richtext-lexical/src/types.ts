@@ -1,5 +1,6 @@
 import type { EditorConfig as LexicalEditorConfig, SerializedEditorState } from 'lexical'
 import type {
+  ClientField,
   DefaultCellComponentProps,
   RichTextAdapter,
   RichTextFieldClient,
@@ -79,11 +80,16 @@ export type LexicalRichTextAdapterProvider =
 
 export type LexicalRichTextFieldProps = {
   admin: LexicalFieldAdminProps
+  featureClientSchemaMap: {
+    [featureKey: string]: {
+      [key: string]: ClientField[]
+    }
+  }
   // clientFeatures is added through the rsc field
   clientFeatures: {
     [featureKey: string]: {
-      clientFeatureProps: object
-      clientFeatureProvider: FeatureProviderProviderClient<any, any>
+      clientFeatureProps?: object
+      clientFeatureProvider?: FeatureProviderProviderClient<any, any>
     }
   }
   lexicalEditorConfig: LexicalEditorConfig

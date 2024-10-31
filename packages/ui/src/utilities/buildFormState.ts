@@ -351,7 +351,11 @@ export const buildFormStateFn = async (
    * so we can safely map over them within `fieldSchemasToFormState`
    */
   const fields = (
-    isEntitySchema ? (fieldOrEntityConfig as { fields: Field[] }).fields : [fieldOrEntityConfig]
+    isEntitySchema
+      ? (fieldOrEntityConfig as { fields: Field[] }).fields
+      : Array.isArray(fieldOrEntityConfig)
+        ? fieldOrEntityConfig
+        : [fieldOrEntityConfig]
   ) as Field[]
   const parentSchemaPath = isEntitySchema ? schemaPath : schemaPath.slice(0, -1)
   const parentPath = isEntitySchema ? path : path.slice(0, -1)

@@ -1,6 +1,7 @@
 'use client'
 
 import type { LexicalEditor } from 'lexical'
+import type { ClientField } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import * as React from 'react'
@@ -21,6 +22,7 @@ export interface EditorConfigContextType {
   editor: LexicalEditor
   editorConfig: SanitizedClientEditorConfig
   editorContainerRef: React.RefObject<HTMLDivElement>
+
   fieldProps: LexicalRichTextFieldProps
   focusedEditor: EditorConfigContextType | null
   // Editor focus handling
@@ -48,6 +50,7 @@ export const EditorConfigProvider = ({
   children: React.ReactNode
   editorConfig: SanitizedClientEditorConfig
   editorContainerRef: React.RefObject<HTMLDivElement | null>
+
   fieldProps: LexicalRichTextFieldProps
   parentContext?: EditorConfigContextType
 }): React.ReactNode => {
