@@ -34,10 +34,7 @@ function SlashMenuItem({
   onMouseEnter: () => void
 }) {
   const {
-    fieldProps: {
-      field: { richTextComponentMap },
-      schemaPath,
-    },
+    fieldProps: { featureClientSchemaMap, schemaPath },
   } = useEditorConfigContext()
 
   const { i18n } = useTranslation()
@@ -51,7 +48,7 @@ function SlashMenuItem({
   if (item.label) {
     title =
       typeof item.label === 'function'
-        ? item.label({ i18n, richTextComponentMap, schemaPath })
+        ? item.label({ featureClientSchemaMap, i18n, schemaPath })
         : item.label
   }
   // Crop title to max. 25 characters
@@ -91,10 +88,7 @@ export function SlashMenuPlugin({
   const { editorConfig } = useEditorConfigContext()
   const { i18n } = useTranslation()
   const {
-    fieldProps: {
-      field: { richTextComponentMap },
-      schemaPath,
-    },
+    fieldProps: { featureClientSchemaMap, schemaPath },
   } = useEditorConfigContext()
 
   const checkForTriggerMatch = useMenuTriggerMatch('/', {
@@ -132,7 +126,7 @@ export function SlashMenuPlugin({
           if (item.label) {
             itemTitle =
               typeof item.label === 'function'
-                ? item.label({ i18n, richTextComponentMap, schemaPath })
+                ? item.label({ featureClientSchemaMap, i18n, schemaPath })
                 : item.label
           }
 
@@ -214,10 +208,10 @@ export function SlashMenuPlugin({
               <div className={baseClass}>
                 {groups.map((group) => {
                   let groupTitle = group.key
-                  if (group.label && richTextComponentMap) {
+                  if (group.label && featureClientSchemaMap) {
                     groupTitle =
                       typeof group.label === 'function'
-                        ? group.label({ i18n, richTextComponentMap, schemaPath })
+                        ? group.label({ featureClientSchemaMap, i18n, schemaPath })
                         : group.label
                   }
 
