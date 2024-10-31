@@ -1,10 +1,8 @@
 import type { EditorConfig as LexicalEditorConfig } from 'lexical'
-import type { FieldState } from 'packages/payload/src/admin/forms/Form.js'
 
 import { getFromImportMap } from '@payloadcms/ui/elements/RenderServerComponent'
 import {
   type ClientComponentProps,
-  createClientField,
   createClientFields,
   deepCopyObjectSimple,
   type RichTextFieldClient,
@@ -14,7 +12,11 @@ import React from 'react'
 
 import type { FeatureProviderProviderClient } from '../features/typesClient.js'
 import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
-import type { LexicalFieldAdminProps, LexicalRichTextFieldProps } from '../types.js'
+import type {
+  FeatureClientSchemaMap,
+  LexicalFieldAdminProps,
+  LexicalRichTextFieldProps,
+} from '../types.js'
 
 import { RichTextField } from './index.js'
 export const RscEntryLexicalField: React.FC<
@@ -35,7 +37,7 @@ export const RscEntryLexicalField: React.FC<
     (a, b) => a[1].order - b[1].order,
   )
 
-  const featureClientSchemaMap = {}
+  const featureClientSchemaMap: FeatureClientSchemaMap = {}
 
   for (const [featureKey, resolvedFeature] of resolvedFeatureMapArray) {
     clientFeatures[featureKey] = {}
@@ -103,16 +105,16 @@ export const RscEntryLexicalField: React.FC<
       for (const key in featureSchemaMap) {
         const state = featureSchemaMap[key]
 
-        if (Array.isArray(state)) {
-          const clientFields = createClientFields({
-            clientFields: deepCopyObjectSimple(state),
-            defaultIDType: args.config.db.defaultIDType,
-            fields: state,
-            i18n: args.i18n,
-            parentSchemaPath: key.split('.'),
-          })
-          featureClientSchemaMap[featureKey][key] = clientFields
-        }
+        const clientFields = createClientFields({
+          clientFields:
+            'fields' in state ? deepCopyObjectSimple(state.fields) : [deepCopyObjectSimple(state)],
+          defaultIDType: args.config.db.defaultIDType,
+          disableAddingIDs: true,
+          fields: 'fields' in state ? state.fields : [state],
+          i18n: args.i18n,
+          parentSchemaPath: key.split('.'),
+        })
+        featureClientSchemaMap[featureKey][key] = clientFields
       }
 
       /*

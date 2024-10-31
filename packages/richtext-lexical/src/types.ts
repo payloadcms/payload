@@ -78,13 +78,14 @@ export type LexicalRichTextAdapterProvider =
     parentIsLocalized: boolean
   }) => Promise<LexicalRichTextAdapter>
 
+export type FeatureClientSchemaMap = {
+  [featureKey: string]: {
+    [key: string]: ClientField[]
+  }
+}
+
 export type LexicalRichTextFieldProps = {
   admin: LexicalFieldAdminProps
-  featureClientSchemaMap: {
-    [featureKey: string]: {
-      [key: string]: ClientField[]
-    }
-  }
   // clientFeatures is added through the rsc field
   clientFeatures: {
     [featureKey: string]: {
@@ -92,6 +93,7 @@ export type LexicalRichTextFieldProps = {
       clientFeatureProvider?: FeatureProviderProviderClient<any, any>
     }
   }
+  featureClientSchemaMap: FeatureClientSchemaMap
   lexicalEditorConfig: LexicalEditorConfig
 } & RichTextFieldClientProps<SerializedEditorState, AdapterProps, object>
 
