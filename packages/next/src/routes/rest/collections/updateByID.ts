@@ -20,6 +20,11 @@ export const updateByID: CollectionRouteHandlerWithID = async ({
   const overrideLock = searchParams.get('overrideLock')
   const publishSpecificLocale = req.query.publishSpecificLocale as string | undefined
 
+  // NOTE: REST request body can be undefined when the request is aborted
+  if (!req.data && !req.file) {
+    return Response.json({ message: 'missing request body' }, { status: httpStatus.BAD_REQUEST })
+  }
+
   const id = sanitizeCollectionID({
     id: incomingID,
     collectionSlug: collection.config.slug,
