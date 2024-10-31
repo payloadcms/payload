@@ -1,4 +1,4 @@
-import type { Payload, TypeWithID } from 'payload'
+import type { Payload } from 'payload'
 
 import path from 'path'
 import { getFileByPath } from 'payload'
@@ -10,7 +10,7 @@ import type { Category, Config, Post, Singular } from './payload-types.js'
 import { devUser } from '../credentials.js'
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { categoriesSlug, uploadsSlug } from './shared.js'
+import { categoriesSlug, postsSlug, uploadsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -103,7 +103,7 @@ describe('Joins Field', () => {
           sort: '-title',
         },
       },
-      collection: 'categories',
+      collection: categoriesSlug,
     })
 
     expect(categoryWithPosts.group.relatedPosts.docs).toHaveLength(10)
@@ -121,7 +121,7 @@ describe('Joins Field', () => {
         },
       },
       select: {},
-      collection: 'categories',
+      collection: categoriesSlug,
     })
 
     expect(Object.keys(categoryWithPosts)).toStrictEqual(['id'])
@@ -140,7 +140,7 @@ describe('Joins Field', () => {
           relatedPosts: true,
         },
       },
-      collection: 'categories',
+      collection: categoriesSlug,
     })
 
     expect(Object.keys(categoryWithPosts)).toStrictEqual(['id', 'group'])
@@ -154,7 +154,7 @@ describe('Joins Field', () => {
   it('should populate relationships in joins', async () => {
     const { docs } = await payload.find({
       limit: 1,
-      collection: 'posts',
+      collection: postsSlug,
       depth: 2,
     })
 
@@ -166,7 +166,7 @@ describe('Joins Field', () => {
   it('should populate relationships in joins with camelCase names', async () => {
     const { docs } = await payload.find({
       limit: 1,
-      collection: 'posts',
+      collection: postsSlug,
     })
 
     expect(docs[0].group.camelCaseCategory.id).toBeDefined()
@@ -177,7 +177,7 @@ describe('Joins Field', () => {
   it('should populate uploads in joins', async () => {
     const { docs } = await payload.find({
       limit: 1,
-      collection: 'posts',
+      collection: postsSlug,
     })
 
     expect(docs[0].upload.id).toBeDefined()
@@ -197,7 +197,7 @@ describe('Joins Field', () => {
           },
         },
       },
-      collection: 'categories',
+      collection: categoriesSlug,
     })
 
     expect(categoryWithPosts.relatedPosts.docs).toHaveLength(1)
@@ -206,7 +206,7 @@ describe('Joins Field', () => {
 
   it('should populate joins using find', async () => {
     const result = await payload.find({
-      collection: 'categories',
+      collection: categoriesSlug,
       where: {
         id: { equals: category.id },
       },
@@ -221,13 +221,13 @@ describe('Joins Field', () => {
 
   it('should populate joins using find with hasMany relationships', async () => {
     const result = await payload.find({
-      collection: 'categories',
+      collection: categoriesSlug,
       where: {
         id: { equals: category.id },
       },
     })
     const otherResult = await payload.find({
-      collection: 'categories',
+      collection: categoriesSlug,
       where: {
         id: { equals: otherCategory.id },
       },
@@ -270,13 +270,13 @@ describe('Joins Field', () => {
     )
 
     const resultEn = await payload.find({
-      collection: 'categories',
+      collection: categoriesSlug,
       where: {
         id: { equals: category.id },
       },
     })
     const otherResultEn = await payload.find({
-      collection: 'categories',
+      collection: categoriesSlug,
       where: {
         id: { equals: otherCategory.id },
       },
@@ -293,14 +293,14 @@ describe('Joins Field', () => {
     expect(otherCategoryWithPostsEn.hasManyPostsLocalized.docs[0].title).toBe('test 14')
 
     const resultEs = await payload.find({
-      collection: 'categories',
+      collection: categoriesSlug,
       locale: 'es',
       where: {
         id: { equals: category.id },
       },
     })
     const otherResultEs = await payload.find({
-      collection: 'categories',
+      collection: categoriesSlug,
       locale: 'es',
       where: {
         id: { equals: otherCategory.id },
@@ -318,7 +318,7 @@ describe('Joins Field', () => {
 
     // clean up
     await payload.delete({
-      collection: 'posts',
+      collection: postsSlug,
       where: {
         id: {
           in: [post_1.id, post_2.id],
@@ -329,18 +329,18 @@ describe('Joins Field', () => {
 
   it('should not error when deleting documents with joins', async () => {
     const category = await payload.create({
-      collection: 'categories',
+      collection: categoriesSlug,
       data: {
         name: 'category with post',
       },
     })
 
-    const post = await createPost({
+    await createPost({
       category: category.id,
     })
 
     const result = await payload.delete({
-      collection: 'categories',
+      collection: categoriesSlug,
       // id: category.id,
       where: {
         id: { equals: category.id },
@@ -348,6 +348,55 @@ describe('Joins Field', () => {
     })
 
     expect(result.docs[0].id).toStrictEqual(category.id)
+  })
+
+  describe('`where` filters', () => {
+    let categoryWithFilteredPost
+    beforeAll(async () => {
+      categoryWithFilteredPost = await payload.create({
+        collection: categoriesSlug,
+        data: {
+          name: 'category with filtered post',
+        },
+      })
+
+      await createPost({
+        title: 'filtered post',
+        category: categoryWithFilteredPost.id,
+        isFiltered: true,
+      })
+
+      await createPost({
+        title: 'unfiltered post',
+        category: categoryWithFilteredPost.id,
+        isFiltered: false,
+      })
+
+      categoryWithFilteredPost = await payload.findByID({
+        id: categoryWithFilteredPost.id,
+        collection: categoriesSlug,
+      })
+    })
+
+    it('should filter joins using where from field config', () => {
+      expect(categoryWithFilteredPost.filtered.docs).toHaveLength(1)
+    })
+
+    it('should filter joins using where from field config and the requested filter', async () => {
+      categoryWithFilteredPost = await payload.findByID({
+        id: categoryWithFilteredPost.id,
+        collection: categoriesSlug,
+        joins: {
+          filtered: {
+            where: {
+              title: { not_equals: 'unfiltered post' },
+            },
+          },
+        },
+      })
+
+      expect(categoryWithFilteredPost.filtered.docs).toHaveLength(0)
+    })
   })
 
   describe('Joins with localization', () => {
@@ -651,7 +700,7 @@ describe('Joins Field', () => {
   })
 
   it('should work id.in command delimited querying with joins', async () => {
-    const allCategories = await payload.find({ collection: 'categories', pagination: false })
+    const allCategories = await payload.find({ collection: categoriesSlug, pagination: false })
 
     const allCategoriesByIds = await restClient
       .GET(`/categories`, {
@@ -671,14 +720,17 @@ describe('Joins Field', () => {
   it('should join with singular collection name', async () => {
     const {
       docs: [category],
-    } = await payload.find({ collection: 'categories', limit: 1, depth: 0 })
+    } = await payload.find({ collection: categoriesSlug, limit: 1, depth: 0 })
 
     const singular = await payload.create({
       collection: 'singular',
       data: { category: category.id },
     })
 
-    const categoryWithJoins = await payload.findByID({ collection: 'categories', id: category.id })
+    const categoryWithJoins = await payload.findByID({
+      collection: categoriesSlug,
+      id: category.id,
+    })
 
     expect((categoryWithJoins.singulars.docs[0] as Singular).id).toBe(singular.id)
   })
@@ -686,7 +738,7 @@ describe('Joins Field', () => {
 
 async function createPost(overrides?: Partial<Post>, locale?: Config['locale']) {
   return payload.create({
-    collection: 'posts',
+    collection: postsSlug,
     locale,
     data: {
       title: 'test',

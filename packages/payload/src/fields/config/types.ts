@@ -1474,6 +1474,7 @@ export type JoinField = {
   on: string
   type: 'join'
   validate?: never
+  where?: Where
 } & FieldBase
 
 export type JoinFieldClient = {
@@ -1485,7 +1486,7 @@ export type JoinFieldClient = {
   } & AdminClient &
     Pick<JoinField['admin'], 'disableBulkEdit' | 'readOnly'>
 } & FieldBaseClient &
-  Pick<JoinField, 'collection' | 'index' | 'maxDepth' | 'on' | 'type'>
+  Pick<JoinField, 'collection' | 'index' | 'maxDepth' | 'on' | 'type' | 'where'>
 
 export type Field =
   | ArrayField

@@ -2,6 +2,7 @@ import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { Field, JoinQuery, SelectMode, SelectType } from 'payload'
 
 import { and, eq, sql } from 'drizzle-orm'
+import { combineQueries } from 'payload'
 import { fieldAffectsData, fieldIsVirtual, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
@@ -441,7 +442,7 @@ export const traverseFields = ({
             locale,
             sort,
             tableName: joinCollectionTableName,
-            where,
+            where: combineQueries(where, field?.where ?? {}),
           })
 
           let subQueryWhere = buildQueryResult.where

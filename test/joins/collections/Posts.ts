@@ -14,6 +14,15 @@ export const Posts: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'isFiltered',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        position: 'sidebar',
+        description: 'Hides posts for the `filtered` join field in categories',
+      },
+    },
+    {
       name: 'upload',
       type: 'upload',
       relationTo: uploadsSlug,

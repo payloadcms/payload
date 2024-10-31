@@ -30,6 +30,7 @@ export interface Config {
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     versions: VersionsSelect<false> | VersionsSelect<true>;
     'categories-versions': CategoriesVersionsSelect<false> | CategoriesVersionsSelect<true>;
+    singular: SingularSelect<false> | SingularSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'localized-categories': LocalizedCategoriesSelect<false> | LocalizedCategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -45,6 +46,10 @@ export interface Config {
   locale: 'en' | 'es';
   user: User & {
     collection: 'users';
+  };
+  jobs?: {
+    tasks: unknown;
+    workflows?: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -72,6 +77,7 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title?: string | null;
+  isFiltered?: boolean | null;
   upload?: (string | null) | Upload;
   category?: (string | null) | Category;
   categories?: (string | Category)[] | null;
@@ -136,6 +142,10 @@ export interface Category {
   };
   singulars?: {
     docs?: (string | Singular)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  filtered?: {
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   updatedAt: string;
@@ -310,6 +320,7 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  isFiltered?: T;
   upload?: T;
   category?: T;
   categories?: T;
@@ -338,6 +349,8 @@ export interface CategoriesSelect<T extends boolean = true> {
         relatedPosts?: T;
         camelCasePosts?: T;
       };
+  singulars?: T;
+  filtered?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -379,6 +392,15 @@ export interface CategoriesVersionsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "singular_select".
+ */
+export interface SingularSelect<T extends boolean = true> {
+  category?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
