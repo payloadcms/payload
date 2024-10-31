@@ -21,10 +21,6 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
   const [finalSanitizedEditorConfig, setFinalSanitizedEditorConfig] =
     useState<null | SanitizedClientEditorConfig>(null)
 
-  const { fields: formFields } = useForm()
-
-  console.log('formFields:', formFields)
-
   useEffect(() => {
     if (finalSanitizedEditorConfig) {
       return

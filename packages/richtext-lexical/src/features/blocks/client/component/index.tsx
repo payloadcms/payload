@@ -7,7 +7,6 @@ import {
   SectionTitle,
   ShimmerEffect,
   useDocumentInfo,
-  useForm,
   useFormSubmitted,
   useServerFunctions,
   useTranslation,
@@ -15,9 +14,8 @@ import {
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 const baseClass = 'lexical-block'
-import type { BlocksFieldClient, FormState } from 'payload'
-
 import { getTranslation } from '@payloadcms/translations'
+import { type BlocksFieldClient, type FormState } from 'payload'
 import { v4 as uuid } from 'uuid'
 
 import type { BlockFields } from '../../server/nodes/BlocksNode.js'
@@ -68,6 +66,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         id,
         collectionSlug,
         data: formData,
+        doNotAbort: true,
         globalSlug,
         operation: 'update',
         renderFields: true,
@@ -113,29 +112,32 @@ export const BlockComponent: React.FC<Props> = (props) => {
       const abortController = new AbortController()
       abortControllerRef.current = abortController
 
-      const { state: formState } = await getFormState({
+      const { state: newFormState } = await getFormState({
         id,
+        collectionSlug,
+        doNotAbort: true,
         formState: prevFormState,
+        globalSlug,
         operation: 'update',
         schemaPath: schemaFieldsPath ? schemaFieldsPath.split('.') : [],
         signal: abortController.signal,
       })
 
-      if (!formState) {
+      if (!newFormState) {
         return prevFormState
       }
 
-      formState.blockName = {
+      newFormState.blockName = {
         initialValue: '',
         passesCondition: true,
         valid: true,
         value: formData.blockName,
       }
 
-      return formState
+      return newFormState
     },
 
-    [id, schemaFieldsPath, formData.blockName, getFormState],
+    [getFormState, id, collectionSlug, globalSlug, schemaFieldsPath, formData.blockName],
   )
 
   // cleanup effect
@@ -154,8 +156,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const classNames = [`${baseClass}__row`, `${baseClass}__row--no-errors`].filter(Boolean).join(' ')
 
   const Label = clientBlock?.admin?.components?.Label
-
-  console.log('FORM', { fields: clientBlock?.fields, initialState })
 
   // Memoized Form JSX
   const formContent = useMemo(() => {
