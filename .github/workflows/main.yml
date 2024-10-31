@@ -391,7 +391,6 @@ jobs:
       #     job-summary: true
 
   app-build-with-packed:
-    if: false # Disable until package resolution in tgzs can be figured out
     runs-on: ubuntu-latest
     needs: build
 
