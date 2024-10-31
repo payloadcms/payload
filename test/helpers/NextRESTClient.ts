@@ -1,4 +1,4 @@
-import type { JoinQuery, SanitizedConfig, SelectType, Where } from 'payload'
+import type { JoinQuery, PopulateType, SanitizedConfig, SelectType, Where } from 'payload'
 import type { ParsedQs } from 'qs-esm'
 
 import {
@@ -22,6 +22,7 @@ type RequestOptions = {
     limit?: number
     locale?: string
     page?: number
+    populate?: PopulateType
     select?: SelectType
     sort?: string
     where?: Where

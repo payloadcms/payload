@@ -3,6 +3,7 @@ import type { CollectionSlug, JoinQuery, Payload, TypedLocale } from '../../../i
 import type {
   Document,
   PayloadRequest,
+  PopulateType,
   RequestContext,
   SelectType,
   Sort,
@@ -33,6 +34,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   overrideAccess?: boolean
   page?: number
   pagination?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
   select?: TSelect
   showHiddenFields?: boolean

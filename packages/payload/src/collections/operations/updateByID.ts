@@ -7,6 +7,7 @@ import type { Args } from '../../fields/hooks/beforeChange/index.js'
 import type { CollectionSlug } from '../../index.js'
 import type {
   PayloadRequest,
+  PopulateType,
   SelectType,
   TransformCollectionWithSelect,
 } from '../../types/index.js'
@@ -51,6 +52,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideAccess?: boolean
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
+  populate?: PopulateType
   publishSpecificLocale?: string
   req: PayloadRequest
   select?: SelectType
@@ -99,6 +101,7 @@ export const updateByIDOperation = async <
       overrideAccess,
       overrideLock,
       overwriteExistingFiles = false,
+      populate,
       publishSpecificLocale,
       req: {
         fallbackLocale,
@@ -392,6 +395,7 @@ export const updateByIDOperation = async <
       global: null,
       locale,
       overrideAccess,
+      populate,
       req,
       select,
       showHiddenFields,

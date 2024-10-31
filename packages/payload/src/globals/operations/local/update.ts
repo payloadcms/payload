@@ -4,6 +4,7 @@ import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../
 import type {
   Document,
   PayloadRequest,
+  PopulateType,
   SelectType,
   TransformGlobalWithSelect,
 } from '../../../types/index.js'
@@ -22,6 +23,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   locale?: TypedLocale
   overrideAccess?: boolean
   overrideLock?: boolean
+  populate?: PopulateType
   publishSpecificLocale?: TypedLocale
   req?: PayloadRequest
   select?: TSelect
@@ -44,6 +46,7 @@ export default async function updateLocal<
     draft,
     overrideAccess = true,
     overrideLock,
+    populate,
     publishSpecificLocale,
     select,
     showHiddenFields,
@@ -63,6 +66,7 @@ export default async function updateLocal<
     globalConfig,
     overrideAccess,
     overrideLock,
+    populate,
     publishSpecificLocale,
     req: await createLocalReq(options, payload),
     select,

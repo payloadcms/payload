@@ -3,6 +3,7 @@ import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
+  PopulateType,
   RequestContext,
   SelectType,
   Sort,
@@ -28,6 +29,7 @@ export type Options<TSlug extends CollectionSlug> = {
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   page?: number
+  populate?: PopulateType
   req?: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
@@ -46,6 +48,7 @@ export default async function findVersionsLocal<TSlug extends CollectionSlug>(
     limit,
     overrideAccess = true,
     page,
+    populate,
     select,
     showHiddenFields,
     sort,
@@ -66,6 +69,7 @@ export default async function findVersionsLocal<TSlug extends CollectionSlug>(
     limit,
     overrideAccess,
     page,
+    populate,
     req: await createLocalReq(options, payload),
     select,
     showHiddenFields,

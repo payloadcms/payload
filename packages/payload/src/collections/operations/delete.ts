@@ -2,7 +2,7 @@ import httpStatus from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
 import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
+import type { PayloadRequest, PopulateType, SelectType, Where } from '../../types/index.js'
 import type {
   BeforeOperationHook,
   BulkOperationResult,
@@ -31,6 +31,7 @@ export type Arguments = {
   disableTransaction?: boolean
   overrideAccess?: boolean
   overrideLock?: boolean
+  populate?: PopulateType
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
@@ -72,6 +73,7 @@ export const deleteOperation = async <
       depth,
       overrideAccess,
       overrideLock,
+      populate,
       req: {
         fallbackLocale,
         locale,
@@ -203,6 +205,7 @@ export const deleteOperation = async <
           global: null,
           locale,
           overrideAccess,
+          populate,
           req,
           select,
           showHiddenFields,

@@ -4,6 +4,7 @@ import type { GlobalSlug, JsonObject } from '../../index.js'
 import type {
   Operation,
   PayloadRequest,
+  PopulateType,
   SelectType,
   TransformGlobalWithSelect,
   Where,
@@ -37,6 +38,7 @@ type Args<TSlug extends GlobalSlug> = {
   globalConfig: SanitizedGlobalConfig
   overrideAccess?: boolean
   overrideLock?: boolean
+  populate?: PopulateType
   publishSpecificLocale?: string
   req: PayloadRequest
   select?: SelectType
@@ -63,6 +65,7 @@ export const updateOperation = async <
     globalConfig,
     overrideAccess,
     overrideLock,
+    populate,
     publishSpecificLocale,
     req: { fallbackLocale, locale, payload },
     req,
@@ -307,6 +310,7 @@ export const updateOperation = async <
       global: globalConfig,
       locale,
       overrideAccess,
+      populate,
       req,
       select,
       showHiddenFields,

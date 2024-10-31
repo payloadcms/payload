@@ -4,6 +4,7 @@ import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type {
   JsonObject,
   PayloadRequest,
+  PopulateType,
   RequestContext,
   SelectMode,
   SelectType,
@@ -43,6 +44,7 @@ type Args = {
    * The parent's schemaPath (path without indexes).
    */
   parentSchemaPath: string[]
+  populate?: PopulateType
   populationPromises: Promise<void>[]
   req: PayloadRequest
   select?: SelectType
@@ -78,6 +80,7 @@ export const promise = async ({
   overrideAccess,
   parentPath,
   parentSchemaPath,
+  populate,
   populationPromises,
   req,
   select,
@@ -328,6 +331,7 @@ export const promise = async ({
           field,
           locale,
           overrideAccess,
+          populate,
           req,
           showHiddenFields,
           siblingDoc,
@@ -361,6 +365,7 @@ export const promise = async ({
         locale,
         overrideAccess,
         path: fieldPath,
+        populate,
         populationPromises,
         req,
         schemaPath: fieldSchemaPath,
@@ -402,6 +407,7 @@ export const promise = async ({
             locale,
             overrideAccess,
             path: [...fieldPath, i],
+            populate,
             populationPromises,
             req,
             schemaPath: fieldSchemaPath,
@@ -433,6 +439,7 @@ export const promise = async ({
                 locale,
                 overrideAccess,
                 path: [...fieldPath, i],
+                populate,
                 populationPromises,
                 req,
                 schemaPath: fieldSchemaPath,
@@ -502,6 +509,7 @@ export const promise = async ({
               locale,
               overrideAccess,
               path: [...fieldPath, i],
+              populate,
               populationPromises,
               req,
               schemaPath: fieldSchemaPath,
@@ -539,6 +547,7 @@ export const promise = async ({
                   locale,
                   overrideAccess,
                   path: [...fieldPath, i],
+                  populate,
                   populationPromises,
                   req,
                   schemaPath: fieldSchemaPath,
@@ -576,6 +585,7 @@ export const promise = async ({
         locale,
         overrideAccess,
         path: fieldPath,
+        populate,
         populationPromises,
         req,
         schemaPath: fieldSchemaPath,
@@ -622,6 +632,7 @@ export const promise = async ({
         locale,
         overrideAccess,
         path: fieldPath,
+        populate,
         populationPromises,
         req,
         schemaPath: fieldSchemaPath,
@@ -653,6 +664,7 @@ export const promise = async ({
         locale,
         overrideAccess,
         path: fieldPath,
+        populate,
         populationPromises,
         req,
         schemaPath: fieldSchemaPath,
@@ -706,6 +718,7 @@ export const promise = async ({
                   originalDoc: doc,
                   overrideAccess,
                   path: fieldPath,
+                  populate,
                   populationPromises,
                   req,
                   schemaPath: fieldSchemaPath,
@@ -742,6 +755,7 @@ export const promise = async ({
               originalDoc: doc,
               overrideAccess,
               path: fieldPath,
+              populate,
               populationPromises,
               req,
               schemaPath: fieldSchemaPath,

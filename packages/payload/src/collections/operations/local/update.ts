@@ -4,6 +4,7 @@ import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
+  PopulateType,
   RequestContext,
   SelectType,
   TransformCollectionWithSelect,
@@ -40,6 +41,7 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
   overrideAccess?: boolean
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
+  populate?: PopulateType
   publishSpecificLocale?: string
   req?: PayloadRequest
   select?: TSelect
@@ -112,6 +114,7 @@ async function updateLocal<
     overrideAccess = true,
     overrideLock,
     overwriteExistingFiles = false,
+    populate,
     publishSpecificLocale,
     select,
     showHiddenFields,
@@ -142,6 +145,7 @@ async function updateLocal<
     overrideLock,
     overwriteExistingFiles,
     payload,
+    populate,
     publishSpecificLocale,
     req,
     select,

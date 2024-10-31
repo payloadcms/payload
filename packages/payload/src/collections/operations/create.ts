@@ -4,6 +4,7 @@ import type { CollectionSlug, JsonObject } from '../../index.js'
 import type {
   Document,
   PayloadRequest,
+  PopulateType,
   SelectType,
   TransformCollectionWithSelect,
 } from '../../types/index.js'
@@ -44,6 +45,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   draft?: boolean
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
+  populate?: PopulateType
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
@@ -97,11 +99,12 @@ export const createOperation = async <
       draft = false,
       overrideAccess,
       overwriteExistingFiles = false,
+      populate,
       req: {
         fallbackLocale,
         locale,
         payload,
-        payload: { config, email },
+        payload: { config },
       },
       req,
       select,
@@ -304,6 +307,7 @@ export const createOperation = async <
       global: null,
       locale,
       overrideAccess,
+      populate,
       req,
       select,
       showHiddenFields,

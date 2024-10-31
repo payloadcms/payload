@@ -3,11 +3,12 @@ import type { Payload } from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
+  PopulateType,
   RequestContext,
   SelectType,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
-import type { DataFromCollectionSlug, SelectFromCollectionSlug } from '../../config/types.js'
+import type { SelectFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -26,6 +27,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   id: number | string
   locale?: TypedLocale
   overrideAccess?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
   select?: TSelect
   showHiddenFields?: boolean
@@ -46,6 +48,7 @@ export async function duplicate<
     disableTransaction,
     draft,
     overrideAccess = true,
+    populate,
     select,
     showHiddenFields,
   } = options
@@ -73,6 +76,7 @@ export async function duplicate<
     disableTransaction,
     draft,
     overrideAccess,
+    populate,
     req,
     select,
     showHiddenFields,

@@ -12,6 +12,7 @@ import type {
   CollectionSlug,
   DataFromGlobalSlug,
   GlobalSlug,
+  TypedCollectionSelect,
   TypedLocale,
   TypedUser,
 } from '../index.js'
@@ -220,3 +221,5 @@ export type TransformGlobalWithSelect<
 > = TSelect extends SelectType
   ? TransformDataWithSelect<DataFromGlobalSlug<TSlug>, TSelect>
   : DataFromGlobalSlug<TSlug>
+
+export type PopulateType = Partial<TypedCollectionSelect>

@@ -3,6 +3,7 @@ import type { PaginatedDocs } from '../../database/types.js'
 import type { CollectionSlug, JoinQuery } from '../../index.js'
 import type {
   PayloadRequest,
+  PopulateType,
   SelectType,
   Sort,
   TransformCollectionWithSelect,
@@ -37,6 +38,7 @@ export type Arguments = {
   overrideAccess?: boolean
   page?: number
   pagination?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
@@ -83,6 +85,7 @@ export const findOperation = async <
       overrideAccess,
       page,
       pagination = true,
+      populate,
       req: { fallbackLocale, locale, payload },
       req,
       select,
@@ -286,6 +289,7 @@ export const findOperation = async <
             global: null,
             locale,
             overrideAccess,
+            populate,
             req,
             select,
             showHiddenFields,

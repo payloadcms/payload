@@ -3,6 +3,7 @@ import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type {
   JsonObject,
   PayloadRequest,
+  PopulateType,
   RequestContext,
   SelectMode,
   SelectType,
@@ -30,6 +31,7 @@ type Args = {
   locale: null | string
   overrideAccess: boolean
   path: (number | string)[]
+  populate?: PopulateType
   populationPromises: Promise<void>[]
   req: PayloadRequest
   schemaPath: string[]
@@ -57,6 +59,7 @@ export const traverseFields = ({
   locale,
   overrideAccess,
   path,
+  populate,
   populationPromises,
   req,
   schemaPath,
@@ -86,6 +89,7 @@ export const traverseFields = ({
         overrideAccess,
         parentPath: path,
         parentSchemaPath: schemaPath,
+        populate,
         populationPromises,
         req,
         select,
