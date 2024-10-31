@@ -1,5 +1,9 @@
-import { type ImportMap, isPlainObject, type PayloadComponent } from 'payload'
-import { isReactServerComponentOrFunction, parsePayloadComponent } from 'payload/shared'
+import { type ImportMap, type PayloadComponent } from 'payload'
+import {
+  isPlainObject,
+  isReactServerComponentOrFunction,
+  parsePayloadComponent,
+} from 'payload/shared'
 import React from 'react'
 
 export const getFromImportMap = <TOutput,>(args: {

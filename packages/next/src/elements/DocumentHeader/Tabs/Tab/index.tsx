@@ -1,6 +1,7 @@
 import type { DocumentTabConfig, DocumentTabProps } from 'payload'
 import type React from 'react'
 
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { Fragment } from 'react'
 
 import './index.scss'
@@ -73,7 +74,7 @@ export const DocumentTab: React.FC<
           {labelToRender}
           <Fragment>
             &nbsp;
-            {/* <RenderServerComponent
+            <RenderServerComponent
               Component={Pill}
               Fallback={Pill_Component}
               importMap={payload.importMap}
@@ -82,7 +83,7 @@ export const DocumentTab: React.FC<
                 payload,
                 permissions,
               }}
-            /> */}
+            />
           </Fragment>
         </span>
       </DocumentTabLink>

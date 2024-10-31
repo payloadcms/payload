@@ -133,6 +133,10 @@ export const DocumentControls: React.FC<{
   const unsavedDraftWithValidations =
     !id && collectionConfig?.versions?.drafts && collectionConfig.versions?.drafts.validate
 
+  const autosaveEnabled =
+    (collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
+    (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)
+
   return (
     <Gutter className={baseClass}>
       <div className={`${baseClass}__wrapper`}>
@@ -164,20 +168,16 @@ export const DocumentControls: React.FC<{
                     <Status />
                   </li>
                 )}
-                {((collectionConfig?.versions?.drafts &&
-                  collectionConfig?.versions?.drafts?.autosave &&
-                  !unsavedDraftWithValidations) ||
-                  (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)) &&
-                  hasSavePermission && (
-                    <li className={`${baseClass}__list-item`}>
-                      <Autosave
-                        collection={collectionConfig}
-                        global={globalConfig}
-                        id={id}
-                        publishedDocUpdatedAt={data?.createdAt}
-                      />
-                    </li>
-                  )}
+                {hasSavePermission && autosaveEnabled && (
+                  <li className={`${baseClass}__list-item`}>
+                    <Autosave
+                      collection={collectionConfig}
+                      global={globalConfig}
+                      id={id}
+                      publishedDocUpdatedAt={data?.createdAt}
+                    />
+                  </li>
+                )}
               </Fragment>
             )}
             {collectionConfig?.timestamps && (isEditing || isAccountView) && (
@@ -213,14 +213,10 @@ export const DocumentControls: React.FC<{
               <Fragment>
                 {collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts ? (
                   <Fragment>
+                    {!autosaveEnabled && (
+                      <Fragment>{CustomSaveDraftButton || <SaveDraftButton />}</Fragment>
+                    )}
                     {CustomPublishButton || <PublishButton />}
-                    {(collectionConfig?.versions?.drafts &&
-                      !collectionConfig?.versions?.drafts?.autosave) ||
-                      unsavedDraftWithValidations ||
-                      (globalConfig?.versions?.drafts &&
-                        !globalConfig?.versions?.drafts?.autosave && (
-                          <Fragment>{CustomSaveDraftButton || <SaveDraftButton />}</Fragment>
-                        ))}
                   </Fragment>
                 ) : (
                   <Fragment>{CustomSaveButton || <SaveButton />}</Fragment>

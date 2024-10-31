@@ -1,18 +1,18 @@
-import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
+import type { GlobalSlug, Payload, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequest, RequestContext, Where } from '../../../types/index.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
-import { countOperation } from '../count.js'
+import { countGlobalVersionsOperation } from '../countGlobalVersions.js'
 
-export type Options<TSlug extends CollectionSlug> = {
-  collection: TSlug
+export type CountGlobalVersionsOptions<TSlug extends GlobalSlug> = {
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: RequestContext
   depth?: number
   disableErrors?: boolean
+  global: TSlug
   locale?: TypedLocale
   overrideAccess?: boolean
   req?: PayloadRequest
@@ -21,23 +21,23 @@ export type Options<TSlug extends CollectionSlug> = {
 }
 
 // eslint-disable-next-line no-restricted-exports
-export default async function countLocal<TSlug extends CollectionSlug>(
+export default async function countGlobalVersionsLocal<TSlug extends GlobalSlug>(
   payload: Payload,
-  options: Options<TSlug>,
+  options: CountGlobalVersionsOptions<TSlug>,
 ): Promise<{ totalDocs: number }> {
-  const { collection: collectionSlug, disableErrors, overrideAccess = true, where } = options
+  const { disableErrors, global: globalSlug, overrideAccess = true, where } = options
 
-  const collection = payload.collections[collectionSlug]
+  const global = payload.globals.config.find(({ slug }) => slug === globalSlug)
 
-  if (!collection) {
+  if (!global) {
     throw new APIError(
-      `The collection with slug ${String(collectionSlug)} can't be found. Count Operation.`,
+      `The global with slug ${String(globalSlug)} can't be found. Count Global Versions Operation.`,
     )
   }
 
-  return countOperation<TSlug>({
-    collection,
+  return countGlobalVersionsOperation<TSlug>({
     disableErrors,
+    global,
     overrideAccess,
     req: await createLocalReq(options, payload),
     where,

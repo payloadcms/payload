@@ -3,7 +3,7 @@ import type { Document, PayloadRequest, RequestContext, Where } from '../../../t
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
-import { countOperation } from '../count.js'
+import { countVersionsOperation } from '../countVersions.js'
 
 export type Options<TSlug extends CollectionSlug> = {
   collection: TSlug
@@ -21,7 +21,7 @@ export type Options<TSlug extends CollectionSlug> = {
 }
 
 // eslint-disable-next-line no-restricted-exports
-export default async function countLocal<TSlug extends CollectionSlug>(
+export default async function countVersionsLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<{ totalDocs: number }> {
@@ -31,11 +31,11 @@ export default async function countLocal<TSlug extends CollectionSlug>(
 
   if (!collection) {
     throw new APIError(
-      `The collection with slug ${String(collectionSlug)} can't be found. Count Operation.`,
+      `The collection with slug ${String(collectionSlug)} can't be found. Count Versions Operation.`,
     )
   }
 
-  return countOperation<TSlug>({
+  return countVersionsOperation<TSlug>({
     collection,
     disableErrors,
     overrideAccess,

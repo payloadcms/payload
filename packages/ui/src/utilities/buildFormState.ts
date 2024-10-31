@@ -102,11 +102,45 @@ type BuildFormStateErrorResult = {
 
 export type BuildFormStateResult = BuildFormStateErrorResult | BuildFormStateSuccessResult
 
-export const buildFormState = async (args: BuildFormStateArgs): Promise<BuildFormStateResult> => {
+export const buildFormStateHandler = async (
+  args: BuildFormStateArgs,
+): Promise<BuildFormStateResult> => {
   const { req } = args
 
+  const incomingUserSlug = req.user?.collection
+  const adminUserSlug = req.payload.config.admin.user
+
   try {
-    const res = await buildFormStateFn(args)
+    // If we have a user slug, test it against the functions
+    if (incomingUserSlug) {
+      const adminAccessFunction = req.payload.collections[incomingUserSlug].config.access?.admin
+
+      // Run the admin access function from the config if it exists
+      if (adminAccessFunction) {
+        const canAccessAdmin = await adminAccessFunction({ req })
+
+        if (!canAccessAdmin) {
+          throw new Error('Unauthorized')
+        }
+        // Match the user collection to the global admin config
+      } else if (adminUserSlug !== incomingUserSlug) {
+        throw new Error('Unauthorized')
+      }
+    } else {
+      const hasUsers = await req.payload.find({
+        collection: adminUserSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
+      })
+
+      // If there are users, we should not allow access because of /create-first-user
+      if (hasUsers.docs.length) {
+        throw new Error('Unauthorized')
+      }
+    }
+
+    const res = await buildFormState(args)
     return res
   } catch (err) {
     req.payload.logger.error({ err, msg: `There was an error building form state` })
@@ -125,17 +159,17 @@ export const buildFormState = async (args: BuildFormStateArgs): Promise<BuildFor
   }
 }
 
-export const buildFormStateFn = async (
+export const buildFormState = async (
   args: BuildFormStateArgs,
 ): Promise<BuildFormStateSuccessResult> => {
   const {
     id: idFromArgs,
     collectionSlug,
-    data: dataFromArgs,
-    docPreferences: docPreferencesFromArgs,
+    data: incomingData,
+    docPermissions,
+    docPreferences,
     formState,
     globalSlug,
-    locale,
     operation,
     path = [],
     renderFields = false,
@@ -151,41 +185,10 @@ export const buildFormStateFn = async (
     updateLastEdited,
   } = args
 
+  let data = incomingData
+
   if (!collectionSlug && !globalSlug) {
     throw new Error('Either collectionSlug or globalSlug must be provided')
-  }
-
-  const incomingUserSlug = user?.collection
-
-  const adminUserSlug = config.admin.user
-
-  // If we have a user slug, test it against the functions
-  if (incomingUserSlug) {
-    const adminAccessFunction = payload.collections[incomingUserSlug].config.access?.admin
-
-    // Run the admin access function from the config if it exists
-    if (adminAccessFunction) {
-      const canAccessAdmin = await adminAccessFunction({ req })
-
-      if (!canAccessAdmin) {
-        throw new Error('Unauthorized')
-      }
-      // Match the user collection to the global admin config
-    } else if (adminUserSlug !== incomingUserSlug) {
-      throw new Error('Unauthorized')
-    }
-  } else {
-    const hasUsers = await payload.find({
-      collection: adminUserSlug,
-      depth: 0,
-      limit: 1,
-      pagination: false,
-    })
-
-    // If there are users, we should not allow access because of /create-first-user
-    if (hasUsers.docs.length) {
-      throw new Error('Unauthorized')
-    }
   }
 
   const fieldSchemaMap = getFieldSchemaMap({
@@ -209,7 +212,6 @@ export const buildFormStateFn = async (
   }
 
   const id = collectionSlug ? idFromArgs : undefined
-
   const fieldOrEntityConfig = fieldSchemaMap.get(schemaPath.join('.'))
 
   if (!fieldOrEntityConfig) {
@@ -228,114 +230,17 @@ export const buildFormStateFn = async (
     )
   }
 
-  let docPreferences = docPreferencesFromArgs
-  let data = dataFromArgs
-
-  const promises: {
-    data?: Promise<void>
-    preferences?: Promise<void>
-  } = {}
-
-  // If the request does not include doc preferences,
-  // we should fetch them. This is useful for DocumentInfoProvider
-  // as it reduces the amount of client-side fetches necessary
-  // when we fetch data for the Edit View
-  if (!docPreferences) {
-    let preferencesKey
-
-    if (collectionSlug && id) {
-      preferencesKey = `collection-${collectionSlug}-${id}`
-    }
-
-    if (globalSlug) {
-      preferencesKey = `global-${globalSlug}`
-    }
-
-    if (preferencesKey) {
-      const fetchPreferences = async () => {
-        const preferencesResult = (await payload.find({
-          collection: 'payload-preferences',
-          depth: 0,
-          limit: 1,
-          where: {
-            and: [
-              {
-                key: {
-                  equals: preferencesKey,
-                },
-              },
-              {
-                'user.relationTo': {
-                  equals: user.collection,
-                },
-              },
-              {
-                'user.value': {
-                  equals: user.id,
-                },
-              },
-            ],
-          },
-        })) as unknown as { docs: { value: DocumentPreferences }[] }
-
-        if (preferencesResult?.docs?.[0]?.value) {
-          docPreferences = preferencesResult.docs[0].value
-        }
-      }
-
-      promises.preferences = fetchPreferences()
-    }
-  }
-
   // If there is a form state,
   // then we can deduce data from that form state
   if (formState) {
     // formState may contain _index- paths (e.g. from row fields). In order to get the data that should not contain those,
     // we use prepareFields to remove those paths
+
+    // TODO: don't use this prepareFields monstrosity
+    // instead, make sure _index paths have disableFormState
+    // that way, reduceFieldsToValues can safely disregard disableFormState
     const sanitizedFormState = prepareFields(formState)
     data = reduceFieldsToValues(sanitizedFormState, true)
-  }
-
-  // If we do not have data at this point,
-  // we can fetch it. This is useful for DocumentInfoProvider
-  // to reduce the amount of fetches required
-  if (!data) {
-    const fetchData = async () => {
-      let resolvedData: Record<string, unknown> | TypeWithID
-
-      if (collectionSlug && id) {
-        resolvedData = await payload.findByID({
-          id,
-          collection: collectionSlug,
-          depth: 0,
-          draft: true,
-          fallbackLocale: null,
-          locale,
-          overrideAccess: false,
-          user,
-        })
-      }
-
-      if (globalSlug && schemaPath?.length === 1 && schemaPath[0] === globalSlug) {
-        resolvedData = await payload.findGlobal({
-          slug: globalSlug,
-          depth: 0,
-          draft: true,
-          fallbackLocale: null,
-          locale,
-          overrideAccess: false,
-          user,
-        })
-      }
-
-      data = resolvedData
-    }
-
-    promises.data = fetchData()
-  }
-
-  if (Object.keys(promises) && Object.keys(promises).length > 0) {
-    await Promise.all(Object.values(promises))
   }
 
   const isEntitySchema =
@@ -497,19 +402,16 @@ export const buildFormStateFn = async (
     }
   }
 
-  const headers = await getHeaders()
-  const { permissions } = await payload.auth({ headers, req })
-
   // mutates form state and adds custom components to field paths
-  attachComponentsToFormState({
-    config,
-    fieldSchemaMap,
-    formState: formStateResult,
-    i18n,
-    payload: req.payload,
-    permissions,
-    schemaPathsToRender,
-  })
+  // attachComponentsToFormState({
+  //   config,
+  //   fieldSchemaMap,
+  //   formState: formStateResult,
+  //   i18n,
+  //   payload: req.payload,
+  //   permissions: docPermissions,
+  //   schemaPathsToRender,
+  // })
 
   return {
     lockedState: lockedStateResult,

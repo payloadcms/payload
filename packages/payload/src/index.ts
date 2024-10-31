@@ -48,6 +48,7 @@ import type { InitOptions, SanitizedConfig } from './config/types.js'
 import type { BaseDatabaseAdapter, PaginatedDocs } from './database/types.js'
 import type { InitializedEmailAdapter } from './email/types.js'
 import type { DataFromGlobalSlug, Globals, SelectFromGlobalSlug } from './globals/config/types.js'
+import type { CountGlobalVersionsOptions } from './globals/operations/local/countGlobalVersions.js'
 import type { Options as FindGlobalOptions } from './globals/operations/local/findOne.js'
 import type { Options as FindGlobalVersionByIDOptions } from './globals/operations/local/findVersionByID.js'
 import type { Options as FindGlobalVersionsOptions } from './globals/operations/local/findVersions.js'
@@ -207,6 +208,30 @@ export class BasePayload {
   ): Promise<{ totalDocs: number }> => {
     const { count } = localOperations
     return count(this, options)
+  }
+
+  /**
+   * @description Performs countGlobalVersions operation
+   * @param options
+   * @returns count of global document versions satisfying query
+   */
+  countGlobalVersions = async <T extends GlobalSlug>(
+    options: CountGlobalVersionsOptions<T>,
+  ): Promise<{ totalDocs: number }> => {
+    const { countGlobalVersions } = localGlobalOperations
+    return countGlobalVersions(this, options)
+  }
+
+  /**
+   * @description Performs countVersions operation
+   * @param options
+   * @returns count of document versions satisfying query
+   */
+  countVersions = async <T extends CollectionSlug>(
+    options: CountOptions<T>,
+  ): Promise<{ totalDocs: number }> => {
+    const { countVersions } = localOperations
+    return countVersions(this, options)
   }
 
   /**
@@ -817,6 +842,8 @@ export type {
   Connect,
   Count,
   CountArgs,
+  CountGlobalVersions,
+  CountVersions,
   Create,
   CreateArgs,
   CreateGlobal,

@@ -33,19 +33,21 @@ export type Props = {
   publishedDocUpdatedAt: string
 }
 
-export const Autosave: React.FC<Props> = ({
-  id,
-  collection,
-  global: globalDoc,
-  publishedDocUpdatedAt,
-}) => {
+export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc }) => {
   const {
     config: {
       routes: { api },
       serverURL,
     },
   } = useConfig()
-  const { docConfig, getVersions, versions } = useDocumentInfo()
+  const {
+    docConfig,
+    lastUpdateTime,
+    mostRecentVersionIsAutosaved,
+    setLastUpdateTime,
+    setMostRecentVersionIsAutosaved,
+    setVersionCount,
+  } = useDocumentInfo()
   const { reportUpdate } = useDocumentEvents()
   const { dispatchFields, setSubmitted } = useForm()
   const submitted = useFormSubmitted()
@@ -62,7 +64,6 @@ export const Autosave: React.FC<Props> = ({
   }
 
   const [saving, setSaving] = useState(false)
-  const [lastSaved, setLastSaved] = useState<number>()
   const debouncedFields = useDebounce(fields, interval)
   const modified = useDebounce(formModified, interval)
   const fieldRef = useRef(fields)
@@ -142,7 +143,7 @@ export const Autosave: React.FC<Props> = ({
                   endTimestamp = newDate.getTime()
 
                   if (res.status === 200) {
-                    setLastSaved(newDate.getTime())
+                    setLastUpdateTime(newDate.getTime())
 
                     reportUpdate({
                       id,
@@ -150,7 +151,10 @@ export const Autosave: React.FC<Props> = ({
                       updatedAt: newDate.toISOString(),
                     })
 
-                    void getVersions()
+                    if (!mostRecentVersionIsAutosaved) {
+                      setVersionCount((count: number) => count + 1)
+                      setMostRecentVersionIsAutosaved(true)
+                    }
                   } else {
                     return res.json()
                   }
@@ -238,7 +242,6 @@ export const Autosave: React.FC<Props> = ({
     api,
     collection,
     dispatchFields,
-    getVersions,
     globalDoc,
     i18n,
     id,
@@ -250,23 +253,19 @@ export const Autosave: React.FC<Props> = ({
     versionsConfig?.drafts,
     debouncedFields,
     submitted,
+    setLastUpdateTime,
+    mostRecentVersionIsAutosaved,
+    setVersionCount,
+    setMostRecentVersionIsAutosaved,
   ])
-
-  useEffect(() => {
-    if (versions?.docs?.[0]) {
-      setLastSaved(new Date(versions.docs[0].updatedAt).getTime())
-    } else if (publishedDocUpdatedAt) {
-      setLastSaved(new Date(publishedDocUpdatedAt).getTime())
-    }
-  }, [publishedDocUpdatedAt, versions])
 
   return (
     <div className={baseClass}>
       {saving && t('general:saving')}
-      {!saving && Boolean(lastSaved) && (
+      {!saving && Boolean(lastUpdateTime) && (
         <React.Fragment>
           {t('version:lastSavedAgo', {
-            distance: formatTimeToNow({ date: lastSaved, i18n }),
+            distance: formatTimeToNow({ date: lastUpdateTime, i18n }),
           })}
         </React.Fragment>
       )}

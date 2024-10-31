@@ -20,9 +20,10 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
     collectionSlug,
     docConfig,
     globalSlug,
+    hasPublishedDoc,
     hasPublishPermission,
-    publishedDoc,
-    unpublishedVersions,
+    setHasPublishedDoc,
+    unpublishedVersionCount,
   } = useDocumentInfo()
 
   const { config } = useConfig()
@@ -41,8 +42,8 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
   const { code } = useLocale()
   const label = labelProp || t('version:publishChanges')
 
-  const hasNewerVersions = unpublishedVersions?.totalDocs > 0
-  const canPublish = hasPublishPermission && (modified || hasNewerVersions || !publishedDoc)
+  const hasNewerVersions = unpublishedVersionCount > 0
+  const canPublish = hasPublishPermission && (modified || hasNewerVersions || !hasPublishedDoc)
   const operation = useOperation()
 
   const forceDisable = operation === 'update' && !modified
@@ -92,7 +93,9 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
         _status: 'published',
       },
     })
-  }, [submit])
+
+    setHasPublishedDoc(true)
+  }, [setHasPublishedDoc, submit])
 
   const publishSpecificLocale = useCallback(
     (locale) => {
@@ -110,8 +113,10 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
           _status: 'published',
         },
       })
+
+      setHasPublishedDoc(true)
     },
-    [api, collectionSlug, globalSlug, id, serverURL, submit],
+    [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, submit],
   )
 
   if (!hasPublishPermission) {

@@ -8,6 +8,9 @@ export const MyServerFieldComponent: TextFieldServerComponent = ({
   fieldState,
   path,
 }) => {
-  console.log('Server field value:', fieldState?.value)
-  return <TextField field={clientField} path={path} />
+  console.log(clientField)
+  console.log({ clientField, fieldState, path })
+  return null
+  // console.log('Server field value:', fieldState?.value)
+  // return <TextField field={clientField} path={path} />
 }

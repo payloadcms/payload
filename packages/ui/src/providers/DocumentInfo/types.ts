@@ -7,12 +7,9 @@ import type {
   DocumentPreferences,
   FormState,
   InsideFieldsPreferences,
-  PaginatedDocs,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
-  TypeWithID,
-  TypeWithTimestamps,
-  TypeWithVersion,
+  TypedUser,
 } from 'payload'
 import type React from 'react'
 
@@ -23,34 +20,40 @@ export type DocumentInfoProps = {
   readonly apiURL?: string
   readonly BeforeFields?: React.ReactNode
   readonly collectionSlug?: SanitizedCollectionConfig['slug']
+  readonly currentEditor: TypedUser
   readonly disableActions?: boolean
   readonly disableCreate?: boolean
   readonly disableLeaveWithoutSaving?: boolean
   readonly docPermissions?: DocumentPermissions
   readonly globalSlug?: SanitizedGlobalConfig['slug']
+  readonly hasPublishedDoc: boolean
   readonly hasPublishPermission?: boolean
   readonly hasSavePermission?: boolean
   readonly id?: number | string
   readonly initialData?: Data
   readonly initialState?: FormState
   readonly isEditing?: boolean
+  readonly isLocked: boolean
+  readonly lastUpdateTime: number
+  readonly mostRecentVersionIsAutosaved: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
+  readonly unpublishedVersionCount: number
+  readonly versionCount: number
 }
 
 export type DocumentInfoContext = {
   currentEditor?: ClientUser
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
   documentIsLocked?: boolean
-  getDocPermissions: (data?: Data) => Promise<void>
   getDocPreferences: () => Promise<DocumentPreferences>
-  getVersions: () => Promise<void>
+  hasPublishedDoc: boolean
   initialData: Data
   initialState?: FormState
   isInitializing: boolean
   lastUpdateTime?: number
+  mostRecentVersionIsAutosaved: boolean
   preferencesKey?: string
-  publishedDoc?: { _status?: string } & TypeWithID & TypeWithTimestamps
   setCurrentEditor?: React.Dispatch<React.SetStateAction<ClientUser>>
   setDocFieldPreferences: (
     field: string,
@@ -58,10 +61,14 @@ export type DocumentInfoContext = {
   ) => void
   setDocumentIsLocked?: React.Dispatch<React.SetStateAction<boolean>>
   setDocumentTitle: (title: string) => void
+  setHasPublishedDoc: React.Dispatch<React.SetStateAction<boolean>>
+  setLastUpdateTime: React.Dispatch<React.SetStateAction<number>>
+  setMostRecentVersionIsAutosaved: React.Dispatch<React.SetStateAction<boolean>>
+  setUnpublishedVersionCount: React.Dispatch<React.SetStateAction<number>>
+  setVersionCount: React.Dispatch<React.SetStateAction<number>>
   title: string
   unlockDocument: (docId: number | string, slug: string) => Promise<void>
-  unpublishedVersions?: PaginatedDocs<TypeWithVersion<any>>
+  unpublishedVersionCount: number
   updateDocumentEditor: (docId: number | string, slug: string, user: ClientUser) => Promise<void>
-  versions?: PaginatedDocs<TypeWithVersion<any>>
-  versionsCount?: PaginatedDocs<TypeWithVersion<any>>
+  versionCount: number
 } & DocumentInfoProps

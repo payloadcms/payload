@@ -41,7 +41,6 @@ export function EditForm({ submitted }: EditFormProps) {
     collectionSlug: docSlug,
     docPermissions,
     getDocPreferences,
-    getVersions,
     hasSavePermission,
     initialState,
     isEditing,
@@ -80,8 +79,6 @@ export function EditForm({ submitted }: EditFormProps) {
         updatedAt: json?.result?.updatedAt || new Date().toISOString(),
       })
 
-      void getVersions()
-
       if (typeof onSaveFromContext === 'function') {
         void onSaveFromContext({
           ...json,
@@ -104,7 +101,6 @@ export function EditForm({ submitted }: EditFormProps) {
       adminRoute,
       collectionSlug,
       depth,
-      getVersions,
       isEditing,
       locale,
       onSaveFromContext,

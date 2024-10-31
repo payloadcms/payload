@@ -3,6 +3,7 @@ import {
   type ClientComponentProps,
   createClientField,
   deepCopyObjectSimple,
+  DocumentPermissions,
   type FieldSchemaMap,
   type FormState,
   type FormStateWithoutComponents,
@@ -26,7 +27,7 @@ type Args = {
   formState: FormStateWithoutComponents
   i18n: I18n
   payload: Payload
-  permissions: Permissions
+  docPermissions: DocumentPermissions
   /**
    * If passed, only fields with these schema paths will be handled by this function.
    */
@@ -38,7 +39,7 @@ type OutputArgs = {
 } & Omit<Args, 'formState'>
 
 export function attachComponentsToFormState(args: Args): args is OutputArgs {
-  const { config, fieldSchemaMap, formState, i18n, payload, permissions, schemaPathsToRender } =
+  const { config, fieldSchemaMap, formState, i18n, payload, d, schemaPathsToRender } =
     args as OutputArgs
 
   if (

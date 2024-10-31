@@ -3,14 +3,7 @@ import type {
   ClientCollectionConfig,
   ClientGlobalConfig,
   ClientUser,
-  Data,
-  DocumentPermissions,
   DocumentPreferences,
-  PaginatedDocs,
-  TypeWithID,
-  TypeWithTimestamps,
-  TypeWithVersion,
-  Where,
 } from 'payload'
 
 import * as qs from 'qs-esm'
@@ -20,9 +13,6 @@ import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
 import { requests } from '../../utilities/api.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
-import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
-import { isEditing as getIsEditing } from '../../utilities/isEditing.js'
-import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
 import { useLocale } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
@@ -43,12 +33,19 @@ const DocumentInfo: React.FC<
   const {
     id,
     collectionSlug,
-    docPermissions: docPermissionsFromProps,
+    currentEditor: currentEditorFromProps,
+    docPermissions,
     globalSlug,
-    hasPublishPermission: hasPublishPermissionFromProps,
-    hasSavePermission: hasSavePermissionFromProps,
+    hasPublishedDoc: hasPublishedDocFromProps,
+    hasPublishPermission,
+    hasSavePermission,
     initialData: data,
     initialState,
+    isLocked: isLockedFromProps,
+    lastUpdateTime: lastUpdateTimeFromProps,
+    mostRecentVersionIsAutosaved: mostRecentVersionIsAutosavedFromProps,
+    unpublishedVersionCount: unpublishedVersionCountFromProps,
+    versionCount: versionCountFromProps,
   } = props
 
   const {
@@ -61,15 +58,10 @@ const DocumentInfo: React.FC<
   } = useConfig()
 
   const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
-
   const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
 
   const abortControllerRef = useRef(new AbortController())
   const docConfig = collectionConfig || globalConfig
-
-  const lockDocumentsProp = docConfig?.lockDocuments !== undefined ? docConfig?.lockDocuments : true
-
-  const isLockingEnabled = lockDocumentsProp !== false
 
   const { i18n } = useTranslation()
 
@@ -86,28 +78,24 @@ const DocumentInfo: React.FC<
     }),
   )
 
-  const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null)
-  const [versions, setVersions] = useState<PaginatedDocs<TypeWithVersion<any>>>(null)
-  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(docPermissionsFromProps)
-  const [hasSavePermission, setHasSavePermission] = useState<boolean>(hasSavePermissionFromProps)
-  const [hasPublishPermission, setHasPublishPermission] = useState<boolean>(
-    hasPublishPermissionFromProps,
+  const [mostRecentVersionIsAutosaved, setMostRecentVersionIsAutosaved] = useState(
+    mostRecentVersionIsAutosavedFromProps,
+  )
+  const [versionCount, setVersionCount] = useState(versionCountFromProps)
+
+  const [hasPublishedDoc, setHasPublishedDoc] = useState(hasPublishedDocFromProps)
+  const [unpublishedVersionCount, setUnpublishedVersionCount] = useState(
+    unpublishedVersionCountFromProps,
   )
 
-  const [documentIsLocked, setDocumentIsLocked] = useState<boolean | undefined>(false)
-  const [currentEditor, setCurrentEditor] = useState<ClientUser | null>(null)
-  const [lastUpdateTime, setLastUpdateTime] = useState<number>(null)
+  const [documentIsLocked, setDocumentIsLocked] = useState<boolean | undefined>(isLockedFromProps)
+  const [currentEditor, setCurrentEditor] = useState<ClientUser | null>(currentEditorFromProps)
+  const [lastUpdateTime, setLastUpdateTime] = useState<number>(lastUpdateTimeFromProps)
 
   const isInitializing = initialState === undefined || data === undefined
-  const [unpublishedVersions, setUnpublishedVersions] =
-    useState<PaginatedDocs<TypeWithVersion<any>>>(null)
 
   const { getPreference, setPreference } = usePreferences()
-  const { permissions } = useAuth()
   const { code: locale } = useLocale()
-  const prevLocale = useRef(locale)
-
-  const versionsConfig = docConfig?.versions
 
   const baseURL = `${serverURL}${api}`
   let slug: string
@@ -128,10 +116,6 @@ const DocumentInfo: React.FC<
       preferencesKey = `collection-${slug}-${id}`
     }
   }
-
-  const isEditing = getIsEditing({ id, collectionSlug, globalSlug })
-  const operation = isEditing ? 'update' : 'create'
-  const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions?.permission)
 
   const unlockDocument = useCallback(
     async (docId: number | string, slug: string) => {
@@ -198,258 +182,6 @@ const DocumentInfo: React.FC<
     [serverURL, api, globalSlug],
   )
 
-  useEffect(() => {
-    if (!isLockingEnabled || (!id && !globalSlug)) {
-      return
-    }
-
-    const fetchDocumentLockState = async () => {
-      if (id || globalSlug) {
-        try {
-          const slug = collectionSlug ?? globalSlug
-          const isGlobal = slug === globalSlug
-
-          const query = isGlobal
-            ? `where[globalSlug][equals]=${slug}`
-            : `where[document.value][equals]=${id}&where[document.relationTo][equals]=${slug}`
-
-          const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
-          const { docs } = await request.json()
-
-          if (docs.length > 0) {
-            const newEditor = docs[0].user?.value
-            const lastUpdatedAt = new Date(docs[0].updatedAt).getTime()
-            if (newEditor && newEditor.id !== currentEditor?.id) {
-              setCurrentEditor(newEditor)
-              setDocumentIsLocked(true)
-              setLastUpdateTime(lastUpdatedAt)
-            }
-          } else {
-            setDocumentIsLocked(false)
-          }
-        } catch (_err) {
-          // swallow error
-        }
-      }
-    }
-    void fetchDocumentLockState()
-  }, [id, serverURL, api, collectionSlug, globalSlug, currentEditor, isLockingEnabled])
-
-  const getVersions = useCallback(async () => {
-    let versionFetchURL
-    let publishedFetchURL
-    let unpublishedVersionJSON = null
-    let versionJSON = null
-    let shouldFetch = true
-
-    const versionParams = {
-      depth: 0,
-      limit: 0,
-      where: {
-        and: [],
-      },
-    }
-
-    const publishedVersionParams: { depth: number; locale: string; where: Where } = {
-      depth: 0,
-      locale: locale || undefined,
-      where: {
-        and: [
-          {
-            or: [
-              {
-                _status: {
-                  equals: 'published',
-                },
-              },
-              {
-                _status: {
-                  exists: false,
-                },
-              },
-            ],
-          },
-        ],
-      },
-    }
-
-    if (globalSlug) {
-      versionFetchURL = `${baseURL}/globals/${globalSlug}/versions`
-      publishedFetchURL = `${baseURL}/globals/${globalSlug}?${qs.stringify(publishedVersionParams)}`
-    }
-
-    if (collectionSlug) {
-      versionFetchURL = `${baseURL}/${collectionSlug}/versions`
-
-      publishedVersionParams.where.and.push({
-        id: {
-          equals: id,
-        },
-      })
-
-      publishedFetchURL = `${baseURL}/${collectionSlug}?${qs.stringify(publishedVersionParams)}`
-
-      if (!id) {
-        shouldFetch = false
-      }
-
-      versionParams.where.and.push({
-        parent: {
-          equals: id,
-        },
-      })
-    }
-
-    if (shouldFetch) {
-      let publishedJSON
-
-      if (versionsConfig?.drafts) {
-        publishedJSON = await fetch(publishedFetchURL, {
-          credentials: 'include',
-          headers: {
-            'Accept-Language': i18n.language,
-          },
-        }).then((res) => res.json())
-
-        if (collectionSlug) {
-          publishedJSON = publishedJSON?.docs?.[0]
-        }
-      }
-
-      if (shouldFetchVersions) {
-        versionJSON = await fetch(`${versionFetchURL}?${qs.stringify(versionParams)}`, {
-          credentials: 'include',
-          headers: {
-            'Accept-Language': i18n.language,
-          },
-        }).then((res) => res.json())
-
-        if (publishedJSON?.updatedAt) {
-          const newerVersionParams = {
-            ...versionParams,
-            where: {
-              ...versionParams.where,
-              and: [
-                ...versionParams.where.and,
-                {
-                  'version._status': {
-                    equals: 'draft',
-                  },
-                },
-                {
-                  updatedAt: {
-                    greater_than: publishedJSON.updatedAt,
-                  },
-                },
-              ],
-            },
-          }
-
-          // Get any newer versions available
-          const newerVersionRes = await fetch(
-            `${versionFetchURL}?${qs.stringify(newerVersionParams)}`,
-            {
-              credentials: 'include',
-              headers: {
-                'Accept-Language': i18n.language,
-              },
-            },
-          )
-
-          if (newerVersionRes.status === 200) {
-            unpublishedVersionJSON = await newerVersionRes.json()
-          }
-        }
-      }
-
-      setPublishedDoc(publishedJSON)
-      setVersions(versionJSON)
-      setUnpublishedVersions(unpublishedVersionJSON)
-    }
-  }, [i18n, globalSlug, collectionSlug, id, baseURL, locale, versionsConfig, shouldFetchVersions])
-
-  const getDocPermissions = React.useCallback(
-    async (data: Data) => {
-      const params = {
-        locale: locale || undefined,
-      }
-
-      const idToUse = data?.id || id
-      const newIsEditing = getIsEditing({ id: idToUse, collectionSlug, globalSlug })
-
-      if (newIsEditing) {
-        const docAccessURL = collectionSlug
-          ? `/${collectionSlug}/access/${idToUse}`
-          : globalSlug
-            ? `/globals/${globalSlug}/access`
-            : null
-
-        if (docAccessURL) {
-          const res = await fetch(`${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`, {
-            body: JSON.stringify({
-              ...(data || {}),
-              _status: 'draft',
-            }),
-            credentials: 'include',
-            headers: {
-              'Accept-Language': i18n.language,
-              'Content-Type': 'application/json',
-            },
-            method: 'post',
-          })
-
-          const json: DocumentPermissions = await res.json()
-          const publishedAccessJSON = await fetch(
-            `${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`,
-            {
-              body: JSON.stringify({
-                ...(data || {}),
-                _status: 'published',
-              }),
-              credentials: 'include',
-              headers: {
-                'Accept-Language': i18n.language,
-                'Content-Type': 'application/json',
-              },
-              method: 'POST',
-            },
-          ).then((res) => res.json())
-
-          setDocPermissions(json)
-
-          setHasSavePermission(
-            getHasSavePermission({
-              collectionSlug,
-              docPermissions: json,
-              globalSlug,
-              isEditing: newIsEditing,
-            }),
-          )
-
-          setHasPublishPermission(publishedAccessJSON?.update?.permission)
-        }
-      } else {
-        // when creating new documents, there is no permissions saved for this document yet
-        // use the generic entity permissions instead
-        const newDocPermissions = collectionSlug
-          ? permissions?.collections?.[collectionSlug]
-          : permissions?.globals?.[globalSlug]
-
-        setDocPermissions(newDocPermissions)
-
-        setHasSavePermission(
-          getHasSavePermission({
-            collectionSlug,
-            docPermissions: newDocPermissions,
-            globalSlug,
-            isEditing: newIsEditing,
-          }),
-        )
-      }
-    },
-    [serverURL, api, id, permissions, i18n.language, locale, collectionSlug, globalSlug],
-  )
-
   const getDocPreferences = useCallback(() => {
     return getPreference<DocumentPreferences>(preferencesKey)
   }, [getPreference, preferencesKey])
@@ -477,10 +209,6 @@ const DocumentInfo: React.FC<
     },
     [setPreference, preferencesKey, getDocPreferences],
   )
-
-  useEffect(() => {
-    void getVersions()
-  }, [getVersions])
 
   useEffect(() => {
     setDocumentTitle(
@@ -531,26 +259,30 @@ const DocumentInfo: React.FC<
     docConfig,
     docPermissions,
     documentIsLocked,
-    getDocPermissions,
     getDocPreferences,
-    getVersions,
+    hasPublishedDoc,
     hasPublishPermission,
     hasSavePermission,
     initialData: data,
     initialState,
     isInitializing,
     lastUpdateTime,
+    mostRecentVersionIsAutosaved,
     preferencesKey,
-    publishedDoc,
     setCurrentEditor,
     setDocFieldPreferences,
     setDocumentIsLocked,
     setDocumentTitle,
+    setHasPublishedDoc,
+    setLastUpdateTime,
+    setMostRecentVersionIsAutosaved,
+    setUnpublishedVersionCount,
+    setVersionCount,
     title: documentTitle,
     unlockDocument,
-    unpublishedVersions,
+    unpublishedVersionCount,
     updateDocumentEditor,
-    versions,
+    versionCount,
   }
 
   return <Context.Provider value={value}>{children}</Context.Provider>

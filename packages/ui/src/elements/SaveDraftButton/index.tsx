@@ -21,7 +21,7 @@ export const SaveDraftButton: React.FC = () => {
       serverURL,
     },
   } = useConfig()
-  const { id, collectionSlug, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug, setUnpublishedVersionCount } = useDocumentInfo()
   const modified = useFormModified()
   const { code: locale } = useLocale()
   const ref = useRef<HTMLButtonElement>(null)
@@ -60,7 +60,19 @@ export const SaveDraftButton: React.FC = () => {
       },
       skipValidation: true,
     })
-  }, [submit, collectionSlug, globalSlug, serverURL, api, locale, id, forceDisable])
+
+    setUnpublishedVersionCount((count) => count + 1)
+  }, [
+    submit,
+    collectionSlug,
+    globalSlug,
+    serverURL,
+    api,
+    locale,
+    id,
+    forceDisable,
+    setUnpublishedVersionCount,
+  ])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     if (forceDisable) {

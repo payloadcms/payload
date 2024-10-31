@@ -1,5 +1,6 @@
 import { type SupportedLanguages } from '@payloadcms/translations'
 
+import type { DocumentPermissions } from '../../auth/types.js'
 import type { Field } from '../../fields/config/types.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
@@ -54,7 +55,8 @@ export type FormStateWithoutComponents = {
 
 export type BuildFormStateArgs = {
   data?: Data
-  docPreferences?: DocumentPreferences
+  docPermissions: DocumentPermissions
+  docPreferences: DocumentPreferences
   formState?: FormState
   id?: number | string
   /*

@@ -9,6 +9,7 @@ import type {
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { formatAdminURL, isEditing as getIsEditing } from '@payloadcms/ui/shared'
+import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound, redirect } from 'next/navigation.js'
 import React from 'react'
 
@@ -18,13 +19,19 @@ import type { ViewFromConfig } from './getViewsFromConfig.js'
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { renderDocumentSlots } from '../../utilities/renderDocumentSlots.js'
 import { NotFoundView } from '../NotFound/index.js'
+import { getDocPreferences } from './getDocPreferences.js'
 import { getDocumentData } from './getDocumentData.js'
 import { getDocumentPermissions } from './getDocumentPermissions.js'
+import { getIsLocked } from './getIsLocked.js'
 import { getMetaBySegment } from './getMetaBySegment.js'
+import { getVersions } from './getVersions.js'
 import { getViewsFromConfig } from './getViewsFromConfig.js'
 
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
 
+// This function will be responsible for rendering an Edit Document view
+// it will be called on the server for Edit page views as well as
+// called on-demand from document drawers
 export const renderDocument = async ({
   disableActions,
   drawerSlug,
@@ -62,11 +69,8 @@ export const renderDocument = async ({
   } = initPageResult
 
   const segments = Array.isArray(params?.segments) ? params.segments : []
-
   const collectionSlug = collectionConfig?.slug || undefined
-
   const globalSlug = globalConfig?.slug || undefined
-
   const isEditing = getIsEditing({ id, collectionSlug, globalSlug })
 
   let RootViewOverride: PayloadComponent
@@ -76,25 +80,75 @@ export const renderDocument = async ({
 
   let apiURL: string
 
-  const { data, formState } = await getDocumentData({
+  // TODO: promise all for data, prefs, versions, lock state
+
+  // Fetch the document data required for a view
+  const data = await getDocumentData({
     id,
-    collectionConfig,
-    globalConfig,
-    importMap,
+    collectionSlug,
+    globalSlug,
     locale,
-    req,
+    payload,
+    user,
   })
 
-  if (!data) {
+  if (isEditing && !data) {
     throw new Error('not-found')
   }
 
+  // Get document preferences
+  const docPreferences = await getDocPreferences({
+    id,
+    collectionSlug,
+    globalSlug,
+    payload,
+    user,
+  })
+
+  // Get permissions
   const { docPermissions, hasPublishPermission, hasSavePermission } = await getDocumentPermissions({
     id,
     collectionConfig,
     data,
     globalConfig,
     req,
+  })
+
+  // Fetch document lock state
+  const { currentEditor, isLocked, lastUpdateTime } = await getIsLocked({
+    id,
+    collectionConfig,
+    globalConfig,
+    isEditing,
+    payload: req.payload,
+    user,
+  })
+
+  // Get all versions required for UI
+  const { hasPublishedDoc, mostRecentVersionIsAutosaved, unpublishedVersionCount, versionCount } =
+    await getVersions({
+      id,
+      collectionConfig,
+      docPermissions,
+      globalConfig,
+      locale: locale?.code,
+      payload,
+      user,
+    })
+
+  // Build initial form state from data
+  const { state: formState } = await buildFormState({
+    id,
+    collectionSlug,
+    data,
+    docPermissions,
+    docPreferences,
+    globalSlug,
+    locale: locale?.code,
+    operation: (collectionSlug && id) || globalSlug ? 'update' : 'create',
+    renderFields: true,
+    req,
+    schemaPath: collectionSlug ? [collectionSlug] : [globalSlug],
   })
 
   const serverProps: ServerProps = {
@@ -252,18 +306,25 @@ export const renderDocument = async ({
       <DocumentInfoProvider
         apiURL={apiURL}
         collectionSlug={collectionConfig?.slug}
+        currentEditor={currentEditor}
         disableActions={disableActions ?? false}
         docPermissions={docPermissions}
         globalSlug={globalConfig?.slug}
+        hasPublishedDoc={hasPublishedDoc}
         hasPublishPermission={hasPublishPermission}
         hasSavePermission={hasSavePermission}
         id={id}
         initialData={data}
         initialState={formState}
         isEditing={isEditing}
+        isLocked={isLocked}
         key={locale?.code}
+        lastUpdateTime={lastUpdateTime}
+        mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}
         redirectAfterDelete={redirectAfterDelete}
         redirectAfterDuplicate={redirectAfterDuplicate}
+        unpublishedVersionCount={unpublishedVersionCount}
+        versionCount={versionCount}
       >
         {!RootViewOverride && !drawerSlug && (
           <DocumentHeader
@@ -308,6 +369,8 @@ export const Document: React.FC<AdminViewProps> = async (args) => {
     const { Document: RenderedDocument } = await renderDocument(args)
     return RenderedDocument
   } catch (error) {
+    args.initPageResult.req.payload.logger.error(error)
+    // TODO: this is wild and does not work
     if (error.message === 'not-found') {
       notFound()
     }

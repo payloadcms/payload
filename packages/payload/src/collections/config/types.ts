@@ -71,6 +71,7 @@ export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
 export type HookOperationType =
   | 'autosave'
   | 'count'
+  | 'countVersions'
   | 'create'
   | 'delete'
   | 'forgotPassword'

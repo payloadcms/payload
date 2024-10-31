@@ -12,6 +12,8 @@ import type { CollectionModel, GlobalModel, MigrateDownArgs, MigrateUpArgs } fro
 
 import { connect } from './connect.js'
 import { count } from './count.js'
+import { countGlobalVersions } from './countGlobalVersions.js'
+import { countVersions } from './countVersions.js'
 import { create } from './create.js'
 import { createGlobal } from './createGlobal.js'
 import { createGlobalVersion } from './createGlobalVersion.js'
@@ -154,7 +156,6 @@ export function mongooseAdapter({
       collections: {},
       connection: undefined,
       connectOptions: connectOptions || {},
-      count,
       disableIndexHints,
       globals: undefined,
       mongoMemoryServer,
@@ -166,6 +167,9 @@ export function mongooseAdapter({
       beginTransaction: transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
       commitTransaction,
       connect,
+      count,
+      countGlobalVersions,
+      countVersions,
       create,
       createGlobal,
       createGlobalVersion,

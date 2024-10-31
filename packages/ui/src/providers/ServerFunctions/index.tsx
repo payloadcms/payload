@@ -2,14 +2,14 @@ import type { BuildFormStateArgs, BuildTableStateArgs, Data, ServerFunctionClien
 
 import React, { createContext, useCallback, useEffect, useRef } from 'react'
 
-import type { buildFormState } from '../../utilities/buildFormState.js'
+import type { buildFormStateHandler } from '../../utilities/buildFormState.js'
 import type { buildTableState } from '../../utilities/buildTableState.js'
 
 type GetFormStateClient = (
   args: {
     signal?: AbortSignal
   } & Omit<BuildFormStateArgs, 'clientConfig' | 'req'>,
-) => ReturnType<typeof buildFormState>
+) => ReturnType<typeof buildFormStateHandler>
 
 type GetTableStateClient = (
   args: {
@@ -76,7 +76,7 @@ export const ServerFunctionsProvider: React.FC<{
           const result = (await serverFunction({
             name: 'form-state',
             args: rest,
-          })) as ReturnType<typeof buildFormState> // TODO: infer this type when `strictNullChecks` is enabled
+          })) as ReturnType<typeof buildFormStateHandler> // TODO: infer this type when `strictNullChecks` is enabled
 
           if (!remoteSignal?.aborted && !localSignal?.aborted) {
             return result
