@@ -17,20 +17,21 @@ import EmailFields from './collections/Email/index.js'
 import GroupFields from './collections/Group/index.js'
 // import IndexedFields from './collections/Indexed/index.js'
 import JSONFields from './collections/JSON/index.js'
+import { LexicalFields } from './collections/Lexical/index.js'
+import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
+import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
+import { LexicalObjectReferenceBugCollection } from './collections/LexicalObjectReferenceBug/index.js'
+import { LexicalRelationshipsFields } from './collections/LexicalRelationships/index.js'
 import NumberFields from './collections/Number/index.js'
 import PointFields from './collections/Point/index.js'
 import RadioFields from './collections/Radio/index.js'
 import RelationshipFields from './collections/Relationship/index.js'
 import RowFields from './collections/Row/index.js'
-import TextFields from './collections/Text/index.js'
-// import LexicalFields from './collections/Lexical/index.js'
-// import LexicalMigrateFields from './collections/LexicalMigrate/index.js'
-// import LexicalLocalizedFields from './collections/LexicalLocalized/index.js'
-// import LexicalRelationshipsFields from './collections/LexicalRelationships/index.js'
 // import RichTextFields from './collections/RichText/index.js'
 import SelectFields from './collections/Select/index.js'
 import TabsFields from './collections/Tabs/index.js'
 import { TabsFields2 } from './collections/Tabs2/index.js'
+import TextFields from './collections/Text/index.js'
 import UIFields from './collections/UI/index.js'
 import Uploads from './collections/Upload/index.js'
 import Uploads2 from './collections/Upload2/index.js'
@@ -39,14 +40,13 @@ import UploadsMultiPoly from './collections/UploadMultiPoly/index.js'
 import UploadsPoly from './collections/UploadPoly/index.js'
 import UploadRestricted from './collections/UploadRestricted/index.js'
 import Uploads3 from './collections/Uploads3/index.js'
-import TabsWithRichText from './globals/TabsWithRichText.js'
 import { clearAndSeedEverything } from './seed.js'
 
 export const collectionSlugs: CollectionConfig[] = [
-  // LexicalFields,
-  // LexicalMigrateFields,
-  // LexicalLocalizedFields,
-  // LexicalObjectReferenceBugCollection
+  LexicalFields,
+  LexicalMigrateFields,
+  LexicalLocalizedFields,
+  LexicalObjectReferenceBugCollection,
   {
     slug: 'users',
     admin: {
@@ -77,7 +77,7 @@ export const collectionSlugs: CollectionConfig[] = [
   NumberFields,
   PointFields,
   RelationshipFields,
-  // // LexicalRelationshipsFields,
+  LexicalRelationshipsFields,
   // // RichTextFields,
   SelectFields,
   TabsFields2,
@@ -104,7 +104,6 @@ export default buildConfigWithDefaults({
       'new-server-value': 'only available on server',
     },
   },
-  editor: null,
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),

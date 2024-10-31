@@ -290,13 +290,6 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
   clientFeatureProps?: ClientFeatureProps
   // @ts-expect-error - TODO: fix this
   componentImports?: Config['admin']['importMap']['generators'][0] | PayloadComponent[]
-  componentMap?:
-    | ((args: { i18n: I18nClient; payload: Payload; props: ServerProps; schemaPath: string }) => {
-        [key: string]: PayloadComponent
-      })
-    | {
-        [key: string]: PayloadComponent
-      }
   generatedTypes?: {
     modifyOutputSchema: ({
       collectionIDFieldTypes,

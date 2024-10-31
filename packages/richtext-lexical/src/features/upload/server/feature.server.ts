@@ -2,6 +2,7 @@ import type {
   CollectionSlug,
   Config,
   Field,
+  FieldSchemaMap,
   FileData,
   FileSize,
   Payload,
@@ -85,11 +86,13 @@ export const UploadFeature = createServerFeature<
           return null
         }
 
-        const schemaMap = new Map<string, Field[]>()
+        const schemaMap: FieldSchemaMap = new Map()
 
         for (const collection in props.collections) {
           if (props.collections[collection].fields?.length) {
-            schemaMap.set(collection, props.collections[collection].fields)
+            schemaMap.set(collection, {
+              fields: props.collections[collection].fields,
+            })
           }
         }
 

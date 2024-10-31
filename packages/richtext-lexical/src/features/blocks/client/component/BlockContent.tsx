@@ -8,6 +8,7 @@ import {
   Collapsible,
   ErrorPill,
   Pill,
+  RenderFields,
   SectionTitle,
   useDocumentInfo,
   useFormSubmitted,
@@ -20,6 +21,7 @@ import React, { useCallback, useEffect } from 'react'
 import type { LexicalRichTextFieldProps } from '../../../../types.js'
 import type { BlockFields } from '../../server/nodes/BlocksNode.js'
 
+import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
 import { FormSavePlugin } from './FormSavePlugin.js'
 
@@ -59,8 +61,11 @@ function removeUndefinedAndNullAndEmptyArraysRecursively(obj: object) {
  * not the whole document.
  */
 export const BlockContent: React.FC<Props> = (props) => {
-  const { baseClass, clientBlock, field, formSchema, Label, nodeKey, schemaPath } = props
+  const { baseClass, clientBlock, field, formSchema, Label, nodeKey, path, schemaPath } = props
   let { formData } = props
+  const {
+    fieldProps: { permissions },
+  } = useEditorConfigContext()
 
   const { i18n } = useTranslation()
   const [editor] = useLexicalComposerContext()
@@ -221,7 +226,12 @@ export const BlockContent: React.FC<Props> = (props) => {
           setIsCollapsed(incomingCollapsedState)
         }}
       >
-        {/* Fields Here */}
+        <RenderFields
+          fields={formSchema}
+          forceRender={true}
+          parentPath={[]}
+          permissions={permissions}
+        />
       </Collapsible>
 
       <FormSavePlugin onChange={onFormChange} />

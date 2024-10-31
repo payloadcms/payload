@@ -114,6 +114,8 @@ export function attachComponentsToFormState(args: Args): args is OutputArgs {
 
       const serverProps: ServerComponentProps = {
         config,
+        fieldSchemaMap,
+        formState,
         i18n,
         payload,
         serverField: fieldConfig,

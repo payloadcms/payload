@@ -7,6 +7,7 @@ import type { buildTableState } from '../../utilities/buildTableState.js'
 
 type GetFormStateClient = (
   args: {
+    doNotAbort?: boolean
     signal?: AbortSignal
   } & Omit<BuildFormStateArgs, 'clientConfig' | 'req'>,
 ) => ReturnType<typeof buildFormStateHandler>
@@ -61,6 +62,21 @@ export const ServerFunctionsProvider: React.FC<{
 
   const getFormState = useCallback<GetFormStateClient>(
     async (args) => {
+      if (args?.doNotAbort) {
+        try {
+          const result = (await serverFunction({
+            name: 'form-state',
+            args,
+          })) as ReturnType<typeof buildFormState> // TODO: infer this type when `strictNullChecks` is enabled
+
+          return result
+        } catch (_err) {
+          console.error(_err) // eslint-disable-line no-console
+        }
+
+        return { state: null }
+      }
+
       if (abortControllerRef.current) {
         abortControllerRef.current.abort()
       }
@@ -86,7 +102,7 @@ export const ServerFunctionsProvider: React.FC<{
         console.error(_err) // eslint-disable-line no-console
       }
 
-      return { state: args.formState }
+      return { state: null }
     },
     [serverFunction],
   )

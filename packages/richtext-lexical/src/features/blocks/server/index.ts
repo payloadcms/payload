@@ -1,4 +1,4 @@
-import type { Block, BlocksField, Config, Field } from 'payload'
+import type { Block, BlocksField, Config, Field, FieldSchemaMap } from 'payload'
 
 import { fieldsToJSONSchema, sanitizeFields } from 'payload'
 
@@ -101,27 +101,33 @@ export const BlocksFeature = createServerFeature<
          * Add sub-fields to the schemaMap. E.g. if you have an array field as part of the block, and it runs addRow, it will request these
          * sub-fields from the component map. Thus, we need to put them in the component map here.
          */
-        const schemaMap = new Map<string, Field[]>()
+        const schemaMap: FieldSchemaMap = new Map()
 
         if (props?.blocks?.length) {
-          schemaMap.set('lexical_blocks', [
-            {
-              name: 'lexical_blocks',
-              type: 'blocks',
-              blocks: props.blocks,
-            },
-          ])
+          for (const block of props.blocks) {
+            schemaMap.set(`lexical_blocks.${block.slug}.fields`, {
+              fields: block.fields,
+            })
+          }
+          schemaMap.set('lexical_blocks', {
+            name: 'lexical_blocks',
+            type: 'blocks',
+            blocks: props.blocks,
+          })
         }
 
         if (props?.inlineBlocks?.length) {
           // To generate block schemaMap which generates things like the componentMap for admin.Label
-          schemaMap.set('lexical_inline_blocks', [
-            {
-              name: 'lexical_inline_blocks',
-              type: 'blocks',
-              blocks: props.inlineBlocks,
-            },
-          ])
+          for (const block of props.inlineBlocks) {
+            schemaMap.set(`lexical_inline_blocks.${block.slug}.fields`, {
+              fields: block.fields,
+            })
+          }
+          schemaMap.set('lexical_inline_blocks', {
+            name: 'lexical_inline_blocks',
+            type: 'blocks',
+            blocks: props.inlineBlocks,
+          })
         }
 
         return schemaMap

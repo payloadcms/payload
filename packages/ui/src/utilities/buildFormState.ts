@@ -255,9 +255,11 @@ export const buildFormState = async (
    * Type assertion is fine because we wrap sub schemas in an array
    * so we can safely map over them within `fieldSchemasToFormState`
    */
-  const fields = (
-    isEntitySchema ? (fieldOrEntityConfig as { fields: Field[] }).fields : [fieldOrEntityConfig]
-  ) as Field[]
+  const fields = Array.isArray(fieldOrEntityConfig)
+    ? fieldOrEntityConfig
+    : 'fields' in fieldOrEntityConfig
+      ? fieldOrEntityConfig.fields
+      : [fieldOrEntityConfig]
   const parentSchemaPath = isEntitySchema ? schemaPath : schemaPath.slice(0, -1)
   const parentPath = isEntitySchema ? path : path.slice(0, -1)
 

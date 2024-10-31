@@ -24,31 +24,25 @@ export const getGenerateSchemaMap =
       })
 
       if (schemas) {
-        const newSchemas = new Map()
-        for (const schema of schemas) {
-          newSchemas.set(schema[0], schema[1])
-        }
-
-        for (const [schemaKey, fields] of schemas.entries()) {
-          // generate schema map entries for sub-fields using traverseFields
-          if (Array.isArray(fields)) {
+        for (const [schemaKey, field] of schemas.entries()) {
+          if ('fields' in field) {
+            // generate schema map entries for sub-fields using traverseFields
             traverseFields({
               config,
-              fields,
+              fields: field.fields,
               i18n,
-              schemaMap: newSchemas,
-              schemaPath: schemaKey ? schemaKey.split('.') : [],
+              schemaMap,
+              schemaPath:
+                `${schemaPath.join('.')}.lexical_internal_feature.${featureKey}.${schemaKey}`.split(
+                  '.',
+                ),
             })
-
-            schemaMap.set(
-              `${schemaPath.join('.')}.lexical_internal_feature.${featureKey}.${schemaKey}`,
-              fields,
-            )
-          } else {
-            throw new Error(
-              'Invalid schema map entry. Lexical feature schema map entries currently must be an array of fields.',
-            )
           }
+
+          schemaMap.set(
+            `${schemaPath.join('.')}.lexical_internal_feature.${featureKey}.${schemaKey}`,
+            field,
+          )
         }
       }
     }
