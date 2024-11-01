@@ -22,7 +22,7 @@ export const handleAuthRedirect = ({ config, route, searchParams, user }: Args):
   }
 
   const redirectRoute =
-    route +
+    (route !== '/admin' ? route : '') +
     (Object.keys(searchParams ?? {}).length > 0
       ? `${qs.stringify(searchParams, { addQueryPrefix: true })}`
       : '')
