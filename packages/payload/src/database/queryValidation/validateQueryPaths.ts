@@ -66,7 +66,7 @@ export async function validateQueryPaths({
   const promises = []
 
   // Validate the user has access to configured join fields
-  if (collectionConfig.joins) {
+  if (collectionConfig?.joins) {
     Object.entries(collectionConfig.joins).forEach(([collectionSlug, collectionJoins]) => {
       collectionJoins.forEach((join) => {
         if (join.field.where) {
