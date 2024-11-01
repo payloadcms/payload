@@ -25,4 +25,4 @@ export type RenderFieldArgs = {
   siblingData: Data
 }
 
-export type RenderFieldMethod = (args: RenderFieldArgs) => Promise<void>
+export type RenderFieldMethod = (args: RenderFieldArgs) => void

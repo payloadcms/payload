@@ -10,14 +10,14 @@ import { getTranslation } from '@payloadcms/translations'
 import { createClientField, deepCopyObjectSimple, MissingEditorProp } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
 
-import type { RenderFieldArgs } from './types.js'
+import type { RenderFieldArgs, RenderFieldMethod } from './types.js'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { RowLabel as DefaultRowLabel } from '../../forms/RowLabel/index.js'
 
-export const renderField = async ({
+export const renderField: RenderFieldMethod = ({
   data,
   fieldConfig,
   fieldSchemaMap,
@@ -32,7 +32,7 @@ export const renderField = async ({
   req,
   schemaPath,
   siblingData,
-}: RenderFieldArgs): Promise<void> => {
+}) => {
   // TODO (ALESSIO): why are we passing the fieldConfig twice?
   // and especially, why are we deepCopyObject -here- instead of inside the createClientField func,
   // so no one screws this up in the future?
