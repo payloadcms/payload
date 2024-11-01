@@ -134,7 +134,6 @@ export const findOperation = async <
 
       await validateQueryPaths({
         collectionConfig: collection.config,
-        joins,
         overrideAccess,
         req,
         versionFields: buildVersionCollectionFields(payload.config, collection.config),
@@ -156,6 +155,7 @@ export const findOperation = async <
     } else {
       await validateQueryPaths({
         collectionConfig,
+        joins,
         overrideAccess,
         req,
         where,
