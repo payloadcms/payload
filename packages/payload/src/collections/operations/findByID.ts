@@ -16,6 +16,7 @@ import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { validateQueryPaths } from '../../index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 import { buildAfterOperation } from './utils.js'
@@ -91,6 +92,8 @@ export const findByIDOperation = async <
       return null
     }
 
+    const where = combineQueries({ id: { equals: id } }, accessResult)
+
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
       joins: req.payloadAPI === 'GraphQL' ? false : joins,
@@ -99,8 +102,16 @@ export const findByIDOperation = async <
         transactionID: req.transactionID,
       } as PayloadRequest,
       select,
-      where: combineQueries({ id: { equals: id } }, accessResult),
+      where,
     }
+
+    await validateQueryPaths({
+      collectionConfig,
+      joins,
+      overrideAccess,
+      req,
+      where,
+    })
 
     // /////////////////////////////////////
     // Find by ID

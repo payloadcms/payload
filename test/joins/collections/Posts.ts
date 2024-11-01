@@ -23,6 +23,14 @@ export const Posts: CollectionConfig = {
       },
     },
     {
+      name: 'restrictedField',
+      type: 'text',
+      access: {
+        read: () => false,
+        update: () => false,
+      },
+    },
+    {
       name: 'upload',
       type: 'upload',
       relationTo: uploadsSlug,

@@ -10,7 +10,13 @@ import type { Category, Config, Post, Singular } from './payload-types.js'
 import { devUser } from '../credentials.js'
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { categoriesSlug, postsSlug, uploadsSlug } from './shared.js'
+import {
+  categoriesSlug,
+  postsSlug,
+  restrictedCategoriesSlug,
+  restrictedPostsSlug,
+  uploadsSlug,
+} from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -25,6 +31,7 @@ describe('Joins Field', () => {
   let category: Category
   let otherCategory: Category
   let categoryID
+  let user
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
@@ -41,6 +48,7 @@ describe('Joins Field', () => {
       .then((res) => res.json())
 
     token = data.token
+    user = data.user
 
     category = await payload.create({
       collection: categoriesSlug,
@@ -515,6 +523,48 @@ describe('Joins Field', () => {
       expect(unlimited.docs[0].relatedPosts.docs).toHaveLength(15)
       expect(unlimited.docs[0].relatedPosts.docs[0].title).toStrictEqual('test 0')
       expect(unlimited.docs[0].relatedPosts.hasNextPage).toStrictEqual(false)
+    })
+
+    it('should respect access control for join request `where` queries', async () => {
+      await expect(async () => {
+        await payload.findByID({
+          id: category.id,
+          collection: categoriesSlug,
+          overrideAccess: false,
+          user,
+          joins: {
+            relatedPosts: {
+              where: {
+                restrictedField: { equals: 'restricted' },
+              },
+            },
+          },
+        })
+      }).rejects.toThrow('The following path cannot be queried: restrictedField')
+    })
+
+    it('should respect access control of join field configured `where` queries', async () => {
+      const restrictedCategory = await payload.create({
+        collection: restrictedCategoriesSlug,
+        data: {
+          name: 'restricted category',
+        },
+      })
+      const post = await createPost({
+        collection: restrictedPostsSlug,
+        data: {
+          title: 'restricted post',
+          category: restrictedCategory.id,
+        },
+      })
+      await expect(async () => {
+        await payload.findByID({
+          id: category.id,
+          collection: restrictedCategoriesSlug,
+          overrideAccess: false,
+          user,
+        })
+      }).rejects.toThrow('The following path cannot be queried: restrictedField')
     })
 
     it('should sort joins', async () => {
