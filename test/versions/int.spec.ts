@@ -831,6 +831,61 @@ describe('Versions', () => {
         expect(docs.totalDocs).toStrictEqual(2)
       })
     })
+
+    describe('Race conditions', () => {
+      it('should keep latest true with parallel writes', async () => {
+        const doc = await payload.create({
+          collection: 'draft-posts',
+          data: {
+            description: 'A',
+            title: 'A',
+          },
+        })
+
+        for (let i = 0; i < 200; i++) {
+          const writeAmount = 2
+
+          const promises = Array.from({ length: writeAmount }, async (_, i) => {
+            return new Promise((resolve) => {
+              // Add latency so updates aren't immediate after each other but still in parallel
+              setTimeout(() => {
+                payload
+                  .update({
+                    id: doc.id,
+                    collection: 'draft-posts',
+                    data: {},
+                    draft: true,
+                  })
+                  .then(resolve)
+                  .catch(resolve)
+              }, i * 10)
+            })
+          })
+
+          await Promise.all(promises)
+
+          const { docs } = await payload.findVersions({
+            collection: 'draft-posts',
+            where: {
+              and: [
+                {
+                  parent: {
+                    equals: doc.id,
+                  },
+                },
+                {
+                  latest: {
+                    equals: true,
+                  },
+                },
+              ],
+            },
+          })
+
+          expect(docs[0]).toBeDefined()
+        }
+      })
+    })
   })
 
   describe('Querying', () => {
