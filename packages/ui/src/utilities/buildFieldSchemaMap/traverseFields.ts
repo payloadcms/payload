@@ -8,33 +8,29 @@ type Args = {
   config: SanitizedConfig
   fields: Field[]
   i18n: I18n<any, any>
+  parentIndexPath: string
+  parentSchemaPath: string
   schemaMap: FieldSchemaMap
-  schemaPath: string[]
 }
 
-// ArrayFields = {
-//   fields: []
-// }
-
-// 'ArrayFields.items': {
-//   name: 'items',
-//   fields: []
-// }
 export const traverseFields = ({
   config,
   fields,
   i18n,
+  parentIndexPath,
+  parentSchemaPath,
   schemaMap,
-  schemaPath: parentSchemaPath,
 }: Args) => {
   for (const [index, field] of fields.entries()) {
-    const { schemaPath } = getFieldPaths({
+    const { indexPath, schemaPath } = getFieldPaths({
       field,
-      parentPath: [],
+      index,
+      parentIndexPath,
+      parentPath: '',
       parentSchemaPath,
-      schemaIndex: index,
     })
-    schemaMap.set(schemaPath.join('.'), field)
+
+    schemaMap.set(schemaPath, field)
 
     switch (field.type) {
       case 'group':
@@ -43,8 +39,9 @@ export const traverseFields = ({
           config,
           fields: field.fields,
           i18n,
+          parentIndexPath: '',
+          parentSchemaPath: schemaPath,
           schemaMap,
-          schemaPath,
         })
 
         break
@@ -55,8 +52,9 @@ export const traverseFields = ({
           config,
           fields: field.fields,
           i18n,
+          parentIndexPath: indexPath,
+          parentSchemaPath: schemaPath,
           schemaMap,
-          schemaPath,
         })
 
         break
@@ -71,8 +69,9 @@ export const traverseFields = ({
             config,
             fields: block.fields,
             i18n,
+            parentIndexPath: '',
+            parentSchemaPath: blockSchemaPath.join('.'),
             schemaMap,
-            schemaPath: blockSchemaPath,
           })
         })
 
@@ -101,24 +100,23 @@ export const traverseFields = ({
 
       case 'tabs':
         field.tabs.map((tab, tabIndex) => {
-          const { schemaPath: tabSchemaPath } = getFieldPaths({
-            field: {
-              ...tab,
-              type: 'tab',
-            },
-            parentPath: [],
-            parentSchemaPath: schemaPath,
-            schemaIndex: tabIndex,
+          const { indexPath: tabIndexPath, schemaPath: tabSchemaPath } = getFieldPaths({
+            field,
+            index: tabIndex,
+            parentIndexPath: indexPath,
+            parentPath: '',
+            parentSchemaPath,
           })
 
-          schemaMap.set(tabSchemaPath.join('.'), tab)
+          schemaMap.set(tabSchemaPath, tab)
 
           traverseFields({
             config,
             fields: tab.fields,
             i18n,
+            parentIndexPath: tabIndexPath,
+            parentSchemaPath: tabSchemaPath,
             schemaMap,
-            schemaPath: tabSchemaPath,
           })
         })
 

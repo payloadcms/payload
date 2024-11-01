@@ -6,12 +6,11 @@ import React from 'react'
 import type { Props } from './types.js'
 
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { RenderIfInViewport } from '../../elements/RenderIfInViewport/index.js'
 import { HiddenField } from '../../fields/Hidden/index.js'
 import { useForm } from '../../forms/Form/context.js'
-import { useIntersect } from '../../hooks/useIntersect.js'
 import { useFieldComponents } from '../../providers/FieldComponents/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
 const baseClass = 'render-fields'
@@ -24,7 +23,9 @@ export const RenderFields: React.FC<Props> = (props) => {
     fields,
     forceRender,
     margins,
+    parentIndexPath,
     parentPath,
+    parentSchemaPath,
     permissions,
     readOnly: readOnlyFromParent,
   } = props
@@ -33,43 +34,15 @@ export const RenderFields: React.FC<Props> = (props) => {
 
   const operation = useOperation()
 
-  const { i18n } = useTranslation()
-
-  const [hasRendered, setHasRendered] = React.useState(Boolean(forceRender))
-
-  const [intersectionRef, entry] = useIntersect(
-    {
-      rootMargin: '1000px',
-    },
-    Boolean(forceRender),
-  )
-
-  const isIntersecting = Boolean(entry?.isIntersecting)
-  const isAboveViewport = entry?.boundingClientRect?.top < 0
-  const shouldRender = forceRender || isIntersecting || isAboveViewport
   const fieldComponents = useFieldComponents()
-
-  React.useEffect(() => {
-    if (shouldRender && !hasRendered) {
-      setHasRendered(true)
-    }
-  }, [shouldRender, hasRendered])
 
   if (!formFields) {
     return <p>No fields to render</p>
   }
 
-  if (!fieldComponents) {
-    throw new Error('Field components not found')
-  }
-
-  if (!i18n) {
-    console.error('Need to implement i18n when calling RenderFields') // eslint-disable-line no-console
-  }
-
   if (fields && fields.length > 0) {
     return (
-      <div
+      <RenderIfInViewport
         className={[
           baseClass,
           className,
@@ -78,19 +51,20 @@ export const RenderFields: React.FC<Props> = (props) => {
         ]
           .filter(Boolean)
           .join(' ')}
-        ref={intersectionRef}
+        forceRender={forceRender}
       >
         {fields.map((field, i) => {
           const fieldPermissions = 'name' in field ? permissions?.[field.name] : permissions
 
-          const { path } = getFieldPaths({
+          const { indexPath, path, schemaPath } = getFieldPaths({
             field,
+            index: i,
+            parentIndexPath,
             parentPath,
-            parentSchemaPath: [],
-            schemaIndex: i,
+            parentSchemaPath,
           })
 
-          const formState = formFields[path.join('.')]
+          const formState = formFields[path]
 
           const CustomField = formState?.customComponents?.Field
 
@@ -122,11 +96,14 @@ export const RenderFields: React.FC<Props> = (props) => {
                 field={field}
                 fieldState={formState}
                 forceRender={forceRender}
+                indexPath={indexPath}
                 key={i}
-                path={path.join('.')}
+                parentPath={parentPath}
+                parentSchemaPath={parentSchemaPath}
+                path={path}
                 permissions={fieldPermissions}
                 readOnly={isReadOnly}
-                schemaPath={field._schemaPath.join('.')}
+                schemaPath={schemaPath}
               />
             )
           }
@@ -139,18 +116,21 @@ export const RenderFields: React.FC<Props> = (props) => {
                   field={field}
                   fieldState={formState}
                   forceRender={forceRender}
+                  indexPath={indexPath}
                   key={i}
-                  path={path.join('.')}
+                  parentPath={parentPath}
+                  parentSchemaPath={parentSchemaPath}
+                  path={path}
                   permissions={fieldPermissions}
                   readOnly={isReadOnly}
-                  schemaPath={field._schemaPath.join('.')}
+                  schemaPath={schemaPath}
                 />
               }
               key={i}
             />
           )
         })}
-      </div>
+      </RenderIfInViewport>
     )
   }
 

@@ -29,6 +29,7 @@ type BlocksFieldProps = {
   Label?: React.ReactNode
   labels: Labels
   moveRow: (fromIndex: number, toIndex: number) => void
+  parentPath: string
   path: string
   permissions: FieldPermissions
   readOnly: boolean
@@ -36,6 +37,7 @@ type BlocksFieldProps = {
   row: Row
   rowCount: number
   rowIndex: number
+  schemaPath: string
   setCollapse: (id: string, collapsed: boolean) => void
 } & UseDraggableSortableReturn
 
@@ -53,18 +55,19 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   labels,
   listeners,
   moveRow,
-  path: parentPath,
+  parentPath,
+  path,
   permissions,
   readOnly,
   removeRow,
   row,
   rowCount,
   rowIndex,
+  schemaPath,
   setCollapse,
   setNodeRef,
   transform,
 }) => {
-  const path = `${parentPath}.${rowIndex}`
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
 
@@ -141,7 +144,9 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
           className={`${baseClass}__fields`}
           fields={fields}
           margins="small"
-          parentPath={path.split('.')}
+          parentIndexPath=""
+          parentPath={path}
+          parentSchemaPath={schemaPath}
           permissions={permissions?.blocks?.[block.slug]?.fields}
           readOnly={readOnly}
         />

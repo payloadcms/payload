@@ -42,7 +42,6 @@ export type FieldState = {
   passesCondition?: boolean
   requiresRender?: boolean
   rows?: Row[]
-  schemaPath: string[]
   valid: boolean
   value: unknown
 }
@@ -79,7 +78,7 @@ export type BuildFormStateArgs = {
   renderFields?: boolean
   req: PayloadRequest
   returnLockStatus?: boolean
-  schemaPath: string[]
+  schemaPath: string
   updateLastEdited?: boolean
 } & (
   | {

@@ -1,5 +1,5 @@
 'use client'
-import type { DocumentPreferences, TabsFieldClientComponent } from 'payload'
+import type { ClientTab, DocumentPreferences, TabsFieldClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { tabHasName, toKebabCase } from 'payload/shared'
@@ -22,6 +22,17 @@ const baseClass = 'tabs-field'
 
 export { TabsProvider }
 
+function generateTabPath({ activeTabConfig, path }: { activeTabConfig: ClientTab; path: string }) {
+  let tabPath = path
+  if (path && tabHasName(activeTabConfig) && activeTabConfig.name) {
+    tabPath = `${path}.${activeTabConfig.name}`
+  } else if (!path && tabHasName(activeTabConfig) && activeTabConfig.name) {
+    tabPath = activeTabConfig.name
+  }
+
+  return tabPath
+}
+
 const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const {
     field: { admin: { className } = {}, tabs = [] },
@@ -31,6 +42,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
     path,
     permissions,
     readOnly,
+    schemaPath,
   } = props
 
   const { getPreference, setPreference } = usePreferences()
@@ -39,6 +51,12 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const { isWithinCollapsible } = useCollapsible()
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0)
   const tabsPrefKey = `tabs-${indexPath}`
+  const [activeTabPath, setActiveTabPath] = useState<string>(() =>
+    generateTabPath({ activeTabConfig: tabs[0], path }),
+  )
+  const [activeTabSchemaPath, setActiveTabSchemaPath] = useState<string>(() =>
+    generateTabPath({ activeTabConfig: tabs[0], path: schemaPath }),
+  )
 
   useEffect(() => {
     if (preferencesKey) {
@@ -56,6 +74,10 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const handleTabChange = useCallback(
     async (incomingTabIndex: number): Promise<void> => {
       setActiveTabIndex(incomingTabIndex)
+      setActiveTabPath(generateTabPath({ activeTabConfig: tabs[incomingTabIndex], path }))
+      setActiveTabSchemaPath(
+        generateTabPath({ activeTabConfig: tabs[incomingTabIndex], path: schemaPath }),
+      )
 
       const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
 
@@ -84,21 +106,10 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
         })
       }
     },
-    [preferencesKey, getPreference, setPreference, path, tabsPrefKey],
+    [tabs, path, schemaPath, getPreference, preferencesKey, setPreference, tabsPrefKey],
   )
 
   const activeTabConfig = tabs[activeTabIndex]
-
-  function generateTabPath() {
-    let tabPath = path
-    if (path && tabHasName(activeTabConfig) && activeTabConfig.name) {
-      tabPath = `${path}.${activeTabConfig.name}`
-    } else if (!path && tabHasName(activeTabConfig) && activeTabConfig.name) {
-      tabPath = activeTabConfig.name
-    }
-
-    return tabPath
-  }
 
   const activeTabDescription = activeTabConfig.description
   const activeTabStaticDescription =
@@ -151,17 +162,20 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
               <RenderCustomComponent
                 CustomComponent={Description}
                 Fallback={
-                  <FieldDescription
-                    description={activeTabStaticDescription}
-                    path={generateTabPath()}
-                  />
+                  <FieldDescription description={activeTabStaticDescription} path={activeTabPath} />
                 }
               />
               {BeforeInput}
               <RenderFields
                 fields={activeTabConfig.fields}
                 forceRender={forceRender}
-                parentPath={generateTabPath().split('.')}
+                parentIndexPath={
+                  tabHasName(activeTabConfig)
+                    ? ''
+                    : `${indexPath ? indexPath + '-' : ''}` + String(activeTabIndex)
+                }
+                parentPath={activeTabPath}
+                parentSchemaPath={activeTabSchemaPath}
                 permissions={
                   'name' in activeTabConfig && permissions?.[activeTabConfig.name]?.fields
                     ? permissions[activeTabConfig.name].fields

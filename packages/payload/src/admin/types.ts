@@ -449,6 +449,7 @@ export type FieldRow = {
 }
 
 export type DocumentSlots = {
+  Description?: React.ReactNode
   PreviewButton?: React.ReactNode
   PublishButton?: React.ReactNode
   SaveButton?: React.ReactNode

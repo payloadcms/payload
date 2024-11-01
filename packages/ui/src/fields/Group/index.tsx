@@ -35,6 +35,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
     path: pathFromProps,
     permissions,
     readOnly,
+    schemaPath,
   } = props
   const path = pathFromProps || name
 
@@ -101,7 +102,9 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
           <RenderFields
             fields={fields}
             margins="small"
-            parentPath={path.split('.')}
+            parentIndexPath=""
+            parentPath={path}
+            parentSchemaPath={schemaPath}
             permissions={permissions.fields}
             readOnly={readOnly}
           />

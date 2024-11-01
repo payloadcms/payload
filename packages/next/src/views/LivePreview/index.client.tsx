@@ -13,12 +13,16 @@ import type {
 import {
   DocumentControls,
   DocumentFields,
+  DocumentLocked,
+  DocumentTakeOver,
   Form,
+  LeaveWithoutSaving,
   OperationProvider,
   SetDocumentStepNav,
   SetDocumentTitle,
   useAuth,
   useConfig,
+  useDocumentDrawerContext,
   useDocumentEvents,
   useDocumentInfo,
   useServerFunctions,
@@ -26,12 +30,8 @@ import {
 } from '@payloadcms/ui'
 import { handleBackToDashboard, handleGoBack, handleTakeOver } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
-import { useDocumentDrawerContext } from 'packages/ui/src/elements/DocumentDrawer/Provider.js'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
-import { DocumentLocked } from '../../elements/DocumentLocked/index.js'
-import { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
-import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 import { useLivePreviewContext } from './Context/context.js'
 import { LivePreviewProvider } from './Context/index.js'
 import './index.scss'
@@ -201,6 +201,7 @@ const PreviewView: React.FC<Props> = ({
       const { lockedState, state } = await getFormState({
         id,
         collectionSlug,
+        docPermissions,
         docPreferences,
         formState: prevFormState,
         globalSlug,

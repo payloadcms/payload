@@ -26,6 +26,7 @@ type ArrayRowProps = {
   readonly isSortable?: boolean
   readonly labels: Partial<ArrayField['labels']>
   readonly moveRow: (fromIndex: number, toIndex: number) => void
+  readonly parentPath: string
   readonly path: string
   readonly permissions: FieldPermissions
   readonly readOnly?: boolean
@@ -34,6 +35,7 @@ type ArrayRowProps = {
   readonly rowCount: number
   readonly rowIndex: number
   readonly rowLabels?: React.ReactNode[]
+  readonly schemaPath: string
   readonly setCollapse: (rowID: string, collapsed: boolean) => void
 } & UseDraggableSortableReturn
 
@@ -50,7 +52,8 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   labels,
   listeners,
   moveRow,
-  path: parentPath,
+  parentPath,
+  path,
   permissions,
   readOnly,
   removeRow,
@@ -58,6 +61,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   rowCount,
   rowIndex,
   rowLabels,
+  schemaPath,
   setCollapse,
   setNodeRef,
   transform,
@@ -131,7 +135,9 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
           fields={fields}
           forceRender={forceRender}
           margins="small"
-          parentPath={[...parentPath.split('.'), rowIndex]}
+          parentIndexPath=""
+          parentPath={path}
+          parentSchemaPath={schemaPath}
           permissions={permissions.fields}
           readOnly={readOnly}
         />

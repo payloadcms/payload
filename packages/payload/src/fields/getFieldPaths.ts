@@ -1,41 +1,52 @@
 import type { ClientField, Field, TabAsField } from './config/types.js'
 
-import { tabHasName } from './config/types.js'
+import { fieldAffectsData } from './config/types.js'
+
+type Args = {
+  field: ClientField | Field | TabAsField
+  index: number
+  parentIndexPath: string
+  parentPath: string
+  parentSchemaPath: string
+}
+
+type Result = {
+  /**
+   * A string of '-' separated indexes representing where
+   * to find this field in a given field schema array.
+   * It will always be complete and accurate.
+   */
+  indexPath: string
+  /**
+   * Path for this field specifically.
+   */
+  path: string
+  /**
+   * Schema path for this field specifically.
+   */
+  schemaPath: string
+}
 
 export function getFieldPaths({
   field,
-  parentPath = [],
-  parentSchemaPath = [],
-  schemaIndex,
-}: {
-  field: ClientField | Field | TabAsField
-  parentPath: (number | string)[]
-  parentSchemaPath: string[]
-  schemaIndex: number
-}): {
-  path: (number | string)[]
-  schemaPath: string[]
-} {
-  if (field.type === 'tabs' || field.type === 'row' || field.type === 'collapsible') {
+  index,
+  parentIndexPath,
+  parentPath,
+  parentSchemaPath,
+}: Args): Result {
+  if (fieldAffectsData(field)) {
     return {
-      path: [...parentPath, `_index-${schemaIndex}`],
-      schemaPath: [...parentSchemaPath, `_index-${schemaIndex}`],
-    }
-  } else if (field.type === 'tab') {
-    if (tabHasName(field)) {
-      return {
-        path: [...parentPath, field.name],
-        schemaPath: [...parentSchemaPath, field.name],
-      }
-    } else {
-      return {
-        path: [...parentPath, `_index-${schemaIndex}`],
-        schemaPath: [...parentSchemaPath, `_index-${schemaIndex}`],
-      }
+      indexPath: `${parentIndexPath ? parentIndexPath + '-' : ''}${index}`,
+      path: `${parentPath ? parentPath + '.' : ''}${field.name}`,
+      schemaPath: `${parentSchemaPath ? parentSchemaPath + '.' : ''}${field.name}`,
     }
   }
-  const path = parentPath?.length ? [...parentPath, field.name] : [field.name]
-  const schemaPath = parentSchemaPath?.length ? [...parentSchemaPath, field.name] : [field.name]
 
-  return { path, schemaPath }
+  const indexSuffix = `_index-${`${parentIndexPath ? parentIndexPath + '-' : ''}${index}`}`
+
+  return {
+    indexPath: `${parentIndexPath ? parentIndexPath + '-' : ''}${index}`,
+    path: `${parentPath ? parentPath + '.' : ''}${indexSuffix}`,
+    schemaPath: `${parentSchemaPath ? parentSchemaPath + '.' : ''}${indexSuffix}`,
+  }
 }

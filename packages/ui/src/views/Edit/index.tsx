@@ -1,6 +1,5 @@
 'use client'
 
-// import { LoadingOverlay } from '../../elements/Loading/index.js'
 import { useModal } from '@faceless-ui/modal'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import {
@@ -14,15 +13,15 @@ import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react
 import type { FormProps } from '../../forms/Form/index.js'
 
 import { DocumentControls } from '../../elements/DocumentControls/index.js'
-// import { RenderComponent } from '../../elements/RenderComponent/index.js'
 import { useDocumentDrawerContext } from '../../elements/DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../elements/DocumentFields/index.js'
+import { DocumentLocked } from '../../elements/DocumentLocked/index.js'
+import { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
 import { IDLabel } from '../../elements/IDLabel/index.js'
+import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 import { RenderTitle } from '../../elements/RenderTitle/index.js'
-// import { DocumentLocked } from '../../../elements/DocumentLocked/index.js'
 import { Upload } from '../../elements/Upload/index.js'
-// import { Upload } from '../../elements/Upload/index.js'
 import { Form } from '../../forms/Form/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
@@ -30,14 +29,14 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
-// import { DocumentTakeOver } from '../../../elements/DocumentTakeOver/index.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
+import { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
+import { handleGoBack } from '../../utilities/handleGoBack.js'
 import { handleTakeOver } from '../../utilities/handleTakeOver.js'
-// import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving/index.js'
 import { Auth } from './Auth/index.js'
 import './index.scss'
 import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
@@ -49,6 +48,7 @@ const baseClass = 'collection-edit'
 // When rendered within a drawer, props are empty
 // This is solely to support custom edit views which get server-rendered
 export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
+  Description,
   PreviewButton,
   PublishButton,
   SaveButton,
@@ -70,7 +70,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     docPermissions,
     documentIsLocked,
     getDocPreferences,
-    getVersions,
     globalSlug,
     hasPublishPermission,
     hasSavePermission,
@@ -187,7 +186,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     classes.push(`collection-edit--${collectionSlug}`)
   }
 
-  const [schemaPath, setSchemaPath] = useState(() => {
+  const [schemaPathSegments, setSchemaPathSegments] = useState(() => {
     if (operation === 'create' && auth && !auth.disableLocalStrategy) {
       return [`_${entitySlug}`, 'auth']
     }
@@ -243,24 +242,24 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       }
     },
     [
-      onSaveFromContext,
-      userSlug,
       reportUpdate,
       id,
       entitySlug,
       user,
-      depth,
       collectionSlug,
-      getVersions,
-      isEditing,
-      refreshCookieAsync,
-      adminRoute,
-      router,
-      locale,
-      resetUploadEdits,
+      userSlug,
+      setVersionCount,
+      onSaveFromContext,
       globalSlug,
       isLockingEnabled,
+      isEditing,
+      depth,
+      refreshCookieAsync,
       setDocumentIsLocked,
+      adminRoute,
+      locale,
+      router,
+      resetUploadEdits,
     ],
   )
 
@@ -291,6 +290,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       const { lockedState, state } = await getFormState({
         id,
         collectionSlug,
+        docPermissions,
         docPreferences,
         formState: prevFormState,
         globalSlug,
@@ -299,7 +299,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
         // We only wanna render ALL fields on initial render, not in onChange.
         renderFields: false,
         returnLockStatus: isLockingEnabled ? true : false,
-        schemaPath,
+        schemaPath: schemaPathSegments,
         // signal: abortController.signal,
         updateLastEdited,
       })
@@ -334,19 +334,19 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       return state
     },
     [
-      collectionSlug,
       editSessionStartTime,
-      schemaPath,
-      getDocPreferences,
-      globalSlug,
-      id,
-      operation,
-      user,
-      documentLockStateRef,
-      setCurrentEditor,
       isLockingEnabled,
-      setDocumentIsLocked,
+      getDocPreferences,
       getFormState,
+      id,
+      collectionSlug,
+      docPermissions,
+      globalSlug,
+      operation,
+      schemaPathSegments,
+      setDocumentIsLocked,
+      user.id,
+      setCurrentEditor,
     ],
   )
 
@@ -442,7 +442,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
               <DocumentTitle />
             </Gutter>
           )}
-          {/* {isLockingEnabled && shouldShowDocumentLockedModal && !isReadOnlyForIncomingUser && (
+          {isLockingEnabled && shouldShowDocumentLockedModal && !isReadOnlyForIncomingUser && (
             <DocumentLocked
               handleGoBack={() => handleGoBack({ adminRoute, collectionSlug, router })}
               isActive={shouldShowDocumentLockedModal}
@@ -466,8 +466,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
               updatedAt={lastUpdateTime}
               user={currentEditor}
             />
-          )} */}
-          {/* {isLockingEnabled && showTakeOverModal && (
+          )}
+          {isLockingEnabled && showTakeOverModal && (
             <DocumentTakeOver
               handleBackToDashboard={() => handleBackToDashboard({ adminRoute, router })}
               isActive={showTakeOverModal}
@@ -476,8 +476,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
                 setShowTakeOverModal(false)
               }}
             />
-          )} */}
-          {/* {!isReadOnlyForIncomingUser && preventLeaveWithoutSaving && <LeaveWithoutSaving />} */}
+          )}
+          {!isReadOnlyForIncomingUser && preventLeaveWithoutSaving && <LeaveWithoutSaving />}
           <SetDocumentStepNav
             collectionSlug={collectionConfig?.slug}
             globalSlug={globalConfig?.slug}
@@ -546,9 +546,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
                       operation={operation}
                       readOnly={!hasSavePermission}
                       requirePassword={!id}
-                      setSchemaPath={setSchemaPath}
+                      setSchemaPathSegments={setSchemaPathSegments}
                       setValidateBeforeSubmit={setValidateBeforeSubmit}
-                      // eslint-disable-next-line react-compiler/react-compiler
                       useAPIKey={auth.useAPIKey}
                       username={data?.username}
                       verify={auth.verify}
@@ -568,9 +567,11 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
                 </Fragment>
               )
             }
+            Description={Description}
             docPermissions={docPermissions}
             fields={docConfig.fields}
             readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
+            schemaPathSegments={schemaPathSegments}
           />
           {AfterDocument}
         </Form>

@@ -21,6 +21,9 @@ export { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
 // elements
+export { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
+export { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
+export { DocumentLocked } from '../../elements/DocumentLocked/index.js'
 export { useTableColumns } from '../../elements/TableColumns/index.js'
 export { Translation } from '../../elements/Translation/index.js'
 export { default as DatePicker } from '../../elements/DatePicker/DatePicker.js'
@@ -48,6 +51,7 @@ export type {
   UseDocumentDrawer,
 } from '../../elements/DocumentDrawer/types.js'
 
+export { useDocumentDrawerContext } from '../../elements/DocumentDrawer/Provider.js'
 export { DocumentFields } from '../../elements/DocumentFields/index.js'
 export { Drawer, DrawerToggler, formatDrawerSlug } from '../../elements/Drawer/index.js'
 export { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
@@ -229,11 +233,7 @@ export {
   useFieldComponents,
 } from '../../providers/FieldComponents/index.js'
 export { UploadEditsProvider, useUploadEdits } from '../../providers/UploadEdits/index.js'
-export {
-  type ColumnPreferences,
-  ListInfoProvider,
-  useListInfo,
-} from '../../providers/ListInfo/index.js'
+export { ListInfoProvider, useListInfo } from '../../providers/ListInfo/index.js'
 export { ListQueryProvider, useListQuery } from '../../providers/ListQuery/index.js'
 export { LocaleProvider, useLocale } from '../../providers/Locale/index.js'
 export { OperationProvider, useOperation } from '../../providers/Operation/index.js'

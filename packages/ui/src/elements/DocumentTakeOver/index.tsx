@@ -1,7 +1,9 @@
 'use client'
-import { Button, Modal, useModal, useTranslation } from '@payloadcms/ui'
 import React, { useEffect } from 'react'
 
+import { useTranslation } from '../../providers/Translation/index.js'
+import { Button } from '../Button/index.js'
+import { Modal, useModal } from '../Modal/index.js'
 import './index.scss'
 
 const modalSlug = 'document-take-over'

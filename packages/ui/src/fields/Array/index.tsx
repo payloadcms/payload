@@ -276,7 +276,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
             const rowPath = `${path}.${i}`
 
             const rowErrorCount = errorPaths?.filter((errorPath) =>
-              errorPath.startsWith(rowPath),
+              errorPath.startsWith(rowPath + '.'),
             ).length
 
             return (
@@ -293,7 +293,8 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     isSortable={isSortable}
                     labels={labels}
                     moveRow={moveRow}
-                    path={path}
+                    parentPath={path}
+                    path={rowPath}
                     permissions={permissions}
                     readOnly={readOnly}
                     removeRow={removeRow}
@@ -301,6 +302,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     rowCount={rowsData?.length}
                     rowIndex={i}
                     rowLabels={rowLabels}
+                    schemaPath={schemaPath}
                     setCollapse={setCollapse}
                   />
                 )}

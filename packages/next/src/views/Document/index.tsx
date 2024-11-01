@@ -148,7 +148,7 @@ export const renderDocument = async ({
     operation: (collectionSlug && id) || globalSlug ? 'update' : 'create',
     renderFields: true,
     req,
-    schemaPath: collectionSlug ? [collectionSlug] : [globalSlug],
+    schemaPath: collectionSlug || globalSlug,
   })
 
   const serverProps: ServerProps = {
@@ -293,9 +293,8 @@ export const renderDocument = async ({
     collectionConfig,
     globalConfig,
     hasSavePermission,
-    importMap,
-    payload,
     permissions,
+    req,
   })
 
   const clientProps = { formState, ...documentSlots }

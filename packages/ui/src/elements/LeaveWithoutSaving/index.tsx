@@ -1,7 +1,11 @@
 'use client'
-import { Button, Modal, useAuth, useFormModified, useModal, useTranslation } from '@payloadcms/ui'
 import React, { useCallback, useEffect } from 'react'
 
+import { useFormModified } from '../../forms/Form/index.js'
+import { useAuth } from '../../providers/Auth/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { Button } from '../Button/index.js'
+import { Modal, useModal } from '../Modal/index.js'
 import './index.scss'
 import { usePreventLeave } from './usePreventLeave.js'
 

@@ -193,7 +193,7 @@ type RichTextAdapterBase<
     field: RichTextField
     i18n: I18n<any, any>
     schemaMap: FieldSchemaMap
-    schemaPath: string[]
+    schemaPath: string
   }) => FieldSchemaMap
   /**
    * Like an afterRead hook, but runs only for the GraphQL resolver. For populating data, this should be used, as afterRead hooks do not have a depth in graphQL.

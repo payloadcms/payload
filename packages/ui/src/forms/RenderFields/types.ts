@@ -12,7 +12,9 @@ export type Props = {
    */
   readonly forceRender?: boolean
   readonly margins?: 'small' | false
-  readonly parentPath: (number | string)[]
+  readonly parentIndexPath: string
+  readonly parentPath: string
+  readonly parentSchemaPath: string
   readonly permissions:
     | {
         [fieldName: string]: FieldPermissions

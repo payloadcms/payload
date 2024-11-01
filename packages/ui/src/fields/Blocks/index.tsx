@@ -264,8 +264,10 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
             const blockConfig = blocks.find((block) => block.slug === blockType)
 
             if (blockConfig) {
+              const rowPath = `${path}.${i}`
+
               const rowErrorCount = errorPaths.filter((errorPath) =>
-                errorPath.startsWith(`${path}.${i}.`),
+                errorPath.startsWith(rowPath + '.'),
               ).length
 
               return (
@@ -284,13 +286,15 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       Label={Label}
                       labels={labels}
                       moveRow={moveRow}
-                      path={path}
+                      parentPath={path}
+                      path={rowPath}
                       permissions={permissions}
                       readOnly={readOnly}
                       removeRow={removeRow}
                       row={row}
                       rowCount={rows.length}
                       rowIndex={i}
+                      schemaPath={schemaPath + blockConfig.slug}
                       setCollapse={setCollapse}
                     />
                   )}

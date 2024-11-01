@@ -3,23 +3,19 @@ import type {
   BuildFormStateArgs,
   ClientConfig,
   ClientUser,
-  DocumentPreferences,
   ErrorResult,
-  Field,
   FieldSchemaMap,
   FormState,
   SanitizedConfig,
-  TypeWithID,
 } from 'payload'
 
-import { headers as getHeaders } from 'next/headers.js'
 import { createClientConfig, formatErrors } from 'payload'
 import { reduceFieldsToValues } from 'payload/shared'
 
 import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
-import { prepareFields } from '../forms/Form/prepareFields.js'
 import { attachComponentsToFormState } from './attachComponentsToFormState.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
+import { handleFormStateLocking } from './handleFormStateLocking.js'
 
 let cachedFieldMap = global._payload_fieldMap
 let cachedClientConfig = global._payload_clientConfig
@@ -178,7 +174,6 @@ export const buildFormState = async (
       i18n,
       payload,
       payload: { config },
-      user,
     },
     returnLockStatus,
     schemaPath = collectionSlug ? [collectionSlug] : [globalSlug],
@@ -199,6 +194,7 @@ export const buildFormState = async (
   })
 
   const schemaPathsToRender = []
+
   if (renderFields) {
     schemaPathsToRender.push(...fieldSchemaMap.keys())
   } else if (formState) {
@@ -233,14 +229,7 @@ export const buildFormState = async (
   // If there is a form state,
   // then we can deduce data from that form state
   if (formState) {
-    // formState may contain _index- paths (e.g. from row fields). In order to get the data that should not contain those,
-    // we use prepareFields to remove those paths
-
-    // TODO: don't use this prepareFields monstrosity
-    // instead, make sure _index paths have disableFormState
-    // that way, reduceFieldsToValues can safely disregard disableFormState
-    const sanitizedFormState = prepareFields(formState)
-    data = reduceFieldsToValues(sanitizedFormState, true)
+    data = reduceFieldsToValues(formState, true)
   }
 
   const isEntitySchema =
@@ -276,8 +265,6 @@ export const buildFormState = async (
     schemaPathsToRender,
   })
 
-  let lockedStateResult = undefined
-
   // Maintain form state of auth / upload fields
   if (collectionSlug && formState) {
     if (payload.collections[collectionSlug]?.config?.upload && formState.file) {
@@ -285,135 +272,28 @@ export const buildFormState = async (
     }
   }
 
-  if (returnLockStatus && user && (id || globalSlug)) {
-    let lockedDocumentQuery
+  let lockedStateResult
 
-    if (collectionSlug) {
-      lockedDocumentQuery = {
-        and: [
-          { 'document.relationTo': { equals: collectionSlug } },
-          { 'document.value': { equals: id } },
-        ],
-      }
-    } else if (globalSlug) {
-      lockedDocumentQuery = {
-        and: [{ globalSlug: { equals: globalSlug } }],
-      }
-    }
-
-    const lockDurationDefault = 300 // Default 5 minutes in seconds
-    const lockDocumentsProp = collectionSlug
-      ? req.payload.config.collections.find((c) => c.slug === collectionSlug)?.lockDocuments
-      : req.payload.config.globals.find((g) => g.slug === globalSlug)?.lockDocuments
-
-    const lockDuration =
-      typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
-    const lockDurationInMilliseconds = lockDuration * 1000
-    const now = new Date().getTime()
-
-    if (lockedDocumentQuery) {
-      // Query where the lock is newer than the current time minus the lock duration
-      lockedDocumentQuery.and.push({
-        updatedAt: {
-          greater_than: new Date(now - lockDurationInMilliseconds).toISOString(),
-        },
-      })
-
-      const lockedDocument = await req.payload.find({
-        collection: 'payload-locked-documents',
-        depth: 1,
-        limit: 1,
-        pagination: false,
-        where: lockedDocumentQuery,
-      })
-
-      if (lockedDocument.docs && lockedDocument.docs.length > 0) {
-        lockedStateResult = {
-          isLocked: true,
-          lastEditedAt: lockedDocument.docs[0]?.updatedAt,
-          user: lockedDocument.docs[0]?.user?.value,
-        }
-
-        if (updateLastEdited) {
-          await payload.db.updateOne({
-            id: lockedDocument.docs[0].id,
-            collection: 'payload-locked-documents',
-            data: {},
-            req,
-          })
-        }
-      } else {
-        // If NO ACTIVE lock document exists, first delete any expired locks and then create a fresh lock
-        // Where updatedAt is older than the duration that is specified in the config
-        let deleteExpiredLocksQuery
-
-        if (collectionSlug) {
-          deleteExpiredLocksQuery = {
-            and: [
-              { 'document.relationTo': { equals: collectionSlug } },
-              {
-                updatedAt: {
-                  less_than: new Date(now - lockDurationInMilliseconds).toISOString(),
-                },
-              },
-            ],
-          }
-        } else if (globalSlug) {
-          deleteExpiredLocksQuery = {
-            and: [
-              { globalSlug: { equals: globalSlug } },
-              {
-                updatedAt: {
-                  less_than: new Date(now - lockDurationInMilliseconds).toISOString(),
-                },
-              },
-            ],
-          }
-        }
-
-        await req.payload.db.deleteMany({
-          collection: 'payload-locked-documents',
-          req,
-          where: deleteExpiredLocksQuery,
-        })
-
-        await req.payload.db.create({
-          collection: 'payload-locked-documents',
-          data: {
-            document: collectionSlug
-              ? {
-                  relationTo: [collectionSlug],
-                  value: id,
-                }
-              : undefined,
-            globalSlug: globalSlug ? globalSlug : undefined,
-            user: {
-              relationTo: [user.collection],
-              value: user.id,
-            },
-          },
-          req,
-        })
-
-        lockedStateResult = {
-          isLocked: true,
-          lastEditedAt: new Date().toISOString(),
-          user: req.user,
-        }
-      }
-    }
+  if (returnLockStatus) {
+    lockedStateResult = await handleFormStateLocking({
+      id,
+      collectionSlug,
+      globalSlug,
+      req,
+      updateLastEdited,
+    })
   }
 
   // mutates form state and adds custom components to field paths
-  // attachComponentsToFormState({
-  //   config,
-  //   fieldSchemaMap,
-  //   formState: formStateResult,
-  //   i18n,
-  //   payload: req.payload,
-  //   permissions: docPermissions,
-  //   schemaPathsToRender,
-  // })
+  attachComponentsToFormState({
+    config,
+    fieldSchemaMap,
+    formState: formStateResult,
+    i18n,
+    payload: req.payload,
+    permissions: docPermissions,
+    schemaPathsToRender,
+  })
 
   return {
     lockedState: lockedStateResult,

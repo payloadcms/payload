@@ -1,5 +1,5 @@
 'use client'
-import type { ClientField, Description, DocumentPermissions } from 'payload'
+import type { ClientField, DocumentPermissions } from 'payload'
 
 import { fieldIsSidebar } from 'payload/shared'
 import React from 'react'
@@ -7,55 +7,58 @@ import React from 'react'
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { Gutter } from '../Gutter/index.js'
-import { RenderIfInViewport } from '../RenderIfInViewport/index.js'
 import './index.scss'
 
 const baseClass = 'document-fields'
 
-const fieldsBaseClass = 'render-fields'
-
 type Args = {
   readonly AfterFields?: React.ReactNode
   readonly BeforeFields?: React.ReactNode
-  readonly description?: Description
+  readonly Description?: React.ReactNode
   readonly docPermissions: DocumentPermissions
   readonly fields: ClientField[]
   readonly forceSidebarWrap?: boolean
   readonly readOnly?: boolean
+  readonly schemaPathSegments: string[]
 }
 
 export const DocumentFields: React.FC<Args> = ({
   AfterFields,
   BeforeFields,
-  description,
+  Description,
   docPermissions,
   fields,
   forceSidebarWrap,
   readOnly: readOnlyProp,
+  schemaPathSegments,
 }) => {
+  const [{ hasSidebarFields, mainFields, sidebarFields }] = React.useState<{
+    hasSidebarFields: boolean
+    mainFields: ClientField[]
+    sidebarFields: ClientField[]
+  }>(() => {
+    return fields.reduce(
+      (acc, field) => {
+        if (fieldIsSidebar(field)) {
+          acc.sidebarFields.push(field)
+          acc.mainFields.push(null)
+          acc.hasSidebarFields = true
+        } else {
+          acc.mainFields.push(field)
+          acc.sidebarFields.push(null)
+        }
+        return acc
+      },
+      {
+        hasSidebarFields: false as boolean,
+        mainFields: [] as ClientField[],
+        sidebarFields: [] as ClientField[],
+      },
+    )
+  })
+
   const formInitializing = useFormInitializing()
   const formProcessing = useFormProcessing()
-
-  if (!fields) {
-    return 'No fields to render'
-  }
-
-  const { mainFields, sidebarFields } = fields.reduce(
-    (acc, field) => {
-      if (fieldIsSidebar(field)) {
-        acc.sidebarFields.push(field)
-      } else {
-        acc.mainFields.push(field)
-      }
-      return acc
-    },
-    {
-      mainFields: [] as ClientField[],
-      sidebarFields: [] as ClientField[],
-    },
-  )
-
-  const hasSidebarFields = sidebarFields && sidebarFields.length > 0
 
   const readOnly = readOnlyProp || formInitializing || formProcessing
 
@@ -71,33 +74,22 @@ export const DocumentFields: React.FC<Args> = ({
     >
       <div className={`${baseClass}__main`}>
         <Gutter className={`${baseClass}__edit`}>
-          <header className={`${baseClass}__header`}>
-            {description && (
-              <div className={`${baseClass}__sub-header`}>
-                {/* <ViewDescription description={description} /> */}
-              </div>
-            )}
-          </header>
+          {Description ? (
+            <header className={`${baseClass}__header`}>
+              <div className={`${baseClass}__sub-header`}>{Description}</div>
+            </header>
+          ) : null}
           {BeforeFields}
-          <RenderIfInViewport
-            className={[
-              fieldsBaseClass,
-              // className,
-              // margins && `${baseClass}--margins-${margins}`,
-              // margins === false && `${baseClass}--margins-none`,
-            ]
-              .filter(Boolean)
-              .join(' ')}
-          >
-            <RenderFields
-              className={`${baseClass}__fields`}
-              fields={mainFields}
-              forceRender
-              parentPath={[]}
-              permissions={docPermissions?.fields}
-              readOnly={readOnly}
-            />
-          </RenderIfInViewport>
+          <RenderFields
+            className={`${baseClass}__fields`}
+            fields={mainFields}
+            forceRender
+            parentIndexPath=""
+            parentPath=""
+            parentSchemaPath={schemaPathSegments.join('.')}
+            permissions={docPermissions?.fields}
+            readOnly={readOnly}
+          />
           {AfterFields}
         </Gutter>
       </div>
@@ -105,24 +97,15 @@ export const DocumentFields: React.FC<Args> = ({
         <div className={`${baseClass}__sidebar-wrap`}>
           <div className={`${baseClass}__sidebar`}>
             <div className={`${baseClass}__sidebar-fields`}>
-              <RenderIfInViewport
-                className={[
-                  fieldsBaseClass,
-                  // className,
-                  // margins && `${baseClass}--margins-${margins}`,
-                  // margins === false && `${baseClass}--margins-none`,
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-              >
-                <RenderFields
-                  fields={sidebarFields}
-                  forceRender
-                  parentPath={[]}
-                  permissions={docPermissions?.fields}
-                  readOnly={readOnly}
-                />
-              </RenderIfInViewport>
+              <RenderFields
+                fields={sidebarFields}
+                forceRender
+                parentIndexPath=""
+                parentPath=""
+                parentSchemaPath={schemaPathSegments.join('.')}
+                permissions={docPermissions?.fields}
+                readOnly={readOnly}
+              />
             </div>
           </div>
         </div>

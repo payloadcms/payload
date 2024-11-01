@@ -30,7 +30,7 @@ export const Auth: React.FC<Props> = (props) => {
     operation,
     readOnly,
     requirePassword,
-    setSchemaPath,
+    setSchemaPathSegments,
     setValidateBeforeSubmit,
     useAPIKey,
     username,
@@ -80,7 +80,7 @@ export const Auth: React.FC<Props> = (props) => {
     (showPasswordFields: boolean) => {
       if (showPasswordFields) {
         setValidateBeforeSubmit(true)
-        setSchemaPath([`_${collectionSlug}`, 'auth'])
+        setSchemaPathSegments([`_${collectionSlug}`, 'auth'])
         dispatchFields({
           type: 'UPDATE',
           errorMessage: t('validation:required'),
@@ -95,14 +95,14 @@ export const Auth: React.FC<Props> = (props) => {
         })
       } else {
         setValidateBeforeSubmit(false)
-        setSchemaPath([collectionSlug])
+        setSchemaPathSegments([collectionSlug])
         dispatchFields({ type: 'REMOVE', path: 'password' })
         dispatchFields({ type: 'REMOVE', path: 'confirm-password' })
       }
 
       setChangingPassword(showPasswordFields)
     },
-    [dispatchFields, t, collectionSlug, setSchemaPath, setValidateBeforeSubmit],
+    [dispatchFields, t, collectionSlug, setSchemaPathSegments, setValidateBeforeSubmit],
   )
 
   const unlock = useCallback(async () => {

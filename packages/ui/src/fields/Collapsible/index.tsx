@@ -24,6 +24,9 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
     field,
     field: { admin: { className, description, initCollapsed = false } = {}, fields, label } = {},
     fieldState: { customComponents: { Description, Label } = {} } = {},
+    indexPath,
+    parentPath,
+    parentSchemaPath,
     path,
     permissions,
     readOnly,
@@ -133,7 +136,9 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
           <RenderFields
             fields={fields}
             margins="small"
-            parentPath={path.split('.')}
+            parentIndexPath={indexPath}
+            parentPath={parentPath}
+            parentSchemaPath={parentSchemaPath}
             permissions={permissions}
             readOnly={readOnly}
           />

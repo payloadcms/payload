@@ -15,6 +15,9 @@ const RowFieldComponent: RowFieldClientComponent = (props) => {
   const {
     field: { admin: { className } = {}, fields },
     forceRender = false,
+    indexPath,
+    parentPath,
+    parentSchemaPath,
     permissions,
     readOnly,
   } = props
@@ -27,7 +30,9 @@ const RowFieldComponent: RowFieldClientComponent = (props) => {
           fields={fields}
           forceRender={forceRender}
           margins={false}
-          parentPath={props.path?.split('.')}
+          parentIndexPath={indexPath}
+          parentPath={parentPath}
+          parentSchemaPath={parentSchemaPath}
           permissions={permissions}
           readOnly={readOnly}
         />

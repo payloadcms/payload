@@ -32,7 +32,7 @@ export const getGenerateSchemaMap =
               fields: field.fields,
               i18n,
               schemaMap,
-              schemaPath:
+              parentSchemaPath:
                 `${schemaPath.join('.')}.lexical_internal_feature.${featureKey}.${schemaKey}`.split(
                   '.',
                 ),

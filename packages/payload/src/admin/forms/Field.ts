@@ -13,6 +13,9 @@ export type ClientComponentProps = {
   field: ClientBlock | ClientField | ClientTab
   fieldState: FormField
   forceRender?: boolean
+  indexPath: string
+  parentPath: string
+  parentSchemaPath: string
   path: string
   permissions: FieldPermissions
   readOnly?: boolean
