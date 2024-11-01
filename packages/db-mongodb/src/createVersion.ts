@@ -46,6 +46,33 @@ export const createVersion: CreateVersion = async function createVersion(
     ),
   })
 
+  if (!global.lockedVersions) {
+    global.lockedVersions = {}
+  }
+
+  if (!global.lockedVersions[collectionSlug]) {
+    global.lockedVersions[collectionSlug] = new Set()
+  }
+
+  const collectionLockMap = global.lockedVersions[collectionSlug] as Set<number | string>
+
+  await new Promise((resolve) => {
+    const resolver = (i: number = 1) => {
+      if (!collectionLockMap.has(parent)) {
+        resolve(true)
+      } else {
+        this.payload.logger.info(`${parent} is locked from creating version, waiting (${i})...`)
+        setTimeout(() => {
+          resolver(i + 1)
+        }, 5)
+      }
+    }
+
+    resolver()
+  })
+
+  collectionLockMap.add(parent)
+
   const [doc] = await VersionModel.create([data], options, req)
 
   const parentQuery = {
@@ -79,11 +106,6 @@ export const createVersion: CreateVersion = async function createVersion(
             $eq: true,
           },
         },
-        {
-          createdAt: {
-            $lte: new Date(doc.createdAt),
-          },
-        },
       ],
     },
     { $unset: { latest: 1 } },
@@ -98,5 +120,8 @@ export const createVersion: CreateVersion = async function createVersion(
   if (verificationToken) {
     result._verificationToken = verificationToken
   }
+
+  collectionLockMap.delete(parent)
+
   return result
 }
