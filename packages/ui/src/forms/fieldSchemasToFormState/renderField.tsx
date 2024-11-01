@@ -98,6 +98,7 @@ export const renderField: RenderFieldMethod = ({
   }
 
   switch (fieldConfig.type) {
+    // TODO: handle block row labels as well in a similar fashion
     case 'array': {
       fieldState?.rows?.forEach((row, rowIndex) => {
         const RowLabel = (

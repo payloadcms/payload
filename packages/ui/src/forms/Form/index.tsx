@@ -529,7 +529,7 @@ export const Form: React.FC<FormProps> = (props) => {
         globalSlug,
         path: path ? path.split('.') : [],
         renderAllFields: true,
-        schemaPath: schemaPath ? schemaPath.split('.') : [],
+        schemaPath,
         signal: abortController.signal,
       })
 
