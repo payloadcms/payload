@@ -90,7 +90,6 @@ export const createClientCollectionConfig = ({
     defaultIDType,
     fields: collection.fields,
     i18n,
-    parentSchemaPath: [collection.slug],
   })
 
   serverOnlyCollectionProperties.forEach((key) => {

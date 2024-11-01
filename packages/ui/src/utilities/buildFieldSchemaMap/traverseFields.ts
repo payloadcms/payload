@@ -101,7 +101,10 @@ export const traverseFields = ({
       case 'tabs':
         field.tabs.map((tab, tabIndex) => {
           const { indexPath: tabIndexPath, schemaPath: tabSchemaPath } = getFieldPaths({
-            field,
+            field: {
+              ...tab,
+              type: 'tab',
+            },
             index: tabIndex,
             parentIndexPath: indexPath,
             parentPath: '',

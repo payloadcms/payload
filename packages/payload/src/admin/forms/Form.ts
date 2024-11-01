@@ -69,13 +69,9 @@ export type BuildFormStateArgs = {
   locale?: string
   operation?: 'create' | 'update'
   /*
-   Used as a "base path" when adding form state to nested fields
-  */
-  path?: (number | string)[]
-  /*
     If true, will render field components within their state object
   */
-  renderFields?: boolean
+  renderAllFields?: boolean
   req: PayloadRequest
   returnLockStatus?: boolean
   schemaPath: string

@@ -1,7 +1,10 @@
 import type {
   Data,
+  DocumentPermissions,
   DocumentPreferences,
   Field as FieldSchema,
+  FieldSchemaMap,
+  FormState,
   FormStateWithoutComponents,
   PayloadRequest,
 } from 'payload'
@@ -9,9 +12,10 @@ import type {
 import type { AddFieldStatePromiseArgs } from './addFieldStatePromise.js'
 
 import { addFieldStatePromise } from './addFieldStatePromise.js'
+import { RenderFieldMethod } from './types.js'
 
 type Args = {
-  addErrorPathToParent: (fieldPath: (number | string)[]) => void
+  addErrorPathToParent: (fieldPath: string) => void
   /**
    * if any parents is localized, then the field is localized. @default false
    */
@@ -19,6 +23,7 @@ type Args = {
   collectionSlug?: string
   data: Data
   fields: FieldSchema[]
+  fieldSchemaMap: FieldSchemaMap
   filter?: (args: AddFieldStatePromiseArgs) => boolean
   /**
    * Force the value of fields like arrays or blocks to be the full value instead of the length @default false
@@ -38,18 +43,15 @@ type Args = {
    * operation is only needed for validation
    */
   operation: 'create' | 'update'
+  parentIndexPath: string
   parentPassesCondition?: boolean
-  /**
-   * The initial path of the field. @default []
-   */
-  parentPath?: (number | string)[]
-  /**
-   * The initial schema path of the field. @default []
-   */
-  parentSchemaPath?: string[]
+  parentPath: string
+  parentSchemaPath: string
+  permissions: DocumentPermissions['fields']
   preferences?: DocumentPreferences
+  previousFormState: FormState
+  renderAllFields: boolean
   req: PayloadRequest
-  schemaPathsToRender?: string[] | true
   /**
    * Whether to skip checking the field's condition. @default false
    */
@@ -59,6 +61,7 @@ type Args = {
    */
   skipValidation?: boolean
   state?: FormStateWithoutComponents
+  renderFieldMethod: RenderFieldMethod
 }
 
 /**
@@ -71,18 +74,23 @@ export const iterateFields = async ({
   collectionSlug,
   data,
   fields,
+  fieldSchemaMap,
   filter,
   forceFullValue = false,
   fullData,
   includeSchema = false,
   omitParents = false,
   operation,
+  parentIndexPath,
   parentPassesCondition = true,
-  parentPath = [],
-  parentSchemaPath = [],
+  parentPath,
+  parentSchemaPath,
+  permissions,
   preferences,
+  previousFormState,
+  renderAllFields,
   req,
-  schemaPathsToRender,
+  renderFieldMethod,
   skipConditionChecks = false,
   skipValidation = false,
   state = {},
@@ -108,18 +116,23 @@ export const iterateFields = async ({
         data,
         field,
         fieldIndex,
+        fieldSchemaMap,
         filter,
         forceFullValue,
         fullData,
+        renderFieldMethod,
         includeSchema,
         omitParents,
         operation,
+        parentIndexPath,
         parentPath,
         parentSchemaPath,
         passesCondition,
+        permissions,
         preferences,
+        previousFormState,
+        renderAllFields,
         req,
-        schemaPathsToRender,
         skipConditionChecks,
         skipValidation,
         state,

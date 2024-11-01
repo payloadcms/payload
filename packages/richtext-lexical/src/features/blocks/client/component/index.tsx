@@ -69,7 +69,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         doNotAbort: true,
         globalSlug,
         operation: 'update',
-        renderFields: true,
+        renderAllFields: true,
         schemaPath: schemaFieldsPath.split('.'),
         signal: abortController.signal,
       })

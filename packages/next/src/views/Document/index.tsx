@@ -146,7 +146,7 @@ export const renderDocument = async ({
     globalSlug,
     locale: locale?.code,
     operation: (collectionSlug && id) || globalSlug ? 'update' : 'create',
-    renderFields: true,
+    renderAllFields: true,
     req,
     schemaPath: collectionSlug || globalSlug,
   })

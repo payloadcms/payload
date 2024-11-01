@@ -25,6 +25,7 @@ import type {
   SelectFromCollectionSlug,
   TypeWithID,
 } from './collections/config/types.js'
+export type { FieldState } from './admin/forms/Form.js'
 export type * from './admin/types.js'
 import type { Options as CountOptions } from './collections/operations/local/count.js'
 import type { Options as CreateOptions } from './collections/operations/local/create.js'

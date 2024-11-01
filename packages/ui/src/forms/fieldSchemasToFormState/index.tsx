@@ -1,10 +1,15 @@
 import type {
   Data,
+  DocumentPermissions,
   DocumentPreferences,
   Field,
+  FieldSchemaMap,
+  FormState,
   FormStateWithoutComponents,
   PayloadRequest,
 } from 'payload'
+
+import type { RenderFieldMethod } from './types.js'
 
 import { calculateDefaultValues } from './calculateDefaultValues/index.js'
 import { iterateFields } from './iterateFields.js'
@@ -13,35 +18,41 @@ type Args = {
   collectionSlug?: string
   data?: Data
   fields: Field[] | undefined
+  fieldSchemaMap: FieldSchemaMap
   id?: number | string
   operation?: 'create' | 'update'
-  parentPath?: (number | string)[]
-  parentSchemaPath?: string[]
+  permissions: DocumentPermissions['fields']
   preferences: DocumentPreferences
-  req: PayloadRequest
   /**
-   * If set, fields with these schema paths will have requireRender: true set in their form state.
-   * This is useful for them to be later processed by attachComponentsToFormState, if schemaPathsToRender is
-   * calculated earlier from the existing form state passed to buildFormState.
-   *
-   * If set to true, all fields will have requireRender: true set in their form state.
+   * Optionally accept the previous form state,
+   * to be able to determine if custom fields need to be re-rendered.
    */
-  schemaPathsToRender?: string[] | true
-  siblingData?: Data
+  previousFormState?: FormState
+  /**
+   * If renderAllFields is true, then no matter what is in previous form state,
+   * all custom fields will be re-rendered.
+   */
+  renderAllFields: boolean
+  renderFieldMethod?: RenderFieldMethod
+  req: PayloadRequest
+  schemaPath: string
 }
 
-export const fieldSchemasToFormState = async (args: Args): Promise<FormStateWithoutComponents> => {
+export const fieldSchemasToFormState = async (args: Args): Promise<FormState> => {
   const {
     id,
     collectionSlug,
     data = {},
     fields,
+    fieldSchemaMap,
     operation,
-    parentPath = [],
-    parentSchemaPath = [],
+    permissions,
     preferences,
+    previousFormState,
+    renderAllFields,
+    renderFieldMethod,
     req,
-    schemaPathsToRender,
+    schemaPath,
   } = args
 
   if (fields && fields.length) {
@@ -64,14 +75,19 @@ export const fieldSchemasToFormState = async (args: Args): Promise<FormStateWith
       collectionSlug,
       data: dataWithDefaultValues,
       fields,
-      fullData: data,
+      fieldSchemaMap,
+      fullData: dataWithDefaultValues,
       operation,
+      parentIndexPath: '',
       parentPassesCondition: true,
-      parentPath,
-      parentSchemaPath,
+      parentPath: '',
+      parentSchemaPath: schemaPath,
+      permissions,
       preferences,
+      previousFormState,
+      renderAllFields,
+      renderFieldMethod,
       req,
-      schemaPathsToRender,
       state,
     })
 

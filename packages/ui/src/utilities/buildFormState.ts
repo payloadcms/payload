@@ -13,7 +13,7 @@ import { createClientConfig, formatErrors } from 'payload'
 import { reduceFieldsToValues } from 'payload/shared'
 
 import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
-import { attachComponentsToFormState } from './attachComponentsToFormState.js'
+import { renderField } from '../forms/fieldSchemasToFormState/renderField.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
 import { handleFormStateLocking } from './handleFormStateLocking.js'
 
@@ -167,8 +167,7 @@ export const buildFormState = async (
     formState,
     globalSlug,
     operation,
-    path = [],
-    renderFields = false,
+    renderAllFields,
     req,
     req: {
       i18n,
@@ -176,7 +175,7 @@ export const buildFormState = async (
       payload: { config },
     },
     returnLockStatus,
-    schemaPath = collectionSlug ? [collectionSlug] : [globalSlug],
+    schemaPath = collectionSlug || globalSlug,
     updateLastEdited,
   } = args
 
@@ -193,25 +192,11 @@ export const buildFormState = async (
     i18n,
   })
 
-  const schemaPathsToRender = []
-
-  if (renderFields) {
-    schemaPathsToRender.push(...fieldSchemaMap.keys())
-  } else if (formState) {
-    for (const key in formState) {
-      const field = formState[key]
-
-      if (field?.requiresRender) {
-        schemaPathsToRender.push(field.schemaPath.join('.'))
-      }
-    }
-  }
-
   const id = collectionSlug ? idFromArgs : undefined
-  const fieldOrEntityConfig = fieldSchemaMap.get(schemaPath.join('.'))
+  const fieldOrEntityConfig = fieldSchemaMap.get(schemaPath)
 
   if (!fieldOrEntityConfig) {
-    throw new Error(`Could not find "${schemaPath.join('.')}" in the fieldSchemaMap`)
+    throw new Error(`Could not find "${schemaPath}" in the fieldSchemaMap`)
   }
 
   if (
@@ -222,7 +207,7 @@ export const buildFormState = async (
     fieldOrEntityConfig.type !== 'blocks'
   ) {
     throw new Error(
-      `The field found in fieldSchemaMap for "${schemaPath.join('.')}" does not contain any subfields.`,
+      `The field found in fieldSchemaMap for "${schemaPath}" does not contain any subfields.`,
     )
   }
 
@@ -231,9 +216,6 @@ export const buildFormState = async (
   if (formState) {
     data = reduceFieldsToValues(formState, true)
   }
-
-  const isEntitySchema =
-    schemaPath.length === 1 && (schemaPath[0] === collectionSlug || schemaPath[0] === globalSlug)
 
   /**
    * When building state for sub schemas we need to adjust:
@@ -249,20 +231,21 @@ export const buildFormState = async (
     : 'fields' in fieldOrEntityConfig
       ? fieldOrEntityConfig.fields
       : [fieldOrEntityConfig]
-  const parentSchemaPath = isEntitySchema ? schemaPath : schemaPath.slice(0, -1)
-  const parentPath = isEntitySchema ? path : path.slice(0, -1)
 
   const formStateResult = await fieldSchemasToFormState({
     id,
     collectionSlug,
     data,
     fields,
+    fieldSchemaMap,
     operation,
-    parentPath,
-    parentSchemaPath,
+    permissions: docPermissions?.['fields'] || {},
     preferences: docPreferences || { fields: {} },
+    previousFormState: formState,
+    renderAllFields,
+    renderFieldMethod: renderField,
     req,
-    schemaPathsToRender,
+    schemaPath,
   })
 
   // Maintain form state of auth / upload fields
@@ -283,17 +266,6 @@ export const buildFormState = async (
       updateLastEdited,
     })
   }
-
-  // mutates form state and adds custom components to field paths
-  attachComponentsToFormState({
-    config,
-    fieldSchemaMap,
-    formState: formStateResult,
-    i18n,
-    payload: req.payload,
-    permissions: docPermissions,
-    schemaPathsToRender,
-  })
 
   return {
     lockedState: lockedStateResult,

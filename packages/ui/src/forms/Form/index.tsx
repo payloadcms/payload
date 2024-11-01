@@ -475,7 +475,7 @@ export const Form: React.FC<FormProps> = (props) => {
         data,
         globalSlug,
         operation,
-        renderFields: true,
+        renderAllFields: true,
         schemaPath: collectionSlug ? [collectionSlug] : [globalSlug],
         signal: abortController.signal,
       })
@@ -528,7 +528,7 @@ export const Form: React.FC<FormProps> = (props) => {
         docPreferences,
         globalSlug,
         path: path ? path.split('.') : [],
-        renderFields: true,
+        renderAllFields: true,
         schemaPath: schemaPath ? schemaPath.split('.') : [],
         signal: abortController.signal,
       })

@@ -297,9 +297,9 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
         operation,
         // Performance optimization: Setting it to false ensure that only fields that have explicit requireRender set in the form state will be rendered (e.g. new array rows).
         // We only wanna render ALL fields on initial render, not in onChange.
-        renderFields: false,
+        renderAllFields: false,
         returnLockStatus: isLockingEnabled ? true : false,
-        schemaPath: schemaPathSegments,
+        schemaPath: schemaPathSegments.join('.'),
         // signal: abortController.signal,
         updateLastEdited,
       })
@@ -340,7 +340,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       getFormState,
       id,
       collectionSlug,
-      docPermissions,
       globalSlug,
       operation,
       schemaPathSegments,
