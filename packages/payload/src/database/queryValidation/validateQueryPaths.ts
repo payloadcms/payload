@@ -59,7 +59,7 @@ export async function validateQueryPaths({
   versionFields,
   where: whereArg,
 }: Args): Promise<void> {
-  const where = whereArg
+  let where = whereArg
   const fields = flattenFields(
     versionFields || (globalConfig || collectionConfig).fields,
   ) as FieldAffectingData[]
@@ -88,6 +88,7 @@ export async function validateQueryPaths({
   }
 
   if (joins) {
+    where = { ...whereArg }
     // concat schemaPath of joins to the join.where to be passed for validation
     Object.entries(joins).forEach(([schemaPath, { where: whereJoin }]) => {
       if (whereJoin) {
