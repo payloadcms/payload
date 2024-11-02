@@ -2,7 +2,7 @@
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
-import { type FormState, type PayloadRequest } from 'payload'
+import { deepCopyObjectComplex, type FormState, type PayloadRequest } from 'payload'
 import {
   getDataByPath as getDataByPathFunc,
   getSiblingData as getSiblingDataFunc,
@@ -43,6 +43,7 @@ import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
+import { reduceToSerializableFields } from './reduceToSerializableFields.js'
 
 const baseClass = 'form'
 
@@ -262,7 +263,8 @@ export const Form: React.FC<FormProps> = (props) => {
 
       // If submit handler comes through via props, run that
       if (onSubmit) {
-        const data = reduceFieldsToValues(fields, true)
+        const serializableFields = reduceToSerializableFields(deepCopyObjectComplex(fields))
+        const data = reduceFieldsToValues(serializableFields, true)
 
         if (overrides) {
           for (const [key, value] of Object.entries(overrides)) {
@@ -677,12 +679,13 @@ export const Form: React.FC<FormProps> = (props) => {
     () => {
       const executeOnChange = async () => {
         if (Array.isArray(onChange)) {
-          let revalidatedFormState: FormState = contextRef.current.fields
+          let revalidatedFormState: FormState = deepCopyObjectComplex(contextRef.current.fields) // deep copy, as we do not want prepareFields to mutate the original state. Complex, to avoid maximum call stack exceeded errors
 
           for (const onChangeFn of onChange) {
             // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
+            const serializableFields = reduceToSerializableFields(revalidatedFormState, true)
             revalidatedFormState = await onChangeFn({
-              formState: revalidatedFormState,
+              formState: serializableFields,
             })
           }
 
