@@ -4,10 +4,11 @@ import type {
   CollectionOptions,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
+import type { ConfigOptions } from 'cloudinary'
 import type { Config, Plugin } from 'payload'
 
-import { ConfigOptions, v2 as cloudinary } from "cloudinary";
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
+import { v2 as cloudinary } from 'cloudinary'
 
 import { getGenerateUrl } from './generateURL.js'
 import { getHandleDelete } from './handleDelete.js'
@@ -15,18 +16,32 @@ import { getHandleUpload } from './handleUpload.js'
 import { getStaticHandler } from './staticHandler.js'
 
 // Video extensions
-export const videoExtensions = ["mp2", "mp3", "mp4", "mov", "avi", "mkv", "flv", "wmv", "webm", "mpg", "mpe", "mpeg"]
-
+export const videoExtensions = [
+  'mp2',
+  'mp3',
+  'mp4',
+  'mov',
+  'avi',
+  'mkv',
+  'flv',
+  'wmv',
+  'webm',
+  'mpg',
+  'mpe',
+  'mpeg',
+]
 
 export type CloudinaryStorageOptions = {
-  /**
-   * Folder name to upload files.
-   */
-  folder: string
   /**
    * Collection options to apply the Cloudinary adapter to.
    */
   collections: Record<string, Omit<CollectionOptions, 'adapter'> | true>
+  /**
+   * Cloudinary client configuration.
+   *
+   * @see https://github.com/cloudinary/cloudinary_npm
+   */
+  config: ConfigOptions
   /**
    * Whether or not to enable the plugin.
    *
@@ -35,11 +50,9 @@ export type CloudinaryStorageOptions = {
   enabled?: boolean
 
   /**
-   * Cloudinary client configuration.
-   *
-   * @see https://github.com/cloudinary/cloudinary_npm
+   * Folder name to upload files.
    */
-  config: ConfigOptions
+  folder?: string
 }
 
 type CloudinaryStoragePlugin = (storageCloudinaryArgs: CloudinaryStorageOptions) => Plugin
@@ -90,19 +103,21 @@ export const cloudinaryStorage: CloudinaryStoragePlugin =
     })(config)
   }
 
-
-function cloudinaryStorageInternal({ folder, config = {} }: CloudinaryStorageOptions): Adapter {
+function cloudinaryStorageInternal({ config = {}, folder }: CloudinaryStorageOptions): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
     if (!cloudinary) {
       throw new Error(
-        'The package cloudinary is not installed, but is required for the plugin-cloud-storage Cloudinary adapter. Please install it.'
+        'The package cloudinary is not installed, but is required for the plugin-cloud-storage Cloudinary adapter. Please install it.',
       )
     }
 
     let storageClient: null | typeof cloudinary = null
+    const folderSrc = folder ? folder.replace(/^\/|\/$/g, '') + '/' : ''
 
     const getStorageClient = (): typeof cloudinary => {
-      if (storageClient) return storageClient
+      if (storageClient) {
+        return storageClient
+      }
 
       cloudinary.config(config)
       storageClient = cloudinary
@@ -111,15 +126,15 @@ function cloudinaryStorageInternal({ folder, config = {} }: CloudinaryStorageOpt
 
     return {
       name: 'cloudinary',
-      generateURL: getGenerateUrl({ folder, getStorageClient }),
-      handleDelete: getHandleDelete({ folder, getStorageClient }),
+      generateURL: getGenerateUrl({ folderSrc, getStorageClient }),
+      handleDelete: getHandleDelete({ folderSrc, getStorageClient }),
       handleUpload: getHandleUpload({
-        folder,
         collection,
+        folderSrc,
         getStorageClient,
-        prefix
+        prefix,
       }),
-      staticHandler: getStaticHandler({ folder, collection, getStorageClient }),
+      staticHandler: getStaticHandler({ collection, folderSrc, getStorageClient }),
     }
   }
 }
