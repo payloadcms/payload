@@ -683,7 +683,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
           for (const onChangeFn of onChange) {
             // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
-            const serializableFields = reduceToSerializableFields(revalidatedFormState, true)
+            const serializableFields = reduceToSerializableFields(revalidatedFormState)
             revalidatedFormState = await onChangeFn({
               formState: serializableFields,
             })
