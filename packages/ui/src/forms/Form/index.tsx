@@ -2,8 +2,9 @@
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
-import { deepCopyObjectComplex, type FormState, type PayloadRequest } from 'payload'
+import { type FormState, type PayloadRequest } from 'payload'
 import {
+  deepCopyObjectComplex,
   getDataByPath as getDataByPathFunc,
   getSiblingData as getSiblingDataFunc,
   reduceFieldsToValues,
