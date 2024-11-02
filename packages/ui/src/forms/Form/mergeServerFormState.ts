@@ -4,7 +4,14 @@ import { type FormState } from 'payload'
 
 import { mergeErrorPaths } from './mergeErrorPaths.js'
 
-const serverPropsToAccept = ['passesCondition', 'valid', 'errorMessage', 'rows', 'customComponents']
+const serverPropsToAccept = [
+  'passesCondition',
+  'valid',
+  'errorMessage',
+  'rows',
+  'customComponents',
+  'requiresRender',
+]
 
 /**
  * Merges certain properties from the server state into the client state. These do not include values,

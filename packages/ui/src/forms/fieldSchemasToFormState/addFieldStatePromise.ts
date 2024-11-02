@@ -277,6 +277,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         fieldState.rows = rows
 
+        // Unset requiresRender
+        // so it will be removed from form state
+        fieldState.requiresRender = false
+
         // Add values to field state
         if (data[field.name] === null) {
           fieldState.value = null
@@ -418,6 +422,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         }
 
         fieldState.rows = rowMetadata
+
+        // Unset requiresRender
+        // so it will be removed from form state
+        fieldState.requiresRender = false
 
         // Add field to state
         if (!omitParents && (!filter || filter(args))) {
@@ -675,6 +683,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   if (requiresRender && !isDisabled && renderFieldMethod) {
     const fieldState = state[path]
     const fieldConfig = fieldSchemaMap.get(schemaPath)
+
+    console.log('this field is re-rendering', schemaPath)
 
     if (!fieldConfig) {
       if (schemaPath.endsWith('.blockType')) {
