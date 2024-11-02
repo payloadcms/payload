@@ -424,15 +424,8 @@ jobs:
 
       - name: Pack and build app
         run: |
-          set -ex
           pnpm run script:pack --dest templates/blank
-          cd templates/blank
-          cp .env.example .env
-          ls -la
-          pnpm add ./*.tgz --ignore-workspace
-          pnpm install --ignore-workspace --no-frozen-lockfile
-          cat package.json
-          pnpm run build
+          pnpm runts scripts/build-template-with-local-pkgs.ts website
 
   tests-type-generation:
     runs-on: ubuntu-latest
