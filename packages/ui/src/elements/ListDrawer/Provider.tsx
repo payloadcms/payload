@@ -2,12 +2,12 @@ import type { CollectionSlug } from 'payload'
 
 import { createContext, useContext } from 'react'
 
+import type { ListQuery } from '../../providers/ListQuery/index.js'
 import type { useSelection } from '../../providers/Selection/index.js'
-import type { ListQuery } from '../ListQuery/index.js'
 
-import { type Option } from '../../elements/ReactSelect/index.js'
+import { type Option } from '../ReactSelect/index.js'
 
-export type ListInfoProps = {
+export type ListDrawerContextProps = {
   readonly createNewDrawerSlug?: string
   readonly drawerSlug?: string
   readonly enabledCollections?: CollectionSlug[]
@@ -18,29 +18,29 @@ export type ListInfoProps = {
   readonly setSelectedOption?: (option: Option<string>) => void
 }
 
-export type ListInfoType = {
+export type ListDrawerContextType = {
   isInDrawer: boolean
-} & ListInfoProps
+} & ListDrawerContextProps
 
-export const ListInfo = createContext({} as ListInfoType)
+export const ListDrawerContext = createContext({} as ListDrawerContextType)
 
-export const ListInfoProvider: React.FC<
+export const ListDrawerContextProvider: React.FC<
   {
     children: React.ReactNode
-  } & ListInfoProps
+  } & ListDrawerContextProps
 > = ({ children, ...rest }) => {
   return (
-    <ListInfo.Provider value={{ isInDrawer: Boolean(rest.drawerSlug), ...rest }}>
+    <ListDrawerContext.Provider value={{ isInDrawer: Boolean(rest.drawerSlug), ...rest }}>
       {children}
-    </ListInfo.Provider>
+    </ListDrawerContext.Provider>
   )
 }
 
-export const useListInfo = (): ListInfoType => {
-  const context = useContext(ListInfo)
+export const useListDrawerContext = (): ListDrawerContextType => {
+  const context = useContext(ListDrawerContext)
 
   if (!context) {
-    throw new Error('useListInfo must be used within a ListInfoProvider')
+    throw new Error('useListDrawerContext must be used within a ListDrawerContextProvider')
   }
 
   return context

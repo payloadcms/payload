@@ -18,6 +18,7 @@ import { DeleteMany } from '../../elements/DeleteMany/index.js'
 import { EditMany } from '../../elements/EditMany/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
+import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { ListSelection } from '../../elements/ListSelection/index.js'
 import { useModal } from '../../elements/Modal/index.js'
 import { Pagination } from '../../elements/Pagination/index.js'
@@ -31,7 +32,6 @@ import { UnpublishMany } from '../../elements/UnpublishMany/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
-import { useListInfo } from '../../providers/ListInfo/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
@@ -86,7 +86,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
 
   const [Table, setTable] = useState(InitialTable)
 
-  const { createNewDrawerSlug, drawerSlug: listDrawerSlug } = useListInfo()
+  const { createNewDrawerSlug, drawerSlug: listDrawerSlug } = useListDrawerContext()
 
   useEffect(() => {
     if (InitialTable) {

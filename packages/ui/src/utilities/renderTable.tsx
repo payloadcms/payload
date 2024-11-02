@@ -7,8 +7,8 @@ import type {
   PaginatedDocs,
 } from 'payload'
 
+import type { ColumnPreferences } from '../providers/ListQuery/index.js'
 import type { Column } from '../elements/Table/index.js'
-import type { ColumnPreferences } from '../providers/ListInfo/index.js'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { Table } from '../elements/Table/index.js'

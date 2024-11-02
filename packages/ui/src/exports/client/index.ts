@@ -233,7 +233,10 @@ export {
   useFieldComponents,
 } from '../../providers/FieldComponents/index.js'
 export { UploadEditsProvider, useUploadEdits } from '../../providers/UploadEdits/index.js'
-export { ListInfoProvider, useListInfo } from '../../providers/ListInfo/index.js'
+export {
+  ListDrawerContextProvider,
+  useListDrawerContext,
+} from '../../elements/ListDrawer/Provider.js'
 export { ListQueryProvider, useListQuery } from '../../providers/ListQuery/index.js'
 export { LocaleProvider, useLocale } from '../../providers/Locale/index.js'
 export { OperationProvider, useOperation } from '../../providers/Operation/index.js'

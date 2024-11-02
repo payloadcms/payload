@@ -10,8 +10,8 @@ import type { ListDrawerProps } from './types.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
-import { ListInfoProvider } from '../../providers/ListInfo/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
+import { ListDrawerContextProvider } from '../ListDrawer/Provider.js'
 import { LoadingOverlay } from '../Loading/index.js'
 import { type Option } from '../ReactSelect/index.js'
 
@@ -151,7 +151,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   return (
     <EditDepthProvider>
-      <ListInfoProvider
+      <ListDrawerContextProvider
         createNewDrawerSlug={documentDrawerSlug}
         drawerSlug={drawerSlug}
         enabledCollections={collectionSlugs}
@@ -163,7 +163,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       >
         {ListView}
         <DocumentDrawer onSave={onCreateNew} />
-      </ListInfoProvider>
+      </ListDrawerContextProvider>
     </EditDepthProvider>
   )
 }

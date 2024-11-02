@@ -2,12 +2,8 @@ import type { ListPreferences, ListViewClientProps } from '@payloadcms/ui'
 import type { ListQuery } from 'packages/ui/src/providers/ListQuery/index.js'
 import type { AdminViewProps, Where } from 'payload'
 
-import {
-  DefaultListView,
-  HydrateAuthProvider,
-  ListInfoProvider,
-  ListQueryProvider,
-} from '@payloadcms/ui'
+import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import { filterFields } from 'packages/ui/src/elements/TableColumns/filterFields.js'
@@ -16,8 +12,6 @@ import { renderFilters, renderTable } from 'packages/ui/src/utilities/renderTabl
 import { mergeListSearchAndWhere } from 'payload'
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
-
-import { RenderServerComponent } from '../../../../ui/src/elements/RenderServerComponent/index.js'
 
 export { generateListMetadata } from './meta.js'
 
@@ -235,7 +229,7 @@ export const renderListView = async (
 export const ListView: React.FC<ListViewArgs> = async (args) => {
   try {
     const { List: RenderedList } = await renderListView({ ...args, enableRowSelections: true })
-    return <ListInfoProvider>{RenderedList}</ListInfoProvider>
+    return RenderedList
   } catch (error) {
     if (error.message === 'not-found') {
       notFound()

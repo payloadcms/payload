@@ -2,7 +2,7 @@ import type { ClientField, Field } from 'payload'
 
 import { fieldAffectsData } from 'payload/shared'
 
-import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
+import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
 
 const getRemainingColumns = <T extends ClientField[] | Field[]>(
   fields: T,

@@ -8,7 +8,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 
 import type { Column } from '../../elements/Table/index.js'
 
-import { useListInfo } from '../../providers/ListInfo/index.js'
+import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useSearchParams } from '../SearchParams/index.js'
 
@@ -63,7 +63,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const { setPreference } = usePreferences()
   const { searchParams } = useSearchParams()
 
-  const { onQueryChange } = useListInfo()
+  const { onQueryChange } = useListDrawerContext()
 
   const [currentQuery, setCurrentQuery] = useState(() => {
     if (modifySearchParams) {

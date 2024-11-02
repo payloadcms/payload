@@ -3,7 +3,7 @@ import type { CellComponentProps, ClientCollectionConfig, SanitizedCollectionCon
 
 import React, { createContext, useCallback, useContext, useState } from 'react'
 
-import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
+import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
 import type { SortColumnProps } from '../SortColumn/index.js'
 import type { Column } from '../Table/index.js'
 
