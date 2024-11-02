@@ -1,7 +1,7 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { Field, FieldAffectingData } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { JoinQuery, Operator, PayloadRequest, Where, WhereField } from '../../types/index.js'
+import type { Operator, PayloadRequest, Where, WhereField } from '../../types/index.js'
 import type { EntityPolicies } from './types.js'
 
 import { QueryError } from '../../errors/QueryError.js'
@@ -12,7 +12,6 @@ import { validateSearchParam } from './validateSearchParams.js'
 
 type Args = {
   errors?: { path: string }[]
-  joins?: JoinQuery
   overrideAccess: boolean
   policies?: EntityPolicies
   req: PayloadRequest
@@ -42,14 +41,10 @@ const flattenWhere = (query: Where): WhereField[] =>
     return [...flattenedConstraints, { [key]: val }]
   }, [])
 
-/**
- * Iterates over the `where` object and to validate the field paths are correct and that the user has access to the fields
- */
 export async function validateQueryPaths({
   collectionConfig,
   errors = [],
   globalConfig,
-  joins,
   overrideAccess,
   policies = {
     collections: {},
@@ -57,52 +52,15 @@ export async function validateQueryPaths({
   },
   req,
   versionFields,
-  where: whereArg,
+  where,
 }: Args): Promise<void> {
-  let where = whereArg
   const fields = flattenFields(
     versionFields || (globalConfig || collectionConfig).fields,
   ) as FieldAffectingData[]
-  const promises = []
-
-  // Validate the user has access to configured join fields
-  if (collectionConfig?.joins) {
-    Object.entries(collectionConfig.joins).forEach(([collectionSlug, collectionJoins]) => {
-      collectionJoins.forEach((join) => {
-        if (join.field.where) {
-          promises.push(
-            validateQueryPaths({
-              collectionConfig: req.payload.config.collections.find(
-                (config) => config.slug === collectionSlug,
-              ),
-              errors,
-              overrideAccess,
-              policies,
-              req,
-              where: join.field.where,
-            }),
-          )
-        }
-      })
-    })
-  }
-
-  if (joins) {
-    where = { ...whereArg }
-    // concat schemaPath of joins to the join.where to be passed for validation
-    Object.entries(joins).forEach(([schemaPath, { where: whereJoin }]) => {
-      if (whereJoin) {
-        Object.entries(whereJoin).forEach(([path, constraint]) => {
-          // merge the paths together to be handled the same way as relationships
-          where[`${schemaPath}.${path}`] = constraint
-        })
-      }
-    })
-  }
-
   if (typeof where === 'object') {
     const whereFields = flattenWhere(where)
     // We need to determine if the whereKey is an AND, OR, or a schema path
+    const promises = []
     void whereFields.map((constraint) => {
       void Object.keys(constraint).map((path) => {
         void Object.entries(constraint[path]).map(([operator, val]) => {
@@ -126,7 +84,6 @@ export async function validateQueryPaths({
         })
       })
     })
-
     await Promise.all(promises)
     if (errors.length > 0) {
       throw new QueryError(errors)

@@ -20,10 +20,14 @@ export const sanitizeJoinParams = (
   const joinQuery = {}
 
   Object.keys(joins).forEach((schemaPath) => {
-    joinQuery[schemaPath] = {
-      limit: isNumber(joins[schemaPath]?.limit) ? Number(joins[schemaPath].limit) : undefined,
-      sort: joins[schemaPath]?.sort ? joins[schemaPath].sort : undefined,
-      where: joins[schemaPath]?.where ? joins[schemaPath].where : undefined,
+    if (joins[schemaPath] === 'false' || joins[schemaPath] === false) {
+      joinQuery[schemaPath] = false
+    } else {
+      joinQuery[schemaPath] = {
+        limit: isNumber(joins[schemaPath]?.limit) ? Number(joins[schemaPath].limit) : undefined,
+        sort: joins[schemaPath]?.sort ? joins[schemaPath].sort : undefined,
+        where: joins[schemaPath]?.where ? joins[schemaPath].where : undefined,
+      }
     }
   })
 

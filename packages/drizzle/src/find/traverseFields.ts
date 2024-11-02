@@ -417,11 +417,17 @@ export const traverseFields = ({
             break
           }
 
+          const joinSchemaPath = `${path.replaceAll('_', '.')}${field.name}`
+
+          if (joinQuery[joinSchemaPath] === false) {
+            break
+          }
+
           const {
             limit: limitArg = field.defaultLimit ?? 10,
             sort = field.defaultSort,
             where,
-          } = joinQuery[`${path.replaceAll('_', '.')}${field.name}`] || {}
+          } = joinQuery[joinSchemaPath] || {}
           let limit = limitArg
 
           if (limit !== 0) {
@@ -442,7 +448,7 @@ export const traverseFields = ({
             locale,
             sort,
             tableName: joinCollectionTableName,
-            where: combineQueries(where, field?.where ?? {}),
+            where,
           })
 
           let subQueryWhere = buildQueryResult.where
