@@ -9,11 +9,13 @@ import { isNumber } from 'payload/shared'
 export const sanitizeJoinParams = (
   joins:
     | {
-        [schemaPath: string]: {
-          limit?: unknown
-          sort?: string
-          where?: unknown
-        }
+        [schemaPath: string]:
+          | {
+              limit?: unknown
+              sort?: string
+              where?: unknown
+            }
+          | false
       }
     | false = {},
 ): JoinQuery => {
