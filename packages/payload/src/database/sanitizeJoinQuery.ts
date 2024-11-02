@@ -49,6 +49,7 @@ export const sanitizeJoinQuery = async ({
 
       if (accessResult === false) {
         joinsQuery[schemaPath] = false
+        continue
       }
 
       if (!joinsQuery[schemaPath]) {
@@ -63,6 +64,10 @@ export const sanitizeJoinQuery = async ({
 
       if (field.where) {
         joinQuery.where = combineQueries(joinQuery.where, field.where)
+      }
+
+      if (typeof accessResult === 'object') {
+        joinQuery.where = combineQueries(joinQuery.where, accessResult)
       }
 
       promises.push(
