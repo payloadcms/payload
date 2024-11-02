@@ -8,25 +8,22 @@ import { validateQueryPaths } from './queryValidation/validateQueryPaths.js'
 
 type Args = {
   collectionConfig: SanitizedCollectionConfig
-  disableErrors?: boolean
-  errors?: { path: string }[]
   joins?: JoinQuery
   overrideAccess: boolean
   req: PayloadRequest
 }
 
 /**
- *
+ * * Validates `where` for each join
+ * * Combines the access result for joined collection
+ * * Combines the default join's `where`
  */
 export const sanitizeJoinQuery = async ({
   collectionConfig,
-  disableErrors,
-  errors = [],
   joins: joinsQuery,
   overrideAccess,
   req,
 }: Args) => {
-  const promises: Promise<void>[] = []
   if (joinsQuery === false) {
     return false
   }
@@ -34,6 +31,9 @@ export const sanitizeJoinQuery = async ({
   if (!joinsQuery) {
     joinsQuery = {}
   }
+
+  const errors: { path: string }[] = []
+  const promises: Promise<void>[] = []
 
   for (const collectionSlug in collectionConfig.joins) {
     for (const { field, schemaPath } of collectionConfig.joins[collectionSlug]) {
