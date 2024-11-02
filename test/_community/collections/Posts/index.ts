@@ -32,6 +32,31 @@ export const PostsCollection: CollectionConfig = {
       type: 'relationship',
       relationTo: postsSlug,
     },
+    {
+      name: 'myArray',
+      type: 'array',
+      fields: [
+        {
+          admin: {
+            components: {
+              Field: '/collections/Posts/MyServerField.js#MyServerFieldComponent',
+            },
+          },
+          name: 'serverTextField',
+          type: 'text',
+        },
+        {
+          admin: {
+            components: {
+              Field: '/collections/Posts/MyClientField.js#MyClientFieldComponent',
+            },
+          },
+          name: 'text',
+          label: 'Client Text Field',
+          type: 'text',
+        },
+      ],
+    },
     // {
     //   name: 'richText',
     //   type: 'richText',

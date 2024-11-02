@@ -125,6 +125,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     parentSchemaPath,
   })
 
+  const requiresRender = renderAllFields || previousFormState?.[path]?.requiresRender
+
   const isHiddenField = 'hidden' in field && field?.hidden
   const disabledFromAdmin = field?.admin && 'disabled' in field.admin && field.admin.disabled
 
@@ -243,7 +245,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 permissions: permissions?.[field.name]?.fields || {},
                 preferences,
                 previousFormState,
-                renderAllFields,
+                renderAllFields: requiresRender,
                 renderFieldMethod,
                 req,
                 skipConditionChecks,
@@ -371,7 +373,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   permissions: permissions?.[field.name]?.blocks?.[block.slug]?.fields || {},
                   preferences,
                   previousFormState,
-                  renderAllFields,
+                  renderAllFields: requiresRender,
                   renderFieldMethod,
                   req,
                   skipConditionChecks,
@@ -668,7 +670,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     }
   }
 
-  const requiresRender = renderAllFields || previousFormState?.[path]?.requiresRender
   const isDisabled = 'disabled' in field.admin && field.admin.disabled
 
   if (requiresRender && !isDisabled && renderFieldMethod) {
@@ -683,7 +684,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
     }
 
-    await renderFieldMethod({
+    renderFieldMethod({
       data: fullData,
       fieldConfig: fieldConfig as Field,
       fieldSchemaMap,

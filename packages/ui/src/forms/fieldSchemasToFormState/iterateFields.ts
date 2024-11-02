@@ -10,9 +10,9 @@ import type {
 } from 'payload'
 
 import type { AddFieldStatePromiseArgs } from './addFieldStatePromise.js'
+import type { RenderFieldMethod } from './types.js'
 
 import { addFieldStatePromise } from './addFieldStatePromise.js'
-import { RenderFieldMethod } from './types.js'
 
 type Args = {
   addErrorPathToParent: (fieldPath: string) => void
@@ -51,6 +51,7 @@ type Args = {
   preferences?: DocumentPreferences
   previousFormState: FormState
   renderAllFields: boolean
+  renderFieldMethod: RenderFieldMethod
   req: PayloadRequest
   /**
    * Whether to skip checking the field's condition. @default false
@@ -61,7 +62,6 @@ type Args = {
    */
   skipValidation?: boolean
   state?: FormStateWithoutComponents
-  renderFieldMethod: RenderFieldMethod
 }
 
 /**
@@ -89,8 +89,8 @@ export const iterateFields = async ({
   preferences,
   previousFormState,
   renderAllFields,
-  req,
   renderFieldMethod,
+  req,
   skipConditionChecks = false,
   skipValidation = false,
   state = {},
@@ -120,7 +120,6 @@ export const iterateFields = async ({
         filter,
         forceFullValue,
         fullData,
-        renderFieldMethod,
         includeSchema,
         omitParents,
         operation,
@@ -132,6 +131,7 @@ export const iterateFields = async ({
         preferences,
         previousFormState,
         renderAllFields,
+        renderFieldMethod,
         req,
         skipConditionChecks,
         skipValidation,

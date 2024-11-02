@@ -20,6 +20,7 @@ export const MyServerFieldComponent: TextFieldServerComponent = (args) => {
     <React.Fragment>
       <h1>{String(fieldState.value)}</h1>
       <p>{JSON.stringify(siblingData)}</p>
+      <p>{path}</p>
       <TextField
         field={clientField}
         fieldState={fieldState}
