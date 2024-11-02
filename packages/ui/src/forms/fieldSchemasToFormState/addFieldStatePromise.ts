@@ -213,7 +213,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             row.id = row?.id || new ObjectId().toHexString()
 
             if (!omitParents && (!filter || filter(args))) {
-              state[[...parentPath, 'id'].join('.')] = {
+              state[parentPath + '.id'] = {
                 fieldSchema: includeSchema
                   ? field.fields.find((field) => 'name' in field && field.name === 'id')
                   : undefined,

@@ -44,7 +44,7 @@ import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
-import { prepareFields } from './prepareFields.js'
+import { reduceToSerializableFields } from './reduceToSerializableFields.js'
 
 const baseClass = 'form'
 
@@ -264,8 +264,8 @@ export const Form: React.FC<FormProps> = (props) => {
 
       // If submit handler comes through via props, run that
       if (onSubmit) {
-        const preparedFields = prepareFields(deepCopyObjectComplex(fields))
-        const data = reduceFieldsToValues(preparedFields, true)
+        const serializableFields = reduceToSerializableFields(deepCopyObjectComplex(fields))
+        const data = reduceFieldsToValues(serializableFields, true)
 
         if (overrides) {
           for (const [key, value] of Object.entries(overrides)) {
@@ -273,7 +273,7 @@ export const Form: React.FC<FormProps> = (props) => {
           }
         }
 
-        onSubmit(preparedFields, data)
+        onSubmit(fields, data)
       }
 
       if (!hasFormSubmitAction) {
@@ -431,8 +431,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const createFormData = useCallback((overrides: any = {}) => {
-    const preparedFields = prepareFields(deepCopyObjectComplex(contextRef.current.fields))
-    const data = reduceFieldsToValues(preparedFields, true)
+    const data = reduceFieldsToValues(contextRef.current.fields, true)
 
     const file = data?.file
 
@@ -476,7 +475,7 @@ export const Form: React.FC<FormProps> = (props) => {
         globalSlug,
         operation,
         renderAllFields: true,
-        schemaPath: collectionSlug ? [collectionSlug] : [globalSlug],
+        schemaPath: collectionSlug ? collectionSlug : globalSlug,
         signal: abortController.signal,
       })
 
@@ -527,7 +526,6 @@ export const Form: React.FC<FormProps> = (props) => {
         data,
         docPreferences,
         globalSlug,
-        path: path ? path.split('.') : [],
         renderAllFields: true,
         schemaPath,
         signal: abortController.signal,
@@ -685,10 +683,10 @@ export const Form: React.FC<FormProps> = (props) => {
           let revalidatedFormState: FormState = deepCopyObjectComplex(contextRef.current.fields) // deep copy, as we do not want prepareFields to mutate the original state. Complex, to avoid maximum call stack exceeded errors
 
           for (const onChangeFn of onChange) {
-            const prepared = prepareFields(revalidatedFormState, true)
             // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
+            const serializableFields = reduceToSerializableFields(revalidatedFormState)
             revalidatedFormState = await onChangeFn({
-              formState: prepared,
+              formState: serializableFields,
             })
           }
 

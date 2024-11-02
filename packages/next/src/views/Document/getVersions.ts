@@ -129,6 +129,32 @@ export const getVersions = async ({
           mostRecentVersionIsAutosaved = true
         }
       }
+
+      if (publishedQuery.docs?.[0]?.updatedAt) {
+        ;({ totalDocs: unpublishedVersionCount } = await payload.countVersions({
+          collection: collectionConfig.slug,
+          user,
+          where: {
+            and: [
+              {
+                parent: {
+                  equals: id,
+                },
+              },
+              {
+                'version._status': {
+                  equals: 'draft',
+                },
+              },
+              {
+                updatedAt: {
+                  greater_than: publishedQuery.docs[0].updatedAt,
+                },
+              },
+            ],
+          },
+        }))
+      }
     }
 
     ;({ totalDocs: versionCount } = await payload.countVersions({
@@ -144,32 +170,6 @@ export const getVersions = async ({
         ],
       },
     }))
-
-    if (publishedQuery.docs?.[0]?.updatedAt) {
-      ;({ totalDocs: unpublishedVersionCount } = await payload.countVersions({
-        collection: collectionConfig.slug,
-        user,
-        where: {
-          and: [
-            {
-              parent: {
-                equals: id,
-              },
-            },
-            {
-              'version._status': {
-                equals: 'draft',
-              },
-            },
-            {
-              updatedAt: {
-                greater_than: publishedQuery.docs[0].updatedAt,
-              },
-            },
-          ],
-        },
-      }))
-    }
   }
 
   if (globalConfig) {
@@ -203,6 +203,28 @@ export const getVersions = async ({
           mostRecentVersionIsAutosaved = true
         }
       }
+
+      if (publishedQuery?.updatedAt) {
+        ;({ totalDocs: unpublishedVersionCount } = await payload.countGlobalVersions({
+          depth: 0,
+          global: globalConfig.slug,
+          user,
+          where: {
+            and: [
+              {
+                'version._status': {
+                  equals: 'draft',
+                },
+              },
+              {
+                updatedAt: {
+                  greater_than: publishedQuery.updatedAt,
+                },
+              },
+            ],
+          },
+        }))
+      }
     }
 
     ;({ totalDocs: versionCount } = await payload.countGlobalVersions({
@@ -210,28 +232,6 @@ export const getVersions = async ({
       global: globalConfig.slug,
       user,
     }))
-
-    if (publishedQuery?.updatedAt) {
-      ;({ totalDocs: unpublishedVersionCount } = await payload.countGlobalVersions({
-        depth: 0,
-        global: globalConfig.slug,
-        user,
-        where: {
-          and: [
-            {
-              'version._status': {
-                equals: 'draft',
-              },
-            },
-            {
-              updatedAt: {
-                greater_than: publishedQuery.updatedAt,
-              },
-            },
-          ],
-        },
-      }))
-    }
   }
 
   return {

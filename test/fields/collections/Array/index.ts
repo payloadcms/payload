@@ -28,6 +28,15 @@ const ArrayFields: CollectionConfig = {
           type: 'text',
         },
         {
+          name: 'uiField',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: './collections/Array/LabelComponent.js#ArrayRowLabel',
+            },
+          },
+        },
+        {
           name: 'localizedText',
           type: 'text',
           localized: true,
