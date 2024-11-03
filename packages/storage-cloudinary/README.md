@@ -25,29 +25,29 @@ export default buildConfig({
   collections: [Media, MediaWithPrefix],
   plugins: [
     cloudinaryStorage({
+      enabled: true, // Optional, defaults to true
       collections: {
         [mediaSlug]: true,
         [mediaWithPrefixSlug]: {
           prefix,
         },
       },
-      folder: 'example',
+      folder: process.env.CLOUDINARY_FOLDER, // Optional
       config: {
         cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
         api_key: process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_API_SECRET
-      }
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+      },
     }),
   ],
 })
 ```
 
-
 ### Configuration Options
 
-| Option        | Description                                                                                         | Default   |
-| ------------- | --------------------------------------------------------------------------------------------------- | --------- |
-| `enabled`     | Whether or not to enable the plugin                                                                 | `true`    |
-| `collections` | Collections to apply the storage to                                                                 |           |
-| `folder`      | Folder name to upload files (if you want upload file to folder on Cloudinary)                                                                       |           |
-| `config`     | Cloudinary client configuration. See [Docs](https://cloudinary.com/documentation/node_integration#set_additional_configuration_parameters) |           |
+| Option        | Description                                                                                                                                | Default |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
+| `enabled`     | Whether or not to enable the plugin                                                                                                        | `true`  |
+| `collections` | Collections to apply the storage to                                                                                                        |         |
+| `folder`      | (Optional) Folder name to upload files (if you want upload file to folder on Cloudinary)                                                   |         |
+| `config`      | Cloudinary client configuration. See [Docs](https://cloudinary.com/documentation/node_integration#set_additional_configuration_parameters) |         |
