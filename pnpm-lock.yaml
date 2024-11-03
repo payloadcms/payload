@@ -1697,6 +1697,9 @@ importers:
       '@payloadcms/storage-azure':
         specifier: workspace:*
         version: link:../packages/storage-azure
+      '@payloadcms/storage-cloudinary':
+        specifier: workspace:*
+        version: link:../packages/storage-cloudinary
       '@payloadcms/storage-gcs':
         specifier: workspace:*
         version: link:../packages/storage-gcs

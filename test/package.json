@@ -50,6 +50,7 @@
     "@payloadcms/richtext-lexical": "workspace:*",
     "@payloadcms/richtext-slate": "workspace:*",
     "@payloadcms/storage-azure": "workspace:*",
+    "@payloadcms/storage-cloudinary": "workspace:*",
     "@payloadcms/storage-gcs": "workspace:*",
     "@payloadcms/storage-s3": "workspace:*",
     "@payloadcms/storage-uploadthing": "workspace:*",
