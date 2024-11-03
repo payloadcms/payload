@@ -16,6 +16,7 @@ import { getHandleUpload } from './handleUpload.js'
 import { getStaticHandler } from './staticHandler.js'
 
 // Video extensions
+// TODO: check file type based on mimetype (staticHandler & generateURL should be returning the type of the file)
 export const videoExtensions = [
   'mp2',
   'mp3',
