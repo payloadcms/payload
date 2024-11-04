@@ -86,6 +86,14 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const renderList = useCallback(
     async (slug: string, query?: ListQuery) => {
       try {
+        const newQuery: ListQuery = { ...(query || {}), where: { ...(query?.where || {}) } }
+
+        const filterOption = filterOptions?.[slug]
+
+        if (filterOptions && typeof filterOption !== 'boolean') {
+          newQuery.where = hoistQueryParamsToAnd(newQuery.where, filterOption)
+        }
+
         const { List: ViewResult } = (await serverFunction({
           name: 'render-list',
           args: {
@@ -94,19 +102,21 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
             disableBulkEdit: true,
             drawerSlug,
             enableRowSelections,
-            query,
+            query: newQuery,
           },
         })) as { List: React.ReactNode }
 
         setListView(ViewResult)
         setIsLoading(false)
       } catch (_err) {
+        console.error('Error rendering List View: ', _err) // eslint-disable-line no-console
+
         if (isOpen) {
           closeModal(drawerSlug)
         }
       }
     },
-    [serverFunction, closeModal, drawerSlug, isOpen, enableRowSelections],
+    [serverFunction, closeModal, drawerSlug, isOpen, enableRowSelections, filterOptions],
   )
 
   useEffect(() => {
