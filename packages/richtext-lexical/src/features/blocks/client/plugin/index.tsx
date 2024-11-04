@@ -44,10 +44,7 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   const [targetNodeKey, setTargetNodeKey] = useState<null | string>(null)
   const { i18n, t } = useTranslation<string, any>()
   const {
-    fieldProps: {
-      field: { richTextComponentMap },
-      schemaPath,
-    },
+    fieldProps: { featureClientSchemaMap, schemaPath },
   } = useEditorConfigContext()
   const { uuid } = useEditorConfigContext()
   const editDepth = useEditDepth()
@@ -57,7 +54,7 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
     depth: editDepth,
   })
 
-  const { toggleDrawer } = useLexicalDrawer(drawerSlug)
+  const { toggleDrawer } = useLexicalDrawer(drawerSlug, true)
 
   useEffect(() => {
     if (!editor.hasNodes([BlockNode])) {
@@ -160,16 +157,13 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
     return null
   }
 
-  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.lexical_inline_blocks.${blockFields?.blockType}`
+  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${blockFields?.blockType}`
 
-  const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
-  const blocksField: BlocksFieldClient = richTextComponentMap?.has(componentMapRenderedBlockPath)
-    ? richTextComponentMap.get(componentMapRenderedBlockPath)[0]
-    : null
+  const clientSchemaMap = featureClientSchemaMap['blocks']
 
-  const clientBlock = blocksField
-    ? blocksField.blocks.find((block) => block.slug === blockFields?.blockType)
-    : null
+  const blocksField: BlocksFieldClient = clientSchemaMap[schemaFieldsPath][0] as BlocksFieldClient
+
+  const clientBlock = blocksField.blocks[0]
 
   if (!blocksField) {
     return null
@@ -197,8 +191,8 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
 
         editor.dispatchCommand(INSERT_INLINE_BLOCK_COMMAND, data)
       }}
-      schemaFieldsPathOverride={schemaFieldsPath}
-      schemaPathSuffix={blockFields?.blockType}
+      schemaPath={schemaPath}
+      schemaPathSuffix={`lexical_blocks.${blockFields?.blockType}.fields`}
     />
   )
 }
