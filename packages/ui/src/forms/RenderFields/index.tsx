@@ -15,7 +15,7 @@ import { GroupField } from '../../fields/Group/index.js'
 import { HiddenField } from '../../fields/Hidden/index.js'
 import { RowField } from '../../fields/Row/index.js'
 import { TabsField } from '../../fields/Tabs/index.js'
-import { useField } from '../../forms/useField/index.js'
+import { useFormFields } from '../../forms/Form/index.js'
 import { useFieldComponents } from '../../providers/FieldComponents/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import './index.scss'
@@ -147,14 +147,12 @@ function RenderField({
   schemaPath,
 }: RenderFieldProps) {
   const fieldComponents = useFieldComponents()
-  const field = useField({ path })
+  const Field = useFormFields(
+    ([fields]) => (fields && fields?.[path]?.customComponents?.Field) || null,
+  )
 
-  if (field) {
-    const { customComponents: { Field } = {} } = field
-
-    if (Field) {
-      return Field
-    }
+  if (Field) {
+    return Field
   }
 
   const sharedProps: Pick<
