@@ -36,9 +36,6 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
       localized,
       required,
     },
-    fieldState: {
-      customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
-    } = {},
     path: pathFromProps,
     readOnly,
     validate,
@@ -54,7 +51,12 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
     [validate, required],
   )
 
-  const { setValue, showError, value } = useField({
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    setValue,
+    showError,
+    value,
+  } = useField({
     path,
     validate: memoizedValidate,
   })

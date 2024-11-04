@@ -47,7 +47,6 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       minRows: minRowsProp,
       required,
     },
-    fieldState: { customComponents: { Description, Error, Label } = {} } = {},
     path: pathFromProps,
     permissions,
     readOnly,
@@ -96,6 +95,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   )
 
   const {
+    customComponents: { Description, Error, Label } = {},
     errorPaths,
     rows = [],
     showError,

@@ -45,7 +45,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       minRows: minRowsProp,
       required,
     },
-    fieldState: { customComponents: { Description, Error, Label } = {} } = {},
     forceRender = false,
     path: pathFromProps,
     permissions,
@@ -111,6 +110,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   )
 
   const {
+    customComponents: { Description, Error, Label } = {},
     errorPaths,
     rows: rowsData = [],
     showError,

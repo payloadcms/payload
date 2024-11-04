@@ -2,7 +2,6 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { MarkOptional } from 'ts-essentials'
 
 import type { FieldPermissions, User } from '../../auth/types.js'
-import type { SanitizedConfig } from '../../config/types.js'
 import type { ClientBlock, ClientField, Field } from '../../fields/config/types.js'
 import type { Payload } from '../../types/index.js'
 import type {
@@ -17,8 +16,8 @@ import type {
 export type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
 
 export type ClientComponentProps = {
+  customComponents: FormField['customComponents']
   field: ClientBlock | ClientField | ClientTab
-  fieldState: FormField
   forceRender?: boolean
   indexPath: string
   parentPath: string
@@ -32,7 +31,6 @@ export type ClientComponentProps = {
 
 export type ServerComponentProps = {
   clientField: ClientFieldWithOptionalType
-  config: SanitizedConfig
   data: Data
   field: Field
   /**
@@ -55,7 +53,7 @@ export type ClientFieldBase<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
 > = {
   readonly field: TFieldClient
-} & Omit<ClientComponentProps, 'field'>
+} & Omit<ClientComponentProps, 'customComponents' | 'field'>
 
 export type ServerFieldBase<
   TFieldServer extends Field = Field,

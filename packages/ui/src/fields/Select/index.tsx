@@ -45,9 +45,6 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       options: optionsFromProps = [],
       required,
     },
-    fieldState: {
-      customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
-    } = {},
     onChange: onChangeFromProps,
     path: pathFromProps,
     readOnly,
@@ -66,7 +63,12 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
     [validate, required, hasMany, options],
   )
 
-  const { setValue, showError, value } = useField({
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    setValue,
+    showError,
+    value,
+  } = useField({
     path,
     validate: memoizedValidate,
   })

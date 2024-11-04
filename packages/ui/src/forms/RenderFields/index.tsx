@@ -1,13 +1,12 @@
 'use client'
 
-import type { FieldPermissions } from 'payload'
+import type { ClientComponentProps, ClientField, FieldPermissions } from 'payload'
 
 import { getFieldPaths } from 'payload/shared'
 import React from 'react'
 
 import type { Props } from './types.js'
 
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { RenderIfInViewport } from '../../elements/RenderIfInViewport/index.js'
 import { ArrayField } from '../../fields/Array/index.js'
 import { BlocksField } from '../../fields/Blocks/index.js'
@@ -16,7 +15,7 @@ import { GroupField } from '../../fields/Group/index.js'
 import { HiddenField } from '../../fields/Hidden/index.js'
 import { RowField } from '../../fields/Row/index.js'
 import { TabsField } from '../../fields/Tabs/index.js'
-import { useForm } from '../../forms/Form/context.js'
+import { useField } from '../../forms/useField/index.js'
 import { useFieldComponents } from '../../providers/FieldComponents/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import './index.scss'
@@ -38,15 +37,7 @@ export const RenderFields: React.FC<Props> = (props) => {
     readOnly: readOnlyFromParent,
   } = props
 
-  const { fields: formFields } = useForm()
-
   const operation = useOperation()
-
-  const fieldComponents = useFieldComponents()
-
-  if (!formFields) {
-    return <p>No fields to render</p>
-  }
 
   if (fields && fields.length > 0) {
     return (
@@ -79,12 +70,6 @@ export const RenderFields: React.FC<Props> = (props) => {
             parentSchemaPath,
           })
 
-          const formState = formFields[path]
-
-          const CustomField = formState?.customComponents?.Field
-
-          const DefaultField = fieldComponents?.[field?.type]
-
           // if the user cannot read the field, then filter it out
           // this is different from `admin.readOnly` which is executed based on `operation`
           if (
@@ -115,65 +100,19 @@ export const RenderFields: React.FC<Props> = (props) => {
             isReadOnly = true
           }
 
-          const sharedProps = {
-            fieldState: formState,
-            forceRender,
-            indexPath,
-            parentPath,
-            parentSchemaPath,
-            path,
-            readOnly: isReadOnly,
-            schemaPath,
-          }
-
-          let FallbackField = null
-
-          switch (field.type) {
-            // named fields with subfields
-            case 'array':
-              FallbackField = (
-                <ArrayField {...sharedProps} field={field} permissions={fieldPermissions} />
-              )
-              break
-            case 'blocks':
-              FallbackField = (
-                <BlocksField {...sharedProps} field={field} permissions={fieldPermissions} />
-              )
-              break
-            case 'group':
-              FallbackField = (
-                <GroupField {...sharedProps} field={field} permissions={fieldPermissions} />
-              )
-              break
-            case 'tabs':
-              FallbackField = (
-                <TabsField {...sharedProps} field={field} permissions={fieldPermissions} />
-              )
-              break
-
-            // unnamed fields with subfields
-            case 'row':
-              FallbackField = (
-                <RowField {...sharedProps} field={field} permissions={fieldPermissions} />
-              )
-              break
-            case 'collapsible':
-              FallbackField = (
-                <CollapsibleField {...sharedProps} field={field} permissions={fieldPermissions} />
-              )
-              break
-
-            default:
-              FallbackField = <DefaultField field={field} {...sharedProps} />
-              break
-          }
-
-          if (field.admin?.hidden) {
-            FallbackField = <HiddenField field={field} {...sharedProps} />
-          }
-
           return (
-            <RenderCustomComponent CustomComponent={CustomField} Fallback={FallbackField} key={i} />
+            <RenderField
+              clientFieldConfig={field}
+              forceRender={forceRender}
+              indexPath={indexPath}
+              key={path}
+              parentPath={parentPath}
+              parentSchemaPath={parentSchemaPath}
+              path={path}
+              permissions={fieldPermissions}
+              readOnly={isReadOnly}
+              schemaPath={schemaPath}
+            />
           )
         })}
       </RenderIfInViewport>
@@ -181,4 +120,95 @@ export const RenderFields: React.FC<Props> = (props) => {
   }
 
   return null
+}
+
+type RenderFieldProps = {
+  clientFieldConfig: ClientField
+  permissions: FieldPermissions
+} & Pick<
+  ClientComponentProps,
+  | 'forceRender'
+  | 'indexPath'
+  | 'parentPath'
+  | 'parentSchemaPath'
+  | 'path'
+  | 'readOnly'
+  | 'schemaPath'
+>
+function RenderField({
+  clientFieldConfig,
+  forceRender,
+  indexPath,
+  parentPath,
+  parentSchemaPath,
+  path,
+  permissions,
+  readOnly,
+  schemaPath,
+}: RenderFieldProps) {
+  const fieldComponents = useFieldComponents()
+  const field = useField({ path })
+
+  if (field) {
+    const { customComponents: { Field } = {} } = field
+
+    if (Field) {
+      return Field
+    }
+  }
+
+  const sharedProps: Pick<
+    ClientComponentProps,
+    | 'forceRender'
+    | 'indexPath'
+    | 'parentPath'
+    | 'parentSchemaPath'
+    | 'path'
+    | 'readOnly'
+    | 'schemaPath'
+  > = {
+    forceRender,
+    indexPath,
+    parentPath,
+    parentSchemaPath,
+    path,
+    readOnly,
+    schemaPath,
+  }
+
+  if (clientFieldConfig.admin?.hidden) {
+    return <HiddenField field={clientFieldConfig} {...sharedProps} />
+  }
+
+  const DefaultField = fieldComponents?.[clientFieldConfig?.type]
+
+  switch (clientFieldConfig.type) {
+    // named fields with subfields
+    case 'array':
+      return (
+        <ArrayField
+          {...sharedProps}
+          field={clientFieldConfig}
+          path="test"
+          permissions={permissions}
+        />
+      )
+    case 'blocks':
+      return <BlocksField {...sharedProps} field={clientFieldConfig} permissions={permissions} />
+    case 'group':
+      return <GroupField {...sharedProps} field={clientFieldConfig} permissions={permissions} />
+    case 'tabs':
+      return <TabsField {...sharedProps} field={clientFieldConfig} permissions={permissions} />
+
+    // unnamed fields with subfields
+    case 'row':
+      return <RowField {...sharedProps} field={clientFieldConfig} permissions={permissions} />
+    case 'collapsible':
+      return (
+        <CollapsibleField {...sharedProps} field={clientFieldConfig} permissions={permissions} />
+      )
+
+    default:
+      return DefaultField ? <DefaultField field={clientFieldConfig} {...sharedProps} /> : null
+  }
 }

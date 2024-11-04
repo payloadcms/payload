@@ -31,7 +31,6 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
       fields,
       label,
     },
-    fieldState: { customComponents: { Description, Label } = {} } = {},
     path: pathFromProps,
     permissions,
     readOnly,
@@ -44,7 +43,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const isWithinGroup = useGroup()
   const isWithinRow = useRow()
   const isWithinTab = useTabs()
-  const { errorPaths } = useField({ path })
+  const { customComponents: { Description, Label } = {}, errorPaths } = useField({ path })
   const submitted = useFormSubmitted()
   const errorCount = errorPaths.length
   const fieldHasErrors = submitted && errorCount > 0

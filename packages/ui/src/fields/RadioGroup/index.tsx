@@ -34,7 +34,6 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
       options = [],
       required,
     } = {} as RadioFieldClientProps['field'],
-    fieldState: { customComponents: { Description, Error, Label } = {} } = {},
     onChange: onChangeFromProps,
     path: pathFromProps,
     readOnly,
@@ -55,6 +54,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
   )
 
   const {
+    customComponents: { Description, Error, Label } = {},
     setValue,
     showError,
     value: valueFromContext,

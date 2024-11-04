@@ -102,6 +102,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
   // to prevent unnecessary rerenders
   const result: FieldType<T> = useMemo(
     () => ({
+      customComponents: field?.customComponents,
       errorMessage: field?.errorMessage,
       errorPaths: field?.errorPaths || [],
       filterOptions,
@@ -130,6 +131,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
       path,
       filterOptions,
       initializing,
+      field?.customComponents,
     ],
   )
 

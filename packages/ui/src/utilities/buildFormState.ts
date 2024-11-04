@@ -239,7 +239,7 @@ export const buildFormState = async (
     fields,
     fieldSchemaMap,
     operation,
-    permissions: docPermissions?.['fields'] || {},
+    permissions: docPermissions?.fields || {},
     preferences: docPreferences || { fields: {} },
     previousFormState: formState,
     renderAllFields,

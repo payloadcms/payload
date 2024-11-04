@@ -1,7 +1,7 @@
 import { type SupportedLanguages } from '@payloadcms/translations'
 
 import type { DocumentPermissions } from '../../auth/types.js'
-import type { Field } from '../../fields/config/types.js'
+import type { Field, Validate } from '../../fields/config/types.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 
@@ -43,6 +43,7 @@ export type FieldState = {
   requiresRender?: boolean
   rows?: Row[]
   valid: boolean
+  validate?: Validate
   value: unknown
 }
 

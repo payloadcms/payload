@@ -25,9 +25,6 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
       localized,
       required,
     },
-    fieldState: {
-      customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
-    } = {},
     path: pathFromProps,
     readOnly,
     validate,
@@ -46,6 +43,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
   )
 
   const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     setValue,
     showError,
     value = [null, null],

@@ -48,27 +48,23 @@ export const renderField: RenderFieldMethod = ({
     : ({} as FieldPermissions)
 
   const clientProps: ClientComponentProps = {
+    customComponents: fieldState?.customComponents || {},
     field: clientField,
-    fieldState, // I DO NOT THINK WE SHOULD ADD FIELD STATE THIS HERE
     indexPath,
     parentPath,
     parentSchemaPath,
     path,
-    readOnly: false, // @TODO fix this
+    readOnly: false,
     schemaPath,
   }
 
-  // TODO: make sure we didn't lose any props from
-  // the current 3.0 branch
-  // - user is missing from here for example
   const serverProps: ServerComponentProps = {
     clientField,
-    config: req.payload.config,
     data,
     field: fieldConfig,
     fieldSchemaMap,
     permissions,
-    // TODO: not sure that I like how we pass the whole field state. Should we pass explicit values? initialValue, value, valid
+    // TODO: Should we pass explicit values? initialValue, value, valid
     // value and initialValue should be typed
     formState,
     i18n: req.i18n,

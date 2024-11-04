@@ -38,9 +38,6 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
       min = -Infinity,
       required,
     },
-    fieldState: {
-      customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
-    } = {},
     onChange: onChangeFromProps,
     path: pathFromProps,
     readOnly,
@@ -59,7 +56,12 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
     [validate, min, max, required],
   )
 
-  const { setValue, showError, value } = useField<number | number[]>({
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    setValue,
+    showError,
+    value,
+  } = useField<number | number[]>({
     path,
     validate: memoizedValidate,
   })

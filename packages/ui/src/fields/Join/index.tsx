@@ -23,7 +23,6 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
       on,
       required,
     },
-    fieldState: { customComponents: { AfterInput, BeforeInput, Label } } = {},
     path: pathFromProps,
     schemaPath,
   } = props
@@ -32,9 +31,10 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
 
   const { id: docID } = useDocumentInfo()
 
-  const { value } = useField<PaginatedDocs>({
-    path,
-  })
+  const { customComponents: { AfterInput, BeforeInput, Label } = {}, value } =
+    useField<PaginatedDocs>({
+      path,
+    })
 
   const filterOptions: Where = useMemo(
     () => ({

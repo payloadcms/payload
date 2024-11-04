@@ -41,9 +41,6 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
       label,
       required,
     } = {} as CheckboxFieldClientProps['field'],
-    fieldState: {
-      customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
-    } = {},
     onChange: onChangeFromProps,
     partialChecked,
     path: pathFromProps,
@@ -65,7 +62,12 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
     [validate, required],
   )
 
-  const { setValue, showError, value } = useField({
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    setValue,
+    showError,
+    value,
+  } = useField({
     disableFormData,
     path,
     validate: memoizedValidate,

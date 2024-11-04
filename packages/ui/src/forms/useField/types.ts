@@ -1,4 +1,4 @@
-import type { FilterOptionsResult, Row, Validate } from 'payload'
+import type { FieldState, FilterOptionsResult, Row, Validate } from 'payload'
 
 export type Options = {
   disableFormData?: boolean
@@ -8,6 +8,7 @@ export type Options = {
 }
 
 export type FieldType<T> = {
+  customComponents?: FieldState['customComponents']
   errorMessage?: string
   errorPaths?: string[]
   filterOptions?: FilterOptionsResult

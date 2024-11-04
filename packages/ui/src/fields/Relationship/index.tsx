@@ -56,7 +56,6 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       relationTo,
       required,
     },
-    fieldState: { customComponents: { Description, Error, Label } = {} } = {},
     path: pathFromProps,
     readOnly,
     validate,
@@ -102,7 +101,14 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     [validate, required],
   )
 
-  const { filterOptions, initialValue, setValue, showError, value } = useField<Value | Value[]>({
+  const {
+    customComponents: { Description, Error, Label } = {},
+    filterOptions,
+    initialValue,
+    setValue,
+    showError,
+    value,
+  } = useField<Value | Value[]>({
     path,
     validate: memoizedValidate,
   })

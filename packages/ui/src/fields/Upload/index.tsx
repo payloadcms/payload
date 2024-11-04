@@ -27,9 +27,6 @@ export function UploadComponent(props: UploadFieldClientProps) {
       relationTo,
       required,
     },
-    fieldState: {
-      customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
-    } = {},
     path: pathFromProps,
     readOnly,
     validate,
@@ -48,6 +45,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
   )
 
   const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     filterOptions,
     readOnly: readOnlyFromField,
     setValue,

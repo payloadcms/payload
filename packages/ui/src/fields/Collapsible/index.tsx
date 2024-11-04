@@ -9,6 +9,7 @@ import { RenderCustomComponent } from '../../elements/RenderCustomComponent/inde
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { RowLabel } from '../../forms/RowLabel/index.js'
+import { useField } from '../../forms/useField/index.js'
 import { WatchChildErrors } from '../../forms/WatchChildErrors/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -23,7 +24,6 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
   const {
     field,
     field: { admin: { className, description, initCollapsed = false } = {}, fields, label } = {},
-    fieldState: { customComponents: { Description, Label } = {} } = {},
     indexPath,
     parentPath,
     parentSchemaPath,
@@ -40,6 +40,10 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
   const fieldPreferencesKey = `collapsible-${schemaPath?.replace(/\./g, '__')}`
   const [errorCount, setErrorCount] = useState(0)
   const fieldHasErrors = errorCount > 0
+
+  const { customComponents: { Description, Label } = {} } = useField({
+    path,
+  })
 
   const onToggle = useCallback(
     async (newCollapsedState: boolean): Promise<void> => {

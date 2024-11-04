@@ -28,9 +28,6 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
       minLength,
       required,
     },
-    fieldState: {
-      customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
-    } = {},
     path: pathFromProps,
     readOnly,
     validate,
@@ -61,7 +58,12 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
     [validate, required, maxLength, minLength],
   )
 
-  const { setValue, showError, value } = useField<string>({
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    setValue,
+    showError,
+    value,
+  } = useField<string>({
     path,
     validate: memoizedValidate,
   })

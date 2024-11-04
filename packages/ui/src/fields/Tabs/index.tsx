@@ -1,5 +1,12 @@
 'use client'
-import type { ClientTab, DocumentPreferences, TabsFieldClientComponent } from 'payload'
+import type {
+  ClientField,
+  ClientTab,
+  DocumentPreferences,
+  FieldPermissions,
+  StaticDescription,
+  TabsFieldClientComponent,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { tabHasName, toKebabCase } from 'payload/shared'
@@ -8,6 +15,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
+import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
@@ -39,7 +47,6 @@ function generateTabPath({ activeTabConfig, path }: { activeTabConfig: ClientTab
 const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const {
     field: { admin: { className } = {}, tabs = [] },
-    fieldState: { customComponents: { AfterInput, BeforeInput, Description } = {} } = {},
     forceRender = false,
     indexPath,
     parentPath,
@@ -178,43 +185,25 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
         </div>
         <div className={`${baseClass}__content-wrap`}>
           {activeTabConfig && (
-            <div
-              className={[
-                `${baseClass}__tab`,
-                activeTabConfig.label &&
-                  `${baseClass}__tabConfigLabel-${toKebabCase(
-                    getTranslation(activeTabConfig.label, i18n),
-                  )}`,
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              <RenderCustomComponent
-                CustomComponent={Description}
-                Fallback={
-                  <FieldDescription description={activeTabStaticDescription} path={activeTabPath} />
-                }
-              />
-              {BeforeInput}
-              <RenderFields
-                fields={activeTabConfig.fields}
-                forceRender={forceRender}
-                parentIndexPath={
-                  tabHasName(activeTabConfig)
-                    ? ''
-                    : `${indexPath ? indexPath + '-' : ''}` + String(activeTabIndex)
-                }
-                parentPath={activePathChildrenPath}
-                parentSchemaPath={activePathSchemaChildrenPath}
-                permissions={
-                  'name' in activeTabConfig && permissions?.[activeTabConfig.name]?.fields
-                    ? permissions[activeTabConfig.name].fields
-                    : permissions
-                }
-                readOnly={readOnly}
-              />
-              {AfterInput}
-            </div>
+            <ActiveTabContent
+              description={activeTabStaticDescription}
+              fields={activeTabConfig.fields}
+              forceRender={forceRender}
+              parentIndexPath={
+                tabHasName(activeTabConfig)
+                  ? ''
+                  : `${indexPath ? indexPath + '-' : ''}` + String(activeTabIndex)
+              }
+              parentPath={activePathChildrenPath}
+              parentSchemaPath={activePathSchemaChildrenPath}
+              path={activeTabPath}
+              permissions={
+                'name' in activeTabConfig && permissions?.[activeTabConfig.name]?.fields
+                  ? permissions[activeTabConfig.name].fields
+                  : permissions
+              }
+              readOnly={readOnly}
+            />
           )}
         </div>
       </TabsProvider>
@@ -223,3 +212,64 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
 }
 
 export const TabsField = withCondition(TabsFieldComponent)
+
+type ActiveTabProps = {
+  description: StaticDescription
+  fields: ClientField[]
+  forceRender?: boolean
+  label?: string
+  parentIndexPath: string
+  parentPath: string
+  parentSchemaPath: string
+  path: string
+  permissions: FieldPermissions
+  readOnly: boolean
+}
+function ActiveTabContent({
+  description,
+  fields,
+  forceRender,
+  label,
+  parentIndexPath,
+  parentPath,
+  parentSchemaPath,
+  path,
+  permissions,
+  readOnly,
+}: ActiveTabProps) {
+  const { i18n } = useTranslation()
+  const { customComponents: { AfterInput, BeforeInput, Description, Field } = {} } = useField({
+    path,
+  })
+
+  if (Field) {
+    return Field
+  }
+
+  return (
+    <div
+      className={[
+        `${baseClass}__tab`,
+        label && `${baseClass}__tabConfigLabel-${toKebabCase(getTranslation(label, i18n))}`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      <RenderCustomComponent
+        CustomComponent={Description}
+        Fallback={<FieldDescription description={description} path={path} />}
+      />
+      {BeforeInput}
+      <RenderFields
+        fields={fields}
+        forceRender={forceRender}
+        parentIndexPath={parentIndexPath}
+        parentPath={parentPath}
+        parentSchemaPath={parentSchemaPath}
+        permissions={permissions}
+        readOnly={readOnly}
+      />
+      {AfterInput}
+    </div>
+  )
+}
