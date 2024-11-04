@@ -1,11 +1,17 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { ListPreferences, ListQuery } from '@payloadcms/ui'
-import type { ClientConfig, PayloadRequest, SanitizedConfig, VisibleEntities } from 'payload'
+import type {
+  ClientConfig,
+  Data,
+  DocumentPreferences,
+  PayloadRequest,
+  SanitizedConfig,
+  VisibleEntities,
+} from 'payload'
 
 import { headers as getHeaders } from 'next/headers.js'
 import { createClientConfig, getAccessResults, isEntityHidden, parseCookies } from 'payload'
 
-import { renderListView } from '../views/List/index.js'
+import { renderDocument } from './index.js'
 
 let cachedClientConfig = global._payload_clientConfig
 
@@ -31,32 +37,28 @@ export const getClientConfig = (args: {
   return cachedClientConfig
 }
 
-type RenderListResult = {
-  List: React.ReactNode
-  preferences: ListPreferences
+type RenderDocumentResult = {
+  data: any
+  Document: React.ReactNode
+  preferences: DocumentPreferences
 }
 
-export const renderList = async (args: {
+export const renderDocumentHandler = async (args: {
   collectionSlug: string
   disableActions?: boolean
-  disableBulkDelete?: boolean
-  disableBulkEdit?: boolean
-  documentDrawerSlug: string
+  docID: string
   drawerSlug?: string
-  enableRowSelections: boolean
-  query: ListQuery
+  initialData?: Data
   redirectAfterDelete: boolean
   redirectAfterDuplicate: boolean
   req: PayloadRequest
-}): Promise<RenderListResult> => {
+}): Promise<RenderDocumentResult> => {
   const {
     collectionSlug,
     disableActions,
-    disableBulkDelete,
-    disableBulkEdit,
+    docID,
     drawerSlug,
-    enableRowSelections,
-    query,
+    initialData,
     redirectAfterDelete,
     redirectAfterDuplicate,
     req,
@@ -110,6 +112,7 @@ export const renderList = async (args: {
     i18n,
   })
 
+  // get prefs, then set update them using the columns that we just received
   const preferencesKey = `${collectionSlug}-list`
 
   const preferences = await payload
@@ -137,7 +140,7 @@ export const renderList = async (args: {
         ],
       },
     })
-    .then((res) => res.docs[0]?.value as ListPreferences)
+    .then((res) => res.docs[0]?.value as DocumentPreferences)
 
   const visibleEntities: VisibleEntities = {
     collections: payload.config.collections
@@ -152,19 +155,18 @@ export const renderList = async (args: {
     req,
   })
 
-  const { List } = await renderListView({
+  const { data, Document } = await renderDocument({
     clientConfig,
     disableActions,
-    disableBulkDelete,
-    disableBulkEdit,
     drawerSlug,
-    enableRowSelections,
     importMap: payload.importMap,
+    initialData,
     initPageResult: {
       collectionConfig: payload.config.collections.find(
         (collection) => collection.slug === collectionSlug,
       ),
       cookies,
+      docID,
       globalConfig: payload.config.globals.find((global) => global.slug === collectionSlug),
       languageOptions: undefined, // TODO
       permissions,
@@ -173,16 +175,16 @@ export const renderList = async (args: {
       visibleEntities,
     },
     params: {
-      segments: ['collections', collectionSlug],
+      segments: ['collections', collectionSlug, docID],
     },
-    query,
     redirectAfterDelete,
     redirectAfterDuplicate,
     searchParams: {},
   })
 
   return {
-    List,
+    data,
+    Document,
     preferences,
   }
 }

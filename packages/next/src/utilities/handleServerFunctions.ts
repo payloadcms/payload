@@ -3,14 +3,14 @@ import type { ServerFunction, ServerFunctionHandler } from 'payload'
 import { buildFormStateHandler } from '@payloadcms/ui/utilities/buildFormState'
 import { buildTableState } from '@payloadcms/ui/utilities/buildTableState'
 
+import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
+import { renderListHandler } from '../views/List/handleServerFunction.js'
 import { initReq } from './initReq.js'
-import { renderDocumentFn } from './renderDocument.js'
-import { renderList } from './renderList.js'
 
 const defaultFunctions = {
   'form-state': buildFormStateHandler as any as ServerFunction,
-  'render-document': renderDocumentFn as any as ServerFunction,
-  'render-list': renderList as any as ServerFunction,
+  'render-document': renderDocumentHandler as any as ServerFunction,
+  'render-list': renderListHandler as any as ServerFunction,
   'table-state': buildTableState as any as ServerFunction,
 }
 
