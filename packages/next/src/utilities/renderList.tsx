@@ -1,6 +1,5 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { ListPreferences } from '@payloadcms/ui'
-import type { ListQuery } from 'packages/ui/src/providers/ListQuery/index.js'
+import type { ListPreferences, ListQuery } from '@payloadcms/ui'
 import type { ClientConfig, PayloadRequest, SanitizedConfig, VisibleEntities } from 'payload'
 
 import { headers as getHeaders } from 'next/headers.js'
@@ -37,7 +36,7 @@ type RenderListResult = {
   preferences: ListPreferences
 }
 
-export const renderListFn = async (args: {
+export const renderList = async (args: {
   collectionSlug: string
   disableActions?: boolean
   disableBulkDelete?: boolean
