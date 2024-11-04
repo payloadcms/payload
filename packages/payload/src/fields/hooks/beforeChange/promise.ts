@@ -230,7 +230,7 @@ export const promise = async ({
       if (typeof siblingDoc[field.name] !== 'object') {
         siblingDoc[field.name] = {}
       }
-      if (typeof siblingDocWithLocales[field.name] !== 'object') {
+      if (siblingDocWithLocales && typeof siblingDocWithLocales?.[field.name] !== 'object') {
         siblingDocWithLocales[field.name] = {}
       }
 
@@ -251,7 +251,7 @@ export const promise = async ({
         schemaPath: fieldSchemaPath,
         siblingData: siblingData[field.name] as JsonObject,
         siblingDoc: siblingDoc[field.name] as JsonObject,
-        siblingDocWithLocales: siblingDocWithLocales[field.name] as JsonObject,
+        siblingDocWithLocales: siblingDocWithLocales?.[field.name] as JsonObject,
         skipValidation: skipValidationFromHere,
       })
 
