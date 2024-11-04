@@ -10,7 +10,7 @@ export const addSelectGenericsToGeneratedTypes = ({
 
   for (const line of compiledGeneratedTypes.split('\n')) {
     let newLine = line
-    if (line === `  collectionsSelect: {` || line === `  globalsSelect?: {`) {
+    if (line === `  collectionsSelect: {` || line === `  globalsSelect: {`) {
       isCollectionsSelectToken = true
     }
 

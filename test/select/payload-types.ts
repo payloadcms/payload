@@ -39,7 +39,7 @@ export interface Config {
     'global-post': GlobalPost;
   };
   globalsSelect: {
-    'global-post': GlobalPostSelect;
+    'global-post': GlobalPostSelect<false> | GlobalPostSelect<true>;
   };
   locale: 'en' | 'de';
   user: User & {
