@@ -37,14 +37,20 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   const [editor] = useLexicalComposerContext()
   const { i18n, t } = useTranslation<object, string>()
   const {
-    fieldProps: { field },
+    fieldProps: { featureClientSchemaMap, readOnly, schemaPath },
   } = useEditorConfigContext()
   const inlineBlockElemElemRef = useRef<HTMLDivElement | null>(null)
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
 
-  const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
-  const blocksField: BlocksFieldClient = richTextComponentMap?.get(componentMapRenderedBlockPath)[0]
-  const clientBlock = blocksField.blocks.find((block) => block.slug === formData.blockType)
+  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${formData.blockType}`
+
+  const clientSchemaMap = featureClientSchemaMap['blocks']
+
+  const blocksField: BlocksFieldClient = clientSchemaMap[
+    componentMapRenderedBlockPath
+  ][0] as BlocksFieldClient
+
+  const clientBlock = blocksField.blocks[0]
 
   const removeInlineBlock = useCallback(() => {
     editor.update(() => {
@@ -119,13 +125,13 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         .join(' ')}
       ref={inlineBlockElemElemRef}
     >
-      {Label ? Label : <div>{getTranslation(clientBlock!.labels!.singular, i18n)}</div>}
+      {Label ? Label : <div>{getTranslation(clientBlock.labels!.singular, i18n)}</div>}
       {editor.isEditable() && (
         <div className={`${baseClass}__actions`}>
           <Button
             buttonStyle="icon-label"
             className={`${baseClass}__editButton`}
-            disabled={field?.admin?.readOnly}
+            disabled={readOnly}
             el="div"
             icon="edit"
             onClick={() => {
@@ -141,7 +147,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           <Button
             buttonStyle="icon-label"
             className={`${baseClass}__removeButton`}
-            disabled={field?.admin?.readOnly}
+            disabled={readOnly}
             icon="x"
             onClick={(e) => {
               e.preventDefault()

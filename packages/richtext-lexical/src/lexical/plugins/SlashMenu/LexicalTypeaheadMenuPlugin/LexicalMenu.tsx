@@ -256,19 +256,21 @@ export function LexicalMenu({
 
   const selectItemAndCleanUp = useCallback(
     (selectedItem: SlashMenuItem) => {
+      let textNodeContainingQuery: null | TextNode = null
       editor.update(() => {
-        const textNodeContainingQuery =
+        textNodeContainingQuery =
           resolution.match != null && shouldSplitNodeWithQuery
             ? $splitNodeContainingQuery(resolution.match)
             : null
-
+      })
+      setTimeout(() => {
         onSelectItem(
           selectedItem,
           textNodeContainingQuery,
           close,
           resolution.match ? resolution.match.matchingString : '',
         )
-      })
+      }, 0)
     },
     [editor, shouldSplitNodeWithQuery, resolution.match, onSelectItem, close],
   )

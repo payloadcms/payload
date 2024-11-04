@@ -54,7 +54,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     componentMapRenderedBlockPath
   ][0] as BlocksFieldClient
 
-  const clientBlock = blocksField.blocks.find((block) => block.slug === formData.blockType)
+  const clientBlock = blocksField.blocks[0]
 
   const { i18n } = useTranslation()
 
