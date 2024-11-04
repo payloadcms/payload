@@ -680,17 +680,14 @@ describe('Relationships', () => {
         expect(query.docs).toHaveLength(1)
         expect(query.docs[0].id).toStrictEqual(firstLevelID)
 
-        const queryREST = await restClient
-          .GET(`/chained`, {
-            query: {
-              where: {
-                'relation.relation.id': {
-                  equals: thirdLevelID,
-                },
-              },
+        const { result: queryREST } = await client.find({
+          slug: 'chained',
+          query: {
+            'relation.relation.id': {
+              equals: thirdLevelID,
             },
-          })
-          .then((res) => res.json())
+          },
+        })
 
         expect(queryREST.docs).toHaveLength(1)
         expect(queryREST.docs[0].id).toStrictEqual(firstLevelID)
