@@ -5,7 +5,7 @@ const blacklistedKeys: BlacklistedKeys[] = ['validate', 'customComponents']
 
 const sanitizeField = (field: FormField): FormField => {
   blacklistedKeys.forEach((key) => {
-    field[key] = undefined
+    delete field[key]
   })
   return field
 }
