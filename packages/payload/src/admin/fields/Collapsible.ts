@@ -17,7 +17,7 @@ import type {
 
 type CollapsibleFieldBaseClientProps = {
   readonly path?: string
-}
+} & Pick<ServerFieldBase, 'permissions'>
 
 type CollapsibleFieldClientWithoutType = MarkOptional<CollapsibleFieldClient, 'type'>
 

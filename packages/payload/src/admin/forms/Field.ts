@@ -24,7 +24,6 @@ export type ClientComponentProps = {
   parentPath: string
   parentSchemaPath: string
   path: string
-  permissions: FieldPermissions
   readOnly?: boolean
   renderedBlocks?: RenderedField[]
   rowLabels?: React.ReactNode[]
@@ -47,6 +46,7 @@ export type ServerComponentProps = {
   formState: FormState
   i18n: I18nClient
   payload: Payload
+  permissions: FieldPermissions
   siblingData: Data
   user: User
 }

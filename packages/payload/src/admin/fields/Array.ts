@@ -22,7 +22,7 @@ type ArrayFieldBaseClientProps = {
   readonly CustomRowLabel?: React.ReactNode
   readonly path?: string
   readonly validate?: ArrayFieldValidation
-}
+} & Pick<ServerFieldBase, 'permissions'>
 
 export type ArrayFieldClientProps = ArrayFieldBaseClientProps &
   ClientFieldBase<ArrayFieldClientWithoutType>

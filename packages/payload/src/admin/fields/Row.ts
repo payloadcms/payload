@@ -20,7 +20,7 @@ type RowFieldClientWithoutType = MarkOptional<RowFieldClient, 'type'>
 
 type RowFieldBaseClientProps = {
   readonly forceRender?: boolean
-}
+} & Pick<ServerFieldBase, 'permissions'>
 
 export type RowFieldClientProps = ClientFieldBase<RowFieldClientWithoutType> &
   RowFieldBaseClientProps

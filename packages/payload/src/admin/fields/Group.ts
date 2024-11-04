@@ -19,7 +19,7 @@ type GroupFieldClientWithoutType = MarkOptional<GroupFieldClient, 'type'>
 
 export type GroupFieldBaseClientProps = {
   readonly path?: string
-}
+} & Pick<ServerFieldBase, 'permissions'>
 
 export type GroupFieldClientProps = ClientFieldBase<GroupFieldClientWithoutType> &
   GroupFieldBaseClientProps

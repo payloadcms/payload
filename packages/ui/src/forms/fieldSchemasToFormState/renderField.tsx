@@ -54,7 +54,6 @@ export const renderField: RenderFieldMethod = ({
     parentPath,
     parentSchemaPath,
     path,
-    permissions,
     readOnly: false, // @TODO fix this
     schemaPath,
   }
@@ -68,6 +67,7 @@ export const renderField: RenderFieldMethod = ({
     data,
     field: fieldConfig,
     fieldSchemaMap,
+    permissions,
     // TODO: not sure that I like how we pass the whole field state. Should we pass explicit values? initialValue, value, valid
     // value and initialValue should be typed
     formState,
