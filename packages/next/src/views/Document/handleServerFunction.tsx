@@ -11,7 +11,7 @@ import type {
 import { headers as getHeaders } from 'next/headers.js'
 import { createClientConfig, getAccessResults, isEntityHidden, parseCookies } from 'payload'
 
-import { renderDocument } from '../views/Document/index.js'
+import { renderDocument } from './index.js'
 
 let cachedClientConfig = global._payload_clientConfig
 
@@ -43,7 +43,7 @@ type RenderDocumentResult = {
   preferences: DocumentPreferences
 }
 
-export const renderDocumentFn = async (args: {
+export const renderDocumentHandler = async (args: {
   collectionSlug: string
   disableActions?: boolean
   docID: string

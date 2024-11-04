@@ -38,6 +38,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     fieldProps: { featureClientSchemaMap, field: parentLexicalRichTextField, path, schemaPath },
   } = useEditorConfigContext()
   const abortControllerRef = useRef(new AbortController())
+  const { getDocPreferences } = useDocumentInfo()
 
   const { getFormState } = useServerFunctions()
 
@@ -45,13 +46,13 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${formData.blockType}.fields`
 
-  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks`
+  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${formData.blockType}`
 
   const clientSchemaMap = featureClientSchemaMap['blocks']
 
-  const blocksField: BlocksFieldClient = clientSchemaMap[componentMapRenderedBlockPath].find(
-    (field) => field && 'name' in field && field.name === 'lexical_blocks',
-  ) as BlocksFieldClient
+  const blocksField: BlocksFieldClient = clientSchemaMap[
+    componentMapRenderedBlockPath
+  ][0] as BlocksFieldClient
 
   const clientBlock = blocksField.blocks.find((block) => block.slug === formData.blockType)
 
@@ -66,11 +67,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
         id,
         collectionSlug,
         data: formData,
+        docPreferences: await getDocPreferences(),
         doNotAbort: true,
         globalSlug,
         operation: 'update',
         renderAllFields: true,
-        schemaPath: schemaFieldsPath.split('.'),
+        schemaPath: schemaFieldsPath,
         signal: abortController.signal,
       })
 
@@ -97,7 +99,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         // swallow error
       }
     }
-  }, [getFormState, schemaFieldsPath, id, collectionSlug, globalSlug]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
+  }, [getFormState, schemaFieldsPath, id, collectionSlug, globalSlug, getDocPreferences]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
@@ -115,11 +117,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
       const { state: newFormState } = await getFormState({
         id,
         collectionSlug,
+        docPreferences: await getDocPreferences(),
         doNotAbort: true,
         formState: prevFormState,
         globalSlug,
         operation: 'update',
-        schemaPath: schemaFieldsPath ? schemaFieldsPath.split('.') : [],
+        schemaPath: schemaFieldsPath,
         signal: abortController.signal,
       })
 
@@ -137,7 +140,15 @@ export const BlockComponent: React.FC<Props> = (props) => {
       return newFormState
     },
 
-    [getFormState, id, collectionSlug, globalSlug, schemaFieldsPath, formData.blockName],
+    [
+      getFormState,
+      id,
+      collectionSlug,
+      getDocPreferences,
+      globalSlug,
+      schemaFieldsPath,
+      formData.blockName,
+    ],
   )
 
   // cleanup effect

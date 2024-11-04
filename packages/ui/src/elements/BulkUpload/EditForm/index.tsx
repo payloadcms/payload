@@ -70,7 +70,7 @@ export function EditForm({ submitted }: EditFormProps) {
 
   const collectionSlug = collectionConfig.slug
 
-  const [schemaPath] = React.useState([collectionSlug])
+  const [schemaPath] = React.useState(collectionSlug)
 
   const onSave = useCallback(
     (json) => {
