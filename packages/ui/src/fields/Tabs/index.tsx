@@ -24,10 +24,13 @@ export { TabsProvider }
 
 function generateTabPath({ activeTabConfig, path }: { activeTabConfig: ClientTab; path: string }) {
   let tabPath = path
-  if (path && tabHasName(activeTabConfig) && activeTabConfig.name) {
-    tabPath = `${path}.${activeTabConfig.name}`
-  } else if (!path && tabHasName(activeTabConfig) && activeTabConfig.name) {
-    tabPath = activeTabConfig.name
+
+  if (tabHasName(activeTabConfig) && activeTabConfig.name) {
+    if (path) {
+      tabPath = `${path}.${activeTabConfig.name}`
+    } else {
+      tabPath = activeTabConfig.name
+    }
   }
 
   return tabPath
@@ -39,6 +42,8 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
     fieldState: { customComponents: { AfterInput, BeforeInput, Description } = {} } = {},
     forceRender = false,
     indexPath,
+    parentPath,
+    parentSchemaPath,
     path,
     permissions,
     readOnly,
@@ -52,11 +57,18 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0)
   const tabsPrefKey = `tabs-${indexPath}`
   const [activeTabPath, setActiveTabPath] = useState<string>(() =>
-    generateTabPath({ activeTabConfig: tabs[0], path }),
+    generateTabPath({ activeTabConfig: tabs[activeTabIndex], path: parentPath }),
   )
+
+  const activePathChildrenPath = tabHasName(tabs[activeTabIndex]) ? activeTabPath : parentPath
+
   const [activeTabSchemaPath, setActiveTabSchemaPath] = useState<string>(() =>
-    generateTabPath({ activeTabConfig: tabs[0], path: schemaPath }),
+    generateTabPath({ activeTabConfig: tabs[0], path: parentSchemaPath }),
   )
+
+  const activePathSchemaChildrenPath = tabHasName(tabs[activeTabIndex])
+    ? activeTabSchemaPath
+    : parentSchemaPath
 
   useEffect(() => {
     if (preferencesKey) {
@@ -65,18 +77,27 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
         const initialIndex = path
           ? existingPreferences?.fields?.[path]?.tabIndex
           : existingPreferences?.fields?.[tabsPrefKey]?.tabIndex
-        setActiveTabIndex(initialIndex || 0)
+
+        const newIndex = initialIndex || 0
+        setActiveTabIndex(newIndex)
+
+        setActiveTabPath(generateTabPath({ activeTabConfig: tabs[newIndex], path: parentPath }))
+        setActiveTabSchemaPath(
+          generateTabPath({ activeTabConfig: tabs[newIndex], path: parentSchemaPath }),
+        )
       }
       void getInitialPref()
     }
-  }, [path, getPreference, preferencesKey, tabsPrefKey])
+  }, [path, getPreference, preferencesKey, tabsPrefKey, tabs, parentPath, parentSchemaPath])
 
   const handleTabChange = useCallback(
     async (incomingTabIndex: number): Promise<void> => {
       setActiveTabIndex(incomingTabIndex)
-      setActiveTabPath(generateTabPath({ activeTabConfig: tabs[incomingTabIndex], path }))
+      setActiveTabPath(
+        generateTabPath({ activeTabConfig: tabs[incomingTabIndex], path: parentPath }),
+      )
       setActiveTabSchemaPath(
-        generateTabPath({ activeTabConfig: tabs[incomingTabIndex], path: schemaPath }),
+        generateTabPath({ activeTabConfig: tabs[incomingTabIndex], path: parentSchemaPath }),
       )
 
       const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
@@ -106,7 +127,16 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
         })
       }
     },
-    [tabs, path, schemaPath, getPreference, preferencesKey, setPreference, tabsPrefKey],
+    [
+      tabs,
+      parentPath,
+      parentSchemaPath,
+      getPreference,
+      preferencesKey,
+      setPreference,
+      path,
+      tabsPrefKey,
+    ],
   )
 
   const activeTabConfig = tabs[activeTabIndex]
@@ -174,8 +204,8 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
                     ? ''
                     : `${indexPath ? indexPath + '-' : ''}` + String(activeTabIndex)
                 }
-                parentPath={activeTabPath}
-                parentSchemaPath={activeTabSchemaPath}
+                parentPath={activePathChildrenPath}
+                parentSchemaPath={activePathSchemaChildrenPath}
                 permissions={
                   'name' in activeTabConfig && permissions?.[activeTabConfig.name]?.fields
                     ? permissions[activeTabConfig.name].fields
