@@ -1,11 +1,18 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { MarkOptional } from 'ts-essentials'
 
-import type { FieldPermissions } from '../../auth/types.js'
+import type { FieldPermissions, User } from '../../auth/types.js'
 import type { SanitizedConfig } from '../../config/types.js'
 import type { ClientBlock, ClientField, Field } from '../../fields/config/types.js'
 import type { Payload } from '../../types/index.js'
-import type { ClientTab, FieldSchemaMap, FormField, FormState, RenderedField } from '../types.js'
+import type {
+  ClientTab,
+  Data,
+  FieldSchemaMap,
+  FormField,
+  FormState,
+  RenderedField,
+} from '../types.js'
 
 export type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
 
@@ -25,7 +32,10 @@ export type ClientComponentProps = {
 }
 
 export type ServerComponentProps = {
+  clientField: ClientFieldWithOptionalType
   config: SanitizedConfig
+  data: Data
+  field: Field
   /**
    * The fieldSchemaMap that is created before form state is built is made available here.
    */
@@ -37,7 +47,8 @@ export type ServerComponentProps = {
   formState: FormState
   i18n: I18nClient
   payload: Payload
-  serverField: Field
+  siblingData: Data
+  user: User
 }
 
 export type ClientFieldBase<

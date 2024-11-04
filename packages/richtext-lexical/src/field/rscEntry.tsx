@@ -151,10 +151,13 @@ export const RscEntryLexicalField: React.FC<
       admin={args.admin}
       clientFeatures={clientFeatures}
       featureClientSchemaMap={featureClientSchemaMap}
-      field={args.field as RichTextFieldClient}
+      field={args.clientField as RichTextFieldClient}
       fieldState={args.fieldState}
       forceRender={args.forceRender}
+      indexPath={args.indexPath}
       lexicalEditorConfig={args.lexicalEditorConfig}
+      parentPath={args.parentPath}
+      parentSchemaPath={args.parentSchemaPath}
       path={args.path}
       permissions={args.permissions}
       readOnly={args.readOnly}

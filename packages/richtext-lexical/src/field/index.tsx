@@ -1,6 +1,6 @@
 'use client'
 
-import { ShimmerEffect, useForm } from '@payloadcms/ui'
+import { ShimmerEffect } from '@payloadcms/ui'
 import React, { lazy, Suspense, useEffect, useState } from 'react'
 
 import type { FeatureProviderClient } from '../features/typesClient.js'

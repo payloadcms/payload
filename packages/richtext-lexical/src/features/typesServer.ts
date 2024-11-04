@@ -319,7 +319,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
     i18n: I18nClient
     props: ServerProps
     schemaMap: FieldSchemaMap
-    schemaPath: string[]
+    schemaPath: string
   }) => FieldSchemaMap | null
   hooks?: RichTextHooks
   /**

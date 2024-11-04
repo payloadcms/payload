@@ -31,18 +31,13 @@ export const getGenerateSchemaMap =
               config,
               fields: field.fields,
               i18n,
+              parentIndexPath: '',
+              parentSchemaPath: `${schemaPath}.lexical_internal_feature.${featureKey}.${schemaKey}`,
               schemaMap,
-              parentSchemaPath:
-                `${schemaPath.join('.')}.lexical_internal_feature.${featureKey}.${schemaKey}`.split(
-                  '.',
-                ),
             })
           }
 
-          schemaMap.set(
-            `${schemaPath.join('.')}.lexical_internal_feature.${featureKey}.${schemaKey}`,
-            field,
-          )
+          schemaMap.set(`${schemaPath}.lexical_internal_feature.${featureKey}.${schemaKey}`, field)
         }
       }
     }
