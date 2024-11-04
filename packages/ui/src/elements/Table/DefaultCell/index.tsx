@@ -52,6 +52,7 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
     classNameFromConfigContext
 
   const onClick = onClickFromProps || onClickFromContext
+  const isLink = link !== undefined ? link : columnIndex === 0
 
   let WrapElement: React.ComponentType<any> | string = 'span'
 
@@ -59,16 +60,14 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
     className?: string
     href?: string
     onClick?: () => void
-    prefetch: false
+    prefetch?: false
     type?: 'button'
   } = {
     className,
-    prefetch: false,
   }
 
-  const isLink = link !== undefined ? link : columnIndex === 0
-
   if (isLink) {
+    wrapElementProps.prefetch = false
     WrapElement = Link
     wrapElementProps.href = customCellContext?.collectionSlug
       ? formatAdminURL({

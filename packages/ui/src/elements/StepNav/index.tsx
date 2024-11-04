@@ -35,7 +35,7 @@ const StepNav: React.FC<{
   const LinkElement = Link || 'a'
 
   const baseLinkProps = {
-    prefetch: false,
+    prefetch: Link ? false : undefined,
   }
 
   return (

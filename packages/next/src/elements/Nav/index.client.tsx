@@ -98,7 +98,7 @@ export const DefaultNavClient: React.FC = () => {
                   href={href}
                   id={id}
                   key={i}
-                  prefetch={false}
+                  prefetch={Link ? false : undefined}
                   tabIndex={!navOpen ? -1 : undefined}
                 >
                   {activeCollection && <div className={`${baseClass}__link-indicator`} />}
