@@ -61,7 +61,7 @@ export const createDatabase = async function (this: BasePostgresAdapter, args: A
 
   try {
     await managementClient.connect()
-    await managementClient.query(`CREATE DATABASE ${dbName}`)
+    await managementClient.query(`CREATE DATABASE "${dbName}"`)
 
     this.payload.logger.info(`Created database "${dbName}"`)
 
