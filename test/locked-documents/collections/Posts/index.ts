@@ -6,6 +6,7 @@ export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
   admin: {
     useAsTitle: 'text',
+    defaultColumns: ['text', 'createdAt', 'updatedAt', '_status'],
   },
   lockDocuments: {
     duration: 180,

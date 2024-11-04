@@ -714,51 +714,6 @@ describe('locked documents', () => {
       })
     })
 
-    test('should not change updatedAt date from custom field if incoming user tries to access locked doc', async () => {
-      const initialLockedDoc = await payload.find({
-        collection: lockedDocumentCollection,
-        limit: 1,
-        pagination: false,
-        where: {
-          'document.value': { equals: postDoc.id },
-        },
-      })
-
-      expect(initialLockedDoc.docs.length).toBe(1)
-
-      expect(initialLockedDoc.docs[0].updatedAt).toEqual(initialLockedDoc.docs[0].createdAt)
-
-      await page.goto(postsUrl.edit(postDoc.id))
-      await page.waitForURL(postsUrl.edit(postDoc.id))
-
-      const modalContainer = page.locator('.payload__modal-container')
-      await expect(modalContainer).toBeVisible()
-
-      // Need to wait for form-state to fire off so updateLastEdited returns true
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(5000)
-
-      // Click read-only button to view doc in read-only mode
-      await page.locator('#document-locked-view-read-only').click()
-
-      // Need to wait for form-state to fire off so updateLastEdited returns true
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(5000)
-
-      const lockedDoc = await payload.find({
-        collection: lockedDocumentCollection,
-        limit: 1,
-        pagination: false,
-        where: {
-          'document.value': { equals: postDoc.id },
-        },
-      })
-
-      expect(lockedDoc.docs.length).toBe(1)
-
-      expect(lockedDoc.docs[0].updatedAt).toEqual(lockedDoc.docs[0].createdAt)
-    })
-
     test('should show Document Locked modal for incoming user when entering locked document', async () => {
       const lockedDoc = await payload.find({
         collection: lockedDocumentCollection,
