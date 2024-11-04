@@ -229,12 +229,13 @@ export const Form: React.FC<FormProps> = (props) => {
       // Execute server side validations
       if (Array.isArray(beforeSubmit)) {
         let revalidatedFormState: FormState
+        const serializableFields = reduceToSerializableFields(deepCopyObjectComplex(fields))
 
         await beforeSubmit.reduce(async (priorOnChange, beforeSubmitFn) => {
           await priorOnChange
 
           const result = await beforeSubmitFn({
-            formState: fields,
+            formState: serializableFields,
           })
 
           revalidatedFormState = result
@@ -273,7 +274,7 @@ export const Form: React.FC<FormProps> = (props) => {
           }
         }
 
-        onSubmit(fields, data)
+        onSubmit(serializableFields, data)
       }
 
       if (!hasFormSubmitAction) {
