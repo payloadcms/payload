@@ -54,6 +54,11 @@ export const RenderFields: React.FC<Props> = (props) => {
         forceRender={forceRender}
       >
         {fields.map((field, i) => {
+          if (!field) {
+            // If there are sidebar fields, those fields will be null in the main fields array. This is to keep the order of the fields consistent and
+            // maintain the correct index paths for the main fields (i). Thus, we can just return null here.
+            return null
+          }
           const fieldPermissions = 'name' in field ? permissions?.[field.name] : permissions
 
           const { indexPath, path, schemaPath } = getFieldPaths({
