@@ -19,7 +19,7 @@ export const RelationshipTableWrapper: React.FC<RelationshipTableComponentProps>
 
   return (
     <Fragment>
-      <Table
+      {/* <Table
         appearance="condensed"
         customCellContext={{
           collectionSlug: collectionConfig.slug,
@@ -27,7 +27,7 @@ export const RelationshipTableWrapper: React.FC<RelationshipTableComponentProps>
         }}
         data={data.docs}
         fields={collectionConfig.fields}
-      />
+      /> */}
       <Pagination
         hasNextPage={data.hasNextPage}
         hasPrevPage={data.hasPrevPage}

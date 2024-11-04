@@ -237,7 +237,7 @@ export {
   ListDrawerContextProvider,
   useListDrawerContext,
 } from '../../elements/ListDrawer/Provider.js'
-export { type ListQuery, ListQueryProvider, useListQuery } from '../../providers/ListQuery/index.js'
+export { ListQueryProvider, useListQuery } from '../../providers/ListQuery/index.js'
 export { LocaleProvider, useLocale } from '../../providers/Locale/index.js'
 export { OperationProvider, useOperation } from '../../providers/Operation/index.js'
 export { ParamsProvider, useParams } from '../../providers/Params/index.js'

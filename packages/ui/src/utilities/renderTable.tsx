@@ -7,9 +7,12 @@ import type {
   PaginatedDocs,
 } from 'payload'
 
-import type { ColumnPreferences } from '../providers/ListQuery/index.js'
-import type { Column } from '../elements/Table/index.js'
+import { getTranslation, type I18nClient } from '@payloadcms/translations'
 
+import type { Column } from '../elements/Table/index.js'
+import type { ColumnPreferences } from '../providers/ListQuery/index.js'
+
+import { Pill } from '../elements/Pill/index.js'
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { Table } from '../elements/Table/index.js'
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
@@ -44,7 +47,10 @@ export const renderTable = ({
   drawerSlug,
   enableRowSelections,
   fields,
+  i18n,
   importMap,
+  renderRowTypes,
+  tableAppearance,
   useAsTitle,
 }: {
   clientFields: ClientField[]
@@ -55,14 +61,29 @@ export const renderTable = ({
   drawerSlug?: string
   enableRowSelections: boolean
   fields: Field[]
+  i18n: I18nClient
   importMap: ImportMap
+  renderRowTypes?: boolean
+  tableAppearance?: 'condensed' | 'default'
   useAsTitle: CollectionConfig['admin']['useAsTitle']
 }): {
   columnState: Column[]
   Table: React.ReactNode
 } => {
   const columnState = buildColumnState({
-    // beforeRows,
+    beforeRows: renderRowTypes
+      ? [
+          {
+            accessor: 'collection',
+            active: true,
+            field: null,
+            Heading: i18n.t('version:type'),
+            renderedCells: docs.map((_, i) => (
+              <Pill key={i}>{getTranslation(collectionConfig.labels.singular, i18n)}</Pill>
+            )),
+          },
+        ]
+      : undefined,
     clientFields,
     collectionConfig,
     columnPreferences,
@@ -78,6 +99,6 @@ export const renderTable = ({
 
   return {
     columnState,
-    Table: <Table columns={columnState} data={docs} />,
+    Table: <Table appearance={tableAppearance} columns={columnState} data={docs} />,
   }
 }

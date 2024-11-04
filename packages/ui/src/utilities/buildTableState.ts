@@ -4,6 +4,7 @@ import type {
   ClientCollectionConfig,
   ClientConfig,
   ErrorResult,
+  PaginatedDocs,
   SanitizedCollectionConfig,
   SanitizedConfig,
 } from 'payload'
@@ -42,6 +43,7 @@ export const getClientConfig = (args: {
 
 type BuildTableStateSuccessResult = {
   clientConfig?: ClientConfig
+  data: PaginatedDocs
   errors?: never
   preferences: ListPreferences
   renderedFilters: Map<string, React.ReactNode>
@@ -50,6 +52,7 @@ type BuildTableStateSuccessResult = {
 }
 
 type BuildTableStateErrorResult = {
+  data?: never
   renderedFilters?: never
   state?: never
   Table?: never
@@ -62,13 +65,13 @@ type BuildTableStateErrorResult = {
 
 export type BuildTableStateResult = BuildTableStateErrorResult | BuildTableStateSuccessResult
 
-export const buildTableState = async (
+export const buildTableStateHandler = async (
   args: BuildTableStateArgs,
 ): Promise<BuildTableStateResult> => {
   const { req } = args
 
   try {
-    const res = await buildTableStateFn(args)
+    const res = await buildTableState(args)
     return res
   } catch (err) {
     req.payload.logger.error({ err, msg: `There was an error building form state` })
@@ -87,14 +90,16 @@ export const buildTableState = async (
   }
 }
 
-export const buildTableStateFn = async (
+export const buildTableState = async (
   args: BuildTableStateArgs,
 ): Promise<BuildTableStateSuccessResult> => {
   const {
     collectionSlug,
     columns,
-    docs,
+    docs: docsFromArgs,
     enableRowSelections,
+    query,
+    renderRowTypes,
     req,
     req: {
       i18n,
@@ -102,6 +107,7 @@ export const buildTableStateFn = async (
       payload: { config },
       user,
     },
+    tableAppearance,
   } = args
 
   const incomingUserSlug = user?.collection
@@ -209,6 +215,23 @@ export const buildTableStateFn = async (
   const fields = collectionConfig.fields
   const clientFields = clientCollectionConfig?.fields || []
 
+  let docs = docsFromArgs
+  let data: PaginatedDocs
+
+  // lookup docs, if desired, i.e. within `join` field which initialize with `depth: 0`
+  if (!docs || query) {
+    data = await payload.find({
+      collection: collectionSlug,
+      depth: 0,
+      limit: query?.limit ? parseInt(query.limit, 10) : undefined,
+      page: query?.page ? parseInt(query.page, 10) : undefined,
+      sort: query?.sort,
+      where: query?.where,
+    })
+
+    docs = data.docs
+  }
+
   const { columnState, Table } = renderTable({
     clientFields,
     collectionConfig: clientCollectionConfig,
@@ -217,13 +240,17 @@ export const buildTableStateFn = async (
     docs,
     enableRowSelections,
     fields,
+    i18n: req.i18n,
     importMap: payload.importMap,
+    renderRowTypes,
+    tableAppearance,
     useAsTitle: collectionConfig.admin.useAsTitle,
   })
 
   const renderedFilters = renderFilters(fields, req.payload.importMap)
 
   return {
+    data,
     preferences: newPrefs,
     renderedFilters,
     state: columnState,
