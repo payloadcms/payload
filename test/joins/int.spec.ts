@@ -784,6 +784,53 @@ describe('Joins Field', () => {
 
     expect((categoryWithJoins.singulars.docs[0] as Singular).id).toBe(singular.id)
   })
+
+  it('local API should not populate individual join by providing schemaPath=false', async () => {
+    const {
+      docs: [res],
+    } = await payload.find({
+      collection: categoriesSlug,
+      where: {
+        id: { equals: category.id },
+      },
+      joins: {
+        relatedPosts: false,
+      },
+    })
+
+    // removed from the result
+    expect(res.relatedPosts).toBeUndefined()
+
+    expect(res.hasManyPosts.docs).toBeDefined()
+    expect(res.hasManyPostsLocalized.docs).toBeDefined()
+    expect(res.group.relatedPosts.docs).toBeDefined()
+    expect(res.group.camelCasePosts.docs).toBeDefined()
+  })
+
+  it('rEST API should not populate individual join by providing schemaPath=false', async () => {
+    const {
+      docs: [res],
+    } = await restClient
+      .GET(`/${categoriesSlug}`, {
+        query: {
+          where: {
+            id: { equals: category.id },
+          },
+          joins: {
+            relatedPosts: false,
+          },
+        },
+      })
+      .then((res) => res.json())
+
+    // removed from the result
+    expect(res.relatedPosts).toBeUndefined()
+
+    expect(res.hasManyPosts.docs).toBeDefined()
+    expect(res.hasManyPostsLocalized.docs).toBeDefined()
+    expect(res.group.relatedPosts.docs).toBeDefined()
+    expect(res.group.camelCasePosts.docs).toBeDefined()
+  })
 })
 
 async function createPost(overrides?: Partial<Post>, locale?: Config['locale']) {

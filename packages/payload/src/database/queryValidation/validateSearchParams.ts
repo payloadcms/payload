@@ -150,10 +150,6 @@ export async function validateSearchParam({
         // Remove top collection and reverse array
         // to work backwards from top
         const pathsToQuery = paths.slice(1).reverse()
-        let joinCollectionSlug
-        if (field.type === 'join') {
-          joinCollectionSlug = field.collection
-        }
 
         pathsToQuery.forEach(
           ({ collectionSlug: pathCollectionSlug, path: subPath }, pathToQueryIndex) => {
@@ -162,8 +158,7 @@ export async function validateSearchParam({
             if (pathToQueryIndex === 0) {
               promises.push(
                 validateQueryPaths({
-                  collectionConfig:
-                    req.payload.collections[joinCollectionSlug ?? pathCollectionSlug].config,
+                  collectionConfig: req.payload.collections[pathCollectionSlug].config,
                   errors,
                   globalConfig: undefined,
                   overrideAccess,

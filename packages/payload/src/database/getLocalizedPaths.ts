@@ -103,11 +103,10 @@ export async function getLocalizedPaths({
           }
 
           case 'relationship':
-          case 'upload':
-          case 'join': {
+          case 'upload': {
             // If this is a polymorphic relation,
             // We only support querying directly (no nested querying)
-            if (matchedField.type !== 'join' && Array.isArray(matchedField.relationTo)) {
+            if (typeof matchedField.relationTo !== 'string') {
               const lastSegmentIsValid =
                 ['relationTo', 'value'].includes(pathSegments[pathSegments.length - 1]) ||
                 pathSegments.length === 1 ||
@@ -130,16 +129,7 @@ export async function getLocalizedPaths({
                 .join('.')
 
               if (nestedPathToQuery) {
-                let slug: string
-                if (matchedField.type === 'join') {
-                  slug = matchedField.collection
-                } else if (
-                  // condition is only for type assertion
-                  !Array.isArray(matchedField.relationTo)
-                ) {
-                  slug = matchedField.relationTo
-                }
-                const relatedCollection = payload.collections[slug].config
+                const relatedCollection = payload.collections[matchedField.relationTo].config
 
                 const remainingPaths = await getLocalizedPaths({
                   collectionSlug: relatedCollection.slug,

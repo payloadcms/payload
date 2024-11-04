@@ -64,6 +64,10 @@ export const buildJoinAggregation = async ({
         continue
       }
 
+      if (joins?.[join.schemaPath] === false) {
+        continue
+      }
+
       const {
         limit: limitJoin = join.field.defaultLimit ?? 10,
         sort: sortJoin = join.field.defaultSort || collectionConfig.defaultSort,
@@ -83,7 +87,7 @@ export const buildJoinAggregation = async ({
       const $match = await joinModel.buildQuery({
         locale,
         payload: adapter.payload,
-        where: combineQueries(whereJoin, join.field?.where ?? {}),
+        where: whereJoin,
       })
 
       const pipeline: Exclude<PipelineStage, PipelineStage.Merge | PipelineStage.Out>[] = [
