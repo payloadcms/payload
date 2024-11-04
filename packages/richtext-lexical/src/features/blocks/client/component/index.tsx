@@ -38,6 +38,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     fieldProps: { featureClientSchemaMap, field: parentLexicalRichTextField, path, schemaPath },
   } = useEditorConfigContext()
   const abortControllerRef = useRef(new AbortController())
+  const { getDocPreferences } = useDocumentInfo()
 
   const { getFormState } = useServerFunctions()
 
@@ -66,11 +67,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
         id,
         collectionSlug,
         data: formData,
+        docPreferences: await getDocPreferences(),
         doNotAbort: true,
         globalSlug,
         operation: 'update',
         renderAllFields: true,
-        schemaPath: schemaFieldsPath.split('.'),
+        schemaPath: schemaFieldsPath,
         signal: abortController.signal,
       })
 
@@ -97,7 +99,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         // swallow error
       }
     }
-  }, [getFormState, schemaFieldsPath, id, collectionSlug, globalSlug]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
+  }, [getFormState, schemaFieldsPath, id, collectionSlug, globalSlug, getDocPreferences]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
@@ -115,11 +117,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
       const { state: newFormState } = await getFormState({
         id,
         collectionSlug,
+        docPreferences: await getDocPreferences(),
         doNotAbort: true,
         formState: prevFormState,
         globalSlug,
         operation: 'update',
-        schemaPath: schemaFieldsPath ? schemaFieldsPath.split('.') : [],
+        schemaPath: schemaFieldsPath,
         signal: abortController.signal,
       })
 
@@ -137,7 +140,15 @@ export const BlockComponent: React.FC<Props> = (props) => {
       return newFormState
     },
 
-    [getFormState, id, collectionSlug, globalSlug, schemaFieldsPath, formData.blockName],
+    [
+      getFormState,
+      id,
+      collectionSlug,
+      getDocPreferences,
+      globalSlug,
+      schemaFieldsPath,
+      formData.blockName,
+    ],
   )
 
   // cleanup effect

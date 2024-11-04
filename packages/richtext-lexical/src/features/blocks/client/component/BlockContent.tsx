@@ -229,7 +229,9 @@ export const BlockContent: React.FC<Props> = (props) => {
         <RenderFields
           fields={formSchema}
           forceRender={true}
-          parentPath={[]}
+          parentIndexPath=""
+          parentPath={''}
+          parentSchemaPath=""
           permissions={permissions}
         />
       </Collapsible>

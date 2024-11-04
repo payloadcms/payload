@@ -207,7 +207,7 @@ const PreviewView: React.FC<Props> = ({
         globalSlug,
         operation,
         returnLockStatus: isLockingEnabled ? true : false,
-        schemaPath: schemaPath ? schemaPath.split('.') : [],
+        schemaPath,
         signal: abortController.signal,
         updateLastEdited,
       })

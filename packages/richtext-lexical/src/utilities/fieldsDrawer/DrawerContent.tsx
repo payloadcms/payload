@@ -53,7 +53,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         id,
         data: data ?? {},
         operation: 'update',
-        schemaPath: schemaFieldsPath ? schemaFieldsPath.split('.') : [],
+        schemaPath: schemaFieldsPath,
         signal: abortController.signal,
       })
 
@@ -88,7 +88,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         id,
         formState: prevFormState,
         operation: 'update',
-        schemaPath: schemaFieldsPath ? schemaFieldsPath.split('.') : [],
+        schemaPath: schemaFieldsPath,
         signal: abortController.signal,
       })
 
