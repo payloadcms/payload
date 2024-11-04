@@ -70,7 +70,6 @@ export const renderField: RenderFieldMethod = ({
     fieldSchemaMap,
     // TODO: not sure that I like how we pass the whole field state. Should we pass explicit values? initialValue, value, valid
     // value and initialValue should be typed
-    fieldState,
     formState,
     i18n: req.i18n,
     payload: req.payload,
