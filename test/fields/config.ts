@@ -15,7 +15,7 @@ import ConditionalLogic from './collections/ConditionalLogic/index.js'
 import DateFields from './collections/Date/index.js'
 import EmailFields from './collections/Email/index.js'
 import GroupFields from './collections/Group/index.js'
-// import IndexedFields from './collections/Indexed/index.js'
+import IndexedFields from './collections/Indexed/index.js'
 import JSONFields from './collections/JSON/index.js'
 import { LexicalFields } from './collections/Lexical/index.js'
 import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
@@ -26,8 +26,8 @@ import NumberFields from './collections/Number/index.js'
 import PointFields from './collections/Point/index.js'
 import RadioFields from './collections/Radio/index.js'
 import RelationshipFields from './collections/Relationship/index.js'
+//import RichTextFields from './collections/RichText/index.js'
 import RowFields from './collections/Row/index.js'
-// import RichTextFields from './collections/RichText/index.js'
 import SelectFields from './collections/Select/index.js'
 import TabsFields from './collections/Tabs/index.js'
 import { TabsFields2 } from './collections/Tabs2/index.js'
@@ -72,13 +72,13 @@ export const collectionSlugs: CollectionConfig[] = [
   RadioFields,
   GroupFields,
   RowFields,
-  // IndexedFields,
+  IndexedFields,
   JSONFields,
   NumberFields,
   PointFields,
   RelationshipFields,
   LexicalRelationshipsFields,
-  // // RichTextFields,
+  //RichTextFields,
   SelectFields,
   TabsFields2,
   TabsFields,
