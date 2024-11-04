@@ -23,6 +23,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
     hasPublishedDoc,
     hasPublishPermission,
     setHasPublishedDoc,
+    setUnpublishedVersionCount,
     unpublishedVersionCount,
   } = useDocumentInfo()
 
@@ -94,8 +95,9 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
       },
     })
 
+    setUnpublishedVersionCount(0)
     setHasPublishedDoc(true)
-  }, [setHasPublishedDoc, submit])
+  }, [setHasPublishedDoc, submit, setUnpublishedVersionCount])
 
   const publishSpecificLocale = useCallback(
     (locale) => {
