@@ -10,6 +10,7 @@
     "tooLong": "Zbyt długie",
     "tooShort": "Zbyt krótkie",
     "almostThere": "Prawie gotowe",
+    "missing": "Missing",
     "characterCount": "{{current}}/{{minLength}}-{{maxLength}} znaków, ",
     "charactersToGo": "pozostało {{characters}} znaków",
     "charactersLeftOver": "zostało {{characters}} znaków",
