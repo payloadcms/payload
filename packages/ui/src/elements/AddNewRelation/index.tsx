@@ -83,7 +83,7 @@ export const AddNewRelation: React.FC<Props> = ({
             setValue(newValue)
           }
         }
-
+      } else {
         setSelectedCollection(undefined)
       }
     },
