@@ -10,6 +10,7 @@ import { nb } from './nb.js'
 import { pl } from './pl.js'
 import { ru } from './ru.js'
 import { sv } from './sv.js'
+import { tr } from './tr.js'
 import { uk } from './uk.js'
 
 export const translations = {
@@ -23,6 +24,7 @@ export const translations = {
   pl,
   ru,
   sv,
+  tr,
   uk,
 }
 

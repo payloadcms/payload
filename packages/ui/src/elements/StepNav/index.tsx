@@ -34,11 +34,20 @@ const StepNav: React.FC<{
 
   const LinkElement = Link || 'a'
 
+  const baseLinkProps = {
+    prefetch: Link ? false : undefined,
+  }
+
   return (
     <Fragment>
       {stepNav.length > 0 ? (
         <nav className={[baseClass, className].filter(Boolean).join(' ')}>
-          <LinkElement className={`${baseClass}__home`} href={admin} tabIndex={0}>
+          <LinkElement
+            className={`${baseClass}__home`}
+            href={admin}
+            tabIndex={0}
+            {...baseLinkProps}
+          >
             <span title={t('general:dashboard')}>
               <RenderComponent
                 Component={PayloadIcon}
@@ -58,7 +67,7 @@ const StepNav: React.FC<{
             ) : (
               <Fragment key={i}>
                 {item.url ? (
-                  <LinkElement href={item.url}>
+                  <LinkElement href={item.url} {...baseLinkProps}>
                     <span key={i}>{StepLabel}</span>
                   </LinkElement>
                 ) : (
