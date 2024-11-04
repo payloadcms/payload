@@ -27,7 +27,7 @@ const DefaultLogout: React.FC<{
   const LinkElement = Link || 'a'
 
   const props = {
-    ariaLabel: t('authentication:logOut'),
+    'aria-label': t('authentication:logOut'),
     className: `${baseClass}__log-out`,
     prefetch: false,
     tabIndex,
