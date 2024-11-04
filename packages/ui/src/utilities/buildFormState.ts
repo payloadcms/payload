@@ -283,6 +283,7 @@ export const buildFormState = async ({
             ? lockedDocument.docs[0]?.user?.value?.id
             : lockedDocument.docs[0]?.user?.value
 
+        // Should only update doc if the incoming / current user is also the owner of the locked doc
         if (updateLastEdited && req.user && lockOwnerId === req.user.id) {
           await req.payload.db.updateOne({
             id: lockedDocument.docs[0].id,
