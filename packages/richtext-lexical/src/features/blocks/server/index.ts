@@ -108,12 +108,12 @@ export const BlocksFeature = createServerFeature<
             schemaMap.set(`lexical_blocks.${block.slug}.fields`, {
               fields: block.fields,
             })
+            schemaMap.set(`lexical_blocks.${block.slug}`, {
+              name: `lexical_blocks_${block.slug}`,
+              type: 'blocks',
+              blocks: [block],
+            })
           }
-          schemaMap.set('lexical_blocks', {
-            name: 'lexical_blocks',
-            type: 'blocks',
-            blocks: props.blocks,
-          })
         }
 
         if (props?.inlineBlocks?.length) {
@@ -122,12 +122,13 @@ export const BlocksFeature = createServerFeature<
             schemaMap.set(`lexical_inline_blocks.${block.slug}.fields`, {
               fields: block.fields,
             })
+
+            schemaMap.set(`lexical_inline_blocks.${block.slug}`, {
+              name: `lexical_inline_blocks_${block.slug}`,
+              type: 'blocks',
+              blocks: [block],
+            })
           }
-          schemaMap.set('lexical_inline_blocks', {
-            name: 'lexical_inline_blocks',
-            type: 'blocks',
-            blocks: props.inlineBlocks,
-          })
         }
 
         return schemaMap

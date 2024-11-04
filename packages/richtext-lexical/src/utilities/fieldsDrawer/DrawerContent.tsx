@@ -1,9 +1,10 @@
 'use client'
-import type { ClientField, FormState } from 'payload'
+import type { FormState } from 'payload'
 
 import {
   Form,
   FormSubmit,
+  RenderFields,
   useDocumentInfo,
   useServerFunctions,
   useTranslation,
@@ -25,25 +26,33 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   schemaPathSuffix,
 }) => {
   const { t } = useTranslation()
-  const { id } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug } = useDocumentInfo()
 
   const abortControllerRef = useRef(new AbortController())
 
   const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
 
   const {
-    field: { richTextComponentMap },
+    fieldProps: { featureClientSchemaMap, permissions },
   } = useEditorConfigContext()
 
   const { getFormState } = useServerFunctions()
 
-  const componentMapRenderedFieldsPath = `lexical_internal_feature.${featureKey}.fields${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
   const schemaFieldsPath =
     schemaFieldsPathOverride ??
     `${schemaPath}.lexical_internal_feature.${featureKey}${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
 
-  const fields: any =
-    fieldMapOverride ?? (richTextComponentMap?.get(componentMapRenderedFieldsPath) as ClientField[]) // Field Schema
+  const fields: any = fieldMapOverride ?? featureClientSchemaMap[featureKey]?.[schemaFieldsPath] // Field Schema
+
+  console.log(
+    'CLIENTMAP FOR',
+    featureKey,
+    featureClientSchemaMap[featureKey],
+    'schemaFieldsPath',
+    schemaFieldsPath,
+    'fields',
+    fields,
+  )
 
   useEffect(() => {
     const abortController = new AbortController()
@@ -51,8 +60,11 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     const awaitInitialState = async () => {
       const { state } = await getFormState({
         id,
+        collectionSlug,
         data: data ?? {},
+        globalSlug,
         operation: 'update',
+        renderAllFields: true,
         schemaPath: schemaFieldsPath,
         signal: abortController.signal,
       })
@@ -69,7 +81,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         // swallow error
       }
     }
-  }, [schemaFieldsPath, id, data, getFormState])
+  }, [schemaFieldsPath, id, data, getFormState, collectionSlug, globalSlug])
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
@@ -86,7 +98,9 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
       const { state } = await getFormState({
         id,
+        collectionSlug,
         formState: prevFormState,
+        globalSlug,
         operation: 'update',
         schemaPath: schemaFieldsPath,
         signal: abortController.signal,
@@ -98,7 +112,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
       return state
     },
-    [schemaFieldsPath, id, getFormState],
+    [getFormState, id, collectionSlug, globalSlug, schemaFieldsPath],
   )
 
   // cleanup effect
@@ -128,7 +142,15 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
       onSubmit={handleDrawerSubmit}
       uuid={uuid()}
     >
-      {/* Fields Here */}
+      <RenderFields
+        fields={Array.isArray(fields) ? fields : []}
+        forceRender
+        parentIndexPath=""
+        parentPath="" // See Blocks feature path for details as for why this is empty
+        parentSchemaPath={schemaFieldsPath}
+        permissions={permissions}
+        readOnly={false}
+      />
       <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
     </Form>
   )

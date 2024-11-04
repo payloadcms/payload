@@ -46,13 +46,13 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${formData.blockType}.fields`
 
-  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks`
+  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${formData.blockType}`
 
   const clientSchemaMap = featureClientSchemaMap['blocks']
 
-  const blocksField: BlocksFieldClient = clientSchemaMap[componentMapRenderedBlockPath].find(
-    (field) => field && 'name' in field && field.name === 'lexical_blocks',
-  ) as BlocksFieldClient
+  const blocksField: BlocksFieldClient = clientSchemaMap[
+    componentMapRenderedBlockPath
+  ][0] as BlocksFieldClient
 
   const clientBlock = blocksField.blocks.find((block) => block.slug === formData.blockType)
 
