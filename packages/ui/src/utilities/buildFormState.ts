@@ -278,7 +278,12 @@ export const buildFormState = async ({
           user: lockedDocument.docs[0]?.user?.value,
         }
 
-        if (updateLastEdited) {
+        const lockOwnerId =
+          typeof lockedDocument.docs[0]?.user?.value === 'object'
+            ? lockedDocument.docs[0]?.user?.value?.id
+            : lockedDocument.docs[0]?.user?.value
+
+        if (updateLastEdited && req.user && lockOwnerId === req.user.id) {
           await req.payload.db.updateOne({
             id: lockedDocument.docs[0].id,
             collection: 'payload-locked-documents',
