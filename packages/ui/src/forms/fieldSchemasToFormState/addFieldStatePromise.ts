@@ -646,10 +646,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         includeSchema,
         omitParents,
         operation,
-        parentIndexPath: tabIndexPath,
+        parentIndexPath: tabHasName(tab) ? '' : tabIndexPath,
         parentPassesCondition: passesCondition,
         parentPath: tabPath,
-        parentSchemaPath: tabSchemaPath,
+        parentSchemaPath: tabHasName(tab) ? tabSchemaPath : parentSchemaPath,
         permissions: tabHasName(tab) ? permissions?.[tab.name]?.fields || {} : permissions,
         preferences,
         previousFormState,
@@ -692,6 +692,12 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       } else {
         throw new Error(`Field config not found for ${schemaPath}`)
       }
+    }
+
+    if (!fieldState) {
+      // Some fields (ie `Tab`) do not live in form state
+      // therefore we cannot attach customComponents to them
+      return
     }
 
     renderFieldMethod({
