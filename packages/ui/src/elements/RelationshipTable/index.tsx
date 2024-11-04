@@ -3,11 +3,12 @@ import type {
   ClientCollectionConfig,
   ClientField,
   JoinFieldClient,
+  ListQuery,
   PaginatedDocs,
   Where,
 } from 'payload'
 
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useState } from 'react'
 import AnimateHeightImport from 'react-animate-height'
 
 const AnimateHeight = AnimateHeightImport.default || AnimateHeightImport
@@ -15,24 +16,23 @@ const AnimateHeight = AnimateHeightImport.default || AnimateHeightImport
 import { getTranslation } from '@payloadcms/translations'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
+import type { Column } from '../Table/index.js'
 
 import { Button } from '../../elements/Button/index.js'
 import { Pill } from '../../elements/Pill/index.js'
-import { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
-import { hoistQueryParamsToAnd } from '../ListDrawer/DrawerContent.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../TableColumns/index.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
 import './index.scss'
-import { RelationshipTableWrapper } from './TableWrapper.js'
 
 const baseClass = 'relationship-table'
 
@@ -57,9 +57,10 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     relationTo,
   } = props
 
+  const [Table, setTable] = useState<React.ReactNode>(null)
+
   const {
     config: {
-      collections,
       routes: { api },
       serverURL,
     },
@@ -77,7 +78,12 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         docs: Array.isArray(initialDataFromProps.docs)
           ? initialDataFromProps.docs.reduce((acc, doc) => {
               if (typeof doc === 'string') {
-                return acc
+                return [
+                  ...acc,
+                  {
+                    id: doc,
+                  },
+                ]
               }
               return [...acc, doc]
             }, [])
@@ -88,87 +94,43 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const { i18n, t } = useTranslation()
 
-  const [limit, setLimit] = useState<number>()
-  const [sort, setSort] = useState<string | undefined>(undefined)
-  const [page, setPage] = useState<number>(1)
-  const [where, setWhere] = useState<null | Where>(null)
-  const [search, setSearch] = useState<string>('')
+  const [query, setQuery] = useState<ListQuery>()
   const [openColumnSelector, setOpenColumnSelector] = useState(false)
 
   const [collectionConfig] = useState(
     () => getEntityConfig({ collectionSlug: relationTo }) as ClientCollectionConfig,
   )
 
-  const apiURL = `${serverURL}${api}/${collectionConfig.slug}`
+  const [isLoadingTable, setIsLoadingTable] = useState(true)
+  const [data, setData] = useState<PaginatedDocs>(initialData)
+  const [columnState, setColumnState] = useState<Column[]>()
 
-  const [{ data }, { setParams }] = usePayloadAPI(apiURL, {
-    initialData,
-    initialParams: {
-      depth: 0,
-    },
-  })
+  const { getTableState } = useServerFunctions()
 
   useEffect(() => {
-    const {
-      admin: { listSearchableFields, useAsTitle } = {} as ClientCollectionConfig['admin'],
-      versions,
-    } = collectionConfig
+    if (!Table) {
+      const getTable = async () => {
+        const {
+          data: newData,
+          state: newColumnState,
+          Table: NewTable,
+        } = await getTableState({
+          collectionSlug: relationTo,
+          //   columns: activeColumns,
+          enableRowSelections: false,
+          renderRowTypes: true,
+          tableAppearance: 'condensed',
+        })
 
-    const params: {
-      cacheBust?: number
-      depth?: number
-      draft?: string
-      limit?: number
-      page?: number
-      search?: string
-      sort?: string
-      where?: unknown
-    } = {
-      depth: 0,
-    }
-
-    let copyOfWhere = { ...(where || {}) }
-
-    if (filterOptions && typeof filterOptions !== 'boolean') {
-      copyOfWhere = hoistQueryParamsToAnd(copyOfWhere, filterOptions)
-    }
-
-    if (search) {
-      const searchAsConditions = (listSearchableFields || [useAsTitle]).map((fieldName) => {
-        return {
-          [fieldName]: {
-            like: search,
-          },
-        }
-      }, [])
-
-      if (searchAsConditions.length > 0) {
-        const searchFilter: Where = {
-          or: [...searchAsConditions],
-        }
-
-        copyOfWhere = hoistQueryParamsToAnd(copyOfWhere, searchFilter)
+        setData(newData)
+        setTable(NewTable)
+        setColumnState(newColumnState)
+        setIsLoadingTable(false)
       }
-    }
 
-    if (limit) {
-      params.limit = limit
+      void getTable()
     }
-    if (page) {
-      params.page = page
-    }
-    if (sort) {
-      params.sort = sort
-    }
-    if (copyOfWhere) {
-      params.where = copyOfWhere
-    }
-    if (versions?.drafts) {
-      params.draft = 'true'
-    }
-
-    setParams(params)
-  }, [page, sort, where, search, collectionConfig, filterOptions, initialData, limit, setParams])
+  }, [collectionConfig, filterOptions, initialData, Table, getTableState, relationTo])
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer, openDrawer }] = useDocumentDrawer({
     collectionSlug: relationTo,
@@ -228,97 +190,82 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           </Pill>
         </div>
       </div>
-      {data.docs && data.docs.length === 0 && (
-        <div className={`${baseClass}__no-results`}>
-          <p>
-            {i18n.t('general:noResults', {
-              label: getTranslation(collectionConfig?.labels?.plural, i18n),
-            })}
-          </p>
-          {canCreate && (
-            <Button onClick={openDrawer}>
-              {i18n.t('general:createNewLabel', {
-                label: getTranslation(collectionConfig?.labels?.singular, i18n),
-              })}
-            </Button>
+      {isLoadingTable ? (
+        <p>Loading...</p>
+      ) : (
+        <Fragment>
+          {data.docs && data.docs.length === 0 && (
+            <div className={`${baseClass}__no-results`}>
+              <p>
+                {i18n.t('general:noResults', {
+                  label: getTranslation(collectionConfig?.labels?.plural, i18n),
+                })}
+              </p>
+              {canCreate && (
+                <Button onClick={openDrawer}>
+                  {i18n.t('general:createNewLabel', {
+                    label: getTranslation(collectionConfig?.labels?.singular, i18n),
+                  })}
+                </Button>
+              )}
+            </div>
           )}
-        </div>
-      )}
-      {data.docs && data.docs.length > 0 && (
-        <RelationshipProvider>
-          <ListQueryProvider
-            data={data}
-            defaultLimit={limit || collectionConfig?.admin?.pagination?.defaultLimit}
-            defaultSort={sort}
-            handlePageChange={setPage}
-            handlePerPageChange={setLimit}
-            handleSearchChange={setSearch}
-            handleSortChange={setSort}
-            handleWhereChange={setWhere}
-            modifySearchParams={false}
-            preferenceKey={preferenceKey}
-          >
-            <TableColumnsProvider
-              beforeRows={[
-                {
-                  accessor: 'collection',
-                  active: true,
-                  cellProps: {
-                    field: {
-                      admin: {
-                        components: {
-                          Cell: {
-                            type: 'client',
-                            RenderedComponent: (
-                              <Pill>{getTranslation(collectionConfig.labels.singular, i18n)}</Pill>
-                            ),
-                          },
-                          Label: null,
-                        },
-                      },
-                    } as ClientField,
-                  },
-                  Heading: i18n.t('version:type'),
-                },
-              ]}
-              cellProps={[
-                {},
-                {
-                  field: {
-                    admin: {
-                      components: {
-                        Cell: {
-                          type: 'client',
-                          RenderedComponent: (
-                            <DrawerLink field={field} onDrawerSave={onDrawerSave} />
-                          ),
-                        },
-                      },
-                    },
-                  } as ClientField,
-                  link: false,
-                },
-              ]}
-              collectionSlug={relationTo}
-              preferenceKey={preferenceKey}
-              sortColumnProps={{
-                appearance: 'condensed',
-              }}
-            >
-              {/* @ts-expect-error TODO: get this CJS import to work, eslint keeps removing the type assertion */}
-              <AnimateHeight
-                className={`${baseClass}__columns`}
-                height={openColumnSelector ? 'auto' : 0}
-                id={`${baseClass}-columns`}
+          {data.docs && data.docs.length > 0 && (
+            <RelationshipProvider>
+              <ListQueryProvider
+                data={data}
+                // defaultLimit={limit || collectionConfig?.admin?.pagination?.defaultLimit}
+                modifySearchParams={false}
+                // defaultSort={sort}
+                onQueryChange={setQuery}
+                preferenceKey={preferenceKey}
               >
-                <div className={`${baseClass}__columns-inner`}>
-                  <ColumnSelector collectionSlug={collectionConfig.slug} />
-                </div>
-              </AnimateHeight>
-              <RelationshipTableWrapper collectionConfig={collectionConfig} />
-            </TableColumnsProvider>
-          </ListQueryProvider>
-        </RelationshipProvider>
+                <TableColumnsProvider
+                  cellProps={[
+                    {},
+                    // {
+                    //   field: {
+                    //     admin: {
+                    //       components: {
+                    //         Cell: {
+                    //           type: 'client',
+                    //           RenderedComponent: (
+                    //             <DrawerLink field={field} onDrawerSave={onDrawerSave} />
+                    //           ),
+                    //         },
+                    //       },
+                    //     },
+                    //   } as ClientField,
+                    //   link: false,
+                    // },
+                  ]}
+                  collectionSlug={relationTo}
+                  columnState={columnState}
+                  preferenceKey={preferenceKey}
+                  renderRowTypes
+                  setTable={setTable}
+                  sortColumnProps={{
+                    appearance: 'condensed',
+                  }}
+                  tableAppearance="condensed"
+                >
+                  {/* @ts-expect-error TODO: get this CJS import to work, eslint keeps removing the type assertion */}
+                  <AnimateHeight
+                    className={`${baseClass}__columns`}
+                    height={openColumnSelector ? 'auto' : 0}
+                    id={`${baseClass}-columns`}
+                  >
+                    <div className={`${baseClass}__columns-inner`}>
+                      <ColumnSelector collectionSlug={collectionConfig.slug} />
+                    </div>
+                  </AnimateHeight>
+                  {Table}
+                  {/* <RelationshipTableWrapper collectionConfig={collectionConfig} Table={Table} /> */}
+                </TableColumnsProvider>
+              </ListQueryProvider>
+            </RelationshipProvider>
+          )}
+        </Fragment>
       )}
       <DocumentDrawer
         initialData={{

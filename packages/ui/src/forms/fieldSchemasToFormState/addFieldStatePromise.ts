@@ -120,7 +120,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   const { indexPath, path, schemaPath } = getFieldPaths({
     field,
     index: fieldIndex,
-    parentIndexPath,
+    parentIndexPath: 'name' in field ? '' : parentIndexPath,
     parentPath,
     parentSchemaPath,
   })
@@ -648,7 +648,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         operation,
         parentIndexPath: tabHasName(tab) ? '' : tabIndexPath,
         parentPassesCondition: passesCondition,
-        parentPath: tabPath,
+        parentPath: tabHasName(tab) ? tabPath : parentPath,
         parentSchemaPath: tabHasName(tab) ? tabSchemaPath : parentSchemaPath,
         permissions: tabHasName(tab) ? permissions?.[tab.name]?.fields || {} : permissions,
         preferences,

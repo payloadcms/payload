@@ -1,5 +1,5 @@
 'use client'
-import type { PaginatedDocs, Where } from 'payload'
+import type { ListQuery, PaginatedDocs, Where } from 'payload'
 
 import { useRouter } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
@@ -28,6 +28,7 @@ export type ListQueryProps = {
   readonly initialLimit?: number
   readonly initialSort?: string
   readonly modifySearchParams?: boolean
+  readonly onQueryChange?: (query: ListQuery) => void
   readonly preferenceKey?: string
 }
 
@@ -43,20 +44,13 @@ const Context = createContext({} as ListQueryContext)
 
 export const useListQuery = (): ListQueryContext => useContext(Context)
 
-export type ListQuery = {
-  limit?: string
-  page?: string
-  search?: string
-  sort?: string
-  where?: Where
-}
-
 export const ListQueryProvider: React.FC<ListQueryProps> = ({
   children,
   data,
   initialLimit,
   initialSort,
   modifySearchParams,
+  onQueryChange: onQueryChangeFromProps,
   preferenceKey,
 }) => {
   const router = useRouter()
@@ -80,7 +74,11 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   }, [searchParams, modifySearchParams])
 
   const refineListData = useCallback(
-    async (query: ListQuery) => {
+    async (
+      query: {
+        search?: string
+      } & ListQuery,
+    ) => {
       let pageQuery = 'page' in query ? query.page : currentQuery?.page
 
       if ('where' in query || 'search' in query) {
@@ -107,28 +105,50 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       const newQuery: ListQuery = {
         limit: 'limit' in query ? query.limit : (currentQuery?.limit as string),
         page: pageQuery as string,
-        search: 'search' in query ? query.search : (currentQuery?.search as string),
         sort: 'sort' in query ? query.sort : (currentQuery?.sort as string),
         where: 'where' in query ? query.where : (currentQuery?.where as Where),
       }
 
+      // TODO: add this back in
+      // if (search) {
+      //   const searchAsConditions = (listSearchableFields || [useAsTitle]).map((fieldName) => {
+      //     return {
+      //       [fieldName]: {
+      //         like: search,
+      //       },
+      //     }
+      //   }, [])
+
+      //   if (searchAsConditions.length > 0) {
+      //     const searchFilter: Where = {
+      //       or: [...searchAsConditions],
+      //     }
+
+      //     newQuery = hoistQueryParamsToAnd(copyOfWhere, searchFilter)
+      //   }
+      // }
+
       if (modifySearchParams) {
         router.replace(`${qs.stringify(newQuery, { addQueryPrefix: true })}`)
-      } else if (typeof onQueryChange === 'function') {
-        onQueryChange(newQuery)
+      } else if (
+        typeof onQueryChange === 'function' ||
+        typeof onQueryChangeFromProps === 'function'
+      ) {
+        const onChangeFn = onQueryChange || onQueryChangeFromProps
+        onChangeFn(newQuery)
       }
     },
     [
       modifySearchParams,
       currentQuery?.page,
       currentQuery?.limit,
-      currentQuery?.search,
       currentQuery?.sort,
       currentQuery?.where,
       preferenceKey,
       router,
       setPreference,
       onQueryChange,
+      onQueryChangeFromProps,
     ],
   )
 

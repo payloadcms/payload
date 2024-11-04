@@ -3,7 +3,7 @@ import type { BuildFormStateArgs, BuildTableStateArgs, Data, ServerFunctionClien
 import React, { createContext, useCallback, useEffect, useRef } from 'react'
 
 import type { buildFormStateHandler } from '../../utilities/buildFormState.js'
-import type { buildTableState } from '../../utilities/buildTableState.js'
+import type { buildTableStateHandler } from '../../utilities/buildTableState.js'
 
 type GetFormStateClient = (
   args: {
@@ -16,7 +16,7 @@ type GetTableStateClient = (
   args: {
     signal?: AbortSignal
   } & Omit<BuildTableStateArgs, 'clientConfig' | 'req'>,
-) => ReturnType<typeof buildTableState>
+) => ReturnType<typeof buildTableStateHandler>
 
 type GetDrawerDocumentView = (args: {
   collectionSlug: string
@@ -67,7 +67,7 @@ export const ServerFunctionsProvider: React.FC<{
           const result = (await serverFunction({
             name: 'form-state',
             args,
-          })) as ReturnType<typeof buildFormState> // TODO: infer this type when `strictNullChecks` is enabled
+          })) as ReturnType<typeof buildFormStateHandler> // TODO: infer this type when `strictNullChecks` is enabled
 
           return result
         } catch (_err) {
@@ -115,7 +115,7 @@ export const ServerFunctionsProvider: React.FC<{
         const result = (await serverFunction({
           name: 'table-state',
           args: rest,
-        })) as ReturnType<typeof buildTableState> // TODO: infer this type when `strictNullChecks` is enabled
+        })) as ReturnType<typeof buildTableStateHandler> // TODO: infer this type when `strictNullChecks` is enabled
 
         return result
       } catch (_err) {

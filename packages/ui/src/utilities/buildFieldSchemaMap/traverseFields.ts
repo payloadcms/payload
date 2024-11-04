@@ -25,7 +25,7 @@ export const traverseFields = ({
     const { indexPath, schemaPath } = getFieldPaths({
       field,
       index,
-      parentIndexPath,
+      parentIndexPath: 'name' in field ? '' : parentIndexPath,
       parentPath: '',
       parentSchemaPath,
     })

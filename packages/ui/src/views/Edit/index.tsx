@@ -340,6 +340,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       getFormState,
       id,
       collectionSlug,
+      docPermissions,
       globalSlug,
       operation,
       schemaPathSegments,

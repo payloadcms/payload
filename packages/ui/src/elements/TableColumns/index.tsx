@@ -32,7 +32,6 @@ export type ListPreferences = {
 }
 
 type Props = {
-  readonly beforeRows?: Column[]
   readonly cellProps?: Partial<CellComponentProps>[]
   readonly children: React.ReactNode
   readonly collectionSlug: string
@@ -41,8 +40,10 @@ type Props = {
   readonly enableRowSelections?: boolean
   readonly listPreferences?: ListPreferences
   readonly preferenceKey: string
+  readonly renderRowTypes?: boolean
   readonly setTable: (Table: React.ReactNode) => void
   readonly sortColumnProps?: Partial<SortColumnProps>
+  readonly tableAppearance?: 'condensed' | 'default'
 }
 
 // strip out Heading, Label, and renderedCells properties, they cannot be sent to the server
@@ -54,7 +55,6 @@ const sanitizeColumns = (columns: Column[]) => {
 }
 
 export const TableColumnsProvider: React.FC<Props> = ({
-  beforeRows,
   cellProps,
   children,
   collectionSlug,
@@ -63,8 +63,10 @@ export const TableColumnsProvider: React.FC<Props> = ({
   enableRowSelections,
   listPreferences,
   preferenceKey,
+  renderRowTypes,
   setTable,
   sortColumnProps,
+  tableAppearance,
 }) => {
   const { getEntityConfig } = useConfig()
 
@@ -101,12 +103,23 @@ export const TableColumnsProvider: React.FC<Props> = ({
         columns: sanitizeColumns(withMovedColumn),
         docs,
         enableRowSelections,
+        renderRowTypes,
+        tableAppearance,
       })
 
       setTableColumns(columnState)
       setTable(Table)
     },
-    [tableColumns, collectionSlug, docs, getTableState, setTable, enableRowSelections],
+    [
+      tableColumns,
+      collectionSlug,
+      docs,
+      getTableState,
+      setTable,
+      enableRowSelections,
+      renderRowTypes,
+      tableAppearance,
+    ],
   )
 
   const toggleColumn = useCallback(
@@ -123,12 +136,23 @@ export const TableColumnsProvider: React.FC<Props> = ({
         columns: toggledColumns,
         docs,
         enableRowSelections,
+        renderRowTypes,
+        tableAppearance,
       })
 
       setTableColumns(columnState)
       setTable(Table)
     },
-    [tableColumns, getTableState, setTable, collectionSlug, docs, enableRowSelections],
+    [
+      tableColumns,
+      getTableState,
+      setTable,
+      collectionSlug,
+      docs,
+      enableRowSelections,
+      renderRowTypes,
+      tableAppearance,
+    ],
   )
 
   const setActiveColumns = React.useCallback(
@@ -156,12 +180,23 @@ export const TableColumnsProvider: React.FC<Props> = ({
         columns: activeColumns,
         docs,
         enableRowSelections,
+        renderRowTypes,
+        tableAppearance,
       })
 
       setTableColumns(columnState)
       setTable(Table)
     },
-    [tableColumns, getTableState, setTable, collectionSlug, docs, enableRowSelections],
+    [
+      tableColumns,
+      getTableState,
+      setTable,
+      collectionSlug,
+      docs,
+      enableRowSelections,
+      renderRowTypes,
+      tableAppearance,
+    ],
   )
 
   const resetColumnsState = React.useCallback(async () => {
@@ -208,7 +243,6 @@ export const TableColumnsProvider: React.FC<Props> = ({
     useAsTitle,
     listPreferences,
     initialColumns,
-    beforeRows,
     enableRowSelections,
     sortColumnProps,
   ])

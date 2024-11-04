@@ -5,7 +5,6 @@ import type { JoinFieldClient, JoinFieldClientComponent, PaginatedDocs, Where } 
 import React, { useMemo } from 'react'
 
 import { RelationshipTable } from '../../elements/RelationshipTable/index.js'
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -17,7 +16,6 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
     field,
     field: {
       name,
-      _schemaPath,
       admin: { allowCreate },
       collection,
       label,
@@ -27,7 +25,9 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
     },
     fieldState: { customComponents: { AfterInput, BeforeInput, Label } } = {},
     path: pathFromProps,
+    schemaPath,
   } = props
+
   const path = pathFromProps || name
 
   const { id: docID } = useDocumentInfo()
@@ -56,19 +56,16 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
         initialDrawerState={{
           [on]: {
             initialValue: docID,
-            schemaPath: _schemaPath,
+            schemaPath,
             valid: true,
             value: docID,
           },
         }}
         Label={
           <h4 style={{ margin: 0 }}>
-            <RenderCustomComponent
-              CustomComponent={Label}
-              Fallback={
-                <FieldLabel label={label} localized={localized} path={path} required={required} />
-              }
-            />
+            {Label || (
+              <FieldLabel label={label} localized={localized} path={path} required={required} />
+            )}
           </h4>
         }
         relationTo={collection}

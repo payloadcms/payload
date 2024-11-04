@@ -1,7 +1,7 @@
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { SanitizedConfig } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
 
 export type DefaultServerFunctionArgs = {
   importMap: ImportMap
@@ -36,10 +36,20 @@ export type ServerFunctionHandler = (
   } & ServerFunctionClientArgs,
 ) => Promise<unknown>
 
+export type ListQuery = {
+  limit?: string
+  page?: string
+  sort?: string
+  where?: Where
+}
+
 export type BuildTableStateArgs = {
   collectionSlug: string
   columns?: any[] // TODO: type this (comes from ui pkg)
-  docs: PaginatedDocs['docs']
+  docs?: PaginatedDocs['docs']
   enableRowSelections?: boolean
+  query?: ListQuery
+  renderRowTypes?: boolean
   req: PayloadRequest
+  tableAppearance?: 'condensed' | 'default'
 }
