@@ -89,12 +89,15 @@ export const promise = async ({
   triggerAccessControl = true,
   triggerHooks = true,
 }: Args): Promise<void> => {
-  const { path: fieldPath, schemaPath: fieldSchemaPath } = getFieldPaths({
+  const { path: _fieldPath, schemaPath: _fieldSchemaPath } = getFieldPaths({
     field,
-    parentPath,
-    parentSchemaPath,
-    schemaIndex: fieldIndex,
+    index: fieldIndex,
+    parentIndexPath: '', // Doesn't matter, as unnamed fields do not affect data, and hooks are only run on fields that affect data
+    parentPath: parentPath.join('.'),
+    parentSchemaPath: parentSchemaPath.join('.'),
   })
+  const fieldPath = _fieldPath ? _fieldPath.split('.') : []
+  const fieldSchemaPath = _fieldSchemaPath ? _fieldSchemaPath.split('.') : []
 
   if (
     fieldAffectsData(field) &&
