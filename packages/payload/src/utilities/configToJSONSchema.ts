@@ -996,7 +996,16 @@ export function configToJSONSchema(
       locale: generateLocaleEntitySchemas(config.localization),
       user: generateAuthEntitySchemas(config.collections),
     },
-    required: ['user', 'locale', 'collections', 'globals', 'auth', 'db'],
+    required: [
+      'user',
+      'locale',
+      'collections',
+      'collectionsSelect',
+      'globalsSelect',
+      'globals',
+      'auth',
+      'db',
+    ],
     title: 'Config',
   }
   if (jobsSchemas.definitions?.size) {

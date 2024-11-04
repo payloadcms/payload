@@ -875,6 +875,35 @@ describe('Relationships', () => {
         expect(query.docs[0].id).toStrictEqual(firstLevelID)
       })
 
+      it('should allow querying on id two levels deep', async () => {
+        const query = await payload.find({
+          collection: 'chained',
+          where: {
+            'relation.relation.id': {
+              equals: thirdLevelID,
+            },
+          },
+        })
+
+        expect(query.docs).toHaveLength(1)
+        expect(query.docs[0].id).toStrictEqual(firstLevelID)
+
+        const queryREST = await restClient
+          .GET(`/chained`, {
+            query: {
+              where: {
+                'relation.relation.id': {
+                  equals: thirdLevelID,
+                },
+              },
+            },
+          })
+          .then((res) => res.json())
+
+        expect(queryREST.docs).toHaveLength(1)
+        expect(queryREST.docs[0].id).toStrictEqual(firstLevelID)
+      })
+
       it('should allow querying within array nesting', async () => {
         const page = await payload.create({
           collection: 'pages',

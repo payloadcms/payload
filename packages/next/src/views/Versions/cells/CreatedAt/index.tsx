@@ -47,7 +47,7 @@ export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
   }
 
   return (
-    <Link href={to}>
+    <Link href={to} prefetch={false}>
       {cellData &&
         formatDate({ date: cellData as Date | number | string, i18n, pattern: dateFormat })}
     </Link>
