@@ -150,7 +150,7 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
       }
 
       buttonElement = (
-        <LinkTag {...buttonProps} href={to || url} to={to || url}>
+        <LinkTag {...buttonProps} href={to || url} prefetch={false} to={to || url}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>
@@ -162,7 +162,7 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
       const Tag = el // eslint-disable-line no-case-declarations
 
       buttonElement = (
-        <Tag ref={ref} type="submit" {...buttonProps}>
+        <Tag ref={ref} type="submit" {...buttonProps} prefetch={false}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>

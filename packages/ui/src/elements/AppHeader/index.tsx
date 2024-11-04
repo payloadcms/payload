@@ -94,6 +94,7 @@ export const AppHeader: React.FC = () => {
               aria-label={t('authentication:account')}
               className={`${baseClass}__account`}
               href={formatAdminURL({ adminRoute, path: accountRoute })}
+              prefetch={Link ? false : undefined}
               tabIndex={0}
             >
               <Account />

@@ -59,9 +59,11 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
     className?: string
     href?: string
     onClick?: () => void
+    prefetch: false
     type?: 'button'
   } = {
     className,
+    prefetch: false,
   }
 
   const isLink = link !== undefined ? link : columnIndex === 0
