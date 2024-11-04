@@ -1,5 +1,5 @@
 'use client'
-import type { ListQuery, PaginatedDocs, Where } from 'payload'
+import type { ClientCollectionConfig, ListQuery, PaginatedDocs, Where } from 'payload'
 
 import { useRouter } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
@@ -9,6 +9,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import type { Column } from '../../elements/Table/index.js'
 
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
+import { useConfig } from '../../providers/Config/index.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useSearchParams } from '../SearchParams/index.js'
 
@@ -24,6 +25,7 @@ type ContextHandlers = {
 
 export type ListQueryProps = {
   readonly children: React.ReactNode
+  readonly collectionSlug: string
   readonly data: PaginatedDocs
   readonly initialLimit?: number
   readonly initialSort?: string
@@ -46,6 +48,7 @@ export const useListQuery = (): ListQueryContext => useContext(Context)
 
 export const ListQueryProvider: React.FC<ListQueryProps> = ({
   children,
+  collectionSlug,
   data,
   initialLimit,
   initialSort,
@@ -56,6 +59,11 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const router = useRouter()
   const { setPreference } = usePreferences()
   const { searchParams } = useSearchParams()
+  const { getEntityConfig } = useConfig()
+
+  const [collectionConfig] = useState(() => {
+    return getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  })
 
   const { onQueryChange } = useListDrawerContext()
 
@@ -74,11 +82,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   }, [searchParams, modifySearchParams])
 
   const refineListData = useCallback(
-    async (
-      query: {
-        search?: string
-      } & ListQuery,
-    ) => {
+    async (query: ListQuery) => {
       let pageQuery = 'page' in query ? query.page : currentQuery?.page
 
       if ('where' in query || 'search' in query) {
@@ -105,28 +109,10 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       const newQuery: ListQuery = {
         limit: 'limit' in query ? query.limit : (currentQuery?.limit as string),
         page: pageQuery as string,
+        search: 'search' in query ? query.search : (currentQuery?.search as string),
         sort: 'sort' in query ? query.sort : (currentQuery?.sort as string),
         where: 'where' in query ? query.where : (currentQuery?.where as Where),
       }
-
-      // TODO: add this back in
-      // if (search) {
-      //   const searchAsConditions = (listSearchableFields || [useAsTitle]).map((fieldName) => {
-      //     return {
-      //       [fieldName]: {
-      //         like: search,
-      //       },
-      //     }
-      //   }, [])
-
-      //   if (searchAsConditions.length > 0) {
-      //     const searchFilter: Where = {
-      //       or: [...searchAsConditions],
-      //     }
-
-      //     newQuery = hoistQueryParamsToAnd(copyOfWhere, searchFilter)
-      //   }
-      // }
 
       if (modifySearchParams) {
         router.replace(`${qs.stringify(newQuery, { addQueryPrefix: true })}`)
@@ -144,6 +130,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       currentQuery?.limit,
       currentQuery?.sort,
       currentQuery?.where,
+      currentQuery?.search,
       preferenceKey,
       router,
       setPreference,

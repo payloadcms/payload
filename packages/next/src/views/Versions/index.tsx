@@ -189,6 +189,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
       <main className={baseClass}>
         <Gutter className={`${baseClass}__wrap`}>
           <ListQueryProvider
+            collectionSlug={collectionSlug}
             data={versionsData}
             defaultLimit={limitToUse}
             defaultSort={sort as string}

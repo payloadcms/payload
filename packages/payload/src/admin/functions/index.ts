@@ -39,6 +39,10 @@ export type ServerFunctionHandler = (
 export type ListQuery = {
   limit?: string
   page?: string
+  /*
+    When provided, is automatically injected into the `where` object
+  */
+  search?: string
   sort?: string
   where?: Where
 }

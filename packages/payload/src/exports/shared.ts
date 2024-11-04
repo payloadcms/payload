@@ -54,8 +54,8 @@ export {
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 
 export { getDataByPath } from '../utilities/getDataByPath.js'
-export { getSelectMode } from '../utilities/getSelectMode.js'
 
+export { getSelectMode } from '../utilities/getSelectMode.js'
 export { getSiblingData } from '../utilities/getSiblingData.js'
 
 export { getUniqueListBy } from '../utilities/getUniqueListBy.js'
