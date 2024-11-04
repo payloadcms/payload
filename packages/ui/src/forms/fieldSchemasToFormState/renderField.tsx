@@ -10,7 +10,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { createClientField, deepCopyObjectSimple, MissingEditorProp } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
 
-import type { RenderFieldArgs, RenderFieldMethod } from './types.js'
+import type { RenderFieldMethod } from './types.js'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
@@ -157,9 +157,7 @@ export const renderField: RenderFieldMethod = ({
 
       fieldState.customComponents.Field = (
         <RenderServerComponent
-          clientProps={{
-            ...clientProps,
-          }}
+          clientProps={clientProps}
           Component={FieldComponent}
           Fallback={undefined}
           importMap={req.payload.importMap}

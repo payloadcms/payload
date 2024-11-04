@@ -1,5 +1,7 @@
 'use client'
 
+import type { FieldPermissions } from 'payload'
+
 import { getFieldPaths } from 'payload/shared'
 import React from 'react'
 
@@ -7,7 +9,13 @@ import type { Props } from './types.js'
 
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { RenderIfInViewport } from '../../elements/RenderIfInViewport/index.js'
+import { ArrayField } from '../../fields/Array/index.js'
+import { BlocksField } from '../../fields/Blocks/index.js'
+import { CollapsibleField } from '../../fields/Collapsible/index.js'
+import { GroupField } from '../../fields/Group/index.js'
 import { HiddenField } from '../../fields/Hidden/index.js'
+import { RowField } from '../../fields/Row/index.js'
+import { TabsField } from '../../fields/Tabs/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useFieldComponents } from '../../providers/FieldComponents/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
@@ -54,7 +62,8 @@ export const RenderFields: React.FC<Props> = (props) => {
         forceRender={forceRender}
       >
         {fields.map((field, i) => {
-          const fieldPermissions = 'name' in field ? permissions?.[field.name] : permissions
+          const fieldPermissions: FieldPermissions =
+            'name' in field ? permissions?.[field.name] : permissions
 
           const { indexPath, path, schemaPath } = getFieldPaths({
             field,
@@ -72,7 +81,13 @@ export const RenderFields: React.FC<Props> = (props) => {
 
           // if the user cannot read the field, then filter it out
           // this is different from `admin.readOnly` which is executed based on `operation`
-          if (fieldPermissions?.read?.permission === false || field?.admin?.disabled) {
+          if (
+            (fieldPermissions &&
+              'read' in fieldPermissions &&
+              'permission' in fieldPermissions.read &&
+              fieldPermissions?.read?.permission === false) ||
+            field?.admin?.disabled
+          ) {
             return null
           }
 
@@ -85,49 +100,74 @@ export const RenderFields: React.FC<Props> = (props) => {
           }
 
           // if the user does not have access control to begin with, force it to be read-only
-          if (fieldPermissions?.[operation]?.permission === false) {
+          if (
+            fieldPermissions &&
+            operation in fieldPermissions &&
+            'permission' in fieldPermissions[operation] &&
+            fieldPermissions[operation]?.permission === false
+          ) {
             isReadOnly = true
           }
 
-          // if the field is hidden, then filter it out
+          const sharedProps = {
+            fieldState: formState,
+            forceRender,
+            indexPath,
+            parentPath,
+            parentSchemaPath,
+            path,
+            readOnly: isReadOnly,
+            schemaPath,
+          }
+
+          let FallbackField = null
+
+          switch (field.type) {
+            // named fields with subfields
+            case 'array':
+              FallbackField = (
+                <ArrayField {...sharedProps} field={field} permissions={fieldPermissions} />
+              )
+              break
+            case 'blocks':
+              FallbackField = (
+                <BlocksField {...sharedProps} field={field} permissions={fieldPermissions} />
+              )
+              break
+            case 'group':
+              FallbackField = (
+                <GroupField {...sharedProps} field={field} permissions={fieldPermissions} />
+              )
+              break
+            case 'tabs':
+              FallbackField = (
+                <TabsField {...sharedProps} field={field} permissions={fieldPermissions} />
+              )
+              break
+
+            // unnamed fields with subfields
+            case 'row':
+              FallbackField = (
+                <RowField {...sharedProps} field={field} permissions={fieldPermissions} />
+              )
+              break
+            case 'collapsible':
+              FallbackField = (
+                <CollapsibleField {...sharedProps} field={field} permissions={fieldPermissions} />
+              )
+              break
+
+            default:
+              FallbackField = <DefaultField field={field} {...sharedProps} />
+              break
+          }
+
           if (field.admin?.hidden) {
-            return (
-              <HiddenField
-                field={field}
-                fieldState={formState}
-                forceRender={forceRender}
-                indexPath={indexPath}
-                key={i}
-                parentPath={parentPath}
-                parentSchemaPath={parentSchemaPath}
-                path={path}
-                permissions={fieldPermissions}
-                readOnly={isReadOnly}
-                schemaPath={schemaPath}
-              />
-            )
+            FallbackField = <HiddenField field={field} {...sharedProps} />
           }
 
           return (
-            <RenderCustomComponent
-              CustomComponent={CustomField}
-              Fallback={
-                <DefaultField
-                  field={field}
-                  fieldState={formState}
-                  forceRender={forceRender}
-                  indexPath={indexPath}
-                  key={i}
-                  parentPath={parentPath}
-                  parentSchemaPath={parentSchemaPath}
-                  path={path}
-                  permissions={fieldPermissions}
-                  readOnly={isReadOnly}
-                  schemaPath={schemaPath}
-                />
-              }
-              key={i}
-            />
+            <RenderCustomComponent CustomComponent={CustomField} Fallback={FallbackField} key={i} />
           )
         })}
       </RenderIfInViewport>
