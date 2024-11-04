@@ -44,16 +44,6 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
   const fields: any = fieldMapOverride ?? featureClientSchemaMap[featureKey]?.[schemaFieldsPath] // Field Schema
 
-  console.log(
-    'CLIENTMAP FOR',
-    featureKey,
-    featureClientSchemaMap[featureKey],
-    'schemaFieldsPath',
-    schemaFieldsPath,
-    'fields',
-    fields,
-  )
-
   useEffect(() => {
     const abortController = new AbortController()
 
