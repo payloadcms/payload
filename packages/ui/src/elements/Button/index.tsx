@@ -114,8 +114,8 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
     className: !SubMenuPopupContent ? [classes, styleClasses].join(' ') : classes,
     disabled,
     onClick: !disabled ? handleClick : undefined,
-    onMouseEnter: tooltip ? () => setShowTooltip(true) : undefined,
-    onMouseLeave: tooltip ? () => setShowTooltip(false) : undefined,
+    onPointerEnter: tooltip ? () => setShowTooltip(true) : undefined,
+    onPointerLeave: tooltip ? () => setShowTooltip(false) : undefined,
     rel: newTab ? 'noopener noreferrer' : undefined,
     target: newTab ? '_blank' : undefined,
   }
