@@ -185,9 +185,9 @@ export function SlashMenuPlugin({
 
   const onSelectItem = useCallback(
     (selectedItem: SlashMenuItemType, closeMenu: () => void, matchingString: string) => {
-      selectedItem.onSelect({ editor, queryString: matchingString })
-
       closeMenu()
+
+      selectedItem.onSelect({ editor, queryString: matchingString })
     },
     [editor],
   )
