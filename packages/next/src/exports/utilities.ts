@@ -4,6 +4,5 @@ export { addLocalesToRequestFromData, sanitizeLocales } from '../utilities/addLo
 export { createPayloadRequest } from '../utilities/createPayloadRequest.js'
 export { getNextRequestI18n } from '../utilities/getNextRequestI18n.js'
 export { getPayloadHMR, reload } from '../utilities/getPayloadHMR.js'
-export { handleServerFunctions } from '../utilities/handleServerFunctions.js'
 export { headersWithCors } from '../utilities/headersWithCors.js'
 export { mergeHeaders } from '../utilities/mergeHeaders.js'
