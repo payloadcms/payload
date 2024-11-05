@@ -677,8 +677,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
     }
   }
-
-  const isDisabled = 'disabled' in field.admin && field.admin.disabled
+  if (!field?.admin) {
+    console.log(field)
+  }
+  const isDisabled = field?.admin && 'disabled' in field.admin && field.admin.disabled
 
   if (requiresRender && !isDisabled && renderFieldMethod) {
     const fieldState = state[path]
