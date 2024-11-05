@@ -5,6 +5,7 @@ import type {
   FieldSchemaMap,
   FieldState,
   FormState,
+  Operation,
   PayloadRequest,
 } from 'payload'
 
@@ -15,6 +16,7 @@ export type RenderFieldArgs = {
   fieldState: FieldState
   formState: FormState
   indexPath: string
+  operation: Operation
   parentPath: string
   parentSchemaPath: string
   path: string

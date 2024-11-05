@@ -24,6 +24,7 @@ export const renderField: RenderFieldMethod = ({
   fieldState,
   formState,
   indexPath,
+  operation,
   parentPath,
   parentSchemaPath,
   path,
@@ -54,7 +55,7 @@ export const renderField: RenderFieldMethod = ({
     parentPath,
     parentSchemaPath,
     path,
-    readOnly: false,
+    readOnly: permissions?.[operation]?.permission === false,
     schemaPath,
   }
 

@@ -707,6 +707,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       fieldState,
       formState: state,
       indexPath,
+      operation,
       parentPath,
       parentSchemaPath,
       path,
