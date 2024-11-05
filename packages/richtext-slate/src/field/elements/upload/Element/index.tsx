@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, FormFieldBase } from 'payload'
+import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -32,12 +32,7 @@ const initialParams = {
   depth: 0,
 }
 
-type Props = {
-  name: string
-  richTextComponentMap: Map<string, React.ReactNode>
-} & FormFieldBase
-
-const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] } & Props> = ({
+const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] }> = ({
   enabledCollectionSlugs,
 }) => {
   const {
@@ -137,7 +132,7 @@ const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] } & P
   )
 
   const relatedFieldSchemaPath = `${uploadFieldsSchemaPath}.${relatedCollection.slug}`
-  const customFieldsMap = fieldProps.field.richTextComponentMap.get(relatedFieldSchemaPath)
+  const customFieldsMap = fieldProps.componentMap[relatedFieldSchemaPath]
 
   return (
     <div
@@ -221,7 +216,7 @@ const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] } & P
   )
 }
 
-export const UploadElement = (props: Props): React.ReactNode => {
+export const UploadElement = (props: any): React.ReactNode => {
   return (
     <EnabledRelationshipsCondition {...props} uploads>
       <UploadElementComponent {...props} />

@@ -16,7 +16,11 @@ import type {
   FieldLabelServerComponent,
 } from '../types.js'
 
-type RichTextFieldClientWithoutType = MarkOptional<RichTextFieldClient, 'type'>
+type RichTextFieldClientWithoutType<
+  TValue extends object = any,
+  TAdapterProps = any,
+  TExtraProperties = object,
+> = MarkOptional<RichTextFieldClient<TValue, TAdapterProps, TExtraProperties>, 'type'>
 
 type RichTextFieldBaseClientProps<
   TValue extends object = any,
@@ -31,7 +35,7 @@ export type RichTextFieldClientProps<
   TValue extends object = any,
   TAdapterProps = any,
   TExtraProperties = object,
-> = ClientFieldBase<RichTextFieldClientWithoutType> &
+> = ClientFieldBase<RichTextFieldClientWithoutType<TValue, TAdapterProps, TExtraProperties>> &
   RichTextFieldBaseClientProps<TValue, TAdapterProps, TExtraProperties>
 
 export type RichTextFieldServerProps = ServerFieldBase<

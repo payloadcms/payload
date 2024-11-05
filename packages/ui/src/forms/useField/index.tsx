@@ -28,7 +28,7 @@ import {
  *
  * @see https://payloadcms.com/docs/admin/hooks#usefield
  */
-export const useField = <T,>(options: Options): FieldType<T> => {
+export const useField = <TValue,>(options: Options): FieldType<TValue> => {
   const { disableFormData = false, hasRows, path, validate } = options
 
   const submitted = useFormSubmitted()
@@ -50,8 +50,8 @@ export const useField = <T,>(options: Options): FieldType<T> => {
   const modified = useFormModified()
 
   const filterOptions = field?.filterOptions
-  const value = field?.value as T
-  const initialValue = field?.initialValue as T
+  const value = field?.value as TValue
+  const initialValue = field?.initialValue as TValue
   const valid = typeof field?.valid === 'boolean' ? field.valid : true
   const showError = valid === false && submitted
 
@@ -100,7 +100,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
 
   // Store result from hook as ref
   // to prevent unnecessary rerenders
-  const result: FieldType<T> = useMemo(
+  const result: FieldType<TValue> = useMemo(
     () => ({
       customComponents: field?.customComponents,
       errorMessage: field?.errorMessage,

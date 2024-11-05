@@ -48,15 +48,15 @@ export function slateEditor(
 
     return {
       CellComponent: '@payloadcms/richtext-slate/client#RichTextCell',
-      FieldComponent: '@payloadcms/richtext-slate/client#RichTextField',
-      generateComponentMap: {
-        path: '@payloadcms/richtext-slate/generateComponentMap#getGenerateComponentMap',
-        serverProps: args,
+      FieldComponent: {
+        path: '@payloadcms/richtext-slate/rscs#RscEntrySlateField',
+        serverProps: {
+          args,
+        },
       },
       generateImportMap: ({ addToImportMap }) => {
         addToImportMap('@payloadcms/richtext-slate/client#RichTextCell')
-        addToImportMap('@payloadcms/richtext-slate/client#RichTextField')
-        addToImportMap('@payloadcms/richtext-slate/generateComponentMap#getGenerateComponentMap')
+        addToImportMap('@payloadcms/richtext-slate/rscs#RscEntrySlateField')
         Object.values(leafTypes).forEach((leaf) => {
           if (leaf.Button) {
             addToImportMap(leaf.Button)

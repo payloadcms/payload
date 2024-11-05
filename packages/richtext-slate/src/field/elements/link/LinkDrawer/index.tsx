@@ -31,7 +31,8 @@ export const LinkDrawer: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation()
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
-  const { id, docPermissions } = useDocumentInfo()
+
+  const { id, collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const { getFormState } = useServerFunctions()
 
@@ -39,15 +40,18 @@ export const LinkDrawer: React.FC<Props> = ({
     async ({ formState: prevFormState }) => {
       const { state } = await getFormState({
         id,
+        collectionSlug,
+        docPreferences: await getDocPreferences(),
         formState: prevFormState,
+        globalSlug,
         operation: 'update',
-        schemaPath: fieldMapPath ? fieldMapPath.split('.') : [],
+        schemaPath: fieldMapPath ?? '',
       })
 
       return state
     },
 
-    [fieldMapPath, id, getFormState],
+    [getFormState, id, collectionSlug, globalSlug, fieldMapPath, getDocPreferences],
   )
 
   return (
@@ -62,7 +66,9 @@ export const LinkDrawer: React.FC<Props> = ({
         <RenderFields
           fields={fields}
           forceRender
-          parentPath={[]}
+          parentIndexPath=""
+          parentPath={''}
+          parentSchemaPath=""
           permissions={docPermissions.fields}
           readOnly={false}
         />

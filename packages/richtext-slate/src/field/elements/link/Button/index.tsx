@@ -2,7 +2,13 @@
 
 import type { FormState } from 'payload'
 
-import { useDrawerSlug, useModal, useServerFunctions, useTranslation } from '@payloadcms/ui'
+import {
+  useDocumentInfo,
+  useDrawerSlug,
+  useModal,
+  useServerFunctions,
+  useTranslation,
+} from '@payloadcms/ui'
 import { reduceFieldsToValues } from 'payload/shared'
 import React, { Fragment, useState } from 'react'
 import { Editor, Range, Transforms } from 'slate'
@@ -63,15 +69,14 @@ export const LinkButton: React.FC<{
   const { t } = useTranslation()
   const editor = useSlate()
   const { getFormState } = useServerFunctions()
+  const { collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const { closeModal, openModal } = useModal()
   const drawerSlug = useDrawerSlug('rich-text-link')
 
-  const {
-    field: { richTextComponentMap },
-  } = fieldProps
+  const { componentMap } = fieldProps
 
-  const fields = richTextComponentMap.get(linkFieldsSchemaPath)
+  const fields = componentMap[linkFieldsSchemaPath]
 
   return (
     <Fragment>
@@ -91,9 +96,15 @@ export const LinkButton: React.FC<{
               }
 
               const { state } = await getFormState({
+                collectionSlug,
                 data,
+                docPreferences: await getDocPreferences(),
+                globalSlug,
                 operation: 'update',
-                schemaPath: [...schemaPath.split('.'), ...linkFieldsSchemaPath.split('.')],
+                renderAllFields: true,
+                schemaPath: [...schemaPath.split('.'), ...linkFieldsSchemaPath.split('.')].join(
+                  '.',
+                ),
               })
 
               setInitialState(state)
@@ -115,6 +126,7 @@ export const LinkButton: React.FC<{
           closeModal(drawerSlug)
         }}
         initialState={initialState}
+        schemaPath={schemaPath}
       />
     </Fragment>
   )

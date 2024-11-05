@@ -40,17 +40,15 @@ export const UploadDrawer: React.FC<{
   const { i18n, t } = useTranslation()
   const { code: locale } = useLocale()
   const { closeModal } = useModal()
-  const { id, collectionSlug } = useDocumentInfo()
+  const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const { getFormState } = useServerFunctions()
 
   const [initialState, setInitialState] = useState({})
-  const {
-    field: { richTextComponentMap },
-  } = fieldProps
+  const { componentMap } = fieldProps
 
   const relatedFieldSchemaPath = `${uploadFieldsSchemaPath}.${relatedCollection.slug}`
-  const fields = richTextComponentMap.get(relatedFieldSchemaPath)
+  const fields = componentMap[relatedFieldSchemaPath]
 
   const { config } = useConfig()
 
@@ -76,8 +74,11 @@ export const UploadDrawer: React.FC<{
         id,
         collectionSlug,
         data,
+        docPreferences: await getDocPreferences(),
+        globalSlug,
         operation: 'update',
-        schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`.split('.'),
+        renderAllFields: true,
+        schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
       })
 
       setInitialState(state)
@@ -94,21 +95,34 @@ export const UploadDrawer: React.FC<{
     schemaPath,
     relatedCollection.slug,
     getFormState,
+    globalSlug,
+    getDocPreferences,
   ])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
       const { state } = await getFormState({
         id,
+        collectionSlug,
+        docPreferences: await getDocPreferences(),
         formState: prevFormState,
+        globalSlug,
         operation: 'update',
-        schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`.split('.'),
+        schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
       })
 
       return state
     },
 
-    [relatedCollection.slug, schemaPath, id, getFormState],
+    [
+      getFormState,
+      id,
+      collectionSlug,
+      getDocPreferences,
+      globalSlug,
+      schemaPath,
+      relatedCollection.slug,
+    ],
   )
 
   return (
@@ -125,7 +139,14 @@ export const UploadDrawer: React.FC<{
         onChange={[onChange]}
         onSubmit={handleUpdateEditData}
       >
-        {/* Fields Here */}
+        <RenderFields
+          fields={Array.isArray(fields) ? fields : []}
+          parentIndexPath=""
+          parentPath=""
+          parentSchemaPath=""
+          permissions={{}}
+          readOnly={false}
+        />
         <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
       </Form>
     </Drawer>

@@ -17,11 +17,15 @@
       "types": "./src/index.tsx",
       "default": "./src/index.tsx"
     },
-    "./generateComponentMap": "./src/generateComponentMap.tsx",
     "./client": {
       "import": "./src/exports/client/index.ts",
       "types": "./src/exports/client/index.ts",
       "default": "./src/exports/client/index.ts"
+    },
+    "./rscs": {
+      "import": "./src/exports/server/rscs.ts",
+      "types": "./src/exports/server/rscs.ts",
+      "default": "./src/exports/server/rscs.ts"
     }
   },
   "main": "./src/index.tsx",
@@ -70,10 +74,10 @@
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       },
-      "./generateComponentMap": {
-        "import": "./dist/generateComponentMap.js",
-        "types": "./dist/generateComponentMap.d.ts",
-        "default": "./dist/generateComponentMap.js"
+      "./rscs": {
+        "import": "./dist/exports/server/rscs.js",
+        "types": "./dist/exports/server/rscs.d.ts",
+        "default": "./dist/exports/server/rscs.js"
       },
       "./client": {
         "import": "./dist/exports/client/index.js",
