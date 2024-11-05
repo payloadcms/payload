@@ -196,7 +196,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     }
 
     return true
-  }, [editor, setNotLink, config.collections, t, i18n, anchorElem])
+  }, [editor, setNotLink, config.routes.admin, config.collections, t, i18n, anchorElem])
 
   useEffect(() => {
     return mergeRegister(
