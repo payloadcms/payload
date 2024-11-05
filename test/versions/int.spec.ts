@@ -894,7 +894,8 @@ describe('Versions', () => {
         })
 
         for (let i = 0; i < 200; i++) {
-          const writeAmount = 2
+          payload.logger.info(`try ${i}`)
+          const writeAmount = 3
 
           const promises = Array.from({ length: writeAmount }, async (_, i) => {
             return new Promise((resolve) => {
@@ -909,7 +910,7 @@ describe('Versions', () => {
                   })
                   .then(resolve)
                   .catch(resolve)
-              }, i * 10)
+              }, i * 5)
             })
           })
 

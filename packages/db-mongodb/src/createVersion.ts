@@ -80,8 +80,8 @@ export const createVersion: CreateVersion = async function createVersion(
           },
         },
         {
-          createdAt: {
-            $lt: new Date(doc.createdAt),
+          updatedAt: {
+            $lt: new Date(doc.updatedAt),
           },
         },
       ],
