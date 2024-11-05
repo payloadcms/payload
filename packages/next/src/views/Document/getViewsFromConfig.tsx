@@ -10,8 +10,6 @@ import type {
 } from 'payload'
 import type React from 'react'
 
-import { notFound } from 'next/navigation.js'
-
 import { APIView as DefaultAPIView } from '../API/index.js'
 import { EditView as DefaultEditView } from '../Edit/index.js'
 import { LivePreviewView as DefaultLivePreviewView } from '../LivePreview/index.js'
@@ -81,7 +79,7 @@ export const getViewsFromConfig = ({
       routeSegments
 
     if (!overrideDocPermissions && !docPermissions?.read?.permission) {
-      notFound()
+      throw new Error('not-found')
     } else {
       // `../:id`, or `../create`
       switch (routeSegments.length) {
@@ -284,7 +282,7 @@ export const getViewsFromConfig = ({
     const [globalEntity, globalSlug, segment3, ...remainingSegments] = routeSegments
 
     if (!overrideDocPermissions && !docPermissions?.read?.permission) {
-      notFound()
+      throw new Error('not-found')
     } else {
       switch (routeSegments.length) {
         case 2: {
