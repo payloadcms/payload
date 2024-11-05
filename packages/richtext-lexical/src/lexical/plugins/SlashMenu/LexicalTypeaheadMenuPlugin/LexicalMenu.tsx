@@ -251,18 +251,20 @@ export function LexicalMenu({
 
   const selectItemAndCleanUp = useCallback(
     (selectedItem: SlashMenuItem) => {
-      editor.update(() => {
-        const textNodeContainingQuery =
-          resolution.match != null && shouldSplitNodeWithQuery
-            ? $splitNodeContainingQuery(resolution.match)
-            : null
+      editor.update(
+        () => {
+          const textNodeContainingQuery =
+            resolution.match != null && shouldSplitNodeWithQuery
+              ? $splitNodeContainingQuery(resolution.match)
+              : null
 
-        if (textNodeContainingQuery) {
-          textNodeContainingQuery.remove()
-        }
-
-        onSelectItem(selectedItem, close, resolution.match ? resolution.match.matchingString : '')
-      })
+          if (textNodeContainingQuery) {
+            textNodeContainingQuery.remove()
+          }
+        },
+        { discrete: true },
+      )
+      onSelectItem(selectedItem, close, resolution.match ? resolution.match.matchingString : '')
     },
     [editor, shouldSplitNodeWithQuery, resolution.match, onSelectItem, close],
   )
