@@ -172,6 +172,10 @@ export const renderListView = async (
     const clientProps: ListViewClientProps = {
       collectionSlug,
       columnState,
+      description:
+        typeof collectionConfig.admin.description === 'function'
+          ? collectionConfig.admin.description({ t: i18n.t })
+          : collectionConfig.admin.description,
       disableBulkDelete,
       disableBulkEdit,
       enableRowSelections,

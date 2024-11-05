@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, StaticDescription } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import LinkImport from 'next/link.js'
@@ -54,6 +54,7 @@ export type ListViewClientProps = {
   collectionSlug: string
   columnState: Column[]
   Description?: React.ReactNode
+  description?: StaticDescription
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   enableRowSelections?: boolean
@@ -75,6 +76,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     collectionSlug,
     columnState,
     Description,
+    description,
     disableBulkDelete,
     disableBulkEdit,
     enableRowSelections,
@@ -200,13 +202,11 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                 smallBreak={smallBreak}
                 t={t}
               />
-              {collectionConfig?.admin?.description || Description ? (
+              {description || Description ? (
                 <div className={`${baseClass}__sub-header`}>
                   <RenderCustomComponent
                     CustomComponent={Description}
-                    Fallback={
-                      <ViewDescription description={collectionConfig?.admin?.description} />
-                    }
+                    Fallback={<ViewDescription description={description} />}
                   />
                 </div>
               ) : null}
