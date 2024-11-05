@@ -3,6 +3,7 @@ import type {
   ClientCollectionConfig,
   ClientGlobalConfig,
   ClientUser,
+  DocumentPermissions,
   DocumentPreferences,
 } from 'payload'
 
@@ -11,6 +12,7 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
+import { useAuth } from '../../providers/Auth/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
 import { useConfig } from '../Config/index.js'
@@ -18,6 +20,7 @@ import { useLocale } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useTranslation } from '../Translation/index.js'
 import { UploadEditsProvider, useUploadEdits } from '../UploadEdits/index.js'
+import { useGetDocPermissions } from './useGetDocPermissions.js'
 
 const Context = createContext({} as DocumentInfoContext)
 
@@ -34,11 +37,11 @@ const DocumentInfo: React.FC<
     id,
     collectionSlug,
     currentEditor: currentEditorFromProps,
-    docPermissions,
+    docPermissions: docPermissionsFromProps,
     globalSlug,
     hasPublishedDoc: hasPublishedDocFromProps,
-    hasPublishPermission,
-    hasSavePermission,
+    hasPublishPermission: hasPublishPermissionFromProps,
+    hasSavePermission: hasSavePermissionFromProps,
     initialData: data,
     initialState,
     isLocked: isLockedFromProps,
@@ -47,6 +50,16 @@ const DocumentInfo: React.FC<
     unpublishedVersionCount: unpublishedVersionCountFromProps,
     versionCount: versionCountFromProps,
   } = props
+
+  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(docPermissionsFromProps)
+
+  const [hasSavePermission, setHasSavePermission] = useState<boolean>(hasSavePermissionFromProps)
+
+  const [hasPublishPermission, setHasPublishPermission] = useState<boolean>(
+    hasPublishPermissionFromProps,
+  )
+
+  const { permissions } = useAuth()
 
   const {
     config: {
@@ -187,6 +200,20 @@ const DocumentInfo: React.FC<
     [serverURL, api, globalSlug],
   )
 
+  const getDocPermissions = useGetDocPermissions({
+    id: id as string,
+    api,
+    collectionSlug,
+    globalSlug,
+    i18n,
+    locale,
+    permissions,
+    serverURL,
+    setDocPermissions,
+    setHasPublishPermission,
+    setHasSavePermission,
+  })
+
   const getDocPreferences = useCallback(() => {
     return getPreference<DocumentPreferences>(preferencesKey)
   }, [getPreference, preferencesKey])
@@ -264,6 +291,7 @@ const DocumentInfo: React.FC<
     docConfig,
     docPermissions,
     documentIsLocked,
+    getDocPermissions,
     getDocPreferences,
     hasPublishedDoc,
     hasPublishPermission,

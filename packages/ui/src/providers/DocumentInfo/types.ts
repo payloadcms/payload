@@ -46,6 +46,7 @@ export type DocumentInfoContext = {
   currentEditor?: ClientUser | null | number | string
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
   documentIsLocked?: boolean
+  getDocPermissions: (data?: Data) => Promise<void>
   getDocPreferences: () => Promise<DocumentPreferences>
   hasPublishedDoc: boolean
   initialData: Data

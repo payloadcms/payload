@@ -439,26 +439,18 @@ describe('access control', () => {
 
     test('should disable field based on document data', async () => {
       await page.goto(docLevelAccessURL.edit(existingDoc.id))
-
-      // validate that the text input is disabled because the field is "locked"
       const isDisabled = page.locator('#field-approvedTitle')
       await expect(isDisabled).toBeDisabled()
     })
 
     test('should disable operation based on document data', async () => {
       await page.goto(docLevelAccessURL.edit(existingDoc.id))
-
-      // validate that the delete action is not displayed
       await openDocControls(page)
-      const deleteAction = page.locator('#action-delete')
-      await expect(deleteAction).toBeHidden()
-
+      await expect(page.locator('#action-delete')).toBeHidden()
       await page.locator('#field-approvedForRemoval').check()
       await saveDocAndAssert(page)
-
       await openDocControls(page)
-      const deleteAction2 = page.locator('#action-delete')
-      await expect(deleteAction2).toBeVisible()
+      await expect(page.locator('#action-delete')).toBeVisible()
     })
   })
 

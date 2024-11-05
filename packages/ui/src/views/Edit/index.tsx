@@ -66,6 +66,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     disableLeaveWithoutSaving,
     docPermissions,
     documentIsLocked,
+    getDocPermissions,
     getDocPreferences,
     globalSlug,
     hasPublishPermission,
@@ -200,7 +201,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   })
 
   const onSave = useCallback(
-    (json) => {
+    async (json) => {
       reportUpdate({
         id,
         entitySlug,
@@ -237,6 +238,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       } else {
         resetUploadEdits()
       }
+
+      await getDocPermissions(json)
     },
     [
       reportUpdate,
