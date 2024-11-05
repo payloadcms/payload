@@ -185,14 +185,7 @@ function RenderField({
   switch (clientFieldConfig.type) {
     // named fields with subfields
     case 'array':
-      return (
-        <ArrayField
-          {...sharedProps}
-          field={clientFieldConfig}
-          path="test"
-          permissions={permissions}
-        />
-      )
+      return <ArrayField {...sharedProps} field={clientFieldConfig} permissions={permissions} />
     case 'blocks':
       return <BlocksField {...sharedProps} field={clientFieldConfig} permissions={permissions} />
     case 'group':
