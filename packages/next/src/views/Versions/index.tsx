@@ -164,6 +164,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
     collectionConfig,
     config,
     docID: id,
+    docs: versionsData?.docs,
     globalConfig,
     i18n,
     latestDraftVersion: latestDraftVersion?.id,

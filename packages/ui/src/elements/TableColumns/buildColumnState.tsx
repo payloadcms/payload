@@ -198,7 +198,6 @@ export const buildColumnState = (args: Args): Column[] => {
                     _field?.admin && 'components' in _field.admin && _field.admin.components?.Cell
                   }
                   importMap={importMap}
-                  key={i}
                   serverProps={serverProps}
                 />
               ) : undefined

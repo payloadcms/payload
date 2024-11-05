@@ -10,12 +10,17 @@ type CreatedAtCellProps = {
   collectionSlug?: string
   docID?: number | string
   globalSlug?: string
+  rowData?: {
+    id: number | string
+    updatedAt: Date | number | string
+  }
 }
 
 export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
   collectionSlug,
   docID,
   globalSlug,
+  rowData: { id, updatedAt } = {},
 }) => {
   const {
     config: {
@@ -26,32 +31,25 @@ export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
 
   const { i18n } = useTranslation()
 
-  const cellData = '' /// TODO: get cellData from props
-  const rowData = { id: undefined } // TODO: get rowData from props
-  // const { cellData, rowData } = useTableCell()
-
-  const versionID = rowData.id
-
   let to: string
 
   if (collectionSlug) {
     to = formatAdminURL({
       adminRoute,
-      path: `/collections/${collectionSlug}/${docID}/versions/${versionID}`,
+      path: `/collections/${collectionSlug}/${docID}/versions/${id}`,
     })
   }
 
   if (globalSlug) {
     to = formatAdminURL({
       adminRoute,
-      path: `/globals/${globalSlug}/versions/${versionID}`,
+      path: `/globals/${globalSlug}/versions/${id}`,
     })
   }
 
   return (
     <Link href={to} prefetch={false}>
-      {cellData &&
-        formatDate({ date: cellData as Date | number | string, i18n, pattern: dateFormat })}
+      {formatDate({ date: updatedAt, i18n, pattern: dateFormat })}
     </Link>
   )
 }

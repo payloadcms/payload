@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, ClientGlobalConfig, SanitizedCollectionConfig } from 'payload'
+import type { SanitizedCollectionConfig } from 'payload'
 
 import {
   type Column,
@@ -7,8 +7,6 @@ import {
   Pagination,
   PerPage,
   Table,
-  useConfig,
-  useDocumentInfo,
   useListQuery,
   useTranslation,
 } from '@payloadcms/ui'
@@ -23,13 +21,7 @@ export const VersionsViewClient: React.FC<{
 }> = (props) => {
   const { baseClass, columns, paginationLimits } = props
 
-  const { collectionSlug, globalSlug } = useDocumentInfo()
   const { data, handlePageChange, handlePerPageChange } = useListQuery()
-
-  const { getEntityConfig } = useConfig()
-
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
-  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
 
   const searchParams = useSearchParams()
   const limit = searchParams.get('limit')
@@ -48,11 +40,7 @@ export const VersionsViewClient: React.FC<{
       )}
       {versionCount > 0 && (
         <React.Fragment>
-          <Table
-            columns={columns}
-            data={data?.docs}
-            fields={(collectionConfig || globalConfig)?.fields}
-          />
+          <Table columns={columns} data={data?.docs} />
           <div className={`${baseClass}__page-controls`}>
             <Pagination
               hasNextPage={data.hasNextPage}
