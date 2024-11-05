@@ -40,6 +40,7 @@ import UploadsMultiPoly from './collections/UploadMultiPoly/index.js'
 import UploadsPoly from './collections/UploadPoly/index.js'
 import UploadRestricted from './collections/UploadRestricted/index.js'
 import Uploads3 from './collections/Uploads3/index.js'
+import TabsWithRichText from './globals/TabsWithRichText.js'
 import { clearAndSeedEverything } from './seed.js'
 
 export const collectionSlugs: CollectionConfig[] = [
@@ -95,7 +96,7 @@ export const collectionSlugs: CollectionConfig[] = [
 
 export default buildConfigWithDefaults({
   collections: collectionSlugs,
-  // globals: [TabsWithRichText],
+  globals: [TabsWithRichText],
   custom: {
     client: {
       'new-value': 'client available',
@@ -109,7 +110,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
     components: {
-      // afterNavLinks: ['/components/AfterNavLinks.js#AfterNavLinks'],
+      afterNavLinks: ['/components/AfterNavLinks.js#AfterNavLinks'],
     },
     custom: {
       client: {
