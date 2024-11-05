@@ -177,6 +177,7 @@ export const arTranslations: DefaultTranslationsObject = {
     addFilter: 'أضف فلتر',
     adminTheme: 'شكل واجهة المستخدم',
     and: 'و',
+    anotherUser: 'مستخدم آخر',
     anotherUserTakenOver: 'قام مستخدم آخر بالاستيلاء على تحرير هذا المستند.',
     applyChanges: 'طبق التغييرات',
     ascending: 'تصاعدي',

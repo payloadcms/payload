@@ -139,6 +139,7 @@ export const findByIDOperation = async <
           collection: 'payload-locked-documents',
           depth: 1,
           limit: 1,
+          overrideAccess: false,
           pagination: false,
           req,
           where: {

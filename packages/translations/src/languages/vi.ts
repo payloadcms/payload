@@ -177,6 +177,7 @@ export const viTranslations: DefaultTranslationsObject = {
     addFilter: 'Thêm bộ lọc',
     adminTheme: 'Giao diện bảng điều khiển',
     and: 'Và',
+    anotherUser: 'Người dùng khác',
     anotherUserTakenOver: 'Người dùng khác đã tiếp quản việc chỉnh sửa tài liệu này.',
     applyChanges: 'Áp dụng Thay đổi',
     ascending: 'Sắp xếp theo thứ tự tăng dần',

@@ -10,7 +10,6 @@ import {
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
-import { Logo } from '../../elements/Logo/index.js'
 import { DefaultNav } from '../../elements/Nav/index.js'
 import './index.scss'
 import { NavHamburger } from './NavHamburger/index.js'
@@ -49,11 +48,8 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     } = {},
   } = payload.config || {}
 
-  const { Actions, CustomAvatar, CustomIcon, CustomLogo } = React.useMemo<{
+  const { Actions } = React.useMemo<{
     Actions: Record<string, React.ReactNode>
-    CustomAvatar: React.ReactNode
-    CustomIcon: React.ReactNode
-    CustomLogo: React.ReactNode
   }>(() => {
     return {
       Actions: viewActions
@@ -73,40 +69,8 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
             return acc
           }, {})
         : undefined,
-      CustomAvatar:
-        avatar !== 'gravatar' && avatar !== 'default' ? (
-          <RenderServerComponent Component={avatar.Component} importMap={payload.importMap} />
-        ) : undefined,
-      CustomIcon: (
-        <RenderServerComponent
-          Component={components?.graphics?.Icon}
-          importMap={payload.importMap}
-        />
-      ),
-      CustomLogo: (
-        <Logo
-          i18n={i18n}
-          locale={locale}
-          params={params}
-          payload={payload}
-          permissions={permissions}
-          searchParams={searchParams}
-          user={user}
-        />
-      ),
     }
-  }, [
-    viewActions,
-    avatar,
-    components,
-    i18n,
-    locale,
-    params,
-    payload,
-    permissions,
-    searchParams,
-    user,
-  ])
+  }, [viewActions, payload])
 
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
@@ -154,9 +118,22 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
               />
               <div className={`${baseClass}__wrap`}>
                 <AppHeader
-                  CustomAvatar={CustomAvatar}
-                  CustomIcon={CustomIcon}
-                  CustomLogo={CustomLogo}
+                  CustomAvatar={
+                    avatar !== 'gravatar' && avatar !== 'default' ? (
+                      <RenderServerComponent
+                        Component={avatar.Component}
+                        importMap={payload.importMap}
+                      />
+                    ) : undefined
+                  }
+                  CustomIcon={
+                    components?.graphics?.Icon ? (
+                      <RenderServerComponent
+                        Component={components.graphics.Icon}
+                        importMap={payload.importMap}
+                      />
+                    ) : undefined
+                  }
                 />
                 {children}
               </div>

@@ -13,7 +13,7 @@ const baseClass = 'dashboard'
 
 export type DashboardProps = {
   globalData: Array<{
-    data: { _isLocked: boolean; _lastEditedAt: string; _userEditing: ClientUser | null }
+    data: { _isLocked: boolean; _lastEditedAt: string; _userEditing: ClientUser | number | string }
     lockDuration?: number
     slug: string
   }>

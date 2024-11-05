@@ -827,6 +827,9 @@ importers:
       console-table-printer:
         specifier: 2.11.2
         version: 2.11.2
+      croner:
+        specifier: 8.1.2
+        version: 8.1.2
       dataloader:
         specifier: 2.2.2
         version: 2.2.2
@@ -5743,6 +5746,10 @@ packages:
     resolution: {integrity: sha512-Adz2bdH0Vq3F53KEMJOoftQFutWCukm6J24wbPWRO4k1kMY7gS7ds/uoJkNuV8wDCtWWnuwGcJwpWcih+zEW1Q==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     hasBin: true
+
+  croner@8.1.2:
+    resolution: {integrity: sha512-ypfPFcAXHuAZRCzo3vJL6ltENzniTjwe/qsLleH1V2/7SRDjgvRQyrLmumFTLmjFax4IuSxfGXEn79fozXcJog==}
+    engines: {node: '>=18.0'}
 
   cross-env@7.0.3:
     resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
@@ -15388,6 +15395,8 @@ snapshots:
       - babel-plugin-macros
       - supports-color
       - ts-node
+
+  croner@8.1.2: {}
 
   cross-env@7.0.3:
     dependencies:

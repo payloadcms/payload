@@ -54,7 +54,6 @@ export {
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 
 export { getDataByPath } from '../utilities/getDataByPath.js'
-
 export { getSelectMode } from '../utilities/getSelectMode.js'
 export { getSiblingData } from '../utilities/getSiblingData.js'
 
@@ -77,6 +76,8 @@ export { setsAreEqual } from '../utilities/setsAreEqual.js'
 export { default as toKebabCase } from '../utilities/toKebabCase.js'
 
 export { unflatten } from '../utilities/unflatten.js'
+
+export { validateMimeType } from '../utilities/validateMimeType.js'
 export { wait } from '../utilities/wait.js'
 export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
 export { versionDefaults } from '../versions/defaults.js'

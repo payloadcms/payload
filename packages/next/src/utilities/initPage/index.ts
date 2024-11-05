@@ -13,6 +13,7 @@ import { getPayloadHMR } from '../getPayloadHMR.js'
 import { initReq } from '../initReq.js'
 import { getRouteInfo } from './handleAdminPage.js'
 import { handleAuthRedirect } from './handleAuthRedirect.js'
+import { isCustomAdminView } from './isCustomAdminView.js'
 import { isPublicAdminRoute } from './shared.js'
 
 export const initPage = async ({
@@ -134,7 +135,8 @@ export const initPage = async ({
 
   if (
     !permissions.canAccessAdmin &&
-    !isPublicAdminRoute({ adminRoute, config: payload.config, route })
+    !isPublicAdminRoute({ adminRoute, config: payload.config, route }) &&
+    !isCustomAdminView({ adminRoute, config: payload.config, route })
   ) {
     redirectTo = handleAuthRedirect({
       config: payload.config,

@@ -174,6 +174,7 @@ export const heTranslations: DefaultTranslationsObject = {
     addFilter: 'הוסף מסנן',
     adminTheme: 'ערכת נושא ממשק הניהול',
     and: 'וגם',
+    anotherUser: 'משתמש אחר',
     anotherUserTakenOver: 'משתמש אחר השתלט על עריכת מסמך זה.',
     applyChanges: 'החל שינויים',
     ascending: 'בסדר עולה',

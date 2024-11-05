@@ -172,6 +172,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     addFilter: '新增過濾器',
     adminTheme: '管理頁面主題',
     and: '和',
+    anotherUser: '另一位使用者',
     anotherUserTakenOver: '另一位使用者接管了此文件的編輯。',
     applyChanges: '套用更改',
     ascending: '升冪',

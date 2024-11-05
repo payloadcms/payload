@@ -1,0 +1,382 @@
+---
+title: Jobs Queue
+label: Jobs Queue
+order: 10
+desc: Payload provides all you need to run job queues, which are helpful to offload long-running processes into separate workers.
+keywords: jobs queue, application framework, typescript, node, react, nextjs
+---
+
+## Defining tasks
+
+A task is a simple function that can be executed directly or within a workflow. The difference between tasks and functions is that tasks can be run in the background, and can be retried if they fail.
+
+Tasks can either be defined within the `jobs.tasks` array in your payload config, or they can be run inline within a workflow.
+
+### Defining tasks in the config
+
+Simply add a task to the `jobs.tasks` array in your Payload config. A task consists of the following fields:
+
+| Option                      | Description                                                                      |
+| --------------------------- | -------------------------------------------------------------------------------- |
+| `slug` | Define a slug-based name for this job. This slug needs to be unique among both tasks and workflows.|
+| `handler`   | The function that should be responsible for running the job. You can either pass a string-based path to the job function file, or the job function itself. If you are using large dependencies within your job, you might prefer to pass the string path because that will avoid bundling large dependencies in your Next.js app.         |
+| `inputSchema` | Define the input field schema - payload will generate a type for this schema. |
+| `interfaceName` | You can use interfaceName to change the name of the interface that is generated for this task. By default, this is "Task" + the capitalized task slug. |
+| `outputSchema` | Define the output field schema - payload will generate a type for this schema. |
+| `label` | Define a human-friendly label for this task. |
+| `onFail` | Function to be executed if the task fails. |
+| `onSuccess` | Function to be executed if the task fails. |
+| `retries` | Specify the number of times that this step should be retried if it fails. |
+
+The handler is the function, or a path to the function, that will run once the job picks up this task. The handler function should return an object with an `output` key, which should contain the output of the task.
+
+Example:
+
+```ts
+export default buildConfig({
+  // ...
+  jobs: {
+    tasks: [
+      {
+        retries: 2,
+        slug: 'createPost',
+        inputSchema: [
+          {
+            name: 'title',
+            type: 'text',
+            required: true,
+          },
+        ],
+        outputSchema: [
+          {
+            name: 'postID',
+            type: 'text',
+            required: true,
+          },
+        ],
+        handler: async ({ input, job, req }) => {
+          const newPost = await req.payload.create({
+            collection: 'post',
+            req,
+            data: {
+              title: input.title,
+            },
+          })
+          return {
+            output: {
+              postID: newPost.id,
+            },
+          }
+        },
+      } as TaskConfig<'createPost'>,
+    ]
+  }
+})
+```
+
+### Example: defining external tasks
+
+payload.config.ts:
+
+```ts
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
+export default buildConfig({
+  // ...
+  jobs: {
+    tasks: [
+      {
+        retries: 2,
+        slug: 'createPost',
+        inputSchema: [
+          {
+            name: 'title',
+            type: 'text',
+            required: true,
+          },
+        ],
+        outputSchema: [
+          {
+            name: 'postID',
+            type: 'text',
+            required: true,
+          },
+        ],
+        handler: path.resolve(dirname, 'src/tasks/createPost.ts') + '#createPostHandler',
+      }
+    ]
+  }
+})
+```
+
+src/tasks/createPost.ts:
+
+```ts
+import type { TaskHandler } from 'payload'
+
+export const createPostHandler: TaskHandler<'createPost'> = async ({ input, job, req }) => {
+  const newPost = await req.payload.create({
+    collection: 'post',
+    req,
+    data: {
+      title: input.title,
+    },
+  })
+  return {
+    output: {
+      postID: newPost.id,
+    },
+  }
+}
+```
+
+
+## Defining workflows
+
+There are two types of workflows - JS-based workflows and JSON-based workflows.
+
+### Defining JS-based workflows
+
+A JS-based function is a function in which you decide yourself when the tasks should run, by simply calling the `runTask` function. If the job, or any task within the job, fails, the entire function will re-run.
+
+Tasks that have successfully been completed will simply re-return the cached output without running again, and failed tasks will be re-run.
+
+Simply add a workflow to the `jobs.wokflows` array in your Payload config. A wokflow consists of the following fields:
+
+| Option                      | Description                                                                      |
+| --------------------------- | -------------------------------------------------------------------------------- |
+| `slug` | Define a slug-based name for this workflow. This slug needs to be unique among both tasks and workflows.|
+| `handler`   | The function that should be responsible for running the workflow. You can either pass a string-based path to the workflow function file, or workflow job function itself. If you are using large dependencies within your workflow, you might prefer to pass the string path because that will avoid bundling large dependencies in your Next.js app.         |
+| `inputSchema` | Define the input field schema - payload will generate a type for this schema. |
+| `interfaceName` | You can use interfaceName to change the name of the interface that is generated for this workflow. By default, this is "Workflow" + the capitalized workflow slug. |
+| `label` | Define a human-friendly label for this workflow. |
+| `queue` | Optionally, define the queue name that this workflow should be tied to. Defaults to "default". |
+
+Example:
+
+```ts
+export default buildConfig({
+  // ...
+  jobs: {
+    tasks: [
+      // ...
+    ]
+    workflows: [
+      {
+        slug: 'createPostAndUpdate',
+        inputSchema: [
+          {
+            name: 'title',
+            type: 'text',
+            required: true,
+          },
+        ],
+        handler: async ({ job, runTask }) => {
+          const output = await runTask({
+            task: 'createPost',
+            id: '1',
+            input: {
+              title: job.input.title,
+            },
+          })
+
+          await runTask({
+            task: 'updatePost',
+            id: '2',
+            input: {
+              post: job.taskStatus.createPost['1'].output.postID, // or output.postID
+              title: job.input.title + '2',
+            },
+          })
+        },
+      } as WorkflowConfig<'updatePost'>
+    ]
+  }
+})
+```
+
+#### Running tasks inline
+
+In order to run tasks inline without predefining them, you can use the `runTaskInline` function.
+
+The drawbacks of this approach are that tasks cannot be re-used as easily, and the **task data stored in the job** will not be typed. In the following example, the inline task data will be stored on the job under `job.taskStatus.inline['2']` but completely untyped, as types for dynamic tasks like these cannot be generated beforehand.
+
+Example:
+
+```ts
+export default buildConfig({
+  // ...
+  jobs: {
+    tasks: [
+      // ...
+    ]
+    workflows: [
+      {
+        slug: 'createPostAndUpdate',
+        inputSchema: [
+          {
+            name: 'title',
+            type: 'text',
+            required: true,
+          },
+        ],
+        handler: async ({ job, runTask }) => {
+          const output = await runTask({
+            task: 'createPost',
+            id: '1',
+            input: {
+              title: job.input.title,
+            },
+          })
+
+          const { newPost } = await runTaskInline({
+            task: async ({ req }) => {
+              const newPost = await req.payload.update({
+                collection: 'post',
+                id: output.postID,
+                req,
+                retries: 3,
+                data: {
+                  title: 'updated!',
+                },
+              })
+              return {
+                output: {
+                  newPost
+                },
+              }
+            },
+            id: '2',
+          })
+        },
+      } as WorkflowConfig<'updatePost'>
+    ]
+  }
+})
+```
+
+### Defining JSON-based workflows
+
+JSON-based workflows are a way to define the tasks the workflow should run in an array. The relationships between the tasks, their run order and their conditions are defined in the JSON object, which allows payload to statically analyze the workflow and will generate more helpful graphs.
+
+This functionality is not available yet, but it will be available in the future.
+
+## Queueing workflows and tasks
+
+In order to queue a workflow or a task (= create them and add them to the queue), you can use the `payload.jobs.queue` function.
+
+Example: queueing workflows:
+
+```ts
+const createdJob = await payload.jobs.queue({
+  workflows: 'createPostAndUpdate',
+  input: {
+    title: 'my title',
+  },
+})
+```
+
+Example: queueing tasks:
+
+```ts
+const createdJob = await payload.jobs.queue({
+  task: 'createPost',
+  input: {
+    title: 'my title',
+  },
+})
+```
+
+## Running workflows and tasks
+
+Workflows and tasks added to the queue will not run unless a worker picks it up and runs it. This can be done in two ways:
+
+### Endpoint
+
+Make a fetch request to the `api/payload-jobs/run` endpoint:
+
+```ts
+await fetch('/api/payload-jobs/run', {
+  method: 'GET',
+  headers: {
+    'Authorization': `JWT ${token}`,
+  },
+});
+```
+
+### Local API
+
+Run the payload.jobs.run function:
+
+```ts
+const results = await payload.jobs.run()
+
+// You can customize the queue name by passing it as an argument
+await payload.jobs.run({ queue: 'posts' })
+```
+
+### Script
+
+You can run the jobs:run script from the command line:
+
+```sh
+npx payload jobs:run --queue default --limit 10
+```
+
+#### Triggering jobs as cronjob
+
+You can pass the --cron flag to the jobs:run script to run the jobs in a cronjob:
+
+```sh
+npx payload jobs:run --cron "*/5 * * * *"
+```
+
+### Vercel Cron
+
+Vercel Cron allows scheduled tasks to be executed automatically by triggering specific endpoints. Below is a step-by-step guide to configuring Vercel Cron for running queued jobs on apps hosted on Vercel:
+
+1. Add Vercel Cron Configuration: Place a vercel.json file at the root of your project with the following content:
+
+```json
+{
+  "crons": [
+    {
+      "path": "/api/payload-jobs/run",
+      "schedule": "*/5 * * * *"
+    }
+  ]
+}
+```
+
+This configuration schedules the endpoint `/api/payload-jobs/run` to be triggered every 5 minutes. This endpoint is added automatically by payload and is responsible for running the queued jobs.
+
+2. Environment Variable Setup: By default, the endpoint may require a JWT token for authorization. However, Vercel Cron jobs cannot pass JWT tokens. Instead, you can use an environment variable to secure the endpoint:
+
+Add a new environment variable named `CRON_SECRET` to your Vercel project settings. This should be a random string, ideally 16 characters or longer.
+
+3. Modify Authentication for Job Running: Adjust the job running authorization logic in your project to accept the `CRON_SECRET` as a valid token. Modify your `payload.config.ts` file as follows:
+
+```ts
+export default buildConfig({
+  // Other configurations...
+  jobs: {
+    access: {
+      run: ({ req }: { req: PayloadRequest }): boolean => {
+        const authHeader = req.headers.get('authorization');
+        return authHeader === `Bearer ${process.env.CRON_SECRET}`;
+      },
+    },
+    // Other job configurations...
+  }
+})
+```
+
+This code snippet ensures that the jobs can only be triggered if the correct `CRON_SECRET` is provided in the authorization header.
+
+Vercel will automatically make the `CRON_SECRET` environment variable available to the endpoint when triggered by the Vercel Cron, ensuring that the jobs can be run securely.
+
+After the project is deployed to Vercel, the Vercel Cron job will automatically trigger the `/api/payload-jobs/run` endpoint in the specified schedule, running the queued jobs in the background.

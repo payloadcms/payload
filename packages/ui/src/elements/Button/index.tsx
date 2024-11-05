@@ -121,6 +121,7 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
   }
 
   let buttonElement
+  let prefetch
 
   switch (el) {
     case 'anchor':
@@ -147,10 +148,12 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
 
       if (disabled) {
         LinkTag = 'div'
+      } else {
+        prefetch = false
       }
 
       buttonElement = (
-        <LinkTag {...buttonProps} href={to || url} to={to || url}>
+        <LinkTag {...buttonProps} href={to || url} prefetch={prefetch} to={to || url}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>

@@ -175,6 +175,7 @@ export const thTranslations: DefaultTranslationsObject = {
     addFilter: 'เพิ่มการกรอง',
     adminTheme: 'ธีมผู้ดูแลระบบ',
     and: 'และ',
+    anotherUser: 'ผู้ใช้อื่น',
     anotherUserTakenOver: 'ผู้ใช้อื่นเข้าครอบครองการแก้ไขเอกสารนี้แล้ว',
     applyChanges: 'ใช้การเปลี่ยนแปลง',
     ascending: 'น้อยไปมาก',

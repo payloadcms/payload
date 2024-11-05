@@ -178,6 +178,7 @@ export const koTranslations: DefaultTranslationsObject = {
     addFilter: '필터 추가',
     adminTheme: '관리자 테마',
     and: '및',
+    anotherUser: '다른 사용자',
     anotherUserTakenOver: '다른 사용자가 이 문서의 편집을 인수했습니다.',
     applyChanges: '변경 사항 적용',
     ascending: '오름차순',

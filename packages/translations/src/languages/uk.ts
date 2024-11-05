@@ -179,6 +179,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     addFilter: 'Додати фільтр',
     adminTheme: 'Тема адмін панелі',
     and: 'і',
+    anotherUser: 'Інший користувач',
     anotherUserTakenOver: 'Інший користувач взяв на себе редагування цього документа.',
     applyChanges: 'Застосувати зміни',
     ascending: 'В порядку зростання',

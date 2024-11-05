@@ -42,6 +42,7 @@ export interface Config {
     'custom-global-views-two': CustomGlobalViewsTwo;
     'group-globals-one': GroupGlobalsOne;
     'group-globals-two': GroupGlobalsTwo;
+    settings: Setting;
   };
   locale: 'es' | 'en';
   user: User & {
@@ -451,6 +452,16 @@ export interface GroupGlobalsOne {
 export interface GroupGlobalsTwo {
   id: string;
   title?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "settings".
+ */
+export interface Setting {
+  id: string;
+  canAccessProtected?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }

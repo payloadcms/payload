@@ -21,9 +21,8 @@ const baseClass = 'app-header'
 type Props = {
   CustomAvatar?: React.ReactNode
   CustomIcon?: React.ReactNode
-  CustomLogo?: React.ReactNode
 }
-export function AppHeader({ CustomAvatar, CustomIcon, CustomLogo }: Props) {
+export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
   const { t } = useTranslation()
 
   const { Actions } = useActions()
@@ -76,12 +75,7 @@ export function AppHeader({ CustomAvatar, CustomIcon, CustomLogo }: Props) {
           </NavToggler>
           <div className={`${baseClass}__controls-wrapper`}>
             <div className={`${baseClass}__step-nav-wrapper`}>
-              <StepNav
-                className={`${baseClass}__step-nav`}
-                CustomIcon={CustomIcon}
-                CustomLogo={CustomLogo}
-                Link={Link}
-              />
+              <StepNav className={`${baseClass}__step-nav`} CustomIcon={CustomIcon} Link={Link} />
             </div>
             <div className={`${baseClass}__actions-wrapper`}>
               <div className={`${baseClass}__actions`} ref={customControlsRef}>
@@ -107,6 +101,7 @@ export function AppHeader({ CustomAvatar, CustomIcon, CustomLogo }: Props) {
               aria-label={t('authentication:account')}
               className={`${baseClass}__account`}
               href={formatAdminURL({ adminRoute, path: accountRoute })}
+              prefetch={Link ? false : undefined}
               tabIndex={0}
             >
               <RenderCustomComponent CustomComponent={CustomAvatar} Fallback={<Account />} />

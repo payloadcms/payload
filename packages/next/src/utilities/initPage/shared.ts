@@ -35,9 +35,10 @@ export const isPublicAdminRoute = ({
   config: SanitizedConfig
   route: string
 }): boolean => {
-  return publicAdminRoutes.some((routeSegment) => {
+  const isPublicAdminRoute = publicAdminRoutes.some((routeSegment) => {
     const segment = config.admin?.routes?.[routeSegment] || routeSegment
     const routeWithoutAdmin = getRouteWithoutAdmin({ adminRoute, route })
+
     if (routeWithoutAdmin.startsWith(segment)) {
       return true
     } else if (routeWithoutAdmin.includes('/verify/')) {
@@ -46,6 +47,8 @@ export const isPublicAdminRoute = ({
       return false
     }
   })
+
+  return isPublicAdminRoute
 }
 
 export const getRouteWithoutAdmin = ({

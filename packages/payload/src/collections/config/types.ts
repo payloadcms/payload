@@ -1,5 +1,5 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import type { DeepRequired, MarkOptional } from 'ts-essentials'
+import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
 import type {
   CustomPreviewButton,
@@ -383,6 +383,9 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * @WARNING: If you change this property with existing data, you will need to handle the renaming of the table in your database or by using migrations
    */
   dbName?: DBIdentifierName
+  defaultPopulate?: IsAny<SelectFromCollectionSlug<TSlug>> extends true
+    ? SelectType
+    : SelectFromCollectionSlug<TSlug>
   /**
    * Default field to sort by in collection list view
    */

@@ -178,6 +178,7 @@ export const azTranslations: DefaultTranslationsObject = {
     addFilter: 'Filter əlavə et',
     adminTheme: 'Admin Mövzusu',
     and: 'Və',
+    anotherUser: 'Başqa bir istifadəçi',
     anotherUserTakenOver: 'Başqa bir istifadəçi bu sənədin redaktəsini ələ keçirdi.',
     applyChanges: 'Dəyişiklikləri Tətbiq Edin',
     ascending: 'Artan',

@@ -1,41 +1,34 @@
-name: Bug Report
-description: Create a bug report for Payload
-labels: ['[possible-bug]']
+name: Design Issue
+description: '[SCREENSHOT REQUIRED] - Create a design issue report'
+labels: ['status: needs-triage', 'v3', 'area: ui']
 body:
-  - type: markdown
-    attributes:
-      value: |
-        *Note:* Feature requests should be opened as [discussions](https://github.com/payloadcms/payload/discussions/new?category=feature-requests-ideas).
-  - type: input
-    id: reproduction-link
-    attributes:
-      label: Link to reproduction
-      description: Want us to look into your issue faster? Follow the [reproduction-guide](https://github.com/payloadcms/payload/blob/main/.github/reproduction-guide.md) for more information.
-    validations:
-      required: false
   - type: textarea
     attributes:
-      label: Describe the Bug
+      label: Describe the Bug.
+      description: >-
+        _REQUIRED:_ Please a screenshot/video of the issue along with a detailed description of the problem.
     validations:
       required: true
+
   - type: textarea
     attributes:
-      label: To Reproduce
+      label: Reproduction Steps
       description: Steps to reproduce the behavior, please provide a clear description of how to reproduce the issue, based on the linked minimal reproduction. Screenshots can be provided in the issue body below. If using code blocks, make sure that [syntax highlighting is correct](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks#syntax-highlighting) and double check that the rendered preview is not broken.
     validations:
       required: true
-  - type: input
-    id: version
+
+  - type: textarea
     attributes:
-      label: Payload Version
-      description: What version of Payload are you running?
+      label: Environment Info
+      description: Paste output from `pnpm payload info` (>= beta.92) _or_ Payload, Node.js, and Next.js versions.
+      render: text
+      placeholder: |
+        Payload:
+        Node.js:
+        Next.js:
     validations:
       required: true
-  - type: input
-    id: adapters-plugins
-    attributes:
-      label: Adapters and Plugins
-      description: What adapters and plugins are you using? ie. db-mongodb, db-postgres, bundler-webpack, etc.
+
   - type: markdown
     attributes:
       value: Before submitting the issue, go through the steps you've written down to make sure the steps provided are detailed and clear.

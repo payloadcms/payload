@@ -11,6 +11,7 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 
 import { MissingEditorProp } from '../errors/MissingEditorProp.js'
 import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
+import { generateJobsJSONSchemas } from '../queues/config/generateJobsJSONSchemas.js'
 import { deepCopyObject } from './deepCopyObject.js'
 import { toWords } from './formatLabels.js'
 import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
@@ -288,13 +289,17 @@ export function fieldsToJSONSchema(
                 type: withNullableJSONSchemaType('array', isRequired),
                 items: {
                   type: 'string',
-                  enum: optionEnums,
                 },
+              }
+              if (optionEnums?.length) {
+                ;(fieldSchema.items as JSONSchema4).enum = optionEnums
               }
             } else {
               fieldSchema = {
                 type: withNullableJSONSchemaType('string', isRequired),
-                enum: optionEnums,
+              }
+              if (optionEnums?.length) {
+                fieldSchema.enum = optionEnums
               }
             }
 
@@ -604,7 +609,11 @@ export function entityToJSONSchema(
   incomingEntity: SanitizedCollectionConfig | SanitizedGlobalConfig,
   interfaceNameDefinitions: Map<string, JSONSchema4>,
   defaultIDType: 'number' | 'text',
+  collectionIDFieldTypes?: { [key: string]: 'number' | 'string' },
 ): JSONSchema4 {
+  if (!collectionIDFieldTypes) {
+    collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
+  }
   const entity: SanitizedCollectionConfig | SanitizedGlobalConfig = deepCopyObject(incomingEntity)
   const title = entity.typescript?.interface
     ? entity.typescript.interface
@@ -640,9 +649,6 @@ export function entityToJSONSchema(
       type: 'text',
     })
   }
-
-  //  Used for relationship fields, to determine whether to use a string or number type for the ID.
-  const collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
 
   return {
     type: 'object',
@@ -912,6 +918,9 @@ export function configToJSONSchema(
   // a mutable Map to store custom top-level `interfaceName` types. Fields with an `interfaceName` property will be moved to the top-level definitions here
   const interfaceNameDefinitions: Map<string, JSONSchema4> = new Map()
 
+  //  Used for relationship fields, to determine whether to use a string or number type for the ID.
+  const collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
+
   // Collections and Globals have to be moved to the top-level definitions as well. Reason: The top-level type will be the `Config` type - we don't want all collection and global
   // types to be inlined inside the `Config` type
 
@@ -928,7 +937,13 @@ export function configToJSONSchema(
 
   const entityDefinitions: { [k: string]: JSONSchema4 } = entities.reduce(
     (acc, { type, entity }) => {
-      acc[entity.slug] = entityToJSONSchema(config, entity, interfaceNameDefinitions, defaultIDType)
+      acc[entity.slug] = entityToJSONSchema(
+        config,
+        entity,
+        interfaceNameDefinitions,
+        defaultIDType,
+        collectionIDFieldTypes,
+      )
       const select = fieldsToSelectJSONSchema({ fields: entity.fields })
 
       if (type === 'global') {
@@ -958,6 +973,10 @@ export function configToJSONSchema(
       { auth: {} },
     )
 
+  const jobsSchemas = config.jobs
+    ? generateJobsJSONSchemas(config, config.jobs, interfaceNameDefinitions, collectionIDFieldTypes)
+    : {}
+
   let jsonSchema: JSONSchema4 = {
     additionalProperties: false,
     definitions: {
@@ -977,8 +996,30 @@ export function configToJSONSchema(
       locale: generateLocaleEntitySchemas(config.localization),
       user: generateAuthEntitySchemas(config.collections),
     },
-    required: ['user', 'locale', 'collections', 'globals', 'auth', 'db'],
+    required: [
+      'user',
+      'locale',
+      'collections',
+      'collectionsSelect',
+      'globalsSelect',
+      'globals',
+      'auth',
+      'db',
+    ],
     title: 'Config',
+  }
+  if (jobsSchemas.definitions?.size) {
+    for (const [key, value] of jobsSchemas.definitions) {
+      jsonSchema.definitions[key] = value
+    }
+  }
+  if (jobsSchemas.properties) {
+    jsonSchema.properties.jobs = {
+      type: 'object',
+      additionalProperties: false,
+      properties: jobsSchemas.properties,
+      required: ['tasks'],
+    }
   }
 
   if (config?.typescript?.schema?.length) {

@@ -178,6 +178,7 @@ export const csTranslations: DefaultTranslationsObject = {
     addFilter: 'Přidat filtr',
     adminTheme: 'Motiv administračního rozhraní',
     and: 'a',
+    anotherUser: 'Jiný uživatel',
     anotherUserTakenOver: 'Jiný uživatel převzal úpravy tohoto dokumentu.',
     applyChanges: 'Použít změny',
     ascending: 'Vzestupně',

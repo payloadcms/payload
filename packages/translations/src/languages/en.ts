@@ -179,6 +179,7 @@ export const enTranslations = {
     addFilter: 'Add Filter',
     adminTheme: 'Admin Theme',
     and: 'And',
+    anotherUser: 'Another user',
     anotherUserTakenOver: 'Another user has taken over editing this document.',
     applyChanges: 'Apply Changes',
     ascending: 'Ascending',

@@ -31,7 +31,7 @@ type MetaTitleProps = {
 export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const {
     field: { label, maxLength: maxLengthFromProps, minLength: minLengthFromProps, required },
-    fieldState: { customComponents: { Label } = {} } = {},
+    fieldState: { customComponents: { AfterInput, BeforeInput, Label } = {} } = {},
     hasGenerateTitleFn,
     path,
   } = props || {}
@@ -164,11 +164,9 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <TextInput
-          Error={{
-            type: 'client',
-            Component: null,
-            RenderedComponent: errorMessage,
-          }}
+          AfterInput={AfterInput}
+          BeforeInput={BeforeInput}
+          Error={errorMessage}
           onChange={setValue}
           path={path}
           required={required}

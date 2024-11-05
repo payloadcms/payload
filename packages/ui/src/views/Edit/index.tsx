@@ -169,7 +169,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   const documentLockStateRef = useRef<{
     hasShownLockedModal: boolean
     isLocked: boolean
-    user: ClientUser
+    user: ClientUser | number | string
   } | null>({
     hasShownLockedModal: false,
     isLocked: false,
@@ -307,7 +307,10 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       setDocumentIsLocked(true)
 
       if (isLockingEnabled) {
-        const previousOwnerId = documentLockStateRef.current?.user?.id
+        const previousOwnerId =
+          typeof documentLockStateRef.current?.user === 'object'
+            ? documentLockStateRef.current?.user?.id
+            : documentLockStateRef.current?.user
 
         if (lockedState) {
           const lockedUserID =
@@ -379,7 +382,11 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       // Unlock the document only if we're actually navigating away from the document
       if (documentId && documentIsLocked && !isStayingWithinDocument) {
         // Check if this user is still the current editor
-        if (documentLockStateRef.current?.user?.id === user?.id) {
+        if (
+          typeof documentLockStateRef.current?.user === 'object'
+            ? documentLockStateRef.current?.user?.id === user?.id
+            : documentLockStateRef.current?.user === user?.id
+        ) {
           void unlockDocument(id, collectionSlug ?? globalSlug)
           setDocumentIsLocked(false)
           setCurrentEditor(null)
@@ -403,7 +410,9 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   const shouldShowDocumentLockedModal =
     documentIsLocked &&
     currentEditor &&
-    currentEditor.id !== user?.id &&
+    (typeof currentEditor === 'object'
+      ? currentEditor.id !== user?.id
+      : currentEditor !== user?.id) &&
     !isReadOnlyForIncomingUser &&
     !showTakeOverModal &&
     !documentLockStateRef.current?.hasShownLockedModal &&
