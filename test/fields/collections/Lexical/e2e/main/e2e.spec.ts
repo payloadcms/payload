@@ -829,13 +829,19 @@ describe('lexicalMain', () => {
 
     await expect(newUploadNode.locator('.lexical-upload__bottomRow')).toContainText('payload.png')
 
+    await page.keyboard.press('Enter') // floating toolbar needs to appear with enough distance to the upload node, otherwise clicking may fail
+    await page.keyboard.press('ArrowLeft')
     await page.keyboard.press('ArrowLeft')
     // Select "there" by pressing shift + arrow left
     for (let i = 0; i < 4; i++) {
       await page.keyboard.press('Shift+ArrowLeft')
     }
 
-    await newUploadNode.locator('.lexical-upload__swap-drawer-toggler').first().click()
+    const swapDrawerButton = newUploadNode.locator('.lexical-upload__swap-drawer-toggler').first()
+
+    await expect(swapDrawerButton).toBeVisible()
+
+    await swapDrawerButton.click()
 
     const uploadSwapDrawer = page.locator('dialog[id^=list-drawer_1_]').first()
     await expect(uploadSwapDrawer).toBeVisible()
@@ -880,7 +886,9 @@ describe('lexicalMain', () => {
         .children[0] as SerializedParagraphNode
       const secondParagraph: SerializedParagraphNode = lexicalField.root
         .children[1] as SerializedParagraphNode
-      const uploadNode: SerializedUploadNode = lexicalField.root.children[2] as SerializedUploadNode
+      const thirdParagraph: SerializedParagraphNode = lexicalField.root
+        .children[2] as SerializedParagraphNode
+      const uploadNode: SerializedUploadNode = lexicalField.root.children[3] as SerializedUploadNode
 
       expect(firstParagraph.children).toHaveLength(2)
       expect((firstParagraph.children[0] as SerializedTextNode).text).toBe('Some ')
@@ -889,6 +897,7 @@ describe('lexicalMain', () => {
       expect((firstParagraph.children[1] as SerializedTextNode).format).toBe(1)
 
       expect(secondParagraph.children).toHaveLength(0)
+      expect(thirdParagraph.children).toHaveLength(0)
 
       expect(uploadNode.relationTo).toBe('uploads')
     }).toPass({

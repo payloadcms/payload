@@ -213,12 +213,7 @@ export function LexicalMenu({
   editor: LexicalEditor
   groups: Array<SlashMenuGroupInternal>
   menuRenderFn: MenuRenderFn
-  onSelectItem: (
-    item: SlashMenuItem,
-    textNodeContainingQuery: null | TextNode,
-    closeMenu: () => void,
-    matchingString: string,
-  ) => void
+  onSelectItem: (item: SlashMenuItem, closeMenu: () => void, matchingString: string) => void
   resolution: MenuResolution
   shouldSplitNodeWithQuery?: boolean
 }): JSX.Element | null {
@@ -256,21 +251,18 @@ export function LexicalMenu({
 
   const selectItemAndCleanUp = useCallback(
     (selectedItem: SlashMenuItem) => {
-      let textNodeContainingQuery: null | TextNode = null
       editor.update(() => {
-        textNodeContainingQuery =
+        const textNodeContainingQuery =
           resolution.match != null && shouldSplitNodeWithQuery
             ? $splitNodeContainingQuery(resolution.match)
             : null
+
+        if (textNodeContainingQuery) {
+          textNodeContainingQuery.remove()
+        }
+
+        onSelectItem(selectedItem, close, resolution.match ? resolution.match.matchingString : '')
       })
-      setTimeout(() => {
-        onSelectItem(
-          selectedItem,
-          textNodeContainingQuery,
-          close,
-          resolution.match ? resolution.match.matchingString : '',
-        )
-      }, 0)
     },
     [editor, shouldSplitNodeWithQuery, resolution.match, onSelectItem, close],
   )

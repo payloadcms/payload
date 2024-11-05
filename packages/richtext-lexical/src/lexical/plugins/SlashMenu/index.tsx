@@ -174,20 +174,17 @@ export function SlashMenuPlugin({
     }
 
     return groupsWithItems
-  }, [getDynamicItems, queryString, editorConfig?.features, i18n])
+  }, [
+    queryString,
+    editorConfig?.features.slashMenu.groups,
+    getDynamicItems,
+    featureClientSchemaMap,
+    i18n,
+    schemaPath,
+  ])
 
   const onSelectItem = useCallback(
-    (
-      selectedItem: SlashMenuItemType,
-      nodeToRemove: null | TextNode,
-      closeMenu: () => void,
-      matchingString: string,
-    ) => {
-      if (nodeToRemove) {
-        editor.update(() => {
-          nodeToRemove.remove()
-        })
-      }
+    (selectedItem: SlashMenuItemType, closeMenu: () => void, matchingString: string) => {
       selectedItem.onSelect({ editor, queryString: matchingString })
 
       closeMenu()
