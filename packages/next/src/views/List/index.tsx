@@ -3,11 +3,14 @@ import type { AdminViewProps, ListQuery, Where } from 'payload'
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
+import { renderFilters, renderTable } from '@payloadcms/ui/rsc'
+import {
+  filterFields,
+  formatAdminURL,
+  getInitialColumns,
+  mergeListSearchAndWhere,
+} from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
-import { filterFields } from 'packages/ui/src/elements/TableColumns/filterFields.js'
-import { getInitialColumns } from 'packages/ui/src/elements/TableColumns/getInitialColumns.js'
-import { renderFilters, renderTable } from 'packages/ui/src/utilities/renderTable.js'
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
 
