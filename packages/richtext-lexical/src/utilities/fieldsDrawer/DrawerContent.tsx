@@ -52,6 +52,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         id,
         collectionSlug,
         data: data ?? {},
+        doNotAbort: true,
         globalSlug,
         operation: 'update',
         renderAllFields: true,
