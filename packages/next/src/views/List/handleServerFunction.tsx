@@ -1,6 +1,12 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { ListPreferences, ListQuery } from '@payloadcms/ui'
-import type { ClientConfig, PayloadRequest, SanitizedConfig, VisibleEntities } from 'payload'
+import type { ListPreferences } from '@payloadcms/ui'
+import type {
+  ClientConfig,
+  PayloadRequest,
+  SanitizedConfig,
+  VisibleEntities,
+  ListQuery,
+} from 'payload'
 
 import { headers as getHeaders } from 'next/headers.js'
 import { createClientConfig, getAccessResults, isEntityHidden, parseCookies } from 'payload'

@@ -5,25 +5,30 @@ import React from 'react'
 
 import { useListDrawerContext } from '../../../elements/ListDrawer/Provider.js'
 import { DefaultCell } from '../../Table/DefaultCell/index.js'
+import { useTableColumns } from '../index.js'
 import './index.scss'
 
 const baseClass = 'default-cell'
 
+const CellPropsContext = React.createContext<DefaultCellComponentProps | null>(null)
+
+export const useCellProps = (): DefaultCellComponentProps | null =>
+  React.useContext(CellPropsContext)
+
 export const RenderDefaultCell: React.FC<{
-  addOnClick
   clientProps: DefaultCellComponentProps
+  columnIndex: number
   enableRowSelections?: boolean
-  index: number
   isLinkedColumn?: boolean
-}> = ({ addOnClick, clientProps, isLinkedColumn }) => {
-  const { onSelect } = useListDrawerContext()
+}> = ({ clientProps, columnIndex, isLinkedColumn }) => {
+  const { drawerSlug, onSelect } = useListDrawerContext()
+  const { LinkedCellOverride } = useTableColumns()
 
-  const propsToPass = { ...clientProps }
+  const propsToPass = { ...clientProps, columnIndex }
 
-  if (isLinkedColumn && addOnClick) {
+  if (isLinkedColumn && drawerSlug) {
     propsToPass.className = `${baseClass}__first-cell`
     propsToPass.link = false
-
     propsToPass.onClick = ({ collectionSlug: rowColl, rowData }) => {
       if (typeof onSelect === 'function') {
         onSelect({
@@ -34,5 +39,9 @@ export const RenderDefaultCell: React.FC<{
     }
   }
 
-  return <DefaultCell {...propsToPass} />
+  return (
+    <CellPropsContext.Provider value={propsToPass}>
+      {isLinkedColumn && LinkedCellOverride ? LinkedCellOverride : <DefaultCell {...propsToPass} />}
+    </CellPropsContext.Provider>
+  )
 }

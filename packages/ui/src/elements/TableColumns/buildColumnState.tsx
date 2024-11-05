@@ -1,6 +1,5 @@
 import type {
   ClientCollectionConfig,
-  ClientField,
   DefaultCellComponentProps,
   Field,
   ImportMap,
@@ -25,12 +24,11 @@ import { RenderDefaultCell } from './RenderDefaultCell/index.js'
 
 type Args = {
   beforeRows?: Column[]
-  clientFields: ClientField[]
   collectionConfig: ClientCollectionConfig
   columnPreferences: ColumnPreferences
   columns?: ColumnPreferences
+  customCellProps: DefaultCellComponentProps['customCellProps']
   docs: PaginatedDocs['docs']
-  drawerSlug: string
   enableRowSelections: boolean
   enableRowTypes?: boolean
   fields: Field[]
@@ -42,18 +40,19 @@ type Args = {
 export const buildColumnState = (args: Args): Column[] => {
   const {
     beforeRows,
-    clientFields,
     collectionConfig,
     columnPreferences,
     columns,
+    customCellProps,
     docs,
-    drawerSlug,
     enableRowSelections,
     fields,
     importMap,
     sortColumnProps,
     useAsTitle,
   } = args
+
+  const clientFields = collectionConfig.fields
 
   // clientFields contains the fake `id` column
   let sortedFieldMap = flattenFieldMap(clientFields)
@@ -163,10 +162,8 @@ export const buildColumnState = (args: Args): Column[] => {
 
     const baseCellClientProps: DefaultCellComponentProps = {
       cellData: undefined,
-      customCellContext: {
-        collectionSlug: collectionConfig.slug,
-        uploadConfig: collectionConfig?.upload,
-      },
+      collectionConfig: { slug: collectionConfig.slug, upload: collectionConfig.upload }, // TODO: for some reason the entire collectionConfig breaks
+      customCellProps,
       field,
       rowData: undefined,
     }
@@ -208,12 +205,11 @@ export const buildColumnState = (args: Args): Column[] => {
             return (
               CustomCell ?? (
                 <RenderDefaultCell
-                  addOnClick={Boolean(drawerSlug)}
                   clientProps={cellClientProps}
+                  columnIndex={index}
                   enableRowSelections={enableRowSelections}
-                  index={index}
                   isLinkedColumn={isLinkedColumn}
-                  key={i}
+                  key={`${i}-${index}`}
                 />
               )
             )

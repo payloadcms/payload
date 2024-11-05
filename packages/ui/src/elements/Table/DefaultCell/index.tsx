@@ -2,7 +2,7 @@
 import LinkImport from 'next/link.js'
 import React from 'react' // TODO: abstract this out to support all routers
 
-import type { CellComponentProps, DefaultCellComponentProps, UploadFieldClient } from 'payload'
+import type { DefaultCellComponentProps, UploadFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { fieldAffectsData } from 'payload/shared'
@@ -15,12 +15,12 @@ import { cellComponents } from './fields/index.js'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-export const DefaultCell: React.FC<CellComponentProps> = (props) => {
+export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
   const {
     cellData,
     className: classNameFromProps,
+    collectionConfig,
     columnIndex,
-    customCellContext,
     field,
     field: { admin },
     link,
@@ -60,10 +60,10 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
 
   if (isLink) {
     WrapElement = Link
-    wrapElementProps.href = customCellContext?.collectionSlug
+    wrapElementProps.href = collectionConfig?.slug
       ? formatAdminURL({
           adminRoute,
-          path: `/collections/${customCellContext?.collectionSlug}/${rowData.id}`,
+          path: `/collections/${collectionConfig?.slug}/${rowData.id}`,
         })
       : ''
   }
@@ -74,7 +74,7 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
     wrapElementProps.onClick = () => {
       onClick({
         cellData,
-        collectionSlug: customCellContext?.collectionSlug,
+        collectionSlug: collectionConfig?.slug,
         rowData,
       })
     }
@@ -94,22 +94,15 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
   let CellComponent: React.ReactNode = null
 
   if (DefaultCellComponent) {
-    CellComponent = (
-      <DefaultCellComponent
-        cellData={cellData}
-        customCellContext={customCellContext}
-        rowData={rowData}
-        {...props}
-      />
-    )
+    CellComponent = <DefaultCellComponent cellData={cellData} rowData={rowData} {...props} />
   } else if (!DefaultCellComponent) {
     // DefaultCellComponent does not exist for certain field types like `text`
-    if (customCellContext.uploadConfig && fieldAffectsData(field) && field.name === 'filename') {
+    if (collectionConfig?.upload && fieldAffectsData(field) && field.name === 'filename') {
       const FileCellComponent = cellComponents.File
+
       CellComponent = (
         <FileCellComponent
           cellData={cellData}
-          customCellContext={customCellContext}
           rowData={rowData}
           {...(props as DefaultCellComponentProps<UploadFieldClient>)}
         />

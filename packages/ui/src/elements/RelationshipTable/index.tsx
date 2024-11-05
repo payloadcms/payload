@@ -1,7 +1,6 @@
 'use client'
 import type {
   ClientCollectionConfig,
-  ClientField,
   JoinFieldClient,
   ListQuery,
   PaginatedDocs,
@@ -33,6 +32,7 @@ import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../TableColumns/index.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
 import './index.scss'
+import { RelationshipTablePagination } from './Pagination.js'
 
 const baseClass = 'relationship-table'
 
@@ -49,7 +49,6 @@ type RelationshipTableComponentProps = {
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
   const {
     allowCreate = true,
-    field,
     filterOptions,
     initialData: initialDataFromProps,
     initialDrawerState,
@@ -59,13 +58,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const [Table, setTable] = useState<React.ReactNode>(null)
 
-  const {
-    config: {
-      routes: { api },
-      serverURL,
-    },
-    getEntityConfig,
-  } = useConfig()
+  const { getEntityConfig } = useConfig()
 
   const { id: docID } = useDocumentInfo()
 
@@ -116,7 +109,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           Table: NewTable,
         } = await getTableState({
           collectionSlug: relationTo,
-          //   columns: activeColumns,
+          // columns: activeColumns,
           enableRowSelections: false,
           renderRowTypes: true,
           tableAppearance: 'condensed',
@@ -222,26 +215,10 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                 preferenceKey={preferenceKey}
               >
                 <TableColumnsProvider
-                  cellProps={[
-                    {},
-                    // {
-                    //   field: {
-                    //     admin: {
-                    //       components: {
-                    //         Cell: {
-                    //           type: 'client',
-                    //           RenderedComponent: (
-                    //             <DrawerLink field={field} onDrawerSave={onDrawerSave} />
-                    //           ),
-                    //         },
-                    //       },
-                    //     },
-                    //   } as ClientField,
-                    //   link: false,
-                    // },
-                  ]}
                   collectionSlug={relationTo}
                   columnState={columnState}
+                  docs={data.docs}
+                  LinkedCellOverride={<DrawerLink onDrawerSave={onDrawerSave} />}
                   preferenceKey={preferenceKey}
                   renderRowTypes
                   setTable={setTable}
@@ -261,7 +238,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                     </div>
                   </AnimateHeight>
                   {Table}
-                  {/* <RelationshipTableWrapper collectionConfig={collectionConfig} Table={Table} /> */}
+                  <RelationshipTablePagination />
                 </TableColumnsProvider>
               </ListQueryProvider>
             </RelationshipProvider>

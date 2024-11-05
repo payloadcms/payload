@@ -1,5 +1,5 @@
 'use client'
-import { useConfig, useTableCell, useTranslation } from '@payloadcms/ui'
+import { useConfig, useTranslation } from '@payloadcms/ui'
 import { formatAdminURL, formatDate } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React from 'react'
@@ -26,7 +26,9 @@ export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
 
   const { i18n } = useTranslation()
 
-  const { cellData, rowData } = useTableCell()
+  const cellData = '' /// TODO: get cellData from props
+  const rowData = { id: undefined } // TODO: get rowData from props
+  // const { cellData, rowData } = useTableCell()
 
   const versionID = rowData.id
 

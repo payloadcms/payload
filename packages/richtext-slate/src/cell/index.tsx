@@ -1,7 +1,7 @@
 'use client'
 import type { DefaultCellComponentProps } from 'payload'
 
-import { useConfig, useTableCell } from '@payloadcms/ui'
+import { useConfig } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React from 'react'
@@ -9,7 +9,13 @@ import React from 'react'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const RichTextCell: React.FC<DefaultCellComponentProps<any[]>> = () => {
-  const { cellData, cellProps, columnIndex, customCellContext, rowData } = useTableCell()
+  const cellData = [] // TODO get from props
+  const cellProps = { link: undefined } // TODO get from props
+  const columnIndex = '' // TODO get from props
+  const customCellContext = '' // TODO get from props
+  const rowData = '' // TODO get from props
+
+  // const { cellData, cellProps, columnIndex, customCellContext, rowData } = useTableCell()
   const flattenedText = cellData?.map((i) => i?.children?.map((c) => c.text)).join(' ')
 
   const {

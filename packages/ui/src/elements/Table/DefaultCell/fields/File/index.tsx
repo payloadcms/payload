@@ -12,23 +12,21 @@ export interface FileCellProps extends DefaultCellComponentProps<any, UploadFiel
 
 export const FileCell: React.FC<FileCellProps> = ({
   cellData: filename,
-  customCellContext,
+  collectionConfig,
   rowData,
 }) => {
-  const { collectionSlug, uploadConfig } = customCellContext
-
   return (
     <div className={baseClass}>
       <Thumbnail
         className={`${baseClass}__thumbnail`}
-        collectionSlug={collectionSlug}
+        collectionSlug={collectionConfig?.slug}
         doc={{
           ...rowData,
           filename,
         }}
         fileSrc={rowData?.thumbnailURL || rowData?.url}
         size="small"
-        uploadConfig={uploadConfig}
+        uploadConfig={collectionConfig?.upload}
       />
       <span className={`${baseClass}__filename`}>{String(filename)}</span>
     </div>
