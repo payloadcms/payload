@@ -1,7 +1,7 @@
 import type { FindArgs } from 'payload/database'
 import type { Field, PayloadRequest, TypeWithID } from 'payload/types'
 
-import { inArray, sql, count as sqlCount } from 'drizzle-orm'
+import { inArray, count as sqlCount } from 'drizzle-orm'
 
 import type { PostgresAdapter } from '../types'
 import type { ChainedMethods } from './chainMethods'
@@ -143,11 +143,7 @@ export const findMany = async function find({
       methods: selectCountMethods,
       query: db
         .select({
-          count:
-            selectCountMethods.length > 0
-              ? sql<number>`count
-            (DISTINCT ${adapter.tables[tableName].id})`
-              : sqlCount(),
+          count: sqlCount(),
         })
         .from(table)
         .where(where),
