@@ -41,10 +41,8 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   const {
     admin: {
       avatar,
-      components: { graphics: { Icon }, header: CustomHeader, Nav: CustomNav } = {
-        graphics: {
-          Icon: undefined,
-        },
+      components,
+      components: { header: CustomHeader, Nav: CustomNav } = {
         header: undefined,
         Nav: undefined,
       },
@@ -79,7 +77,12 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
         avatar !== 'gravatar' && avatar !== 'default' ? (
           <RenderServerComponent Component={avatar.Component} importMap={payload.importMap} />
         ) : undefined,
-      CustomIcon: <RenderServerComponent Component={Icon} importMap={payload.importMap} />,
+      CustomIcon: (
+        <RenderServerComponent
+          Component={components?.graphics?.Icon}
+          importMap={payload.importMap}
+        />
+      ),
       CustomLogo: (
         <Logo
           i18n={i18n}
@@ -92,7 +95,18 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
         />
       ),
     }
-  }, [viewActions, avatar, Icon, i18n, locale, params, payload, permissions, searchParams, user])
+  }, [
+    viewActions,
+    avatar,
+    components,
+    i18n,
+    locale,
+    params,
+    payload,
+    permissions,
+    searchParams,
+    user,
+  ])
 
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
