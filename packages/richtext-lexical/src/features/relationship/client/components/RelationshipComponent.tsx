@@ -160,7 +160,9 @@ const Component: React.FC<Props> = (props) => {
       <div className={`${baseClass}__wrap`}>
         <p className={`${baseClass}__label`}>
           {t('fields:labelRelationship', {
-            label: getTranslation(relatedCollection.labels.singular, i18n),
+            label: relatedCollection.labels?.singular
+              ? getTranslation(relatedCollection.labels?.singular, i18n)
+              : relatedCollection.slug,
           })}
         </p>
         <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>

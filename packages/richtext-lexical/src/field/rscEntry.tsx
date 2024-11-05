@@ -3,6 +3,7 @@ import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 import { getFromImportMap } from '@payloadcms/ui/elements/RenderServerComponent'
 import {
   type ClientComponentProps,
+  type ClientField,
   createClientFields,
   deepCopyObjectSimple,
   type RichTextFieldClient,
@@ -106,13 +107,13 @@ export const RscEntryLexicalField: React.FC<
         const state = featureSchemaMap[key]
 
         const clientFields = createClientFields({
-          clientFields:
-            'fields' in state ? deepCopyObjectSimple(state.fields) : [deepCopyObjectSimple(state)],
+          clientFields: ('fields' in state
+            ? deepCopyObjectSimple(state.fields)
+            : [deepCopyObjectSimple(state)]) as ClientField[],
           defaultIDType: args.payload.config.db.defaultIDType,
-          disableAddingIDs: true,
+          disableAddingID: true,
           fields: 'fields' in state ? state.fields : [state],
           i18n: args.i18n,
-          parentSchemaPath: key.split('.'),
         })
         featureClientSchemaMap[featureKey][key] = clientFields
       }

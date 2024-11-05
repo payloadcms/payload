@@ -28,6 +28,9 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
 
     const featureProvidersLocal: FeatureProviderClient<any, any>[] = []
     for (const [_featureKey, clientFeature] of Object.entries(clientFeatures)) {
+      if (!clientFeature.clientFeatureProvider) {
+        continue
+      }
       featureProvidersLocal.push(
         clientFeature.clientFeatureProvider(clientFeature.clientFeatureProps),
       ) // Execute the clientFeatureProvider function here, as the server cannot execute functions imported from use client files
