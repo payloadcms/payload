@@ -151,7 +151,7 @@ function RenderField({
     ([fields]) => (fields && fields?.[path]?.customComponents?.Field) || null,
   )
 
-  if (Field !== undefined) {
+  if (Field) {
     return Field
   }
 
