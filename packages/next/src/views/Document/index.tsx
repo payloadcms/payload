@@ -82,7 +82,7 @@ export const renderDocument = async ({
 
   // TODO: promise all for data, prefs, versions, lock state
 
-  // Fetch the document data required for a view
+  // Fetch the data required for the view
   const data = await getDocumentData({
     id,
     collectionSlug,
