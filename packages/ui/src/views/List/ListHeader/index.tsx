@@ -23,7 +23,6 @@ const drawerBaseClass = 'list-drawer-header'
 type Props = {
   className?: string
   collectionConfig: ClientCollectionConfig
-  Description?: React.ReactNode
   hasCreatePermission: boolean
   i18n: I18nClient
   isBulkUploadEnabled: boolean
@@ -36,7 +35,6 @@ type Props = {
 const DefaultListHeader: React.FC<Props> = ({
   className,
   collectionConfig,
-  Description,
   hasCreatePermission,
   i18n,
   isBulkUploadEnabled,
@@ -77,11 +75,6 @@ const DefaultListHeader: React.FC<Props> = ({
       {!smallBreak && (
         <ListSelection label={getTranslation(collectionConfig?.labels?.plural, i18n)} />
       )}
-      {collectionConfig?.admin?.description || Description ? (
-        <div className={`${baseClass}__sub-header`}>
-          {Description ?? <ViewDescription description={collectionConfig?.admin?.description} />}
-        </div>
-      ) : null}
     </header>
   )
 }

@@ -24,11 +24,13 @@ import { useModal } from '../../elements/Modal/index.js'
 import { Pagination } from '../../elements/Pagination/index.js'
 import { PerPage } from '../../elements/PerPage/index.js'
 import { PublishMany } from '../../elements/PublishMany/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { StaggeredShimmers } from '../../elements/ShimmerEffect/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../../elements/TableColumns/index.js'
 import { UnpublishMany } from '../../elements/UnpublishMany/index.js'
+import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
@@ -190,7 +192,6 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
             <Gutter className={`${baseClass}__wrap`}>
               <ListHeader
                 collectionConfig={collectionConfig}
-                Description={Description}
                 hasCreatePermission={hasCreatePermission}
                 i18n={i18n}
                 isBulkUploadEnabled={isBulkUploadEnabled}
@@ -199,6 +200,16 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                 smallBreak={smallBreak}
                 t={t}
               />
+              {collectionConfig?.admin?.description || Description ? (
+                <div className={`${baseClass}__sub-header`}>
+                  <RenderCustomComponent
+                    CustomComponent={Description}
+                    Fallback={
+                      <ViewDescription description={collectionConfig?.admin?.description} />
+                    }
+                  />
+                </div>
+              ) : null}
               <ListControls
                 beforeActions={beforeActions}
                 collectionConfig={collectionConfig}
