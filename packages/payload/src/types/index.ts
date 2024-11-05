@@ -12,6 +12,7 @@ import type {
   CollectionSlug,
   DataFromGlobalSlug,
   GlobalSlug,
+  RequestContext,
   TypedLocale,
   TypedUser,
 } from '../index.js'
@@ -93,10 +94,6 @@ export type PayloadRequest = CustomPayloadRequestProperties &
   Partial<Request> &
   PayloadRequestData &
   Required<Pick<Request, 'headers'>>
-
-export interface RequestContext {
-  [key: string]: unknown
-}
 
 export type Operator = (typeof validOperators)[number]
 

@@ -54,6 +54,7 @@ describe('_Community Tests', () => {
       data: {
         text: 'LOCAL API EXAMPLE',
       },
+      context: {},
     })
 
     expect(newPost.text).toEqual('LOCAL API EXAMPLE')

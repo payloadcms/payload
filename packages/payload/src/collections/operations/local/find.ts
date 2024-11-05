@@ -1,9 +1,14 @@
 import type { PaginatedDocs } from '../../../database/types.js'
-import type { CollectionSlug, JoinQuery, Payload, TypedLocale } from '../../../index.js'
+import type {
+  CollectionSlug,
+  JoinQuery,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
-  RequestContext,
   SelectType,
   Sort,
   TransformCollectionWithSelect,
