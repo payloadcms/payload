@@ -1,7 +1,7 @@
-import type { Payload, PayloadRequest } from 'payload';
+import type { Payload, PayloadRequest } from 'payload'
 
 import path from 'path'
-import { isolateObjectProperty , ValidationError } from 'payload'
+import { ValidationError } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
@@ -885,8 +885,6 @@ describe('Versions', () => {
 
     describe('Race conditions', () => {
       it('should keep latest true with parallel writes', async () => {
-        const req = isolateObjectProperty({ payload } as PayloadRequest, 'transactionID')
-
         const doc = await payload.create({
           collection: 'draft-posts',
           data: {
@@ -907,7 +905,6 @@ describe('Versions', () => {
                     id: doc.id,
                     collection: 'draft-posts',
                     data: {},
-                    // req,
                     draft: true,
                   })
                   .then(resolve)
@@ -920,7 +917,6 @@ describe('Versions', () => {
 
           const { docs } = await payload.findVersions({
             collection: 'draft-posts',
-            // req,
             where: {
               and: [
                 {
