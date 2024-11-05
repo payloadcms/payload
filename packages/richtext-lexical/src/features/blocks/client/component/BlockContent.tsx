@@ -72,7 +72,7 @@ export const BlockContent: React.FC<Props> = (props) => {
   // Used for saving collapsed to preferences (and gettin' it from there again)
   // Remember, these preferences are scoped to the whole document, not just this form. This
   // is important to consider for the data path used in setDocFieldPreferences
-  const { getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
+  const { docPermissions, getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
 
   const [isCollapsed, setIsCollapsed] = React.useState<boolean>()
 
@@ -232,7 +232,7 @@ export const BlockContent: React.FC<Props> = (props) => {
           parentIndexPath=""
           parentPath={''}
           parentSchemaPath=""
-          permissions={permissions}
+          permissions={permissions} // TODO: Pass field permissions
         />
       </Collapsible>
 
