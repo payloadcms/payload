@@ -54,7 +54,9 @@ const Component: React.FC<Props> = (props) => {
 
   const [editor] = useLexicalComposerContext()
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey!)
-  const { field } = useEditorConfigContext()
+  const {
+    fieldProps: { readOnly },
+  } = useEditorConfigContext()
   const {
     config: {
       collections,
@@ -172,7 +174,7 @@ const Component: React.FC<Props> = (props) => {
           <Button
             buttonStyle="icon-label"
             className={`${baseClass}__swapButton`}
-            disabled={field?.admin?.readOnly}
+            disabled={readOnly}
             el="button"
             icon="swap"
             onClick={() => {
@@ -188,7 +190,7 @@ const Component: React.FC<Props> = (props) => {
           <Button
             buttonStyle="icon-label"
             className={`${baseClass}__removeButton`}
-            disabled={field?.admin?.readOnly}
+            disabled={readOnly}
             icon="x"
             onClick={(e) => {
               e.preventDefault()

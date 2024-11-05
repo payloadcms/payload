@@ -108,7 +108,7 @@ export const RscEntryLexicalField: React.FC<
         const clientFields = createClientFields({
           clientFields:
             'fields' in state ? deepCopyObjectSimple(state.fields) : [deepCopyObjectSimple(state)],
-          defaultIDType: args.config.db.defaultIDType,
+          defaultIDType: args.payload.config.db.defaultIDType,
           disableAddingIDs: true,
           fields: 'fields' in state ? state.fields : [state],
           i18n: args.i18n,
@@ -152,7 +152,6 @@ export const RscEntryLexicalField: React.FC<
       clientFeatures={clientFeatures}
       featureClientSchemaMap={featureClientSchemaMap}
       field={args.clientField as RichTextFieldClient}
-      fieldState={args.fieldState}
       forceRender={args.forceRender}
       indexPath={args.indexPath}
       lexicalEditorConfig={args.lexicalEditorConfig}
