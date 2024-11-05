@@ -29,7 +29,7 @@ import { anotherTextDoc, textDoc } from './collections/Text/shared.js'
 import { uploadsDoc } from './collections/Upload/shared.js'
 import {
   arrayFieldsSlug,
-  //blockFieldsSlug,
+  blockFieldsSlug,
   codeFieldsSlug,
   collapsibleFieldsSlug,
   collectionSlugs,
@@ -46,7 +46,7 @@ import {
   pointFieldsSlug,
   radioFieldsSlug,
   relationshipFieldsSlug,
-  //richTextFieldsSlug,
+  richTextFieldsSlug,
   selectFieldsSlug,
   tabsFieldsSlug,
   textFieldsSlug,
@@ -131,15 +131,15 @@ export const seed = async (_payload: Payload) => {
     overrideAccess: true,
   })
 
-  const createdJPGDocSlug2 = await _payload.create({
-    collection: uploads2Slug,
-    data: {
-      ...uploadsDoc,
-    },
-    file: jpgFile,
-    depth: 0,
-    overrideAccess: true,
-  })
+  // const createdJPGDocSlug2 = await _payload.create({
+  //   collection: uploads2Slug,
+  //   data: {
+  //     ...uploadsDoc,
+  //   },
+  //   file: jpgFile,
+  //   depth: 0,
+  //   overrideAccess: true,
+  // })
 
   // Create hasMany upload
   await _payload.create({
@@ -150,15 +150,15 @@ export const seed = async (_payload: Payload) => {
   })
 
   // Create hasMany poly upload
-  await _payload.create({
-    collection: uploadsMultiPoly,
-    data: {
-      media: [
-        { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
-        { value: createdJPGDoc.id, relationTo: uploadsSlug },
-      ],
-    },
-  })
+  // await _payload.create({
+  //   collection: uploadsMultiPoly,
+  //   data: {
+  //     media: [
+  //       { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
+  //       { value: createdJPGDoc.id, relationTo: uploadsSlug },
+  //     ],
+  //   },
+  // })
 
   // Create poly upload
   await _payload.create({
@@ -168,12 +168,12 @@ export const seed = async (_payload: Payload) => {
     },
   })
   // Create poly upload
-  await _payload.create({
-    collection: uploadsPoly,
-    data: {
-      media: { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
-    },
-  })
+  // await _payload.create({
+  //   collection: uploadsPoly,
+  //   data: {
+  //     media: { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
+  //   },
+  // })
 
   const formattedID =
     _payload.db.defaultIDType === 'number' ? createdArrayDoc.id : `"${createdArrayDoc.id}"`
@@ -190,7 +190,6 @@ export const seed = async (_payload: Payload) => {
       .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
       .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
   )
-
   const richTextBulletsDocWithRelId = JSON.parse(
     JSON.stringify(richTextBulletsDocData)
       .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
@@ -207,12 +206,12 @@ export const seed = async (_payload: Payload) => {
   blocksDocWithRichText.blocks[0].richText = richTextDocWithRelationship.richText
   blocksDocWithRichText.localizedBlocks[0].richText = richTextDocWithRelationship.richText
 
-  //await _payload.create({
-  //  collection: richTextFieldsSlug,
-  //  data: richTextBulletsDocWithRelId,
-  //  depth: 0,
-  //  overrideAccess: true,
-  //}) // TODO
+  await _payload.create({
+    collection: richTextFieldsSlug,
+    data: richTextBulletsDocWithRelId,
+    depth: 0,
+    overrideAccess: true,
+  })
 
   await _payload.create({
     collection: emailFieldsSlug,
@@ -228,12 +227,12 @@ export const seed = async (_payload: Payload) => {
     overrideAccess: true,
   })
 
-  const createdRichTextDoc = /*await _payload.create({
+  const createdRichTextDoc = await _payload.create({
     collection: richTextFieldsSlug,
     data: richTextDocWithRelationship,
     depth: 0,
     overrideAccess: true,
-  })*/ { id: 1 } // TODO
+  })
 
   const formattedRichTextDocID =
     _payload.db.defaultIDType === 'number' ? createdRichTextDoc.id : `"${createdRichTextDoc.id}"`
@@ -334,12 +333,12 @@ export const seed = async (_payload: Payload) => {
     overrideAccess: true,
   })
 
-  //await _payload.create({
-  //  collection: blockFieldsSlug,
-  //  data: blocksDocWithRichText,
-  //  depth: 0,
-  //  overrideAccess: true,
-  //}) // TODO
+  await _payload.create({
+    collection: blockFieldsSlug,
+    data: blocksDocWithRichText,
+    depth: 0,
+    overrideAccess: true,
+  })
 
   const relationshipField1 = await _payload.create({
     collection: relationshipFieldsSlug,

@@ -310,7 +310,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
             if (!block) {
               throw new Error(
-                `Block with type "${row.blockType}" was found in block data, but no block with that type is defined in the config.`,
+                `Block with type "${row.blockType}" was found in block data, but no block with that type is defined in the config for field with schema path ${schemaPath}.`,
               )
             }
 
