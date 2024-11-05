@@ -10,6 +10,7 @@ import {
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
+import { Logo } from '../../elements/Logo/index.js'
 import { DefaultNav } from '../../elements/Nav/index.js'
 import './index.scss'
 import { NavHamburger } from './NavHamburger/index.js'
@@ -40,10 +41,9 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   const {
     admin: {
       avatar,
-      components: { graphics: { Icon, Logo }, header: CustomHeader, Nav: CustomNav } = {
+      components: { graphics: { Icon }, header: CustomHeader, Nav: CustomNav } = {
         graphics: {
           Icon: undefined,
-          Logo: undefined,
         },
         header: undefined,
         Nav: undefined,
@@ -80,9 +80,19 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
           <RenderServerComponent Component={avatar.Component} importMap={payload.importMap} />
         ) : undefined,
       CustomIcon: <RenderServerComponent Component={Icon} importMap={payload.importMap} />,
-      CustomLogo: <RenderServerComponent Component={Logo} importMap={payload.importMap} />,
+      CustomLogo: (
+        <Logo
+          i18n={i18n}
+          locale={locale}
+          params={params}
+          payload={payload}
+          permissions={permissions}
+          searchParams={searchParams}
+          user={user}
+        />
+      ),
     }
-  }, [avatar, payload.importMap, viewActions, Logo, Icon])
+  }, [viewActions, avatar, Icon, i18n, locale, params, payload, permissions, searchParams, user])
 
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
