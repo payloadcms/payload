@@ -677,16 +677,12 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
     }
   }
-  if (!field?.admin) {
-    console.log(field)
-  }
+
   const isDisabled = field?.admin && 'disabled' in field.admin && field.admin.disabled
 
   if (requiresRender && !isDisabled && renderFieldMethod) {
     const fieldState = state[path]
     const fieldConfig = fieldSchemaMap.get(schemaPath)
-
-    console.log('this field is re-rendering', schemaPath)
 
     if (!fieldConfig) {
       if (schemaPath.endsWith('.blockType')) {
