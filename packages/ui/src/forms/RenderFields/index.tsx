@@ -147,11 +147,9 @@ function RenderField({
   schemaPath,
 }: RenderFieldProps) {
   const fieldComponents = useFieldComponents()
-  const Field = useFormFields(
-    ([fields]) => (fields && fields?.[path]?.customComponents?.Field) || null,
-  )
+  const Field = useFormFields(([fields]) => fields && fields?.[path]?.customComponents?.Field)
 
-  if (Field) {
+  if (Field !== undefined) {
     return Field
   }
 
