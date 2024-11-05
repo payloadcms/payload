@@ -170,6 +170,30 @@ export const renderListView = async (
     const renderedFilters = renderFilters(fields, req.payload.importMap)
 
     const clientProps: ListViewClientProps = {
+      AfterList: (
+        <RenderServerComponent
+          Component={collectionConfig.admin.components?.afterList}
+          importMap={payload.importMap}
+        />
+      ),
+      AfterListTable: (
+        <RenderServerComponent
+          Component={collectionConfig.admin.components?.afterListTable}
+          importMap={payload.importMap}
+        />
+      ),
+      BeforeList: (
+        <RenderServerComponent
+          Component={collectionConfig.admin.components?.beforeList}
+          importMap={payload.importMap}
+        />
+      ),
+      BeforeListTable: (
+        <RenderServerComponent
+          Component={collectionConfig.admin.components?.beforeListTable}
+          importMap={payload.importMap}
+        />
+      ),
       collectionSlug,
       columnState,
       description:
