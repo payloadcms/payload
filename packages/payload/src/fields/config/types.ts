@@ -422,7 +422,6 @@ export interface FieldBase {
 }
 
 export interface FieldBaseClient {
-  _isPresentational?: undefined
   admin?: AdminClient
   hidden?: boolean
   index?: boolean
@@ -779,7 +778,6 @@ export type UIField = {
 }
 
 export type UIFieldClient = {
-  _isPresentational?: true
   // still include FieldBaseClient.admin (even if it's undefinable) so that we don't need constant type checks (e.g. if('xy' in field))
 
   admin: DeepUndefinable<FieldBaseClient['admin']> &
@@ -787,7 +785,7 @@ export type UIFieldClient = {
       UIField['admin'],
       'custom' | 'disableBulkEdit' | 'disableListColumn' | 'position' | 'width'
     >
-} & Omit<DeepUndefinable<FieldBaseClient>, '_isPresentational' | 'admin'> & // still include FieldBaseClient (even if it's undefinable) so that we don't need constant type checks (e.g. if('xy' in field))
+} & Omit<DeepUndefinable<FieldBaseClient>, 'admin'> & // still include FieldBaseClient (even if it's undefinable) so that we don't need constant type checks (e.g. if('xy' in field))
   Pick<UIField, 'label' | 'name' | 'type'>
 
 type SharedUploadProperties = {

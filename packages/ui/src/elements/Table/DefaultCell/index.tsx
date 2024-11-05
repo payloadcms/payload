@@ -83,7 +83,16 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
   if ('name' in field && field.name === 'id') {
     return (
       <WrapElement {...wrapElementProps}>
-        <CodeCell cellData={`ID: ${cellData}`} field={field} nowrap rowData={rowData} />
+        <CodeCell
+          cellData={`ID: ${cellData}`}
+          collectionConfig={collectionConfig}
+          field={{
+            ...field,
+            type: 'code',
+          }}
+          nowrap
+          rowData={rowData}
+        />
       </WrapElement>
     )
   }
@@ -97,7 +106,12 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     CellComponent = <DefaultCellComponent cellData={cellData} rowData={rowData} {...props} />
   } else if (!DefaultCellComponent) {
     // DefaultCellComponent does not exist for certain field types like `text`
-    if (collectionConfig?.upload && fieldAffectsData(field) && field.name === 'filename') {
+    if (
+      collectionConfig?.upload &&
+      fieldAffectsData(field) &&
+      field.name === 'filename' &&
+      field.type === 'text'
+    ) {
       const FileCellComponent = cellComponents.File
 
       CellComponent = (
@@ -105,6 +119,8 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
           cellData={cellData}
           rowData={rowData}
           {...(props as DefaultCellComponentProps<UploadFieldClient>)}
+          collectionConfig={collectionConfig}
+          field={field}
         />
       )
     } else {
