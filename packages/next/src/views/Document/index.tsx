@@ -369,7 +369,7 @@ export const Document: React.FC<AdminViewProps> = async (args) => {
     return RenderedDocument
   } catch (error) {
     args.initPageResult.req.payload.logger.error(error)
-    // TODO: this is wild and does not work
+
     if (error.message === 'not-found') {
       notFound()
     }
