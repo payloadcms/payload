@@ -37,7 +37,6 @@ import {
   protectedCustomNestedViewPath,
   publicCustomViewPath,
 } from './shared.js'
-import { settingsGlobalSlug } from './slugs.js'
 
 export default buildConfigWithDefaults({
   admin: {

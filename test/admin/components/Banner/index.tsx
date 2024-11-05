@@ -1,5 +1,9 @@
-export function Banner(props: { description?: string; message?: string }) {
-  const { description, message } = props
+export function Banner(props: {
+  children?: React.ReactNode
+  description?: string
+  message?: string
+}) {
+  const { children, description, message } = props
   return (
     <div
       style={{
@@ -9,7 +13,7 @@ export function Banner(props: { description?: string; message?: string }) {
         padding: '1rem',
       }}
     >
-      {message || description || 'A custom banner component'}
+      {children || message || description || 'A custom banner component'}
     </div>
   )
 }

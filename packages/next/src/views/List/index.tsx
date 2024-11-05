@@ -240,7 +240,7 @@ export const renderListView = async (
           >
             <RenderServerComponent
               clientProps={clientProps}
-              Component={collectionConfig?.admin?.components?.views?.list.Component}
+              Component={collectionConfig?.admin?.components?.views?.list?.Component}
               Fallback={DefaultListView}
               importMap={payload.importMap}
               serverProps={{
