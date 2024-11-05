@@ -1011,6 +1011,7 @@ export type JSONField = {
       Label?: CustomComponent<JSONFieldLabelClientComponent | JSONFieldLabelServerComponent>
     } & Admin['components']
     editorOptions?: EditorProps['options']
+    maxHeight?: number
   } & Admin
 
   jsonSchema?: {
@@ -1030,6 +1031,7 @@ export type JSONFieldClient = {
       Error?: MappedComponent
       Label?: MappedComponent
     } & AdminClient['components']
+    maxHeight?: number
   } & AdminClient &
     Pick<JSONField['admin'], 'editorOptions'>
 } & Omit<FieldBaseClient, 'admin'> &
