@@ -691,6 +691,10 @@ export const Form: React.FC<FormProps> = (props) => {
             })
           }
 
+          if (!revalidatedFormState) {
+            return
+          }
+
           const { changed, newState } = mergeServerFormState(
             contextRef.current.fields || {},
             revalidatedFormState,
