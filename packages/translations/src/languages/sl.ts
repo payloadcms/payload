@@ -178,6 +178,7 @@ export const slTranslations = {
     addFilter: 'Dodaj filter',
     adminTheme: 'Tema skrbnika',
     and: 'In',
+    anotherUser: 'Drug uporabnik',
     anotherUserTakenOver: 'Drug uporabnik je prevzel urejanje tega dokumenta.',
     applyChanges: 'Uporabi spremembe',
     ascending: 'Naraščajoče',

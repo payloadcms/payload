@@ -40,7 +40,9 @@ export const reorderColumns = async (
     })
     .boundingBox()
 
-  if (!fromBoundingBox || !toBoundingBox) {return}
+  if (!fromBoundingBox || !toBoundingBox) {
+    return
+  }
 
   // drag the "from" column to the left of the "to" column
   await page.mouse.move(fromBoundingBox.x + 2, fromBoundingBox.y + 2, { steps: 10 })

@@ -4,6 +4,7 @@ import type { ClientUser } from 'payload'
 import React, { useEffect } from 'react'
 
 import { useTranslation } from '../../providers/Translation/index.js'
+import { isClientUserObject } from '../../utilities/isClientUserObject.js'
 import { Button } from '../Button/index.js'
 import { Modal, useModal } from '../Modal/index.js'
 import './index.scss'
@@ -32,7 +33,7 @@ export const DocumentLocked: React.FC<{
   onReadOnly: () => void
   onTakeOver: () => void
   updatedAt?: null | number
-  user?: ClientUser
+  user?: ClientUser | number | string
 }> = ({ handleGoBack, isActive, onReadOnly, onTakeOver, updatedAt, user }) => {
   const { closeModal, openModal } = useModal()
   const { t } = useTranslation()
@@ -51,7 +52,10 @@ export const DocumentLocked: React.FC<{
         <div className={`${baseClass}__content`}>
           <h1>{t('general:documentLocked')}</h1>
           <p>
-            <strong>{user?.email ?? user?.id}</strong> {t('general:currentlyEditing')}
+            <strong>
+              {isClientUserObject(user) ? (user.email ?? user.id) : `${t('general:user')}: ${user}`}
+            </strong>{' '}
+            {t('general:currentlyEditing')}
           </p>
           <p>
             {t('general:editedSince')} <strong>{formatDate(updatedAt)}</strong>

@@ -181,6 +181,7 @@ export const trTranslations: DefaultTranslationsObject = {
     addFilter: 'Filtre ekle',
     adminTheme: 'Admin arayüzü',
     and: 've',
+    anotherUser: 'Başka bir kullanıcı',
     anotherUserTakenOver: 'Başka bir kullanıcı bu belgenin düzenlemesini devraldı.',
     applyChanges: 'Değişiklikleri Uygula',
     ascending: 'artan',

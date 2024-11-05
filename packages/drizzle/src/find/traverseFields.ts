@@ -1,5 +1,5 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
-import type { Field, JoinQuery, SelectMode, SelectType } from 'payload'
+import type { Field, JoinQuery, SelectMode, SelectType, TabAsField } from 'payload'
 
 import { and, eq, sql } from 'drizzle-orm'
 import { fieldAffectsData, fieldIsVirtual, tabHasName } from 'payload/shared'
@@ -17,7 +17,7 @@ type TraverseFieldArgs = {
   currentArgs: Result
   currentTableName: string
   depth?: number
-  fields: Field[]
+  fields: (Field | TabAsField)[]
   joinQuery: JoinQuery
   joins?: BuildQueryJoinAliases
   locale?: string
@@ -77,7 +77,11 @@ export const traverseFields = ({
       }
     }
 
-    if (field.type === 'collapsible' || field.type === 'row') {
+    if (
+      field.type === 'collapsible' ||
+      field.type === 'row' ||
+      (field.type === 'tab' && !tabHasName(field))
+    ) {
       traverseFields({
         _locales,
         adapter,
@@ -100,43 +104,24 @@ export const traverseFields = ({
     }
 
     if (field.type === 'tabs') {
-      field.tabs.forEach((tab) => {
-        const tabPath = tabHasName(tab) ? `${path}${tab.name}_` : path
-        const tabTablePath = tabHasName(tab) ? `${tablePath}${toSnakeCase(tab.name)}_` : tablePath
-
-        const tabSelect = tabHasName(tab) ? select?.[tab.name] : select
-
-        if (tabSelect === false) {
-          return
-        }
-
-        let tabSelectAllOnCurrentLevel = selectAllOnCurrentLevel
-
-        if (tabHasName(tab) && select && !tabSelectAllOnCurrentLevel) {
-          tabSelectAllOnCurrentLevel =
-            select[tab.name] === true ||
-            (selectMode === 'exclude' && typeof select[tab.name] === 'undefined')
-        }
-
-        traverseFields({
-          _locales,
-          adapter,
-          currentArgs,
-          currentTableName,
-          depth,
-          fields: tab.fields,
-          joinQuery,
-          joins,
-          path: tabPath,
-          select: typeof tabSelect === 'object' ? tabSelect : undefined,
-          selectAllOnCurrentLevel: tabSelectAllOnCurrentLevel,
-          selectMode,
-          tablePath: tabTablePath,
-          topLevelArgs,
-          topLevelTableName,
-          versions,
-          withTabledFields,
-        })
+      traverseFields({
+        _locales,
+        adapter,
+        currentArgs,
+        currentTableName,
+        depth,
+        fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+        joinQuery,
+        joins,
+        path,
+        select,
+        selectAllOnCurrentLevel,
+        selectMode,
+        tablePath,
+        topLevelArgs,
+        topLevelTableName,
+        versions,
+        withTabledFields,
       })
 
       return
@@ -369,10 +354,11 @@ export const traverseFields = ({
           break
         }
 
-        case 'group': {
-          const groupSelect = select?.[field.name]
+        case 'group':
+        case 'tab': {
+          const fieldSelect = select?.[field.name]
 
-          if (groupSelect === false) {
+          if (fieldSelect === false) {
             break
           }
 
@@ -386,11 +372,11 @@ export const traverseFields = ({
             joinQuery,
             joins,
             path: `${path}${field.name}_`,
-            select: typeof groupSelect === 'object' ? groupSelect : undefined,
+            select: typeof fieldSelect === 'object' ? fieldSelect : undefined,
             selectAllOnCurrentLevel:
               selectAllOnCurrentLevel ||
-              groupSelect === true ||
-              (selectMode === 'exclude' && typeof groupSelect === 'undefined'),
+              fieldSelect === true ||
+              (selectMode === 'exclude' && typeof fieldSelect === 'undefined'),
             selectMode,
             tablePath: `${tablePath}${toSnakeCase(field.name)}_`,
             topLevelArgs,

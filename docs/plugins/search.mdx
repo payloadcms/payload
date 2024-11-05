@@ -143,7 +143,8 @@ Before creating or updating a search record, the `beforeSync` function runs. Thi
   searchPlugin({
     beforeSync: ({ originalDoc, searchDoc }) => ({
       ...searchDoc,
-      // Modify your docs in any way here, this can be async
+      // - Modify your docs in any way here, this can be async
+      // - You also need to add the `excerpt` field in the `searchOverrides` config
       excerpt: originalDoc?.excerpt || 'This is a fallback excerpt',
     }),
   }),

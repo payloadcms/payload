@@ -163,9 +163,9 @@ export type SelectMode = 'exclude' | 'include'
 
 export type SelectType = SelectExcludeType | SelectIncludeType
 
-export type ApplyDisableErrors<T, DisableErrors extends boolean> = DisableErrors extends true
-  ? null | T
-  : T
+export type ApplyDisableErrors<T, DisableErrors = false> = false extends DisableErrors
+  ? T
+  : null | T
 
 export type TransformDataWithSelect<
   Data extends Record<string, any>,

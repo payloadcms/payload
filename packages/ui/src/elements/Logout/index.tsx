@@ -25,16 +25,21 @@ export const Logout: React.FC<{
   const basePath = process.env.NEXT_BASE_PATH ?? ''
   const LinkElement = Link || 'a'
 
+  const props = {
+    'aria-label': t('authentication:logOut'),
+    className: `${baseClass}__log-out`,
+    prefetch: Link ? false : undefined,
+    tabIndex,
+  }
+
   return (
     <LinkElement
-      aria-label={t('authentication:logOut')}
-      className={`${baseClass}__log-out`}
+      {...props}
       href={formatAdminURL({
         adminRoute,
         basePath,
         path: logoutRoute,
       })}
-      tabIndex={tabIndex}
     >
       <LogOutIcon />
     </LinkElement>

@@ -180,6 +180,7 @@ export const myTranslations: DefaultTranslationsObject = {
     addFilter: 'ဇကာထည့်ပါ။',
     adminTheme: 'အက်ပ်ဒိုင်များစပ်စွာ',
     and: 'နှင့်',
+    anotherUser: 'တစ်ခြားအသုံးပြုသူ',
     anotherUserTakenOver: 'တစ်ခြားအသုံးပြုသူသည်ဤစာရွက်စာတမ်းကိုပြင်ဆင်မှုကိုရယူလိုက်သည်။',
     applyChanges: 'ပြောင်းလဲမှုများ အသုံးပြုပါ',
     ascending: 'တက်နေသည်',

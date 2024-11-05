@@ -3,10 +3,13 @@
 import type { JsonObject } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
+import { validateMimeType } from 'payload/shared'
 import React from 'react'
+import { toast } from 'sonner'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { AddFilesView } from './AddFilesView/index.js'
 import { AddingFilesView } from './AddingFilesView/index.js'
@@ -19,6 +22,7 @@ function DrawerContent() {
   const { closeModal } = useModal()
   const { collectionSlug, drawerSlug } = useBulkUpload()
   const { config } = useConfig()
+  const { t } = useTranslation()
 
   const uploadCollection = config.collections.find((col) => col.slug === collectionSlug)
   const uploadConfig = uploadCollection.upload
@@ -31,14 +35,18 @@ function DrawerContent() {
         if (
           uploadMimeTypes === undefined ||
           uploadMimeTypes.length === 0 ||
-          uploadMimeTypes?.includes(candidateFile.type)
+          validateMimeType(candidateFile.type, uploadMimeTypes)
         ) {
           fileTransfer.items.add(candidateFile)
         }
       }
-      void addFiles(fileTransfer.files)
+      if (fileTransfer.files.length === 0) {
+        toast.error(t('error:invalidFileType'))
+      } else {
+        void addFiles(fileTransfer.files)
+      }
     },
-    [addFiles, uploadMimeTypes],
+    [addFiles, t, uploadMimeTypes],
   )
 
   if (!collectionSlug) {

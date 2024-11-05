@@ -107,6 +107,7 @@ export function AppHeader({ CustomAvatar, CustomIcon, CustomLogo }: Props) {
               aria-label={t('authentication:account')}
               className={`${baseClass}__account`}
               href={formatAdminURL({ adminRoute, path: accountRoute })}
+              prefetch={Link ? false : undefined}
               tabIndex={0}
             >
               <RenderCustomComponent CustomComponent={CustomAvatar} Fallback={<Account />} />

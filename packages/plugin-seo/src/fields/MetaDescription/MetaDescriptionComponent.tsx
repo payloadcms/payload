@@ -36,7 +36,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
       minLength: minLengthFromProps,
       required,
     },
-    fieldState: { customComponents: { Label } = {} } = {},
+    fieldState: { customComponents: { AfterInput, BeforeInput, Label } = {} } = {},
     hasGenerateDescriptionFn,
     path,
   } = props
@@ -174,6 +174,8 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
         }}
       >
         <TextareaInput
+          AfterInput={AfterInput}
+          BeforeInput={BeforeInput}
           Error={errorMessage}
           onChange={setValue}
           path={path}

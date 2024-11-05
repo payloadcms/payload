@@ -187,6 +187,7 @@ export const findOperation = async <
           collection: 'payload-locked-documents',
           depth: 1,
           limit: sanitizedLimit,
+          overrideAccess: false,
           pagination: false,
           req,
           where: {

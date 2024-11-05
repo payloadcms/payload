@@ -148,7 +148,7 @@ const DocumentInfo: React.FC<
   )
 
   const updateDocumentEditor = useCallback(
-    async (docId: number | string, slug: string, user: ClientUser) => {
+    async (docId: number | string, slug: string, user: ClientUser | number | string) => {
       try {
         const isGlobal = slug === globalSlug
 
@@ -164,10 +164,15 @@ const DocumentInfo: React.FC<
         if (docs.length > 0) {
           const lockId = docs[0].id
 
+          const userData =
+            typeof user === 'object'
+              ? { relationTo: user.collection, value: user.id }
+              : { relationTo: 'users', value: user }
+
           // Send a patch request to update the _lastEdited info
           await requests.patch(`${serverURL}${api}/payload-locked-documents/${lockId}`, {
             body: JSON.stringify({
-              user: { relationTo: user?.collection, value: user?.id },
+              user: userData,
             }),
             headers: {
               'Content-Type': 'application/json',

@@ -178,6 +178,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     addFilter: 'Додај филтер',
     adminTheme: 'Администраторска тема',
     and: 'И',
+    anotherUser: 'Други корисник',
     anotherUserTakenOver: 'Други корисник је преузео уређивање овог документа.',
     applyChanges: 'Примени промене',
     ascending: 'Узлазно',

@@ -67,6 +67,10 @@ export const NotFoundPage = async ({
 
   const params = await paramsPromise
 
+  if (!initPageResult.req.user || !initPageResult.permissions.canAccessAdmin) {
+    return <NotFoundClient />
+  }
+
   return (
     <DefaultTemplate
       i18n={initPageResult.req.i18n}

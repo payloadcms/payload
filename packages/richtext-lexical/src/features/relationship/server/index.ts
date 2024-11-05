@@ -90,6 +90,7 @@ export const RelationshipFeature = createServerFeature<
                     key: 'value',
                     overrideAccess,
                     req,
+                    select: collection.config.defaultPopulate,
                     showHiddenFields,
                   }),
                 )

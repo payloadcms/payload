@@ -6,7 +6,7 @@ import {
   type SelectType,
   type TabAsField,
 } from 'payload'
-import { fieldAffectsData, getSelectMode } from 'payload/shared'
+import { fieldAffectsData, getSelectMode, tabHasName } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 
@@ -131,9 +131,17 @@ const traverseFields = ({
 
       case 'group':
       case 'tab':
-      case 'array':
+      case 'array': {
+        let fieldSelect: SelectType
+
+        if (field.type === 'tab' && !tabHasName(field)) {
+          fieldSelect = select
+        } else {
+          fieldSelect = select[field.name] as SelectType
+        }
+
         if (field.type === 'array' && selectMode === 'include') {
-          select[field.name]['id'] = true
+          fieldSelect['id'] = true
         }
 
         traverseFields({
@@ -141,12 +149,13 @@ const traverseFields = ({
           databaseSchemaPath: fieldDatabaseSchemaPath,
           fields: field.fields,
           projection,
-          select: select[field.name] as SelectType,
+          select: fieldSelect,
           selectMode,
           withinLocalizedField: fieldWithinLocalizedField,
         })
 
         break
+      }
 
       case 'blocks': {
         const blocksSelect = select[field.name] as SelectType

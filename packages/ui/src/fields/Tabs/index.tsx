@@ -149,6 +149,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const activeTabConfig = tabs[activeTabIndex]
 
   const activeTabDescription = activeTabConfig.description
+
   const activeTabStaticDescription =
     typeof activeTabDescription === 'function'
       ? activeTabDescription({ t: i18n.t })

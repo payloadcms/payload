@@ -43,7 +43,7 @@ export type DocumentInfoProps = {
 }
 
 export type DocumentInfoContext = {
-  currentEditor?: ClientUser
+  currentEditor?: ClientUser | null | number | string
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
   documentIsLocked?: boolean
   getDocPreferences: () => Promise<DocumentPreferences>

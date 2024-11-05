@@ -179,6 +179,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     addFilter: '絞り込みを追加',
     adminTheme: '管理画面のテーマ',
     and: 'かつ',
+    anotherUser: '別のユーザー',
     anotherUserTakenOver: '別のユーザーがこのドキュメントの編集を引き継ぎました。',
     applyChanges: '変更を適用する',
     ascending: '昇順',

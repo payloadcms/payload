@@ -29,6 +29,7 @@ export default buildConfigWithDefaults({
           email: devUser.email,
           password: devUser.password,
           name: 'Admin',
+          roles: ['is_admin', 'is_user'],
         },
       })
 
@@ -38,6 +39,7 @@ export default buildConfigWithDefaults({
           email: regularUser.email,
           password: regularUser.password,
           name: 'Dev',
+          roles: ['is_user'],
         },
       })
 

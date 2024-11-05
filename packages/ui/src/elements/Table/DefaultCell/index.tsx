@@ -51,14 +51,14 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     className?: string
     href?: string
     onClick?: () => void
+    prefetch?: false
     type?: 'button'
   } = {
     className,
   }
 
-  const isLink = link !== undefined ? link : columnIndex === 0
-
-  if (isLink) {
+  if (link) {
+    wrapElementProps.prefetch = false
     WrapElement = Link
     wrapElementProps.href = collectionConfig?.slug
       ? formatAdminURL({

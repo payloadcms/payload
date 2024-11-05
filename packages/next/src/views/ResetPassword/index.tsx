@@ -48,6 +48,7 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
                       adminRoute,
                       path: accountRoute,
                     })}
+                    prefetch={false}
                   >
                     {children}
                   </Link>
@@ -75,6 +76,7 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
           adminRoute,
           path: loginRoute,
         })}
+        prefetch={false}
       >
         {i18n.t('authentication:backToLogin')}
       </Link>
