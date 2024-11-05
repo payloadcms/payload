@@ -1,5 +1,5 @@
 import type { ListPreferences, ListViewClientProps } from '@payloadcms/ui'
-import type { AdminViewProps, ListQuery, Where } from 'payload'
+import type { AdminViewProps, ListQuery, StaticDescription, Where } from 'payload'
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -169,6 +169,11 @@ export const renderListView = async (
 
     const renderedFilters = renderFilters(fields, req.payload.importMap)
 
+    const staticDescription: StaticDescription =
+      typeof collectionConfig.admin.description === 'function'
+        ? collectionConfig.admin.description({ t: i18n.t })
+        : collectionConfig.admin.description
+
     const clientProps: ListViewClientProps = {
       AfterList: (
         <RenderServerComponent
@@ -196,10 +201,16 @@ export const renderListView = async (
       ),
       collectionSlug,
       columnState,
-      description:
-        typeof collectionConfig.admin.description === 'function'
-          ? collectionConfig.admin.description({ t: i18n.t })
-          : collectionConfig.admin.description,
+      Description: (
+        <RenderServerComponent
+          clientProps={{
+            description: staticDescription,
+          }}
+          Component={collectionConfig.admin.components?.Description}
+          importMap={payload.importMap}
+        />
+      ),
+      description: staticDescription,
       disableBulkDelete,
       disableBulkEdit,
       enableRowSelections,
