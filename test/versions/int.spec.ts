@@ -1,7 +1,7 @@
-import type { Payload } from 'payload'
+import type { Payload, PayloadRequest } from 'payload';
 
 import path from 'path'
-import { ValidationError } from 'payload'
+import { isolateObjectProperty , ValidationError } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
@@ -484,6 +484,57 @@ describe('Versions', () => {
       })
     })
 
+    it('should restore published version with correct data', async () => {
+      // create a post
+      const originalPost = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          description: 'description',
+          title: 'v1',
+          _status: 'published',
+        },
+      })
+
+      // update the post
+      await payload.update({
+        collection: draftCollectionSlug,
+        draft: true,
+        id: originalPost.id,
+        data: {
+          title: 'v2',
+          _status: 'published',
+        },
+      })
+
+      // get the version id of the original draft
+      const versions = await payload.findVersions({
+        collection: draftCollectionSlug,
+        where: {
+          parent: {
+            equals: originalPost.id,
+          },
+        },
+      })
+
+      // restore the version
+      const versionToRestore = versions.docs[versions.docs.length - 1]
+      const restoredVersion = await payload.restoreVersion({
+        id: versionToRestore.id,
+        collection: draftCollectionSlug,
+      })
+
+      // get the latest draft
+      const latestDraft = await payload.findByID({
+        id: originalPost.id,
+        collection: draftCollectionSlug,
+        draft: true,
+      })
+
+      // assert it has the original post content
+      expect(latestDraft.title).toStrictEqual('v1')
+      expect(restoredVersion.title).toStrictEqual('v1')
+    })
+
     describe('Update', () => {
       it('should allow a draft to be patched', async () => {
         const originalTitle = 'Here is a published post'
@@ -834,6 +885,8 @@ describe('Versions', () => {
 
     describe('Race conditions', () => {
       it('should keep latest true with parallel writes', async () => {
+        const req = isolateObjectProperty({ payload } as PayloadRequest, 'transactionID')
+
         const doc = await payload.create({
           collection: 'draft-posts',
           data: {
@@ -854,6 +907,7 @@ describe('Versions', () => {
                     id: doc.id,
                     collection: 'draft-posts',
                     data: {},
+                    // req,
                     draft: true,
                   })
                   .then(resolve)
@@ -866,6 +920,7 @@ describe('Versions', () => {
 
           const { docs } = await payload.findVersions({
             collection: 'draft-posts',
+            // req,
             where: {
               and: [
                 {
