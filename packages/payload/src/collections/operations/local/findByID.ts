@@ -1,10 +1,16 @@
 /* eslint-disable no-restricted-exports */
-import type { CollectionSlug, JoinQuery, Payload, SelectType, TypedLocale } from '../../../index.js'
+import type {
+  CollectionSlug,
+  JoinQuery,
+  Payload,
+  RequestContext,
+  SelectType,
+  TypedLocale,
+} from '../../../index.js'
 import type {
   ApplyDisableErrors,
   Document,
   PayloadRequest,
-  RequestContext,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
 import type { SelectFromCollectionSlug } from '../../config/types.js'

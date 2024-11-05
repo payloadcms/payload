@@ -121,11 +121,12 @@ import type {
   JSONFieldValidation,
   PointFieldValidation,
   RadioFieldValidation,
+  RequestContext,
   Sort,
   TextareaFieldValidation,
 } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
+import type { Operation, PayloadRequest, Where } from '../../types/index.js'
 import type {
   NumberFieldManyValidation,
   NumberFieldSingleValidation,

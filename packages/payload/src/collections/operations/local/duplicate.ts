@@ -1,13 +1,12 @@
 import type { CollectionSlug, TypedLocale } from '../../..//index.js'
-import type { Payload } from '../../../index.js'
+import type { Payload, RequestContext } from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
-  RequestContext,
   SelectType,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
-import type { DataFromCollectionSlug, SelectFromCollectionSlug } from '../../config/types.js'
+import type { SelectFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
