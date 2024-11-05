@@ -1,14 +1,13 @@
 'use client'
 import type {
   ClientCollectionConfig,
-  ClientField,
   JoinFieldClient,
   ListQuery,
   PaginatedDocs,
   Where,
 } from 'payload'
 
-import React, { Fragment, useCallback, useEffect, useState } from 'react'
+import React, { Fragment, useCallback, useState } from 'react'
 import AnimateHeightImport from 'react-animate-height'
 
 const AnimateHeight = AnimateHeightImport.default || AnimateHeightImport
@@ -20,6 +19,7 @@ import type { Column } from '../Table/index.js'
 
 import { Button } from '../../elements/Button/index.js'
 import { Pill } from '../../elements/Pill/index.js'
+import { useIgnoredEffect } from '../../hooks/useIgnoredEffect.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -33,6 +33,7 @@ import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../TableColumns/index.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
 import './index.scss'
+import { RelationshipTablePagination } from './Pagination.js'
 
 const baseClass = 'relationship-table'
 
@@ -49,7 +50,6 @@ type RelationshipTableComponentProps = {
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
   const {
     allowCreate = true,
-    field,
     filterOptions,
     initialData: initialDataFromProps,
     initialDrawerState,
@@ -59,13 +59,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const [Table, setTable] = useState<React.ReactNode>(null)
 
-  const {
-    config: {
-      routes: { api },
-      serverURL,
-    },
-    getEntityConfig,
-  } = useConfig()
+  const { getEntityConfig } = useConfig()
 
   const { id: docID } = useDocumentInfo()
 
@@ -107,30 +101,35 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const { getTableState } = useServerFunctions()
 
-  useEffect(() => {
-    if (!Table) {
-      const getTable = async () => {
-        const {
-          data: newData,
-          state: newColumnState,
-          Table: NewTable,
-        } = await getTableState({
-          collectionSlug: relationTo,
-          //   columns: activeColumns,
-          enableRowSelections: false,
-          renderRowTypes: true,
-          tableAppearance: 'condensed',
-        })
+  useIgnoredEffect(
+    () => {
+      if (!Table || query) {
+        const getTable = async () => {
+          const {
+            data: newData,
+            state: newColumnState,
+            Table: NewTable,
+          } = await getTableState({
+            collectionSlug: relationTo,
+            // columns: activeColumns,
+            enableRowSelections: false,
+            query,
+            renderRowTypes: true,
+            tableAppearance: 'condensed',
+          })
 
-        setData(newData)
-        setTable(NewTable)
-        setColumnState(newColumnState)
-        setIsLoadingTable(false)
+          setData(newData)
+          setTable(NewTable)
+          setColumnState(newColumnState)
+          setIsLoadingTable(false)
+        }
+
+        void getTable()
       }
-
-      void getTable()
-    }
-  }, [collectionConfig, filterOptions, initialData, Table, getTableState, relationTo])
+    },
+    [query],
+    [collectionConfig, filterOptions, initialData, Table, getTableState, relationTo],
+  )
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer, openDrawer }] = useDocumentDrawer({
     collectionSlug: relationTo,
@@ -191,7 +190,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         </div>
       </div>
       {isLoadingTable ? (
-        <p>Loading...</p>
+        <p>{t('general:loading')}</p>
       ) : (
         <Fragment>
           {data.docs && data.docs.length === 0 && (
@@ -215,33 +214,16 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
               <ListQueryProvider
                 collectionSlug={relationTo}
                 data={data}
-                // defaultLimit={limit || collectionConfig?.admin?.pagination?.defaultLimit}
+                defaultLimit={collectionConfig?.admin?.pagination?.defaultLimit}
                 modifySearchParams={false}
-                // defaultSort={sort}
                 onQueryChange={setQuery}
                 preferenceKey={preferenceKey}
               >
                 <TableColumnsProvider
-                  cellProps={[
-                    {},
-                    // {
-                    //   field: {
-                    //     admin: {
-                    //       components: {
-                    //         Cell: {
-                    //           type: 'client',
-                    //           RenderedComponent: (
-                    //             <DrawerLink field={field} onDrawerSave={onDrawerSave} />
-                    //           ),
-                    //         },
-                    //       },
-                    //     },
-                    //   } as ClientField,
-                    //   link: false,
-                    // },
-                  ]}
                   collectionSlug={relationTo}
                   columnState={columnState}
+                  docs={data.docs}
+                  LinkedCellOverride={<DrawerLink onDrawerSave={onDrawerSave} />}
                   preferenceKey={preferenceKey}
                   renderRowTypes
                   setTable={setTable}
@@ -261,7 +243,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                     </div>
                   </AnimateHeight>
                   {Table}
-                  {/* <RelationshipTableWrapper collectionConfig={collectionConfig} Table={Table} /> */}
+                  <RelationshipTablePagination />
                 </TableColumnsProvider>
               </ListQueryProvider>
             </RelationshipProvider>

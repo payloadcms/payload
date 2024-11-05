@@ -14,6 +14,7 @@ import React, { Fragment } from 'react'
 export { generateListMetadata } from './meta.js'
 
 type ListViewArgs = {
+  customCellProps?: Record<string, any>
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   enableRowSelections: boolean
@@ -27,6 +28,7 @@ export const renderListView = async (
 }> => {
   const {
     clientConfig,
+    customCellProps,
     disableBulkDelete,
     disableBulkEdit,
     drawerSlug,
@@ -149,10 +151,10 @@ export const renderListView = async (
     const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
 
     const { columnState, Table } = renderTable({
-      clientFields: clientCollectionConfig?.fields,
       collectionConfig: clientCollectionConfig,
       columnPreferences: listPreferences?.columns,
       columns: initialColumns,
+      customCellProps,
       docs: data.docs,
       drawerSlug,
       enableRowSelections,
@@ -189,8 +191,8 @@ export const renderListView = async (
           <ListQueryProvider
             collectionSlug={collectionSlug}
             data={data}
-            initialLimit={limit}
-            initialSort={sort}
+            defaultLimit={limit}
+            defaultSort={sort}
             modifySearchParams={!isInDrawer}
             preferenceKey={preferenceKey}
           >

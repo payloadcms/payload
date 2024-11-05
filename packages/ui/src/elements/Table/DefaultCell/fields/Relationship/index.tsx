@@ -30,7 +30,7 @@ export type RelationshipCellProps = DefaultCellComponentProps<
 
 export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   cellData: cellDataFromProps,
-  customCellContext,
+  customCellProps: customCellContext,
   field,
   field: { label },
 }) => {
@@ -120,7 +120,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
             fileField = (
               <FileCell
                 cellData={label}
-                customCellContext={customCellContext}
+                customCellProps={customCellContext}
                 field={field}
                 rowData={document}
               />

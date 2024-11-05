@@ -1,5 +1,5 @@
 'use client'
-import type { CellComponentProps, ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
 
 import React, { createContext, useCallback, useContext, useState } from 'react'
 
@@ -15,8 +15,8 @@ import { filterFields } from './filterFields.js'
 import { getInitialColumns } from './getInitialColumns.js'
 
 export interface ITableColumns {
-  cellProps?: Partial<CellComponentProps>[]
   columns: Column[]
+  LinkedCellOverride?: React.ReactNode
   moveColumn: (args: { fromIndex: number; toIndex: number }) => Promise<void>
   resetColumnsState: () => Promise<void>
   setActiveColumns: (columns: string[]) => Promise<void>
@@ -32,12 +32,12 @@ export type ListPreferences = {
 }
 
 type Props = {
-  readonly cellProps?: Partial<CellComponentProps>[]
   readonly children: React.ReactNode
   readonly collectionSlug: string
   readonly columnState: Column[]
   readonly docs: any[]
   readonly enableRowSelections?: boolean
+  readonly LinkedCellOverride?: React.ReactNode
   readonly listPreferences?: ListPreferences
   readonly preferenceKey: string
   readonly renderRowTypes?: boolean
@@ -55,12 +55,12 @@ const sanitizeColumns = (columns: Column[]) => {
 }
 
 export const TableColumnsProvider: React.FC<Props> = ({
-  cellProps,
   children,
   collectionSlug,
   columnState,
   docs,
   enableRowSelections,
+  LinkedCellOverride,
   listPreferences,
   preferenceKey,
   renderRowTypes,
@@ -250,8 +250,8 @@ export const TableColumnsProvider: React.FC<Props> = ({
   return (
     <TableColumnContext.Provider
       value={{
-        cellProps,
         columns: tableColumns,
+        LinkedCellOverride,
         moveColumn,
         resetColumnsState,
         setActiveColumns,

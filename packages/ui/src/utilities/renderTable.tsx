@@ -1,6 +1,5 @@
 import type {
   ClientCollectionConfig,
-  ClientField,
   CollectionConfig,
   Field,
   ImportMap,
@@ -39,12 +38,11 @@ export const renderFilters = (
   )
 
 export const renderTable = ({
-  clientFields,
   collectionConfig,
   columnPreferences,
   columns,
+  customCellProps,
   docs,
-  drawerSlug,
   enableRowSelections,
   fields,
   i18n,
@@ -53,10 +51,10 @@ export const renderTable = ({
   tableAppearance,
   useAsTitle,
 }: {
-  clientFields: ClientField[]
   collectionConfig: ClientCollectionConfig
   columnPreferences: ColumnPreferences
   columns: ColumnPreferences
+  customCellProps?: Record<string, any>
   docs: PaginatedDocs['docs']
   drawerSlug?: string
   enableRowSelections: boolean
@@ -84,15 +82,14 @@ export const renderTable = ({
           },
         ]
       : undefined,
-    clientFields,
     collectionConfig,
     columnPreferences,
     columns,
     enableRowSelections,
     fields,
     // sortColumnProps,
+    customCellProps,
     docs,
-    drawerSlug,
     importMap,
     useAsTitle,
   })

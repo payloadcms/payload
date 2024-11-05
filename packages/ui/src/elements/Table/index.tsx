@@ -17,8 +17,6 @@ export type Column = {
   readonly renderedCells: React.ReactNode[]
 }
 
-export { TableCellProvider, useTableCell } from './TableCellProvider/index.js'
-
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
   readonly columns?: Column[]

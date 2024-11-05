@@ -1,5 +1,5 @@
 'use client'
-import { Pill, useConfig, useTableCell, useTranslation } from '@payloadcms/ui'
+import { Pill, useConfig, useTranslation } from '@payloadcms/ui'
 import React, { Fragment } from 'react'
 
 type AutosaveCellProps = {
@@ -25,7 +25,10 @@ export const AutosaveCell: React.FC<AutosaveCellProps> = ({
   latestPublishedVersion,
 }) => {
   const { i18n, t } = useTranslation()
-  const { rowData } = useTableCell()
+
+  const rowData = { autosave: undefined, publishedLocale: undefined, version: undefined } //  TODO: get rowData from props
+  // const { rowData } = useTableCell()
+
   const {
     config: { localization },
   } = useConfig()

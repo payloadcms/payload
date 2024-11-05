@@ -233,7 +233,6 @@ export const buildTableState = async (
   }
 
   const { columnState, Table } = renderTable({
-    clientFields,
     collectionConfig: clientCollectionConfig,
     columnPreferences: undefined, // TODO, might not be needed
     columns,

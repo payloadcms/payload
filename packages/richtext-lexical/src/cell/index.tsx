@@ -2,7 +2,7 @@
 import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 
 import { createHeadlessEditor } from '@lexical/headless'
-import { useConfig, useTableCell } from '@payloadcms/ui'
+import { useConfig } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { $getRoot } from 'lexical'
 import LinkImport from 'next/link.js'
@@ -37,7 +37,13 @@ export const RichTextCell: React.FC<
 
   const [preview, setPreview] = React.useState('Loading...')
 
-  const { cellData, cellProps, columnIndex, customCellContext, rowData } = useTableCell()
+  const cellData = '' // TODO
+  const cellProps = { link: undefined } // TODO
+  const columnIndex = '' // TODO
+  const customCellContext = { collectionSlug: '' } // TODO
+  const rowData = '' // TODO
+
+  // const { cellData, cellProps, columnIndex, customCellContext, rowData } = useTableCell()
 
   const {
     config: {
