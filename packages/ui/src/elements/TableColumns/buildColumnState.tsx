@@ -16,6 +16,7 @@ import type { SortColumnProps } from '../SortColumn/index.js'
 import type { Column } from '../Table/index.js'
 
 import { flattenFieldMap } from '../../utilities/flattenFieldMap.js'
+import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import { SelectAll } from '../SelectAll/index.js'
 import { SelectRow } from '../SelectRow/index.js'
@@ -203,15 +204,18 @@ export const buildColumnState = (args: Args): Column[] => {
               ) : undefined
 
             return (
-              CustomCell ?? (
-                <RenderDefaultCell
-                  clientProps={cellClientProps}
-                  columnIndex={index}
-                  enableRowSelections={enableRowSelections}
-                  isLinkedColumn={isLinkedColumn}
-                  key={`${i}-${index}`}
-                />
-              )
+              <RenderCustomComponent
+                CustomComponent={CustomCell}
+                Fallback={
+                  <RenderDefaultCell
+                    clientProps={cellClientProps}
+                    columnIndex={index}
+                    enableRowSelections={enableRowSelections}
+                    isLinkedColumn={isLinkedColumn}
+                  />
+                }
+                key={`${i}-${index}`}
+              />
             )
           })
         : [],
