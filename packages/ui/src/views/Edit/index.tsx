@@ -13,17 +13,14 @@ import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react
 import type { FormProps } from '../../forms/Form/index.js'
 
 import { DocumentControls } from '../../elements/DocumentControls/index.js'
+import { DocumentDrawerHeader } from '../../elements/DocumentDrawer/DrawerHeader/index.js'
 import { useDocumentDrawerContext } from '../../elements/DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../elements/DocumentFields/index.js'
 import { DocumentLocked } from '../../elements/DocumentLocked/index.js'
 import { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
-import { Gutter } from '../../elements/Gutter/index.js'
-import { IDLabel } from '../../elements/IDLabel/index.js'
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
-import { RenderTitle } from '../../elements/RenderTitle/index.js'
 import { Upload } from '../../elements/Upload/index.js'
 import { Form } from '../../forms/Form/index.js'
-import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
@@ -432,25 +429,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
           onChange={[onChange]}
           onSuccess={onSave}
         >
-          {isInDrawer && (
-            <Gutter className={`doc-drawer-header`}>
-              <div className={`doc-drawer-header__content`}>
-                <h2 className={`doc-drawer-header__text`}>{<RenderTitle element="span" />}</h2>
-                {/* TODO: the `button` HTML element breaks CSS transitions on the drawer for some reason...
-              i.e. changing to a `div` element will fix the animation issue but will break accessibility
-            */}
-                <button
-                  aria-label={t('general:close')}
-                  className={`doc-drawer-header__close`}
-                  onClick={() => closeModal(drawerSlug)}
-                  type="button"
-                >
-                  <XIcon />
-                </button>
-              </div>
-              <DocumentTitle />
-            </Gutter>
-          )}
+          {isInDrawer && <DocumentDrawerHeader drawerSlug={drawerSlug} />}
           {isLockingEnabled && shouldShowDocumentLockedModal && !isReadOnlyForIncomingUser && (
             <DocumentLocked
               handleGoBack={() => handleGoBack({ adminRoute, collectionSlug, router })}
@@ -587,9 +566,4 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       </OperationProvider>
     </main>
   )
-}
-
-const DocumentTitle: React.FC = () => {
-  const { id, title } = useDocumentInfo()
-  return id && id !== title ? <IDLabel id={id.toString()} /> : null
 }
