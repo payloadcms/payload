@@ -1,35 +1,19 @@
 'use client'
-import type { ClientCollectionConfig, Where } from 'payload'
+import type { ClientCollectionConfig, ListQuery } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { ListQuery } from '../../providers/ListQuery/index.js'
 import type { ListDrawerProps } from './types.js'
 
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
+import { hoistQueryParamsToAnd } from '../../utilities/mergeListSearchAndWhere.js'
 import { ListDrawerContextProvider } from '../ListDrawer/Provider.js'
 import { LoadingOverlay } from '../Loading/index.js'
 import { type Option } from '../ReactSelect/index.js'
-
-export const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
-  if ('and' in where) {
-    where.and.push(queryParams)
-  } else if ('or' in where) {
-    where = {
-      and: [where, queryParams],
-    }
-  } else {
-    where = {
-      and: [where, queryParams],
-    }
-  }
-
-  return where
-}
 
 export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   allowCreate = true,

@@ -64,10 +64,9 @@ export const LinkElement = () => {
 
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
 
-  const {
-    field: { richTextComponentMap },
-  } = fieldProps
-  const fields = richTextComponentMap.get(linkFieldsSchemaPath)
+  const { componentMap } = fieldProps
+  const fields = componentMap[linkFieldsSchemaPath]
+  const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const editor = useSlate()
   const { config } = useConfig()
@@ -77,7 +76,6 @@ export const LinkElement = () => {
   const [renderModal, setRenderModal] = useState(false)
   const [renderPopup, setRenderPopup] = useState(false)
   const [initialState, setInitialState] = useState<FormState>({})
-  const { id, collectionSlug } = useDocumentInfo()
 
   const { getFormState } = useServerFunctions()
 
@@ -101,9 +99,13 @@ export const LinkElement = () => {
       }
 
       const { state } = await getFormState({
+        collectionSlug,
         data,
+        docPreferences: await getDocPreferences(),
+        globalSlug,
         operation: 'update',
-        schemaPath: fieldMapPath ? fieldMapPath.split('.') : [],
+        renderAllFields: true,
+        schemaPath: fieldMapPath ?? '',
       })
 
       setInitialState(state)
@@ -112,7 +114,19 @@ export const LinkElement = () => {
     if (renderModal) {
       void awaitInitialState()
     }
-  }, [renderModal, element, locale, t, collectionSlug, config, id, fieldMapPath, getFormState])
+  }, [
+    renderModal,
+    element,
+    locale,
+    t,
+    collectionSlug,
+    config,
+    id,
+    fieldMapPath,
+    getFormState,
+    globalSlug,
+    getDocPreferences,
+  ])
 
   return (
     <span className={baseClass} {...attributes}>
@@ -131,6 +145,7 @@ export const LinkElement = () => {
               setRenderModal(false)
             }}
             initialState={initialState}
+            schemaPath={schemaPath}
           />
         )}
         <Popup

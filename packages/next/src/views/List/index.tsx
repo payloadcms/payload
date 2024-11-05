@@ -1,15 +1,13 @@
 import type { ListPreferences, ListViewClientProps } from '@payloadcms/ui'
-import type { ListQuery } from 'packages/ui/src/providers/ListQuery/index.js'
-import type { AdminViewProps, Where } from 'payload'
+import type { AdminViewProps, ListQuery, Where } from 'payload'
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import { filterFields } from 'packages/ui/src/elements/TableColumns/filterFields.js'
 import { getInitialColumns } from 'packages/ui/src/elements/TableColumns/getInitialColumns.js'
 import { renderFilters, renderTable } from 'packages/ui/src/utilities/renderTable.js'
-import { mergeListSearchAndWhere } from 'payload'
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
 
@@ -114,10 +112,8 @@ export const renderListView = async (
 
     const whereQuery = mergeListSearchAndWhere({
       collectionConfig,
-      query: {
-        search: typeof query?.search === 'string' ? query.search : undefined,
-        where: (query?.where as Where) || undefined,
-      },
+      search: typeof query?.search === 'string' ? query.search : undefined,
+      where: (query?.where as Where) || undefined,
     })
 
     const limit = isNumber(query?.limit)
@@ -161,6 +157,7 @@ export const renderListView = async (
       drawerSlug,
       enableRowSelections,
       fields,
+      i18n: req.i18n,
       importMap: payload.importMap,
       useAsTitle,
     })
@@ -190,6 +187,7 @@ export const renderListView = async (
         <Fragment>
           <HydrateAuthProvider permissions={permissions} />
           <ListQueryProvider
+            collectionSlug={collectionSlug}
             data={data}
             initialLimit={limit}
             initialSort={sort}

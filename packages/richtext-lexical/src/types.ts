@@ -6,6 +6,7 @@ import type {
   RichTextFieldClient,
   RichTextFieldClientProps,
   SanitizedConfig,
+  ServerFieldBase,
 } from 'payload'
 
 import type {
@@ -95,7 +96,8 @@ export type LexicalRichTextFieldProps = {
   }
   featureClientSchemaMap: FeatureClientSchemaMap
   lexicalEditorConfig: LexicalEditorConfig
-} & RichTextFieldClientProps<SerializedEditorState, AdapterProps, object>
+} & Pick<ServerFieldBase, 'permissions'> &
+  RichTextFieldClientProps<SerializedEditorState, AdapterProps, object>
 
 export type LexicalRichTextCellProps = DefaultCellComponentProps<
   SerializedEditorState,

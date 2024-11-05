@@ -29,9 +29,6 @@ const RichTextComponent: React.FC<
       localized,
       required,
     },
-    fieldState: {
-      customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
-    } = {},
     path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
     validate, // Users can pass in client side validation if they WANT to, but it's not required anymore
@@ -54,12 +51,19 @@ const RichTextComponent: React.FC<
     [validate, required],
   )
 
-  const { formInitializing, formProcessing, initialValue, setValue, showError, value } =
-    useField<SerializedEditorState>({
-      path,
-      // @ts-expect-error: TODO: Fix this
-      validate: memoizedValidate,
-    })
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    formInitializing,
+    formProcessing,
+    initialValue,
+    setValue,
+    showError,
+    value,
+  } = useField<SerializedEditorState>({
+    path,
+    // @ts-expect-error: TODO: Fix this
+    validate: memoizedValidate,
+  })
 
   const disabled = readOnlyFromProps || formProcessing || formInitializing
 

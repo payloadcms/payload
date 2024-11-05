@@ -41,21 +41,18 @@ declare module 'slate' {
 
 const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
   const {
-    Description,
     elements,
-    Error,
     field: {
       name,
-      _path: pathFromProps,
-      _schemaPath,
       admin: { className, placeholder, readOnly: readOnlyFromAdmin, style, width } = {},
       label,
       required,
     },
-    Label,
     leaves,
+    path: pathFromProps,
     plugins,
     readOnly: readOnlyFromTopLevelProps,
+    schemaPath,
     validate = richTextValidate,
   } = props
 
@@ -85,7 +82,14 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
 
   const path = pathFromProps ?? name
 
-  const { formInitializing, initialValue, setValue, showError, value } = useField({
+  const {
+    customComponents: { Description, Error, Label } = {},
+    formInitializing,
+    initialValue,
+    setValue,
+    showError,
+    value,
+  } = useField({
     path,
     validate: memoizedValidate,
   })
@@ -159,9 +163,9 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
             element={element}
             fieldProps={props}
             path={path}
-            schemaPath={_schemaPath}
+            schemaPath={schemaPath}
           >
-            {/* Render Field Here */}
+            {Element}
           </ElementProvider>
         )
 
@@ -170,7 +174,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
 
       return <div {...attr}>{children}</div>
     },
-    [elements, path, props, _schemaPath],
+    [elements, path, props, schemaPath],
   )
 
   const renderLeaf = useCallback(
@@ -192,9 +196,9 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
                   leaf={leaf}
                   path={path}
                   result={result}
-                  schemaPath={_schemaPath}
+                  schemaPath={schemaPath}
                 >
-                  {/* Render Leaf Here */}
+                  {Leaf}
                 </LeafProvider>
               )
             }
@@ -207,7 +211,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
 
       return <span {...attributes}>{children}</span>
     },
-    [path, props, _schemaPath, leaves],
+    [path, props, schemaPath, leaves],
   )
 
   // All slate changes fire the onChange event
@@ -332,7 +336,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
                           path={path}
                           schemaPath={schemaPath}
                         >
-                          {/* Render Button Here */}
+                          {Button}
                         </ElementButtonProvider>
                       )
                     }
@@ -348,9 +352,9 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
                           fieldProps={props}
                           key={leaf.name}
                           path={path}
-                          schemaPath={_schemaPath}
+                          schemaPath={schemaPath}
                         >
-                          {/* Render Lead Here */}
+                          {Button}
                         </LeafButtonProvider>
                       )
                     }

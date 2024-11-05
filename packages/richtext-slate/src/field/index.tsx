@@ -6,6 +6,7 @@ import React, { lazy, Suspense, useEffect, useState } from 'react'
 import type { RichTextPlugin, SlateFieldProps } from '../types.js'
 import type { EnabledFeatures } from './types.js'
 
+import { SlatePropsProvider } from '../utilities/SlatePropsProvider.js'
 import { createFeatureMap } from './createFeatureMap.js'
 
 const RichTextEditor = lazy(() =>
@@ -15,15 +16,13 @@ const RichTextEditor = lazy(() =>
 )
 
 export const RichTextField: React.FC<SlateFieldProps> = (props) => {
-  const {
-    field: { _schemaPath, richTextComponentMap },
-  } = props
+  const { componentMap, schemaPath } = props
 
   const clientFunctions = useClientFunctions()
   const [hasLoadedPlugins, setHasLoadedPlugins] = useState(false)
 
   const [features] = useState<EnabledFeatures>(() => {
-    return createFeatureMap(richTextComponentMap as any)
+    return createFeatureMap(new Map(Object.entries(componentMap)))
   })
 
   const [plugins, setPlugins] = useState<RichTextPlugin[]>([])
@@ -33,7 +32,7 @@ export const RichTextField: React.FC<SlateFieldProps> = (props) => {
       const plugins: RichTextPlugin[] = []
 
       Object.entries(clientFunctions).forEach(([key, plugin]) => {
-        if (key.startsWith(`slatePlugin.${_schemaPath}.`)) {
+        if (key.startsWith(`slatePlugin.${schemaPath}.`)) {
           plugins.push(plugin)
         }
       })
@@ -43,27 +42,29 @@ export const RichTextField: React.FC<SlateFieldProps> = (props) => {
         setHasLoadedPlugins(true)
       }
     }
-  }, [hasLoadedPlugins, clientFunctions, _schemaPath, features.plugins.length])
+  }, [hasLoadedPlugins, clientFunctions, schemaPath, features.plugins.length])
 
   if (!hasLoadedPlugins) {
     return (
-      <React.Fragment>
+      <SlatePropsProvider schemaPath={schemaPath}>
         {Array.isArray(features.plugins) &&
           features.plugins.map((Plugin, i) => {
-            return <React.Fragment key={i}>{/* Render Field Here */}</React.Fragment>
+            return <React.Fragment key={i}>{Plugin}</React.Fragment>
           })}
-      </React.Fragment>
+      </SlatePropsProvider>
     )
   }
 
   return (
     <Suspense fallback={<ShimmerEffect height="35vh" />}>
-      <RichTextEditor
-        {...props}
-        elements={features.elements}
-        leaves={features.leaves}
-        plugins={plugins}
-      />
+      <SlatePropsProvider schemaPath={schemaPath}>
+        <RichTextEditor
+          {...props}
+          elements={features.elements}
+          leaves={features.leaves}
+          plugins={plugins}
+        />
+      </SlatePropsProvider>
     </Suspense>
   )
 }

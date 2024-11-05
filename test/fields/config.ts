@@ -26,7 +26,7 @@ import NumberFields from './collections/Number/index.js'
 import PointFields from './collections/Point/index.js'
 import RadioFields from './collections/Radio/index.js'
 import RelationshipFields from './collections/Relationship/index.js'
-//import RichTextFields from './collections/RichText/index.js'
+import RichTextFields from './collections/RichText/index.js'
 import RowFields from './collections/Row/index.js'
 import SelectFields from './collections/Select/index.js'
 import TabsFields from './collections/Tabs/index.js'
@@ -78,7 +78,7 @@ export const collectionSlugs: CollectionConfig[] = [
   PointFields,
   RelationshipFields,
   LexicalRelationshipsFields,
-  //RichTextFields,
+  RichTextFields,
   SelectFields,
   TabsFields2,
   TabsFields,
