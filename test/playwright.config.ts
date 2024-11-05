@@ -8,9 +8,11 @@ const dirname = path.dirname(filename)
 
 dotenv.config({ path: path.resolve(dirname, 'test.env') })
 
-export const TEST_TIMEOUT_LONG = 640000 * 3 // 8*3 minutes - used as timeOut for the beforeAll
-export const TEST_TIMEOUT = 160000
-export const EXPECT_TIMEOUT = 12000
+let multiplier = process.env.CI ? 3 : 0.5
+
+export const TEST_TIMEOUT_LONG = 640000 * multiplier // 8*3 minutes - used as timeOut for the beforeAll
+export const TEST_TIMEOUT = 30000 * multiplier
+export const EXPECT_TIMEOUT = 5000 * multiplier
 export const POLL_TOPASS_TIMEOUT = EXPECT_TIMEOUT * 4 // That way expect.poll() or expect().toPass can retry 4 times. 4x higher than default expect timeout => can retry 4 times if retryable expects are used inside
 
 export default defineConfig({

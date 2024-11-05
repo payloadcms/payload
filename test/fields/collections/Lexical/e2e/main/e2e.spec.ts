@@ -812,13 +812,14 @@ describe('lexicalMain', () => {
     const uploadSelectButton = slashMenuPopover.locator('button').first()
     await expect(uploadSelectButton).toBeVisible()
     await expect(uploadSelectButton).toContainText('Upload')
+    await wait(1000)
     await uploadSelectButton.click()
     await expect(slashMenuPopover).toBeHidden()
 
     await wait(500) // wait for drawer form state to initialize (it's a flake)
     const uploadListDrawer = page.locator('dialog[id^=list-drawer_1_]').first() // IDs starting with list-drawer_1_ (there's some other symbol after the underscore)
     await expect(uploadListDrawer).toBeVisible()
-    await wait(500)
+    await wait(1000)
 
     await uploadListDrawer.locator('button').getByText('payload.png').first().click()
     await expect(uploadListDrawer).toBeHidden()
@@ -826,6 +827,8 @@ describe('lexicalMain', () => {
     const newUploadNode = richTextField.locator('.lexical-upload').first()
     await newUploadNode.scrollIntoViewIfNeeded()
     await expect(newUploadNode).toBeVisible()
+
+    await expect(slashMenuPopover).toBeHidden()
 
     await expect(newUploadNode.locator('.lexical-upload__bottomRow')).toContainText('payload.png')
 
