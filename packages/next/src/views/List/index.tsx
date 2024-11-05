@@ -191,8 +191,8 @@ export const renderListView = async (
           <ListQueryProvider
             collectionSlug={collectionSlug}
             data={data}
-            initialLimit={limit}
-            initialSort={sort}
+            defaultLimit={limit}
+            defaultSort={sort}
             modifySearchParams={!isInDrawer}
             preferenceKey={preferenceKey}
           >

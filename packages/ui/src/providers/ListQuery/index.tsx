@@ -27,8 +27,8 @@ export type ListQueryProps = {
   readonly children: React.ReactNode
   readonly collectionSlug: string
   readonly data: PaginatedDocs
-  readonly initialLimit?: number
-  readonly initialSort?: string
+  readonly defaultLimit?: number
+  readonly defaultSort?: string
   readonly modifySearchParams?: boolean
   readonly onQueryChange?: (query: ListQuery) => void
   readonly preferenceKey?: string
@@ -36,8 +36,8 @@ export type ListQueryProps = {
 
 export type ListQueryContext = {
   data: PaginatedDocs
-  initialLimit?: number
-  initialSort?: string
+  defaultLimit?: number
+  defaultSort?: string
   query: ListQuery
   refineListData: (args: ListQuery) => Promise<void>
 } & ContextHandlers
@@ -50,8 +50,8 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   children,
   collectionSlug,
   data,
-  initialLimit,
-  initialSort,
+  defaultLimit,
+  defaultSort,
   modifySearchParams,
   onQueryChange: onQueryChangeFromProps,
   preferenceKey,
@@ -180,13 +180,13 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     if (modifySearchParams) {
       let shouldUpdateQueryString = false
 
-      if (isNumber(initialLimit) && !('limit' in currentQuery)) {
-        currentQuery.limit = String(initialLimit)
+      if (isNumber(defaultLimit) && !('limit' in currentQuery)) {
+        currentQuery.limit = String(defaultLimit)
         shouldUpdateQueryString = true
       }
 
-      if (initialSort && !('sort' in currentQuery)) {
-        currentQuery.sort = initialSort
+      if (defaultSort && !('sort' in currentQuery)) {
+        currentQuery.sort = defaultSort
         shouldUpdateQueryString = true
       }
 
@@ -197,7 +197,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         router.replace(`?${qs.stringify(currentQuery)}`)
       }
     }
-  }, [initialSort, initialLimit, router, modifySearchParams, currentQuery])
+  }, [defaultSort, defaultLimit, router, modifySearchParams, currentQuery])
 
   return (
     <Context.Provider

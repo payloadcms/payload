@@ -101,7 +101,13 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
   const { getEntityConfig } = useConfig()
   const router = useRouter()
 
-  const { data, handlePageChange, handlePerPageChange, initialLimit, query } = useListQuery()
+  const {
+    data,
+    defaultLimit: initialLimit,
+    handlePageChange,
+    handlePerPageChange,
+    query,
+  } = useListQuery()
   const { openModal } = useModal()
   const { setCollectionSlug, setOnSuccess } = useBulkUpload()
   const { drawerSlug: bulkUploadDrawerSlug } = useBulkUpload()
