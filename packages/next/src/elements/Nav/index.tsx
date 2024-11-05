@@ -2,10 +2,10 @@ import type { EntityToGroup } from '@payloadcms/ui/shared'
 import type { ServerProps } from 'payload'
 
 import { Logout } from '@payloadcms/ui'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import React from 'react'
 
-import { RenderServerComponent } from '../../../../ui/src/elements/RenderServerComponent/index.js'
 import './index.scss'
 import { NavHamburger } from './NavHamburger/index.js'
 import { NavWrapper } from './NavWrapper/index.js'
@@ -25,7 +25,7 @@ export const DefaultNav: React.FC<NavProps> = (props) => {
 
   const {
     admin: {
-      components: { afterNavLinks, beforeNavLinks },
+      components: { afterNavLinks, beforeNavLinks, logout },
     },
     collections,
     globals,
@@ -87,7 +87,20 @@ export const DefaultNav: React.FC<NavProps> = (props) => {
           }}
         />
         <div className={`${baseClass}__controls`}>
-          <Logout />
+          <RenderServerComponent
+            Component={logout?.Button}
+            Fallback={Logout}
+            importMap={payload.importMap}
+            serverProps={{
+              i18n,
+              locale,
+              params,
+              payload,
+              permissions,
+              searchParams,
+              user,
+            }}
+          />
         </div>
       </nav>
       <div className={`${baseClass}__header`}>

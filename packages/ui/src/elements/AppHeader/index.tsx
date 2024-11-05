@@ -12,12 +12,18 @@ import { Localizer } from '../Localizer/index.js'
 import { LocalizerLabel } from '../Localizer/LocalizerLabel/index.js'
 import { useNav } from '../Nav/context.js'
 import { NavToggler } from '../Nav/NavToggler/index.js'
+import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { StepNav } from '../StepNav/index.js'
 import './index.scss'
 
 const baseClass = 'app-header'
 
-export function AppHeader() {
+type Props = {
+  CustomAvatar?: React.ReactNode
+  CustomIcon?: React.ReactNode
+  CustomLogo?: React.ReactNode
+}
+export function AppHeader({ CustomAvatar, CustomIcon, CustomLogo }: Props) {
   const { t } = useTranslation()
 
   const { Actions } = useActions()
@@ -70,7 +76,12 @@ export function AppHeader() {
           </NavToggler>
           <div className={`${baseClass}__controls-wrapper`}>
             <div className={`${baseClass}__step-nav-wrapper`}>
-              <StepNav className={`${baseClass}__step-nav`} Link={Link} />
+              <StepNav
+                className={`${baseClass}__step-nav`}
+                CustomIcon={CustomIcon}
+                CustomLogo={CustomLogo}
+                Link={Link}
+              />
             </div>
             <div className={`${baseClass}__actions-wrapper`}>
               <div className={`${baseClass}__actions`} ref={customControlsRef}>
@@ -98,7 +109,7 @@ export function AppHeader() {
               href={formatAdminURL({ adminRoute, path: accountRoute })}
               tabIndex={0}
             >
-              <Account />
+              <RenderCustomComponent CustomComponent={CustomAvatar} Fallback={<Account />} />
             </LinkElement>
           </div>
         </div>

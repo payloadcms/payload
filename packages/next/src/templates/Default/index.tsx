@@ -39,37 +39,55 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
 }) => {
   const {
     admin: {
-      components: { header: CustomHeader, Nav: CustomNav } = {
+      avatar,
+      components: { graphics: { Icon, Logo }, header: CustomHeader, Nav: CustomNav } = {
+        graphics: {
+          Icon: undefined,
+          Logo: undefined,
+        },
         header: undefined,
         Nav: undefined,
       },
     } = {},
   } = payload.config || {}
 
+  const { Actions, CustomAvatar, CustomIcon, CustomLogo } = React.useMemo<{
+    Actions: Record<string, React.ReactNode>
+    CustomAvatar: React.ReactNode
+    CustomIcon: React.ReactNode
+    CustomLogo: React.ReactNode
+  }>(() => {
+    return {
+      Actions: viewActions
+        ? viewActions.reduce((acc, action) => {
+            if (action) {
+              if (typeof action === 'object') {
+                acc[action.path] = (
+                  <RenderServerComponent Component={action} importMap={payload.importMap} />
+                )
+              } else {
+                acc[action] = (
+                  <RenderServerComponent Component={action} importMap={payload.importMap} />
+                )
+              }
+            }
+
+            return acc
+          }, {})
+        : undefined,
+      CustomAvatar:
+        avatar !== 'gravatar' && avatar !== 'default' ? (
+          <RenderServerComponent Component={avatar.Component} importMap={payload.importMap} />
+        ) : undefined,
+      CustomIcon: <RenderServerComponent Component={Icon} importMap={payload.importMap} />,
+      CustomLogo: <RenderServerComponent Component={Logo} importMap={payload.importMap} />,
+    }
+  }, [avatar, payload.importMap, viewActions, Logo, Icon])
+
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
       <BulkUploadProvider>
-        <ActionsProvider
-          Actions={
-            viewActions
-              ? viewActions.reduce((acc, action, i) => {
-                  if (action) {
-                    if (typeof action === 'object') {
-                      acc[action.path] = (
-                        <RenderServerComponent Component={action} importMap={payload.importMap} />
-                      )
-                    } else {
-                      acc[action] = (
-                        <RenderServerComponent Component={action} importMap={payload.importMap} />
-                      )
-                    }
-                  }
-
-                  return acc
-                }, {})
-              : undefined
-          }
-        >
+        <ActionsProvider Actions={Actions}>
           <RenderServerComponent
             clientProps={{ clientProps: { visibleEntities } }}
             Component={CustomHeader}
@@ -111,7 +129,11 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                 }}
               />
               <div className={`${baseClass}__wrap`}>
-                <AppHeader />
+                <AppHeader
+                  CustomAvatar={CustomAvatar}
+                  CustomIcon={CustomIcon}
+                  CustomLogo={CustomLogo}
+                />
                 {children}
               </div>
             </Wrapper>

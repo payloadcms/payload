@@ -24,17 +24,6 @@ export const Account = () => {
   const pathname = usePathname()
   const isOnAccountPage = pathname === formatAdminURL({ adminRoute, path: accountRoute })
 
-  // if (CustomAvatar) {
-  //   return (
-  //     <RenderComponent
-  //       clientProps={{
-  //         active: isOnAccountPage,
-  //       }}
-  //       mappedComponent={CustomAvatar}
-  //     />
-  //   )
-  // }
-
   if (!user?.email || avatar === 'default') {
     return <DefaultAccountIcon active={isOnAccountPage} />
   }
