@@ -1,12 +1,12 @@
 import type { EntityToGroup } from '@payloadcms/ui/shared'
 import type { AdminViewProps } from 'payload'
 
-import { HydrateAuthProvider } from '@payloadcms/ui'
+import { HydrateAuthProvider, SetStepNav } from '@payloadcms/ui'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'
 
-import { RenderServerComponent } from '../../../../ui/src/elements/RenderServerComponent/index.js'
 import { DefaultDashboard } from './Default/index.js'
 
 export { generateDashboardMetadata } from './meta.js'
@@ -110,6 +110,7 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
   return (
     <Fragment>
       <HydrateAuthProvider permissions={permissions} />
+      <SetStepNav nav={[]} />
       <RenderServerComponent
         clientProps={{
           Link,
