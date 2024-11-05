@@ -40,9 +40,11 @@ const DocumentInfo: React.FC<Props> = ({
   const { permissions } = useAuth()
   const { code } = useLocale()
   const { uploadEdits } = useUploadEdits()
-  const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null)
-  const [versions, setVersions] = useState<PaginatedDocs<Version>>(null)
-  const [unpublishedVersions, setUnpublishedVersions] = useState<PaginatedDocs<Version>>(null)
+  const [publishedDoc, setPublishedDoc] = useState<(TypeWithID & TypeWithTimestamps) | null>(null)
+  const [versions, setVersions] = useState<PaginatedDocs<Version> | null>(null)
+  const [unpublishedVersions, setUnpublishedVersions] = useState<PaginatedDocs<Version> | null>(
+    null,
+  )
 
   const baseURL = `${serverURL}${api}`
   let slug: string
