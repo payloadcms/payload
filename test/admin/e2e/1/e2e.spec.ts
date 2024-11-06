@@ -246,6 +246,7 @@ describe('admin1', () => {
     describe('document meta', () => {
       test('should render custom meta title from collection config', async () => {
         await page.goto(customViewsURL.list)
+        await page.waitForURL(customViewsURL.list)
         const pattern = new RegExp(`^${customCollectionMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
@@ -258,21 +259,27 @@ describe('admin1', () => {
 
       test('should render custom meta title from nested edit view', async () => {
         await navigateToDoc(page, customViewsURL)
-        await page.goto(`${page.url()}/versions`)
+        const versionsURL = `${page.url()}/versions`
+        await page.goto(versionsURL)
+        await page.waitForURL(versionsURL)
         const pattern = new RegExp(`^${customVersionsTabMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
 
       test('should render custom meta title from nested custom view', async () => {
         await navigateToDoc(page, customViewsURL)
-        await page.goto(`${page.url()}/custom-tab-view`)
+        const customTabURL = `${page.url()}/custom-tab-view`
+        await page.goto(customTabURL)
+        await page.waitForURL(customTabURL)
         const pattern = new RegExp(`^${customViewMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
 
       test('should render fallback meta title from nested custom view', async () => {
         await navigateToDoc(page, customViewsURL)
-        await page.goto(`${page.url()}${customTabViewPath}`)
+        const customTabURL = `${page.url()}${customTabViewPath}`
+        await page.goto(customTabURL)
+        await page.waitForURL(customTabURL)
         const pattern = new RegExp(`^${customCollectionMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
