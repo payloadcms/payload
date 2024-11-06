@@ -4,6 +4,7 @@ import type {
   Permissions,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
+  StaticDescription,
 } from 'payload'
 
 import { ViewDescription } from '@payloadcms/ui'
@@ -35,26 +36,24 @@ export const renderDocumentSlots: (args: {
     )
   }
 
-  let description
+  const descriptionFromConfig =
+    collectionConfig?.admin?.description || globalConfig?.admin?.description
 
-  if (collectionConfig?.admin?.description || globalConfig?.admin?.description) {
-    description = collectionConfig?.admin?.description || globalConfig?.admin?.description
-
-    if (typeof description === 'function') {
-      description = description({ t: req.i18n.t })
-    }
-  }
+  const staticDescription: StaticDescription =
+    typeof descriptionFromConfig === 'function'
+      ? descriptionFromConfig({ t: req.i18n.t })
+      : descriptionFromConfig
 
   const CustomDescription =
     collectionConfig?.admin?.components?.Description ||
     globalConfig?.admin?.components?.elements?.Description
 
-  const hasDescription = CustomDescription || description
+  const hasDescription = CustomDescription || staticDescription
 
   if (hasDescription) {
     components.Description = (
       <RenderServerComponent
-        clientProps={{ description }}
+        clientProps={{ description: staticDescription }}
         Component={CustomDescription}
         Fallback={ViewDescription}
         importMap={req.payload.importMap}

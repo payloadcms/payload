@@ -8,7 +8,6 @@ import { useRouter } from 'next/navigation.js'
 import { formatFilesize, isNumber } from 'payload/shared'
 import React, { Fragment, useEffect, useState } from 'react'
 
-// import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import type { Column } from '../../elements/Table/index.js'
 import type { ListPreferences } from './types.js'
 
@@ -45,15 +44,19 @@ import { ListHeader } from './ListHeader/index.js'
 const baseClass = 'collection-list'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-export type ListViewClientProps = {
+export type ListViewSlots = {
   AfterList?: React.ReactNode
   AfterListTable?: React.ReactNode
-  beforeActions?: React.ReactNode[]
   BeforeList?: React.ReactNode
   BeforeListTable?: React.ReactNode
+  Description?: React.ReactNode
+  Table: React.ReactNode
+}
+
+export type ListViewClientProps = {
+  beforeActions?: React.ReactNode[]
   collectionSlug: string
   columnState: Column[]
-  Description?: React.ReactNode
   description?: StaticDescription
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
@@ -63,8 +66,7 @@ export type ListViewClientProps = {
   newDocumentURL: string
   preferenceKey?: string
   renderedFilters?: Map<string, React.ReactNode>
-  Table: React.ReactNode
-}
+} & ListViewSlots
 
 export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
   const {

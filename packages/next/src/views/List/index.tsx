@@ -1,5 +1,5 @@
 import type { ListPreferences, ListViewClientProps } from '@payloadcms/ui'
-import type { AdminViewProps, ListQuery, StaticDescription, Where } from 'payload'
+import type { AdminViewProps, ListQuery, Where } from 'payload'
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -13,6 +13,8 @@ import {
 import { notFound } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
+
+import { renderListViewSlots } from './renderListViewSlots.js'
 
 export { generateListMetadata } from './meta.js'
 
@@ -169,47 +171,21 @@ export const renderListView = async (
 
     const renderedFilters = renderFilters(fields, req.payload.importMap)
 
-    const staticDescription: StaticDescription =
+    const staticDescription =
       typeof collectionConfig.admin.description === 'function'
         ? collectionConfig.admin.description({ t: i18n.t })
         : collectionConfig.admin.description
 
+    const listViewSlots = renderListViewSlots({
+      collectionConfig,
+      description: staticDescription,
+      payload,
+    })
+
     const clientProps: ListViewClientProps = {
-      AfterList: (
-        <RenderServerComponent
-          Component={collectionConfig.admin.components?.afterList}
-          importMap={payload.importMap}
-        />
-      ),
-      AfterListTable: (
-        <RenderServerComponent
-          Component={collectionConfig.admin.components?.afterListTable}
-          importMap={payload.importMap}
-        />
-      ),
-      BeforeList: (
-        <RenderServerComponent
-          Component={collectionConfig.admin.components?.beforeList}
-          importMap={payload.importMap}
-        />
-      ),
-      BeforeListTable: (
-        <RenderServerComponent
-          Component={collectionConfig.admin.components?.beforeListTable}
-          importMap={payload.importMap}
-        />
-      ),
+      ...listViewSlots,
       collectionSlug,
       columnState,
-      Description: (
-        <RenderServerComponent
-          clientProps={{
-            description: staticDescription,
-          }}
-          Component={collectionConfig.admin.components?.Description}
-          importMap={payload.importMap}
-        />
-      ),
       description: staticDescription,
       disableBulkDelete,
       disableBulkEdit,

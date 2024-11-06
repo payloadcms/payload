@@ -23,7 +23,7 @@ export const Posts: CollectionConfig = {
         },
       ],
       Description: {
-        path: '/components/Banner/index.js#Banner',
+        path: '/components/ViewDescription/index.js#ViewDescription',
       },
       afterListTable: [
         {

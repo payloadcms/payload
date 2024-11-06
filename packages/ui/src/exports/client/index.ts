@@ -259,7 +259,11 @@ export { NumberField as NumberCondition } from '../../elements/WhereBuilder/Cond
 export { DateField as DateCondition } from '../../elements/WhereBuilder/Condition/Date/index.js'
 export { EmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
 
-export { DefaultListView, type ListViewClientProps } from '../../views/List/index.js'
+export {
+  DefaultListView,
+  type ListViewClientProps,
+  type ListViewSlots,
+} from '../../views/List/index.js'
 export type { ListPreferences } from '../../views/List/types.js'
 
 export { DefaultEditView } from '../../views/Edit/index.js'
