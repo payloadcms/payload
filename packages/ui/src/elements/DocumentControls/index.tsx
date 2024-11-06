@@ -47,7 +47,7 @@ export const DocumentControls: React.FC<{
   readonly disableCreate?: boolean
   readonly hasPublishPermission?: boolean
   readonly hasSavePermission?: boolean
-  id?: number | string
+  readonly id?: number | string
   readonly isAccountView?: boolean
   readonly isEditing?: boolean
   readonly onDelete?: DocumentDrawerContextType['onDelete']
@@ -65,6 +65,7 @@ export const DocumentControls: React.FC<{
 }> = (props) => {
   const {
     id,
+    slug,
     customComponents: {
       PreviewButton: CustomPreviewButton,
       PublishButton: CustomPublishButton,
@@ -94,13 +95,9 @@ export const DocumentControls: React.FC<{
 
   const { config, getEntityConfig } = useConfig()
 
-  const collectionConfig = getEntityConfig({
-    collectionSlug: props.slug,
-  }) as ClientCollectionConfig
+  const collectionConfig = getEntityConfig({ collectionSlug: slug }) as ClientCollectionConfig
 
-  const globalConfig = getEntityConfig({
-    collectionSlug: 'global',
-  }) as ClientGlobalConfig
+  const globalConfig = getEntityConfig({ globalSlug: slug }) as ClientGlobalConfig
 
   const {
     admin: { dateFormat },

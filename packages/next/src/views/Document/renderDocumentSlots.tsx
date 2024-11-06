@@ -23,20 +23,15 @@ export const renderDocumentSlots: (args: {
 
   const unsavedDraftWithValidations = undefined
 
-  const hasPreviewButton =
-    (collectionConfig?.admin?.preview || globalConfig?.admin?.preview) &&
-    (collectionConfig?.admin?.components?.edit?.PreviewButton ||
-      globalConfig?.admin?.components?.elements?.PreviewButton)
+  const isPreviewEnabled = collectionConfig?.admin?.preview || globalConfig?.admin?.preview
 
-  if (hasPreviewButton) {
+  const CustomPreviewButton =
+    collectionConfig?.admin?.components?.edit?.PreviewButton ||
+    globalConfig?.admin?.components?.elements?.PreviewButton
+
+  if (isPreviewEnabled && CustomPreviewButton) {
     components.PreviewButton = (
-      <RenderServerComponent
-        Component={
-          collectionConfig?.admin?.components?.edit?.PreviewButton ||
-          globalConfig?.admin?.components?.elements?.PreviewButton
-        }
-        importMap={req.payload.importMap}
-      />
+      <RenderServerComponent Component={CustomPreviewButton} importMap={req.payload.importMap} />
     )
   }
 
@@ -50,19 +45,17 @@ export const renderDocumentSlots: (args: {
     }
   }
 
-  const hasDescription =
+  const CustomDescription =
     collectionConfig?.admin?.components?.Description ||
-    globalConfig?.admin?.components?.elements?.Description ||
-    description
+    globalConfig?.admin?.components?.elements?.Description
+
+  const hasDescription = CustomDescription || description
 
   if (hasDescription) {
     components.Description = (
       <RenderServerComponent
         clientProps={{ description }}
-        Component={
-          collectionConfig?.admin?.components?.Description ||
-          globalConfig?.admin?.components?.elements?.Description
-        }
+        Component={CustomDescription}
         Fallback={ViewDescription}
         importMap={req.payload.importMap}
       />
@@ -71,51 +64,42 @@ export const renderDocumentSlots: (args: {
 
   if (hasSavePermission) {
     if (collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) {
-      if (
+      const CustomPublishButton =
         collectionConfig?.admin?.components?.edit?.PublishButton ||
         globalConfig?.admin?.components?.elements?.PublishButton
-      ) {
+
+      if (CustomPublishButton) {
         components.PublishButton = (
           <RenderServerComponent
-            Component={
-              collectionConfig?.admin?.components?.edit?.PublishButton ||
-              globalConfig?.admin?.components?.elements?.PublishButton
-            }
+            Component={CustomPublishButton}
             importMap={req.payload.importMap}
           />
         )
       }
+      const CustomSaveDraftButton =
+        collectionConfig?.admin?.components?.edit?.SaveDraftButton ||
+        globalConfig?.admin?.components?.elements?.SaveDraftButton
 
-      if (
-        ((collectionConfig?.versions?.drafts && !collectionConfig?.versions?.drafts?.autosave) ||
-          unsavedDraftWithValidations ||
-          (globalConfig?.versions?.drafts && !globalConfig?.versions?.drafts?.autosave)) &&
-        (collectionConfig?.admin?.components?.edit?.SaveDraftButton ||
-          globalConfig?.admin?.components?.elements?.SaveDraftButton)
-      ) {
+      const draftsEnabled =
+        (collectionConfig?.versions?.drafts && !collectionConfig?.versions?.drafts?.autosave) ||
+        (globalConfig?.versions?.drafts && !globalConfig?.versions?.drafts?.autosave)
+
+      if ((draftsEnabled || unsavedDraftWithValidations) && CustomSaveDraftButton) {
         components.SaveDraftButton = (
           <RenderServerComponent
-            Component={
-              collectionConfig?.admin?.components?.edit?.SaveDraftButton ||
-              globalConfig?.admin?.components?.elements?.SaveDraftButton
-            }
+            Component={CustomSaveDraftButton}
             importMap={req.payload.importMap}
           />
         )
       }
     } else {
-      if (
+      const CustomSaveButton =
         collectionConfig?.admin?.components?.edit?.SaveButton ||
         globalConfig?.admin?.components?.elements?.SaveButton
-      ) {
+
+      if (CustomSaveButton) {
         components.SaveButton = (
-          <RenderServerComponent
-            Component={
-              collectionConfig?.admin?.components?.edit?.SaveButton ||
-              globalConfig?.admin?.components?.elements?.SaveButton
-            }
-            importMap={req.payload.importMap}
-          />
+          <RenderServerComponent Component={CustomSaveButton} importMap={req.payload.importMap} />
         )
       }
     }
