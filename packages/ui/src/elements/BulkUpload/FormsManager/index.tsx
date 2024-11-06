@@ -275,73 +275,68 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
       setIsUploading(true)
 
-      try {
-        for (let i = 0; i < currentForms.length; i++) {
-          try {
-            const form = currentForms[i]
+      for (let i = 0; i < currentForms.length; i++) {
+        try {
+          const form = currentForms[i]
 
-            // TODO: translate this string
-            setLoadingText(`Uploading ${i + 1} of ${currentForms.length}`)
+          setLoadingText(t('general:uploadingBulk', { current: i + 1, total: currentForms.length }))
 
-            const req = await fetch(actionURL, {
-              body: createFormData(form.formState, overrides),
-              method: 'POST',
-            })
+          const req = await fetch(actionURL, {
+            body: createFormData(form.formState, overrides),
+            method: 'POST',
+          })
 
-            const json = await req.json()
+          const json = await req.json()
 
-            if (req.status === 201 && json?.doc) {
-              newDocs.push(json.doc)
-            }
-
-            // should expose some sort of helper for this
-            if (json?.errors?.length) {
-              const [fieldErrors, nonFieldErrors] = json.errors.reduce(
-                ([fieldErrs, nonFieldErrs], err) => {
-                  const newFieldErrs: any[] = []
-                  const newNonFieldErrs: any[] = []
-
-                  if (err?.message) {
-                    newNonFieldErrs.push(err)
-                  }
-
-                  if (Array.isArray(err?.data?.errors)) {
-                    err.data?.errors.forEach((dataError) => {
-                      if (dataError?.field) {
-                        newFieldErrs.push(dataError)
-                      } else {
-                        newNonFieldErrs.push(dataError)
-                      }
-                    })
-                  }
-
-                  return [
-                    [...fieldErrs, ...newFieldErrs],
-                    [...nonFieldErrs, ...newNonFieldErrs],
-                  ]
-                },
-                [[], []],
-              )
-
-              currentForms[i] = {
-                errorCount: fieldErrors.length,
-                formState: fieldReducer(currentForms[i].formState, {
-                  type: 'ADD_SERVER_ERRORS',
-                  errors: fieldErrors,
-                }),
-              }
-            }
-          } catch (_) {
-            // swallow
+          if (req.status === 201 && json?.doc) {
+            newDocs.push(json.doc)
           }
+
+          // should expose some sort of helper for this
+          if (json?.errors?.length) {
+            const [fieldErrors] = json.errors.reduce(
+              ([fieldErrs, nonFieldErrs], err) => {
+                const newFieldErrs: any[] = []
+                const newNonFieldErrs: any[] = []
+
+                if (err?.message) {
+                  newNonFieldErrs.push(err)
+                }
+
+                if (Array.isArray(err?.data?.errors)) {
+                  err.data?.errors.forEach((dataError) => {
+                    if (dataError?.field) {
+                      newFieldErrs.push(dataError)
+                    } else {
+                      newNonFieldErrs.push(dataError)
+                    }
+                  })
+                }
+
+                return [
+                  [...fieldErrs, ...newFieldErrs],
+                  [...nonFieldErrs, ...newNonFieldErrs],
+                ]
+              },
+              [[], []],
+            )
+
+            currentForms[i] = {
+              errorCount: fieldErrors.length,
+              formState: fieldReducer(currentForms[i].formState, {
+                type: 'ADD_SERVER_ERRORS',
+                errors: fieldErrors,
+              }),
+            }
+          }
+        } catch (_) {
+          // swallow
         }
-      } catch (_) {
-        // swallow
-      } finally {
-        setHasSubmitted(true)
-        setLoadingText('')
-        setIsUploading(false)
       }
+
+      setHasSubmitted(true)
+      setLoadingText('')
+      setIsUploading(false)
 
       const remainingForms = currentForms.filter(({ errorCount }) => errorCount > 0)
       const successCount = Math.max(0, currentForms.length - remainingForms.length)
