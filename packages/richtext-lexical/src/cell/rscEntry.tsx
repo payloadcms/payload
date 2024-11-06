@@ -1,6 +1,7 @@
 import type { Payload } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
+import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { $getRoot } from 'lexical'
 import LinkImport from 'next/link.js'
@@ -10,30 +11,29 @@ import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
 import type { LexicalFieldAdminProps, LexicalRichTextCellProps } from '../types.js'
 
 import { getEnabledNodes } from '../lexical/nodes/index.js'
-import { defaultRichTextValue } from '../populateGraphQL/defaultValue.js'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const RscEntryLexicalCell: React.FC<
   {
     admin: LexicalFieldAdminProps
+    i18n: I18nClient
     payload: Payload
     sanitizedEditorConfig: SanitizedServerEditorConfig
   } & LexicalRichTextCellProps
 > = (props) => {
   const {
-    cellData: cellDataFromProps,
+    cellData,
     className: classNameFromProps,
     collectionConfig,
     field: { admin },
     field,
+    i18n,
     link,
     onClick: onClickFromProps,
     payload,
     rowData,
     sanitizedEditorConfig,
   } = props
-
-  const cellData = cellDataFromProps ?? defaultRichTextValue
 
   const classNameFromConfigContext = admin && 'className' in admin ? admin.className : undefined
 
@@ -80,20 +80,30 @@ export const RscEntryLexicalCell: React.FC<
     }
   }
 
-  // initialize headless editor
-  const headlessEditor = createHeadlessEditor({
-    namespace: sanitizedEditorConfig.lexical.namespace,
-    nodes: getEnabledNodes({ editorConfig: sanitizedEditorConfig }),
-    theme: sanitizedEditorConfig.lexical.theme,
-  })
-  const parsedEditorState = headlessEditor.parseEditorState(cellData)
+  let textContent = ''
 
-  headlessEditor.setEditorState(parsedEditorState)
+  if (cellData) {
+    // initialize headless editor
+    const headlessEditor = createHeadlessEditor({
+      namespace: sanitizedEditorConfig.lexical.namespace,
+      nodes: getEnabledNodes({ editorConfig: sanitizedEditorConfig }),
+      theme: sanitizedEditorConfig.lexical.theme,
+    })
+    const parsedEditorState = headlessEditor.parseEditorState(cellData)
 
-  const textContent =
-    headlessEditor.getEditorState().read(() => {
-      return $getRoot().getTextContent()
-    }) || ''
+    headlessEditor.setEditorState(parsedEditorState)
+
+    textContent =
+      headlessEditor.getEditorState().read(() => {
+        return $getRoot().getTextContent()
+      }) || ''
+  }
+
+  if (!cellData || !textContent?.length) {
+    textContent = i18n.t('general:noLabel', {
+      label: getTranslation(('label' in field ? field.label : null) || 'data', i18n),
+    })
+  }
 
   return <WrapElement {...wrapElementProps}>{textContent}</WrapElement>
 }
