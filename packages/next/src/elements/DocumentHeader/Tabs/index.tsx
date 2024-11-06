@@ -6,9 +6,9 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
+import { RenderServerComponent } from '@payloadcms/ui/utilities/RenderServerComponent'
 import React from 'react'
 
-import { RenderServerComponent } from '../../../../../ui/src/elements/RenderServerComponent/index.js'
 import { getCustomViews } from './getCustomViews.js'
 import { getViewConfig } from './getViewConfig.js'
 import './index.scss'
@@ -83,7 +83,6 @@ export const DocumentTabs: React.FC<{
                   return (
                     <RenderServerComponent
                       clientProps={{
-                        key: `tab-custom-${index}`,
                         path,
                       }}
                       Component={tab.Component}
@@ -93,8 +92,6 @@ export const DocumentTabs: React.FC<{
                         collectionConfig,
                         globalConfig,
                         i18n,
-                        key: `tab-custom-${index}`,
-                        path,
                         payload,
                         permissions,
                       }}

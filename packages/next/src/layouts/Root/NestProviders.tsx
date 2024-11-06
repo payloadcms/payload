@@ -9,6 +9,7 @@ type Args = {
   readonly importMap: ImportMap
   readonly providers: Config['admin']['components']['providers']
 }
+
 export function NestProviders({ children, importMap, providers }: Args): React.ReactNode {
   return (
     <RenderServerComponent
