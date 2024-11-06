@@ -97,6 +97,12 @@ export interface GeneratedTypes {
       }
     }
   }
+
+  collectionsJoinsUntyped: {
+    [slug: string]: {
+      [schemaPath: string]: CollectionSlug
+    }
+  }
   collectionsSelectUntyped: {
     [slug: string]: SelectType
   }
@@ -141,6 +147,12 @@ type ResolveCollectionSelectType<T> = 'collectionsSelect' extends keyof T
   ? T['collectionsSelect']
   : // @ts-expect-error
     T['collectionsSelectUntyped']
+
+type ResolveCollectionJoinsType<T> = 'collectionsJoins' extends keyof T
+  ? T['collectionsJoins']
+  : // @ts-expect-error
+    T['collectionsJoinsUntyped']
+
 type ResolveGlobalType<T> = 'globals' extends keyof T
   ? T['globals']
   : // @ts-expect-error
@@ -155,6 +167,9 @@ type ResolveGlobalSelectType<T> = 'globalsSelect' extends keyof T
 export type TypedCollection = ResolveCollectionType<GeneratedTypes>
 
 export type TypedCollectionSelect = ResolveCollectionSelectType<GeneratedTypes>
+
+export type TypedCollectionJoins = ResolveCollectionJoinsType<GeneratedTypes>
+
 export type TypedGlobal = ResolveGlobalType<GeneratedTypes>
 
 export type TypedGlobalSelect = ResolveGlobalSelectType<GeneratedTypes>

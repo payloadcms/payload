@@ -93,6 +93,43 @@ function generateEntitySelectSchemas(
   }
 }
 
+function generateCollectionJoinsSchemas(collections: SanitizedCollectionConfig[]): JSONSchema4 {
+  const properties = [...collections].reduce<Record<string, JSONSchema4>>(
+    (acc, { slug, joins }) => {
+      const schema = {
+        type: 'object',
+        additionalProperties: false,
+        properties: {},
+        required: [],
+      } satisfies JSONSchema4
+
+      for (const collectionSlug in joins) {
+        for (const join of joins[collectionSlug]) {
+          schema.properties[join.schemaPath] = {
+            type: 'string',
+            enum: [collectionSlug],
+          }
+          schema.required.push(join.schemaPath)
+        }
+      }
+
+      if (Object.keys(schema.properties).length > 0) {
+        acc[slug] = schema
+      }
+
+      return acc
+    },
+    {},
+  )
+
+  return {
+    type: 'object',
+    additionalProperties: false,
+    properties,
+    required: Object.keys(properties),
+  }
+}
+
 function generateLocaleEntitySchemas(localization: SanitizedConfig['localization']): JSONSchema4 {
   if (localization && 'locales' in localization && localization?.locales) {
     const localesFromConfig = localization?.locales
@@ -989,6 +1026,7 @@ export function configToJSONSchema(
     properties: {
       auth: generateAuthOperationSchemas(config.collections),
       collections: generateEntitySchemas(config.collections || []),
+      collectionsJoins: generateCollectionJoinsSchemas(config.collections || []),
       collectionsSelect: generateEntitySelectSchemas(config.collections || []),
       db: generateDbEntitySchema(config),
       globals: generateEntitySchemas(config.globals || []),
@@ -1001,6 +1039,7 @@ export function configToJSONSchema(
       'locale',
       'collections',
       'collectionsSelect',
+      'collectionsJoins',
       'globalsSelect',
       'globals',
       'auth',
