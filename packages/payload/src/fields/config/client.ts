@@ -9,15 +9,15 @@ import {
   type ClientBlock,
   type ClientField,
   type Field,
-  fieldAffectsData,
   type FieldBase,
-  fieldIsPresentationalOnly,
   type LabelsClient,
   type RadioFieldClient,
   type RowFieldClient,
   type SelectFieldClient,
   type TabsFieldClient,
 } from '../../fields/config/types.js'
+import { fieldAffectsData } from '../../fields/config/types.js'
+import { flattenTopLevelFields } from '../../index.js'
 
 // Should not be used - ClientField should be used instead. This is why we don't export ClientField, we don't want people
 // to accidentally use it instead of ClientField and get confused
@@ -311,7 +311,7 @@ export const createClientFields = ({
     }
   }
 
-  const hasID = newClientFields.findIndex((f) => fieldAffectsData(f) && f.name === 'id') > -1
+  const hasID = flattenTopLevelFields(fields).some((f) => fieldAffectsData(f) && f.name === 'id')
 
   if (!disableAddingID && !hasID) {
     newClientFields.push({
@@ -320,6 +320,7 @@ export const createClientFields = ({
       admin: {
         description: 'The unique identifier for this document',
         disableBulkEdit: true,
+        disabled: true,
         hidden: true,
       },
       hidden: true,

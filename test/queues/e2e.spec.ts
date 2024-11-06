@@ -33,10 +33,7 @@ test.describe('Queues', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await reInitializeDB({
-      serverURL,
-      snapshotKey: 'queuesTest',
-    })
+
     await ensureCompilationIsDone({ page, serverURL })
   })
 

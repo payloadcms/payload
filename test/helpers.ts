@@ -70,8 +70,31 @@ export async function ensureCompilationIsDone({
 
   const adminURL = `${serverURL}${adminRoute}`
 
-  await page.goto(adminURL)
-  await page.waitForURL(adminURL)
+  const maxAttempts = 50
+  let attempt = 1
+
+  while (attempt <= maxAttempts) {
+    try {
+      console.log(`Checking if compilation is done (attempt ${attempt}/${maxAttempts})...`)
+
+      await page.goto(adminURL)
+      await page.waitForURL(adminURL)
+
+      console.log('Successfully compiled')
+      return
+    } catch (error) {
+      console.error(`Compilation not done yet`)
+
+      if (attempt === maxAttempts) {
+        console.error('Max retry attempts reached. Giving up.')
+        throw error
+      }
+
+      console.log('Retrying in 3 seconds...')
+      await wait(3000)
+      attempt++
+    }
+  }
 
   await expect(() => expect(page.locator('.template-default')).toBeVisible()).toPass({
     timeout: POLL_TOPASS_TIMEOUT,

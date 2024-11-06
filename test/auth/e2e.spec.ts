@@ -100,24 +100,25 @@ describe('auth', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
-    await createFirstUser({ page, serverURL })
-
-    await payload.create({
-      collection: 'api-keys',
-      data: {
-        apiKey: uuid(),
-        enableAPIKey: true,
-      },
-    })
-
-    await payload.create({
-      collection: 'api-keys',
-      data: {
-        apiKey: uuid(),
-        enableAPIKey: true,
-      },
-    })
     await ensureCompilationIsDone({ page, serverURL })
+
+    await payload.create({
+      collection: 'api-keys',
+      data: {
+        apiKey: uuid(),
+        enableAPIKey: true,
+      },
+    })
+
+    await payload.create({
+      collection: 'api-keys',
+      data: {
+        apiKey: uuid(),
+        enableAPIKey: true,
+      },
+    })
+
+    await createFirstUser({ page, serverURL })
   })
 
   describe('passwords', () => {
