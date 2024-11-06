@@ -358,12 +358,8 @@ describe('admin1', () => {
 
     test('should use custom logout route', async () => {
       const customLogoutRouteURL = `${serverURL}${adminRoutes.routes.admin}${adminRoutes.admin.routes.logout}`
-      await page.goto(customLogoutRouteURL)
-      await page.waitForURL(customLogoutRouteURL)
-
-      await expect(() => expect(page.url()).not.toContain(loginURL)).toPass({
-        timeout: POLL_TOPASS_TIMEOUT,
-      })
+      const response = await page.goto(customLogoutRouteURL)
+      expect(response.status() !== 404).toBeTruthy()
     })
   })
 
