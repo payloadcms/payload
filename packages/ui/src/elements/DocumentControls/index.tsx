@@ -27,6 +27,7 @@ import { Locked } from '../Locked/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { PreviewButton } from '../PreviewButton/index.js'
 import { PublishButton } from '../PublishButton/index.js'
+import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { SaveButton } from '../SaveButton/index.js'
 import { SaveDraftButton } from '../SaveDraftButton/index.js'
 import { Status } from '../Status/index.js'
@@ -165,7 +166,7 @@ export const DocumentControls: React.FC<{
                     <Status />
                   </li>
                 )}
-                {hasSavePermission && autosaveEnabled && (
+                {hasSavePermission && autosaveEnabled && !unsavedDraftWithValidations && (
                   <li className={`${baseClass}__list-item`}>
                     <Autosave
                       collection={collectionConfig}
@@ -204,19 +205,31 @@ export const DocumentControls: React.FC<{
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
             {(collectionConfig?.admin.preview || globalConfig?.admin.preview) && (
-              <Fragment>{CustomPreviewButton || <PreviewButton />}</Fragment>
+              <RenderCustomComponent
+                CustomComponent={CustomPreviewButton}
+                Fallback={<PreviewButton />}
+              />
             )}
             {hasSavePermission && (
               <Fragment>
                 {collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts ? (
                   <Fragment>
-                    {!autosaveEnabled && (
-                      <Fragment>{CustomSaveDraftButton || <SaveDraftButton />}</Fragment>
+                    {(unsavedDraftWithValidations || !autosaveEnabled) && (
+                      <RenderCustomComponent
+                        CustomComponent={CustomSaveDraftButton}
+                        Fallback={<SaveDraftButton />}
+                      />
                     )}
-                    {CustomPublishButton || <PublishButton />}
+                    <RenderCustomComponent
+                      CustomComponent={CustomPublishButton}
+                      Fallback={<PublishButton />}
+                    />
                   </Fragment>
                 ) : (
-                  <Fragment>{CustomSaveButton || <SaveButton />}</Fragment>
+                  <RenderCustomComponent
+                    CustomComponent={CustomSaveButton}
+                    Fallback={<SaveButton />}
+                  />
                 )}
               </Fragment>
             )}
