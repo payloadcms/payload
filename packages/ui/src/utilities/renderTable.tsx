@@ -88,6 +88,7 @@ export const renderTable = ({
     columns,
     enableRowSelections,
     fields,
+    i18n,
     // sortColumnProps,
     customCellProps,
     docs,

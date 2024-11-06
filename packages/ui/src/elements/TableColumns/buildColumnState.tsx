@@ -1,3 +1,5 @@
+import type { I18nClient } from '@payloadcms/translations'
+
 import {
   type ClientCollectionConfig,
   deepCopyObjectSimple,
@@ -35,6 +37,7 @@ type Args = {
   enableRowSelections: boolean
   enableRowTypes?: boolean
   fields: Field[]
+  i18n: I18nClient
   payload: Payload
   sortColumnProps?: Partial<SortColumnProps>
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
@@ -50,6 +53,7 @@ export const buildColumnState = (args: Args): Column[] => {
     docs,
     enableRowSelections,
     fields,
+    i18n,
     payload,
     sortColumnProps,
     useAsTitle,
@@ -173,6 +177,7 @@ export const buildColumnState = (args: Args): Column[] => {
 
     const serverProps = {
       field: _field,
+      i18n,
       payload,
     }
 
