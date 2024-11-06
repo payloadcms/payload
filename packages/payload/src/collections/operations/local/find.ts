@@ -9,6 +9,7 @@ import type {
 import type {
   Document,
   PayloadRequest,
+  PopulateType,
   SelectType,
   Sort,
   TransformCollectionWithSelect,
@@ -38,6 +39,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   overrideAccess?: boolean
   page?: number
   pagination?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
   select?: TSelect
   showHiddenFields?: boolean

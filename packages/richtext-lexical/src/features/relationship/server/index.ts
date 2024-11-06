@@ -62,6 +62,7 @@ export const RelationshipFeature = createServerFeature<
                 draft,
                 node,
                 overrideAccess,
+                populateArg,
                 populationPromises,
                 req,
                 showHiddenFields,
@@ -90,7 +91,8 @@ export const RelationshipFeature = createServerFeature<
                     key: 'value',
                     overrideAccess,
                     req,
-                    select: collection.config.defaultPopulate,
+                    select:
+                      populateArg?.[collection.config.slug] ?? collection.config.defaultPopulate,
                     showHiddenFields,
                   }),
                 )

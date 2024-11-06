@@ -3,6 +3,7 @@ import type { CollectionSlug, JoinQuery } from '../../index.js'
 import type {
   ApplyDisableErrors,
   PayloadRequest,
+  PopulateType,
   SelectType,
   TransformCollectionWithSelect,
 } from '../../types/index.js'
@@ -32,6 +33,7 @@ export type Arguments = {
   includeLockStatus?: boolean
   joins?: JoinQuery
   overrideAccess?: boolean
+  populate?: PopulateType
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
@@ -74,6 +76,7 @@ export const findByIDOperation = async <
       includeLockStatus,
       joins,
       overrideAccess = false,
+      populate,
       req: { fallbackLocale, locale, t },
       req,
       select,
@@ -241,6 +244,7 @@ export const findByIDOperation = async <
       global: null,
       locale,
       overrideAccess,
+      populate,
       req,
       select,
       showHiddenFields,

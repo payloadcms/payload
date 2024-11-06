@@ -2,6 +2,7 @@ import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../..
 import type {
   Document,
   PayloadRequest,
+  PopulateType,
   SelectType,
   TransformCollectionWithSelect,
   Where,
@@ -25,6 +26,7 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
   locale?: TypedLocale
   overrideAccess?: boolean
   overrideLock?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
   select?: TSelect
   showHiddenFields?: boolean
@@ -87,6 +89,7 @@ async function deleteLocal<
     disableTransaction,
     overrideAccess = true,
     overrideLock,
+    populate,
     select,
     showHiddenFields,
     where,
@@ -107,6 +110,7 @@ async function deleteLocal<
     disableTransaction,
     overrideAccess,
     overrideLock,
+    populate,
     req: await createLocalReq(options, payload),
     select,
     showHiddenFields,
