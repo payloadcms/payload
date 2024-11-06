@@ -37,7 +37,7 @@ export type Options<
   fallbackLocale?: TypedLocale
   id: number | string
   includeLockStatus?: boolean
-  joins?: JoinQuery
+  joins?: JoinQuery<TSlug>
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   populate?: PopulateType

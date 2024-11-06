@@ -33,7 +33,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   draft?: boolean
   fallbackLocale?: TypedLocale
   includeLockStatus?: boolean
-  joins?: JoinQuery
+  joins?: JoinQuery<TSlug>
   limit?: number
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean

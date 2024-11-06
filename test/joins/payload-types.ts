@@ -26,7 +26,39 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsSelect?: {
+  collectionsJoins: {
+    posts: {};
+    categories: {
+      relatedPosts: 'posts';
+      hasManyPosts: 'posts';
+      hasManyPostsLocalized: 'posts';
+      'group.relatedPosts': 'posts';
+      'group.camelCasePosts': 'posts';
+      filtered: 'posts';
+      singulars: 'singular';
+    };
+    uploads: {
+      relatedPosts: 'posts';
+    };
+    versions: {};
+    'categories-versions': {
+      relatedVersions: 'versions';
+    };
+    singular: {};
+    'localized-posts': {};
+    'localized-categories': {
+      relatedPosts: 'localized-posts';
+    };
+    'restricted-categories': {
+      restrictedPosts: 'posts';
+    };
+    'restricted-posts': {};
+    users: {};
+    'payload-locked-documents': {};
+    'payload-preferences': {};
+    'payload-migrations': {};
+  };
+  collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
@@ -46,7 +78,7 @@ export interface Config {
     defaultIDType: string;
   };
   globals: {};
-  globalsSelect?: {};
+  globalsSelect: {};
   locale: 'en' | 'es';
   user: User & {
     collection: 'users';
