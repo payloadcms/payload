@@ -99,6 +99,7 @@ export const LinkButton: React.FC<{
                 collectionSlug,
                 data,
                 docPreferences: await getDocPreferences(),
+                doNotAbort: true,
                 globalSlug,
                 operation: 'update',
                 renderAllFields: true,

@@ -102,6 +102,7 @@ export const LinkElement = () => {
         collectionSlug,
         data,
         docPreferences: await getDocPreferences(),
+        doNotAbort: true,
         globalSlug,
         operation: 'update',
         renderAllFields: true,
