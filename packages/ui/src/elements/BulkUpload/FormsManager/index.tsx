@@ -15,6 +15,7 @@ import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { getFormState } from '../../../utilities/getFormState.js'
 import { hasSavePermission as getHasSavePermission } from '../../../utilities/hasSavePermission.js'
+import { LoadingOverlay } from '../../Loading/index.js'
 import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
 import { createThumbnail } from '../../Thumbnail/createThumbnail.js'
 import { useBulkUpload } from '../index.js'
@@ -130,6 +131,9 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const { toggleLoadingOverlay } = useLoadingOverlay()
   const { closeModal } = useModal()
   const { collectionSlug, drawerSlug, initialFiles, onSuccess } = useBulkUpload()
+
+  const [isUploading, setIsUploading] = React.useState(false)
+  const [loadingText, setLoadingText] = React.useState('')
 
   const hasInitializedWithFiles = React.useRef(false)
   const initialStateRef = React.useRef<FormState>(null)
@@ -268,13 +272,15 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         formState: currentFormsData,
       }
       const newDocs = []
-      const promises = currentForms.map(async (form, i) => {
+
+      setIsUploading(true)
+
+      for (let i = 0; i < currentForms.length; i++) {
         try {
-          toggleLoadingOverlay({
-            isLoading: true,
-            key: 'saveAllDocs',
-            loadingText: t('general:uploading'),
-          })
+          const form = currentForms[i]
+
+          setLoadingText(t('general:uploadingBulk', { current: i + 1, total: currentForms.length }))
+
           const req = await fetch(actionURL, {
             body: createFormData(form.formState, overrides),
             method: 'POST',
@@ -288,7 +294,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
           // should expose some sort of helper for this
           if (json?.errors?.length) {
-            const [fieldErrors, nonFieldErrors] = json.errors.reduce(
+            const [fieldErrors] = json.errors.reduce(
               ([fieldErrs, nonFieldErrs], err) => {
                 const newFieldErrs: any[] = []
                 const newNonFieldErrs: any[] = []
@@ -323,15 +329,14 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
               }),
             }
           }
-        } catch (error) {
-          // swallow error
-        } finally {
-          setHasSubmitted(true)
-          toggleLoadingOverlay({ isLoading: false, key: 'saveAllDocs' })
+        } catch (_) {
+          // swallow
         }
-      })
+      }
 
-      await Promise.all(promises)
+      setHasSubmitted(true)
+      setLoadingText('')
+      setIsUploading(false)
 
       const remainingForms = currentForms.filter(({ errorCount }) => errorCount > 0)
       const successCount = Math.max(0, currentForms.length - remainingForms.length)
@@ -360,7 +365,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         },
       })
     },
-    [actionURL, activeIndex, forms, onSuccess, t, toggleLoadingOverlay, closeModal, drawerSlug],
+    [actionURL, activeIndex, forms, onSuccess, t, closeModal, drawerSlug],
   )
 
   React.useEffect(() => {
@@ -419,6 +424,14 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         totalErrorCount,
       }}
     >
+      {isUploading && (
+        <LoadingOverlay
+          animationDuration="250ms"
+          loadingText={loadingText}
+          overlayType="fullscreen"
+          show
+        />
+      )}
       {children}
     </Context.Provider>
   )

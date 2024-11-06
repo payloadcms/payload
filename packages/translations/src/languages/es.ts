@@ -314,6 +314,7 @@ export const esTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Actualizado con éxito.',
     updating: 'Actualizando',
     uploading: 'Subiendo',
+    uploadingBulk: 'Subiendo {{current}} de {{total}}',
     user: 'Usuario',
     username: 'Nombre de usuario',
     users: 'Usuarios',
