@@ -302,6 +302,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: '更新成功。',
     updating: '更新中',
     uploading: '上传中',
+    uploadingBulk: '正在上传{{current}}，共{{total}}',
     user: '用户',
     username: '用户名',
     users: '用户',

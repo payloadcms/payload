@@ -312,6 +312,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Succesvol aangepast.',
     updating: 'Bijwerken',
     uploading: 'Uploaden',
+    uploadingBulk: 'Bezig met uploaden {{current}} van {{total}}',
     user: 'Gebruiker',
     username: 'Gebruikersnaam',
     users: 'Gebruikers',

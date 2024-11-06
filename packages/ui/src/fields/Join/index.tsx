@@ -36,14 +36,19 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
     path: pathFromContext ?? pathFromProps ?? name,
   })
 
-  const filterOptions: Where = useMemo(
-    () => ({
+  const filterOptions: Where = useMemo(() => {
+    const where = {
       [on]: {
         in: [docID || null],
       },
-    }),
-    [docID, on],
-  )
+    }
+    if (field.where) {
+      return {
+        and: [where, field.where],
+      }
+    }
+    return where
+  }, [docID, on, field.where])
 
   return (
     <div className={[fieldBaseClass, 'join'].filter(Boolean).join(' ')}>

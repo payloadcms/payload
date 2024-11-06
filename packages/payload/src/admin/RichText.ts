@@ -12,13 +12,8 @@ import type {
   Validate,
 } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-import type {
-  JsonObject,
-  Payload,
-  PayloadRequest,
-  PopulateType,
-  RequestContext,
-} from '../types/index.js'
+import type { RequestContext } from '../index.js'
+import type { JsonObject, Payload, PayloadRequest, PopulateType } from '../types/index.js'
 import type { RichTextFieldClientProps } from './fields/RichText.js'
 import type { CreateMappedComponent } from './types.js'
 

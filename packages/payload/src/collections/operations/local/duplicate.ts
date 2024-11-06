@@ -1,10 +1,9 @@
 import type { CollectionSlug, TypedLocale } from '../../..//index.js'
-import type { Payload } from '../../../index.js'
+import type { Payload, RequestContext } from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
   PopulateType,
-  RequestContext,
   SelectType,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'

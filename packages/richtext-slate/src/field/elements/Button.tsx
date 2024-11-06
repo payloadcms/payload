@@ -54,8 +54,8 @@ export const ElementButton: React.FC<ButtonProps> = (props) => {
         .filter(Boolean)
         .join(' ')}
       onClick={onClick || defaultOnClick}
-      onMouseEnter={() => setShowTooltip(true)}
-      onMouseLeave={() => setShowTooltip(false)}
+      onPointerEnter={() => setShowTooltip(true)}
+      onPointerLeave={() => setShowTooltip(false)}
     >
       {tooltip && <Tooltip show={showTooltip}>{tooltip}</Tooltip>}
       {children}

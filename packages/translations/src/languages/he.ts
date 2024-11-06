@@ -304,6 +304,7 @@ export const heTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'עודכן בהצלחה.',
     updating: 'מעדכן',
     uploading: 'מעלה',
+    uploadingBulk: 'מעלה {{current}} מתוך {{total}}',
     user: 'משתמש',
     username: 'שם משתמש',
     users: 'משתמשים',

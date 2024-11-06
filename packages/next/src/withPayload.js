@@ -13,6 +13,11 @@ export const withPayload = (nextConfig = {}) => {
     env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH = 'true'
   }
 
+  const poweredByHeader = {
+    key: 'X-Powered-By',
+    value: 'Next.js, Payload',
+  }
+
   /**
    * @type {import('next').NextConfig}
    */
@@ -41,6 +46,8 @@ export const withPayload = (nextConfig = {}) => {
         },
       },
     },
+    // We disable the poweredByHeader here because we add it manually in the headers function below
+    ...(nextConfig?.poweredByHeader !== false ? { poweredByHeader: false } : {}),
     headers: async () => {
       const headersFromConfig = 'headers' in nextConfig ? await nextConfig.headers() : []
 
@@ -61,6 +68,7 @@ export const withPayload = (nextConfig = {}) => {
               key: 'Critical-CH',
               value: 'Sec-CH-Prefers-Color-Scheme',
             },
+            ...(nextConfig?.poweredByHeader !== false ? [poweredByHeader] : []),
           ],
         },
       ]

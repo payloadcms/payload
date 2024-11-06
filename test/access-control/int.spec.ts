@@ -175,6 +175,47 @@ describe('Access Control', () => {
         expect(retrievedDoc.restrictedField).toBeUndefined()
       })
 
+      it('should error when querying field without read access', async () => {
+        const { id } = await createDoc({ restrictedField: 'restricted' })
+
+        await expect(
+          async () =>
+            await payload.find({
+              collection: slug,
+              overrideAccess: false,
+              where: {
+                and: [
+                  {
+                    id: { equals: id },
+                  },
+                  {
+                    restrictedField: {
+                      equals: 'restricted',
+                    },
+                  },
+                ],
+              },
+            }),
+        ).rejects.toThrow('The following path cannot be queried: restrictedField')
+      })
+
+      it('should respect access control for join request where queries of relationship properties', async () => {
+        const post = await createDoc({})
+        await createDoc({ post: post.id, name: 'test' }, 'relation-restricted')
+        await expect(
+          async () =>
+            await payload.find({
+              collection: 'relation-restricted',
+              overrideAccess: false,
+              where: {
+                'post.restrictedField': {
+                  equals: 'restricted',
+                },
+              },
+            }),
+        ).rejects.toThrow('The following path cannot be queried: restrictedField')
+      })
+
       it('field without read access should not show when overrideAccess: true', async () => {
         const { id, restrictedField } = await createDoc({ restrictedField: 'restricted' })
 

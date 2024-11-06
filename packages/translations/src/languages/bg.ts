@@ -309,6 +309,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Обновен успешно.',
     updating: 'Обновява се',
     uploading: 'Качва се',
+    uploadingBulk: 'Качване на {{current}} от {{total}}',
     user: 'Потребител',
     username: 'Потребителско име',
     users: 'Потребители',

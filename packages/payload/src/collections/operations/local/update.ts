@@ -1,11 +1,10 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
+import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
   PopulateType,
-  RequestContext,
   SelectType,
   TransformCollectionWithSelect,
   Where,

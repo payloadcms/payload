@@ -21,7 +21,7 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsSelect?: {
+  collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'versioned-posts': VersionedPostsSelect<false> | VersionedPostsSelect<true>;
@@ -38,7 +38,7 @@ export interface Config {
   globals: {
     'global-post': GlobalPost;
   };
-  globalsSelect?: {
+  globalsSelect: {
     'global-post': GlobalPostSelect<false> | GlobalPostSelect<true>;
   };
   locale: 'en' | 'de';

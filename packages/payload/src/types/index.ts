@@ -12,6 +12,7 @@ import type {
   CollectionSlug,
   DataFromGlobalSlug,
   GlobalSlug,
+  RequestContext,
   TypedCollectionSelect,
   TypedLocale,
   TypedUser,
@@ -95,10 +96,6 @@ export type PayloadRequest = CustomPayloadRequestProperties &
   PayloadRequestData &
   Required<Pick<Request, 'headers'>>
 
-export interface RequestContext {
-  [key: string]: unknown
-}
-
 export type Operator = (typeof validOperators)[number]
 
 // Makes it so things like passing new Date() will error
@@ -128,11 +125,13 @@ export type Sort = Array<string> | string
  */
 export type JoinQuery =
   | {
-      [schemaPath: string]: {
-        limit?: number
-        sort?: string
-        where?: Where
-      }
+      [schemaPath: string]:
+        | {
+            limit?: number
+            sort?: string
+            where?: Where
+          }
+        | false
     }
   | false
 

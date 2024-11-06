@@ -313,6 +313,7 @@ export const myTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'အပ်ဒိတ်လုပ်ပြီးပါပြီ။',
     updating: 'ပြင်ဆင်ရန်',
     uploading: 'တင်ပေးနေသည်',
+    uploadingBulk: 'တင်နေသည် {{current}} ခု အမှတ်ဖြစ်သည် {{total}} ခုစုစုပေါင်းဖြင့်',
     user: 'အသုံးပြုသူ',
     username: 'Nama pengguna',
     users: 'အသုံးပြုသူများ',

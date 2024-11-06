@@ -1,11 +1,5 @@
-import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
-import type {
-  Document,
-  PayloadRequest,
-  PopulateType,
-  RequestContext,
-  SelectType,
-} from '../../../types/index.js'
+import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type { Document, PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromCollectionSlug } from '../../config/types.js'
 

@@ -90,5 +90,14 @@ export const Categories: CollectionConfig = {
       collection: singularSlug,
       on: 'category',
     },
+    {
+      name: 'filtered',
+      type: 'join',
+      collection: postsSlug,
+      on: 'category',
+      where: {
+        isFiltered: { not_equals: true },
+      },
+    },
   ],
 }

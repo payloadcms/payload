@@ -1,11 +1,11 @@
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
+import type { RequestContext } from '../../../index.js'
 import type {
   JsonObject,
   PayloadRequest,
   PopulateType,
-  RequestContext,
   SelectMode,
   SelectType,
 } from '../../../types/index.js'
