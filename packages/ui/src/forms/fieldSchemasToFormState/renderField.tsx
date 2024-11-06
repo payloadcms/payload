@@ -82,25 +82,26 @@ export const renderField: RenderFieldMethod = ({
     // TODO: handle block row labels as well in a similar fashion
     case 'array': {
       fieldState?.rows?.forEach((row, rowIndex) => {
-        const RowLabel = (
-          <RenderServerComponent
-            clientProps={{
-              ...clientProps,
-              rowLabel: `${getTranslation(fieldConfig.labels.singular, req.i18n)} ${String(
-                rowIndex + 1,
-              ).padStart(2, '0')}`,
-              rowNumber: rowIndex + 1,
-            }}
-            Component={fieldConfig.admin?.components?.RowLabel}
-            Fallback={DefaultRowLabel}
-            importMap={req.payload.importMap}
-            serverProps={serverProps}
-          />
-        )
-        if (!clientProps.rowLabels) {
-          clientProps.rowLabels = []
+        if (fieldConfig.admin?.components && 'RowLabel' in fieldConfig.admin.components) {
+          if (!fieldState.customComponents.RowLabels) {
+            fieldState.customComponents.RowLabels = []
+          }
+
+          fieldState.customComponents.RowLabels[rowIndex] = (
+            <RenderServerComponent
+              clientProps={{
+                ...clientProps,
+                rowLabel: `${getTranslation(fieldConfig.labels.singular, req.i18n)} ${String(
+                  rowIndex + 1,
+                ).padStart(2, '0')}`,
+                rowNumber: rowIndex + 1,
+              }}
+              Component={fieldConfig.admin.components.RowLabel}
+              importMap={req.payload.importMap}
+              serverProps={serverProps}
+            />
+          )
         }
-        clientProps.rowLabels[rowIndex] = RowLabel
       })
 
       break

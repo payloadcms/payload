@@ -49,7 +49,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     path: pathFromProps,
     permissions,
     readOnly,
-    rowLabels,
     schemaPath,
     validate,
   } = props
@@ -110,7 +109,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   )
 
   const {
-    customComponents: { Description, Error, Label } = {},
+    customComponents: { Description, Error, Label, RowLabels } = {},
     errorPaths,
     rows: rowsData = [],
     showError,
@@ -291,6 +290,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                   <ArrayRow
                     {...draggableSortableItemProps}
                     addRow={addRow}
+                    CustomRowLabel={RowLabels?.[i]}
                     duplicateRow={duplicateRow}
                     errorCount={rowErrorCount}
                     fields={fields}
@@ -307,7 +307,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     row={rowData}
                     rowCount={rowsData?.length}
                     rowIndex={i}
-                    rowLabels={rowLabels}
                     schemaPath={schemaPath}
                     setCollapse={setCollapse}
                   />

@@ -25,7 +25,6 @@ export type ClientComponentProps = {
   path: string
   readOnly?: boolean
   renderedBlocks?: RenderedField[]
-  rowLabels?: React.ReactNode[]
   schemaPath: string
 }
 
