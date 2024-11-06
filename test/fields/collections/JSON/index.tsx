@@ -34,6 +34,16 @@ const JSON: CollectionConfig = {
         uri: 'a://b/foo.json',
       },
     },
+    {
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          name: 'jsonWithinGroup',
+          type: 'json',
+        },
+      ],
+    },
   ],
   versions: {
     maxPerDoc: 1,

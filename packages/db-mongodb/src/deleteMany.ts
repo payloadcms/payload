@@ -11,7 +11,7 @@ export const deleteMany: DeleteMany = async function deleteMany(
 ) {
   const Model = this.collections[collection]
   const options = {
-    ...withSession(this, req.transactionID),
+    ...(await withSession(this, req)),
     lean: true,
   }
 

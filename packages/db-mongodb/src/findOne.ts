@@ -14,7 +14,7 @@ export const findOne: FindOne = async function findOne(
 ) {
   const Model = this.collections[collection]
   const options: MongooseQueryOptions = {
-    ...withSession(this, req.transactionID),
+    ...(await withSession(this, req)),
     lean: true,
   }
 

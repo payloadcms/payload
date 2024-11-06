@@ -10,6 +10,7 @@ import getExtractJWT from '../getExtractJWT'
 export type Result = {
   collection?: string
   exp?: number
+  strategy?: string
   token?: string
   user?: User
 }
@@ -19,7 +20,8 @@ export type Arguments = {
   req: PayloadRequest
 }
 
-async function me({ collection, req }: Arguments): Promise<Result> {
+async function me(args: Arguments): Promise<Result> {
+  const { collection, req } = args
   const extractJWT = getExtractJWT(req.payload.config)
   let response: Result = {
     user: null,
@@ -46,17 +48,34 @@ async function me({ collection, req }: Arguments): Promise<Result> {
 
     delete user.collection
 
-    response = {
-      collection: req.user.collection,
-      user,
+    // /////////////////////////////////////
+    // me hook - Collection
+    // /////////////////////////////////////
+
+    for (const meHook of collection.config.hooks.me) {
+      const hookResult = await meHook({ args, user })
+
+      if (hookResult) {
+        response.user = hookResult.user
+        response.exp = hookResult.exp
+
+        break
+      }
     }
+
+    response.collection = req.user.collection
+    response.strategy = req.user._strategy
 
     const token = extractJWT(req)
 
-    if (token) {
-      const decoded = jwt.decode(token) as jwt.JwtPayload
-      if (decoded) response.exp = decoded.exp
-      if (!collection.config.auth.removeTokenFromResponses) response.token = token
+    if (!response.user) {
+      response.user = user
+
+      if (token) {
+        const decoded = jwt.decode(token) as jwt.JwtPayload
+        if (decoded) response.exp = decoded.exp
+        if (!collection.config.auth.removeTokenFromResponses) response.token = token
+      }
     }
   }
 

@@ -105,7 +105,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       throw new AuthenticationError(req.t)
     }
 
-    if (user && isLocked(user.lockUntil)) {
+    if (user && isLocked(new Date(user.lockUntil).getTime())) {
       throw new LockedAuth(req.t)
     }
 

@@ -19,7 +19,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
   const VersionModel = this.versions[global]
   const whereToUse = where || { id: { equals: id } }
   const options = {
-    ...withSession(this, req.transactionID),
+    ...(await withSession(this, req)),
     lean: true,
     new: true,
   }

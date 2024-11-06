@@ -1,3 +1,72 @@
+## [2.23.1](https://github.com/payloadcms/payload/compare/v2.23.0...v2.23.1) (2024-06-28)
+
+### Bug Fixes
+
+* remove unused refresh arg, this affected me/refresh hooks ([#6976](https://github.com/payloadcms/payload/issues/6976)) ([c82d2ca](https://github.com/payloadcms/payload/commit/77e8ce980ef0bcb0380b499dd1ccdfd36199b707))
+
+## [2.23.0](https://github.com/payloadcms/payload/compare/v2.22.2...v2.23.0) (2024-06-28)
+
+
+### Features
+
+* adds me and refresh hooks ([#6968](https://github.com/payloadcms/payload/issues/6968)) ([c82d2ca](https://github.com/payloadcms/payload/commit/c82d2caa29422083e97affc99a033296d78892d6))
+
+
+### Bug Fixes
+
+* **richtext-lexical:** html converters unnecessarily growing over time ([#6963](https://github.com/payloadcms/payload/issues/6963)) ([cf52d64](https://github.com/payloadcms/payload/commit/cf52d64d984d98ab782ca33f20b43c935ce60683))
+
+## [2.22.2](https://github.com/payloadcms/payload/compare/v2.22.1...v2.22.2) (2024-06-26)
+
+
+### Bug Fixes
+
+* return exp and strategy from auth ([#6943](https://github.com/payloadcms/payload/issues/6943)) ([ea18735](https://github.com/payloadcms/payload/commit/ea18735d3b2d2a96989009130e3724aab487e520))
+
+## [2.22.1](https://github.com/payloadcms/payload/compare/v2.22.0...v2.22.1) (2024-06-25)
+
+
+### Bug Fixes
+
+* graphql query concurrency issues ([#6857](https://github.com/payloadcms/payload/issues/6857)) ([bb911cc](https://github.com/payloadcms/payload/commit/bb911cc7eca1eeef15ade8eb043c0056c281e311))
+* sends cropped image pixel values to server instead of percent values ([#6852](https://github.com/payloadcms/payload/issues/6852)) ([8747743](https://github.com/payloadcms/payload/commit/874774375f8beada9bac0a8ef3e77f63adc30834))
+
+## [2.22.0](https://github.com/payloadcms/payload/compare/v2.21.0...v2.22.0) (2024-06-20)
+
+
+### Features
+
+* passes prev value through to validate functions ([#6805](https://github.com/payloadcms/payload/issues/6805)) ([0a51de7](https://github.com/payloadcms/payload/commit/0a51de7623d7c7790db52f0cc3e431b5ec3436f2))
+
+
+### Bug Fixes
+
+* adjust json field schema for defaultValue ([#6872](https://github.com/payloadcms/payload/issues/6872)) ([58427ff](https://github.com/payloadcms/payload/commit/58427ffae3e0c1159fae817850b4c1770f43b9b9))
+* array row validation messages ([#6780](https://github.com/payloadcms/payload/issues/6780)) ([68ea693](https://github.com/payloadcms/payload/commit/68ea693a88714951661464917d5df10a416a5ca0))
+* cannot use empty string in defaultValue on text-like fields ([#6842](https://github.com/payloadcms/payload/issues/6842)) ([3364385](https://github.com/payloadcms/payload/commit/336438506ce5e54065f59a0352531e0255f5313d))
+* corrects redirect with lonely slash on login ([#6784](https://github.com/payloadcms/payload/issues/6784)) ([dae56e6](https://github.com/payloadcms/payload/commit/dae56e60eef9e6456d9c51e7fc3b995a32e56f5e))
+* **db-postgres:** cascade delete FKs on hasMany relationships ([#6735](https://github.com/payloadcms/payload/issues/6735)) ([9ecc6c8](https://github.com/payloadcms/payload/commit/9ecc6c889929a07d1163919eac14c9b33b90208a))
+* **payload, db-mongodb:** querying relationships with `in` & `not_in` ([#6773](https://github.com/payloadcms/payload/issues/6773)) ([f6ba3be](https://github.com/payloadcms/payload/commit/f6ba3befaeb02edca66f04fbc2ea91d2d2549d08)), closes [#6741](https://github.com/payloadcms/payload/issues/6741)
+* **plugin-cloud-storage:** missing error handling for invalid plugin config, leading to unexpected webpack errors ([#6786](https://github.com/payloadcms/payload/issues/6786)) ([015aafd](https://github.com/payloadcms/payload/commit/015aafda758938028c37a96e9b5fe62902757b09))
+* **ui:** withinCollapsible always false from useCollapsible provider ([#6783](https://github.com/payloadcms/payload/issues/6783)) ([9f0aaf0](https://github.com/payloadcms/payload/commit/9f0aaf066e76210a85faf43b2b5dc5129ccf3879)), closes [#6760](https://github.com/payloadcms/payload/issues/6760)
+* unflattening json objects containing keys with periods ([#6834](https://github.com/payloadcms/payload/issues/6834)) ([025306f](https://github.com/payloadcms/payload/commit/025306f9e685c030956dad3b0f0158c1dce49668)), closes [#5378](https://github.com/payloadcms/payload/issues/5378)
+* upgrade swc, fixing swc issues on linux ([#6809](https://github.com/payloadcms/payload/issues/6809)) ([1c986a9](https://github.com/payloadcms/payload/commit/1c986a98321163c921cb071a160b6fa9fc8bd9ee))
+
+
+## [2.21.0](https://github.com/payloadcms/payload/compare/v2.20.0...v2.21.0) (2024-06-14)
+
+
+### Features
+
+* draft validation ([#6746](https://github.com/payloadcms/payload/issues/6746)) ([ff70fd9](https://github.com/payloadcms/payload/commit/ff70fd9813ec7dc14bf54d3457c25e145fe01699))
+
+
+### Bug Fixes
+
+* adjust version status pill when unpublished ([#6744](https://github.com/payloadcms/payload/issues/6744)) ([b7e8529](https://github.com/payloadcms/payload/commit/b7e852993beaaa465e38caa36e75e870819516b5))
+* use correct time for isLocked check ([#6052](https://github.com/payloadcms/payload/issues/6052)) ([3b4bb30](https://github.com/payloadcms/payload/commit/3b4bb3065a6d2ac2f7d6aafd0fb4a35b580f3662))
+* unable to save animated file types with undefined image sizes ([#6733](https://github.com/payloadcms/payload/issues/6733)) ([e40570b](https://github.com/payloadcms/payload/commit/e40570bd0d64660bb2ae5b5785b4c85c684ca9ab)), closes [#6727](https://github.com/payloadcms/payload/issues/6727)
+
 ## [2.20.0](https://github.com/payloadcms/payload/compare/v2.19.3...v2.20.0) (2024-06-11)
 
 

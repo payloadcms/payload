@@ -18,6 +18,7 @@ import { getFieldsToSign } from './getFieldsToSign'
 export type Result = {
   exp: number
   refreshedToken: string
+  strategy?: string
   user: Document
 }
 
@@ -25,7 +26,6 @@ export type Arguments = {
   collection: Collection
   req: PayloadRequest
   res?: Response
-  token: string
 }
 
 async function refresh(incomingArgs: Arguments): Promise<Result> {
@@ -65,7 +65,7 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
       },
     } = args
 
-    if (typeof args.token !== 'string' || !args.req.user) throw new Forbidden(args.req.t)
+    if (!args.req.user) throw new Forbidden(args.req.t)
 
     const parsedURL = url.parse(args.req.url)
     const isGraphQL = parsedURL.pathname === config.routes.graphQL
@@ -77,38 +77,56 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
       req: args.req,
     })
 
-    const fieldsToSign = getFieldsToSign({
-      collectionConfig,
-      email: user?.email as string,
-      user: args?.req?.user,
-    })
+    let result: Result
 
-    const refreshedToken = jwt.sign(fieldsToSign, secret, {
-      expiresIn: collectionConfig.auth.tokenExpiration,
-    })
+    // /////////////////////////////////////
+    // refresh hook - Collection
+    // /////////////////////////////////////
 
-    const exp = (jwt.decode(refreshedToken) as Record<string, unknown>).exp as number
+    for (const refreshHook of args.collection.config.hooks.refresh) {
+      const hookResult = await refreshHook({ args, user })
 
-    if (args.res) {
-      const cookieOptions = {
-        domain: undefined,
-        expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
-        httpOnly: true,
-        path: '/',
-        sameSite: collectionConfig.auth.cookies.sameSite,
-        secure: collectionConfig.auth.cookies.secure,
+      if (hookResult) {
+        result = hookResult
+        break
       }
-
-      if (collectionConfig.auth.cookies.domain)
-        cookieOptions.domain = collectionConfig.auth.cookies.domain
-
-      args.res.cookie(`${config.cookiePrefix}-token`, refreshedToken, cookieOptions)
     }
 
-    let result: Result = {
-      exp,
-      refreshedToken,
-      user,
+    if (!result) {
+      const fieldsToSign = getFieldsToSign({
+        collectionConfig,
+        email: user?.email as string,
+        user: args?.req?.user,
+      })
+
+      const refreshedToken = jwt.sign(fieldsToSign, secret, {
+        expiresIn: collectionConfig.auth.tokenExpiration,
+      })
+
+      const exp = (jwt.decode(refreshedToken) as Record<string, unknown>).exp as number
+
+      if (args.res) {
+        const cookieOptions = {
+          domain: undefined,
+          expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
+          httpOnly: true,
+          path: '/',
+          sameSite: collectionConfig.auth.cookies.sameSite,
+          secure: collectionConfig.auth.cookies.secure,
+        }
+
+        if (collectionConfig.auth.cookies.domain)
+          cookieOptions.domain = collectionConfig.auth.cookies.domain
+
+        args.res.cookie(`${config.cookiePrefix}-token`, refreshedToken, cookieOptions)
+      }
+
+      result = {
+        exp,
+        refreshedToken,
+        strategy: args.req.user._strategy,
+        user,
+      }
     }
 
     // /////////////////////////////////////
@@ -122,10 +140,10 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
         (await hook({
           collection: args.collection?.config,
           context: args.req.context,
-          exp,
+          exp: result.exp,
           req: args.req,
           res: args.res,
-          token: refreshedToken,
+          token: result.refreshedToken,
         })) || result
     }, Promise.resolve())
 

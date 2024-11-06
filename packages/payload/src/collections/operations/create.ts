@@ -204,7 +204,10 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       global: null,
       operation: 'create',
       req,
-      skipValidation: shouldSaveDraft,
+      skipValidation:
+        shouldSaveDraft &&
+        collectionConfig.versions.drafts &&
+        !collectionConfig.versions.drafts.validate,
     })
 
     // /////////////////////////////////////

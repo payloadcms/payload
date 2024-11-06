@@ -2,11 +2,13 @@ import type i18n from 'i18next'
 
 import type { SanitizedCollectionConfig } from '../../../../../../collections/config/types'
 import type { PaginatedDocs } from '../../../../../../database/types'
+import type { Operator } from '../../../../../../exports/types'
 import type { RelationshipField } from '../../../../../../fields/config/types'
 
 export type Props = {
   disabled?: boolean
   onChange: (val: unknown) => void
+  operator: Operator
   value: unknown
 } & RelationshipField
 

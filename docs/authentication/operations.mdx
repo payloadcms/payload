@@ -191,7 +191,7 @@ mutation {
 
 ### Refresh
 
-Allows for "refreshing" JWTs. If your user has a token that is about to expire, but the user is still active and using the app, you might want to use the `refresh` operation to receive a new token by sending the operation the token that is about to expire.
+Allows for "refreshing" JWTs. If your user has a token that is about to expire, but the user is still active and using the app, you might want to use the `refresh` operation to receive a new token by executing this operation via the authenticated user.
 
 This operation requires a non-expired token to send back a new one. If the user's token has already expired, you will need to allow them to log in again to retrieve a new token.
 
@@ -236,13 +236,6 @@ mutation {
   }
 }
 ```
-
-<Banner type="success">
-  The Refresh operation will automatically find the user's token in either a JWT header or the
-  HTTP-only cookie. But, you can specify the token you're looking to refresh by providing the REST
-  API with a `token` within the JSON body of the request, or by providing the GraphQL resolver a
-  `token` arg.
-</Banner>
 
 ### Verify by Email
 
@@ -290,6 +283,9 @@ const res = await fetch(`http://localhost:3000/api/[collection-slug]/unlock`, {
   headers: {
     'Content-Type': 'application/json',
   },
+  body: JSON.stringify({
+    email: 'dev@payloadcms.com',
+  }),
 })
 ```
 
@@ -297,7 +293,7 @@ const res = await fetch(`http://localhost:3000/api/[collection-slug]/unlock`, {
 
 ```
 mutation {
-  unlock[collection-singular-label]
+  unlock[collection-singular-label](email: "dev@payloadcms.com")
 }
 ```
 
@@ -306,6 +302,9 @@ mutation {
 ```ts
 const result = await payload.unlock({
   collection: '[collection-slug]',
+  data: {
+    email: 'dev@payloadcms.com',
+  },
 })
 ```
 

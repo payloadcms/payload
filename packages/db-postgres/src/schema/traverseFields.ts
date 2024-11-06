@@ -264,7 +264,7 @@ export const traverseFields = ({
                 name: `${selectTableName}_parent_fk`,
                 columns: [cols.parent],
                 foreignColumns: [adapter.tables[parentTableName].id],
-              }),
+              }).onDelete('cascade'),
             parentIdx: (cols) => index(`${selectTableName}_parent_idx`).on(cols.parent),
           }
 
