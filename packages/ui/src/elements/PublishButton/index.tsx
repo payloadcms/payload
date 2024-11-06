@@ -126,7 +126,7 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
       disabled={!canPublish}
       onClick={publish}
       size="medium"
-      SubMenuPopupContent={
+      SubMenuPopupContent={({ close }) =>
         localization
           ? localization.locales.map((locale) => {
               const formattedLabel =
@@ -139,7 +139,7 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
               if (isActive) {
                 return (
                   <PopupList.ButtonGroup key={locale.code}>
-                    <PopupList.Button onClick={() => publishSpecificLocale(locale.code)}>
+                    <PopupList.Button onClick={() => [publishSpecificLocale(locale.code), close()]}>
                       {t('version:publishIn', { locale: formattedLabel || locale.code })}
                     </PopupList.Button>
                   </PopupList.ButtonGroup>
