@@ -15,6 +15,7 @@ import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { getFormState } from '../../../utilities/getFormState.js'
 import { hasSavePermission as getHasSavePermission } from '../../../utilities/hasSavePermission.js'
+import { LoadingOverlay } from '../../Loading/index.js'
 import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
 import { createThumbnail } from '../../Thumbnail/createThumbnail.js'
 import { useBulkUpload } from '../index.js'
@@ -130,6 +131,9 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const { toggleLoadingOverlay } = useLoadingOverlay()
   const { closeModal } = useModal()
   const { collectionSlug, drawerSlug, initialFiles, onSuccess } = useBulkUpload()
+
+  const [isUploading, setIsUploading] = React.useState(false)
+  const [loadingText, setLoadingText] = React.useState('')
 
   const hasInitializedWithFiles = React.useRef(false)
   const initialStateRef = React.useRef<FormState>(null)
@@ -269,68 +273,74 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       }
       const newDocs = []
 
-      for (let i = 0; i < currentForms.length; i++) {
-        const form = currentForms[i]
-        try {
-          toggleLoadingOverlay({
-            isLoading: true,
-            key: 'saveAllDocs',
-            loadingText: t('general:uploading'),
-          })
-          const req = await fetch(actionURL, {
-            body: createFormData(form.formState, overrides),
-            method: 'POST',
-          })
+      setIsUploading(true)
 
-          const json = await req.json()
+      try {
+        for (let i = 0; i < currentForms.length; i++) {
+          try {
+            const form = currentForms[i]
 
-          if (req.status === 201 && json?.doc) {
-            newDocs.push(json.doc)
-          }
+            // TODO: translate this string
+            setLoadingText(`Uploading ${i + 1} of ${currentForms.length}`)
 
-          // should expose some sort of helper for this
-          if (json?.errors?.length) {
-            const [fieldErrors, nonFieldErrors] = json.errors.reduce(
-              ([fieldErrs, nonFieldErrs], err) => {
-                const newFieldErrs: any[] = []
-                const newNonFieldErrs: any[] = []
+            const req = await fetch(actionURL, {
+              body: createFormData(form.formState, overrides),
+              method: 'POST',
+            })
 
-                if (err?.message) {
-                  newNonFieldErrs.push(err)
-                }
+            const json = await req.json()
 
-                if (Array.isArray(err?.data?.errors)) {
-                  err.data?.errors.forEach((dataError) => {
-                    if (dataError?.field) {
-                      newFieldErrs.push(dataError)
-                    } else {
-                      newNonFieldErrs.push(dataError)
-                    }
-                  })
-                }
-
-                return [
-                  [...fieldErrs, ...newFieldErrs],
-                  [...nonFieldErrs, ...newNonFieldErrs],
-                ]
-              },
-              [[], []],
-            )
-
-            currentForms[i] = {
-              errorCount: fieldErrors.length,
-              formState: fieldReducer(currentForms[i].formState, {
-                type: 'ADD_SERVER_ERRORS',
-                errors: fieldErrors,
-              }),
+            if (req.status === 201 && json?.doc) {
+              newDocs.push(json.doc)
             }
+
+            // should expose some sort of helper for this
+            if (json?.errors?.length) {
+              const [fieldErrors, nonFieldErrors] = json.errors.reduce(
+                ([fieldErrs, nonFieldErrs], err) => {
+                  const newFieldErrs: any[] = []
+                  const newNonFieldErrs: any[] = []
+
+                  if (err?.message) {
+                    newNonFieldErrs.push(err)
+                  }
+
+                  if (Array.isArray(err?.data?.errors)) {
+                    err.data?.errors.forEach((dataError) => {
+                      if (dataError?.field) {
+                        newFieldErrs.push(dataError)
+                      } else {
+                        newNonFieldErrs.push(dataError)
+                      }
+                    })
+                  }
+
+                  return [
+                    [...fieldErrs, ...newFieldErrs],
+                    [...nonFieldErrs, ...newNonFieldErrs],
+                  ]
+                },
+                [[], []],
+              )
+
+              currentForms[i] = {
+                errorCount: fieldErrors.length,
+                formState: fieldReducer(currentForms[i].formState, {
+                  type: 'ADD_SERVER_ERRORS',
+                  errors: fieldErrors,
+                }),
+              }
+            }
+          } catch (_) {
+            // swallow
           }
-        } catch (error) {
-          // swallow error
-        } finally {
-          setHasSubmitted(true)
-          toggleLoadingOverlay({ isLoading: false, key: 'saveAllDocs' })
         }
+      } catch (_) {
+        // swallow
+      } finally {
+        setHasSubmitted(true)
+        setLoadingText('')
+        setIsUploading(false)
       }
 
       const remainingForms = currentForms.filter(({ errorCount }) => errorCount > 0)
@@ -360,7 +370,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         },
       })
     },
-    [actionURL, activeIndex, forms, onSuccess, t, toggleLoadingOverlay, closeModal, drawerSlug],
+    [actionURL, activeIndex, forms, onSuccess, t, closeModal, drawerSlug],
   )
 
   React.useEffect(() => {
@@ -419,6 +429,14 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         totalErrorCount,
       }}
     >
+      {isUploading && (
+        <LoadingOverlay
+          animationDuration="250ms"
+          loadingText={loadingText}
+          overlayType="fullscreen"
+          show
+        />
+      )}
       {children}
     </Context.Provider>
   )
