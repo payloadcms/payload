@@ -51,7 +51,7 @@ type Args = {
   preferences?: DocumentPreferences
   previousFormState: FormState
   renderAllFields: boolean
-  renderFieldMethod: RenderFieldMethod
+  renderFieldFn: RenderFieldMethod
   req: PayloadRequest
   /**
    * Whether to skip checking the field's condition. @default false
@@ -89,7 +89,7 @@ export const iterateFields = async ({
   preferences,
   previousFormState,
   renderAllFields,
-  renderFieldMethod,
+  renderFieldFn: renderFieldFn,
   req,
   skipConditionChecks = false,
   skipValidation = false,
@@ -131,7 +131,7 @@ export const iterateFields = async ({
         preferences,
         previousFormState,
         renderAllFields,
-        renderFieldMethod,
+        renderFieldFn,
         req,
         skipConditionChecks,
         skipValidation,

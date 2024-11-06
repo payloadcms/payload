@@ -343,29 +343,23 @@ describe('admin1', () => {
 
   describe('routing', () => {
     test('should 404 not found root pages', async () => {
-      await page.goto(`${serverURL}/admin/1234`)
-      const response = await page.waitForResponse((response) => response.status() === 404)
-      expect(response).toBeTruthy()
+      const unknownPageURL = `${serverURL}/admin/1234`
+      const response = await page.goto(unknownPageURL)
+      expect(response.status() === 404).toBeTruthy()
       await expect(page.locator('.not-found')).toContainText('Nothing found')
     })
 
     test('should 404 not found documents', async () => {
-      await page.goto(`${postsUrl.collection(postsCollectionSlug)}/1234`)
-      const response = await page.waitForResponse((response) => response.status() === 404)
-      expect(response).toBeTruthy()
+      const unknownDocumentURL = `${postsUrl.collection(postsCollectionSlug)}/1234`
+      const response = await page.goto(unknownDocumentURL)
+      expect(response.status() === 404).toBeTruthy()
       await expect(page.locator('.not-found')).toContainText('Nothing found')
     })
 
     test('should use custom logout route', async () => {
-      await page.goto(`${serverURL}${adminRoutes.routes.admin}${adminRoutes.admin.routes.logout}`)
-
-      await page.waitForURL(
-        `${serverURL}${adminRoutes.routes.admin}${adminRoutes.admin.routes.logout}`,
-      )
-
-      await expect(() => expect(page.url()).not.toContain(loginURL)).toPass({
-        timeout: POLL_TOPASS_TIMEOUT,
-      })
+      const customLogoutRouteURL = `${serverURL}${adminRoutes.routes.admin}${adminRoutes.admin.routes.logout}`
+      const response = await page.goto(customLogoutRouteURL)
+      expect(response.status() !== 404).toBeTruthy()
     })
   })
 

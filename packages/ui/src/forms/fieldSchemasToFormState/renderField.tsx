@@ -78,44 +78,30 @@ export const renderField: RenderFieldMethod = ({
     fieldState.customComponents = {}
   }
 
-  if ('label' in fieldConfig) {
-    fieldState.customComponents.Label = (
-      <FieldLabel
-        label={
-          typeof fieldConfig.label === 'string' || typeof fieldConfig.label === 'object'
-            ? fieldConfig.label
-            : typeof fieldConfig.label === 'function'
-              ? fieldConfig.label({ t: req.i18n.t })
-              : ''
-        }
-        required={'required' in fieldConfig && fieldConfig.required}
-      />
-    )
-  }
-
   switch (fieldConfig.type) {
     // TODO: handle block row labels as well in a similar fashion
     case 'array': {
       fieldState?.rows?.forEach((row, rowIndex) => {
-        const RowLabel = (
-          <RenderServerComponent
-            clientProps={{
-              ...clientProps,
-              rowLabel: `${getTranslation(fieldConfig.labels.singular, req.i18n)} ${String(
-                rowIndex + 1,
-              ).padStart(2, '0')}`,
-              rowNumber: rowIndex + 1,
-            }}
-            Component={fieldConfig.admin?.components?.RowLabel}
-            Fallback={DefaultRowLabel}
-            importMap={req.payload.importMap}
-            serverProps={serverProps}
-          />
-        )
-        if (!clientProps.rowLabels) {
-          clientProps.rowLabels = []
+        if (fieldConfig.admin?.components && 'RowLabel' in fieldConfig.admin.components) {
+          if (!fieldState.customComponents.RowLabels) {
+            fieldState.customComponents.RowLabels = []
+          }
+
+          fieldState.customComponents.RowLabels[rowIndex] = (
+            <RenderServerComponent
+              clientProps={clientProps}
+              Component={fieldConfig.admin.components.RowLabel}
+              importMap={req.payload.importMap}
+              serverProps={{
+                ...serverProps,
+                rowLabel: `${getTranslation(fieldConfig.labels.singular, req.i18n)} ${String(
+                  rowIndex + 1,
+                ).padStart(2, '0')}`,
+                rowNumber: rowIndex + 1,
+              }}
+            />
+          )
         }
-        clientProps.rowLabels[rowIndex] = RowLabel
       })
 
       break

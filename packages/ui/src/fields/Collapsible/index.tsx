@@ -1,6 +1,7 @@
 'use client'
 import type { AdminClient, CollapsibleFieldClientComponent, DocumentPreferences } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import { Collapsible as CollapsibleElement } from '../../elements/Collapsible/index.js'
@@ -129,7 +130,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
             <div className={`${baseClass}__row-label-wrap`}>
               <RenderCustomComponent
                 CustomComponent={Label}
-                Fallback={<RowLabel rowLabel={label} />}
+                Fallback={<RowLabel label={getTranslation(label, i18n)} path={path} />}
               />
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>

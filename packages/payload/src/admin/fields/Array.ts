@@ -19,7 +19,6 @@ import type {
 type ArrayFieldClientWithoutType = MarkOptional<ArrayFieldClient, 'type'>
 
 type ArrayFieldBaseClientProps = {
-  readonly CustomRowLabel?: React.ReactNode
   readonly path?: string
   readonly validate?: ArrayFieldValidation
 } & Pick<ServerFieldBase, 'permissions'>

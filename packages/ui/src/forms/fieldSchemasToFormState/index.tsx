@@ -33,7 +33,7 @@ type Args = {
    * all custom fields will be re-rendered.
    */
   renderAllFields: boolean
-  renderFieldMethod?: RenderFieldMethod
+  renderFieldFn?: RenderFieldMethod
   req: PayloadRequest
   schemaPath: string
 }
@@ -50,7 +50,7 @@ export const fieldSchemasToFormState = async (args: Args): Promise<FormState> =>
     preferences,
     previousFormState,
     renderAllFields,
-    renderFieldMethod,
+    renderFieldFn,
     req,
     schemaPath,
   } = args
@@ -86,7 +86,7 @@ export const fieldSchemasToFormState = async (args: Args): Promise<FormState> =>
       preferences,
       previousFormState,
       renderAllFields,
-      renderFieldMethod,
+      renderFieldFn,
       req,
       state,
     })

@@ -113,7 +113,7 @@ export async function seedDB({
   if (isMongoose(_payload)) {
     await Promise.all([
       ...collectionSlugs.map(async (collectionSlug) => {
-        await _payload.db.collections[collectionSlug].createIndexes()
+        void _payload.db.collections[collectionSlug].createIndexes()
       }),
     ])
   }

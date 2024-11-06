@@ -11,6 +11,7 @@ import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
+import { RowLabel } from '../../forms/RowLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
@@ -18,6 +19,7 @@ const baseClass = 'array-field'
 
 type ArrayRowProps = {
   readonly addRow: (rowIndex: number) => Promise<void> | void
+  readonly CustomRowLabel?: React.ReactNode
   readonly duplicateRow: (rowIndex: number) => void
   readonly errorCount: number
   readonly fields: ClientField[]
@@ -34,7 +36,6 @@ type ArrayRowProps = {
   readonly row: Row
   readonly rowCount: number
   readonly rowIndex: number
-  readonly rowLabels?: React.ReactNode[]
   readonly schemaPath: string
   readonly setCollapse: (rowID: string, collapsed: boolean) => void
 } & UseDraggableSortableReturn
@@ -42,6 +43,7 @@ type ArrayRowProps = {
 export const ArrayRow: React.FC<ArrayRowProps> = ({
   addRow,
   attributes,
+  CustomRowLabel,
   duplicateRow,
   errorCount,
   fields,
@@ -60,7 +62,6 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   row,
   rowCount,
   rowIndex,
-  rowLabels,
   schemaPath,
   setCollapse,
   setNodeRef,
@@ -123,7 +124,12 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         }
         header={
           <div className={`${baseClass}__row-header`}>
-            {rowLabels?.[rowIndex] || fallbackLabel}
+            <RowLabel
+              CustomComponent={CustomRowLabel}
+              label={fallbackLabel}
+              path={path}
+              rowNumber={rowIndex}
+            />
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
         }
