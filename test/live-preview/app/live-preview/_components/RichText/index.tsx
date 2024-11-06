@@ -16,9 +16,7 @@ const RichText: React.FC<{
 
   return (
     <div className={[classes.richText, className].filter(Boolean).join(' ')}>
-      {serializer === 'slate'
-        ? serializeSlate(content, renderUploadFilenameOnly)
-        : serializeLexical(content, renderUploadFilenameOnly)}
+      {serializeLexical(content, renderUploadFilenameOnly)}
     </div>
   )
 }

@@ -1,6 +1,31 @@
-import type { Field } from 'payload'
+import type { Field, FieldHook } from 'payload'
 
-import { slateEditor } from '@payloadcms/richtext-slate'
+import {
+  consolidateHTMLConverters,
+  convertLexicalToHTML,
+  defaultEditorConfig,
+  defaultEditorFeatures,
+  HTMLConverterFeature,
+  lexicalEditor,
+  sanitizeServerEditorConfig,
+} from '@payloadcms/richtext-lexical'
+import { SlateToLexicalFeature } from '@payloadcms/richtext-lexical/migrate'
+
+const hook: FieldHook = async ({ req, siblingData }) => {
+  const editorConfig = defaultEditorConfig
+
+  editorConfig.features = [...defaultEditorFeatures, HTMLConverterFeature({})]
+
+  const sanitizedEditorConfig = await sanitizeServerEditorConfig(editorConfig, req.payload.config)
+
+  const html = await convertLexicalToHTML({
+    converters: consolidateHTMLConverters({ editorConfig: sanitizedEditorConfig }),
+    data: siblingData.lexicalSimple,
+    req,
+  })
+  console.log('HTML:', html)
+  // return html
+}
 
 export const hero: Field = {
   name: 'hero',
@@ -32,7 +57,14 @@ export const hero: Field = {
       name: 'richText',
       label: 'Rich Text',
       type: 'richText',
-      editor: slateEditor({}),
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [...defaultFeatures, SlateToLexicalFeature({})],
+      }),
+      hooks: {
+        afterRead: [hook],
+        beforeValidate: [hook],
+        afterChange: [hook],
+      },
     },
     {
       name: 'media',
