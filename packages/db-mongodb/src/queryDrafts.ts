@@ -16,7 +16,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 ) {
   const VersionModel = this.versions[collection]
   const collectionConfig = this.payload.collections[collection].config
-  const options = withSession(this, req.transactionID)
+  const options = await withSession(this, req)
 
   let hasNearConstraint
   let sort

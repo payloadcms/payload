@@ -31,8 +31,8 @@ export default function findResolver(collection: Collection): Resolver {
     let { req } = context
     const locale = req.locale
     const fallbackLocale = req.fallbackLocale
-    req = isolateObjectProperty(req, 'locale')
-    req = isolateObjectProperty(req, 'fallbackLocale')
+
+    req = isolateObjectProperty(req, ['locale', 'fallbackLocale', 'transactionID'])
     req.locale = args.locale || locale
     req.fallbackLocale = args.fallbackLocale || fallbackLocale
     if (!req.query) req.query = {}
@@ -41,8 +41,8 @@ export default function findResolver(collection: Collection): Resolver {
       args.draft ?? req.query?.draft === 'false'
         ? false
         : req.query?.draft === 'true'
-        ? true
-        : undefined
+          ? true
+          : undefined
     if (typeof draft === 'boolean') req.query.draft = String(draft)
 
     context.req = req
@@ -53,7 +53,7 @@ export default function findResolver(collection: Collection): Resolver {
       draft: args.draft,
       limit: args.limit,
       page: args.page,
-      req: isolateObjectProperty<PayloadRequest>(req, 'transactionID'),
+      req,
       sort: args.sort,
       where: args.where,
     }

@@ -18,7 +18,7 @@ export const CollapsibleProvider: React.FC<{
   collapsed?: boolean
   toggle: () => void
   withinCollapsible?: boolean
-}> = ({ children, collapsed, toggle, withinCollapsible }) => {
+}> = ({ children, collapsed, toggle, withinCollapsible = true }) => {
   const { collapsed: parentIsCollapsed, isVisible } = useCollapsible()
 
   const contextValue = React.useMemo((): ContextType => {

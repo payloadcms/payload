@@ -79,6 +79,10 @@ export const Routes: React.FC = () => {
     }
   }, [i18n.language, routes, userCollection])
 
+  const [_, redirectAfterLogin] = window.location.pathname
+    .replace(/\/+$/, '')
+    .split(`${routes.admin}/`)
+
   return (
     <Suspense fallback={<LoadingOverlayToggle name="route-suspense" show />}>
       <LoadingOverlayToggle name="route-loader" show={isLoadingUser} />
@@ -186,10 +190,8 @@ export const Routes: React.FC = () => {
                   ) : (
                     <Redirect
                       to={`${match.url}/login${
-                        window.location.pathname.startsWith(routes.admin)
-                          ? `?redirect=${encodeURIComponent(
-                              window.location.pathname.replace(routes.admin, ''),
-                            )}`
+                        window.location.pathname.startsWith(routes.admin) && redirectAfterLogin
+                          ? `?redirect=${encodeURIComponent(`/${redirectAfterLogin}`)}`
                           : ''
                       }`}
                     />

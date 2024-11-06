@@ -12,12 +12,20 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
 import { adminThumbnailSrc } from './collections/admin-thumbnail'
-import { adminThumbnailSlug, audioSlug, globalWithMedia, mediaSlug, relationSlug } from './shared'
+import {
+  adminThumbnailSlug,
+  animatedTypeMedia,
+  audioSlug,
+  globalWithMedia,
+  mediaSlug,
+  relationSlug,
+} from './shared'
 
 const { beforeAll, describe } = test
 
 let client: RESTClient
 let mediaURL: AdminUrlUtil
+let animatedTypeMediaURL: AdminUrlUtil
 let audioURL: AdminUrlUtil
 let relationURL: AdminUrlUtil
 let adminThumbnailURL: AdminUrlUtil
@@ -34,6 +42,7 @@ describe('uploads', () => {
     await client.login()
 
     mediaURL = new AdminUrlUtil(serverURL, mediaSlug)
+    animatedTypeMediaURL = new AdminUrlUtil(serverURL, animatedTypeMedia)
     audioURL = new AdminUrlUtil(serverURL, audioSlug)
     relationURL = new AdminUrlUtil(serverURL, relationSlug)
     adminThumbnailURL = new AdminUrlUtil(serverURL, adminThumbnailSlug)
@@ -92,6 +101,26 @@ describe('uploads', () => {
     const filename = page.locator('.file-field__filename')
 
     await expect(filename).toHaveValue('image.png')
+
+    await saveDocAndAssert(page)
+  })
+
+  test('should create animated file upload', async () => {
+    await page.goto(animatedTypeMediaURL.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(__dirname, './animated.webp'))
+    const animatedFilename = page.locator('.file-field__filename')
+
+    await expect(animatedFilename).toHaveValue('animated.webp')
+
+    await saveDocAndAssert(page)
+
+    await page.goto(animatedTypeMediaURL.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(__dirname, './non-animated.webp'))
+    const nonAnimatedFileName = page.locator('.file-field__filename')
+
+    await expect(nonAnimatedFileName).toHaveValue('non-animated.webp')
 
     await saveDocAndAssert(page)
   })
@@ -186,7 +215,7 @@ describe('uploads', () => {
     // choose from existing
     await page.locator('.list-drawer__toggler').click()
 
-    await expect(page.locator('.cell-title')).toContainText('draft')
+    await expect(page.locator('.row-3 .cell-title')).toContainText('draft')
   })
 
   test('should restrict mimetype based on filterOptions', async () => {

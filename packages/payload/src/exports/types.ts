@@ -42,6 +42,8 @@ export type {
   BeforeValidateHook as CollectionBeforeValidateHook,
   Collection,
   CollectionConfig,
+  MeHook as CollectionMeHook,
+  RefreshHook as CollectionRefreshHook,
   SanitizedCollectionConfig,
   TypeWithID,
 } from './../collections/config/types'

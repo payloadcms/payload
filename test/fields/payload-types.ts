@@ -265,10 +265,12 @@ export interface ArrayField {
         id?: string | null
       }[]
     | null
-  disableSortItems?: {
-    text: string
-    id?: string | null
-  }[]
+  disableSort?:
+    | {
+        text: string
+        id?: string | null
+      }[]
+    | null
   updatedAt: string
   createdAt: string
 }
@@ -373,6 +375,53 @@ export interface BlockField {
       }
   )[]
   collapsedByDefaultBlocks: (
+    | {
+        text: string
+        richText?:
+          | {
+              [k: string]: unknown
+            }[]
+          | null
+        id?: string | null
+        blockName?: string | null
+        blockType: 'localizedContent'
+      }
+    | {
+        number: number
+        id?: string | null
+        blockName?: string | null
+        blockType: 'localizedNumber'
+      }
+    | {
+        subBlocks?:
+          | (
+              | {
+                  text: string
+                  id?: string | null
+                  blockName?: string | null
+                  blockType: 'text'
+                }
+              | {
+                  number: number
+                  id?: string | null
+                  blockName?: string | null
+                  blockType: 'number'
+                }
+            )[]
+          | null
+        id?: string | null
+        blockName?: string | null
+        blockType: 'localizedSubBlocks'
+      }
+    | {
+        textInCollapsible?: string | null
+        textInRow?: string | null
+        id?: string | null
+        blockName?: string | null
+        blockType: 'localizedTabs'
+      }
+  )[]
+  disableSort: (
     | {
         text: string
         richText?:
@@ -764,6 +813,7 @@ export interface GroupField {
 export interface RowField {
   id: string
   title: string
+  disableListColumnText?: string | null
   field_with_width_a?: string | null
   field_with_width_b?: string | null
   field_within_collapsible_a?: string | null
@@ -1089,10 +1139,12 @@ export interface TabsField {
     }[]
     text?: string | null
     defaultValue?: string | null
-    arrayInRow?: {
-      text: string
-      id?: string | null
-    }[]
+    arrayInRow?:
+      | {
+          textInArrayInRow?: string | null
+          id?: string | null
+        }[]
+      | null
   }
   namedTabWithDefaultValue: {
     defaultValue?: string | null
@@ -1138,6 +1190,8 @@ export interface Upload {
   filesize?: number | null
   width?: number | null
   height?: number | null
+  focalX?: number | null
+  focalY?: number | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1155,6 +1209,8 @@ export interface Uploads2 {
   filesize?: number | null
   width?: number | null
   height?: number | null
+  focalX?: number | null
+  focalY?: number | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1176,6 +1232,8 @@ export interface Uploads3 {
   filesize?: number | null
   width?: number | null
   height?: number | null
+  focalX?: number | null
+  focalY?: number | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

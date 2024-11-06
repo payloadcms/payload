@@ -26,6 +26,7 @@ const RelationshipField: React.FC<Props> = (props) => {
     filterOptions,
     hasMany,
     onChange,
+    operator,
     relationTo,
     value,
   } = props
@@ -46,6 +47,8 @@ const RelationshipField: React.FC<Props> = (props) => {
   const debouncedSearch = useDebounce(search, 300)
   const { i18n, t } = useTranslation('general')
   const { user } = useAuth()
+
+  const isMulti = ['in', 'not_in'].includes(operator)
 
   const addOptions = useCallback(
     (data, relation) => {
@@ -175,7 +178,7 @@ const RelationshipField: React.FC<Props> = (props) => {
 
   const findOptionsByValue = useCallback((): Option | Option[] => {
     if (value) {
-      if (hasMany) {
+      if (hasMany || isMulti) {
         if (Array.isArray(value)) {
           return value.map((val) => {
             if (hasMultipleRelations) {
@@ -228,7 +231,7 @@ const RelationshipField: React.FC<Props> = (props) => {
     }
 
     return undefined
-  }, [hasMany, hasMultipleRelations, value, options])
+  }, [hasMany, hasMultipleRelations, isMulti, value, options])
 
   const handleInputChange = useCallback(
     (newSearch) => {
@@ -253,6 +256,7 @@ const RelationshipField: React.FC<Props> = (props) => {
           const data = await response.json()
           addOptions({ docs: [data] }, relation)
         } else {
+          // eslint-disable-next-line no-console
           console.error(t('error:loadingDocument', { id }))
         }
       }
@@ -266,15 +270,15 @@ const RelationshipField: React.FC<Props> = (props) => {
 
   useEffect(() => {
     dispatchOptions({
+      type: 'CLEAR',
       i18n,
       required: true,
-      type: 'CLEAR',
     })
 
     setHasLoadedFirstOptions(true)
     setLastLoadedPage(1)
     setLastFullyLoadedRelation(-1)
-    getResults({ search: debouncedSearch })
+    void getResults({ search: debouncedSearch })
   }, [getResults, debouncedSearch, relationTo, i18n])
 
   // ///////////////////////////
@@ -283,15 +287,15 @@ const RelationshipField: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (value && hasLoadedFirstOptions) {
-      if (hasMany) {
+      if (hasMany || isMulti) {
         const matchedOptions = findOptionsByValue()
 
         ;((matchedOptions as Option[]) || []).forEach((option, i) => {
           if (!option) {
             if (hasMultipleRelations) {
-              addOptionByID(value[i].value, value[i].relationTo)
+              void addOptionByID(value[i].value, value[i].relationTo)
             } else {
-              addOptionByID(value[i], relationTo)
+              void addOptionByID(value[i], relationTo)
             }
           }
         })
@@ -301,9 +305,9 @@ const RelationshipField: React.FC<Props> = (props) => {
         if (!matchedOption) {
           if (hasMultipleRelations) {
             const valueWithRelation = value as ValueWithRelation
-            addOptionByID(valueWithRelation.value, valueWithRelation.relationTo)
+            void addOptionByID(valueWithRelation.value, valueWithRelation.relationTo)
           } else {
-            addOptionByID(value, relationTo)
+            void addOptionByID(value, relationTo)
           }
         }
       }
@@ -313,6 +317,7 @@ const RelationshipField: React.FC<Props> = (props) => {
     findOptionsByValue,
     hasMany,
     hasMultipleRelations,
+    isMulti,
     relationTo,
     value,
     hasLoadedFirstOptions,
@@ -329,10 +334,10 @@ const RelationshipField: React.FC<Props> = (props) => {
       {!errorLoading && (
         <ReactSelect
           disabled={disabled}
-          isMulti={hasMany}
+          isMulti={hasMany || isMulti}
           isSortable={isSortable}
           onChange={(selected) => {
-            if (hasMany) {
+            if (hasMany || isMulti) {
               onChange(
                 selected
                   ? selected.map((option) => {
@@ -358,7 +363,7 @@ const RelationshipField: React.FC<Props> = (props) => {
           }}
           onInputChange={handleInputChange}
           onMenuScrollToBottom={() => {
-            getResults({ lastFullyLoadedRelation, lastLoadedPage: lastLoadedPage + 1 })
+            void getResults({ lastFullyLoadedRelation, lastLoadedPage: lastLoadedPage + 1 })
           }}
           options={options}
           placeholder={t('selectValue')}

@@ -244,7 +244,11 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       global: null,
       operation: 'update',
       req,
-      skipValidation: Boolean(collectionConfig.versions?.drafts) && data._status !== 'published',
+      skipValidation:
+        shouldSaveDraft &&
+        collectionConfig.versions.drafts &&
+        !collectionConfig.versions.drafts.validate &&
+        data._status !== 'published',
     })
 
     // /////////////////////////////////////

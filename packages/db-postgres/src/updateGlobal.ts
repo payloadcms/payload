@@ -11,7 +11,7 @@ export async function updateGlobal<T extends TypeWithID>(
   this: PostgresAdapter,
   { slug, data, req = {} as PayloadRequest }: UpdateGlobalArgs,
 ): Promise<T> {
-  const db = this.sessions[req.transactionID]?.db || this.drizzle
+  const db = this.sessions[await req.transactionID]?.db || this.drizzle
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
   const tableName = this.tableNameMap.get(toSnakeCase(globalConfig.slug))
 

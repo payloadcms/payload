@@ -15,7 +15,7 @@ export const createGlobal: CreateGlobal = async function createGlobal(
     globalType: slug,
     ...data,
   }
-  const options = withSession(this, req.transactionID)
+  const options = await withSession(this, req)
 
   let [result] = (await Model.create([global], options)) as any
 

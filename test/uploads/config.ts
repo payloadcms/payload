@@ -8,6 +8,7 @@ import { Uploads1 } from './collections/Upload1'
 import Uploads2 from './collections/Upload2'
 import AdminThumbnailCol from './collections/admin-thumbnail'
 import {
+  animatedTypeMedia,
   audioSlug,
   cropOnlySlug,
   enlargeSlug,
@@ -318,6 +319,43 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: animatedTypeMedia,
+      fields: [],
+      upload: {
+        staticDir: './media',
+        staticURL: '/media',
+        resizeOptions: {
+          position: 'center',
+          width: 200,
+          height: 200,
+        },
+        imageSizes: [
+          {
+            name: 'squareSmall',
+            width: 480,
+            height: 480,
+            position: 'centre',
+            withoutEnlargement: false,
+          },
+          {
+            name: 'undefinedHeight',
+            width: 300,
+            height: undefined,
+          },
+          {
+            name: 'undefinedWidth',
+            width: undefined,
+            height: 300,
+          },
+          {
+            name: 'undefinedAll',
+            width: undefined,
+            height: undefined,
+          },
+        ],
+      },
+    },
+    {
       slug: enlargeSlug,
       fields: [],
       upload: {
@@ -541,6 +579,43 @@ export default buildConfigWithDefaults({
         image: uploadedImage,
         versionedImage,
       },
+    })
+
+    // Create animated type images
+    const animatedImageFilePath = path.resolve(__dirname, './animated.webp')
+    const animatedImageFile = await getFileByPath(animatedImageFilePath)
+
+    await payload.create({
+      collection: animatedTypeMedia,
+      data: {},
+      file: animatedImageFile,
+    })
+
+    await payload.create({
+      collection: versionSlug,
+      data: {
+        _status: 'published',
+        title: 'upload',
+      },
+      file: animatedImageFile,
+    })
+
+    const nonAnimatedImageFilePath = path.resolve(__dirname, './non-animated.webp')
+    const nonAnimatedImageFile = await getFileByPath(nonAnimatedImageFilePath)
+
+    await payload.create({
+      collection: animatedTypeMedia,
+      data: {},
+      file: nonAnimatedImageFile,
+    })
+
+    await payload.create({
+      collection: versionSlug,
+      data: {
+        _status: 'published',
+        title: 'upload',
+      },
+      file: nonAnimatedImageFile,
     })
 
     // Create audio

@@ -11,7 +11,7 @@ export const create: Create = async function create(
   { collection, data, req = {} as PayloadRequest },
 ) {
   const Model = this.collections[collection]
-  const options = withSession(this, req.transactionID)
+  const options = await withSession(this, req)
   let doc
   try {
     ;[doc] = await Model.create([data], options)

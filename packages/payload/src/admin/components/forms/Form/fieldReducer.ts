@@ -89,6 +89,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
               'errorMessage',
               'initialValue',
               'passesCondition',
+              'previousValue',
               'rows',
               'valid',
               'validate',

@@ -386,6 +386,9 @@ function initCollectionsGraphQL(payload: Payload): void {
             exp: {
               type: GraphQLInt,
             },
+            strategy: {
+              type: GraphQLString,
+            },
             token: {
               type: GraphQLString,
             },
@@ -412,14 +415,14 @@ function initCollectionsGraphQL(payload: Payload): void {
             refreshedToken: {
               type: GraphQLString,
             },
+            strategy: {
+              type: GraphQLString,
+            },
             user: {
               type: collection.graphQL.JWT,
             },
           },
         }),
-        args: {
-          token: { type: GraphQLString },
-        },
         resolve: refresh(collection),
       }
 

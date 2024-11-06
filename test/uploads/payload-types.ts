@@ -172,6 +172,53 @@ export interface Media {
     }
   }
 }
+export interface AnimatedTypeMedia {
+  id: string
+  updatedAt: string
+  createdAt: string
+  url?: string
+  filename?: string
+  mimeType?: string
+  filesize?: number
+  width?: number
+  height?: number
+  focalX?: number
+  focalY?: number
+  sizes?: {
+    squareSmall?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    undefinedHeight?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    undefinedWidth?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    undefinedAll?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+  }
+}
 export interface Audio {
   id: string
   audio?: string | Media

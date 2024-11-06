@@ -23,6 +23,7 @@ export type FormField = {
   fieldSchema?: FieldConfig
   initialValue: unknown
   passesCondition?: boolean
+  previousValue?: unknown
   rows?: Row[]
   valid: boolean
   validate?: Validate

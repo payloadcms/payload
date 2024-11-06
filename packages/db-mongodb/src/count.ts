@@ -13,7 +13,7 @@ export const count: Count = async function count(
   { collection, locale, req = {} as PayloadRequest, where },
 ) {
   const Model = this.collections[collection]
-  const options: QueryOptions = withSession(this, req.transactionID)
+  const options: QueryOptions = await withSession(this, req)
 
   let hasNearConstraint = false
 

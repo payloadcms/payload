@@ -6,8 +6,10 @@ export type AuthContext<T = User> = {
   permissions?: Permissions
   refreshCookie: (forceRefresh?: boolean) => void
   refreshCookieAsync: () => Promise<User>
-  refreshPermissions: () => Promise<void>
+  refreshPermissions: ({ locale }?: { locale?: string }) => Promise<void>
   setUser: (user: T) => void
+  strategy?: string
   token?: string
+  tokenExpiration?: number
   user?: T | null
 }

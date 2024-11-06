@@ -41,6 +41,16 @@ const TextFields: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'defaultString',
+      defaultValue: defaultText,
+      type: 'text',
+    },
+    {
+      name: 'defaultEmptyString',
+      defaultValue: '',
+      type: 'text',
+    },
+    {
       name: 'defaultFunction',
       defaultValue: () => defaultText,
       type: 'text',
