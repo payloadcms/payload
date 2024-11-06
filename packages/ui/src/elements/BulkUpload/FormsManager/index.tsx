@@ -268,7 +268,9 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         formState: currentFormsData,
       }
       const newDocs = []
-      const promises = currentForms.map(async (form, i) => {
+
+      for (let i = 0; i < currentForms.length; i++) {
+        const form = currentForms[i]
         try {
           toggleLoadingOverlay({
             isLoading: true,
@@ -329,9 +331,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           setHasSubmitted(true)
           toggleLoadingOverlay({ isLoading: false, key: 'saveAllDocs' })
         }
-      })
-
-      await Promise.all(promises)
+      }
 
       const remainingForms = currentForms.filter(({ errorCount }) => errorCount > 0)
       const successCount = Math.max(0, currentForms.length - remainingForms.length)
