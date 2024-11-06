@@ -13,6 +13,7 @@ import {
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
+import { reduceToSerializableFields } from '@payloadcms/ui/shared'
 import React, { useCallback } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
@@ -31,10 +32,10 @@ type MetaTitleProps = {
 export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const {
     field: { label, maxLength: maxLengthFromProps, minLength: minLengthFromProps, required },
-    fieldState: { customComponents: { AfterInput, BeforeInput, Label } = {} } = {},
     hasGenerateTitleFn,
     path,
   } = props || {}
+
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
   const {
@@ -45,6 +46,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   } = useConfig()
 
   const field: FieldType<string> = useField({ path } as Options)
+  const { customComponents: { AfterInput, BeforeInput, Label } = {} } = field
 
   const locale = useLocale()
   const { getData } = useForm()
@@ -72,10 +74,13 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         hasPublishPermission: docInfo.hasPublishPermission,
         hasSavePermission: docInfo.hasSavePermission,
         initialData: docInfo.initialData,
-        initialState: docInfo.initialState,
+        initialState: reduceToSerializableFields(docInfo.initialState),
         locale: typeof locale === 'object' ? locale?.code : locale,
         title: docInfo.title,
-      } satisfies Omit<Parameters<GenerateTitle>[0], 'collectionConfig' | 'globalConfig' | 'req'>),
+      } satisfies Omit<
+        Parameters<GenerateTitle>[0],
+        'collectionConfig' | 'globalConfig' | 'hasPublishedDoc' | 'req' | 'versionCount'
+      >),
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',

@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
 import { type FormState, type PayloadRequest } from 'payload'
 import {
-  deepCopyObjectComplex,
   getDataByPath as getDataByPathFunc,
   getSiblingData as getSiblingDataFunc,
   reduceFieldsToValues,
@@ -229,7 +228,7 @@ export const Form: React.FC<FormProps> = (props) => {
       // Execute server side validations
       if (Array.isArray(beforeSubmit)) {
         let revalidatedFormState: FormState
-        const serializableFields = reduceToSerializableFields(deepCopyObjectComplex(fields))
+        const serializableFields = reduceToSerializableFields(fields)
 
         await beforeSubmit.reduce(async (priorOnChange, beforeSubmitFn) => {
           await priorOnChange
@@ -265,7 +264,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       // If submit handler comes through via props, run that
       if (onSubmit) {
-        const serializableFields = reduceToSerializableFields(deepCopyObjectComplex(fields))
+        const serializableFields = reduceToSerializableFields(fields)
         const data = reduceFieldsToValues(serializableFields, true)
 
         if (overrides) {
@@ -681,7 +680,7 @@ export const Form: React.FC<FormProps> = (props) => {
     () => {
       const executeOnChange = async () => {
         if (Array.isArray(onChange)) {
-          let revalidatedFormState: FormState = deepCopyObjectComplex(contextRef.current.fields) // deep copy, as we do not want prepareFields to mutate the original state. Complex, to avoid maximum call stack exceeded errors
+          let revalidatedFormState: FormState = contextRef.current.fields
 
           for (const onChangeFn of onChange) {
             // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request

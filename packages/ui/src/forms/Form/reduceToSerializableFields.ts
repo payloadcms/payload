@@ -1,12 +1,16 @@
-import type { FormField, FormState } from 'payload'
+import { type FormField, type FormState } from 'payload'
+import { deepCopyObjectComplex } from 'payload/shared'
 
 type BlacklistedKeys = 'customComponents' | 'validate'
 const blacklistedKeys: BlacklistedKeys[] = ['validate', 'customComponents']
 
-const sanitizeField = (field: FormField): FormField => {
+const sanitizeField = (incomingField: FormField): FormField => {
+  const field = deepCopyObjectComplex(incomingField)
+
   blacklistedKeys.forEach((key) => {
     delete field[key]
   })
+
   return field
 }
 

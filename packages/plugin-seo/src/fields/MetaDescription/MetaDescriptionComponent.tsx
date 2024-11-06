@@ -13,6 +13,7 @@ import {
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
+import { reduceToSerializableFields } from '@payloadcms/ui/shared'
 import React, { useCallback } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
@@ -36,7 +37,6 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
       minLength: minLengthFromProps,
       required,
     },
-    fieldState: { customComponents: { AfterInput, BeforeInput, Label } = {} } = {},
     hasGenerateDescriptionFn,
     path,
   } = props
@@ -57,7 +57,13 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
   const maxLength = maxLengthFromProps || maxLengthDefault
   const minLength = minLengthFromProps || minLengthDefault
 
-  const { errorMessage, setValue, showError, value }: FieldType<string> = useField({
+  const {
+    customComponents: { AfterInput, BeforeInput, Label },
+    errorMessage,
+    setValue,
+    showError,
+    value,
+  }: FieldType<string> = useField({
     path,
   } as Options)
 
@@ -78,12 +84,12 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
         hasPublishPermission: docInfo.hasPublishPermission,
         hasSavePermission: docInfo.hasSavePermission,
         initialData: docInfo.initialData,
-        initialState: docInfo.initialState,
+        initialState: reduceToSerializableFields(docInfo.initialState),
         locale: typeof locale === 'object' ? locale?.code : locale,
         title: docInfo.title,
       } satisfies Omit<
         Parameters<GenerateDescription>[0],
-        'collectionConfig' | 'globalConfig' | 'req'
+        'collectionConfig' | 'globalConfig' | 'hasPublishedDoc' | 'req' | 'versionCount'
       >),
       credentials: 'include',
       headers: {
