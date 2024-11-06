@@ -6,7 +6,7 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
-import { RenderServerComponent } from '@payloadcms/ui/utilities/RenderServerComponent'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
 import { getCustomViews } from './getCustomViews.js'
