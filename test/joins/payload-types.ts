@@ -19,6 +19,8 @@ export interface Config {
     singular: Singular;
     'localized-posts': LocalizedPost;
     'localized-categories': LocalizedCategory;
+    'restricted-categories': RestrictedCategory;
+    'restricted-posts': RestrictedPost;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -30,8 +32,11 @@ export interface Config {
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     versions: VersionsSelect<false> | VersionsSelect<true>;
     'categories-versions': CategoriesVersionsSelect<false> | CategoriesVersionsSelect<true>;
+    singular: SingularSelect<false> | SingularSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'localized-categories': LocalizedCategoriesSelect<false> | LocalizedCategoriesSelect<true>;
+    'restricted-categories': RestrictedCategoriesSelect<false> | RestrictedCategoriesSelect<true>;
+    'restricted-posts': RestrictedPostsSelect<false> | RestrictedPostsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -45,6 +50,10 @@ export interface Config {
   locale: 'en' | 'es';
   user: User & {
     collection: 'users';
+  };
+  jobs?: {
+    tasks: unknown;
+    workflows?: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -72,6 +81,8 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title?: string | null;
+  isFiltered?: boolean | null;
+  restrictedField?: string | null;
   upload?: (string | null) | Upload;
   category?: (string | null) | Category;
   categories?: (string | Category)[] | null;
@@ -136,6 +147,10 @@ export interface Category {
   };
   singulars?: {
     docs?: (string | Singular)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  filtered?: {
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   updatedAt: string;
@@ -204,6 +219,32 @@ export interface LocalizedCategory {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-categories".
+ */
+export interface RestrictedCategory {
+  id: string;
+  name?: string | null;
+  restrictedPosts?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-posts".
+ */
+export interface RestrictedPost {
+  id: string;
+  title?: string | null;
+  restrictedField?: string | null;
+  category?: (string | null) | RestrictedCategory;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -259,6 +300,14 @@ export interface PayloadLockedDocument {
         value: string | LocalizedCategory;
       } | null)
     | ({
+        relationTo: 'restricted-categories';
+        value: string | RestrictedCategory;
+      } | null)
+    | ({
+        relationTo: 'restricted-posts';
+        value: string | RestrictedPost;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null);
@@ -310,6 +359,8 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  isFiltered?: T;
+  restrictedField?: T;
   upload?: T;
   category?: T;
   categories?: T;
@@ -338,6 +389,8 @@ export interface CategoriesSelect<T extends boolean = true> {
         relatedPosts?: T;
         camelCasePosts?: T;
       };
+  singulars?: T;
+  filtered?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -382,6 +435,15 @@ export interface CategoriesVersionsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "singular_select".
+ */
+export interface SingularSelect<T extends boolean = true> {
+  category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "localized-posts_select".
  */
 export interface LocalizedPostsSelect<T extends boolean = true> {
@@ -397,6 +459,27 @@ export interface LocalizedPostsSelect<T extends boolean = true> {
 export interface LocalizedCategoriesSelect<T extends boolean = true> {
   name?: T;
   relatedPosts?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-categories_select".
+ */
+export interface RestrictedCategoriesSelect<T extends boolean = true> {
+  name?: T;
+  restrictedPosts?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-posts_select".
+ */
+export interface RestrictedPostsSelect<T extends boolean = true> {
+  title?: T;
+  restrictedField?: T;
+  category?: T;
   updatedAt?: T;
   createdAt?: T;
 }

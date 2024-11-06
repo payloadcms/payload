@@ -341,10 +341,6 @@ export const createClientField = ({
       break
     }
 
-    // case 'joins': {
-    //
-    // }
-
     case 'select':
     case 'radio': {
       const field = clientField as RadioFieldClient | SelectFieldClient

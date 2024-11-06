@@ -124,11 +124,13 @@ export type Sort = Array<string> | string
  */
 export type JoinQuery =
   | {
-      [schemaPath: string]: {
-        limit?: number
-        sort?: string
-        where?: Where
-      }
+      [schemaPath: string]:
+        | {
+            limit?: number
+            sort?: string
+            where?: Where
+          }
+        | false
     }
   | false
 
