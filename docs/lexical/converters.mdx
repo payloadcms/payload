@@ -370,7 +370,12 @@ const yourEditorState: SerializedEditorState // <= your current editor state her
 
 // Import editor state into your headless editor
 try {
-  headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState)) // This should commit the editor state immediately
+  headlessEditor.update(
+    () => {
+      headlessEditor.setEditorState(parsedEditorState)
+    },
+    { discrete: true },  // This should commit the editor state immediately
+  )
 } catch (e) {
   logger.error({ err: e }, 'ERROR parsing editor state')
 }
@@ -381,8 +386,6 @@ headlessEditor.getEditorState().read(() => {
   markdown = $convertToMarkdownString(yourSanitizedEditorConfig?.features?.markdownTransformers)
 })
 ```
-
-The `.setEditorState()` function immediately updates your editor state. Thus, there's no need for the `discrete: true` flag when reading the state afterward.
 
 ## Lexical => Plain Text
 
@@ -401,8 +404,12 @@ const yourEditorState: SerializedEditorState // <= your current editor state her
 
 // Import editor state into your headless editor
 try {
-  headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState)) // This should commit the editor state immediately
-} catch (e) {
+  headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState)) // This should commit the editor state immediately  headlessEditor.update(
+    () => {
+      headlessEditor.setEditorState(parsedEditorState)
+    },
+    { discrete: true },  // This should commit the editor state immediately
+  )} catch (e) {
   logger.error({ err: e }, 'ERROR parsing editor state')
 }
 

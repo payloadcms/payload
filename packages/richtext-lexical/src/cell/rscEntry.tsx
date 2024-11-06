@@ -91,7 +91,12 @@ export const RscEntryLexicalCell: React.FC<
     })
     const parsedEditorState = headlessEditor.parseEditorState(cellData)
 
-    headlessEditor.setEditorState(parsedEditorState)
+    headlessEditor.update(
+      () => {
+        headlessEditor.setEditorState(parsedEditorState)
+      },
+      { discrete: true },
+    )
 
     textContent =
       headlessEditor.getEditorState().read(() => {
