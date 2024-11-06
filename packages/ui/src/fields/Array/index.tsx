@@ -227,7 +227,13 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
               <RenderCustomComponent
                 CustomComponent={Label}
                 Fallback={
-                  <FieldLabel label={label} localized={localized} path={path} required={required} />
+                  <FieldLabel
+                    as="span"
+                    label={label}
+                    localized={localized}
+                    path={path}
+                    required={required}
+                  />
                 }
               />
             </h3>

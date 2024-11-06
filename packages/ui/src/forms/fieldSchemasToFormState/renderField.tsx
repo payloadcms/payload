@@ -78,21 +78,6 @@ export const renderField: RenderFieldMethod = ({
     fieldState.customComponents = {}
   }
 
-  if ('label' in fieldConfig) {
-    fieldState.customComponents.Label = (
-      <FieldLabel
-        label={
-          typeof fieldConfig.label === 'string' || typeof fieldConfig.label === 'object'
-            ? fieldConfig.label
-            : typeof fieldConfig.label === 'function'
-              ? fieldConfig.label({ t: req.i18n.t })
-              : ''
-        }
-        required={'required' in fieldConfig && fieldConfig.required}
-      />
-    )
-  }
-
   switch (fieldConfig.type) {
     // TODO: handle block row labels as well in a similar fashion
     case 'array': {
