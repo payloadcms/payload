@@ -96,37 +96,45 @@ export const renderDocument = async ({
     throw new Error('not-found')
   }
 
-  // Get document preferences
-  const docPreferences = await getDocPreferences({
-    id,
-    collectionSlug,
-    globalSlug,
-    payload,
-    user,
-  })
+  const [
+    docPreferences,
+    { docPermissions, hasPublishPermission, hasSavePermission },
+    { currentEditor, isLocked, lastUpdateTime },
+  ] = await Promise.all([
+    // Get document preferences
+    getDocPreferences({
+      id,
+      collectionSlug,
+      globalSlug,
+      payload,
+      user,
+    }),
 
-  // Get permissions
-  const { docPermissions, hasPublishPermission, hasSavePermission } = await getDocumentPermissions({
-    id,
-    collectionConfig,
-    data,
-    globalConfig,
-    req,
-  })
+    // Get permissions
+    getDocumentPermissions({
+      id,
+      collectionConfig,
+      data,
+      globalConfig,
+      req,
+    }),
 
-  // Fetch document lock state
-  const { currentEditor, isLocked, lastUpdateTime } = await getIsLocked({
-    id,
-    collectionConfig,
-    globalConfig,
-    isEditing,
-    payload: req.payload,
-    user,
-  })
+    // Fetch document lock state
+    getIsLocked({
+      id,
+      collectionConfig,
+      globalConfig,
+      isEditing,
+      payload: req.payload,
+      user,
+    }),
+  ])
 
-  // Get all versions required for UI
-  const { hasPublishedDoc, mostRecentVersionIsAutosaved, unpublishedVersionCount, versionCount } =
-    await getVersions({
+  const [
+    { hasPublishedDoc, mostRecentVersionIsAutosaved, unpublishedVersionCount, versionCount },
+    { state: formState },
+  ] = await Promise.all([
+    getVersions({
       id,
       collectionConfig,
       docPermissions,
@@ -134,22 +142,21 @@ export const renderDocument = async ({
       locale: locale?.code,
       payload,
       user,
-    })
-
-  // Build initial form state from data
-  const { state: formState } = await buildFormState({
-    id,
-    collectionSlug,
-    data,
-    docPermissions,
-    docPreferences,
-    globalSlug,
-    locale: locale?.code,
-    operation: (collectionSlug && id) || globalSlug ? 'update' : 'create',
-    renderAllFields: true,
-    req,
-    schemaPath: collectionSlug || globalSlug,
-  })
+    }),
+    buildFormState({
+      id,
+      collectionSlug,
+      data,
+      docPermissions,
+      docPreferences,
+      globalSlug,
+      locale: locale?.code,
+      operation: (collectionSlug && id) || globalSlug ? 'update' : 'create',
+      renderAllFields: true,
+      req,
+      schemaPath: collectionSlug || globalSlug,
+    }),
+  ])
 
   const serverProps: ServerProps = {
     i18n,
