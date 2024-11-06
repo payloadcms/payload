@@ -11,6 +11,7 @@ export const reInitializeDB = async ({
 }) => {
   const maxAttempts = 50
   let attempt = 1
+  const startTime = Date.now()
 
   while (attempt <= maxAttempts) {
     try {
@@ -31,7 +32,8 @@ export const reInitializeDB = async ({
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      console.log('Successfully reinitialized DB')
+      const timeTaken = Date.now() - startTime
+      console.log(`Successfully reinitialized DB (took ${timeTaken}ms)`)
       return
     } catch (error) {
       console.error(`Failed to reinitialize DB: ${error.message}`)
