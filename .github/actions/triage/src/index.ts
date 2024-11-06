@@ -118,7 +118,7 @@ async function checkValidReproduction(): Promise<void> {
   )
 
   // Tag
-  if (!config.actionsToPerform.includes('tag')) {
+  if (config.actionsToPerform.includes('tag')) {
     info(`Added label: ${config.invalidLink.label}`)
     await client.issues.addLabels({ ...common, labels: [config.invalidLink.label] })
   } else {
