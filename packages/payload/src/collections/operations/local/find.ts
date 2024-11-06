@@ -9,6 +9,7 @@ import type {
 import type {
   Document,
   PayloadRequest,
+  PopulateType,
   SelectType,
   Sort,
   TransformCollectionWithSelect,
@@ -32,12 +33,13 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   draft?: boolean
   fallbackLocale?: TypedLocale
   includeLockStatus?: boolean
-  joins?: JoinQuery
+  joins?: JoinQuery<TSlug>
   limit?: number
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   page?: number
   pagination?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
   select?: TSelect
   showHiddenFields?: boolean

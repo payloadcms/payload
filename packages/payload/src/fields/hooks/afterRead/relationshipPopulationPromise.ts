@@ -1,4 +1,4 @@
-import type { PayloadRequest } from '../../../types/index.js'
+import type { PayloadRequest, PopulateType } from '../../../types/index.js'
 import type { JoinField, RelationshipField, UploadField } from '../../config/types.js'
 
 import { createDataloaderCacheKey } from '../../../collections/dataloader.js'
@@ -16,6 +16,7 @@ type PopulateArgs = {
   key?: string
   locale: null | string
   overrideAccess: boolean
+  populateArg?: PopulateType
   req: PayloadRequest
   showHiddenFields: boolean
 }
@@ -32,6 +33,7 @@ const populate = async ({
   key,
   locale,
   overrideAccess,
+  populateArg,
   req,
   showHiddenFields,
 }: PopulateArgs) => {
@@ -69,7 +71,9 @@ const populate = async ({
           fallbackLocale,
           locale,
           overrideAccess,
-          select: relatedCollection.config.defaultPopulate,
+          select:
+            populateArg?.[relatedCollection.config.slug] ??
+            relatedCollection.config.defaultPopulate,
           showHiddenFields,
           transactionID: req.transactionID,
         }),
@@ -110,6 +114,7 @@ type PromiseArgs = {
   field: JoinField | RelationshipField | UploadField
   locale: null | string
   overrideAccess: boolean
+  populate?: PopulateType
   req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: Record<string, any>
@@ -123,6 +128,7 @@ export const relationshipPopulationPromise = async ({
   field,
   locale,
   overrideAccess,
+  populate: populateArg,
   req,
   showHiddenFields,
   siblingDoc,
@@ -154,6 +160,7 @@ export const relationshipPopulationPromise = async ({
                 key: localeKey,
                 locale,
                 overrideAccess,
+                populateArg,
                 req,
                 showHiddenFields,
               })
@@ -183,6 +190,7 @@ export const relationshipPopulationPromise = async ({
               index,
               locale,
               overrideAccess,
+              populateArg,
               req,
               showHiddenFields,
             })
@@ -211,6 +219,7 @@ export const relationshipPopulationPromise = async ({
           key: localeKey,
           locale,
           overrideAccess,
+          populateArg,
           req,
           showHiddenFields,
         })
@@ -230,6 +239,7 @@ export const relationshipPopulationPromise = async ({
       field,
       locale,
       overrideAccess,
+      populateArg,
       req,
       showHiddenFields,
     })
