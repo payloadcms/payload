@@ -130,7 +130,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
             <div className={`${baseClass}__row-label-wrap`}>
               <RenderCustomComponent
                 CustomComponent={Label}
-                Fallback={<RowLabel label={getTranslation(label, i18n)} />}
+                Fallback={<RowLabel label={getTranslation(label, i18n)} path={path} />}
               />
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>

@@ -124,7 +124,12 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         }
         header={
           <div className={`${baseClass}__row-header`}>
-            <RowLabel CustomComponent={CustomRowLabel} label={fallbackLabel} />
+            <RowLabel
+              CustomComponent={CustomRowLabel}
+              label={fallbackLabel}
+              path={path}
+              rowNumber={rowIndex}
+            />
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
         }

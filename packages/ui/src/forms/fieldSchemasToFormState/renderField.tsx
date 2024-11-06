@@ -89,16 +89,16 @@ export const renderField: RenderFieldMethod = ({
 
           fieldState.customComponents.RowLabels[rowIndex] = (
             <RenderServerComponent
-              clientProps={{
-                ...clientProps,
+              clientProps={clientProps}
+              Component={fieldConfig.admin.components.RowLabel}
+              importMap={req.payload.importMap}
+              serverProps={{
+                ...serverProps,
                 rowLabel: `${getTranslation(fieldConfig.labels.singular, req.i18n)} ${String(
                   rowIndex + 1,
                 ).padStart(2, '0')}`,
                 rowNumber: rowIndex + 1,
               }}
-              Component={fieldConfig.admin.components.RowLabel}
-              importMap={req.payload.importMap}
-              serverProps={serverProps}
             />
           )
         }
