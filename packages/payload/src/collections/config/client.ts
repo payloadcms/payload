@@ -20,7 +20,7 @@ export type ServerOnlyCollectionProperties = keyof Pick<
 
 export type ServerOnlyCollectionAdminProperties = keyof Pick<
   SanitizedCollectionConfig['admin'],
-  'hidden' | 'preview'
+  'hidden'
 >
 
 export type ServerOnlyUploadProperties = keyof Pick<
@@ -33,14 +33,19 @@ export type ServerOnlyUploadProperties = keyof Pick<
 >
 
 export type ClientCollectionConfig = {
-  _isPreviewEnabled?: true
   admin: {
     components: null
     description?: StaticDescription
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
+    preview?: boolean
   } & Omit<
     SanitizedCollectionConfig['admin'],
-    'components' | 'description' | 'joins' | 'livePreview' | ServerOnlyCollectionAdminProperties
+    | 'components'
+    | 'description'
+    | 'joins'
+    | 'livePreview'
+    | 'preview'
+    | ServerOnlyCollectionAdminProperties
   >
   fields: ClientField[]
   labels?: {
@@ -70,7 +75,7 @@ const serverOnlyUploadProperties: Partial<ServerOnlyUploadProperties>[] = [
 
 const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProperties>[] = [
   'hidden',
-  'preview',
+  // 'preview' is handled separately
   // `livePreview` is handled separately
 ]
 
@@ -130,10 +135,6 @@ export const createClientCollectionConfig = ({
     })
   }
 
-  if (collection.admin.preview) {
-    clientCollection._isPreviewEnabled = true
-  }
-
   if (!clientCollection.admin) {
     clientCollection.admin = {} as ClientCollectionConfig['admin']
   }
@@ -143,6 +144,10 @@ export const createClientCollectionConfig = ({
       delete clientCollection.admin[key]
     }
   })
+
+  if (collection.admin.preview) {
+    clientCollection.admin.preview = true
+  }
 
   clientCollection.admin.components = null
 

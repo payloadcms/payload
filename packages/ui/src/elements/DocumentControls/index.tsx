@@ -203,7 +203,7 @@ export const DocumentControls: React.FC<{
         </div>
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
-            {(collectionConfig?._isPreviewEnabled || globalConfig?._isPreviewEnabled) && (
+            {(collectionConfig?.admin.preview || globalConfig?.admin.preview) && (
               <Fragment>{CustomPreviewButton || <PreviewButton />}</Fragment>
             )}
             {hasSavePermission && (

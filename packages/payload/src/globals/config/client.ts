@@ -15,22 +15,30 @@ export type ServerOnlyGlobalProperties = keyof Pick<
   SanitizedGlobalConfig,
   'access' | 'admin' | 'custom' | 'endpoints' | 'fields' | 'hooks'
 >
-export type ServerOnlyGlobalAdminProperties = keyof Pick<
-  SanitizedGlobalConfig['admin'],
-  'hidden' | 'preview'
->
+
+export type ServerOnlyGlobalAdminProperties = keyof Pick<SanitizedGlobalConfig['admin'], 'hidden'>
 
 export type ClientGlobalConfig = {
-  _isPreviewEnabled?: true
   admin: {
     components: null
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
+    preview?: boolean
   } & Omit<
     SanitizedGlobalConfig['admin'],
-    'components' | 'livePreview' | ServerOnlyGlobalAdminProperties
+    'components' | 'livePreview' | 'preview' | ServerOnlyGlobalAdminProperties
   >
   fields: ClientField[]
 } & Omit<SanitizedGlobalConfig, 'admin' | 'fields' | ServerOnlyGlobalProperties>
+
+const serverOnlyProperties: Partial<ServerOnlyGlobalProperties>[] = [
+  'hooks',
+  'access',
+  'endpoints',
+  'custom',
+  // `admin` is handled separately
+]
+
+const serverOnlyGlobalAdminProperties: Partial<ServerOnlyGlobalAdminProperties>[] = ['hidden']
 
 export const createClientGlobalConfig = ({
   defaultIDType,
@@ -50,38 +58,25 @@ export const createClientGlobalConfig = ({
     i18n,
   })
 
-  const serverOnlyProperties: Partial<ServerOnlyGlobalProperties>[] = [
-    'hooks',
-    'access',
-    'endpoints',
-    'custom',
-    // `admin` is handled separately
-  ]
-
   serverOnlyProperties.forEach((key) => {
     if (key in clientGlobal) {
       delete clientGlobal[key]
     }
   })
 
-  if (global.admin.preview) {
-    clientGlobal._isPreviewEnabled = true
-  }
-
   if (!clientGlobal.admin) {
     clientGlobal.admin = {} as ClientGlobalConfig['admin']
   }
-
-  const serverOnlyGlobalAdminProperties: Partial<ServerOnlyGlobalAdminProperties>[] = [
-    'hidden',
-    'preview',
-  ]
 
   serverOnlyGlobalAdminProperties.forEach((key) => {
     if (key in clientGlobal.admin) {
       delete clientGlobal.admin[key]
     }
   })
+
+  if (global.admin.preview) {
+    clientGlobal.admin.preview = true
+  }
 
   clientGlobal.admin.components = null
 
