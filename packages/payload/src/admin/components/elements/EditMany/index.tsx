@@ -77,7 +77,7 @@ const SaveDraft: React.FC<{ action: string; disabled: boolean }> = ({ action, di
   }, [action, submit])
 
   return (
-    <FormSubmit className={`${baseClass}__draft`} disabled={disabled} onClick={save}>
+    <FormSubmit buttonStyle="secondary" className={`${baseClass}__draft`} disabled={disabled} onClick={save}>
       {t('saveDraft')}
     </FormSubmit>
   )
@@ -147,11 +147,11 @@ const EditMany: React.FC<Props> = (props) => {
                       <div className={`${baseClass}__document-actions`}>
                         {collection.versions ? (
                           <React.Fragment>
-                            <Publish
+                            <SaveDraft
                               action={`${serverURL}${api}/${slug}${getQueryParams()}&draft=true`}
                               disabled={selected.length === 0}
                             />
-                            <SaveDraft
+                            <Publish
                               action={`${serverURL}${api}/${slug}${getQueryParams()}&draft=true`}
                               disabled={selected.length === 0}
                             />
