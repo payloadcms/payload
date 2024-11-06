@@ -1,6 +1,5 @@
 'use client'
 
-export { RichTextCell } from '../../cell/index.js'
 export { BlockquoteElementButton } from '../../field/elements/blockquote/Button.js'
 export { BlockquoteElement } from '../../field/elements/blockquote/Element.js'
 export { ElementButton } from '../../field/elements/Button.js'
