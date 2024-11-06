@@ -107,10 +107,6 @@ describe('admin1', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await reInitializeDB({
-      serverURL,
-      snapshotKey: 'adminTests1',
-    })
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
 

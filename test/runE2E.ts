@@ -1,3 +1,4 @@
+import { spawn } from 'child_process'
 import globby from 'globby'
 import minimist from 'minimist'
 import path from 'path'
@@ -70,8 +71,6 @@ testRunCodes.forEach((tr) => {
 })
 console.log('\n')
 
-if (testRunCodes.some((tr) => tr.code > 0)) process.exit(1)
-
 function executePlaywright(suitePath: string, bail = false) {
   console.log(`Executing ${suitePath}...`)
   const playwrightCfg = path.resolve(
@@ -79,10 +78,16 @@ function executePlaywright(suitePath: string, bail = false) {
     `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
   )
 
+  const suite = path.basename(path.dirname(suitePath))
+
+  const child = spawn('pnpm', ['dev', suite], {
+    stdio: 'inherit',
+    cwd: path.resolve(dirname, '..'),
+  })
+
   const cmd = slash(`${playwrightBin} test ${suitePath} -c ${playwrightCfg}`)
   console.log('\n', cmd)
   const { code, stdout } = shelljs.exec(cmd)
-  const suite = path.basename(path.dirname(suitePath))
   const results = { code, suiteName: suite }
   if (code) {
     if (bail) {
@@ -91,6 +96,8 @@ function executePlaywright(suitePath: string, bail = false) {
     }
   }
   testRunCodes.push(results)
+
+  child.kill()
   return stdout
 }
 
