@@ -163,7 +163,7 @@ export const renderListView = async (
       enableRowSelections,
       fields,
       i18n: req.i18n,
-      importMap: payload.importMap,
+      payload,
       useAsTitle,
     })
 

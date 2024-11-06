@@ -240,7 +240,7 @@ export const buildTableState = async (
     enableRowSelections,
     fields,
     i18n: req.i18n,
-    importMap: payload.importMap,
+    payload,
     renderRowTypes,
     tableAppearance,
     useAsTitle: collectionConfig.admin.useAsTitle,

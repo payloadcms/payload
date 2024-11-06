@@ -4,6 +4,7 @@ import type {
   Field,
   ImportMap,
   PaginatedDocs,
+  Payload,
 } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
@@ -46,7 +47,7 @@ export const renderTable = ({
   enableRowSelections,
   fields,
   i18n,
-  importMap,
+  payload,
   renderRowTypes,
   tableAppearance,
   useAsTitle,
@@ -60,7 +61,7 @@ export const renderTable = ({
   enableRowSelections: boolean
   fields: Field[]
   i18n: I18nClient
-  importMap: ImportMap
+  payload: Payload
   renderRowTypes?: boolean
   tableAppearance?: 'condensed' | 'default'
   useAsTitle: CollectionConfig['admin']['useAsTitle']
@@ -90,7 +91,7 @@ export const renderTable = ({
     // sortColumnProps,
     customCellProps,
     docs,
-    importMap,
+    payload,
     useAsTitle,
   })
 

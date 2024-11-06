@@ -1,13 +1,15 @@
-import type {
-  ClientCollectionConfig,
-  DefaultCellComponentProps,
-  Field,
-  ImportMap,
-  PaginatedDocs,
-  SanitizedCollectionConfig,
-  StaticLabel,
+import {
+  type ClientCollectionConfig,
+  deepCopyObjectSimple,
+  type DefaultCellComponentProps,
+  type Field,
+  MissingEditorProp,
+  type PaginatedDocs,
+  type Payload,
+  type PayloadComponent,
+  type SanitizedCollectionConfig,
+  type StaticLabel,
 } from 'payload'
-
 import { fieldIsPresentationalOnly } from 'payload/shared'
 import React from 'react'
 
@@ -33,7 +35,7 @@ type Args = {
   enableRowSelections: boolean
   enableRowTypes?: boolean
   fields: Field[]
-  importMap: ImportMap
+  payload: Payload
   sortColumnProps?: Partial<SortColumnProps>
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }
@@ -48,7 +50,7 @@ export const buildColumnState = (args: Args): Column[] => {
     docs,
     enableRowSelections,
     fields,
-    importMap,
+    payload,
     sortColumnProps,
     useAsTitle,
   } = args
@@ -143,7 +145,7 @@ export const buildColumnState = (args: Args): Column[] => {
         : undefined
 
     const CustomLabel = CustomLabelToRender ? (
-      <RenderServerComponent Component={CustomLabelToRender} importMap={importMap} />
+      <RenderServerComponent Component={CustomLabelToRender} importMap={payload.importMap} />
     ) : undefined
 
     const fieldAffectsDataSubFields =
@@ -171,6 +173,7 @@ export const buildColumnState = (args: Args): Column[] => {
 
     const serverProps = {
       field: _field,
+      payload,
     }
 
     const column: Column = {
@@ -190,17 +193,61 @@ export const buildColumnState = (args: Args): Column[] => {
               rowData: doc,
             }
 
-            const CustomCell =
-              _field?.admin && 'components' in _field.admin && _field.admin.components?.Cell ? (
+            let CustomCell = null
+
+            if (_field?.type === 'richText') {
+              if (!_field?.editor) {
+                throw new MissingEditorProp(_field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+              }
+
+              if (typeof _field?.editor === 'function') {
+                throw new Error('Attempted to access unsanitized rich text editor.')
+              }
+
+              if (!_field.admin) {
+                _field.admin = {}
+              }
+
+              if (!_field.admin.components) {
+                _field.admin.components = {}
+              }
+
+              /**
+               * We have to deep copy all the props we send to the client (= CellComponent.clientProps).
+               * That way, every editor's field / cell props we send to the client have their own object references.
+               *
+               * If we send the same object reference to the client twice (e.g. through some configurations where 2 or more fields
+               * reference the same editor object, like the root editor), the admin panel may hang indefinitely. This has been happening since
+               * a newer Next.js update that made it break when sending the same object reference to the client twice.
+               *
+               * We can use deepCopyObjectSimple as client props should be JSON-serializable.
+               */
+              const CellComponent: PayloadComponent = _field.editor.CellComponent
+              if (typeof CellComponent === 'object' && CellComponent.clientProps) {
+                CellComponent.clientProps = deepCopyObjectSimple(CellComponent.clientProps)
+              }
+
+              CustomCell = (
                 <RenderServerComponent
                   clientProps={cellClientProps}
-                  Component={
-                    _field?.admin && 'components' in _field.admin && _field.admin.components?.Cell
-                  }
-                  importMap={importMap}
+                  Component={CellComponent}
+                  importMap={payload.importMap}
                   serverProps={serverProps}
                 />
-              ) : undefined
+              )
+            } else {
+              CustomCell =
+                _field?.admin && 'components' in _field.admin && _field.admin.components?.Cell ? (
+                  <RenderServerComponent
+                    clientProps={cellClientProps}
+                    Component={
+                      _field?.admin && 'components' in _field.admin && _field.admin.components?.Cell
+                    }
+                    importMap={payload.importMap}
+                    serverProps={serverProps}
+                  />
+                ) : undefined
+            }
 
             return (
               <RenderCustomComponent
