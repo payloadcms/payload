@@ -26,7 +26,7 @@ import type {
   TabsFieldClient,
 } from 'payload'
 
-import { deepCopyObjectSimple, MissingEditorProp } from 'payload'
+import { deepCopyObjectSimple, flattenTopLevelFields, MissingEditorProp } from 'payload'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 
 import { getComponent } from './getComponent.js'
@@ -579,7 +579,7 @@ export const createClientFields = ({
     }
   }
 
-  const hasID = newClientFields.findIndex((f) => fieldAffectsData(f) && f.name === 'id') > -1
+  const hasID = flattenTopLevelFields(fields).some((f) => fieldAffectsData(f) && f.name === 'id')
 
   if (!disableAddingID && !hasID) {
     newClientFields.push({
