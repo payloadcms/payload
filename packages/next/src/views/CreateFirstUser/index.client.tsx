@@ -1,6 +1,12 @@
 'use client'
 import type { FormProps, UserWithToken } from '@payloadcms/ui'
-import type { ClientCollectionConfig, FormState, LoginWithUsernameOptions } from 'payload'
+import type {
+  ClientCollectionConfig,
+  DocumentPermissions,
+  DocumentPreferences,
+  FormState,
+  LoginWithUsernameOptions,
+} from 'payload'
 
 import {
   ConfirmPasswordField,
@@ -8,6 +14,7 @@ import {
   Form,
   FormSubmit,
   PasswordField,
+  RenderFields,
   useAuth,
   useConfig,
   useServerFunctions,
@@ -16,10 +23,12 @@ import {
 import React from 'react'
 
 export const CreateFirstUserClient: React.FC<{
+  docPermissions: DocumentPermissions
+  docPreferences: DocumentPreferences
   initialState: FormState
   loginWithUsername?: false | LoginWithUsernameOptions
   userSlug: string
-}> = ({ initialState, loginWithUsername, userSlug }) => {
+}> = ({ docPermissions, docPreferences, initialState, loginWithUsername, userSlug }) => {
   const {
     config: {
       routes: { admin, api: apiRoute },
@@ -39,14 +48,16 @@ export const CreateFirstUserClient: React.FC<{
     async ({ formState: prevFormState }) => {
       const { state } = await getFormState({
         collectionSlug: userSlug,
+        docPermissions,
+        docPreferences,
         formState: prevFormState,
         operation: 'create',
-        schemaPath: `_${userSlug}.auth`,
+        schemaPath: userSlug,
       })
 
       return state
     },
-    [userSlug, getFormState],
+    [userSlug, getFormState, docPermissions, docPreferences],
   )
 
   const handleFirstRegister = (data: UserWithToken) => {
@@ -79,7 +90,15 @@ export const CreateFirstUserClient: React.FC<{
         }}
       />
       <ConfirmPasswordField />
-      {/* Fields Here */}
+      <RenderFields
+        fields={collectionConfig.fields}
+        forceRender
+        parentIndexPath=""
+        parentPath=""
+        parentSchemaPath={userSlug}
+        permissions={null}
+        readOnly={false}
+      />
       <FormSubmit size="large">{t('general:create')}</FormSubmit>
     </Form>
   )

@@ -150,7 +150,7 @@ function RenderField({
   const Field = useFormFields(([fields]) => fields && fields?.[path]?.customComponents?.Field)
 
   if (Field !== undefined) {
-    return Field
+    return Field || null
   }
 
   const sharedProps: Pick<

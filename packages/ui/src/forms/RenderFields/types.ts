@@ -20,5 +20,6 @@ export type Props = {
         [fieldName: string]: FieldPermissions
       }
     | FieldPermissions
+    | null
   readonly readOnly?: boolean
 }
