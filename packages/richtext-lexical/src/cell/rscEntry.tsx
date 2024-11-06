@@ -89,13 +89,11 @@ export const RscEntryLexicalCell: React.FC<
       nodes: getEnabledNodes({ editorConfig: sanitizedEditorConfig }),
       theme: sanitizedEditorConfig.lexical.theme,
     })
-    const parsedEditorState = headlessEditor.parseEditorState(cellData)
-
     headlessEditor.update(
       () => {
-        headlessEditor.setEditorState(parsedEditorState)
+        headlessEditor.setEditorState(headlessEditor.parseEditorState(cellData))
       },
-      { discrete: true },
+      { discrete: true }, // This should commit the editor state immediately
     )
 
     textContent =

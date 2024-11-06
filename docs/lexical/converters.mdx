@@ -372,7 +372,7 @@ const yourEditorState: SerializedEditorState // <= your current editor state her
 try {
   headlessEditor.update(
     () => {
-      headlessEditor.setEditorState(parsedEditorState)
+      headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
     },
     { discrete: true },  // This should commit the editor state immediately
   )
@@ -404,12 +404,13 @@ const yourEditorState: SerializedEditorState // <= your current editor state her
 
 // Import editor state into your headless editor
 try {
-  headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState)) // This should commit the editor state immediately  headlessEditor.update(
+    headlessEditor.update(
     () => {
-      headlessEditor.setEditorState(parsedEditorState)
+      headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
     },
     { discrete: true },  // This should commit the editor state immediately
-  )} catch (e) {
+  )
+  } catch (e) {
   logger.error({ err: e }, 'ERROR parsing editor state')
 }
 
