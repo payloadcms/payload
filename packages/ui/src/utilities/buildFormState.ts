@@ -243,7 +243,7 @@ export const buildFormState = async (
     preferences: docPreferences || { fields: {} },
     previousFormState: formState,
     renderAllFields,
-    renderFieldMethod: renderField,
+    renderFieldFn: renderField,
     req,
     schemaPath,
   })
