@@ -21,17 +21,7 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {
-    posts: {};
-    'localized-posts': {};
-    'versioned-posts': {};
-    'deep-posts': {};
-    pages: {};
-    users: {};
-    'payload-locked-documents': {};
-    'payload-preferences': {};
-    'payload-migrations': {};
-  };
+  collectionsJoins: {};
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;

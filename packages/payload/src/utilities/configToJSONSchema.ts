@@ -113,7 +113,9 @@ function generateCollectionJoinsSchemas(collections: SanitizedCollectionConfig[]
         }
       }
 
-      acc[slug] = schema
+      if (Object.keys(schema.properties).length > 0) {
+        acc[slug] = schema
+      }
 
       return acc
     },

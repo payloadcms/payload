@@ -27,7 +27,6 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {
-    posts: {};
     categories: {
       relatedPosts: 'posts';
       hasManyPosts: 'posts';
@@ -40,23 +39,15 @@ export interface Config {
     uploads: {
       relatedPosts: 'posts';
     };
-    versions: {};
     'categories-versions': {
       relatedVersions: 'versions';
     };
-    singular: {};
-    'localized-posts': {};
     'localized-categories': {
       relatedPosts: 'localized-posts';
     };
     'restricted-categories': {
       restrictedPosts: 'posts';
     };
-    'restricted-posts': {};
-    users: {};
-    'payload-locked-documents': {};
-    'payload-preferences': {};
-    'payload-migrations': {};
   };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
