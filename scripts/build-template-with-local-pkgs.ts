@@ -16,9 +16,15 @@ async function main() {
   const templateDir = path.resolve(dirname, '../templates')
   const templateName = process.argv[2]
   const templatePath = path.join(templateDir, templateName)
+
   console.log({
     templatePath,
   })
+
+  const execOpts = {
+    cwd: templatePath,
+    stdio: 'inherit' as const,
+  }
 
   const allFiles = await fs.readdir(templatePath, { withFileTypes: true })
   const allTgzs = allFiles
@@ -30,8 +36,8 @@ async function main() {
     allTgzs,
   })
 
-  execSync('pnpm add ./*.tgz --ignore-workspace', { cwd: templatePath, stdio: 'inherit' })
-  execSync('pnpm install --ignore-workspace', { cwd: templatePath, stdio: 'inherit' })
+  execSync('pnpm add ./*.tgz --ignore-workspace', execOpts)
+  execSync('pnpm install --ignore-workspace', execOpts)
 
   const packageJsonPath = path.join(templatePath, 'package.json')
   const packageJson = await fs.readFile(packageJsonPath, 'utf-8')
@@ -57,8 +63,8 @@ async function main() {
   packageJsonObj.pnpm = { overrides }
   await fs.writeFile(packageJsonPath, JSON.stringify(packageJsonObj, null, 2))
 
-  execSync('pnpm install --ignore-workspace', { cwd: templatePath, stdio: 'inherit' })
-  execSync('pnpm run build', { cwd: templatePath, stdio: 'inherit' })
+  execSync('pnpm install --ignore-workspace', execOpts)
+  execSync('pnpm run build', execOpts)
 
   header(`\n🎉 Done!`)
 }

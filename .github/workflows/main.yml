@@ -393,6 +393,11 @@ jobs:
   app-build-with-packed:
     runs-on: ubuntu-latest
     needs: build
+    strategy:
+      matrix:
+        template:
+          - blank
+          - website
 
     steps:
       # https://github.com/actions/virtual-environments/issues/1187
@@ -417,15 +422,10 @@ jobs:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
 
-      - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.11.0
-        with:
-          mongodb-version: 6.0
-
-      - name: Pack and build app
+      - name: Build Template ${{ matrix.template }}
         run: |
-          pnpm run script:pack --dest templates/blank
-          pnpm runts scripts/build-template-with-local-pkgs.ts website
+          pnpm run script:pack --dest templates/${{ matrix.template }}
+          pnpm runts scripts/build-template-with-local-pkgs.ts ${{ matrix.template }}
 
   tests-type-generation:
     runs-on: ubuntu-latest
