@@ -79,7 +79,9 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
       </div>
       <RenderCustomComponent
         CustomComponent={Label}
-        Fallback={<FieldLabel label={label} localized={localized} required={required} />}
+        Fallback={
+          <FieldLabel htmlFor={name} label={label} localized={localized} required={required} />
+        }
       />
     </div>
   )

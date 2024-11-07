@@ -212,7 +212,7 @@ export {
   ServerFunctionsProvider,
   useServerFunctions,
 } from '../../providers/ServerFunctions/index.js'
-export { ActionsProvider, SetViewActions, useActions } from '../../providers/Actions/index.js'
+export { ActionsProvider, useActions } from '../../providers/Actions/index.js'
 export { AuthProvider, useAuth } from '../../providers/Auth/index.js'
 export type { UserWithToken } from '../../providers/Auth/index.js'
 export { ClientFunctionProvider, useClientFunctions } from '../../providers/ClientFunction/index.js'

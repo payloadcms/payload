@@ -29,7 +29,6 @@ export const renderField: RenderFieldMethod = ({
   parentSchemaPath,
   path,
   permissions: incomingPermissions,
-  previousFieldState,
   req,
   schemaPath,
   siblingData,

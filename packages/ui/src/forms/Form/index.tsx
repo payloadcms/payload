@@ -47,7 +47,7 @@ import { mergeServerFormState } from './mergeServerFormState.js'
 const baseClass = 'form'
 
 export const Form: React.FC<FormProps> = (props) => {
-  const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const {
     action,
@@ -467,10 +467,14 @@ export const Form: React.FC<FormProps> = (props) => {
       const abortController = new AbortController()
       abortControllerRef.current = abortController
 
+      const docPreferences = await getDocPreferences()
+
       const { state: newState } = await getFormState({
         id,
         collectionSlug,
         data,
+        docPermissions,
+        docPreferences,
         globalSlug,
         operation,
         renderAllFields: true,
@@ -482,7 +486,16 @@ export const Form: React.FC<FormProps> = (props) => {
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state: newState })
     },
-    [collectionSlug, dispatchFields, globalSlug, id, operation, getFormState],
+    [
+      collectionSlug,
+      dispatchFields,
+      globalSlug,
+      id,
+      operation,
+      getFormState,
+      docPermissions,
+      getDocPreferences,
+    ],
   )
 
   const replaceState = useCallback(
@@ -492,47 +505,6 @@ export const Form: React.FC<FormProps> = (props) => {
       dispatchFields({ type: 'REPLACE_STATE', state })
     },
     [dispatchFields],
-  )
-
-  const getFieldStateBySchemaPath = useCallback(
-    async ({
-      collectionSlug,
-      data,
-      globalSlug,
-      path,
-      schemaPath,
-    }: {
-      collectionSlug: string
-      data: unknown
-      globalSlug: string
-      path: string
-      schemaPath: string
-    }) => {
-      if (abortControllerRef2.current) {
-        try {
-          abortControllerRef2.current.abort()
-        } catch (_err) {
-          // swallow error
-        }
-      }
-
-      const abortController = new AbortController()
-      abortControllerRef2.current = abortController
-      const docPreferences = await getDocPreferences()
-
-      const { state: formState } = await getFormState({
-        collectionSlug,
-        data,
-        docPreferences,
-        globalSlug,
-        renderAllFields: true,
-        schemaPath,
-        signal: abortController.signal,
-      })
-
-      return { formState }
-    },
-    [getFormState, getDocPreferences],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(

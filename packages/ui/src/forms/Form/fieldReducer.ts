@@ -55,11 +55,10 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
       const errorPaths: { fieldErrorPath: string; parentPath: string }[] = []
 
-      action.errors.forEach(({ fieldPath, fieldSchemaPath, message }) => {
-        newState[fieldPath.join('.')] = {
-          ...(newState[fieldPath.join('.')] || {
+      action.errors.forEach(({ message, path: fieldPath }) => {
+        newState[fieldPath] = {
+          ...(newState[fieldPath] || {
             initialValue: null,
-            schemaPath: fieldSchemaPath,
             value: null,
           }),
           errorMessage: message,
@@ -69,8 +68,11 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
         if (fieldPath.length > 1) {
           errorPaths.push({
-            fieldErrorPath: fieldPath.join('.'),
-            parentPath: fieldPath.slice(0, fieldPath.length - 1).join('.'),
+            fieldErrorPath: fieldPath,
+            parentPath: fieldPath
+              .split('.')
+              .slice(0, fieldPath.length - 1)
+              .join('.'),
           })
         }
       })
