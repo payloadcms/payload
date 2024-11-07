@@ -65,7 +65,7 @@ export type AddFieldStatePromiseArgs = {
   preferences: DocumentPreferences
   previousFormState: FormState
   renderAllFields: boolean
-  renderFieldMethod: RenderFieldMethod
+  renderFieldFn: RenderFieldMethod
   /**
    * Req is used for validation and defaultValue calculation. If you don't need validation,
    * just create your own req and pass in the locale and the user
@@ -110,7 +110,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     preferences,
     previousFormState,
     renderAllFields,
-    renderFieldMethod,
+    renderFieldFn,
     req,
     skipConditionChecks = false,
     skipValidation = false,
@@ -246,7 +246,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 preferences,
                 previousFormState,
                 renderAllFields: requiresRender,
-                renderFieldMethod,
+                renderFieldFn,
                 req,
                 skipConditionChecks,
                 skipValidation,
@@ -378,7 +378,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   preferences,
                   previousFormState,
                   renderAllFields: requiresRender,
-                  renderFieldMethod,
+                  renderFieldFn,
                   req,
                   skipConditionChecks,
                   skipValidation,
@@ -463,7 +463,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           preferences,
           previousFormState,
           renderAllFields,
-          renderFieldMethod,
+          renderFieldFn,
           req,
           skipConditionChecks,
           skipValidation,
@@ -607,7 +607,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       preferences,
       previousFormState,
       renderAllFields,
-      renderFieldMethod,
+      renderFieldFn,
       req,
       skipConditionChecks,
       skipValidation,
@@ -654,7 +654,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         preferences,
         previousFormState,
         renderAllFields,
-        renderFieldMethod,
+        renderFieldFn,
         req,
         skipConditionChecks,
         skipValidation,
@@ -680,7 +680,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
   const isDisabled = field?.admin && 'disabled' in field.admin && field.admin.disabled
 
-  if (requiresRender && !isDisabled && renderFieldMethod) {
+  if (requiresRender && !isDisabled && renderFieldFn) {
     const fieldState = state[path]
     const fieldConfig = fieldSchemaMap.get(schemaPath)
 
@@ -698,7 +698,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       return
     }
 
-    renderFieldMethod({
+    renderFieldFn({
       data: fullData,
       fieldConfig: fieldConfig as Field,
       fieldSchemaMap,

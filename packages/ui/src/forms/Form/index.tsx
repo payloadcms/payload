@@ -12,7 +12,6 @@ import {
 } from 'payload/shared'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { v4 as uuidv4 } from 'uuid'
 
 import type {
   Context as FormContextType,
@@ -44,7 +43,6 @@ import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
-import { reduceToSerializableFields } from './reduceToSerializableFields.js'
 
 const baseClass = 'form'
 
@@ -673,10 +671,7 @@ export const Form: React.FC<FormProps> = (props) => {
     () => {
       const executeOnChange = async () => {
         if (Array.isArray(onChange)) {
-          // deep copy, as we do not want to mutate the original state. Complex, to avoid maximum call stack exceeded errors
-          let revalidatedFormState: FormState = deepCopyObjectSimpleWithoutReactComponents(
-            contextRef.current.fields,
-          )
+          let revalidatedFormState: FormState = contextRef.current.fields
 
           for (const onChangeFn of onChange) {
             // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
