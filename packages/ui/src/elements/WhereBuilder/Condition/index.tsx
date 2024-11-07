@@ -46,23 +46,10 @@ import { useDebounce } from '../../../hooks/useDebounce.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
-import { DateField } from './Date/index.js'
+import { DefaultFilter } from './DefaultFilter/index.js'
 import './index.scss'
-import { NumberField } from './Number/index.js'
-import { RelationshipField } from './Relationship/index.js'
-import { Select } from './Select/index.js'
-import { Text } from './Text/index.js'
 
 const baseClass = 'condition'
-
-const valueFields = {
-  date: DateField,
-  number: NumberField,
-  radio: Select,
-  relationship: RelationshipField,
-  select: Select,
-  text: Text,
-}
 
 export const Condition: React.FC<Props> = (props) => {
   const {
@@ -115,10 +102,6 @@ export const Condition: React.FC<Props> = (props) => {
   const booleanSelect =
     ['exists'].includes(internalOperatorOption) || internalField?.field?.type === 'checkbox'
 
-  const FilterComponent = booleanSelect
-    ? Select
-    : valueFields?.[internalField?.field?.type as keyof typeof valueFields] || Text
-
   let valueOptions
 
   if (booleanSelect) {
@@ -163,30 +146,16 @@ export const Condition: React.FC<Props> = (props) => {
           </div>
           <div className={`${baseClass}__value`}>
             {RenderedFilter || (
-              <FilterComponent
+              <DefaultFilter
+                booleanSelect={booleanSelect}
                 disabled={!internalOperatorOption}
-                field={internalField?.field}
+                internalField={internalField}
                 onChange={setInternalQueryValue}
                 operator={internalOperatorOption}
                 options={valueOptions}
                 value={internalQueryValue ?? ''}
               />
             )}
-            {/* <RenderComponent
-              clientProps={{
-                ...internalField?.field,
-                disabled: !internalOperatorOption,
-                onChange: setInternalQueryValue,
-                operator: internalOperatorOption,
-                options: valueOptions,
-                relationTo:
-                  internalField?.field?.type === 'relationship'
-                    ? internalField?.field?.relationTo
-                    : undefined,
-                value: internalQueryValue ?? '',
-              }}
-              mappedComponent={ValueComponent}
-            /> */}
           </div>
         </div>
         <div className={`${baseClass}__actions`}>

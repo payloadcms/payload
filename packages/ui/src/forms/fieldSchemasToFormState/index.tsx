@@ -18,7 +18,12 @@ type Args = {
   collectionSlug?: string
   data?: Data
   fields: Field[] | undefined
-  fieldSchemaMap: FieldSchemaMap
+  /**
+   * The field schema map is required for field rendering.
+   * If fields should not be rendered (=> `renderFieldFn` is not provided),
+   * then the field schema map is not required.
+   */
+  fieldSchemaMap: FieldSchemaMap | undefined
   id?: number | string
   operation?: 'create' | 'update'
   permissions: DocumentPermissions['fields']

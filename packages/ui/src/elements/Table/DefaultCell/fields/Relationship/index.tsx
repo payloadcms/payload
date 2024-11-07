@@ -119,6 +119,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
           if (previewAllowed && document) {
             fileField = (
               <FileCell
+                collectionConfig={relatedCollection}
                 cellData={label}
                 customCellProps={customCellContext}
                 field={field}

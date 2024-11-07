@@ -8,7 +8,6 @@ import type { ListDrawerProps } from './types.js'
 
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { hoistQueryParamsToAnd } from '../../utilities/mergeListSearchAndWhere.js'
 import { ListDrawerContextProvider } from '../ListDrawer/Provider.js'
@@ -144,20 +143,18 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   }
 
   return (
-    <EditDepthProvider>
-      <ListDrawerContextProvider
-        createNewDrawerSlug={documentDrawerSlug}
-        drawerSlug={drawerSlug}
-        enabledCollections={collectionSlugs}
-        onBulkSelect={onBulkSelect}
-        onQueryChange={onQueryChange}
-        onSelect={onSelect}
-        selectedOption={selectedOption}
-        setSelectedOption={setMySelectedOption}
-      >
-        {ListView}
-        <DocumentDrawer onSave={onCreateNew} />
-      </ListDrawerContextProvider>
-    </EditDepthProvider>
+    <ListDrawerContextProvider
+      createNewDrawerSlug={documentDrawerSlug}
+      drawerSlug={drawerSlug}
+      enabledCollections={collectionSlugs}
+      onBulkSelect={onBulkSelect}
+      onQueryChange={onQueryChange}
+      onSelect={onSelect}
+      selectedOption={selectedOption}
+      setSelectedOption={setMySelectedOption}
+    >
+      {ListView}
+      <DocumentDrawer onSave={onCreateNew} />
+    </ListDrawerContextProvider>
   )
 }

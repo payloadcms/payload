@@ -131,8 +131,14 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   const disabledFromAdmin = field?.admin && 'disabled' in field.admin && field.admin.disabled
 
   if (fieldAffectsData(field) && !(isHiddenField || disabledFromAdmin)) {
-    const hasPermission =
+    let hasPermission =
       typeof permissions?.[field.name]?.read === 'boolean' ? permissions[field.name].read : true
+
+    if (typeof field?.access?.read === 'function') {
+      hasPermission = await field.access.read({ doc: fullData, req, siblingData: data })
+    } else {
+      hasPermission = true
+    }
 
     if (!hasPermission) {
       return

@@ -3,6 +3,7 @@ import type {
   ClientConfig,
   Data,
   DocumentPreferences,
+  FormState,
   PayloadRequest,
   SanitizedConfig,
   VisibleEntities,
@@ -49,6 +50,7 @@ export const renderDocumentHandler = async (args: {
   docID: string
   drawerSlug?: string
   initialData?: Data
+  initialState?: FormState
   redirectAfterDelete: boolean
   redirectAfterDuplicate: boolean
   req: PayloadRequest
@@ -112,35 +114,38 @@ export const renderDocumentHandler = async (args: {
     i18n,
   })
 
-  // get prefs, then set update them using the columns that we just received
-  const preferencesKey = `${collectionSlug}-list`
+  let preferences: DocumentPreferences
 
-  const preferences = await payload
-    .find({
-      collection: 'payload-preferences',
-      depth: 0,
-      limit: 1,
-      where: {
-        and: [
-          {
-            key: {
-              equals: preferencesKey,
+  if (docID) {
+    const preferencesKey = `${collectionSlug}-edit-${docID}`
+
+    preferences = await payload
+      .find({
+        collection: 'payload-preferences',
+        depth: 0,
+        limit: 1,
+        where: {
+          and: [
+            {
+              key: {
+                equals: preferencesKey,
+              },
             },
-          },
-          {
-            'user.relationTo': {
-              equals: user.collection,
+            {
+              'user.relationTo': {
+                equals: user.collection,
+              },
             },
-          },
-          {
-            'user.value': {
-              equals: user.id,
+            {
+              'user.value': {
+                equals: user.id,
+              },
             },
-          },
-        ],
-      },
-    })
-    .then((res) => res.docs[0]?.value as DocumentPreferences)
+          ],
+        },
+      })
+      .then((res) => res.docs[0]?.value as DocumentPreferences)
+  }
 
   const visibleEntities: VisibleEntities = {
     collections: payload.config.collections

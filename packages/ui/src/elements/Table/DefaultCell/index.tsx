@@ -20,7 +20,6 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     cellData,
     className: classNameFromProps,
     collectionConfig,
-    columnIndex,
     field,
     field: { admin },
     link,

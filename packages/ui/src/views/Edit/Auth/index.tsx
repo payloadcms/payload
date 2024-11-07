@@ -156,13 +156,15 @@ export const Auth: React.FC<Props> = (props) => {
                 autoComplete="new-password"
                 field={{
                   name: 'password',
-                  _schemaPath: ['password'],
                   admin: {
                     disabled,
                   },
                   label: t('authentication:newPassword'),
                   required: true,
                 }}
+                indexPath=""
+                parentPath=""
+                parentSchemaPath=""
                 path="password"
                 schemaPath="password"
               />

@@ -33,10 +33,13 @@ export const blockValidationHOC = (
       collectionSlug,
       data: blockFieldData,
       fields: block.fields,
+      fieldSchemaMap: undefined,
       operation: operation === 'create' || operation === 'update' ? operation : 'update',
+      permissions: {},
       preferences,
+      renderAllFields: false,
       req,
-      siblingData: blockFieldData,
+      schemaPath: '',
     })
 
     let errorPaths: string[] = []

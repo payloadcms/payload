@@ -41,6 +41,7 @@ export const LinkDrawer: React.FC<Props> = ({
       const { state } = await getFormState({
         id,
         collectionSlug,
+        docPermissions,
         docPreferences: await getDocPreferences(),
         formState: prevFormState,
         globalSlug,
@@ -51,7 +52,7 @@ export const LinkDrawer: React.FC<Props> = ({
       return state
     },
 
-    [getFormState, id, collectionSlug, globalSlug, fieldMapPath, getDocPreferences],
+    [getFormState, id, collectionSlug, getDocPreferences, docPermissions, globalSlug, fieldMapPath],
   )
 
   return (

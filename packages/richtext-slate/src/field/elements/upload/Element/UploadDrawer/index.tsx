@@ -40,7 +40,7 @@ export const UploadDrawer: React.FC<{
   const { i18n, t } = useTranslation()
   const { code: locale } = useLocale()
   const { closeModal } = useModal()
-  const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const { getFormState } = useServerFunctions()
 
@@ -74,6 +74,7 @@ export const UploadDrawer: React.FC<{
         id,
         collectionSlug,
         data,
+        docPermissions,
         docPreferences: await getDocPreferences(),
         doNotAbort: true,
         globalSlug,
@@ -98,6 +99,7 @@ export const UploadDrawer: React.FC<{
     getFormState,
     globalSlug,
     getDocPreferences,
+    docPermissions,
   ])
 
   const onChange: FormProps['onChange'][0] = useCallback(
@@ -105,6 +107,7 @@ export const UploadDrawer: React.FC<{
       const { state } = await getFormState({
         id,
         collectionSlug,
+        docPermissions,
         docPreferences: await getDocPreferences(),
         formState: prevFormState,
         globalSlug,
@@ -119,6 +122,7 @@ export const UploadDrawer: React.FC<{
       getFormState,
       id,
       collectionSlug,
+      docPermissions,
       getDocPreferences,
       globalSlug,
       schemaPath,

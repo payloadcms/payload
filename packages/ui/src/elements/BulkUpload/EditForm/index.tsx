@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, DocumentPermissions } from 'payload'
+import type { ClientCollectionConfig } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { useCallback } from 'react'
@@ -20,7 +20,6 @@ import { useUploadEdits } from '../../../providers/UploadEdits/index.js'
 import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
 import { useDocumentDrawerContext } from '../../DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
-import { RenderComponent } from '../../RenderComponent/index.js'
 import { Upload } from '../../Upload/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import { BulkUploadProvider } from '../index.js'
@@ -35,9 +34,6 @@ const baseClass = 'collection-edit'
 export function EditForm({ submitted }: EditFormProps) {
   const {
     action,
-    AfterDocument,
-    AfterFields,
-    BeforeFields,
     collectionSlug: docSlug,
     docPermissions,
     getDocPreferences,
@@ -45,6 +41,7 @@ export function EditForm({ submitted }: EditFormProps) {
     initialState,
     isEditing,
     isInitializing,
+    Upload: CustomUpload,
   } = useDocumentInfo()
 
   const { onSave: onSaveFromContext } = useDocumentDrawerContext()
@@ -115,6 +112,7 @@ export function EditForm({ submitted }: EditFormProps) {
       const docPreferences = await getDocPreferences()
       const { state: newFormState } = await getFormState({
         collectionSlug,
+        docPermissions,
         docPreferences,
         formState: prevFormState,
         operation: 'create',
@@ -123,7 +121,7 @@ export function EditForm({ submitted }: EditFormProps) {
 
       return newFormState
     },
-    [collectionSlug, schemaPath, getDocPreferences, getFormState],
+    [collectionSlug, schemaPath, getDocPreferences, getFormState, docPermissions],
   )
 
   return (
@@ -141,31 +139,24 @@ export function EditForm({ submitted }: EditFormProps) {
           submitted={submitted}
         >
           <DocumentFields
-            AfterFields={AfterFields}
             BeforeFields={
-              BeforeFields || (
-                <React.Fragment>
-                  {/* {collectionConfig?.admin?.components?.edit?.Upload ? (
-                    <RenderComponent
-                      mappedComponent={collectionConfig.admin.components.edit.Upload}
-                    />
-                  ) : (
-                    <Upload
-                      collectionSlug={collectionConfig.slug}
-                      initialState={initialState}
-                      uploadConfig={collectionConfig.upload}
-                    />
-                  )} */}
-                </React.Fragment>
-              )
+              <React.Fragment>
+                {CustomUpload || (
+                  <Upload
+                    collectionSlug={collectionConfig.slug}
+                    initialState={initialState}
+                    uploadConfig={collectionConfig.upload}
+                  />
+                )}
+              </React.Fragment>
             }
+            docPermissions={docPermissions}
             fields={collectionConfig.fields}
-            formState={initialState}
+            schemaPathSegments={[collectionConfig.slug]}
           />
           <ReportAllErrors />
           <GetFieldProxy />
         </Form>
-        {AfterDocument}
       </BulkUploadProvider>
     </OperationProvider>
   )

@@ -1,4 +1,4 @@
-import type { ClientField, Operator, Where } from 'payload'
+import type { Operator, Where } from 'payload'
 
 import type { Action, FieldCondition } from '../types.js'
 
@@ -12,7 +12,6 @@ export type Props = {
 
 export type DefaultFilterProps = {
   readonly disabled: boolean
-  readonly field: ClientField
   readonly onChange: (val: any) => void
   readonly operator: Operator
   readonly value: unknown

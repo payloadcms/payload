@@ -2,10 +2,10 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { ListPreferences } from '@payloadcms/ui'
 import type {
   ClientConfig,
+  ListQuery,
   PayloadRequest,
   SanitizedConfig,
   VisibleEntities,
-  ListQuery,
 } from 'payload'
 
 import { headers as getHeaders } from 'next/headers.js'

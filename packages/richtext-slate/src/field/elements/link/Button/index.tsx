@@ -69,7 +69,7 @@ export const LinkButton: React.FC<{
   const { t } = useTranslation()
   const editor = useSlate()
   const { getFormState } = useServerFunctions()
-  const { collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
+  const { collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const { closeModal, openModal } = useModal()
   const drawerSlug = useDrawerSlug('rich-text-link')
@@ -98,6 +98,7 @@ export const LinkButton: React.FC<{
               const { state } = await getFormState({
                 collectionSlug,
                 data,
+                docPermissions,
                 docPreferences: await getDocPreferences(),
                 doNotAbort: true,
                 globalSlug,

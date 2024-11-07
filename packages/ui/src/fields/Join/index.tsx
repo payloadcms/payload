@@ -24,7 +24,6 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
       required,
     },
     path: pathFromProps,
-    schemaPath,
   } = props
 
   const path = pathFromProps || name
@@ -61,7 +60,6 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
         initialDrawerState={{
           [on]: {
             initialValue: docID,
-            schemaPath,
             valid: true,
             value: docID,
           },

@@ -75,13 +75,27 @@ export const ResetPasswordForm: React.FC<Args> = ({ token }) => {
             label: i18n.t('authentication:newPassword'),
             required: true,
           }}
+          indexPath=""
+          parentPath=""
+          parentSchemaPath=""
+          path="password"
+          schemaPath={`${userSlug}.password`}
         />
         <ConfirmPasswordField />
         <HiddenField
           field={{
             name: 'token',
+            type: 'text',
+            admin: {
+              hidden: true,
+            },
           }}
           forceUsePathFromProps
+          indexPath=""
+          parentPath=""
+          parentSchemaPath=""
+          path="token"
+          schemaPath={`${userSlug}.token`}
           value={token}
         />
       </div>

@@ -7,6 +7,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { reduceFieldsToValues } from 'payload/shared'
 import React from 'react'
 
+import { useAuth } from '../../../providers/Auth/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { DocumentInfoProvider } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -29,10 +30,12 @@ export function AddingFilesView() {
     hasPublishPermission,
     hasSavePermission,
     hasSubmitted,
+    documentSlots,
   } = useFormsManager()
   const activeForm = forms[activeIndex]
-  const { config, getEntityConfig } = useConfig()
+  const { getEntityConfig } = useConfig()
   const { i18n } = useTranslation()
+  const { user } = useAuth()
   const { openModal } = useModal()
 
   const collection = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
@@ -49,13 +52,21 @@ export function AddingFilesView() {
         {activeForm ? (
           <DocumentInfoProvider
             collectionSlug={collectionSlug}
+            currentEditor={user}
             docPermissions={docPermissions}
+            hasPublishedDoc={false}
             hasPublishPermission={hasPublishPermission}
             hasSavePermission={hasSavePermission}
             id={null}
             initialData={reduceFieldsToValues(activeForm.formState, true)}
             initialState={activeForm.formState}
+            isLocked={false}
             key={`${activeIndex}-${forms.length}`}
+            lastUpdateTime={0}
+            mostRecentVersionIsAutosaved={false}
+            unpublishedVersionCount={0}
+            Upload={documentSlots.Upload}
+            versionCount={0}
           >
             <ActionsBar />
             <EditForm submitted={hasSubmitted} />

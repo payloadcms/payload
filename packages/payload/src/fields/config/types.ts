@@ -6,6 +6,7 @@ import type { CSSProperties } from 'react'
 import type { DeepUndefinable } from 'ts-essentials'
 
 import type {
+  JoinFieldClientProps,
   JoinFieldErrorClientComponent,
   JoinFieldErrorServerComponent,
   JoinFieldLabelClientComponent,
@@ -1390,6 +1391,7 @@ export type ClientFieldProps =
   | EmailFieldClientProps
   | GroupFieldClientProps
   | HiddenFieldProps
+  | JoinFieldClientProps
   | JSONFieldClientProps
   | NumberFieldClientProps
   | PointFieldClientProps

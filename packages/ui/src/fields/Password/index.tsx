@@ -17,14 +17,9 @@ import { PasswordInput } from './input.js'
 
 const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
   const {
-    AfterInput,
     autoComplete,
-    BeforeInput,
-    Description,
-    Error,
     field: {
       name,
-      _path: pathFromProps,
       admin: {
         className,
         disabled: disabledFromProps,
@@ -38,7 +33,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       required,
     } = {} as PasswordFieldProps['field'],
     inputRef,
-    Label,
+    path: pathFromProps,
     validate,
   } = props
   const path = pathFromProps || name
@@ -71,7 +66,14 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
     [validate, config, t, required],
   )
 
-  const { formInitializing, formProcessing, setValue, showError, value } = useField({
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    formInitializing,
+    formProcessing,
+    setValue,
+    showError,
+    value,
+  } = useField({
     path,
     validate: memoizedValidate,
   })

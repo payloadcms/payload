@@ -6,10 +6,12 @@ import { buildTableStateHandler } from '@payloadcms/ui/utilities/buildTableState
 import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
 import { renderListHandler } from '../views/List/handleServerFunction.js'
 import { initReq } from './initReq.js'
+import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
 
 const defaultFunctions = {
   'form-state': buildFormStateHandler as any as ServerFunction,
   'render-document': renderDocumentHandler as any as ServerFunction,
+  'render-document-slots': renderDocumentSlotsHandler as any as ServerFunction,
   'render-list': renderListHandler as any as ServerFunction,
   'table-state': buildTableStateHandler as any as ServerFunction,
 }
