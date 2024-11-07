@@ -16,7 +16,7 @@ export const createThumbnail = (
      */
     const _getBase64ImageUrl = async (
       media: HTMLImageElement | HTMLVideoElement,
-      maxDimension = 280,
+      maxDimension = 420,
     ): Promise<string> => {
       return new Promise((_resolve, _reject) => {
         let drawHeight: number, drawWidth: number
@@ -46,7 +46,7 @@ export const createThumbnail = (
 
         // Convert the OffscreenCanvas to a Blob and free up memory
         canvas
-          .convertToBlob({ type: 'image/jpeg', quality: 0.25 })
+          .convertToBlob({ type: 'image/png', quality: 0.25 })
           .then((blob) => {
             // Release the Object URL
             URL.revokeObjectURL(media.src)
@@ -71,7 +71,9 @@ export const createThumbnail = (
       media = document.createElement('video')
       media.src = url
       media.crossOrigin = 'anonymous'
-      media.onloadeddata = () => {
+      media.onloadeddata = async () => {
+        ;(media as HTMLVideoElement).currentTime = 0.1
+        await new Promise((r) => setTimeout(r, 50))
         _getBase64ImageUrl(media)
           .then((url) => resolve(url))
           .catch(reject)
