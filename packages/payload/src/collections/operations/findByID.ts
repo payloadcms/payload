@@ -3,6 +3,7 @@ import type { CollectionSlug, JoinQuery } from '../../index.js'
 import type {
   ApplyDisableErrors,
   PayloadRequest,
+  PopulateType,
   SelectType,
   TransformCollectionWithSelect,
 } from '../../types/index.js'
@@ -14,8 +15,10 @@ import type {
 
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
+import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
 import { NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { validateQueryPaths } from '../../index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 import { buildAfterOperation } from './utils.js'
@@ -30,6 +33,7 @@ export type Arguments = {
   includeLockStatus?: boolean
   joins?: JoinQuery
   overrideAccess?: boolean
+  populate?: PopulateType
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
@@ -72,6 +76,7 @@ export const findByIDOperation = async <
       includeLockStatus,
       joins,
       overrideAccess = false,
+      populate,
       req: { fallbackLocale, locale, t },
       req,
       select,
@@ -91,16 +96,32 @@ export const findByIDOperation = async <
       return null
     }
 
+    const where = combineQueries({ id: { equals: id } }, accessResult)
+
+    const sanitizedJoins = await sanitizeJoinQuery({
+      collectionConfig,
+      joins,
+      overrideAccess,
+      req,
+    })
+
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
-      joins: req.payloadAPI === 'GraphQL' ? false : joins,
+      joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
       locale,
       req: {
         transactionID: req.transactionID,
       } as PayloadRequest,
       select,
-      where: combineQueries({ id: { equals: id } }, accessResult),
+      where,
     }
+
+    await validateQueryPaths({
+      collectionConfig,
+      overrideAccess,
+      req,
+      where,
+    })
 
     // /////////////////////////////////////
     // Find by ID
@@ -223,6 +244,7 @@ export const findByIDOperation = async <
       global: null,
       locale,
       overrideAccess,
+      populate,
       req,
       select,
       showHiddenFields,

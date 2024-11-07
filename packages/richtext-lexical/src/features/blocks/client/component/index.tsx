@@ -38,7 +38,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     fieldProps: { featureClientSchemaMap, field: parentLexicalRichTextField, path, schemaPath },
   } = useEditorConfigContext()
   const abortControllerRef = useRef(new AbortController())
-  const { getDocPreferences } = useDocumentInfo()
+  const { docPermissions, getDocPreferences } = useDocumentInfo()
 
   const { getFormState } = useServerFunctions()
 
@@ -67,6 +67,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         id,
         collectionSlug,
         data: formData,
+        docPermissions,
         docPreferences: await getDocPreferences(),
         doNotAbort: true,
         globalSlug,
@@ -99,7 +100,16 @@ export const BlockComponent: React.FC<Props> = (props) => {
         // swallow error
       }
     }
-  }, [getFormState, schemaFieldsPath, id, collectionSlug, globalSlug, getDocPreferences]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
+  }, [
+    getFormState,
+    schemaFieldsPath,
+    id,
+    collectionSlug,
+    globalSlug,
+    getDocPreferences,
+    formData,
+    docPermissions,
+  ]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
@@ -117,6 +127,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       const { state: newFormState } = await getFormState({
         id,
         collectionSlug,
+        docPermissions,
         docPreferences: await getDocPreferences(),
         doNotAbort: true,
         formState: prevFormState,
@@ -144,6 +155,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       getFormState,
       id,
       collectionSlug,
+      docPermissions,
       getDocPreferences,
       globalSlug,
       schemaFieldsPath,

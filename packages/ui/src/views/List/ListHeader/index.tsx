@@ -12,8 +12,6 @@ import { useListDrawerContext } from '../../../elements/ListDrawer/Provider.js'
 import { ListSelection } from '../../../elements/ListSelection/index.js'
 import { Pill } from '../../../elements/Pill/index.js'
 import { ReactSelect } from '../../../elements/ReactSelect/index.js'
-import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
-import { ViewDescription } from '../../../elements/ViewDescription/index.js'
 import { FieldLabel } from '../../../fields/FieldLabel/index.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
@@ -79,14 +77,7 @@ const DefaultListHeader: React.FC<Props> = ({
       {!smallBreak && (
         <ListSelection label={getTranslation(collectionConfig?.labels?.plural, i18n)} />
       )}
-      {collectionConfig?.admin?.description || Description ? (
-        <div className={`${drawerBaseClass}__sub-header`}>
-          <RenderCustomComponent
-            CustomComponent={Description}
-            Fallback={<ViewDescription description={collectionConfig?.admin?.description} />}
-          />
-        </div>
-      ) : null}
+      {Description}
     </header>
   )
 }
@@ -137,14 +128,7 @@ const ListDrawerHeader: React.FC<Props> = ({ Description, hasCreatePermission, i
           <XIcon />
         </button>
       </div>
-      {collectionConfig?.admin?.description || Description ? (
-        <div className={`${drawerBaseClass}__sub-header`}>
-          <RenderCustomComponent
-            CustomComponent={Description}
-            Fallback={<ViewDescription description={collectionConfig?.admin?.description} />}
-          />
-        </div>
-      ) : null}
+      {Description}
       {moreThanOneAvailableCollection && (
         <div className={`${drawerBaseClass}__select-collection-wrap`}>
           <FieldLabel label={t('upload:selectCollectionToBrowse')} />

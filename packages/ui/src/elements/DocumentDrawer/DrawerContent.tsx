@@ -44,7 +44,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const [isLoading, setIsLoading] = useState(true)
 
   const getDocumentView = useCallback(
-    async (docID?: number | string) => {
+    async (docID?: number | string, doNotAbort?: boolean) => {
       setIsLoading(true)
 
       try {
@@ -52,6 +52,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
           collectionSlug,
           disableActions,
           docID,
+          doNotAbort,
           drawerSlug,
           initialData,
           redirectAfterDelete: redirectAfterDelete !== undefined ? redirectAfterDelete : false,
@@ -84,9 +85,9 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   useEffect(() => {
     if (!DocumentView) {
-      void getDocumentView()
+      void getDocumentView(existingDocID, true)
     }
-  }, [DocumentView, getDocumentView])
+  }, [DocumentView, getDocumentView, existingDocID])
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {

@@ -120,12 +120,11 @@ export default buildConfig({
   }),
   // database-adapter-config-start
   db: mongooseAdapter({
-    url: process.env.DATABASE_URI!,
+    url: process.env.DATABASE_URI,
   }),
   // database-adapter-config-end
   collections: [Pages, Posts, Media, Categories, Users],
-  cors: [process.env.PAYLOAD_PUBLIC_SERVER_URL || ''].filter(Boolean),
-  csrf: [process.env.PAYLOAD_PUBLIC_SERVER_URL || ''].filter(Boolean),
+  cors: [process.env.NEXT_PUBLIC_SERVER_URL || ''].filter(Boolean),
   endpoints: [
     // The seed endpoint is used to populate the database with some example data
     // You should delete this endpoint before deploying your site to production
@@ -203,7 +202,7 @@ export default buildConfig({
     }),
     payloadCloudPlugin(), // storage-adapter-placeholder
   ],
-  secret: process.env.PAYLOAD_SECRET!,
+  secret: process.env.PAYLOAD_SECRET,
   sharp,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

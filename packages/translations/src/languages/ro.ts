@@ -314,6 +314,7 @@ export const roTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Actualizat cu succes.',
     updating: 'Actualizare',
     uploading: 'Încărcare',
+    uploadingBulk: 'Încărcare {{current}} din {{total}}',
     user: 'Utilizator',
     username: 'Nume de utilizator',
     users: 'Utilizatori',

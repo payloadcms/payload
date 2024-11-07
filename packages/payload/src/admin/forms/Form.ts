@@ -60,7 +60,7 @@ export type FormStateWithoutComponents = {
 
 export type BuildFormStateArgs = {
   data?: Data
-  docPermissions: DocumentPermissions
+  docPermissions: DocumentPermissions | undefined
   docPreferences: DocumentPreferences
   formState?: FormState
   id?: number | string

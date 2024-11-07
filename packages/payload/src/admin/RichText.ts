@@ -12,7 +12,8 @@ import type {
   Validate,
 } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { JsonObject, Payload, PayloadRequest, RequestContext } from '../types/index.js'
+import type { RequestContext } from '../index.js'
+import type { JsonObject, Payload, PayloadRequest, PopulateType } from '../types/index.js'
 import type { RichTextFieldClientProps } from './fields/RichText.js'
 import type { FieldSchemaMap } from './types.js'
 
@@ -28,7 +29,6 @@ export type AfterReadRichTextHookArgs<
   draft?: boolean
 
   fallbackLocale?: string
-
   fieldPromises?: Promise<void>[]
 
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
@@ -42,6 +42,8 @@ export type AfterReadRichTextHookArgs<
   operation?: 'create' | 'delete' | 'read' | 'update'
 
   overrideAccess?: boolean
+
+  populate?: PopulateType
 
   populationPromises?: Promise<void>[]
   showHiddenFields?: boolean
@@ -211,6 +213,7 @@ type RichTextAdapterBase<
     findMany: boolean
     flattenLocales: boolean
     overrideAccess?: boolean
+    populateArg?: PopulateType
     populationPromises: Promise<void>[]
     req: PayloadRequest
     showHiddenFields: boolean

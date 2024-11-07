@@ -306,6 +306,7 @@ export const thTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'แก้ไขสำเร็จ',
     updating: 'กำลังอัปเดต',
     uploading: 'กำลังอัปโหลด',
+    uploadingBulk: 'อัปโหลด {{current}} จาก {{total}}',
     user: 'ผู้ใช้',
     username: 'ชื่อผู้ใช้',
     users: 'ผู้ใช้',

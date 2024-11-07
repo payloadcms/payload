@@ -312,6 +312,7 @@ export const huTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Sikeresen frissítve.',
     updating: 'Frissítés',
     uploading: 'Feltöltés',
+    uploadingBulk: 'Feltöltés: {{current}} / {{total}}',
     user: 'Felhasználó',
     username: 'Felhasználónév',
     users: 'Felhasználók',

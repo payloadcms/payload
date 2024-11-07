@@ -16,6 +16,7 @@ import type {
   Payload,
   PayloadComponent,
   PayloadRequest,
+  PopulateType,
   ReplaceAny,
   RequestContext,
   RichTextField,
@@ -149,6 +150,10 @@ export type AfterReadNodeHookArgs<T extends SerializedLexicalNode> = {
    */
   locale: string
   overrideAccess: boolean
+  /**
+   * Only available in `afterRead` hooks.
+   */
+  populateArg?: PopulateType
   /**
    *  Only available in `afterRead` field hooks.
    */

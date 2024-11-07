@@ -390,10 +390,33 @@ jobs:
       #     report-tag: ${{ matrix.suite }}
       #     job-summary: true
 
-  app-build-with-packed:
-    if: false # Disable until package resolution in tgzs can be figured out
+  # Build listed templates with packed local packages
+  build-templates:
     runs-on: ubuntu-latest
     needs: build
+    strategy:
+      matrix:
+        include:
+          - template: blank
+            database: mongodb
+          - template: website
+            database: mongodb
+          - template: with-payload-cloud
+            database: mongodb
+          - template: with-vercel-mongodb
+            database: mongodb
+          # Postgres
+          - template: with-postgres
+            database: postgres
+          - template: with-vercel-postgres
+            database: postgres
+
+    name: ${{ matrix.template }}-${{ matrix.database }}
+
+    env:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: payloadtests
 
     steps:
       # https://github.com/actions/virtual-environments/issues/1187
@@ -418,22 +441,35 @@ jobs:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
 
+      - name: Start PostgreSQL
+        uses: CasperWA/postgresql-action@v1.2
+        with:
+          postgresql version: '14' # See https://hub.docker.com/_/postgres for available versions
+          postgresql db: ${{ env.POSTGRES_DB }}
+          postgresql user: ${{ env.POSTGRES_USER }}
+          postgresql password: ${{ env.POSTGRES_PASSWORD }}
+        if: matrix.database == 'postgres'
+
+      - name: Wait for PostgreSQL
+        run: sleep 30
+        if: matrix.database == 'postgres'
+
+      - name: Configure PostgreSQL
+        run: |
+          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
+          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
+          echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
+        if: matrix.database == 'postgres'
+
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.11.0
         with:
           mongodb-version: 6.0
 
-      - name: Pack and build app
+      - name: Build Template
         run: |
-          set -ex
-          pnpm run script:pack --dest templates/blank
-          cd templates/blank
-          cp .env.example .env
-          ls -la
-          pnpm add ./*.tgz --ignore-workspace
-          pnpm install --ignore-workspace --no-frozen-lockfile
-          cat package.json
-          pnpm run build
+          pnpm run script:pack --dest templates/${{ matrix.template }}
+          pnpm runts scripts/build-template-with-local-pkgs.ts ${{ matrix.template }} $POSTGRES_URL
 
   tests-type-generation:
     runs-on: ubuntu-latest
@@ -467,41 +503,6 @@ jobs:
 
       - name: Generate GraphQL schema file
         run: pnpm dev:generate-graphql-schema graphql-schema-gen
-
-  templates:
-    needs: changes
-    if: false # Disable until templates are updated for 3.0
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        template: [blank, website, ecommerce]
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 25
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
-
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.11.0
-        with:
-          mongodb-version: 6.0
-
-      - name: Build Template
-        run: |
-          cd templates/${{ matrix.template }}
-          cp .env.example .env
-          yarn install
-          yarn build
-          yarn generate:types
 
   generated-templates:
     needs: build

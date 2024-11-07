@@ -95,7 +95,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
         })
       }
     } catch (error) {
-      console.error(error) // eslint-disable-line no-console
+      payload.logger.error(error)
     }
   }
 
@@ -138,7 +138,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
         })
       }
     } catch (error) {
-      console.error(error) // eslint-disable-line no-console
+      payload.logger.error(error)
     }
 
     if (!versionsData) {

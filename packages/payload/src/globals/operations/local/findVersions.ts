@@ -1,7 +1,14 @@
 /* eslint-disable no-restricted-exports */
 import type { PaginatedDocs } from '../../../database/types.js'
 import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
-import type { Document, PayloadRequest, SelectType, Sort, Where } from '../../../types/index.js'
+import type {
+  Document,
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  Sort,
+  Where,
+} from '../../../types/index.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
 
@@ -17,6 +24,7 @@ export type Options<TSlug extends GlobalSlug> = {
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   page?: number
+  populate?: PopulateType
   req?: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
@@ -36,6 +44,7 @@ export default async function findVersionsLocal<TSlug extends GlobalSlug>(
     limit,
     overrideAccess = true,
     page,
+    populate,
     select,
     showHiddenFields,
     sort,
@@ -54,6 +63,7 @@ export default async function findVersionsLocal<TSlug extends GlobalSlug>(
     limit,
     overrideAccess,
     page,
+    populate,
     req: await createLocalReq(options, payload),
     select,
     showHiddenFields,
