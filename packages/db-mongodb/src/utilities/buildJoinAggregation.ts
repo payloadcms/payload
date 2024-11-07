@@ -1,8 +1,6 @@
 import type { PipelineStage } from 'mongoose'
 import type { CollectionSlug, JoinQuery, SanitizedCollectionConfig, Where } from 'payload'
 
-import { combineQueries } from 'payload'
-
 import type { MongooseAdapter } from '../index.js'
 
 import { buildSortParam } from '../queries/buildSortParam.js'
@@ -64,7 +62,7 @@ export const buildJoinAggregation = async ({
         continue
       }
 
-      if (joins?.[join.schemaPath] === false) {
+      if (joins?.[join.joinPath] === false) {
         continue
       }
 

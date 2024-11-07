@@ -1,6 +1,6 @@
 'use client'
 
-import type { Data, DocumentPermissions, FormState } from 'payload'
+import type { Data, DocumentPermissions, DocumentSlots, FormState } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import * as qs from 'qs-esm'
@@ -27,6 +27,7 @@ type FormsManagerContext = {
   readonly addFiles: (filelist: FileList) => Promise<void>
   readonly collectionSlug: string
   readonly docPermissions?: DocumentPermissions
+  readonly documentSlots: DocumentSlots
   readonly forms: State['forms']
   getFormDataRef: React.RefObject<() => Data>
   readonly hasPublishPermission: boolean
@@ -52,6 +53,7 @@ const Context = React.createContext<FormsManagerContext>({
   addFiles: () => Promise.resolve(),
   collectionSlug: '',
   docPermissions: undefined,
+  documentSlots: {},
   forms: [],
   getFormDataRef: { current: () => ({}) },
   hasPublishPermission: false,
@@ -85,8 +87,9 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const { code } = useLocale()
   const { i18n, t } = useTranslation()
 
-  const { getFormState } = useServerFunctions()
+  const { getDocumentSlots, getFormState } = useServerFunctions()
 
+  const [documentSlots, setDocumentSlots] = React.useState<DocumentSlots>({})
   const [hasSubmitted, setHasSubmitted] = React.useState(false)
   const [docPermissions, setDocPermissions] = React.useState<DocumentPermissions>()
   const [hasSavePermission, setHasSavePermission] = React.useState(false)
@@ -144,7 +147,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
   const actionURL = `${api}/${collectionSlug}`
 
-  const initilizeSharedDocPermissions = React.useCallback(async () => {
+  const initializeSharedDocPermissions = React.useCallback(async () => {
     const params = {
       locale: code || undefined,
     }
@@ -195,6 +198,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         abortController.abort('aborting previous fetch for initial form state without files')
       }
 
+      // FETCH AND SET THE DOCUMENT SLOTS HERE!
+      const documentSlots = await getDocumentSlots({ collectionSlug })
+      setDocumentSlots(documentSlots)
+
       try {
         const { state: formStateWithoutFiles } = await getFormState({
           collectionSlug,
@@ -211,7 +218,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         // swallow error
       }
     },
-    [code, collectionSlug, getFormState, docPermissions],
+    [getDocumentSlots, collectionSlug, getFormState, docPermissions, code],
   )
 
   const setActiveIndex: FormsManagerContext['setActiveIndex'] = React.useCallback(
@@ -377,7 +384,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     }
 
     if (!hasInitializedDocPermissions) {
-      void initilizeSharedDocPermissions()
+      void initializeSharedDocPermissions()
     }
 
     if (initialFiles) {
@@ -397,7 +404,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     addFiles,
     initialFiles,
     initializeSharedFormState,
-    initilizeSharedDocPermissions,
+    initializeSharedDocPermissions,
     collectionSlug,
     hasInitializedState,
     hasInitializedDocPermissions,
@@ -410,6 +417,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         addFiles,
         collectionSlug,
         docPermissions,
+        documentSlots,
         forms,
         getFormDataRef,
         hasPublishPermission,

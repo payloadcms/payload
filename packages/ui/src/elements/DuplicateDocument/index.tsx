@@ -8,8 +8,6 @@ import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
-import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
-
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
@@ -20,13 +18,14 @@ import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { Button } from '../Button/index.js'
 import { drawerZBase } from '../Drawer/index.js'
 import { PopupList } from '../Popup/index.js'
+import { DocumentDrawerContextType } from '../DocumentDrawer/Provider.jsx'
 import './index.scss'
 
 const baseClass = 'duplicate'
 
 export type Props = {
   readonly id: string
-  readonly onDuplicate?: DocumentInfoContext['onDuplicate']
+  readonly onDuplicate?: DocumentDrawerContextType['onDuplicate']
   readonly redirectAfterDuplicate?: boolean
   readonly singularLabel: SanitizedCollectionConfig['labels']['singular']
   readonly slug: string

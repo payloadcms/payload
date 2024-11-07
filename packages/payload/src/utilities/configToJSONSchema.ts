@@ -105,11 +105,11 @@ function generateCollectionJoinsSchemas(collections: SanitizedCollectionConfig[]
 
       for (const collectionSlug in joins) {
         for (const join of joins[collectionSlug]) {
-          schema.properties[join.schemaPath] = {
+          schema.properties[join.joinPath] = {
             type: 'string',
             enum: [collectionSlug],
           }
-          schema.required.push(join.schemaPath)
+          schema.required.push(join.joinPath)
         }
       }
 

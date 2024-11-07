@@ -1,8 +1,7 @@
-import type { CollectionSlug } from 'payload'
+import type { CollectionSlug, ListQuery } from 'payload'
 
 import { createContext, useContext } from 'react'
 
-import type { ListQuery } from '../../providers/ListQuery/index.js'
 import type { useSelection } from '../../providers/Selection/index.js'
 
 import { type Option } from '../ReactSelect/index.js'

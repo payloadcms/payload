@@ -169,7 +169,7 @@ export const buildColumnState = (args: Args): Column[] => {
 
     const baseCellClientProps: DefaultCellComponentProps = {
       cellData: undefined,
-      collectionConfig: { slug: collectionConfig.slug, upload: collectionConfig.upload }, // TODO: for some reason the entire collectionConfig breaks
+      collectionConfig,
       customCellProps,
       field,
       rowData: undefined,

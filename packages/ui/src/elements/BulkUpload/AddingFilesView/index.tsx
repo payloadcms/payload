@@ -30,6 +30,7 @@ export function AddingFilesView() {
     hasPublishPermission,
     hasSavePermission,
     hasSubmitted,
+    documentSlots,
   } = useFormsManager()
   const activeForm = forms[activeIndex]
   const { getEntityConfig } = useConfig()
@@ -64,6 +65,7 @@ export function AddingFilesView() {
             lastUpdateTime={0}
             mostRecentVersionIsAutosaved={false}
             unpublishedVersionCount={0}
+            Upload={documentSlots.Upload}
             versionCount={0}
           >
             <ActionsBar />

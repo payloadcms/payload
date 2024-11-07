@@ -1,4 +1,10 @@
-import type { BuildFormStateArgs, BuildTableStateArgs, Data, ServerFunctionClient } from 'payload'
+import type {
+  BuildFormStateArgs,
+  BuildTableStateArgs,
+  Data,
+  DocumentSlots,
+  ServerFunctionClient,
+} from 'payload'
 
 import React, { createContext, useCallback, useEffect, useRef } from 'react'
 
@@ -30,7 +36,13 @@ type GetDrawerDocumentView = (args: {
   signal?: AbortSignal
 }) => Promise<{ docID: string; Document: React.ReactNode }>
 
+type GetDocumentSlots = (args: {
+  collectionSlug: string
+  signal?: AbortSignal
+}) => Promise<DocumentSlots>
+
 type ServerFunctionsContextType = {
+  getDocumentSlots: GetDocumentSlots
   getDrawerDocument: GetDrawerDocumentView
   getFormState: GetFormStateClient
   getTableState: GetTableStateClient
@@ -60,6 +72,16 @@ export const ServerFunctionsProvider: React.FC<{
   // This is the local abort controller, to abort requests when the _provider_ itself unmounts, etc.
   // Each callback also accept a remote signal, to abort requests when each _component_ unmounts, etc.
   const abortControllerRef = useRef(new AbortController())
+
+  const getDocumentSlots = useCallback<GetDocumentSlots>(
+    async (args) => {
+      return serverFunction({
+        name: 'render-document-slots',
+        args,
+      })
+    },
+    [serverFunction],
+  )
 
   const getFormState = useCallback<GetFormStateClient>(
     async (args) => {
@@ -187,7 +209,7 @@ export const ServerFunctionsProvider: React.FC<{
 
   return (
     <ServerFunctionsContext.Provider
-      value={{ getDrawerDocument, getFormState, getTableState, serverFunction }}
+      value={{ getDrawerDocument, getFormState, getTableState, serverFunction, getDocumentSlots }}
     >
       {children}
     </ServerFunctionsContext.Provider>

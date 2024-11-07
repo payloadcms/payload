@@ -34,9 +34,6 @@ const baseClass = 'collection-edit'
 export function EditForm({ submitted }: EditFormProps) {
   const {
     action,
-    AfterDocument,
-    AfterFields,
-    BeforeFields,
     collectionSlug: docSlug,
     docPermissions,
     getDocPreferences,
@@ -142,19 +139,16 @@ export function EditForm({ submitted }: EditFormProps) {
           submitted={submitted}
         >
           <DocumentFields
-            AfterFields={AfterFields}
             BeforeFields={
-              BeforeFields || (
-                <React.Fragment>
-                  {CustomUpload || (
-                    <Upload
-                      collectionSlug={collectionConfig.slug}
-                      initialState={initialState}
-                      uploadConfig={collectionConfig.upload}
-                    />
-                  )}
-                </React.Fragment>
-              )
+              <React.Fragment>
+                {CustomUpload || (
+                  <Upload
+                    collectionSlug={collectionConfig.slug}
+                    initialState={initialState}
+                    uploadConfig={collectionConfig.upload}
+                  />
+                )}
+              </React.Fragment>
             }
             docPermissions={docPermissions}
             fields={collectionConfig.fields}
@@ -163,7 +157,6 @@ export function EditForm({ submitted }: EditFormProps) {
           <ReportAllErrors />
           <GetFieldProxy />
         </Form>
-        {AfterDocument}
       </BulkUploadProvider>
     </OperationProvider>
   )

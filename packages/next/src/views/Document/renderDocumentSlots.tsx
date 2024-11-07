@@ -1,7 +1,8 @@
 import type {
+  DefaultServerFunctionArgs,
+  DocumentPermissions,
   DocumentSlots,
   PayloadRequest,
-  Permissions,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   StaticDescription,
@@ -11,11 +12,13 @@ import { ViewDescription } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
+import { getDocumentPermissions } from './getDocumentPermissions.js'
+
 export const renderDocumentSlots: (args: {
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
   hasSavePermission: boolean
-  permissions: Permissions
+  permissions: DocumentPermissions
   req: PayloadRequest
 }) => DocumentSlots = (args) => {
   const { collectionConfig, globalConfig, hasSavePermission, req } = args
@@ -105,4 +108,29 @@ export const renderDocumentSlots: (args: {
   }
 
   return components
+}
+
+export const renderDocumentSlotsHandler = async (
+  args: { collectionSlug: string } & DefaultServerFunctionArgs,
+) => {
+  const { collectionSlug, req } = args
+
+  const collectionConfig = req.payload.collections[collectionSlug]?.config
+
+  if (!collectionConfig) {
+    throw new Error(req.t('error:incorrectCollection'))
+  }
+
+  const { docPermissions, hasSavePermission } = await getDocumentPermissions({
+    collectionConfig,
+    data: {},
+    req,
+  })
+
+  return renderDocumentSlots({
+    collectionConfig,
+    hasSavePermission,
+    permissions: docPermissions,
+    req,
+  })
 }

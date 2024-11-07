@@ -299,7 +299,7 @@ export const renderDocument = async ({
     collectionConfig,
     globalConfig,
     hasSavePermission,
-    permissions,
+    permissions: docPermissions,
     req,
   })
 
