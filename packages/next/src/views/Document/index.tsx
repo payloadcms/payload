@@ -80,17 +80,16 @@ export const renderDocument = async ({
 
   let apiURL: string
 
-  // TODO: promise all for data, prefs, versions, lock state
-
   // Fetch the doc required for the view
-  const doc = await getDocumentData({
-    id,
-    collectionSlug,
-    globalSlug,
-    locale,
-    payload,
-    user,
-  })
+  const doc =
+    (await getDocumentData({
+      id,
+      collectionSlug,
+      globalSlug,
+      locale,
+      payload,
+      user,
+    })) || initialData
 
   if (isEditing && !doc) {
     throw new Error('not-found')

@@ -32,12 +32,19 @@ export function EmailAndUsernameFields(props: RenderEmailAndUsernameFieldsProps)
     <Fragment>
       {showEmailField ? (
         <EmailField
-          autoComplete="off"
           field={{
             name: 'email',
+            admin: {
+              autoComplete: 'off',
+            },
             label: t('general:email'),
             required: !loginWithUsername || (loginWithUsername && loginWithUsername.requireEmail),
           }}
+          indexPath=""
+          parentPath=""
+          parentSchemaPath=""
+          path="email"
+          schemaPath="email"
           validate={email}
         />
       ) : null}
@@ -48,6 +55,11 @@ export function EmailAndUsernameFields(props: RenderEmailAndUsernameFieldsProps)
             label: t('authentication:username'),
             required: loginWithUsername && loginWithUsername.requireUsername,
           }}
+          indexPath=""
+          parentPath=""
+          parentSchemaPath=""
+          path="username"
+          schemaPath="username"
           validate={username}
         />
       )}

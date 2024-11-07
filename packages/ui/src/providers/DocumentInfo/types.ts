@@ -39,6 +39,7 @@ export type DocumentInfoProps = {
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
   readonly unpublishedVersionCount: number
+  readonly Upload?: React.ReactNode
   readonly versionCount: number
 }
 

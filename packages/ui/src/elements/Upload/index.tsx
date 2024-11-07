@@ -222,7 +222,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
-      <FieldError field={null} message={errorMessage} showError={showError} />
+      <FieldError message={errorMessage} showError={showError} />
       {doc.filename && !replacingFile && (
         <FileDetails
           collectionSlug={collectionSlug}

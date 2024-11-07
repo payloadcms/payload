@@ -128,7 +128,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         await new Promise((resolve) => setTimeout(resolve, 100))
       }
     })()
-  }, [formsCount, createThumbnail])
+  }, [formsCount])
 
   const { toggleLoadingOverlay } = useLoadingOverlay()
   const { closeModal } = useModal()
@@ -194,8 +194,11 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       try {
         const { state: formStateWithoutFiles } = await getFormState({
           collectionSlug,
+          docPermissions,
+          docPreferences: { fields: {} },
           locale: code,
           operation: 'create',
+          renderAllFields: true,
           schemaPath: collectionSlug,
         })
         initialStateRef.current = formStateWithoutFiles
@@ -204,7 +207,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         // swallow error
       }
     },
-    [code, collectionSlug, getFormState],
+    [code, collectionSlug, getFormState, docPermissions],
   )
 
   const setActiveIndex: FormsManagerContext['setActiveIndex'] = React.useCallback(

@@ -20,11 +20,6 @@
       "types": "./src/exports/shared/index.ts",
       "default": "./src/exports/shared/index.ts"
     },
-    "./rsc": {
-      "import": "./src/exports/rsc/index.ts",
-      "types": "./src/exports/rsc/index.ts",
-      "default": "./src/exports/rsc/index.ts"
-    },
     "./scss": {
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
@@ -145,11 +140,6 @@
         "import": "./dist/exports/shared/index.js",
         "types": "./dist/exports/shared/index.d.ts",
         "default": "./dist/exports/shared/index.js"
-      },
-      "./rsc": {
-        "import": "./dist/exports/rsc/index.js",
-        "types": "./dist/exports/rsc/index.d.ts",
-        "default": "./dist/exports/rsc/index.js"
       },
       "./css": {
         "import": "./dist/styles.css",
