@@ -26,6 +26,7 @@ export default buildConfigWithDefaults({
     MediaCollection,
   ],
   admin: {
+    autoLogin: false, // TODO: Temporary for testing
     importMap: {
       baseDir: path.resolve(dirname),
     },
