@@ -283,9 +283,9 @@ jobs:
   tests-e2e:
     runs-on: ubuntu-latest
     needs: build
+    name: ${{ matrix.suite }}
     strategy:
       fail-fast: false
-      name: ${{ matrix.suite }}
       matrix:
         # find test -type f -name 'e2e.spec.ts' | sort | xargs dirname | xargs -I {} basename {}
         suite:
