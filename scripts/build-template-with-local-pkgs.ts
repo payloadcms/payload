@@ -64,6 +64,10 @@ async function main() {
   await fs.writeFile(packageJsonPath, JSON.stringify(packageJsonObj, null, 2))
 
   execSync('pnpm install --ignore-workspace --no-frozen-lockfile', execOpts)
+  await fs.writeFile(
+    path.resolve(templatePath, '.env'),
+    'PAYLOAD_SECRET=secret\nDATABASE_URI=mongodb://127.0.0.1/payload-template-website',
+  )
   execSync('pnpm run build', execOpts)
 
   header(`\n🎉 Done!`)
