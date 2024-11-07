@@ -465,41 +465,6 @@ jobs:
       - name: Generate GraphQL schema file
         run: pnpm dev:generate-graphql-schema graphql-schema-gen
 
-  templates:
-    needs: changes
-    if: false # Disable until templates are updated for 3.0
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        template: [blank, website, ecommerce]
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 25
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
-
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.11.0
-        with:
-          mongodb-version: 6.0
-
-      - name: Build Template
-        run: |
-          cd templates/${{ matrix.template }}
-          cp .env.example .env
-          yarn install
-          yarn build
-          yarn generate:types
-
   generated-templates:
     needs: build
     if: false # Needs to pull in tgz files from build
