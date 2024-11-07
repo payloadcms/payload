@@ -6,6 +6,7 @@ import type { ClientCollectionConfig } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import {
   Drawer,
+  EditDepthProvider,
   Form,
   FormSubmit,
   RenderFields,
@@ -131,29 +132,31 @@ export const UploadDrawer: React.FC<{
   )
 
   return (
-    <Drawer
-      slug={drawerSlug}
-      title={t('general:editLabel', {
-        label: getTranslation(relatedCollection.labels.singular, i18n),
-      })}
-    >
-      <Form
-        beforeSubmit={[onChange]}
-        disableValidationOnSubmit
-        initialState={initialState}
-        onChange={[onChange]}
-        onSubmit={handleUpdateEditData}
+    <EditDepthProvider>
+      <Drawer
+        slug={drawerSlug}
+        title={t('general:editLabel', {
+          label: getTranslation(relatedCollection.labels.singular, i18n),
+        })}
       >
-        <RenderFields
-          fields={Array.isArray(fields) ? fields : []}
-          parentIndexPath=""
-          parentPath=""
-          parentSchemaPath=""
-          permissions={{}}
-          readOnly={false}
-        />
-        <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
-      </Form>
-    </Drawer>
+        <Form
+          beforeSubmit={[onChange]}
+          disableValidationOnSubmit
+          initialState={initialState}
+          onChange={[onChange]}
+          onSubmit={handleUpdateEditData}
+        >
+          <RenderFields
+            fields={Array.isArray(fields) ? fields : []}
+            parentIndexPath=""
+            parentPath=""
+            parentSchemaPath=""
+            permissions={{}}
+            readOnly={false}
+          />
+          <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
+        </Form>
+      </Drawer>
+    </EditDepthProvider>
   )
 }

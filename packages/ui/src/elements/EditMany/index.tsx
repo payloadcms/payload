@@ -16,6 +16,7 @@ import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
+import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { OperationContext } from '../../providers/Operation/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
@@ -195,83 +196,85 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
       >
         {t('general:edit')}
       </DrawerToggler>
-      <Drawer Header={null} slug={drawerSlug}>
-        <DocumentInfoProvider
-          collectionSlug={slug}
-          currentEditor={user}
-          hasPublishedDoc={false}
-          id={null}
-          initialData={{}}
-          initialState={initialState}
-          isLocked={false}
-          lastUpdateTime={0}
-          mostRecentVersionIsAutosaved={false}
-          unpublishedVersionCount={0}
-          versionCount={0}
-        >
-          <OperationContext.Provider value="update">
-            <div className={`${baseClass}__main`}>
-              <div className={`${baseClass}__header`}>
-                <h2 className={`${baseClass}__header__title`}>
-                  {t('general:editingLabel', { count, label: getTranslation(plural, i18n) })}
-                </h2>
-                <button
-                  aria-label={t('general:close')}
-                  className={`${baseClass}__header__close`}
-                  id={`close-drawer__${drawerSlug}`}
-                  onClick={() => closeModal(drawerSlug)}
-                  type="button"
+      <EditDepthProvider>
+        <Drawer Header={null} slug={drawerSlug}>
+          <DocumentInfoProvider
+            collectionSlug={slug}
+            currentEditor={user}
+            hasPublishedDoc={false}
+            id={null}
+            initialData={{}}
+            initialState={initialState}
+            isLocked={false}
+            lastUpdateTime={0}
+            mostRecentVersionIsAutosaved={false}
+            unpublishedVersionCount={0}
+            versionCount={0}
+          >
+            <OperationContext.Provider value="update">
+              <div className={`${baseClass}__main`}>
+                <div className={`${baseClass}__header`}>
+                  <h2 className={`${baseClass}__header__title`}>
+                    {t('general:editingLabel', { count, label: getTranslation(plural, i18n) })}
+                  </h2>
+                  <button
+                    aria-label={t('general:close')}
+                    className={`${baseClass}__header__close`}
+                    id={`close-drawer__${drawerSlug}`}
+                    onClick={() => closeModal(drawerSlug)}
+                    type="button"
+                  >
+                    <XIcon />
+                  </button>
+                </div>
+                <Form
+                  className={`${baseClass}__form`}
+                  initialState={initialState}
+                  onChange={[onChange]}
+                  onSuccess={onSuccess}
                 >
-                  <XIcon />
-                </button>
-              </div>
-              <Form
-                className={`${baseClass}__form`}
-                initialState={initialState}
-                onChange={[onChange]}
-                onSuccess={onSuccess}
-              >
-                <FieldSelect fields={fields} setSelected={setSelected} />
-                {selected.length === 0 ? null : (
-                  <RenderFields
-                    fields={selected}
-                    parentIndexPath=""
-                    parentPath=""
-                    parentSchemaPath={slug}
-                    permissions={permissions?.collections?.[slug]?.fields}
-                    readOnly={false}
-                  />
-                )}
-                <div className={`${baseClass}__sidebar-wrap`}>
-                  <div className={`${baseClass}__sidebar`}>
-                    <div className={`${baseClass}__sidebar-sticky-wrap`}>
-                      <div className={`${baseClass}__document-actions`}>
-                        {collection?.versions?.drafts ? (
-                          <React.Fragment>
-                            <SaveDraftButton
-                              action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}&draft=true`}
+                  <FieldSelect fields={fields} setSelected={setSelected} />
+                  {selected.length === 0 ? null : (
+                    <RenderFields
+                      fields={selected}
+                      parentIndexPath=""
+                      parentPath=""
+                      parentSchemaPath={slug}
+                      permissions={permissions?.collections?.[slug]?.fields}
+                      readOnly={false}
+                    />
+                  )}
+                  <div className={`${baseClass}__sidebar-wrap`}>
+                    <div className={`${baseClass}__sidebar`}>
+                      <div className={`${baseClass}__sidebar-sticky-wrap`}>
+                        <div className={`${baseClass}__document-actions`}>
+                          {collection?.versions?.drafts ? (
+                            <React.Fragment>
+                              <SaveDraftButton
+                                action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}&draft=true`}
+                                disabled={selected.length === 0}
+                              />
+                              <PublishButton
+                                action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}&draft=true`}
+                                disabled={selected.length === 0}
+                              />
+                            </React.Fragment>
+                          ) : (
+                            <Submit
+                              action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}`}
                               disabled={selected.length === 0}
                             />
-                            <PublishButton
-                              action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}&draft=true`}
-                              disabled={selected.length === 0}
-                            />
-                          </React.Fragment>
-                        ) : (
-                          <Submit
-                            action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}`}
-                            disabled={selected.length === 0}
-                          />
-                        )}
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </Form>
-            </div>
-          </OperationContext.Provider>
-        </DocumentInfoProvider>
-      </Drawer>
+                </Form>
+              </div>
+            </OperationContext.Provider>
+          </DocumentInfoProvider>
+        </Drawer>
+      </EditDepthProvider>
     </div>
   )
 }

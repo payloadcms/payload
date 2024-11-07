@@ -67,6 +67,7 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
+  collectionsJoins: {};
   collectionsSelect: {
     'lexical-fields': LexicalFieldsSelect<false> | LexicalFieldsSelect<true>;
     'lexical-migrate-fields': LexicalMigrateFieldsSelect<false> | LexicalMigrateFieldsSelect<true>;
@@ -410,6 +411,60 @@ export interface ArrayField {
       | null;
     id?: string | null;
   }[];
+  collapsedArray?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  localized: {
+    text: string;
+    id?: string | null;
+  }[];
+  readOnly?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  potentiallyEmptyArray?:
+    | {
+        text?: string | null;
+        groupInRow?: {
+          textInGroupInRow?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  rowLabelAsComponent?:
+    | {
+        title?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayWithMinRows?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  disableSort?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  nestedArrayLocalized?:
+    | {
+        array?:
+          | {
+              text?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -838,6 +893,28 @@ export interface CodeField {
 export interface CollapsibleField {
   id: string;
   text: string;
+  group?: {
+    textWithinGroup?: string | null;
+    subGroup?: {
+      textWithinSubGroup?: string | null;
+    };
+  };
+  someText?: string | null;
+  group2?: {
+    textWithinGroup?: string | null;
+    subGroup?: {
+      textWithinSubGroup?: string | null;
+    };
+  };
+  functionTitleField?: string | null;
+  componentTitleField?: string | null;
+  nestedTitle?: string | null;
+  arrayWithCollapsibles?:
+    | {
+        innerCollapsible?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1942,6 +2019,64 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  collapsedArray?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  localized?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  readOnly?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  potentiallyEmptyArray?:
+    | T
+    | {
+        text?: T;
+        groupInRow?:
+          | T
+          | {
+              textInGroupInRow?: T;
+            };
+        id?: T;
+      };
+  rowLabelAsComponent?:
+    | T
+    | {
+        title?: T;
+        id?: T;
+      };
+  arrayWithMinRows?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  disableSort?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  nestedArrayLocalized?:
+    | T
+    | {
+        array?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2370,6 +2505,36 @@ export interface CodeFieldsSelect<T extends boolean = true> {
  */
 export interface CollapsibleFieldsSelect<T extends boolean = true> {
   text?: T;
+  group?:
+    | T
+    | {
+        textWithinGroup?: T;
+        subGroup?:
+          | T
+          | {
+              textWithinSubGroup?: T;
+            };
+      };
+  someText?: T;
+  group2?:
+    | T
+    | {
+        textWithinGroup?: T;
+        subGroup?:
+          | T
+          | {
+              textWithinSubGroup?: T;
+            };
+      };
+  functionTitleField?: T;
+  componentTitleField?: T;
+  nestedTitle?: T;
+  arrayWithCollapsibles?:
+    | T
+    | {
+        innerCollapsible?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

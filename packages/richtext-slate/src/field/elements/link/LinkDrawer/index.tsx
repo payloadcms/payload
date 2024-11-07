@@ -4,6 +4,7 @@ import type { FormProps } from '@payloadcms/ui'
 
 import {
   Drawer,
+  EditDepthProvider,
   Form,
   FormSubmit,
   RenderFields,
@@ -56,26 +57,28 @@ export const LinkDrawer: React.FC<Props> = ({
   )
 
   return (
-    <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink')}>
-      <Form
-        beforeSubmit={[onChange]}
-        disableValidationOnSubmit
-        initialState={initialState}
-        onChange={[onChange]}
-        onSubmit={handleModalSubmit}
-      >
-        <RenderFields
-          fields={fields}
-          forceRender
-          parentIndexPath=""
-          parentPath={''}
-          parentSchemaPath=""
-          permissions={docPermissions.fields}
-          readOnly={false}
-        />
-        <LinkSubmit />
-      </Form>
-    </Drawer>
+    <EditDepthProvider>
+      <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink')}>
+        <Form
+          beforeSubmit={[onChange]}
+          disableValidationOnSubmit
+          initialState={initialState}
+          onChange={[onChange]}
+          onSubmit={handleModalSubmit}
+        >
+          <RenderFields
+            fields={fields}
+            forceRender
+            parentIndexPath=""
+            parentPath={''}
+            parentSchemaPath=""
+            permissions={docPermissions.fields}
+            readOnly={false}
+          />
+          <LinkSubmit />
+        </Form>
+      </Drawer>
+    </EditDepthProvider>
   )
 }
 
