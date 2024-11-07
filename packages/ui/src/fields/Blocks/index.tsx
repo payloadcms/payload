@@ -110,7 +110,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const addRow = useCallback(
     (rowIndex: number, blockType: string) => {
       addFieldRow({
-        data: { blockType },
+        blockType,
         path,
         rowIndex,
         schemaPath,

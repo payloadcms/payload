@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
 import { type FormState, type PayloadRequest } from 'payload'
 import {
-  deepCopyObjectComplex,
+  deepCopyObjectSimpleWithoutReactComponents,
   getDataByPath as getDataByPathFunc,
   getSiblingData as getSiblingDataFunc,
   reduceFieldsToValues,
@@ -229,7 +229,7 @@ export const Form: React.FC<FormProps> = (props) => {
       // Execute server side validations
       if (Array.isArray(beforeSubmit)) {
         let revalidatedFormState: FormState
-        const serializableFields = reduceToSerializableFields(deepCopyObjectComplex(fields))
+        const serializableFields = deepCopyObjectSimpleWithoutReactComponents(fields)
 
         await beforeSubmit.reduce(async (priorOnChange, beforeSubmitFn) => {
           await priorOnChange
@@ -265,7 +265,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       // If submit handler comes through via props, run that
       if (onSubmit) {
-        const serializableFields = reduceToSerializableFields(deepCopyObjectComplex(fields))
+        const serializableFields = deepCopyObjectSimpleWithoutReactComponents(fields)
         const data = reduceFieldsToValues(serializableFields, true)
 
         if (overrides) {
@@ -538,7 +538,7 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
-    ({ data, path, rowIndex: rowIndexArg }) => {
+    ({ blockType, path, rowIndex: rowIndexArg, subFieldState }) => {
       const newRows: unknown[] = getDataByPath(path) || []
       const rowIndex = rowIndexArg === undefined ? newRows.length : rowIndexArg
 
@@ -546,9 +546,10 @@ export const Form: React.FC<FormProps> = (props) => {
       // This performs no form state request, as the debounced onChange effect will do that for us.
       dispatchFields({
         type: 'ADD_ROW',
-        blockType: data?.blockType,
+        blockType,
         path,
         rowIndex,
+        subFieldState,
       })
     },
     [dispatchFields, getDataByPath],
@@ -562,28 +563,19 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const replaceFieldRow: FormContextType['replaceFieldRow'] = useCallback(
-    async ({ data, path, rowIndex: rowIndexArg, schemaPath }) => {
-      const newRows: unknown[] = getDataByPath(path)
-      const rowIndex = rowIndexArg === undefined ? newRows.length : rowIndexArg
-      newRows[rowIndex] = { id: uuidv4(), ...(data || {}) }
-      const fieldName = path.split('.').pop()
-
-      const { formState: newFormState } = await getFieldStateBySchemaPath({
-        collectionSlug,
-        data: {
-          [fieldName]: newRows,
-        },
-        globalSlug,
-        path,
-        schemaPath,
-      })
+    ({ blockType, path, rowIndex: rowIndexArg, subFieldState }) => {
+      const currentRows: unknown[] = getDataByPath(path)
+      const rowIndex = rowIndexArg === undefined ? currentRows.length : rowIndexArg
 
       dispatchFields({
-        type: 'UPDATE_MANY',
-        formState: newFormState,
+        type: 'REPLACE_ROW',
+        blockType,
+        path,
+        rowIndex,
+        subFieldState,
       })
     },
-    [getFieldStateBySchemaPath, dispatchFields, collectionSlug, globalSlug, getDataByPath],
+    [dispatchFields, getDataByPath],
   )
 
   // clean on unmount
@@ -681,13 +673,15 @@ export const Form: React.FC<FormProps> = (props) => {
     () => {
       const executeOnChange = async () => {
         if (Array.isArray(onChange)) {
-          let revalidatedFormState: FormState = deepCopyObjectComplex(contextRef.current.fields) // deep copy, as we do not want prepareFields to mutate the original state. Complex, to avoid maximum call stack exceeded errors
+          // deep copy, as we do not want to mutate the original state. Complex, to avoid maximum call stack exceeded errors
+          let revalidatedFormState: FormState = deepCopyObjectSimpleWithoutReactComponents(
+            contextRef.current.fields,
+          )
 
           for (const onChangeFn of onChange) {
             // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
-            const serializableFields = reduceToSerializableFields(revalidatedFormState)
             revalidatedFormState = await onChangeFn({
-              formState: serializableFields,
+              formState: deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields),
             })
           }
 

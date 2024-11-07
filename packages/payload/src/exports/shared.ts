@@ -43,6 +43,7 @@ export {
   deepCopyObject,
   deepCopyObjectComplex,
   deepCopyObjectSimple,
+  deepCopyObjectSimpleWithoutReactComponents,
 } from '../utilities/deepCopyObject.js'
 export {
   deepMerge,

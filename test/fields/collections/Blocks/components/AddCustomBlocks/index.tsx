@@ -9,10 +9,11 @@ const baseClass = 'custom-blocks-field-management'
 
 const blocksPath = 'customBlocks'
 
-export const AddCustomBlocks: React.FC = (props) => {
+export const AddCustomBlocks: React.FC<any> = (props) => {
   const { addFieldRow, replaceFieldRow } = useForm()
   const field = useField<number>({ path: blocksPath })
   const { value } = field
+
   const schemaPath = props.schemaPath.replace(`.${props.field.name}`, `.${blocksPath}`)
 
   return (
@@ -20,11 +21,18 @@ export const AddCustomBlocks: React.FC = (props) => {
       <div className={`${baseClass}__blocks-grid`}>
         <button
           className={`${baseClass}__block-button`}
-          onClick={async () => {
-            await addFieldRow({
-              data: { block1Title: 'Block 1: Prefilled Title', blockType: 'block-1' },
+          onClick={() => {
+            addFieldRow({
+              blockType: 'block-1',
               path: blocksPath,
               schemaPath,
+              subFieldState: {
+                block1Title: {
+                  initialValue: 'Block 1: Prefilled Title',
+                  valid: true,
+                  value: 'Block 1: Prefilled Title',
+                },
+              },
             })
           }}
           type="button"
@@ -34,11 +42,18 @@ export const AddCustomBlocks: React.FC = (props) => {
 
         <button
           className={`${baseClass}__block-button`}
-          onClick={async () => {
-            await addFieldRow({
-              data: { block2Title: 'Block 2: Prefilled Title', blockType: 'block-2' },
+          onClick={() => {
+            addFieldRow({
+              blockType: 'block-2',
               path: blocksPath,
               schemaPath,
+              subFieldState: {
+                block2Title: {
+                  initialValue: 'Block 2: Prefilled Title',
+                  valid: true,
+                  value: 'Block 2: Prefilled Title',
+                },
+              },
             })
           }}
           type="button"
@@ -52,10 +67,17 @@ export const AddCustomBlocks: React.FC = (props) => {
           className={`${baseClass}__block-button ${baseClass}__replace-block-button`}
           onClick={() =>
             replaceFieldRow({
-              data: { block1Title: 'REPLACED BLOCK', blockType: 'block-1' },
+              blockType: 'block-1',
               path: blocksPath,
-              rowIndex: value - 1,
+              rowIndex: value,
               schemaPath,
+              subFieldState: {
+                block1Title: {
+                  initialValue: 'REPLACED BLOCK',
+                  valid: true,
+                  value: 'REPLACED BLOCK',
+                },
+              },
             })
           }
           type="button"

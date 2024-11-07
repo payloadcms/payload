@@ -181,15 +181,17 @@ export type FormFieldsContext = [FormState, Dispatch<FieldAction>]
 
 export type Context = {
   addFieldRow: ({
-    data,
+    blockType,
     path,
     rowIndex,
     schemaPath,
+    subFieldState,
   }: {
-    data?: Data
+    blockType?: string
     path: string
     rowIndex?: number
     schemaPath: string
+    subFieldState?: FormState
   }) => void
   buildRowErrors: () => void
   createFormData: CreateFormData
@@ -208,16 +210,18 @@ export type Context = {
   initializing: boolean
   removeFieldRow: ({ path, rowIndex }: { path: string; rowIndex: number }) => void
   replaceFieldRow: ({
-    data,
+    blockType,
     path,
     rowIndex,
     schemaPath,
+    subFieldState,
   }: {
-    data?: Data
+    blockType?: string
     path: string
     rowIndex: number
     schemaPath: string
-  }) => Promise<void>
+    subFieldState?: FormState
+  }) => void
   replaceState: (state: FormState) => void
   reset: Reset
   setDisabled: (disabled: boolean) => void
