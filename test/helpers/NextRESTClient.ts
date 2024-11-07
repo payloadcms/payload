@@ -1,4 +1,4 @@
-import type { JoinQuery, SanitizedConfig, SelectType, Where } from 'payload'
+import type { JoinQuery, PopulateType, SanitizedConfig, SelectType, Where } from 'payload'
 import type { ParsedQs } from 'qs-esm'
 
 import {
@@ -7,6 +7,7 @@ import {
   GRAPHQL_POST as createGraphqlPOST,
   REST_PATCH as createPATCH,
   REST_POST as createPOST,
+  REST_PUT as createPUT,
 } from '@payloadcms/next/routes'
 import * as qs from 'qs-esm'
 
@@ -22,6 +23,7 @@ type RequestOptions = {
     limit?: number
     locale?: string
     page?: number
+    populate?: PopulateType
     select?: SelectType
     sort?: string
     where?: Where
@@ -67,6 +69,11 @@ export class NextRESTClient {
     args: { params: Promise<{ slug: string[] }> },
   ) => Promise<Response>
 
+  private _PUT: (
+    request: Request,
+    args: { params: Promise<{ slug: string[] }> },
+  ) => Promise<Response>
+
   private readonly config: SanitizedConfig
 
   private token: string
@@ -82,6 +89,7 @@ export class NextRESTClient {
     this._POST = createPOST(config)
     this._DELETE = createDELETE(config)
     this._PATCH = createPATCH(config)
+    this._PUT = createPUT(config)
     this._GRAPHQL_POST = createGraphqlPOST(config)
   }
 
@@ -220,5 +228,18 @@ export class NextRESTClient {
       method: 'POST',
     })
     return this._POST(request, { params: Promise.resolve({ slug }) })
+  }
+
+  async PUT(path: ValidPath, options: FileArg & RequestInit & RequestOptions): Promise<Response> {
+    const { slug, params, url } = this.generateRequestParts(path)
+    const { query, ...rest } = options
+    const queryParams = generateQueryString(query, params)
+
+    const request = new Request(`${url}${queryParams}`, {
+      ...rest,
+      headers: this.buildHeaders(options),
+      method: 'PUT',
+    })
+    return this._PUT(request, { params: Promise.resolve({ slug }) })
   }
 }

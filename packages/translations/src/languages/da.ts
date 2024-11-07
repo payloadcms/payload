@@ -308,6 +308,7 @@ export const daTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Opdateret.',
     updating: 'Opdaterer',
     uploading: 'Uploader',
+    uploadingBulk: 'Uploader {{current}} af {{total}}',
     user: 'Bruger',
     username: 'Brugernavn',
     users: 'Brugere',

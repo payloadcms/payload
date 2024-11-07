@@ -12,6 +12,9 @@ import type {
   CollectionSlug,
   DataFromGlobalSlug,
   GlobalSlug,
+  RequestContext,
+  TypedCollectionJoins,
+  TypedCollectionSelect,
   TypedLocale,
   TypedUser,
 } from '../index.js'
@@ -94,10 +97,6 @@ export type PayloadRequest = CustomPayloadRequestProperties &
   PayloadRequestData &
   Required<Pick<Request, 'headers'>>
 
-export interface RequestContext {
-  [key: string]: unknown
-}
-
 export type Operator = (typeof validOperators)[number]
 
 // Makes it so things like passing new Date() will error
@@ -125,15 +124,20 @@ export type Sort = Array<string> | string
 /**
  * Applies pagination for join fields for including collection relationships
  */
-export type JoinQuery =
-  | {
-      [schemaPath: string]: {
-        limit?: number
-        sort?: string
-        where?: Where
-      }
-    }
-  | false
+export type JoinQuery<TSlug extends CollectionSlug = string> =
+  TypedCollectionJoins[TSlug] extends Record<string, string>
+    ?
+        | false
+        | Partial<{
+            [K in keyof TypedCollectionJoins[TSlug]]:
+              | {
+                  limit?: number
+                  sort?: string
+                  where?: Where
+                }
+              | false
+          }>
+    : never
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Document = any
@@ -220,3 +224,5 @@ export type TransformGlobalWithSelect<
 > = TSelect extends SelectType
   ? TransformDataWithSelect<DataFromGlobalSlug<TSlug>, TSelect>
   : DataFromGlobalSlug<TSlug>
+
+export type PopulateType = Partial<TypedCollectionSelect>

@@ -311,6 +311,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Atualizado com sucesso.',
     updating: 'Atualizando',
     uploading: 'Fazendo upload',
+    uploadingBulk: 'Carregando {{current}} de {{total}}',
     user: 'usuário',
     username: 'Nome de usuário',
     users: 'usuários',

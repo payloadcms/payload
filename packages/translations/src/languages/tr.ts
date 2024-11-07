@@ -314,6 +314,7 @@ export const trTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Başarıyla güncellendi.',
     updating: 'Güncelleniyor',
     uploading: 'Yükleniyor',
+    uploadingBulk: "{{total}}'den {{current}} yükleniyor",
     user: 'kullanıcı',
     username: 'Kullanıcı Adı',
     users: 'kullanıcı',

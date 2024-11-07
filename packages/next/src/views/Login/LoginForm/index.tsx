@@ -105,6 +105,7 @@ export const LoginForm: React.FC<{
           adminRoute,
           path: forgotRoute,
         })}
+        prefetch={false}
       >
         {t('authentication:forgotPasswordQuestion')}
       </Link>

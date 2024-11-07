@@ -308,6 +308,7 @@ export const arTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'تم التحديث بنجاح.',
     updating: 'جار التحديث',
     uploading: 'جار الرفع',
+    uploadingBulk: 'جاري التحميل {{current}} من {{total}}',
     user: 'المستخدم',
     username: 'اسم المستخدم',
     users: 'المستخدمين',

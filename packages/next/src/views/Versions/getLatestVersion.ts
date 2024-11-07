@@ -61,7 +61,7 @@ export async function getLatestVersion(args: Args): Promise<ReturnType> {
       updatedAt: response.docs[0].updatedAt,
     }
   } catch (e) {
-    console.error(e)
+    payload.logger.error(e)
     return null
   }
 }

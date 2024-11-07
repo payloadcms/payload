@@ -310,6 +310,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Uspješno ažurirano.',
     updating: 'Ažuriranje',
     uploading: 'Prijenos',
+    uploadingBulk: 'Prenosim {{current}} od {{total}}',
     user: 'Korisnik',
     username: 'Korisničko ime',
     users: 'Korisnici',

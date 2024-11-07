@@ -310,6 +310,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: '更新成功。',
     updating: '更新中',
     uploading: 'アップロード中',
+    uploadingBulk: '{{current}} / {{total}} をアップロード中',
     user: 'ユーザー',
     username: 'ユーザーネーム',
     users: 'ユーザー',

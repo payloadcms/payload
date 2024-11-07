@@ -308,6 +308,7 @@ export const viTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Cập nhật thành công.',
     updating: 'Đang cập nhật',
     uploading: 'Đang tải lên',
+    uploadingBulk: 'Đang tải lên {{current}} trong tổng số {{total}}',
     user: 'Người dùng',
     username: 'Tên đăng nhập',
     users: 'Người dùng',

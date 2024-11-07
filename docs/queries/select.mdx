@@ -128,3 +128,31 @@ export const Pages: CollectionConfig<'pages'> = {
   ],
 }
 ```
+
+## `populate`
+
+You can override `defaultPopulate` with the `populate` property in the Local and REST API
+
+Local API:
+```ts
+const getPosts = async () => {
+  const posts = await payload.find({
+    collection: 'posts',
+    populate: {
+      // Select only `text` from populated docs in the "pages" collection
+      pages: {
+        text: true,
+      }, // highlight-line
+    },
+  })
+
+  return posts
+}
+```
+
+REST API:
+```ts
+fetch('https://localhost:3000/api/posts?populate[pages][text]=true') // highlight-line
+  .then((res) => res.json())
+  .then((data) => console.log(data))
+```

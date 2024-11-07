@@ -6,6 +6,7 @@ import type { FindOneArgs } from '../../database/types.js'
 import type { CollectionSlug } from '../../index.js'
 import type {
   PayloadRequest,
+  PopulateType,
   SelectType,
   TransformCollectionWithSelect,
 } from '../../types/index.js'
@@ -41,6 +42,7 @@ export type Arguments = {
   draft?: boolean
   id: number | string
   overrideAccess?: boolean
+  populate?: PopulateType
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
@@ -81,6 +83,7 @@ export const duplicateOperation = async <
       depth,
       draft: draftArg = true,
       overrideAccess,
+      populate,
       req: { fallbackLocale, locale: localeArg, payload },
       req,
       select,
@@ -306,6 +309,7 @@ export const duplicateOperation = async <
       global: null,
       locale: localeArg,
       overrideAccess,
+      populate,
       req,
       select,
       showHiddenFields,

@@ -1,4 +1,6 @@
-We cannot recreate the issue with the provided information. **Please add a reproduction in order for us to be able to investigate.**
+**Please add a reproduction in order for us to be able to investigate.**
+
+Depending on the quality of reproduction steps, this issue may be closed if no reproduction is provided.
 
 ### Why was this issue marked with the `invalid-reproduction` label?
 

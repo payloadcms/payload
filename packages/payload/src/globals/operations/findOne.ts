@@ -1,5 +1,5 @@
 import type { AccessResult } from '../../config/types.js'
-import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
+import type { PayloadRequest, PopulateType, SelectType, Where } from '../../types/index.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
@@ -14,6 +14,7 @@ type Args = {
   globalConfig: SanitizedGlobalConfig
   includeLockStatus?: boolean
   overrideAccess?: boolean
+  populate?: PopulateType
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
@@ -30,6 +31,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     globalConfig,
     includeLockStatus,
     overrideAccess = false,
+    populate,
     req: { fallbackLocale, locale },
     req,
     select,
@@ -169,6 +171,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
       global: globalConfig,
       locale,
       overrideAccess,
+      populate,
       req,
       select,
       showHiddenFields,

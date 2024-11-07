@@ -310,6 +310,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Успішно відредаговано.',
     updating: 'оновлення',
     uploading: 'завантаження',
+    uploadingBulk: 'Завантаження {{current}} з {{total}}',
     user: 'Користувач',
     username: "Ім'я користувача",
     users: 'Користувачі',
