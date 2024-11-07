@@ -819,6 +819,8 @@ describe('lexicalBlocks', () => {
       const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
+      await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+      await wait(1000) // Wait for form state requests to be done, to reduce flakes
 
       const conditionalArrayBlock = richTextField.locator('.lexical-block').nth(7)
 
