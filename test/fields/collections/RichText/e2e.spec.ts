@@ -314,6 +314,7 @@ describe('Rich Text', () => {
   describe('editor', () => {
     test('should populate url link', async () => {
       await navigateToRichTextFields()
+      await wait(500)
 
       // Open link popup
       await page.locator('#field-richText span >> text="render links"').click()
@@ -330,6 +331,7 @@ describe('Rich Text', () => {
       const textField = editLinkModal.locator('#field-text')
       await expect(textField).toHaveValue('render links')
 
+      await wait(1000)
       // Close the drawer
       await editLinkModal.locator('button[type="submit"]').click()
       await expect(editLinkModal).toBeHidden()
@@ -398,12 +400,15 @@ describe('Rich Text', () => {
 
     test('should populate new links', async () => {
       await navigateToRichTextFields()
+      await wait(1000)
 
       // Highlight existing text
       const headingElement = page.locator(
         '#field-richText h1 >> text="Hello, I\'m a rich text field."',
       )
       await headingElement.selectText()
+
+      await wait(500)
 
       // click the toolbar link button
       await page.locator('.rich-text__toolbar button:not([disabled]) .link').first().click()
@@ -419,12 +424,15 @@ describe('Rich Text', () => {
       await page.locator('#field-blocks').scrollIntoViewIfNeeded()
       await expect(page.locator('#field-blocks__0__text')).toBeVisible()
       await expect(page.locator('#field-blocks__0__text')).toHaveValue('Regular text')
+      await wait(500)
       const editBlock = page.locator('#blocks-row-0 .popup-button')
       await editBlock.click()
       const removeButton = page.locator('#blocks-row-0').getByRole('button', { name: 'Remove' })
       await expect(removeButton).toBeVisible()
+      await wait(500)
       await removeButton.click()
       const richTextField = page.locator('#field-blocks__0__text')
+      await expect(richTextField).toBeVisible()
       const richTextValue = await richTextField.innerText()
       expect(richTextValue).toContain('Rich text')
     })
