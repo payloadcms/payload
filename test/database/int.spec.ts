@@ -182,26 +182,36 @@ describe('database', () => {
       expect(migration.batch).toStrictEqual(1)
     })
 
-    // known issue: https://github.com/payloadcms/payload/issues/4597
-    it.skip('should run migrate:down', async () => {
+    it('should run migrate:down', async () => {
       let error
       try {
         await payload.db.migrateDown()
       } catch (e) {
         error = e
       }
+
+      const migrations = await payload.find({
+        collection: 'payload-migrations',
+      })
+
       expect(error).toBeUndefined()
+      expect(migrations.docs).toHaveLength(0)
     })
 
-    // known issue: https://github.com/payloadcms/payload/issues/4597
-    it.skip('should run migrate:refresh', async () => {
+    it('should run migrate:refresh', async () => {
       let error
       try {
         await payload.db.migrateRefresh()
       } catch (e) {
         error = e
       }
+
+      const migrations = await payload.find({
+        collection: 'payload-migrations',
+      })
+
       expect(error).toBeUndefined()
+      expect(migrations.docs).toHaveLength(1)
     })
   })
 
