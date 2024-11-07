@@ -390,7 +390,8 @@ jobs:
       #     report-tag: ${{ matrix.suite }}
       #     job-summary: true
 
-  app-build-with-packed:
+  # Build listed templates with packed local packages
+  build-templates:
     runs-on: ubuntu-latest
     needs: build
     strategy:
@@ -398,6 +399,9 @@ jobs:
         template:
           - blank
           - website
+          - with-payload-cloud
+          - with-vercel-mongodb
+          # TODO: Add postgres templates, need to ensure migrations are up-to-date and working
 
     steps:
       # https://github.com/actions/virtual-environments/issues/1187
