@@ -49,7 +49,7 @@
   "dependencies": {
     "@payloadcms/drizzle": "workspace:*",
     "@vercel/postgres": "^0.9.0",
-    "console-table-printer": "2.11.2",
+    "console-table-printer": "2.12.1",
     "drizzle-kit": "0.26.2",
     "drizzle-orm": "0.35.1",
     "pg": "8.11.3",
