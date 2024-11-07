@@ -25,10 +25,13 @@ export const linkValidation = (
       collectionSlug,
       data: node.fields,
       fields: sanitizedFieldsWithoutText, // Sanitized in feature.server.ts
+      fieldSchemaMap: undefined,
       operation: operation === 'create' || operation === 'update' ? operation : 'update',
+      permissions: {},
       preferences,
+      renderAllFields: false,
       req,
-      siblingData: node.fields,
+      schemaPath: '',
     })
 
     let errorPaths: string[] = []
