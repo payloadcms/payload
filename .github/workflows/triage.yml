@@ -99,4 +99,4 @@ jobs:
           reproduction-comment: '.github/comments/invalid-reproduction.md'
           reproduction-link-section: '### Link to the code that reproduces this issue(.*)### Reproduction Steps'
           reproduction-issue-labels: 'validate-reproduction'
-          tag-only: 'true'
+          actions-to-perform: 'tag,comment'

@@ -813,3 +813,87 @@ export const PATCH =
       })
     }
   }
+
+export const PUT =
+  (config: Promise<SanitizedConfig> | SanitizedConfig) =>
+  async (request: Request, { params: paramsPromise }: { params: Promise<{ slug: string[] }> }) => {
+    const { slug } = await paramsPromise
+    const [slug1] = slug
+    let req: PayloadRequest
+    let res: Response
+    let collection: Collection
+
+    try {
+      req = await createPayloadRequest({
+        config,
+        request,
+      })
+      collection = req.payload.collections?.[slug1]
+
+      const disableEndpoints = endpointsAreDisabled({
+        endpoints: req.payload.config.endpoints,
+        request,
+      })
+      if (disableEndpoints) {
+        return disableEndpoints
+      }
+
+      if (collection) {
+        req.routeParams.collection = slug1
+
+        const disableEndpoints = endpointsAreDisabled({
+          endpoints: collection.config.endpoints,
+          request,
+        })
+        if (disableEndpoints) {
+          return disableEndpoints
+        }
+
+        const customEndpointResponse = await handleCustomEndpoints({
+          endpoints: collection.config.endpoints,
+          entitySlug: slug1,
+          req,
+        })
+
+        if (customEndpointResponse) {
+          return customEndpointResponse
+        }
+      }
+
+      if (res instanceof Response) {
+        if (req.responseHeaders) {
+          const mergedResponse = new Response(res.body, {
+            headers: mergeHeaders(req.responseHeaders, res.headers),
+            status: res.status,
+            statusText: res.statusText,
+          })
+
+          return mergedResponse
+        }
+
+        return res
+      }
+
+      // root routes
+      const customEndpointResponse = await handleCustomEndpoints({
+        endpoints: req.payload.config.endpoints,
+        req,
+      })
+
+      if (customEndpointResponse) {
+        return customEndpointResponse
+      }
+
+      return RouteNotFoundResponse({
+        slug,
+        req,
+      })
+    } catch (error) {
+      return routeError({
+        collection,
+        config,
+        err: error,
+        req: req || request,
+      })
+    }
+  }

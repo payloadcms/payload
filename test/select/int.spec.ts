@@ -1612,24 +1612,26 @@ describe('Select', () => {
     })
   })
 
-  describe('defaultPopulate', () => {
+  describe('populate / defaultPopulate', () => {
     let homePage: Page
     let aboutPage: Page
     let expectedHomePage: { id: number | string; slug: string }
+    let expectedHomePageOverride: { additional: string; id: number | string }
     beforeAll(async () => {
       homePage = await payload.create({
         depth: 0,
         collection: 'pages',
-        data: { content: [], slug: 'home' },
+        data: { content: [], slug: 'home', additional: 'additional-data' },
       })
       expectedHomePage = { id: homePage.id, slug: homePage.slug }
+      expectedHomePageOverride = { id: homePage.id, additional: homePage.additional }
       aboutPage = await payload.create({
         depth: 0,
         collection: 'pages',
         data: {
           content: [
             {
-              blockType: 'cta',
+              blockType: 'introduction',
               richTextSlate: [
                 {
                   type: 'relationship',
@@ -1744,6 +1746,151 @@ describe('Select', () => {
       ])
       expect(richTextLexicalRel.value).toMatchObject(expectedHomePage)
       expect(richTextSlateRel.value).toMatchObject(expectedHomePage)
+    })
+
+    it('graphQL - should retrieve fields against defaultPopulate', async () => {
+      const query = `query {
+        Pages {
+          docs { 
+            id,
+            content {
+              ... on Introduction {
+                link {
+                  doc {
+                    id,
+                    additional,
+                    slug, 
+                  }
+                },
+                richTextLexical(depth: 1)
+                richTextSlate(depth: 1)
+              }
+            }
+          }
+        }
+      }`
+
+      const {
+        data: {
+          Pages: {
+            docs: [
+              {
+                content: [
+                  {
+                    link,
+                    richTextSlate: [richTextSlateRel],
+                    richTextLexical: {
+                      root: {
+                        children: [richTextLexicalRel],
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+        })
+        .then((res) => res.json())
+
+      expect(link.doc).toMatchObject({
+        id: homePage.id,
+        additional: homePage.additional,
+        slug: homePage.slug,
+      })
+      expect(richTextLexicalRel.value).toMatchObject(homePage)
+      expect(richTextSlateRel.value).toMatchObject(homePage)
+    })
+
+    it('local API - should populate and override defaultSelect select shape from the populate arg', async () => {
+      const result = await payload.findByID({
+        populate: {
+          pages: {
+            additional: true,
+          },
+        },
+        collection: 'pages',
+        depth: 1,
+        id: aboutPage.id,
+      })
+
+      const {
+        content: [
+          {
+            link: { doc, docHasManyPoly, docMany, docPoly },
+            richTextSlate: [richTextSlateRel],
+            richTextLexical: {
+              root: {
+                children: [richTextLexicalRel],
+              },
+            },
+          },
+        ],
+      } = result
+
+      expect(doc).toStrictEqual(expectedHomePageOverride)
+      expect(docMany).toStrictEqual([expectedHomePageOverride])
+      expect(docPoly).toStrictEqual({
+        relationTo: 'pages',
+        value: expectedHomePageOverride,
+      })
+      expect(docHasManyPoly).toStrictEqual([
+        {
+          relationTo: 'pages',
+          value: expectedHomePageOverride,
+        },
+      ])
+
+      expect(richTextLexicalRel.value).toStrictEqual(expectedHomePageOverride)
+      expect(richTextSlateRel.value).toStrictEqual(expectedHomePageOverride)
+    })
+
+    it('rEST API - should populate and override defaultSelect select shape from the populate arg', async () => {
+      const result = await restClient
+        .GET(`/pages/${aboutPage.id}`, {
+          query: {
+            populate: {
+              pages: {
+                additional: true,
+              },
+            },
+            depth: 1,
+          },
+        })
+        .then((res) => res.json())
+
+      const {
+        content: [
+          {
+            link: { doc, docHasManyPoly, docMany, docPoly },
+            richTextSlate: [richTextSlateRel],
+            richTextLexical: {
+              root: {
+                children: [richTextLexicalRel],
+              },
+            },
+          },
+        ],
+      } = result
+
+      expect(doc).toMatchObject(expectedHomePageOverride)
+      expect(docMany).toMatchObject([expectedHomePageOverride])
+      expect(docPoly).toMatchObject({
+        relationTo: 'pages',
+        value: expectedHomePageOverride,
+      })
+      expect(docHasManyPoly).toMatchObject([
+        {
+          relationTo: 'pages',
+          value: expectedHomePageOverride,
+        },
+      ])
+
+      expect(richTextLexicalRel.value).toMatchObject(expectedHomePageOverride)
+      expect(richTextSlateRel.value).toMatchObject(expectedHomePageOverride)
     })
   })
 })

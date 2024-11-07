@@ -311,6 +311,7 @@ export const enTranslations = {
     updatedSuccessfully: 'Updated successfully.',
     updating: 'Updating',
     uploading: 'Uploading',
+    uploadingBulk: 'Uploading {{current}} of {{total}}',
     user: 'User',
     username: 'Username',
     users: 'Users',

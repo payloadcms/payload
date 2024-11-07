@@ -4,7 +4,7 @@ import httpStatus from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
 import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
+import type { PayloadRequest, PopulateType, SelectType, Where } from '../../types/index.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -46,6 +46,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideAccess?: boolean
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
+  populate?: PopulateType
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
@@ -89,6 +90,7 @@ export const updateOperation = async <
       overrideAccess,
       overrideLock,
       overwriteExistingFiles = false,
+      populate,
       req: {
         fallbackLocale,
         locale,
@@ -361,6 +363,7 @@ export const updateOperation = async <
           global: null,
           locale,
           overrideAccess,
+          populate,
           req,
           select,
           showHiddenFields,

@@ -313,6 +313,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Успешно Обновлено.',
     updating: 'Обновление',
     uploading: 'Загрузка',
+    uploadingBulk: 'Загрузка {{current}} из {{total}}',
     user: 'пользователь',
     username: 'Имя пользователя',
     users: 'пользователи',

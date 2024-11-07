@@ -235,6 +235,7 @@ export const UploadFeature = createServerFeature<
                 draft,
                 node,
                 overrideAccess,
+                populateArg,
                 populationPromises,
                 req,
                 showHiddenFields,
@@ -264,7 +265,8 @@ export const UploadFeature = createServerFeature<
                     key: 'value',
                     overrideAccess,
                     req,
-                    select: collection.config.defaultPopulate,
+                    select:
+                      populateArg?.[collection.config.slug] ?? collection.config.defaultPopulate,
                     showHiddenFields,
                   }),
                 )

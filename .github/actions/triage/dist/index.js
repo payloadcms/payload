@@ -33843,6 +33843,7 @@ if (!process.env.GITHUB_TOKEN)
     throw new TypeError('No GITHUB_TOKEN provided');
 if (!process.env.GITHUB_WORKSPACE)
     throw new TypeError('Not a GitHub workspace');
+var validActionsToPerform = ['tag', 'comment', 'close'];
 var config = {
     invalidLink: {
         comment: (0,core.getInput)('reproduction_comment') || '.github/invalid-reproduction.md',
@@ -33853,7 +33854,15 @@ var config = {
         label: (0,core.getInput)('reproduction_invalid_label') || 'invalid-reproduction',
         linkSection: (0,core.getInput)('reproduction_link_section') || '### Link to reproduction(.*)### To reproduce',
     },
-    tagOnly: getBooleanOrUndefined('tag_only') || false,
+    actionsToPerform: ((0,core.getInput)('actions_to_perform') || validActionsToPerform.join(','))
+        .split(',')
+        .map(function (a) {
+        var action = a.trim().toLowerCase();
+        if (validActionsToPerform.includes(action)) {
+            return action;
+        }
+        throw new TypeError("Invalid action: ".concat(action));
+    }),
     token: process.env.GITHUB_TOKEN,
     workspace: process.env.GITHUB_WORKSPACE,
 };
@@ -33870,7 +33879,7 @@ function tryParse(json) {
 // Retrieves a boolean input or undefined based on environment variables
 function getBooleanOrUndefined(value) {
     var variable = process.env["INPUT_".concat(value.toUpperCase())];
-    return variable === undefined || variable === '' ? undefined : (0,core.getBooleanInput)(value);
+    return variable === undefined || variable === '' ? undefined : getBooleanInput(value);
 }
 // Returns the appropriate label match type
 function getLabelMatch(value) {
@@ -33910,36 +33919,47 @@ function checkValidReproduction() {
                 case 3:
                     (0,core.info)("Invalid reproduction, issue will be closed/labeled/commented...");
                     // Adjust labels
-                    return [4 /*yield*/, Promise.all(labelsToRemove.map(function (label) { return client.issues.removeLabel(__assign(__assign({}, common), { name: label })); }))];
+                    return [4 /*yield*/, Promise.all(labelsToRemove.map(function (label) { return client.issues.removeLabel(__assign(__assign({}, common), { name: label })); }))
+                        // Tag
+                    ];
                 case 4:
                     // Adjust labels
                     _f.sent();
-                    (0,core.info)("Issue #".concat(issue.number, " - validate label removed"));
+                    if (!!config.actionsToPerform.includes('tag')) return [3 /*break*/, 6];
+                    (0,core.info)("Added label: ".concat(config.invalidLink.label));
                     return [4 /*yield*/, client.issues.addLabels(__assign(__assign({}, common), { labels: [config.invalidLink.label] }))];
                 case 5:
                     _f.sent();
-                    (0,core.info)("Issue #".concat(issue.number, " - labeled"));
-                    // If tagOnly, do not close or comment
-                    if (config.tagOnly) {
-                        (0,core.info)('Tag-only enabled, no closing/commenting actions taken');
-                        return [2 /*return*/];
-                    }
-                    // Perform closing and commenting actions
-                    return [4 /*yield*/, client.issues.update(__assign(__assign({}, common), { state: 'closed' }))];
+                    return [3 /*break*/, 7];
                 case 6:
-                    // Perform closing and commenting actions
-                    _f.sent();
-                    (0,core.info)("Issue #".concat(issue.number, " - closed"));
+                    (0,core.info)('Tag - skipped, not provided in actions to perform');
+                    _f.label = 7;
+                case 7:
+                    if (!config.actionsToPerform.includes('comment')) return [3 /*break*/, 10];
                     comment = (0,external_node_path_namespaceObject.join)(config.workspace, config.invalidLink.comment);
                     _c = (_b = client.issues).createComment;
                     _d = [__assign({}, common)];
                     _e = {};
                     return [4 /*yield*/, getCommentBody(comment)];
-                case 7: return [4 /*yield*/, _c.apply(_b, [__assign.apply(void 0, _d.concat([(_e.body = _f.sent(), _e)]))])];
-                case 8:
+                case 8: return [4 /*yield*/, _c.apply(_b, [__assign.apply(void 0, _d.concat([(_e.body = _f.sent(), _e)]))])];
+                case 9:
                     _f.sent();
-                    (0,core.info)("Issue #".concat(issue.number, " - commented"));
-                    return [2 /*return*/];
+                    (0,core.info)("Commented with invalid reproduction message");
+                    return [3 /*break*/, 11];
+                case 10:
+                    (0,core.info)('Comment - skipped, not provided in actions to perform');
+                    _f.label = 11;
+                case 11:
+                    if (!config.actionsToPerform.includes('close')) return [3 /*break*/, 13];
+                    return [4 /*yield*/, client.issues.update(__assign(__assign({}, common), { state: 'closed' }))];
+                case 12:
+                    _f.sent();
+                    (0,core.info)("Closed issue #".concat(issue.number));
+                    return [3 /*break*/, 14];
+                case 13:
+                    (0,core.info)('Close - skipped, not provided in actions to perform');
+                    _f.label = 14;
+                case 14: return [2 /*return*/];
             }
         });
     });

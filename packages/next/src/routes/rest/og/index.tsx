@@ -42,7 +42,7 @@ export const generateOGImage = async ({ req }: { req: PayloadRequest }) => {
       // Or better yet, use a CDN like Google Fonts if ever supported
       fontData = fs.readFile(path.join(dirname, 'roboto-regular.woff'))
     } catch (e) {
-      console.error(`Error reading font file or not readable: ${e.message}`) // eslint-disable-line no-console
+      req.payload.logger.error(`Error reading font file or not readable: ${e.message}`)
     }
 
     const fontFamily = 'Roboto, sans-serif'
@@ -77,7 +77,7 @@ export const generateOGImage = async ({ req }: { req: PayloadRequest }) => {
       },
     )
   } catch (e: any) {
-    console.error(`${e.message}`) // eslint-disable-line no-console
+    req.payload.logger.error(`Error generating Open Graph image: ${e.message}`)
     return NextResponse.json({ error: `Internal Server Error: ${e.message}` }, { status: 500 })
   }
 }

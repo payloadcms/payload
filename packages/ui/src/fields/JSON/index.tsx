@@ -19,7 +19,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
   const {
     field: {
       name,
-      admin: { className, description, editorOptions, style, width } = {},
+      admin: { className, description, editorOptions, style, width, maxHeight } = {},
       jsonSchema,
       label,
       localized,
@@ -136,6 +136,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         {BeforeInput}
         <CodeEditor
           defaultLanguage="json"
+          maxHeight={maxHeight}
           onChange={handleChange}
           onMount={handleMount}
           options={editorOptions}

@@ -310,6 +310,7 @@ export const slTranslations = {
     updatedSuccessfully: 'Uspešno posodobljeno.',
     updating: 'Posodabljanje',
     uploading: 'Nalaganje',
+    uploadingBulk: 'Nalaganje {{current}} od {{total}}',
     user: 'Uporabnik',
     username: 'Uporabniško ime',
     users: 'Uporabniki',
