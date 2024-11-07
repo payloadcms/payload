@@ -5,6 +5,7 @@ import type { HTMLAttributes } from 'react'
 import type { useSelection } from '../../providers/Selection/index.js'
 
 export type ListDrawerProps = {
+  readonly allowCreate?: boolean
   readonly collectionSlugs: string[]
   readonly customHeader?: React.ReactNode
   readonly drawerSlug?: string
@@ -31,8 +32,10 @@ export type UseListDrawer = (args: {
   selectedCollection?: string
   uploads?: boolean // finds all collections with upload: true
 }) => [
-  React.FC<Pick<ListDrawerProps, 'enableRowSelections' | 'onBulkSelect' | 'onSelect'>>, // drawer
-  React.FC<Pick<ListTogglerProps, 'children' | 'className' | 'disabled'>>, // toggler
+  React.FC<
+    Pick<ListDrawerProps, 'allowCreate' | 'enableRowSelections' | 'onBulkSelect' | 'onSelect'>
+  >, // drawer
+  React.FC<Pick<ListTogglerProps, 'children' | 'className' | 'disabled' | 'onClick'>>, // toggler
   {
     closeDrawer: () => void
     collectionSlugs: SanitizedCollectionConfig['slug'][]

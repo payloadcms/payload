@@ -1,24 +1,27 @@
 # Payload Multi-Tenant Example
 
-This example demonstrates how to achieve a multi-tenancy in [Payload](https://github.com/payloadcms/payload). This is a powerful way to vertically scale your application by sharing infrastructure across tenants.
+This example demonstrates how to achieve a multi-tenancy in [Payload](https://github.com/payloadcms/payload). Tenants are separated by a `Tenants` collection.
 
 ## Quick Start
 
 To spin up this example locally, follow these steps:
 
-1. First clone the repo
-1. Then `cd YOUR_PROJECT_REPO && cp .env.example .env`
-1. Next `yarn && yarn dev`
-1. Now `open http://localhost:3000/admin` to access the admin panel
-1. Login with email `demo@payloadcms.com` and password `demo`
+1. Clone this repo
+1. `cd` into this directory and run `pnpm i --ignore-workspace`\*, `yarn`, or `npm install`
 
-That's it! Changes made in `./src` will be reflected in your app. See the [Development](#development) section for more details on how to log in as a tenant.
+   > \*If you are running using pnpm within the Payload Monorepo, the `--ignore-workspace` flag is needed so that pnpm generates a lockfile in this example's directory despite the fact that one exists in root.
+
+1. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
+   - Press `y` when prompted to seed the database
+1. `open http://localhost:3000` to access the home page
+1. `open http://localhost:3000/admin` to access the admin panel
+   - Login with email `demo@payloadcms.com` and password `demo`
 
 ## How it works
 
 A multi-tenant Payload application is a single server that hosts multiple "tenants". Examples of tenants may be your agency's clients, your business conglomerate's organizations, or your SaaS customers.
 
-Each tenant has its own set of users, pages, and other data that is scoped to that tenant. This means that your application will be shared across tenants but the data will be scoped to each tenant. Tenants also run on separate domains entirely, so users are not aware of their tenancy.
+Each tenant has its own set of users, pages, and other data that is scoped to that tenant. This means that your application will be shared across tenants but the data will be scoped to each tenant.
 
 ### Collections
 
@@ -36,9 +39,15 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
   For more details on how to extend this functionality, see the [Payload Access Control](https://payloadcms.com/docs/access-control/overview) docs.
 
+  **Domain-based Tenant Setting**:
+
+  This example also supports domain-based tenant selection, where tenants can be associated with specific domains. If a tenant is associated with a domain (e.g., `abc.localhost.com:3000`), when a user logs in from that domain, they will be automatically scoped to the matching tenant. This is accomplished through an optional `afterLogin` hook that sets a `payload-tenant` cookie based on the domain.
+
+  By default, this functionality is commented out in the code but can be enabled easily. See the `setCookieBasedOnDomain` hook in the `Users` collection for more details.
+
 - #### Pages
 
-  Each page is assigned a `tenant` which is used to control access and scope API requests. Pages that are created by tenants are automatically assigned that tenant based on that user's `lastLoggedInTenant` field.
+  Each page is assigned a `tenant`, which is used to control access and scope API requests. Only users with the `super-admin` role can create pages, and pages are assigned to specific tenants. Other users can view only the pages assigned to the tenant they are associated with.
 
 ## Access control
 
@@ -52,8 +61,6 @@ This applies to each collection in the following ways:
 - `users`: Only super-admins, tenant-admins, and the user themselves can access their profile. Anyone can create a user, but only these admins can delete users. See [Users](#users) for more details.
 - `tenants`: Only super-admins and tenant-admins can read, create, update, or delete tenants. See [Tenants](#tenants) for more details.
 - `pages`: Everyone can access pages, but only super-admins and tenant-admins can create, update, or delete them.
-
-When a user logs in, a `lastLoggedInTenant` field is saved to their profile. This is done by reading the value of `req.headers.host`, querying for a tenant with a matching `domain`, and verifying that the user is a member of that tenant. This field is then used to automatically assign the tenant to any documents that the user creates, such as pages. Super-admins can also use this field to browse the admin panel as a specific tenant.
 
 > If you have versions and drafts enabled on your pages, you will need to add additional read access control condition to check the user's tenants that prevents them from accessing draft documents of other tenants.
 
@@ -69,63 +76,7 @@ For more details on this, see the [CORS](https://payloadcms.com/docs/production/
 
 ## Front-end
 
-If you're building a website or other front-end for your tenant, you will need specify the `tenant` in your requests. For example, if you wanted to fetch all pages for the tenant `ABC`, you would make a request to `/api/pages?where[tenant][slug][equals]=abc`.
-
-For a head start on building a website for your tenant(s), check out the official [Website Template](https://github.com/payloadcms/template-website). It includes a page layout builder, preview, SEO, and much more. It is not multi-tenant, though, but you can easily take the concepts from that example and apply them here.
-
-## Development
-
-To spin up this example locally, follow the [Quick Start](#quick-start).
-
-### Seed
-
-On boot, a seed script is included to scaffold a basic database for you to use as an example. This is done by setting the `PAYLOAD_DROP_DATABASE` and `PAYLOAD_SEED` environment variables which are included in the `.env.example` by default. You can remove these from your `.env` to prevent this behavior. You can also freshly seed your project at any time by running `yarn seed`. This seed creates a super-admin user with email `demo@payloadcms.com` and password `demo` along with the following tenants:
-
-- `ABC`
-  - Domains:
-    - `abc.localhost.com:3000`
-  - Users:
-    - `admin@abc.com` with role `admin` and password `test`
-    - `user@abc.com` with role `user` and password `test`
-  - Pages:
-    - `ABC Home` with content `Hello, ABC!`
-- `BBC`
-  - Domains:
-    - `bbc.localhost.com:3000`
-  - Users:
-    - `admin@bbc.com` with role `admin` and password `test`
-    - `user@bbc.com` with role `user` and password `test`
-  - Pages:
-    - `BBC Home` with content `Hello, BBC!`
-
-> NOTICE: seeding the database is destructive because it drops your current database to populate a fresh one from the seed template. Only run this command if you are starting a new project or can afford to lose your current data.
-
-### Hosts file
-
-To fully experience the multi-tenancy of this example locally, your app must run on one of the domains listed in any of your tenant's `domains` field. The simplest way to do this to add the following lines to your hosts file.
-
-```bash
-# these domains were provided in the seed script
-# if needed, change them based on your own tenant settings
-# remember to specify the port number when browsing to these domains
-127.0.0.1 abc.localhost.com
-127.0.0.1 bbc.localhost.com
-```
-
-> On Mac you can find the hosts file at `/etc/hosts`. On Windows, it's at `C:\Windows\System32\drivers\etc\hosts`.
-
-Then you can access your app at `http://abc.localhost.com:3000` and `http://bbc.localhost.com:3000`. Access control will be scoped to the correct tenant based on that user's `tenants`, see [Access Control](#access-control) for more details.
-
-## Production
-
-To run Payload in production, you need to build and serve the Admin panel. To do so, follow these steps:
-
-1. First, invoke the `payload build` script by running `yarn build` or `npm run build` in your project root. This creates a `./build` directory with a production-ready admin bundle.
-1. Then, run `yarn serve` or `npm run serve` to run Node in production and serve Payload from the `./build` directory.
-
-### Deployment
-
-The easiest way to deploy your project is to use [Payload Cloud](https://payloadcms.com/new/import), a one-click hosting solution to deploy production-ready instances of your Payload apps directly from your GitHub repo. You can also choose to self-host your app, check out the [Deployment](https://payloadcms.com/docs/production/deployment) docs for more details.
+The frontend is scaffolded out in this example directory. You can view the code for rendering pages at `/src/app/(app)/[tenant]/[...slug]/page.tsx`. This is a starter template, you may need to adjust the app to better fit your needs.
 
 ## Questions
 

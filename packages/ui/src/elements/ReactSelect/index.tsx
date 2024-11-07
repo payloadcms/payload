@@ -106,6 +106,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         onMenuClose={onMenuClose}
         onMenuOpen={onMenuOpen}
         options={options}
+        unstyled={true}
         value={value}
       />
     )
@@ -182,6 +183,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       onMenuClose={onMenuClose}
       onMenuOpen={onMenuOpen}
       options={options}
+      unstyled={true}
       value={value}
     />
   )

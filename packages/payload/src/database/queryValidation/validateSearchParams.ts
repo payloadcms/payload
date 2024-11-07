@@ -73,6 +73,19 @@ export async function validateSearchParam({
     })
   }
   const promises = []
+
+  // Sanitize relation.otherRelation.id to relation.otherRelation
+  if (paths.at(-1)?.path === 'id') {
+    const previousField = paths.at(-2)?.field
+    if (
+      previousField &&
+      (previousField.type === 'relationship' || previousField.type === 'upload') &&
+      typeof previousField.relationTo === 'string'
+    ) {
+      paths.pop()
+    }
+  }
+
   promises.push(
     ...paths.map(async ({ collectionSlug, field, invalid, path }, i) => {
       if (invalid) {
@@ -115,6 +128,7 @@ export async function validateSearchParam({
         ) {
           fieldPath = fieldPath.replace('.value', '')
         }
+
         const entityType: 'collections' | 'globals' = globalConfig ? 'globals' : 'collections'
         const entitySlug = collectionSlug || globalConfig.slug
         const segments = fieldPath.split('.')

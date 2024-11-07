@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-form-builder",
-  "version": "3.0.0-beta.110",
+  "version": "3.0.0-beta.126",
   "description": "Form builder plugin for Payload CMS",
   "keywords": [
     "payload",
@@ -60,7 +60,6 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/escape-html": "^1.0.4",
-    "@types/express": "^4.17.21",
     "@types/react": "npm:types-react@19.0.0-rc.1",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "copyfiles": "^2.4.1",
@@ -69,8 +68,8 @@
   },
   "peerDependencies": {
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-5dcb0097-20240918",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-5dcb0097-20240918"
+    "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020"
   },
   "publishConfig": {
     "exports": {

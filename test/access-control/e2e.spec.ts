@@ -482,7 +482,7 @@ describe('access control', () => {
         serverURL,
       })
 
-      await expect(page.locator('.next-error-h1')).toBeVisible()
+      await expect(page.locator('.unauthorized')).toBeVisible()
 
       await page.goto(logoutURL)
       await page.waitForURL(logoutURL)
@@ -500,6 +500,7 @@ describe('access control', () => {
 
     test('should block admin access to non-admin user', async () => {
       const adminURL = `${serverURL}/admin`
+      const unauthorizedURL = `${serverURL}/admin/unauthorized`
       await page.goto(adminURL)
       await page.waitForURL(adminURL)
 
@@ -527,9 +528,9 @@ describe('access control', () => {
       ])
 
       await page.goto(adminURL)
-      await page.waitForURL(adminURL)
+      await page.waitForURL(unauthorizedURL)
 
-      await expect(page.locator('.next-error-h1')).toBeVisible()
+      await expect(page.locator('.unauthorized')).toBeVisible()
     })
   })
 

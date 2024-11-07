@@ -6,7 +6,7 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
-import type { Config, Media } from './payload-types.js'
+import type { Config, Media, Relation } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
@@ -58,6 +58,7 @@ describe('uploads', () => {
   let page: Page
   let pngDoc: Media
   let audioDoc: Media
+  let relationDoc: Relation
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -96,6 +97,15 @@ describe('uploads', () => {
 
     pngDoc = findPNG.docs[0] as unknown as Media
 
+    const findRelationDoc = await payload.find({
+      collection: relationSlug,
+      depth: 0,
+      limit: 1,
+      pagination: false,
+    })
+
+    relationDoc = findRelationDoc.docs[0] as unknown as Relation
+
     const findAudio = await payload.find({
       collection: audioSlug,
       depth: 0,
@@ -121,6 +131,31 @@ describe('uploads', () => {
     await expect(field).toContainText('image')
   })
 
+  test('should update upload field after editing relationship in document drawer', async () => {
+    await page.goto(relationURL.edit(relationDoc.id))
+    await page.waitForURL(relationURL.edit(relationDoc.id))
+
+    const filename = page.locator('.upload-relationship-details__filename a').nth(0)
+    await expect(filename).toContainText('image.png')
+
+    await page.locator('.upload-relationship-details__edit').nth(0).click()
+    await page.locator('.file-details__remove').click()
+
+    const fileChooserPromise = page.waitForEvent('filechooser')
+    await page.getByText('Select a file').click()
+    const fileChooser = await fileChooserPromise
+    await wait(1000)
+    await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+
+    await page.locator('button#action-save').nth(1).click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
+
+    await page.locator('.doc-drawer__header-close').click()
+
+    await expect(filename).toContainText('test-image.png')
+  })
+
   test('should show upload filename in upload collection list', async () => {
     await page.goto(mediaURL.list)
     const audioUpload = page.locator('tr.row-1 .cell-filename')
@@ -137,6 +172,18 @@ describe('uploads', () => {
     const filename = page.locator('.file-field__filename')
 
     await expect(filename).toHaveValue('image.png')
+
+    await saveDocAndAssert(page)
+  })
+
+  test('should properly create IOS file upload', async () => {
+    await page.goto(mediaURL.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './ios-image.jpeg'))
+
+    const filename = page.locator('.file-field__filename')
+
+    await expect(filename).toHaveValue('ios-image.jpeg')
 
     await saveDocAndAssert(page)
   })
@@ -618,6 +665,35 @@ describe('uploads', () => {
 
       // without focal point update this generated size was equal to 1736
       expect(redDoc.sizes.focalTest.filesize).toEqual(1598)
+    })
+
+    test('should resize image after crop if resizeOptions defined', async () => {
+      await page.goto(animatedTypeMediaURL.create)
+      await page.waitForURL(animatedTypeMediaURL.create)
+
+      const fileChooserPromise = page.waitForEvent('filechooser')
+      await page.getByText('Select a file').click()
+      const fileChooser = await fileChooserPromise
+      await wait(1000)
+      await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+
+      await page.locator('.file-field__edit').click()
+
+      // set crop
+      await page.locator('.edit-upload__input input[name="Width (px)"]').fill('400')
+      await page.locator('.edit-upload__input input[name="Height (px)"]').fill('800')
+      // set focal point
+      await page.locator('.edit-upload__input input[name="X %"]').fill('75') // init left focal point
+      await page.locator('.edit-upload__input input[name="Y %"]').fill('50') // init top focal point
+
+      await page.locator('button:has-text("Apply Changes")').click()
+      await page.waitForSelector('button#action-save')
+      await page.locator('button#action-save').click()
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      await wait(1000) // Wait for the save
+
+      const resizeOptionMedia = page.locator('.file-meta .file-meta__size-type')
+      await expect(resizeOptionMedia).toContainText('200x200')
     })
   })
 

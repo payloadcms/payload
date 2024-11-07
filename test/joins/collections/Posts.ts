@@ -14,6 +14,23 @@ export const Posts: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'isFiltered',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        position: 'sidebar',
+        description: 'Hides posts for the `filtered` join field in categories',
+      },
+    },
+    {
+      name: 'restrictedField',
+      type: 'text',
+      access: {
+        read: () => false,
+        update: () => false,
+      },
+    },
+    {
       name: 'upload',
       type: 'upload',
       relationTo: uploadsSlug,
@@ -24,11 +41,29 @@ export const Posts: CollectionConfig = {
       relationTo: categoriesSlug,
     },
     {
+      name: 'categories',
+      type: 'relationship',
+      relationTo: categoriesSlug,
+      hasMany: true,
+    },
+    {
+      name: 'categoriesLocalized',
+      type: 'relationship',
+      relationTo: categoriesSlug,
+      hasMany: true,
+      localized: true,
+    },
+    {
       name: 'group',
       type: 'group',
       fields: [
         {
           name: 'category',
+          type: 'relationship',
+          relationTo: categoriesSlug,
+        },
+        {
+          name: 'camelCaseCategory',
           type: 'relationship',
           relationTo: categoriesSlug,
         },

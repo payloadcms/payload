@@ -1,14 +1,20 @@
 import crypto from 'crypto'
 
 import type { CollectionSlug, JsonObject } from '../../index.js'
-import type { Document, PayloadRequest } from '../../types/index.js'
+import type {
+  Document,
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  TransformCollectionWithSelect,
+} from '../../types/index.js'
 import type {
   AfterChangeHook,
   BeforeOperationHook,
   BeforeValidateHook,
   Collection,
-  DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
+  SelectFromCollectionSlug,
 } from '../config/types.js'
 
 import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
@@ -34,21 +40,27 @@ export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
   data: RequiredDataFromCollectionSlug<TSlug>
   depth?: number
+  disableTransaction?: boolean
   disableVerificationEmail?: boolean
   draft?: boolean
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
+  populate?: PopulateType
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
 }
 
-export const createOperation = async <TSlug extends CollectionSlug>(
+export const createOperation = async <
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   incomingArgs: Arguments<TSlug>,
-): Promise<DataFromCollectionSlug<TSlug>> => {
+): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
 
   try {
-    const shouldCommit = await initTransaction(args.req)
+    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
     ensureUsernameOrEmail<TSlug>({
       authOptions: args.collection.config.auth,
@@ -87,13 +99,15 @@ export const createOperation = async <TSlug extends CollectionSlug>(
       draft = false,
       overrideAccess,
       overwriteExistingFiles = false,
+      populate,
       req: {
         fallbackLocale,
         locale,
         payload,
-        payload: { config, email },
+        payload: { config },
       },
       req,
+      select,
       showHiddenFields,
     } = args
 
@@ -234,12 +248,14 @@ export const createOperation = async <TSlug extends CollectionSlug>(
         password: data.password as string,
         payload: req.payload,
         req,
+        select,
       })
     } else {
       doc = await payload.db.create({
         collection: collectionConfig.slug,
         data: resultWithLocales,
         req,
+        select,
       })
     }
 
@@ -291,7 +307,9 @@ export const createOperation = async <TSlug extends CollectionSlug>(
       global: null,
       locale,
       overrideAccess,
+      populate,
       req,
+      select,
       showHiddenFields,
     })
 

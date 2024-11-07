@@ -13,7 +13,9 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import {
   customIdNumberSlug,
   customIdSlug,
+  endpointsSlug,
   errorOnHookSlug,
+  methods,
   pointSlug,
   relationSlug,
   slug,
@@ -152,6 +154,36 @@ describe('collections-rest', () => {
         expect(docs[0].title).toEqual('title') // Check was not modified
         expect(docs[0].description).toEqual(description)
         expect(docs.pop().description).toEqual(description)
+      })
+
+      it('should bulk update with limit', async () => {
+        const ids = []
+        for (let i = 0; i < 3; i++) {
+          const post = await createPost({ description: `to-update` })
+          ids.push(post.id)
+        }
+
+        const description = 'updated-description'
+        const response = await restClient.PATCH(`/${slug}`, {
+          body: JSON.stringify({
+            description,
+          }),
+          query: { limit: 2, where: { id: { in: ids } } },
+        })
+        const { docs, errors } = await response.json()
+
+        expect(errors).toHaveLength(0)
+        expect(response.status).toEqual(200)
+        expect(docs).toHaveLength(2)
+        expect(docs[0].description).toEqual(description)
+        expect(docs.pop().description).toEqual(description)
+
+        const { docs: resDocs } = await payload.find({
+          limit: 10,
+          collection: slug,
+          where: { id: { in: ids } },
+        })
+        expect(resDocs.at(-1).description).toEqual('to-update')
       })
 
       it('should not bulk update with a bad query', async () => {
@@ -1614,6 +1646,25 @@ describe('collections-rest', () => {
       await expect(
         payload.findByID({ collection: 'posts', id, disableErrors: true }),
       ).resolves.toBeNull()
+    })
+  })
+
+  describe('Custom endpoints', () => {
+    it('should execute custom root endpoints', async () => {
+      for (const method of methods) {
+        const response = await restClient[method.toUpperCase()](`/${method}-test`, {})
+        await expect(response.text()).resolves.toBe(`${method} response`)
+      }
+    })
+
+    it('should execute custom collection endpoints', async () => {
+      for (const method of methods) {
+        const response = await restClient[method.toUpperCase()](
+          `/${endpointsSlug}/${method}-test`,
+          {},
+        )
+        await expect(response.text()).resolves.toBe(`${method} response`)
+      }
     })
   })
 })

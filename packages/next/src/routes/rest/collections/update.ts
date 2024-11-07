@@ -8,11 +8,17 @@ import { isNumber } from 'payload/shared'
 import type { CollectionRouteHandler } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
+import { sanitizePopulate } from '../utilities/sanitizePopulate.js'
+import { sanitizeSelect } from '../utilities/sanitizeSelect.js'
 
 export const update: CollectionRouteHandler = async ({ collection, req }) => {
-  const { depth, draft, where } = req.query as {
+  const { depth, draft, limit, overrideLock, populate, select, where } = req.query as {
     depth?: string
     draft?: string
+    limit?: string
+    overrideLock?: string
+    populate?: Record<string, unknown>
+    select?: Record<string, unknown>
     where?: Where
   }
 
@@ -21,7 +27,11 @@ export const update: CollectionRouteHandler = async ({ collection, req }) => {
     data: req.data,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: draft === 'true',
+    limit: isNumber(limit) ? Number(limit) : undefined,
+    overrideLock: Boolean(overrideLock === 'true'),
+    populate: sanitizePopulate(populate),
     req,
+    select: sanitizeSelect(select),
     where,
   })
 

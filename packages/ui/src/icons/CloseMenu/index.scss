@@ -1,10 +1,12 @@
 @import '../../scss/styles.scss';
 
-.icon--close-menu {
-  height: $baseline;
-  width: $baseline;
+@layer payload-default {
+  .icon--close-menu {
+    height: $baseline;
+    width: $baseline;
 
-  .stroke {
-    stroke: currentColor;
+    .stroke {
+      stroke: currentColor;
+    }
   }
 }

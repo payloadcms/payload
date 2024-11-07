@@ -611,4 +611,48 @@ describe('Locked documents', () => {
 
     expect(docsFromLocksCollection.docs).toHaveLength(0)
   })
+
+  it('should allow take over on locked doc (simulates take over modal from admin ui)', async () => {
+    const newPost7 = await payload.create({
+      collection: postsSlug,
+      data: {
+        text: 'new post 7',
+      },
+    })
+
+    const lockedDocInstance = await payload.create({
+      collection: lockedDocumentCollection,
+      data: {
+        editedAt: new Date().toISOString(),
+        user: {
+          relationTo: 'users',
+          value: user2.id,
+        },
+        document: {
+          relationTo: 'posts',
+          value: newPost7.id,
+        },
+        globalSlug: undefined,
+      },
+    })
+
+    // This is the take over action - changing the user to the current user
+    await payload.update({
+      collection: 'payload-locked-documents',
+      data: {
+        user: { relationTo: 'users', value: user?.id },
+      },
+      id: lockedDocInstance.id,
+    })
+
+    const docsFromLocksCollection = await payload.find({
+      collection: lockedDocumentCollection,
+      where: {
+        'user.value': { equals: user.id },
+      },
+    })
+
+    expect(docsFromLocksCollection.docs).toHaveLength(1)
+    expect(docsFromLocksCollection.docs[0].user.value?.id).toEqual(user.id)
+  })
 })

@@ -55,7 +55,7 @@ export const DocumentControls: React.FC<{
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
   readonly slug: SanitizedCollectionConfig['slug']
-  readonly user?: ClientUser
+  readonly user?: ClientUser | number | string
 }> = (props) => {
   const {
     id,
@@ -279,7 +279,7 @@ export const DocumentControls: React.FC<{
                         )}
                       </Fragment>
                     )}
-                    {!collectionConfig.disableDuplicate && isEditing && (
+                    {collectionConfig.disableDuplicate !== true && isEditing && (
                       <DuplicateDocument
                         id={id.toString()}
                         onDuplicate={onDuplicate}

@@ -37,7 +37,7 @@ To help you visualize what your page might look like in a search engine, a previ
 Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
 
 ```bash
-  pnpm add @payloadcms/plugin-seo
+  pnpm add @payloadcms/plugin-seo@beta
 ```
 
 ## Basic Usage
@@ -89,12 +89,23 @@ An array of global slugs to enable SEO. Enabled globals receive a `meta` field w
 
 ##### `fields`
 
-An array of fields that allows you to inject your own custom fields onto the `meta` field group. The following fields are provided by default:
+A function that takes in the default fields via an object and expects an array of fields in return. You can use this to modify existing fields or add new ones.
 
-- `title`: text
-- `description`: textarea
-- `image`: upload (if an `uploadsCollection` is provided)
-- `preview`: ui
+```ts
+// payload.config.ts
+{
+  // ...
+  seoPlugin({
+    fields: ({ defaultFields }) => [
+      ...defaultFields,
+      {
+        name: 'customField',
+        type: 'text',
+      }
+    ]
+  })
+}
+```
 
 ##### `uploadsCollection`
 
@@ -209,25 +220,6 @@ Rename the meta group interface name that is generated for TypeScript and GraphQ
 }
 ```
 
-#### `fieldOverrides`
-
-Pass any valid field props to the base fields: Title, Description or Image.
-
-```ts
-// payload.config.ts
-seoPlugin({
-  // ...
-  fieldOverrides: {
-    title: {
-      required: true,
-    },
-    description: {
-      localized: true,
-    },
-  },
-})
-```
-
 ## Direct use of fields
 
 There is the option to directly import any of the fields from the plugin so that you can include them anywhere as needed.
@@ -275,6 +267,10 @@ OverviewField({
   imagePath: 'meta.image',
 })
 ```
+
+<Banner type="info">
+Tip: You can override the length rules by changing the minLength and maxLength props on the fields. In the case of the OverviewField you can use `titleOverrides` and `descriptionOverrides` to override the length rules.
+</Banner>
 
 ## TypeScript
 

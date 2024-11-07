@@ -40,21 +40,21 @@ export const CollectionConfig: CollectionConfig = {
 
 The following options are available:
 
-| Option              | Description                                                                                                                                                                                                                      |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`condition`**         | Programmatically show / hide fields based on other fields. [More details](../admin/fields#conditional-logic).                                                                                               |
-| **`components`**        | All Field Components can be swapped out for [Custom Components](../admin/components) that you define. [More details](../admin/fields).                                                                             |
-| **`description`**       | Helper text to display alongside the field to provide more information for the editor. [More details](../admin/fields#description).                                                                                                 |
+| Option                  | Description                                                                                                                                                                                                                      |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`condition`**         | Programmatically show / hide fields based on other fields. [More details](../admin/fields#conditional-logic).                                                                                                                    |
+| **`components`**        | All Field Components can be swapped out for [Custom Components](../admin/components) that you define. [More details](../admin/fields).                                                                                           |
+| **`description`**       | Helper text to display alongside the field to provide more information for the editor. [More details](../admin/fields#description).                                                                                              |
 | **`position`**          | Specify if the field should be rendered in the sidebar by defining `position: 'sidebar'`.                                                                                                                                        |
 | **`width`**             | Restrict the width of a field. You can pass any string-based value here, be it pixels, percentages, etc. This property is especially useful when fields are nested within a `Row` type where they can be organized horizontally. |
-| **`style`**         | [CSS Properties](https://developer.mozilla.org/en-US/docs/Web/CSS) to inject into the root element of the field.                                                                                                           |
-| **`className`**         | Attach a [CSS class attribute](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) to the root DOM element of a field.                                                                                                                                                                      |
+| **`style`**             | [CSS Properties](https://developer.mozilla.org/en-US/docs/Web/CSS) to inject into the root element of the field.                                                                                                                 |
+| **`className`**         | Attach a [CSS class attribute](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) to the root DOM element of a field.                                                                                             |
 | **`readOnly`**          | Setting a field to `readOnly` has no effect on the API whatsoever but disables the admin component's editability to prevent editors from modifying the field's value.                                                            |
-| **`disabled`**          | If a field is `disabled`, it is completely omitted from the [Admin Panel](../admin/overview).                                                                                                                                                         |
-| **`disableBulkEdit`**   | Set `disableBulkEdit` to `true` to prevent fields from appearing in the select options when making edits for multiple documents.                                                                                                 |
+| **`disabled`**          | If a field is `disabled`, it is completely omitted from the [Admin Panel](../admin/overview).                                                                                                                                    |
+| **`disableBulkEdit`**   | Set `disableBulkEdit` to `true` to prevent fields from appearing in the select options when making edits for multiple documents. Defaults to `true` for UI fields.                                                               |
 | **`disableListColumn`** | Set `disableListColumn` to `true` to prevent fields from appearing in the list view column selector.                                                                                                                             |
 | **`disableListFilter`** | Set `disableListFilter` to `true` to prevent fields from appearing in the list view filter options.                                                                                                                              |
-| **`hidden`**            | Will transform the field into a `hidden` input type. Its value will still submit with requests in the Admin Panel, but the field itself will not be visible to editors.        |
+| **`hidden`**            | Will transform the field into a `hidden` input type. Its value will still submit with requests in the Admin Panel, but the field itself will not be visible to editors.                                                          |
 
 ## Field Components
 
@@ -217,6 +217,7 @@ Client Component:
 'use client'
 import React from 'react'
 import type { TextFieldClientComponent } from 'payload'
+import { TextField } from '@payloadcms/ui'
 
 export const MyTextField: TextFieldClientComponent = ({ field }) => {
   return <TextField field={field} />

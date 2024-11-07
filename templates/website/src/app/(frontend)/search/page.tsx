@@ -6,9 +6,15 @@ import { getPayloadHMR } from '@payloadcms/next/utilities'
 import React from 'react'
 import { Post } from '@/payload-types'
 import { Search } from '@/search/Component'
+import PageClient from './page.client'
 
-export default async function Page({ searchParams }: { searchParams: { q: string } }) {
-  const query = searchParams.q
+type Args = {
+  searchParams: Promise<{
+    q: string
+  }>
+}
+export default async function Page({ searchParams: searchParamsPromise }: Args) {
+  const { q: query } = await searchParamsPromise
   const payload = await getPayloadHMR({ config: configPromise })
 
   const posts = await payload.find({
@@ -47,6 +53,7 @@ export default async function Page({ searchParams }: { searchParams: { q: string
 
   return (
     <div className="pt-24 pb-24">
+      <PageClient />
       <div className="container mb-16">
         <div className="prose dark:prose-invert max-w-none">
           <h1 className="sr-only">Search</h1>
@@ -54,7 +61,11 @@ export default async function Page({ searchParams }: { searchParams: { q: string
         </div>
       </div>
 
-      <CollectionArchive posts={posts.docs as unknown as Post[]} />
+      {posts.totalDocs > 0 ? (
+        <CollectionArchive posts={posts.docs as unknown as Post[]} />
+      ) : (
+        <div className="container">No results found.</div>
+      )}
     </div>
   )
 }

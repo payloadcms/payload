@@ -67,6 +67,7 @@ export const DocumentTabLink: React.FC<{
       <Link
         className={`${baseClass}__link`}
         href={!isActive || href !== pathname ? hrefWithLocale : ''}
+        prefetch={false}
         {...(newTab && { rel: 'noopener noreferrer', target: '_blank' })}
         tabIndex={isActive ? -1 : 0}
       >

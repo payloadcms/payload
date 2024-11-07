@@ -93,7 +93,7 @@ For more granular control, pass a configuration object instead. Payload exposes 
 | **`path`** \*      | Any valid URL path or array of paths that [`path-to-regexp`](https://www.npmjs.com/package/path-to-regex) understands.                                                                     |
 | **`exact`**        | Boolean. When true, will only match if the path matches the `usePathname()` exactly.                                                                                                     |
 | **`strict`**       | When true, a path that has a trailing slash will only match a `location.pathname` with a trailing slash. This has no effect when there are additional URL segments in the pathname. |
-| **`sensitive`**    | When true, will match if the path is case sensitive.
+| **`sensitive`**    | When true, will match if the path is case sensitive.|
 | **`meta`**         | Page metadata overrides to apply to this view within the Admin Panel. [More details](./metadata).                                                                           |
 
 _\* An asterisk denotes that a property is required._
@@ -131,6 +131,12 @@ The above example shows how to add a new [Root View](#root-views), but the patte
   match on URLs that simply _start_ with the route's path. This is helpful when creating catch-all
   routes in your application. Alternatively, define your nested route _before_ your parent
   route.
+</Banner>
+
+<Banner type="warning">
+  <strong>Custom views are public</strong>
+  <br />
+  Custom views are public by default. If your view requires a user to be logged in or to have certain access rights, you should handle that within your view component yourself.
 </Banner>
 
 ## Collection Views

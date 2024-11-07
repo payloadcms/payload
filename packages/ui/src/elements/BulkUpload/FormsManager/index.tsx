@@ -15,7 +15,9 @@ import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { getFormState } from '../../../utilities/getFormState.js'
 import { hasSavePermission as getHasSavePermission } from '../../../utilities/hasSavePermission.js'
+import { LoadingOverlay } from '../../Loading/index.js'
 import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
+import { createThumbnail } from '../../Thumbnail/createThumbnail.js'
 import { useBulkUpload } from '../index.js'
 import { createFormData } from './createFormData.js'
 import { formsManagementReducer } from './reducer.js'
@@ -41,6 +43,7 @@ type FormsManagerContext = {
     errorCount: number
     index: number
   }) => void
+  readonly thumbnailUrls: string[]
   readonly totalErrorCount?: number
 }
 
@@ -59,6 +62,7 @@ const Context = React.createContext<FormsManagerContext>({
   saveAllDocs: () => Promise.resolve(),
   setActiveIndex: () => 0,
   setFormTotalErrorCount: () => {},
+  thumbnailUrls: [],
   totalErrorCount: 0,
 })
 
@@ -90,9 +94,46 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const [state, dispatch] = React.useReducer(formsManagementReducer, initialState)
   const { activeIndex, forms, totalErrorCount } = state
 
+  const formsRef = React.useRef(forms)
+  formsRef.current = forms
+  const formsCount = forms.length
+
+  const thumbnailUrlsRef = React.useRef<string[]>([])
+  const processedFiles = React.useRef(new Set()) // Track already-processed files
+  const [renderedThumbnails, setRenderedThumbnails] = React.useState<string[]>([])
+
+  React.useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    ;(async () => {
+      const newThumbnails = [...thumbnailUrlsRef.current]
+
+      for (let i = 0; i < formsCount; i++) {
+        const file = formsRef.current[i].formState.file.value as File
+
+        // Skip if already processed
+        if (processedFiles.current.has(file) || !file) {
+          continue
+        }
+        processedFiles.current.add(file)
+
+        // Generate thumbnail and update ref
+        const thumbnailUrl = await createThumbnail(file)
+        newThumbnails[i] = thumbnailUrl
+        thumbnailUrlsRef.current = newThumbnails
+
+        // Trigger re-render in batches
+        setRenderedThumbnails([...newThumbnails])
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
+    })()
+  }, [formsCount, createThumbnail])
+
   const { toggleLoadingOverlay } = useLoadingOverlay()
   const { closeModal } = useModal()
   const { collectionSlug, drawerSlug, initialFiles, onSuccess } = useBulkUpload()
+
+  const [isUploading, setIsUploading] = React.useState(false)
+  const [loadingText, setLoadingText] = React.useState('')
 
   const hasInitializedWithFiles = React.useRef(false)
   const initialStateRef = React.useRef<FormState>(null)
@@ -231,13 +272,15 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         formState: currentFormsData,
       }
       const newDocs = []
-      const promises = currentForms.map(async (form, i) => {
+
+      setIsUploading(true)
+
+      for (let i = 0; i < currentForms.length; i++) {
         try {
-          toggleLoadingOverlay({
-            isLoading: true,
-            key: 'saveAllDocs',
-            loadingText: t('general:uploading'),
-          })
+          const form = currentForms[i]
+
+          setLoadingText(t('general:uploadingBulk', { current: i + 1, total: currentForms.length }))
+
           const req = await fetch(actionURL, {
             body: createFormData(form.formState, overrides),
             method: 'POST',
@@ -251,7 +294,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
           // should expose some sort of helper for this
           if (json?.errors?.length) {
-            const [fieldErrors, nonFieldErrors] = json.errors.reduce(
+            const [fieldErrors] = json.errors.reduce(
               ([fieldErrs, nonFieldErrs], err) => {
                 const newFieldErrs: any[] = []
                 const newNonFieldErrs: any[] = []
@@ -286,15 +329,14 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
               }),
             }
           }
-        } catch (error) {
-          // swallow error
-        } finally {
-          setHasSubmitted(true)
-          toggleLoadingOverlay({ isLoading: false, key: 'saveAllDocs' })
+        } catch (_) {
+          // swallow
         }
-      })
+      }
 
-      await Promise.all(promises)
+      setHasSubmitted(true)
+      setLoadingText('')
+      setIsUploading(false)
 
       const remainingForms = currentForms.filter(({ errorCount }) => errorCount > 0)
       const successCount = Math.max(0, currentForms.length - remainingForms.length)
@@ -323,7 +365,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         },
       })
     },
-    [actionURL, activeIndex, forms, onSuccess, t, toggleLoadingOverlay, closeModal, drawerSlug],
+    [actionURL, activeIndex, forms, onSuccess, t, closeModal, drawerSlug],
   )
 
   React.useEffect(() => {
@@ -378,9 +420,18 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         saveAllDocs,
         setActiveIndex,
         setFormTotalErrorCount,
+        thumbnailUrls: renderedThumbnails,
         totalErrorCount,
       }}
     >
+      {isUploading && (
+        <LoadingOverlay
+          animationDuration="250ms"
+          loadingText={loadingText}
+          overlayType="fullscreen"
+          show
+        />
+      )}
       {children}
     </Context.Provider>
   )

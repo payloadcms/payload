@@ -56,9 +56,11 @@ export async function GET(
       payload.logger.error('Error verifying token for live preview:', error)
     }
 
+    const draft = await draftMode()
+
     // You can add additional checks here to see if the user is allowed to preview this page
     if (!user) {
-      draftMode().disable()
+      draft.disable()
       return new Response('You are not allowed to preview this page', { status: 403 })
     }
 
@@ -66,6 +68,7 @@ export async function GET(
     try {
       const docs = await payload.find({
         collection: collection,
+        draft: true,
         where: {
           slug: {
             equals: slug,
@@ -80,7 +83,8 @@ export async function GET(
       payload.logger.error('Error verifying token for live preview:', error)
     }
 
-    draftMode().enable()
+    draft.enable()
+
     redirect(path)
   }
 }

@@ -1,6 +1,8 @@
 import type { PipelineStage } from 'mongoose'
 import type { CollectionSlug, JoinQuery, SanitizedCollectionConfig, Where } from 'payload'
 
+import { combineQueries } from 'payload'
+
 import type { MongooseAdapter } from '../index.js'
 
 import { buildSortParam } from '../queries/buildSortParam.js'
@@ -13,8 +15,11 @@ type BuildJoinAggregationArgs = {
   // the number of docs to get at the top collection level
   limit?: number
   locale: string
+  projection?: Record<string, true>
   // the where clause for the top collection
   query?: Where
+  /** whether the query is from drafts */
+  versions?: boolean
 }
 
 export const buildJoinAggregation = async ({
@@ -24,7 +29,9 @@ export const buildJoinAggregation = async ({
   joins,
   limit,
   locale,
+  projection,
   query,
+  versions,
 }: BuildJoinAggregationArgs): Promise<PipelineStage[] | undefined> => {
   if (Object.keys(collectionConfig.joins).length === 0 || joins === false) {
     return
@@ -53,9 +60,17 @@ export const buildJoinAggregation = async ({
     for (const join of joinConfig[slug]) {
       const joinModel = adapter.collections[join.field.collection]
 
+      if (projection && !projection[join.schemaPath]) {
+        continue
+      }
+
+      if (joins?.[join.schemaPath] === false) {
+        continue
+      }
+
       const {
-        limit: limitJoin = 10,
-        sort: sortJoin,
+        limit: limitJoin = join.field.defaultLimit ?? 10,
+        sort: sortJoin = join.field.defaultSort || collectionConfig.defaultSort,
         where: whereJoin,
       } = joins?.[join.schemaPath] || {}
 
@@ -63,7 +78,7 @@ export const buildJoinAggregation = async ({
         config: adapter.payload.config,
         fields: adapter.payload.collections[slug].config.fields,
         locale,
-        sort: sortJoin || collectionConfig.defaultSort,
+        sort: sortJoin,
         timestamps: true,
       })
       const sortProperty = Object.keys(sort)[0]
@@ -90,15 +105,15 @@ export const buildJoinAggregation = async ({
 
       if (adapter.payload.config.localization && locale === 'all') {
         adapter.payload.config.localization.localeCodes.forEach((code) => {
-          const as = `${join.schemaPath}${code}`
+          const as = `${versions ? `version.${join.schemaPath}` : join.schemaPath}${code}`
 
           aggregate.push(
             {
               $lookup: {
                 as: `${as}.docs`,
                 foreignField: `${join.field.on}${code}`,
-                from: slug,
-                localField: '_id',
+                from: adapter.collections[slug].collection.name,
+                localField: versions ? 'parent' : '_id',
                 pipeline,
               },
             },
@@ -131,15 +146,15 @@ export const buildJoinAggregation = async ({
       } else {
         const localeSuffix =
           join.field.localized && adapter.payload.config.localization && locale ? `.${locale}` : ''
-        const as = `${join.schemaPath}${localeSuffix}`
+        const as = `${versions ? `version.${join.schemaPath}` : join.schemaPath}${localeSuffix}`
 
         aggregate.push(
           {
             $lookup: {
               as: `${as}.docs`,
               foreignField: `${join.field.on}${localeSuffix}`,
-              from: slug,
-              localField: '_id',
+              from: adapter.collections[slug].collection.name,
+              localField: versions ? 'parent' : '_id',
               pipeline,
             },
           },
@@ -169,6 +184,10 @@ export const buildJoinAggregation = async ({
         }
       }
     }
+  }
+
+  if (projection) {
+    aggregate.push({ $project: projection })
   }
 
   return aggregate
