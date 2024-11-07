@@ -47,7 +47,6 @@ export function UploadComponent(props: UploadFieldClientProps) {
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     filterOptions,
-    readOnly: readOnlyFromField,
     setValue,
     showError,
     value,
@@ -59,6 +58,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
   return (
     <UploadInput
       AfterInput={AfterInput}
+      allowCreate={allowCreate !== false}
       api={config.routes.api}
       BeforeInput={BeforeInput}
       className={className}
@@ -74,7 +74,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
       maxRows={maxRows}
       onChange={setValue}
       path={path}
-      readOnly={readOnly || readOnlyFromField || allowCreate === false}
+      readOnly={readOnly}
       relationTo={relationTo}
       required={required}
       serverURL={config.serverURL}

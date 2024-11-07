@@ -44,6 +44,7 @@ type PopulatedDocs = { relationTo: string; value: JsonObject }[]
 
 export type UploadInputProps = {
   readonly AfterInput?: React.ReactNode
+  readonly allowCreate?: boolean
   /**
    * Controls the visibility of the "Create new collection" button
    */
@@ -78,6 +79,7 @@ export type UploadInputProps = {
 export function UploadInput(props: UploadInputProps) {
   const {
     AfterInput,
+    allowCreate,
     api,
     BeforeInput,
     className,
@@ -156,7 +158,7 @@ export function UploadInput(props: UploadInputProps) {
   const loadedValueDocsRef = React.useRef<boolean>(false)
 
   const canCreate = useMemo(() => {
-    if (readOnly) {
+    if (readOnly || !allowCreate) {
       return false
     }
 
@@ -169,7 +171,7 @@ export function UploadInput(props: UploadInputProps) {
     }
 
     return false
-  }, [activeRelationTo, permissions, readOnly])
+  }, [activeRelationTo, permissions, readOnly, allowCreate])
 
   const onChange = React.useCallback(
     (newValue) => {
@@ -411,12 +413,9 @@ export function UploadInput(props: UploadInputProps) {
   }, [populateDocs, activeRelationTo, value])
 
   const showDropzone =
-    !readOnly &&
-    (!value ||
-      (hasMany &&
-        Array.isArray(value) &&
-        (typeof maxRows !== 'number' || value.length < maxRows)) ||
-      (!hasMany && populatedDocs?.[0] && typeof populatedDocs[0].value === 'undefined'))
+    !value ||
+    (hasMany && Array.isArray(value) && (typeof maxRows !== 'number' || value.length < maxRows)) ||
+    (!hasMany && populatedDocs?.[0] && typeof populatedDocs[0].value === 'undefined')
 
   return (
     <div
