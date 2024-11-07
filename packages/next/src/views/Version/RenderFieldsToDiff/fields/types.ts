@@ -16,6 +16,7 @@ export type DiffComponentProps<TField extends ClientField = ClientField> = {
   readonly isRichText?: boolean
   readonly locale?: string
   readonly locales?: string[]
+  readonly modifiedOnly?: boolean
   readonly permissions?: Record<string, FieldPermissions>
   readonly version: any
 }
