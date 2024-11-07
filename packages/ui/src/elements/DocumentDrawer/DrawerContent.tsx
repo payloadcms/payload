@@ -84,9 +84,9 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   useEffect(() => {
     if (!DocumentView) {
-      void getDocumentView()
+      void getDocumentView(existingDocID)
     }
-  }, [DocumentView, getDocumentView])
+  }, [DocumentView, getDocumentView, existingDocID])
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
