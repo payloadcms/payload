@@ -171,6 +171,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         [path]: {
           ...state[path],
           disableFormData: rows.length > 0,
+          requiresRender: true,
           rows: rowsMetadata,
           value: rows.length,
         },
