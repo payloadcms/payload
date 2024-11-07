@@ -124,17 +124,6 @@ export const createOperation = async <
     }
 
     // /////////////////////////////////////
-    // Custom id
-    // /////////////////////////////////////
-
-    if (payload.collections[collectionConfig.slug].customIDType) {
-      data = {
-        _id: data.id,
-        ...data,
-      }
-    }
-
-    // /////////////////////////////////////
     // Generate data for all files and sizes
     // /////////////////////////////////////
 

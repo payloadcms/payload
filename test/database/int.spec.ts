@@ -75,10 +75,19 @@ describe('database', () => {
 
       expect(updated.id).toStrictEqual(created.doc.id)
     })
+
+    it('should create with generated ID text from hook', async () => {
+      const doc = await payload.create({
+        collection: 'custom-ids',
+        data: {},
+      })
+
+      expect(doc.id).toBeDefined()
+    })
   })
 
   describe('timestamps', () => {
-    it('should have createdAt and updatedAt timetstamps to the millisecond', async () => {
+    it('should have createdAt and updatedAt timestamps to the millisecond', async () => {
       const result = await payload.create({
         collection: 'posts',
         data: {
