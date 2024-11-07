@@ -115,7 +115,6 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     collection,
     collectionConfig,
     joins,
-    limit,
     locale,
     projection,
     query: versionQuery,
