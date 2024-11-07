@@ -107,7 +107,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
     collectionSlug,
     globalSlug,
     getDocPreferences,
-    formData,
     docPermissions,
   ]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
 
