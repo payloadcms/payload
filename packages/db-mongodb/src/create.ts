@@ -20,7 +20,7 @@ export const create: Create = async function create(
     fields: this.payload.collections[collection].config.fields,
   })
 
-  if (req.payload.collections[collection].customIDType) {
+  if (this.payload.collections[collection].customIDType) {
     sanitizedData._id = sanitizedData.id
   }
 
