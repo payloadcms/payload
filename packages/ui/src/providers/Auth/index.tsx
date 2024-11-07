@@ -292,14 +292,12 @@ export function AuthProvider({
     if (remainingTime > 0) {
       reminder = setTimeout(() => {
         openModal(stayLoggedInModalSlug)
-        // }, remindInTimeFromNow) // Temporarily disabled
-      }, 10000) // Temporary
+      }, remindInTimeFromNow)
 
       forceLogOut = setTimeout(() => {
         setNewUser(null)
-        redirectToInactivityRoute() // I added this
-        // }, forceLogOutInTimeFromNow) // Temporarily disabled
-      }, 15000) // TODO: Temporary for debugging
+        redirectToInactivityRoute()
+      }, forceLogOutInTimeFromNow)
     }
 
     return () => {
