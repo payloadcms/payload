@@ -549,7 +549,7 @@ export type EmailField = {
 } & Omit<FieldBase, 'validate'>
 
 export type EmailFieldClient = {
-  admin?: AdminClient & Pick<EmailField['admin'], 'placeholder'>
+  admin?: AdminClient & Pick<EmailField['admin'], 'autoComplete' | 'placeholder'>
 } & FieldBaseClient &
   Pick<EmailField, 'type'>
 
