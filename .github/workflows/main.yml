@@ -396,12 +396,27 @@ jobs:
     needs: build
     strategy:
       matrix:
-        template:
-          - blank
-          - website
-          - with-payload-cloud
-          - with-vercel-mongodb
-          # TODO: Add postgres templates, need to ensure migrations are up-to-date and working
+        include:
+          - template: blank
+            database: mongodb
+          - template: website
+            database: mongodb
+          - template: with-payload-cloud
+            database: mongodb
+          - template: with-vercel-mongodb
+            database: mongodb
+          # Postgres
+          - template: with-postgres
+            database: postgres
+          - template: with-vercel-postgres
+            database: postgres
+
+    name: ${{ matrix.template }}-${{ matrix.database }}
+
+    env:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: payloadtests
 
     steps:
       # https://github.com/actions/virtual-environments/issues/1187
@@ -426,12 +441,30 @@ jobs:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
 
+      - name: Start PostgreSQL
+        uses: CasperWA/postgresql-action@v1.2
+        with:
+          postgresql version: '14' # See https://hub.docker.com/_/postgres for available versions
+          postgresql db: ${{ env.POSTGRES_DB }}
+          postgresql user: ${{ env.POSTGRES_USER }}
+          postgresql password: ${{ env.POSTGRES_PASSWORD }}
+        if: matrix.database == 'postgres'
+
+      - name: Configure PostgreSQL
+        run: |
+          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
+          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
+          echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
+          # Wait for PostgreSQL
+          sleep 30
+        if: matrix.database == 'postgres'
+
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.11.0
         with:
           mongodb-version: 6.0
 
-      - name: Build Template ${{ matrix.template }}
+      - name: Build Template
         run: |
           pnpm run script:pack --dest templates/${{ matrix.template }}
           pnpm runts scripts/build-template-with-local-pkgs.ts ${{ matrix.template }}
