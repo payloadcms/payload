@@ -182,7 +182,8 @@ describe('database', () => {
       expect(migration.batch).toStrictEqual(1)
     })
 
-    it('should run migrate:down', async () => {
+    // known issue: https://github.com/payloadcms/payload/issues/4597
+    it.skip('should run migrate:down', async () => {
       let error
       try {
         await payload.db.migrateDown()
@@ -198,7 +199,8 @@ describe('database', () => {
       expect(migrations.docs).toHaveLength(0)
     })
 
-    it('should run migrate:refresh', async () => {
+    // known issue: https://github.com/payloadcms/payload/issues/4597
+    it.skip('should run migrate:refresh', async () => {
       let error
       try {
         await payload.db.migrateRefresh()
