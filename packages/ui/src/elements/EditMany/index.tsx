@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, ClientField, FormState } from 'payload'
+import type { ClientCollectionConfig, FormState } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -92,11 +92,17 @@ const SaveDraftButton: React.FC<{ action: string; disabled: boolean }> = ({ acti
   }, [action, submit])
 
   return (
-    <FormSubmit buttonStyle="secondary" className={`${baseClass}__draft`} disabled={disabled} onClick={save}>
+    <FormSubmit
+      buttonStyle="secondary"
+      className={`${baseClass}__draft`}
+      disabled={disabled}
+      onClick={save}
+    >
       {t('version:saveDraft')}
     </FormSubmit>
   )
 }
+
 export const EditMany: React.FC<EditManyProps> = (props) => {
   const { collection: { slug, fields, labels: { plural } } = {}, collection } = props
 
@@ -133,6 +139,8 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
         const { state: result } = await getFormState({
           collectionSlug: slug,
           data: {},
+          docPermissions: collectionPermissions,
+          docPreferences: null,
           operation: 'update',
           schemaPath: slug,
         })
@@ -143,12 +151,14 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
       void getInitialState()
     }
-  }, [apiRoute, hasInitializedState, serverURL, slug, getFormState, user])
+  }, [apiRoute, hasInitializedState, serverURL, slug, getFormState, user, collectionPermissions])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
       const { state } = await getFormState({
         collectionSlug: slug,
+        docPermissions: collectionPermissions,
+        docPreferences: null,
         formState: prevFormState,
         operation: 'update',
         schemaPath: slug,
@@ -156,7 +166,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
       return state
     },
-    [slug, getFormState],
+    [slug, getFormState, collectionPermissions],
   )
 
   if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {
@@ -186,7 +196,19 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
         {t('general:edit')}
       </DrawerToggler>
       <Drawer Header={null} slug={drawerSlug}>
-        <DocumentInfoProvider collectionSlug={slug} id={null}>
+        <DocumentInfoProvider
+          collectionSlug={slug}
+          currentEditor={user}
+          hasPublishedDoc={false}
+          id={null}
+          initialData={{}}
+          initialState={initialState}
+          isLocked={false}
+          lastUpdateTime={0}
+          mostRecentVersionIsAutosaved={false}
+          unpublishedVersionCount={0}
+          versionCount={0}
+        >
           <OperationContext.Provider value="update">
             <div className={`${baseClass}__main`}>
               <div className={`${baseClass}__header`}>
@@ -213,7 +235,9 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                 {selected.length === 0 ? null : (
                   <RenderFields
                     fields={selected}
-                    parentPath={[]}
+                    parentIndexPath=""
+                    parentPath=""
+                    parentSchemaPath={slug}
                     permissions={permissions?.collections?.[slug]?.fields}
                     readOnly={false}
                   />
