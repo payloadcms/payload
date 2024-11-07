@@ -6,15 +6,13 @@ import { getPredefinedMigration } from 'payload'
 import { fileURLToPath } from 'url'
 
 const migrationTemplate = ({ downSQL, imports, upSQL }: MigrationTemplateArgs): string => `import {
-  MigrateUpArgs,
   MigrateDownArgs,
+  MigrateUpArgs,
 } from '@payloadcms/db-mongodb'
-${imports}
-
+${imports ?? ''}
 export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
 ${upSQL ?? `  // Migration code`}
 }
-
 export async function down({ payload, req }: MigrateDownArgs): Promise<void> {
 ${downSQL ?? `  // Migration code`}
 }
