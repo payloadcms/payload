@@ -704,6 +704,7 @@ describe('lexicalBlocks', () => {
       await expect(richTextField).toBeVisible()
       // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
       await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+      await wait(1000) // Wait for form state requests to be done, to reduce flakes
 
       const radioButtonBlock1 = richTextField.locator('.lexical-block').nth(5)
 
@@ -877,6 +878,7 @@ describe('lexicalBlocks', () => {
       await expect(richTextField).toBeVisible()
       // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
       await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+      await wait(1000) // Wait for form state requests to be done, to reduce flakes
 
       const conditionalArrayBlock = richTextField.locator('.lexical-block').nth(7)
 
