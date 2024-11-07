@@ -63,7 +63,7 @@ async function main() {
   packageJsonObj.pnpm = { overrides }
   await fs.writeFile(packageJsonPath, JSON.stringify(packageJsonObj, null, 2))
 
-  execSync('pnpm install --ignore-workspace', execOpts)
+  execSync('pnpm install --ignore-workspace --no-frozen-lockfile', execOpts)
   execSync('pnpm run build', execOpts)
 
   header(`\n🎉 Done!`)
