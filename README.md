@@ -18,7 +18,7 @@
 <hr/>
 
 > [!IMPORTANT]
-> 🎉 <strong>Payload 2.0 is now available!</strong> Read more in the <a target="_blank" href="https://payloadcms.com/blog/payload-2-0" rel="dofollow"><strong>announcement post</strong></a>.
+> 🎉 <strong>Payload 3.0 is coming soon. Get started with 3.0 beta!</strong>Learn more in our <a target="_blank" href="https://www.youtube.com/watch?v=VWMLYb-3n1s" rel="dofollow"><strong>latest video</strong></a>.
 
 <h3>Benefits over a regular CMS</h3>
 <ul>
