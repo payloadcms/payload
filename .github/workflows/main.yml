@@ -422,6 +422,11 @@ jobs:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
 
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.11.0
+        with:
+          mongodb-version: 6.0
+
       - name: Build Template ${{ matrix.template }}
         run: |
           pnpm run script:pack --dest templates/${{ matrix.template }}
