@@ -66,7 +66,7 @@ export const LinkElement = () => {
 
   const { componentMap } = fieldProps
   const fields = componentMap[linkFieldsSchemaPath]
-  const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const editor = useSlate()
   const { config } = useConfig()
@@ -101,6 +101,7 @@ export const LinkElement = () => {
       const { state } = await getFormState({
         collectionSlug,
         data,
+        docPermissions,
         docPreferences: await getDocPreferences(),
         doNotAbort: true,
         globalSlug,
@@ -127,6 +128,7 @@ export const LinkElement = () => {
     getFormState,
     globalSlug,
     getDocPreferences,
+    docPermissions,
   ])
 
   return (

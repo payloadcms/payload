@@ -26,7 +26,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   schemaPathSuffix,
 }) => {
   const { t } = useTranslation()
-  const { id, collectionSlug, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const abortControllerRef = useRef(new AbortController())
 
@@ -52,6 +52,8 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         id,
         collectionSlug,
         data: data ?? {},
+        docPermissions,
+        docPreferences: await getDocPreferences(),
         doNotAbort: true,
         globalSlug,
         operation: 'update',
@@ -72,7 +74,16 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         // swallow error
       }
     }
-  }, [schemaFieldsPath, id, data, getFormState, collectionSlug, globalSlug])
+  }, [
+    schemaFieldsPath,
+    id,
+    data,
+    getFormState,
+    collectionSlug,
+    globalSlug,
+    docPermissions,
+    getDocPreferences,
+  ])
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
@@ -90,6 +101,8 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
       const { state } = await getFormState({
         id,
         collectionSlug,
+        docPermissions,
+        docPreferences: await getDocPreferences(),
         formState: prevFormState,
         globalSlug,
         operation: 'update',
@@ -103,7 +116,15 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
       return state
     },
-    [getFormState, id, collectionSlug, globalSlug, schemaFieldsPath],
+    [
+      getFormState,
+      id,
+      collectionSlug,
+      docPermissions,
+      getDocPreferences,
+      globalSlug,
+      schemaFieldsPath,
+    ],
   )
 
   // cleanup effect
