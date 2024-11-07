@@ -1,17 +1,36 @@
 import type { Payload } from 'payload'
 
-import { createHeadlessEditor } from '@lexical/headless'
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { formatAdminURL } from '@payloadcms/ui/shared'
-import { $getRoot } from 'lexical'
+import { type SerializedLexicalNode } from 'lexical'
 import LinkImport from 'next/link.js'
 import React from 'react'
 
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
 import type { LexicalFieldAdminProps, LexicalRichTextCellProps } from '../types.js'
 
-import { getEnabledNodes } from '../lexical/nodes/index.js'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
+
+function recurseEditorState(
+  editorState: SerializedLexicalNode[],
+  textContent: React.ReactNode[],
+  i: number = 0,
+): React.ReactNode[] {
+  for (const node of editorState) {
+    i++
+    if ('text' in node && node.text) {
+      textContent.push(node.text as string)
+    } else {
+      if (!('children' in node)) {
+        textContent.push(<code key={i}>&#32;[{node.type}]</code>)
+      }
+    }
+    if ('children' in node && node.children) {
+      textContent = recurseEditorState(node.children as SerializedLexicalNode[], textContent, i)
+    }
+  }
+  return textContent
+}
 
 export const RscEntryLexicalCell: React.FC<
   {
@@ -80,28 +99,18 @@ export const RscEntryLexicalCell: React.FC<
     }
   }
 
-  let textContent = ''
+  let textContent: React.ReactNode[] = []
 
-  if (cellData) {
-    // initialize headless editor
-    const headlessEditor = createHeadlessEditor({
-      namespace: sanitizedEditorConfig.lexical.namespace,
-      nodes: getEnabledNodes({ editorConfig: sanitizedEditorConfig }),
-      theme: sanitizedEditorConfig.lexical.theme,
-    })
-
-    const parsed = headlessEditor.parseEditorState(cellData)
-
-    textContent =
-      parsed.read(() => {
-        return $getRoot().getTextContent()
-      }) || ''
+  if (cellData?.root?.children) {
+    textContent = recurseEditorState(cellData?.root?.children, textContent)
   }
 
-  if (!cellData || !textContent?.length) {
-    textContent = i18n.t('general:noLabel', {
-      label: getTranslation(('label' in field ? field.label : null) || 'data', i18n),
-    })
+  if (!textContent?.length) {
+    textContent = [
+      i18n.t('general:noLabel', {
+        label: getTranslation(('label' in field ? field.label : null) || 'data', i18n),
+      }),
+    ]
   }
 
   return <WrapElement {...wrapElementProps}>{textContent}</WrapElement>
