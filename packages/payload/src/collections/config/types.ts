@@ -496,9 +496,9 @@ export type SanitizedJoin = {
    */
   field: JoinField
   /**
-   * The schemaPath of the join field in dot notation
+   * The path of the join field in dot notation
    */
-  schemaPath: string
+  joinPath: string
   targetField: RelationshipField | UploadField
 }
 

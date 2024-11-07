@@ -159,27 +159,10 @@ export const promise = async ({
 
       if (typeof validationResult === 'string') {
         errors.push({
-          fieldPath,
-          fieldSchemaPath,
           message: validationResult,
+          path: fieldPath.join('.'),
         })
       }
-    }
-
-    const beforeDuplicateArgs: FieldHookArgs = {
-      collection,
-      context,
-      data,
-      field,
-      global: undefined,
-      path: fieldPath,
-      previousSiblingDoc: siblingDoc,
-      previousValue: siblingDoc[field.name],
-      req,
-      schemaPath: parentSchemaPath,
-      siblingData,
-      siblingDocWithLocales,
-      value: siblingData[field.name],
     }
 
     // Push merge locale action if applicable
