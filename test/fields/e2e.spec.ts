@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -239,7 +239,7 @@ describe('fields', () => {
     test('should render collapsible as collapsed if initCollapsed is true', async () => {
       await page.goto(url.create)
       const collapsedCollapsible = page.locator(
-        '#field-collapsible-1 .collapsible__toggle--collapsed',
+        '#field-collapsible-_index-1 .collapsible__toggle--collapsed',
       )
       await expect(collapsedCollapsible).toBeVisible()
     })
@@ -247,10 +247,10 @@ describe('fields', () => {
     test('should render CollapsibleLabel using a function', async () => {
       const label = 'custom row label'
       await page.goto(url.create)
-      await page.locator('#field-collapsible-3__1 #field-nestedTitle').fill(label)
+      await page.locator('#field-collapsible-_index-3-1 #field-nestedTitle').fill(label)
       await wait(100)
       const customCollapsibleLabel = page.locator(
-        `#field-collapsible-3__1 .collapsible-field__row-label-wrap :text("${label}")`,
+        `#field-collapsible-_index-3-1 .collapsible-field__row-label-wrap :text("${label}")`,
       )
       await expect(customCollapsibleLabel).toContainText(label)
     })
@@ -267,7 +267,7 @@ describe('fields', () => {
 
       await page
         .locator(
-          '#arrayWithCollapsibles-row-0 #field-collapsible-4__0-arrayWithCollapsibles__0 #field-arrayWithCollapsibles__0__innerCollapsible',
+          '#arrayWithCollapsibles-row-0 #field-collapsible-arrayWithCollapsibles__0___index-0 #field-arrayWithCollapsibles__0__innerCollapsible',
         )
         .fill(label)
       await wait(100)

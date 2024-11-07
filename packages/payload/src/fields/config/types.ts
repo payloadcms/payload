@@ -659,10 +659,9 @@ export type CollapsibleField = {
   | {
       admin: {
         components: {
-          Label?: CustomComponent<
+          Label: CustomComponent<
             CollapsibleFieldLabelClientComponent | CollapsibleFieldLabelServerComponent
           >
-          RowLabel: RowLabelComponent
         } & Admin['components']
         initCollapsed?: boolean
       } & Admin

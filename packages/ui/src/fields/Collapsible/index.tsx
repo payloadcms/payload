@@ -31,14 +31,13 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
     path,
     permissions,
     readOnly,
-    schemaPath,
   } = props
 
   const { i18n } = useTranslation()
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
   const [collapsedOnMount, setCollapsedOnMount] = useState<boolean>()
-  const fieldPreferencesKey = `collapsible-${schemaPath?.replace(/\./g, '__')}`
+  const fieldPreferencesKey = `collapsible-${path?.replace(/\./g, '__')}`
   const [errorCount, setErrorCount] = useState(0)
   const fieldHasErrors = errorCount > 0
 
@@ -120,7 +119,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
         ]
           .filter(Boolean)
           .join(' ')}
-        id={`field-${fieldPreferencesKey}${path ? `-${path?.replace(/\./g, '__')}` : ''}`}
+        id={`field-${fieldPreferencesKey}`}
         style={style}
       >
         <CollapsibleElement
@@ -128,10 +127,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
           collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
           header={
             <div className={`${baseClass}__row-label-wrap`}>
-              <RenderCustomComponent
-                CustomComponent={Label}
-                Fallback={<RowLabel label={getTranslation(label, i18n)} path={path} />}
-              />
+              <RowLabel CustomComponent={Label} label={getTranslation(label, i18n)} path={path} />
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
           }

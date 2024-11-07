@@ -105,6 +105,7 @@ export const renderField: RenderFieldMethod = ({
 
       break
     }
+
     case 'richText': {
       if (!fieldConfig?.editor) {
         throw new MissingEditorProp(fieldConfig) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
@@ -149,8 +150,6 @@ export const renderField: RenderFieldMethod = ({
 
       break
     }
-
-    // @TODO collapsible labels?
 
     default: {
       break
