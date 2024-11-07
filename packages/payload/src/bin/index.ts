@@ -91,7 +91,7 @@ export const bin = async () => {
     const queue = args.queue ? args.queue : undefined
 
     if (args.cron) {
-      Cron(args.cron, async () => {
+      new Cron(args.cron, async () => {
         await payload.jobs.run({
           limit,
           queue,
