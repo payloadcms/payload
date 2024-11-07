@@ -2,7 +2,6 @@
 
 import { useModal } from '@faceless-ui/modal'
 import { useWindowInfo } from '@faceless-ui/window-info'
-import { isImage } from 'payload/shared'
 import React from 'react'
 import AnimateHeightImport from 'react-animate-height'
 
@@ -157,7 +156,8 @@ export function FileSidebar() {
                   >
                     <Thumbnail
                       className={`${baseClass}__thumbnail`}
-                      fileSrc={isImage(currentFile.type) ? thumbnailUrls[index] : undefined}
+                      fileSrc={thumbnailUrls[index]}
+                      key={thumbnailUrls[index]}
                     />
                     <div className={`${baseClass}__fileDetails`}>
                       <p className={`${baseClass}__fileName`} title={currentFile.name}>

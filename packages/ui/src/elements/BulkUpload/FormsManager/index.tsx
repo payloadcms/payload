@@ -123,8 +123,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         processedFiles.current.add(file)
 
         // Generate thumbnail and update ref
-        const thumbnailUrl = await createThumbnail(file)
-        newThumbnails[i] = thumbnailUrl
+        newThumbnails[i] = await createThumbnail(file, null, file.type)
         thumbnailUrlsRef.current = newThumbnails
 
         // Trigger re-render in batches
