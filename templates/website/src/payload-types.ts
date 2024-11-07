@@ -24,7 +24,8 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsSelect?: {
+  collectionsJoins: {};
+  collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -45,7 +46,7 @@ export interface Config {
     header: Header;
     footer: Footer;
   };
-  globalsSelect?: {
+  globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
   };
@@ -165,7 +166,7 @@ export interface Media {
   focalX?: number | null;
   focalY?: number | null;
   sizes?: {
-    square?: {
+    thumbnail?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -173,7 +174,7 @@ export interface Media {
       filesize?: number | null;
       filename?: string | null;
     };
-    thumbnail?: {
+    square?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -941,7 +942,7 @@ export interface MediaSelect<T extends boolean = true> {
   sizes?:
     | T
     | {
-        square?:
+        thumbnail?:
           | T
           | {
               url?: T;
@@ -951,7 +952,7 @@ export interface MediaSelect<T extends boolean = true> {
               filesize?: T;
               filename?: T;
             };
-        thumbnail?:
+        square?:
           | T
           | {
               url?: T;
