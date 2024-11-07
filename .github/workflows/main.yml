@@ -187,6 +187,7 @@ jobs:
   tests-int:
     runs-on: ubuntu-latest
     needs: build
+    name: int-${{ matrix.database }}
     strategy:
       fail-fast: false
       matrix:
@@ -284,6 +285,7 @@ jobs:
     needs: build
     strategy:
       fail-fast: false
+      name: ${{ matrix.suite }}
       matrix:
         # find test -type f -name 'e2e.spec.ts' | sort | xargs dirname | xargs -I {} basename {}
         suite:
