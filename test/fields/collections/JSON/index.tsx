@@ -11,6 +11,9 @@ const JSON: CollectionConfig = {
     {
       name: 'json',
       type: 'json',
+      admin: {
+        maxHeight: 542,
+      },
       jsonSchema: {
         fileMatch: ['a://b/foo.json'],
         schema: {

@@ -255,6 +255,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:updating',
   'general:viewReadOnly',
   'general:uploading',
+  'general:uploadingBulk',
   'general:welcome',
 
   'operators:equals',

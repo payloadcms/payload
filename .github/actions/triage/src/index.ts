@@ -8,6 +8,9 @@ import { join } from 'node:path'
 if (!process.env.GITHUB_TOKEN) throw new TypeError('No GITHUB_TOKEN provided')
 if (!process.env.GITHUB_WORKSPACE) throw new TypeError('Not a GitHub workspace')
 
+const validActionsToPerform = ['tag', 'comment', 'close'] as const
+type ActionsToPerform = (typeof validActionsToPerform)[number]
+
 // Define the configuration object
 interface Config {
   invalidLink: {
@@ -17,7 +20,7 @@ interface Config {
     label: string
     linkSection: string
   }
-  tagOnly: boolean
+  actionsToPerform: ActionsToPerform[]
   token: string
   workspace: string
 }
@@ -33,7 +36,16 @@ const config: Config = {
     linkSection:
       getInput('reproduction_link_section') || '### Link to reproduction(.*)### To reproduce',
   },
-  tagOnly: getBooleanOrUndefined('tag_only') || false,
+  actionsToPerform: (getInput('actions_to_perform') || validActionsToPerform.join(','))
+    .split(',')
+    .map((a) => {
+      const action = a.trim().toLowerCase() as ActionsToPerform
+      if (validActionsToPerform.includes(action)) {
+        return action
+      }
+
+      throw new TypeError(`Invalid action: ${action}`)
+    }),
   token: process.env.GITHUB_TOKEN,
   workspace: process.env.GITHUB_WORKSPACE,
 }
@@ -104,23 +116,31 @@ async function checkValidReproduction(): Promise<void> {
   await Promise.all(
     labelsToRemove.map((label) => client.issues.removeLabel({ ...common, name: label })),
   )
-  info(`Issue #${issue.number} - validate label removed`)
-  await client.issues.addLabels({ ...common, labels: [config.invalidLink.label] })
-  info(`Issue #${issue.number} - labeled`)
 
-  // If tagOnly, do not close or comment
-  if (config.tagOnly) {
-    info('Tag-only enabled, no closing/commenting actions taken')
-    return
+  // Tag
+  if (config.actionsToPerform.includes('tag')) {
+    info(`Added label: ${config.invalidLink.label}`)
+    await client.issues.addLabels({ ...common, labels: [config.invalidLink.label] })
+  } else {
+    info('Tag - skipped, not provided in actions to perform')
   }
 
-  // Perform closing and commenting actions
-  await client.issues.update({ ...common, state: 'closed' })
-  info(`Issue #${issue.number} - closed`)
+  // Comment
+  if (config.actionsToPerform.includes('comment')) {
+    const comment = join(config.workspace, config.invalidLink.comment)
+    await client.issues.createComment({ ...common, body: await getCommentBody(comment) })
+    info(`Commented with invalid reproduction message`)
+  } else {
+    info('Comment - skipped, not provided in actions to perform')
+  }
 
-  const comment = join(config.workspace, config.invalidLink.comment)
-  await client.issues.createComment({ ...common, body: await getCommentBody(comment) })
-  info(`Issue #${issue.number} - commented`)
+  // Close
+  if (config.actionsToPerform.includes('close')) {
+    await client.issues.update({ ...common, state: 'closed' })
+    info(`Closed issue #${issue.number}`)
+  } else {
+    info('Close - skipped, not provided in actions to perform')
+  }
 }
 
 /**

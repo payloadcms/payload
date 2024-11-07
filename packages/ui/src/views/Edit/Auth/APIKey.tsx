@@ -116,15 +116,7 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
   return (
     <React.Fragment>
       <div className={[fieldBaseClass, 'api-key', 'read-only'].filter(Boolean).join(' ')}>
-        <FieldLabel
-          field={null}
-          htmlFor={path}
-          Label={{
-            type: 'client',
-            Component: null,
-            RenderedComponent: APIKeyLabel,
-          }}
-        />
+        {APIKeyLabel}
         <input
           aria-label={apiKeyLabel}
           className={highlightedField ? 'highlight' : undefined}

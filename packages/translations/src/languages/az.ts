@@ -311,6 +311,7 @@ export const azTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Uğurla yeniləndi.',
     updating: 'Yenilənir',
     uploading: 'Yüklənir',
+    uploadingBulk: '{{total}}-dan {{current}}-un yüklənməsi',
     user: 'İstifadəçi',
     username: 'İstifadəçi adı',
     users: 'İstifadəçilər',

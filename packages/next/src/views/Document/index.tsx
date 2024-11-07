@@ -82,8 +82,8 @@ export const renderDocument = async ({
 
   // TODO: promise all for data, prefs, versions, lock state
 
-  // Fetch the data required for the view
-  const data = await getDocumentData({
+  // Fetch the doc required for the view
+  const doc = await getDocumentData({
     id,
     collectionSlug,
     globalSlug,
@@ -92,7 +92,7 @@ export const renderDocument = async ({
     user,
   })
 
-  if (isEditing && !data) {
+  if (isEditing && !doc) {
     throw new Error('not-found')
   }
 
@@ -114,7 +114,7 @@ export const renderDocument = async ({
     getDocumentPermissions({
       id,
       collectionConfig,
-      data,
+      data: doc,
       globalConfig,
       req,
     }),
@@ -146,7 +146,7 @@ export const renderDocument = async ({
     buildFormState({
       id,
       collectionSlug,
-      data,
+      data: doc,
       docPermissions,
       docPreferences,
       globalSlug,
@@ -307,7 +307,7 @@ export const renderDocument = async ({
   const clientProps = { formState, ...documentSlots }
 
   return {
-    data,
+    data: doc,
     Document: (
       <DocumentInfoProvider
         apiURL={apiURL}
@@ -320,7 +320,7 @@ export const renderDocument = async ({
         hasPublishPermission={hasPublishPermission}
         hasSavePermission={hasSavePermission}
         id={id}
-        initialData={data}
+        initialData={doc}
         initialState={formState}
         isEditing={isEditing}
         isLocked={isLocked}

@@ -311,6 +311,7 @@ export const skTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Úspešne aktualizované.',
     updating: 'Aktualizácia',
     uploading: 'Nahrávanie',
+    uploadingBulk: 'Nahrávanie {{current}} z {{total}}',
     user: 'Používateľ',
     username: 'Používateľské meno',
     users: 'Používatelia',

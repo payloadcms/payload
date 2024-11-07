@@ -9,6 +9,7 @@ import type { CollectionRouteHandlerWithID } from '../types.js'
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { sanitizeCollectionID } from '../utilities/sanitizeCollectionID.js'
 import { sanitizeJoinParams } from '../utilities/sanitizeJoinParams.js'
+import { sanitizePopulate } from '../utilities/sanitizePopulate.js'
 import { sanitizeSelect } from '../utilities/sanitizeSelect.js'
 
 export const findByID: CollectionRouteHandlerWithID = async ({
@@ -31,6 +32,7 @@ export const findByID: CollectionRouteHandlerWithID = async ({
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: searchParams.get('draft') === 'true',
     joins: sanitizeJoinParams(req.query.joins as JoinQuery),
+    populate: sanitizePopulate(req.query.populate),
     req,
     select: sanitizeSelect(req.query.select),
   })

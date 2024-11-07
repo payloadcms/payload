@@ -6,7 +6,7 @@ This template is right for you if you are working on:
 
 - A personal or enterprise-grade website, blog, or portfolio
 - A content publishing platform with a fully featured publication workflow
-- A lead generation website with premium content gated behind authentication
+- Exploring the capabilities of Payload
 
 Core features:
 
@@ -36,13 +36,17 @@ Go to Payload Cloud and [clone this template](https://payloadcms.com/new/clone/w
 
 Use the `create-payload-app` CLI to clone this template directly to your machine:
 
-    npx create-payload-app@beta my-project -t website
+```bash
+pnpx create-payload-app@beta my-project -t website
+```
 
 #### Method 3
 
 Use the `git` CLI to clone this template directly to your machine:
 
-    git clone -n --depth=1 --filter=tree:0 https://github.com/payloadcms/payload my-project && cd my-project && git sparse-checkout set --no-cone templates/website && git checkout && rm -rf .git && git init && git add . && git mv -f templates/website/{.,}* . && git add . && git commit -m "Initial commit"
+```bash
+git clone -n --depth=1 --filter=tree:0 https://github.com/payloadcms/payload my-project && cd my-project && git sparse-checkout set --no-cone templates/website && git checkout && rm -rf .git && git init && git add . && git mv -f templates/website/{.,}* . && git add . && git commit -m "Initial commit"
+```
 
 ### Development
 
@@ -77,7 +81,7 @@ See the [Collections](https://payloadcms.com/docs/beta/configuration/collections
 
 - #### Media
 
-  This is the uploads enabled collection used by pages, posts, and projects to contain media like images, videos, downloads, and other assets.
+  This is the uploads enabled collection used by pages, posts, and projects to contain media like images, videos, downloads, and other assets. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
 
 - #### Categories
 
@@ -137,6 +141,10 @@ In addition to draft previews you can also enable live preview to view your end 
 
 This template comes pre-configured with the official [Payload SEO Plugin](https://payloadcms.com/docs/beta/plugins/seo) for complete SEO control from the admin panel. All SEO data is fully integrated into the front-end website that comes with this template. See [Website](#website) for more details.
 
+## Search
+
+This template also pre-configured with the official [Payload Saerch Plugin](https://payloadcms.com/docs/beta/plugins/search) to showcase how SSR search features can easily be implemented into Next.js with Payload. See [Website](#website) for more details.
+
 ## Redirects
 
 If you are migrating an existing site or moving content to a new URL, you can use the `redirects` collection to create a proper redirect from old URLs to new ones. This will ensure that proper request status codes are returned to search engines and that your users are not left with a broken link. This template comes pre-configured with the official [Payload Redirects Plugin](https://payloadcms.com/docs/beta/plugins/redirects) for complete redirect control from the admin panel. All redirects are fully integrated into the front-end website that comes with this template. See [Website](#website) for more details.
@@ -153,13 +161,13 @@ Core features:
 - [Payload Admin Bar](https://github.com/payloadcms/payload-admin-bar)
 - [TailwindCSS styling](https://tailwindcss.com/)
 - [shadcn/ui components](https://ui.shadcn.com/)
-- Authentication
+- User Accounts and Authentication
 - Fully featured blog
 - Publication workflow
-- User accounts
 - Dark mode
 - Pre-made layout building blocks
 - SEO
+- Search
 - Redirects
 - Live preview
 
@@ -207,14 +215,57 @@ The easiest way to deploy your project is to use [Payload Cloud](https://payload
 
 ### Deploying to Vercel
 
-Coming soon.
+This template can also be deployed to Vercel for free. You can get started by choosing the Vercel DB adapter during the setup of the template or by manually installing and configuring it:
+
+```bash
+pnpm add @payloadcms/db-vercel-postgres
+```
+
+```ts
+// payload.config.ts
+import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
+
+export default buildConfig({
+  // ...
+  db: vercelPostgresAdapter({
+    pool: {
+      connectionString: process.env.POSTGRES_URL || '',
+    },
+  }),
+  // ...
+```
+
+We also support Vercel's blob storage:
+
+```bash
+pnpm add @payloadcms/storage-vercel-blob
+```
+
+```ts
+// payload.config.ts
+import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
+
+export default buildConfig({
+  // ...
+  plugins: [
+    vercelBlobStorage({
+      collections: {
+        [Media.slug]: true,
+      },
+      token: process.env.BLOB_READ_WRITE_TOKEN || '',
+    }),
+  ],
+  // ...
+```
+
+There is also a simplified [one click deploy](https://github.com/payloadcms/payload/tree/beta/templates/with-vercel-postgres) to Vercel should you need it.
 
 ### Self-hosting
 
 Before deploying your app, you need to:
 
 1. Ensure your app builds and serves in production. See [Production](#production) for more details.
-2. Serve it from a
+2. You can then deploy Payload as you would any other Node.js or Next.js application either directly on a VPS, DigitalOcean's Apps Platform, via Coolify or more. More guides coming soon.
 
 You can also deploy your app manually, check out the [deployment documentation](https://payloadcms.com/docs/beta/production/deployment) for full details.
 

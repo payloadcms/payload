@@ -22,6 +22,7 @@ type GetDrawerDocumentView = (args: {
   collectionSlug: string
   disableActions?: boolean
   docID?: number | string
+  doNotAbort?: boolean
   drawerSlug?: string
   initialData?: Data
   redirectAfterDelete?: boolean
@@ -129,6 +130,19 @@ export const ServerFunctionsProvider: React.FC<{
 
   const getDrawerDocument = useCallback<GetDrawerDocumentView>(
     async (args) => {
+      if (args?.doNotAbort) {
+        try {
+          const result = (await serverFunction({
+            name: 'render-document',
+            args,
+          })) as { docID: string; Document: React.ReactNode }
+
+          return result
+        } catch (_err) {
+          console.error(_err) // eslint-disable-line no-console
+          return
+        }
+      }
       if (abortControllerRef.current) {
         abortControllerRef.current.abort()
       }

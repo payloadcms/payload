@@ -2,8 +2,6 @@
 
 import React, { createContext, useContext, useState } from 'react'
 
-export { SetViewActions } from './SetViewActions/index.js'
-
 type ActionsContextType = {
   Actions: {
     [key: string]: React.ReactNode

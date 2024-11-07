@@ -2,8 +2,9 @@ import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { JsonObject, Operation, PayloadRequest, RequestContext } from '../../../types/index.js'
-import type { Field, FieldHookArgs, TabAsField } from '../../config/types.js'
+import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
+import type { Field, TabAsField } from '../../config/types.js'
+import type { RequestContext } from '../../../index.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
@@ -159,27 +160,10 @@ export const promise = async ({
 
       if (typeof validationResult === 'string') {
         errors.push({
-          fieldPath,
-          fieldSchemaPath,
           message: validationResult,
+          path: fieldPath.join('.'),
         })
       }
-    }
-
-    const beforeDuplicateArgs: FieldHookArgs = {
-      collection,
-      context,
-      data,
-      field,
-      global: undefined,
-      path: fieldPath,
-      previousSiblingDoc: siblingDoc,
-      previousValue: siblingDoc[field.name],
-      req,
-      schemaPath: parentSchemaPath,
-      siblingData,
-      siblingDocWithLocales,
-      value: siblingData[field.name],
     }
 
     // Push merge locale action if applicable

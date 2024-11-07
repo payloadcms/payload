@@ -138,7 +138,7 @@ export const runJobs = async ({
     const jobReq = isolateObjectProperty(req, 'transactionID')
 
     const workflowConfig: WorkflowConfig<WorkflowTypes> = job.workflowSlug
-      ? req.payload.config.jobs.workflows.find(({ slug }) => slug === job.workflowSlug)
+      ? req.payload.config.jobs?.workflows.find(({ slug }) => slug === job.workflowSlug)
       : {
           slug: 'singleTask',
           handler: async ({ job, tasks }) => {

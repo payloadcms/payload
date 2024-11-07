@@ -21,6 +21,7 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
+  collectionsJoins: {};
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
@@ -297,10 +298,11 @@ export interface Page {
           | null;
         id?: string | null;
         blockName?: string | null;
-        blockType: 'cta';
+        blockType: 'introduction';
       }[]
     | null;
   slug: string;
+  additional?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -605,7 +607,7 @@ export interface PagesSelect<T extends boolean = true> {
   content?:
     | T
     | {
-        cta?:
+        introduction?:
           | T
           | {
               title?: T;
@@ -625,6 +627,7 @@ export interface PagesSelect<T extends boolean = true> {
             };
       };
   slug?: T;
+  additional?: T;
   updatedAt?: T;
   createdAt?: T;
 }

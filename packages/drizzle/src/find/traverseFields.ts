@@ -2,6 +2,7 @@ import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { Field, JoinQuery, SelectMode, SelectType, TabAsField } from 'payload'
 
 import { and, eq, sql } from 'drizzle-orm'
+import { combineQueries } from 'payload'
 import { fieldAffectsData, fieldIsVirtual, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
@@ -402,11 +403,17 @@ export const traverseFields = ({
             break
           }
 
+          const joinSchemaPath = `${path.replaceAll('_', '.')}${field.name}`
+
+          if (joinQuery[joinSchemaPath] === false) {
+            break
+          }
+
           const {
             limit: limitArg = field.defaultLimit ?? 10,
             sort = field.defaultSort,
             where,
-          } = joinQuery[`${path.replaceAll('_', '.')}${field.name}`] || {}
+          } = joinQuery[joinSchemaPath] || {}
           let limit = limitArg
 
           if (limit !== 0) {

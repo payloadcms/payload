@@ -185,6 +185,7 @@ describe('Rich Text', () => {
 
     test('should only list RTE enabled upload collections in drawer', async () => {
       await navigateToRichTextFields()
+      await wait(1000)
 
       // Open link drawer
       await page
@@ -192,10 +193,13 @@ describe('Rich Text', () => {
         .first()
         .click()
 
-      // open the list select menu
-      await page.locator('.list-drawer-header__select-collection-wrap .rs__control').click()
+      const drawer = page.locator('[id^=list-drawer_1_]')
+      await expect(drawer).toBeVisible()
 
-      const menu = page.locator('.list-drawer-header__select-collection-wrap .rs__menu')
+      // open the list select menu
+      await page.locator('.list-drawer__select-collection-wrap .rs__control').click()
+
+      const menu = page.locator('.list-drawer__select-collection-wrap .rs__menu')
       // `uploads-3` has enableRichTextRelationship set to false
       await expect(menu).not.toContainText('Uploads3')
     })
@@ -221,8 +225,8 @@ describe('Rich Text', () => {
       )
 
       // change the selected collection to `array-fields`
-      await page.locator('.list-drawer-header__select-collection-wrap .rs__control').click()
-      const menu = page.locator('.list-drawer-header__select-collection-wrap .rs__menu')
+      await page.locator('.list-drawer_select-collection-wrap .rs__control').click()
+      const menu = page.locator('.list-drawer__select-collection-wrap .rs__menu')
       await menu.locator('.rs__option').getByText('Array Field').click()
 
       // check that `id` is now the default search field
@@ -261,9 +265,9 @@ describe('Rich Text', () => {
       await wait(300)
 
       // open the list select menu
-      await page.locator('.list-drawer-header__select-collection-wrap .rs__control').click()
+      await page.locator('.list-drawer__select-collection-wrap .rs__control').click()
 
-      const menu = page.locator('.list-drawer-header__select-collection-wrap .rs__menu')
+      const menu = page.locator('.list-drawer__select-collection-wrap .rs__menu')
       const regex = /\bUploads\b/
       await expect(menu).not.toContainText(regex)
     })
@@ -314,6 +318,7 @@ describe('Rich Text', () => {
   describe('editor', () => {
     test('should populate url link', async () => {
       await navigateToRichTextFields()
+      await wait(500)
 
       // Open link popup
       await page.locator('#field-richText span >> text="render links"').click()
@@ -330,6 +335,7 @@ describe('Rich Text', () => {
       const textField = editLinkModal.locator('#field-text')
       await expect(textField).toHaveValue('render links')
 
+      await wait(1000)
       // Close the drawer
       await editLinkModal.locator('button[type="submit"]').click()
       await expect(editLinkModal).toBeHidden()
@@ -398,12 +404,15 @@ describe('Rich Text', () => {
 
     test('should populate new links', async () => {
       await navigateToRichTextFields()
+      await wait(1000)
 
       // Highlight existing text
       const headingElement = page.locator(
         '#field-richText h1 >> text="Hello, I\'m a rich text field."',
       )
       await headingElement.selectText()
+
+      await wait(500)
 
       // click the toolbar link button
       await page.locator('.rich-text__toolbar button:not([disabled]) .link').first().click()
@@ -419,12 +428,15 @@ describe('Rich Text', () => {
       await page.locator('#field-blocks').scrollIntoViewIfNeeded()
       await expect(page.locator('#field-blocks__0__text')).toBeVisible()
       await expect(page.locator('#field-blocks__0__text')).toHaveValue('Regular text')
+      await wait(500)
       const editBlock = page.locator('#blocks-row-0 .popup-button')
       await editBlock.click()
       const removeButton = page.locator('#blocks-row-0').getByRole('button', { name: 'Remove' })
       await expect(removeButton).toBeVisible()
+      await wait(500)
       await removeButton.click()
       const richTextField = page.locator('#field-blocks__0__text')
+      await expect(richTextField).toBeVisible()
       const richTextValue = await richTextField.innerText()
       expect(richTextValue).toContain('Rich text')
     })

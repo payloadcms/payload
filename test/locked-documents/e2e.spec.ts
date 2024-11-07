@@ -2,7 +2,6 @@ import type { Page } from '@playwright/test'
 import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
-import exp from 'constants'
 import * as path from 'path'
 import { mapAsync } from 'payload'
 import { wait } from 'payload/shared'
@@ -143,6 +142,11 @@ describe('locked documents', () => {
 
     afterAll(async () => {
       await payload.delete({
+        collection: 'users',
+        id: user2.id,
+      })
+
+      await payload.delete({
         collection: lockedDocumentCollection,
         id: lockedDoc.id,
       })
@@ -165,11 +169,6 @@ describe('locked documents', () => {
       await payload.delete({
         collection: 'tests',
         id: testDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'users',
-        id: user2.id,
       })
     })
 
@@ -397,13 +396,18 @@ describe('locked documents', () => {
 
     afterAll(async () => {
       await payload.delete({
-        collection: lockedDocumentCollection,
-        id: expiredDocOne.id,
+        collection: 'users',
+        id: user2.id,
       })
 
       await payload.delete({
         collection: lockedDocumentCollection,
-        id: expiredDocTwo.id,
+        id: expiredLockedDocOne.id,
+      })
+
+      await payload.delete({
+        collection: lockedDocumentCollection,
+        id: expiredLockedDocTwo.id,
       })
 
       await payload.delete({
@@ -640,7 +644,7 @@ describe('locked documents', () => {
 
     beforeAll(async () => {
       postDoc = await createPostDoc({
-        text: 'hello',
+        text: 'new post doc',
       })
 
       expiredTestDoc = await createTestDoc({
@@ -715,20 +719,6 @@ describe('locked documents', () => {
     })
 
     test('should show Document Locked modal for incoming user when entering locked document', async () => {
-      const lockedDoc = await payload.find({
-        collection: lockedDocumentCollection,
-        limit: 1,
-        pagination: false,
-        where: {
-          'document.value': { equals: postDoc.id },
-        },
-      })
-
-      expect(lockedDoc.docs.length).toBe(1)
-
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
-
       await page.goto(postsUrl.list)
       await page.waitForURL(new RegExp(postsUrl.list))
 
@@ -748,20 +738,6 @@ describe('locked documents', () => {
     })
 
     test('should not show Document Locked modal for incoming user when entering expired locked document', async () => {
-      const lockedDoc = await payload.find({
-        collection: lockedDocumentCollection,
-        limit: 1,
-        pagination: false,
-        where: {
-          'document.value': { equals: expiredTestDoc.id },
-        },
-      })
-
-      expect(lockedDoc.docs.length).toBe(1)
-
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
-
       await page.goto(testsUrl.list)
       await page.waitForURL(new RegExp(testsUrl.list))
 
@@ -1004,6 +980,11 @@ describe('locked documents', () => {
         collection: 'users',
         id: user2.id,
       })
+
+      await payload.delete({
+        collection: 'posts',
+        id: postDoc.id,
+      })
     })
     test('should show Document Take Over modal for previous user if taken over', async () => {
       await page.goto(postsUrl.edit(postDoc.id))
@@ -1184,11 +1165,11 @@ describe('locked documents', () => {
         },
       })
 
-      lockedMenuGlobal = await payload.create({
+      lockedAdminGlobal = await payload.create({
         collection: lockedDocumentCollection,
         data: {
           document: undefined,
-          globalSlug: 'menu',
+          globalSlug: 'admin',
           user: {
             relationTo: 'users',
             value: user2.id,
@@ -1196,11 +1177,11 @@ describe('locked documents', () => {
         },
       })
 
-      lockedAdminGlobal = await payload.create({
+      lockedMenuGlobal = await payload.create({
         collection: lockedDocumentCollection,
         data: {
           document: undefined,
-          globalSlug: 'admin',
+          globalSlug: 'menu',
           user: {
             relationTo: 'users',
             value: user2.id,
@@ -1213,6 +1194,16 @@ describe('locked documents', () => {
       await payload.delete({
         collection: 'users',
         id: user2.id,
+      })
+
+      await payload.delete({
+        collection: lockedDocumentCollection,
+        id: lockedAdminGlobal.id,
+      })
+
+      await payload.delete({
+        collection: lockedDocumentCollection,
+        id: lockedMenuGlobal.id,
       })
     })
 

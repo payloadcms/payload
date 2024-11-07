@@ -121,11 +121,12 @@ import type {
   JSONFieldValidation,
   PointFieldValidation,
   RadioFieldValidation,
+  RequestContext,
   Sort,
   TextareaFieldValidation,
 } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
+import type { Operation, PayloadRequest, Where } from '../../types/index.js'
 import type {
   NumberFieldManyValidation,
   NumberFieldSingleValidation,
@@ -915,6 +916,7 @@ export type JSONField = {
       Label?: CustomComponent<JSONFieldLabelClientComponent | JSONFieldLabelServerComponent>
     } & Admin['components']
     editorOptions?: EditorProps['options']
+    maxHeight?: number
   } & Admin
 
   jsonSchema?: {
@@ -927,7 +929,7 @@ export type JSONField = {
 } & Omit<FieldBase, 'admin' | 'validate'>
 
 export type JSONFieldClient = {
-  admin?: AdminClient & Pick<JSONField['admin'], 'editorOptions'>
+  admin?: AdminClient & Pick<JSONField['admin'], 'editorOptions' | 'maxHeight'>
 } & Omit<FieldBaseClient, 'admin'> &
   Pick<JSONField, 'jsonSchema' | 'type'>
 
@@ -1323,12 +1325,13 @@ export type JoinField = {
   on: string
   type: 'join'
   validate?: never
+  where?: Where
 } & FieldBase
 
 export type JoinFieldClient = {
   admin?: AdminClient & Pick<JoinField['admin'], 'allowCreate' | 'disableBulkEdit' | 'readOnly'>
 } & FieldBaseClient &
-  Pick<JoinField, 'collection' | 'index' | 'maxDepth' | 'on' | 'type'>
+  Pick<JoinField, 'collection' | 'index' | 'maxDepth' | 'on' | 'type' | 'where'>
 
 export type Field =
   | ArrayField
