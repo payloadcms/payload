@@ -134,7 +134,7 @@ export const Drawer: React.FC<Props> = ({
   return null
 }
 
-export const DrawerDepthContext = createContext(0)
+export const DrawerDepthContext = createContext(1)
 
 export const DrawerDepthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const parentDepth = useDrawerDepth()

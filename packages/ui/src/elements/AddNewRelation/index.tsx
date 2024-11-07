@@ -1,5 +1,4 @@
 'use client'
-
 import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -34,17 +33,11 @@ export const AddNewRelation: React.FC<Props> = ({
   const relatedCollections = useRelatedCollections(relationTo)
   const { permissions } = useAuth()
   const [show, setShow] = useState(false)
-  const relatedToMany = relatedCollections.length > 1
-
-  // the drawer must be rendered on the page before before opening it
-  // this is why 'selectedCollection' is different from 'collectionConfig'
   const [selectedCollection, setSelectedCollection] = useState<string>()
-
-  // maintain the config in separate state so that selection can be cleared without losing the config
+  const relatedToMany = relatedCollections.length > 1
   const [collectionConfig, setCollectionConfig] = useState<ClientCollectionConfig>(() =>
     !relatedToMany ? relatedCollections[0] : undefined,
   )
-
   const [popupOpen, setPopupOpen] = useState(false)
   const { i18n, t } = useTranslation()
   const [showTooltip, setShowTooltip] = useState(false)
@@ -60,7 +53,7 @@ export const AddNewRelation: React.FC<Props> = ({
       if (operation === 'create') {
         const newValue: Value = Array.isArray(relationTo)
           ? {
-              relationTo: selectedCollection,
+              relationTo: collectionConfig?.slug,
               value: doc.id,
             }
           : doc.id
@@ -93,7 +86,7 @@ export const AddNewRelation: React.FC<Props> = ({
         setSelectedCollection(undefined)
       }
     },
-    [relationTo, selectedCollection, hasMany, setValue, value],
+    [relationTo, collectionConfig, hasMany, setValue, value],
   )
 
   const onPopupToggle = useCallback((state) => {
@@ -124,6 +117,8 @@ export const AddNewRelation: React.FC<Props> = ({
 
   useEffect(() => {
     if (relatedToMany && collectionConfig) {
+      // the drawer must be rendered on the page before before opening it
+      // this is why 'selectedCollection' is different from 'collectionConfig'
       toggleDrawer()
       setSelectedCollection(undefined)
     }
@@ -134,6 +129,10 @@ export const AddNewRelation: React.FC<Props> = ({
       setCollectionConfig(undefined)
     }
   }, [isDrawerOpen, relatedToMany])
+
+  const label = t('fields:addNewLabel', {
+    label: getTranslation(relatedCollections[0].labels.singular, i18n),
+  })
 
   if (show) {
     return (
@@ -156,9 +155,7 @@ export const AddNewRelation: React.FC<Props> = ({
               ) : (
                 <Fragment>
                   <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
-                    {t('fields:addNewLabel', {
-                      label: relatedCollections[0]?.labels.singular,
-                    })}
+                    {label}
                   </Tooltip>
                   <PlusIcon />
                 </Fragment>
@@ -199,7 +196,7 @@ export const AddNewRelation: React.FC<Props> = ({
                             setSelectedCollection(relatedCollection?.slug)
                           }}
                         >
-                          {getTranslation(relatedCollection?.labels.singular, i18n)}
+                          {getTranslation(relatedCollection?.labels?.singular, i18n)}
                         </PopupList.Button>
                       )
                     }
@@ -210,8 +207,8 @@ export const AddNewRelation: React.FC<Props> = ({
               )}
               size="medium"
             />
-            {selectedCollection &&
-              permissions.collections[selectedCollection]?.create?.permission && (
+            {collectionConfig &&
+              permissions.collections[collectionConfig?.slug]?.create?.permission && (
                 <DocumentDrawer onSave={onSave} />
               )}
           </Fragment>
