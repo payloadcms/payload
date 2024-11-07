@@ -52,7 +52,7 @@ export const DocumentControls: React.FC<{
   readonly isAccountView?: boolean
   readonly isEditing?: boolean
   readonly onDelete?: DocumentDrawerContextType['onDelete']
-  readonly onDrawerCreate?: () => void
+  readonly onDrawerCreateNew?: () => void
   /* Only available if `redirectAfterDuplicate` is `false` */
   readonly onDuplicate?: DocumentDrawerContextType['onDuplicate']
   readonly onSave?: DocumentDrawerContextType['onSave']
@@ -80,7 +80,7 @@ export const DocumentControls: React.FC<{
     isAccountView,
     isEditing,
     onDelete,
-    onDrawerCreate,
+    onDrawerCreateNew,
     onDuplicate,
     onTakeOver,
     permissions,
@@ -265,7 +265,7 @@ export const DocumentControls: React.FC<{
                     {!disableCreate && (
                       <Fragment>
                         {editDepth > 1 ? (
-                          <PopupList.Button id="action-create" onClick={onDrawerCreate}>
+                          <PopupList.Button id="action-create" onClick={onDrawerCreateNew}>
                             {i18n.t('general:createNew')}
                           </PopupList.Button>
                         ) : (

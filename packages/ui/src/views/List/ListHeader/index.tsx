@@ -1,6 +1,7 @@
+import type { I18nClient, TFunction } from '@payloadcms/translations'
 import type { ClientCollectionConfig } from 'payload'
 
-import { getTranslation, type I18nClient, type TFunction } from '@payloadcms/translations'
+import { getTranslation } from '@payloadcms/translations'
 import LinkImport from 'next/link.js'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 import { useModal } from '@faceless-ui/modal'
@@ -11,6 +12,7 @@ import { useListDrawerContext } from '../../../elements/ListDrawer/Provider.js'
 import { ListSelection } from '../../../elements/ListSelection/index.js'
 import { Pill } from '../../../elements/Pill/index.js'
 import { ReactSelect } from '../../../elements/ReactSelect/index.js'
+import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
 import { ViewDescription } from '../../../elements/ViewDescription/index.js'
 import { FieldLabel } from '../../../fields/FieldLabel/index.js'
 import { XIcon } from '../../../icons/X/index.js'
@@ -18,11 +20,12 @@ import { useConfig } from '../../../providers/Config/index.js'
 import './index.scss'
 
 const baseClass = 'list-header'
-const drawerBaseClass = 'list-drawer-header'
+const drawerBaseClass = 'list-drawer'
 
 type Props = {
   className?: string
   collectionConfig: ClientCollectionConfig
+  Description?: React.ReactNode
   hasCreatePermission: boolean
   i18n: I18nClient
   isBulkUploadEnabled: boolean
@@ -35,6 +38,7 @@ type Props = {
 const DefaultListHeader: React.FC<Props> = ({
   className,
   collectionConfig,
+  Description,
   hasCreatePermission,
   i18n,
   isBulkUploadEnabled,
@@ -75,6 +79,14 @@ const DefaultListHeader: React.FC<Props> = ({
       {!smallBreak && (
         <ListSelection label={getTranslation(collectionConfig?.labels?.plural, i18n)} />
       )}
+      {collectionConfig?.admin?.description || Description ? (
+        <div className={`${drawerBaseClass}__sub-header`}>
+          <RenderCustomComponent
+            CustomComponent={Description}
+            Fallback={<ViewDescription description={collectionConfig?.admin?.description} />}
+          />
+        </div>
+      ) : null}
     </header>
   )
 }
@@ -127,7 +139,10 @@ const ListDrawerHeader: React.FC<Props> = ({ Description, hasCreatePermission, i
       </div>
       {collectionConfig?.admin?.description || Description ? (
         <div className={`${drawerBaseClass}__sub-header`}>
-          {Description ?? <ViewDescription description={collectionConfig?.admin?.description} />}
+          <RenderCustomComponent
+            CustomComponent={Description}
+            Fallback={<ViewDescription description={collectionConfig?.admin?.description} />}
+          />
         </div>
       ) : null}
       {moreThanOneAvailableCollection && (

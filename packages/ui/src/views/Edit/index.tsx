@@ -1,6 +1,5 @@
 'use client'
 
-import { useModal } from '@faceless-ui/modal'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import {
   type ClientCollectionConfig,
@@ -28,7 +27,6 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
@@ -86,8 +84,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   } = useDocumentInfo()
 
   const {
+    clearDoc,
     drawerSlug,
-    onCreate: onDrawerCreate,
     onDelete,
     onDuplicate,
     onSave: onSaveFromContext,
@@ -105,9 +103,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     },
     getEntityConfig,
   } = useConfig()
-
-  const { t } = useTranslation()
-  const { closeModal } = useModal()
 
   const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
   const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
@@ -254,6 +249,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       isLockingEnabled,
       isEditing,
       depth,
+      getDocPermissions,
       refreshCookieAsync,
       setDocumentIsLocked,
       adminRoute,
@@ -498,7 +494,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
             id={id}
             isEditing={isEditing}
             onDelete={onDelete}
-            onDrawerCreate={onDrawerCreate}
+            onDrawerCreateNew={clearDoc}
             onDuplicate={onDuplicate}
             onSave={onSave}
             onTakeOver={() =>

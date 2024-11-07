@@ -57,7 +57,6 @@ export type ListViewClientProps = {
   beforeActions?: React.ReactNode[]
   collectionSlug: string
   columnState: Column[]
-  description?: StaticDescription
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   enableRowSelections?: boolean
@@ -78,7 +77,6 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     collectionSlug,
     columnState,
     Description,
-    description,
     disableBulkDelete,
     disableBulkEdit,
     enableRowSelections,
@@ -196,6 +194,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
             <Gutter className={`${baseClass}__wrap`}>
               <ListHeader
                 collectionConfig={collectionConfig}
+                Description={Description}
                 hasCreatePermission={hasCreatePermission}
                 i18n={i18n}
                 isBulkUploadEnabled={isBulkUploadEnabled}
@@ -204,14 +203,6 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                 smallBreak={smallBreak}
                 t={t}
               />
-              {description || Description ? (
-                <div className={`${baseClass}__sub-header`}>
-                  <RenderCustomComponent
-                    CustomComponent={Description}
-                    Fallback={<ViewDescription description={description} />}
-                  />
-                </div>
-              ) : null}
               <ListControls
                 beforeActions={beforeActions}
                 collectionConfig={collectionConfig}

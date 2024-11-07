@@ -3,8 +3,8 @@ import type { ClientCollectionConfig, Data, TypeWithID } from 'payload'
 import { createContext, useContext } from 'react'
 
 export type DocumentDrawerContextProps = {
+  readonly clearDoc?: () => void
   readonly drawerSlug: string
-  readonly onCreate?: () => void
   readonly onDelete?: (args: {
     collectionConfig?: ClientCollectionConfig
     id: string
@@ -30,9 +30,9 @@ export const DocumentDrawerContextProvider: React.FC<
   {
     children: React.ReactNode
   } & DocumentDrawerContextProps
-> = ({ children, ...callbacks }) => {
+> = ({ children, ...rest }) => {
   return (
-    <DocumentDrawerCallbacksContext.Provider value={callbacks}>
+    <DocumentDrawerCallbacksContext.Provider value={rest}>
       {children}
     </DocumentDrawerCallbacksContext.Provider>
   )
