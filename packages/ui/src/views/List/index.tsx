@@ -194,7 +194,16 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
             <Gutter className={`${baseClass}__wrap`}>
               <ListHeader
                 collectionConfig={collectionConfig}
-                Description={Description}
+                Description={
+                  <div className={`${baseClass}__sub-header`}>
+                    <RenderCustomComponent
+                      CustomComponent={Description}
+                      Fallback={
+                        <ViewDescription description={collectionConfig?.admin?.description} />
+                      }
+                    />
+                  </div>
+                }
                 hasCreatePermission={hasCreatePermission}
                 i18n={i18n}
                 isBulkUploadEnabled={isBulkUploadEnabled}
