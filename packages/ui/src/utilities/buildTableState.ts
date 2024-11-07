@@ -52,7 +52,7 @@ type BuildTableStateSuccessResult = {
 }
 
 type BuildTableStateErrorResult = {
-  data?: never
+  data?: any
   renderedFilters?: never
   state?: never
   Table?: never
