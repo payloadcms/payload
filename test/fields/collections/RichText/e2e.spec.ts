@@ -193,9 +193,9 @@ describe('Rich Text', () => {
         .click()
 
       // open the list select menu
-      await page.locator('.list-drawer__select-collection-wrap .rs__control').click()
+      await page.locator('.list-drawer-header__select-collection-wrap .rs__control').click()
 
-      const menu = page.locator('.list-drawer__select-collection-wrap .rs__menu')
+      const menu = page.locator('.list-drawer-header__select-collection-wrap .rs__menu')
       // `uploads-3` has enableRichTextRelationship set to false
       await expect(menu).not.toContainText('Uploads3')
     })
@@ -221,8 +221,8 @@ describe('Rich Text', () => {
       )
 
       // change the selected collection to `array-fields`
-      await page.locator('.list-drawer__select-collection-wrap .rs__control').click()
-      const menu = page.locator('.list-drawer__select-collection-wrap .rs__menu')
+      await page.locator('.list-drawer-header__select-collection-wrap .rs__control').click()
+      const menu = page.locator('.list-drawer-header__select-collection-wrap .rs__menu')
       await menu.locator('.rs__option').getByText('Array Field').click()
 
       // check that `id` is now the default search field
@@ -261,9 +261,9 @@ describe('Rich Text', () => {
       await wait(300)
 
       // open the list select menu
-      await page.locator('.list-drawer__select-collection-wrap .rs__control').click()
+      await page.locator('.list-drawer-header__select-collection-wrap .rs__control').click()
 
-      const menu = page.locator('.list-drawer__select-collection-wrap .rs__menu')
+      const menu = page.locator('.list-drawer-header__select-collection-wrap .rs__menu')
       const regex = /\bUploads\b/
       await expect(menu).not.toContainText(regex)
     })
