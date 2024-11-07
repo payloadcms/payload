@@ -47,10 +47,13 @@ export const uploadValidation = (
       collectionSlug: node.relationTo,
       data: node?.fields ?? {},
       fields: collection.fields,
+      fieldSchemaMap: undefined,
       operation: operation === 'create' || operation === 'update' ? operation : 'update',
+      permissions: {},
       preferences,
+      renderAllFields: false,
       req,
-      siblingData: node?.fields ?? {},
+      schemaPath: '',
     })
 
     let errorPaths: string[] = []
