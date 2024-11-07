@@ -560,7 +560,7 @@ describe('lexicalMain', () => {
     await relationshipSelectButton.click()
     await expect(slashMenuPopover).toBeHidden()
 
-    const relationshipListDrawer = page.locator('.list-drawer-header__header-text')
+    const relationshipListDrawer = page.locator('.list-drawer__header-text')
     await expect(relationshipListDrawer).toHaveText('Array Fields')
   })
 
@@ -577,6 +577,7 @@ describe('lexicalMain', () => {
    */
   test('ensure lexical editor within drawer within relationship within lexical field has fully-functioning inline toolbar', async () => {
     await navigateToLexicalFields()
+    await wait(500)
     const richTextField = page.locator('.rich-text-lexical').first()
     await richTextField.scrollIntoViewIfNeeded()
     await expect(richTextField).toBeVisible()
@@ -633,7 +634,6 @@ describe('lexicalMain', () => {
     await wait(500)
 
     const docRichTextField = docDrawer.locator('.rich-text-lexical').first()
-    await docRichTextField.scrollIntoViewIfNeeded()
     await expect(docRichTextField).toBeVisible()
 
     const docParagraph = docRichTextField.locator('.LexicalEditorTheme__paragraph').first()
