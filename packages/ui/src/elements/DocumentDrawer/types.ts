@@ -15,7 +15,7 @@ export type DocumentDrawerProps = {
   readonly initialState?: FormState
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
-} & Pick<DocumentDrawerContextProps, 'onCreate' | 'onDelete' | 'onDuplicate' | 'onSave'> &
+} & Pick<DocumentDrawerContextProps, 'onDelete' | 'onDuplicate' | 'onSave'> &
   Pick<DrawerProps, 'Header'>
 
 export type DocumentTogglerProps = {

@@ -1,10 +1,12 @@
 'use client'
 
+import type { ClientCollectionConfig } from 'payload'
+
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import type { Value } from '../../fields/Relationship/types.js'
-import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
+import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 import type { Props } from './types.js'
 
 import { PlusIcon } from '../../icons/Plus/index.js'
@@ -32,12 +34,16 @@ export const AddNewRelation: React.FC<Props> = ({
   const relatedCollections = useRelatedCollections(relationTo)
   const { permissions } = useAuth()
   const [show, setShow] = useState(false)
-
-  const [selectedCollection, setSelectedCollection] = useState<string>(
-    typeof relationTo === 'string' ? relationTo : '',
-  )
-
   const relatedToMany = relatedCollections.length > 1
+
+  // the drawer must be rendered on the page before before opening it
+  // this is why 'selectedCollection' is different from 'collectionConfig'
+  const [selectedCollection, setSelectedCollection] = useState<string>()
+
+  // maintain the config in separate state so that selection can be cleared without losing the config
+  const [collectionConfig, setCollectionConfig] = useState<ClientCollectionConfig>(() =>
+    !relatedToMany ? relatedCollections[0] : undefined,
+  )
 
   const [popupOpen, setPopupOpen] = useState(false)
   const { i18n, t } = useTranslation()
@@ -45,11 +51,11 @@ export const AddNewRelation: React.FC<Props> = ({
 
   const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen, toggleDrawer }] = useDocumentDrawer(
     {
-      collectionSlug: selectedCollection,
+      collectionSlug: collectionConfig?.slug,
     },
   )
 
-  const onSave: DocumentInfoContext['onSave'] = useCallback(
+  const onSave: DocumentDrawerContextType['onSave'] = useCallback(
     ({ doc, operation }) => {
       if (operation === 'create') {
         const newValue: Value = Array.isArray(relationTo)
@@ -83,7 +89,7 @@ export const AddNewRelation: React.FC<Props> = ({
             setValue(newValue)
           }
         }
-      } else {
+
         setSelectedCollection(undefined)
       }
     },
@@ -110,13 +116,22 @@ export const AddNewRelation: React.FC<Props> = ({
 
   useEffect(() => {
     if (relatedToMany && selectedCollection) {
-      toggleDrawer()
+      setCollectionConfig(
+        relatedCollections.find((collection) => collection?.slug === selectedCollection),
+      )
     }
-  }, [toggleDrawer, relatedToMany, selectedCollection])
+  }, [selectedCollection, relatedToMany, relatedCollections])
+
+  useEffect(() => {
+    if (relatedToMany && collectionConfig) {
+      toggleDrawer()
+      setSelectedCollection(undefined)
+    }
+  }, [toggleDrawer, relatedToMany, collectionConfig])
 
   useEffect(() => {
     if (relatedToMany && !isDrawerOpen) {
-      setSelectedCollection(undefined)
+      setCollectionConfig(undefined)
     }
   }, [isDrawerOpen, relatedToMany])
 
