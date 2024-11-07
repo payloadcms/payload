@@ -186,7 +186,6 @@ export const renderListView = async (
       ...listViewSlots,
       collectionSlug,
       columnState,
-      description: staticDescription,
       disableBulkDelete,
       disableBulkEdit,
       enableRowSelections,
