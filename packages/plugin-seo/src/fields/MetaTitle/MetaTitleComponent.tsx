@@ -23,7 +23,7 @@ import { defaults } from '../../defaults.js'
 import { LengthIndicator } from '../../ui/LengthIndicator.js'
 import '../index.scss'
 
-const { maxLength, minLength } = defaults.title
+const { maxLength: maxLengthDefault, minLength: minLengthDefault } = defaults.title
 
 type MetaTitleProps = {
   readonly hasGenerateTitleFn: boolean
@@ -33,9 +33,11 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const {
     field: {
       admin: {
-        components: { Label },
+        components: { afterInput, beforeInput, Label },
       },
       label,
+      maxLength: maxLengthFromProps,
+      minLength: minLengthFromProps,
       required,
     },
     field: fieldFromProps,
@@ -59,6 +61,9 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const locale = useLocale()
   const { getData } = useForm()
   const docInfo = useDocumentInfo()
+
+  const minLength = minLengthFromProps || minLengthDefault
+  const maxLength = maxLengthFromProps || maxLengthDefault
 
   const { errorMessage, setValue, showError, value } = field
 
@@ -177,6 +182,8 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <TextInput
+          afterInput={afterInput}
+          beforeInput={beforeInput}
           Error={{
             type: 'client',
             Component: null,

@@ -22,7 +22,7 @@ import type { GenerateDescription } from '../../types.js'
 import { defaults } from '../../defaults.js'
 import { LengthIndicator } from '../../ui/LengthIndicator.js'
 
-const { maxLength, minLength } = defaults.description
+const { maxLength: maxLengthDefault, minLength: minLengthDefault } = defaults.description
 
 type MetaDescriptionProps = {
   readonly hasGenerateDescriptionFn: boolean
@@ -32,11 +32,14 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
   const {
     field: {
       admin: {
-        components: { Label },
+        components: { afterInput, beforeInput, Label },
       },
       label,
+      maxLength: maxLengthFromProps,
+      minLength: minLengthFromProps,
       required,
     },
+    field: fieldFromProps,
     hasGenerateDescriptionFn,
     labelProps,
   } = props
@@ -54,6 +57,9 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
   const locale = useLocale()
   const { getData } = useForm()
   const docInfo = useDocumentInfo()
+
+  const maxLength = maxLengthFromProps || maxLengthDefault
+  const minLength = minLengthFromProps || minLengthDefault
 
   const field: FieldType<string> = useField({
     path: pathFromContext,
@@ -127,7 +133,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
       >
         <div className="plugin-seo__field">
           <FieldLabel
-            field={null}
+            field={fieldFromProps}
             Label={Label}
             label={label}
             required={required}
@@ -178,6 +184,8 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
         }}
       >
         <TextareaInput
+          afterInput={afterInput}
+          beforeInput={beforeInput}
           Error={{
             type: 'client',
             Component: null,

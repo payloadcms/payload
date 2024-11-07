@@ -6,7 +6,7 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
-import type { Config, Media } from './payload-types.js'
+import type { Config, Media, Relation } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
@@ -58,6 +58,7 @@ describe('uploads', () => {
   let page: Page
   let pngDoc: Media
   let audioDoc: Media
+  let relationDoc: Relation
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -96,6 +97,15 @@ describe('uploads', () => {
 
     pngDoc = findPNG.docs[0] as unknown as Media
 
+    const findRelationDoc = await payload.find({
+      collection: relationSlug,
+      depth: 0,
+      limit: 1,
+      pagination: false,
+    })
+
+    relationDoc = findRelationDoc.docs[0] as unknown as Relation
+
     const findAudio = await payload.find({
       collection: audioSlug,
       depth: 0,
@@ -119,6 +129,31 @@ describe('uploads', () => {
     const field = page.locator('.cell-versionedImage')
 
     await expect(field).toContainText('image')
+  })
+
+  test('should update upload field after editing relationship in document drawer', async () => {
+    await page.goto(relationURL.edit(relationDoc.id))
+    await page.waitForURL(relationURL.edit(relationDoc.id))
+
+    const filename = page.locator('.upload-relationship-details__filename a').nth(0)
+    await expect(filename).toContainText('image.png')
+
+    await page.locator('.upload-relationship-details__edit').nth(0).click()
+    await page.locator('.file-details__remove').click()
+
+    const fileChooserPromise = page.waitForEvent('filechooser')
+    await page.getByText('Select a file').click()
+    const fileChooser = await fileChooserPromise
+    await wait(1000)
+    await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+
+    await page.locator('button#action-save').nth(1).click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
+
+    await page.locator('.doc-drawer__header-close').click()
+
+    await expect(filename).toContainText('test-image.png')
   })
 
   test('should show upload filename in upload collection list', async () => {

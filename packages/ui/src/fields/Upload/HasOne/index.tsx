@@ -4,6 +4,8 @@ import type { JsonObject } from 'payload'
 
 import React from 'react'
 
+import type { ReloadDoc } from '../types.js'
+
 import { RelationshipContent } from '../RelationshipContent/index.js'
 import { UploadCard } from '../UploadCard/index.js'
 import './index.scss'
@@ -18,11 +20,12 @@ type Props = {
   }
   readonly onRemove?: () => void
   readonly readonly?: boolean
+  readonly reloadDoc: ReloadDoc
   readonly serverURL: string
 }
 
 export function UploadComponentHasOne(props: Props) {
-  const { className, fileDoc, onRemove, readonly, serverURL } = props
+  const { className, fileDoc, onRemove, readonly, reloadDoc, serverURL } = props
   const { relationTo, value } = fileDoc
   const id = String(value?.id)
 
@@ -47,6 +50,7 @@ export function UploadComponentHasOne(props: Props) {
         id={id}
         mimeType={value?.mimeType as string}
         onRemove={onRemove}
+        reloadDoc={reloadDoc}
         src={src}
         x={value?.width as number}
         y={value?.height as number}

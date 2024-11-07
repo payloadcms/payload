@@ -163,7 +163,7 @@ In development mode, if the configuration file is not found at the root, Payload
 
 **Production Mode**
 
-In production mode, Payload will first attempt to find the config file in the `outDir` of your `tsconfig.json`, and if not found, will fallback to the `rootDor` directory:
+In production mode, Payload will first attempt to find the config file in the `outDir` of your `tsconfig.json`, and if not found, will fallback to the `rootDir` directory:
 
 ```json
 {
@@ -216,7 +216,7 @@ Cross-origin resource sharing (CORS) can be configured with either a whitelist a
 Here's an example showing how to allow incoming requests from any domain:
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 
 export default buildConfig({
   // ...
@@ -227,7 +227,7 @@ export default buildConfig({
 Here's an example showing how to append a new header (`x-custom-header`) in `Access-Control-Allow-Headers`:
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 
 export default buildConfig({
   // ...

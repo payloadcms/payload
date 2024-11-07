@@ -101,7 +101,7 @@ export async function createProject(args: {
   })
 
   // Remove yarn.lock file. This is only desired in Payload Cloud.
-  const lockPath = path.resolve(projectDir, 'yarn.lock')
+  const lockPath = path.resolve(projectDir, 'pnpm-lock.yaml')
   if (fse.existsSync(lockPath)) {
     await fse.remove(lockPath)
   }

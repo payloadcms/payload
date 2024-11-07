@@ -12,7 +12,9 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
 
   const { id, _status: status, title } = doc || {}
 
-  const { beforeSync, defaultPriorities, deleteDrafts, syncDrafts } = pluginConfig
+  const { beforeSync, defaultPriorities, deleteDrafts, searchOverrides, syncDrafts } = pluginConfig
+
+  const searchSlug = searchOverrides?.slug || 'search'
 
   let dataToSave: DocToSync = {
     doc: {
@@ -28,7 +30,7 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
       docToSyncWith = await payload.findByID({
         id,
         collection,
-        locale: 'all',
+        locale: req.locale,
         req,
       })
     }
@@ -50,7 +52,7 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
       } catch (err: unknown) {
         payload.logger.error(err)
         payload.logger.error(
-          `Error gathering default priority for search documents related to ${collection}`,
+          `Error gathering default priority for ${searchSlug} documents related to ${collection}`,
         )
       }
     } else {
@@ -64,11 +66,12 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
     if (operation === 'create') {
       if (doSync) {
         await payload.create({
-          collection: 'search',
+          collection: searchSlug,
           data: {
             ...dataToSave,
             priority: defaultPriority,
           },
+          locale: req.locale,
           req,
         })
       }
@@ -78,8 +81,9 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
       try {
         // find the correct doc to sync with
         const searchDocQuery = await payload.find({
-          collection: 'search',
+          collection: searchSlug,
           depth: 0,
+          locale: req.locale,
           req,
           where: {
             'doc.relationTo': {
@@ -104,12 +108,12 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
           try {
             const duplicativeDocIDs = duplicativeDocs.map(({ id }) => id)
             await payload.delete({
-              collection: 'search',
+              collection: searchSlug,
               req,
               where: { id: { in: duplicativeDocIDs } },
             })
           } catch (err: unknown) {
-            payload.logger.error(`Error deleting duplicative search documents.`)
+            payload.logger.error(`Error deleting duplicative ${searchSlug} documents.`)
           }
         }
 
@@ -121,15 +125,16 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
             try {
               await payload.update({
                 id: searchDocID,
-                collection: 'search',
+                collection: searchSlug,
                 data: {
                   ...dataToSave,
                   priority: foundDoc.priority || defaultPriority,
                 },
+                locale: req.locale,
                 req,
               })
             } catch (err: unknown) {
-              payload.logger.error(`Error updating search document.`)
+              payload.logger.error(`Error updating ${searchSlug} document.`)
             }
           }
           if (deleteDrafts && status === 'draft') {
@@ -137,35 +142,36 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
             try {
               await payload.delete({
                 id: searchDocID,
-                collection: 'search',
+                collection: searchSlug,
                 req,
               })
             } catch (err: unknown) {
-              payload.logger.error({ err, msg: `Error deleting search document.` })
+              payload.logger.error({ err, msg: `Error deleting ${searchSlug} document.` })
             }
           }
         } else if (doSync) {
           try {
             await payload.create({
-              collection: 'search',
+              collection: searchSlug,
               data: {
                 ...dataToSave,
                 priority: defaultPriority,
               },
+              locale: req.locale,
               req,
             })
           } catch (err: unknown) {
-            payload.logger.error({ err, msg: `Error creating search document.` })
+            payload.logger.error({ err, msg: `Error creating ${searchSlug} document.` })
           }
         }
       } catch (err: unknown) {
-        payload.logger.error({ err, msg: `Error finding search document.` })
+        payload.logger.error({ err, msg: `Error finding ${searchSlug} document.` })
       }
     }
   } catch (err: unknown) {
     payload.logger.error({
       err,
-      msg: `Error syncing search document related to ${collection} with id: '${id}'.`,
+      msg: `Error syncing ${searchSlug} document related to ${collection} with id: '${id}'.`,
     })
   }
 

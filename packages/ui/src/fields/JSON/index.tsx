@@ -29,6 +29,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         className,
         description,
         editorOptions,
+        maxHeight,
         readOnly: readOnlyFromAdmin,
         style,
         width,
@@ -144,6 +145,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
         <CodeEditor
           defaultLanguage="json"
+          maxHeight={maxHeight}
           onChange={handleChange}
           onMount={handleMount}
           options={editorOptions}

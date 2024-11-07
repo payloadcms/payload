@@ -1,13 +1,7 @@
 import type { DocumentInfoContext } from '@payloadcms/ui'
-import type {
-  CollectionConfig,
-  Field,
-  GlobalConfig,
-  PayloadRequest,
-  TextareaField,
-  TextField,
-  UploadField,
-} from 'payload'
+import type { CollectionConfig, Field, GlobalConfig, PayloadRequest } from 'payload'
+
+export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
 
 export type PartialDocumentInfoContext = Pick<
   DocumentInfoContext,
@@ -66,20 +60,37 @@ export type GenerateURL<T = any> = (
 ) => Promise<string> | string
 
 export type SEOPluginConfig = {
+  /**
+   * Collections to include the SEO fields in
+   */
   collections?: string[]
-  fieldOverrides?: {
-    description?: Partial<TextareaField>
-    image?: Partial<UploadField>
-    title?: Partial<TextField>
-  }
-  fields?: Field[]
+  /**
+   * Override the default fields inserted by the SEO plugin via a function that receives the default fields and returns the new fields
+   *
+   * If you need more flexibility you can insert the fields manually as needed. @link https://payloadcms.com/docs/beta/plugins/seo#direct-use-of-fields
+   */
+  fields?: FieldsOverride
   generateDescription?: GenerateDescription
   generateImage?: GenerateImage
   generateTitle?: GenerateTitle
+  /**
+   *
+   */
   generateURL?: GenerateURL
+  /**
+   * Globals to include the SEO fields in
+   */
   globals?: string[]
   interfaceName?: string
+  /**
+   * Group fields into tabs, your content will be automatically put into a general tab and the SEO fields into an SEO tab
+   *
+   * If you need more flexibility you can insert the fields manually as needed. @link https://payloadcms.com/docs/beta/plugins/seo#direct-use-of-fields
+   */
   tabbedUI?: boolean
+  /**
+   * The slug of the collection used to handle image uploads
+   */
   uploadsCollection?: string
 }
 

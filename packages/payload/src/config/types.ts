@@ -31,7 +31,7 @@ import type {
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { Payload, RequestContext, TypedUser } from '../index.js'
+import type { JobsConfig, Payload, RequestContext, TypedUser } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -936,6 +936,10 @@ export type Config = {
   /** Automatically index all sortable top-level fields in the database to improve sort performance and add database compatibility for Azure Cosmos and similar. */
   indexSortableFields?: boolean
   /**
+   * @experimental There may be frequent breaking changes to this API
+   */
+  jobs?: JobsConfig
+  /**
    * Translate your content to different languages/locales.
    *
    * @default false // disable localization
@@ -1058,6 +1062,7 @@ export type SanitizedConfig = {
   endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>
+  jobs: JobsConfig // Redefine here, as the DeepRequired<Config> can break its type
   localization: false | SanitizedLocalizationConfig
   paths: {
     config: string

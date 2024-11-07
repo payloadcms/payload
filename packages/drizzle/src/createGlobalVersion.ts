@@ -16,6 +16,7 @@ export async function createGlobalVersion<T extends TypeWithID>(
     globalSlug,
     publishedLocale,
     req = {} as PayloadRequest,
+    select,
     snapshot,
     updatedAt,
     versionData,
@@ -41,6 +42,7 @@ export async function createGlobalVersion<T extends TypeWithID>(
     fields: buildVersionGlobalFields(this.payload.config, global),
     operation: 'create',
     req,
+    select,
     tableName,
   })
 
