@@ -16,9 +16,11 @@ async function main() {
   const templateDir = path.resolve(dirname, '../templates')
   const templateName = process.argv[2]
   const templatePath = path.join(templateDir, templateName)
+  const databaseConnection = process.argv[3] || 'mongodb://127.0.0.1/payloadtests'
 
   console.log({
     templatePath,
+    databaseConnection,
   })
 
   const execOpts = {
@@ -66,7 +68,8 @@ async function main() {
   execSync('pnpm install --ignore-workspace --no-frozen-lockfile', execOpts)
   await fs.writeFile(
     path.resolve(templatePath, '.env'),
-    'PAYLOAD_SECRET=secret\nDATABASE_URI=mongodb://127.0.0.1/payload-template-website',
+    // Populate POSTGRES_URL just in case it's needed
+    `PAYLOAD_SECRET=secret\nDATABASE_URI=${databaseConnection}\nPOSTGRES_URL=${databaseConnection}`,
   )
   execSync('pnpm run build', execOpts)
 
