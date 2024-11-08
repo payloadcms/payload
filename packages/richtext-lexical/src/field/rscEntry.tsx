@@ -1,15 +1,13 @@
-import {
-  type ClientComponentProps,
-  type RichTextFieldClient,
-  type ServerComponentProps,
-} from 'payload'
+import type { ClientComponentProps, RichTextFieldClient, ServerComponentProps } from 'payload'
+
 import React from 'react'
 
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
 import type { LexicalFieldAdminProps } from '../types.js'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { RichTextField } from '../exports/client/index.js'
 import { initLexicalFeatures } from '../utilities/initLexicalFeatures.js'
-import { RichTextField } from './index.js'
 export const RscEntryLexicalField: React.FC<
   {
     admin: LexicalFieldAdminProps

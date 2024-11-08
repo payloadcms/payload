@@ -20,6 +20,7 @@ export { Heading6Element } from '../../field/elements/h6/Heading6.js'
 
 export { IndentButton } from '../../field/elements/indent/Button.js'
 export { IndentElement } from '../../field/elements/indent/Element.js'
+export { elements } from '../../field/elements/index.js'
 export { ListItemElement } from '../../field/elements/li/ListItem.js'
 
 export { LinkButton } from '../../field/elements/link/Button/index.js'
@@ -52,13 +53,14 @@ export { CodeLeaf } from '../../field/leaves/code/Code/index.js'
 
 export { CodeLeafButton } from '../../field/leaves/code/LeafButton.js'
 
+export { defaultLeaves } from '../../field/leaves/index.js'
 export { ItalicLeaf } from '../../field/leaves/italic/Italic/index.js'
 export { ItalicLeafButton } from '../../field/leaves/italic/LeafButton.js'
+
 export { StrikethroughLeafButton } from '../../field/leaves/strikethrough/LeafButton.js'
-
 export { StrikethroughLeaf } from '../../field/leaves/strikethrough/Strikethrough/index.js'
-export { UnderlineLeafButton } from '../../field/leaves/underline/LeafButton.js'
 
+export { UnderlineLeafButton } from '../../field/leaves/underline/LeafButton.js'
 export { UnderlineLeaf } from '../../field/leaves/underline/Underline/index.js'
 
 export { useElement } from '../../field/providers/ElementProvider.js'

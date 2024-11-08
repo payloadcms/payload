@@ -1,21 +1,21 @@
 import type { I18nClient } from '@payloadcms/translations'
 
+import type {
+  AdminClient,
+  BlocksFieldClient,
+  ClientBlock,
+  ClientField,
+  Field,
+  FieldBase,
+  LabelsClient,
+  RadioFieldClient,
+  RowFieldClient,
+  SelectFieldClient,
+  TabsFieldClient,
+} from '../../fields/config/types.js'
 import type { Payload } from '../../types/index.js'
 
 import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
-import {
-  type AdminClient,
-  type BlocksFieldClient,
-  type ClientBlock,
-  type ClientField,
-  type Field,
-  type FieldBase,
-  type LabelsClient,
-  type RadioFieldClient,
-  type RowFieldClient,
-  type SelectFieldClient,
-  type TabsFieldClient,
-} from '../../fields/config/types.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { flattenTopLevelFields } from '../../index.js'
 

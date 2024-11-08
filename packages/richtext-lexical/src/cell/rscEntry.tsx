@@ -1,8 +1,8 @@
+import type { SerializedLexicalNode } from 'lexical'
 import type { Payload } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { formatAdminURL } from '@payloadcms/ui/shared'
-import { type SerializedLexicalNode } from 'lexical'
 import LinkImport from 'next/link.js'
 import React from 'react'
 
