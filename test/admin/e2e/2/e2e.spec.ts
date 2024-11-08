@@ -27,6 +27,7 @@ const description = 'Description'
 let payload: PayloadTestSDK<Config>
 
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
@@ -494,14 +495,14 @@ describe('admin2', () => {
         await expect(listDrawer).toBeVisible()
 
         const collectionSelector = page.locator(
-          '[id^=list-drawer_1_] .list-drawer__select-collection.react-select',
+          '[id^=list-drawer_1_] .list-header__select-collection.react-select',
         )
 
         // select the "Post" collection
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            '[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option',
             {
               hasText: exactText('Post'),
             },
@@ -533,7 +534,7 @@ describe('admin2', () => {
         await expect(listDrawer).toBeVisible()
 
         const collectionSelector = page.locator(
-          '[id^=list-drawer_1_] .list-drawer__select-collection.react-select',
+          '[id^=list-drawer_1_] .list-header__select-collection.react-select',
         )
         const columnSelector = page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns')
 
@@ -556,7 +557,7 @@ describe('admin2', () => {
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            '[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option',
             {
               hasText: exactText('Post'),
             },
@@ -577,7 +578,7 @@ describe('admin2', () => {
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            '[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option',
             {
               hasText: exactText('User'),
             },
@@ -598,7 +599,7 @@ describe('admin2', () => {
 
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            '[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option',
             {
               hasText: exactText('Post'),
             },
