@@ -190,13 +190,8 @@ describe('admin2', () => {
       test('should toggle columns', async () => {
         const columnCountLocator = 'table > thead > tr > th'
         await createPost()
-
         await page.locator('.list-controls__toggle-columns').click()
-
-        // track the number of columns before manipulating toggling any
         const numberOfColumns = await page.locator(columnCountLocator).count()
-
-        // wait until the column toggle UI is visible and fully expanded
         await expect(page.locator('.column-selector')).toBeVisible()
         await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
 
@@ -204,19 +199,13 @@ describe('admin2', () => {
           hasText: exactText('ID'),
         })
 
-        // Remove ID column
         await idButton.click()
-
-        // wait until .cell-id is not present on the page:
-        await page.locator('.cell-id').waitFor({ state: 'detached' })
-
+        await page.locator('#heading-id').waitFor({ state: 'detached' })
+        await page.locator('.cell-id').first().waitFor({ state: 'detached' })
         await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1)
         await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('Number')
-
-        // Add back ID column
         await idButton.click()
         await expect(page.locator('.cell-id').first()).toBeVisible()
-
         await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns)
         await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
       })
@@ -225,27 +214,24 @@ describe('admin2', () => {
         const { id } = await createPost()
         await page.reload()
         const linkCell = page.locator(`${tableRowLocator} td`).nth(1).locator('a')
+
         await expect(linkCell).toHaveAttribute(
           'href',
           `${adminRoutes.routes.admin}/collections/posts/${id}`,
         )
 
-        // open the column controls
         await page.locator('.list-controls__toggle-columns').click()
-        // wait until the column toggle UI is visible and fully expanded
         await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
 
-        // toggle off the ID column
         await page
           .locator('.column-selector .column-selector__column', {
             hasText: exactText('ID'),
           })
           .click()
 
-        // wait until .cell-id is not present on the page:
-        await page.locator('.cell-id').waitFor({ state: 'detached' })
+        await page.locator('#heading-id').waitFor({ state: 'detached' })
+        await page.locator('.cell-id').first().waitFor({ state: 'detached' })
 
-        // recheck that the 2nd cell is still a link
         await expect(linkCell).toHaveAttribute(
           'href',
           `${adminRoutes.routes.admin}/collections/posts/${id}`,
