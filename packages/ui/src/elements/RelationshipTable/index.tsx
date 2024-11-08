@@ -27,6 +27,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { hoistQueryParamsToAnd } from '../../utilities/mergeListSearchAndWhere.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
@@ -40,7 +41,7 @@ const baseClass = 'relationship-table'
 type RelationshipTableComponentProps = {
   readonly allowCreate?: boolean
   readonly field: JoinFieldClient
-  readonly filterOptions?: boolean | Where
+  readonly filterOptions?: Where
   readonly initialData?: PaginatedDocs
   readonly initialDrawerState?: DocumentDrawerProps['initialState']
   readonly Label?: React.ReactNode
@@ -104,6 +105,12 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   useIgnoredEffect(
     () => {
       if (!Table || query) {
+        const newQuery: ListQuery = { ...(query || {}), where: { ...(query?.where || {}) } }
+
+        if (filterOptions) {
+          newQuery.where = hoistQueryParamsToAnd(newQuery.where, filterOptions)
+        }
+
         const getTable = async () => {
           const {
             data: newData,
@@ -113,7 +120,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
             collectionSlug: relationTo,
             // columns: activeColumns,
             enableRowSelections: false,
-            query,
+            query: newQuery,
             renderRowTypes: true,
             tableAppearance: 'condensed',
           })
@@ -128,7 +135,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       }
     },
     [query],
-    [collectionConfig, filterOptions, initialData, Table, getTableState, relationTo],
+    [Table, getTableState, relationTo],
   )
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer, openDrawer }] = useDocumentDrawer({
