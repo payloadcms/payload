@@ -40,7 +40,6 @@ export const RscEntryLexicalField: React.FC<
       permissions={args.permissions}
       readOnly={args.readOnly}
       renderedBlocks={args.renderedBlocks}
-      rowLabels={args.rowLabels}
       schemaPath={args.schemaPath}
     />
   )

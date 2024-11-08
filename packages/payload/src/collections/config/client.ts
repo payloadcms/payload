@@ -48,7 +48,7 @@ export type ClientCollectionConfig = {
     | ServerOnlyCollectionAdminProperties
   >
   fields: ClientField[]
-  labels?: {
+  labels: {
     plural: StaticLabel
     singular: StaticLabel
   }

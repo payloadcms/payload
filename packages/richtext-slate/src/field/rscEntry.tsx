@@ -34,7 +34,6 @@ export const RscEntrySlateField: React.FC<
   payload,
   readOnly,
   renderedBlocks,
-  rowLabels,
   schemaPath,
 }) => {
   const componentMap: Map<string, ClientField[] | React.ReactNode> = new Map()
@@ -197,7 +196,6 @@ export const RscEntrySlateField: React.FC<
       path={path}
       readOnly={readOnly}
       renderedBlocks={renderedBlocks}
-      rowLabels={rowLabels}
       schemaPath={schemaPath}
     />
   )
