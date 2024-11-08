@@ -13,6 +13,7 @@ type Args = {
   adminRoute: string
   config: SanitizedConfig
   defaultIDType: Payload['db']['defaultIDType']
+  payload?: Payload
   route: string
 }
 
@@ -24,7 +25,13 @@ type RouteInfo = {
   globalSlug?: string
 }
 
-export function getRouteInfo({ adminRoute, config, defaultIDType, route }: Args): RouteInfo {
+export function getRouteInfo({
+  adminRoute,
+  config,
+  defaultIDType,
+  payload,
+  route,
+}: Args): RouteInfo {
   if (isAdminRoute({ adminRoute, config, route })) {
     const routeWithoutAdmin = getRouteWithoutAdmin({ adminRoute, route })
     const routeSegments = routeWithoutAdmin.split('/').filter(Boolean)
@@ -45,12 +52,9 @@ export function getRouteInfo({ adminRoute, config, defaultIDType, route }: Args)
     }
 
     // If the collection has an ID field, we need to determine the type of the ID field
-    if (collectionConfig) {
-      const IDField = collectionConfig.fields.find((field) =>
-        fieldAffectsData(field) ? field.name === 'id' : false,
-      )
-      if (IDField && (IDField.type === 'number' || IDField.type === 'text')) {
-        idType = IDField.type
+    if (collectionConfig && payload) {
+      if (payload.collections?.[collectionSlug]) {
+        idType = payload.collections?.[collectionSlug].customIDType
       }
     }
 
