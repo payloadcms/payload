@@ -38,7 +38,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
   const filterOptions: Where = useMemo(() => {
     const where = {
       [on]: {
-        in: [docID || null],
+        in: [docID || ''],
       },
     }
     if (field.where) {

@@ -104,7 +104,10 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const renderTable = useCallback(
     async (docs?: PaginatedDocs['docs']) => {
-      const newQuery: ListQuery = { ...(query || {}), where: { ...(query?.where || {}) } }
+      const newQuery: ListQuery = {
+        ...(query || {}),
+        where: { ...(query?.where || {}) },
+      }
 
       if (filterOptions) {
         newQuery.where = hoistQueryParamsToAnd(newQuery.where, filterOptions)

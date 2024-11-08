@@ -219,6 +219,7 @@ export const buildTableState = async (
   let data: PaginatedDocs
 
   // lookup docs, if desired, i.e. within `join` field which initialize with `depth: 0`
+
   if (!docs || query) {
     data = await payload.find({
       collection: collectionSlug,
