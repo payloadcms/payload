@@ -166,7 +166,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   dropDatabase: DropDatabase
   enums?: never | Record<string, unknown>
   execute: Execute<unknown>
-  extensionsFilter: Set<string>
+
   features: {
     json?: boolean
   }
@@ -201,7 +201,6 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   }
   tableNameMap: Map<string, string>
   tables: Record<string, any>
-  tablesFilter: Set<string>
   transactionOptions: unknown
   versionsSuffix?: string
 }
