@@ -116,6 +116,15 @@ describe('uploads', () => {
     audioDoc = findAudio.docs[0] as unknown as Media
   })
 
+  test('should show upload filename in upload collection list', async () => {
+    await page.goto(mediaURL.list)
+    const audioUpload = page.locator('tr.row-1 .cell-filename')
+    await expect(audioUpload).toHaveText('audio.mp3')
+
+    const imageUpload = page.locator('tr.row-2 .cell-filename')
+    await expect(imageUpload).toHaveText('image.png')
+  })
+
   test('should see upload filename in relation list', async () => {
     await page.goto(relationURL.list)
     const field = page.locator('.cell-image')
@@ -153,15 +162,6 @@ describe('uploads', () => {
     await page.locator('.doc-drawer__header-close').click()
 
     await expect(filename).toContainText('test-image.png')
-  })
-
-  test('should show upload filename in upload collection list', async () => {
-    await page.goto(mediaURL.list)
-    const audioUpload = page.locator('tr.row-1 .cell-filename')
-    await expect(audioUpload).toHaveText('audio.mp3')
-
-    const imageUpload = page.locator('tr.row-2 .cell-filename')
-    await expect(imageUpload).toHaveText('image.png')
   })
 
   test('should create file upload', async () => {
@@ -345,19 +345,19 @@ describe('uploads', () => {
     await wait(500) // flake workaround
     await page.locator('#field-audio .upload-relationship-details__remove').click()
 
-    await openDocDrawer(page, '#field-audio  .upload__listToggler')
+    await openDocDrawer(page, '#field-audio .upload__listToggler')
 
     const listDrawer = page.locator('[id^=list-drawer_1_]')
     await expect(listDrawer).toBeVisible()
 
     await openDocDrawer(page, 'button.list-drawer__create-new-button.doc-drawer__toggler')
-    await expect(page.locator('[id^=doc-drawer_media_2_]')).toBeVisible()
+    await expect(page.locator('[id^=doc-drawer_media_1_]')).toBeVisible()
 
     // upload an image and try to select it
     await page
-      .locator('[id^=doc-drawer_media_2_] .file-field__upload input[type="file"]')
+      .locator('[id^=doc-drawer_media_1_] .file-field__upload input[type="file"]')
       .setInputFiles(path.resolve(dirname, './image.png'))
-    await page.locator('[id^=doc-drawer_media_2_] button#action-save').click()
+    await page.locator('[id^=doc-drawer_media_1_] button#action-save').click()
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'successfully',
     )
@@ -400,7 +400,6 @@ describe('uploads', () => {
   })
 
   test('should render adminThumbnail when using a function', async () => {
-    await page.reload() // Flakey test, it likely has to do with the test that comes before it. Trace viewer is not helpful when it fails.
     await page.goto(adminThumbnailFunctionURL.list)
     await page.waitForURL(adminThumbnailFunctionURL.list)
 
