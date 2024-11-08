@@ -5,6 +5,8 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
+import { fieldAffectsData } from 'payload/shared'
+
 import { getRouteWithoutAdmin, isAdminRoute } from './shared.js'
 
 type Args = {
@@ -30,15 +32,9 @@ export function getRouteInfo({ adminRoute, config, defaultIDType, route }: Args)
     const collectionSlug = entityType === 'collections' ? entitySlug : undefined
     const globalSlug = entityType === 'globals' ? entitySlug : undefined
 
-    const docID =
-      collectionSlug && createOrID !== 'create'
-        ? defaultIDType === 'number'
-          ? Number(createOrID)
-          : createOrID
-        : undefined
-
     let collectionConfig: SanitizedCollectionConfig | undefined
     let globalConfig: SanitizedGlobalConfig | undefined
+    let idType = defaultIDType
 
     if (collectionSlug) {
       collectionConfig = config.collections.find((collection) => collection.slug === collectionSlug)
@@ -47,6 +43,23 @@ export function getRouteInfo({ adminRoute, config, defaultIDType, route }: Args)
     if (globalSlug) {
       globalConfig = config.globals.find((global) => global.slug === globalSlug)
     }
+
+    // If the collection has an ID field, we need to determine the type of the ID field
+    if (collectionConfig) {
+      const IDField = collectionConfig.fields.find((field) =>
+        fieldAffectsData(field) ? field.name === 'id' : false,
+      )
+      if (IDField && (IDField.type === 'number' || IDField.type === 'text')) {
+        idType = IDField.type
+      }
+    }
+
+    const docID =
+      collectionSlug && createOrID !== 'create'
+        ? idType === 'number'
+          ? Number(createOrID)
+          : createOrID
+        : undefined
 
     return {
       collectionConfig,
