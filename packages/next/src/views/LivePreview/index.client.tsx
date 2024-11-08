@@ -246,18 +246,19 @@ const PreviewView: React.FC<Props> = ({
       return state
     },
     [
-      collectionSlug,
       editSessionStartTime,
-      globalSlug,
-      id,
       isLockingEnabled,
+      getDocPreferences,
+      getFormState,
+      id,
+      collectionSlug,
+      docPermissions,
+      globalSlug,
       operation,
       schemaPath,
-      getDocPreferences,
-      setCurrentEditor,
       setDocumentIsLocked,
-      user,
-      getFormState,
+      user.id,
+      setCurrentEditor,
     ],
   )
 
@@ -442,6 +443,7 @@ const PreviewView: React.FC<Props> = ({
               fields={fields}
               forceSidebarWrap
               readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
+              schemaPathSegments={[collectionSlug || globalSlug]}
             />
             {AfterDocument}
           </div>
