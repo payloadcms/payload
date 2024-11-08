@@ -13,6 +13,7 @@ import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { isMongoose } from '../helpers/isMongoose.js'
 import removeFiles from '../helpers/removeFiles.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -183,7 +184,8 @@ describe('database', () => {
     })
 
     // known issue: https://github.com/payloadcms/payload/issues/4597
-    it.skip('should run migrate:down', async () => {
+    it('should run migrate:down', async () => {
+      if (!isMongoose(payload)) {return}
       let error
       try {
         await payload.db.migrateDown()
@@ -200,7 +202,8 @@ describe('database', () => {
     })
 
     // known issue: https://github.com/payloadcms/payload/issues/4597
-    it.skip('should run migrate:refresh', async () => {
+    it('should run migrate:refresh', async () => {
+      if (!isMongoose(payload)) {return}
       let error
       try {
         await payload.db.migrateRefresh()
