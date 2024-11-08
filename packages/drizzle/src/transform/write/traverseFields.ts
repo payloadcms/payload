@@ -592,7 +592,7 @@ export const traverseFields = ({
       valuesToTransform.forEach(({ localeKey, ref, value }) => {
         if (typeof value !== 'undefined') {
           let formattedValue = value
-          if (field.type === 'point' && adapter.name !== 'sqlite') {
+          if (value && field.type === 'point' && adapter.name !== 'sqlite') {
             formattedValue = sql`ST_GeomFromGeoJSON(${JSON.stringify(value)})`
           }
 
