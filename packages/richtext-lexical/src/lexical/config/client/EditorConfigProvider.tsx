@@ -1,7 +1,7 @@
 'use client'
 
 import type { LexicalEditor } from 'lexical'
-import type { ClientField } from 'payload'
+import type { MarkRequired } from 'ts-essentials'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import * as React from 'react'
@@ -23,7 +23,10 @@ export interface EditorConfigContextType {
   editorConfig: SanitizedClientEditorConfig
   editorContainerRef: React.RefObject<HTMLDivElement>
 
-  fieldProps: LexicalRichTextFieldProps
+  fieldProps: MarkRequired<
+    LexicalRichTextFieldProps,
+    'indexPath' | 'parentPath' | 'parentSchemaPath' | 'path' | 'schemaPath'
+  >
   focusedEditor: EditorConfigContextType | null
   // Editor focus handling
   focusEditor: (editorContext: EditorConfigContextType) => void

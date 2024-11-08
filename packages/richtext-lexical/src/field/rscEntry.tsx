@@ -17,13 +17,15 @@ export const RscEntryLexicalField: React.FC<
   } & ClientComponentProps &
     ServerComponentProps
 > = (args) => {
+  const path = args.path ?? (args.clientField as RichTextFieldClient).name
+  const schemaPath = args.schemaPath ?? path
   const { clientFeatures, featureClientSchemaMap } = initLexicalFeatures({
     fieldSchemaMap: args.fieldSchemaMap,
     i18n: args.i18n,
-    path: args.path,
+    path,
     payload: args.payload,
     sanitizedEditorConfig: args.sanitizedEditorConfig,
-    schemaPath: args.schemaPath,
+    schemaPath,
   })
   return (
     <RichTextField
@@ -36,11 +38,11 @@ export const RscEntryLexicalField: React.FC<
       lexicalEditorConfig={args.sanitizedEditorConfig.lexical}
       parentPath={args.parentPath}
       parentSchemaPath={args.parentSchemaPath}
-      path={args.path}
+      path={path}
       permissions={args.permissions}
       readOnly={args.readOnly}
       renderedBlocks={args.renderedBlocks}
-      schemaPath={args.schemaPath}
+      schemaPath={schemaPath}
     />
   )
 }
