@@ -91,8 +91,9 @@ describe('access control', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
-    await login({ page, serverURL })
     await ensureCompilationIsDone({ page, serverURL })
+
+    await login({ page, serverURL })
 
     const {
       admin: {

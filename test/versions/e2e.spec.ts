@@ -113,6 +113,7 @@ describe('versions', () => {
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   beforeEach(async () => {

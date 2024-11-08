@@ -34,8 +34,6 @@ test.describe('Admin Panel (Root)', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
-    await login({ page, serverURL, customRoutes: { admin: adminRoute } })
-
     await ensureCompilationIsDone({
       customRoutes: {
         admin: adminRoute,
@@ -43,6 +41,8 @@ test.describe('Admin Panel (Root)', () => {
       page,
       serverURL,
     })
+
+    await login({ page, serverURL, customRoutes: { admin: adminRoute } })
   })
 
   test('renders admin panel at root', async () => {

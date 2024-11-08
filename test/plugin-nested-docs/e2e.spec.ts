@@ -30,6 +30,7 @@ describe('Nested Docs Plugin', () => {
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
+    await ensureCompilationIsDone({ page, serverURL })
 
     async function createPage({
       slug,
@@ -68,8 +69,6 @@ describe('Nested Docs Plugin', () => {
       _status: 'draft',
     })
     draftChildId = draftChildPage.id
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   describe('Core functionality', () => {

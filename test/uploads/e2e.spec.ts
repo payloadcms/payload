@@ -83,6 +83,7 @@ describe('uploads', () => {
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
+    await ensureCompilationIsDone({ page, serverURL })
 
     const findPNG = await payload.find({
       collection: mediaSlug,
@@ -113,8 +114,6 @@ describe('uploads', () => {
     })
 
     audioDoc = findAudio.docs[0] as unknown as Media
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   test('should see upload filename in relation list', async () => {
