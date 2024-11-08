@@ -24,7 +24,7 @@ type GetTableStateClient = (
   } & Omit<BuildTableStateArgs, 'clientConfig' | 'req'>,
 ) => ReturnType<typeof buildTableStateHandler>
 
-type GetDrawerDocumentView = (args: {
+type RenderDocument = (args: {
   collectionSlug: string
   disableActions?: boolean
   docID?: number | string
@@ -43,9 +43,9 @@ type GetDocumentSlots = (args: {
 
 type ServerFunctionsContextType = {
   getDocumentSlots: GetDocumentSlots
-  getDrawerDocument: GetDrawerDocumentView
   getFormState: GetFormStateClient
   getTableState: GetTableStateClient
+  renderDocument: RenderDocument
   serverFunction: ServerFunctionClient
 }
 
@@ -74,12 +74,11 @@ export const ServerFunctionsProvider: React.FC<{
   const abortControllerRef = useRef(new AbortController())
 
   const getDocumentSlots = useCallback<GetDocumentSlots>(
-    async (args) => {
-      return serverFunction({
+    async (args) =>
+      await serverFunction({
         name: 'render-document-slots',
         args,
-      })
-    },
+      }),
     [serverFunction],
   )
 
@@ -150,7 +149,7 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
-  const getDrawerDocument = useCallback<GetDrawerDocumentView>(
+  const renderDocument = useCallback<RenderDocument>(
     async (args) => {
       if (args?.doNotAbort) {
         try {
@@ -209,7 +208,13 @@ export const ServerFunctionsProvider: React.FC<{
 
   return (
     <ServerFunctionsContext.Provider
-      value={{ getDrawerDocument, getFormState, getTableState, serverFunction, getDocumentSlots }}
+      value={{
+        getDocumentSlots,
+        getFormState,
+        getTableState,
+        renderDocument,
+        serverFunction,
+      }}
     >
       {children}
     </ServerFunctionsContext.Provider>

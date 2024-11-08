@@ -23,7 +23,6 @@ import { useIgnoredEffect } from '../../hooks/useIgnoredEffect.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -43,7 +42,7 @@ type RelationshipTableComponentProps = {
   readonly field: JoinFieldClient
   readonly filterOptions?: Where
   readonly initialData?: PaginatedDocs
-  readonly initialDrawerState?: DocumentDrawerProps['initialState']
+  readonly initialDrawerData?: DocumentDrawerProps['initialData']
   readonly Label?: React.ReactNode
   readonly relationTo: string
 }
@@ -53,16 +52,13 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     allowCreate = true,
     filterOptions,
     initialData: initialDataFromProps,
-    initialDrawerState,
+    initialDrawerData,
     Label,
     relationTo,
   } = props
-
   const [Table, setTable] = useState<React.ReactNode>(null)
 
   const { getEntityConfig } = useConfig()
-
-  const { id: docID } = useDocumentInfo()
 
   const { permissions } = useAuth()
 
@@ -260,13 +256,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           )}
         </Fragment>
       )}
-      <DocumentDrawer
-        initialData={{
-          category: docID,
-        }}
-        initialState={initialDrawerState}
-        onSave={onDrawerCreate}
-      />
+      <DocumentDrawer initialData={initialDrawerData} onSave={onDrawerCreate} />
     </div>
   )
 }

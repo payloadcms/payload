@@ -41,11 +41,13 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
         in: [docID || ''],
       },
     }
+
     if (field.where) {
       return {
         and: [where, field.where],
       }
     }
+
     return where
   }, [docID, on, field.where])
 
@@ -57,12 +59,8 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
         field={field as JoinFieldClient}
         filterOptions={filterOptions}
         initialData={docID && value ? value : ({ docs: [] } as PaginatedDocs)}
-        initialDrawerState={{
-          [on]: {
-            initialValue: docID,
-            valid: true,
-            value: docID,
-          },
+        initialDrawerData={{
+          [on]: docID,
         }}
         Label={
           <h4 style={{ margin: 0 }}>

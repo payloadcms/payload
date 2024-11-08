@@ -38,7 +38,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const { closeModal } = useModal()
   const { t } = useTranslation()
 
-  const { getDrawerDocument } = useServerFunctions()
+  const { renderDocument } = useServerFunctions()
 
   const [DocumentView, setDocumentView] = useState<React.ReactNode>(undefined)
   const [isLoading, setIsLoading] = useState(true)
@@ -48,7 +48,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       setIsLoading(true)
 
       try {
-        const result = await getDrawerDocument({
+        const result = await renderDocument({
           collectionSlug,
           disableActions,
           docID,
@@ -77,8 +77,9 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       initialData,
       redirectAfterDelete,
       redirectAfterDuplicate,
-      getDrawerDocument,
+      renderDocument,
       closeModal,
+      initialState,
       t,
     ],
   )
