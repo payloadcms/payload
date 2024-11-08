@@ -118,7 +118,6 @@ export const find: Find = async function find(
     collection,
     collectionConfig,
     joins,
-    limit,
     locale,
     query,
   })

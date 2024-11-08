@@ -453,6 +453,27 @@ describe('fields - relationship', () => {
     ).toHaveCount(1)
   })
 
+  test('should update relationship from drawer without enabling save in main doc', async () => {
+    await page.goto(url.edit(docWithExistingRelations.id))
+
+    const saveButton = page.locator('#action-save')
+    await expect(saveButton).toBeDisabled()
+
+    await openDocDrawer(
+      page,
+      '#field-relationship button.relationship--single-value__drawer-toggler ',
+    )
+
+    const field = page.locator('#field-name')
+    await field.fill('Updated')
+
+    await saveButton.nth(1).click()
+    await expect(page.locator('.payload-toast-container')).toContainText('Updated successfully')
+    await page.locator('.doc-drawer__header-close').click()
+
+    await expect(saveButton).toBeDisabled()
+  })
+
   test('should allow filtering by polymorphic relationships with version drafts enabled', async () => {
     await createVersionedRelationshipFieldDoc('Without relationship')
     await createVersionedRelationshipFieldDoc('with relationship', [

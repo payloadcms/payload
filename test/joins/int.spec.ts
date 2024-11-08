@@ -831,6 +831,28 @@ describe('Joins Field', () => {
     expect(res.group.relatedPosts.docs).toBeDefined()
     expect(res.group.camelCasePosts.docs).toBeDefined()
   })
+
+  it('should have correct totalDocs', async () => {
+    for (let i = 0; i < 50; i++) {
+      await payload.create({ collection: categoriesSlug, data: { name: 'totalDocs' } })
+    }
+
+    const count = await payload.count({
+      collection: categoriesSlug,
+      where: { name: { equals: 'totalDocs' } },
+    })
+    expect(count.totalDocs).toBe(50)
+
+    const find = await payload.find({
+      collection: categoriesSlug,
+      limit: 5,
+      where: { name: { equals: 'totalDocs' } },
+    })
+    expect(find.totalDocs).toBe(50)
+    expect(find.docs).toHaveLength(5)
+
+    await payload.delete({ collection: categoriesSlug, where: { name: { equals: 'totalDocs' } } })
+  })
 })
 
 async function createPost(overrides?: Partial<Post>, locale?: Config['locale']) {

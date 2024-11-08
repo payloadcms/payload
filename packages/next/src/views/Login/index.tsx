@@ -29,7 +29,7 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
   } = config
 
   if (user) {
-    redirect(admin)
+    redirect((searchParams.redirect as string) || admin)
   }
 
   const collectionConfig = collections.find(({ slug }) => slug === userSlug)
