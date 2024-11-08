@@ -109,8 +109,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         return acc
       }, {})
 
-      console.log(newState)
-
       return newState
     }
 
