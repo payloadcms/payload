@@ -13,6 +13,7 @@ import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { isMongoose } from '../helpers/isMongoose.js'
 import removeFiles from '../helpers/removeFiles.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -134,8 +135,14 @@ describe('database', () => {
   })
 
   describe('migrations', () => {
+    let ranFreshTest = false
+
     beforeEach(async () => {
-      if (process.env.PAYLOAD_DROP_DATABASE === 'true' && 'drizzle' in payload.db) {
+      if (
+        process.env.PAYLOAD_DROP_DATABASE === 'true' &&
+        'drizzle' in payload.db &&
+        !ranFreshTest
+      ) {
         const db = payload.db as unknown as PostgresAdapter
         await db.dropDatabase({ adapter: db })
       }
@@ -195,28 +202,47 @@ describe('database', () => {
       const migration = docs[0]
       expect(migration.name).toContain('_test')
       expect(migration.batch).toStrictEqual(1)
+      ranFreshTest = true
     })
 
-    // known issue: https://github.com/payloadcms/payload/issues/4597
-    it.skip('should run migrate:down', async () => {
+    it('should run migrate:down', async () => {
+      // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+      if (!isMongoose(payload)) {
+        return
+      }
       let error
       try {
         await payload.db.migrateDown()
       } catch (e) {
         error = e
       }
+
+      const migrations = await payload.find({
+        collection: 'payload-migrations',
+      })
+
       expect(error).toBeUndefined()
+      expect(migrations.docs).toHaveLength(0)
     })
 
-    // known issue: https://github.com/payloadcms/payload/issues/4597
-    it.skip('should run migrate:refresh', async () => {
+    it('should run migrate:refresh', async () => {
+      // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+      if (!isMongoose(payload)) {
+        return
+      }
       let error
       try {
         await payload.db.migrateRefresh()
       } catch (e) {
         error = e
       }
+
+      const migrations = await payload.find({
+        collection: 'payload-migrations',
+      })
+
       expect(error).toBeUndefined()
+      expect(migrations.docs).toHaveLength(1)
     })
   })
 
