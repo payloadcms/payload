@@ -494,22 +494,18 @@ describe('versions', () => {
 
     test('collection — autosave should only update the current document', async () => {
       await page.goto(autosaveURL.create)
-      await waitForAutoSaveToComplete(page)
       await expect(page.locator('#field-title')).toBeEnabled()
       await page.locator('#field-title').fill('first post title')
       await expect(page.locator('#field-description')).toBeEnabled()
       await page.locator('#field-description').fill('first post description')
       await saveDocAndAssert(page)
-      await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
       await page.goto(autosaveURL.create)
-      await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
       await wait(500)
       await expect(page.locator('#field-title')).toBeEnabled()
       await page.locator('#field-title').fill('second post title')
       await expect(page.locator('#field-description')).toBeEnabled()
       await page.locator('#field-description').fill('second post description')
       await saveDocAndAssert(page)
-      await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
       await page.locator('#field-title').fill('updated second post title')
       await page.locator('#field-description').fill('updated second post description')
       await waitForAutoSaveToRunAndComplete(page)
