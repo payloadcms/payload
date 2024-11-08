@@ -1,7 +1,7 @@
 'use client'
 import type { ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
 
-import React, { createContext, useCallback, useContext, useState } from 'react'
+import React, { createContext, useCallback, useContext } from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
 import type { SortColumnProps } from '../SortColumn/index.js'
@@ -10,8 +10,6 @@ import type { Column } from '../Table/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
-import { filterFields } from './filterFields.js'
-import { getInitialColumns } from './getInitialColumns.js'
 
 export interface ITableColumns {
   columns: Column[]
@@ -77,16 +75,6 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
   const prevCollection = React.useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
   const { getPreference, setPreference } = usePreferences()
-
-  const [initialColumns, setInitialColumns] = useState<ColumnPreferences>(() =>
-    fields ? getInitialColumns(filterFields(fields), useAsTitle, defaultColumns) : [],
-  )
-
-  // useEffect(() => {
-  //   if (fields) {
-  //     setInitialColumns(getInitialColumns(filterFields(fields), useAsTitle, defaultColumns))
-  //   }
-  // }, [defaultColumns, fields, useAsTitle])
 
   const [tableColumns, setTableColumns] = React.useState(columnState)
 
@@ -241,7 +229,6 @@ export const TableColumnsProvider: React.FC<Props> = ({
     defaultColumns,
     useAsTitle,
     listPreferences,
-    initialColumns,
     enableRowSelections,
     sortColumnProps,
   ])

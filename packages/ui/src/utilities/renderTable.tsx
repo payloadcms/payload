@@ -15,6 +15,8 @@ import type { ColumnPreferences } from '../providers/ListQuery/index.js'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
+import { filterFields } from '../elements/TableColumns/filterFields.js'
+import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { Pill, Table } from '../exports/client/index.js'
 
@@ -42,7 +44,7 @@ export const renderFilters = (
 export const renderTable = ({
   collectionConfig,
   columnPreferences,
-  columns,
+  columns: columnsFromArgs,
   customCellProps,
   docs,
   enableRowSelections,
@@ -55,7 +57,7 @@ export const renderTable = ({
 }: {
   collectionConfig: ClientCollectionConfig
   columnPreferences: ColumnPreferences
-  columns: ColumnPreferences
+  columns?: ColumnPreferences
   customCellProps?: Record<string, any>
   docs: PaginatedDocs['docs']
   drawerSlug?: string
@@ -70,6 +72,10 @@ export const renderTable = ({
   columnState: Column[]
   Table: React.ReactNode
 } => {
+  const columns =
+    columnsFromArgs ||
+    getInitialColumns(filterFields(fields), useAsTitle, collectionConfig?.admin?.defaultColumns)
+
   const columnState = buildColumnState({
     beforeRows: renderRowTypes
       ? [

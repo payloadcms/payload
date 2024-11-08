@@ -4,12 +4,7 @@ import type { AdminViewProps, ListQuery, Where } from 'payload'
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { renderFilters, renderTable } from '@payloadcms/ui/rsc'
-import {
-  filterFields,
-  formatAdminURL,
-  getInitialColumns,
-  mergeListSearchAndWhere,
-} from '@payloadcms/ui/shared'
+import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
@@ -48,7 +43,7 @@ export const renderListView = async (
     collectionConfig,
     collectionConfig: {
       slug: collectionSlug,
-      admin: { defaultColumns, useAsTitle },
+      admin: { useAsTitle },
       defaultSort,
       fields,
     },
@@ -151,14 +146,11 @@ export const renderListView = async (
       where: whereQuery || {},
     })
 
-    const initialColumns = getInitialColumns(filterFields(fields), useAsTitle, defaultColumns)
-
     const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
 
     const { columnState, Table } = renderTable({
       collectionConfig: clientCollectionConfig,
       columnPreferences: listPreferences?.columns,
-      columns: initialColumns,
       customCellProps,
       docs: data.docs,
       drawerSlug,

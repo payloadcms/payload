@@ -118,7 +118,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
             Table: NewTable,
           } = await getTableState({
             collectionSlug: relationTo,
-            // columns: activeColumns,
             enableRowSelections: false,
             query: newQuery,
             renderRowTypes: true,
@@ -135,7 +134,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       }
     },
     [query],
-    [Table, getTableState, relationTo],
+    [Table, getTableState, relationTo, filterOptions],
   )
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer, openDrawer }] = useDocumentDrawer({
