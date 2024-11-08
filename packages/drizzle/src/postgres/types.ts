@@ -151,6 +151,7 @@ export type BasePostgresAdapter = {
   operators: Operators
   pgSchema: Schema
   poolOptions?: ClientConfig
+  postgisCreated: boolean
   prodMigrations?: {
     down: (args: MigrateDownArgs) => Promise<void>
     name: string

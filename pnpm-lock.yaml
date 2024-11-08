@@ -10,7 +10,7 @@ overrides:
   copyfiles: 2.4.1
   cross-env: 7.0.3
   dotenv: 16.4.5
-  drizzle-orm: 0.35.1
+  drizzle-orm: 0.36.1
   graphql: ^16.8.1
   mongodb-memory-server: ^9.0
   react: 19.0.0-rc-65a56d0e-20241020
@@ -109,11 +109,11 @@ importers:
         specifier: 16.4.5
         version: 16.4.5
       drizzle-kit:
-        specifier: 0.26.2
-        version: 0.26.2
+        specifier: 0.28.0
+        version: 0.28.0
       drizzle-orm:
-        specifier: 0.35.1
-        version: 0.35.1(@libsql/client@0.14.0(bufferutil@4.0.8))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-65a56d0e-20241020)(types-react@19.0.0-rc.1)
+        specifier: 0.36.1
+        version: 0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-65a56d0e-20241020)(types-react@19.0.0-rc.1)
       escape-html:
         specifier: ^1.0.3
         version: 1.0.3
@@ -315,11 +315,11 @@ importers:
         specifier: 2.12.1
         version: 2.12.1
       drizzle-kit:
-        specifier: 0.26.2
-        version: 0.26.2
+        specifier: 0.28.0
+        version: 0.28.0
       drizzle-orm:
-        specifier: 0.35.1
-        version: 0.35.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-65a56d0e-20241020)(types-react@19.0.0-rc.1)
+        specifier: 0.36.1
+        version: 0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-65a56d0e-20241020)(types-react@19.0.0-rc.1)
       pg:
         specifier: 8.11.3
         version: 8.11.3
@@ -361,11 +361,11 @@ importers:
         specifier: 2.12.1
         version: 2.12.1
       drizzle-kit:
-        specifier: 0.26.2
-        version: 0.26.2
+        specifier: 0.28.0
+        version: 0.28.0
       drizzle-orm:
-        specifier: 0.35.1
-        version: 0.35.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-65a56d0e-20241020)(types-react@19.0.0-rc.1)
+        specifier: 0.36.1
+        version: 0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-65a56d0e-20241020)(types-react@19.0.0-rc.1)
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -401,11 +401,11 @@ importers:
         specifier: 2.12.1
         version: 2.12.1
       drizzle-kit:
-        specifier: 0.26.2
-        version: 0.26.2
+        specifier: 0.28.0
+        version: 0.28.0
       drizzle-orm:
-        specifier: 0.35.1
-        version: 0.35.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-65a56d0e-20241020)(types-react@19.0.0-rc.1)
+        specifier: 0.36.1
+        version: 0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-65a56d0e-20241020)(types-react@19.0.0-rc.1)
       pg:
         specifier: 8.11.3
         version: 8.11.3
@@ -444,8 +444,8 @@ importers:
         specifier: 2.12.1
         version: 2.12.1
       drizzle-orm:
-        specifier: 0.35.1
-        version: 0.35.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-65a56d0e-20241020)(types-react@19.0.0-rc.1)
+        specifier: 0.36.1
+        version: 0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-65a56d0e-20241020)(types-react@19.0.0-rc.1)
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -1727,11 +1727,11 @@ importers:
         specifier: 16.4.5
         version: 16.4.5
       drizzle-kit:
-        specifier: 0.26.2
-        version: 0.26.2
+        specifier: 0.28.0
+        version: 0.28.0
       eslint-plugin-playwright:
-        specifier: 1.7.0
-        version: 1.7.0(eslint-plugin-jest@28.8.1(@typescript-eslint/eslint-plugin@8.3.0(@typescript-eslint/parser@8.3.0(eslint@9.9.1(jiti@1.21.6))(typescript@5.6.3))(eslint@9.9.1(jiti@1.21.6))(typescript@5.6.3))(eslint@9.9.1(jiti@1.21.6))(jest@29.7.0(@types/node@22.5.4)(babel-plugin-macros@3.1.0))(typescript@5.6.3))(eslint@9.9.1(jiti@1.21.6))
+        specifier: 1.6.2
+        version: 1.6.2(eslint-plugin-jest@28.8.1(@typescript-eslint/eslint-plugin@8.3.0(@typescript-eslint/parser@8.3.0(eslint@9.9.1(jiti@1.21.6))(typescript@5.6.3))(eslint@9.9.1(jiti@1.21.6))(typescript@5.6.3))(eslint@9.9.1(jiti@1.21.6))(jest@29.7.0(@types/node@22.5.4)(babel-plugin-macros@3.1.0))(typescript@5.6.3))(eslint@9.9.1(jiti@1.21.6))
       execa:
         specifier: 5.1.1
         version: 5.1.1
@@ -2724,8 +2724,8 @@ packages:
     peerDependencies:
       react: 19.0.0-rc-65a56d0e-20241020
 
-  '@drizzle-team/brocli@0.10.1':
-    resolution: {integrity: sha512-AHy0vjc+n/4w/8Mif+w86qpppHuF3AyXbcWW+R/W7GNA3F5/p2nuhlkCJaTXSLZheB4l1rtHzOfr9A7NwoR/Zg==}
+  '@drizzle-team/brocli@0.10.2':
+    resolution: {integrity: sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w==}
 
   '@effect/schema@0.68.12':
     resolution: {integrity: sha512-UWJsFXzeYTBQYnftwI1KR2uaxIZ8fk+kffDS7BnJwnGjPPgODq3/AzeoBDSu1MAlnwBKOz+QRdMuSMxrT/pHig==}
@@ -5861,17 +5861,18 @@ packages:
     resolution: {integrity: sha512-ZmdL2rui+eB2YwhsWzjInR8LldtZHGDoQ1ugH85ppHKwpUHL7j7rN0Ti9NCnGiQbhaZ11FpR+7ao1dNsmduNUg==}
     engines: {node: '>=12'}
 
-  drizzle-kit@0.26.2:
-    resolution: {integrity: sha512-cMq8omEKywjIy5KcqUo6LvEFxkl8/zYHsgYjFVXjmPWWtuW4blcz+YW9+oIhoaALgs2ebRjzXwsJgN9i6P49Dw==}
+  drizzle-kit@0.28.0:
+    resolution: {integrity: sha512-KqI+CS2Ga9GYIrXpxpCDUJJrH/AT/k4UY0Pb4oRgQEGkgN1EdCnqp664cXgwPWjDr5RBtTsjZipw8+8C//K63A==}
     hasBin: true
 
-  drizzle-orm@0.35.1:
-    resolution: {integrity: sha512-HQxDdYuXlZFuvDPztlUIzrX8TqWa/Ej6uN6L0hkbuGL4slexOUMc3u4nXVU15RQ5QYbk+uLQnR6v1+OIrdCTXQ==}
+  drizzle-orm@0.36.1:
+    resolution: {integrity: sha512-F4hbimnMEhyWzDowQB4xEuVJJWXLHZYD7FYwvo8RImY+N7pStGqsbfmT95jDbec1s4qKmQbiuxEDZY90LRrfIw==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
       '@cloudflare/workers-types': '>=3'
-      '@electric-sql/pglite': '>=0.1.1'
+      '@electric-sql/pglite': '>=0.2.0'
       '@libsql/client': '>=0.10.0'
+      '@libsql/client-wasm': '>=0.10.0'
       '@neondatabase/serverless': '>=0.1'
       '@op-engineering/op-sqlite': '>=2'
       '@opentelemetry/api': ^1.4.1
@@ -5904,6 +5905,8 @@ packages:
       '@electric-sql/pglite':
         optional: true
       '@libsql/client':
+        optional: true
+      '@libsql/client-wasm':
         optional: true
       '@neondatabase/serverless':
         optional: true
@@ -6178,8 +6181,8 @@ packages:
       vue-eslint-parser:
         optional: true
 
-  eslint-plugin-playwright@1.7.0:
-    resolution: {integrity: sha512-pDp2jFeWbBmlwDfZ39Ypdlz1+IafmRKvFTnnonX0TbS7hAByy4oh7Y6ioZRKvLGE+djd/e2VbqOo9sxgZSY2ow==}
+  eslint-plugin-playwright@1.6.2:
+    resolution: {integrity: sha512-mraN4Em3b5jLt01q7qWPyLg0Q5v3KAWfJSlEWwldyUXoa7DSPrBR4k6B6LROLqipsG8ndkwWMdjl1Ffdh15tag==}
     engines: {node: '>=16.6.0'}
     peerDependencies:
       eslint: '>=8.40.0'
@@ -11660,7 +11663,7 @@ snapshots:
       react: 19.0.0-rc-cd22717c-20241013
       tslib: 2.6.3
 
-  '@drizzle-team/brocli@0.10.1': {}
+  '@drizzle-team/brocli@0.10.2': {}
 
   '@effect/schema@0.68.12(effect@3.4.5)':
     dependencies:
@@ -15403,16 +15406,16 @@ snapshots:
 
   dotenv@16.4.5: {}
 
-  drizzle-kit@0.26.2:
+  drizzle-kit@0.28.0:
     dependencies:
-      '@drizzle-team/brocli': 0.10.1
+      '@drizzle-team/brocli': 0.10.2
       '@esbuild-kit/esm-loader': 2.6.5
       esbuild: 0.19.12
       esbuild-register: 3.6.0(esbuild@0.19.12)
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.35.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-65a56d0e-20241020)(types-react@19.0.0-rc.1):
+  drizzle-orm@0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-65a56d0e-20241020)(types-react@19.0.0-rc.1):
     optionalDependencies:
       '@libsql/client': 0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4)
       '@neondatabase/serverless': 0.9.4
@@ -15423,7 +15426,7 @@ snapshots:
       pg: 8.11.3
       react: 19.0.0-rc-65a56d0e-20241020
 
-  drizzle-orm@0.35.1(@libsql/client@0.14.0(bufferutil@4.0.8))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-65a56d0e-20241020)(types-react@19.0.0-rc.1):
+  drizzle-orm@0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8))(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-65a56d0e-20241020)(types-react@19.0.0-rc.1):
     optionalDependencies:
       '@libsql/client': 0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.4)
       '@neondatabase/serverless': 0.9.4
@@ -15794,7 +15797,7 @@ snapshots:
       - supports-color
       - typescript
 
-  eslint-plugin-playwright@1.7.0(eslint-plugin-jest@28.8.1(@typescript-eslint/eslint-plugin@8.3.0(@typescript-eslint/parser@8.3.0(eslint@9.9.1(jiti@1.21.6))(typescript@5.6.3))(eslint@9.9.1(jiti@1.21.6))(typescript@5.6.3))(eslint@9.9.1(jiti@1.21.6))(jest@29.7.0(@types/node@22.5.4)(babel-plugin-macros@3.1.0))(typescript@5.6.3))(eslint@9.9.1(jiti@1.21.6)):
+  eslint-plugin-playwright@1.6.2(eslint-plugin-jest@28.8.1(@typescript-eslint/eslint-plugin@8.3.0(@typescript-eslint/parser@8.3.0(eslint@9.9.1(jiti@1.21.6))(typescript@5.6.3))(eslint@9.9.1(jiti@1.21.6))(typescript@5.6.3))(eslint@9.9.1(jiti@1.21.6))(jest@29.7.0(@types/node@22.5.4)(babel-plugin-macros@3.1.0))(typescript@5.6.3))(eslint@9.9.1(jiti@1.21.6)):
     dependencies:
       eslint: 9.9.1(jiti@1.21.6)
       globals: 13.24.0

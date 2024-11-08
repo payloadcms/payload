@@ -121,6 +121,8 @@ export type RequireDrizzleKit = () => {
     schema: Record<string, unknown>,
     drizzle: DrizzleAdapter['drizzle'],
     filterSchema?: string[],
+    tablesFilter?: string[],
+    extensionsFilter?: string[],
   ) => Promise<{ apply; hasDataLoss; warnings }>
 }
 
@@ -164,6 +166,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   dropDatabase: DropDatabase
   enums?: never | Record<string, unknown>
   execute: Execute<unknown>
+  extensionsFilter: Set<string>
   features: {
     json?: boolean
   }
@@ -187,6 +190,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   requireDrizzleKit: RequireDrizzleKit
   resolveInitializing: () => void
   schema: Record<string, unknown>
+
   schemaName?: string
   sessions: {
     [id: string]: {
@@ -197,6 +201,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   }
   tableNameMap: Map<string, string>
   tables: Record<string, any>
+  tablesFilter: Set<string>
   transactionOptions: unknown
   versionsSuffix?: string
 }

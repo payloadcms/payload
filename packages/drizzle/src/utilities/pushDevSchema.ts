@@ -16,6 +16,8 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
     adapter.schema,
     adapter.drizzle,
     adapter.schemaName ? [adapter.schemaName] : undefined,
+    adapter.tablesFilter ? Array.from(adapter.tablesFilter) : undefined,
+    adapter.extensionsFilter ? Array.from(adapter.extensionsFilter) : undefined,
   )
 
   if (warnings.length) {

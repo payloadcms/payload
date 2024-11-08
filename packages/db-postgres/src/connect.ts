@@ -100,6 +100,11 @@ export const connect: Connect = async function connect(
     process.exit(1)
   }
 
+  if (this.extensionsFilter.has('postgis') && !this.postgisCreated) {
+    await this.drizzle.execute(`CREATE EXTENSION IF NOT EXISTS postgis`)
+    this.postgisCreated = true
+  }
+
   // Only push schema if not in production
   if (
     process.env.NODE_ENV !== 'production' &&

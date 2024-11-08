@@ -6,6 +6,7 @@ import { relations } from 'drizzle-orm'
 import {
   boolean,
   foreignKey,
+  geometry,
   index,
   integer,
   jsonb,
@@ -156,7 +157,7 @@ export const traverseFields = ({
 
       if (
         (field.unique || field.index || ['relationship', 'upload'].includes(field.type)) &&
-        !['array', 'blocks', 'group', 'point'].includes(field.type) &&
+        !['array', 'blocks', 'group'].includes(field.type) &&
         !('hasMany' in field && field.hasMany === true) &&
         !('relationTo' in field && Array.isArray(field.relationTo))
       ) {
@@ -261,6 +262,11 @@ export const traverseFields = ({
       }
 
       case 'point': {
+        targetTable[fieldName] = withDefault(
+          geometry(columnName, { type: 'point', mode: 'tuple', srid: 4326 }),
+          field,
+        )
+        adapter.extensionsFilter.add('postgis')
         break
       }
 

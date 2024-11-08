@@ -29,7 +29,7 @@ describe('collections-graphql', () => {
     if (payload.db.name === 'mongoose') {
       await new Promise((resolve, reject) => {
         payload.db?.collections?.point?.ensureIndexes(function (err) {
-          if (err) reject(err)
+          if (err) {reject(err)}
           resolve(true)
         })
       })
@@ -578,13 +578,13 @@ describe('collections-graphql', () => {
         expect(docs).toContainEqual(expect.objectContaining({ id: specialPost.id }))
       })
 
-      if (['mongodb'].includes(process.env.PAYLOAD_DATABASE)) {
-        describe('near', () => {
-          const point = [10, 20]
-          const [lat, lng] = point
+      describe('near', () => {
+        const point = [10, 20]
+        const [lat, lng] = point
 
-          it('should return a document near a point', async () => {
-            const nearQuery = `
+        it('should return a document near a point', async () => {
+          if (payload.db.name === 'sqlite') {return}
+          const nearQuery = `
               query {
                 Points(
                   where: {
@@ -600,16 +600,17 @@ describe('collections-graphql', () => {
                 }
               }`
 
-            const { data } = await restClient
-              .GRAPHQL_POST({ body: JSON.stringify({ query: nearQuery }) })
-              .then((res) => res.json())
-            const { docs } = data.Points
+          const { data } = await restClient
+            .GRAPHQL_POST({ body: JSON.stringify({ query: nearQuery }) })
+            .then((res) => res.json())
+          const { docs } = data.Points
 
-            expect(docs).toHaveLength(1)
-          })
+          expect(docs).toHaveLength(1)
+        })
 
-          it('should not return a point far away', async () => {
-            const nearQuery = `
+        it('should not return a point far away', async () => {
+          if (payload.db.name === 'sqlite') {return}
+          const nearQuery = `
               query {
                 Points(
                   where: {
@@ -625,29 +626,30 @@ describe('collections-graphql', () => {
                 }
               }`
 
-            const { data } = await restClient
-              .GRAPHQL_POST({ body: JSON.stringify({ query: nearQuery }) })
-              .then((res) => res.json())
-            const { docs } = data.Points
+          const { data } = await restClient
+            .GRAPHQL_POST({ body: JSON.stringify({ query: nearQuery }) })
+            .then((res) => res.json())
+          const { docs } = data.Points
 
-            expect(docs).toHaveLength(0)
+          expect(docs).toHaveLength(0)
+        })
+
+        it('should sort find results by nearest distance', async () => {
+          if (payload.db.name === 'sqlite') {return}
+          // creating twice as many records as we are querying to get a random sample
+          await mapAsync([...Array(10)], async () => {
+            // randomize the creation timestamp
+            await wait(Math.random())
+            await payload.create({
+              collection: pointSlug,
+              data: {
+                // only randomize longitude to make distance comparison easy
+                point: [Math.random(), 0],
+              },
+            })
           })
 
-          it('should sort find results by nearest distance', async () => {
-            // creating twice as many records as we are querying to get a random sample
-            await mapAsync([...Array(10)], async () => {
-              // randomize the creation timestamp
-              await wait(Math.random())
-              await payload.create({
-                collection: pointSlug,
-                data: {
-                  // only randomize longitude to make distance comparison easy
-                  point: [Math.random(), 0],
-                },
-              })
-            })
-
-            const nearQuery = `
+          const nearQuery = `
               query {
                 Points(
                   where: {
@@ -655,6 +657,7 @@ describe('collections-graphql', () => {
                       near: [0, 0, 100000, 0]
                     }
                   },
+                  sort: "point",
                   limit: 5
                 ) {
                   docs {
@@ -664,32 +667,33 @@ describe('collections-graphql', () => {
                 }
               }`
 
-            const { data } = await restClient
-              .GRAPHQL_POST({ body: JSON.stringify({ query: nearQuery }) })
-              .then((res) => res.json())
-            const { docs } = data.Points
+          const { data } = await restClient
+            .GRAPHQL_POST({ body: JSON.stringify({ query: nearQuery }) })
+            .then((res) => res.json())
+          const { docs } = data.Points
 
-            let previous = 0
-            docs.forEach(({ point: coordinates }) => {
-              // The next document point should always be greater than the one before
-              expect(previous).toBeLessThanOrEqual(coordinates[0])
-              ;[previous] = coordinates
-            })
+          let previous = 0
+          docs.forEach(({ point: coordinates }) => {
+            // The next document point should always be greater than the one before
+            expect(previous).toBeLessThanOrEqual(coordinates[0])
+            ;[previous] = coordinates
           })
         })
+      })
 
-        describe('within', () => {
-          type Point = [number, number]
-          const polygon: Point[] = [
-            [9.0, 19.0], // bottom-left
-            [9.0, 21.0], // top-left
-            [11.0, 21.0], // top-right
-            [11.0, 19.0], // bottom-right
-            [9.0, 19.0], // back to starting point to close the polygon
-          ]
+      describe('within', () => {
+        type Point = [number, number]
+        const polygon: Point[] = [
+          [9.0, 19.0], // bottom-left
+          [9.0, 21.0], // top-left
+          [11.0, 21.0], // top-right
+          [11.0, 19.0], // bottom-right
+          [9.0, 19.0], // back to starting point to close the polygon
+        ]
 
-          it('should return a document with the point inside the polygon', async () => {
-            const query = `
+        it('should return a document with the point inside the polygon', async () => {
+          if (payload.db.name === 'sqlite') {return}
+          const query = `
               query {
                 Points(
                   where: {
@@ -707,18 +711,19 @@ describe('collections-graphql', () => {
                 }
               }`
 
-            const { data } = await restClient
-              .GRAPHQL_POST({ body: JSON.stringify({ query }) })
-              .then((res) => res.json())
-            const { docs } = data.Points
+          const { data } = await restClient
+            .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+            .then((res) => res.json())
+          const { docs } = data.Points
 
-            expect(docs).toHaveLength(1)
-            expect(docs[0].point).toEqual([10, 20])
-          })
+          expect(docs).toHaveLength(1)
+          expect(docs[0].point).toEqual([10, 20])
+        })
 
-          it('should not return a document with the point outside the polygon', async () => {
-            const reducedPolygon = polygon.map((vertex) => vertex.map((coord) => coord * 0.1))
-            const query = `
+        it('should not return a document with the point outside the polygon', async () => {
+          if (payload.db.name === 'sqlite') {return}
+          const reducedPolygon = polygon.map((vertex) => vertex.map((coord) => coord * 0.1))
+          const query = `
               query {
                 Points(
                   where: {
@@ -736,27 +741,28 @@ describe('collections-graphql', () => {
                 }
               }`
 
-            const { data } = await restClient
-              .GRAPHQL_POST({ body: JSON.stringify({ query }) })
-              .then((res) => res.json())
-            const { docs } = data.Points
+          const { data } = await restClient
+            .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+            .then((res) => res.json())
+          const { docs } = data.Points
 
-            expect(docs).toHaveLength(0)
-          })
+          expect(docs).toHaveLength(0)
         })
+      })
 
-        describe('intersects', () => {
-          type Point = [number, number]
-          const polygon: Point[] = [
-            [9.0, 19.0], // bottom-left
-            [9.0, 21.0], // top-left
-            [11.0, 21.0], // top-right
-            [11.0, 19.0], // bottom-right
-            [9.0, 19.0], // back to starting point to close the polygon
-          ]
+      describe('intersects', () => {
+        type Point = [number, number]
+        const polygon: Point[] = [
+          [9.0, 19.0], // bottom-left
+          [9.0, 21.0], // top-left
+          [11.0, 21.0], // top-right
+          [11.0, 19.0], // bottom-right
+          [9.0, 19.0], // back to starting point to close the polygon
+        ]
 
-          it('should return a document with the point intersecting the polygon', async () => {
-            const query = `
+        it('should return a document with the point intersecting the polygon', async () => {
+          if (payload.db.name === 'sqlite') {return}
+          const query = `
               query {
                 Points(
                   where: {
@@ -774,18 +780,19 @@ describe('collections-graphql', () => {
                 }
               }`
 
-            const { data } = await restClient
-              .GRAPHQL_POST({ body: JSON.stringify({ query }) })
-              .then((res) => res.json())
-            const { docs } = data.Points
+          const { data } = await restClient
+            .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+            .then((res) => res.json())
+          const { docs } = data.Points
 
-            expect(docs).toHaveLength(1)
-            expect(docs[0].point).toEqual([10, 20])
-          })
+          expect(docs).toHaveLength(1)
+          expect(docs[0].point).toEqual([10, 20])
+        })
 
-          it('should not return a document with the point not intersecting a smaller polygon', async () => {
-            const reducedPolygon = polygon.map((vertex) => vertex.map((coord) => coord * 0.1))
-            const query = `
+        it('should not return a document with the point not intersecting a smaller polygon', async () => {
+          if (payload.db.name === 'sqlite') {return}
+          const reducedPolygon = polygon.map((vertex) => vertex.map((coord) => coord * 0.1))
+          const query = `
               query {
                 Points(
                   where: {
@@ -803,15 +810,14 @@ describe('collections-graphql', () => {
                 }
               }`
 
-            const { data } = await restClient
-              .GRAPHQL_POST({ body: JSON.stringify({ query }) })
-              .then((res) => res.json())
-            const { docs } = data.Points
+          const { data } = await restClient
+            .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+            .then((res) => res.json())
+          const { docs } = data.Points
 
-            expect(docs).toHaveLength(0)
-          })
+          expect(docs).toHaveLength(0)
         })
-      }
+      })
 
       it('can query deeply nested fields within rows, tabs, collapsibles', async () => {
         const withNestedField = await createPost({ D1: { D2: { D3: { D4: 'nested message' } } } })

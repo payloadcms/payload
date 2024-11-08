@@ -285,6 +285,39 @@ export function parseParams({
                   break
                 }
 
+                if (field.type === 'point') {
+                  switch (operator) {
+                    case 'near': {
+                      const [lng, lat, maxDistance, minDistance] = queryValue as number[]
+
+                      let constraint = sql`ST_DWithin(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857), ${maxDistance})`
+                      if (typeof minDistance === 'number' && !Number.isNaN(minDistance)) {
+                        constraint = sql`${constraint} AND ST_Distance(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857)) >= ${minDistance}`
+                      }
+                      constraints.push(constraint)
+                      break
+                    }
+
+                    case 'within': {
+                      constraints.push(
+                        sql`ST_Within(${table[columnName]}, ST_GeomFromGeoJSON(${JSON.stringify(queryValue)}))`,
+                      )
+                      break
+                    }
+
+                    case 'intersects': {
+                      constraints.push(
+                        sql`ST_Intersects(${table[columnName]}, ST_GeomFromGeoJSON(${JSON.stringify(queryValue)}))`,
+                      )
+                      break
+                    }
+
+                    default:
+                      break
+                  }
+                  break
+                }
+
                 constraints.push(
                   adapter.operators[queryOperator](rawColumn || table[columnName], queryValue),
                 )

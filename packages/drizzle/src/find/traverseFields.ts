@@ -390,6 +390,28 @@ export const traverseFields = ({
           break
         }
 
+        case 'point': {
+          if (adapter.name === 'sqlite') {
+            break
+          }
+
+          const args = field.localized ? _locales : currentArgs
+          if (!args.columns) {
+            args.columns = {}
+          }
+
+          if (!args.extras) {
+            args.extras = {}
+          }
+
+          const name = `${path}${field.name}`
+
+          args.columns[name] = false
+
+          args.extras[name] = sql.raw(`ST_AsGeoJSON(${toSnakeCase(name)})::jsonb`).as(name)
+          break
+        }
+
         case 'join': {
           // when `joinsQuery` is false, do not join
           if (joinQuery === false) {
