@@ -66,7 +66,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const { permissions } = useAuth()
 
-  const [initialData, setInitialData] = useState<PaginatedDocs>(() => {
+  const [initialData] = useState<PaginatedDocs>(() => {
     if (initialDataFromProps) {
       return {
         ...initialDataFromProps,
@@ -102,39 +102,43 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const { getTableState } = useServerFunctions()
 
+  const renderTable = useCallback(
+    async (docs?: PaginatedDocs['docs']) => {
+      const newQuery: ListQuery = { ...(query || {}), where: { ...(query?.where || {}) } }
+
+      if (filterOptions) {
+        newQuery.where = hoistQueryParamsToAnd(newQuery.where, filterOptions)
+      }
+
+      const {
+        data: newData,
+        state: newColumnState,
+        Table: NewTable,
+      } = await getTableState({
+        collectionSlug: relationTo,
+        docs,
+        enableRowSelections: false,
+        query: newQuery,
+        renderRowTypes: true,
+        tableAppearance: 'condensed',
+      })
+
+      setData(newData)
+      setTable(NewTable)
+      setColumnState(newColumnState)
+      setIsLoadingTable(false)
+    },
+    [getTableState, relationTo, filterOptions, query],
+  )
+
   useIgnoredEffect(
     () => {
       if (!Table || query) {
-        const newQuery: ListQuery = { ...(query || {}), where: { ...(query?.where || {}) } }
-
-        if (filterOptions) {
-          newQuery.where = hoistQueryParamsToAnd(newQuery.where, filterOptions)
-        }
-
-        const getTable = async () => {
-          const {
-            data: newData,
-            state: newColumnState,
-            Table: NewTable,
-          } = await getTableState({
-            collectionSlug: relationTo,
-            enableRowSelections: false,
-            query: newQuery,
-            renderRowTypes: true,
-            tableAppearance: 'condensed',
-          })
-
-          setData(newData)
-          setTable(NewTable)
-          setColumnState(newColumnState)
-          setIsLoadingTable(false)
-        }
-
-        void getTable()
+        void renderTable()
       }
     },
     [query],
-    [Table, getTableState, relationTo, filterOptions],
+    [Table, renderTable],
   )
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer, openDrawer }] = useDocumentDrawer({
@@ -144,22 +148,19 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const onDrawerSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
       const foundDocIndex = data?.docs?.findIndex((doc) => doc.id === args.doc.id)
+      let withNewOrUpdatedDoc: PaginatedDocs['docs'] = undefined
 
       if (foundDocIndex !== -1) {
         const newDocs = [...data.docs]
         newDocs[foundDocIndex] = args.doc
-        setInitialData({
-          ...data,
-          docs: newDocs,
-        })
+        withNewOrUpdatedDoc = newDocs
       } else {
-        setInitialData({
-          ...data,
-          docs: [args.doc, ...data.docs],
-        })
+        withNewOrUpdatedDoc = [args.doc, ...data.docs]
       }
+
+      void renderTable(withNewOrUpdatedDoc)
     },
-    [data],
+    [data.docs, renderTable],
   )
 
   const onDrawerCreate = useCallback<DocumentDrawerProps['onSave']>(
