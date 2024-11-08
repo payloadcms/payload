@@ -3,6 +3,7 @@ import type arg from 'arg'
 export interface Args extends arg.Spec {
   '--beta': BooleanConstructor
   '--db': StringConstructor
+  '--dbUri': StringConstructor
   '--dry-run': BooleanConstructor
   '--help': BooleanConstructor
   '--name': StringConstructor
