@@ -12,12 +12,10 @@ import React from 'react'
 
 import type { AdapterArguments, RichTextCustomElement, RichTextCustomLeaf } from '../types.js'
 
-import {
-  elements as elementTypes,
-  defaultLeaves as leafTypes,
-  RichTextField,
-  // eslint-disable-next-line payload/no-imports-from-exports-dir
-} from '../exports/client/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { RichTextField } from '../exports/client/index.js'
+import { elements as elementTypes } from '../field/elements/index.js'
+import { defaultLeaves as leafTypes } from '../field/leaves/index.js'
 import { linkFieldsSchemaPath } from './elements/link/shared.js'
 import { uploadFieldsSchemaPath } from './elements/upload/shared.js'
 export const RscEntrySlateField: React.FC<
