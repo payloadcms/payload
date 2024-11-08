@@ -1296,8 +1296,8 @@ importers:
         specifier: npm:types-react-dom@19.0.0-rc.1
         version: types-react-dom@19.0.0-rc.1
       babel-plugin-react-compiler:
-        specifier: 0.0.0-experimental-48eb8f4-20240822
-        version: 0.0.0-experimental-48eb8f4-20240822
+        specifier: 0.0.0-experimental-24ec0eb-20240918
+        version: 0.0.0-experimental-24ec0eb-20240918
       babel-plugin-transform-remove-imports:
         specifier: ^1.8.0
         version: 1.8.0(@babel/core@7.26.0)
@@ -5312,9 +5312,6 @@ packages:
 
   babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918:
     resolution: {integrity: sha512-3uFbIPB/q68AUwoPlv4nleIARMdLnzco0FL9f1Iv05kb0/wwOX8sE6rHz+6fyXEScBWf8cogTq1lnlHBc/dyNQ==}
-
-  babel-plugin-react-compiler@0.0.0-experimental-48eb8f4-20240822:
-    resolution: {integrity: sha512-yMkqwmqBtn6R8sY5b6I4aEQxzaX8sDHLa2JnU44wmZT6UFKh6GqPxtHw1mPNvxEadIXeyClT+JEZda/cA//F2g==}
 
   babel-plugin-transform-remove-imports@1.8.0:
     resolution: {integrity: sha512-QdE5ZnIjON1pSgTPU8KzLnl/LEzdq9PLmZNuHgGKTx0LOI9PBrHBj0fz9uCg2CdssiTw7v/zVRYs8GJxbvhKnQ==}
@@ -14690,16 +14687,6 @@ snapshots:
       - supports-color
 
   babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918:
-    dependencies:
-      '@babel/generator': 7.2.0
-      '@babel/types': 7.26.0
-      chalk: 4.1.2
-      invariant: 2.2.4
-      pretty-format: 24.9.0
-      zod: 3.23.8
-      zod-validation-error: 2.1.0(zod@3.23.8)
-
-  babel-plugin-react-compiler@0.0.0-experimental-48eb8f4-20240822:
     dependencies:
       '@babel/generator': 7.2.0
       '@babel/types': 7.26.0
