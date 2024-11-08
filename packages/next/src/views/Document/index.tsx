@@ -374,6 +374,9 @@ export const Document: React.FC<AdminViewProps> = async (args) => {
     const { Document: RenderedDocument } = await renderDocument(args)
     return RenderedDocument
   } catch (error) {
+    if (error?.message === 'NEXT_REDIRECT') {
+      throw error
+    }
     args.initPageResult.req.payload.logger.error(error)
 
     if (error.message === 'not-found') {
