@@ -29,12 +29,6 @@ export interface Config {
   collectionsJoins: {
     categories: {
       relatedPosts: 'posts';
-      hasManyPosts: 'posts';
-      hasManyPostsLocalized: 'posts';
-      'group.relatedPosts': 'posts';
-      'group.camelCasePosts': 'posts';
-      filtered: 'posts';
-      singulars: 'singular';
     };
     uploads: {
       relatedPosts: 'posts';
@@ -150,42 +144,6 @@ export interface Category {
     docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
-  hasManyPosts?: {
-    docs?: (string | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
-  hasManyPostsLocalized?: {
-    docs?: (string | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
-  group?: {
-    relatedPosts?: {
-      docs?: (string | Post)[] | null;
-      hasNextPage?: boolean | null;
-    } | null;
-    camelCasePosts?: {
-      docs?: (string | Post)[] | null;
-      hasNextPage?: boolean | null;
-    } | null;
-  };
-  singulars?: {
-    docs?: (string | Singular)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
-  filtered?: {
-    docs?: (string | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "singular".
- */
-export interface Singular {
-  id: string;
-  category?: (string | null) | Category;
   updatedAt: string;
   createdAt: string;
 }
@@ -214,6 +172,16 @@ export interface CategoriesVersion {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "singular".
+ */
+export interface Singular {
+  id: string;
+  category?: (string | null) | Category;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -404,16 +372,6 @@ export interface PostsSelect<T extends boolean = true> {
 export interface CategoriesSelect<T extends boolean = true> {
   name?: T;
   relatedPosts?: T;
-  hasManyPosts?: T;
-  hasManyPostsLocalized?: T;
-  group?:
-    | T
-    | {
-        relatedPosts?: T;
-        camelCasePosts?: T;
-      };
-  singulars?: T;
-  filtered?: T;
   updatedAt?: T;
   createdAt?: T;
 }
