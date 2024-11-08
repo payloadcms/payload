@@ -145,6 +145,12 @@ describe('database', () => {
       expect(migrationFile).toContain('_test')
     })
 
+    it('should create index.ts file in the migrations directory with file imports', () => {
+      const indexFile = path.join(payload.db.migrationDir, 'index.ts')
+      const indexFileContent = fs.readFileSync(indexFile, 'utf8')
+      expect(indexFileContent).toContain("_test from './")
+    })
+
     it('should run migrate', async () => {
       let error
       try {
