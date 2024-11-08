@@ -14,8 +14,6 @@ import type { RenderFieldMethod } from './types.js'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
-import { FieldLabel } from '../../fields/FieldLabel/index.js'
-import { RowLabel as DefaultRowLabel } from '../../forms/RowLabel/index.js'
 
 export const renderField: RenderFieldMethod = ({
   data,

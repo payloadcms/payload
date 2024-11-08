@@ -301,6 +301,8 @@ export type {
   TextareaFieldServerProps,
 } from './fields/Textarea.js'
 
+export type { UIFieldClientComponent, UIFieldServerComponent } from './fields/UI.js'
+
 export type {
   UploadFieldClientComponent,
   UploadFieldClientProps,
