@@ -312,7 +312,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
                 if (Array.isArray(err?.data?.errors)) {
                   err.data?.errors.forEach((dataError) => {
-                    if (dataError?.field) {
+                    if (dataError?.path) {
                       newFieldErrs.push(dataError)
                     } else {
                       newNonFieldErrs.push(dataError)

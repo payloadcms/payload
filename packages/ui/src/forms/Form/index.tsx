@@ -352,7 +352,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
                 if (Array.isArray(err?.data?.errors)) {
                   err.data?.errors.forEach((dataError) => {
-                    if (dataError?.fieldPath) {
+                    if (dataError?.path) {
                       newFieldErrs.push(dataError)
                     } else {
                       newNonFieldErrs.push(dataError)

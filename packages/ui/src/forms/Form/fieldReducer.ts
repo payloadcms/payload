@@ -62,17 +62,14 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
             value: null,
           }),
           errorMessage: message,
-
           valid: false,
         }
 
-        if (fieldPath.length > 1) {
+        const segments = fieldPath.split('.')
+        if (segments.length > 1) {
           errorPaths.push({
             fieldErrorPath: fieldPath,
-            parentPath: fieldPath
-              .split('.')
-              .slice(0, fieldPath.length - 1)
-              .join('.'),
+            parentPath: segments.slice(0, segments.length - 1).join('.'),
           })
         }
       })
@@ -111,6 +108,8 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
         return acc
       }, {})
+
+      console.log(newState)
 
       return newState
     }

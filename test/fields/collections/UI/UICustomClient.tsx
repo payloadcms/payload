@@ -5,9 +5,9 @@ import React from 'react'
 
 export const UICustomClient: TextFieldClientComponent = ({
   field: {
-    _path: path,
+    name,
     admin: { custom },
   },
 }) => {
-  return <div id={path}>{custom?.customValue}</div>
+  return <div id={name}>{custom?.customValue}</div>
 }
