@@ -183,9 +183,11 @@ describe('database', () => {
       expect(migration.batch).toStrictEqual(1)
     })
 
-    // known issue: https://github.com/payloadcms/payload/issues/4597
     it('should run migrate:down', async () => {
-      if (!isMongoose(payload)) {return}
+      // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+      if (!isMongoose(payload)) {
+        return
+      }
       let error
       try {
         await payload.db.migrateDown()
@@ -201,9 +203,11 @@ describe('database', () => {
       expect(migrations.docs).toHaveLength(0)
     })
 
-    // known issue: https://github.com/payloadcms/payload/issues/4597
     it('should run migrate:refresh', async () => {
-      if (!isMongoose(payload)) {return}
+      // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+      if (!isMongoose(payload)) {
+        return
+      }
       let error
       try {
         await payload.db.migrateRefresh()
