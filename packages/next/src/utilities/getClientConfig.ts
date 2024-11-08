@@ -13,6 +13,6 @@ export const getClientConfig = cache(
       i18n,
     })
 
-    return clientConfig
+    return Promise.resolve(clientConfig)
   },
 )
