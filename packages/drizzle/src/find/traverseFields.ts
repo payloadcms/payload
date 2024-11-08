@@ -406,9 +406,27 @@ export const traverseFields = ({
 
           const name = `${path}${field.name}`
 
+          // Drizzle handles that poorly. See https://github.com/drizzle-team/drizzle-orm/issues/2526
+          // Additionally, this way we format the column value straight in the database using ST_AsGeoJSON
           args.columns[name] = false
 
-          args.extras[name] = sql.raw(`ST_AsGeoJSON(${toSnakeCase(name)})::jsonb`).as(name)
+          let shouldSelect = false
+
+          if (select || selectAllOnCurrentLevel) {
+            if (
+              selectAllOnCurrentLevel ||
+              (selectMode === 'include' && select[field.name] === true) ||
+              (selectMode === 'exclude' && typeof select[field.name] === 'undefined')
+            ) {
+              shouldSelect = true
+            }
+          } else {
+            shouldSelect = true
+          }
+
+          if (shouldSelect) {
+            args.extras[name] = sql.raw(`ST_AsGeoJSON(${toSnakeCase(name)})::jsonb`).as(name)
+          }
           break
         }
 
