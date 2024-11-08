@@ -245,15 +245,6 @@ jobs:
       - name: Start LocalStack
         run: pnpm docker:start
 
-      # - name: Start PostgreSQL
-      #   uses: CasperWA/postgresql-action@v1.2
-      #   with:
-      #     postgresql version: '14' # See https://hub.docker.com/_/postgres for available versions
-      #     postgresql db: ${{ env.POSTGRES_DB }}
-      #     postgresql user: ${{ env.POSTGRES_USER }}
-      #     postgresql password: ${{ env.POSTGRES_PASSWORD }}
-      #   if: startsWith(matrix.database, 'postgres')
-
       - name: Install Supabase CLI
         uses: supabase/setup-cli@v1
         with:
@@ -265,10 +256,6 @@ jobs:
           supabase init
           supabase start
         if: matrix.database == 'supabase'
-
-      - name: Wait for PostgreSQL
-        run: sleep 30
-        if: startsWith(matrix.database, 'postgres')
 
       - name: Configure PostgreSQL
         run: |

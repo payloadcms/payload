@@ -65,7 +65,7 @@
     "create-payload-app": "workspace:*",
     "dotenv": "16.4.5",
     "drizzle-kit": "0.28.0",
-    "eslint-plugin-playwright": "1.6.2",
+    "eslint-plugin-playwright": "1.7.0",
     "execa": "5.1.1",
     "file-type": "19.3.0",
     "http-status": "1.6.2",
