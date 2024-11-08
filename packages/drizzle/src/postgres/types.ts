@@ -138,6 +138,7 @@ export type BasePostgresAdapter = {
   dropDatabase: DropDatabase
   enums: Record<string, GenericEnum>
   execute: Execute<unknown>
+  extensionsFilter: Set<string>
   /**
    * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
    * Used for returning properly formed errors from unique fields
@@ -151,10 +152,7 @@ export type BasePostgresAdapter = {
   operators: Operators
   pgSchema: Schema
   poolOptions?: ClientConfig
-  postgis: {
-    created: boolean
-    enabled: boolean
-  }
+  postgisCreated: boolean
   prodMigrations?: {
     down: (args: MigrateDownArgs) => Promise<void>
     name: string

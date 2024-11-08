@@ -30,6 +30,7 @@ export type Args = {
    * @default false
    */
   disableCreateDatabase?: boolean
+  extensionsFilter?: string[]
   idType?: 'serial' | 'uuid'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']

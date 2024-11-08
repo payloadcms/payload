@@ -264,7 +264,7 @@ export const traverseFields = ({
 
       case 'point': {
         targetTable[fieldName] = withDefault(geometryColumn(columnName), field)
-        adapter.postgis.enabled = true
+        adapter.extensionsFilter.add('postgis')
         break
       }
 
