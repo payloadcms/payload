@@ -126,8 +126,14 @@ describe('database', () => {
   })
 
   describe('migrations', () => {
+    let ranFreshTest = false
+
     beforeEach(async () => {
-      if (process.env.PAYLOAD_DROP_DATABASE === 'true' && 'drizzle' in payload.db) {
+      if (
+        process.env.PAYLOAD_DROP_DATABASE === 'true' &&
+        'drizzle' in payload.db &&
+        !ranFreshTest
+      ) {
         const db = payload.db as unknown as PostgresAdapter
         await db.dropDatabase({ adapter: db })
       }
@@ -181,6 +187,7 @@ describe('database', () => {
       const migration = docs[0]
       expect(migration.name).toContain('_test')
       expect(migration.batch).toStrictEqual(1)
+      ranFreshTest = true
     })
 
     it('should run migrate:down', async () => {
