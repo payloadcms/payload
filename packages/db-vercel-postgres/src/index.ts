@@ -84,7 +84,6 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       disableCreateDatabase: args.disableCreateDatabase ?? false,
       drizzle: undefined,
       enums: {},
-      extensionsFilter: new Set(args.extensionsFilter ?? []),
       features: {
         json: true,
       },
@@ -99,7 +98,10 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       pgSchema: adapterSchema,
       pool: undefined,
       poolOptions: args.pool,
-      postgisCreated: false,
+      postgis: {
+        created: false,
+        enabled: false,
+      },
       prodMigrations: args.prodMigrations,
       push: args.push,
       relations: {},

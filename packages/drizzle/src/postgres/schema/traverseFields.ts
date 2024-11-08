@@ -266,7 +266,7 @@ export const traverseFields = ({
           geometry(columnName, { type: 'point', mode: 'tuple', srid: 4326 }),
           field,
         )
-        adapter.extensionsFilter.add('postgis')
+        adapter.postgis.enabled = true
         break
       }
 

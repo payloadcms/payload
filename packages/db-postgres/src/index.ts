@@ -84,7 +84,6 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       disableCreateDatabase: args.disableCreateDatabase ?? false,
       drizzle: undefined,
       enums: {},
-      extensionsFilter: new Set(args.extensionsFilter ?? []),
       features: {
         json: true,
       },
@@ -98,7 +97,10 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       pgSchema: adapterSchema,
       pool: undefined,
       poolOptions: args.pool,
-      postgisCreated: false,
+      postgis: {
+        created: false,
+        enabled: false,
+      },
       prodMigrations: args.prodMigrations,
       push: args.push,
       relations: {},
