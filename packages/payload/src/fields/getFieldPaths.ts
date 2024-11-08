@@ -34,7 +34,7 @@ export function getFieldPaths({
   parentPath,
   parentSchemaPath,
 }: Args): Result {
-  if (fieldAffectsData(field)) {
+  if ('name' in field) {
     return {
       indexPath: `${parentIndexPath ? parentIndexPath + '-' : ''}${index}`,
       path: `${parentPath ? parentPath + '.' : ''}${field.name}`,

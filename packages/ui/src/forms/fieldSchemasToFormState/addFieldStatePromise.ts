@@ -120,7 +120,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   const { indexPath, path, schemaPath } = getFieldPaths({
     field,
     index: fieldIndex,
-    parentIndexPath,
+    parentIndexPath: 'name' in field ? '' : parentIndexPath,
     parentPath,
     parentSchemaPath,
   })
