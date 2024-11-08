@@ -87,10 +87,15 @@ const ListDrawerHeader: React.FC<Props> = ({ Description, hasCreatePermission, i
     config: { collections },
   } = useConfig()
 
-  const { closeModal, openModal } = useModal()
+  const { closeModal } = useModal()
 
-  const { createNewDrawerSlug, drawerSlug, enabledCollections, selectedOption, setSelectedOption } =
-    useListDrawerContext()
+  const {
+    DocumentDrawerToggler,
+    drawerSlug,
+    enabledCollections,
+    selectedOption,
+    setSelectedOption,
+  } = useListDrawerContext()
 
   const collectionConfig = collections.find(({ slug }) => slug === selectedOption.value)
 
@@ -108,13 +113,9 @@ const ListDrawerHeader: React.FC<Props> = ({ Description, hasCreatePermission, i
             {getTranslation(collectionConfig?.labels?.plural, i18n)}
           </h2>
           {hasCreatePermission && (
-            <button
-              className={`${drawerBaseClass}__create-new-button`}
-              onClick={() => openModal(createNewDrawerSlug)}
-              type="button"
-            >
+            <DocumentDrawerToggler className={`${drawerBaseClass}__create-new-button`}>
               <Pill>{t('general:createNew')}</Pill>
-            </button>
+            </DocumentDrawerToggler>
           )}
         </div>
         <button

@@ -3,11 +3,12 @@ import type { CollectionSlug, ListQuery } from 'payload'
 import { createContext, useContext } from 'react'
 
 import type { useSelection } from '../../providers/Selection/index.js'
-
-import { type Option } from '../ReactSelect/index.js'
+import type { UseDocumentDrawer } from '../DocumentDrawer/types.js'
+import type { Option } from '../ReactSelect/index.js'
 
 export type ListDrawerContextProps = {
   readonly createNewDrawerSlug?: string
+  readonly DocumentDrawerToggler?: ReturnType<UseDocumentDrawer>[1]
   readonly drawerSlug?: string
   readonly enabledCollections?: CollectionSlug[]
   readonly onBulkSelect?: (selected: ReturnType<typeof useSelection>['selected']) => void

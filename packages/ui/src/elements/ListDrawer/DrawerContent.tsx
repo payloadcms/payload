@@ -53,9 +53,10 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       : undefined
   })
 
-  const [DocumentDrawer, , { drawerSlug: documentDrawerSlug }] = useDocumentDrawer({
-    collectionSlug: selectedOption.value,
-  })
+  const [DocumentDrawer, DocumentDrawerToggler, { drawerSlug: documentDrawerSlug }] =
+    useDocumentDrawer({
+      collectionSlug: selectedOption.value,
+    })
 
   useEffect(() => {
     if (selectedCollectionFromProps && selectedCollectionFromProps !== selectedOption?.value) {
@@ -145,6 +146,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   return (
     <ListDrawerContextProvider
       createNewDrawerSlug={documentDrawerSlug}
+      DocumentDrawerToggler={DocumentDrawerToggler}
       drawerSlug={drawerSlug}
       enabledCollections={collectionSlugs}
       onBulkSelect={onBulkSelect}
