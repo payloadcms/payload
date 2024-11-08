@@ -42,11 +42,11 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   } = useConfig()
   const {
     docConfig,
+    incrementVersionCount,
     lastUpdateTime,
     mostRecentVersionIsAutosaved,
     setLastUpdateTime,
     setMostRecentVersionIsAutosaved,
-    setVersionCount,
   } = useDocumentInfo()
   const { reportUpdate } = useDocumentEvents()
   const { dispatchFields, setSubmitted } = useForm()
@@ -152,7 +152,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
                     })
 
                     if (!mostRecentVersionIsAutosaved) {
-                      setVersionCount((count: number) => count + 1)
+                      incrementVersionCount()
                       setMostRecentVersionIsAutosaved(true)
                     }
                   } else {
@@ -255,7 +255,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     submitted,
     setLastUpdateTime,
     mostRecentVersionIsAutosaved,
-    setVersionCount,
+    incrementVersionCount,
     setMostRecentVersionIsAutosaved,
   ])
 

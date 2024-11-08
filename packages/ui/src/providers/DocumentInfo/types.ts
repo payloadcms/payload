@@ -50,6 +50,7 @@ export type DocumentInfoContext = {
   getDocPermissions: (data?: Data) => Promise<void>
   getDocPreferences: () => Promise<DocumentPreferences>
   hasPublishedDoc: boolean
+  incrementVersionCount: () => void
   initialData: Data
   initialState?: FormState
   isInitializing: boolean
@@ -67,7 +68,6 @@ export type DocumentInfoContext = {
   setLastUpdateTime: React.Dispatch<React.SetStateAction<number>>
   setMostRecentVersionIsAutosaved: React.Dispatch<React.SetStateAction<boolean>>
   setUnpublishedVersionCount: React.Dispatch<React.SetStateAction<number>>
-  setVersionCount: React.Dispatch<React.SetStateAction<number>>
   title: string
   unlockDocument: (docId: number | string, slug: string) => Promise<void>
   unpublishedVersionCount: number

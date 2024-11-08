@@ -69,6 +69,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     globalSlug,
     hasPublishPermission,
     hasSavePermission,
+    incrementVersionCount,
     initialData: data,
     initialState,
     isEditing,
@@ -78,7 +79,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     redirectAfterDuplicate,
     setCurrentEditor,
     setDocumentIsLocked,
-    setVersionCount,
     unlockDocument,
     updateDocumentEditor,
   } = useDocumentInfo()
@@ -209,7 +209,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
         void refreshCookieAsync()
       }
 
-      setVersionCount((count) => count + 1)
+      incrementVersionCount()
 
       if (typeof onSaveFromContext === 'function') {
         void onSaveFromContext({
@@ -243,7 +243,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       user,
       collectionSlug,
       userSlug,
-      setVersionCount,
+      incrementVersionCount,
       onSaveFromContext,
       globalSlug,
       isLockingEnabled,

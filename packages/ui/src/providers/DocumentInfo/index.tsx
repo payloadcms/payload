@@ -296,6 +296,18 @@ const DocumentInfo: React.FC<
     hasPublishedDoc,
     hasPublishPermission,
     hasSavePermission,
+    incrementVersionCount: () => {
+      let maxVersions = 100
+
+      if (collectionConfig && typeof collectionConfig.versions.maxPerDoc === 'number') {
+        maxVersions = collectionConfig.versions.maxPerDoc
+      }
+      if (globalConfig && typeof globalConfig.versions.max === 'number') {
+        maxVersions = globalConfig.versions.max
+      }
+
+      setVersionCount(Math.min(versionCount + 1, maxVersions))
+    },
     initialData: data,
     initialState,
     isInitializing,
@@ -310,7 +322,6 @@ const DocumentInfo: React.FC<
     setLastUpdateTime,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
-    setVersionCount,
     title: documentTitle,
     unlockDocument,
     unpublishedVersionCount,

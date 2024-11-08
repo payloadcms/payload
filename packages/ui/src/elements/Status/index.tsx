@@ -21,7 +21,7 @@ export const Status: React.FC = () => {
     docPermissions,
     globalSlug,
     hasPublishedDoc,
-    setVersionCount,
+    incrementVersionCount,
     unpublishedVersionCount,
   } = useDocumentInfo()
   const { toggleModal } = useModal()
@@ -107,7 +107,7 @@ export const Status: React.FC = () => {
         resetForm(data)
         toast.success(json.message)
 
-        setVersionCount((count) => count + 1)
+        incrementVersionCount()
       } else {
         toast.error(t('error:unPublishingDocument'))
       }
@@ -124,7 +124,7 @@ export const Status: React.FC = () => {
     [
       api,
       collectionSlug,
-      setVersionCount,
+      incrementVersionCount,
       globalSlug,
       i18n.language,
       id,
