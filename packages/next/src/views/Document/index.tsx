@@ -89,7 +89,7 @@ export const renderDocument = async ({
       locale,
       payload,
       user,
-    })) || initialData
+    })) || (initialData ? initialData : null)
 
   if (isEditing && !doc) {
     throw new Error('not-found')
