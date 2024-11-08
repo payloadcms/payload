@@ -8,7 +8,6 @@ export type WhereBuilderProps = {
 }
 
 export type FieldCondition = {
-  component?: string
   field: ClientField
   label: string
   operators: {
