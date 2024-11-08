@@ -10,6 +10,7 @@ import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@p
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { formatAdminURL, isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
+import { isRedirectError } from 'next/dist/client/components/redirect.js'
 import { notFound, redirect } from 'next/navigation.js'
 import React from 'react'
 
@@ -375,7 +376,7 @@ export const Document: React.FC<AdminViewProps> = async (args) => {
     const { Document: RenderedDocument } = await renderDocument(args)
     return RenderedDocument
   } catch (error) {
-    if (error?.message === 'NEXT_REDIRECT') {
+    if (isRedirectError(error)) {
       throw error
     }
     args.initPageResult.req.payload.logger.error(error)
