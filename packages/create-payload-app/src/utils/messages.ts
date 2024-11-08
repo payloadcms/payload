@@ -28,6 +28,8 @@ export function helpMessage(): string {
 
       -n     {underline my-payload-app}         Set project name
       -t     {underline template_name}          Choose specific template
+      -d     {underline database_type}          Choose specific database
+      --dbUri     {underline connection_string}          Set connection string
 
         {dim Available templates: ${formatTemplates(validTemplates)}}
 
