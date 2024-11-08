@@ -34,9 +34,10 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
     path: pathFromProps,
     permissions,
     readOnly,
-    schemaPath,
+    schemaPath: schemaPathFromProps,
   } = props
-  const path = pathFromProps || name
+  const path = pathFromProps ?? name
+  const schemaPath = schemaPathFromProps ?? name
 
   const { i18n } = useTranslation()
   const { isWithinCollapsible } = useCollapsible()

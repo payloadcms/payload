@@ -26,7 +26,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
     path: pathFromProps,
   } = props
 
-  const path = pathFromProps || name
+  const path = pathFromProps ?? name
 
   const { id: docID } = useDocumentInfo()
 

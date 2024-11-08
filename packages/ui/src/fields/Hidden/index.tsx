@@ -15,13 +15,14 @@ const HiddenFieldComponent: React.FC<HiddenFieldProps> = (props) => {
   const {
     disableModifyingForm = true,
     field: { name } = {},
-    forceUsePathFromProps,
-    path,
+    path: pathFromProps,
     value: valueFromProps,
   } = props
 
+  const path = pathFromProps ?? (name || '')
+
   const { setValue, value } = useField({
-    path: (!forceUsePathFromProps ? path : null) || name,
+    path,
   })
 
   useEffect(() => {

@@ -49,10 +49,11 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     path: pathFromProps,
     permissions,
     readOnly,
-    schemaPath,
+    schemaPath: schemaPathFromProps,
     validate,
   } = props
-  const path = pathFromProps || name
+  const path = pathFromProps ?? name
+  const schemaPath = schemaPathFromProps ?? name
 
   const minRows = (minRowsProp ?? required) ? 1 : 0
 

@@ -6,7 +6,6 @@ type HiddenFieldBaseClientProps = {
   readonly field?: {
     readonly name?: string
   } & ClientField
-  readonly forceUsePathFromProps?: boolean
   readonly value?: unknown
 }
 

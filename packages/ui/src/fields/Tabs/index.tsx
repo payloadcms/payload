@@ -48,13 +48,12 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const {
     field: { admin: { className } = {}, tabs = [] },
     forceRender = false,
-    indexPath,
-    parentPath,
-    parentSchemaPath,
-    path,
+    indexPath = '',
+    parentPath = '',
+    parentSchemaPath = '',
+    path = '',
     permissions,
     readOnly,
-    schemaPath,
   } = props
 
   const { getPreference, setPreference } = usePreferences()

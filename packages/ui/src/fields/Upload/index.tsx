@@ -31,7 +31,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
     readOnly,
     validate,
   } = props
-  const path = pathFromProps || name
+  const path = pathFromProps ?? name
 
   const { config } = useConfig()
 

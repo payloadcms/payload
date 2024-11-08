@@ -60,7 +60,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     readOnly,
     validate,
   } = props
-  const path = pathFromProps || name
+  const path = pathFromProps ?? name
 
   const { config } = useConfig()
 

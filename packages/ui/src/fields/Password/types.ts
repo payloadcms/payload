@@ -11,12 +11,27 @@ import type { MarkOptional } from 'ts-essentials'
 export type PasswordFieldProps = {
   readonly autoComplete?: string
   readonly field: MarkOptional<TextFieldClient, 'type'>
-  readonly indexPath: string
+  /**
+   * @default ''
+   */
+  readonly indexPath?: string
   readonly inputRef?: React.RefObject<HTMLInputElement>
-  readonly parentPath: string
-  readonly parentSchemaPath: string
-  readonly path: string
-  readonly schemaPath: string
+  /**
+   * @default ''
+   */
+  readonly parentPath?: string
+  /**
+   * @default ''
+   */
+  readonly parentSchemaPath?: string
+  /**
+   * @default field.name
+   */
+  readonly path?: string
+  /**
+   * @default field.name
+   */
+  readonly schemaPath?: string
   readonly validate?: PasswordFieldValidation
 }
 

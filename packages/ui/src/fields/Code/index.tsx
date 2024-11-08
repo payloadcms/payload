@@ -40,7 +40,7 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
     readOnly,
     validate,
   } = props
-  const path = pathFromProps || name
+  const path = pathFromProps ?? name
 
   const memoizedValidate = useCallback(
     (value, options) => {

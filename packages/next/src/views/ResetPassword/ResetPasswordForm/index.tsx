@@ -90,10 +90,9 @@ export const ResetPasswordForm: React.FC<Args> = ({ token }) => {
               hidden: true,
             },
           }}
-          forceUsePathFromProps
           indexPath=""
-          parentPath=""
-          parentSchemaPath=""
+          parentPath={userSlug}
+          parentSchemaPath={userSlug}
           path="token"
           schemaPath={`${userSlug}.token`}
           value={token}

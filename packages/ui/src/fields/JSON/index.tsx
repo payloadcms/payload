@@ -19,7 +19,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
   const {
     field: {
       name,
-      admin: { className, description, editorOptions, style, width, maxHeight } = {},
+      admin: { className, description, editorOptions, maxHeight, style, width } = {},
       jsonSchema,
       label,
       localized,
@@ -29,7 +29,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     readOnly,
     validate,
   } = props
-  const path = pathFromProps || name
+  const path = pathFromProps ?? name
 
   const [stringValue, setStringValue] = useState<string>()
   const [jsonError, setJsonError] = useState<string>()

@@ -30,7 +30,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
     readOnly,
     validate,
   } = props
-  const path = pathFromProps || name
+  const path = pathFromProps ?? name
 
   const { i18n } = useTranslation()
 

@@ -40,7 +40,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
     validate,
     value: valueFromProps,
   } = props
-  const path = pathFromProps || name
+  const path = pathFromProps ?? name
 
   const { uuid } = useForm()
 

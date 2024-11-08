@@ -43,7 +43,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
     readOnly,
     validate,
   } = props
-  const path = pathFromProps || name
+  const path = pathFromProps ?? name
 
   const { i18n, t } = useTranslation()
 

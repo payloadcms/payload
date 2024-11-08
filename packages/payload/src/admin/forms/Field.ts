@@ -19,13 +19,28 @@ export type ClientComponentProps = {
   customComponents: FormField['customComponents']
   field: ClientBlock | ClientField | ClientTab
   forceRender?: boolean
-  indexPath: string
-  parentPath: string
-  parentSchemaPath: string
-  path: string
+  /**
+   * @default ''
+   */
+  indexPath?: string
+  /**
+   * @default ''
+   */
+  parentPath?: string
+  /**
+   * @default '''
+   */
+  parentSchemaPath?: string
+  /**
+   * @default field.name
+   */
+  path?: string
   readOnly?: boolean
   renderedBlocks?: RenderedField[]
-  schemaPath: string
+  /**
+   * @default field.name
+   **/
+  schemaPath?: string
 }
 
 export type ServerComponentProps = {

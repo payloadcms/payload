@@ -35,7 +35,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
     readOnly,
     validate,
   } = props
-  const path = pathFromProps || name
+  const path = pathFromProps ?? name
 
   const locale = useLocale()
 
