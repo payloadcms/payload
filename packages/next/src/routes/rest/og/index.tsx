@@ -8,7 +8,6 @@ import path from 'path'
 import React from 'react'
 import { fileURLToPath } from 'url'
 
-import { RenderServerComponent } from '../../../../../ui/src/elements/RenderServerComponent/index.js'
 import { OGImage } from './image.js'
 
 const filename = fileURLToPath(import.meta.url)
