@@ -82,6 +82,7 @@ export const renderDocument = async ({
 
   // Fetch the doc required for the view
   const doc =
+    initialData ||
     (await getDocumentData({
       id,
       collectionSlug,
@@ -89,7 +90,7 @@ export const renderDocument = async ({
       locale,
       payload,
       user,
-    })) || (initialData ? initialData : null)
+    }))
 
   if (isEditing && !doc) {
     throw new Error('not-found')
