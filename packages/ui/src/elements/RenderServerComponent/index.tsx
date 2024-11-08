@@ -1,4 +1,5 @@
-import { type ImportMap, type PayloadComponent } from 'payload'
+import type { ImportMap, PayloadComponent } from 'payload'
+
 import {
   isPlainObject,
   isReactServerComponentOrFunction,

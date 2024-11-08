@@ -2,7 +2,6 @@ import type { I18nClient } from '@payloadcms/translations'
 
 import {
   type ClientCollectionConfig,
-  deepCopyObjectSimple,
   type DefaultCellComponentProps,
   type Field,
   MissingEditorProp,
@@ -12,20 +11,23 @@ import {
   type SanitizedCollectionConfig,
   type StaticLabel,
 } from 'payload'
-import { fieldIsPresentationalOnly } from 'payload/shared'
+import { deepCopyObjectSimple, fieldIsPresentationalOnly } from 'payload/shared'
 import React from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
 import type { SortColumnProps } from '../SortColumn/index.js'
 import type { Column } from '../Table/index.js'
 
+import {
+  RenderCustomComponent,
+  RenderDefaultCell,
+  SelectAll,
+  SelectRow,
+  SortColumn,
+  // eslint-disable-next-line payload/no-imports-from-exports-dir
+} from '../../exports/client/index.js'
 import { flattenFieldMap } from '../../utilities/flattenFieldMap.js'
-import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { RenderServerComponent } from '../RenderServerComponent/index.js'
-import { SelectAll } from '../SelectAll/index.js'
-import { SelectRow } from '../SelectRow/index.js'
-import { SortColumn } from '../SortColumn/index.js'
-import { RenderDefaultCell } from './RenderDefaultCell/index.js'
 
 type Args = {
   beforeRows?: Column[]

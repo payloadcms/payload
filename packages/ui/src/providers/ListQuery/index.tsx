@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, ListQuery, PaginatedDocs, Where } from 'payload'
+import type { ListQuery, PaginatedDocs, Where } from 'payload'
 
 import { useRouter } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
@@ -9,7 +9,6 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import type { Column } from '../../elements/Table/index.js'
 
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
-import { useConfig } from '../../providers/Config/index.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useSearchParams } from '../SearchParams/index.js'
 
@@ -56,14 +55,10 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   onQueryChange: onQueryChangeFromProps,
   preferenceKey,
 }) => {
+  'use no memo'
   const router = useRouter()
   const { setPreference } = usePreferences()
   const { searchParams } = useSearchParams()
-  const { getEntityConfig } = useConfig()
-
-  const [collectionConfig] = useState(() => {
-    return getEntityConfig({ collectionSlug }) as ClientCollectionConfig
-  })
 
   const { onQueryChange } = useListDrawerContext()
 

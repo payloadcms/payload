@@ -9,13 +9,14 @@ import type {
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 
-import type { Column } from '../elements/Table/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import type { Column } from '../exports/client/index.js'
 import type { ColumnPreferences } from '../providers/ListQuery/index.js'
 
-import { Pill } from '../elements/Pill/index.js'
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
-import { Table } from '../elements/Table/index.js'
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { Pill, Table } from '../exports/client/index.js'
 
 export const renderFilters = (
   fields: Field[],

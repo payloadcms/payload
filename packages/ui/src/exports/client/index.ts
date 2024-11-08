@@ -25,6 +25,11 @@ export { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 export { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
 export { DocumentLocked } from '../../elements/DocumentLocked/index.js'
 export { useTableColumns } from '../../elements/TableColumns/index.js'
+export {
+  RenderDefaultCell,
+  useCellProps,
+} from '../../elements/TableColumns/RenderDefaultCell/index.js'
+
 export { Translation } from '../../elements/Translation/index.js'
 export { default as DatePicker } from '../../elements/DatePicker/DatePicker.js'
 export { ViewDescription } from '../../elements/ViewDescription/index.js'
@@ -259,6 +264,8 @@ export { RelationshipField as RelationshipCondition } from '../../elements/Where
 export { NumberField as NumberCondition } from '../../elements/WhereBuilder/Condition/Number/index.js'
 export { DateField as DateCondition } from '../../elements/WhereBuilder/Condition/Date/index.js'
 export { EmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
+export { SelectAll } from '../../elements/SelectAll/index.js'
+export { SelectRow } from '../../elements/SelectRow/index.js'
 
 export {
   DefaultListView,

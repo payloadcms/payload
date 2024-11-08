@@ -10,7 +10,6 @@ import type { Column } from '../Table/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
-// import { buildColumnState } from './buildColumnState.js'
 import { filterFields } from './filterFields.js'
 import { getInitialColumns } from './getInitialColumns.js'
 

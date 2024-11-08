@@ -58,6 +58,7 @@
     "dev:generate-importmap": "pnpm runts ./test/generateImportMap.ts",
     "dev:generate-types": "pnpm runts ./test/generateTypes.ts",
     "dev:postgres": "cross-env PAYLOAD_DATABASE=postgres pnpm runts ./test/dev.ts",
+    "dev:prod": "cross-env NODE_OPTIONS=--no-deprecation tsx ./test/dev.ts --prod",
     "dev:vercel-postgres": "cross-env PAYLOAD_DATABASE=vercel-postgres pnpm runts ./test/dev.ts",
     "devsafe": "node ./scripts/delete-recursively.js '**/.next' && pnpm dev",
     "docker:restart": "pnpm docker:stop --remove-orphans && pnpm docker:start",
@@ -152,8 +153,8 @@
     "playwright-core": "1.48.1",
     "prettier": "3.3.3",
     "prompts": "2.4.2",
-    "react": "19.0.0-rc-65a56d0e-20241020",
-    "react-dom": "19.0.0-rc-65a56d0e-20241020",
+    "react": "19.0.0-rc-5c56b873-20241107",
+    "react-dom": "19.0.0-rc-5c56b873-20241107",
     "rimraf": "3.0.2",
     "semver": "^7.5.4",
     "sharp": "0.32.6",
@@ -167,8 +168,8 @@
     "typescript": "5.6.3"
   },
   "peerDependencies": {
-    "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020"
+    "react": "^19.0.0 || ^19.0.0-rc-5c56b873-20241107",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-5c56b873-20241107"
   },
   "packageManager": "pnpm@9.7.1",
   "engines": {
