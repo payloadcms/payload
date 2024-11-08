@@ -312,8 +312,8 @@ importers:
         specifier: 8.10.2
         version: 8.10.2
       console-table-printer:
-        specifier: 2.12.1
-        version: 2.12.1
+        specifier: 2.11.2
+        version: 2.11.2
       drizzle-kit:
         specifier: 0.28.0
         version: 0.28.0
@@ -5558,6 +5558,9 @@ packages:
   consola@3.2.3:
     resolution: {integrity: sha512-I5qxpzLv+sJhTVEoLYNcTW+bThDCPsit0vLNKShZx6rLtpilNpmmeTPaeqJb9ZE9dV3DGaeby6Vuhrw38WjeyQ==}
     engines: {node: ^14.18.0 || >=16.10.0}
+
+  console-table-printer@2.11.2:
+    resolution: {integrity: sha512-uuUHie0sfPP542TKGzPFal0W1wo1beuKAqIZdaavcONx8OoqdnJRKjkinbRTOta4FaCa1RcIL+7mMJWX3pQGVg==}
 
   console-table-printer@2.12.1:
     resolution: {integrity: sha512-wKGOQRRvdnd89pCeH96e2Fn4wkbenSP6LMHfjfyNLMbGuHEFbMqQNuxXqd0oXG9caIOQ1FTvc5Uijp9/4jujnQ==}
@@ -15108,6 +15111,10 @@ snapshots:
       proto-list: 1.2.4
 
   consola@3.2.3: {}
+
+  console-table-printer@2.11.2:
+    dependencies:
+      simple-wcswidth: 1.0.1
 
   console-table-printer@2.12.1:
     dependencies:
