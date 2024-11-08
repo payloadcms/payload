@@ -36,6 +36,7 @@ import { hasLocalesTable } from '../../utilities/hasLocalesTable.js'
 import { validateExistingBlockIsIdentical } from '../../utilities/validateExistingBlockIsIdentical.js'
 import { buildTable } from './build.js'
 import { createIndex } from './createIndex.js'
+import { geometryColumn } from './geometryColumn.js'
 import { idToUUID } from './idToUUID.js'
 import { parentIDColumnMap } from './parentIDColumnMap.js'
 import { withDefault } from './withDefault.js'
@@ -262,10 +263,7 @@ export const traverseFields = ({
       }
 
       case 'point': {
-        targetTable[fieldName] = withDefault(
-          geometry(columnName, { type: 'point', mode: 'tuple', srid: 4326 }),
-          field,
-        )
+        targetTable[fieldName] = withDefault(geometryColumn(columnName), field)
         adapter.postgis.enabled = true
         break
       }
