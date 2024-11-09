@@ -59,8 +59,8 @@ export async function selectDb(args: CliArgs, projectName: string): Promise<DbDe
 
   const dbChoice = dbChoiceRecord[dbType]
 
-  if (args['--dbUri']) {
-    dbUri = args['--dbUri'] as string
+  if (args['--db-uri']) {
+    dbUri = args['--db-uri'] as string
     return {
       dbUri,
       type: dbChoice.value,
