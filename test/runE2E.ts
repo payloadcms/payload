@@ -82,7 +82,7 @@ function executePlaywright(suitePath: string, baseTestFolder: string, bail = fal
     `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
   )
 
-  const spawnDevArgs: string[] = ['dev', baseTestFolder]
+  const spawnDevArgs: string[] = ['dev', baseTestFolder, '--start-memory-db']
   if (prod) {
     spawnDevArgs.push('--prod')
   }

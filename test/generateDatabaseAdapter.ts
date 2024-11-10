@@ -80,6 +80,6 @@ export function generateDatabaseAdapter(dbAdapter) {
   `,
   )
 
-  console.log('Wrote', dbAdapter, 'db adapter', process.env)
+  console.log('Wrote', dbAdapter, 'db adapter')
   return databaseAdapter
 }
