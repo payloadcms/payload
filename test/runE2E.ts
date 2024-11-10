@@ -82,9 +82,14 @@ function executePlaywright(suitePath: string, baseTestFolder: string, bail = fal
     `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
   )
 
-  const child = spawn('pnpm', ['dev', baseTestFolder], {
+  let spawnDevArgs: string[] = ['dev', baseTestFolder]
+  if (prod) {
+    spawnDevArgs.push('--prod')
+  }
+  const child = spawn('pnpm', spawnDevArgs, {
     stdio: 'inherit',
     cwd: path.resolve(dirname, '..'),
+    env: process.env,
   })
 
   const cmd = slash(`${playwrightBin} test ${suitePath} -c ${playwrightCfg}`)
@@ -93,15 +98,12 @@ function executePlaywright(suitePath: string, baseTestFolder: string, bail = fal
   const suite = path.basename(path.dirname(suitePath))
   const results = { code, suiteName: suite }
 
-  console.log({ stdout, code })
-
   if (code) {
     if (bail) {
       console.error(`TEST FAILURE DURING ${suite} suite.`)
     }
-    process.exit(1)
-
     child.kill(1)
+    process.exit(1)
   } else {
     child.kill()
   }
