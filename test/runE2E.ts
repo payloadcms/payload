@@ -56,13 +56,14 @@ if (!suiteName) {
 
   files.forEach((file) => {
     clearWebpackCache()
-    executePlaywright(file, bail)
+    executePlaywright(file, file, bail)
   })
 } else {
   // Run specific suite
   clearWebpackCache()
   const suitePath = path.resolve(dirname, suiteName, 'e2e.spec.ts').replaceAll('__', '/')
-  executePlaywright(suitePath)
+  const baseTestFolder = suiteName.split('__')[0]
+  executePlaywright(suitePath, baseTestFolder)
 }
 
 console.log('\nRESULTS:')
@@ -71,16 +72,17 @@ testRunCodes.forEach((tr) => {
 })
 console.log('\n')
 
-function executePlaywright(suitePath: string, bail = false) {
+// baseTestFolder is the most top level folder of the test suite, that contains the payload config.
+// We need this because pnpm dev for a given test suite will always be run from the top level test folder,
+// not from a nested suite folder.
+function executePlaywright(suitePath: string, baseTestFolder: string, bail = false) {
   console.log(`Executing ${suitePath}...`)
   const playwrightCfg = path.resolve(
     dirname,
     `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
   )
 
-  const suite = path.basename(path.dirname(suitePath))
-
-  const child = spawn('pnpm', ['dev', suite], {
+  const child = spawn('pnpm', ['dev', baseTestFolder], {
     stdio: 'inherit',
     cwd: path.resolve(dirname, '..'),
   })
@@ -88,6 +90,7 @@ function executePlaywright(suitePath: string, bail = false) {
   const cmd = slash(`${playwrightBin} test ${suitePath} -c ${playwrightCfg}`)
   console.log('\n', cmd)
   const { code, stdout } = shelljs.exec(cmd)
+  const suite = path.basename(path.dirname(suitePath))
   const results = { code, suiteName: suite }
 
   console.log({ stdout, code })
