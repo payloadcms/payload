@@ -53,51 +53,51 @@ export const Categories: CollectionConfig = {
       on: 'category',
       maxDepth: 1,
     },
-    // {
-    //   name: 'hasManyPosts',
-    //   type: 'join',
-    //   collection: postsSlug,
-    //   on: 'categories',
-    // },
-    // {
-    //   name: 'hasManyPostsLocalized',
-    //   type: 'join',
-    //   collection: postsSlug,
-    //   on: 'categoriesLocalized',
-    // },
-    // {
-    //   name: 'group',
-    //   type: 'group',
-    //   fields: [
-    //     {
-    //       name: 'relatedPosts',
-    //       label: 'Related Posts (Group)',
-    //       type: 'join',
-    //       collection: postsSlug,
-    //       on: 'group.category',
-    //     },
-    //     {
-    //       name: 'camelCasePosts',
-    //       type: 'join',
-    //       collection: postsSlug,
-    //       on: 'group.camelCaseCategory',
-    //     },
-    //   ],
-    // },
-    // {
-    //   name: 'singulars',
-    //   type: 'join',
-    //   collection: singularSlug,
-    //   on: 'category',
-    // },
-    // {
-    //   name: 'filtered',
-    //   type: 'join',
-    //   collection: postsSlug,
-    //   on: 'category',
-    //   where: {
-    //     isFiltered: { not_equals: true },
-    //   },
-    // },
+    {
+      name: 'hasManyPosts',
+      type: 'join',
+      collection: postsSlug,
+      on: 'categories',
+    },
+    {
+      name: 'hasManyPostsLocalized',
+      type: 'join',
+      collection: postsSlug,
+      on: 'categoriesLocalized',
+    },
+    {
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          name: 'relatedPosts',
+          label: 'Related Posts (Group)',
+          type: 'join',
+          collection: postsSlug,
+          on: 'group.category',
+        },
+        {
+          name: 'camelCasePosts',
+          type: 'join',
+          collection: postsSlug,
+          on: 'group.camelCaseCategory',
+        },
+      ],
+    },
+    {
+      name: 'singulars',
+      type: 'join',
+      collection: singularSlug,
+      on: 'category',
+    },
+    {
+      name: 'filtered',
+      type: 'join',
+      collection: postsSlug,
+      on: 'category',
+      where: {
+        isFiltered: { not_equals: true },
+      },
+    },
   ],
 }
