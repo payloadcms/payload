@@ -82,14 +82,16 @@ function executePlaywright(suitePath: string, baseTestFolder: string, bail = fal
     `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
   )
 
-  let spawnDevArgs: string[] = ['dev', baseTestFolder]
+  const spawnDevArgs: string[] = ['dev', baseTestFolder]
   if (prod) {
     spawnDevArgs.push('--prod')
   }
   const child = spawn('pnpm', spawnDevArgs, {
     stdio: 'inherit',
     cwd: path.resolve(dirname, '..'),
-    env: process.env,
+    env: {
+      ...process.env,
+    },
   })
 
   const cmd = slash(`${playwrightBin} test ${suitePath} -c ${playwrightCfg}`)

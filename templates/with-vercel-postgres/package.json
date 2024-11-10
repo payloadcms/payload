@@ -25,8 +25,8 @@
     "graphql": "^16.8.1",
     "next": "15.0.0",
     "payload": "beta",
-    "react": "19.0.0-rc-5c56b873-20241107",
-    "react-dom": "19.0.0-rc-5c56b873-20241107"
+    "react": "19.0.0-rc-65a56d0e-20241020",
+    "react-dom": "19.0.0-rc-65a56d0e-20241020"
   },
   "devDependencies": {
     "@types/node": "^22.5.4",
