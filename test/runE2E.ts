@@ -89,15 +89,21 @@ function executePlaywright(suitePath: string, bail = false) {
   console.log('\n', cmd)
   const { code, stdout } = shelljs.exec(cmd)
   const results = { code, suiteName: suite }
+
+  console.log({ stdout, code })
+
   if (code) {
     if (bail) {
       console.error(`TEST FAILURE DURING ${suite} suite.`)
-      process.exit(1)
     }
+    process.exit(1)
+
+    child.kill(1)
+  } else {
+    child.kill()
   }
   testRunCodes.push(results)
 
-  child.kill()
   return stdout
 }
 
