@@ -24,7 +24,7 @@
     "prepublishOnly": "pnpm clean && pnpm build"
   },
   "dependencies": {
-    "compression": "1.7.4",
+    "compression": "1.7.5",
     "connect-history-api-fallback": "1.6.0",
     "css-loader": "5.2.7",
     "file-loader": "6.2.0",
