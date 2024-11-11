@@ -4,7 +4,9 @@ export const reInitializeDB = async ({
   serverURL,
   snapshotKey,
   uploadsDir,
+  deleteOnly,
 }: {
+  deleteOnly?: boolean
   serverURL: string
   snapshotKey: string
   uploadsDir?: string | string[]
@@ -22,6 +24,7 @@ export const reInitializeDB = async ({
         body: JSON.stringify({
           snapshotKey,
           uploadsDir,
+          deleteOnly,
         }),
         headers: {
           'Content-Type': 'application/json',

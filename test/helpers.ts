@@ -58,9 +58,11 @@ export async function ensureCompilationIsDone({
   customRoutes,
   page,
   serverURL,
+  noAutoLogin,
 }: {
   customAdminRoutes?: Config['admin']['routes']
   customRoutes?: Config['routes']
+  noAutoLogin?: boolean
   page: Page
   serverURL: string
 }): Promise<void> {
@@ -78,7 +80,7 @@ export async function ensureCompilationIsDone({
       console.log(`Checking if compilation is done (attempt ${attempt}/${maxAttempts})...`)
 
       await page.goto(adminURL)
-      await page.waitForURL(adminURL)
+      await page.waitForURL(noAutoLogin ? `${adminURL}/login` : adminURL)
 
       console.log('Successfully compiled')
       return
@@ -96,6 +98,9 @@ export async function ensureCompilationIsDone({
     }
   }
 
+  if (noAutoLogin) {
+    return
+  }
   await expect(() => expect(page.locator('.template-default')).toBeVisible()).toPass({
     timeout: POLL_TOPASS_TIMEOUT,
   })
