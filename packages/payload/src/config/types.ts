@@ -14,7 +14,7 @@ import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
-import type { DocumentTabConfig, RichTextAdapter, ServerFunctionConfig } from '../admin/types.js'
+import type { DocumentTabConfig, RichTextAdapter } from '../admin/types.js'
 import type {
   AdminViewConfig,
   ServerSideEditViewProps,
@@ -826,7 +826,6 @@ export type Config = {
       /** The route for the unauthorized page. */
       unauthorized?: string
     }
-    serverFunctions?: ServerFunctionConfig[]
     /**
      * Restrict the Admin Panel theme to use only one of your choice
      *
