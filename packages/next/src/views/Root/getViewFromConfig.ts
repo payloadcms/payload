@@ -13,6 +13,7 @@ import { forgotPasswordBaseClass, ForgotPasswordView } from '../ForgotPassword/i
 import { ListView } from '../List/index.js'
 import { loginBaseClass, LoginView } from '../Login/index.js'
 import { LogoutInactivity, LogoutView } from '../Logout/index.js'
+import { PluginsView } from '../Plugins/index.js'
 import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword/index.js'
 import { UnauthorizedView } from '../Unauthorized/index.js'
 import { Verify, verifyBaseClass } from '../Verify/index.js'
@@ -23,6 +24,7 @@ const baseClasses = {
   account: 'account',
   forgot: forgotPasswordBaseClass,
   login: loginBaseClass,
+  plugins: 'plugins',
   reset: resetPasswordBaseClass,
   verify: verifyBaseClass,
 }
@@ -43,6 +45,7 @@ const oneSegmentViews: OneSegmentViews = {
   inactivity: LogoutInactivity,
   login: LoginView,
   logout: LogoutView,
+  plugins: PluginsView,
   unauthorized: UnauthorizedView,
 }
 

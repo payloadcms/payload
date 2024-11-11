@@ -25,6 +25,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
       inactivity: '/logout-inactivity',
       login: '/login',
       logout: '/logout',
+      plugins: '/plugins',
       reset: '/reset',
       unauthorized: '/unauthorized',
     },

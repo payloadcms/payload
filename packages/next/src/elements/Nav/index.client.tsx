@@ -109,6 +109,20 @@ export const DefaultNavClient: React.FC = () => {
           </NavGroup>
         )
       })}
+      <div className="nav-group Plugins" id="nav-group-Plugins">
+        <button className="nav-group__toggle nav-group__toggle--open" tabIndex={0} type="button">
+          <div className="nav-group__label">Plugins</div>
+        </button>
+        <div
+          aria-hidden="false"
+          className="rah-static rah-static--height-auto"
+          style={{ height: 'auto' }}
+        >
+          <div>
+            <div className="nav-group__content"></div>
+          </div>
+        </div>
+      </div>
     </Fragment>
   )
 }
