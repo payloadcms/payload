@@ -301,7 +301,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
           // should expose some sort of helper for this
           if (json?.errors?.length) {
-            const [fieldErrors] = json.errors.reduce(
+            const [fieldErrors, nonFieldErrors] = json.errors.reduce(
               ([fieldErrs, nonFieldErrs], err) => {
                 const newFieldErrs: any[] = []
                 const newNonFieldErrs: any[] = []
@@ -334,6 +334,16 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
                 type: 'ADD_SERVER_ERRORS',
                 errors: fieldErrors,
               }),
+            }
+
+            if (req.status === 413) {
+              // file too large
+              currentForms[i] = {
+                ...currentForms[i],
+                errorCount: currentForms[i].errorCount + 1,
+              }
+
+              toast.error(nonFieldErrors[0]?.message)
             }
           }
         } catch (_) {
