@@ -21,9 +21,11 @@ if (prod) {
   process.env.PAYLOAD_TEST_PROD = 'true'
 }
 
-const shouldStartMemoryDB = process.argv.includes('--start-memory-db')
+const shouldStartMemoryDB =
+  process.argv.includes('--start-memory-db') || process.env.START_MEMORY_DB === 'true'
 if (shouldStartMemoryDB) {
   process.argv = process.argv.filter((arg) => arg !== '--start-memory-db')
+  process.env.START_MEMORY_DB = 'true'
 }
 
 loadEnv()

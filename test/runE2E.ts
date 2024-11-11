@@ -87,6 +87,8 @@ async function executePlaywright(suitePath: string, baseTestFolder: string, bail
     spawnDevArgs.push('--prod')
   }
 
+  process.env.START_MEMORY_DB = 'true'
+
   const child = spawn('pnpm', spawnDevArgs, {
     stdio: 'inherit',
     cwd: path.resolve(dirname, '..'),
