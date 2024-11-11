@@ -571,7 +571,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         break
       }
     }
-  } else if (fieldHasSubFields(field)) {
+  } else if (fieldHasSubFields(field) && !fieldAffectsData(field)) {
     // Handle field types that do not use names (row, etc)
 
     if (!filter || filter(args)) {
