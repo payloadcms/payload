@@ -80,7 +80,7 @@ describe('lexicalBlocks', () => {
     })*/
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsLexicalBlocksTest',
+      snapshotKey: 'fieldsTest',
       uploadsDir: [
         path.resolve(dirname, './collections/Upload/uploads'),
         path.resolve(dirname, './collections/Upload2/uploads2'),

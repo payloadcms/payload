@@ -125,6 +125,6 @@ export async function clearAndSeedEverything(_payload: Payload) {
     _payload,
     collectionSlugs,
     seedFunction: seed,
-    snapshotKey: 'adminTest',
+    snapshotKey: 'adminTests',
   })
 }

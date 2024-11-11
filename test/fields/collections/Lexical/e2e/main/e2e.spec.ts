@@ -80,7 +80,7 @@ describe('lexicalMain', () => {
     })*/
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsLexicalMainTest',
+      snapshotKey: 'fieldsTest',
       uploadsDir: [
         path.resolve(dirname, './collections/Upload/uploads'),
         path.resolve(dirname, './collections/Upload2/uploads2'),
