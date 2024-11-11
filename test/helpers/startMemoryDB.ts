@@ -2,6 +2,8 @@ import { MongoMemoryReplSet } from 'mongodb-memory-server'
 
 // eslint-disable-next-line no-restricted-exports
 export default async () => {
+  console.log('Starting memory db...')
+
   // @ts-expect-error
   process.env.NODE_ENV = 'test'
   process.env.PAYLOAD_DROP_DATABASE = 'true'

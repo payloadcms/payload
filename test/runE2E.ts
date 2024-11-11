@@ -54,16 +54,16 @@ if (!suiteName) {
   }
   console.log(`${files.join('\n')}\n`)
 
-  files.forEach((file) => {
+  for (const file of files) {
     clearWebpackCache()
-    executePlaywright(file, file, bail)
-  })
+    await executePlaywright(file, file, bail)
+  }
 } else {
   // Run specific suite
   clearWebpackCache()
   const suitePath = path.resolve(dirname, suiteName, 'e2e.spec.ts').replaceAll('__', '/')
   const baseTestFolder = suiteName.split('__')[0]
-  executePlaywright(suitePath, baseTestFolder)
+  await executePlaywright(suitePath, baseTestFolder)
 }
 
 console.log('\nRESULTS:')
@@ -75,7 +75,7 @@ console.log('\n')
 // baseTestFolder is the most top level folder of the test suite, that contains the payload config.
 // We need this because pnpm dev for a given test suite will always be run from the top level test folder,
 // not from a nested suite folder.
-function executePlaywright(suitePath: string, baseTestFolder: string, bail = false) {
+async function executePlaywright(suitePath: string, baseTestFolder: string, bail = false) {
   console.log(`Executing ${suitePath}...`)
   const playwrightCfg = path.resolve(
     dirname,
@@ -86,9 +86,11 @@ function executePlaywright(suitePath: string, baseTestFolder: string, bail = fal
   if (prod) {
     spawnDevArgs.push('--prod')
   }
+
   const child = spawn('pnpm', spawnDevArgs, {
     stdio: 'inherit',
     cwd: path.resolve(dirname, '..'),
+    // empty env to avoid passing PAYLOAD_TEST_PROD to the dev server
     env: {
       ...process.env,
     },
@@ -96,7 +98,9 @@ function executePlaywright(suitePath: string, baseTestFolder: string, bail = fal
 
   const cmd = slash(`${playwrightBin} test ${suitePath} -c ${playwrightCfg}`)
   console.log('\n', cmd)
-  const { code, stdout } = shelljs.exec(cmd)
+  const { code, stdout } = shelljs.exec(cmd, {
+    cwd: path.resolve(dirname, '..'),
+  })
   const suite = path.basename(path.dirname(suitePath))
   const results = { code, suiteName: suite }
 

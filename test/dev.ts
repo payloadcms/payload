@@ -52,7 +52,7 @@ const { rootDir, adminRoute } = getNextRootDir(testSuiteArg)
 
 await safelyRunScriptFunction(runInit, 4000, testSuiteArg, true)
 
-if (startMemoryDB) {
+if (shouldStartMemoryDB) {
   await startMemoryDB()
 }
 
@@ -91,7 +91,7 @@ process.env.PAYLOAD_DROP_DATABASE = process.env.PAYLOAD_DROP_DATABASE === 'false
 
 // fetch the admin url to force a render
 void fetch(`http://localhost:${port}${adminRoute}`)
-
+void fetch('http://localhost:3000/api/access')
 // This ensures that the next-server process is killed when this process is killed and doesn't linger around.
 process.on('SIGINT', () => {
   if (child) {
