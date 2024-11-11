@@ -134,25 +134,19 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
     return {
       CellComponent: {
-        clientProps: {
+        path: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell',
+        serverProps: {
           admin: props?.admin,
-          lexicalEditorConfig: finalSanitizedEditorConfig.lexical,
+          sanitizedEditorConfig: finalSanitizedEditorConfig,
         },
-        path: '@payloadcms/richtext-lexical/client#RichTextCell',
       },
       editorConfig: finalSanitizedEditorConfig,
       features,
       FieldComponent: {
-        clientProps: {
-          admin: props?.admin,
-          lexicalEditorConfig: finalSanitizedEditorConfig.lexical,
-        },
-        path: '@payloadcms/richtext-lexical/client#RichTextField',
-      },
-      generateComponentMap: {
-        path: '@payloadcms/richtext-lexical/generateComponentMap#getGenerateComponentMap',
+        path: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalField',
         serverProps: {
-          resolvedFeatureMap,
+          admin: props?.admin,
+          sanitizedEditorConfig: finalSanitizedEditorConfig,
         },
       },
       generateImportMap: getGenerateImportMap({

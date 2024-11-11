@@ -13,29 +13,25 @@ import type {
 import {
   DocumentControls,
   DocumentFields,
+  DocumentLocked,
+  DocumentTakeOver,
   Form,
+  LeaveWithoutSaving,
   OperationProvider,
-  SetViewActions,
+  SetDocumentStepNav,
+  SetDocumentTitle,
   useAuth,
   useConfig,
+  useDocumentDrawerContext,
   useDocumentEvents,
   useDocumentInfo,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import {
-  getFormState,
-  handleBackToDashboard,
-  handleGoBack,
-  handleTakeOver,
-} from '@payloadcms/ui/shared'
+import { handleBackToDashboard, handleGoBack, handleTakeOver } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
-import { DocumentLocked } from '../../elements/DocumentLocked/index.js'
-import { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
-import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
-import { SetDocumentStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'
-import { SetDocumentTitle } from '../Edit/Default/SetDocumentTitle/index.js'
 import { useLivePreviewContext } from './Context/context.js'
 import { LivePreviewProvider } from './Context/index.js'
 import './index.scss'
@@ -55,13 +51,11 @@ type Props = {
 }
 
 const PreviewView: React.FC<Props> = ({
-  apiRoute,
   collectionConfig,
   config,
   fields,
   globalConfig,
   schemaPath,
-  serverURL,
 }) => {
   const {
     id,
@@ -69,7 +63,6 @@ const PreviewView: React.FC<Props> = ({
     AfterDocument,
     AfterFields,
     apiURL,
-    BeforeDocument,
     BeforeFields,
     collectionSlug,
     currentEditor,
@@ -86,12 +79,15 @@ const PreviewView: React.FC<Props> = ({
     isEditing,
     isInitializing,
     lastUpdateTime,
-    onSave: onSaveFromProps,
     setCurrentEditor,
     setDocumentIsLocked,
     unlockDocument,
     updateDocumentEditor,
   } = useDocumentInfo()
+
+  const { getFormState } = useServerFunctions()
+
+  const { onSave: onSaveFromProps } = useDocumentDrawerContext()
 
   const operation = id ? 'update' : 'create'
 
@@ -119,6 +115,8 @@ const PreviewView: React.FC<Props> = ({
 
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
+
+  const abortControllerRef = useRef(new AbortController())
 
   const [editSessionStartTime, setEditSessionStartTime] = useState(Date.now())
 
@@ -178,6 +176,17 @@ const PreviewView: React.FC<Props> = ({
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+
       const currentTime = Date.now()
       const timeSinceLastUpdate = currentTime - editSessionStartTime
 
@@ -190,19 +199,17 @@ const PreviewView: React.FC<Props> = ({
       const docPreferences = await getDocPreferences()
 
       const { lockedState, state } = await getFormState({
-        apiRoute,
-        body: {
-          id,
-          collectionSlug,
-          docPreferences,
-          formState: prevFormState,
-          globalSlug,
-          operation,
-          returnLockStatus: isLockingEnabled ? true : false,
-          schemaPath,
-          updateLastEdited,
-        },
-        serverURL,
+        id,
+        collectionSlug,
+        docPermissions,
+        docPreferences,
+        formState: prevFormState,
+        globalSlug,
+        operation,
+        returnLockStatus: isLockingEnabled ? true : false,
+        schemaPath,
+        signal: abortController.signal,
+        updateLastEdited,
       })
 
       setDocumentIsLocked(true)
@@ -214,8 +221,13 @@ const PreviewView: React.FC<Props> = ({
             : documentLockStateRef.current?.user
 
         if (lockedState) {
-          if (!documentLockStateRef.current || lockedState.user.id !== previousOwnerId) {
-            if (previousOwnerId === user.id && lockedState.user.id !== user.id) {
+          const lockedUserID =
+            typeof lockedState.user === 'string' || typeof lockedState.user === 'number'
+              ? lockedState.user
+              : lockedState.user.id
+
+          if (!documentLockStateRef.current || lockedUserID !== previousOwnerId) {
+            if (previousOwnerId === user.id && lockedUserID !== user.id) {
               setShowTakeOverModal(true)
               documentLockStateRef.current.hasShownLockedModal = true
             }
@@ -223,9 +235,10 @@ const PreviewView: React.FC<Props> = ({
             documentLockStateRef.current = documentLockStateRef.current = {
               hasShownLockedModal: documentLockStateRef.current?.hasShownLockedModal || false,
               isLocked: true,
-              user: lockedState.user,
+              user: lockedState.user as ClientUser,
             }
-            setCurrentEditor(lockedState.user)
+
+            setCurrentEditor(lockedState.user as ClientUser)
           }
         }
       }
@@ -233,25 +246,33 @@ const PreviewView: React.FC<Props> = ({
       return state
     },
     [
-      collectionSlug,
       editSessionStartTime,
-      globalSlug,
-      serverURL,
-      apiRoute,
-      id,
       isLockingEnabled,
+      getDocPreferences,
+      getFormState,
+      id,
+      collectionSlug,
+      docPermissions,
+      globalSlug,
       operation,
       schemaPath,
-      getDocPreferences,
-      setCurrentEditor,
       setDocumentIsLocked,
-      user,
+      user.id,
+      setCurrentEditor,
     ],
   )
 
   // Clean up when the component unmounts or when the document is unlocked
   useEffect(() => {
     return () => {
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+
       if (!isLockingEnabled) {
         return
       }
@@ -415,7 +436,6 @@ const PreviewView: React.FC<Props> = ({
               .filter(Boolean)
               .join(' ')}
           >
-            {BeforeDocument}
             <DocumentFields
               AfterFields={AfterFields}
               BeforeFields={BeforeFields}
@@ -423,7 +443,7 @@ const PreviewView: React.FC<Props> = ({
               fields={fields}
               forceSidebarWrap
               readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
-              schemaPath={collectionSlug || globalSlug}
+              schemaPathSegments={[collectionSlug || globalSlug]}
             />
             {AfterDocument}
           </div>
@@ -464,11 +484,6 @@ export const LivePreviewClient: React.FC<{
 
   return (
     <Fragment>
-      <SetViewActions
-        actions={
-          (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.livePreview?.actions
-        }
-      />
       <LivePreviewProvider
         breakpoints={breakpoints}
         fieldSchema={collectionConfig?.fields || globalConfig?.fields}

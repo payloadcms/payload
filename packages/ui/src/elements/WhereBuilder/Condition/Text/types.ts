@@ -1,5 +1,9 @@
+import type { TextFieldClient } from 'payload'
+
+import type { DefaultFilterProps } from '../types.js'
+
 export type Props = {
-  disabled?: boolean
-  onChange: (val: string) => void
-  value: string
-}
+  readonly field: TextFieldClient
+  readonly onChange: (val: string) => void
+  readonly value: string
+} & DefaultFilterProps

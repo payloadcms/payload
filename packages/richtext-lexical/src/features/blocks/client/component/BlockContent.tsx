@@ -8,7 +8,6 @@ import {
   Collapsible,
   ErrorPill,
   Pill,
-  RenderComponent,
   RenderFields,
   SectionTitle,
   useDocumentInfo,
@@ -22,6 +21,7 @@ import React, { useCallback, useEffect } from 'react'
 import type { LexicalRichTextFieldProps } from '../../../../types.js'
 import type { BlockFields } from '../../server/nodes/BlocksNode.js'
 
+import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
 import { FormSavePlugin } from './FormSavePlugin.js'
 
@@ -31,6 +31,7 @@ type Props = {
   field: LexicalRichTextFieldProps['field']
   formData: BlockFields
   formSchema: ClientField[]
+  Label?: React.ReactNode
   nodeKey: string
   path: string
   schemaPath: string
@@ -60,15 +61,18 @@ function removeUndefinedAndNullAndEmptyArraysRecursively(obj: object) {
  * not the whole document.
  */
 export const BlockContent: React.FC<Props> = (props) => {
-  const { baseClass, clientBlock, field, formSchema, nodeKey, schemaPath } = props
+  const { baseClass, clientBlock, field, formSchema, Label, nodeKey, path, schemaPath } = props
   let { formData } = props
+  const {
+    fieldProps: { permissions },
+  } = useEditorConfigContext()
 
   const { i18n } = useTranslation()
   const [editor] = useLexicalComposerContext()
   // Used for saving collapsed to preferences (and gettin' it from there again)
   // Remember, these preferences are scoped to the whole document, not just this form. This
   // is important to consider for the data path used in setDocFieldPreferences
-  const { getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
+  const { docPermissions, getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
 
   const [isCollapsed, setIsCollapsed] = React.useState<boolean>()
 
@@ -184,12 +188,7 @@ export const BlockContent: React.FC<Props> = (props) => {
         className={classNames}
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
         header={
-          clientBlock?.admin?.components?.Label ? (
-            <RenderComponent
-              clientProps={{ blockKind: 'lexicalBlock', formData }}
-              mappedComponent={clientBlock.admin.components.Label}
-            />
-          ) : (
+          Label || (
             <div className={`${baseClass}__block-header`}>
               <div>
                 <Pill
@@ -228,13 +227,12 @@ export const BlockContent: React.FC<Props> = (props) => {
         }}
       >
         <RenderFields
-          className={`${baseClass}__fields`}
           fields={formSchema}
-          forceRender
-          margins="small"
-          path="" // Leaving path empty makes it so field values are not prefixed / scoped by the entire schemaPath. e.g. we can access "myField" instead of "someLexicalField.feature.blocks.someArrayB" // TODO: Could there be any implications leaving path different than schemaPath?
-          readOnly={false}
-          schemaPath={schemaPath} // Having the correct schemaPath here allows sub-fields (like array > addRow) to run correct form-state calls and retrieve their needed form state from the server
+          forceRender={true}
+          parentIndexPath=""
+          parentPath={''}
+          parentSchemaPath=""
+          permissions={permissions} // TODO: Pass field permissions
         />
       </Collapsible>
 

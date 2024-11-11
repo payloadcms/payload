@@ -66,14 +66,14 @@
       "@payloadcms/richtext-lexical/client": [
         "./packages/richtext-lexical/src/exports/client/index.ts"
       ],
-      "@payloadcms/richtext-lexical/generateComponentMap": [
-        "./packages/richtext-lexical/src/utilities/generateComponentMap.tsx"
+      "@payloadcms/richtext-lexical/rsc": [
+        "./packages/richtext-lexical/src/exports/server/rsc.ts"
+      ],
+      "@payloadcms/richtext-slate/rsc": [
+        "./packages/richtext-slate/src/exports/server/rsc.ts"
       ],
       "@payloadcms/richtext-slate/client": [
         "./packages/richtext-slate/src/exports/client/index.ts"
-      ],
-      "@payloadcms/richtext-slate/generateComponentMap": [
-        "./packages/richtext-slate/src/generateComponentMap.tsx"
       ],
       "@payloadcms/plugin-seo/client": [
         "./packages/plugin-seo/src/exports/client.ts"
@@ -172,7 +172,6 @@
   ],
   "include": [
     "app",
-    "next-env.d.ts",
     ".next/types/**/*.ts",
     "scripts/**/*.ts",
     "instrumentation.ts",

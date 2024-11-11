@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 
 import type { Config, Page as PayloadPage } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -30,6 +30,7 @@ describe('Nested Docs Plugin', () => {
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
+    await ensureCompilationIsDone({ page, serverURL })
 
     async function createPage({
       slug,
@@ -68,8 +69,6 @@ describe('Nested Docs Plugin', () => {
       _status: 'draft',
     })
     draftChildId = draftChildPage.id
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   describe('Core functionality', () => {
@@ -98,6 +97,7 @@ describe('Nested Docs Plugin', () => {
       await slug.fill('updated-parent-slug')
       await expect(slug).toHaveValue('updated-parent-slug')
       await page.locator(publishButtonClass).nth(0).click()
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
       await page.goto(url.edit(childId))
 
       // TODO: remove when error states are fixed
@@ -126,6 +126,7 @@ describe('Nested Docs Plugin', () => {
       await page.goto(url.edit(parentId))
       await page.locator(slugClass).nth(0).fill('parent-updated-draft')
       await page.locator(draftButtonClass).nth(0).click()
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
       await page.goto(url.edit(draftChildId))
 
       await apiTabButton.click()

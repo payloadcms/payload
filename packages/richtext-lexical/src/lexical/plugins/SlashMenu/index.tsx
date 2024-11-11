@@ -2,7 +2,7 @@
 import type { TextNode } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { useFieldProps, useTranslation } from '@payloadcms/ui'
+import { useTranslation } from '@payloadcms/ui'
 import { useCallback, useMemo, useState } from 'react'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
@@ -34,9 +34,8 @@ function SlashMenuItem({
   onMouseEnter: () => void
 }) {
   const {
-    field: { richTextComponentMap },
+    fieldProps: { featureClientSchemaMap, schemaPath },
   } = useEditorConfigContext()
-  const { schemaPath } = useFieldProps()
 
   const { i18n } = useTranslation()
 
@@ -49,7 +48,7 @@ function SlashMenuItem({
   if (item.label) {
     title =
       typeof item.label === 'function'
-        ? item.label({ i18n, richTextComponentMap, schemaPath })
+        ? item.label({ featureClientSchemaMap, i18n, schemaPath })
         : item.label
   }
   // Crop title to max. 25 characters
@@ -89,9 +88,8 @@ export function SlashMenuPlugin({
   const { editorConfig } = useEditorConfigContext()
   const { i18n } = useTranslation()
   const {
-    field: { richTextComponentMap },
+    fieldProps: { featureClientSchemaMap, schemaPath },
   } = useEditorConfigContext()
-  const { schemaPath } = useFieldProps()
 
   const checkForTriggerMatch = useMenuTriggerMatch('/', {
     minLength: 0,
@@ -128,7 +126,7 @@ export function SlashMenuPlugin({
           if (item.label) {
             itemTitle =
               typeof item.label === 'function'
-                ? item.label({ i18n, richTextComponentMap, schemaPath })
+                ? item.label({ featureClientSchemaMap, i18n, schemaPath })
                 : item.label
           }
 
@@ -176,23 +174,20 @@ export function SlashMenuPlugin({
     }
 
     return groupsWithItems
-  }, [getDynamicItems, queryString, editorConfig?.features, i18n])
+  }, [
+    queryString,
+    editorConfig?.features.slashMenu.groups,
+    getDynamicItems,
+    featureClientSchemaMap,
+    i18n,
+    schemaPath,
+  ])
 
   const onSelectItem = useCallback(
-    (
-      selectedItem: SlashMenuItemType,
-      nodeToRemove: null | TextNode,
-      closeMenu: () => void,
-      matchingString: string,
-    ) => {
-      if (nodeToRemove) {
-        editor.update(() => {
-          nodeToRemove.remove()
-        })
-      }
-      selectedItem.onSelect({ editor, queryString: matchingString })
-
+    (selectedItem: SlashMenuItemType, closeMenu: () => void, matchingString: string) => {
       closeMenu()
+
+      selectedItem.onSelect({ editor, queryString: matchingString })
     },
     [editor],
   )
@@ -210,10 +205,10 @@ export function SlashMenuPlugin({
               <div className={baseClass}>
                 {groups.map((group) => {
                   let groupTitle = group.key
-                  if (group.label && richTextComponentMap) {
+                  if (group.label && featureClientSchemaMap) {
                     groupTitle =
                       typeof group.label === 'function'
-                        ? group.label({ i18n, richTextComponentMap, schemaPath })
+                        ? group.label({ featureClientSchemaMap, i18n, schemaPath })
                         : group.label
                   }
 

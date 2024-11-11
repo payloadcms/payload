@@ -1,9 +1,10 @@
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { RequestContext } from '../../../index.js'
 import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
-import type { Field, FieldHookArgs, TabAsField, ValidateOptions } from '../../config/types.js'
+import type { Field, TabAsField } from '../../config/types.js'
+import type { RequestContext } from '../../../index.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
@@ -18,8 +19,13 @@ type Args = {
   data: JsonObject
   doc: JsonObject
   docWithLocales: JsonObject
-  errors: { field: string; message: string }[]
+  errors: ValidationFieldError[]
   field: Field | TabAsField
+  /**
+   * The index of the field as it appears in the parent's fields array. This is used to construct the field path / schemaPath
+   * for unnamed fields like rows and collapsibles.
+   */
+  fieldIndex: number
   global: null | SanitizedGlobalConfig
   id?: number | string
   mergeLocaleActions: (() => Promise<void>)[]
@@ -56,6 +62,7 @@ export const promise = async ({
   docWithLocales,
   errors,
   field,
+  fieldIndex,
   global,
   mergeLocaleActions,
   operation,
@@ -75,11 +82,15 @@ export const promise = async ({
   const defaultLocale = localization ? localization?.defaultLocale : 'en'
   const operationLocale = req.locale || defaultLocale
 
-  const { path: fieldPath, schemaPath: fieldSchemaPath } = getFieldPaths({
+  const { path: _fieldPath, schemaPath: _fieldSchemaPath } = getFieldPaths({
     field,
-    parentPath,
-    parentSchemaPath,
+    index: fieldIndex,
+    parentIndexPath: '', // Doesn't matter, as unnamed fields do not affect data, and hooks are only run on fields that affect data
+    parentPath: parentPath.join('.'),
+    parentSchemaPath: parentSchemaPath.join('.'),
   })
+  const fieldPath = _fieldPath ? _fieldPath.split('.') : []
+  const fieldSchemaPath = _fieldSchemaPath ? _fieldSchemaPath.split('.') : []
 
   if (fieldAffectsData(field)) {
     // skip validation if the field is localized and the incoming data is null
@@ -149,26 +160,10 @@ export const promise = async ({
 
       if (typeof validationResult === 'string') {
         errors.push({
-          field: fieldPath.join('.'),
           message: validationResult,
+          path: fieldPath.join('.'),
         })
       }
-    }
-
-    const beforeDuplicateArgs: FieldHookArgs = {
-      collection,
-      context,
-      data,
-      field,
-      global: undefined,
-      path: fieldPath,
-      previousSiblingDoc: siblingDoc,
-      previousValue: siblingDoc[field.name],
-      req,
-      schemaPath: parentSchemaPath,
-      siblingData,
-      siblingDocWithLocales,
-      value: siblingData[field.name],
     }
 
     // Push merge locale action if applicable

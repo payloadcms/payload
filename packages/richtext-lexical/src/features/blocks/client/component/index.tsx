@@ -4,22 +4,18 @@ import {
   Collapsible,
   Form,
   Pill,
-  RenderComponent,
   SectionTitle,
   ShimmerEffect,
-  useConfig,
   useDocumentInfo,
-  useFieldProps,
   useFormSubmitted,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 const baseClass = 'lexical-block'
-import type { BlocksFieldClient, FormState } from 'payload'
-
 import { getTranslation } from '@payloadcms/translations'
-import { getFormState } from '@payloadcms/ui/shared'
+import { type BlocksFieldClient, type FormState } from 'payload'
 import { v4 as uuid } from 'uuid'
 
 import type { BlockFields } from '../../server/nodes/BlocksNode.js'
@@ -36,36 +32,49 @@ type Props = {
 
 export const BlockComponent: React.FC<Props> = (props) => {
   const { formData, nodeKey } = props
-  const { config } = useConfig()
   const submitted = useFormSubmitted()
-  const { id } = useDocumentInfo()
-  const { path, schemaPath } = useFieldProps()
-  const { field: parentLexicalRichTextField } = useEditorConfigContext()
-
-  const [initialState, setInitialState] = useState<false | FormState>(false)
+  const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const {
-    field: { richTextComponentMap },
+    fieldProps: { featureClientSchemaMap, field: parentLexicalRichTextField, path, schemaPath },
   } = useEditorConfigContext()
+  const abortControllerRef = useRef(new AbortController())
+  const { docPermissions, getDocPreferences } = useDocumentInfo()
 
-  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.lexical_blocks.${formData.blockType}`
+  const { getFormState } = useServerFunctions()
 
-  const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
-  const blocksField: BlocksFieldClient = richTextComponentMap?.get(componentMapRenderedBlockPath)[0]
+  const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
 
-  const clientBlock = blocksField.blocks.find((block) => block.slug === formData.blockType)
+  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${formData.blockType}.fields`
+
+  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${formData.blockType}`
+
+  const clientSchemaMap = featureClientSchemaMap['blocks']
+
+  const blocksField: BlocksFieldClient = clientSchemaMap[
+    componentMapRenderedBlockPath
+  ][0] as BlocksFieldClient
+
+  const clientBlock = blocksField.blocks[0]
+
+  const { i18n } = useTranslation()
 
   // Field Schema
   useEffect(() => {
+    const abortController = new AbortController()
+
     const awaitInitialState = async () => {
       const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
-          id,
-          data: formData,
-          operation: 'update',
-          schemaPath: schemaFieldsPath,
-        },
-        serverURL: config.serverURL,
+        id,
+        collectionSlug,
+        data: formData,
+        docPermissions,
+        docPreferences: await getDocPreferences(),
+        doNotAbort: true,
+        globalSlug,
+        operation: 'update',
+        renderAllFields: true,
+        schemaPath: schemaFieldsPath,
+        signal: abortController.signal,
       })
 
       if (state) {
@@ -83,36 +92,92 @@ export const BlockComponent: React.FC<Props> = (props) => {
     if (formData) {
       void awaitInitialState()
     }
-  }, [config.routes.api, config.serverURL, schemaFieldsPath, id]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
+
+    return () => {
+      try {
+        abortController.abort()
+      } catch (_err) {
+        // swallow error
+      }
+    }
+  }, [
+    getFormState,
+    schemaFieldsPath,
+    id,
+    collectionSlug,
+    globalSlug,
+    getDocPreferences,
+    docPermissions,
+  ]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      const { state: formState } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
-          id,
-          formState: prevFormState,
-          operation: 'update',
-          schemaPath: schemaFieldsPath,
-        },
-        serverURL: config.serverURL,
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (_err) {
+          // swallow error
+        }
+      }
+
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+
+      const { state: newFormState } = await getFormState({
+        id,
+        collectionSlug,
+        docPermissions,
+        docPreferences: await getDocPreferences(),
+        doNotAbort: true,
+        formState: prevFormState,
+        globalSlug,
+        operation: 'update',
+        schemaPath: schemaFieldsPath,
+        signal: abortController.signal,
       })
 
-      formState.blockName = {
+      if (!newFormState) {
+        return prevFormState
+      }
+
+      newFormState.blockName = {
         initialValue: '',
         passesCondition: true,
         valid: true,
         value: formData.blockName,
       }
 
-      return formState
+      return newFormState
     },
 
-    [config.routes.api, config.serverURL, id, schemaFieldsPath, formData.blockName],
+    [
+      getFormState,
+      id,
+      collectionSlug,
+      docPermissions,
+      getDocPreferences,
+      globalSlug,
+      schemaFieldsPath,
+      formData.blockName,
+    ],
   )
-  const { i18n } = useTranslation()
+
+  // cleanup effect
+  useEffect(() => {
+    const abortController = abortControllerRef.current
+
+    return () => {
+      try {
+        abortController.abort()
+      } catch (_err) {
+        // swallow error
+      }
+    }
+  }, [])
 
   const classNames = [`${baseClass}__row`, `${baseClass}__row--no-errors`].filter(Boolean).join(' ')
+
+  const Label = clientBlock?.admin?.components?.Label
 
   // Memoized Form JSX
   const formContent = useMemo(() => {
@@ -142,10 +207,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         collapsibleStyle="default"
         header={
           clientBlock?.admin?.components?.Label ? (
-            <RenderComponent
-              clientProps={{ blockKind: 'lexicalBlock', formData }}
-              mappedComponent={clientBlock.admin.components.Label}
-            />
+            Label
           ) : (
             <div className={`${baseClass}__block-header`}>
               <div>
@@ -181,7 +243,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     schemaFieldsPath,
     classNames,
     i18n,
-  ])
+  ]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
 
   return <div className={baseClass + ' ' + baseClass + '-' + formData.blockType}>{formContent}</div>
 }

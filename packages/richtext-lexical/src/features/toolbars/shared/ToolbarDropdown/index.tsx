@@ -30,7 +30,7 @@ const ToolbarItem = ({
 }) => {
   const { i18n } = useTranslation()
   const {
-    field: { richTextComponentMap },
+    fieldProps: { featureClientSchemaMap, schemaPath },
   } = useEditorConfigContext()
 
   if (item.Component) {
@@ -51,7 +51,9 @@ const ToolbarItem = ({
   let title = item.key
   if (item.label) {
     title =
-      typeof item.label === 'function' ? item.label({ i18n, richTextComponentMap }) : item.label
+      typeof item.label === 'function'
+        ? item.label({ featureClientSchemaMap, i18n, schemaPath })
+        : item.label
   }
   // Crop title to max. 25 characters
   if (title.length > 25) {

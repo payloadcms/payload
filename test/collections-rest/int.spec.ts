@@ -30,19 +30,6 @@ let payload: Payload
 describe('collections-rest', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
-
-    // Wait for indexes to be created,
-    // as we need them to query by point
-    if (payload.db.name === 'mongoose') {
-      await new Promise((resolve, reject) => {
-        payload.db.collections[pointSlug].ensureIndexes(function (err) {
-          if (err) {
-            reject(err)
-          }
-          resolve(true)
-        })
-      })
-    }
   })
 
   afterAll(async () => {
@@ -1107,7 +1094,9 @@ describe('collections-rest', () => {
         const point = [10, 20]
         const [lat, lng] = point
         it('should return a document near a point', async () => {
-          if (payload.db.name === 'sqlite') {return}
+          if (payload.db.name === 'sqlite') {
+            return
+          }
 
           const near = `${lat + 0.01}, ${lng + 0.01}, 10000`
           const response = await restClient.GET(`/${pointSlug}`, {
@@ -1126,7 +1115,9 @@ describe('collections-rest', () => {
         })
 
         it('should not return a point far away', async () => {
-          if (payload.db.name === 'sqlite') {return}
+          if (payload.db.name === 'sqlite') {
+            return
+          }
 
           const near = `${lng + 1}, ${lat + 1}, 5000`
           const response = await restClient.GET(`/${pointSlug}`, {
@@ -1145,7 +1136,9 @@ describe('collections-rest', () => {
         })
 
         it('should sort find results by nearest distance', async () => {
-          if (payload.db.name === 'sqlite') {return}
+          if (payload.db.name === 'sqlite') {
+            return
+          }
 
           // creating twice as many records as we are querying to get a random sample
           const promises = []
@@ -1199,7 +1192,9 @@ describe('collections-rest', () => {
           [9.0, 19.0], // back to starting point to close the polygon
         ]
         it('should return a document with the point inside the polygon', async () => {
-          if (payload.db.name === 'sqlite') {return}
+          if (payload.db.name === 'sqlite') {
+            return
+          }
           // There should be 1 total points document populated by default with the point [10, 20]
           const response = await restClient.GET(`/${pointSlug}`, {
             query: {
@@ -1220,7 +1215,9 @@ describe('collections-rest', () => {
         })
 
         it('should not return a document with the point outside a smaller polygon', async () => {
-          if (payload.db.name === 'sqlite') {return}
+          if (payload.db.name === 'sqlite') {
+            return
+          }
           const response = await restClient.GET(`/${pointSlug}`, {
             query: {
               where: {
@@ -1251,7 +1248,9 @@ describe('collections-rest', () => {
         ]
 
         it('should return a document with the point intersecting the polygon', async () => {
-          if (payload.db.name === 'sqlite') {return}
+          if (payload.db.name === 'sqlite') {
+            return
+          }
           // There should be 1 total points document populated by default with the point [10, 20]
           const response = await restClient.GET(`/${pointSlug}`, {
             query: {
@@ -1272,7 +1271,9 @@ describe('collections-rest', () => {
         })
 
         it('should not return a document with the point not intersecting a smaller polygon', async () => {
-          if (payload.db.name === 'sqlite') {return}
+          if (payload.db.name === 'sqlite') {
+            return
+          }
           const response = await restClient.GET(`/${pointSlug}`, {
             query: {
               where: {

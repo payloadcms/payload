@@ -9,6 +9,7 @@ import type {
   SelectFromCollectionSlug,
 } from '../config/types.js'
 import type { countOperation } from './count.js'
+import type { countVersionsOperation } from './countVersions.js'
 import type { createOperation } from './create.js'
 import type { deleteOperation } from './delete.js'
 import type { deleteByIDOperation } from './deleteByID.js'
@@ -19,6 +20,7 @@ import type { updateByIDOperation } from './updateByID.js'
 
 export type AfterOperationMap<TOperationGeneric extends CollectionSlug> = {
   count: typeof countOperation<TOperationGeneric>
+  countVersions: typeof countVersionsOperation<TOperationGeneric>
   create: typeof createOperation<TOperationGeneric, SelectFromCollectionSlug<TOperationGeneric>>
   delete: typeof deleteOperation<TOperationGeneric, SelectFromCollectionSlug<TOperationGeneric>>
   deleteByID: typeof deleteByIDOperation<
@@ -50,6 +52,11 @@ export type AfterOperationArg<TOperationGeneric extends CollectionSlug> = {
       args: Parameters<AfterOperationMap<TOperationGeneric>['count']>[0]
       operation: 'count'
       result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['count']>>
+    }
+  | {
+      args: Parameters<AfterOperationMap<TOperationGeneric>['countVersions']>[0]
+      operation: 'countVersions'
+      result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['countVersions']>>
     }
   | {
       args: Parameters<AfterOperationMap<TOperationGeneric>['create']>[0]

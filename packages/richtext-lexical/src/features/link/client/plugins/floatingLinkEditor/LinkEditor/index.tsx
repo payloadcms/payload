@@ -11,7 +11,6 @@ import {
   formatDrawerSlug,
   useConfig,
   useEditDepth,
-  useModal,
   useTranslation,
 } from '@payloadcms/ui'
 import {
@@ -25,7 +24,6 @@ import {
 } from 'lexical'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import type { LinkNode } from '../../../../nodes/LinkNode.js'
 import type { LinkFields } from '../../../../nodes/types.js'
 import type { LinkPayload } from '../types.js'
 
@@ -45,7 +43,10 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
   const [linkUrl, setLinkUrl] = useState<null | string>(null)
   const [linkLabel, setLinkLabel] = useState<null | string>(null)
 
-  const { uuid } = useEditorConfigContext()
+  const {
+    fieldProps: { schemaPath },
+    uuid,
+  } = useEditorConfigContext()
 
   const { config } = useConfig()
 
@@ -195,7 +196,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     }
 
     return true
-  }, [editor, setNotLink, config.collections, t, i18n, anchorElem])
+  }, [editor, setNotLink, config.routes.admin, config.collections, t, i18n, anchorElem])
 
   useEffect(() => {
     return mergeRegister(
@@ -366,6 +367,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
             text: newLinkPayload.text,
           })
         }}
+        schemaPath={schemaPath}
         schemaPathSuffix="fields"
       />
     </React.Fragment>

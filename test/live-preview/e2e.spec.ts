@@ -13,6 +13,7 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { waitForAutoSaveToRunAndComplete } from '../helpers/waitForAutoSaveToRunAndComplete.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   ensureDeviceIsCentered,
@@ -95,7 +96,7 @@ describe('Live Preview', () => {
     const titleField = page.locator('#field-title')
     const frame = page.frameLocator('iframe.live-preview-iframe').first()
 
-    await expect(titleField).toBeVisible()
+    await expect(titleField).toBeEnabled()
 
     const renderedPageTitleLocator = `#${renderedPageTitleID}`
 
@@ -155,7 +156,7 @@ describe('Live Preview', () => {
     const titleField = page.locator('#field-title')
     const frame = page.frameLocator('iframe.live-preview-iframe').first()
 
-    await expect(titleField).toBeVisible()
+    await expect(titleField).toBeEnabled()
 
     const renderedPageTitleLocator = `#${renderedPageTitleID}`
 
@@ -169,6 +170,8 @@ describe('Live Preview', () => {
     const newTitleValue = 'SSR Home (Edited)'
 
     await titleField.fill(newTitleValue)
+
+    await waitForAutoSaveToRunAndComplete(page)
 
     await expect(() =>
       expect(frame.locator(renderedPageTitleLocator)).toHaveText(`For Testing: ${newTitleValue}`),

@@ -1,15 +1,7 @@
 'use client'
 import type { SerializedEditorState } from 'lexical'
 
-import {
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-  useEditDepth,
-  useField,
-  useFieldProps,
-  withCondition,
-} from '@payloadcms/ui'
+import { FieldLabel, useEditDepth, useField, withCondition } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
@@ -29,24 +21,21 @@ const RichTextComponent: React.FC<
   } & LexicalRichTextFieldProps
 > = (props) => {
   const {
-    descriptionProps,
     editorConfig,
-    errorProps,
     field: {
       name,
-      _path: pathFromProps,
-      admin: { className, components, readOnly: readOnlyFromAdmin, style, width } = {},
+      admin: { className, readOnly: readOnlyFromAdmin, style, width } = {},
+      label,
+      localized,
       required,
     },
-    field,
-    labelProps,
+    path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
     validate, // Users can pass in client side validation if they WANT to, but it's not required anymore
   } = props
-  const Description = components?.Description
-  const Error = components?.Error
-  const Label = components?.Label
+
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
+  const path = pathFromProps ?? name
 
   const editDepth = useEditDepth()
 
@@ -61,18 +50,22 @@ const RichTextComponent: React.FC<
     // Removing props from the dependencies array fixed this issue: https://github.com/payloadcms/payload/issues/3709
     [validate, required],
   )
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
-  const fieldType = useField<SerializedEditorState>({
-    path: pathFromContext ?? pathFromProps ?? name,
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    formInitializing,
+    formProcessing,
+    initialValue,
+    setValue,
+    showError,
+    value,
+  } = useField<SerializedEditorState>({
+    path,
     // @ts-expect-error: TODO: Fix this
     validate: memoizedValidate,
   })
 
-  const { formInitializing, formProcessing, initialValue, path, setValue, showError, value } =
-    fieldType
-
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const classes = [
     baseClass,
@@ -96,20 +89,15 @@ const RichTextComponent: React.FC<
         width,
       }}
     >
-      <FieldError
-        CustomError={Error}
-        path={path}
-        {...(errorProps || {})}
-        alignCaret="left"
-        field={field}
-      />
-      <FieldLabel Label={Label} {...(labelProps || {})} field={field} />
+      {Error}
+      {Label || <FieldLabel label={label} localized={localized} required={required} />}
       <div className={`${baseClass}__wrap`}>
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
+          {BeforeInput}
           <LexicalProvider
             composerKey={pathWithEditDepth}
             editorConfig={editorConfig}
-            field={field}
+            fieldProps={props}
             key={JSON.stringify({ initialValue, path })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
             onChange={(editorState) => {
               let serializedEditorState = editorState.toJSON()
@@ -126,8 +114,9 @@ const RichTextComponent: React.FC<
             readOnly={disabled}
             value={value}
           />
+          {AfterInput}
         </ErrorBoundary>
-        <FieldDescription Description={Description} {...(descriptionProps || {})} field={field} />
+        {Description}
       </div>
     </div>
   )

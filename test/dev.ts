@@ -10,14 +10,22 @@ import { loadEnv } from 'payload/node'
 import { parse } from 'url'
 
 import { getNextRootDir } from './helpers/getNextRootDir.js'
+import startMemoryDB from './helpers/startMemoryDB.js'
 import { runInit } from './runInit.js'
 import { child, safelyRunScriptFunction } from './safelyRunScript.js'
 import { createTestHooks } from './testHooks.js'
 
 const prod = process.argv.includes('--prod')
-process.argv = process.argv.filter((arg) => arg !== '--prod')
 if (prod) {
+  process.argv = process.argv.filter((arg) => arg !== '--prod')
   process.env.PAYLOAD_TEST_PROD = 'true'
+}
+
+const shouldStartMemoryDB =
+  process.argv.includes('--start-memory-db') || process.env.START_MEMORY_DB === 'true'
+if (shouldStartMemoryDB) {
+  process.argv = process.argv.filter((arg) => arg !== '--start-memory-db')
+  process.env.START_MEMORY_DB = 'true'
 }
 
 loadEnv()
@@ -45,6 +53,10 @@ await beforeTest()
 const { rootDir, adminRoute } = getNextRootDir(testSuiteArg)
 
 await safelyRunScriptFunction(runInit, 4000, testSuiteArg, true)
+
+if (shouldStartMemoryDB) {
+  await startMemoryDB()
+}
 
 // Open the admin if the -o flag is passed
 if (args.o) {
@@ -81,7 +93,7 @@ process.env.PAYLOAD_DROP_DATABASE = process.env.PAYLOAD_DROP_DATABASE === 'false
 
 // fetch the admin url to force a render
 void fetch(`http://localhost:${port}${adminRoute}`)
-
+void fetch(`http://localhost:${port}/api/access`)
 // This ensures that the next-server process is killed when this process is killed and doesn't linger around.
 process.on('SIGINT', () => {
   if (child) {

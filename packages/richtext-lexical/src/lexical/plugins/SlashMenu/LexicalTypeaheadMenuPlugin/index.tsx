@@ -110,12 +110,7 @@ export type TypeaheadMenuPluginProps = {
   onClose?: () => void
   onOpen?: (resolution: MenuResolution) => void
   onQueryChange: (matchingString: null | string) => void
-  onSelectItem: (
-    item: SlashMenuItem,
-    textNodeContainingQuery: null | TextNode,
-    closeMenu: () => void,
-    matchingString: string,
-  ) => void
+  onSelectItem: (item: SlashMenuItem, closeMenu: () => void, matchingString: string) => void
   triggerFn: TriggerFn
 }
 
