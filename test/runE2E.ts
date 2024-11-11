@@ -56,7 +56,8 @@ if (!suiteName) {
 
   for (const file of files) {
     clearWebpackCache()
-    await executePlaywright(file, file, bail)
+    const baseTestFolder = file.split('/test/')[1].split('/')[0]
+    await executePlaywright(file, baseTestFolder, bail)
   }
 } else {
   // Run specific suite
