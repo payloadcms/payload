@@ -98,7 +98,7 @@ export const RenderFields: React.FC<Props> = (props) => {
               clientFieldConfig={field}
               forceRender={forceRender}
               indexPath={indexPath}
-              key={path}
+              key={`${path}-${i}`}
               parentPath={parentPath}
               parentSchemaPath={parentSchemaPath}
               path={path}
