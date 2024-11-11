@@ -1,6 +1,7 @@
 'use client'
 import type { InitialConfigType } from '@lexical/react/LexicalComposer.js'
 import type { EditorState, LexicalEditor, SerializedEditorState } from 'lexical'
+import type { ClientField } from 'payload'
 
 import { LexicalComposer } from '@lexical/react/LexicalComposer.js'
 import * as React from 'react'
@@ -17,10 +18,10 @@ import { LexicalEditor as LexicalEditorComponent } from './LexicalEditor.js'
 import { getEnabledNodes } from './nodes/index.js'
 
 export type LexicalProviderProps = {
+  composerKey: string
   editorConfig: SanitizedClientEditorConfig
-  field: LexicalRichTextFieldProps['field']
+  fieldProps: LexicalRichTextFieldProps
   onChange: (editorState: EditorState, editor: LexicalEditor, tags: Set<string>) => void
-  path: string
   readOnly: boolean
   value: SerializedEditorState
 }
@@ -41,7 +42,7 @@ const NestProviders = ({ children, providers }) => {
 }
 
 export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
-  const { editorConfig, field, onChange, path, readOnly, value } = props
+  const { composerKey, editorConfig, fieldProps, onChange, readOnly, value } = props
 
   const parentContext = useEditorConfigContext()
 
@@ -82,7 +83,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
       editable: readOnly !== true,
       editorState: processedValue != null ? JSON.stringify(processedValue) : undefined,
       namespace: editorConfig.lexical.namespace,
-      nodes: [...getEnabledNodes({ editorConfig })],
+      nodes: getEnabledNodes({ editorConfig }),
       onError: (error: Error) => {
         throw error
       },
@@ -94,12 +95,14 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
     return <p>Loading...</p>
   }
 
+  // We need to add initialConfig.editable to the key to force a re-render when the readOnly prop changes.
+  // Without it, there were cases where lexical editors inside drawers turn readOnly initially - a few miliseconds later they turn editable, but the editor does not re-render and stays readOnly.
   return (
-    <LexicalComposer initialConfig={initialConfig} key={path}>
+    <LexicalComposer initialConfig={initialConfig} key={composerKey + initialConfig.editable}>
       <EditorConfigProvider
         editorConfig={editorConfig}
         editorContainerRef={editorContainerRef}
-        field={field}
+        fieldProps={fieldProps}
         parentContext={parentContext}
       >
         <NestProviders providers={editorConfig.features.providers}>

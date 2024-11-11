@@ -1,3 +1,4 @@
+import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { Relation } from 'drizzle-orm'
 import type {
   AnySQLiteColumn,
@@ -9,7 +10,7 @@ import type {
 } from 'drizzle-orm/sqlite-core'
 import type { Field, SanitizedJoins } from 'payload'
 
-import { createTableName } from '@payloadcms/drizzle'
+import { buildIndexName, createTableName } from '@payloadcms/drizzle'
 import { relations, sql } from 'drizzle-orm'
 import {
   foreignKey,
@@ -60,7 +61,6 @@ type Args = {
   disableRelsTableUnique?: boolean
   disableUnique: boolean
   fields: Field[]
-  joins?: SanitizedJoins
   locales?: [string, ...string[]]
   rootRelationships?: Set<string>
   rootRelationsToBuild?: RelationMap
@@ -94,7 +94,6 @@ export const buildTable = ({
   disableRelsTableUnique,
   disableUnique = false,
   fields,
-  joins,
   locales,
   rootRelationships,
   rootRelationsToBuild,
@@ -143,7 +142,6 @@ export const buildTable = ({
     disableUnique,
     fields,
     indexes,
-    joins,
     locales,
     localesColumns,
     localesIndexes,
@@ -416,21 +414,25 @@ export const buildTable = ({
             foreignColumns: [adapter.tables[formattedRelationTo].id],
           }).onDelete('cascade')
 
-        const indexName = [colName]
+        const indexColumns = [colName]
 
         const unique = !disableUnique && uniqueRelationships.has(relationTo)
 
         if (unique) {
-          indexName.push('path')
+          indexColumns.push('path')
         }
         if (hasLocalizedRelationshipField) {
-          indexName.push('locale')
+          indexColumns.push('locale')
         }
 
-        relationExtraConfig[`${relationTo}IdIdx`] = createIndex({
-          name: indexName,
-          columnName: `${formattedRelationTo}_id`,
-          tableName: relationshipsTableName,
+        const indexName = buildIndexName({
+          name: `${relationshipsTableName}_${formattedRelationTo}_id`,
+          adapter: adapter as unknown as DrizzleAdapter,
+        })
+
+        relationExtraConfig[indexName] = createIndex({
+          name: indexColumns,
+          indexName,
           unique,
         })
       })

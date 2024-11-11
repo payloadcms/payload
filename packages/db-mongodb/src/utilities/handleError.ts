@@ -19,8 +19,8 @@ export const handleError = ({
         collection,
         errors: [
           {
-            field: Object.keys(error.keyValue)[0],
             message: req.t('error:valueMustBeUnique'),
+            path: Object.keys(error.keyValue)[0],
           },
         ],
         global,

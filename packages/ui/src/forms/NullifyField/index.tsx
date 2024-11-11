@@ -59,6 +59,11 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
           label: t('general:fallbackToDefaultLocale'),
         }}
         id={`field-${path.replace(/\./g, '__')}`}
+        indexPath=""
+        parentPath=""
+        parentSchemaPath=""
+        path={path}
+        schemaPath=""
         // onToggle={onChange}
       />
     </Banner>

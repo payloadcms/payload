@@ -22,6 +22,7 @@ export type Props = {
   readonly operator: Operator
   readonly orIndex: number
   readonly removeCondition: ({ andIndex, orIndex }: { andIndex: number; orIndex: number }) => void
+  readonly RenderedFilter: React.ReactNode
   readonly updateCondition: ({
     andIndex,
     fieldName,
@@ -37,21 +38,16 @@ export type Props = {
   }) => void
 }
 
-import type { FieldTypes, MappedComponent, Operator } from 'payload'
+import type { Operator } from 'payload'
 
 import type { Option } from '../../ReactSelect/index.js'
 
 import { useDebounce } from '../../../hooks/useDebounce.js'
-import { RenderComponent } from '../../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
-import { DateField } from './Date/index.js'
+import { DefaultFilter } from './DefaultFilter/index.js'
 import './index.scss'
-import { NumberField } from './Number/index.js'
-import { RelationshipField } from './Relationship/index.js'
-import { Select } from './Select/index.js'
-import { Text } from './Text/index.js'
 
 const baseClass = 'condition'
 
@@ -65,11 +61,13 @@ export const Condition: React.FC<Props> = (props) => {
     operator,
     orIndex,
     removeCondition,
+    RenderedFilter,
     updateCondition,
   } = props
   const [internalField, setInternalField] = useState<FieldCondition>(() =>
     fields.find((field) => fieldName === field.value),
   )
+
   const { t } = useTranslation()
   const [internalOperatorOption, setInternalOperatorOption] = useState<Operator>(operator)
   const [internalQueryValue, setInternalQueryValue] = useState<string>(initialValue)
@@ -104,28 +102,8 @@ export const Condition: React.FC<Props> = (props) => {
   const booleanSelect =
     ['exists'].includes(internalOperatorOption) || internalField?.field?.type === 'checkbox'
 
-  const valueFields: Partial<{
-    [key in FieldTypes]: React.FC
-  }> = {
-    date: DateField,
-    number: NumberField,
-    radio: Select,
-    relationship: RelationshipField,
-    select: Select,
-    text: Text,
-  }
-
-  const ValueComponent: MappedComponent = booleanSelect
-    ? {
-        type: 'client',
-        Component: Select,
-      }
-    : internalField?.Filter || {
-        type: 'client',
-        Component: valueFields?.[internalField?.field?.type] || Text,
-      }
-
   let valueOptions
+
   if (booleanSelect) {
     valueOptions = [
       { label: t('general:true'), value: 'true' },
@@ -167,21 +145,17 @@ export const Condition: React.FC<Props> = (props) => {
             />
           </div>
           <div className={`${baseClass}__value`}>
-            <RenderComponent
-              clientProps={{
-                ...internalField?.field,
-                disabled: !internalOperatorOption,
-                onChange: setInternalQueryValue,
-                operator: internalOperatorOption,
-                options: valueOptions,
-                relationTo:
-                  internalField?.field?.type === 'relationship'
-                    ? internalField?.field?.relationTo
-                    : undefined,
-                value: internalQueryValue ?? '',
-              }}
-              mappedComponent={ValueComponent}
-            />
+            {RenderedFilter || (
+              <DefaultFilter
+                booleanSelect={booleanSelect}
+                disabled={!internalOperatorOption}
+                internalField={internalField}
+                onChange={setInternalQueryValue}
+                operator={internalOperatorOption}
+                options={valueOptions}
+                value={internalQueryValue ?? ''}
+              />
+            )}
           </div>
         </div>
         <div className={`${baseClass}__actions`}>

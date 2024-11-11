@@ -24,7 +24,7 @@ The Relationship field is used in a variety of ways, including:
 To add a Relationship Field, set the `type` to `relationship` in your [Field Config](./overview):
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyRelationshipField: Field = {
   // ...
@@ -74,7 +74,7 @@ _\* An asterisk denotes that a property is required._
 The customize the appearance and behavior of the Relationship Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyRelationshipField: Field = {
   // ...
@@ -159,7 +159,7 @@ called with an argument object with the following properties:
 ## Example
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',

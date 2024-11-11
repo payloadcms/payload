@@ -66,7 +66,7 @@ export const connect: Connect = async function connect(
     }
 
     const logger = this.logger || false
-    this.drizzle = drizzle(this.pool, { logger, schema: this.schema })
+    this.drizzle = drizzle({ client: this.pool, logger, schema: this.schema })
 
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
@@ -99,6 +99,8 @@ export const connect: Connect = async function connect(
     }
     process.exit(1)
   }
+
+  await this.createExtensions()
 
   // Only push schema if not in production
   if (

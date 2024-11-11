@@ -26,16 +26,43 @@ export interface Config {
     'mixed-media': MixedMedia;
     'versioned-relationship-field': VersionedRelationshipField;
     users: User;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+  };
+  collectionsJoins: {};
+  collectionsSelect: {
+    'fields-relationship': FieldsRelationshipSelect<false> | FieldsRelationshipSelect<true>;
+    'relation-filter-false': RelationFilterFalseSelect<false> | RelationFilterFalseSelect<true>;
+    'relation-filter-true': RelationFilterTrueSelect<false> | RelationFilterTrueSelect<true>;
+    'relation-one': RelationOneSelect<false> | RelationOneSelect<true>;
+    'relation-two': RelationTwoSelect<false> | RelationTwoSelect<true>;
+    'relation-restricted': RelationRestrictedSelect<false> | RelationRestrictedSelect<true>;
+    'relation-with-title': RelationWithTitleSelect<false> | RelationWithTitleSelect<true>;
+    'relation-updated-externally': RelationUpdatedExternallySelect<false> | RelationUpdatedExternallySelect<true>;
+    'collection-1': Collection1Select<false> | Collection1Select<true>;
+    'collection-2': Collection2Select<false> | Collection2Select<true>;
+    videos: VideosSelect<false> | VideosSelect<true>;
+    podcasts: PodcastsSelect<false> | PodcastsSelect<true>;
+    'mixed-media': MixedMediaSelect<false> | MixedMediaSelect<true>;
+    'versioned-relationship-field': VersionedRelationshipFieldSelect<false> | VersionedRelationshipFieldSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
     defaultIDType: string;
   };
   globals: {};
+  globalsSelect: {};
   locale: 'en';
   user: User & {
     collection: 'users';
+  };
+  jobs?: {
+    tasks: unknown;
+    workflows?: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -297,6 +324,81 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'fields-relationship';
+        value: string | FieldsRelationship;
+      } | null)
+    | ({
+        relationTo: 'relation-filter-false';
+        value: string | RelationFilterFalse;
+      } | null)
+    | ({
+        relationTo: 'relation-filter-true';
+        value: string | RelationFilterTrue;
+      } | null)
+    | ({
+        relationTo: 'relation-one';
+        value: string | RelationOne;
+      } | null)
+    | ({
+        relationTo: 'relation-two';
+        value: string | RelationTwo;
+      } | null)
+    | ({
+        relationTo: 'relation-restricted';
+        value: string | RelationRestricted;
+      } | null)
+    | ({
+        relationTo: 'relation-with-title';
+        value: string | RelationWithTitle;
+      } | null)
+    | ({
+        relationTo: 'relation-updated-externally';
+        value: string | RelationUpdatedExternally;
+      } | null)
+    | ({
+        relationTo: 'collection-1';
+        value: string | Collection1;
+      } | null)
+    | ({
+        relationTo: 'collection-2';
+        value: string | Collection2;
+      } | null)
+    | ({
+        relationTo: 'videos';
+        value: number | Video;
+      } | null)
+    | ({
+        relationTo: 'podcasts';
+        value: number | Podcast;
+      } | null)
+    | ({
+        relationTo: 'mixed-media';
+        value: string | MixedMedia;
+      } | null)
+    | ({
+        relationTo: 'versioned-relationship-field';
+        value: string | VersionedRelationshipField;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
@@ -328,6 +430,203 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fields-relationship_select".
+ */
+export interface FieldsRelationshipSelect<T extends boolean = true> {
+  relationship?: T;
+  relationshipHasMany?: T;
+  relationshipMultiple?: T;
+  relationshipHasManyMultiple?: T;
+  relationshipRestricted?: T;
+  relationshipWithTitle?: T;
+  relationshipFiltered?: T;
+  relationshipFilteredAsync?: T;
+  relationshipManyFiltered?: T;
+  filter?: T;
+  relationshipReadOnly?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-filter-false_select".
+ */
+export interface RelationFilterFalseSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-filter-true_select".
+ */
+export interface RelationFilterTrueSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-one_select".
+ */
+export interface RelationOneSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-two_select".
+ */
+export interface RelationTwoSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-restricted_select".
+ */
+export interface RelationRestrictedSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-with-title_select".
+ */
+export interface RelationWithTitleSelect<T extends boolean = true> {
+  name?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-updated-externally_select".
+ */
+export interface RelationUpdatedExternallySelect<T extends boolean = true> {
+  relationPrePopulate?: T;
+  prePopulate?: T;
+  relationHasMany?: T;
+  prePopulateRelationHasMany?: T;
+  relationToManyHasMany?: T;
+  prePopulateToMany?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-1_select".
+ */
+export interface Collection1Select<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-2_select".
+ */
+export interface Collection2Select<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "videos_select".
+ */
+export interface VideosSelect<T extends boolean = true> {
+  id?: T;
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcasts_select".
+ */
+export interface PodcastsSelect<T extends boolean = true> {
+  id?: T;
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "mixed-media_select".
+ */
+export interface MixedMediaSelect<T extends boolean = true> {
+  relatedMedia?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-relationship-field_select".
+ */
+export interface VersionedRelationshipFieldSelect<T extends boolean = true> {
+  title?: T;
+  relationshipField?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_select".
+ */
+export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_select".
+ */
+export interface PayloadPreferencesSelect<T extends boolean = true> {
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select".
+ */
+export interface PayloadMigrationsSelect<T extends boolean = true> {
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

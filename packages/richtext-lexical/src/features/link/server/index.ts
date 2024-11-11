@@ -1,9 +1,9 @@
 import type {
   CollectionSlug,
   Config,
-  DefaultDocumentIDType,
   Field,
   FieldAffectingData,
+  FieldSchemaMap,
   SanitizedConfig,
 } from 'payload'
 
@@ -112,8 +112,10 @@ export const LinkFeature = createServerFeature<
           return null
         }
 
-        const schemaMap = new Map<string, Field[]>()
-        schemaMap.set('fields', sanitizedFields)
+        const schemaMap: FieldSchemaMap = new Map()
+        schemaMap.set('fields', {
+          fields: sanitizedFields,
+        })
 
         return schemaMap
       },

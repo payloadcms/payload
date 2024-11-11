@@ -1,12 +1,11 @@
 export const pagesSlug = 'pages'
-
 export const tenantsSlug = 'tenants'
-
 export const ssrPagesSlug = 'ssr'
-
 export const ssrAutosavePagesSlug = 'ssr-autosave'
-
 export const postsSlug = 'posts'
+export const mediaSlug = 'media'
+export const categoriesSlug = 'categories'
+export const usersSlug = 'users'
 
 export const mobileBreakpoint = {
   label: 'Mobile',

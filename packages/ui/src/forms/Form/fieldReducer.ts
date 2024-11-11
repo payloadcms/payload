@@ -3,7 +3,7 @@ import type { FormField, FormState, Row } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
-import { deepCopyObject, deepCopyObjectSimple } from 'payload/shared'
+import { deepCopyObjectSimple, deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
 
 import type { FieldAction } from './types.js'
 
@@ -55,9 +55,9 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
       const errorPaths: { fieldErrorPath: string; parentPath: string }[] = []
 
-      action.errors.forEach(({ field, message }) => {
-        newState[field] = {
-          ...(newState[field] || {
+      action.errors.forEach(({ message, path: fieldPath }) => {
+        newState[fieldPath] = {
+          ...(newState[fieldPath] || {
             initialValue: null,
             value: null,
           }),
@@ -65,10 +65,10 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
           valid: false,
         }
 
-        const segments = field.split('.')
+        const segments = fieldPath.split('.')
         if (segments.length > 1) {
           errorPaths.push({
-            fieldErrorPath: field,
+            fieldErrorPath: fieldPath,
             parentPath: segments.slice(0, segments.length - 1).join('.'),
           })
         }
@@ -145,6 +145,16 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       return newState
     }
 
+    case 'UPDATE_MANY': {
+      const newState = { ...state }
+
+      Object.entries(action.formState).forEach(([path, field]) => {
+        newState[path] = field
+      })
+
+      return newState
+    }
+
     case 'REMOVE_ROW': {
       const { path, rowIndex } = action
       const { remainingFields, rows } = separateRows(path, state)
@@ -158,6 +168,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         [path]: {
           ...state[path],
           disableFormData: rows.length > 0,
+          requiresRender: true,
           rows: rowsMetadata,
           value: rows.length,
         },
@@ -198,9 +209,17 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       const newState: FormState = {
         ...remainingFields,
         ...flattenRows(path, siblingRows),
+        [`${path}.${rowIndex}.id`]: {
+          initialValue: newRow.id,
+          passesCondition: true,
+          requiresRender: true,
+          valid: true,
+          value: newRow.id,
+        },
         [path]: {
           ...state[path],
           disableFormData: true,
+          requiresRender: true,
           rows: withNewRow,
           value: siblingRows.length,
         },
@@ -257,10 +276,19 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         duplicateRowMetadata.id = new ObjectId().toHexString()
       }
 
-      const duplicateRowState = deepCopyObject(rows[rowIndex])
+      const duplicateRowState = deepCopyObjectSimpleWithoutReactComponents(rows[rowIndex])
       if (duplicateRowState.id) {
         duplicateRowState.id.value = new ObjectId().toHexString()
         duplicateRowState.id.initialValue = new ObjectId().toHexString()
+      }
+
+      for (const key of Object.keys(duplicateRowState).filter((key) => key.endsWith('.id'))) {
+        const idState = duplicateRowState[key]
+
+        if (idState && typeof idState.value === 'string' && ObjectId.isValid(idState.value)) {
+          duplicateRowState[key].value = new ObjectId().toHexString()
+          duplicateRowState[key].initialValue = new ObjectId().toHexString()
+        }
       }
 
       // If there are subfields
@@ -276,6 +304,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         [path]: {
           ...state[path],
           disableFormData: true,
+          requiresRender: true,
           rows: rowsMetadata,
           value: rows.length,
         },

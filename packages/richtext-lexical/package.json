@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "3.0.0-beta.114",
+  "version": "3.0.0-beta.127",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -23,12 +23,16 @@
       "types": "./src/exports/client/index.ts",
       "default": "./src/exports/client/index.ts"
     },
+    "./rsc": {
+      "import": "./src/exports/server/rsc.ts",
+      "types": "./src/exports/server/rsc.ts",
+      "default": "./src/exports/server/rsc.ts"
+    },
     "./migrate": {
       "import": "./src/exports/server/migrate.ts",
       "types": "./src/exports/server/migrate.ts",
       "default": "./src/exports/server/migrate.ts"
-    },
-    "./generateComponentMap": "./src/utilities/generateComponentMap.tsx"
+    }
   },
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -69,6 +73,7 @@
     "escape-html": "1.0.3",
     "lexical": "0.18.0",
     "react-error-boundary": "4.0.13",
+    "ts-essentials": "10.0.3",
     "uuid": "10.0.0"
   },
   "devDependencies": {
@@ -84,7 +89,7 @@
     "@types/node": "22.5.4",
     "@types/react": "npm:types-react@19.0.0-rc.1",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
-    "babel-plugin-react-compiler": "0.0.0-experimental-48eb8f4-20240822",
+    "babel-plugin-react-compiler": "0.0.0-experimental-24ec0eb-20240918",
     "babel-plugin-transform-remove-imports": "^1.8.0",
     "esbuild": "0.23.1",
     "esbuild-sass-plugin": "3.3.1",
@@ -108,8 +113,8 @@
     "@payloadcms/next": "workspace:*",
     "lexical": "0.18.0",
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-3edc000d-20240926",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-3edc000d-20240926"
+    "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
@@ -126,15 +131,15 @@
         "types": "./dist/exports/client/index.d.ts",
         "default": "./dist/exports/client/index.js"
       },
+      "./rsc": {
+        "import": "./dist/exports/server/rsc.js",
+        "types": "./dist/exports/server/rsc.d.ts",
+        "default": "./dist/exports/server/rsc.js"
+      },
       "./migrate": {
         "import": "./dist/exports/server/migrate.js",
         "types": "./dist/exports/server/migrate.d.ts",
         "default": "./dist/exports/server/migrate.js"
-      },
-      "./generateComponentMap": {
-        "import": "./dist/utilities/generateComponentMap.js",
-        "types": "./dist/utilities/generateComponentMap.d.ts",
-        "default": "./dist/utilities/generateComponentMap.js"
       }
     },
     "main": "./dist/index.js",

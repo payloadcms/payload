@@ -226,7 +226,7 @@ async function installDeps(projectDir: string, packageManager: PackageManager, d
     'payload',
     '@payloadcms/next',
     '@payloadcms/richtext-lexical',
-    '@payloadcms/plugin-cloud',
+    '@payloadcms/payload-cloud',
   ].map((pkg) => `${pkg}@beta`)
 
   packagesToInstall.push(`@payloadcms/db-${dbType}@beta`)

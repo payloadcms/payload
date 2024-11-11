@@ -5,7 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import type { Value } from '../../fields/Relationship/types.js'
-import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
+import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 import type { Props } from './types.js'
 
 import { PlusIcon } from '../../icons/Plus/index.js'
@@ -48,7 +48,7 @@ export const AddNewRelation: React.FC<Props> = ({
     },
   )
 
-  const onSave: DocumentInfoContext['onSave'] = useCallback(
+  const onSave: DocumentDrawerContextType['onSave'] = useCallback(
     ({ doc, operation }) => {
       if (operation === 'create') {
         const newValue: Value = Array.isArray(relationTo)

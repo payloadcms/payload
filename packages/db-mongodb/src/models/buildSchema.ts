@@ -246,6 +246,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     buildSchemaOptions: BuildSchemaOptions,
   ): void => {
     field.fields.forEach((subField: Field) => {
+      if (fieldIsVirtual(subField)) {
+        return
+      }
+
       const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type]
 
       if (addFieldSchema) {
@@ -349,6 +353,9 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       type: {
         type: String,
         enum: ['Point'],
+        ...(typeof field.defaultValue !== 'undefined' && {
+          default: 'Point',
+        }),
       },
       coordinates: {
         type: [Number],
@@ -501,6 +508,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     buildSchemaOptions: BuildSchemaOptions,
   ): void => {
     field.fields.forEach((subField: Field) => {
+      if (fieldIsVirtual(subField)) {
+        return
+      }
+
       const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type]
 
       if (addFieldSchema) {
@@ -545,6 +556,9 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
   ): void => {
     field.tabs.forEach((tab) => {
       if (tabHasName(tab)) {
+        if (fieldIsVirtual(tab)) {
+          return
+        }
         const baseSchema = {
           type: buildSchema(config, tab.fields, {
             disableUnique: buildSchemaOptions.disableUnique,
@@ -562,6 +576,9 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
         })
       } else {
         tab.fields.forEach((subField: Field) => {
+          if (fieldIsVirtual(subField)) {
+            return
+          }
           const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type]
 
           if (addFieldSchema) {

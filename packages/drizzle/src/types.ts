@@ -121,6 +121,8 @@ export type RequireDrizzleKit = () => {
     schema: Record<string, unknown>,
     drizzle: DrizzleAdapter['drizzle'],
     filterSchema?: string[],
+    tablesFilter?: string[],
+    extensionsFilter?: string[],
   ) => Promise<{ apply; hasDataLoss; warnings }>
 }
 
@@ -164,6 +166,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   dropDatabase: DropDatabase
   enums?: never | Record<string, unknown>
   execute: Execute<unknown>
+
   features: {
     json?: boolean
   }
@@ -174,6 +177,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   fieldConstraints: Record<string, Record<string, string>>
   getMigrationTemplate: (args: MigrationTemplateArgs) => string
   idType: 'serial' | 'uuid'
+  indexes: Set<string>
   initializing: Promise<void>
   insert: Insert
   localesSuffix?: string
@@ -186,6 +190,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   requireDrizzleKit: RequireDrizzleKit
   resolveInitializing: () => void
   schema: Record<string, unknown>
+
   schemaName?: string
   sessions: {
     [id: string]: {

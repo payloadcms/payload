@@ -8,7 +8,7 @@ keywords: admin, components, custom, documentation, Content Management System, c
 
 The Payload [Admin Panel](./overview) is designed to be as minimal and straightforward as possible to allow for both easy customization and full control over the UI. In order for Payload to support this level of customization, Payload provides a pattern for you to supply your own React components through your [Payload Config](../configuration/overview).
 
-All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, with the exception of [Custom Providers](#custom-providers). This enables the use of the [Local API](../local-api) directly on the front-end. Custom Components are available for nearly every part of the Admin Panel for extreme granularity and control.
+All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, with the exception of [Custom Providers](#custom-providers). This enables the use of the [Local API](../local-api/overview) directly on the front-end. Custom Components are available for nearly every part of the Admin Panel for extreme granularity and control.
 
 <Banner type="success">
   <strong>Note:</strong>
@@ -145,7 +145,7 @@ Instead, we utilize component paths to reference React Components. This method e
 
 When constructing the `ClientConfig`, Payload uses the component paths as keys to fetch the corresponding React Component imports from the Import Map. It then substitutes the `PayloadComponent` with a `MappedComponent`. A `MappedComponent` includes the React Component and additional metadata, such as whether it's a server or a client component and which props it should receive. These components are then rendered through the `<RenderComponent />` component within the Payload Admin Panel.
 
-Import maps are regenerated whenever you modify any element related to component paths. This regeneration occurs at startup and whenever Hot Module Replacement (HMR) runs. If the import maps fail to regenerate during HMR, you can restart your application and execute the `payload generate:importmap` command to manually create a new import map. If you encounter any errors running this command, see the [Troubleshooting](/docs/beta/local-api/outside-nextjs#troubleshooting) section.
+Import maps are regenerated whenever you modify any element related to component paths. This regeneration occurs at startup and whenever Hot Module Replacement (HMR) runs. If the import maps fail to regenerate during HMR, you can restart your application and execute the `payload generate:importmap` command to manually create a new import map. If you encounter any errors running this command, see the [Troubleshooting](../local-api/outside-nextjs#troubleshooting) section.
 
 ### Component paths in external packages
 
@@ -329,7 +329,7 @@ export const useMyCustomContext = () => useContext(MyCustomContext)
 
 ## Building Custom Components
 
-All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, with the exception of [Custom Providers](#custom-providers). This enables the use of the [Local API](../local-api) directly on the front-end, among other things.
+All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, with the exception of [Custom Providers](#custom-providers). This enables the use of the [Local API](../local-api/overview) directly on the front-end, among other things.
 
 To make building Custom Components as easy as possible, Payload automatically provides common props, such as the [`payload`](../local-api/overview) class and the [`i18n`](../configuration/i18n) object. This means that when building Custom Components within the Admin Panel, you do not have to get these yourself.
 

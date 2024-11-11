@@ -6,6 +6,7 @@ import { relations } from 'drizzle-orm'
 import {
   boolean,
   foreignKey,
+  geometry,
   index,
   integer,
   jsonb,
@@ -30,10 +31,12 @@ import type {
 } from '../types.js'
 
 import { createTableName } from '../../createTableName.js'
+import { buildIndexName } from '../../utilities/buildIndexName.js'
 import { hasLocalesTable } from '../../utilities/hasLocalesTable.js'
 import { validateExistingBlockIsIdentical } from '../../utilities/validateExistingBlockIsIdentical.js'
 import { buildTable } from './build.js'
 import { createIndex } from './createIndex.js'
+import { geometryColumn } from './geometryColumn.js'
 import { idToUUID } from './idToUUID.js'
 import { parentIDColumnMap } from './parentIDColumnMap.js'
 import { withDefault } from './withDefault.js'
@@ -49,7 +52,6 @@ type Args = {
   fields: (Field | TabAsField)[]
   forceLocalized?: boolean
   indexes: Record<string, (cols: GenericColumns) => IndexBuilder>
-  joins?: SanitizedJoins
   localesColumns: Record<string, PgColumnBuilder>
   localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder>
   newTableName: string
@@ -88,7 +90,6 @@ export const traverseFields = ({
   fields,
   forceLocalized,
   indexes,
-  joins,
   localesColumns,
   localesIndexes,
   newTableName,
@@ -157,7 +158,7 @@ export const traverseFields = ({
 
       if (
         (field.unique || field.index || ['relationship', 'upload'].includes(field.type)) &&
-        !['array', 'blocks', 'group', 'point'].includes(field.type) &&
+        !['array', 'blocks', 'group'].includes(field.type) &&
         !('hasMany' in field && field.hasMany === true) &&
         !('relationTo' in field && Array.isArray(field.relationTo))
       ) {
@@ -169,10 +170,12 @@ export const traverseFields = ({
           }
           adapter.fieldConstraints[rootTableName][`${columnName}_idx`] = constraintValue
         }
-        targetIndexes[`${newTableName}_${field.name}Idx`] = createIndex({
+
+        const indexName = buildIndexName({ name: `${newTableName}_${columnName}`, adapter })
+
+        targetIndexes[indexName] = createIndex({
           name: field.localized ? [fieldName, '_locale'] : fieldName,
-          columnName,
-          tableName: newTableName,
+          indexName,
           unique,
         })
       }
@@ -260,6 +263,10 @@ export const traverseFields = ({
       }
 
       case 'point': {
+        targetTable[fieldName] = withDefault(geometryColumn(columnName), field)
+        if (!adapter.extensions.postgis) {
+          adapter.extensions.postgis = true
+        }
         break
       }
 
@@ -669,7 +676,6 @@ export const traverseFields = ({
             fields: field.fields,
             forceLocalized,
             indexes,
-            joins,
             localesColumns,
             localesIndexes,
             newTableName,
@@ -724,7 +730,6 @@ export const traverseFields = ({
           fields: field.fields,
           forceLocalized: field.localized,
           indexes,
-          joins,
           localesColumns,
           localesIndexes,
           newTableName: `${parentTableName}_${columnName}`,
@@ -780,7 +785,6 @@ export const traverseFields = ({
           fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
           forceLocalized,
           indexes,
-          joins,
           localesColumns,
           localesIndexes,
           newTableName,
@@ -836,7 +840,6 @@ export const traverseFields = ({
           fields: field.fields,
           forceLocalized,
           indexes,
-          joins,
           localesColumns,
           localesIndexes,
           newTableName,
@@ -932,30 +935,6 @@ export const traverseFields = ({
         }
 
         break
-
-      case 'join': {
-        // fieldName could be 'posts' or 'group_posts'
-        // using `on` as the key for the relation
-        const localized = adapter.payload.config.localization && field.localized
-        const fieldSchemaPath = `${fieldPrefix || ''}${field.name}`
-        let target: string
-        const joinConfig = joins[field.collection].find(
-          ({ schemaPath }) => fieldSchemaPath === schemaPath,
-        )
-        if (joinConfig.targetField.hasMany) {
-          target = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${adapter.relationshipsSuffix}`
-        } else {
-          target = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${localized ? adapter.localesSuffix : ''}`
-        }
-        relationsToBuild.set(fieldName, {
-          type: 'many',
-          // joins are not localized on the parent table
-          localized: false,
-          relationName: field.on.replaceAll('.', '_'),
-          target,
-        })
-        break
-      }
 
       default:
         break

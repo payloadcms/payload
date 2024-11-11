@@ -6,7 +6,7 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
-import type { Config, Media } from './payload-types.js'
+import type { Config, Media, Relation } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
@@ -58,6 +58,7 @@ describe('uploads', () => {
   let page: Page
   let pngDoc: Media
   let audioDoc: Media
+  let relationDoc: Relation
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -82,6 +83,7 @@ describe('uploads', () => {
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
+    await ensureCompilationIsDone({ page, serverURL })
 
     const findPNG = await payload.find({
       collection: mediaSlug,
@@ -96,6 +98,15 @@ describe('uploads', () => {
 
     pngDoc = findPNG.docs[0] as unknown as Media
 
+    const findRelationDoc = await payload.find({
+      collection: relationSlug,
+      depth: 0,
+      limit: 1,
+      pagination: false,
+    })
+
+    relationDoc = findRelationDoc.docs[0] as unknown as Relation
+
     const findAudio = await payload.find({
       collection: audioSlug,
       depth: 0,
@@ -103,8 +114,15 @@ describe('uploads', () => {
     })
 
     audioDoc = findAudio.docs[0] as unknown as Media
+  })
 
-    await ensureCompilationIsDone({ page, serverURL })
+  test('should show upload filename in upload collection list', async () => {
+    await page.goto(mediaURL.list)
+    const audioUpload = page.locator('tr.row-1 .cell-filename')
+    await expect(audioUpload).toHaveText('audio.mp3')
+
+    const imageUpload = page.locator('tr.row-2 .cell-filename')
+    await expect(imageUpload).toHaveText('image.png')
   })
 
   test('should see upload filename in relation list', async () => {
@@ -121,13 +139,84 @@ describe('uploads', () => {
     await expect(field).toContainText('image')
   })
 
-  test('should show upload filename in upload collection list', async () => {
-    await page.goto(mediaURL.list)
-    const audioUpload = page.locator('tr.row-1 .cell-filename')
-    await expect(audioUpload).toHaveText('audio.mp3')
+  test('should show resized images', async () => {
+    await page.goto(mediaURL.edit(pngDoc.id))
 
-    const imageUpload = page.locator('tr.row-2 .cell-filename')
-    await expect(imageUpload).toHaveText('image.png')
+    await page.locator('.file-field__previewSizes').click()
+
+    const maintainedAspectRatioItem = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(1)
+      .locator('.file-meta__size-type')
+    await expect(maintainedAspectRatioItem).toContainText('1024x1024')
+
+    const differentFormatFromMainImageMeta = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(2)
+      .locator('.file-meta__size-type')
+    await expect(differentFormatFromMainImageMeta).toContainText('image/jpeg')
+
+    const maintainedImageSizeMeta = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(3)
+      .locator('.file-meta__size-type')
+    await expect(maintainedImageSizeMeta).toContainText('1600x1600')
+
+    const maintainedImageSizeWithNewFormatMeta = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(4)
+      .locator('.file-meta__size-type')
+    await expect(maintainedImageSizeWithNewFormatMeta).toContainText('1600x1600')
+    await expect(maintainedImageSizeWithNewFormatMeta).toContainText('image/jpeg')
+
+    const sameSizeMeta = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(5)
+      .locator('.file-meta__size-type')
+    await expect(sameSizeMeta).toContainText('320x80')
+
+    const tabletMeta = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(6)
+      .locator('.file-meta__size-type')
+    await expect(tabletMeta).toContainText('640x480')
+
+    const mobileMeta = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(7)
+      .locator('.file-meta__size-type')
+    await expect(mobileMeta).toContainText('320x240')
+
+    const iconMeta = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(8)
+      .locator('.file-meta__size-type')
+    await expect(iconMeta).toContainText('16x16')
+  })
+
+  test('should update upload field after editing relationship in document drawer', async () => {
+    await page.goto(relationURL.edit(relationDoc.id))
+    await page.waitForURL(relationURL.edit(relationDoc.id))
+
+    const filename = page.locator('.upload-relationship-details__filename a').nth(0)
+    await expect(filename).toContainText('image.png')
+
+    await page.locator('.upload-relationship-details__edit').nth(0).click()
+    await page.locator('.file-details__remove').click()
+
+    const fileChooserPromise = page.waitForEvent('filechooser')
+    await page.getByText('Select a file').click()
+    const fileChooser = await fileChooserPromise
+    await wait(1000)
+    await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+
+    await page.locator('button#action-save').nth(1).click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
+
+    await page.locator('.doc-drawer__header-close').click()
+
+    await expect(filename).toContainText('test-image.png')
   })
 
   test('should create file upload', async () => {
@@ -190,61 +279,6 @@ describe('uploads', () => {
       .nth(1)
       .locator('.file-meta__url a')
     await expect(smallSquareFilename).toContainText(/480x480\.webp$/)
-  })
-
-  test('should show resized images', async () => {
-    await page.goto(mediaURL.edit(pngDoc.id))
-
-    await page.locator('.file-field__previewSizes').click()
-
-    const maintainedAspectRatioItem = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(1)
-      .locator('.file-meta__size-type')
-    await expect(maintainedAspectRatioItem).toContainText('1024x1024')
-
-    const differentFormatFromMainImageMeta = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(2)
-      .locator('.file-meta__size-type')
-    await expect(differentFormatFromMainImageMeta).toContainText('image/jpeg')
-
-    const maintainedImageSizeMeta = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(3)
-      .locator('.file-meta__size-type')
-    await expect(maintainedImageSizeMeta).toContainText('1600x1600')
-
-    const maintainedImageSizeWithNewFormatMeta = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(4)
-      .locator('.file-meta__size-type')
-    await expect(maintainedImageSizeWithNewFormatMeta).toContainText('1600x1600')
-    await expect(maintainedImageSizeWithNewFormatMeta).toContainText('image/jpeg')
-
-    const sameSizeMeta = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(5)
-      .locator('.file-meta__size-type')
-    await expect(sameSizeMeta).toContainText('320x80')
-
-    const tabletMeta = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(6)
-      .locator('.file-meta__size-type')
-    await expect(tabletMeta).toContainText('640x480')
-
-    const mobileMeta = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(7)
-      .locator('.file-meta__size-type')
-    await expect(mobileMeta).toContainText('320x240')
-
-    const iconMeta = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(8)
-      .locator('.file-meta__size-type')
-    await expect(iconMeta).toContainText('16x16')
   })
 
   test('should resize and show tiff images', async () => {
@@ -311,19 +345,19 @@ describe('uploads', () => {
     await wait(500) // flake workaround
     await page.locator('#field-audio .upload-relationship-details__remove').click()
 
-    await openDocDrawer(page, '#field-audio  .upload__listToggler')
+    await openDocDrawer(page, '#field-audio .upload__listToggler')
 
     const listDrawer = page.locator('[id^=list-drawer_1_]')
     await expect(listDrawer).toBeVisible()
 
     await openDocDrawer(page, 'button.list-drawer__create-new-button.doc-drawer__toggler')
-    await expect(page.locator('[id^=doc-drawer_media_2_]')).toBeVisible()
+    await expect(page.locator('[id^=doc-drawer_media_1_]')).toBeVisible()
 
     // upload an image and try to select it
     await page
-      .locator('[id^=doc-drawer_media_2_] .file-field__upload input[type="file"]')
+      .locator('[id^=doc-drawer_media_1_] .file-field__upload input[type="file"]')
       .setInputFiles(path.resolve(dirname, './image.png'))
-    await page.locator('[id^=doc-drawer_media_2_] button#action-save').click()
+    await page.locator('[id^=doc-drawer_media_1_] button#action-save').click()
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'successfully',
     )
@@ -366,7 +400,6 @@ describe('uploads', () => {
   })
 
   test('should render adminThumbnail when using a function', async () => {
-    await page.reload() // Flakey test, it likely has to do with the test that comes before it. Trace viewer is not helpful when it fails.
     await page.goto(adminThumbnailFunctionURL.list)
     await page.waitForURL(adminThumbnailFunctionURL.list)
 

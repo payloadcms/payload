@@ -1,11 +1,10 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 import type { Props, TogglerProps } from './types.js'
 
 import { XIcon } from '../../icons/X/index.js'
-import { EditDepthContext, useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Gutter } from '../Gutter/index.js'
 import './index.scss'
@@ -57,7 +56,7 @@ export const Drawer: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation()
   const { closeModal, modalState } = useModal()
-  const drawerDepth = useEditDepth()
+  const drawerDepth = useDrawerDepth()
 
   const [isOpen, setIsOpen] = useState(false)
   const [animateIn, setAnimateIn] = useState(false)
@@ -73,37 +72,37 @@ export const Drawer: React.FC<Props> = ({
   if (isOpen) {
     // IMPORTANT: do not render the drawer until it is explicitly open, this is to avoid large html trees especially when nesting drawers
     return (
-      <Modal
-        className={[
-          className,
-          baseClass,
-          animateIn && `${baseClass}--is-open`,
-          drawerDepth > 1 && `${baseClass}--nested`,
-        ]
-          .filter(Boolean)
-          .join(' ')}
-        slug={slug}
-        style={{
-          zIndex: drawerZBase + drawerDepth,
-        }}
-      >
-        {(!drawerDepth || drawerDepth === 1) && <div className={`${baseClass}__blur-bg`} />}
-        <button
-          aria-label={t('general:close')}
-          className={`${baseClass}__close`}
-          id={`close-drawer__${slug}`}
-          onClick={() => closeModal(slug)}
-          type="button"
-        />
-        <div
-          className={`${baseClass}__content`}
+      <DrawerDepthProvider>
+        <Modal
+          className={[
+            className,
+            baseClass,
+            animateIn && `${baseClass}--is-open`,
+            drawerDepth > 1 && `${baseClass}--nested`,
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          slug={slug}
           style={{
-            width: `calc(100% - (${drawerDepth} * var(--gutter-h))`,
+            zIndex: drawerZBase + drawerDepth,
           }}
         >
-          <div className={`${baseClass}__blur-bg-content`} />
-          <Gutter className={`${baseClass}__content-children`} left={gutter} right={gutter}>
-            <EditDepthContext.Provider value={drawerDepth + 1}>
+          {(!drawerDepth || drawerDepth === 1) && <div className={`${baseClass}__blur-bg`} />}
+          <button
+            aria-label={t('general:close')}
+            className={`${baseClass}__close`}
+            id={`close-drawer__${slug}`}
+            onClick={() => closeModal(slug)}
+            type="button"
+          />
+          <div
+            className={`${baseClass}__content`}
+            style={{
+              width: `calc(100% - (${drawerDepth} * var(--gutter-h))`,
+            }}
+          >
+            <div className={`${baseClass}__blur-bg-content`} />
+            <Gutter className={`${baseClass}__content-children`} left={gutter} right={gutter}>
               {Header}
               {Header === undefined && (
                 <div className={`${baseClass}__header`}>
@@ -125,12 +124,23 @@ export const Drawer: React.FC<Props> = ({
                 </div>
               )}
               {children}
-            </EditDepthContext.Provider>
-          </Gutter>
-        </div>
-      </Modal>
+            </Gutter>
+          </div>
+        </Modal>
+      </DrawerDepthProvider>
     )
   }
 
   return null
 }
+
+export const DrawerDepthContext = createContext(1)
+
+export const DrawerDepthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const parentDepth = useDrawerDepth()
+  const depth = parentDepth + 1
+
+  return <DrawerDepthContext.Provider value={depth}>{children}</DrawerDepthContext.Provider>
+}
+
+export const useDrawerDepth = (): number => useContext(DrawerDepthContext)

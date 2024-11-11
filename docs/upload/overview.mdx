@@ -43,7 +43,7 @@ Every Payload Collection can opt-in to supporting Uploads by specifying the `upl
 </Banner>
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -98,7 +98,7 @@ _An asterisk denotes that an option is required._
 | **`displayPreview`**           | Enable displaying preview of the uploaded file in Upload fields related to this Collection. Can be locally overridden by `displayPreview` option in Upload field. [More](/docs/fields/upload#config-options).                         |
 | **`externalFileHeaderFilter`** | Accepts existing headers and returns the headers after filtering or modifying.                                                                                                                                                        |
 | **`filesRequiredOnCreate`**    | Mandate file data on creation, default is true.                                                                                                                                                                                       |
-| **`filenameCompoundIndex`**    | Field slugs to use for a compount index instead of the default filename index.
+| **`filenameCompoundIndex`**    | Field slugs to use for a compound index instead of the default filename index.
 | **`focalPoint`**               | Set to `false` to disable the focal point selection tool in the [Admin Panel](../admin/overview). The focal point selector is only available when `imageSizes` or `resizeOptions` are defined. [More](#crop-and-focal-point-selector) |
 | **`formatOptions`**            | An object with `format` and `options` that are used with the Sharp image library to format the upload file. [More](https://sharp.pixelplumbing.com/api-output#toformat)                                                               |
 | **`handlers`**                 | Array of Request handlers to execute when fetching a file, if a handler returns a Response it will be sent to the client. Otherwise Payload will retrieve and send back the file.                                                     |
@@ -144,7 +144,7 @@ export default buildConfig({
 
 If you specify an array of `imageSizes` to your `upload` config, Payload will automatically crop and resize your uploads to fit each of the sizes specified by your config.
 
-The [Admin Panel](../admin/overview) will also automatically display all available files, including width, height, and filesize, for each of your uploaded files.
+The [Admin Panel](../admin/overview) will also automatically display all available files, including width, height, and file size, for each of your uploaded files.
 
 Behind the scenes, Payload relies on [`sharp`](https://sharp.pixelplumbing.com/api-resize#resize) to perform its image resizing. You can specify additional options for `sharp` to use while resizing your images.
 
@@ -217,7 +217,7 @@ You can specify how Payload retrieves admin thumbnails for your upload-enabled C
 1. `adminThumbnail` as a **string**, equal to one of your provided image size names.
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -246,7 +246,7 @@ export const Media: CollectionConfig = {
 2. `adminThumbnail` as a **function** that takes the document's data and sends back a full URL to load the thumbnail.
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -267,7 +267,7 @@ Some example values are: `image/*`, `audio/*`, `video/*`, `image/png`, `applicat
 **Example mimeTypes usage:**
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const Media: CollectionConfig = {
   slug: 'media',

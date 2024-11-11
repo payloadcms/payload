@@ -12,7 +12,10 @@ import type { GetResults, Option, Value } from './types.js'
 import { AddNewRelation } from '../../elements/AddNewRelation/index.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
@@ -21,9 +24,6 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { createRelationMap } from './createRelationMap.js'
 import { findOptionsByValue } from './findOptionsByValue.js'
@@ -38,32 +38,29 @@ const baseClass = 'relationship'
 
 const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => {
   const {
-    descriptionProps,
-    errorProps,
-    field,
     field: {
       name,
-      _path: pathFromProps,
       admin: {
         allowCreate = true,
         allowEdit = true,
         className,
         description,
         isSortable = true,
-        readOnly: readOnlyFromAdmin,
         sortOptions,
         style,
         width,
       } = {},
       hasMany,
+      label,
+      localized,
       relationTo,
       required,
     },
-    labelProps,
-    readOnly: readOnlyFromTopLevelProps,
+    path: pathFromProps,
+    readOnly,
     validate,
   } = props
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
+  const path = pathFromProps ?? name
 
   const { config } = useConfig()
 
@@ -103,24 +100,19 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     },
     [validate, required],
   )
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
   const {
+    customComponents: { Description, Error, Label } = {},
     filterOptions,
-    formInitializing,
-    formProcessing,
     initialValue,
-    path,
     setValue,
     showError,
     value,
   } = useField<Value | Value[]>({
-    path: pathFromContext ?? pathFromProps ?? name,
+    path,
     validate: memoizedValidate,
   })
   const [options, dispatchOptions] = useReducer(optionsReducer, [])
-
-  const readOnly = readOnlyFromProps || readOnlyFromContext || formInitializing
 
   const valueRef = useRef(value)
   valueRef.current = value
@@ -418,7 +410,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   useIgnoredEffect(
     () => {
       // If the menu is open while filterOptions changes
-      // due to latency of getFormState and fast clicking into this field,
+      // due to latency of form state and fast clicking into this field,
       // re-fetch options
       if (hasLoadedFirstPageRef.current && menuIsOpen) {
         setIsLoading(true)
@@ -457,26 +449,25 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         i18n,
       })
 
-      if (hasMany) {
-        setValue(
-          valueRef.current
-            ? (valueRef.current as Option[]).map((option) => {
-                if (option.value === args.doc.id) {
-                  return {
-                    relationTo: args.collectionConfig.slug,
-                    value: args.doc.id,
-                  }
-                }
+      const currentValue = valueRef.current
+      const docId = args.doc.id
 
-                return option
-              })
-            : null,
+      if (hasMany) {
+        const unchanged = (currentValue as Option[]).some((option) =>
+          typeof option === 'string' ? option === docId : option.value === docId,
         )
+
+        const valuesToSet = (currentValue as Option[]).map((option) =>
+          option.value === docId
+            ? { relationTo: args.collectionConfig.slug, value: docId }
+            : option,
+        )
+
+        setValue(valuesToSet, unchanged)
       } else {
-        setValue({
-          relationTo: args.collectionConfig.slug,
-          value: args.doc.id,
-        })
+        const unchanged = currentValue === docId
+
+        setValue({ relationTo: args.collectionConfig.slug, value: docId }, unchanged)
       }
     },
     [i18n, config, hasMany, setValue],
@@ -602,13 +593,16 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         width,
       }}
     >
-      <FieldLabel field={field} Label={field?.admin?.components?.Label} {...(labelProps || {})} />
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
+      />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError
-          CustomError={field?.admin?.components?.Error}
-          field={field}
-          path={path}
-          {...(errorProps || {})}
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
         />
         {!errorLoading && (
           <div className={`${baseClass}__wrap`}>
@@ -624,7 +618,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                 onDocumentDrawerOpen,
                 onSave,
               }}
-              disabled={readOnly || formProcessing || isDrawerOpen}
+              disabled={readOnly || isDrawerOpen}
               filterOption={enableWordBoundarySearch ? filterOption : undefined}
               getOptionValue={(option) => {
                 if (!option) {
@@ -714,11 +708,9 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
           </div>
         )}
         {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
-        <FieldDescription
-          Description={field?.admin?.components?.Description}
-          description={description}
-          field={field}
-          {...(descriptionProps || {})}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
         />
       </div>
       {currentlyOpenRelationship.collectionSlug && currentlyOpenRelationship.hasReadPermission && (

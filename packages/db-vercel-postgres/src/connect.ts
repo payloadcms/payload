@@ -26,7 +26,8 @@ export const connect: Connect = async function connect(
     const logger = this.logger || false
     // Passed the poolOptions if provided,
     // else have vercel/postgres detect the connection string from the environment
-    this.drizzle = drizzle(this.poolOptions ? new VercelPool(this.poolOptions) : sql, {
+    this.drizzle = drizzle({
+      client: this.poolOptions ? new VercelPool(this.poolOptions) : sql,
       logger,
       schema: this.schema,
     })
@@ -62,6 +63,8 @@ export const connect: Connect = async function connect(
     }
     process.exit(1)
   }
+
+  await this.createExtensions()
 
   // Only push schema if not in production
   if (

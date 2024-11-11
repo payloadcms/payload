@@ -1,11 +1,11 @@
-import type { BlockField, CollectionConfig } from 'payload'
+import type { BlocksField, CollectionConfig } from 'payload'
 
 import { slateEditor } from '@payloadcms/richtext-slate'
 
 import { blockFieldsSlug, textFieldsSlug } from '../../slugs.js'
 import { getBlocksFieldSeedData } from './shared.js'
 
-export const getBlocksField = (prefix?: string): BlockField => ({
+export const getBlocksField = (prefix?: string): BlocksField => ({
   name: 'blocks',
   type: 'blocks',
   blocks: [
