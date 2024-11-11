@@ -19,7 +19,7 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
     adapter.schema,
     adapter.drizzle,
     adapter.schemaName ? [adapter.schemaName] : undefined,
-    tablesFilter ? Array.from(tablesFilter) : undefined,
+    tablesFilter,
     // Drizzle extensionsFilter supports only postgis for now
     // https://github.com/drizzle-team/drizzle-orm/blob/83daf2d5cf023112de878bc2249ee2c41a2a5b1b/drizzle-kit/src/cli/validations/cli.ts#L26
     extensions.postgis ? ['postgis'] : undefined,
