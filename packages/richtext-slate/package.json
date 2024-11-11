@@ -22,10 +22,10 @@
       "types": "./src/exports/client/index.ts",
       "default": "./src/exports/client/index.ts"
     },
-    "./rscs": {
-      "import": "./src/exports/server/rscs.ts",
-      "types": "./src/exports/server/rscs.ts",
-      "default": "./src/exports/server/rscs.ts"
+    "./rsc": {
+      "import": "./src/exports/server/rsc.ts",
+      "types": "./src/exports/server/rsc.ts",
+      "default": "./src/exports/server/rsc.ts"
     }
   },
   "main": "./src/index.tsx",
@@ -74,10 +74,10 @@
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       },
-      "./rscs": {
-        "import": "./dist/exports/server/rscs.js",
-        "types": "./dist/exports/server/rscs.d.ts",
-        "default": "./dist/exports/server/rscs.js"
+      "./rsc": {
+        "import": "./dist/exports/server/rsc.js",
+        "types": "./dist/exports/server/rsc.d.ts",
+        "default": "./dist/exports/server/rsc.js"
       },
       "./client": {
         "import": "./dist/exports/client/index.js",

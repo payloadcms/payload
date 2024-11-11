@@ -134,7 +134,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
     return {
       CellComponent: {
-        path: '@payloadcms/richtext-lexical/rscs#RscEntryLexicalCell',
+        path: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell',
         serverProps: {
           admin: props?.admin,
           sanitizedEditorConfig: finalSanitizedEditorConfig,
@@ -143,7 +143,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       editorConfig: finalSanitizedEditorConfig,
       features,
       FieldComponent: {
-        path: '@payloadcms/richtext-lexical/rscs#RscEntryLexicalField',
+        path: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalField',
         serverProps: {
           admin: props?.admin,
           sanitizedEditorConfig: finalSanitizedEditorConfig,

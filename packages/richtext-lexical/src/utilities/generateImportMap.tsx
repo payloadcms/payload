@@ -7,8 +7,8 @@ import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
 export const getGenerateImportMap =
   (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): RichTextAdapter['generateImportMap'] =>
   ({ addToImportMap, baseDir, config, importMap, imports }) => {
-    addToImportMap('@payloadcms/richtext-lexical/rscs#RscEntryLexicalCell')
-    addToImportMap('@payloadcms/richtext-lexical/rscs#RscEntryLexicalField')
+    addToImportMap('@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell')
+    addToImportMap('@payloadcms/richtext-lexical/rsc#RscEntryLexicalField')
 
     // iterate just through args.resolvedFeatureMap.values()
     for (const resolvedFeature of args.resolvedFeatureMap.values()) {
