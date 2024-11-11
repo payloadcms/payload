@@ -723,6 +723,16 @@ interface RequestContext {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
+/**
+ * Export of all base fields that could potentially be
+ * useful as users wish to extend built-in fields with custom logic
+ */
+export { accountLockFields as baseAccountLockFields } from './auth/baseFields/accountLock.js'
+export { apiKeyFields as baseAPIKeyFields } from './auth/baseFields/apiKey.js'
+export { baseAuthFields } from './auth/baseFields/auth.js'
+export { emailFieldConfig as baseEmailField } from './auth/baseFields/email.js'
+export { usernameFieldConfig as baseUsernameField } from './auth/baseFields/username.js'
+export { verificationFields as baseVerificationFields } from './auth/baseFields/verification.js'
 export { default as executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
 export { getAccessResults } from './auth/getAccessResults.js'
@@ -810,9 +820,9 @@ export { findVersionsOperation } from './collections/operations/findVersions.js'
 export { restoreVersionOperation } from './collections/operations/restoreVersion.js'
 export { updateOperation } from './collections/operations/update.js'
 export { updateByIDOperation } from './collections/operations/updateByID.js'
+
 export { buildConfig } from './config/build.js'
 export type { ClientConfig } from './config/client.js'
-
 export { serverOnlyConfigProperties } from './config/client.js'
 export { defaults } from './config/defaults.js'
 export { sanitizeConfig } from './config/sanitize.js'
@@ -923,6 +933,7 @@ export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'
 export type { ServerOnlyFieldProperties } from './fields/config/client.js'
 export type { ServerOnlyFieldAdminProperties } from './fields/config/client.js'
+
 export { sanitizeFields } from './fields/config/sanitize.js'
 export type {
   AdminClient,
@@ -1017,7 +1028,6 @@ export type {
   ValidateOptions,
   ValueWithRelation,
 } from './fields/config/types.js'
-
 export { getDefaultValue } from './fields/getDefaultValue.js'
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
@@ -1110,6 +1120,7 @@ export type {
 } from './queues/config/types/workflowTypes.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
+export { getBaseUploadFields as getBaseUploadFields } from './uploads/getBaseFields.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export type * from './uploads/types.js'
 export { commitTransaction } from './utilities/commitTransaction.js'
@@ -1162,9 +1173,10 @@ export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { versionDefaults } from './versions/defaults.js'
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
+
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
-export { saveVersion } from './versions/saveVersion.js'
 
+export { saveVersion } from './versions/saveVersion.js'
 export type { TypeWithVersion } from './versions/types.js'
 export { deepMergeSimple } from '@payloadcms/translations/utilities'
