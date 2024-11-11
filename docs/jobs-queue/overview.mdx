@@ -166,7 +166,7 @@ If a task within a workflow fails, the Workflow will automatically "pick back up
 
 #### Defining a workflow
 
-The most important aspect of a Workflow is the `handler`, where you can declare when and how the tasks should run by simply calling the `runTask` function. If any task within the workflow, fails, the entire `handler` function will re-run.
+The most important aspect of a Workflow is the `handler`, where you can declare when and how the tasks should run by simply calling the task function, which you can find under the `tasks` object. If any task within the workflow, fails, the entire `handler` function will re-run.
 
 However, importantly, tasks that have successfully been completed will simply re-return the cached and saved output without running again. The Workflow will pick back up where it failed and only task from the failure point onward will be re-executed.
 
@@ -204,17 +204,16 @@ export default buildConfig({
         ],
 
         // The handler that defines the "control flow" of the workflow
-        // Notice how it calls `runTask` to execute tasks
-        handler: async ({ job, runTask }) => {
+        // Notice how it calls `tasks.[task name]` to execute tasks
+        handler: async ({ job, tasks }) => {
 
           // This workflow first runs a task called `createPost`
-          const output = await runTask({
-            task: 'createPost',
+          // You need to pass a unique ID for this task invocation as the first argument
+          // that will always be the same if this workflow fails
+          // and is re-executed in the future.
+          // Do not use IDs that change between invocations, like Date.now(), Math.random() or uuid()
+          const output = await tasks.createPost('1',{
 
-            // You need to define a unique ID for this task invocation
-            // that will always be the same if this workflow fails
-            // and is re-executed in the future
-            id: '1',
             input: {
               title: job.input.title,
             },
@@ -222,9 +221,7 @@ export default buildConfig({
 
           // Once the prior task completes, it will run a task
           // called `updatePost`
-          await runTask({
-            task: 'updatePost',
-            id: '2',
+          await tasks.updatePost('2', {
             input: {
               post: job.taskStatus.createPost['1'].output.postID, // or output.postID
               title: job.input.title + '2',
@@ -241,7 +238,7 @@ export default buildConfig({
 
 In the above example, our workflow was executing tasks that we already had defined in our Payload config. But, you can also run tasks without predefining them.
 
-To do this, you can use the `runTaskInline` function.
+To do this, you can use the `inlineTask` function.
 
 The drawbacks of this approach are that tasks cannot be re-used across workflows as easily, and the **task data stored in the job** will not be typed. In the following example, the inline task data will be stored on the job under `job.taskStatus.inline['2']` but completely untyped, as types for dynamic tasks like these cannot be generated beforehand.
 
@@ -264,13 +261,11 @@ export default buildConfig({
             required: true,
           },
         ],
-        handler: async ({ job, runTask }) => {
+        handler: async ({ job, tasks, inlineTask }) => {
           // Here, we run a predefined task.
           // The `createPost` handler arguments and return type
           // are both strongly typed
-          const output = await runTask({
-            task: 'createPost',
-            id: '1',
+          const output = await tasks.createPost('1', {
             input: {
               title: job.input.title,
             },
@@ -280,7 +275,7 @@ export default buildConfig({
           // Here, this task is not defined in the Payload config
           // and is "inline". Its output will be stored on the Job in the database
           // however its arguments will be untyped.
-          const { newPost } = await runTaskInline({
+          const { newPost } = await inlineTask('2', {
             task: async ({ req }) => {
               const newPost = await req.payload.update({
                 collection: 'post',
@@ -296,8 +291,7 @@ export default buildConfig({
                   newPost
                 },
               }
-            },
-            id: '2',
+            }
           })
         },
       } as WorkflowConfig<'updatePost'>
