@@ -19,7 +19,7 @@ export type IncomingCollectionVersions = {
 
 export interface SanitizedCollectionVersions extends Omit<IncomingCollectionVersions, 'drafts'> {
   drafts: false | SanitizedDrafts
-  maxPerDoc?: number
+  maxPerDoc: number
 }
 
 export type IncomingGlobalVersions = {

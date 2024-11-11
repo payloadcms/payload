@@ -242,6 +242,14 @@ const DocumentInfo: React.FC<
     [setPreference, preferencesKey, getDocPreferences],
   )
 
+  const incrementVersionCount = useCallback(() => {
+    if (collectionConfig && collectionConfig.versions) {
+      setVersionCount(Math.min(versionCount + 1, collectionConfig.versions.maxPerDoc))
+    } else if (globalConfig && globalConfig.versions) {
+      setVersionCount(Math.min(versionCount + 1, globalConfig.versions.max))
+    }
+  }, [collectionConfig, globalConfig, versionCount])
+
   useEffect(() => {
     setDocumentTitle(
       formatDocTitle({
@@ -296,18 +304,7 @@ const DocumentInfo: React.FC<
     hasPublishedDoc,
     hasPublishPermission,
     hasSavePermission,
-    incrementVersionCount: () => {
-      let maxVersions = 100
-
-      if (collectionConfig && typeof collectionConfig.versions.maxPerDoc === 'number') {
-        maxVersions = collectionConfig.versions.maxPerDoc
-      }
-      if (globalConfig && typeof globalConfig.versions.max === 'number') {
-        maxVersions = globalConfig.versions.max
-      }
-
-      setVersionCount(Math.min(versionCount + 1, maxVersions))
-    },
+    incrementVersionCount,
     initialData: data,
     initialState,
     isInitializing,
