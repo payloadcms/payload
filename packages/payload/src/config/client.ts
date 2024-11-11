@@ -19,6 +19,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'endpoints'
   | 'graphQL'
   | 'hooks'
+  | 'jobs'
   | 'logger'
   | 'onInit'
   | 'plugins'
@@ -39,7 +40,7 @@ export type ClientConfig = {
         Logo: MappedComponent
       }
       LogoutButton?: MappedComponent
-    }
+    } & Pick<SanitizedConfig['admin']['components'], 'views'>
     dependencies?: Record<string, MappedComponent>
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
@@ -64,6 +65,7 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'email',
   'custom',
   'graphQL',
-  'logger'
+  'jobs',
+  'logger',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]

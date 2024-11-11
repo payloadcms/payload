@@ -1,5 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
-import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { RequestContext } from '../../../index.js'
+import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Field, FieldHookArgs, TabAsField } from '../../config/types.js'
 
 import { fieldAffectsData, tabHasName } from '../../config/types.js'

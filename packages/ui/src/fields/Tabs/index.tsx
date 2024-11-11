@@ -112,7 +112,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
     return tabPath
   }
 
-  const activeTabDescription = activeTabConfig.description
+  const activeTabDescription = activeTabConfig?.description
   const activeTabStaticDescription =
     typeof activeTabDescription === 'function'
       ? activeTabDescription({ t: i18n.t })

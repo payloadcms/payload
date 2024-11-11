@@ -5,10 +5,17 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Categories } from './collections/Categories.js'
 import { CategoriesVersions } from './collections/CategoriesVersions.js'
 import { Posts } from './collections/Posts.js'
+import { Singular } from './collections/Singular.js'
 import { Uploads } from './collections/Uploads.js'
 import { Versions } from './collections/Versions.js'
 import { seed } from './seed.js'
-import { localizedCategoriesSlug, localizedPostsSlug } from './shared.js'
+import {
+  localizedCategoriesSlug,
+  localizedPostsSlug,
+  postsSlug,
+  restrictedCategoriesSlug,
+  restrictedPostsSlug,
+} from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -20,6 +27,7 @@ export default buildConfigWithDefaults({
     Uploads,
     Versions,
     CategoriesVersions,
+    Singular,
     {
       slug: localizedPostsSlug,
       admin: {
@@ -55,6 +63,53 @@ export default buildConfigWithDefaults({
           collection: localizedPostsSlug,
           on: 'category',
           localized: true,
+        },
+      ],
+    },
+    {
+      slug: restrictedCategoriesSlug,
+      admin: {
+        useAsTitle: 'name',
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          // this field is misconfigured to have `where` constraint using a restricted field
+          name: 'restrictedPosts',
+          type: 'join',
+          collection: postsSlug,
+          on: 'category',
+          where: {
+            restrictedField: { equals: 'restricted' },
+          },
+        },
+      ],
+    },
+    {
+      slug: restrictedPostsSlug,
+      admin: {
+        useAsTitle: 'title',
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'restrictedField',
+          type: 'text',
+          access: {
+            read: () => false,
+            update: () => false,
+          },
+        },
+        {
+          name: 'category',
+          type: 'relationship',
+          relationTo: restrictedCategoriesSlug,
         },
       ],
     },

@@ -21,11 +21,11 @@ Add the plugin to your Payload config
 `yarn add @payloadcms/payload-cloud`
 
 ```ts
-import { payloadCloud } from '@payloadcms/payload-cloud'
+import { payloadCloudPlugin } from '@payloadcms/payload-cloud'
 import { buildConfig } from 'payload'
 
 export default buildConfig({
-  plugins: [payloadCloud()],
+  plugins: [payloadCloudPlugin()],
   // rest of config
 })
 ```
@@ -41,7 +41,7 @@ After configuring, ensure that the `from` email address is from a domain you hav
 If you wish to opt-out of any Payload cloud features, the plugin also accepts options to do so.
 
 ```ts
-payloadCloud({
+payloadCloudPlugin({
   storage: false, // Disable file storage
   email: false, // Disable email delivery
   uploadCaching: false, // Disable upload caching
@@ -53,7 +53,7 @@ payloadCloud({
 If you wish to configure upload caching on a per-collection basis, you can do so by passing in a keyed object of collection names. By default, all collections will be cached for 24 hours (86400 seconds). The cache is invalidated when an item is updated or deleted.
 
 ```ts
-payloadCloud({
+payloadCloudPlugin({
   uploadCaching: {
     maxAge: 604800, // Override default maxAge for all collections
     collection1Slug: {

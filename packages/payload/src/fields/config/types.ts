@@ -121,10 +121,12 @@ import type {
   JSONFieldValidation,
   PointFieldValidation,
   RadioFieldValidation,
+  RequestContext,
+  Sort,
   TextareaFieldValidation,
 } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
+import type { Operation, PayloadRequest, Where } from '../../types/index.js'
 import type {
   NumberFieldManyValidation,
   NumberFieldSingleValidation,
@@ -1010,6 +1012,7 @@ export type JSONField = {
       Label?: CustomComponent<JSONFieldLabelClientComponent | JSONFieldLabelServerComponent>
     } & Admin['components']
     editorOptions?: EditorProps['options']
+    maxHeight?: number
   } & Admin
 
   jsonSchema?: {
@@ -1029,6 +1032,7 @@ export type JSONFieldClient = {
       Error?: MappedComponent
       Label?: MappedComponent
     } & AdminClient['components']
+    maxHeight?: number
   } & AdminClient &
     Pick<JSONField['admin'], 'editorOptions'>
 } & Omit<FieldBaseClient, 'admin'> &
@@ -1441,6 +1445,7 @@ export type JoinField = {
     update?: never
   }
   admin?: {
+    allowCreate?: boolean
     components?: {
       Error?: CustomComponent<JoinFieldErrorClientComponent | JoinFieldErrorServerComponent>
       Label?: CustomComponent<JoinFieldLabelClientComponent | JoinFieldLabelServerComponent>
@@ -1452,6 +1457,8 @@ export type JoinField = {
    * The slug of the collection to relate with.
    */
   collection: CollectionSlug
+  defaultLimit?: number
+  defaultSort?: Sort
   defaultValue?: never
   /**
    * This does not need to be set and will be overridden by the relationship field's hasMany property.
@@ -1470,17 +1477,19 @@ export type JoinField = {
   on: string
   type: 'join'
   validate?: never
+  where?: Where
 } & FieldBase
 
 export type JoinFieldClient = {
   admin?: {
+    allowCreate?: boolean
     components?: {
       Label?: MappedComponent
     } & AdminClient['components']
   } & AdminClient &
     Pick<JoinField['admin'], 'disableBulkEdit' | 'readOnly'>
 } & FieldBaseClient &
-  Pick<JoinField, 'collection' | 'index' | 'maxDepth' | 'on' | 'type'>
+  Pick<JoinField, 'collection' | 'index' | 'maxDepth' | 'on' | 'type' | 'where'>
 
 export type Field =
   | ArrayField

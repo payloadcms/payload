@@ -420,7 +420,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
       }
 
       if (field.type === 'join') {
-        const { limit = 10 } = joinQuery?.[`${fieldPrefix.replaceAll('_', '.')}${field.name}`] || {}
+        const { limit = field.defaultLimit ?? 10 } =
+          joinQuery?.[`${fieldPrefix.replaceAll('_', '.')}${field.name}`] || {}
 
         // raw hasMany results from SQLite
         if (typeof fieldData === 'string') {

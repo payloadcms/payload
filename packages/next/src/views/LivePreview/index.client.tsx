@@ -85,6 +85,7 @@ const PreviewView: React.FC<Props> = ({
     initialState,
     isEditing,
     isInitializing,
+    lastUpdateTime,
     onSave: onSaveFromProps,
     setCurrentEditor,
     setDocumentIsLocked,
@@ -109,23 +110,31 @@ const PreviewView: React.FC<Props> = ({
   const docConfig = collectionConfig || globalConfig
 
   const lockDocumentsProp = docConfig?.lockDocuments !== undefined ? docConfig?.lockDocuments : true
-
   const isLockingEnabled = lockDocumentsProp !== false
+
+  const lockDurationDefault = 300 // Default 5 minutes in seconds
+  const lockDuration =
+    typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
+  const lockDurationInMilliseconds = lockDuration * 1000
 
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
 
+  const [editSessionStartTime, setEditSessionStartTime] = useState(Date.now())
+
+  const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
+
+  const isLockExpired = Date.now() > lockExpiryTime
+
   const documentLockStateRef = useRef<{
     hasShownLockedModal: boolean
     isLocked: boolean
-    user: ClientUser
+    user: ClientUser | number | string
   } | null>({
     hasShownLockedModal: false,
     isLocked: false,
     user: null,
   })
-
-  const [lastUpdateTime, setLastUpdateTime] = useState(Date.now())
 
   const onSave = useCallback(
     (json) => {
@@ -170,12 +179,12 @@ const PreviewView: React.FC<Props> = ({
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
       const currentTime = Date.now()
-      const timeSinceLastUpdate = currentTime - lastUpdateTime
+      const timeSinceLastUpdate = currentTime - editSessionStartTime
 
       const updateLastEdited = isLockingEnabled && timeSinceLastUpdate >= 10000 // 10 seconds
 
       if (updateLastEdited) {
-        setLastUpdateTime(currentTime)
+        setEditSessionStartTime(currentTime)
       }
 
       const docPreferences = await getDocPreferences()
@@ -199,7 +208,10 @@ const PreviewView: React.FC<Props> = ({
       setDocumentIsLocked(true)
 
       if (isLockingEnabled) {
-        const previousOwnerId = documentLockStateRef.current?.user?.id
+        const previousOwnerId =
+          typeof documentLockStateRef.current?.user === 'object'
+            ? documentLockStateRef.current?.user?.id
+            : documentLockStateRef.current?.user
 
         if (lockedState) {
           if (!documentLockStateRef.current || lockedState.user.id !== previousOwnerId) {
@@ -222,12 +234,12 @@ const PreviewView: React.FC<Props> = ({
     },
     [
       collectionSlug,
+      editSessionStartTime,
       globalSlug,
       serverURL,
       apiRoute,
       id,
       isLockingEnabled,
-      lastUpdateTime,
       operation,
       schemaPath,
       getDocPreferences,
@@ -258,7 +270,11 @@ const PreviewView: React.FC<Props> = ({
       // Unlock the document only if we're actually navigating away from the document
       if (documentId && documentIsLocked && !isStayingWithinDocument) {
         // Check if this user is still the current editor
-        if (documentLockStateRef.current?.user?.id === user?.id) {
+        if (
+          typeof documentLockStateRef.current?.user === 'object'
+            ? documentLockStateRef.current?.user?.id === user?.id
+            : documentLockStateRef.current?.user === user?.id
+        ) {
           void unlockDocument(id, collectionSlug ?? globalSlug)
           setDocumentIsLocked(false)
           setCurrentEditor(null)
@@ -282,11 +298,14 @@ const PreviewView: React.FC<Props> = ({
   const shouldShowDocumentLockedModal =
     documentIsLocked &&
     currentEditor &&
-    currentEditor.id !== user.id &&
+    (typeof currentEditor === 'object'
+      ? currentEditor.id !== user?.id
+      : currentEditor !== user?.id) &&
     !isReadOnlyForIncomingUser &&
     !showTakeOverModal &&
     // eslint-disable-next-line react-compiler/react-compiler
-    !documentLockStateRef.current?.hasShownLockedModal
+    !documentLockStateRef.current?.hasShownLockedModal &&
+    !isLockExpired
 
   return (
     <OperationProvider operation={operation}>

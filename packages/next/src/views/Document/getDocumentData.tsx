@@ -47,7 +47,7 @@ export const getDocumentData = async (args: {
       formState,
     }
   } catch (error) {
-    console.error('Error getting document data', error) // eslint-disable-line no-console
+    req.payload.logger.error({ err: error, msg: 'Error getting document data' })
     return {
       data: null,
       formState: {

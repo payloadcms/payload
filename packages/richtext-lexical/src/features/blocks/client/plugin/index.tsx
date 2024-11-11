@@ -24,7 +24,6 @@ import {
   COMMAND_PRIORITY_EDITOR,
   type RangeSelection,
 } from 'lexical'
-import { useLexicalDrawer } from 'packages/richtext-lexical/src/utilities/fieldsDrawer/useLexicalDrawer.js'
 import React, { useEffect, useState } from 'react'
 
 import type { PluginComponent } from '../../../typesClient.js'
@@ -33,6 +32,7 @@ import type { BlocksFeatureClientProps } from '../index.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { FieldsDrawer } from '../../../../utilities/fieldsDrawer/Drawer.js'
+import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { $createBlockNode, BlockNode } from '../nodes/BlocksNode.js'
 import { $createInlineBlockNode, $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
 import {

@@ -1,14 +1,23 @@
-import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
-import type { Document, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type {
+  Document,
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  TransformCollectionWithSelect,
+} from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'
-import type { DataFromCollectionSlug, RequiredDataFromCollectionSlug } from '../../config/types.js'
+import type {
+  RequiredDataFromCollectionSlug,
+  SelectFromCollectionSlug,
+} from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { getFileByPath } from '../../../uploads/getFileByPath.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { createOperation } from '../create.js'
 
-export type Options<TSlug extends CollectionSlug> = {
+export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
@@ -25,16 +34,21 @@ export type Options<TSlug extends CollectionSlug> = {
   locale?: TypedLocale
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
+  select?: TSelect
   showHiddenFields?: boolean
   user?: Document
 }
 
 // eslint-disable-next-line no-restricted-exports
-export default async function createLocal<TSlug extends CollectionSlug>(
+export default async function createLocal<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   payload: Payload,
-  options: Options<TSlug>,
-): Promise<DataFromCollectionSlug<TSlug>> {
+  options: Options<TSlug, TSelect>,
+): Promise<TransformCollectionWithSelect<TSlug, TSelect>> {
   const {
     collection: collectionSlug,
     data,
@@ -46,6 +60,8 @@ export default async function createLocal<TSlug extends CollectionSlug>(
     filePath,
     overrideAccess = true,
     overwriteExistingFiles = false,
+    populate,
+    select,
     showHiddenFields,
   } = options
   const collection = payload.collections[collectionSlug]
@@ -59,7 +75,7 @@ export default async function createLocal<TSlug extends CollectionSlug>(
   const req = await createLocalReq(options, payload)
   req.file = file ?? (await getFileByPath(filePath))
 
-  return createOperation<TSlug>({
+  return createOperation<TSlug, TSelect>({
     collection,
     data,
     depth,
@@ -68,7 +84,9 @@ export default async function createLocal<TSlug extends CollectionSlug>(
     draft,
     overrideAccess,
     overwriteExistingFiles,
+    populate,
     req,
+    select,
     showHiddenFields,
   })
 }

@@ -1,5 +1,5 @@
 import type { PaginatedDocs } from '../../database/types.js'
-import type { PayloadRequest, Sort, Where } from '../../types/index.js'
+import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
@@ -18,7 +18,9 @@ export type Arguments = {
   overrideAccess?: boolean
   page?: number
   pagination?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
   sort?: Sort
   where?: Where
@@ -34,8 +36,10 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     overrideAccess,
     page,
     pagination = true,
+    populate,
     req: { fallbackLocale, locale, payload },
     req,
+    select,
     showHiddenFields,
     sort,
     where,
@@ -73,6 +77,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
       page: page || 1,
       pagination,
       req,
+      select,
       sort,
       where: fullWhere,
     })
@@ -84,27 +89,31 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     let result = {
       ...paginatedDocs,
       docs: await Promise.all(
-        paginatedDocs.docs.map(async (data) => ({
-          ...data,
-          version: await afterRead<T>({
-            collection: null,
-            context: req.context,
-            depth,
-            doc: {
-              ...data.version,
-              // Patch globalType onto version doc
-              globalType: globalConfig.slug,
-            },
-            draft: undefined,
-            fallbackLocale,
-            findMany: true,
-            global: globalConfig,
-            locale,
-            overrideAccess,
-            req,
-            showHiddenFields,
-          }),
-        })),
+        paginatedDocs.docs.map(async (data) => {
+          return {
+            ...data,
+            version: await afterRead<T>({
+              collection: null,
+              context: req.context,
+              depth,
+              doc: {
+                ...data.version,
+                // Patch globalType onto version doc
+                globalType: globalConfig.slug,
+              },
+              draft: undefined,
+              fallbackLocale,
+              findMany: true,
+              global: globalConfig,
+              locale,
+              overrideAccess,
+              populate,
+              req,
+              select,
+              showHiddenFields,
+            }),
+          }
+        }),
       ),
     } as PaginatedDocs<T>
 

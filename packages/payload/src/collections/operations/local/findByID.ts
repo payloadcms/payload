@@ -1,12 +1,30 @@
-import type { CollectionSlug, JoinQuery, Payload, TypedLocale } from '../../../index.js'
-import type { Document, PayloadRequest, RequestContext } from '../../../types/index.js'
-import type { DataFromCollectionSlug } from '../../config/types.js'
+/* eslint-disable no-restricted-exports */
+import type {
+  CollectionSlug,
+  JoinQuery,
+  Payload,
+  RequestContext,
+  SelectType,
+  TypedLocale,
+} from '../../../index.js'
+import type {
+  ApplyDisableErrors,
+  Document,
+  PayloadRequest,
+  PopulateType,
+  TransformCollectionWithSelect,
+} from '../../../types/index.js'
+import type { SelectFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findByIDOperation } from '../findByID.js'
 
-export type Options<TSlug extends CollectionSlug = CollectionSlug> = {
+export type Options<
+  TSlug extends CollectionSlug,
+  TDisableErrors extends boolean,
+  TSelect extends SelectType,
+> = {
   collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
@@ -14,27 +32,29 @@ export type Options<TSlug extends CollectionSlug = CollectionSlug> = {
   context?: RequestContext
   currentDepth?: number
   depth?: number
-  disableErrors?: boolean
+  disableErrors?: TDisableErrors
   draft?: boolean
   fallbackLocale?: TypedLocale
   id: number | string
   includeLockStatus?: boolean
-  joins?: JoinQuery
+  joins?: JoinQuery<TSlug>
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
+  select?: TSelect
   showHiddenFields?: boolean
   user?: Document
 }
 
-export default async function findByIDLocal<TOptions extends Options>(
+export default async function findByIDLocal<
+  TSlug extends CollectionSlug,
+  TDisableErrors extends boolean,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   payload: Payload,
-  options: TOptions,
-): Promise<
-  TOptions['disableErrors'] extends true
-    ? DataFromCollectionSlug<TOptions['collection']> | null
-    : DataFromCollectionSlug<TOptions['collection']>
-> {
+  options: Options<TSlug, TDisableErrors, TSelect>,
+): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> {
   const {
     id,
     collection: collectionSlug,
@@ -45,6 +65,8 @@ export default async function findByIDLocal<TOptions extends Options>(
     includeLockStatus,
     joins,
     overrideAccess = true,
+    populate,
+    select,
     showHiddenFields,
   } = options
 
@@ -56,7 +78,7 @@ export default async function findByIDLocal<TOptions extends Options>(
     )
   }
 
-  return findByIDOperation<TOptions['collection']>({
+  return findByIDOperation<TSlug, TDisableErrors, TSelect>({
     id,
     collection,
     currentDepth,
@@ -66,7 +88,9 @@ export default async function findByIDLocal<TOptions extends Options>(
     includeLockStatus,
     joins,
     overrideAccess,
+    populate,
     req: await createLocalReq(options, payload),
+    select,
     showHiddenFields,
   })
 }

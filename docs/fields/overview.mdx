@@ -356,7 +356,7 @@ For full details on Admin Options, see the [Field Admin Options](../admin/fields
 
 ## Custom ID Fields
 
-All [Collections](../configuration/collections) automatically generate their own ID field. If needed, you can override this behavior by providing an explicit ID field to your config. This will force users to provide a their own ID value when creating a record.
+All [Collections](../configuration/collections) automatically generate their own ID field. If needed, you can override this behavior by providing an explicit ID field to your config. This field should either be required or have a hook to generate the ID dynamically.
 
 To define a custom ID field, add a new field with the `name` property set to `id`:
 
@@ -368,6 +368,7 @@ export const MyCollection: CollectionConfig = {
   fields: [
     {
       name: 'id', // highlight-line
+      required: true,
       type: 'number',
     },
   ],

@@ -19,6 +19,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
       name,
       _path: pathFromProps,
       admin: {
+        allowCreate = true,
         components: { Label },
       },
       collection,
@@ -35,18 +36,24 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
     path: pathFromContext ?? pathFromProps ?? name,
   })
 
-  const filterOptions: Where = useMemo(
-    () => ({
+  const filterOptions: Where = useMemo(() => {
+    const where = {
       [on]: {
         in: [docID || null],
       },
-    }),
-    [docID, on],
-  )
+    }
+    if (field.where) {
+      return {
+        and: [where, field.where],
+      }
+    }
+    return where
+  }, [docID, on, field.where])
 
   return (
     <div className={[fieldBaseClass, 'join'].filter(Boolean).join(' ')}>
       <RelationshipTable
+        allowCreate={typeof docID !== 'undefined' && allowCreate}
         field={field as JoinFieldClient}
         filterOptions={filterOptions}
         initialData={docID && value ? value : ({ docs: [] } as PaginatedDocs)}

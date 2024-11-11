@@ -13,7 +13,9 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import {
   customIdNumberSlug,
   customIdSlug,
+  endpointsSlug,
   errorOnHookSlug,
+  methods,
   pointSlug,
   relationSlug,
   slug,
@@ -1644,6 +1646,25 @@ describe('collections-rest', () => {
       await expect(
         payload.findByID({ collection: 'posts', id, disableErrors: true }),
       ).resolves.toBeNull()
+    })
+  })
+
+  describe('Custom endpoints', () => {
+    it('should execute custom root endpoints', async () => {
+      for (const method of methods) {
+        const response = await restClient[method.toUpperCase()](`/${method}-test`, {})
+        await expect(response.text()).resolves.toBe(`${method} response`)
+      }
+    })
+
+    it('should execute custom collection endpoints', async () => {
+      for (const method of methods) {
+        const response = await restClient[method.toUpperCase()](
+          `/${endpointsSlug}/${method}-test`,
+          {},
+        )
+        await expect(response.text()).resolves.toBe(`${method} response`)
+      }
     })
   })
 })

@@ -1,16 +1,29 @@
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { CollectionSlug, JoinQuery } from '../../index.js'
-import type { PayloadRequest, Sort, Where } from '../../types/index.js'
-import type { Collection, DataFromCollectionSlug } from '../config/types.js'
+import type {
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  Sort,
+  TransformCollectionWithSelect,
+  Where,
+} from '../../types/index.js'
+import type {
+  Collection,
+  DataFromCollectionSlug,
+  SelectFromCollectionSlug,
+} from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
+import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
+import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
 import { buildAfterOperation } from './utils.js'
 
@@ -26,15 +39,20 @@ export type Arguments = {
   overrideAccess?: boolean
   page?: number
   pagination?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
   sort?: Sort
   where?: Where
 }
 
-export const findOperation = async <TSlug extends CollectionSlug>(
+export const findOperation = async <
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   incomingArgs: Arguments,
-): Promise<PaginatedDocs<DataFromCollectionSlug<TSlug>>> => {
+): Promise<PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>> => {
   let args = incomingArgs
 
   try {
@@ -68,8 +86,10 @@ export const findOperation = async <TSlug extends CollectionSlug>(
       overrideAccess,
       page,
       pagination = true,
+      populate,
       req: { fallbackLocale, locale, payload },
       req,
+      select,
       showHiddenFields,
       sort,
       where,
@@ -113,6 +133,13 @@ export const findOperation = async <TSlug extends CollectionSlug>(
 
     let fullWhere = combineQueries(where, accessResult)
 
+    const sanitizedJoins = await sanitizeJoinQuery({
+      collectionConfig,
+      joins,
+      overrideAccess,
+      req,
+    })
+
     if (collectionConfig.versions?.drafts && draftsEnabled) {
       fullWhere = appendVersionToQueryKey(fullWhere)
 
@@ -126,12 +153,13 @@ export const findOperation = async <TSlug extends CollectionSlug>(
 
       result = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
-        joins: req.payloadAPI === 'GraphQL' ? false : joins,
+        joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
         limit: sanitizedLimit,
         locale,
         page: sanitizedPage,
         pagination: usePagination,
         req,
+        select: getQueryDraftsSelect({ select }),
         sort: getQueryDraftsSort({ collectionConfig, sort }),
         where: fullWhere,
       })
@@ -145,12 +173,13 @@ export const findOperation = async <TSlug extends CollectionSlug>(
 
       result = await payload.db.find<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
-        joins: req.payloadAPI === 'GraphQL' ? false : joins,
+        joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
         limit: sanitizedLimit,
         locale,
         page: sanitizedPage,
         pagination,
         req,
+        select,
         sort,
         where: fullWhere,
       })
@@ -158,10 +187,18 @@ export const findOperation = async <TSlug extends CollectionSlug>(
 
     if (includeLockStatus) {
       try {
+        const lockDocumentsProp = collectionConfig?.lockDocuments
+
+        const lockDurationDefault = 300 // Default 5 minutes in seconds
+        const lockDuration =
+          typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
+        const lockDurationInMilliseconds = lockDuration * 1000
+
         const lockedDocuments = await payload.find({
           collection: 'payload-locked-documents',
           depth: 1,
           limit: sanitizedLimit,
+          overrideAccess: false,
           pagination: false,
           req,
           where: {
@@ -176,14 +213,27 @@ export const findOperation = async <TSlug extends CollectionSlug>(
                   in: result.docs.map((doc) => doc.id),
                 },
               },
+              // Query where the lock is newer than the current time minus lock time
+              {
+                updatedAt: {
+                  greater_than: new Date(new Date().getTime() - lockDurationInMilliseconds),
+                },
+              },
             ],
           },
         })
 
+        const now = new Date().getTime()
         const lockedDocs = Array.isArray(lockedDocuments?.docs) ? lockedDocuments.docs : []
 
+        // Filter out stale locks
+        const validLockedDocs = lockedDocs.filter((lock) => {
+          const lastEditedAt = new Date(lock?.updatedAt).getTime()
+          return lastEditedAt + lockDurationInMilliseconds > now
+        })
+
         result.docs = result.docs.map((doc) => {
-          const lockedDoc = lockedDocs.find((lock) => lock?.document?.value === doc.id)
+          const lockedDoc = validLockedDocs.find((lock) => lock?.document?.value === doc.id)
           return {
             ...doc,
             _isLocked: !!lockedDoc,
@@ -247,7 +297,9 @@ export const findOperation = async <TSlug extends CollectionSlug>(
             global: null,
             locale,
             overrideAccess,
+            populate,
             req,
+            select,
             showHiddenFields,
           }),
         ),
@@ -298,7 +350,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
     // Return results
     // /////////////////////////////////////
 
-    return result
+    return result as PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>
   } catch (error: unknown) {
     await killTransaction(args.req)
     throw error

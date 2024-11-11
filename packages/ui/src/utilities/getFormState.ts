@@ -9,7 +9,10 @@ export const getFormState = async (args: {
   serverURL: SanitizedConfig['serverURL']
   signal?: AbortSignal
   token?: string
-}): Promise<{ lockedState?: { isLocked: boolean; user: ClientUser }; state: FormState }> => {
+}): Promise<{
+  lockedState?: { isLocked: boolean; user: ClientUser }
+  state: FormState
+}> => {
   const { apiRoute, body, onError, serverURL, signal, token } = args
 
   const res = await fetch(`${serverURL}${apiRoute}/form-state`, {

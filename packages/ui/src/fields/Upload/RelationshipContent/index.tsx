@@ -1,7 +1,11 @@
 'use client'
 
+import type { TypeWithID } from 'payload'
+
 import { formatFilesize } from 'payload/shared'
 import React from 'react'
+
+import type { ReloadDoc } from '../types.js'
 
 import { Button } from '../../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
@@ -21,6 +25,7 @@ type Props = {
   readonly id: number | string
   readonly mimeType: string
   readonly onRemove: () => void
+  readonly reloadDoc: ReloadDoc
   readonly src: string
   readonly withMeta?: boolean
   readonly x?: number
@@ -38,11 +43,17 @@ export function RelationshipContent(props: Props) {
     filename,
     mimeType,
     onRemove,
+    reloadDoc,
     src,
     withMeta = true,
     x,
     y,
   } = props
+
+  const onSave = React.useCallback(
+    async ({ doc }: { doc: TypeWithID }) => reloadDoc(doc.id, collectionSlug),
+    [reloadDoc, collectionSlug],
+  )
 
   const [DocumentDrawer, _, { openDrawer }] = useDocumentDrawer({
     id,
@@ -108,7 +119,7 @@ export function RelationshipContent(props: Props) {
               onClick={() => onRemove()}
             />
           ) : null}
-          <DocumentDrawer />
+          <DocumentDrawer onSave={onSave} />
         </div>
       ) : null}
     </div>
