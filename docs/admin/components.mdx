@@ -6,7 +6,7 @@ desc: Fully customize your Admin Panel by swapping in your own React components.
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-The Payload [Admin Panel](./overview) is designed to be as minimal and straightforward as possible to allow for both easy customization and full control over the UI. In order for Payload to support this level of customization, Payload provides a pattern for you to supply your own React components through your [Payload Config](../configuration/overview).
+The Payload [Admin Panel](./overview) is designed to be as minimal and straightforward as possible to allow for easy customization and full control over the UI. In order for Payload to support this level of customization, Payload provides a pattern for you to supply your own React components through your [Payload Config](../configuration/overview).
 
 All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, with the exception of [Custom Providers](#custom-providers). This enables the use of the [Local API](../local-api/overview) directly on the front-end. Custom Components are available for nearly every part of the Admin Panel for extreme granularity and control.
 
@@ -22,47 +22,48 @@ There are four main types of Custom Components in Payload:
 - [Global Components](./globals#components)
 - [Field Components](./fields)
 
-To swap in your own Custom Component, consult the list of available components. Determine the scope that corresponds to what you are trying to accomplish, then [author your React component(s)](#building-custom-components) accordingly.
+To swap in your own Custom Component, first consult the list of available components, determine the scope that corresponds to what you are trying to accomplish, then [author your React component(s)](#building-custom-components) accordingly.
 
+## Defining Custom Components
 
-## Defining Custom Components in the Payload Config
+As Payload compiles the Admin Panel, it constantly checks your config for any Custom Components. When detected, Payload will either replace its own default component with your own, or render yours outright if there is no default.
 
-In the Payload Config, you can define custom React Components to enhance the admin interface. However, these components should not be imported directly into the server-only Payload Config to avoid including client-side code. Instead, you specify the path to the component. Here’s how you can do it:
+There are many places throughout the config where custom components can be defined, all of which follow the same structure.
 
+To add a Custom Component, specify the _file path_ that points to the component:
 
-src/components/Logout.tsx
-```tsx
-'use client'
-import React from 'react'
-
-export const MyComponent = () => {
-  return (
-    <button>Click me!</button>
-  )
-}
-```
-
-payload.config.ts:
 ```ts
 import { buildConfig } from 'payload'
 
 const config = buildConfig({
   // ...
-  admin: { // highlight-line
+  admin: {
     components: {
       logout: {
-        Button: '/src/components/Logout#MyComponent'
+        Button: '/src/components/Logout#MyComponent' // highlight-line
       }
     }
   },
 })
 ```
 
-In the path `/src/components/Logout#MyComponent`, `/src/components/Logout` is the file path, and `MyComponent` is the named export. If the component is the default export, the export name can be omitted. Path and export name are separated by a `#`.
+<Banner type="success">
+  <strong>Note:</strong>
+  All Custom Components can be either Server Components or Client Components, depending on the presence of the `use client` directive at the top of the file.
+</Banner>
 
-### Configuring the Base Directory
+### Component Paths
 
-Component paths, by default, are relative to your working directory - this is usually where your Next.js config lies. To simplify component paths, you have the option to configure the *base directory* using the `admin.baseDir.baseDir` property:
+Component paths, by default, are relative to your project's base directory. This is either your current working directory or the directory specified in `config.admin.baseDir`.
+
+Named exports are identified either by appending `#` followed by the export name. If the component is the default export, this can be omitted. For example, in the path `src/components/Logout#MyComponent`, `src/components/Logout` is the file path, and `MyComponent` is the named export.
+
+<Banner type="info">
+  <strong>Note:</strong>
+  The reason why components are defined as file paths instead of named imports is to ensure the Payload Config itself is fully Node.js compatible and remains as lightweight as possible.
+</Banner>
+
+To simplify component paths, you can also configure the base directory using the `admin.importMap.baseDir` property:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -73,79 +74,63 @@ const dirname = path.dirname(filename)
 
 const config = buildConfig({
   // ...
-  admin: { // highlight-line
-     importMap: {
-      baseDir: path.resolve(dirname, 'src'),
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname, 'src'), // highlight-line
     },
     components: {
       logout: {
-        Button: '/components/Logout#MyComponent'
+        Button: '/components/Logout#MyComponent' // highlight-line
       }
     }
   },
 })
 ```
 
-In this example, we set the base directory to the `src` directory - thus we can omit the `/src/` part of our component path string.
+In this example, we set the base directory to the `src` directory, and omit the `/src/` part of our component path string.
 
-### Passing Props
+### Config Options
 
-Each React Component in the Payload Config is typed as `PayloadComponent`. This usually is a string, but can also be an object containing the following properties:
+While Custom Components are usually defined as a string, you can also pass in an object with additional options:
 
-| Property      | Description                                                                                                                   |
-|---------------|-------------------------------------------------------------------------------------------------------------------------------|
-| `clientProps` | Props to be passed to the React Component if it's a Client Component                                                          |
-| `exportName`  | Instead of declaring named exports using `#` in the component path, you can also omit them from `path` and pass them in here. |
-| `path`        | Path to the React Component. Named exports can be appended to the end of the path, separated by a `#`                         |
-| `serverProps` | Props to be passed to the React Component if it's a Server Component                                                          |
-
-To pass in props from the config, you can use the `clientProps` and/or `serverProps` properties. This alleviates the need to use an HOC (Higher-Order-Component) to declare a React Component with props passed in.
-
-Here is an example:
-
-src/components/Logout.tsx
-```tsx
-'use client'
-import React from 'react'
-
-export const MyComponent = ({ text }: { text: string }) => {
-  return (
-    <button>Click me! {text}</button>
-  )
-}
-```
-
-payload.config.ts:
 ```ts
 import { buildConfig } from 'payload'
 
 const config = buildConfig({
   // ...
-  admin: { // highlight-line
+  admin: {
     components: {
       logout: {
+        // highlight-start
         Button: {
           path: '/src/components/Logout',
-          clientProps: {
-            text: 'Some Text.'
-          },
-          exportName: 'MyComponent'
+          exportName: 'MyComponent',
         }
+        // highlight-end
       }
     }
   },
 })
 ```
 
-### Import Maps
+The following options are available:
 
-It's essential to understand how `PayloadComponent` paths function behind the scenes. Directly importing React Components into your Payload Config using import statements can introduce client-only modules like CSS into your server-only config. This could error when attempting to load the Payload Config in server-only environments and unnecessarily increase the size of the Payload Config, which should remain streamlined and efficient for server use.
+| Property      | Description                                                                                                                   |
+|---------------|-------------------------------------------------------------------------------------------------------------------------------|
+| **`clientProps`** | Props to be passed to the React Component if it's a Client Component. [More details](#custom-props).                         |
+| **`exportName`**  | Instead of declaring named exports using `#` in the component path, you can also omit them from `path` and pass them in here. |
+| **`path`**        | Path to the React Component. Named exports can be appended to the end of the path, separated by a `#`.                         |
+| **`serverProps`** | Props to be passed to the React Component if it's a Server Component. [More details](#custom-props).                         |
 
-Instead, we utilize component paths to reference React Components. This method enhances the Payload Config with actual React Component imports on the client side, without affecting server-side usage. A script is deployed to scan the Payload Config, collecting all component paths and creating an `importMap.js`. This file, located in app/(payload)/admin/importMap.js, must be statically imported by your Next.js root page and layout. The script imports all the React Components from the specified paths into a Map, associating them with their respective paths (the ones you defined).
+For more details on how to build Custom Components, see [Building Custom Components](#building-custom-components).
 
-When constructing the `ClientConfig`, Payload uses the component paths as keys to fetch the corresponding React Component imports from the Import Map. It then substitutes the `PayloadComponent` with a `MappedComponent`. A `MappedComponent` includes the React Component and additional metadata, such as whether it's a server or a client component and which props it should receive. These components are then rendered through the `<RenderComponent />` component within the Payload Admin Panel.
+### Import Map
 
-Import maps are regenerated whenever you modify any element related to component paths. This regeneration occurs at startup and whenever Hot Module Replacement (HMR) runs. If the import maps fail to regenerate during HMR, you can restart your application and execute the `payload generate:importmap` command to manually create a new import map. If you encounter any errors running this command, see the [Troubleshooting](../local-api/outside-nextjs#troubleshooting) section.
+In order for Payload to make use of component paths, an "Import Map" is automatically generated at `app/(payload)/admin/importMap.js`. This file contains a Map of the imports for your Custom Components, keyed to their respective paths.
+
+The Import Map is regenerated whenever you modify Custom Components. This regeneration occurs at startup and whenever Hot Module Replacement (HMR) runs.
+
+The `payload generate:importmap` command can also be used to manually create a new Import Map. If you encounter any errors running this command, see the [Troubleshooting](../local-api/outside-nextjs#troubleshooting) section.
 
 ### Component paths in external packages
 
@@ -331,6 +316,8 @@ export const useMyCustomContext = () => useContext(MyCustomContext)
 
 All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, with the exception of [Custom Providers](#custom-providers). This enables the use of the [Local API](../local-api/overview) directly on the front-end, among other things.
 
+### Default Props
+
 To make building Custom Components as easy as possible, Payload automatically provides common props, such as the [`payload`](../local-api/overview) class and the [`i18n`](../configuration/i18n) object. This means that when building Custom Components within the Admin Panel, you do not have to get these yourself.
 
 Here is an example:
@@ -359,11 +346,45 @@ Each Custom Component receives the following props by default:
 | `payload`                 | The [Payload](../local-api/overview) class.                                                           |
 | `i18n`                    | The [i18n](../configuration/i18n) object.                                                                           |
 
-Custom Components also receive various other props that are specific to the context in which the Custom Component is being rendered. For example, [Custom Views](./views) receive the `user` prop. For a full list of available props, consult the documentation related to the specific component you are working with.
-
-<Banner type="success">
-  See [Root Components](#root-components), [Collection Components](#collection-components), [Global Components](#global-components), or [Field Components](#custom-field-components) for a complete list of all available components.
+<Banner type="warning">
+  <strong>Reminder:</strong>
+  All Custom Components also receive various other props that are specific component being rendered. See [Root Components](#root-components), [Collection Components](#collection-components), [Global Components](#global-components), or [Field Components](#custom-field-components) for a complete list of all default props per component.
 </Banner>
+
+### Custom Props
+
+To pass in custom props from the config, you can use either the `clientProps` or `serverProps` properties depending on whether your prop is [serializable](https://react.dev/reference/rsc/use-client#serializable-types), and whether your component is a Server or Client Component.
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: { // highlight-line
+    components: {
+      logout: {
+        Button: {
+          path: '/src/components/Logout#MyComponent',
+          clientProps: {
+            myCustomProp: 'Hello, World!' // highlight-line
+          },
+        }
+      }
+    }
+  },
+})
+```
+
+```tsx
+'use client'
+import React from 'react'
+
+export const MyComponent = ({ myCustomProp }: { myCustomProp: string }) => {
+  return (
+    <button>{myCustomProp}</button>
+  )
+}
+```
 
 ### Client Components
 
