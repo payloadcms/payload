@@ -686,7 +686,8 @@ describe('lexicalMain', () => {
   })
 
   /**
-   * A fix was implemented to resolve a limitation in Firefox where the escape key resets the active element to the beginning of the page
+   * When the escape key is pressed, Firefox resets the active element to the beginning of the page instead of staying with the editor.
+   * By applying a keydown listener when the escape key is pressed, we can programatically focus the previous element if shift+tab is pressed.
    */
   test('ensure escape key can be used to move focus away from editor', async () => {
     await navigateToLexicalFields()
@@ -713,7 +714,7 @@ describe('lexicalMain', () => {
     await paragraph.press('Shift+Tab')
     await expect(textField).not.toBeFocused()
   })
-    
+
   test('creating a link, then clicking in the link drawer, then saving the link, should preserve cursor position and not move cursor to beginning of richtext field', async () => {
     await navigateToLexicalFields()
     /**

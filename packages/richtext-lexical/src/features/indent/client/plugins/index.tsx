@@ -2,6 +2,7 @@
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin'
+import { mergeRegister } from '@lexical/utils'
 import { COMMAND_PRIORITY_LOW, FOCUS_COMMAND, KEY_ESCAPE_COMMAND } from 'lexical'
 import { useEffect, useState } from 'react'
 
@@ -13,38 +14,26 @@ export const IndentPlugin: PluginComponent<undefined> = () => {
   const [tabIndentEnabled, setTabIndentEnabled] = useState<boolean>(true)
 
   useEffect(() => {
-    const handleFocus = () => {
-      // Ensure the tab indent plugin is enabled on first visit to the editor
-      setTabIndentEnabled(true)
-    }
-
-    const handleEscape = () => {
-      setTabIndentEnabled(false)
-    }
-
-    const unregisterFocus = editor.registerCommand<MouseEvent>(
-      FOCUS_COMMAND,
-      () => {
-        handleFocus()
-        return true
-      },
-      COMMAND_PRIORITY_LOW,
+    return mergeRegister(
+      editor.registerCommand<MouseEvent>(
+        FOCUS_COMMAND,
+        () => {
+          // Ensure the tab indent plugin is enabled on first visit to the editor
+          setTabIndentEnabled(true)
+          return true
+        },
+        COMMAND_PRIORITY_LOW,
+      ),
+      editor.registerCommand(
+        KEY_ESCAPE_COMMAND,
+        () => {
+          setTabIndentEnabled(false)
+          return true
+        },
+        COMMAND_PRIORITY_LOW,
+      ),
     )
-
-    const unregisterEscape = editor.registerCommand<KeyboardEvent>(
-      KEY_ESCAPE_COMMAND,
-      () => {
-        handleEscape()
-        return true
-      },
-      COMMAND_PRIORITY_LOW,
-    )
-
-    return () => {
-      unregisterFocus()
-      unregisterEscape()
-    }
-  }, [editor])
+  }, [editor, setTabIndentEnabled])
 
   useEffect(() => {
     if (tabIndentEnabled) {
