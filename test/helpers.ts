@@ -46,6 +46,11 @@ const networkConditions = {
     latency: 1000,
     upload: ((3 * 1000 * 1000) / 8) * 0.8,
   },
+  'Fast 4G': {
+    download: ((20 * 1000 * 1000) / 8) * 0.8,
+    latency: 1000,
+    upload: ((10 * 1000 * 1000) / 8) * 0.8,
+  },
 }
 
 /**
@@ -341,7 +346,8 @@ export function initPageConsoleErrorCatch(page: Page) {
       !msg.text().includes('Failed to fetch RSC payload for') &&
       !msg.text().includes('Error: NEXT_NOT_FOUND') &&
       !msg.text().includes('Error: NEXT_REDIRECT') &&
-      !msg.text().includes('Error getting document data')
+      !msg.text().includes('Error getting document data') &&
+      !msg.text().includes('Failed trying to load default language strings')
     ) {
       // "Failed to fetch RSC payload for" happens seemingly randomly. There are lots of issues in the next.js repository for this. Causes e2e tests to fail and flake. Will ignore for now
       // the the server responded with a status of error happens frequently. Will ignore it for now.
