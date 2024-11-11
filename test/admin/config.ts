@@ -105,14 +105,6 @@ export default buildConfigWithDefaults({
         },
       },
     },
-    serverFunctions: [
-      {
-        name: 'my-server-function',
-        fn: ({ req, importMap, value }) => {
-          return `Hello, ${value as string}`
-        },
-      },
-    ],
     meta: {
       description: 'This is a custom meta description',
       icons: [

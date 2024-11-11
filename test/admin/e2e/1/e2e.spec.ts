@@ -718,27 +718,6 @@ describe('admin1', () => {
     })
   })
 
-  describe('server functions', () => {
-    // go to field with server function
-    test('should execute custom server function', async () => {
-      await page.goto(customFieldsURL.create)
-      await page.waitForURL(customFieldsURL.create)
-      await expect(page.locator('#field-customTextClientField')).toBeVisible()
-
-      await expect
-        .poll(
-          () =>
-            page
-              .locator('#server-function-result', {
-                hasText: exactText('Server Function result: Hello, world!'),
-              })
-              .innerText(),
-          { timeout: POLL_TOPASS_TIMEOUT },
-        )
-        .toBeTruthy()
-    })
-  })
-
   describe('API view', () => {
     test('collection — should not show API tab when disabled in config', async () => {
       await page.goto(postsUrl.collection(noApiViewCollectionSlug))
