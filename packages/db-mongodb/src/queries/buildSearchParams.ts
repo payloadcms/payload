@@ -89,17 +89,19 @@ export async function buildSearchParam({
   const [{ field, path }] = paths
 
   if (path) {
-    const {
-      operator: formattedOperator,
-      rawQuery,
-      val: formattedValue,
-    } = sanitizeQueryValue({
+    const sanitizedQueryValue = sanitizeQueryValue({
       field,
       hasCustomID,
       operator,
       path,
       val,
     })
+
+    if (!sanitizedQueryValue) {
+      return undefined
+    }
+
+    const { operator: formattedOperator, rawQuery, val: formattedValue } = sanitizedQueryValue
 
     if (rawQuery) {
       return { value: rawQuery }
