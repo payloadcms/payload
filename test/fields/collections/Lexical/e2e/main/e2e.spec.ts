@@ -77,7 +77,7 @@ describe('lexicalMain', () => {
     /*await throttleTest({
       page,
       context,
-      delay: 'Slow 4G',
+      delay: 'Fast 4G',
     })*/
     await reInitializeDB({
       serverURL,
@@ -114,6 +114,10 @@ describe('lexicalMain', () => {
   test('should not warn about unsaved changes when navigating to lexical editor with blocks node and then leaving the page after making a change and saving', async () => {
     // Relevant issue: https://github.com/payloadcms/payload/issues/4115
     await navigateToLexicalFields()
+    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
+      10,
+    )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
     const thirdBlock = page.locator('.rich-text-lexical').nth(2).locator('.lexical-block').nth(2)
     await thirdBlock.scrollIntoViewIfNeeded()
     await expect(thirdBlock).toBeVisible()
@@ -137,6 +141,10 @@ describe('lexicalMain', () => {
 
     // Save
     await saveDocAndAssert(page)
+    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
+      10,
+    )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
     await expect(newSpanInBlock).toHaveText('Some text below rmoretextelationship node 1')
 
     // Navigate to some different page, away from the current document
@@ -435,7 +443,10 @@ describe('lexicalMain', () => {
     await expect(uploadListDrawer).toBeHidden()
     await wait(500)
     await saveDocAndAssert(page)
-
+    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
+      10,
+    )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
     // second one should be the newly created one
     const secondUploadNode = richTextField.locator('.lexical-upload').nth(1)
     await secondUploadNode.scrollIntoViewIfNeeded()
@@ -516,6 +527,10 @@ describe('lexicalMain', () => {
     await wait(500)
     await saveDocAndAssert(page)
     await wait(500)
+    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
+      10,
+    )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
     // Reload page, open the extra fields drawer again and check if the text is still there
     await page.reload()
     await wait(300)

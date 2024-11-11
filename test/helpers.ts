@@ -124,7 +124,7 @@ export async function throttleTest({
   page,
 }: {
   context: BrowserContext
-  delay: 'Fast 3G' | 'Slow 3G' | 'Slow 4G'
+  delay: keyof typeof networkConditions
   page: Page
 }) {
   const cdpSession = await context.newCDPSession(page)
