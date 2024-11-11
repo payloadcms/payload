@@ -131,6 +131,7 @@ export type BasePostgresAdapter = {
   beforeSchemaInit: PostgresSchemaHook[]
   countDistinct: CountDistinct
   createDatabase: CreateDatabase
+  createExtensions: () => Promise<void>
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
   deleteWhere: DeleteWhere
   disableCreateDatabase: boolean
@@ -138,7 +139,7 @@ export type BasePostgresAdapter = {
   dropDatabase: DropDatabase
   enums: Record<string, GenericEnum>
   execute: Execute<unknown>
-  extensionsFilter: Set<string>
+  extensions: Record<string, boolean>
   /**
    * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
    * Used for returning properly formed errors from unique fields
@@ -152,7 +153,6 @@ export type BasePostgresAdapter = {
   operators: Operators
   pgSchema: Schema
   poolOptions?: ClientConfig
-  postgisCreated: boolean
   prodMigrations?: {
     down: (args: MigrateDownArgs) => Promise<void>
     name: string
@@ -173,7 +173,7 @@ export type BasePostgresAdapter = {
   }
   tableNameMap: Map<string, string>
   tables: Record<string, GenericTable>
-  tablesFilter: Set<string>
+  tablesFilter?: string[]
   versionsSuffix?: string
 } & PostgresDrizzleAdapter
 

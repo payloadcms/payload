@@ -101,6 +101,11 @@ export default buildConfigWithDefaults({
             { value: 'default', label: 'Default' },
           ],
         },
+        {
+          name: 'point',
+          type: 'point',
+          defaultValue: [10, 20],
+        },
       ],
     },
     {

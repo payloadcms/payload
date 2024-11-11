@@ -557,6 +557,10 @@ describe('database', () => {
       expect(result.array[0].defaultValue).toStrictEqual('default value from database')
       expect(result.group.defaultValue).toStrictEqual('default value from database')
       expect(result.select).toStrictEqual('default')
+      // eslint-disable-next-line jest/no-conditional-in-test
+      if (payload.db.name !== 'sqlite') {
+        expect(result.point).toStrictEqual({ coordinates: [10, 20], type: 'Point' })
+      }
     })
   })
   describe('drizzle: schema hooks', () => {

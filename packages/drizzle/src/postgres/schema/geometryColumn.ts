@@ -9,7 +9,7 @@ type Point = [number, number]
 export const geometryColumn = (name: string) =>
   customType<{ data: Point; driverData: string }>({
     dataType() {
-      return `geometry(Point,4326)`
+      return `geometry(Point)`
     },
     fromDriver(value: string) {
       return parseEWKB(value)

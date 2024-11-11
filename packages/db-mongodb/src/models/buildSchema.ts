@@ -353,6 +353,9 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       type: {
         type: String,
         enum: ['Point'],
+        ...(typeof field.defaultValue !== 'undefined' && {
+          default: 'Point',
+        }),
       },
       coordinates: {
         type: [Number],

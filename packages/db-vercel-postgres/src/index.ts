@@ -36,6 +36,7 @@ import {
   convertPathToJSONTraversal,
   countDistinct,
   createDatabase,
+  createExtensions,
   createJSONQuery,
   createMigration,
   defaultDrizzleSnapshot,
@@ -75,16 +76,22 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       adapterSchema = { enum: pgEnum, table: pgTable }
     }
 
+    const extensions = (args.extensions ?? []).reduce((acc, name) => {
+      acc[name] = true
+      return acc
+    }, {})
+
     return createDatabaseAdapter<VercelPostgresAdapter>({
       name: 'postgres',
       afterSchemaInit: args.afterSchemaInit ?? [],
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       createDatabase,
+      createExtensions,
       defaultDrizzleSnapshot,
       disableCreateDatabase: args.disableCreateDatabase ?? false,
       drizzle: undefined,
       enums: {},
-      extensionsFilter: new Set(args.extensionsFilter ?? []),
+      extensions,
       features: {
         json: true,
       },
@@ -99,7 +106,6 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       pgSchema: adapterSchema,
       pool: undefined,
       poolOptions: args.pool,
-      postgisCreated: false,
       prodMigrations: args.prodMigrations,
       push: args.push,
       relations: {},
@@ -109,7 +115,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       sessions: {},
       tableNameMap: new Map<string, string>(),
       tables: {},
-      tablesFilter: new Set(args.tablesFilter ?? []),
+      tablesFilter: args.tablesFilter,
       transactionOptions: args.transactionOptions || undefined,
       versionsSuffix: args.versionsSuffix || '_v',
 

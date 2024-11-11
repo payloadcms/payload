@@ -285,7 +285,7 @@ export function parseParams({
                   break
                 }
 
-                if (field.type === 'point') {
+                if (field.type === 'point' && adapter.name === 'postgres') {
                   switch (operator) {
                     case 'near': {
                       const [lng, lat, maxDistance, minDistance] = queryValue as number[]

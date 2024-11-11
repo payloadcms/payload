@@ -30,7 +30,7 @@ export type Args = {
    * @default false
    */
   disableCreateDatabase?: boolean
-  extensionsFilter?: string[]
+  extensions?: string[]
   idType?: 'serial' | 'uuid'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
@@ -71,6 +71,7 @@ declare module 'payload' {
     beginTransaction: (options?: PgTransactionConfig) => Promise<null | number | string>
     drizzle: PostgresDB
     enums: Record<string, GenericEnum>
+    extensions: Record<string, boolean>
     extensionsFilter: Set<string>
     /**
      * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
@@ -96,7 +97,7 @@ declare module 'payload' {
     schema: Record<string, unknown>
     schemaName?: Args['schemaName']
     tableNameMap: Map<string, string>
-    tablesFilter: Set<string>
+    tablesFilter?: string[]
     versionsSuffix?: string
   }
 }
