@@ -265,7 +265,7 @@ The following arguments are provided to the `validate` function:
 
 #### Validation Context
 
-The `ctx` argument contains full document data, sibling field data, the current operation, and other useful information such as currently authenticated in user:
+The `ctx` argument contains full document data, sibling field data, the current operation, and other useful information such as currently authenticated user:
 
 ```ts
 import type { Field } from 'payload'
@@ -359,7 +359,7 @@ For full details on Admin Options, see the [Field Admin Options](../admin/fields
 
 All [Collections](../configuration/collections) automatically generate their own ID field. If needed, you can override this behavior by providing an explicit ID field to your config. This field should either be required or have a hook to generate the ID dynamically.
 
-To define a custom ID field, add a new field with the `name` property set to `id`:
+To define a custom ID field, add a top-level field with the `name` property set to `id`:
 
 ```ts
 import type { CollectionConfig } from 'payload'
