@@ -149,6 +149,7 @@ export const initPage = async ({
     adminRoute,
     config: payload.config,
     defaultIDType: payload.db.defaultIDType,
+    payload,
     route,
   })
 
