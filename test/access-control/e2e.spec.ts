@@ -5,6 +5,7 @@ import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -345,6 +346,7 @@ describe('access control', () => {
         const documentDrawer = page.locator('[id^=doc-drawer_user-restricted-collection_1_]')
         await expect(documentDrawer).toBeVisible()
         await documentDrawer.locator('#field-name').fill('anonymous@email.com')
+        await wait(500)
         await documentDrawer.locator('#action-save').click()
         await expect(page.locator('.payload-toast-container')).toContainText('successfully')
         await expect(documentDrawer.locator('#field-name')).toBeDisabled()
