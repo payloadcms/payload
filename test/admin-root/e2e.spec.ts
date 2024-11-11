@@ -40,9 +40,18 @@ test.describe('Admin Panel (Root)', () => {
       },
       page,
       serverURL,
+      noAutoLogin: true,
     })
 
     await login({ page, serverURL, customRoutes: { admin: adminRoute } })
+
+    await ensureCompilationIsDone({
+      customRoutes: {
+        admin: adminRoute,
+      },
+      page,
+      serverURL,
+    })
   })
 
   test('renders admin panel at root', async () => {
