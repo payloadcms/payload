@@ -14,6 +14,7 @@ import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
+  throttleTest,
 } from '../../../../../helpers.js'
 import { AdminUrlUtil } from '../../../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../../../helpers/initPayloadE2ENoConfig.js'
@@ -152,6 +153,7 @@ describe('lexicalMain', () => {
     await expect(richTextField).toBeVisible()
     // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
     await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     const spanInEditor = richTextField.locator('span').getByText('Upload Node:').first()
     await expect(spanInEditor).toBeVisible()
@@ -198,6 +200,7 @@ describe('lexicalMain', () => {
     await expect(richTextField).toBeVisible()
     // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
     await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     const spanInEditor = richTextField.locator('span').getByText('Upload Node:').first()
     await expect(spanInEditor).toBeVisible()
@@ -307,6 +310,7 @@ describe('lexicalMain', () => {
     await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
       10,
     )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     // Find span in contentEditable with text "Some text below relationship node"
     const contentEditable = richTextField.locator('.ContentEditable__root').first()
@@ -370,6 +374,7 @@ describe('lexicalMain', () => {
     await expect(richTextField).toBeVisible()
     // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
     await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     const lastParagraph = richTextField.locator('p').last()
     await lastParagraph.scrollIntoViewIfNeeded()
@@ -397,6 +402,7 @@ describe('lexicalMain', () => {
     const uploadListDrawer = page.locator('dialog[id^=list-drawer_1_]').first() // IDs starting with list-drawer_1_ (there's some other symbol after the underscore)
     await expect(uploadListDrawer).toBeVisible()
     await wait(500)
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     await uploadListDrawer.locator('.rs__control .value-container').first().click()
     await wait(500)
@@ -452,6 +458,7 @@ describe('lexicalMain', () => {
 
     // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
     await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     const lastParagraph = richTextField.locator('p').last()
     await lastParagraph.scrollIntoViewIfNeeded()
@@ -512,6 +519,9 @@ describe('lexicalMain', () => {
     // Reload page, open the extra fields drawer again and check if the text is still there
     await page.reload()
     await wait(300)
+    await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+
     const reloadedUploadNode = page
       .locator('.rich-text-lexical')
       .nth(2)
@@ -585,6 +595,7 @@ describe('lexicalMain', () => {
     await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
       10,
     )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
     await paragraph.scrollIntoViewIfNeeded()
@@ -705,6 +716,7 @@ describe('lexicalMain', () => {
     await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
       10,
     )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
     await paragraph.scrollIntoViewIfNeeded()
@@ -807,6 +819,7 @@ describe('lexicalMain', () => {
     await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
       10,
     )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
     await paragraph.scrollIntoViewIfNeeded()
