@@ -1,4 +1,4 @@
-import type { QueryOptions } from 'mongoose'
+import type { CountOptions } from 'mongodb'
 import type { CountVersions, PayloadRequest } from 'payload'
 
 import { flattenWhereToOperators } from 'payload'
@@ -12,7 +12,7 @@ export const countVersions: CountVersions = async function countVersions(
   { collection, locale, req = {} as PayloadRequest, where },
 ) {
   const Model = this.versions[collection]
-  const options: QueryOptions = await withSession(this, req)
+  const options: CountOptions = await withSession(this, req)
 
   let hasNearConstraint = false
 

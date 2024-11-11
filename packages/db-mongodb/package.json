@@ -42,18 +42,17 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "bson-objectid": "2.0.4",
     "http-status": "1.6.2",
     "mongoose": "8.8.1",
-    "mongoose-aggregate-paginate-v2": "1.0.6",
-    "mongoose-paginate-v2": "1.7.22",
+    "mongoose-aggregate-paginate-v2": "1.1.2",
+    "mongoose-paginate-v2": "1.8.5",
     "prompts": "2.4.2",
     "uuid": "10.0.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/mongoose-aggregate-paginate-v2": "1.0.6",
-    "mongodb": "4.17.1",
+    "@types/mongoose-aggregate-paginate-v2": "1.0.12",
+    "mongodb": "6.10.0",
     "mongodb-memory-server": "^9",
     "payload": "workspace:*"
   },

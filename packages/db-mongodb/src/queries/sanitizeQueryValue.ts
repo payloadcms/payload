@@ -1,7 +1,6 @@
 import type { Field, TabAsField } from 'payload'
 
-import ObjectIdImport from 'bson-objectid'
-import mongoose from 'mongoose'
+import { Types } from 'mongoose'
 import { createArrayFromCommaDelineated } from 'payload'
 
 type SanitizeQueryValueArgs = {
@@ -36,8 +35,6 @@ const buildExistsQuery = (formattedValue, path) => {
   }
 }
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
 export const sanitizeQueryValue = ({
   field,
   hasCustomID,
@@ -56,17 +53,17 @@ export const sanitizeQueryValue = ({
   if (path === '_id') {
     if (typeof val === 'string' && val.split(',').length === 1) {
       if (!hasCustomID) {
-        const isValid = mongoose.Types.ObjectId.isValid(val)
+        const isValid = Types.ObjectId.isValid(val)
 
         if (!isValid) {
           return { operator: formattedOperator, val: undefined }
         } else {
           if (['in', 'not_in'].includes(operator)) {
-            formattedValue = createArrayFromCommaDelineated(formattedValue).map((id) =>
-              ObjectId(id),
+            formattedValue = createArrayFromCommaDelineated(formattedValue).map(
+              (id) => new Types.ObjectId(id),
             )
           } else {
-            formattedValue = ObjectId(val)
+            formattedValue = new Types.ObjectId(val)
           }
         }
       }
@@ -86,8 +83,8 @@ export const sanitizeQueryValue = ({
       formattedValue = formattedValue.reduce((formattedValues, inVal) => {
         const newValues = [inVal]
         if (!hasCustomID) {
-          if (mongoose.Types.ObjectId.isValid(inVal)) {
-            newValues.push(ObjectId(inVal))
+          if (Types.ObjectId.isValid(inVal)) {
+            newValues.push(new Types.ObjectId(inVal))
           }
         }
 
@@ -154,10 +151,10 @@ export const sanitizeQueryValue = ({
       formattedValue.relationTo
     ) {
       const { value } = formattedValue
-      const isValid = mongoose.Types.ObjectId.isValid(value)
+      const isValid = Types.ObjectId.isValid(value)
 
       if (isValid) {
-        formattedValue.value = ObjectId(value)
+        formattedValue.value = new Types.ObjectId(value)
       }
 
       return {
@@ -173,8 +170,8 @@ export const sanitizeQueryValue = ({
     if (['in', 'not_in'].includes(operator) && Array.isArray(formattedValue)) {
       formattedValue = formattedValue.reduce((formattedValues, inVal) => {
         const newValues = [inVal]
-        if (mongoose.Types.ObjectId.isValid(inVal)) {
-          newValues.push(ObjectId(inVal))
+        if (Types.ObjectId.isValid(inVal)) {
+          newValues.push(new Types.ObjectId(inVal))
         }
 
         const parsedNumber = parseFloat(inVal)
@@ -186,9 +183,9 @@ export const sanitizeQueryValue = ({
       }, [])
     }
 
-    if (operator === 'contains' && typeof formattedValue === 'string') {
-      if (mongoose.Types.ObjectId.isValid(formattedValue)) {
-        formattedValue = ObjectId(formattedValue)
+    if (typeof formattedValue === 'string') {
+      if (Types.ObjectId.isValid(formattedValue)) {
+        formattedValue = new Types.ObjectId(formattedValue)
       }
     }
   }
@@ -232,7 +229,7 @@ export const sanitizeQueryValue = ({
   }
 
   if (path !== '_id' || (path === '_id' && hasCustomID && field.type === 'text')) {
-    if (operator === 'contains' && !mongoose.Types.ObjectId.isValid(formattedValue)) {
+    if (operator === 'contains' && !Types.ObjectId.isValid(formattedValue)) {
       formattedValue = {
         $options: 'i',
         $regex: formattedValue.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
