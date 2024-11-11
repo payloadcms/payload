@@ -9,7 +9,7 @@
         content: '';
         position: absolute;
         top: 0;
-        left: 8px;
+        left: 6.5px;
         width: 1px;
         height: 100%;
         border-left: 1px dashed var(--theme-elevation-200);
@@ -77,7 +77,7 @@
     }
 
     &__row-line--nested {
-      margin-left: 25px;
+      margin-left: 12px;
     }
 
     &__bracket {
