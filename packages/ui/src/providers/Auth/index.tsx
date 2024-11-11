@@ -1,5 +1,5 @@
 'use client'
-import type { ClientUser, MeOperationResult, Permissions, User } from 'payload'
+import type { ClientUser, Permissions, User } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { usePathname, useRouter } from 'next/navigation.js'
@@ -14,9 +14,13 @@ import { requests } from '../../utilities/api.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { useConfig } from '../Config/index.js'
 
-export type UserResponse = MeOperationResult | null
+export type UserWithToken<T = ClientUser> = {
+  exp: number
+  token: string
+  user: T
+}
 
-export type AuthContext = {
+export type AuthContext<T = ClientUser> = {
   fetchFullUser: () => Promise<null | User>
   logOut: () => Promise<boolean>
   permissions?: Permissions
@@ -24,11 +28,11 @@ export type AuthContext = {
   refreshCookieAsync: () => Promise<ClientUser>
   refreshPermissions: () => Promise<void>
   setPermissions: (permissions: Permissions) => void
-  setUser: (user: UserResponse) => void
+  setUser: (user: null | UserWithToken<T>) => void
   strategy?: string
   token?: string
   tokenExpiration?: number
-  user?: null | UserResponse['user']
+  user?: null | T
 }
 
 const Context = createContext({} as AuthContext)
@@ -99,7 +103,7 @@ export function AuthProvider({
   }, [])
 
   const setNewUser = useCallback(
-    (userResponse: UserResponse) => {
+    (userResponse: null | UserWithToken) => {
       if (userResponse?.user) {
         setUserInMemory(userResponse.user)
         setTokenInMemory(userResponse.token)
@@ -242,7 +246,7 @@ export function AuthProvider({
       })
 
       if (request.status === 200) {
-        const json: MeOperationResult = await request.json()
+        const json: UserWithToken = await request.json()
         const user = null
 
         setNewUser(json)
@@ -292,6 +296,7 @@ export function AuthProvider({
 
       forceLogOut = setTimeout(() => {
         setNewUser(null)
+        redirectToInactivityRoute()
       }, forceLogOutInTimeFromNow)
     }
 
@@ -325,4 +330,4 @@ export function AuthProvider({
   )
 }
 
-export const useAuth = (): AuthContext => useContext(Context)
+export const useAuth = <T = ClientUser,>(): AuthContext<T> => useContext(Context) as AuthContext<T>

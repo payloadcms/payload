@@ -35,6 +35,7 @@ import {
 import {
   convertPathToJSONTraversal,
   countDistinct,
+  createDatabase,
   createJSONQuery,
   createMigration,
   defaultDrizzleSnapshot,
@@ -78,7 +79,9 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       name: 'postgres',
       afterSchemaInit: args.afterSchemaInit ?? [],
       beforeSchemaInit: args.beforeSchemaInit ?? [],
+      createDatabase,
       defaultDrizzleSnapshot,
+      disableCreateDatabase: args.disableCreateDatabase ?? false,
       drizzle: undefined,
       enums: {},
       features: {
@@ -87,6 +90,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       fieldConstraints: {},
       getMigrationTemplate,
       idType: postgresIDType,
+      indexes: new Set<string>(),
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,

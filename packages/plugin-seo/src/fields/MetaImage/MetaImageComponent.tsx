@@ -35,6 +35,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
       relationTo,
       required,
     },
+    field: fieldFromProps,
     hasGenerateImageFn,
     labelProps,
   } = props || {}
@@ -125,7 +126,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
       >
         <div className="plugin-seo__field">
           <FieldLabel
-            field={null}
+            field={fieldFromProps}
             Label={Label}
             label={label}
             required={required}

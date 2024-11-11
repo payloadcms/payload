@@ -13,6 +13,7 @@ export interface Config {
   collections: {
     pages: Page;
     posts: Post;
+    tests: Test;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -22,6 +23,7 @@ export interface Config {
     defaultIDType: string;
   };
   globals: {
+    admin: Admin;
     menu: Menu;
   };
   locale: null;
@@ -71,11 +73,23 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tests".
+ */
+export interface Test {
+  id: string;
+  text?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: string;
   name?: string | null;
+  roles?: ('is_user' | 'is_admin')[] | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -101,6 +115,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'tests';
+        value: string | Test;
       } | null)
     | ({
         relationTo: 'users';
@@ -147,6 +165,16 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin".
+ */
+export interface Admin {
+  id: string;
+  adminText?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

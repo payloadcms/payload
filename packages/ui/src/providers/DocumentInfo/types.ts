@@ -57,7 +57,7 @@ export type DocumentInfoProps = {
 }
 
 export type DocumentInfoContext = {
-  currentEditor?: ClientUser
+  currentEditor?: ClientUser | null | number | string
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
   documentIsLocked?: boolean
   getDocPermissions: (data?: Data) => Promise<void>
@@ -67,6 +67,7 @@ export type DocumentInfoContext = {
   initialState?: FormState
   isInitializing: boolean
   isLoading: boolean
+  lastUpdateTime?: number
   preferencesKey?: string
   publishedDoc?: { _status?: string } & TypeWithID & TypeWithTimestamps
   setCurrentEditor?: React.Dispatch<React.SetStateAction<ClientUser>>

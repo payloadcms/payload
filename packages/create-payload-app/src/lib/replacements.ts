@@ -82,8 +82,8 @@ const vercelBlobStorageReplacement: StorageAdapterReplacement = {
 
 const payloadCloudReplacement: StorageAdapterReplacement = {
   configReplacement: ['    payloadCloudPlugin(),'],
-  importReplacement: "import { payloadCloudPlugin } from '@payloadcms/plugin-cloud'",
-  packageName: '@payloadcms/plugin-cloud',
+  importReplacement: "import { payloadCloudPlugin } from '@payloadcms/payload-cloud'",
+  packageName: '@payloadcms/payload-cloud',
 }
 
 // Removes placeholders

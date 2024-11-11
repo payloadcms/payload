@@ -48,7 +48,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
   if (collectionSlug) {
     limitToUse = limitToUse || collectionConfig.admin.pagination.defaultLimit
     const whereQuery: {
-      and: Array<{ parent?: { equals: string }; snapshot?: { not_equals: boolean } }>
+      and: Array<{ parent?: { equals: number | string }; snapshot?: { not_equals: boolean } }>
     } = {
       and: [
         {
@@ -96,7 +96,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
         })
       }
     } catch (error) {
-      console.error(error) // eslint-disable-line no-console
+      payload.logger.error(error)
     }
   }
 
@@ -139,7 +139,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
         })
       }
     } catch (error) {
-      console.error(error) // eslint-disable-line no-console
+      payload.logger.error(error)
     }
 
     if (!versionsData) {

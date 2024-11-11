@@ -65,6 +65,7 @@ export const DefaultEditView: React.FC = () => {
     initialState,
     isEditing,
     isInitializing,
+    lastUpdateTime,
     onDelete,
     onDrawerCreate,
     onDuplicate,
@@ -110,8 +111,12 @@ export const DefaultEditView: React.FC = () => {
   const docConfig = collectionConfig || globalConfig
 
   const lockDocumentsProp = docConfig?.lockDocuments !== undefined ? docConfig?.lockDocuments : true
-
   const isLockingEnabled = lockDocumentsProp !== false
+
+  const lockDurationDefault = 300 // Default 5 minutes in seconds
+  const lockDuration =
+    typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
+  const lockDurationInMilliseconds = lockDuration * 1000
 
   let preventLeaveWithoutSaving = true
 
@@ -130,17 +135,21 @@ export const DefaultEditView: React.FC = () => {
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
 
+  const [editSessionStartTime, setEditSessionStartTime] = useState(Date.now())
+
+  const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
+
+  const isLockExpired = Date.now() > lockExpiryTime
+
   const documentLockStateRef = useRef<{
     hasShownLockedModal: boolean
     isLocked: boolean
-    user: ClientUser
+    user: ClientUser | number | string
   } | null>({
     hasShownLockedModal: false,
     isLocked: false,
     user: null,
   })
-
-  const [lastUpdateTime, setLastUpdateTime] = useState(Date.now())
 
   const classes = [baseClass, (id || globalSlug) && `${baseClass}--is-editing`]
 
@@ -230,12 +239,12 @@ export const DefaultEditView: React.FC = () => {
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
       const currentTime = Date.now()
-      const timeSinceLastUpdate = currentTime - lastUpdateTime
+      const timeSinceLastUpdate = currentTime - editSessionStartTime
 
       const updateLastEdited = isLockingEnabled && timeSinceLastUpdate >= 10000 // 10 seconds
 
       if (updateLastEdited) {
-        setLastUpdateTime(currentTime)
+        setEditSessionStartTime(currentTime)
       }
 
       const docPreferences = await getDocPreferences()
@@ -259,7 +268,10 @@ export const DefaultEditView: React.FC = () => {
       setDocumentIsLocked(true)
 
       if (isLockingEnabled) {
-        const previousOwnerId = documentLockStateRef.current?.user?.id
+        const previousOwnerId =
+          typeof documentLockStateRef.current?.user === 'object'
+            ? documentLockStateRef.current?.user?.id
+            : documentLockStateRef.current?.user
 
         if (lockedState) {
           if (!documentLockStateRef.current || lockedState.user.id !== previousOwnerId) {
@@ -283,6 +295,7 @@ export const DefaultEditView: React.FC = () => {
     [
       apiRoute,
       collectionSlug,
+      editSessionStartTime,
       schemaPath,
       getDocPreferences,
       globalSlug,
@@ -294,7 +307,6 @@ export const DefaultEditView: React.FC = () => {
       setCurrentEditor,
       isLockingEnabled,
       setDocumentIsLocked,
-      lastUpdateTime,
     ],
   )
 
@@ -319,7 +331,11 @@ export const DefaultEditView: React.FC = () => {
       // Unlock the document only if we're actually navigating away from the document
       if (documentId && documentIsLocked && !isStayingWithinDocument) {
         // Check if this user is still the current editor
-        if (documentLockStateRef.current?.user?.id === user?.id) {
+        if (
+          typeof documentLockStateRef.current?.user === 'object'
+            ? documentLockStateRef.current?.user?.id === user?.id
+            : documentLockStateRef.current?.user === user?.id
+        ) {
           void unlockDocument(id, collectionSlug ?? globalSlug)
           setDocumentIsLocked(false)
           setCurrentEditor(null)
@@ -343,10 +359,13 @@ export const DefaultEditView: React.FC = () => {
   const shouldShowDocumentLockedModal =
     documentIsLocked &&
     currentEditor &&
-    currentEditor.id !== user.id &&
+    (typeof currentEditor === 'object'
+      ? currentEditor.id !== user?.id
+      : currentEditor !== user?.id) &&
     !isReadOnlyForIncomingUser &&
     !showTakeOverModal &&
-    !documentLockStateRef.current?.hasShownLockedModal
+    !documentLockStateRef.current?.hasShownLockedModal &&
+    !isLockExpired
 
   return (
     <main className={classes.filter(Boolean).join(' ')}>

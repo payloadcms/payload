@@ -20,6 +20,7 @@ export const buildVersionGlobalFields = (
       admin: {
         disabled: true,
       },
+      index: true,
     },
     {
       name: 'updatedAt',
@@ -27,6 +28,7 @@ export const buildVersionGlobalFields = (
       admin: {
         disabled: true,
       },
+      index: true,
     },
   ]
 

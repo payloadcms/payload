@@ -1,10 +1,11 @@
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { Payload } from '../index.js'
-import type { PayloadRequest } from '../types/index.js'
+import type { FindVersionsArgs, Payload } from '../index.js'
+import type { PayloadRequest, SelectType } from '../types/index.js'
 
 import { deepCopyObjectSimple } from '../index.js'
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields.js'
+import { getQueryDraftsSelect } from './drafts/getQueryDraftsSelect.js'
 import { enforceMaxVersions } from './enforceMaxVersions.js'
 
 type Args = {
@@ -17,6 +18,7 @@ type Args = {
   payload: Payload
   publishSpecificLocale?: string
   req?: PayloadRequest
+  select?: SelectType
   snapshot?: any
 }
 
@@ -30,6 +32,7 @@ export const saveVersion = async ({
   payload,
   publishSpecificLocale,
   req,
+  select,
   snapshot,
 }: Args): Promise<TypeWithID> => {
   let result
@@ -52,6 +55,7 @@ export const saveVersion = async ({
         req,
         sort: '-updatedAt',
       }
+
       if (collection) {
         ;({ docs } = await payload.db.findVersions({
           ...findVersionArgs,
@@ -82,7 +86,9 @@ export const saveVersion = async ({
 
         const data: Record<string, unknown> = {
           createdAt: new Date(latestVersion.createdAt).toISOString(),
-          updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
+          latest: true,
+          parent: id,
+          updatedAt: now,
           version: {
             ...versionData,
           },
@@ -114,12 +120,13 @@ export const saveVersion = async ({
       const createVersionArgs = {
         autosave: Boolean(autosave),
         collectionSlug: undefined,
-        createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
+        createdAt: now,
         globalSlug: undefined,
         parent: collection ? id : undefined,
         publishedLocale: publishSpecificLocale || undefined,
         req,
-        updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
+        select: getQueryDraftsSelect({ select }),
+        updatedAt: now,
         versionData,
       }
 
@@ -194,8 +201,6 @@ export const saveVersion = async ({
   }
 
   let createdVersion = result.version
-  createdVersion.createdAt = result.createdAt
-  createdVersion.updatedAt = result.updatedAt
 
   createdVersion = sanitizeInternalFields(createdVersion)
   createdVersion.id = result.parent

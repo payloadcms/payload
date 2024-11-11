@@ -13,6 +13,7 @@ import type {
   LabelsClient,
   MappedComponent,
   Payload,
+  PayloadComponent,
   RadioFieldClient,
   RichTextFieldClient,
   RichTextGenerateComponentMap,
@@ -25,7 +26,7 @@ import type {
   TabsFieldClient,
 } from 'payload'
 
-import { MissingEditorProp } from 'payload'
+import { deepCopyObjectSimple, flattenTopLevelFields, MissingEditorProp } from 'payload'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 
 import { getComponent } from './getComponent.js'
@@ -247,15 +248,35 @@ export const createClientField = ({
         field.admin.components = {}
       }
 
+      /**
+       * We have to deep copy all the props we send to the client (= FieldComponent.clientProps).
+       * That way, every editor's field / cell props we send to the client have their own object references.
+       *
+       * If we send the same object reference to the client twice (e.g. through some configurations where 2 or more fields
+       * reference the same editor object, like the root editor), the admin panel may hang indefinitely. This has been happening since
+       * a newer Next.js update that made it break when sending the same object reference to the client twice.
+       *
+       * We can use deepCopyObjectSimple as client props should be JSON-serializable.
+       */
+      const FieldComponent: PayloadComponent = incomingField.editor.FieldComponent
+      if (typeof FieldComponent === 'object' && FieldComponent.clientProps) {
+        FieldComponent.clientProps = deepCopyObjectSimple(FieldComponent.clientProps)
+      }
+
       field.admin.components.Field = createMappedComponent(
-        incomingField.editor.FieldComponent,
+        FieldComponent,
         serverProps,
         undefined,
         'incomingField.editor.FieldComponent',
       )
 
+      const CellComponent: PayloadComponent = incomingField.editor.CellComponent
+      if (typeof CellComponent === 'object' && CellComponent.clientProps) {
+        CellComponent.clientProps = deepCopyObjectSimple(CellComponent.clientProps)
+      }
+
       field.admin.components.Cell = createMappedComponent(
-        incomingField.editor.CellComponent,
+        CellComponent,
         serverProps,
         undefined,
         'incomingField.editor.CellComponent',
@@ -319,10 +340,6 @@ export const createClientField = ({
 
       break
     }
-
-    // case 'joins': {
-    //
-    // }
 
     case 'select':
     case 'radio': {
@@ -562,7 +579,7 @@ export const createClientFields = ({
     }
   }
 
-  const hasID = newClientFields.findIndex((f) => fieldAffectsData(f) && f.name === 'id') > -1
+  const hasID = flattenTopLevelFields(fields).some((f) => fieldAffectsData(f) && f.name === 'id')
 
   if (!disableAddingID && !hasID) {
     newClientFields.push({

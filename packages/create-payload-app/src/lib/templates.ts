@@ -1,6 +1,7 @@
 import type { ProjectTemplate } from '../types.js'
 
 import { error, info } from '../utils/log.js'
+import { PACKAGE_VERSION } from './constants.js'
 
 export function validateTemplate(templateName: string): boolean {
   const validTemplates = getValidTemplates()
@@ -18,13 +19,13 @@ export function getValidTemplates(): ProjectTemplate[] {
       name: 'blank',
       type: 'starter',
       description: 'Blank 3.0 Template',
-      url: 'https://github.com/payloadcms/payload/templates/blank#beta',
+      url: `https://github.com/payloadcms/payload/templates/blank#v${PACKAGE_VERSION}`,
     },
     {
       name: 'website',
       type: 'starter',
       description: 'Website Template',
-      url: 'https://github.com/payloadcms/payload/templates/website#beta',
+      url: `https://github.com/payloadcms/payload/templates/website#v${PACKAGE_VERSION}`,
     },
 
     // Remove these until they have been updated for 3.0

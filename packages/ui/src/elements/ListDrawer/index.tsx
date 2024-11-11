@@ -27,12 +27,14 @@ export const ListDrawerToggler: React.FC<ListTogglerProps> = ({
   className,
   disabled,
   drawerSlug,
+  onClick,
   ...rest
 }) => {
   return (
     <DrawerToggler
       className={[className, `${baseClass}__toggler`].filter(Boolean).join(' ')}
       disabled={disabled}
+      onClick={onClick}
       slug={drawerSlug}
       {...rest}
     >

@@ -16,7 +16,11 @@ import './index.scss'
 const baseClass = 'dashboard'
 
 export type DashboardProps = {
-  globalData: Array<{ data: { _isLocked: boolean; _userEditing: ClientUser | null }; slug: string }>
+  globalData: Array<{
+    data: { _isLocked: boolean; _lastEditedAt: string; _userEditing: ClientUser | number | string }
+    lockDuration?: number
+    slug: string
+  }>
   Link: React.ComponentType<any>
   navGroups?: ReturnType<typeof groupNavItems>
   permissions: Permissions
@@ -95,7 +99,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                       let createHREF: string
                       let href: string
                       let hasCreatePermission: boolean
-                      let lockStatus = null
+                      let isLocked = null
                       let userEditing = null
 
                       if (type === EntityType.collection) {
@@ -130,9 +134,24 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                         const globalLockData = globalData.find(
                           (global) => global.slug === entity.slug,
                         )
+
                         if (globalLockData) {
-                          lockStatus = globalLockData.data._isLocked
+                          isLocked = globalLockData.data._isLocked
                           userEditing = globalLockData.data._userEditing
+
+                          // Check if the lock is expired
+                          const lockDuration = globalLockData?.lockDuration
+                          const lastEditedAt = new Date(
+                            globalLockData.data?._lastEditedAt,
+                          ).getTime()
+
+                          const lockDurationInMilliseconds = lockDuration * 1000
+                          const lockExpirationTime = lastEditedAt + lockDurationInMilliseconds
+
+                          if (new Date().getTime() > lockExpirationTime) {
+                            isLocked = false
+                            userEditing = null
+                          }
                         }
                       }
 
@@ -140,7 +159,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                         <li key={entityIndex}>
                           <Card
                             actions={
-                              lockStatus && user?.id !== userEditing?.id ? (
+                              isLocked && user?.id !== userEditing?.id ? (
                                 <Locked className={`${baseClass}__locked`} user={userEditing} />
                               ) : hasCreatePermission && type === EntityType.collection ? (
                                 <Button

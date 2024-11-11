@@ -457,26 +457,25 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         i18n,
       })
 
-      if (hasMany) {
-        setValue(
-          valueRef.current
-            ? (valueRef.current as Option[]).map((option) => {
-                if (option.value === args.doc.id) {
-                  return {
-                    relationTo: args.collectionConfig.slug,
-                    value: args.doc.id,
-                  }
-                }
+      const currentValue = valueRef.current
+      const docId = args.doc.id
 
-                return option
-              })
-            : null,
+      if (hasMany) {
+        const unchanged = (currentValue as Option[]).some((option) =>
+          typeof option === 'string' ? option === docId : option.value === docId,
         )
+
+        const valuesToSet = (currentValue as Option[]).map((option) =>
+          option.value === docId
+            ? { relationTo: args.collectionConfig.slug, value: docId }
+            : option,
+        )
+
+        setValue(valuesToSet, unchanged)
       } else {
-        setValue({
-          relationTo: args.collectionConfig.slug,
-          value: args.doc.id,
-        })
+        const unchanged = currentValue === docId
+
+        setValue({ relationTo: args.collectionConfig.slug, value: docId }, unchanged)
       }
     },
     [i18n, config, hasMany, setValue],

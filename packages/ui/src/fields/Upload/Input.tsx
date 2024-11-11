@@ -8,7 +8,6 @@ import type {
   FilterOptionsResult,
   JsonObject,
   MappedComponent,
-  PaginatedDocs,
   StaticDescription,
   StaticLabel,
   UploadFieldClient,
@@ -22,6 +21,7 @@ import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo } from 'react'
 
 import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
+import type { PopulateDocs, ReloadDoc } from './types.js'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -158,6 +158,10 @@ export function UploadInput(props: UploadInputProps) {
   const loadedValueDocsRef = React.useRef<boolean>(false)
 
   const canCreate = useMemo(() => {
+    if (readOnly || !allowCreate) {
+      return false
+    }
+
     if (typeof activeRelationTo === 'string') {
       if (permissions?.collections && permissions.collections?.[activeRelationTo]?.create) {
         if (permissions.collections[activeRelationTo].create?.permission === true) {
@@ -167,7 +171,7 @@ export function UploadInput(props: UploadInputProps) {
     }
 
     return false
-  }, [activeRelationTo, permissions])
+  }, [activeRelationTo, permissions, readOnly, allowCreate])
 
   const onChange = React.useCallback(
     (newValue) => {
@@ -178,11 +182,8 @@ export function UploadInput(props: UploadInputProps) {
     [onChangeFromProps],
   )
 
-  const populateDocs = React.useCallback(
-    async (
-      ids: (number | string)[],
-      relatedCollectionSlug: string,
-    ): Promise<null | PaginatedDocs> => {
+  const populateDocs = React.useCallback<PopulateDocs>(
+    async (ids, relatedCollectionSlug) => {
       const query: {
         [key: string]: unknown
         where: Where
@@ -368,6 +369,29 @@ export function UploadInput(props: UploadInputProps) {
     [closeListDrawer, hasMany, populateDocs, onChange, value, activeRelationTo],
   )
 
+  const reloadDoc = React.useCallback<ReloadDoc>(
+    async (docID, collectionSlug) => {
+      const { docs } = await populateDocs([docID], collectionSlug)
+
+      if (docs[0]) {
+        setPopulatedDocs((currentDocs) => {
+          const existingDocIndex = currentDocs?.findIndex((doc) => {
+            return doc.value.id === docs[0].id && doc.relationTo === collectionSlug
+          })
+          if (existingDocIndex > -1) {
+            const updatedDocs = [...currentDocs]
+            updatedDocs[existingDocIndex] = {
+              relationTo: collectionSlug,
+              value: docs[0],
+            }
+            return updatedDocs
+          }
+        })
+      }
+    },
+    [populateDocs],
+  )
+
   // only hasMany can reorder
   const onReorder = React.useCallback(
     (newValue) => {
@@ -459,6 +483,7 @@ export function UploadInput(props: UploadInputProps) {
                 onRemove={onRemove}
                 onReorder={onReorder}
                 readonly={readOnly}
+                reloadDoc={reloadDoc}
                 serverURL={serverURL}
               />
             ) : (
@@ -478,6 +503,7 @@ export function UploadInput(props: UploadInputProps) {
                 fileDoc={populatedDocs[0]}
                 onRemove={onRemove}
                 readonly={readOnly}
+                reloadDoc={reloadDoc}
                 serverURL={serverURL}
               />
             ) : populatedDocs && value && !populatedDocs?.[0]?.value ? (
@@ -491,10 +517,14 @@ export function UploadInput(props: UploadInputProps) {
         ) : null}
 
         {showDropzone ? (
-          <Dropzone disabled={!allowCreate} multipleFiles={hasMany} onChange={onLocalFileSelection}>
+          <Dropzone
+            disabled={readOnly || !canCreate}
+            multipleFiles={hasMany}
+            onChange={onLocalFileSelection}
+          >
             <div className={`${baseClass}__dropzoneContent`}>
               <div className={`${baseClass}__dropzoneContent__buttons`}>
-                {allowCreate && (
+                {canCreate && (
                   <>
                     <Button
                       buttonStyle="pill"
@@ -530,14 +560,14 @@ export function UploadInput(props: UploadInputProps) {
 
                 <CreateDocDrawer onSave={onDocCreate} />
                 <ListDrawer
-                  allowCreate={allowCreate}
+                  allowCreate={canCreate}
                   enableRowSelections={hasMany}
                   onBulkSelect={onListBulkSelect}
                   onSelect={onListSelect}
                 />
               </div>
 
-              {allowCreate && (
+              {canCreate && (
                 <p className={`${baseClass}__dragAndDropText`}>
                   {t('general:or')} {t('upload:dragAndDrop')}
                 </p>

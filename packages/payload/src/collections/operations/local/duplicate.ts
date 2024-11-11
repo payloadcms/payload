@@ -1,39 +1,54 @@
 import type { CollectionSlug, TypedLocale } from '../../..//index.js'
-import type { Payload } from '../../../index.js'
-import type { Document, PayloadRequest, RequestContext } from '../../../types/index.js'
-import type { DataFromCollectionSlug } from '../../config/types.js'
+import type { Payload, RequestContext } from '../../../index.js'
+import type {
+  Document,
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  TransformCollectionWithSelect,
+} from '../../../types/index.js'
+import type { SelectFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { duplicateOperation } from '../duplicate.js'
 
-export type Options<TSlug extends CollectionSlug> = {
+export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: RequestContext
   depth?: number
+  disableTransaction?: boolean
   draft?: boolean
   fallbackLocale?: TypedLocale
   id: number | string
   locale?: TypedLocale
   overrideAccess?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
+  select?: TSelect
   showHiddenFields?: boolean
   user?: Document
 }
 
-export async function duplicate<TSlug extends CollectionSlug>(
+export async function duplicate<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   payload: Payload,
-  options: Options<TSlug>,
-): Promise<DataFromCollectionSlug<TSlug>> {
+  options: Options<TSlug, TSelect>,
+): Promise<TransformCollectionWithSelect<TSlug, TSelect>> {
   const {
     id,
     collection: collectionSlug,
     depth,
+    disableTransaction,
     draft,
     overrideAccess = true,
+    populate,
+    select,
     showHiddenFields,
   } = options
   const collection = payload.collections[collectionSlug]
@@ -53,13 +68,16 @@ export async function duplicate<TSlug extends CollectionSlug>(
 
   const req = await createLocalReq(options, payload)
 
-  return duplicateOperation<TSlug>({
+  return duplicateOperation<TSlug, TSelect>({
     id,
     collection,
     depth,
+    disableTransaction,
     draft,
     overrideAccess,
+    populate,
     req,
+    select,
     showHiddenFields,
   })
 }

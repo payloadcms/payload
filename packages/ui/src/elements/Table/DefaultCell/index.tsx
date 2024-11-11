@@ -52,6 +52,7 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
     classNameFromConfigContext
 
   const onClick = onClickFromProps || onClickFromContext
+  const isLink = link !== undefined ? link : columnIndex === 0
 
   let WrapElement: React.ComponentType<any> | string = 'span'
 
@@ -59,14 +60,14 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
     className?: string
     href?: string
     onClick?: () => void
+    prefetch?: false
     type?: 'button'
   } = {
     className,
   }
 
-  const isLink = link !== undefined ? link : columnIndex === 0
-
   if (isLink) {
+    wrapElementProps.prefetch = false
     WrapElement = Link
     wrapElementProps.href = customCellContext?.collectionSlug
       ? formatAdminURL({
@@ -133,13 +134,13 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
     } else {
       return (
         <WrapElement {...wrapElementProps}>
-          {(cellData === '' || typeof cellData === 'undefined') &&
+          {(cellData === '' || typeof cellData === 'undefined' || cellData === null) &&
             i18n.t('general:noLabel', {
               label: getTranslation(('label' in field ? field.label : null) || 'data', i18n),
             })}
           {typeof cellData === 'string' && cellData}
           {typeof cellData === 'number' && cellData}
-          {typeof cellData === 'object' && JSON.stringify(cellData)}
+          {typeof cellData === 'object' && cellData !== null && JSON.stringify(cellData)}
         </WrapElement>
       )
     }

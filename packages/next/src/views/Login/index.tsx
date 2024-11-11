@@ -46,7 +46,7 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
   const mappedAfterLogins = createMappedComponent(afterLogin, undefined, undefined, 'afterLogin')
 
   if (user) {
-    redirect(admin)
+    redirect((searchParams.redirect as string) || admin)
   }
 
   const collectionConfig = collections.find(({ slug }) => slug === userSlug)

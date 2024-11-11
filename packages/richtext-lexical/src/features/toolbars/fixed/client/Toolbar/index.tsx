@@ -155,7 +155,7 @@ function FixedToolbar({
 }): React.ReactNode {
   const currentToolbarRef = React.useRef<HTMLDivElement>(null)
 
-  const { y } = useScrollInfo!()
+  const { y } = useScrollInfo()
 
   // Memoize the parent toolbar element
   const parentToolbarElem = useMemo(() => {

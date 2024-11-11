@@ -1,4 +1,4 @@
-import type { Field } from 'payload'
+import type { Field, Sort } from 'payload'
 
 import { asc, desc } from 'drizzle-orm'
 
@@ -13,7 +13,7 @@ type Args = {
   joins: BuildQueryJoinAliases
   locale?: string
   selectFields: Record<string, GenericColumn>
-  sort?: string
+  sort?: Sort
   tableName: string
 }
 
@@ -29,54 +29,54 @@ export const buildOrderBy = ({
   sort,
   tableName,
 }: Args): BuildQueryResult['orderBy'] => {
-  const orderBy: BuildQueryResult['orderBy'] = {
-    column: null,
-    order: null,
+  const orderBy: BuildQueryResult['orderBy'] = []
+
+  if (!sort) {
+    const createdAt = adapter.tables[tableName]?.createdAt
+    if (createdAt) {
+      sort = '-createdAt'
+    } else {
+      sort = '-id'
+    }
   }
 
-  if (sort) {
-    let sortPath
+  if (typeof sort === 'string') {
+    sort = [sort]
+  }
 
-    if (sort[0] === '-') {
-      sortPath = sort.substring(1)
-      orderBy.order = desc
+  for (const sortItem of sort) {
+    let sortProperty: string
+    let sortDirection: 'asc' | 'desc'
+    if (sortItem[0] === '-') {
+      sortProperty = sortItem.substring(1)
+      sortDirection = 'desc'
     } else {
-      sortPath = sort
-      orderBy.order = asc
+      sortProperty = sortItem
+      sortDirection = 'asc'
     }
-
     try {
       const { columnName: sortTableColumnName, table: sortTable } = getTableColumnFromPath({
         adapter,
-        collectionPath: sortPath,
+        collectionPath: sortProperty,
         fields,
         joins,
         locale,
-        pathSegments: sortPath.replace(/__/g, '.').split('.'),
+        pathSegments: sortProperty.replace(/__/g, '.').split('.'),
         selectFields,
         tableName,
-        useAlias: true,
-        value: sortPath,
+        value: sortProperty,
       })
-      orderBy.column = sortTable?.[sortTableColumnName]
+      if (sortTable?.[sortTableColumnName]) {
+        orderBy.push({
+          column: sortTable[sortTableColumnName],
+          order: sortDirection === 'asc' ? asc : desc,
+        })
+
+        selectFields[sortTableColumnName] = sortTable[sortTableColumnName]
+      }
     } catch (err) {
       // continue
     }
-  }
-
-  if (!orderBy?.column) {
-    orderBy.order = desc
-    const createdAt = adapter.tables[tableName]?.createdAt
-
-    if (createdAt) {
-      orderBy.column = createdAt
-    } else {
-      orderBy.column = adapter.tables[tableName].id
-    }
-  }
-
-  if (orderBy.column) {
-    selectFields.sort = orderBy.column
   }
 
   return orderBy
