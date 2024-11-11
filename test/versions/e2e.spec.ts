@@ -45,6 +45,7 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
+import { waitForAutoSaveToRunAndComplete } from '../helpers/waitForAutoSaveToRunAndComplete.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { titleToDelete } from './shared.js'
 import {
@@ -70,24 +71,6 @@ const { beforeAll, beforeEach, describe } = test
 let payload: PayloadTestSDK<Config>
 let global: AdminUrlUtil
 let id: string
-
-const waitForAutoSaveToRunAndComplete = async (page: Page) => {
-  await expect(async () => {
-    await expect(page.locator('.autosave:has-text("Saving...")')).toBeVisible()
-  }).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-
-  await wait(500)
-
-  await expect(async () => {
-    await expect(
-      page.locator('.autosave:has-text("Last saved less than a minute ago")'),
-    ).toBeVisible()
-  }).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-}
 
 let context: BrowserContext
 
