@@ -73,21 +73,22 @@ export const RootPage = async ({
     segments,
   })
 
-  let dbHasUser = false
-
   const initPageResult = await initPage(initPageOptions)
 
-  dbHasUser = await initPageResult?.req.payload.db
-    .findOne({
-      collection: userSlug,
-      req: initPageResult?.req,
-    })
-    ?.then((doc) => !!doc)
+  const dbHasUser =
+    initPageResult.req.user ||
+    (await initPageResult?.req.payload.db
+      .findOne({
+        collection: userSlug,
+        req: initPageResult?.req,
+      })
+      ?.then((doc) => !!doc))
 
   if (!DefaultView?.Component && !DefaultView?.payloadComponent) {
     if (initPageResult?.req?.user) {
       notFound()
     }
+
     if (dbHasUser) {
       redirect(adminRoute)
     }
