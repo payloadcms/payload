@@ -2657,6 +2657,66 @@ describe('Fields', () => {
         expect(docIDs).not.toContain(3)
         expect(docIDs).toContain(2)
       })
+
+      it('should query deeply', async () => {
+        // eslint-disable-next-line jest/no-conditional-in-test
+        if (payload.db.name === 'sqlite') {
+          return
+        }
+
+        const json_1 = await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: {
+              array: [
+                {
+                  text: 'some-text',
+                  object: {
+                    text: 'deep-text',
+                    array: [10],
+                  },
+                },
+              ],
+            },
+          },
+        })
+
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            and: [
+              {
+                'json.array.text': {
+                  equals: 'some-text',
+                },
+              },
+              {
+                'json.array.object.text': {
+                  equals: 'deep-text',
+                },
+              },
+              {
+                'json.array.object.array': {
+                  in: [10, 20],
+                },
+              },
+              {
+                'json.array.object.array': {
+                  exists: true,
+                },
+              },
+              {
+                'json.array.object.notexists': {
+                  exists: false,
+                },
+              },
+            ],
+          },
+        })
+
+        expect(docs).toHaveLength(1)
+        expect(docs[0].id).toBe(json_1.id)
+      })
     })
   })
 

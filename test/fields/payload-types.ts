@@ -1183,6 +1183,13 @@ export interface IndexedField {
 export interface JsonField {
   id: string;
   json?: {
+    array?: {
+      object?: {
+        array?: number[];
+        text?: string;
+      };
+      text?: string;
+    }[];
     foo?: 'bar' | 'foobar';
     number?: 10 | 5;
     [k: string]: unknown;
