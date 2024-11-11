@@ -525,6 +525,7 @@ jobs:
   publish-canary:
     name: Publish Canary
     runs-on: ubuntu-latest
+    if: ${{ needs.all-green.result == 'success' && github.ref_name == 'beta' }}
     needs:
       - all-green
 
@@ -533,4 +534,3 @@ jobs:
       - run: |
           echo github.ref: ${{ github.ref }}
           echo isBeta: ${{ github.ref == 'refs/heads/beta' }}
-          echo isMain: ${{ github.ref == 'refs/heads/main' }}
