@@ -1,4 +1,4 @@
-import type { SerializedEditorState } from 'lexical'
+import type { ElementNode, SerializedEditorState } from 'lexical'
 import type { CollectionAfterReadHook, CollectionBeforeChangeHook, RichTextField } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
@@ -104,9 +104,15 @@ export const saveMDXBeforeChange: CollectionBeforeChangeHook = ({ collection, da
 export function mdxToEditorJSON({
   mdxWithFrontmatter,
   editorConfig,
+  options,
 }: {
   editorConfig: SanitizedServerEditorConfig
   mdxWithFrontmatter: string
+  options?: {
+    node?: ElementNode
+    shouldMergeAdjacentLines?: boolean
+    shouldPreserveNewLines?: boolean
+  }
 }): {
   editorState: SerializedEditorState
   frontMatter: { key: string; value: string }[]
@@ -123,7 +129,7 @@ export function mdxToEditorJSON({
 
   headlessEditor.update(
     () => {
-      $customConvertFromMarkdownString(mdx, editorConfig.features.markdownTransformers)
+      $customConvertFromMarkdownString(mdx, editorConfig.features.markdownTransformers, options)
     },
     { discrete: true },
   )

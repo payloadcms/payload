@@ -549,7 +549,7 @@ const TABLE_ROW_DIVIDER_REG_EXP = /^(\| ?:?-*:? ?)+\|\s?$/
 const TAG_START_REGEX = /^[ \t]*<[a-z_][\w-]*(?:\s[^<>]*)?\/?>/i
 const TAG_END_REGEX = /^[ \t]*<\/[a-z_][\w-]*\s*>/i
 
-export function normalizeMarkdown(input: string, shouldMergeAdjacentLines = false): string {
+function normalizeMarkdown(input: string): string {
   const lines = input.split('\n')
   let inCodeBlock = false
   const sanitizedLines: string[] = []
@@ -597,7 +597,6 @@ export function normalizeMarkdown(input: string, shouldMergeAdjacentLines = fals
       CHECK_LIST_REGEX.test(line) ||
       TABLE_ROW_REG_EXP.test(line) ||
       TABLE_ROW_DIVIDER_REG_EXP.test(line) ||
-      !shouldMergeAdjacentLines ||
       TAG_START_REGEX.test(line) ||
       TAG_END_REGEX.test(line) ||
       TAG_START_REGEX.test(lastLine) ||
@@ -613,21 +612,33 @@ export function normalizeMarkdown(input: string, shouldMergeAdjacentLines = fals
 }
 
 /**
- * Renders markdown from a string. The selection is moved to the start after the operation.
+ * Converts a markdown string using custom transformers.
  *
- *  @param {boolean} [shouldPreserveNewLines] By setting this to true, new lines will be preserved between conversions
- *  @param {boolean} [shouldMergeAdjacentLines] By setting this to true, adjacent non empty lines will be merged according to commonmark spec: https://spec.commonmark.org/0.24/#example-177. Not applicable if shouldPreserveNewLines = true.
+ * @param markdown - The markdown string to convert.
+ * @param transformers - An array of transformers to use for the conversion.
+ * @param options - Optional settings for the conversion.
+ * @param options.node - An optional `ElementNode` to use as the root for the conversion.
+ * @param options.shouldPreserveNewLines - If set to true, new lines will be preserved during the conversion.
+ * @param options.shouldMergeAdjacentLines - If set to true, adjacent non-empty lines will be merged
+ * according to the CommonMark specification. This option is ignored if `shouldPreserveNewLines` is set to true.
  */
 export function $customConvertFromMarkdownString(
   markdown: string,
   transformers: Array<Transformer> = TRANSFORMERS,
-  node?: ElementNode,
-  shouldPreserveNewLines = false,
-  shouldMergeAdjacentLines = true, // Changed from false to true here
+  options?: {
+    node?: ElementNode
+    shouldMergeAdjacentLines?: boolean
+    shouldPreserveNewLines?: boolean
+  },
 ): void {
-  const sanitizedMarkdown = shouldPreserveNewLines
-    ? markdown
-    : normalizeMarkdown(markdown, shouldMergeAdjacentLines)
+  console.log('\nshouldMergeAdjacentLines', options?.shouldMergeAdjacentLines)
+  const node = options?.node
+  const shouldPreserveNewLines =
+    options?.shouldPreserveNewLines === undefined ? false : options.shouldPreserveNewLines
+  const shouldMergeAdjacentLines =
+    options?.shouldMergeAdjacentLines !== undefined ? options?.shouldMergeAdjacentLines : true
+  console.log('shouldMergeAdjacentLines2', options?.shouldMergeAdjacentLines)
+  const sanitizedMarkdown = shouldMergeAdjacentLines ? normalizeMarkdown(markdown) : markdown
   const importMarkdown = createMarkdownImport(transformers, shouldPreserveNewLines)
   return importMarkdown(sanitizedMarkdown, node)
 }

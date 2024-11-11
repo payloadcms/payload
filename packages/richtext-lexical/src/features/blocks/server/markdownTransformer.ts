@@ -351,7 +351,7 @@ function getMarkdownTransformerForBlock(
           const node = $createServerBlockNode({
             blockType: block.slug,
             ...blockFields,
-          } as any)
+          })
 
           if (node) {
             // Now handle beforeStartLine and afterEndLine. If those are not empty, we need to add them as text nodes before and after the block node.
@@ -437,7 +437,7 @@ function getMarkdownTransformerForBlock(
         const node = $createServerBlockNode({
           blockType: block.slug,
           ...blockFields,
-        } as any)
+        })
 
         if (node) {
           rootNode.append(node)
@@ -455,6 +455,11 @@ function getMarkdownTransformerForBlock(
 export function getMarkdownToLexical(
   allNodes: Array<NodeWithHooks>,
   allTransformers: Transformer[],
+  options?: {
+    node?: ElementNode
+    shouldMergeAdjacentLines?: boolean
+    shouldPreserveNewLines?: boolean
+  },
 ): (args: { markdown: string }) => SerializedEditorState {
   const markdownToLexical = ({ markdown }: { markdown: string }): SerializedEditorState => {
     const headlessEditor = createHeadlessEditor({
@@ -465,7 +470,7 @@ export function getMarkdownToLexical(
 
     headlessEditor.update(
       () => {
-        $customConvertFromMarkdownString(markdown, allTransformers)
+        $customConvertFromMarkdownString(markdown, allTransformers, options)
       },
       { discrete: true },
     )
