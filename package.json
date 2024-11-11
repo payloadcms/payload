@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-beta.126",
+  "version": "3.0.0-beta.127",
   "private": true,
   "type": "module",
   "scripts": {
@@ -133,8 +133,8 @@
     "create-payload-app": "workspace:*",
     "cross-env": "7.0.3",
     "dotenv": "16.4.5",
-    "drizzle-kit": "0.26.2",
-    "drizzle-orm": "0.35.1",
+    "drizzle-kit": "0.28.0",
+    "drizzle-orm": "0.36.1",
     "escape-html": "^1.0.3",
     "execa": "5.1.1",
     "form-data": "3.0.1",

@@ -107,6 +107,11 @@ export interface DefaultValue {
     defaultValue?: string | null;
   };
   select?: ('option0' | 'option1' | 'default') | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point?: [number, number] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -402,6 +407,7 @@ export interface DefaultValuesSelect<T extends boolean = true> {
         defaultValue?: T;
       };
   select?: T;
+  point?: T;
   updatedAt?: T;
   createdAt?: T;
 }

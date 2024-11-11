@@ -390,6 +390,46 @@ export const traverseFields = ({
           break
         }
 
+        case 'point': {
+          if (adapter.name === 'sqlite') {
+            break
+          }
+
+          const args = field.localized ? _locales : currentArgs
+          if (!args.columns) {
+            args.columns = {}
+          }
+
+          if (!args.extras) {
+            args.extras = {}
+          }
+
+          const name = `${path}${field.name}`
+
+          // Drizzle handles that poorly. See https://github.com/drizzle-team/drizzle-orm/issues/2526
+          // Additionally, this way we format the column value straight in the database using ST_AsGeoJSON
+          args.columns[name] = false
+
+          let shouldSelect = false
+
+          if (select || selectAllOnCurrentLevel) {
+            if (
+              selectAllOnCurrentLevel ||
+              (selectMode === 'include' && select[field.name] === true) ||
+              (selectMode === 'exclude' && typeof select[field.name] === 'undefined')
+            ) {
+              shouldSelect = true
+            }
+          } else {
+            shouldSelect = true
+          }
+
+          if (shouldSelect) {
+            args.extras[name] = sql.raw(`ST_AsGeoJSON(${toSnakeCase(name)})::jsonb`).as(name)
+          }
+          break
+        }
+
         case 'join': {
           // when `joinsQuery` is false, do not join
           if (joinQuery === false) {
