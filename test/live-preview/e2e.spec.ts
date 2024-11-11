@@ -96,7 +96,7 @@ describe('Live Preview', () => {
     const titleField = page.locator('#field-title')
     const frame = page.frameLocator('iframe.live-preview-iframe').first()
 
-    await expect(titleField).toBeVisible()
+    await expect(titleField).toBeEnabled()
 
     const renderedPageTitleLocator = `#${renderedPageTitleID}`
 
@@ -156,7 +156,7 @@ describe('Live Preview', () => {
     const titleField = page.locator('#field-title')
     const frame = page.frameLocator('iframe.live-preview-iframe').first()
 
-    await expect(titleField).toBeVisible()
+    await expect(titleField).toBeEnabled()
 
     const renderedPageTitleLocator = `#${renderedPageTitleID}`
 

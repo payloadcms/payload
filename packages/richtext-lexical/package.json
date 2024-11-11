@@ -23,7 +23,7 @@
       "types": "./src/exports/client/index.ts",
       "default": "./src/exports/client/index.ts"
     },
-    "./rss": {
+    "./rsc": {
       "import": "./src/exports/server/rsc.ts",
       "types": "./src/exports/server/rsc.ts",
       "default": "./src/exports/server/rsc.ts"
