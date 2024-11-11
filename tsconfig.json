@@ -66,11 +66,11 @@
       "@payloadcms/richtext-lexical/client": [
         "./packages/richtext-lexical/src/exports/client/index.ts"
       ],
-      "@payloadcms/richtext-lexical/rscs": [
-        "./packages/richtext-lexical/src/exports/server/rscs.ts"
+      "@payloadcms/richtext-lexical/rsc": [
+        "./packages/richtext-lexical/src/exports/server/rsc.ts"
       ],
-      "@payloadcms/richtext-slate/rscs": [
-        "./packages/richtext-slate/src/exports/server/rscs.ts"
+      "@payloadcms/richtext-slate/rsc": [
+        "./packages/richtext-slate/src/exports/server/rsc.ts"
       ],
       "@payloadcms/richtext-slate/client": [
         "./packages/richtext-slate/src/exports/client/index.ts"
