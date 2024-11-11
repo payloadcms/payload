@@ -80,7 +80,9 @@ export async function ensureCompilationIsDone({
       console.log(`Checking if compilation is done (attempt ${attempt}/${maxAttempts})...`)
 
       await page.goto(adminURL)
-      await page.waitForURL(noAutoLogin ? `${adminURL}/login` : adminURL)
+      await page.waitForURL(
+        noAutoLogin ? `${adminURL + (adminURL.endsWith('/') ? '' : '/')}login` : adminURL,
+      )
 
       console.log('Successfully compiled')
       return
