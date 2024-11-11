@@ -1,3 +1,19 @@
+## [2.30.4](https://github.com/payloadcms/payload/compare/v2.30.3...v2.30.4) (2024-11-11)
+
+
+### Features
+
+* **plugin-seo:** add Turkish translation ([#8918](https://github.com/payloadcms/payload/issues/8918)) ([7c9ec9c](https://github.com/payloadcms/payload/commit/7c9ec9c4e0bafd19eb0ef94e9bb4aa07df3e097e))
+
+
+### Bug Fixes
+
+* **db-postgres:** sort by localized fields ([#9016](https://github.com/payloadcms/payload/issues/9016)) ([9c25754](https://github.com/payloadcms/payload/commit/9c25754eed87e70b053231693102378150b8b80d))
+* edit many modal draft action button order and style ([#9046](https://github.com/payloadcms/payload/issues/9046)) ([a907480](https://github.com/payloadcms/payload/commit/a907480a94f07b4afa0e0723a3738c8bd457c51f)), closes [#9045](https://github.com/payloadcms/payload/issues/9045)
+* error saving after duplicating blocks with nested items ([#8814](https://github.com/payloadcms/payload/issues/8814)) ([eba777c](https://github.com/payloadcms/payload/commit/eba777c3a0b4c489d87d3c6154d835a105fef4a2))
+* list drawer relationship not displaying ([#9011](https://github.com/payloadcms/payload/issues/9011)) ([169da5c](https://github.com/payloadcms/payload/commit/169da5c3d83bfe3559227504929aa62721ded1d9))
+* querying relationships by `id` path with REST ([#9014](https://github.com/payloadcms/payload/issues/9014)) ([a0bd706](https://github.com/payloadcms/payload/commit/a0bd7060c45df3037ee074bd83400837c0adb83a))
+
 ## [2.30.3](https://github.com/payloadcms/payload/compare/v2.30.2...v2.30.3) (2024-10-18)
 
 
