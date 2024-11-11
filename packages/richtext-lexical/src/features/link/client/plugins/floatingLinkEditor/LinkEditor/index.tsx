@@ -166,6 +166,9 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
             },
           })
           .then(async (res) => {
+            if (!res.ok) {
+              throw new Error(`HTTP error! Status: ${res.status}`)
+            }
             const data = await res.json()
             const useAsTitle = relatedField?.admin?.useAsTitle || 'id'
             const title = data[useAsTitle]
@@ -175,9 +178,10 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
             setLinkLabel(label)
           })
           .catch(() => {
-            setLinkLabel(
-              `${getTranslation(relatedField.labels.singular, i18n)} - ${t('general:untitled', i18n)}`,
-            )
+            const label = t('fields:linkedTo', {
+              label: `${getTranslation(relatedField.labels.singular, i18n)} - ${t('general:untitled', i18n)} - ID: ${id}`,
+            }).replace(/<[^>]*>?/g, '')
+            setLinkLabel(label)
           })
       }
     }
