@@ -1860,6 +1860,25 @@ describe('Select', () => {
       })
 
       const {
+        docs: [resultFind],
+      } = await payload.find({
+        collection: 'pages',
+        depth: 1,
+        populate: {
+          pages: {
+            additional: true,
+          },
+        },
+        where: {
+          id: {
+            equals: aboutPage.id,
+          },
+        },
+      })
+
+      expect(resultFind).toStrictEqual(result)
+
+      const {
         content: [
           {
             link: { doc, docHasManyPoly, docMany, docPoly },

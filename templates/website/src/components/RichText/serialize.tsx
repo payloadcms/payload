@@ -16,16 +16,14 @@ import {
   IS_SUPERSCRIPT,
   IS_UNDERLINE,
 } from './nodeFormat'
-import type { Page } from '@/payload-types'
+import type {
+  CallToActionBlock as CTABlockProps,
+  MediaBlock as MediaBlockProps,
+} from '@/payload-types'
 
 export type NodeTypes =
   | DefaultNodeTypes
-  | SerializedBlockNode<
-      | Extract<Page['layout'][0], { blockType: 'cta' }>
-      | Extract<Page['layout'][0], { blockType: 'mediaBlock' }>
-      | BannerBlockProps
-      | CodeBlockProps
-    >
+  | SerializedBlockNode<CTABlockProps | MediaBlockProps | BannerBlockProps | CodeBlockProps>
 
 type Props = {
   nodes: NodeTypes[]

@@ -21,11 +21,11 @@ export const handleAuthRedirect = ({ config, route, searchParams, user }: Args):
     delete searchParams.redirect
   }
 
-  const redirectRoute = encodeURIComponent(
-    route + Object.keys(searchParams ?? {}).length
+  const redirectRoute =
+    (route !== adminRoute ? route : '') +
+    (Object.keys(searchParams ?? {}).length > 0
       ? `${qs.stringify(searchParams, { addQueryPrefix: true })}`
-      : undefined,
-  )
+      : '')
 
   const redirectTo = formatAdminURL({
     adminRoute,
