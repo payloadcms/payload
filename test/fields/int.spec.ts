@@ -1096,7 +1096,7 @@ describe('Fields', () => {
             uniqueRelationship: textDoc.id,
           },
         })
-        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
             locale: 'es',
@@ -1132,7 +1132,7 @@ describe('Fields', () => {
             uniqueHasManyRelationship: [textDoc.id],
           },
         })
-        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
             locale: 'es',
@@ -1153,7 +1153,7 @@ describe('Fields', () => {
             uniqueHasManyRelationship_2: [textDoc.id],
           },
         })
-        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
             locale: 'es',
@@ -1176,7 +1176,7 @@ describe('Fields', () => {
       ).rejects.toBeTruthy()
     })
 
-    it('should throw validation error saving on unique relationship fields polymorphic', async () => {
+    it('should throw validation error saving on unique relationship fields polymorphic not hasMany', async () => {
       const textDoc = await payload.create({ collection: 'text-fields', data: { text: 'asd' } })
 
       await payload
@@ -1189,7 +1189,7 @@ describe('Fields', () => {
             uniquePolymorphicRelationship: { relationTo: 'text-fields', value: textDoc.id },
           },
         })
-        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
             locale: 'es',
@@ -1210,7 +1210,7 @@ describe('Fields', () => {
             uniquePolymorphicRelationship_2: { relationTo: 'text-fields', value: textDoc.id },
           },
         })
-        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
             locale: 'es',
@@ -1270,7 +1270,7 @@ describe('Fields', () => {
             ],
           },
         })
-        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
             locale: 'es',

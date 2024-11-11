@@ -113,9 +113,22 @@ export async function seedDB({
   if (isMongoose(_payload)) {
     await Promise.all([
       ...collectionSlugs.map(async (collectionSlug) => {
-        await _payload.db.collections[collectionSlug].createIndexes() // Needs to be awaited if we want to avoid nasty errors when the mongo memory server is used
+        await _payload.db.collections[collectionSlug].createIndexes()
       }),
     ])
+
+    await Promise.all(
+      _payload.config.collections.map(async (coll) => {
+        await new Promise((resolve, reject) => {
+          _payload.db?.collections[coll.slug]?.ensureIndexes(function (err) {
+            if (err) {
+              reject(err)
+            }
+            resolve(true)
+          })
+        })
+      }),
+    )
   }
 
   /**

@@ -23,17 +23,6 @@ const dirname = path.dirname(filename)
 describe('collections-graphql', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
-
-    // Wait for indexes to be created,
-    // as we need them to query by point
-    if (payload.db.name === 'mongoose') {
-      await new Promise((resolve, reject) => {
-        payload.db?.collections?.point?.ensureIndexes(function (err) {
-          if (err) reject(err)
-          resolve(true)
-        })
-      })
-    }
   })
 
   afterAll(async () => {
