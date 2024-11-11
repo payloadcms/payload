@@ -72,19 +72,21 @@ export const DocumentTab: React.FC<
       >
         <span className={`${baseClass}__label`}>
           {labelToRender}
-          <Fragment>
-            &nbsp;
-            <RenderServerComponent
-              Component={Pill}
-              Fallback={Pill_Component}
-              importMap={payload.importMap}
-              serverProps={{
-                i18n,
-                payload,
-                permissions,
-              }}
-            />
-          </Fragment>
+          {Pill || Pill_Component ? (
+            <Fragment>
+              &nbsp;
+              <RenderServerComponent
+                Component={Pill}
+                Fallback={Pill_Component}
+                importMap={payload.importMap}
+                serverProps={{
+                  i18n,
+                  payload,
+                  permissions,
+                }}
+              />
+            </Fragment>
+          ) : null}
         </span>
       </DocumentTabLink>
     )
