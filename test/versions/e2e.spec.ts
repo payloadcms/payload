@@ -71,16 +71,6 @@ let payload: PayloadTestSDK<Config>
 let global: AdminUrlUtil
 let id: string
 
-const waitForAutoSaveToComplete = async (page: Page) => {
-  await expect(async () => {
-    await expect(
-      page.locator('.autosave:has-text("Last saved less than a minute ago")'),
-    ).toBeVisible()
-  }).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-}
-
 const waitForAutoSaveToRunAndComplete = async (page: Page) => {
   await expect(async () => {
     await expect(page.locator('.autosave:has-text("Saving...")')).toBeVisible()
@@ -88,7 +78,15 @@ const waitForAutoSaveToRunAndComplete = async (page: Page) => {
     timeout: POLL_TOPASS_TIMEOUT,
   })
 
-  await waitForAutoSaveToComplete(page)
+  await wait(500)
+
+  await expect(async () => {
+    await expect(
+      page.locator('.autosave:has-text("Last saved less than a minute ago")'),
+    ).toBeVisible()
+  }).toPass({
+    timeout: POLL_TOPASS_TIMEOUT,
+  })
 }
 
 let context: BrowserContext
