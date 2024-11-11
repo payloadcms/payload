@@ -54,6 +54,8 @@ class JestCiSpecReporter {
     console.log(`TOTAL: ${numFailedTests || numNotSkippedTests} ${testResultText}`)
   }
   onTestResult(test, { testResults }) {
+    // Log pretty ALL RESULTS message
+    console.log('\n\n\x1b[1m\x1b[30mALL RESULTS\x1b[0m')
     testResults.forEach((result) => {
       var _a, _b
       const { title, duration, status, ancestorTitles } = result
@@ -72,6 +74,25 @@ class JestCiSpecReporter {
       )
     })
   }
+
+  onTestCaseResult(test, result) {
+    var _a, _b
+    const { title, duration, status, ancestorTitles } = result
+    const { name } =
+      (_b = (_a = test.context.config) === null || _a === void 0 ? void 0 : _a.displayName) !==
+        null && _b !== void 0
+        ? _b
+        : {}
+    if (name) {
+      ancestorTitles.unshift(name)
+    }
+    const breadcrumbs = `${ancestorTitles.join(' > ')} >`
+
+    console.log(
+      `    ${this._getTestStatus(status)} ${breadcrumbs} ${title} ${this._getTestDuration(duration)}`,
+    )
+  }
+
   getLastError() {
     return undefined
   }
