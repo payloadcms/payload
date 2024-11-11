@@ -1175,7 +1175,7 @@ describe('collections-graphql', () => {
       expect(errors[0].path[0]).toEqual('test2')
       expect(errors[0].extensions.name).toEqual('ValidationError')
       expect(errors[0].extensions.data.errors[0].message).toEqual('This field is required.')
-      expect(errors[0].extensions.data.errors[0].field).toEqual('password')
+      expect(errors[0].extensions.data.errors[0].path).toEqual('password')
 
       expect(Array.isArray(errors[1].locations)).toEqual(true)
       expect(errors[1].message).toEqual('The following field is invalid: email')
@@ -1184,7 +1184,7 @@ describe('collections-graphql', () => {
       expect(errors[1].extensions.data.errors[0].message).toEqual(
         'A user with the given email is already registered.',
       )
-      expect(errors[1].extensions.data.errors[0].field).toEqual('email')
+      expect(errors[1].extensions.data.errors[0].path).toEqual('email')
 
       expect(Array.isArray(errors[2].locations)).toEqual(true)
       expect(errors[2].message).toEqual('The following field is invalid: email')
@@ -1193,7 +1193,7 @@ describe('collections-graphql', () => {
       expect(errors[2].extensions.data.errors[0].message).toEqual(
         'Please enter a valid email address.',
       )
-      expect(errors[2].extensions.data.errors[0].field).toEqual('email')
+      expect(errors[2].extensions.data.errors[0].path).toEqual('email')
     })
 
     it('should return the minimum allowed information about internal errors', async () => {
