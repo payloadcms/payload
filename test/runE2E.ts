@@ -90,7 +90,6 @@ async function executePlaywright(suitePath: string, baseTestFolder: string, bail
   const child = spawn('pnpm', spawnDevArgs, {
     stdio: 'inherit',
     cwd: path.resolve(dirname, '..'),
-    // empty env to avoid passing PAYLOAD_TEST_PROD to the dev server
     env: {
       ...process.env,
     },
