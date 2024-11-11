@@ -126,27 +126,30 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
       disabled={!canPublish}
       onClick={publish}
       size="medium"
-      SubMenuPopupContent={({ close }) =>
+      SubMenuPopupContent={
         localization
-          ? localization.locales.map((locale) => {
-              const formattedLabel =
-                typeof locale.label === 'string'
-                  ? locale.label
-                  : locale.label && locale.label[i18n?.language]
+          ? ({ close }) =>
+              localization.locales.map((locale) => {
+                const formattedLabel =
+                  typeof locale.label === 'string'
+                    ? locale.label
+                    : locale.label && locale.label[i18n?.language]
 
-              const isActive = typeof locale === 'string' ? locale === code : locale.code === code
+                const isActive = typeof locale === 'string' ? locale === code : locale.code === code
 
-              if (isActive) {
-                return (
-                  <PopupList.ButtonGroup key={locale.code}>
-                    <PopupList.Button onClick={() => [publishSpecificLocale(locale.code), close()]}>
-                      {t('version:publishIn', { locale: formattedLabel || locale.code })}
-                    </PopupList.Button>
-                  </PopupList.ButtonGroup>
-                )
-              }
-            })
-          : null
+                if (isActive) {
+                  return (
+                    <PopupList.ButtonGroup key={locale.code}>
+                      <PopupList.Button
+                        onClick={() => [publishSpecificLocale(locale.code), close()]}
+                      >
+                        {t('version:publishIn', { locale: formattedLabel || locale.code })}
+                      </PopupList.Button>
+                    </PopupList.ButtonGroup>
+                  )
+                }
+              })
+          : undefined
       }
       type="button"
     >
