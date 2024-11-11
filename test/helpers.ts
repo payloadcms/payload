@@ -347,7 +347,8 @@ export function initPageConsoleErrorCatch(page: Page) {
       !msg.text().includes('Error: NEXT_NOT_FOUND') &&
       !msg.text().includes('Error: NEXT_REDIRECT') &&
       !msg.text().includes('Error getting document data') &&
-      !msg.text().includes('Failed trying to load default language strings')
+      !msg.text().includes('Failed trying to load default language strings') &&
+      !msg.text().includes('TypeError: Failed to fetch') // This happens when server actions are aborted
     ) {
       // "Failed to fetch RSC payload for" happens seemingly randomly. There are lots of issues in the next.js repository for this. Causes e2e tests to fail and flake. Will ignore for now
       // the the server responded with a status of error happens frequently. Will ignore it for now.
