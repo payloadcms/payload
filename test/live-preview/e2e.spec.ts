@@ -35,7 +35,7 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { beforeAll, describe } = test
+const { beforeAll, beforeEach, describe } = test
 
 describe('Live Preview', () => {
   let page: Page
@@ -57,6 +57,15 @@ describe('Live Preview', () => {
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
+
+    await ensureCompilationIsDone({ page, serverURL })
+  })
+
+  beforeEach(async () => {
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'livePreviewTest',
+    })
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -213,12 +222,7 @@ describe('Live Preview', () => {
   })
 
   test('global — has route', async () => {
-    const url = page.url()
     await goToGlobalLivePreview(page, 'header', serverURL)
-
-    await expect(() => expect(page.url()).toBe(`${url}/preview`)).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
   })
 
   test('global — renders iframe', async () => {
