@@ -54,10 +54,12 @@ export const init: Init = function init(this: MongooseAdapter) {
       this.versions[collection.slug] = model
     }
 
+    const modelName = getDBName({ config: collection })
+
     const model = mongoose.model(
-      getDBName({ config: collection }),
+      modelName,
       schema,
-      this.autoPluralization === true ? undefined : collection.slug,
+      this.autoPluralization === true ? undefined : modelName,
     ) as CollectionModel
     this.collections[collection.slug] = model
   })
