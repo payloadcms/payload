@@ -93,7 +93,7 @@ process.env.PAYLOAD_DROP_DATABASE = process.env.PAYLOAD_DROP_DATABASE === 'false
 
 // fetch the admin url to force a render
 void fetch(`http://localhost:${port}${adminRoute}`)
-void fetch(`http://localhost:${port}/api/access`)
+void fetch(`http://localhost:${port}/api/health`)
 // This ensures that the next-server process is killed when this process is killed and doesn't linger around.
 process.on('SIGINT', () => {
   if (child) {

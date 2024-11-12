@@ -24,6 +24,7 @@ import {
   UnorderedListFeature,
   UploadFeature,
 } from '@payloadcms/richtext-lexical'
+import { healthEndpoint } from 'helpers/health.js'
 // import { slateEditor } from '@payloadcms/richtext-slate'
 import { buildConfig } from 'payload'
 import { de } from 'payload/i18n/de'
@@ -131,7 +132,7 @@ export async function buildConfigWithDefaults(
       ],
     }),
     email: testEmailAdapter,
-    endpoints: [localAPIEndpoint, reInitEndpoint],
+    endpoints: [localAPIEndpoint, reInitEndpoint, healthEndpoint],
     secret: 'TEST_SECRET',
     sharp,
     telemetry: false,

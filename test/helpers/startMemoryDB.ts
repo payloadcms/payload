@@ -1,6 +1,4 @@
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
-import mongoose from 'mongoose'
-
 // eslint-disable-next-line no-restricted-exports
 export default async () => {
   console.log('Starting memory db...')
@@ -18,7 +16,8 @@ export default async () => {
       console.log('Stopped memorydb')
     }
 
-    if (Object.keys(mongoose.models).length > 0) {
+    if (global._payload?.payload?.db?.mongoose?.models) {
+      const mongoose = global._payload?.payload?.db?.mongoose
       Object.keys(mongoose.models).map((model) => mongoose.deleteModel(model))
     }
 

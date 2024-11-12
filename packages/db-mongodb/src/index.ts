@@ -98,6 +98,7 @@ export type MongooseAdapter = {
   connection: Connection
   globals: GlobalModel
   mongoMemoryServer: MongoMemoryReplSet
+  mongoose: typeof mongoose
   prodMigrations?: {
     down: (args: MigrateDownArgs) => Promise<void>
     name: string
@@ -120,6 +121,7 @@ declare module 'payload' {
     connection: Connection
     globals: GlobalModel
     mongoMemoryServer: MongoMemoryReplSet
+    mongoose: typeof mongoose
     prodMigrations?: {
       down: (args: MigrateDownArgs) => Promise<void>
       name: string
@@ -159,6 +161,7 @@ export function mongooseAdapter({
       disableIndexHints,
       globals: undefined,
       mongoMemoryServer,
+      mongoose,
       sessions: {},
       transactionOptions: transactionOptions === false ? undefined : transactionOptions,
       url,
