@@ -233,11 +233,9 @@ _For details on how to build Custom Components, see [Building Custom Components]
   Instead of replacing the entire Field Component, you can alternately replace or slot-in only specific parts by using the [`Label`](#label), [`Error`](#error), [`beforeInput`](#afterinput-and-beforinput), and [`afterInput`](#afterinput-and-beforinput) properties.
 </Banner>
 
-### Default Props
+#### Default Props
 
-#### Client Props
-
-All Field Components receive the following props:
+All Field Components receive the following props by default:
 
 | Property         | Description                                                                                                                                                                                                                      |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -251,13 +249,11 @@ All Field Components receive the following props:
 | **`schemaPath`** | A string representing the direct, static path to the [Field Config](../fields/overview), i.e. `posts.myGroup.myArray.myField`. |
 | **`indexPath`**  | A hyphen-notated string representing the path to the field _within the nearest named ancestor field_, i.e. `0-0` |
 
-#### Server Props
-
-In addition to the above props, Server Components will also receive the following props:
+In addition to the above props, all Server Components will also receive the following props:
 
 | Property         | Description                                                                                                                                                                                                                      |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`clientField`** | The serialized Client Field Config. |
+| **`clientField`** | The serializable Client Field Config. |
 | **`field`** | The Field Config. [More details](../fields/overview). |
 | **`data`**       | The current document being edited.                                                                                                                                                                                                   |
 | **`i18n`**       | The [i18n](../configuration/i18n) object.
@@ -356,7 +352,7 @@ export const myField: Field = {
 }
 ```
 
-All Label Components receive the same props that the [Field Component](#field) receives. For details on how to build Custom Components themselves, see [Building Custom Components](./components#building-custom-components).
+All Label Components receive the same [Default Field Component Props](#field). For details on how to build Custom Components themselves, see [Building Custom Components](./components#building-custom-components).
 
 #### TypeScript
 
@@ -396,7 +392,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 }
 ```
 
-All Description Components receive the same props that the [Field Component](#field) receives. For details on how to build a Custom Components themselves, see [Building Custom Components](./components#building-custom-components).
+All Description Components receive the same [Default Field Component Props](#field). For details on how to build a Custom Components themselves, see [Building Custom Components](./components#building-custom-components).
 
 #### TypeScript
 
@@ -430,7 +426,7 @@ export const myField: Field = {
 }
 ```
 
-All Description Components receive the same props that the [Field Component](#field) receives. For details on how to build Custom Components themselves, see [Building Custom Components](./components#building-custom-components).
+All Error Components receive the same [Default Field Component Props](#field). For details on how to build Custom Components themselves, see [Building Custom Components](./components#building-custom-components).
 
 #### TypeScript
 
@@ -475,4 +471,4 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 
 _For details on how to build Custom Components, see [Building Custom Components](./components#building-custom-components)._
 
-All `beforeInput` and `afterInput` Components receive the same props that the [Field Component](#field) receives.
+All `afterInput` and `beforeInput` Components receive the same [Default Field Component Props](#field).
