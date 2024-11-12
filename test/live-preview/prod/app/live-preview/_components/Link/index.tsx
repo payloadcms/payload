@@ -1,7 +1,7 @@
 import LinkWithDefault from 'next/link.js'
 import React from 'react'
 
-import type { Page, Post } from '../../../../payload-types.js'
+import type { Page, Post } from '../../../../../payload-types.js'
 import type { Props as ButtonProps } from '../Button/index.js'
 
 import { Button } from '../Button/index.js'

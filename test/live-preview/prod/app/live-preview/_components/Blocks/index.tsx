@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react'
 
-import type { Page } from '../../../../payload-types.js'
+import type { Page } from '../../../../../payload-types.js'
 import type { RelationshipsBlockProps } from '../../_blocks/Relationships/index.js'
 import type { VerticalPaddingOptions } from '../VerticalPadding/index.js'
 

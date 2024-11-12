@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 
-import type { Page } from '../../../../payload-types.js'
+import type { Page } from '../../../../../payload-types.js'
 
 import { getDoc } from '../../_api/getDoc.js'
 import { getDocs } from '../../_api/getDocs.js'

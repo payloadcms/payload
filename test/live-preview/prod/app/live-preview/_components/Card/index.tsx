@@ -1,7 +1,7 @@
 import LinkWithDefault from 'next/link.js'
 import React, { Fragment } from 'react'
 
-import type { Post } from '../../../../payload-types.js'
+import type { Post } from '../../../../../payload-types.js'
 
 import { Media } from '../Media/index.js'
 import classes from './index.module.scss'

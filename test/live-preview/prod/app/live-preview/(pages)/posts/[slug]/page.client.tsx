@@ -4,9 +4,9 @@ import { useLivePreview } from '@payloadcms/live-preview-react'
 import { Gutter } from '@payloadcms/ui'
 import React from 'react'
 
-import type { Post as PostType } from '../../../../../payload-types.js'
+import type { Post as PostType } from '../../../../../../payload-types.js'
 
-import { postsSlug, renderedPageTitleID } from '../../../../../shared.js'
+import { postsSlug, renderedPageTitleID } from '../../../../../../shared.js'
 import { PAYLOAD_SERVER_URL } from '../../../_api/serverURL.js'
 import { Blocks } from '../../../_components/Blocks/index.js'
 import { PostHero } from '../../../_heros/PostHero/index.js'

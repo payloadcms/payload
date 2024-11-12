@@ -1,7 +1,7 @@
-import type { StaticImageData } from 'next/image'
+import type { StaticImageData } from 'next/image.js'
 import type { ElementType, Ref } from 'react'
 
-import type { Media as MediaType } from '../../../payload-types.js'
+import type { Media as MediaType } from '../../../../../payload-types.js'
 
 export interface Props {
   alt?: string

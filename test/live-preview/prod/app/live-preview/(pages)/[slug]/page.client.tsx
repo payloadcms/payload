@@ -3,9 +3,9 @@
 import { useLivePreview } from '@payloadcms/live-preview-react'
 import React from 'react'
 
-import type { Page as PageType } from '../../../../payload-types.js'
+import type { Page as PageType } from '../../../../../payload-types.js'
 
-import { renderedPageTitleID } from '../../../../shared.js'
+import { renderedPageTitleID } from '../../../../../shared.js'
 import { PAYLOAD_SERVER_URL } from '../../_api/serverURL.js'
 import { Blocks } from '../../_components/Blocks/index.js'
 import { Gutter } from '../../_components/Gutter/index.js'

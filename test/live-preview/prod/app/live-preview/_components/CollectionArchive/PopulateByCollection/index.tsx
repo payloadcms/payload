@@ -3,7 +3,7 @@
 import * as qs from 'qs-esm'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
-import type { Post } from '../../../../../payload-types.js'
+import type { Post } from '../../../../../../payload-types.js'
 import type { ArchiveBlockProps } from '../../../_blocks/ArchiveBlock/types.js'
 
 import { PAYLOAD_SERVER_URL } from '../../../_api/serverURL.js'

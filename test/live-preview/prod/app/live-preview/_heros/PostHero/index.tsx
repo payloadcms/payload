@@ -1,7 +1,7 @@
 import LinkWithDefault from 'next/link.js'
 import React, { Fragment } from 'react'
 
-import type { Post } from '../../../../payload-types.js'
+import type { Post } from '../../../../../payload-types.js'
 
 import { PAYLOAD_SERVER_URL } from '../../_api/serverURL.js'
 import { Gutter } from '../../_components/Gutter/index.js'

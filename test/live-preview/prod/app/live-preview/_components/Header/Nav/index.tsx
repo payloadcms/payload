@@ -2,7 +2,7 @@
 
 import React from 'react'
 
-import type { Header as HeaderType } from '../../../../../test/live-preview/payload-types.js'
+import type { Header as HeaderType } from '../../../../../../payload-types.js'
 
 import { CMSLink } from '../../Link/index.js'
 import classes from './index.module.scss'

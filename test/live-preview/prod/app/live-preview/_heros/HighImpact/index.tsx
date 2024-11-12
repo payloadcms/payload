@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react'
 
-import type { Page } from '../../../../test/live-preview/payload-types.js'
+import type { Page } from '../../../../../payload-types.js'
 
 import { Gutter } from '../../_components/Gutter/index.js'
 import { Media } from '../../_components/Media/index.js'

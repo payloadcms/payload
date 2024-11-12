@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { Page } from '../../../../payload-types.js'
+import type { Page } from '../../../../../payload-types.js'
 
 import { Gutter } from '../../_components/Gutter/index.js'
 import { CMSLink } from '../../_components/Link/index.js'

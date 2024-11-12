@@ -2,9 +2,9 @@ import { Gutter } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
-import type { Page } from '../../../../../payload-types.js'
+import type { Page } from '../../../../../../payload-types.js'
 
-import { renderedPageTitleID, ssrAutosavePagesSlug } from '../../../../../shared.js'
+import { renderedPageTitleID, ssrAutosavePagesSlug } from '../../../../../../shared.js'
 import { getDoc } from '../../../_api/getDoc.js'
 import { getDocs } from '../../../_api/getDocs.js'
 import { Blocks } from '../../../_components/Blocks/index.js'

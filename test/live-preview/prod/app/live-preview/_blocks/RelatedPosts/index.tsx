@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { Post } from '../../../../payload-types.js'
+import type { Post } from '../../../../../payload-types.js'
 
 import { Card } from '../../_components/Card/index.js'
 import { Gutter } from '../../_components/Gutter/index.js'

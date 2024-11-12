@@ -1,5 +1,3 @@
-import type { ElementType } from 'react'
-
 import React, { Fragment } from 'react'
 
 import type { Props } from './types.js'

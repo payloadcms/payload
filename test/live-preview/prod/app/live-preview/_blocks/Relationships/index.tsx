@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react'
 
-import type { Page } from '../../../../payload-types.js'
+import type { Page } from '../../../../../payload-types.js'
 
 import { Gutter } from '../../_components/Gutter/index.js'
 import RichText from '../../_components/RichText/index.js'
