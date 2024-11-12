@@ -1,5 +1,6 @@
+/* eslint-disable no-restricted-exports */
 import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
-import type { Document, PayloadRequest } from '../../../types/index.js'
+import type { Document, PayloadRequest, PopulateType } from '../../../types/index.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -13,6 +14,7 @@ export type Options<TSlug extends GlobalSlug> = {
   id: string
   locale?: TypedLocale
   overrideAccess?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
   showHiddenFields?: boolean
   slug: TSlug
@@ -23,7 +25,7 @@ export default async function restoreVersionLocal<TSlug extends GlobalSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<DataFromGlobalSlug<TSlug>> {
-  const { id, slug: globalSlug, depth, overrideAccess = true, showHiddenFields } = options
+  const { id, slug: globalSlug, depth, overrideAccess = true, populate, showHiddenFields } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
 
@@ -36,6 +38,7 @@ export default async function restoreVersionLocal<TSlug extends GlobalSlug>(
     depth,
     globalConfig,
     overrideAccess,
+    populate,
     req: await createLocalReq(options, payload),
     showHiddenFields,
   })

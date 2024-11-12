@@ -3,6 +3,7 @@ import type { PayloadRequest, UpdateOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { handleError } from './utilities/handleError.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
@@ -17,16 +18,19 @@ export const updateOne: UpdateOne = async function updateOne(
     locale,
     options: optionsArgs = {},
     req = {} as PayloadRequest,
+    select,
     where: whereArg,
   },
 ) {
   const where = id ? { id: { equals: id } } : whereArg
   const Model = this.collections[collection]
+  const fields = this.payload.collections[collection].config.fields
   const options: QueryOptions = {
     ...optionsArgs,
     ...(await withSession(this, req)),
     lean: true,
     new: true,
+    projection: buildProjectionFromSelect({ adapter: this, fields, select }),
   }
 
   const query = await Model.buildQuery({
@@ -40,7 +44,7 @@ export const updateOne: UpdateOne = async function updateOne(
   const sanitizedData = sanitizeRelationshipIDs({
     config: this.payload.config,
     data,
-    fields: this.payload.collections[collection].config.fields,
+    fields,
   })
 
   try {

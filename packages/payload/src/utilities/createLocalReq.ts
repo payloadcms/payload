@@ -7,7 +7,7 @@ import { getLocalI18n } from '../translations/getLocalI18n.js'
 import { sanitizeFallbackLocale } from '../utilities/sanitizeFallbackLocale.js'
 
 function getRequestContext(
-  req: PayloadRequest = { context: null } as PayloadRequest,
+  req: Partial<PayloadRequest> = { context: null } as PayloadRequest,
   context: RequestContext = {},
 ): RequestContext {
   if (req.context) {
@@ -22,7 +22,7 @@ function getRequestContext(
   }
 }
 
-const attachFakeURLProperties = (req: PayloadRequest) => {
+const attachFakeURLProperties = (req: Partial<PayloadRequest>) => {
   /**
    * *NOTE*
    * If no URL is provided, the local API was called directly outside
@@ -56,15 +56,15 @@ const attachFakeURLProperties = (req: PayloadRequest) => {
     req.pathname = getURLObject().pathname
   }
   if (!req.searchParams) {
-    // @ts-expect-error
+    // @ts-expect-error eslint-disable-next-line no-param-reassign
     req.searchParams = getURLObject().searchParams
   }
   if (!req.origin) {
-    // @ts-expect-error
+    // @ts-expect-error eslint-disable-next-line no-param-reassign
     req.origin = getURLObject().origin
   }
   if (!req?.url) {
-    // @ts-expect-error
+    // @ts-expect-error eslint-disable-next-line no-param-reassign
     req.url = getURLObject().href
   }
 }
@@ -74,11 +74,12 @@ type CreateLocalReq = (
     context?: RequestContext
     fallbackLocale?: string
     locale?: string
-    req?: PayloadRequest
+    req?: Partial<PayloadRequest>
     user?: User
   },
   payload: Payload,
 ) => Promise<PayloadRequest>
+
 export const createLocalReq: CreateLocalReq = async (
   { context, fallbackLocale, locale: localeArg, req = {} as PayloadRequest, user },
   payload,
@@ -88,6 +89,7 @@ export const createLocalReq: CreateLocalReq = async (
     const locale = localeArg === '*' ? 'all' : localeArg
     const defaultLocale = localization.defaultLocale
     const localeCandidate = locale || req?.locale || req?.query?.locale
+
     req.locale =
       localeCandidate && typeof localeCandidate === 'string' ? localeCandidate : defaultLocale
 
@@ -105,20 +107,21 @@ export const createLocalReq: CreateLocalReq = async (
     (await getLocalI18n({ config: payload.config, language: payload.config.i18n.fallbackLanguage }))
 
   if (!req.headers) {
-    // @ts-expect-error
+    // @ts-expect-error eslint-disable-next-line no-param-reassign
     req.headers = new Headers()
   }
+
   req.context = getRequestContext(req, context)
   req.payloadAPI = req?.payloadAPI || 'local'
   req.payload = payload
   req.i18n = i18n
   req.t = i18n.t
   req.user = user || req?.user || null
-  req.payloadDataLoader = req?.payloadDataLoader || getDataLoader(req)
+  req.payloadDataLoader = req?.payloadDataLoader || getDataLoader(req as PayloadRequest)
   req.routeParams = req?.routeParams || {}
   req.query = req?.query || {}
 
   attachFakeURLProperties(req)
 
-  return req
+  return req as PayloadRequest
 }

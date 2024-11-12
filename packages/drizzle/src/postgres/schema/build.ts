@@ -30,6 +30,7 @@ import type {
 } from '../types.js'
 
 import { createTableName } from '../../createTableName.js'
+import { buildIndexName } from '../../utilities/buildIndexName.js'
 import { createIndex } from './createIndex.js'
 import { parentIDColumnMap } from './parentIDColumnMap.js'
 import { setColumnID } from './setColumnID.js'
@@ -49,7 +50,6 @@ type Args = {
   disableRelsTableUnique?: boolean
   disableUnique: boolean
   fields: Field[]
-  joins?: SanitizedJoins
   rootRelationships?: Set<string>
   rootRelationsToBuild?: RelationMap
   rootTableIDColType?: string
@@ -82,7 +82,6 @@ export const buildTable = ({
   disableRelsTableUnique = false,
   disableUnique = false,
   fields,
-  joins,
   rootRelationships,
   rootRelationsToBuild,
   rootTableIDColType,
@@ -132,7 +131,6 @@ export const buildTable = ({
     disableUnique,
     fields,
     indexes,
-    joins,
     localesColumns,
     localesIndexes,
     newTableName: tableName,
@@ -389,21 +387,25 @@ export const buildTable = ({
             foreignColumns: [adapter.tables[formattedRelationTo].id],
           }).onDelete('cascade')
 
-        const indexName = [colName]
+        const indexColumns = [colName]
 
         const unique = !disableUnique && uniqueRelationships.has(relationTo)
 
         if (unique) {
-          indexName.push('path')
+          indexColumns.push('path')
         }
         if (hasLocalizedRelationshipField) {
-          indexName.push('locale')
+          indexColumns.push('locale')
         }
 
-        relationExtraConfig[`${relationTo}IdIdx`] = createIndex({
-          name: indexName,
-          columnName: `${formattedRelationTo}_id`,
-          tableName: relationshipsTableName,
+        const indexName = buildIndexName({
+          name: `${relationshipsTableName}_${formattedRelationTo}_id`,
+          adapter,
+        })
+
+        relationExtraConfig[indexName] = createIndex({
+          name: indexColumns,
+          indexName,
           unique,
         })
       })

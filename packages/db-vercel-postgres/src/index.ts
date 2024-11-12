@@ -4,6 +4,8 @@ import {
   beginTransaction,
   commitTransaction,
   count,
+  countGlobalVersions,
+  countVersions,
   create,
   createGlobal,
   createGlobalVersion,
@@ -33,9 +35,9 @@ import {
   updateVersion,
 } from '@payloadcms/drizzle'
 import {
-  convertPathToJSONTraversal,
   countDistinct,
   createDatabase,
+  createExtensions,
   createJSONQuery,
   createMigration,
   defaultDrizzleSnapshot,
@@ -75,21 +77,29 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       adapterSchema = { enum: pgEnum, table: pgTable }
     }
 
+    const extensions = (args.extensions ?? []).reduce((acc, name) => {
+      acc[name] = true
+      return acc
+    }, {})
+
     return createDatabaseAdapter<VercelPostgresAdapter>({
       name: 'postgres',
       afterSchemaInit: args.afterSchemaInit ?? [],
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       createDatabase,
+      createExtensions,
       defaultDrizzleSnapshot,
       disableCreateDatabase: args.disableCreateDatabase ?? false,
       drizzle: undefined,
       enums: {},
+      extensions,
       features: {
         json: true,
       },
       fieldConstraints: {},
       getMigrationTemplate,
       idType: postgresIDType,
+      indexes: new Set<string>(),
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
@@ -106,6 +116,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       sessions: {},
       tableNameMap: new Map<string, string>(),
       tables: {},
+      tablesFilter: args.tablesFilter,
       transactionOptions: args.transactionOptions || undefined,
       versionsSuffix: args.versionsSuffix || '_v',
 
@@ -114,9 +125,10 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
         args.transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
       commitTransaction,
       connect,
-      convertPathToJSONTraversal,
       count,
       countDistinct,
+      countGlobalVersions,
+      countVersions,
       create,
       createGlobal,
       createGlobalVersion,

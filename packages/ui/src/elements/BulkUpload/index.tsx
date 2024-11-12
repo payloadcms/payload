@@ -3,11 +3,13 @@
 import type { JsonObject } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
+import { validateMimeType } from 'payload/shared'
 import React from 'react'
+import { toast } from 'sonner'
 
 import { useConfig } from '../../providers/Config/index.js'
-import { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index.js'
-import { Drawer } from '../Drawer/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { Drawer, useDrawerDepth } from '../Drawer/index.js'
 import { AddFilesView } from './AddFilesView/index.js'
 import { AddingFilesView } from './AddingFilesView/index.js'
 import { FormsManagerProvider, useFormsManager } from './FormsManager/index.js'
@@ -19,10 +21,11 @@ function DrawerContent() {
   const { closeModal } = useModal()
   const { collectionSlug, drawerSlug } = useBulkUpload()
   const { config } = useConfig()
+  const { t } = useTranslation()
 
   const uploadCollection = config.collections.find((col) => col.slug === collectionSlug)
-  const uploadConfig = uploadCollection.upload
-  const uploadMimeTypes = uploadConfig.mimeTypes
+  const uploadConfig = uploadCollection?.upload
+  const uploadMimeTypes = uploadConfig?.mimeTypes
 
   const onDrop = React.useCallback(
     (acceptedFiles: FileList) => {
@@ -31,14 +34,18 @@ function DrawerContent() {
         if (
           uploadMimeTypes === undefined ||
           uploadMimeTypes.length === 0 ||
-          uploadMimeTypes?.includes(candidateFile.type)
+          validateMimeType(candidateFile.type, uploadMimeTypes)
         ) {
           fileTransfer.items.add(candidateFile)
         }
       }
-      void addFiles(fileTransfer.files)
+      if (fileTransfer.files.length === 0) {
+        toast.error(t('error:invalidFileType'))
+      } else {
+        void addFiles(fileTransfer.files)
+      }
     },
-    [addFiles, uploadMimeTypes],
+    [addFiles, t, uploadMimeTypes],
   )
 
   if (!collectionSlug) {
@@ -63,17 +70,14 @@ export type BulkUploadProps = {
 }
 
 export function BulkUploadDrawer() {
-  const currentDepth = useEditDepth()
   const { drawerSlug } = useBulkUpload()
 
   return (
-    <EditDepthProvider depth={currentDepth || 1}>
-      <Drawer gutter={false} Header={null} slug={drawerSlug}>
-        <FormsManagerProvider>
-          <DrawerContent />
-        </FormsManagerProvider>
-      </Drawer>
-    </EditDepthProvider>
+    <Drawer gutter={false} Header={null} slug={drawerSlug}>
+      <FormsManagerProvider>
+        <DrawerContent />
+      </FormsManagerProvider>
+    </Drawer>
   )
 }
 
@@ -155,7 +159,7 @@ export function BulkUploadProvider({ children }: { readonly children: React.Reac
 export const useBulkUpload = () => React.useContext(Context)
 
 export function useBulkUploadDrawerSlug() {
-  const depth = useEditDepth()
+  const depth = useDrawerDepth()
 
   return `${drawerSlug}-${depth || 1}`
 }

@@ -41,10 +41,10 @@ export const sanitizeCollection = async (
     collectionConfig: sanitized,
     config,
     fields: sanitized.fields,
+    joinPath: '',
     joins,
     parentIsLocalized: false,
     richTextSanitizationPromises,
-    schemaPath: '',
     validRelationships,
   })
 
@@ -71,6 +71,7 @@ export const sanitizeCollection = async (
           disableBulkEdit: true,
           hidden: true,
         },
+        index: true,
         label: ({ t }) => t('general:updatedAt'),
       })
     }
@@ -93,12 +94,15 @@ export const sanitizeCollection = async (
 
   if (sanitized.versions) {
     if (sanitized.versions === true) {
-      sanitized.versions = { drafts: false }
+      sanitized.versions = { drafts: false, maxPerDoc: 100 }
     }
 
     if (sanitized.timestamps === false) {
       throw new TimestampsRequired(collection)
     }
+
+    sanitized.versions.maxPerDoc =
+      typeof sanitized.versions.maxPerDoc === 'number' ? sanitized.versions.maxPerDoc : 100
 
     if (sanitized.versions.drafts) {
       if (sanitized.versions.drafts === true) {

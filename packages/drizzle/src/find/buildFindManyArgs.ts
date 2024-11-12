@@ -1,5 +1,7 @@
 import type { DBQueryConfig } from 'drizzle-orm'
-import type { Field, JoinQuery } from 'payload'
+import type { Field, JoinQuery, SelectType } from 'payload'
+
+import { getSelectMode } from 'payload/shared'
 
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
 
@@ -15,7 +17,9 @@ type BuildFindQueryArgs = {
    */
   joins?: BuildQueryJoinAliases
   locale?: string
+  select?: SelectType
   tableName: string
+  versions?: boolean
 }
 
 export type Result = {
@@ -33,55 +37,39 @@ export const buildFindManyArgs = ({
   joinQuery,
   joins = [],
   locale,
+  select,
   tableName,
+  versions,
 }: BuildFindQueryArgs): Record<string, unknown> => {
   const result: Result = {
     extras: {},
     with: {},
   }
 
+  if (select) {
+    result.columns = {
+      id: true,
+    }
+  }
+
   const _locales: Result = {
-    columns: {
-      id: false,
-      _parentID: false,
-    },
+    columns: select
+      ? { _locale: true }
+      : {
+          id: false,
+          _parentID: false,
+        },
     extras: {},
     with: {},
   }
 
-  if (adapter.tables[`${tableName}_texts`]) {
-    result.with._texts = {
-      columns: {
-        id: false,
-        parent: false,
-      },
-      orderBy: ({ order }, { asc: ASC }) => [ASC(order)],
-    }
-  }
-
-  if (adapter.tables[`${tableName}_numbers`]) {
-    result.with._numbers = {
-      columns: {
-        id: false,
-        parent: false,
-      },
-      orderBy: ({ order }, { asc: ASC }) => [ASC(order)],
-    }
-  }
-
-  if (adapter.tables[`${tableName}${adapter.relationshipsSuffix}`]) {
-    result.with._rels = {
-      columns: {
-        id: false,
-        parent: false,
-      },
-      orderBy: ({ order }, { asc: ASC }) => [ASC(order)],
-    }
-  }
-
-  if (adapter.tables[`${tableName}${adapter.localesSuffix}`]) {
-    result.with._locales = _locales
-  }
+  const withTabledFields = select
+    ? {}
+    : {
+        numbers: true,
+        rels: true,
+        texts: true,
+      }
 
   traverseFields({
     _locales,
@@ -94,10 +82,51 @@ export const buildFindManyArgs = ({
     joins,
     locale,
     path: '',
+    select,
+    selectMode: select ? getSelectMode(select) : undefined,
     tablePath: '',
     topLevelArgs: result,
     topLevelTableName: tableName,
+    versions,
+    withTabledFields,
   })
+
+  if (adapter.tables[`${tableName}_texts`] && withTabledFields.texts) {
+    result.with._texts = {
+      columns: {
+        id: false,
+        parent: false,
+      },
+      orderBy: ({ order }, { asc: ASC }) => [ASC(order)],
+    }
+  }
+
+  if (adapter.tables[`${tableName}_numbers`] && withTabledFields.numbers) {
+    result.with._numbers = {
+      columns: {
+        id: false,
+        parent: false,
+      },
+      orderBy: ({ order }, { asc: ASC }) => [ASC(order)],
+    }
+  }
+
+  if (adapter.tables[`${tableName}${adapter.relationshipsSuffix}`] && withTabledFields.rels) {
+    result.with._rels = {
+      columns: {
+        id: false,
+        parent: false,
+      },
+      orderBy: ({ order }, { asc: ASC }) => [ASC(order)],
+    }
+  }
+
+  if (
+    adapter.tables[`${tableName}${adapter.localesSuffix}`] &&
+    (!select || Object.keys(_locales.columns).length > 1)
+  ) {
+    result.with._locales = _locales
+  }
 
   return result
 }

@@ -8,6 +8,7 @@ const baseClass = 'thumbnail'
 import type { SanitizedCollectionConfig } from 'payload'
 
 import { File } from '../../graphics/File/index.js'
+import { useIntersect } from '../../hooks/useIntersect.js'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 
 export type ThumbnailProps = {
@@ -28,6 +29,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
 
   React.useEffect(() => {
     if (!fileSrc) {
+      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setFileExists(false)
       return
     }
@@ -72,6 +74,7 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
 
   React.useEffect(() => {
     if (!fileSrc) {
+      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setFileExists(false)
       return
     }

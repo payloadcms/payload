@@ -1,6 +1,5 @@
 import type { LabelFunction, ServerProps } from '../../config/types.js'
 import type { Field } from '../../fields/config/types.js'
-import type { MappedComponent } from '../types.js'
 import type { ClientFieldWithOptionalType } from './Field.js'
 
 export type DescriptionFunction = LabelFunction
@@ -20,9 +19,9 @@ export type Description = DescriptionFunction | StaticDescription
 
 export type GenericDescriptionProps = {
   readonly className?: string
-  readonly Description?: MappedComponent
   readonly description?: StaticDescription
   readonly marginPlacement?: 'bottom' | 'top'
+  readonly path: string
 }
 
 export type FieldDescriptionServerProps<

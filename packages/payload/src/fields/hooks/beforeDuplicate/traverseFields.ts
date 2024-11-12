@@ -1,5 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
-import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { RequestContext } from '../../../index.js'
+import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { promise } from './promise.js'
@@ -30,7 +31,7 @@ export const traverseFields = async <T>({
   siblingDoc,
 }: Args<T>): Promise<void> => {
   const promises = []
-  fields.forEach((field) => {
+  fields.forEach((field, fieldIndex) => {
     promises.push(
       promise({
         id,
@@ -38,6 +39,7 @@ export const traverseFields = async <T>({
         context,
         doc,
         field,
+        fieldIndex,
         overrideAccess,
         parentPath: path,
         parentSchemaPath: schemaPath,

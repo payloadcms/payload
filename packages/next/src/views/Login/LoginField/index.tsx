@@ -17,9 +17,11 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
   if (type === 'email') {
     return (
       <EmailField
-        autoComplete="email"
         field={{
           name: 'email',
+          admin: {
+            autoComplete: 'email',
+          },
           label: t('general:email'),
           required,
         }}

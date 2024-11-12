@@ -120,6 +120,23 @@ const IndexedFields: CollectionConfig = {
       ],
       label: 'Collapsible',
     },
+    {
+      type: 'text',
+      name: 'someText',
+      index: true,
+    },
+    {
+      type: 'array',
+      name: 'some',
+      index: true,
+      fields: [
+        {
+          type: 'text',
+          name: 'text',
+          index: true,
+        },
+      ],
+    },
   ],
   versions: true,
 }

@@ -4,6 +4,8 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { TextField } from 'payload'
 
+import { v4 as uuid } from 'uuid'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 
@@ -100,6 +102,11 @@ export default buildConfigWithDefaults({
             { value: 'option1', label: 'Option 1' },
             { value: 'default', label: 'Default' },
           ],
+        },
+        {
+          name: 'point',
+          type: 'point',
+          defaultValue: [10, 20],
         },
       ],
     },
@@ -318,7 +325,66 @@ export default buildConfigWithDefaults({
           virtual: true,
           fields: [],
         },
+        {
+          type: 'row',
+          fields: [
+            {
+              type: 'text',
+              name: 'textWithinRow',
+              virtual: true,
+            },
+          ],
+        },
+        {
+          type: 'collapsible',
+          fields: [
+            {
+              type: 'text',
+              name: 'textWithinCollapsible',
+              virtual: true,
+            },
+          ],
+          label: 'Colllapsible',
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'tab',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'textWithinTabs',
+                  virtual: true,
+                },
+              ],
+            },
+          ],
+        },
       ],
+    },
+    {
+      slug: 'custom-ids',
+      fields: [
+        {
+          name: 'id',
+          type: 'text',
+          admin: {
+            readOnly: true,
+          },
+          hooks: {
+            beforeChange: [
+              ({ value, operation }) => {
+                if (operation === 'create') {
+                  return uuid()
+                }
+                return value
+              },
+            ],
+          },
+        },
+      ],
+      versions: { drafts: true },
     },
   ],
   globals: [

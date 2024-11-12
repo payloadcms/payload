@@ -1,12 +1,21 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.0.0-beta.115",
+  "version": "3.0.0-beta.127",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/payloadcms/payload.git",
     "directory": "packages/ui"
   },
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
   "sideEffects": false,
   "type": "module",
   "exports": {
@@ -24,25 +33,35 @@
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
     },
-    "./utilities/createClientConfig": {
-      "import": "./src/providers/Config/createClientConfig/index.tsx",
-      "types": "./src/providers/Config/createClientConfig/index.tsx",
-      "default": "./src/providers/Config/createClientConfig/index.tsx"
+    "./elements/RenderServerComponent": {
+      "import": "./src/elements/RenderServerComponent/index.tsx",
+      "types": "./src/elements/RenderServerComponent/index.tsx",
+      "default": "./src/elements/RenderServerComponent/index.tsx"
+    },
+    "./rsc": {
+      "import": "./src/exports/rsc/index.ts",
+      "types": "./src/exports/rsc/index.ts",
+      "default": "./src/exports/rsc/index.ts"
     },
     "./utilities/buildFormState": {
       "import": "./src/utilities/buildFormState.ts",
       "types": "./src/utilities/buildFormState.ts",
       "default": "./src/utilities/buildFormState.ts"
     },
+    "./utilities/buildTableState": {
+      "import": "./src/utilities/buildTableState.ts",
+      "types": "./src/utilities/buildTableState.ts",
+      "default": "./src/utilities/buildTableState.ts"
+    },
     "./utilities/buildFieldSchemaMap/traverseFields": {
       "import": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
       "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
       "default": "./src/utilities/buildFieldSchemaMap/traverseFields.ts"
     },
-    "./forms/buildStateFromSchema": {
-      "import": "./src/forms/buildStateFromSchema/index.tsx",
-      "types": "./src/forms/buildStateFromSchema/index.tsx",
-      "default": "./src/forms/buildStateFromSchema/index.tsx"
+    "./forms/fieldSchemasToFormState": {
+      "import": "./src/forms/fieldSchemasToFormState/index.tsx",
+      "types": "./src/forms/fieldSchemasToFormState/index.tsx",
+      "default": "./src/forms/fieldSchemasToFormState/index.tsx"
     },
     "./scss/app.scss": "./src/scss/app.scss",
     "./assets": {
@@ -92,7 +111,7 @@
     "react-select": "5.8.0",
     "scheduler": "0.0.0-experimental-3edc000d-20240926",
     "sonner": "^1.5.0",
-    "ts-essentials": "10.0.2",
+    "ts-essentials": "10.0.3",
     "use-context-selector": "2.0.0",
     "uuid": "10.0.0"
   },
@@ -112,14 +131,14 @@
     "babel-plugin-react-compiler": "0.0.0-experimental-24ec0eb-20240918",
     "esbuild": "0.23.1",
     "esbuild-sass-plugin": "3.3.1",
-    "eslint-plugin-react-compiler": "0.0.0-experimental-7670337-20240918",
+    "eslint-plugin-react-compiler": "19.0.0-beta-a7bf2bd-20241110",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "next": "^15.0.0-canary.173",
+    "next": "^15.0.0",
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-3edc000d-20240926",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-3edc000d-20240926"
+    "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
@@ -136,11 +155,6 @@
         "types": "./dist/exports/shared/index.d.ts",
         "default": "./dist/exports/shared/index.js"
       },
-      "./utilities/createClientConfig": {
-        "import": "./dist/providers/Config/createClientConfig/index.js",
-        "types": "./dist/providers/Config/createClientConfig/index.d.ts",
-        "default": "./dist/providers/Config/createClientConfig/index.js"
-      },
       "./css": {
         "import": "./dist/styles.css",
         "default": "./dist/styles.css"
@@ -149,12 +163,22 @@
         "import": "./dist/scss/styles.scss",
         "default": "./dist/scss/styles.scss"
       },
+      "./rsc": {
+        "import": "./dist/exports/rsc/index.js",
+        "types": "./dist/exports/rsc/index.d.ts",
+        "default": "./dist/exports/rsc/index.js"
+      },
       "./scss/app.scss": "./dist/scss/app.scss",
       "./styles.css": "./dist/styles.css",
       "./assets": {
         "import": "./dist/assets/index.js",
         "types": "./dist/assets/index.d.ts",
         "default": "./dist/assets/index.js"
+      },
+      "./elements/RenderServerComponent": {
+        "import": "./dist/elements/RenderServerComponent/index.js",
+        "types": "./dist/elements/RenderServerComponent/index.d.ts",
+        "default": "./dist/elements/RenderServerComponent/index.js"
       },
       "./elements/*": {
         "import": "./dist/elements/*/index.js",

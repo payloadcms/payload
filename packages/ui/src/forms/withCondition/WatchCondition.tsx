@@ -12,18 +12,11 @@ export const WatchCondition: React.FC<{
   path?: string
   type: FieldTypes
 }> = (props) => {
-  const { name, type, children, indexPath, path: pathFromProps } = props
+  const { name, children, path: pathFromProps } = props
 
   const path = typeof pathFromProps === 'string' ? pathFromProps : name
 
-  let formStateID = path
-
-  if (['collapsible', 'row'].includes(type)) {
-    const index = indexPath.split('.').pop()
-    formStateID = `${path ? `${path}.` : ''}_index-${index}`
-  }
-
-  const field = useFormFields(([fields]) => (fields && fields?.[formStateID]) || null)
+  const field = useFormFields(([fields]) => (fields && fields?.[path]) || null)
 
   const { passesCondition } = field || {}
 

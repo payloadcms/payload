@@ -1,5 +1,13 @@
 import type { TypeWithID } from '../collections/config/types.js'
-import type { Document, JoinQuery, Payload, PayloadRequest, Where } from '../types/index.js'
+import type {
+  Document,
+  JoinQuery,
+  Payload,
+  PayloadRequest,
+  SelectType,
+  Sort,
+  Where,
+} from '../types/index.js'
 import type { TypeWithVersion } from '../versions/types.js'
 
 export type { TypeWithVersion }
@@ -21,6 +29,8 @@ export interface BaseDatabaseAdapter {
   connect?: Connect
 
   count: Count
+  countGlobalVersions: CountGlobalVersions
+  countVersions: CountVersions
 
   create: Create
 
@@ -174,12 +184,14 @@ export type CommitTransaction = (id: number | Promise<number | string> | string)
 
 export type QueryDraftsArgs = {
   collection: string
+  joins?: JoinQuery
   limit?: number
   locale?: string
   page?: number
   pagination?: boolean
   req: PayloadRequest
-  sort?: string
+  select?: SelectType
+  sort?: Sort
   where?: Where
 }
 
@@ -190,6 +202,7 @@ export type FindOneArgs = {
   joins?: JoinQuery
   locale?: string
   req: PayloadRequest
+  select?: SelectType
   where?: Where
 }
 
@@ -205,8 +218,9 @@ export type FindArgs = {
   pagination?: boolean
   projection?: Record<string, unknown>
   req: PayloadRequest
+  select?: SelectType
   skip?: number
-  sort?: string
+  sort?: Sort
   versions?: boolean
   where?: Where
 }
@@ -222,14 +236,26 @@ export type CountArgs = {
 
 export type Count = (args: CountArgs) => Promise<{ totalDocs: number }>
 
+export type CountVersions = (args: CountArgs) => Promise<{ totalDocs: number }>
+
+export type CountGlobalVersionArgs = {
+  global: string
+  locale?: string
+  req: PayloadRequest
+  where?: Where
+}
+
+export type CountGlobalVersions = (args: CountGlobalVersionArgs) => Promise<{ totalDocs: number }>
+
 type BaseVersionArgs = {
   limit?: number
   locale?: string
   page?: number
   pagination?: boolean
   req: PayloadRequest
+  select?: SelectType
   skip?: number
-  sort?: string
+  sort?: Sort
   versions?: boolean
   where?: Where
 }
@@ -249,6 +275,7 @@ export type FindGlobalVersionsArgs = {
 export type FindGlobalArgs = {
   locale?: string
   req: PayloadRequest
+  select?: SelectType
   slug: string
   where?: Where
 }
@@ -257,6 +284,7 @@ export type UpdateGlobalVersionArgs<T = TypeWithID> = {
   global: string
   locale?: string
   req: PayloadRequest
+  select?: SelectType
   versionData: T
 } & (
   | {
@@ -289,6 +317,7 @@ export type CreateGlobal = <T extends Record<string, unknown> = any>(
 export type UpdateGlobalArgs<T extends Record<string, unknown> = any> = {
   data: T
   req: PayloadRequest
+  select?: SelectType
   slug: string
 }
 export type UpdateGlobal = <T extends Record<string, unknown> = any>(
@@ -318,6 +347,7 @@ export type CreateVersionArgs<T = TypeWithID> = {
   parent: number | string
   publishedLocale?: string
   req: PayloadRequest
+  select?: SelectType
   snapshot?: true
   updatedAt: string
   versionData: T
@@ -335,6 +365,7 @@ export type CreateGlobalVersionArgs<T = TypeWithID> = {
   parent: number | string
   publishedLocale?: string
   req: PayloadRequest
+  select?: SelectType
   snapshot?: true
   updatedAt: string
   versionData: T
@@ -350,6 +381,7 @@ export type UpdateVersionArgs<T = TypeWithID> = {
   collection: string
   locale?: string
   req: PayloadRequest
+  select?: SelectType
   versionData: T
 } & (
   | {
@@ -372,6 +404,7 @@ export type CreateArgs = {
   draft?: boolean
   locale?: string
   req: PayloadRequest
+  select?: SelectType
 }
 
 export type Create = (args: CreateArgs) => Promise<Document>
@@ -387,6 +420,7 @@ export type UpdateOneArgs = {
    */
   options?: Record<string, unknown>
   req: PayloadRequest
+  select?: SelectType
 } & (
   | {
       id: number | string
@@ -406,6 +440,7 @@ export type UpsertArgs = {
   joins?: JoinQuery
   locale?: string
   req: PayloadRequest
+  select?: SelectType
   where: Where
 }
 
@@ -415,6 +450,7 @@ export type DeleteOneArgs = {
   collection: string
   joins?: JoinQuery
   req: PayloadRequest
+  select?: SelectType
   where: Where
 }
 

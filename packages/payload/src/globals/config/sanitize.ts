@@ -73,8 +73,10 @@ export const sanitizeGlobals = async (
 
     if (global.versions) {
       if (global.versions === true) {
-        global.versions = { drafts: false }
+        global.versions = { drafts: false, max: 100 }
       }
+
+      global.versions.max = typeof global.versions.max === 'number' ? global.versions.max : 100
 
       if (global.versions.drafts) {
         if (global.versions.drafts === true) {

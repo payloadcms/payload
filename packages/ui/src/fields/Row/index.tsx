@@ -3,14 +3,11 @@ import type { RowFieldClientComponent } from 'payload'
 
 import React from 'react'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
-import { RowProvider, useRow } from './provider.js'
-
-export { RowProvider, useRow }
+import { RowProvider } from './provider.js'
 
 const baseClass = 'row'
 
@@ -18,9 +15,12 @@ const RowFieldComponent: RowFieldClientComponent = (props) => {
   const {
     field: { admin: { className } = {}, fields },
     forceRender = false,
+    indexPath = '',
+    parentPath = '',
+    parentSchemaPath = '',
+    permissions,
+    readOnly,
   } = props
-
-  const { indexPath, path, readOnly, schemaPath, siblingPermissions } = useFieldProps()
 
   return (
     <RowProvider>
@@ -29,12 +29,12 @@ const RowFieldComponent: RowFieldClientComponent = (props) => {
           className={`${baseClass}__fields`}
           fields={fields}
           forceRender={forceRender}
-          indexPath={indexPath}
           margins={false}
-          path={path}
-          permissions={siblingPermissions}
+          parentIndexPath={indexPath}
+          parentPath={parentPath}
+          parentSchemaPath={parentSchemaPath}
+          permissions={permissions}
           readOnly={readOnly}
-          schemaPath={schemaPath}
         />
       </div>
     </RowProvider>

@@ -1,3 +1,4 @@
+// NOTICE: Server-only utilities, do not import anything client-side here.
 export { addDataAndFileToRequest } from '../utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from '../utilities/addLocalesToRequest.js'
 export { createPayloadRequest } from '../utilities/createPayloadRequest.js'
