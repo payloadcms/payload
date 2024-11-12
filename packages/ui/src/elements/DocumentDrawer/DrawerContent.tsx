@@ -40,24 +40,25 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   const { renderDocument } = useServerFunctions()
 
+  const initialDocumentAbortControllerRef = React.useRef(new AbortController())
+
   const [DocumentView, setDocumentView] = useState<React.ReactNode>(undefined)
   const [isLoading, setIsLoading] = useState(true)
 
   const getDocumentView = useCallback(
-    async (docID?: number | string, doNotAbort?: boolean) => {
+    async (docID?: number | string, signal?: AbortSignal) => {
       setIsLoading(true)
-
       try {
         const result = await renderDocument({
           collectionSlug,
           disableActions,
           docID,
-          doNotAbort,
           drawerSlug,
           initialData,
           redirectAfterDelete: redirectAfterDelete !== undefined ? redirectAfterDelete : false,
           redirectAfterDuplicate:
             redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false,
+          signal,
         })
 
         if (result?.Document) {
@@ -79,14 +80,31 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       redirectAfterDuplicate,
       renderDocument,
       closeModal,
-      initialState,
       t,
     ],
   )
 
   useEffect(() => {
+    if (initialDocumentAbortControllerRef.current) {
+      try {
+        initialDocumentAbortControllerRef.current.abort()
+      } catch (_err) {
+        // swallow error
+      }
+
+      initialDocumentAbortControllerRef.current = new AbortController()
+    }
+
     if (!DocumentView) {
-      void getDocumentView(existingDocID, true)
+      void getDocumentView(existingDocID, initialDocumentAbortControllerRef.current.signal)
+    }
+
+    return () => {
+      try {
+        initialDocumentAbortControllerRef.current.abort()
+      } catch (_err) {
+        // swallow error
+      }
     }
   }, [DocumentView, getDocumentView, existingDocID])
 

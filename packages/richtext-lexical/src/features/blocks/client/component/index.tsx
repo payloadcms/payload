@@ -37,7 +37,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const {
     fieldProps: { featureClientSchemaMap, field: parentLexicalRichTextField, path, schemaPath },
   } = useEditorConfigContext()
-  const abortControllerRef = useRef(new AbortController())
+  const onChangeAbortControllerRef = useRef(new AbortController())
+  const initialStateAbortControllerRef = useRef<AbortController>(new AbortController())
   const { docPermissions, getDocPreferences } = useDocumentInfo()
 
   const { getFormState } = useServerFunctions()
@@ -60,7 +61,15 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   // Field Schema
   useEffect(() => {
-    const abortController = new AbortController()
+    if (initialStateAbortControllerRef.current) {
+      try {
+        initialStateAbortControllerRef.current.abort()
+      } catch (_err) {
+        // swallow error
+      }
+
+      initialStateAbortControllerRef.current = new AbortController()
+    }
 
     const awaitInitialState = async () => {
       const { state } = await getFormState({
@@ -69,12 +78,11 @@ export const BlockComponent: React.FC<Props> = (props) => {
         data: formData,
         docPermissions,
         docPreferences: await getDocPreferences(),
-        doNotAbort: true,
         globalSlug,
         operation: 'update',
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
-        signal: abortController.signal,
+        signal: initialStateAbortControllerRef.current.signal,
       })
 
       if (state) {
@@ -95,7 +103,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
     return () => {
       try {
-        abortController.abort()
+        initialStateAbortControllerRef.current.abort()
       } catch (_err) {
         // swallow error
       }
@@ -108,32 +116,31 @@ export const BlockComponent: React.FC<Props> = (props) => {
     globalSlug,
     getDocPreferences,
     docPermissions,
-  ]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
+    // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
+  ])
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      if (abortControllerRef.current) {
+      if (onChangeAbortControllerRef.current) {
         try {
-          abortControllerRef.current.abort()
+          onChangeAbortControllerRef.current.abort()
         } catch (_err) {
           // swallow error
         }
-      }
 
-      const abortController = new AbortController()
-      abortControllerRef.current = abortController
+        onChangeAbortControllerRef.current = new AbortController()
+      }
 
       const { state: newFormState } = await getFormState({
         id,
         collectionSlug,
         docPermissions,
         docPreferences: await getDocPreferences(),
-        doNotAbort: true,
         formState: prevFormState,
         globalSlug,
         operation: 'update',
         schemaPath: schemaFieldsPath,
-        signal: abortController.signal,
+        signal: onChangeAbortControllerRef.current.signal,
       })
 
       if (!newFormState) {
@@ -164,11 +171,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   // cleanup effect
   useEffect(() => {
-    const abortController = abortControllerRef.current
-
     return () => {
       try {
-        abortController.abort()
+        onChangeAbortControllerRef.current.abort()
       } catch (_err) {
         // swallow error
       }
@@ -243,7 +248,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
     schemaFieldsPath,
     classNames,
     i18n,
-  ]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
+    // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
+  ])
 
   return <div className={baseClass + ' ' + baseClass + '-' + formData.blockType}>{formContent}</div>
 }
