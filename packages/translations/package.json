@@ -45,7 +45,7 @@
     "translateNewKeys": "node --no-deprecation --import @swc-node/register/esm-register scripts/translateNewKeys/run.ts"
   },
   "dependencies": {
-    "date-fns": "3.3.1"
+    "date-fns": "4.1.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
