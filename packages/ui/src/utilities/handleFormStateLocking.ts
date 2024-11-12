@@ -127,13 +127,13 @@ export const handleFormStateLocking = async ({
           data: {
             document: collectionSlug
               ? {
-                  relationTo: [collectionSlug],
+                  relationTo: collectionSlug,
                   value: id,
                 }
               : undefined,
             globalSlug: globalSlug ? globalSlug : undefined,
             user: {
-              relationTo: [req.user.collection],
+              relationTo: req.user.collection,
               value: req.user.id,
             },
           },
