@@ -1,1 +1,15 @@
 export * from './index.js'
+
+export type ErrorName =
+  | 'APIError'
+  | 'AuthenticationError'
+  | 'ErrorDeletingFile'
+  | 'FileRetrievalError'
+  | 'FileUploadError'
+  | 'Forbidden'
+  | 'Locked'
+  | 'LockedAuth'
+  | 'MissingFile'
+  | 'NotFound'
+  | 'QueryError'
+  | 'ValidationError'
