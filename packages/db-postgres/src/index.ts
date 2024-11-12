@@ -35,7 +35,6 @@ import {
   updateVersion,
 } from '@payloadcms/drizzle'
 import {
-  convertPathToJSONTraversal,
   countDistinct,
   createDatabase,
   createExtensions,
@@ -125,7 +124,6 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
         args.transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
       commitTransaction,
       connect,
-      convertPathToJSONTraversal,
       count,
       countDistinct,
       countGlobalVersions,
