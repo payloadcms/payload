@@ -32,6 +32,7 @@ import {
   ssrAutosavePagesSlug,
   ssrPagesSlug,
 } from './shared.js'
+import { wait } from 'payload/shared'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -178,8 +179,12 @@ describe('Live Preview', () => {
     await expect(frame.locator(renderedPageTitleLocator)).toHaveText('For Testing: SSR Home')
 
     const newTitleValue = 'SSR Home (Edited)'
+    await wait(1000)
 
-    await titleField.fill(newTitleValue)
+    await titleField.clear()
+    await titleField.pressSequentially(newTitleValue)
+
+    await wait(1000)
 
     await waitForAutoSaveToRunAndComplete(page)
 
