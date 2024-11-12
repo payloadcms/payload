@@ -40,7 +40,12 @@ export const countVersions: CountVersions = async function countVersions(
     }
   }
 
-  const result = await Model.countDocuments(query, options)
+  let result: number
+  if (useEstimatedCount) {
+    result = await Model.estimatedDocumentCount({ session: options.session })
+  } else {
+    result = await Model.countDocuments(query, options)
+  }
 
   return {
     totalDocs: result,
