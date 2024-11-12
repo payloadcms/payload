@@ -31,7 +31,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     MissingFile: 'info',
     NotFound: 'info',
     ValidationError: 'info',
-    ...(sanitizedConfig.loggingLevels ?? {}),
+    ...(sanitizedConfig.loggingLevels || {}),
   }
 
   // add default user collection if none provided
