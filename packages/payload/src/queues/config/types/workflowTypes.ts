@@ -108,8 +108,9 @@ export type WorkflowConfig<TWorkflowSlugOrInput extends keyof TypedJobs['workflo
    */
   label?: string
   /**
-   * Optionally, define the queue name that this workflow should be tied to.
+   * Optionally, define the default queue name that this workflow should be tied to.
    * Defaults to "default".
+   * Can be overridden when queuing jobs via Local API.
    */
   queue?: string
   /**

@@ -3,8 +3,18 @@ import type { TextFieldServerComponent } from 'payload'
 import { TextField } from '@payloadcms/ui'
 import React from 'react'
 
-export const MyServerFieldComponent: TextFieldServerComponent = (args) => {
-  const { clientField, indexPath, parentPath, parentSchemaPath, path, schemaPath } = args
+export const MyServerFieldComponent: TextFieldServerComponent = (props) => {
+  const {
+    clientField,
+    indexPath,
+    parentPath,
+    parentSchemaPath,
+    path,
+    schemaPath,
+    // siblingData,
+    // value,
+    // data
+  } = props
 
   return (
     <TextField

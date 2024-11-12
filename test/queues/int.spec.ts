@@ -153,6 +153,7 @@ describe('Queues', () => {
   it('ensure job retrying works', async () => {
     const job = await payload.jobs.queue({
       workflow: 'retriesTest',
+      queue: 'default',
       input: {
         message: 'hello',
       },
