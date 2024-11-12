@@ -81,10 +81,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       }
 
       void fetchDocumentView()
-
-      return () => {
-        abortAndIgnore(controller)
-      }
     },
     [
       collectionSlug,
@@ -101,8 +97,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
-      const cleanup = getDocumentView(args.doc.id)
-      cleanup()
+      getDocumentView(args.doc.id)
 
       if (typeof onSaveFromProps === 'function') {
         void onSaveFromProps({
@@ -116,8 +111,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   const onDuplicate = useCallback<DocumentDrawerProps['onDuplicate']>(
     (args) => {
-      const cleanup = getDocumentView(args.doc.id)
-      cleanup()
+      getDocumentView(args.doc.id)
 
       if (typeof onDuplicateFromProps === 'function') {
         void onDuplicateFromProps({
@@ -144,14 +138,12 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   )
 
   const clearDoc = useCallback(() => {
-    const cleanup = getDocumentView()
-    cleanup()
+    getDocumentView()
   }, [getDocumentView])
 
   useEffect(() => {
     if (!DocumentView) {
-      const cleanup = getDocumentView(existingDocID)
-      return cleanup
+      getDocumentView(existingDocID)
     }
   }, [DocumentView, getDocumentView, existingDocID])
 
