@@ -238,7 +238,7 @@ All Field Components receive the following props:
 | Property         | Description                                                                                                                                                                                                                      |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`docPreferences`** | An object that contains the [Preferences](./preferences) for the document.
-| **`field`** | The serializable Client Field Config. |
+| **`field`** | In Client Components, this is the sanitized Client Field Config. In Server Components, this is the original Field Config. Server Components will also receive the sanitized field config through the`clientField` prop (see below). |
 | **`locale`**     | The locale of the field. [More details](../configuration/localization).                                                                                                                                                                   |
 | **`readOnly`**   | A boolean value that represents if the field is read-only or not.                                                                                                                                                                  |
 | **`user`**       | The currently authenticated user. [More details](../authentication/overview). |
@@ -337,7 +337,7 @@ All Cell Components will receive the following props:
 
 | Property         | Description                                                       |
 | ---------------- | ----------------------------------------------------------------- |
-| **`field`** | The serializable Client Field Config. |
+| **`field`** | In Client Components, this is the sanitized Client Field Config. In Server Components, this is the original Field Config. Server Components will also receive the sanitized field config through the `clientField` prop (see below). |
 | **`link`** | A boolean representing whether this cell should be wrapped in a link. |
 | **`onClick`** | A function that is called when the cell is clicked. |
 
@@ -383,7 +383,7 @@ Custom Label Components receive all [Field Component](#field) props, plus the fo
 
 | Property       | Description                                                      |
 | -------------- | ---------------------------------------------------------------- |
-| **`field`** | The serializable Client Field Config. |
+| **`field`** | In Client Components, this is the sanitized Client Field Config. In Server Components, this is the original Field Config. Server Components will also receive the sanitized field config through the `clientField` prop (see below). |
 
 In addition to the above props, Server Components will also receive the following props:
 
@@ -427,7 +427,7 @@ Custom Description Components receive all [Field Component](#field) props, plus 
 
 | Property       | Description                                                      |
 | -------------- | ---------------------------------------------------------------- |
-| **`field`** |  The serializable Client Field Config. |
+| **`field`** | In Client Components, this is the sanitized Client Field Config. In Server Components, this is the original Field Config. Server Components will also receive the sanitized field config through the `clientField` prop (see below). |
 
 In addition to the above props, Server Components will also receive the following props:
 
@@ -476,7 +476,7 @@ Custom Error Components receive all [Field Component](#field) props, plus the fo
 
 | Property        | Description                                                   |
 | --------------- | ------------------------------------------------------------- |
-| **`field`** | The serializable Client Field Config. |
+| **`field`** | In Client Components, this is the sanitized Client Field Config. In Server Components, this is the original Field Config. Server Components will also receive the sanitized field config through the `clientField` prop (see below). |
 
 In addition to the above props, Server Components will also receive the following props:
 
