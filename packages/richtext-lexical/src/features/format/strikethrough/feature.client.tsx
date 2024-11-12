@@ -1,5 +1,6 @@
 'use client'
 
+import { $isTableSelection } from '@lexical/table'
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import { StrikethroughIcon } from '../../../lexical/ui/icons/Strikethrough/index.js'
@@ -12,7 +13,7 @@ const toolbarGroups = [
     {
       ChildComponent: StrikethroughIcon,
       isActive: ({ selection }) => {
-        if ($isRangeSelection(selection)) {
+        if ($isRangeSelection(selection) || $isTableSelection(selection)) {
           return selection.hasFormat('strikethrough')
         }
         return false

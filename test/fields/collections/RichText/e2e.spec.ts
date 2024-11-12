@@ -238,11 +238,14 @@ describe('Rich Text', () => {
 
     test('should only list RTE enabled collections in link drawer', async () => {
       await navigateToRichTextFields()
+      await wait(1000)
 
       await page.locator('.rich-text__toolbar button:not([disabled]) .link').first().click()
 
       const editLinkModal = page.locator('[id^=drawer_1_rich-text-link-]')
       await expect(editLinkModal).toBeVisible()
+
+      await wait(1000)
 
       await editLinkModal.locator('label[for="field-linkType-internal-2"]').click()
       await editLinkModal.locator('.relationship__wrap .rs__control').click()
@@ -255,6 +258,7 @@ describe('Rich Text', () => {
 
     test('should only list non-upload collections in relationship drawer', async () => {
       await navigateToRichTextFields()
+      await wait(1000)
 
       // Open link drawer
       await page
@@ -262,7 +266,7 @@ describe('Rich Text', () => {
         .first()
         .click()
 
-      await wait(300)
+      await wait(1000)
 
       // open the list select menu
       await page.locator('.list-drawer__select-collection-wrap .rs__control').click()
@@ -277,12 +281,15 @@ describe('Rich Text', () => {
       const linkText = 'link'
       const value = 'test value'
       await navigateToRichTextFields()
+      await wait(1000)
+
       const field = page.locator('.rich-text', {
         has: page.locator('#field-richTextCustomFields'),
       })
       // open link drawer
       const button = field.locator('button.rich-text__button.link')
       await button.click()
+      await wait(1000)
 
       // fill link fields
       const linkDrawer = page.locator('[id^=drawer_1_rich-text-link-]')
@@ -292,11 +299,13 @@ describe('Rich Text', () => {
       const input = fields.locator('#field-fields__customLinkField')
       await input.fill(value)
 
-      await wait(300)
+      await wait(1000)
 
       // submit link closing drawer
       await linkDrawer.locator('button[type="submit"]').click()
       const linkInEditor = field.locator(`.rich-text-link >> text="${linkText}"`)
+      await wait(300)
+
       await saveDocAndAssert(page)
 
       // open modal again

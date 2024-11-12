@@ -1,87 +1,43 @@
-import { convertPathToJSONTraversal } from './convertPathToJSONTraversal.js'
-import { formatJSONPathSegment } from './formatJSONPathSegment.js'
+import type { CreateJSONQueryArgs } from '../../types.js'
 
-const operatorMap = {
-  contains: '~*',
-  equals: '=',
-  like: '~*',
+const operatorMap: Record<string, string> = {
+  contains: '~',
+  equals: '==',
+  in: 'in',
+  like: 'like_regex',
+  not_equals: '!=',
+  not_in: 'in',
 }
 
-type FromArrayArgs = {
-  isRoot?: true
-  operator: string
-  pathSegments: string[]
-  treatAsArray?: string[]
-  value: unknown
-}
-
-const fromArray = ({ isRoot, operator, pathSegments, treatAsArray, value }: FromArrayArgs) => {
-  const newPathSegments = pathSegments.slice(isRoot ? 1 : 2)
-  const alias = `${pathSegments[isRoot ? 0 : 1]}_alias_${newPathSegments.length}`
-
-  newPathSegments.unshift(alias)
-
-  const arrayElements = isRoot
-    ? pathSegments[0]
-    : `${pathSegments[0]} -> ${formatJSONPathSegment(pathSegments[1])}`
-
-  return `EXISTS (
-    SELECT 1
-    FROM jsonb_array_elements(${arrayElements}) AS ${alias}
-    WHERE ${createJSONQuery({
-      operator,
-      pathSegments: newPathSegments,
-      treatAsArray,
-      value,
-    })}
-  )`
-}
-
-type CreateConstraintArgs = {
-  operator: string
-  pathSegments: string[]
-  treatAsArray?: string[]
-  value: unknown
-}
-
-const createConstraint = ({ operator, pathSegments, value }: CreateConstraintArgs): string => {
-  const jsonQuery = convertPathToJSONTraversal(pathSegments)
-  return `${pathSegments[0]}${jsonQuery} ${operatorMap[operator]} '${value}'`
-}
-
-type Args = {
-  operator: string
-  pathSegments: string[]
-  treatAsArray?: string[]
-  treatRootAsArray?: boolean
-  value: unknown
-}
-
-export const createJSONQuery = ({
-  operator,
-  pathSegments,
-  treatAsArray,
-  treatRootAsArray,
-  value,
-}: Args): string => {
-  if (treatRootAsArray) {
-    return fromArray({
-      isRoot: true,
-      operator,
-      pathSegments,
-      treatAsArray,
-      value,
-    })
+const sanitizeValue = (value: unknown, operator?: string) => {
+  if (typeof value === 'string') {
+    // ignore casing with like
+    return `"${operator === 'like' ? '(?i)' : ''}${value}"`
   }
 
-  if (treatAsArray.includes(pathSegments[1])) {
-    return fromArray({
-      operator,
-      pathSegments,
-      treatAsArray,
-      value,
+  return value as string
+}
+
+export const createJSONQuery = ({ column, operator, pathSegments, value }: CreateJSONQueryArgs) => {
+  const columnName = typeof column === 'object' ? column.name : column
+  const jsonPaths = pathSegments
+    .slice(1)
+    .map((key) => {
+      return `${key}[*]`
     })
+    .join('.')
+
+  let sql = ''
+
+  if (['in', 'not_in'].includes(operator) && Array.isArray(value)) {
+    value.forEach((item, i) => {
+      sql = `${sql}${createJSONQuery({ column, operator: operator === 'in' ? 'equals' : 'not_equals', pathSegments, value: item })}${i === value.length - 1 ? '' : ` ${operator === 'in' ? 'OR' : 'AND'} `}`
+    })
+  } else if (operator === 'exists') {
+    sql = `${value === false ? 'NOT ' : ''}jsonb_path_exists(${columnName}, '$.${jsonPaths}')`
+  } else {
+    sql = `jsonb_path_exists(${columnName}, '$.${jsonPaths} ? (@ ${operatorMap[operator]} ${sanitizeValue(value, operator)})')`
   }
 
-  return createConstraint({ operator, pathSegments, treatAsArray, value })
+  return sql
 }
