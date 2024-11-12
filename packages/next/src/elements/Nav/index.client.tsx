@@ -24,7 +24,7 @@ export const DefaultNavClient: React.FC<{
 
   const { i18n } = useTranslation()
   const { navOpen } = useNav()
-  console.log(collapsedPreferences)
+
   return (
     <Fragment>
       {groups.map(({ entities, label }, key) => {

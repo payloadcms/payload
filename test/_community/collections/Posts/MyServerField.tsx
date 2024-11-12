@@ -20,6 +20,8 @@ export const MyServerFieldComponent: TextFieldServerComponent = (args) => {
       <h1>{String(value)}</h1>
       <p>{JSON.stringify(siblingData)}</p>
       <p>{path}</p>
+      <p>{schemaPath}</p>
+      <p>{indexPath}</p>
       <TextField
         field={clientField}
         indexPath={indexPath}
