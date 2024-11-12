@@ -127,7 +127,7 @@ describe('uploads', () => {
       pagination: false,
     })
 
-    relationDoc = findRelationDoc.docs[0] as unknown as Relation
+    relationDoc = findRelationDoc.docs[0]
 
     await page.goto(relationURL.edit(relationDoc.id))
     await page.waitForURL(relationURL.edit(relationDoc.id))
@@ -227,7 +227,7 @@ describe('uploads', () => {
       },
     })
 
-    pngDoc = findPNG.docs[0] as unknown as Media
+    pngDoc = findPNG.docs[0]
 
     await page.goto(mediaURL.edit(pngDoc.id))
 
@@ -346,7 +346,7 @@ describe('uploads', () => {
       pagination: false,
     })
 
-    audioDoc = findAudio.docs[0] as unknown as Media
+    audioDoc = findAudio.docs[0]
 
     await page.goto(audioURL.edit(audioDoc.id))
     await page.waitForURL(audioURL.edit(audioDoc.id))
@@ -389,7 +389,7 @@ describe('uploads', () => {
       pagination: false,
     })
 
-    audioDoc = findAudio.docs[0] as unknown as Media
+    audioDoc = findAudio.docs[0]
 
     await page.goto(audioURL.edit(audioDoc.id))
     await page.waitForURL(audioURL.edit(audioDoc.id))
