@@ -47,7 +47,7 @@ export const routeError = async ({
 
   let status = err.status || httpStatus.INTERNAL_SERVER_ERROR
 
-  const level = payload.config.loggingLevels[err.name] || 'error'
+  const level = payload.config.loggingLevels[err.name] ?? 'error'
   if (level) {
     logger[level](level === 'info' ? err.message : err.stack)
   }
