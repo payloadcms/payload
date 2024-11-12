@@ -171,6 +171,9 @@ export const RootLayout = async ({
 
   return (
     <html data-theme={theme} dir={dir} lang={languageCode}>
+      <head>
+        <style>{`@layer payload-default, payload;`}</style>
+      </head>
       <body>
         <RootProvider
           config={clientConfig}
