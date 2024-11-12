@@ -87,7 +87,7 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
         break
       }
       case 'collapsible':
-
+      // falls through
       case 'row': {
         return traverseFields({
           doc,
@@ -126,7 +126,7 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
       }
 
       case 'relationship':
-
+      // falls through
       case 'upload': {
         if (typeof field.relationTo === 'string') {
           if (field.type === 'upload' || !field.hasMany) {
@@ -175,6 +175,7 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
             }
           }
         }
+        break
       }
       case 'tabs': {
         return field.tabs.forEach((tab) => {
