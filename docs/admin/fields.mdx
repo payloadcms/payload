@@ -288,20 +288,6 @@ export const CustomTextField: React.FC = () => {
 
 #### TypeScript
 
-When building Custom Field Components, you can import the component type to ensure type safety. There is an explicit type for the Field Component, one for every [Field Type](../fields/overview) and for every client/server environment. The convention is to prepend the field type onto the target type, i.e. `TextFieldClientComponent`:
-
-```tsx
-import type {
-  TextFieldClientComponent,
-  TextFieldServerComponent,
-  TextFieldClientProps,
-  TextFieldServerProps,
-  // ...and so on for each Field Type
-} from 'payload'
-```
-
-#### TypeScript
-
 When building Custom Field Components, you can import the client field props to ensure type safety in your component. There is an explicit type for the Field Component, one for every [Field Type](../fields/overview) and server/client environment. The convention is to prepend the field type onto the target type, i.e. `TextFieldClientComponent`:
 
 ```tsx
@@ -334,8 +320,6 @@ export const myField: Field = {
 }
 ```
 
-_For details on how to build Custom Components, see [Building Custom Components](./components#building-custom-components)._
-
 All Cell Components will receive all the the same props that [Field Components](#field) receive, plus the following props:
 
 | Property         | Description                                                       |
@@ -343,10 +327,7 @@ All Cell Components will receive all the the same props that [Field Components](
 | **`link`** | A boolean representing whether this cell should be wrapped in a link. |
 | **`onClick`** | A function that is called when the cell is clicked. |
 
-<Banner type="success">
-  <strong>Reminder:</strong>
-  All [Custom Server Components](./components) receive the `payload` and `i18n` properties by default. See [Building Custom Components](./components#building-custom-components) for more details.
-</Banner>
+For details on how to build Custom Components themselves, see [Building Custom Components](./components#building-custom-components).
 
 ### Label
 
@@ -368,9 +349,19 @@ export const myField: Field = {
 }
 ```
 
-_For details on how to build Custom Components, see [Building Custom Components](./components#building-custom-components)._
+All Label Components receive the same props that the [Field Component](#field) receives. For details on how to build Custom Components themselves, see [Building Custom Components](./components#building-custom-components).
 
-All Label Components receive the same props that [Field Components](#field) receive.
+#### TypeScript
+
+When building Custom Label Components, you can import the component types to ensure type safety in your component. There is an explicit type for the Label Component, one for every [Field Type](../fields/overview) and server/client environment. The convention is to append `LabelServerComponent` or `LabelClientComponent` to the type of field, i.e. `TextFieldLabelClientComponent`.
+
+```tsx
+import type {
+  TextFieldLabelServerComponent,
+  TextFieldLabelClientComponent,
+  // ...and so on for each Field Type
+} from 'payload'
+```
 
 ### Description
 
@@ -398,19 +389,17 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 }
 ```
 
-_For details on how to build a Custom Description, see [Building Custom Components](./components#building-custom-components)._
-
-All Description Components receive the same props that [Field Components](#field) receive.
+All Description Components receive the same props that the [Field Component](#field) receives. For details on how to build a Custom Components themselves, see [Building Custom Components](./components#building-custom-components).
 
 #### TypeScript
 
-When building Custom Label Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Label Component, one for every [Field Type](../fields/overview) and server/client environment. The convention is to append `LabelServerComponent` or `LabelClientComponent` to the type of field, i.e. `TextFieldLabelClientComponent`.
+When building Custom Description Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Description Component, one for every [Field Type](../fields/overview) and server/client environment. The convention is to append `DescriptionServerComponent` or `DescriptionClientComponent` to the type of field, i.e. `TextFieldDescriptionClientComponent`.
 
 ```tsx
 import type {
-  TextFieldLabelServerComponent,
-  TextFieldLabelClientComponent,
-  // ...and so on for each Field Type
+  TextFieldDescriptionServerComponent,
+  TextFieldDescriptionClientComponent,
+  // And so on for each Field Type
 } from 'payload'
 ```
 
@@ -434,30 +423,16 @@ export const myField: Field = {
 }
 ```
 
-_For details on how to build Custom Components, see [Building Custom Components](./components#building-custom-components)._
-
-All Description Components receive the same props that [Field Components](#field) receive.
+All Description Components receive the same props that the [Field Component](#field) receives. For details on how to build Custom Components themselves, see [Building Custom Components](./components#building-custom-components).
 
 #### TypeScript
 
-When building Custom Error Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Error Component, one for every [Field Type](../fields/overview) and server/client environment. The convention is to append `ErrorServerComponent` or `ErrorClientComponent` to the type of field, i.e. `TextFieldErrorClientComponent`.
+When building Custom Error Components, you can import the component types to ensure type safety in your component. There is an explicit type for the Error Component, one for every [Field Type](../fields/overview) and server/client environment. The convention is to append `ErrorServerComponent` or `ErrorClientComponent` to the type of field, i.e. `TextFieldErrorClientComponent`.
 
 ```tsx
 import type {
   TextFieldErrorServerComponent,
   TextFieldErrorClientComponent,
-  // And so on for each Field Type
-} from 'payload'
-```
-
-#### TypeScript
-
-When building Custom Description Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Description Component, one for every [Field Type](../fields/overview) and server/client environment. The convention is to append `DescriptionServerComponent` or `DescriptionClientComponent` to the type of field, i.e. `TextFieldDescriptionClientComponent`.
-
-```tsx
-import type {
-  TextFieldDescriptionServerComponent,
-  TextFieldDescriptionClientComponent,
   // And so on for each Field Type
 } from 'payload'
 ```
@@ -493,4 +468,4 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 
 _For details on how to build Custom Components, see [Building Custom Components](./components#building-custom-components)._
 
-All `beforeInput` and `afterInput` Components receive the same props that [Field Components](#field) receive.
+All `beforeInput` and `afterInput` Components receive the same props that the [Field Component](#field) receives.
