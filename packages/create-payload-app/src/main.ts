@@ -205,7 +205,7 @@ export class Main {
       }
 
       if (debugFlag) {
-        debug(`Using templates from git tag: ${PACKAGE_VERSION}`)
+        debug(`Using templates from git tag: v${PACKAGE_VERSION}`)
       }
 
       const validTemplates = getValidTemplates()
