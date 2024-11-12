@@ -1,11 +1,9 @@
-import type { Transformer } from '@lexical/markdown'
+import type { MultilineElementTransformer, Transformer } from '@lexical/markdown'
 import type { Klass, LexicalNode, LexicalNodeReplacement, SerializedEditorState } from 'lexical'
 import type { ClientBlock } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
 import { $convertFromMarkdownString, $convertToMarkdownString } from '@lexical/markdown'
-
-import type { MultilineElementTransformer } from '../../../utilities/jsx/lexicalMarkdownCopy.js'
 
 import { extractPropsFromJSXPropsString } from '../../../utilities/jsx/extractPropsFromJSXPropsString.js'
 import { propsToJSXString } from '../../../utilities/jsx/jsx.js'
@@ -95,10 +93,10 @@ export const getBlockMarkdownTransformers = ({
 
           const blockFields = block.jsx.import({
             children: childrenString,
-            closeMatch,
+            closeMatch: closeMatch as RegExpMatchArray,
             htmlToLexical: null, // TODO
             markdownToLexical,
-            openMatch,
+            openMatch: openMatch as RegExpMatchArray,
             props: propsString
               ? extractPropsFromJSXPropsString({
                   propsString,

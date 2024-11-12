@@ -1,4 +1,8 @@
-import type { TextMatchTransformer, Transformer } from '@lexical/markdown'
+import type {
+  MultilineElementTransformer,
+  TextMatchTransformer,
+  Transformer,
+} from '@lexical/markdown'
 import type { ElementNode, SerializedEditorState, SerializedLexicalNode } from 'lexical'
 import type { Block } from 'payload'
 
@@ -11,10 +15,7 @@ import type { NodeWithHooks } from '../../typesServer.js'
 import { getEnabledNodesFromServerNodes } from '../../../lexical/nodes/index.js'
 import { extractPropsFromJSXPropsString } from '../../../utilities/jsx/extractPropsFromJSXPropsString.js'
 import { propsToJSXString } from '../../../utilities/jsx/jsx.js'
-import {
-  $customConvertFromMarkdownString,
-  type MultilineElementTransformer,
-} from '../../../utilities/jsx/lexicalMarkdownCopy.js'
+import { $convertFromMarkdownString } from '../../../utilities/jsx/lexicalMarkdownCopy.js'
 import { linesFromStartToContentAndPropsString } from './linesFromMatchToContentAndPropsString.js'
 import { $createServerBlockNode, $isServerBlockNode, ServerBlockNode } from './nodes/BlocksNode.js'
 import {
@@ -323,9 +324,7 @@ function getMarkdownTransformerForBlock(
 
           if (!block?.jsx?.import) {
             // No multiline transformer handled this line successfully
-            return {
-              return: [false, startLineIndex],
-            }
+            return [false, startLineIndex]
           }
 
           const markdownToLexical = getMarkdownToLexical(allNodes, allTransformers)
@@ -343,9 +342,7 @@ function getMarkdownTransformerForBlock(
               : {},
           })
           if (blockFields === false) {
-            return {
-              return: [false, startLineIndex],
-            }
+            return [false, startLineIndex]
           }
 
           const node = $createServerBlockNode({
@@ -384,9 +381,7 @@ function getMarkdownTransformerForBlock(
             }
           }
 
-          return {
-            return: [true, endLineIndex],
-          }
+          return [true, endLineIndex]
         },
     regExpEnd: block.jsx?.customEndRegex ?? regex.regExpEnd,
     regExpStart: block.jsx?.customStartRegex ?? regex.regExpStart,
@@ -420,10 +415,10 @@ function getMarkdownTransformerForBlock(
 
         const blockFields = block.jsx.import({
           children: childrenString,
-          closeMatch,
+          closeMatch: closeMatch as RegExpMatchArray,
           htmlToLexical: null, // TODO
           markdownToLexical,
-          openMatch,
+          openMatch: openMatch as RegExpMatchArray,
           props: propsString
             ? extractPropsFromJSXPropsString({
                 propsString,
@@ -465,7 +460,7 @@ export function getMarkdownToLexical(
 
     headlessEditor.update(
       () => {
-        $customConvertFromMarkdownString(markdown, allTransformers)
+        $convertFromMarkdownString(markdown, allTransformers)
       },
       { discrete: true },
     )

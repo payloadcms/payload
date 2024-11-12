@@ -985,5 +985,5 @@ export {
   objectToFrontmatter,
   propsToJSXString,
 } from './utilities/jsx/jsx.js'
-export { $customConvertFromMarkdownString } from './utilities/jsx/lexicalMarkdownCopy.js'
+export { $convertFromMarkdownString } from './utilities/jsx/lexicalMarkdownCopy.js'
 export { upgradeLexicalData } from './utilities/upgradeLexicalData/index.js'

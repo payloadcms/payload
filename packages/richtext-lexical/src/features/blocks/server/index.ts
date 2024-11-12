@@ -17,7 +17,6 @@ export type BlocksFeatureProps = {
 }
 
 export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatureProps>({
-  // @ts-expect-error //TODO: will be fixed once we get rid of our own copy of lexical/markdown
   feature: async ({ config: _config, isRoot, parentIsLocalized, props }) => {
     const validRelationships = _config.collections.map((c) => c.slug) || []
 

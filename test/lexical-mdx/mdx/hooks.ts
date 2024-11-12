@@ -4,7 +4,7 @@ import type { CollectionAfterReadHook, CollectionBeforeChangeHook, RichTextField
 import { createHeadlessEditor } from '@lexical/headless'
 import { $convertToMarkdownString } from '@lexical/markdown'
 import {
-  $customConvertFromMarkdownString,
+  $convertFromMarkdownString,
   extractFrontmatter,
   frontmatterToObject,
   getEnabledNodes,
@@ -123,7 +123,7 @@ export function mdxToEditorJSON({
 
   headlessEditor.update(
     () => {
-      $customConvertFromMarkdownString(mdx, editorConfig.features.markdownTransformers)
+      $convertFromMarkdownString(mdx, editorConfig.features.markdownTransformers)
     },
     { discrete: true },
   )
