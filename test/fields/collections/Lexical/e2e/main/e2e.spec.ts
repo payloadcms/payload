@@ -701,6 +701,7 @@ describe('lexicalMain', () => {
     await expect(paragraph).toBeVisible()
 
     const textField = page.locator('#field-title')
+    const addBlockButton = page.locator('.add-block-menu').first()
 
     // Pressing 'Escape' allows focus to be moved to the previous element
     await paragraph.click()
@@ -709,10 +710,22 @@ describe('lexicalMain', () => {
     await page.keyboard.press('Shift+Tab')
     await expect(textField).toBeFocused()
 
+    // Pressing 'Escape' allows focus to be moved to the next element
+    await paragraph.click()
+    await page.keyboard.press('Tab')
+    await page.keyboard.press('Escape')
+    await page.keyboard.press('Tab')
+    await expect(addBlockButton).toBeFocused()
+
     // Focus is not moved to the previous element if 'Escape' is not pressed
     await paragraph.click()
-    await paragraph.press('Shift+Tab')
+    await page.keyboard.press('Shift+Tab')
     await expect(textField).not.toBeFocused()
+
+    // Focus is not moved to the next element if 'Escape' is not pressed
+    await paragraph.click()
+    await page.keyboard.press('Tab')
+    await expect(addBlockButton).not.toBeFocused()
   })
 
   test('creating a link, then clicking in the link drawer, then saving the link, should preserve cursor position and not move cursor to beginning of richtext field', async () => {
