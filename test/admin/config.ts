@@ -37,7 +37,6 @@ import {
   protectedCustomNestedViewPath,
   publicCustomViewPath,
 } from './shared.js'
-import { settingsGlobalSlug } from './slugs.js'
 
 export default buildConfigWithDefaults({
   admin: {
@@ -52,6 +51,10 @@ export default buildConfigWithDefaults({
       ],
       afterNavLinks: ['/components/AfterNavLinks/index.js#AfterNavLinks'],
       beforeLogin: ['/components/BeforeLogin/index.js#BeforeLogin'],
+      graphics: {
+        Logo: '/components/graphics/Logo.js#Logo',
+        Icon: '/components/graphics/Icon.js#Icon',
+      },
       header: ['/components/CustomHeader/index.js#CustomHeader'],
       logout: {
         Button: '/components/Logout/index.js#Logout',

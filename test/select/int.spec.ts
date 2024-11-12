@@ -9,6 +9,7 @@ import type {
   GlobalPost,
   LocalizedPost,
   Page,
+  Point,
   Post,
   VersionedPost,
 } from './payload-types.js'
@@ -40,14 +41,21 @@ describe('Select', () => {
     let post: Post
     let postId: number | string
 
+    let point: Point
+    let pointId: number | string
+
     beforeEach(async () => {
       post = await createPost()
       postId = post.id
+
+      point = await createPoint()
+      pointId = point.id
     })
 
     // Clean up to safely mutate in each test
     afterEach(async () => {
       await payload.delete({ id: postId, collection: 'posts' })
+      await payload.delete({ id: pointId, collection: 'points' })
     })
 
     describe('Include mode', () => {
@@ -307,6 +315,23 @@ describe('Select', () => {
           ),
         })
       })
+
+      it('should select a point field', async () => {
+        if (payload.db.name === 'sqlite') {
+          return
+        }
+
+        const res = await payload.findByID({
+          collection: 'points',
+          id: pointId,
+          select: { point: true },
+        })
+
+        expect(res).toStrictEqual({
+          id: pointId,
+          point: point.point,
+        })
+      })
     })
 
     describe('Exclude mode', () => {
@@ -485,6 +510,23 @@ describe('Select', () => {
             return block
           }),
         })
+      })
+
+      it('should exclude a point field', async () => {
+        if (payload.db.name === 'sqlite') {
+          return
+        }
+        const res = await payload.findByID({
+          collection: 'points',
+          id: pointId,
+          select: { point: false },
+        })
+
+        const copy = { ...point }
+
+        delete copy['point']
+
+        expect(res).toStrictEqual(copy)
       })
     })
   })
@@ -1818,6 +1860,25 @@ describe('Select', () => {
       })
 
       const {
+        docs: [resultFind],
+      } = await payload.find({
+        collection: 'pages',
+        depth: 1,
+        populate: {
+          pages: {
+            additional: true,
+          },
+        },
+        where: {
+          id: {
+            equals: aboutPage.id,
+          },
+        },
+      })
+
+      expect(resultFind).toStrictEqual(result)
+
+      const {
         content: [
           {
             link: { doc, docHasManyPoly, docMany, docPoly },
@@ -2012,4 +2073,8 @@ function createVersionedPost() {
       blocks: [{ blockType: 'test', text: 'hela' }],
     },
   })
+}
+
+function createPoint() {
+  return payload.create({ collection: 'points', data: { text: 'some', point: [10, 20] } })
 }

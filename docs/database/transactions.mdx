@@ -16,7 +16,7 @@ By default, Payload will use transactions for all data changing operations, as l
   MongoDB requires a connection to a replicaset in order to make use of transactions.
 </Banner>
 
-The initial request made to Payload will begin a new transaction and attach it to the `req.transactionID`. If you have a `hook` that interacts with the database, you can opt-in to using the same transaction by passing the `req` in the arguments. For example:
+The initial request made to Payload will begin a new transaction and attach it to the `req.transactionID`. If you have a `hook` that interacts with the database, you can opt in to using the same transaction by passing the `req` in the arguments. For example:
 
 ```ts
 const afterChange: CollectionAfterChangeHook = async ({ req }) => {
@@ -65,9 +65,9 @@ When writing your own scripts or custom endpoints, you may wish to have direct c
 
 The following functions can be used for managing transactions:
 
-`payload.db.beginTransaction` - Starts a new session and returns a transaction ID for use in other Payload Local API calls.
-`payload.db.commitTransaction` - Takes the identifier for the transaction, finalizes any changes.
-`payload.db.rollbackTransaction` - Takes the identifier for the transaction, discards any changes.
+- `payload.db.beginTransaction` - Starts a new session and returns a transaction ID for use in other Payload Local API calls.
+- `payload.db.commitTransaction` - Takes the identifier for the transaction, finalizes any changes.
+- `payload.db.rollbackTransaction` - Takes the identifier for the transaction, discards any changes.
 
 Payload uses the `req` object to pass the transaction ID through to the database adapter. If you are not using the `req` object, you can make a new object to pass the transaction ID directly to database adapter methods and local API calls.
 Example:

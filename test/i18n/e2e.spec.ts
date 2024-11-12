@@ -35,10 +35,7 @@ describe('i18n', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await reInitializeDB({
-      serverURL,
-      snapshotKey: 'i18nTests',
-    })
+
     await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {

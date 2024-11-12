@@ -67,7 +67,7 @@ fetch('https://localhost:3000/api/posts?select[color]=true&select[group][number]
 
 To understand the syntax, you need to understand that complex URL search strings are parsed into a JSON object. This one isn't too bad, but more complex queries get unavoidably more difficult to write.
 
-For this reason, we recommend to use the extremely helpful and ubiquitous [`qs`](https://www.npmjs.com/package/qs) package to parse your JSON / object-formatted queries into query strings:
+For this reason, we recommend to use the extremely helpful and ubiquitous [`qs-esm`](https://www.npmjs.com/package/qs-esm) package to parse your JSON / object-formatted queries into query strings:
 
 ```ts
 import { stringify } from 'qs-esm'

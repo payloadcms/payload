@@ -6,4 +6,5 @@ export type Props = {
   readonly handleClose: () => void
   readonly handleModalSubmit: (fields: FormState, data: Record<string, unknown>) => void
   readonly initialState?: FormState
+  readonly schemaPath: string
 }

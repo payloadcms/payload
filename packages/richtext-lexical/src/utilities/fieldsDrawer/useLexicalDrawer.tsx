@@ -72,7 +72,7 @@ export const useLexicalDrawer = (slug: string, restoreLate?: boolean) => {
         // restoreLate is used for upload extra field drawers. For some reason, the selection is not restored if we call restoreSelection immediately.
         setTimeout(() => {
           restoreSelection()
-        }, 1)
+        }, 0)
       } else {
         restoreSelection()
       }

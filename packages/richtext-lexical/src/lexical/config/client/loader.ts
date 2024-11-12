@@ -7,6 +7,7 @@ import type {
   ResolvedClientFeature,
   ResolvedClientFeatureMap,
 } from '../../../features/typesClient.js'
+import type { FeatureClientSchemaMap } from '../../../types.js'
 import type { ClientEditorConfig } from '../types.js'
 
 /**
@@ -14,10 +15,14 @@ import type { ClientEditorConfig } from '../types.js'
  * @param unSanitizedEditorConfig
  */
 export function loadClientFeatures({
+  featureClientSchemaMap,
   field,
+  schemaPath,
   unSanitizedEditorConfig,
 }: {
+  featureClientSchemaMap: FeatureClientSchemaMap
   field?: RichTextFieldClient
+  schemaPath: string
   unSanitizedEditorConfig: ClientEditorConfig
 }): ResolvedClientFeatureMap {
   for (const featureProvider of unSanitizedEditorConfig.features) {
@@ -50,9 +55,11 @@ export function loadClientFeatures({
     const feature: Partial<ResolvedClientFeature<any>> =
       typeof featureProvider.feature === 'function'
         ? featureProvider.feature({
+            featureClientSchemaMap,
             featureProviderMap,
             field,
             resolvedFeatures,
+            schemaPath,
             unSanitizedEditorConfig,
           })
         : featureProvider.feature

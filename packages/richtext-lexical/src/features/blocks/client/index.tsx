@@ -13,31 +13,33 @@ import type { ToolbarGroup, ToolbarGroupItem } from '../../toolbars/types.js'
 import { BlockIcon } from '../../../lexical/ui/icons/Block/index.js'
 import { InlineBlocksIcon } from '../../../lexical/ui/icons/InlineBlocks/index.js'
 import { createClientFeature } from '../../../utilities/createClientFeature.js'
-import { getBlockMarkdownTransformers } from './markdownTransformer.js'
 import { BlockNode } from './nodes/BlocksNode.js'
 import { InlineBlockNode } from './nodes/InlineBlocksNode.js'
 import { INSERT_BLOCK_COMMAND, OPEN_INLINE_BLOCK_DRAWER_COMMAND } from './plugin/commands.js'
 import { BlocksPlugin } from './plugin/index.js'
 
-export type BlocksFeatureClientProps = {
-  clientBlockSlugs: string[]
-  clientInlineBlockSlugs: string[]
-}
+export const BlocksFeatureClient = createClientFeature(
+  ({ featureClientSchemaMap, props, schemaPath }) => {
+    const schemaMapRenderedBlockPathPrefix = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks`
+    const schemaMapRenderedInlineBlockPathPrefix = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks`
+    const clientSchema = featureClientSchemaMap['blocks']
 
-export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>(
-  ({ field, props }) => {
-    const richTextComponentMap = field?.richTextComponentMap
+    const blocksFields: BlocksFieldClient[] = Object.entries(clientSchema)
+      .filter(([key]) => key.startsWith(schemaMapRenderedBlockPathPrefix))
+      .map(([key, value]) => value[0] as BlocksFieldClient)
+    const inlineBlocksFields: BlocksFieldClient[] = Object.entries(clientSchema)
+      .filter(([key]) => key.startsWith(schemaMapRenderedInlineBlockPathPrefix))
+      .map(([key, value]) => value[0] as BlocksFieldClient)
 
-    const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
+    const clientBlocks: ClientBlock[] = blocksFields.map((field) => {
+      return field.blocks[0]
+    })
 
-    const blocksField: BlocksFieldClient = richTextComponentMap?.get(componentMapRenderedBlockPath)
-
-    const clientBlocks: ClientBlock[] = blocksField ? blocksField[0].blocks : []
+    const clientInlineBlocks: ClientBlock[] = inlineBlocksFields.map((field) => {
+      return field.blocks[0]
+    })
 
     return {
-      markdownTransformers: getBlockMarkdownTransformers({
-        blocks: clientBlocks, // TODO: Support inline blocks
-      }),
       nodes: [BlockNode, InlineBlockNode],
       plugins: [
         {
@@ -48,37 +50,24 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
       sanitizedClientFeatureProps: props,
       slashMenu: {
         groups: [
-          props.clientBlockSlugs?.length
+          clientBlocks?.length
             ? {
-                items: props.clientBlockSlugs.map((blockSlug) => {
+                items: clientBlocks.map((block) => {
                   return {
                     Icon: BlockIcon,
-                    key: 'block-' + blockSlug,
-                    keywords: ['block', 'blocks', blockSlug],
-                    label: ({ i18n, richTextComponentMap }) => {
-                      if (!richTextComponentMap) {
-                        return blockSlug
-                      }
-
-                      const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
-                      const blocksField: BlocksFieldClient = richTextComponentMap.get(
-                        componentMapRenderedBlockPath,
-                      )?.[0]
-
-                      const clientBlock = blocksField.blocks.find(
-                        (_block) => _block.slug === blockSlug,
-                      )
-
-                      const blockDisplayName = clientBlock?.labels?.singular
-                        ? getTranslation(clientBlock.labels.singular, i18n)
-                        : clientBlock?.slug
+                    key: 'block-' + block.slug,
+                    keywords: ['block', 'blocks', block.slug],
+                    label: ({ i18n }) => {
+                      const blockDisplayName = block?.labels?.singular
+                        ? getTranslation(block.labels.singular, i18n)
+                        : block?.slug
 
                       return blockDisplayName
                     },
                     onSelect: ({ editor }) => {
                       editor.dispatchCommand(INSERT_BLOCK_COMMAND, {
                         blockName: '',
-                        blockType: blockSlug,
+                        blockType: block.slug,
                       })
                     },
                   } as SlashMenuItem
@@ -88,32 +77,18 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                   return i18n.t('lexical:blocks:label')
                 },
               }
-            : false,
-          props.clientInlineBlockSlugs?.length
+            : null,
+          clientInlineBlocks?.length
             ? {
-                items: props.clientInlineBlockSlugs.map((inlineBlockSlug) => {
+                items: clientInlineBlocks.map((inlineBlock) => {
                   return {
                     Icon: InlineBlocksIcon,
-                    key: 'inlineBlocks-' + inlineBlockSlug,
-                    keywords: ['inlineBlock', 'inline block', inlineBlockSlug],
-                    label: ({ i18n, richTextComponentMap }) => {
-                      if (!richTextComponentMap) {
-                        return inlineBlockSlug
-                      }
-
-                      const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
-
-                      const blocksField: BlocksFieldClient = richTextComponentMap.get(
-                        componentMapRenderedBlockPath,
-                      )?.[0]
-
-                      const clientBlock = blocksField.blocks.find(
-                        (_block) => _block.slug === inlineBlockSlug,
-                      )
-
-                      const blockDisplayName = clientBlock?.labels?.singular
-                        ? getTranslation(clientBlock.labels.singular, i18n)
-                        : clientBlock?.slug
+                    key: 'inlineBlocks-' + inlineBlock.slug,
+                    keywords: ['inlineBlock', 'inline block', inlineBlock.slug],
+                    label: ({ i18n }) => {
+                      const blockDisplayName = inlineBlock?.labels?.singular
+                        ? getTranslation(inlineBlock.labels.singular, i18n)
+                        : inlineBlock?.slug
 
                       return blockDisplayName
                     },
@@ -121,7 +96,7 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                       editor.dispatchCommand(OPEN_INLINE_BLOCK_DRAWER_COMMAND, {
                         fields: {
                           blockName: '',
-                          blockType: inlineBlockSlug,
+                          blockType: inlineBlock.slug,
                         },
                       })
                     },
@@ -132,43 +107,31 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                   return i18n.t('lexical:blocks:inlineBlocks:label')
                 },
               }
-            : false,
+            : null,
         ].filter(Boolean) as SlashMenuGroup[],
       },
       toolbarFixed: {
         groups: [
-          props.clientBlockSlugs?.length
+          clientBlocks.length
             ? {
                 type: 'dropdown',
                 ChildComponent: BlockIcon,
-                items: props.clientBlockSlugs.map((blockSlug, index) => {
+                items: clientBlocks.map((block, index) => {
                   return {
                     ChildComponent: BlockIcon,
                     isActive: undefined, // At this point, we would be inside a sub-richtext-editor. And at this point this will be run against the focused sub-editor, not the parent editor which has the actual block. Thus, no point in running this
-                    key: 'block-' + blockSlug,
-                    label: ({ i18n, richTextComponentMap }) => {
-                      if (!richTextComponentMap) {
-                        return blockSlug
-                      }
-                      const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
-                      const blocksField: BlocksFieldClient = richTextComponentMap.get(
-                        componentMapRenderedBlockPath,
-                      )?.[0]
-
-                      const clientBlock = blocksField.blocks.find(
-                        (_block) => _block.slug === blockSlug,
-                      )
-
-                      const blockDisplayName = clientBlock?.labels?.singular
-                        ? getTranslation(clientBlock.labels.singular, i18n)
-                        : clientBlock?.slug
+                    key: 'block-' + block.slug,
+                    label: ({ i18n }) => {
+                      const blockDisplayName = block?.labels?.singular
+                        ? getTranslation(block.labels.singular, i18n)
+                        : block?.slug
 
                       return blockDisplayName
                     },
                     onSelect: ({ editor }) => {
                       editor.dispatchCommand(INSERT_BLOCK_COMMAND, {
                         blockName: '',
-                        blockType: blockSlug,
+                        blockType: block.slug,
                       })
                     },
                     order: index,
@@ -177,40 +140,27 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                 key: 'blocks',
                 order: 20,
               }
-            : undefined,
-          props.clientInlineBlockSlugs?.length
+            : null,
+          clientInlineBlocks?.length
             ? {
                 type: 'dropdown',
                 ChildComponent: InlineBlocksIcon,
-                items: props.clientInlineBlockSlugs.map((inlineBlockSlug, index) => {
+                items: clientInlineBlocks.map((inlineBlock, index) => {
                   return {
                     ChildComponent: InlineBlocksIcon,
                     isActive: undefined,
-                    key: 'inlineBlock-' + inlineBlockSlug,
-                    label: ({ i18n, richTextComponentMap }) => {
-                      if (!richTextComponentMap) {
-                        return inlineBlockSlug
-                      }
-
-                      const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
-                      const blocksField: BlocksFieldClient = richTextComponentMap.get(
-                        componentMapRenderedBlockPath,
-                      )?.[0]
-
-                      const clientBlock = blocksField.blocks.find(
-                        (_block) => _block.slug === inlineBlockSlug,
-                      )
-
-                      const blockDisplayName = clientBlock?.labels?.singular
-                        ? getTranslation(clientBlock.labels.singular, i18n)
-                        : clientBlock?.slug
+                    key: 'inlineBlock-' + inlineBlock.slug,
+                    label: ({ i18n }) => {
+                      const blockDisplayName = inlineBlock?.labels?.singular
+                        ? getTranslation(inlineBlock.labels.singular, i18n)
+                        : inlineBlock?.slug
 
                       return blockDisplayName
                     },
                     onSelect: ({ editor }) => {
                       editor.dispatchCommand(OPEN_INLINE_BLOCK_DRAWER_COMMAND, {
                         fields: {
-                          blockType: inlineBlockSlug,
+                          blockType: inlineBlock.slug,
                         },
                       })
                     },
@@ -220,7 +170,7 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                 key: 'inlineBlocks',
                 order: 25,
               }
-            : undefined,
+            : null,
         ].filter(Boolean) as ToolbarGroup[],
       },
     }

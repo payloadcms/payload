@@ -20,6 +20,10 @@ export const create: Create = async function create(
     fields: this.payload.collections[collection].config.fields,
   })
 
+  if (this.payload.collections[collection].customIDType) {
+    sanitizedData._id = sanitizedData.id
+  }
+
   try {
     ;[doc] = await Model.create([sanitizedData], options)
   } catch (error) {

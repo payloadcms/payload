@@ -13,6 +13,7 @@ import {
   HeadingFeature,
   ItalicFeature,
   LinkFeature,
+  ParagraphFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 import sharp from 'sharp' // editor-import
@@ -90,6 +91,7 @@ export default buildConfig({
   editor: lexicalEditor({
     features: () => {
       return [
+        ParagraphFeature(),
         UnderlineFeature(),
         BoldFeature(),
         ItalicFeature(),

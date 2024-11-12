@@ -1,14 +1,7 @@
 'use client'
 import type { ClientCollectionConfig, ClientGlobalConfig, OptionObject } from 'payload'
 
-import {
-  Gutter,
-  SetViewActions,
-  useConfig,
-  useDocumentInfo,
-  usePayloadAPI,
-  useTranslation,
-} from '@payloadcms/ui'
+import { Gutter, useConfig, useDocumentInfo, usePayloadAPI, useTranslation } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
 import React, { useState } from 'react'
 
@@ -80,11 +73,6 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   return (
     <main className={baseClass}>
-      <SetViewActions
-        actions={
-          (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.version?.actions
-        }
-      />
       <SetStepNav
         collectionConfig={collectionConfig}
         collectionSlug={collectionSlug}

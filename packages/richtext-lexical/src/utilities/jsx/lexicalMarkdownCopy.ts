@@ -45,7 +45,7 @@ export type MultilineElementTransformer = {
      */
     isImport: boolean,
   ) => boolean | void
-} & Omit<_MultilineElementTransformer, 'replace'>
+} & Omit<_MultilineElementTransformer, 'handleImportAfterStartMatch' | 'replace'>
 
 import { $isListItemNode, $isListNode } from '@lexical/list'
 import { TRANSFORMERS } from '@lexical/markdown'
@@ -417,7 +417,6 @@ function importTextMatchTransformers(
       if (!transformer.replace || !transformer.importRegExp) {
         continue
       }
-
       const match = textNode.getTextContent().match(transformer.importRegExp)
 
       if (!match) {
@@ -425,11 +424,14 @@ function importTextMatchTransformers(
       }
 
       const startIndex = match.index || 0
-      // @ts-expect-error TODO: PR to lexical
-      const endIndex = transformer?.getEndIndex
-        ? // @ts-expect-error TODO: PR to lexical
-          transformer?.getEndIndex(textNode, match)
+      const endIndex = transformer.getEndIndex
+        ? transformer.getEndIndex(textNode, match)
         : startIndex + match[0].length
+
+      if (endIndex === false) {
+        continue
+      }
+
       let newTextNode, replaceNode
 
       if (startIndex === 0) {

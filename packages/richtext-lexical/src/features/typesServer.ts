@@ -11,6 +11,7 @@ import type {
 import type {
   Config,
   Field,
+  FieldSchemaMap,
   JsonObject,
   Payload,
   PayloadComponent,
@@ -22,6 +23,7 @@ import type {
   RichTextHooks,
   SanitizedConfig,
   ValidateOptions,
+  ValidationFieldError,
 } from 'payload'
 
 import type { ServerEditorConfig } from '../lexical/config/types.js'
@@ -188,7 +190,7 @@ export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
   /**
    * Only available in `beforeChange` hooks.
    */
-  errors: { field: string; message: string }[]
+  errors: ValidationFieldError[]
   mergeLocaleActions: (() => Promise<void>)[]
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation: 'create' | 'delete' | 'read' | 'update'
@@ -293,13 +295,6 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
   clientFeatureProps?: ClientFeatureProps
   // @ts-expect-error - TODO: fix this
   componentImports?: Config['admin']['importMap']['generators'][0] | PayloadComponent[]
-  componentMap?:
-    | ((args: { i18n: I18nClient; payload: Payload; props: ServerProps; schemaPath: string }) => {
-        [key: string]: PayloadComponent
-      })
-    | {
-        [key: string]: PayloadComponent
-      }
   generatedTypes?: {
     modifyOutputSchema: ({
       collectionIDFieldTypes,
@@ -328,9 +323,9 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
     field: RichTextField
     i18n: I18nClient
     props: ServerProps
-    schemaMap: Map<string, Field[]>
+    schemaMap: FieldSchemaMap
     schemaPath: string
-  }) => Map<string, Field[]> | null
+  }) => FieldSchemaMap | null
   hooks?: RichTextHooks
   /**
    * Here you can provide i18n translations for your feature. These will only be available on the server and client.

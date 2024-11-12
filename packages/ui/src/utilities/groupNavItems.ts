@@ -1,10 +1,9 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
-  ClientCollectionConfig,
-  ClientGlobalConfig,
   Permissions,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
+  StaticLabel,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -16,16 +15,20 @@ export enum EntityType {
 
 export type EntityToGroup =
   | {
-      entity: ClientCollectionConfig | SanitizedCollectionConfig
+      entity: SanitizedCollectionConfig
       type: EntityType.collection
     }
   | {
-      entity: ClientGlobalConfig | SanitizedGlobalConfig
+      entity: SanitizedGlobalConfig
       type: EntityType.global
     }
 
 export type Group = {
-  entities: EntityToGroup[]
+  entities: {
+    label: StaticLabel
+    slug: string
+    type: EntityType
+  }[]
   label: string
 }
 
@@ -41,22 +44,43 @@ export function groupNavItems(
           .permission
       ) {
         const translatedGroup = getTranslation(entityToGroup.entity.admin.group, i18n)
+
         if (entityToGroup.entity.admin.group) {
           const existingGroup = groups.find(
             (group) => getTranslation(group.label, i18n) === translatedGroup,
           ) as Group
+
           let matchedGroup: Group = existingGroup
+
           if (!existingGroup) {
             matchedGroup = { entities: [], label: translatedGroup }
             groups.push(matchedGroup)
           }
 
-          matchedGroup.entities.push(entityToGroup)
+          matchedGroup.entities.push({
+            slug: entityToGroup.entity.slug,
+            type: entityToGroup.type,
+            label:
+              'labels' in entityToGroup.entity
+                ? typeof entityToGroup.entity.labels.plural === 'function'
+                  ? entityToGroup.entity.labels.plural({ t: i18n.t })
+                  : entityToGroup.entity.labels.plural
+                : entityToGroup.entity.label,
+          })
         } else {
           const defaultGroup = groups.find((group) => {
             return getTranslation(group.label, i18n) === i18n.t(`general:${entityToGroup.type}`)
           }) as Group
-          defaultGroup.entities.push(entityToGroup)
+          defaultGroup.entities.push({
+            slug: entityToGroup.entity.slug,
+            type: entityToGroup.type,
+            label:
+              'labels' in entityToGroup.entity
+                ? typeof entityToGroup.entity.labels.plural === 'function'
+                  ? entityToGroup.entity.labels.plural({ t: i18n.t })
+                  : entityToGroup.entity.labels.plural
+                : entityToGroup.entity.label,
+          })
         }
       }
 

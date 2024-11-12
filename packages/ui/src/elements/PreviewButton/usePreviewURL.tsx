@@ -14,13 +14,13 @@ export const usePreviewURL = (): {
   label: string
   previewURL: string
 } => {
-  const { id, collectionSlug, globalSlug, versions } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug, versionCount } = useDocumentInfo()
 
   const [isLoading, setIsLoading] = useState(false)
   const [previewURL, setPreviewURL] = useState('')
   const { code: locale } = useLocale()
 
-  const hasVersions = versions?.totalDocs > 0
+  const hasVersions = versionCount > 0
 
   const {
     config: {

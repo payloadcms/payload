@@ -1,8 +1,6 @@
-import type { Block, BlocksField, Config, Field } from 'payload'
+import type { Block, BlocksField, Config, FieldSchemaMap } from 'payload'
 
 import { fieldsToJSONSchema, sanitizeFields } from 'payload'
-
-import type { BlocksFeatureClientProps } from '../client/index.js'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
@@ -18,17 +16,9 @@ export type BlocksFeatureProps = {
   inlineBlocks?: Block[]
 }
 
-export const BlocksFeature = createServerFeature<
-  BlocksFeatureProps,
-  BlocksFeatureProps,
-  BlocksFeatureClientProps
->({
+export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatureProps>({
+  // @ts-expect-error //TODO: will be fixed once we get rid of our own copy of lexical/markdown
   feature: async ({ config: _config, isRoot, parentIsLocalized, props }) => {
-    // Build clientProps
-    const clientProps: BlocksFeatureClientProps = {
-      clientBlockSlugs: [],
-      clientInlineBlockSlugs: [],
-    }
     const validRelationships = _config.collections.map((c) => c.slug) || []
 
     const sanitized = await sanitizeFields({
@@ -53,12 +43,8 @@ export const BlocksFeature = createServerFeature<
     props.blocks = (sanitized[0] as BlocksField).blocks
     props.inlineBlocks = (sanitized[1] as BlocksField).blocks
 
-    clientProps.clientBlockSlugs = props.blocks.map((block) => block.slug)
-    clientProps.clientInlineBlockSlugs = props.inlineBlocks.map((block) => block.slug)
-
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#BlocksFeatureClient',
-      clientFeatureProps: clientProps,
       generatedTypes: {
         modifyOutputSchema: ({
           collectionIDFieldTypes,
@@ -102,27 +88,34 @@ export const BlocksFeature = createServerFeature<
          * Add sub-fields to the schemaMap. E.g. if you have an array field as part of the block, and it runs addRow, it will request these
          * sub-fields from the component map. Thus, we need to put them in the component map here.
          */
-        const schemaMap = new Map<string, Field[]>()
+        const schemaMap: FieldSchemaMap = new Map()
 
         if (props?.blocks?.length) {
-          schemaMap.set('lexical_blocks', [
-            {
-              name: 'lexical_blocks',
+          for (const block of props.blocks) {
+            schemaMap.set(`lexical_blocks.${block.slug}.fields`, {
+              fields: block.fields,
+            })
+            schemaMap.set(`lexical_blocks.${block.slug}`, {
+              name: `lexical_blocks_${block.slug}`,
               type: 'blocks',
-              blocks: props.blocks,
-            },
-          ])
+              blocks: [block],
+            })
+          }
         }
 
         if (props?.inlineBlocks?.length) {
           // To generate block schemaMap which generates things like the componentMap for admin.Label
-          schemaMap.set('lexical_inline_blocks', [
-            {
-              name: 'lexical_inline_blocks',
+          for (const block of props.inlineBlocks) {
+            schemaMap.set(`lexical_inline_blocks.${block.slug}.fields`, {
+              fields: block.fields,
+            })
+
+            schemaMap.set(`lexical_inline_blocks.${block.slug}`, {
+              name: `lexical_inline_blocks_${block.slug}`,
               type: 'blocks',
-              blocks: props.inlineBlocks,
-            },
-          ])
+              blocks: [block],
+            })
+          }
         }
 
         return schemaMap

@@ -107,10 +107,6 @@ describe('admin1', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await reInitializeDB({
-      serverURL,
-      snapshotKey: 'adminTests1',
-    })
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
 
@@ -121,7 +117,7 @@ describe('admin1', () => {
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'adminTests1',
+      snapshotKey: 'adminTests',
     })
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
@@ -246,6 +242,7 @@ describe('admin1', () => {
     describe('document meta', () => {
       test('should render custom meta title from collection config', async () => {
         await page.goto(customViewsURL.list)
+        await page.waitForURL(customViewsURL.list)
         const pattern = new RegExp(`^${customCollectionMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
@@ -258,21 +255,27 @@ describe('admin1', () => {
 
       test('should render custom meta title from nested edit view', async () => {
         await navigateToDoc(page, customViewsURL)
-        await page.goto(`${page.url()}/versions`)
+        const versionsURL = `${page.url()}/versions`
+        await page.goto(versionsURL)
+        await page.waitForURL(versionsURL)
         const pattern = new RegExp(`^${customVersionsTabMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
 
       test('should render custom meta title from nested custom view', async () => {
         await navigateToDoc(page, customViewsURL)
-        await page.goto(`${page.url()}/custom-tab-view`)
+        const customTabURL = `${page.url()}/custom-tab-view`
+        await page.goto(customTabURL)
+        await page.waitForURL(customTabURL)
         const pattern = new RegExp(`^${customViewMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
 
       test('should render fallback meta title from nested custom view', async () => {
         await navigateToDoc(page, customViewsURL)
-        await page.goto(`${page.url()}${customTabViewPath}`)
+        const customTabURL = `${page.url()}${customTabViewPath}`
+        await page.goto(customTabURL)
+        await page.waitForURL(customTabURL)
         const pattern = new RegExp(`^${customCollectionMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
@@ -340,29 +343,23 @@ describe('admin1', () => {
 
   describe('routing', () => {
     test('should 404 not found root pages', async () => {
-      await page.goto(`${serverURL}/admin/1234`)
-      const response = await page.waitForResponse((response) => response.status() === 404)
-      expect(response).toBeTruthy()
+      const unknownPageURL = `${serverURL}/admin/1234`
+      const response = await page.goto(unknownPageURL)
+      expect(response.status() === 404).toBeTruthy()
       await expect(page.locator('.not-found')).toContainText('Nothing found')
     })
 
     test('should 404 not found documents', async () => {
-      await page.goto(`${postsUrl.collection(postsCollectionSlug)}/1234`)
-      const response = await page.waitForResponse((response) => response.status() === 404)
-      expect(response).toBeTruthy()
+      const unknownDocumentURL = `${postsUrl.collection(postsCollectionSlug)}/1234`
+      const response = await page.goto(unknownDocumentURL)
+      expect(response.status() === 404).toBeTruthy()
       await expect(page.locator('.not-found')).toContainText('Nothing found')
     })
 
     test('should use custom logout route', async () => {
-      await page.goto(`${serverURL}${adminRoutes.routes.admin}${adminRoutes.admin.routes.logout}`)
-
-      await page.waitForURL(
-        `${serverURL}${adminRoutes.routes.admin}${adminRoutes.admin.routes.logout}`,
-      )
-
-      await expect(() => expect(page.url()).not.toContain(loginURL)).toPass({
-        timeout: POLL_TOPASS_TIMEOUT,
-      })
+      const customLogoutRouteURL = `${serverURL}${adminRoutes.routes.admin}${adminRoutes.admin.routes.logout}`
+      const response = await page.goto(customLogoutRouteURL)
+      expect(response.status() !== 404).toBeTruthy()
     })
   })
 
@@ -593,6 +590,12 @@ describe('admin1', () => {
   })
 
   describe('custom fields', () => {
+    test('should render custom field component', async () => {
+      await page.goto(customFieldsURL.create)
+      await page.waitForURL(customFieldsURL.create)
+      await expect(page.locator('#field-customTextClientField')).toBeVisible()
+    })
+
     test('renders custom label component', async () => {
       await page.goto(customFieldsURL.create)
       await page.waitForURL(customFieldsURL.create)

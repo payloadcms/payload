@@ -11,6 +11,7 @@ import type React from 'react'
 
 import type { ClientEditorConfig } from '../lexical/config/types.js'
 import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
+import type { FeatureClientSchemaMap } from '../types.js'
 import type { ToolbarGroup } from './toolbars/types.js'
 
 export type FeatureProviderProviderClient<
@@ -31,11 +32,13 @@ export type FeatureProviderClient<
   clientFeatureProps: BaseClientFeatureProps<UnSanitizedClientFeatureProps>
   feature:
     | ((props: {
+        featureClientSchemaMap: FeatureClientSchemaMap
         /** unSanitizedEditorConfig.features, but mapped */
         featureProviderMap: ClientFeatureProviderMap
         field?: RichTextFieldClient
         // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
         resolvedFeatures: ResolvedClientFeatureMap
+        schemaPath: string
         // unSanitized EditorConfig,
         unSanitizedEditorConfig: ClientEditorConfig
       }) => ClientFeature<ClientFeatureProps>)

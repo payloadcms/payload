@@ -218,32 +218,6 @@ export const traverseFields = ({
           break
         }
 
-        case 'select': {
-          if (field.hasMany) {
-            if (select) {
-              if (
-                (selectMode === 'include' && !select[field.name]) ||
-                (selectMode === 'exclude' && select[field.name] === false)
-              ) {
-                break
-              }
-            }
-
-            const withSelect: Result = {
-              columns: {
-                id: false,
-                order: false,
-                parent: false,
-              },
-              orderBy: ({ order }, { asc }) => [asc(order)],
-            }
-
-            currentArgs.with[`${path}${field.name}`] = withSelect
-          }
-
-          break
-        }
-
         case 'blocks': {
           const blocksSelect = selectAllOnCurrentLevel ? true : select?.[field.name]
 
@@ -356,6 +330,7 @@ export const traverseFields = ({
         }
 
         case 'group':
+
         case 'tab': {
           const fieldSelect = select?.[field.name]
 
@@ -389,7 +364,6 @@ export const traverseFields = ({
 
           break
         }
-
         case 'join': {
           // when `joinsQuery` is false, do not join
           if (joinQuery === false) {
@@ -576,6 +550,72 @@ export const traverseFields = ({
                 ) AS ${sql.raw(`${columnName}_sub`)}
               ), '[]'::json)
             `.as(columnName)
+          }
+
+          break
+        }
+
+        case 'point': {
+          if (adapter.name === 'sqlite') {
+            break
+          }
+
+          const args = field.localized ? _locales : currentArgs
+          if (!args.columns) {
+            args.columns = {}
+          }
+
+          if (!args.extras) {
+            args.extras = {}
+          }
+
+          const name = `${path}${field.name}`
+
+          // Drizzle handles that poorly. See https://github.com/drizzle-team/drizzle-orm/issues/2526
+          // Additionally, this way we format the column value straight in the database using ST_AsGeoJSON
+          args.columns[name] = false
+
+          let shouldSelect = false
+
+          if (select || selectAllOnCurrentLevel) {
+            if (
+              selectAllOnCurrentLevel ||
+              (selectMode === 'include' && select[field.name] === true) ||
+              (selectMode === 'exclude' && typeof select[field.name] === 'undefined')
+            ) {
+              shouldSelect = true
+            }
+          } else {
+            shouldSelect = true
+          }
+
+          if (shouldSelect) {
+            args.extras[name] = sql.raw(`ST_AsGeoJSON(${toSnakeCase(name)})::jsonb`).as(name)
+          }
+          break
+        }
+
+        case 'select': {
+          if (field.hasMany) {
+            if (select) {
+              if (
+                (selectMode === 'include' && !select[field.name]) ||
+                (selectMode === 'exclude' && select[field.name] === false)
+              ) {
+                break
+              }
+            }
+
+            const withSelect: Result = {
+              columns: {
+                id: false,
+                order: false,
+                parent: false,
+              },
+              orderBy: ({ order }, { asc }) => [asc(order)],
+            }
+
+            currentArgs.with[`${path}${field.name}`] = withSelect
           }
 
           break

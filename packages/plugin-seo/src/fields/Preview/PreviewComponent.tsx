@@ -10,6 +10,7 @@ import {
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
+import { reduceToSerializableFields } from '@payloadcms/ui/shared'
 import React, { useEffect, useState } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
@@ -66,10 +67,13 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
           hasPublishPermission: docInfo.hasPublishPermission,
           hasSavePermission: docInfo.hasSavePermission,
           initialData: docInfo.initialData,
-          initialState: docInfo.initialState,
+          initialState: reduceToSerializableFields(docInfo.initialState),
           locale: typeof locale === 'object' ? locale?.code : locale,
           title: docInfo.title,
-        } satisfies Omit<Parameters<GenerateURL>[0], 'collectionConfig' | 'globalConfig' | 'req'>),
+        } satisfies Omit<
+          Parameters<GenerateURL>[0],
+          'collectionConfig' | 'globalConfig' | 'hasPublishedDoc' | 'req' | 'versionCount'
+        >),
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',

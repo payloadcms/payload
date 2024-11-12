@@ -1,13 +1,13 @@
 'use client'
-import type { ClientField, FieldWithPath, MappedComponent } from 'payload'
+import type { ClientField, FieldWithPath, FormState } from 'payload'
 
 import { fieldAffectsData, fieldHasSubFields } from 'payload/shared'
-import React, { Fragment, type JSX, useState } from 'react'
+import React, { Fragment, useState } from 'react'
 
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ReactSelect } from '../ReactSelect/index.js'
 import './index.scss'
@@ -20,57 +20,27 @@ export type FieldSelectProps = {
 }
 
 export const combineLabel = ({
-  customLabel,
+  CustomLabel,
   field,
   prefix,
 }: {
-  customLabel?: string
+  CustomLabel?: React.ReactNode
   field?: ClientField
-  prefix?: JSX.Element | string
-}): JSX.Element => {
-  const CustomLabelToRender: MappedComponent =
-    field?.admin?.components &&
-    'Label' in field.admin.components &&
-    field?.admin?.components?.Label !== undefined
-      ? field.admin.components.Label
-      : null
-
-  const DefaultLabelToRender: MappedComponent =
-    field && 'label' in field && field.label
-      ? {
-          type: 'client',
-          Component: FieldLabel,
-          props: {
-            Label:
-              field.admin?.components && 'Label' in field.admin.components
-                ? field.admin?.components?.Label
-                : null,
-            label: field.label,
-          },
-        }
-      : null
-
-  const LabelToRender: MappedComponent = CustomLabelToRender ||
-    DefaultLabelToRender || {
-      type: 'client',
-      Component: null,
-      RenderedComponent: customLabel,
-    }
-
-  if (!LabelToRender) {
-    return null
-  }
-
+  prefix?: React.ReactNode
+}): React.ReactNode => {
   return (
     <Fragment>
-      {prefix && (
+      {prefix ? (
         <Fragment>
           <span style={{ display: 'inline-block' }}>{prefix}</span>
           {' > '}
         </Fragment>
-      )}
+      ) : null}
       <span style={{ display: 'inline-block' }}>
-        <RenderComponent mappedComponent={LabelToRender} />
+        <RenderCustomComponent
+          CustomComponent={CustomLabel}
+          Fallback={<FieldLabel label={'label' in field && field.label} />}
+        />
       </span>
     </Fragment>
   )
@@ -78,16 +48,20 @@ export const combineLabel = ({
 
 const reduceFields = ({
   fields,
+  formState,
   labelPrefix = null,
   path = '',
 }: {
   fields: ClientField[]
-  labelPrefix?: JSX.Element | string
+  formState?: FormState
+  labelPrefix?: React.ReactNode
   path?: string
-}): { Label: JSX.Element; value: FieldWithPath }[] => {
+}): { Label: React.ReactNode; value: FieldWithPath }[] => {
   if (!fields) {
     return []
   }
+
+  const CustomLabel = formState?.[path]?.customComponents?.Label
 
   return fields?.reduce((fieldsToUse, field) => {
     // escape for a variety of reasons, include ui fields as they have `name`.
@@ -106,7 +80,7 @@ const reduceFields = ({
         ...fieldsToUse,
         ...reduceFields({
           fields: field.fields,
-          labelPrefix: combineLabel({ field, prefix: labelPrefix }),
+          labelPrefix: combineLabel({ CustomLabel, field, prefix: labelPrefix }),
           path: createNestedClientFieldPath(path, field),
         }),
       ]
@@ -132,7 +106,7 @@ const reduceFields = ({
     }
 
     const formattedField = {
-      label: combineLabel({ field, prefix: labelPrefix }),
+      label: combineLabel({ CustomLabel, field, prefix: labelPrefix }),
       value: {
         ...field,
         path: createNestedClientFieldPath(path, field),
@@ -145,12 +119,13 @@ const reduceFields = ({
 
 export const FieldSelect: React.FC<FieldSelectProps> = ({ fields, setSelected }) => {
   const { t } = useTranslation()
-  const [options] = useState(() => reduceFields({ fields }))
-
   const { dispatchFields, getFields } = useForm()
+
+  const [options] = useState(() => reduceFields({ fields, formState: getFields() }))
 
   const handleChange = (selected) => {
     const activeFields = getFields()
+
     if (selected === null) {
       setSelected([])
     } else {
@@ -177,7 +152,7 @@ export const FieldSelect: React.FC<FieldSelectProps> = ({ fields, setSelected })
 
   return (
     <div className={baseClass}>
-      <FieldLabel field={null} label={t('fields:selectFieldsToEdit')} />
+      <FieldLabel label={t('fields:selectFieldsToEdit')} />
       <ReactSelect
         getOptionValue={(option) => {
           if (typeof option.value === 'object' && 'path' in option.value) {
