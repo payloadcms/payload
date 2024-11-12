@@ -173,7 +173,6 @@ import {
   useEntityVisibility,
   useField,
   useFieldComponents,
-  useFieldProps,
   useForm,
   useFormFields,
   useFormInitializing,
@@ -199,7 +198,6 @@ import {
   useSearchParams,
   useSelection,
   useStepNav,
-  useTableCell,
   useTheme,
   useThrottledEffect,
   useTranslation,
@@ -468,10 +466,9 @@ export const ServerRenderedDescription = () => <ClientRenderedDescription />
 'use client'
 import React from 'react'
 import type { TextFieldDescriptionClientComponent } from 'payload'
-import { useFieldProps, useFormFields } from '@payloadcms/ui'
+import { useFormFields } from '@payloadcms/ui'
 
-export const ClientRenderedDescription: TextFieldDescriptionClientComponent = () ={
-  const { path } = useFieldProps()
+export const ClientRenderedDescription: TextFieldDescriptionClientComponent = ({ path }) => {
   const { value } = useFormFields(([fields]) => fields[path])
   const customDescription = `Component description: ${path} - ${value}`
 
@@ -526,71 +523,13 @@ export const ServerRenderedCollapsibleLabel = () => <ClientCollapsibleLabel />
 // file: components/ClientCollapsibleLabel.tsx
 'use client'
 import React from 'react'
-import { useFieldProps, useFormFields } from '@payloadcms/ui'
+import { useFormFields } from '@payloadcms/ui'
 
-export const ClientCollapsibleLabel = () => {
-  const { path } = useFieldProps()
+export const ClientCollapsibleLabel = ({ path }) => {
   const { value } = useFormFields(([fields]) => fields[path])
   const customLabel = `${value?.fieldInCollapsible || 'Untitled Collapsible'}`
 
   return <div>{customLabel}</div>
-}
-```
-
-11. The `admin.components.Cell`  no longer receives `rowData`  or `cellData`.
-
-If using a custom component, you must now get the data yourself via the `useTableCell` hook, i.e. `const { cellData, rowData } = useTableCell()`.
-
-
-```tsx
-// file: payload.config.ts
-import { buildConfig } from 'payload'
-import  { ServerRenderedTitleCell } from './components/ServerRenderedTitleCell.tsx'
-
-export default buildConfig({
-  // ...
-  collections: [
-    {
-      slug: 'posts',
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          admin: {
-            components: {
-              Cell: ServerRenderedTitleCell
-            }
-          }
-        }
-      ]
-    }
-  ]
-  // ...
-})
-
-
-// file: components/ServerRenderedTitleCell.tsx
-import React from 'react'
-
-import { ClientTitleCell } from './ClientTitleCell.tsx'
-
-export const ServerRenderedTitleCell = () => <ClientTitleCell />
-
-
-// file: components/ClientTitleCell.tsx
-'use client'
-import React from 'react'
-import { useTableCell } from '@payloadcms/ui'
-
-export const ClientTitleCell: CellComponent = () ={
-  const { cellData, rowData } = useTableCell()
-  const customCellText = `Component cell: ${cellData}`
-
-  return (
-    <div>
-      {customCellText}
-    </div>
-  )
 }
 ```
 

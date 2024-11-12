@@ -2,10 +2,8 @@ import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
 import type React from 'react'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
-import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { Block, ClientField, Field, FieldTypes, Tab } from '../fields/config/types.js'
-import type { SanitizedGlobalConfig } from '../globals/config/types.js'
+import type { Block, Field, FieldTypes, Tab } from '../fields/config/types.js'
 import type { JsonObject } from '../types/index.js'
 import type {
   BuildFormStateArgs,
