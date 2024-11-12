@@ -26,7 +26,7 @@ To swap in your own Custom Component, first consult the list of available compon
 
 ## Defining Custom Components
 
-As Payload compiles the Admin Panel, it checks your config for Custom Components. When detected, Payload either replaces its own default component with yours, or if none exists, renders yours outright. There are _many_ places where Custom Components are supported in Payload, but each is defined in the same way using [Component Paths](#component-paths).
+As Payload compiles the Admin Panel, it checks your config for Custom Components. When detected, Payload either replaces its own default component with yours, or if none exists by default, renders yours outright. While are many places where Custom Components are supported in Payload, each is defined in the same way using [Component Paths](#component-paths).
 
 To add a Custom Component, point to its file path in your Payload Config:
 
@@ -56,7 +56,7 @@ In order to ensure the Payload Config is fully Node.js compatible and as lightwe
 
 Component Paths, by default, are relative to your project's base directory. This is either your current working directory, or the directory specified in `config.admin.baseDir`. To simplify Component Paths, you can also configure the base directory using the `admin.importMap.baseDir` property.
 
-Components using named exports are identified either by appending `#` followed by the export name. If the component is the default export, this can be omitted.
+Components using named exports are identified either by appending `#` followed by the export name, or using the `exportName` property. If the component is the default export, this can be omitted.
 
 ```ts
 import { buildConfig } from 'payload'
@@ -116,26 +116,6 @@ The following options are available:
 | **`serverProps`** | Props to be passed to the Custom Component if it's a Server Component. [More details](#custom-props).                         |
 
 For more details on how to build Custom Components, see [Building Custom Components](#building-custom-components).
-
-#### Defining Custom Components in External Packages
-
-When using custom components from external packages, Payload cannot resolve relative paths. Instead, you must use an import path that's accessible from in your project's base directory.
-
-For example, to export a field with a custom component from an external package named `some-external-package`:
-
-```ts
-import type { Field } from 'payload'
-
-export const MyCustomField: Field = {
-  type: 'text',
-  name: 'MyField',
-  admin: {
-    components: {
-      Field: 'some-external-package/client#MyFieldComponent'
-    }
-  }
-}
-```
 
 ### Import Map
 
