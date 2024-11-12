@@ -20,7 +20,7 @@ type Props = {
 
 export const NavGroup: React.FC<Props> = ({ children, initialCollapsedState, label }) => {
   const [collapsed, setCollapsed] = useState(
-    typeof initialCollapsedState !== 'undefined' ? initialCollapsedState : true,
+    typeof initialCollapsedState !== 'undefined' ? initialCollapsedState : false,
   )
   const [animate, setAnimate] = useState(false)
   const { getPreference, setPreference } = usePreferences()
