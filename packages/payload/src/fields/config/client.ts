@@ -111,8 +111,8 @@ export const createClientField = ({
 
   switch (incomingField.type) {
     case 'array':
-    case 'group':
     case 'collapsible':
+    case 'group':
     case 'row': {
       const field = clientField as unknown as RowFieldClient
 
@@ -182,6 +182,31 @@ export const createClientField = ({
       break
     }
 
+    case 'radio':
+
+    case 'select': {
+      const field = clientField as RadioFieldClient | SelectFieldClient
+
+      if (incomingField.options?.length) {
+        for (let i = 0; i < incomingField.options.length; i++) {
+          const option = incomingField.options[i]
+
+          if (typeof option === 'object' && typeof option.label === 'function') {
+            if (!field.options) {
+              field.options = []
+            }
+
+            field.options[i] = {
+              label: option.label({ t: i18n.t }),
+              value: option.value,
+            }
+          }
+        }
+      }
+
+      break
+    }
+
     case 'richText': {
       if (!incomingField?.editor) {
         throw new MissingEditorProp(incomingField) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
@@ -193,7 +218,6 @@ export const createClientField = ({
 
       break
     }
-
     case 'tabs': {
       const field = clientField as unknown as TabsFieldClient
 
@@ -215,30 +239,6 @@ export const createClientField = ({
             fields: tab.fields,
             i18n,
           })
-        }
-      }
-
-      break
-    }
-
-    case 'select':
-    case 'radio': {
-      const field = clientField as RadioFieldClient | SelectFieldClient
-
-      if (incomingField.options?.length) {
-        for (let i = 0; i < incomingField.options.length; i++) {
-          const option = incomingField.options[i]
-
-          if (typeof option === 'object' && typeof option.label === 'function') {
-            if (!field.options) {
-              field.options = []
-            }
-
-            field.options[i] = {
-              label: option.label({ t: i18n.t }),
-              value: option.value,
-            }
-          }
         }
       }
 

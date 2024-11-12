@@ -39,25 +39,6 @@ export const defaultValuePromise = async <T>({
 
   // Traverse subfields
   switch (field.type) {
-    case 'group': {
-      if (typeof siblingData[field.name] !== 'object') {
-        siblingData[field.name] = {}
-      }
-
-      const groupData = siblingData[field.name] as Record<string, unknown>
-
-      await iterateFields({
-        id,
-        data,
-        fields: field.fields,
-        locale,
-        siblingData: groupData,
-        user,
-      })
-
-      break
-    }
-
     case 'array': {
       const rows = siblingData[field.name]
 
@@ -112,14 +93,33 @@ export const defaultValuePromise = async <T>({
       break
     }
 
-    case 'row':
-    case 'collapsible': {
+    case 'collapsible':
+
+    case 'row': {
       await iterateFields({
         id,
         data,
         fields: field.fields,
         locale,
         siblingData,
+        user,
+      })
+
+      break
+    }
+    case 'group': {
+      if (typeof siblingData[field.name] !== 'object') {
+        siblingData[field.name] = {}
+      }
+
+      const groupData = siblingData[field.name] as Record<string, unknown>
+
+      await iterateFields({
+        id,
+        data,
+        fields: field.fields,
+        locale,
+        siblingData: groupData,
         user,
       })
 

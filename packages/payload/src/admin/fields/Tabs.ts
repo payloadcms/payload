@@ -22,8 +22,8 @@ import type {
 } from '../types.js'
 
 export type ClientTab =
-  | ({ fields: ClientField[] } & Omit<UnnamedTab, 'fields'>)
   | ({ fields: ClientField[]; readonly path?: string } & Omit<NamedTab, 'fields'>)
+  | ({ fields: ClientField[] } & Omit<UnnamedTab, 'fields'>)
 
 type TabsFieldBaseClientProps = {} & Pick<ServerFieldBase, 'permissions'>
 
