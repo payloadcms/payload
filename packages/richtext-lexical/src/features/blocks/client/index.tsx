@@ -25,10 +25,19 @@ export const BlocksFeatureClient = createClientFeature(
     const clientSchema = featureClientSchemaMap['blocks']
 
     const blocksFields: BlocksFieldClient[] = Object.entries(clientSchema)
-      .filter(([key]) => key.startsWith(schemaMapRenderedBlockPathPrefix))
+      .filter(
+        ([key]) =>
+          key.startsWith(schemaMapRenderedBlockPathPrefix + '.') &&
+          !key.replace(schemaMapRenderedBlockPathPrefix + '.', '').includes('.'),
+      )
       .map(([key, value]) => value[0] as BlocksFieldClient)
+
     const inlineBlocksFields: BlocksFieldClient[] = Object.entries(clientSchema)
-      .filter(([key]) => key.startsWith(schemaMapRenderedInlineBlockPathPrefix))
+      .filter(
+        ([key]) =>
+          key.startsWith(schemaMapRenderedInlineBlockPathPrefix + '.') &&
+          !key.replace(schemaMapRenderedInlineBlockPathPrefix + '.', '').includes('.'),
+      )
       .map(([key, value]) => value[0] as BlocksFieldClient)
 
     const clientBlocks: ClientBlock[] = blocksFields.map((field) => {
