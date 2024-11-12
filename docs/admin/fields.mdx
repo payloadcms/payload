@@ -58,7 +58,7 @@ The following options are available:
 
 ## Field Components
 
-Within the [Admin Panel](./overview), fields are rendered in three distinct places:
+Within the [Admin Panel](./overview), fields are represented in three distinct places:
 
 - [Field](#the-field-component) - The actual form field rendered in the Edit View.
 - [Cell](#the-cell-component) - The table cell component rendered in the List View.
@@ -136,17 +136,24 @@ All Field Components receive the following props:
 | Property         | Description                                                                                                                                                                                                                      |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`docPreferences`** | An object that contains the [Preferences](./preferences) for the document.
-| **`field`** | In Server Components, this is the original Field Config. In Client Components, this is the sanitized Client Field Config. [More details](#the-field-prop). |
-| **`clientField`** | Server components receive the Client Field Config through this prop. [More details](#the-field-prop). |
+| **`field`** | The serializable Client Field Config. |
 | **`locale`**     | The locale of the field. [More details](../configuration/localization).                                                                                                                                                                   |
 | **`readOnly`**   | A boolean value that represents if the field is read-only or not.                                                                                                                                                                  |
 | **`user`**       | The currently authenticated user. [More details](../authentication/overview). |
 | **`validate`**   | A function that can be used to validate the field.                                                                                                                                                                                 |
+| **`path`**       | A string representing the direct, dynamic path to the field at runtime, i.e. `myGroup.myArray[0].myField`. |
+| **`schemaPath`** | A string representing the direct, static path to the [Field Config](../fields/overview), i.e. `myGroup.myArray.myField` |
 
-<Banner type="success">
-  <strong>Reminder:</strong>
-  All [Custom Server Components](./components) receive the `payload` and `i18n` properties by default. See [Building Custom Components](./components#building-custom-components) for more details.
-</Banner>
+In addition to the above props, Server Components will also receive the following props:
+
+| Property         | Description                                                                                                                                                                                                                      |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`clientField`** | The serialized Client Field Config. |
+| **`field`** | The Field Config. [More details](../fields/overview). |
+| **`i18n`**       | The [i18n](../configuration/i18n) object.
+| **`payload`**    | The [Payload](../local-api/overview) class.                                                           |
+| **`siblingData`** | The data of the field's siblings.                                                                                                                                                                                                   |
+| **`value`**      | The value of the field at render-time.                                                                                                                                                                                                   |
 
 #### Sending and receiving values from the form
 
@@ -188,54 +195,6 @@ import type {
 } from 'payload'
 ```
 
-### The `field` Prop
-
-All Field Components are passed their own Field Config through a common `field` prop. Within Server Components, this is the original Field Config as written within your Payload Config. Within Client Components, however, this is a "Client Config", which is a sanitized, client-friendly version of the Field Config. This is because the original Field Config is [non-serializable](https://react.dev/reference/rsc/use-client#serializable-types), meaning it cannot be passed into Client Components without first being transformed.
-
-The Client Field Config is an exact copy of the original Field Config, minus all non-serializable properties, plus all evaluated functions such as field labels, [Custom Components](../components), etc.
-
-Server Component:
-
-```tsx
-import React from 'react'
-import type { TextFieldServerComponent } from 'payload'
-import { TextField } from '@payloadcms/ui'
-
-export const MyServerField: TextFieldServerComponent = ({ clientField }) => {
-  return <TextField field={clientField} />
-}
-```
-
-<Banner type="info">
-  <strong>Tip:</strong>
-  Server Components can still access the original Field Config through the `field` prop.
-</Banner>
-
-Client Component:
-
-```tsx
-'use client'
-import React from 'react'
-import type { TextFieldClientComponent } from 'payload'
-import { TextField } from '@payloadcms/ui'
-
-export const MyTextField: TextFieldClientComponent = ({ field }) => {
-  return <TextField field={field} />
-}
-```
-
-The following additional properties are also provided to the `field` prop:
-
-| Property         | Description                                                                                                                                                                                                                      |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`_path`** | A string representing the direct, dynamic path to the field at runtime, i.e. `myGroup.myArray[0].myField`. |
-| **`_schemaPath`** | A string representing the direct, static path to the [Field Config](../fields/overview), i.e. `myGroup.myArray.myField` |
-
-<Banner type="info">
-  <strong>Note:</strong>
-  These properties are underscored to denote that they are not part of the original Field Config, and instead are attached during client sanitization to make fields easier to work with on the front-end.
-</Banner>
-
 #### TypeScript
 
 When building Custom Field Components, you can import the client field props to ensure type safety in your component. There is an explicit type for the Field Component, one for every [Field Type](../fields/overview) and server/client environment. The convention is to prepend the field type onto the target type, i.e. `TextFieldClientComponent`:
@@ -272,14 +231,24 @@ export const myField: Field = {
 
 _For details on how to build Custom Components, see [Building Custom Components](./components#building-custom-components)._
 
-All Cell Components receive the following props:
+All Cell Components will receive the following props:
 
 | Property         | Description                                                       |
 | ---------------- | ----------------------------------------------------------------- |
-| **`field`** | In Server Components, this is the original Field Config. In Client Components, this is the sanitized Client Field Config. [More details](#the-field-prop). |
-| **`clientField`** | Server components receive the Client Field Config through this prop. [More details](#the-field-prop). |
+| **`field`** | The serializable Client Field Config. |
 | **`link`** | A boolean representing whether this cell should be wrapped in a link. |
 | **`onClick`** | A function that is called when the cell is clicked. |
+
+In addition to the above props, Server Components will also receive the following props:
+
+| Property         | Description                                                       |
+| ---------------- | ----------------------------------------------------------------- |
+| **`clientField`** | The Client Field Config. |
+| **`field`** | The Field Config. [More details](../fields/overview). |
+| **`i18n`**       | The [i18n](../configuration/i18n) object.                        |
+| **`payload`**    | The [Payload](../local-api/overview) class.                      |
+| **`siblingData`** | The data of the field's siblings.                                                                                                                                                                                                   |
+| **`value`**      | The value of the field at render-time.                           |
 
 <Banner type="success">
   <strong>Reminder:</strong>
@@ -312,13 +281,16 @@ Custom Label Components receive all [Field Component](#the-field-component) prop
 
 | Property       | Description                                                      |
 | -------------- | ---------------------------------------------------------------- |
-| **`field`** | In Server Components, this is the original Field Config. In Client Components, this is the sanitized Client Field Config. [More details](#the-field-prop). |
-| **`clientField`** | Server components receive the Client Field Config through this prop. [More details](#the-field-prop). |
+| **`field`** | The serializable Client Field Config. |
 
-<Banner type="success">
-  <strong>Reminder:</strong>
-  All [Custom Server Components](./components) receive the `payload` and `i18n` properties by default. See [Building Custom Components](./components#building-custom-components) for more details.
-</Banner>
+In addition to the above props, Server Components will also receive the following props:
+
+| Property         | Description                                                       |
+| ---------------- | ----------------------------------------------------------------- |
+| **`field`** | The Field Config. [More details](../fields/overview). |
+| **`clientField`**      | The serialized Client Field Config. |
+| **`payload`**    | The [Payload](../local-api/overview) class.                      |
+| **`i18n`**       | The [i18n](../configuration/i18n) object.                        |
 
 #### TypeScript
 
@@ -358,13 +330,16 @@ Custom Error Components receive all [Field Component](#the-field-component) prop
 
 | Property        | Description                                                   |
 | --------------- | ------------------------------------------------------------- |
-| **`field`** | In Server Components, this is the original Field Config. In Client Components, this is the sanitized Client Field Config. [More details](#the-field-prop). |
-| **`clientField`** | Server components receive the Client Field Config through this prop. [More details](#the-field-prop). |
+| **`field`** | The serializable Client Field Config. |
 
-<Banner type="success">
-  <strong>Reminder:</strong>
-  All [Custom Server Components](./components) receive the `payload` and `i18n` properties by default. See [Building Custom Components](./components#building-custom-components) for more details.
-</Banner>
+In addition to the above props, Server Components will also receive the following props:
+
+| Property         | Description                                                       |
+| ---------------- | ----------------------------------------------------------------- |
+| **`field`** | The Field Config. [More details](../fields/overview). |
+| **`clientField`**      | The serialized Client Field Config. |
+| **`payload`**    | The [Payload](../local-api/overview) class.                      |
+| **`i18n`**       | The [i18n](../configuration/i18n) object.                        |
 
 #### TypeScript
 
@@ -475,13 +450,16 @@ Custom Description Components receive all [Field Component](#the-field-component
 
 | Property       | Description                                                      |
 | -------------- | ---------------------------------------------------------------- |
-| **`field`** | In Server Components, this is the original Field Config. In Client Components, this is the sanitized Client Field Config. [More details](#the-field-prop). |
-| **`clientField`** | Server components receive the Client Field Config through this prop. [More details](#the-field-prop). |
+| **`field`** |  The serializable Client Field Config. |
 
-<Banner type="success">
-  <strong>Reminder:</strong>
-  All [Custom Server Components](./components) receive the `payload` and `i18n` properties by default. See [Building Custom Components](./components#building-custom-components) for more details.
-</Banner>
+In addition to the above props, Server Components will also receive the following props:
+
+| Property         | Description                                                       |
+| ---------------- | ----------------------------------------------------------------- |
+| **`clientField`** | The serialized Client Field Config. |
+| **`field`** | The Field Config. [More details](../fields/overview). |
+| **`i18n`**       | The [i18n](../configuration/i18n) object.                        |
+| **`payload`**    | The [Payload](../local-api/overview) class.                      |
 
 #### TypeScript
 

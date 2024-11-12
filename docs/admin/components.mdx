@@ -380,14 +380,13 @@ export const MyClientComponent: React.FC = () => {
   See [Using Hooks](#using-hooks) for more details.
 </Banner>
 
-All [Field Components](./fields) automatically receive their respective Field Config through a common [`field`](./fields#the-field-prop) prop:
+All [Field Components](./fields) automatically receive their respective Field Config through props.
 
 ```tsx
-'use client'
 import React from 'react'
-import type { TextFieldClientComponent } from 'payload'
+import type { TextFieldServerComponent } from 'payload'
 
-export const MyClientFieldComponent: TextFieldClientComponent = ({ field: { name } }) => {
+export const MyClientFieldComponent: TextFieldServerComponent = ({ field: { name } }) => {
   return (
     <p>
       {`This field's name is ${name}`}
