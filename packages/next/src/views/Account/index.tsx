@@ -98,8 +98,7 @@ export const Account: React.FC<AdminViewProps> = async ({
       id: user.id,
       collectionConfig,
       isEditing: true,
-      payload: req.payload,
-      user,
+      req,
     })
 
     // Get all versions required for UI

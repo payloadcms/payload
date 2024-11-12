@@ -9,6 +9,7 @@ import {
   useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
+import { abortAndIgnore } from '@payloadcms/ui/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
@@ -28,7 +29,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   const { t } = useTranslation()
   const { id, collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
 
-  const abortControllerRef = useRef(new AbortController())
+  const onChangeAbortControllerRef = useRef(new AbortController())
 
   const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
 
@@ -45,7 +46,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   const fields: any = fieldMapOverride ?? featureClientSchemaMap[featureKey]?.[schemaFieldsPath] // Field Schema
 
   useEffect(() => {
-    const abortController = new AbortController()
+    const controller = new AbortController()
 
     const awaitInitialState = async () => {
       const { state } = await getFormState({
@@ -54,12 +55,11 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         data: data ?? {},
         docPermissions,
         docPreferences: await getDocPreferences(),
-        doNotAbort: true,
         globalSlug,
         operation: 'update',
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
-        signal: abortController.signal,
+        signal: controller.signal,
       })
 
       setInitialState(state)
@@ -68,11 +68,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     void awaitInitialState()
 
     return () => {
-      try {
-        abortController.abort()
-      } catch (_err) {
-        // swallow error
-      }
+      abortAndIgnore(controller)
     }
   }, [
     schemaFieldsPath,
@@ -87,16 +83,10 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      if (abortControllerRef.current) {
-        try {
-          abortControllerRef.current.abort()
-        } catch (_err) {
-          // swallow error
-        }
-      }
+      abortAndIgnore(onChangeAbortControllerRef.current)
 
-      const abortController = new AbortController()
-      abortControllerRef.current = abortController
+      const controller = new AbortController()
+      onChangeAbortControllerRef.current = controller
 
       const { state } = await getFormState({
         id,
@@ -107,7 +97,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         globalSlug,
         operation: 'update',
         schemaPath: schemaFieldsPath,
-        signal: abortController.signal,
+        signal: controller.signal,
       })
 
       if (!state) {
@@ -129,14 +119,8 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
   // cleanup effect
   useEffect(() => {
-    const abortController = abortControllerRef.current
-
     return () => {
-      try {
-        abortController.abort()
-      } catch (_err) {
-        // swallow error
-      }
+      abortAndIgnore(onChangeAbortControllerRef.current)
     }
   }, [])
 
