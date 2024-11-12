@@ -57,6 +57,27 @@ export const connect: Connect = async function connect(
       }
     }
 
+    if (this.ensureIndexes) {
+      // await Promise.all([
+      //   ...Object.keys(this.payload.collections).map(async (collectionSlug) => {
+      //     await this.collections[collectionSlug].createIndexes()
+      //   }),
+      // ])
+
+      await Promise.all(
+        this.payload.config.collections.map(async (coll) => {
+          await new Promise((resolve, reject) => {
+            this.collections[coll.slug]?.ensureIndexes(function (err) {
+              if (err) {
+                reject(err)
+              }
+              resolve(true)
+            })
+          })
+        }),
+      )
+    }
+
     if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
       await this.migrate({ migrations: this.prodMigrations })
     }
