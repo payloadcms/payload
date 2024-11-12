@@ -9,6 +9,7 @@ import {
   useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
+import { abortAndIgnore } from '@payloadcms/ui/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
@@ -28,7 +29,6 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   const { t } = useTranslation()
   const { id, collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
 
-  const intialStateAbortControllerRef = useRef(new AbortController())
   const onChangeAbortControllerRef = useRef(new AbortController())
 
   const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
@@ -46,15 +46,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   const fields: any = fieldMapOverride ?? featureClientSchemaMap[featureKey]?.[schemaFieldsPath] // Field Schema
 
   useEffect(() => {
-    if (intialStateAbortControllerRef.current) {
-      try {
-        intialStateAbortControllerRef.current.abort()
-      } catch (_err) {
-        // swallow error
-      }
-
-      intialStateAbortControllerRef.current = new AbortController()
-    }
+    const controller = new AbortController()
 
     const awaitInitialState = async () => {
       const { state } = await getFormState({
@@ -67,7 +59,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         operation: 'update',
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
-        signal: intialStateAbortControllerRef.current.signal,
+        signal: controller.signal,
       })
 
       setInitialState(state)
@@ -76,11 +68,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     void awaitInitialState()
 
     return () => {
-      try {
-        intialStateAbortControllerRef.current.abort()
-      } catch (_err) {
-        // swallow error
-      }
+      abortAndIgnore(controller)
     }
   }, [
     schemaFieldsPath,
@@ -95,15 +83,10 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      if (onChangeAbortControllerRef.current) {
-        try {
-          onChangeAbortControllerRef.current.abort()
-        } catch (_err) {
-          // swallow error
-        }
+      abortAndIgnore(onChangeAbortControllerRef.current)
 
-        onChangeAbortControllerRef.current = new AbortController()
-      }
+      const controller = new AbortController()
+      onChangeAbortControllerRef.current = controller
 
       const { state } = await getFormState({
         id,
@@ -114,7 +97,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         globalSlug,
         operation: 'update',
         schemaPath: schemaFieldsPath,
-        signal: onChangeAbortControllerRef.current.signal,
+        signal: controller.signal,
       })
 
       if (!state) {
@@ -137,11 +120,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   // cleanup effect
   useEffect(() => {
     return () => {
-      try {
-        onChangeAbortControllerRef.current.abort()
-      } catch (_err) {
-        // swallow error
-      }
+      abortAndIgnore(onChangeAbortControllerRef.current)
     }
   }, [])
 

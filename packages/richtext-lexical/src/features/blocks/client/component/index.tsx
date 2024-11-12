@@ -11,6 +11,7 @@ import {
   useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
+import { abortAndIgnore } from '@payloadcms/ui/shared'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 const baseClass = 'lexical-block'
@@ -38,7 +39,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
     fieldProps: { featureClientSchemaMap, field: parentLexicalRichTextField, path, schemaPath },
   } = useEditorConfigContext()
   const onChangeAbortControllerRef = useRef(new AbortController())
-  const initialStateAbortControllerRef = useRef<AbortController>(new AbortController())
   const { docPermissions, getDocPreferences } = useDocumentInfo()
 
   const { getFormState } = useServerFunctions()
@@ -61,15 +61,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   // Field Schema
   useEffect(() => {
-    if (initialStateAbortControllerRef.current) {
-      try {
-        initialStateAbortControllerRef.current.abort()
-      } catch (_err) {
-        // swallow error
-      }
-
-      initialStateAbortControllerRef.current = new AbortController()
-    }
+    const abortController = new AbortController()
 
     const awaitInitialState = async () => {
       const { state } = await getFormState({
@@ -82,7 +74,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         operation: 'update',
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
-        signal: initialStateAbortControllerRef.current.signal,
+        signal: abortController.signal,
       })
 
       if (state) {
@@ -102,11 +94,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     }
 
     return () => {
-      try {
-        initialStateAbortControllerRef.current.abort()
-      } catch (_err) {
-        // swallow error
-      }
+      abortAndIgnore(abortController)
     }
   }, [
     getFormState,
@@ -121,15 +109,10 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
-      if (onChangeAbortControllerRef.current) {
-        try {
-          onChangeAbortControllerRef.current.abort()
-        } catch (_err) {
-          // swallow error
-        }
+      abortAndIgnore(onChangeAbortControllerRef.current)
 
-        onChangeAbortControllerRef.current = new AbortController()
-      }
+      const controller = new AbortController()
+      onChangeAbortControllerRef.current = controller
 
       const { state: newFormState } = await getFormState({
         id,
@@ -140,7 +123,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         globalSlug,
         operation: 'update',
         schemaPath: schemaFieldsPath,
-        signal: onChangeAbortControllerRef.current.signal,
+        signal: controller.signal,
       })
 
       if (!newFormState) {
@@ -169,14 +152,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
     ],
   )
 
-  // cleanup effect
   useEffect(() => {
     return () => {
-      try {
-        onChangeAbortControllerRef.current.abort()
-      } catch (_err) {
-        // swallow error
-      }
+      abortAndIgnore(onChangeAbortControllerRef.current)
     }
   }, [])
 

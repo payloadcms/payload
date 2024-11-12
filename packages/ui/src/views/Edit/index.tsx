@@ -28,6 +28,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
+import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
 import { handleGoBack } from '../../utilities/handleGoBack.js'
@@ -115,7 +116,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   const { resetUploadEdits } = useUploadEdits()
   const { getFormState } = useServerFunctions()
 
-  const abortControllerRef = useRef(new AbortController())
+  const onChangeAbortControllerRef = useRef<AbortController>(null)
 
   const locale = params.get('locale')
 
@@ -261,16 +262,10 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      if (abortControllerRef.current) {
-        try {
-          abortControllerRef.current.abort()
-        } catch (e) {
-          // swallow error
-        }
-      }
+      abortAndIgnore(onChangeAbortControllerRef.current)
 
-      const abortController = new AbortController()
-      abortControllerRef.current = abortController
+      const controller = new AbortController()
+      onChangeAbortControllerRef.current = controller
 
       const currentTime = Date.now()
       const timeSinceLastUpdate = currentTime - editSessionStartTime
@@ -296,7 +291,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
         renderAllFields: false,
         returnLockStatus: isLockingEnabled ? true : false,
         schemaPath: schemaPathSegments.join('.'),
-        // signal: abortController.signal,
+        signal: controller.signal,
         updateLastEdited,
       })
 
@@ -352,14 +347,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   // Clean up when the component unmounts or when the document is unlocked
   useEffect(() => {
     return () => {
-      if (abortControllerRef.current) {
-        try {
-          abortControllerRef.current.abort()
-        } catch (e) {
-          // swallow error
-        }
-      }
-
       if (!isLockingEnabled) {
         return
       }
@@ -402,6 +389,12 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     documentIsLocked,
     setDocumentIsLocked,
   ])
+
+  useEffect(() => {
+    return () => {
+      abortAndIgnore(onChangeAbortControllerRef.current)
+    }
+  }, [])
 
   const shouldShowDocumentLockedModal =
     documentIsLocked &&

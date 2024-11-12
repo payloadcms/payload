@@ -102,15 +102,19 @@ export const ServerFunctionsProvider: React.FC<{
 
   const getTableState = useCallback<GetTableStateClient>(
     async (args) => {
-      const { ...rest } = args || {}
+      const { signal: remoteSignal, ...rest } = args || {}
 
       try {
-        const result = (await serverFunction({
-          name: 'table-state',
-          args: rest,
-        })) as ReturnType<typeof buildTableStateHandler> // TODO: infer this type when `strictNullChecks` is enabled
+        if (!remoteSignal?.aborted) {
+          const result = (await serverFunction({
+            name: 'table-state',
+            args: rest,
+          })) as ReturnType<typeof buildTableStateHandler> // TODO: infer this type when `strictNullChecks` is enabled
 
-        return result
+          if (!remoteSignal?.aborted) {
+            return result
+          }
+        }
       } catch (_err) {
         console.error(_err) // eslint-disable-line no-console
       }
