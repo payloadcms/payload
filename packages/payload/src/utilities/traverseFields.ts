@@ -79,23 +79,30 @@ export const traverseFields = ({
     if (skip) {
       return false
     }
+
+    // avoid mutation of ref for all fields
+    let currentRef = ref
+
     if (field.type === 'tabs' && 'tabs' in field) {
       field.tabs.forEach((tab) => {
         if ('name' in tab && tab.name) {
           if (typeof ref[tab.name] === 'undefined') {
             ref[tab.name] = {}
           }
-          ref = ref[tab.name]
+          currentRef = ref[tab.name]
         }
-        if (callback && callback({ field: { ...tab, type: 'tab' }, next, parentRef, ref })) {
+        if (
+          callback &&
+          callback({ field: { ...tab, type: 'tab' }, next, parentRef, ref: currentRef })
+        ) {
           return true
         }
-        traverseFields({ callback, fields: tab.fields, parentRef, ref })
+        traverseFields({ callback, fields: tab.fields, parentRef, ref: currentRef })
       })
       return
     }
     if (field.type !== 'tab' && (fieldHasSubFields(field) || field.type === 'blocks')) {
-      const parentRef = ref
+      const parentRef = currentRef
       if ('name' in field && field.name) {
         if (typeof ref[field.name] === 'undefined') {
           if (field.type === 'array' || field.type === 'blocks') {
@@ -109,7 +116,7 @@ export const traverseFields = ({
             ref[field.name] = {}
           }
         }
-        ref = ref[field.name]
+        currentRef = ref[field.name]
       }
 
       if (field.type === 'blocks' || field.type === 'array') {
@@ -130,13 +137,13 @@ export const traverseFields = ({
         } else if (Array.isArray(ref)) {
           traverseArrayOrBlocksField({
             callback,
-            data: ref,
+            data: currentRef as Record<string, unknown>[],
             field,
             parentRef,
           })
         }
       } else {
-        traverseFields({ callback, fields: field.fields, parentRef, ref })
+        traverseFields({ callback, fields: field.fields, parentRef, ref: currentRef })
       }
     }
   })
