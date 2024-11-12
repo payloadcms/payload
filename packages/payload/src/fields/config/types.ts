@@ -1188,12 +1188,14 @@ type BlockFields = {
 
 export type BlockJSX = {
   /**
-   * Override the default regex used to search for the start of the block in the JSX. My default, it's <BlockSlugHere
+   * Override the default regex used to search for the start of the block in the JSX.
+   * By default, it's <BlockSlugHere
    */
   customEndRegex?:
     | {
         /**
-         * Whether the end match is optional. If true, the end match is not required to match for the transformer to be triggered.
+         * Whether the end match is optional. If true, the end match is
+         * not required to match for the transformer to be triggered.
          * The entire text from regexpStart to the end of the document will then be matched.
          */
         optional?: true
@@ -1201,15 +1203,21 @@ export type BlockJSX = {
       }
     | RegExp
   /**
-   * Override the default regex used to search for the start of the block in the JSX. My default, it's <BlockSlugHere/>
+   * Override the default regex used to search for the start of the block in the JSX.
+   * By default, it's <BlockSlugHere/>
    */
   customStartRegex?: RegExp
   /**
-   * By default, all spaces at the beginning and end of every line of the children (text between the open and close match)
-   * is removed.
+   * By default, all spaces at the beginning and end of every line of the
+   * children (text between the open and close match) are removed.
    * Set this to true to disable this behavior.
    */
   doNotTrimChildren?: boolean
+  /**
+   * Function that receives the data for a given block and returns a JSX representation of it.
+   *
+   * This is used to convert Lexical => JSX
+   */
   export: (props: {
     fields: BlockFields
     lexicalToMarkdown?: (props: { editorState: Record<string, any> }) => string
@@ -1220,6 +1228,12 @@ export type BlockJSX = {
       }
     | false
     | string
+  /**
+   * Function that receives the markdown string and parsed
+   * JSX props for a given matched block and returns a Lexical representation of it.
+   *
+   * This is used to convert JSX => Lexical
+   */
   import: (props: {
     children: string
     closeMatch: null | RegExpMatchArray // Only available when customEndRegex is set
