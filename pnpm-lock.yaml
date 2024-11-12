@@ -792,8 +792,8 @@ importers:
         specifier: 3.3.1
         version: 3.3.1(esbuild@0.23.1)(sass-embedded@1.80.6)
       eslint-plugin-react-compiler:
-        specifier: 0.0.0-experimental-7670337-20240918
-        version: 0.0.0-experimental-7670337-20240918(eslint@9.14.0(jiti@1.21.6))
+        specifier: 19.0.0-beta-a7bf2bd-20241110
+        version: 19.0.0-beta-a7bf2bd-20241110(eslint@9.14.0(jiti@1.21.6))
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -1308,8 +1308,8 @@ importers:
         specifier: 3.3.1
         version: 3.3.1(esbuild@0.23.1)(sass-embedded@1.80.6)
       eslint-plugin-react-compiler:
-        specifier: 0.0.0-experimental-7670337-20240918
-        version: 0.0.0-experimental-7670337-20240918(eslint@9.14.0(jiti@1.21.6))
+        specifier: 19.0.0-beta-a7bf2bd-20241110
+        version: 19.0.0-beta-a7bf2bd-20241110(eslint@9.14.0(jiti@1.21.6))
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -1595,8 +1595,8 @@ importers:
         specifier: 3.3.1
         version: 3.3.1(esbuild@0.23.1)(sass-embedded@1.80.6)
       eslint-plugin-react-compiler:
-        specifier: 0.0.0-experimental-7670337-20240918
-        version: 0.0.0-experimental-7670337-20240918(eslint@9.14.0(jiti@1.21.6))
+        specifier: 19.0.0-beta-a7bf2bd-20241110
+        version: 19.0.0-beta-a7bf2bd-20241110(eslint@9.14.0(jiti@1.21.6))
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -6265,8 +6265,8 @@ packages:
       eslint-plugin-jest:
         optional: true
 
-  eslint-plugin-react-compiler@0.0.0-experimental-7670337-20240918:
-    resolution: {integrity: sha512-FZXoYqGK3BiJw2BFQIUL0C9GgEF2QS+y6oiVPm4GooX6SXrg/UVtCi1nMAaBhqTpsF/KF2RjobgePY8KgbqXow==}
+  eslint-plugin-react-compiler@19.0.0-beta-a7bf2bd-20241110:
+    resolution: {integrity: sha512-b5/hRnOQlnH9CEnJQ6UrPoIAG4y/wIGv+OVEHTeAkbq+1uojfcuQyLToYvK1T9a6vz5WQHeMjQqFOZk3mtWorg==}
     engines: {node: ^14.17.0 || ^16.0.0 || >= 18.0.0}
     peerDependencies:
       eslint: '>=7'
@@ -7540,7 +7540,6 @@ packages:
 
   libsql@0.4.7:
     resolution: {integrity: sha512-T9eIRCs6b0J1SHKYIvD8+KCJMcWZ900iZyxdnSCdqxN12Z1ijzT+jY5nrk72Jw4B0HGzms2NgpryArlJqvc3Lw==}
-    cpu: [x64, arm64, wasm32]
     os: [darwin, linux, win32]
 
   lie@3.1.1:
@@ -15595,7 +15594,7 @@ snapshots:
     optionalDependencies:
       eslint-plugin-jest: 28.9.0(@typescript-eslint/eslint-plugin@8.14.0(@typescript-eslint/parser@8.14.0(eslint@9.14.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.14.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.14.0(jiti@1.21.6))(jest@29.7.0(@types/node@22.5.4)(babel-plugin-macros@3.1.0))(typescript@5.6.3)
 
-  eslint-plugin-react-compiler@0.0.0-experimental-7670337-20240918(eslint@9.14.0(jiti@1.21.6)):
+  eslint-plugin-react-compiler@19.0.0-beta-a7bf2bd-20241110(eslint@9.14.0(jiti@1.21.6)):
     dependencies:
       '@babel/core': 7.26.0
       '@babel/parser': 7.26.2

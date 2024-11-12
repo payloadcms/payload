@@ -150,6 +150,9 @@ export const RscEntrySlateField: React.FC<
           break
         }
 
+        case 'relationship':
+          break
+
         case 'upload': {
           const uploadEnabledCollections = payload.config.collections.filter(
             ({ admin: { enableRichTextRelationship, hidden }, upload }) => {
@@ -179,9 +182,6 @@ export const RscEntrySlateField: React.FC<
 
           break
         }
-
-        case 'relationship':
-          break
       }
     }
   })

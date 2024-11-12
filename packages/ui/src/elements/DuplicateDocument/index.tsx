@@ -8,6 +8,8 @@ import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
+import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
+
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
@@ -18,7 +20,6 @@ import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { Button } from '../Button/index.js'
 import { drawerZBase } from '../Drawer/index.js'
 import { PopupList } from '../Popup/index.js'
-import { DocumentDrawerContextType } from '../DocumentDrawer/Provider.jsx'
 import './index.scss'
 
 const baseClass = 'duplicate'

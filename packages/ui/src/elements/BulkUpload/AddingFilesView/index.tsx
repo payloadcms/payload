@@ -26,11 +26,11 @@ export function AddingFilesView() {
     activeIndex,
     collectionSlug,
     docPermissions,
+    documentSlots,
     forms,
     hasPublishPermission,
     hasSavePermission,
     hasSubmitted,
-    documentSlots,
   } = useFormsManager()
   const activeForm = forms[activeIndex]
   const { getEntityConfig } = useConfig()

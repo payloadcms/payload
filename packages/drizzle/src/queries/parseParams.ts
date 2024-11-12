@@ -287,6 +287,13 @@ export function parseParams({
 
                 if (field.type === 'point' && adapter.name === 'postgres') {
                   switch (operator) {
+                    case 'intersects': {
+                      constraints.push(
+                        sql`ST_Intersects(${table[columnName]}, ST_GeomFromGeoJSON(${JSON.stringify(queryValue)}))`,
+                      )
+                      break
+                    }
+
                     case 'near': {
                       const [lng, lat, maxDistance, minDistance] = queryValue as number[]
 
@@ -301,13 +308,6 @@ export function parseParams({
                     case 'within': {
                       constraints.push(
                         sql`ST_Within(${table[columnName]}, ST_GeomFromGeoJSON(${JSON.stringify(queryValue)}))`,
-                      )
-                      break
-                    }
-
-                    case 'intersects': {
-                      constraints.push(
-                        sql`ST_Intersects(${table[columnName]}, ST_GeomFromGeoJSON(${JSON.stringify(queryValue)}))`,
                       )
                       break
                     }

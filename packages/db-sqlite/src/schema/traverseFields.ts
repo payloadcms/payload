@@ -179,183 +179,6 @@ export const traverseFields = ({
     }
 
     switch (field.type) {
-      case 'text': {
-        if (field.hasMany) {
-          const isLocalized =
-            Boolean(field.localized && adapter.payload.config.localization) ||
-            withinLocalizedArrayOrBlock ||
-            forceLocalized
-
-          if (isLocalized) {
-            hasLocalizedManyTextField = true
-          }
-
-          if (field.index) {
-            hasManyTextField = 'index'
-          } else if (!hasManyTextField) {
-            hasManyTextField = true
-          }
-
-          if (field.unique) {
-            throw new InvalidConfiguration(
-              'Unique is not supported in SQLite for hasMany text fields.',
-            )
-          }
-        } else {
-          targetTable[fieldName] = withDefault(text(columnName), field)
-        }
-        break
-      }
-      case 'email':
-      case 'code':
-      case 'textarea': {
-        targetTable[fieldName] = withDefault(text(columnName), field)
-        break
-      }
-
-      case 'number': {
-        if (field.hasMany) {
-          const isLocalized =
-            Boolean(field.localized && adapter.payload.config.localization) ||
-            withinLocalizedArrayOrBlock ||
-            forceLocalized
-
-          if (isLocalized) {
-            hasLocalizedManyNumberField = true
-          }
-
-          if (field.index) {
-            hasManyNumberField = 'index'
-          } else if (!hasManyNumberField) {
-            hasManyNumberField = true
-          }
-
-          if (field.unique) {
-            throw new InvalidConfiguration(
-              'Unique is not supported in Postgres for hasMany number fields.',
-            )
-          }
-        } else {
-          targetTable[fieldName] = withDefault(numeric(columnName), field)
-        }
-        break
-      }
-
-      case 'richText':
-      case 'json': {
-        targetTable[fieldName] = withDefault(text(columnName, { mode: 'json' }), field)
-        break
-      }
-
-      case 'date': {
-        targetTable[fieldName] = withDefault(text(columnName), field)
-        break
-      }
-
-      case 'point': {
-        break
-      }
-
-      case 'radio':
-      case 'select': {
-        const options = field.options.map((option) => {
-          if (optionIsObject(option)) {
-            return option.value
-          }
-
-          return option
-        }) as [string, ...string[]]
-
-        if (field.type === 'select' && field.hasMany) {
-          const selectTableName = createTableName({
-            adapter,
-            config: field,
-            parentTableName: newTableName,
-            prefix: `${newTableName}_`,
-            versionsCustomName: versions,
-          })
-          const baseColumns: Record<string, SQLiteColumnBuilder> = {
-            order: integer('order').notNull(),
-            parent: getIDColumn({
-              name: 'parent_id',
-              type: parentIDColType,
-              notNull: true,
-              primaryKey: false,
-            }),
-            value: text('value', { enum: options }),
-          }
-
-          const baseExtraConfig: BaseExtraConfig = {
-            orderIdx: (cols) => index(`${selectTableName}_order_idx`).on(cols.order),
-            parentFk: (cols) =>
-              foreignKey({
-                name: `${selectTableName}_parent_fk`,
-                columns: [cols.parent],
-                foreignColumns: [adapter.tables[parentTableName].id],
-              }).onDelete('cascade'),
-            parentIdx: (cols) => index(`${selectTableName}_parent_idx`).on(cols.parent),
-          }
-
-          const isLocalized =
-            Boolean(field.localized && adapter.payload.config.localization) ||
-            withinLocalizedArrayOrBlock ||
-            forceLocalized
-
-          if (isLocalized) {
-            baseColumns.locale = text('locale', { enum: locales }).notNull()
-            baseExtraConfig.localeIdx = (cols) =>
-              index(`${selectTableName}_locale_idx`).on(cols.locale)
-          }
-
-          if (field.index) {
-            baseExtraConfig.value = (cols) => index(`${selectTableName}_value_idx`).on(cols.value)
-          }
-
-          buildTable({
-            adapter,
-            baseColumns,
-            baseExtraConfig,
-            disableNotNull,
-            disableUnique,
-            fields: [],
-            rootTableName,
-            tableName: selectTableName,
-            versions,
-          })
-
-          relationsToBuild.set(fieldName, {
-            type: 'many',
-            // selects have their own localized table, independent of the base table.
-            localized: false,
-            target: selectTableName,
-          })
-
-          adapter.relations[`relations_${selectTableName}`] = relations(
-            adapter.tables[selectTableName],
-            ({ one }) => ({
-              parent: one(adapter.tables[parentTableName], {
-                fields: [adapter.tables[selectTableName].parent],
-                references: [adapter.tables[parentTableName].id],
-                relationName: fieldName,
-              }),
-            }),
-          )
-        } else {
-          targetTable[fieldName] = withDefault(
-            text(columnName, {
-              enum: options,
-            }),
-            field,
-          )
-        }
-        break
-      }
-
-      case 'checkbox': {
-        targetTable[fieldName] = withDefault(integer(columnName, { mode: 'boolean' }), field)
-        break
-      }
-
       case 'array': {
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
@@ -493,7 +316,6 @@ export const traverseFields = ({
 
         break
       }
-
       case 'blocks': {
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
@@ -646,9 +468,82 @@ export const traverseFields = ({
 
         break
       }
+      case 'checkbox': {
+        targetTable[fieldName] = withDefault(integer(columnName, { mode: 'boolean' }), field)
+        break
+      }
+      case 'code':
 
-      case 'tab':
-      case 'group': {
+      case 'email':
+
+      case 'textarea': {
+        targetTable[fieldName] = withDefault(text(columnName), field)
+        break
+      }
+      case 'collapsible':
+
+      case 'row': {
+        const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
+        const {
+          hasLocalizedField: rowHasLocalizedField,
+          hasLocalizedManyNumberField: rowHasLocalizedManyNumberField,
+          hasLocalizedManyTextField: rowHasLocalizedManyTextField,
+          hasLocalizedRelationshipField: rowHasLocalizedRelationshipField,
+          hasManyNumberField: rowHasManyNumberField,
+          hasManyTextField: rowHasManyTextField,
+        } = traverseFields({
+          adapter,
+          columnPrefix,
+          columns,
+          disableNotNull: disableNotNullFromHere,
+          disableUnique,
+          fieldPrefix,
+          fields: field.fields,
+          forceLocalized,
+          indexes,
+          locales,
+          localesColumns,
+          localesIndexes,
+          newTableName,
+          parentTableName,
+          relationships,
+          relationsToBuild,
+          rootRelationsToBuild,
+          rootTableIDColType,
+          rootTableName,
+          uniqueRelationships,
+          versions,
+          withinLocalizedArrayOrBlock,
+        })
+
+        if (rowHasLocalizedField) {
+          hasLocalizedField = true
+        }
+        if (rowHasLocalizedRelationshipField) {
+          hasLocalizedRelationshipField = true
+        }
+        if (rowHasManyTextField) {
+          hasManyTextField = true
+        }
+        if (rowHasLocalizedManyTextField) {
+          hasLocalizedManyTextField = true
+        }
+        if (rowHasManyNumberField) {
+          hasManyNumberField = true
+        }
+        if (rowHasLocalizedManyNumberField) {
+          hasLocalizedManyNumberField = true
+        }
+        break
+      }
+
+      case 'date': {
+        targetTable[fieldName] = withDefault(text(columnName), field)
+        break
+      }
+
+      case 'group':
+      case 'tab': {
         if (!('name' in field)) {
           const {
             hasLocalizedField: groupHasLocalizedField,
@@ -758,114 +653,136 @@ export const traverseFields = ({
         break
       }
 
-      case 'tabs': {
-        const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
+      case 'json':
 
-        const {
-          hasLocalizedField: tabHasLocalizedField,
-          hasLocalizedManyNumberField: tabHasLocalizedManyNumberField,
-          hasLocalizedManyTextField: tabHasLocalizedManyTextField,
-          hasLocalizedRelationshipField: tabHasLocalizedRelationshipField,
-          hasManyNumberField: tabHasManyNumberField,
-          hasManyTextField: tabHasManyTextField,
-        } = traverseFields({
-          adapter,
-          columnPrefix,
-          columns,
-          disableNotNull: disableNotNullFromHere,
-          disableUnique,
-          fieldPrefix,
-          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
-          forceLocalized,
-          indexes,
-          locales,
-          localesColumns,
-          localesIndexes,
-          newTableName,
-          parentTableName,
-          relationships,
-          relationsToBuild,
-          rootRelationsToBuild,
-          rootTableIDColType,
-          rootTableName,
-          uniqueRelationships,
-          versions,
-          withinLocalizedArrayOrBlock,
-        })
+      case 'richText': {
+        targetTable[fieldName] = withDefault(text(columnName, { mode: 'json' }), field)
+        break
+      }
 
-        if (tabHasLocalizedField) {
-          hasLocalizedField = true
-        }
-        if (tabHasLocalizedRelationshipField) {
-          hasLocalizedRelationshipField = true
-        }
-        if (tabHasManyTextField) {
-          hasManyTextField = true
-        }
-        if (tabHasLocalizedManyTextField) {
-          hasLocalizedManyTextField = true
-        }
-        if (tabHasManyNumberField) {
-          hasManyNumberField = true
-        }
-        if (tabHasLocalizedManyNumberField) {
-          hasLocalizedManyNumberField = true
+      case 'number': {
+        if (field.hasMany) {
+          const isLocalized =
+            Boolean(field.localized && adapter.payload.config.localization) ||
+            withinLocalizedArrayOrBlock ||
+            forceLocalized
+
+          if (isLocalized) {
+            hasLocalizedManyNumberField = true
+          }
+
+          if (field.index) {
+            hasManyNumberField = 'index'
+          } else if (!hasManyNumberField) {
+            hasManyNumberField = true
+          }
+
+          if (field.unique) {
+            throw new InvalidConfiguration(
+              'Unique is not supported in Postgres for hasMany number fields.',
+            )
+          }
+        } else {
+          targetTable[fieldName] = withDefault(numeric(columnName), field)
         }
         break
       }
 
-      case 'row':
-      case 'collapsible': {
-        const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
-        const {
-          hasLocalizedField: rowHasLocalizedField,
-          hasLocalizedManyNumberField: rowHasLocalizedManyNumberField,
-          hasLocalizedManyTextField: rowHasLocalizedManyTextField,
-          hasLocalizedRelationshipField: rowHasLocalizedRelationshipField,
-          hasManyNumberField: rowHasManyNumberField,
-          hasManyTextField: rowHasManyTextField,
-        } = traverseFields({
-          adapter,
-          columnPrefix,
-          columns,
-          disableNotNull: disableNotNullFromHere,
-          disableUnique,
-          fieldPrefix,
-          fields: field.fields,
-          forceLocalized,
-          indexes,
-          locales,
-          localesColumns,
-          localesIndexes,
-          newTableName,
-          parentTableName,
-          relationships,
-          relationsToBuild,
-          rootRelationsToBuild,
-          rootTableIDColType,
-          rootTableName,
-          uniqueRelationships,
-          versions,
-          withinLocalizedArrayOrBlock,
-        })
+      case 'point': {
+        break
+      }
+      case 'radio':
 
-        if (rowHasLocalizedField) {
-          hasLocalizedField = true
-        }
-        if (rowHasLocalizedRelationshipField) {
-          hasLocalizedRelationshipField = true
-        }
-        if (rowHasManyTextField) {
-          hasManyTextField = true
-        }
-        if (rowHasLocalizedManyTextField) {
-          hasLocalizedManyTextField = true
-        }
-        if (rowHasManyNumberField) {
-          hasManyNumberField = true
-        }
-        if (rowHasLocalizedManyNumberField) {
-          hasLocalizedManyNumberField = true
+      case 'select': {
+        const options = field.options.map((option) => {
+          if (optionIsObject(option)) {
+            return option.value
+          }
+
+          return option
+        }) as [string, ...string[]]
+
+        if (field.type === 'select' && field.hasMany) {
+          const selectTableName = createTableName({
+            adapter,
+            config: field,
+            parentTableName: newTableName,
+            prefix: `${newTableName}_`,
+            versionsCustomName: versions,
+          })
+          const baseColumns: Record<string, SQLiteColumnBuilder> = {
+            order: integer('order').notNull(),
+            parent: getIDColumn({
+              name: 'parent_id',
+              type: parentIDColType,
+              notNull: true,
+              primaryKey: false,
+            }),
+            value: text('value', { enum: options }),
+          }
+
+          const baseExtraConfig: BaseExtraConfig = {
+            orderIdx: (cols) => index(`${selectTableName}_order_idx`).on(cols.order),
+            parentFk: (cols) =>
+              foreignKey({
+                name: `${selectTableName}_parent_fk`,
+                columns: [cols.parent],
+                foreignColumns: [adapter.tables[parentTableName].id],
+              }).onDelete('cascade'),
+            parentIdx: (cols) => index(`${selectTableName}_parent_idx`).on(cols.parent),
+          }
+
+          const isLocalized =
+            Boolean(field.localized && adapter.payload.config.localization) ||
+            withinLocalizedArrayOrBlock ||
+            forceLocalized
+
+          if (isLocalized) {
+            baseColumns.locale = text('locale', { enum: locales }).notNull()
+            baseExtraConfig.localeIdx = (cols) =>
+              index(`${selectTableName}_locale_idx`).on(cols.locale)
+          }
+
+          if (field.index) {
+            baseExtraConfig.value = (cols) => index(`${selectTableName}_value_idx`).on(cols.value)
+          }
+
+          buildTable({
+            adapter,
+            baseColumns,
+            baseExtraConfig,
+            disableNotNull,
+            disableUnique,
+            fields: [],
+            rootTableName,
+            tableName: selectTableName,
+            versions,
+          })
+
+          relationsToBuild.set(fieldName, {
+            type: 'many',
+            // selects have their own localized table, independent of the base table.
+            localized: false,
+            target: selectTableName,
+          })
+
+          adapter.relations[`relations_${selectTableName}`] = relations(
+            adapter.tables[selectTableName],
+            ({ one }) => ({
+              parent: one(adapter.tables[parentTableName], {
+                fields: [adapter.tables[selectTableName].parent],
+                references: [adapter.tables[parentTableName].id],
+                relationName: fieldName,
+              }),
+            }),
+          )
+        } else {
+          targetTable[fieldName] = withDefault(
+            text(columnName, {
+              enum: options,
+            }),
+            field,
+          )
         }
         break
       }
@@ -930,6 +847,89 @@ export const traverseFields = ({
         }
 
         break
+
+      case 'tabs': {
+        const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
+
+        const {
+          hasLocalizedField: tabHasLocalizedField,
+          hasLocalizedManyNumberField: tabHasLocalizedManyNumberField,
+          hasLocalizedManyTextField: tabHasLocalizedManyTextField,
+          hasLocalizedRelationshipField: tabHasLocalizedRelationshipField,
+          hasManyNumberField: tabHasManyNumberField,
+          hasManyTextField: tabHasManyTextField,
+        } = traverseFields({
+          adapter,
+          columnPrefix,
+          columns,
+          disableNotNull: disableNotNullFromHere,
+          disableUnique,
+          fieldPrefix,
+          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+          forceLocalized,
+          indexes,
+          locales,
+          localesColumns,
+          localesIndexes,
+          newTableName,
+          parentTableName,
+          relationships,
+          relationsToBuild,
+          rootRelationsToBuild,
+          rootTableIDColType,
+          rootTableName,
+          uniqueRelationships,
+          versions,
+          withinLocalizedArrayOrBlock,
+        })
+
+        if (tabHasLocalizedField) {
+          hasLocalizedField = true
+        }
+        if (tabHasLocalizedRelationshipField) {
+          hasLocalizedRelationshipField = true
+        }
+        if (tabHasManyTextField) {
+          hasManyTextField = true
+        }
+        if (tabHasLocalizedManyTextField) {
+          hasLocalizedManyTextField = true
+        }
+        if (tabHasManyNumberField) {
+          hasManyNumberField = true
+        }
+        if (tabHasLocalizedManyNumberField) {
+          hasLocalizedManyNumberField = true
+        }
+        break
+      }
+      case 'text': {
+        if (field.hasMany) {
+          const isLocalized =
+            Boolean(field.localized && adapter.payload.config.localization) ||
+            withinLocalizedArrayOrBlock ||
+            forceLocalized
+
+          if (isLocalized) {
+            hasLocalizedManyTextField = true
+          }
+
+          if (field.index) {
+            hasManyTextField = 'index'
+          } else if (!hasManyTextField) {
+            hasManyTextField = true
+          }
+
+          if (field.unique) {
+            throw new InvalidConfiguration(
+              'Unique is not supported in SQLite for hasMany text fields.',
+            )
+          }
+        } else {
+          targetTable[fieldName] = withDefault(text(columnName), field)
+        }
+        break
+      }
 
       default:
         break

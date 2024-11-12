@@ -217,6 +217,16 @@ export class Main {
       }
 
       switch (template.type) {
+        case 'plugin': {
+          await createProject({
+            cliArgs: this.args,
+            packageManager,
+            projectDir,
+            projectName,
+            template,
+          })
+          break
+        }
         case 'starter': {
           const dbDetails = await selectDb(this.args, projectName)
           const payloadSecret = generateSecret()
@@ -234,16 +244,6 @@ export class Main {
             databaseUri: dbDetails.dbUri,
             payloadSecret,
             projectDir,
-            template,
-          })
-          break
-        }
-        case 'plugin': {
-          await createProject({
-            cliArgs: this.args,
-            packageManager,
-            projectDir,
-            projectName,
             template,
           })
           break

@@ -239,123 +239,125 @@ export function fieldsToJSONSchema(
         let fieldSchema: JSONSchema4
 
         switch (field.type) {
-          case 'text':
-            if (field.hasMany === true) {
-              fieldSchema = {
-                type: withNullableJSONSchemaType('array', isRequired),
-                items: { type: 'string' },
-              }
-            } else {
-              fieldSchema = { type: withNullableJSONSchemaType('string', isRequired) }
+          case 'array': {
+            fieldSchema = {
+              type: withNullableJSONSchemaType('array', isRequired),
+              items: {
+                type: 'object',
+                additionalProperties: false,
+                ...fieldsToJSONSchema(
+                  collectionIDFieldTypes,
+                  field.fields,
+                  interfaceNameDefinitions,
+                  config,
+                ),
+              },
             }
-            break
-          case 'textarea':
-          case 'code':
-          case 'email':
-          case 'date': {
-            fieldSchema = { type: withNullableJSONSchemaType('string', isRequired) }
-            break
-          }
 
-          case 'number': {
-            if (field.hasMany === true) {
+            if (field.interfaceName) {
+              interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
+
               fieldSchema = {
-                type: withNullableJSONSchemaType('array', isRequired),
-                items: { type: 'number' },
+                $ref: `#/definitions/${field.interfaceName}`,
               }
-            } else {
-              fieldSchema = { type: withNullableJSONSchemaType('number', isRequired) }
             }
             break
           }
+          case 'blocks': {
+            // Check for a case where no blocks are provided.
+            // We need to generate an empty array for this case, note that JSON schema 4 doesn't support empty arrays
+            // so the best we can get is `unknown[]`
+            const hasBlocks = Boolean(field.blocks.length)
 
+            fieldSchema = {
+              type: withNullableJSONSchemaType('array', isRequired),
+              items: hasBlocks
+                ? {
+                    oneOf: field.blocks.map((block) => {
+                      const blockFieldSchemas = fieldsToJSONSchema(
+                        collectionIDFieldTypes,
+                        block.fields,
+                        interfaceNameDefinitions,
+                        config,
+                      )
+
+                      const blockSchema: JSONSchema4 = {
+                        type: 'object',
+                        additionalProperties: false,
+                        properties: {
+                          ...blockFieldSchemas.properties,
+                          blockType: {
+                            const: block.slug,
+                          },
+                        },
+                        required: ['blockType', ...blockFieldSchemas.required],
+                      }
+
+                      if (block.interfaceName) {
+                        interfaceNameDefinitions.set(block.interfaceName, blockSchema)
+
+                        return {
+                          $ref: `#/definitions/${block.interfaceName}`,
+                        }
+                      }
+
+                      return blockSchema
+                    }),
+                  }
+                : {},
+            }
+            break
+          }
           case 'checkbox': {
             fieldSchema = { type: withNullableJSONSchemaType('boolean', isRequired) }
             break
           }
+          case 'code':
+          case 'date':
 
-          case 'json': {
-            fieldSchema = field.jsonSchema?.schema || {
-              type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
-            }
+          case 'email':
+
+          case 'textarea': {
+            fieldSchema = { type: withNullableJSONSchemaType('string', isRequired) }
             break
           }
 
-          case 'richText': {
-            if (!field?.editor) {
-              throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
-            }
-            if (typeof field.editor === 'function') {
-              throw new Error('Attempted to access unsanitized rich text editor.')
-            }
-            if (field.editor.outputSchema) {
-              fieldSchema = field.editor.outputSchema({
+          case 'collapsible':
+
+          case 'row': {
+            const childSchema = fieldsToJSONSchema(
+              collectionIDFieldTypes,
+              field.fields,
+              interfaceNameDefinitions,
+              config,
+            )
+            Object.entries(childSchema.properties).forEach(([propName, propSchema]) => {
+              fieldSchemas.set(propName, propSchema)
+            })
+            childSchema.required.forEach((propName) => {
+              requiredFieldNames.add(propName)
+            })
+            break
+          }
+
+          case 'group': {
+            fieldSchema = {
+              type: 'object',
+              additionalProperties: false,
+              ...fieldsToJSONSchema(
                 collectionIDFieldTypes,
-                config,
-                field,
+                field.fields,
                 interfaceNameDefinitions,
-                isRequired,
-              })
-            } else {
-              // Maintain backwards compatibility with existing rich text editors
-              fieldSchema = {
-                type: withNullableJSONSchemaType('array', isRequired),
-                items: {
-                  type: 'object',
-                },
-              }
+                config,
+              ),
             }
 
-            break
-          }
+            if (field.interfaceName) {
+              interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
 
-          case 'radio': {
-            fieldSchema = {
-              type: withNullableJSONSchemaType('string', isRequired),
-              enum: buildOptionEnums(field.options),
-            }
-
-            break
-          }
-
-          case 'select': {
-            const optionEnums = buildOptionEnums(field.options)
-
-            if (field.hasMany) {
               fieldSchema = {
-                type: withNullableJSONSchemaType('array', isRequired),
-                items: {
-                  type: 'string',
-                },
+                $ref: `#/definitions/${field.interfaceName}`,
               }
-              if (optionEnums?.length) {
-                ;(fieldSchema.items as JSONSchema4).enum = optionEnums
-              }
-            } else {
-              fieldSchema = {
-                type: withNullableJSONSchemaType('string', isRequired),
-              }
-              if (optionEnums?.length) {
-                fieldSchema.enum = optionEnums
-              }
-            }
-
-            break
-          }
-
-          case 'point': {
-            fieldSchema = {
-              type: withNullableJSONSchemaType('array', isRequired),
-              items: [
-                {
-                  type: 'number',
-                },
-                {
-                  type: 'number',
-                },
-              ],
-              maxItems: 2,
-              minItems: 2,
             }
             break
           }
@@ -384,8 +386,53 @@ export function fieldsToJSONSchema(
             break
           }
 
-          case 'upload':
-          case 'relationship': {
+          case 'json': {
+            fieldSchema = field.jsonSchema?.schema || {
+              type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
+            }
+            break
+          }
+
+          case 'number': {
+            if (field.hasMany === true) {
+              fieldSchema = {
+                type: withNullableJSONSchemaType('array', isRequired),
+                items: { type: 'number' },
+              }
+            } else {
+              fieldSchema = { type: withNullableJSONSchemaType('number', isRequired) }
+            }
+            break
+          }
+
+          case 'point': {
+            fieldSchema = {
+              type: withNullableJSONSchemaType('array', isRequired),
+              items: [
+                {
+                  type: 'number',
+                },
+                {
+                  type: 'number',
+                },
+              ],
+              maxItems: 2,
+              minItems: 2,
+            }
+            break
+          }
+          case 'radio': {
+            fieldSchema = {
+              type: withNullableJSONSchemaType('string', isRequired),
+              enum: buildOptionEnums(field.options),
+            }
+
+            break
+          }
+
+          case 'relationship':
+
+          case 'upload': {
             if (Array.isArray(field.relationTo)) {
               if (field.hasMany) {
                 fieldSchema = {
@@ -474,91 +521,55 @@ export function fieldsToJSONSchema(
             break
           }
 
-          case 'blocks': {
-            // Check for a case where no blocks are provided.
-            // We need to generate an empty array for this case, note that JSON schema 4 doesn't support empty arrays
-            // so the best we can get is `unknown[]`
-            const hasBlocks = Boolean(field.blocks.length)
-
-            fieldSchema = {
-              type: withNullableJSONSchemaType('array', isRequired),
-              items: hasBlocks
-                ? {
-                    oneOf: field.blocks.map((block) => {
-                      const blockFieldSchemas = fieldsToJSONSchema(
-                        collectionIDFieldTypes,
-                        block.fields,
-                        interfaceNameDefinitions,
-                        config,
-                      )
-
-                      const blockSchema: JSONSchema4 = {
-                        type: 'object',
-                        additionalProperties: false,
-                        properties: {
-                          ...blockFieldSchemas.properties,
-                          blockType: {
-                            const: block.slug,
-                          },
-                        },
-                        required: ['blockType', ...blockFieldSchemas.required],
-                      }
-
-                      if (block.interfaceName) {
-                        interfaceNameDefinitions.set(block.interfaceName, blockSchema)
-
-                        return {
-                          $ref: `#/definitions/${block.interfaceName}`,
-                        }
-                      }
-
-                      return blockSchema
-                    }),
-                  }
-                : {},
+          case 'richText': {
+            if (!field?.editor) {
+              throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
             }
-            break
-          }
-
-          case 'array': {
-            fieldSchema = {
-              type: withNullableJSONSchemaType('array', isRequired),
-              items: {
-                type: 'object',
-                additionalProperties: false,
-                ...fieldsToJSONSchema(
-                  collectionIDFieldTypes,
-                  field.fields,
-                  interfaceNameDefinitions,
-                  config,
-                ),
-              },
+            if (typeof field.editor === 'function') {
+              throw new Error('Attempted to access unsanitized rich text editor.')
             }
-
-            if (field.interfaceName) {
-              interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
-
+            if (field.editor.outputSchema) {
+              fieldSchema = field.editor.outputSchema({
+                collectionIDFieldTypes,
+                config,
+                field,
+                interfaceNameDefinitions,
+                isRequired,
+              })
+            } else {
+              // Maintain backwards compatibility with existing rich text editors
               fieldSchema = {
-                $ref: `#/definitions/${field.interfaceName}`,
+                type: withNullableJSONSchemaType('array', isRequired),
+                items: {
+                  type: 'object',
+                },
               }
             }
+
             break
           }
+          case 'select': {
+            const optionEnums = buildOptionEnums(field.options)
 
-          case 'row':
-          case 'collapsible': {
-            const childSchema = fieldsToJSONSchema(
-              collectionIDFieldTypes,
-              field.fields,
-              interfaceNameDefinitions,
-              config,
-            )
-            Object.entries(childSchema.properties).forEach(([propName, propSchema]) => {
-              fieldSchemas.set(propName, propSchema)
-            })
-            childSchema.required.forEach((propName) => {
-              requiredFieldNames.add(propName)
-            })
+            if (field.hasMany) {
+              fieldSchema = {
+                type: withNullableJSONSchemaType('array', isRequired),
+                items: {
+                  type: 'string',
+                },
+              }
+              if (optionEnums?.length) {
+                ;(fieldSchema.items as JSONSchema4).enum = optionEnums
+              }
+            } else {
+              fieldSchema = {
+                type: withNullableJSONSchemaType('string', isRequired),
+              }
+              if (optionEnums?.length) {
+                fieldSchema.enum = optionEnums
+              }
+            }
+
             break
           }
 
@@ -596,27 +607,16 @@ export function fieldsToJSONSchema(
             break
           }
 
-          case 'group': {
-            fieldSchema = {
-              type: 'object',
-              additionalProperties: false,
-              ...fieldsToJSONSchema(
-                collectionIDFieldTypes,
-                field.fields,
-                interfaceNameDefinitions,
-                config,
-              ),
-            }
-
-            if (field.interfaceName) {
-              interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
-
+          case 'text':
+            if (field.hasMany === true) {
               fieldSchema = {
-                $ref: `#/definitions/${field.interfaceName}`,
+                type: withNullableJSONSchemaType('array', isRequired),
+                items: { type: 'string' },
               }
+            } else {
+              fieldSchema = { type: withNullableJSONSchemaType('string', isRequired) }
             }
             break
-          }
 
           default: {
             break
@@ -704,15 +704,6 @@ export function fieldsToSelectJSONSchema({ fields }: { fields: Field[] }): JSONS
 
   for (const field of fields) {
     switch (field.type) {
-      case 'row':
-      case 'collapsible':
-        schema.properties = {
-          ...schema.properties,
-          ...fieldsToSelectJSONSchema({ fields: field.fields }).properties,
-        }
-
-        break
-
       case 'array':
       case 'group':
         schema.properties[field.name] = {
@@ -722,27 +713,6 @@ export function fieldsToSelectJSONSchema({ fields }: { fields: Field[] }): JSONS
             },
             fieldsToSelectJSONSchema({ fields: field.fields }),
           ],
-        }
-        break
-
-      case 'tabs':
-        for (const tab of field.tabs) {
-          if (tabHasName(tab)) {
-            schema.properties[tab.name] = {
-              oneOf: [
-                {
-                  type: 'boolean',
-                },
-                fieldsToSelectJSONSchema({ fields: tab.fields }),
-              ],
-            }
-            continue
-          }
-
-          schema.properties = {
-            ...schema.properties,
-            ...fieldsToSelectJSONSchema({ fields: tab.fields }).properties,
-          }
         }
         break
 
@@ -775,6 +745,36 @@ export function fieldsToSelectJSONSchema({ fields }: { fields: Field[] }): JSONS
 
         break
       }
+      case 'collapsible':
+
+      case 'row':
+        schema.properties = {
+          ...schema.properties,
+          ...fieldsToSelectJSONSchema({ fields: field.fields }).properties,
+        }
+
+        break
+
+      case 'tabs':
+        for (const tab of field.tabs) {
+          if (tabHasName(tab)) {
+            schema.properties[tab.name] = {
+              oneOf: [
+                {
+                  type: 'boolean',
+                },
+                fieldsToSelectJSONSchema({ fields: tab.fields }),
+              ],
+            }
+            continue
+          }
+
+          schema.properties = {
+            ...schema.properties,
+            ...fieldsToSelectJSONSchema({ fields: tab.fields }).properties,
+          }
+        }
+        break
 
       default:
         schema.properties[field.name] = {
@@ -800,6 +800,34 @@ const generateAuthFieldTypes = ({
 }): JSONSchema4 => {
   if (loginWithUsername) {
     switch (type) {
+      case 'forgotOrUnlock': {
+        if (loginWithUsername.allowEmailLogin) {
+          // allow email or username for unlock/forgot-password
+          return {
+            additionalProperties: false,
+            oneOf: [
+              {
+                additionalProperties: false,
+                properties: { email: fieldType },
+                required: ['email'],
+              },
+              {
+                additionalProperties: false,
+                properties: { username: fieldType },
+                required: ['username'],
+              },
+            ],
+          }
+        } else {
+          // allow only username for unlock/forgot-password
+          return {
+            additionalProperties: false,
+            properties: { username: fieldType },
+            required: ['username'],
+          }
+        }
+      }
+
       case 'login': {
         if (loginWithUsername.allowEmailLogin) {
           // allow username or email and require password for login
@@ -856,34 +884,6 @@ const generateAuthFieldTypes = ({
           additionalProperties: false,
           properties,
           required: requiredFields,
-        }
-      }
-
-      case 'forgotOrUnlock': {
-        if (loginWithUsername.allowEmailLogin) {
-          // allow email or username for unlock/forgot-password
-          return {
-            additionalProperties: false,
-            oneOf: [
-              {
-                additionalProperties: false,
-                properties: { email: fieldType },
-                required: ['email'],
-              },
-              {
-                additionalProperties: false,
-                properties: { username: fieldType },
-                required: ['username'],
-              },
-            ],
-          }
-        } else {
-          // allow only username for unlock/forgot-password
-          return {
-            additionalProperties: false,
-            properties: { username: fieldType },
-            required: ['username'],
-          }
         }
       }
     }

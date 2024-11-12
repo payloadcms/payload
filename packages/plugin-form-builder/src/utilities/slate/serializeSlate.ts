@@ -92,6 +92,30 @@ export const serializeSlate = (children?: Node[], submissionData?: any): string 
           ${serializeSlate(node.children, submissionData)}
         </h6>
       `
+        case 'indent':
+          return `
+          <p style="padding-left: 20px">
+            ${serializeSlate(node.children, submissionData)}
+          </p>
+        `
+        case 'li':
+          return `
+        <li>
+          ${serializeSlate(node.children, submissionData)}
+        </li>
+      `
+        case 'link':
+          return `
+          <a href={${escapeHTML(replaceDoubleCurlys(node.url, submissionData))}}>
+          ${serializeSlate(node.children, submissionData)}
+        </a>
+      `
+        case 'ol':
+          return `
+        <ol>
+          ${serializeSlate(node.children, submissionData)}
+        </ol>
+      `
         case 'quote':
           return `
         <blockquote>
@@ -103,30 +127,6 @@ export const serializeSlate = (children?: Node[], submissionData?: any): string 
         <ul>
           ${serializeSlate(node.children, submissionData)}
         </ul>
-      `
-        case 'ol':
-          return `
-        <ol>
-          ${serializeSlate(node.children, submissionData)}
-        </ol>
-      `
-        case 'li':
-          return `
-        <li>
-          ${serializeSlate(node.children, submissionData)}
-        </li>
-      `
-        case 'indent':
-          return `
-          <p style="padding-left: 20px">
-            ${serializeSlate(node.children, submissionData)}
-          </p>
-        `
-        case 'link':
-          return `
-          <a href={${escapeHTML(replaceDoubleCurlys(node.url, submissionData))}}>
-          ${serializeSlate(node.children, submissionData)}
-        </a>
       `
 
         default:
