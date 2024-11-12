@@ -361,6 +361,7 @@ But, the Payload Config is [non-serializable](https://react.dev/reference/rsc/us
 For this reason, Payload creates a Client Config and passes it into the Config Provider. This is a serializable version of the Payload Config that can be accessed from any Client Component via the [`useConfig`](./hooks#useconfig) hook:
 
 ```tsx
+'use client'
 import React from 'react'
 import { useConfig } from '@payloadcms/ui'
 
@@ -395,28 +396,6 @@ export const MyClientFieldComponent: TextFieldClientComponent = ({ field: { name
 }
 ```
 
-### Using Hooks
-
-To make it easier to [build your Custom Components](#building-custom-components), you can use [Payload's built-in React Hooks](./hooks) in any Client Component. For example, you might want to interact with one of Payload's many React Contexts:
-
-```tsx
-'use client'
-import React from 'react'
-import { useDocumentInfo } from '@payloadcms/ui'
-
-export const MyClientComponent: React.FC = () => {
-  const { slug } = useDocumentInfo() // highlight-line
-
-  return (
-    <p>{`Entity slug: ${slug}`}</p>
-  )
-}
-```
-
-<Banner type="success">
-  See the [Hooks](./hooks) documentation for a full list of available hooks.
-</Banner>
-
 ### Getting the Current Language
 
 All Custom Components can support multiple languages to be consistent with Payload's [Internationalization](../configuration/i18n). To do this, first add your translation resources to the [I18n Config](../configuration/i18n).
@@ -439,6 +418,7 @@ export default async function MyServerComponent({ i18n }) {
 The best way to do this within a Client Component is to import the `useTranslation` hook from `@payloadcms/ui`:
 
 ```tsx
+'use client'
 import React from 'react'
 import { useTranslation } from '@payloadcms/ui'
 
@@ -482,6 +462,7 @@ export default async function MyServerComponent({ payload, locale }) {
 The best way to do this within a Client Component is to import the `useLocale` hook from `@payloadcms/ui`:
 
 ```tsx
+'use client'
 import React from 'react'
 import { useLocale } from '@payloadcms/ui'
 
@@ -503,7 +484,29 @@ const Greeting: React.FC = () => {
   See the [Hooks](./hooks) documentation for a full list of available hooks.
 </Banner>
 
-### Styling Custom Components
+### Using Hooks
+
+To make it easier to [build your Custom Components](#building-custom-components), you can use [Payload's built-in React Hooks](./hooks) in any Client Component. For example, you might want to interact with one of Payload's many React Contexts. To do this, you can one of the many hooks available depending on your needs.
+
+```tsx
+'use client'
+import React from 'react'
+import { useDocumentInfo } from '@payloadcms/ui'
+
+export const MyClientComponent: React.FC = () => {
+  const { slug } = useDocumentInfo() // highlight-line
+
+  return (
+    <p>{`Entity slug: ${slug}`}</p>
+  )
+}
+```
+
+<Banner type="success">
+  See the [Hooks](./hooks) documentation for a full list of available hooks.
+</Banner>
+
+### Adding Styles
 
 Payload has a robust [CSS Library](./customizing-css) that you can use to style your Custom Components similarly to Payload's built-in styling. This will ensure that your Custom Components match the existing design system, and so that they automatically adapt to any theme changes that might occur.
 
@@ -539,7 +542,6 @@ Payload also exports its [SCSS](https://sass-lang.com) library for reuse which i
     background-color: var(--theme-elevation-900);
   }
 }
-
 ```
 
 <Banner type="success">
