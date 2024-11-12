@@ -537,17 +537,19 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     const r = wordBoundariesRegex(searchFilter || '')
     // breaking the labels to search into smaller parts increases performance
     const breakApartThreshold = 250
-    let string = item.label
+    let labelString = String(item.label)
     // strings less than breakApartThreshold length won't be chunked
-    while (string.length > breakApartThreshold) {
+    while (labelString.length > breakApartThreshold) {
       // slicing by the next space after the length of the search input prevents slicing the string up by partial words
-      const indexOfSpace = string.indexOf(' ', searchFilter.length)
-      if (r.test(string.slice(0, indexOfSpace === -1 ? searchFilter.length : indexOfSpace + 1))) {
+      const indexOfSpace = labelString.indexOf(' ', searchFilter.length)
+      if (
+        r.test(labelString.slice(0, indexOfSpace === -1 ? searchFilter.length : indexOfSpace + 1))
+      ) {
         return true
       }
-      string = string.slice(indexOfSpace === -1 ? searchFilter.length : indexOfSpace + 1)
+      labelString = labelString.slice(indexOfSpace === -1 ? searchFilter.length : indexOfSpace + 1)
     }
-    return r.test(string.slice(-breakApartThreshold))
+    return r.test(labelString.slice(-breakApartThreshold))
   }, [])
 
   const onDocumentDrawerOpen = useCallback<
