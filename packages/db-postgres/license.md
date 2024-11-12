@@ -1,4 +1,4 @@
-(The MIT License)
+MIT License
 
 Copyright (c) 2018-2024 Payload CMS, Inc. <info@payloadcms.com>
 
