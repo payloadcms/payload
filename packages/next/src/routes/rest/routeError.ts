@@ -49,7 +49,7 @@ export const routeError = async ({
 
   const level = payload.config.loggingLevels[err.name] || 'error'
   if (level) {
-    logger[level](level === 'error' ? err.stack : err.message)
+    logger[level](level === 'info' ? err.message : err.stack)
   }
 
   // Internal server errors can contain anything, including potentially sensitive data.
