@@ -1,6 +1,7 @@
 'use client'
 
 import type { groupNavItems } from '@payloadcms/ui/shared'
+import type { NavPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { NavGroup, useConfig, useNav, useTranslation } from '@payloadcms/ui'
@@ -9,14 +10,12 @@ import LinkWithDefault from 'next/link.js'
 import { usePathname } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
-import type { ResolvedCollapsedPreferences } from './getNavPrefs.js'
-
 const baseClass = 'nav'
 
 export const DefaultNavClient: React.FC<{
-  collapsedPreferences: ResolvedCollapsedPreferences
   groups: ReturnType<typeof groupNavItems>
-}> = ({ collapsedPreferences, groups }) => {
+  navPreferences: NavPreferences
+}> = ({ groups, navPreferences }) => {
   const pathname = usePathname()
 
   const {
@@ -32,7 +31,7 @@ export const DefaultNavClient: React.FC<{
     <Fragment>
       {groups.map(({ entities, label }, key) => {
         return (
-          <NavGroup initialCollapsedState={collapsedPreferences[label]} key={key} label={label}>
+          <NavGroup isOpen={navPreferences?.groups?.[label]?.open} key={key} label={label}>
             {entities.map(({ slug, type, label }, i) => {
               let href: string
               let id: string

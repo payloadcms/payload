@@ -1,11 +1,13 @@
 'use client'
+import type { NavPreferences } from 'payload'
+
 import React, { useState } from 'react'
 import AnimateHeightImport from 'react-animate-height'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
-import { useNav } from '../Nav/context.js'
 import './index.scss'
+import { useNav } from '../Nav/context.js'
 
 const AnimateHeight = (AnimateHeightImport.default ||
   AnimateHeightImport) as typeof AnimateHeightImport.default
@@ -14,32 +16,33 @@ const baseClass = 'nav-group'
 
 type Props = {
   children: React.ReactNode
-  initialCollapsedState?: boolean
+  isOpen?: boolean
   label: string
 }
 
-export const NavGroup: React.FC<Props> = ({ children, initialCollapsedState, label }) => {
+const preferencesKey = 'nav'
+
+export const NavGroup: React.FC<Props> = ({ children, isOpen: isOpenFromProps, label }) => {
   const [collapsed, setCollapsed] = useState(
-    typeof initialCollapsedState !== 'undefined' ? initialCollapsedState : false,
+    typeof isOpenFromProps !== 'undefined' ? !isOpenFromProps : false,
   )
+
   const [animate, setAnimate] = useState(false)
-  const { getPreference, setPreference } = usePreferences()
+  const { setPreference } = usePreferences()
   const { navOpen } = useNav()
 
-  const preferencesKey = `collapsed-${label}-groups`
-
   if (label) {
-    const toggleCollapsed = async () => {
+    const toggleCollapsed = () => {
       setAnimate(true)
-      let preferences: string[] = (await getPreference(preferencesKey)) || []
+      const newGroupPrefs: NavPreferences['groups'] = {}
 
-      if (collapsed) {
-        preferences = preferences.filter((preference) => label !== preference)
+      if (!newGroupPrefs?.[label]) {
+        newGroupPrefs[label] = { open: Boolean(collapsed) }
       } else {
-        preferences.push(label)
+        newGroupPrefs[label].open = Boolean(collapsed)
       }
 
-      void setPreference(preferencesKey, preferences)
+      void setPreference(preferencesKey, { groups: newGroupPrefs }, true)
       setCollapsed(!collapsed)
     }
 

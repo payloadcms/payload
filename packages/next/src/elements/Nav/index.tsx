@@ -57,7 +57,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
     i18n,
   )
 
-  const collapsedPreferences = await getNavPrefs({ groups, payload, user })
+  const navPreferences = await getNavPrefs({ payload, user })
 
   return (
     <NavWrapper baseClass={baseClass}>
@@ -75,7 +75,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
             user,
           }}
         />
-        <DefaultNavClient collapsedPreferences={collapsedPreferences} groups={groups} />
+        <DefaultNavClient groups={groups} navPreferences={navPreferences} />
         <RenderServerComponent
           Component={afterNavLinks}
           importMap={payload.importMap}
