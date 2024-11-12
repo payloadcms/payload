@@ -156,10 +156,10 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
       }
 
       void getInitialState()
+    }
 
-      return () => {
-        abortAndIgnore(controller)
-      }
+    return () => {
+      abortAndIgnore(controller)
     }
   }, [apiRoute, hasInitializedState, serverURL, slug, getFormState, user, collectionPermissions])
 
@@ -186,7 +186,9 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   )
 
   useEffect(() => {
-    abortAndIgnore(formStateAbortControllerRef.current)
+    return () => {
+      abortAndIgnore(formStateAbortControllerRef.current)
+    }
   }, [])
 
   if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {

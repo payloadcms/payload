@@ -154,22 +154,27 @@ const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] }> = 
             </div>
             <div className={`${baseClass}__actions`}>
               {Boolean(customFieldsMap) && (
-                <DrawerToggler
-                  className={`${baseClass}__upload-drawer-toggler`}
-                  disabled={fieldProps?.field?.admin?.readOnly}
-                  slug={drawerSlug}
-                >
-                  <Button
-                    buttonStyle="icon-label"
-                    el="div"
-                    icon="edit"
-                    onClick={(e) => {
-                      e.preventDefault()
-                    }}
-                    round
-                    tooltip={t('fields:editRelationship')}
+                <>
+                  <DrawerToggler
+                    className={`${baseClass}__upload-drawer-toggler`}
+                    disabled={fieldProps?.field?.admin?.readOnly}
+                    slug={drawerSlug}
+                  >
+                    <Button
+                      buttonStyle="icon-label"
+                      el="div"
+                      icon="edit"
+                      onClick={(e) => {
+                        e.preventDefault()
+                      }}
+                      round
+                      tooltip={t('fields:editRelationship')}
+                    />
+                  </DrawerToggler>
+                  <UploadDrawer
+                    {...{ drawerSlug, element, fieldProps, relatedCollection, schemaPath }}
                   />
-                </DrawerToggler>
+                </>
               )}
               <ListDrawerToggler
                 className={`${baseClass}__list-drawer-toggler`}
@@ -211,7 +216,6 @@ const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] }> = 
       {children}
       {value?.id && <DocumentDrawer onSave={updateUpload} />}
       <ListDrawer onSelect={swapUpload} />
-      <UploadDrawer {...{ drawerSlug, element, fieldProps, relatedCollection, schemaPath }} />
     </div>
   )
 }
