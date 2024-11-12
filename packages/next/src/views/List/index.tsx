@@ -1,4 +1,9 @@
-import type { ListPreferences, ListViewClientProps } from '@payloadcms/ui'
+import type {
+  ListPreferences,
+  ListSlotClientProps,
+  ListSlotServerProps,
+  ListViewClientProps,
+} from '@payloadcms/ui'
 import type { AdminViewProps, ListQuery, Where } from 'payload'
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
@@ -168,25 +173,43 @@ export const renderListView = async (
         ? collectionConfig.admin.description({ t: i18n.t })
         : collectionConfig.admin.description
 
-    const listViewSlots = renderListViewSlots({
-      collectionConfig,
-      description: staticDescription,
-      payload,
-    })
-
-    const clientProps: ListViewClientProps = {
-      ...listViewSlots,
+    const sharedClientProps: ListSlotClientProps = {
       collectionSlug,
-      columnState,
-      disableBulkDelete,
-      disableBulkEdit,
-      enableRowSelections,
       hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
-      listPreferences,
       newDocumentURL: formatAdminURL({
         adminRoute,
         path: `/collections/${collectionSlug}/create`,
       }),
+    }
+
+    const sharedServerProps: ListSlotServerProps = {
+      collectionConfig,
+      i18n,
+      limit,
+      locale: fullLocale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    }
+
+    const listViewSlots = renderListViewSlots({
+      clientProps: sharedClientProps,
+      collectionConfig,
+      description: staticDescription,
+      payload,
+      serverProps: sharedServerProps,
+    })
+
+    const clientProps: ListViewClientProps = {
+      ...listViewSlots,
+      ...sharedClientProps,
+      columnState,
+      disableBulkDelete,
+      disableBulkEdit,
+      enableRowSelections,
+      listPreferences,
       renderedFilters,
       Table,
     }
@@ -211,19 +234,10 @@ export const renderListView = async (
               Fallback={DefaultListView}
               importMap={payload.importMap}
               serverProps={{
-                collectionConfig,
-                collectionSlug,
+                ...sharedServerProps,
                 data,
-                i18n,
-                limit,
                 listPreferences,
                 listSearchableFields: collectionConfig.admin.listSearchableFields,
-                locale: fullLocale,
-                params,
-                payload,
-                permissions,
-                searchParams,
-                user,
               }}
             />
           </ListQueryProvider>
