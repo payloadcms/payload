@@ -58,12 +58,6 @@ export const connect: Connect = async function connect(
     }
 
     if (this.ensureIndexes) {
-      // await Promise.all([
-      //   ...Object.keys(this.payload.collections).map(async (collectionSlug) => {
-      //     await this.collections[collectionSlug].createIndexes()
-      //   }),
-      // ])
-
       await Promise.all(
         this.payload.config.collections.map(async (coll) => {
           await new Promise((resolve, reject) => {

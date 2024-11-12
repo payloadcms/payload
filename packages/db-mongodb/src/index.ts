@@ -79,6 +79,7 @@ export interface Args {
   disableIndexHints?: boolean
   /**
    * Set to `true` to ensure that indexes are ready before completing connection.
+   * NOTE: not recommended for production. This can slow down the initialization of Payload.
    */
   ensureIndexes?: boolean
   migrationDir?: string
