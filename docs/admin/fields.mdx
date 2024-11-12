@@ -233,6 +233,10 @@ _For details on how to build Custom Components, see [Building Custom Components]
   Instead of replacing the entire Field Component, you can alternately replace or slot-in only specific parts by using the [`Label`](#label), [`Error`](#error), [`beforeInput`](#afterinput-and-beforinput), and [`afterInput`](#afterinput-and-beforinput) properties.
 </Banner>
 
+### Default Props
+
+#### Client Props
+
 All Field Components receive the following props:
 
 | Property         | Description                                                                                                                                                                                                                      |
@@ -247,12 +251,15 @@ All Field Components receive the following props:
 | **`schemaPath`** | A string representing the direct, static path to the [Field Config](../fields/overview), i.e. `posts.myGroup.myArray.myField`. |
 | **`indexPath`**  | A hyphen-notated string representing the path to the field _within the nearest named ancestor field_, i.e. `0-0` |
 
+#### Server Props
+
 In addition to the above props, Server Components will also receive the following props:
 
 | Property         | Description                                                                                                                                                                                                                      |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`clientField`** | The serialized Client Field Config. |
 | **`field`** | The Field Config. [More details](../fields/overview). |
+| **`data`**       | The current document being edited.                                                                                                                                                                                                   |
 | **`i18n`**       | The [i18n](../configuration/i18n) object.
 | **`payload`**    | The [Payload](../local-api/overview) class.                                                           |
 | **`permissions`** | The field permissions based on the currently authenticated user.                                                                                                                                                                                                   |
