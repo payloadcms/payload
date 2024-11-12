@@ -13,6 +13,10 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
   const workflowSlugs: Set<string> = new Set()
   const taskSlugs: Set<string> = new Set(['inline'])
 
+  config.jobs?.workflows.forEach((workflow) => {
+    workflowSlugs.add(workflow.slug)
+  })
+
   config.jobs.tasks.forEach((task) => {
     if (workflowSlugs.has(task.slug)) {
       throw new Error(
