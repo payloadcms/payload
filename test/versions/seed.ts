@@ -4,6 +4,7 @@ import type { DraftPost } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
+import { isMongoose } from '../helpers/isMongoose.js'
 import { titleToDelete } from './shared.js'
 import { draftCollectionSlug } from './slugs.js'
 
@@ -15,6 +16,27 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       text: 'Hello World',
     },
   ]
+
+  if (isMongoose(_payload)) {
+    await Promise.all([
+      ...Object.keys(_payload.collections).map(async (collectionSlug) => {
+        await _payload.db.collections[collectionSlug].createIndexes()
+      }),
+    ])
+
+    await Promise.all(
+      _payload.config.collections.map(async (coll) => {
+        await new Promise((resolve, reject) => {
+          _payload.db?.collections[coll.slug]?.ensureIndexes(function (err) {
+            if (err) {
+              reject(err)
+            }
+            resolve(true)
+          })
+        })
+      }),
+    )
+  }
 
   await executePromises(
     [
