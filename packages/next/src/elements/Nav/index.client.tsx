@@ -9,11 +9,14 @@ import LinkWithDefault from 'next/link.js'
 import { usePathname } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
+import type { ResolvedCollapsedPreferences } from './getNavPrefs.js'
+
 const baseClass = 'nav'
 
 export const DefaultNavClient: React.FC<{
+  collapsedPreferences: ResolvedCollapsedPreferences
   groups: ReturnType<typeof groupNavItems>
-}> = ({ groups }) => {
+}> = ({ collapsedPreferences, groups }) => {
   const pathname = usePathname()
 
   const {
@@ -29,7 +32,7 @@ export const DefaultNavClient: React.FC<{
     <Fragment>
       {groups.map(({ entities, label }, key) => {
         return (
-          <NavGroup key={key} label={label}>
+          <NavGroup initialCollapsedState={collapsedPreferences[label]} key={key} label={label}>
             {entities.map(({ slug, type, label }, i) => {
               let href: string
               let id: string

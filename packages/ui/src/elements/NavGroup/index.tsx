@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import AnimateHeightImport from 'react-animate-height'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
@@ -14,36 +14,31 @@ const baseClass = 'nav-group'
 
 type Props = {
   children: React.ReactNode
+  initialCollapsedState?: boolean
   label: string
 }
 
-export const NavGroup: React.FC<Props> = ({ children, label }) => {
-  const [collapsed, setCollapsed] = useState(true)
+export const NavGroup: React.FC<Props> = ({ children, initialCollapsedState, label }) => {
+  const [collapsed, setCollapsed] = useState(
+    typeof initialCollapsedState !== 'undefined' ? initialCollapsedState : true,
+  )
   const [animate, setAnimate] = useState(false)
   const { getPreference, setPreference } = usePreferences()
   const { navOpen } = useNav()
 
   const preferencesKey = `collapsed-${label}-groups`
 
-  useEffect(() => {
-    if (label) {
-      const setCollapsedFromPreferences = async () => {
-        const preferences = (await getPreference(preferencesKey)) || []
-        setCollapsed(preferences.indexOf(label) !== -1)
-      }
-      void setCollapsedFromPreferences()
-    }
-  }, [getPreference, label, preferencesKey])
-
   if (label) {
     const toggleCollapsed = async () => {
       setAnimate(true)
       let preferences: string[] = (await getPreference(preferencesKey)) || []
+
       if (collapsed) {
         preferences = preferences.filter((preference) => label !== preference)
       } else {
         preferences.push(label)
       }
+
       void setPreference(preferencesKey, preferences)
       setCollapsed(!collapsed)
     }
