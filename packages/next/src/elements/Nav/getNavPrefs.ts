@@ -44,7 +44,7 @@ export const getNavPrefs = async ({
         },
       })
 
-      preferences[label] = result.docs[0]?.value?.some((value: string) => value === label) ?? false
+      preferences[label] = result.docs[0]?.value?.some((value: string) => value === label)
     }),
   )
 
