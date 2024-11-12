@@ -25,13 +25,13 @@ export type ListPreferences = {
   sort: string
 }
 
-export type ListSlotClientProps = {
+export type ListComponentClientProps = {
   collectionSlug: SanitizedCollectionConfig['slug']
   hasCreatePermission: boolean
   newDocumentURL: string
 }
 
-export type ListSlotServerProps = {
+export type ListComponentServerProps = {
   collectionConfig: SanitizedCollectionConfig
   i18n: I18n
   limit: number

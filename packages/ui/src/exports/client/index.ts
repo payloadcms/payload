@@ -273,9 +273,9 @@ export {
   type ListViewSlots,
 } from '../../views/List/index.js'
 export type {
+  ListComponentClientProps,
+  ListComponentServerProps,
   ListPreferences,
-  ListSlotClientProps,
-  ListSlotServerProps,
 } from '../../views/List/types.js'
 
 export { DefaultEditView } from '../../views/Edit/index.js'

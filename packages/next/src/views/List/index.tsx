@@ -1,7 +1,7 @@
 import type {
+  ListComponentClientProps,
+  ListComponentServerProps,
   ListPreferences,
-  ListSlotClientProps,
-  ListSlotServerProps,
   ListViewClientProps,
 } from '@payloadcms/ui'
 import type { AdminViewProps, ListQuery, Where } from 'payload'
@@ -173,7 +173,7 @@ export const renderListView = async (
         ? collectionConfig.admin.description({ t: i18n.t })
         : collectionConfig.admin.description
 
-    const sharedClientProps: ListSlotClientProps = {
+    const sharedClientProps: ListComponentClientProps = {
       collectionSlug,
       hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
       newDocumentURL: formatAdminURL({
@@ -182,7 +182,7 @@ export const renderListView = async (
       }),
     }
 
-    const sharedServerProps: ListSlotServerProps = {
+    const sharedServerProps: ListComponentServerProps = {
       collectionConfig,
       i18n,
       limit,

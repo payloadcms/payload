@@ -1,14 +1,18 @@
-import type { ListSlotClientProps, ListSlotServerProps, ListViewSlots } from '@payloadcms/ui'
+import type {
+  ListComponentClientProps,
+  ListComponentServerProps,
+  ListViewSlots,
+} from '@payloadcms/ui'
 import type { Payload, SanitizedCollectionConfig, StaticDescription } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 
 type Args = {
-  clientProps: ListSlotClientProps
+  clientProps: ListComponentClientProps
   collectionConfig: SanitizedCollectionConfig
   description?: StaticDescription
   payload: Payload
-  serverProps: ListSlotServerProps
+  serverProps: ListComponentServerProps
 }
 export const renderListViewSlots = ({
   clientProps,
