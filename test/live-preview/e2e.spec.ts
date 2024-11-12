@@ -181,7 +181,7 @@ describe('Live Preview', () => {
     const newTitleValue = 'SSR Home (Edited)'
     await wait(1000)
 
-    await titleField.fill(newTitleValue)
+    await titleField.pressSequentially(newTitleValue)
 
     await wait(1000)
 
