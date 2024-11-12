@@ -6,7 +6,7 @@ desc:
 keywords:
 ---
 
-[Fields](../fields/overview) within the [Admin Panel](./overview) can be endlessly customized in their appearance and behavior without affecting their underlying data structure. Fields are designed to withstand heavy modification or even complete replacement through the use of [Custom Field Components](#field-components), [Conditional Logic](#conditional-logic), [Custom Validations](../fields/overview#validation), and more.
+[Fields](../fields/overview) within the [Admin Panel](./overview) can be endlessly customized in their appearance and behavior without affecting their underlying data structure. Fields are designed to withstand heavy modification or even complete replacement through the use of [Custom Field Components](#components), [Conditional Logic](#conditional-logic), [Custom Validations](../fields/overview#validation), and more.
 
 For example, your app might need to render a specific interface that Payload does not inherently support, such as a color picker. To do this, you could replace the default [Text Field](../fields/text) input with your own user-friendly component that formats the data into a valid color value.
 
@@ -56,7 +56,72 @@ The following options are available:
 | **`disableListFilter`** | Set `disableListFilter` to `true` to prevent fields from appearing in the list view filter options.                                                                                                                              |
 | **`hidden`**            | Will transform the field into a `hidden` input type. Its value will still submit with requests in the Admin Panel, but the field itself will not be visible to editors.                                                          |
 
-## Field Components
+## Descriptions
+
+Field Descriptions are used to provide additional information to the editor about a field, such as special instructions. Their placement varies from field to field, but typically are displayed with subtle style differences beneath the field inputs.
+
+A description can be configured in three ways:
+
+  - As a string.
+  - As a function which returns a string. [More details](#description-functions).
+  - As a React component. [More details](#the-description-component).
+
+To easily add a Custom Description to a field, use the `admin.description` property in your [Field Config](../fields/overview):
+
+```ts
+import type { SanitizedCollectionConfig } from 'payload'
+
+export const MyCollectionConfig: SanitizedCollectionConfig = {
+  // ...
+  fields: [
+    // ...
+    {
+      name: 'myField',
+      type: 'text',
+      admin: {
+        description: 'Hello, world!' // highlight-line
+      },
+    },
+  ]
+}
+```
+
+<Banner type="warning">
+  <strong>Reminder:</strong>
+  To replace the Field Description with a [Custom Component](./components), use the `admin.components.Description` property. [More details](#the-description-component).
+</Banner>
+
+#### Description Functions
+
+Custom Descriptions can also be defined as a function. Description Functions are executed on the server and can be used to format simple descriptions based on the user's current [Locale](../configuration/localization).
+
+To easily add a Description Function to a field, set the `admin.description` property to a _function_ in your [Field Config](../fields/overview):
+
+```ts
+import type { SanitizedCollectionConfig } from 'payload'
+
+export const MyCollectionConfig: SanitizedCollectionConfig = {
+  // ...
+  fields: [
+    // ...
+    {
+      name: 'myField',
+      type: 'text',
+      admin: {
+        description: ({ t }) => `${t('Hello, world!')}` // highlight-line
+      },
+    },
+  ]
+}
+```
+
+All Description Functions receive the following arguments:
+
+| Argument       | Description                                                      |
+| -------------- | ---------------------------------------------------------------- |
+| **`t`**        | The `t` function used to internationalize the Admin Panel. [More details](../configuration/i18n) |
+
+## Components
 
 Within the [Admin Panel](./overview), fields are represented in three distinct places:
 
@@ -100,7 +165,7 @@ The following options are available:
 
 _\* **`beforeInput`** and **`afterInput`** are only supported in fields that do not contain other fields, such as [`Text`](../fields/text), and [`Textarea`](../fields/textarea)._
 
-### The Field Component
+### Field
 
 The Field Component is the actual form field rendered in the Edit View. This is the input that user's will interact with when editing a document.
 
@@ -209,7 +274,7 @@ import type {
 } from 'payload'
 ```
 
-### The Cell Component
+### Cell
 
 The Cell Component is rendered in the table of the List View. It represents the value of the field when displayed in a table cell.
 
@@ -255,7 +320,7 @@ In addition to the above props, Server Components will also receive the followin
   All [Custom Server Components](./components) receive the `payload` and `i18n` properties by default. See [Building Custom Components](./components#building-custom-components) for more details.
 </Banner>
 
-### The Label Component
+### Label
 
 The Label Component is rendered anywhere a field needs to be represented by a label. This is typically used in the Edit View, but can also be used in the List View and elsewhere.
 
@@ -304,7 +369,7 @@ import type {
 } from 'payload'
 ```
 
-### The Error Component
+### Error
 
 The Error Component is rendered when a field fails validation. It is typically displayed beneath the field input in a visually-compelling style.
 
@@ -353,72 +418,7 @@ import type {
 } from 'payload'
 ```
 
-### The Description Property
-
-Field Descriptions are used to provide additional information to the editor about a field, such as special instructions. Their placement varies from field to field, but typically are displayed with subtle style differences beneath the field inputs.
-
-A description can be configured in three ways:
-
-  - As a string.
-  - As a function which returns a string. [More details](#description-functions).
-  - As a React component. [More details](#the-description-component).
-
-To easily add a Custom Description to a field, use the `admin.description` property in your [Field Config](../fields/overview):
-
-```ts
-import type { SanitizedCollectionConfig } from 'payload'
-
-export const MyCollectionConfig: SanitizedCollectionConfig = {
-  // ...
-  fields: [
-    // ...
-    {
-      name: 'myField',
-      type: 'text',
-      admin: {
-        description: 'Hello, world!' // highlight-line
-      },
-    },
-  ]
-}
-```
-
-<Banner type="warning">
-  <strong>Reminder:</strong>
-  To replace the Field Description with a [Custom Component](./components), use the `admin.components.Description` property. [More details](#the-description-component).
-</Banner>
-
-#### Description Functions
-
-Custom Descriptions can also be defined as a function. Description Functions are executed on the server and can be used to format simple descriptions based on the user's current [Locale](../configuration/localization).
-
-To easily add a Description Function to a field, set the `admin.description` property to a _function_ in your [Field Config](../fields/overview):
-
-```ts
-import type { SanitizedCollectionConfig } from 'payload'
-
-export const MyCollectionConfig: SanitizedCollectionConfig = {
-  // ...
-  fields: [
-    // ...
-    {
-      name: 'myField',
-      type: 'text',
-      admin: {
-        description: ({ t }) => `${t('Hello, world!')}` // highlight-line
-      },
-    },
-  ]
-}
-```
-
-All Description Functions receive the following arguments:
-
-| Argument       | Description                                                      |
-| -------------- | ---------------------------------------------------------------- |
-| **`t`**        | The `t` function used to internationalize the Admin Panel. [More details](../configuration/i18n) |
-
-### The Description Component
+### Description
 
 Alternatively to the [Description Property](#the-description-property), you can also use a [Custom Component](./components) as the Field Description. This can be useful when you need to provide more complex feedback to the user, such as rendering dynamic field values or other interactive elements.
 
