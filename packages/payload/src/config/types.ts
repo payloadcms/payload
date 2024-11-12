@@ -982,9 +982,26 @@ export type Config = {
   logger?: 'sync' | { destination?: DestinationStream; options: pino.LoggerOptions } | PayloadLogger
 
   /**
-   * Override the log level of errors for Payload's error handler.
+   * Override the log level of errors for Payload's error handler or disable logging with `false`.
+   * Levels can be any of the following: 'trace', 'debug', 'info', 'warn', 'error', 'fatal' or false.
+   *
+   * Default levels:
+   * {
+  `*   APIError: 'error',
+  `*   AuthenticationError: 'error',
+  `*   ErrorDeletingFile: 'error',
+  `*   FileRetrievalError: 'error',
+  `*   FileUploadError: 'error',
+  `*   Forbidden: 'info',
+  `*   Locked: 'info',
+  `*   LockedAuth: 'error',
+  `*   MissingFile: 'info',
+  `*   NotFound: 'info',
+  `*   QueryError: 'error',
+  `*   ValidationError: 'info',
+   * }
    */
-  loggingLevels?: Record<ErrorName, Level>
+  loggingLevels?: Partial<Record<ErrorName, false | Level>>
 
   /**
    * The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries.
