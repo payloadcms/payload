@@ -40,10 +40,10 @@
       "types": "./src/exports/server/migrate.ts",
       "default": "./src/exports/server/migrate.ts"
     },
-    "./jsx": {
-      "import": "./src/exports/server/jsx.ts",
-      "types": "./src/exports/server/jsx.ts",
-      "default": "./src/exports/server/jsx.ts"
+    "./ast/mdx": {
+      "import": "./src/exports/server/ast/mdx.ts",
+      "types": "./src/exports/server/ast/mdx.ts",
+      "default": "./src/exports/server/ast/mdx.ts"
     },
     "./shared": {
       "import": "./src/exports/shared.ts",
@@ -170,10 +170,10 @@
         "types": "./dist/exports/server/migrate.d.ts",
         "default": "./dist/exports/server/migrate.js"
       },
-      "./jsx": {
-        "import": "./dist/exports/server/jsx.js",
-        "types": "./dist/exports/server/jsx.d.ts",
-        "default": "./dist/exports/server/jsx.js"
+      "./ast/mdx": {
+        "import": "./dist/exports/server/ast/mdx.js",
+        "types": "./dist/exports/server/ast/mdx.d.ts",
+        "default": "./dist/exports/server/ast/mdx.js"
       },
       "./shared": {
         "import": "./dist/exports/shared.js",
