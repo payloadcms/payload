@@ -57,9 +57,6 @@ let customFileNameURL: AdminUrlUtil
 
 describe('uploads', () => {
   let page: Page
-  let pngDoc: Media
-  let audioDoc: Media
-  let relationDoc: Relation
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -120,14 +117,14 @@ describe('uploads', () => {
   })
 
   test('should update upload field after editing relationship in document drawer', async () => {
-    const findRelationDoc = await payload.find({
-      collection: relationSlug,
-      depth: 0,
-      limit: 1,
-      pagination: false,
-    })
-
-    relationDoc = findRelationDoc.docs[0]
+    const relationDoc = (
+      await payload.find({
+        collection: relationSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
+      })
+    ).docs[0]
 
     await page.goto(relationURL.edit(relationDoc.id))
     await page.waitForURL(relationURL.edit(relationDoc.id))
@@ -216,18 +213,18 @@ describe('uploads', () => {
   })
 
   test('should show resized images', async () => {
-    const findPNG = await payload.find({
-      collection: mediaSlug,
-      depth: 0,
-      pagination: false,
-      where: {
-        mimeType: {
-          equals: 'image/png',
+    const pngDoc = (
+      await payload.find({
+        collection: mediaSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          mimeType: {
+            equals: 'image/png',
+          },
         },
-      },
-    })
-
-    pngDoc = findPNG.docs[0]
+      })
+    ).docs[0]
 
     await page.goto(mediaURL.edit(pngDoc.id))
 
@@ -340,13 +337,13 @@ describe('uploads', () => {
   })
 
   test('should restrict mimetype based on filterOptions', async () => {
-    const findAudio = await payload.find({
-      collection: audioSlug,
-      depth: 0,
-      pagination: false,
-    })
-
-    audioDoc = findAudio.docs[0]
+    const audioDoc = (
+      await payload.find({
+        collection: audioSlug,
+        depth: 0,
+        pagination: false,
+      })
+    ).docs[0]
 
     await page.goto(audioURL.edit(audioDoc.id))
     await page.waitForURL(audioURL.edit(audioDoc.id))
@@ -383,13 +380,13 @@ describe('uploads', () => {
   })
 
   test('should restrict uploads in drawer based on filterOptions', async () => {
-    const findAudio = await payload.find({
-      collection: audioSlug,
-      depth: 0,
-      pagination: false,
-    })
-
-    audioDoc = findAudio.docs[0]
+    const audioDoc = (
+      await payload.find({
+        collection: audioSlug,
+        depth: 0,
+        pagination: false,
+      })
+    ).docs[0]
 
     await page.goto(audioURL.edit(audioDoc.id))
     await page.waitForURL(audioURL.edit(audioDoc.id))
