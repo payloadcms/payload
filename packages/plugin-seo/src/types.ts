@@ -8,15 +8,15 @@ export type PartialDocumentInfoContext = Pick<
   | 'collectionSlug'
   | 'docPermissions'
   | 'globalSlug'
+  | 'hasPublishedDoc'
   | 'hasPublishPermission'
   | 'hasSavePermission'
   | 'id'
   | 'initialData'
   | 'initialState'
   | 'preferencesKey'
-  | 'publishedDoc'
   | 'title'
-  | 'versionsCount'
+  | 'versionCount'
 >
 
 export type GenerateTitle<T = any> = (

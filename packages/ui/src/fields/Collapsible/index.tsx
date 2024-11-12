@@ -1,13 +1,16 @@
 'use client'
 import type { AdminClient, CollapsibleFieldClientComponent, DocumentPreferences } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import { Collapsible as CollapsibleElement } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { RowLabel } from '../../forms/RowLabel/index.js'
+import { useField } from '../../forms/useField/index.js'
 import { WatchChildErrors } from '../../forms/WatchChildErrors/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -18,44 +21,29 @@ import './index.scss'
 
 const baseClass = 'collapsible-field'
 
-import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-
 const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
   const {
-    descriptionProps,
     field,
-    field: {
-      _path: pathFromProps,
-      admin: { className, description, initCollapsed = false, readOnly: readOnlyFromAdmin } = {},
-      fields,
-      label,
-    },
-    readOnly: readOnlyFromTopLevelProps,
+    field: { admin: { className, description, initCollapsed = false } = {}, fields, label } = {},
+    indexPath = '',
+    parentPath = '',
+    parentSchemaPath = '',
+    path = '',
+    permissions,
+    readOnly,
   } = props
-
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
-
-  const {
-    indexPath,
-    path: pathFromContext,
-    readOnly: readOnlyFromContext,
-    schemaPath,
-    siblingPermissions,
-  } = useFieldProps()
-
-  const formInitializing = useFormInitializing()
-  const formProcessing = useFormProcessing()
-
-  const path = pathFromContext ?? pathFromProps
 
   const { i18n } = useTranslation()
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
   const [collapsedOnMount, setCollapsedOnMount] = useState<boolean>()
-  const fieldPreferencesKey = `collapsible-${indexPath.replace(/\./g, '__')}`
+  const fieldPreferencesKey = `collapsible-${path?.replace(/\./g, '__')}`
   const [errorCount, setErrorCount] = useState(0)
   const fieldHasErrors = errorCount > 0
+
+  const { customComponents: { Description, Label } = {} } = useField({
+    path,
+  })
 
   const onToggle = useCallback(
     async (newCollapsedState: boolean): Promise<void> => {
@@ -114,8 +102,6 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
     return null
   }
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
-
   const style: AdminClient['style'] = {
     ...field.admin?.style,
     '--field-width': field.admin.width,
@@ -123,7 +109,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
 
   return (
     <Fragment>
-      <WatchChildErrors fields={fields} path={path} setErrorCount={setErrorCount} />
+      <WatchChildErrors fields={fields} path={path.split('.')} setErrorCount={setErrorCount} />
       <div
         className={[
           fieldBaseClass,
@@ -133,7 +119,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
         ]
           .filter(Boolean)
           .join(' ')}
-        id={`field-${fieldPreferencesKey}${path ? `-${path.replace(/\./g, '__')}` : ''}`}
+        id={`field-${fieldPreferencesKey}`}
         style={style}
       >
         <CollapsibleElement
@@ -141,16 +127,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
           collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
           header={
             <div className={`${baseClass}__row-label-wrap`}>
-              <RowLabel
-                i18n={i18n}
-                path={path}
-                RowLabel={
-                  field?.admin?.components && 'RowLabel' in field.admin.components
-                    ? field.admin.components.RowLabel
-                    : undefined
-                }
-                rowLabel={label}
-              />
+              <RowLabel CustomComponent={Label} label={getTranslation(label, i18n)} path={path} />
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
           }
@@ -159,20 +136,17 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
         >
           <RenderFields
             fields={fields}
-            forceRender
-            indexPath={indexPath}
             margins="small"
-            path={path}
-            permissions={siblingPermissions}
-            readOnly={disabled}
-            schemaPath={schemaPath}
+            parentIndexPath={indexPath}
+            parentPath={parentPath}
+            parentSchemaPath={parentSchemaPath}
+            permissions={permissions}
+            readOnly={readOnly}
           />
         </CollapsibleElement>
-        <FieldDescription
-          Description={field?.admin?.components?.Description}
-          description={description}
-          field={field}
-          {...(descriptionProps || {})}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
         />
       </div>
     </Fragment>

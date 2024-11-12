@@ -32,6 +32,7 @@ describe('SEO Plugin', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+    await ensureCompilationIsDone({ page, serverURL })
 
     const filePath = path.resolve(dirname, './image-1.jpg')
     const file = await getFileByPath(filePath)
@@ -56,8 +57,6 @@ describe('SEO Plugin', () => {
       },
     })) as unknown as PayloadPage
     id = createdPage.id
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   describe('Core functionality', () => {

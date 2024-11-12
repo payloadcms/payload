@@ -1,5 +1,5 @@
 'use client'
-import type { PaginatedDocs, Where } from 'payload'
+import type { ClientCollectionConfig, PaginatedDocs, Where } from 'payload'
 
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
@@ -19,7 +19,12 @@ const baseClass = 'condition-value-relationship'
 const maxResultsPerRequest = 10
 
 export const RelationshipField: React.FC<Props> = (props) => {
-  const { admin: { isSortable } = {}, disabled, hasMany, onChange, relationTo, value } = props
+  const {
+    disabled,
+    field: { admin: { isSortable } = {}, hasMany, relationTo },
+    onChange,
+    value,
+  } = props
 
   const {
     config: {
@@ -27,6 +32,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
       routes: { api },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
 
   const hasMultipleRelations = Array.isArray(relationTo)
@@ -49,10 +55,10 @@ export const RelationshipField: React.FC<Props> = (props) => {
 
   const addOptions = useCallback(
     (data, relation) => {
-      const collection = collections.find((coll) => coll.slug === relation)
+      const collection = getEntityConfig({ collectionSlug: relation }) as ClientCollectionConfig
       dispatchOptions({ type: 'ADD', collection, data, hasMultipleRelations, i18n, relation })
     },
-    [collections, hasMultipleRelations, i18n],
+    [hasMultipleRelations, i18n, getEntityConfig],
   )
 
   const loadRelationOptions = React.useCallback(
@@ -64,7 +70,9 @@ export const RelationshipField: React.FC<Props> = (props) => {
       relationSlug: string
     }) => {
       if (relationSlug && partiallyLoadedRelationshipSlugs.current.includes(relationSlug)) {
-        const collection = collections.find((coll) => coll.slug === relationSlug)
+        const collection = getEntityConfig({
+          collectionSlug: relationSlug,
+        }) as ClientCollectionConfig
         const fieldToSearch = collection?.admin?.useAsTitle || 'id'
         const pageIndex = nextPageByRelationshipRef.current.get(relationSlug)
 
@@ -253,7 +261,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
         if (controller.signal) {
           try {
             controller.abort()
-          } catch (error) {
+          } catch (_err) {
             // swallow error
           }
         }

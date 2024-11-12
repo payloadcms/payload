@@ -10,10 +10,8 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { ListDrawerContent } from './DrawerContent.js'
-import './index.scss'
 
 export const baseClass = 'list-drawer'
-
 export const formatListDrawerSlug = ({
   depth,
   uuid,

@@ -3,16 +3,15 @@ import React from 'react'
 
 import { LogOutIcon } from '../../icons/LogOut/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 
 const baseClass = 'nav'
 
-const DefaultLogout: React.FC<{
-  Link: React.ComponentType
+export const Logout: React.FC<{
+  Link?: React.ComponentType
   tabIndex?: number
-}> = ({ Link, tabIndex }) => {
+}> = ({ Link, tabIndex = 0 }) => {
   const { t } = useTranslation()
   const { config } = useConfig()
 
@@ -45,23 +44,4 @@ const DefaultLogout: React.FC<{
       <LogOutIcon />
     </LinkElement>
   )
-}
-
-export const Logout: React.FC<{
-  Link?: React.ComponentType
-  tabIndex?: number
-}> = ({ Link, tabIndex = 0 }) => {
-  const {
-    config: {
-      admin: {
-        components: { LogoutButton: CustomLogout },
-      },
-    },
-  } = useConfig()
-
-  if (CustomLogout) {
-    return <RenderComponent mappedComponent={CustomLogout} />
-  }
-
-  return <DefaultLogout Link={Link} tabIndex={tabIndex} />
 }

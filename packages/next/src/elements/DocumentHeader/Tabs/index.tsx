@@ -6,7 +6,7 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
-import { getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
 import { getCustomViews } from './getCustomViews.js'
@@ -80,33 +80,21 @@ export const DocumentTabs: React.FC<{
                 const { path, tab } = CustomView
 
                 if (tab.Component) {
-                  const createMappedComponent = getCreateMappedComponent({
-                    importMap: payload.importMap,
-                    serverProps: {
-                      i18n,
-                      payload,
-                      permissions,
-                      ...props,
-                      key: `tab-custom-${index}`,
-                      path,
-                    },
-                  })
-
-                  const mappedTab = createMappedComponent(
-                    tab.Component,
-                    undefined,
-                    undefined,
-                    'tab.Component',
-                  )
-
                   return (
-                    <RenderComponent
+                    <RenderServerComponent
                       clientProps={{
-                        key: `tab-custom-${index}`,
                         path,
                       }}
+                      Component={tab.Component}
+                      importMap={payload.importMap}
                       key={`tab-custom-${index}`}
-                      mappedComponent={mappedTab}
+                      serverProps={{
+                        collectionConfig,
+                        globalConfig,
+                        i18n,
+                        payload,
+                        permissions,
+                      }}
                     />
                   )
                 }
@@ -121,6 +109,7 @@ export const DocumentTabs: React.FC<{
                   />
                 )
               }
+
               return null
             })}
           </ul>

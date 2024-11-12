@@ -23,17 +23,6 @@ const dirname = path.dirname(filename)
 describe('collections-graphql', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
-
-    // Wait for indexes to be created,
-    // as we need them to query by point
-    if (payload.db.name === 'mongoose') {
-      await new Promise((resolve, reject) => {
-        payload.db?.collections?.point?.ensureIndexes(function (err) {
-          if (err) {reject(err)}
-          resolve(true)
-        })
-      })
-    }
   })
 
   afterAll(async () => {
@@ -583,7 +572,9 @@ describe('collections-graphql', () => {
         const [lat, lng] = point
 
         it('should return a document near a point', async () => {
-          if (payload.db.name === 'sqlite') {return}
+          if (payload.db.name === 'sqlite') {
+            return
+          }
           const nearQuery = `
               query {
                 Points(
@@ -609,7 +600,9 @@ describe('collections-graphql', () => {
         })
 
         it('should not return a point far away', async () => {
-          if (payload.db.name === 'sqlite') {return}
+          if (payload.db.name === 'sqlite') {
+            return
+          }
           const nearQuery = `
               query {
                 Points(
@@ -635,7 +628,9 @@ describe('collections-graphql', () => {
         })
 
         it('should sort find results by nearest distance', async () => {
-          if (payload.db.name === 'sqlite') {return}
+          if (payload.db.name === 'sqlite') {
+            return
+          }
           // creating twice as many records as we are querying to get a random sample
           await mapAsync([...Array(10)], async () => {
             // randomize the creation timestamp
@@ -692,7 +687,9 @@ describe('collections-graphql', () => {
         ]
 
         it('should return a document with the point inside the polygon', async () => {
-          if (payload.db.name === 'sqlite') {return}
+          if (payload.db.name === 'sqlite') {
+            return
+          }
           const query = `
               query {
                 Points(
@@ -721,7 +718,9 @@ describe('collections-graphql', () => {
         })
 
         it('should not return a document with the point outside the polygon', async () => {
-          if (payload.db.name === 'sqlite') {return}
+          if (payload.db.name === 'sqlite') {
+            return
+          }
           const reducedPolygon = polygon.map((vertex) => vertex.map((coord) => coord * 0.1))
           const query = `
               query {
@@ -761,7 +760,9 @@ describe('collections-graphql', () => {
         ]
 
         it('should return a document with the point intersecting the polygon', async () => {
-          if (payload.db.name === 'sqlite') {return}
+          if (payload.db.name === 'sqlite') {
+            return
+          }
           const query = `
               query {
                 Points(
@@ -790,7 +791,9 @@ describe('collections-graphql', () => {
         })
 
         it('should not return a document with the point not intersecting a smaller polygon', async () => {
-          if (payload.db.name === 'sqlite') {return}
+          if (payload.db.name === 'sqlite') {
+            return
+          }
           const reducedPolygon = polygon.map((vertex) => vertex.map((coord) => coord * 0.1))
           const query = `
               query {
@@ -1192,7 +1195,7 @@ describe('collections-graphql', () => {
       expect(errors[0].path[0]).toEqual('test2')
       expect(errors[0].extensions.name).toEqual('ValidationError')
       expect(errors[0].extensions.data.errors[0].message).toEqual('This field is required.')
-      expect(errors[0].extensions.data.errors[0].field).toEqual('password')
+      expect(errors[0].extensions.data.errors[0].path).toEqual('password')
 
       expect(Array.isArray(errors[1].locations)).toEqual(true)
       expect(errors[1].message).toEqual('The following field is invalid: email')
@@ -1201,7 +1204,7 @@ describe('collections-graphql', () => {
       expect(errors[1].extensions.data.errors[0].message).toEqual(
         'A user with the given email is already registered.',
       )
-      expect(errors[1].extensions.data.errors[0].field).toEqual('email')
+      expect(errors[1].extensions.data.errors[0].path).toEqual('email')
 
       expect(Array.isArray(errors[2].locations)).toEqual(true)
       expect(errors[2].message).toEqual('The following field is invalid: email')
@@ -1210,7 +1213,7 @@ describe('collections-graphql', () => {
       expect(errors[2].extensions.data.errors[0].message).toEqual(
         'Please enter a valid email address.',
       )
-      expect(errors[2].extensions.data.errors[0].field).toEqual('email')
+      expect(errors[2].extensions.data.errors[0].path).toEqual('email')
     })
 
     it('should return the minimum allowed information about internal errors', async () => {

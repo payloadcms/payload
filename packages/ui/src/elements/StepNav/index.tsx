@@ -3,28 +3,29 @@
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment } from 'react'
 
-import { useConfig } from '../../providers/Config/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
-import { StepNavProvider, useStepNav } from './context.js'
-import './index.scss'
-export { SetStepNav } from './SetStepNav.js'
 import type { StepNavItem } from './types.js'
 
 import { PayloadIcon } from '../../graphics/Icon/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
+import { StepNavProvider, useStepNav } from './context.js'
+import './index.scss'
+
+export { SetStepNav } from './SetStepNav.js'
 
 const baseClass = 'step-nav'
 
 const StepNav: React.FC<{
   readonly className?: string
+  readonly CustomIcon?: React.ReactNode
   readonly Link?: React.ComponentType
-}> = ({ className, Link }) => {
+}> = ({ className, CustomIcon, Link }) => {
   const { i18n } = useTranslation()
 
   const { stepNav } = useStepNav()
 
   const {
-    config,
     config: {
       routes: { admin },
     },
@@ -49,10 +50,7 @@ const StepNav: React.FC<{
             {...baseLinkProps}
           >
             <span title={t('general:dashboard')}>
-              <RenderComponent
-                Component={PayloadIcon}
-                mappedComponent={config?.admin?.components?.graphics?.Icon}
-              />
+              <RenderCustomComponent CustomComponent={CustomIcon} Fallback={<PayloadIcon />} />
             </span>
           </LinkElement>
           <span>/</span>
@@ -84,10 +82,7 @@ const StepNav: React.FC<{
         <div className={[baseClass, className].filter(Boolean).join(' ')}>
           <div className={`${baseClass}__home`}>
             <span title={t('general:dashboard')}>
-              <RenderComponent
-                Component={PayloadIcon}
-                mappedComponent={config?.admin?.components?.graphics?.Icon}
-              />
+              <RenderCustomComponent CustomComponent={CustomIcon} Fallback={<PayloadIcon />} />
             </span>
           </div>
         </div>

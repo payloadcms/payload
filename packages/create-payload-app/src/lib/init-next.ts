@@ -32,13 +32,13 @@ type InitNextArgs = {
 } & Pick<CliArgs, '--debug'>
 
 type InitNextResult =
+  | { isSrcDir: boolean; nextAppDir?: string; reason: string; success: false }
   | {
       isSrcDir: boolean
       nextAppDir: string
       payloadConfigPath: string
       success: true
     }
-  | { isSrcDir: boolean; nextAppDir?: string; reason: string; success: false }
 
 export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
   const { dbType: dbType, packageManager, projectDir } = args

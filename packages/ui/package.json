@@ -7,6 +7,15 @@
     "url": "https://github.com/payloadcms/payload.git",
     "directory": "packages/ui"
   },
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
   "sideEffects": false,
   "type": "module",
   "exports": {
@@ -24,25 +33,35 @@
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
     },
-    "./utilities/createClientConfig": {
-      "import": "./src/providers/Config/createClientConfig/index.tsx",
-      "types": "./src/providers/Config/createClientConfig/index.tsx",
-      "default": "./src/providers/Config/createClientConfig/index.tsx"
+    "./elements/RenderServerComponent": {
+      "import": "./src/elements/RenderServerComponent/index.tsx",
+      "types": "./src/elements/RenderServerComponent/index.tsx",
+      "default": "./src/elements/RenderServerComponent/index.tsx"
+    },
+    "./rsc": {
+      "import": "./src/exports/rsc/index.ts",
+      "types": "./src/exports/rsc/index.ts",
+      "default": "./src/exports/rsc/index.ts"
     },
     "./utilities/buildFormState": {
       "import": "./src/utilities/buildFormState.ts",
       "types": "./src/utilities/buildFormState.ts",
       "default": "./src/utilities/buildFormState.ts"
     },
+    "./utilities/buildTableState": {
+      "import": "./src/utilities/buildTableState.ts",
+      "types": "./src/utilities/buildTableState.ts",
+      "default": "./src/utilities/buildTableState.ts"
+    },
     "./utilities/buildFieldSchemaMap/traverseFields": {
       "import": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
       "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
       "default": "./src/utilities/buildFieldSchemaMap/traverseFields.ts"
     },
-    "./forms/buildStateFromSchema": {
-      "import": "./src/forms/buildStateFromSchema/index.tsx",
-      "types": "./src/forms/buildStateFromSchema/index.tsx",
-      "default": "./src/forms/buildStateFromSchema/index.tsx"
+    "./forms/fieldSchemasToFormState": {
+      "import": "./src/forms/fieldSchemasToFormState/index.tsx",
+      "types": "./src/forms/fieldSchemasToFormState/index.tsx",
+      "default": "./src/forms/fieldSchemasToFormState/index.tsx"
     },
     "./scss/app.scss": "./src/scss/app.scss",
     "./assets": {
@@ -112,7 +131,7 @@
     "babel-plugin-react-compiler": "0.0.0-experimental-24ec0eb-20240918",
     "esbuild": "0.23.1",
     "esbuild-sass-plugin": "3.3.1",
-    "eslint-plugin-react-compiler": "0.0.0-experimental-7670337-20240918",
+    "eslint-plugin-react-compiler": "19.0.0-beta-a7bf2bd-20241110",
     "payload": "workspace:*"
   },
   "peerDependencies": {
@@ -136,11 +155,6 @@
         "types": "./dist/exports/shared/index.d.ts",
         "default": "./dist/exports/shared/index.js"
       },
-      "./utilities/createClientConfig": {
-        "import": "./dist/providers/Config/createClientConfig/index.js",
-        "types": "./dist/providers/Config/createClientConfig/index.d.ts",
-        "default": "./dist/providers/Config/createClientConfig/index.js"
-      },
       "./css": {
         "import": "./dist/styles.css",
         "default": "./dist/styles.css"
@@ -149,12 +163,22 @@
         "import": "./dist/scss/styles.scss",
         "default": "./dist/scss/styles.scss"
       },
+      "./rsc": {
+        "import": "./dist/exports/rsc/index.js",
+        "types": "./dist/exports/rsc/index.d.ts",
+        "default": "./dist/exports/rsc/index.js"
+      },
       "./scss/app.scss": "./dist/scss/app.scss",
       "./styles.css": "./dist/styles.css",
       "./assets": {
         "import": "./dist/assets/index.js",
         "types": "./dist/assets/index.d.ts",
         "default": "./dist/assets/index.js"
+      },
+      "./elements/RenderServerComponent": {
+        "import": "./dist/elements/RenderServerComponent/index.js",
+        "types": "./dist/elements/RenderServerComponent/index.d.ts",
+        "default": "./dist/elements/RenderServerComponent/index.js"
       },
       "./elements/*": {
         "import": "./dist/elements/*/index.js",

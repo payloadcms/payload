@@ -999,7 +999,9 @@ describe('Fields', () => {
     })
 
     it('should read', async () => {
-      if (payload.db.name === 'sqlite') {return}
+      if (payload.db.name === 'sqlite') {
+        return
+      }
       const find = await payload.find({
         collection: 'point-fields',
         pagination: false,
@@ -1013,7 +1015,9 @@ describe('Fields', () => {
     })
 
     it('should create', async () => {
-      if (payload.db.name === 'sqlite') {return}
+      if (payload.db.name === 'sqlite') {
+        return
+      }
       doc = await payload.create({
         collection: 'point-fields',
         data: {
@@ -1029,7 +1033,9 @@ describe('Fields', () => {
     })
 
     it('should not create duplicate point when unique', async () => {
-      if (payload.db.name === 'sqlite') {return}
+      if (payload.db.name === 'sqlite') {
+        return
+      }
       // first create the point field
       doc = await payload.create({
         collection: 'point-fields',
@@ -1099,7 +1105,7 @@ describe('Fields', () => {
             uniqueRelationship: textDoc.id,
           },
         })
-        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
             locale: 'es',
@@ -1135,7 +1141,7 @@ describe('Fields', () => {
             uniqueHasManyRelationship: [textDoc.id],
           },
         })
-        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
             locale: 'es',
@@ -1156,7 +1162,7 @@ describe('Fields', () => {
             uniqueHasManyRelationship_2: [textDoc.id],
           },
         })
-        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
             locale: 'es',
@@ -1179,7 +1185,7 @@ describe('Fields', () => {
       ).rejects.toBeTruthy()
     })
 
-    it('should throw validation error saving on unique relationship fields polymorphic', async () => {
+    it('should throw validation error saving on unique relationship fields polymorphic not hasMany', async () => {
       const textDoc = await payload.create({ collection: 'text-fields', data: { text: 'asd' } })
 
       await payload
@@ -1192,7 +1198,7 @@ describe('Fields', () => {
             uniquePolymorphicRelationship: { relationTo: 'text-fields', value: textDoc.id },
           },
         })
-        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
             locale: 'es',
@@ -1213,7 +1219,7 @@ describe('Fields', () => {
             uniquePolymorphicRelationship_2: { relationTo: 'text-fields', value: textDoc.id },
           },
         })
-        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
             locale: 'es',
@@ -1273,7 +1279,7 @@ describe('Fields', () => {
             ],
           },
         })
-        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
             locale: 'es',
@@ -2650,6 +2656,66 @@ describe('Fields', () => {
         expect(docIDs).not.toContain(1)
         expect(docIDs).not.toContain(3)
         expect(docIDs).toContain(2)
+      })
+
+      it('should query deeply', async () => {
+        // eslint-disable-next-line jest/no-conditional-in-test
+        if (payload.db.name === 'sqlite') {
+          return
+        }
+
+        const json_1 = await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: {
+              array: [
+                {
+                  text: 'some-text',
+                  object: {
+                    text: 'deep-text',
+                    array: [10],
+                  },
+                },
+              ],
+            },
+          },
+        })
+
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            and: [
+              {
+                'json.array.text': {
+                  equals: 'some-text',
+                },
+              },
+              {
+                'json.array.object.text': {
+                  equals: 'deep-text',
+                },
+              },
+              {
+                'json.array.object.array': {
+                  in: [10, 20],
+                },
+              },
+              {
+                'json.array.object.array': {
+                  exists: true,
+                },
+              },
+              {
+                'json.array.object.notexists': {
+                  exists: false,
+                },
+              },
+            ],
+          },
+        })
+
+        expect(docs).toHaveLength(1)
+        expect(docs[0].id).toBe(json_1.id)
       })
     })
   })

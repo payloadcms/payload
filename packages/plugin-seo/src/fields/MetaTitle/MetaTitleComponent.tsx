@@ -9,11 +9,11 @@ import {
   useConfig,
   useDocumentInfo,
   useField,
-  useFieldProps,
   useForm,
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
+import { reduceToSerializableFields } from '@payloadcms/ui/shared'
 import React, { useCallback } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
@@ -31,20 +31,11 @@ type MetaTitleProps = {
 
 export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const {
-    field: {
-      admin: {
-        components: { afterInput, beforeInput, Label },
-      },
-      label,
-      maxLength: maxLengthFromProps,
-      minLength: minLengthFromProps,
-      required,
-    },
-    field: fieldFromProps,
+    field: { label, maxLength: maxLengthFromProps, minLength: minLengthFromProps, required },
     hasGenerateTitleFn,
-    labelProps,
+    path,
   } = props || {}
-  const { path: pathFromContext } = useFieldProps()
+
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
   const {
@@ -54,9 +45,8 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
     },
   } = useConfig()
 
-  const field: FieldType<string> = useField({
-    path: pathFromContext,
-  } as Options)
+  const field: FieldType<string> = useField({ path } as Options)
+  const { customComponents: { AfterInput, BeforeInput, Label } = {} } = field
 
   const locale = useLocale()
   const { getData } = useForm()
@@ -84,10 +74,13 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         hasPublishPermission: docInfo.hasPublishPermission,
         hasSavePermission: docInfo.hasSavePermission,
         initialData: docInfo.initialData,
-        initialState: docInfo.initialState,
+        initialState: reduceToSerializableFields(docInfo.initialState),
         locale: typeof locale === 'object' ? locale?.code : locale,
         title: docInfo.title,
-      } satisfies Omit<Parameters<GenerateTitle>[0], 'collectionConfig' | 'globalConfig' | 'req'>),
+      } satisfies Omit<
+        Parameters<GenerateTitle>[0],
+        'collectionConfig' | 'globalConfig' | 'hasPublishedDoc' | 'req' | 'versionCount'
+      >),
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
@@ -129,13 +122,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel
-            field={fieldFromProps}
-            Label={Label}
-            label={label}
-            required={required}
-            {...(labelProps || {})}
-          />
+          {Label ?? <FieldLabel label={label} path={path} required={required} />}
           {hasGenerateTitleFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
@@ -182,15 +169,11 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <TextInput
-          afterInput={afterInput}
-          beforeInput={beforeInput}
-          Error={{
-            type: 'client',
-            Component: null,
-            RenderedComponent: errorMessage,
-          }}
+          AfterInput={AfterInput}
+          BeforeInput={BeforeInput}
+          Error={errorMessage}
           onChange={setValue}
-          path={pathFromContext}
+          path={path}
           required={required}
           showError={showError}
           style={{

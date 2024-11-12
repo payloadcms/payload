@@ -31,6 +31,28 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
+  collectionsJoins: {};
+  collectionsSelect: {
+    uploads: UploadsSelect<false> | UploadsSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    'hidden-collection': HiddenCollectionSelect<false> | HiddenCollectionSelect<true>;
+    'collection-no-api-view': CollectionNoApiViewSelect<false> | CollectionNoApiViewSelect<true>;
+    'custom-views-one': CustomViewsOneSelect<false> | CustomViewsOneSelect<true>;
+    'custom-views-two': CustomViewsTwoSelect<false> | CustomViewsTwoSelect<true>;
+    'custom-fields': CustomFieldsSelect<false> | CustomFieldsSelect<true>;
+    'group-one-collection-ones': GroupOneCollectionOnesSelect<false> | GroupOneCollectionOnesSelect<true>;
+    'group-one-collection-twos': GroupOneCollectionTwosSelect<false> | GroupOneCollectionTwosSelect<true>;
+    'group-two-collection-ones': GroupTwoCollectionOnesSelect<false> | GroupTwoCollectionOnesSelect<true>;
+    'group-two-collection-twos': GroupTwoCollectionTwosSelect<false> | GroupTwoCollectionTwosSelect<true>;
+    geo: GeoSelect<false> | GeoSelect<true>;
+    customIdTab: CustomIdTabSelect<false> | CustomIdTabSelect<true>;
+    customIdRow: CustomIdRowSelect<false> | CustomIdRowSelect<true>;
+    'disable-duplicate': DisableDuplicateSelect<false> | DisableDuplicateSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+  };
   db: {
     defaultIDType: string;
   };
@@ -44,9 +66,23 @@ export interface Config {
     'group-globals-two': GroupGlobalsTwo;
     settings: Setting;
   };
+  globalsSelect: {
+    'hidden-global': HiddenGlobalSelect<false> | HiddenGlobalSelect<true>;
+    'global-no-api-view': GlobalNoApiViewSelect<false> | GlobalNoApiViewSelect<true>;
+    global: GlobalSelect<false> | GlobalSelect<true>;
+    'custom-global-views-one': CustomGlobalViewsOneSelect<false> | CustomGlobalViewsOneSelect<true>;
+    'custom-global-views-two': CustomGlobalViewsTwoSelect<false> | CustomGlobalViewsTwoSelect<true>;
+    'group-globals-one': GroupGlobalsOneSelect<false> | GroupGlobalsOneSelect<true>;
+    'group-globals-two': GroupGlobalsTwoSelect<false> | GroupGlobalsTwoSelect<true>;
+    settings: SettingsSelect<false> | SettingsSelect<true>;
+  };
   locale: 'es' | 'en';
   user: User & {
     collection: 'users';
+  };
+  jobs?: {
+    tasks: unknown;
+    workflows?: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -386,6 +422,222 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads_select".
+ */
+export interface UploadsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  number?: T;
+  richText?: T;
+  demoUIField?: T;
+  group?:
+    | T
+    | {
+        title?: T;
+      };
+  relationship?: T;
+  customCell?: T;
+  sidebarField?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  textField?: T;
+  sidebarField?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hidden-collection_select".
+ */
+export interface HiddenCollectionSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-no-api-view_select".
+ */
+export interface CollectionNoApiViewSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-views-one_select".
+ */
+export interface CustomViewsOneSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-views-two_select".
+ */
+export interface CustomViewsTwoSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-fields_select".
+ */
+export interface CustomFieldsSelect<T extends boolean = true> {
+  customTextServerField?: T;
+  customTextClientField?: T;
+  descriptionAsString?: T;
+  descriptionAsFunction?: T;
+  descriptionAsComponent?: T;
+  customSelectField?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "group-one-collection-ones_select".
+ */
+export interface GroupOneCollectionOnesSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "group-one-collection-twos_select".
+ */
+export interface GroupOneCollectionTwosSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "group-two-collection-ones_select".
+ */
+export interface GroupTwoCollectionOnesSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "group-two-collection-twos_select".
+ */
+export interface GroupTwoCollectionTwosSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "geo_select".
+ */
+export interface GeoSelect<T extends boolean = true> {
+  point?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customIdTab_select".
+ */
+export interface CustomIdTabSelect<T extends boolean = true> {
+  title?: T;
+  id?: T;
+  description?: T;
+  number?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customIdRow_select".
+ */
+export interface CustomIdRowSelect<T extends boolean = true> {
+  title?: T;
+  id?: T;
+  description?: T;
+  number?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disable-duplicate_select".
+ */
+export interface DisableDuplicateSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_select".
+ */
+export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_select".
+ */
+export interface PayloadPreferencesSelect<T extends boolean = true> {
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select".
+ */
+export interface PayloadMigrationsSelect<T extends boolean = true> {
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "hidden-global".
  */
 export interface HiddenGlobal {
@@ -464,6 +716,87 @@ export interface Setting {
   canAccessProtected?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hidden-global_select".
+ */
+export interface HiddenGlobalSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-no-api-view_select".
+ */
+export interface GlobalNoApiViewSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global_select".
+ */
+export interface GlobalSelect<T extends boolean = true> {
+  title?: T;
+  sidebarField?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-global-views-one_select".
+ */
+export interface CustomGlobalViewsOneSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-global-views-two_select".
+ */
+export interface CustomGlobalViewsTwoSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "group-globals-one_select".
+ */
+export interface GroupGlobalsOneSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "group-globals-two_select".
+ */
+export interface GroupGlobalsTwoSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "settings_select".
+ */
+export interface SettingsSelect<T extends boolean = true> {
+  canAccessProtected?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

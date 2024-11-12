@@ -1,4 +1,5 @@
 import type {
+  Column,
   ColumnBaseConfig,
   ColumnDataType,
   DrizzleConfig,
@@ -148,6 +149,7 @@ export type Migration = {
 } & MigrationData
 
 export type CreateJSONQueryArgs = {
+  column?: Column | string
   operator: string
   pathSegments: string[]
   table?: string
@@ -157,7 +159,7 @@ export type CreateJSONQueryArgs = {
 }
 
 export interface DrizzleAdapter extends BaseDatabaseAdapter {
-  convertPathToJSONTraversal: (incomingSegments: string[]) => string
+  convertPathToJSONTraversal?: (incomingSegments: string[]) => string
   countDistinct: CountDistinct
   createJSONQuery: (args: CreateJSONQueryArgs) => string
   defaultDrizzleSnapshot: Record<string, unknown>
