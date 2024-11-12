@@ -25,6 +25,8 @@ const dirname = path.dirname(filename)
 type TemplateVariations = {
   /** package.json name */
   name: string
+  /** Base template to copy from */
+  base?: string
   /** Directory in templates dir */
   dirname: string
   db: DbType
@@ -35,6 +37,7 @@ type TemplateVariations = {
     dbUri: string
   }
   configureConfig?: boolean
+  generateLockfile?: boolean
 }
 
 main().catch((error) => {
@@ -59,6 +62,27 @@ async function main() {
         `https://vercel.com/new/clone?repository-url=` +
         encodeURI(
           `${templateRepoUrlBase}/with-vercel-postgres` +
+            '&project-name=payload-project' +
+            '&env=PAYLOAD_SECRET' +
+            '&build-command=pnpm run ci' +
+            '&stores=[{"type":"postgres"},{"type":"blob"}]', // Postgres and Vercel Blob Storage
+        ),
+      envNames: {
+        // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
+        dbUri: 'POSTGRES_URL',
+      },
+    },
+    {
+      name: 'payload-vercel-website-template',
+      base: 'website', // This is the base template to copy from
+      dirname: 'with-vercel-website',
+      db: 'vercel-postgres',
+      storage: 'vercelBlobStorage',
+      sharp: false,
+      vercelDeployButtonLink:
+        `https://vercel.com/new/clone?repository-url=` +
+        encodeURI(
+          `${templateRepoUrlBase}/with-vercel-website` +
             '&project-name=payload-project' +
             '&env=PAYLOAD_SECRET' +
             '&build-command=pnpm run ci' +
@@ -110,6 +134,7 @@ async function main() {
       name: 'payload-cloud-mongodb-template',
       dirname: 'with-payload-cloud',
       db: 'mongodb',
+      generateLockfile: true,
       storage: 'payloadCloud',
       sharp: true,
     },
@@ -117,8 +142,10 @@ async function main() {
 
   for (const {
     name,
+    base,
     dirname,
     db,
+    generateLockfile,
     storage,
     vercelDeployButtonLink,
     envNames,
@@ -127,7 +154,14 @@ async function main() {
   } of variations) {
     header(`Generating ${name}...`)
     const destDir = path.join(templatesDir, dirname)
-    copyRecursiveSync(path.join(templatesDir, '_template'), destDir)
+    copyRecursiveSync(path.join(templatesDir, base || '_template'), destDir, [
+      'node_modules',
+      '\\*\\.tgz',
+      '.next',
+      '.env$',
+      'pnpm-lock.yaml',
+    ])
+
     log(`Copied to ${destDir}`)
 
     if (configureConfig !== false) {
@@ -192,6 +226,11 @@ async function main() {
           await fs.writeFile(migrationFilePath, updatedFileContents)
         }
       }
+    }
+
+    if (generateLockfile) {
+      log('Generating pnpm-lock.yaml')
+      execSync(`pnpm install --ignore-workspace`, { cwd: destDir })
     }
 
     // TODO: Email?
