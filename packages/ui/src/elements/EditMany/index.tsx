@@ -4,7 +4,7 @@ import type { ClientCollectionConfig, FormState } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
 
@@ -23,6 +23,7 @@ import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { FieldSelect } from '../FieldSelect/index.js'
 import './index.scss'
@@ -127,6 +128,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   const router = useRouter()
   const [initialState, setInitialState] = useState<FormState>()
   const hasInitializedState = React.useRef(false)
+  const formStateAbortControllerRef = React.useRef<AbortController>(null)
   const { clearRouteCache } = useRouteCache()
 
   const collectionPermissions = permissions?.collections?.[slug]
@@ -135,6 +137,8 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   const drawerSlug = `edit-${slug}`
 
   React.useEffect(() => {
+    const controller = new AbortController()
+
     if (!hasInitializedState.current) {
       const getInitialState = async () => {
         const { state: result } = await getFormState({
@@ -144,6 +148,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
           docPreferences: null,
           operation: 'update',
           schemaPath: slug,
+          signal: controller.signal,
         })
 
         setInitialState(result)
@@ -152,10 +157,19 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
       void getInitialState()
     }
+
+    return () => {
+      abortAndIgnore(controller)
+    }
   }, [apiRoute, hasInitializedState, serverURL, slug, getFormState, user, collectionPermissions])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
+      abortAndIgnore(formStateAbortControllerRef.current)
+
+      const controller = new AbortController()
+      formStateAbortControllerRef.current = controller
+
       const { state } = await getFormState({
         collectionSlug: slug,
         docPermissions: collectionPermissions,
@@ -163,12 +177,19 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
         formState: prevFormState,
         operation: 'update',
         schemaPath: slug,
+        signal: controller.signal,
       })
 
       return state
     },
     [slug, getFormState, collectionPermissions],
   )
+
+  useEffect(() => {
+    return () => {
+      abortAndIgnore(formStateAbortControllerRef.current)
+    }
+  }, [])
 
   if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {
     return null

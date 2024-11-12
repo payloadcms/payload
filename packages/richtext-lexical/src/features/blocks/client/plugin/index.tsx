@@ -191,7 +191,7 @@ export const BlocksPlugin: PluginComponent = () => {
         editor.dispatchCommand(INSERT_INLINE_BLOCK_COMMAND, data)
       }}
       schemaPath={schemaPath}
-      schemaPathSuffix={`lexical_blocks.${blockFields?.blockType}.fields`}
+      schemaPathSuffix={`lexical_inline_blocks.${blockFields?.blockType}.fields`}
     />
   )
 }

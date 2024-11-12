@@ -17,6 +17,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     args:
       | {
           input: TypedJobs['tasks'][TTaskOrWorkflowSlug]['input']
+          queue?: string
           req?: PayloadRequest
           // TTaskOrWorkflowlug with keyof TypedJobs['workflows'] removed:
           task: TTaskOrWorkflowSlug extends keyof TypedJobs['tasks'] ? TTaskOrWorkflowSlug : never
@@ -24,6 +25,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
         }
       | {
           input: TypedJobs['workflows'][TTaskOrWorkflowSlug]['input']
+          queue?: string
           req?: PayloadRequest
           task?: never
           workflow: TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
@@ -35,10 +37,25 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       ? RunningJob<TTaskOrWorkflowSlug>
       : RunningJobFromTask<TTaskOrWorkflowSlug>
   > => {
+    let queue: string
+
+    // If user specifies queue, use that
+    if (args.queue) {
+      queue = args.queue
+    } else if (args.workflow) {
+      // Otherwise, if there is a workflow specified, and it has a default queue to use,
+      // use that
+      const workflow = payload.config.jobs?.workflows?.find(({ slug }) => slug === args.workflow)
+      if (workflow?.queue) {
+        queue = workflow.queue
+      }
+    }
+
     return (await payload.create({
       collection: 'payload-jobs',
       data: {
         input: args.input,
+        queue,
         taskSlug: 'task' in args ? args.task : undefined,
         workflowSlug: 'workflow' in args ? args.workflow : undefined,
       },
