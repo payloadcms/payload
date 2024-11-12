@@ -17,7 +17,9 @@ import type {
 
 type JoinFieldClientWithoutType = MarkOptional<JoinFieldClient, 'type'>
 
-export type JoinFieldClientProps = ClientFieldBase<JoinFieldClientWithoutType>
+export type JoinFieldClientProps = {
+  path?: string
+} & ClientFieldBase<JoinFieldClientWithoutType>
 
 export type JoinFieldServerProps = ServerFieldBase<JoinField>
 

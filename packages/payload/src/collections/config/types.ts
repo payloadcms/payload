@@ -35,13 +35,13 @@ import type { Field, JoinField, RelationshipField, UploadField } from '../../fie
 import type {
   CollectionSlug,
   JsonObject,
+  RequestContext,
   TypedAuthOperations,
   TypedCollection,
   TypedCollectionSelect,
 } from '../../index.js'
 import type {
   PayloadRequest,
-  RequestContext,
   SelectType,
   Sort,
   TransformCollectionWithSelect,
@@ -71,6 +71,7 @@ export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
 export type HookOperationType =
   | 'autosave'
   | 'count'
+  | 'countVersions'
   | 'create'
   | 'delete'
   | 'forgotPassword'
@@ -495,9 +496,9 @@ export type SanitizedJoin = {
    */
   field: JoinField
   /**
-   * The schemaPath of the join field in dot notation
+   * The path of the join field in dot notation
    */
-  schemaPath: string
+  joinPath: string
   targetField: RelationshipField | UploadField
 }
 

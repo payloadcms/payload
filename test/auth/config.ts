@@ -178,7 +178,9 @@ export default buildConfigWithDefaults({
       slug: apiKeysSlug,
       access: {
         read: ({ req: { user } }) => {
-          if (!user) return false
+          if (!user) {
+            return false
+          }
           if (user?.collection === 'api-keys') {
             return {
               id: {
@@ -222,33 +224,31 @@ export default buildConfigWithDefaults({
     },
   ],
   onInit: async (payload) => {
-    if (process.env.SKIP_ON_INIT !== 'true') {
-      await payload.create({
-        collection: 'users',
-        data: {
-          custom: 'Hello, world!',
-          email: devUser.email,
-          password: devUser.password,
-          roles: ['admin'],
-        },
-      })
+    await payload.create({
+      collection: 'users',
+      data: {
+        custom: 'Hello, world!',
+        email: devUser.email,
+        password: devUser.password,
+        roles: ['admin'],
+      },
+    })
 
-      await payload.create({
-        collection: 'api-keys',
-        data: {
-          apiKey: uuid(),
-          enableAPIKey: true,
-        },
-      })
+    await payload.create({
+      collection: 'api-keys',
+      data: {
+        apiKey: uuid(),
+        enableAPIKey: true,
+      },
+    })
 
-      await payload.create({
-        collection: 'api-keys',
-        data: {
-          apiKey: uuid(),
-          enableAPIKey: true,
-        },
-      })
-    }
+    await payload.create({
+      collection: 'api-keys',
+      data: {
+        apiKey: uuid(),
+        enableAPIKey: true,
+      },
+    })
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

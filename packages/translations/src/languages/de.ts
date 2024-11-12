@@ -315,6 +315,7 @@ export const deTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Erfolgreich aktualisiert.',
     updating: 'Aktualisierung',
     uploading: 'Hochladen',
+    uploadingBulk: 'Hochladen von {{current}} von {{total}}',
     user: 'Benutzer',
     username: 'Benutzername',
     users: 'Benutzer',

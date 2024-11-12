@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, DocumentPermissions } from 'payload'
+import type { ClientCollectionConfig } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { useCallback } from 'react'
@@ -11,14 +11,14 @@ import { Form, useForm } from '../../../forms/Form/index.js'
 import { type FormProps } from '../../../forms/Form/types.js'
 import { WatchChildErrors } from '../../../forms/WatchChildErrors/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
-import { RenderComponent } from '../../../providers/Config/RenderComponent.js'
 import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../../providers/Operation/index.js'
+import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useUploadEdits } from '../../../providers/UploadEdits/index.js'
 import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
-import { getFormState } from '../../../utilities/getFormState.js'
+import { useDocumentDrawerContext } from '../../DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
 import { Upload } from '../../Upload/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
@@ -34,28 +34,28 @@ const baseClass = 'collection-edit'
 export function EditForm({ submitted }: EditFormProps) {
   const {
     action,
-    AfterDocument,
-    AfterFields,
-    BeforeDocument,
-    BeforeFields,
     collectionSlug: docSlug,
     docPermissions,
     getDocPreferences,
-    getVersions,
     hasSavePermission,
     initialState,
     isEditing,
     isInitializing,
-    onSave: onSaveFromContext,
+    Upload: CustomUpload,
   } = useDocumentInfo()
+
+  const { onSave: onSaveFromContext } = useDocumentDrawerContext()
+
+  const { getFormState } = useServerFunctions()
 
   const {
     config: {
-      routes: { admin: adminRoute, api: apiRoute },
-      serverURL,
+      routes: { admin: adminRoute },
     },
     getEntityConfig,
   } = useConfig()
+
+  const collectionConfig = getEntityConfig({ collectionSlug: docSlug }) as ClientCollectionConfig
 
   const router = useRouter()
   const depth = useEditDepth()
@@ -65,7 +65,6 @@ export function EditForm({ submitted }: EditFormProps) {
 
   const locale = params.get('locale')
 
-  const collectionConfig = getEntityConfig({ collectionSlug: docSlug }) as ClientCollectionConfig
   const collectionSlug = collectionConfig.slug
 
   const [schemaPath] = React.useState(collectionSlug)
@@ -76,8 +75,6 @@ export function EditForm({ submitted }: EditFormProps) {
         entitySlug: collectionSlug,
         updatedAt: json?.result?.updatedAt || new Date().toISOString(),
       })
-
-      void getVersions()
 
       if (typeof onSaveFromContext === 'function') {
         void onSaveFromContext({
@@ -101,7 +98,6 @@ export function EditForm({ submitted }: EditFormProps) {
       adminRoute,
       collectionSlug,
       depth,
-      getVersions,
       isEditing,
       locale,
       onSaveFromContext,
@@ -115,26 +111,22 @@ export function EditForm({ submitted }: EditFormProps) {
     async ({ formState: prevFormState }) => {
       const docPreferences = await getDocPreferences()
       const { state: newFormState } = await getFormState({
-        apiRoute,
-        body: {
-          collectionSlug,
-          docPreferences,
-          formState: prevFormState,
-          operation: 'create',
-          schemaPath,
-        },
-        serverURL,
+        collectionSlug,
+        docPermissions,
+        docPreferences,
+        formState: prevFormState,
+        operation: 'create',
+        schemaPath,
       })
 
       return newFormState
     },
-    [apiRoute, collectionSlug, schemaPath, getDocPreferences, serverURL],
+    [collectionSlug, schemaPath, getDocPreferences, getFormState, docPermissions],
   )
 
   return (
     <OperationProvider operation="create">
       <BulkUploadProvider>
-        {BeforeDocument}
         <Form
           action={action}
           className={`${baseClass}__form`}
@@ -147,33 +139,24 @@ export function EditForm({ submitted }: EditFormProps) {
           submitted={submitted}
         >
           <DocumentFields
-            AfterFields={AfterFields}
             BeforeFields={
-              BeforeFields || (
-                <React.Fragment>
-                  {collectionConfig?.admin?.components?.edit?.Upload ? (
-                    <RenderComponent
-                      mappedComponent={collectionConfig.admin.components.edit.Upload}
-                    />
-                  ) : (
-                    <Upload
-                      collectionSlug={collectionConfig.slug}
-                      initialState={initialState}
-                      uploadConfig={collectionConfig.upload}
-                    />
-                  )}
-                </React.Fragment>
-              )
+              <React.Fragment>
+                {CustomUpload || (
+                  <Upload
+                    collectionSlug={collectionConfig.slug}
+                    initialState={initialState}
+                    uploadConfig={collectionConfig.upload}
+                  />
+                )}
+              </React.Fragment>
             }
-            docPermissions={docPermissions || ({} as DocumentPermissions)}
+            docPermissions={docPermissions}
             fields={collectionConfig.fields}
-            readOnly={!hasSavePermission}
-            schemaPath={schemaPath}
+            schemaPathSegments={[collectionConfig.slug]}
           />
           <ReportAllErrors />
           <GetFieldProxy />
         </Form>
-        {AfterDocument}
       </BulkUploadProvider>
     </OperationProvider>
   )
@@ -210,5 +193,7 @@ function ReportAllErrors() {
     return null
   }
 
-  return <WatchChildErrors fields={docConfig.fields} path="" setErrorCount={reportFormErrorCount} />
+  return (
+    <WatchChildErrors fields={docConfig.fields} path={[]} setErrorCount={reportFormErrorCount} />
+  )
 }

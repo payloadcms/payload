@@ -5,7 +5,7 @@ import React, { lazy, Suspense, useEffect, useState } from 'react'
 
 import type { FeatureProviderClient } from '../features/typesClient.js'
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
-import type { GeneratedFeatureProviderComponent, LexicalRichTextFieldProps } from '../types.js'
+import type { LexicalRichTextFieldProps } from '../types.js'
 
 import { defaultEditorLexicalConfig } from '../lexical/config/client/default.js'
 import { loadClientFeatures } from '../lexical/config/client/loader.js'
@@ -16,11 +16,7 @@ const RichTextEditor = lazy(() =>
 )
 
 export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
-  const {
-    admin = {},
-    field: { richTextComponentMap },
-    lexicalEditorConfig,
-  } = props
+  const { admin = {}, clientFeatures, lexicalEditorConfig } = props
 
   const [finalSanitizedEditorConfig, setFinalSanitizedEditorConfig] =
     useState<null | SanitizedClientEditorConfig>(null)
@@ -29,13 +25,15 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
     if (finalSanitizedEditorConfig) {
       return
     }
-    const clientFeatures: GeneratedFeatureProviderComponent[] = richTextComponentMap?.get(
-      'features',
-    ) as GeneratedFeatureProviderComponent[]
 
     const featureProvidersLocal: FeatureProviderClient<any, any>[] = []
-    for (const clientFeature of clientFeatures) {
-      featureProvidersLocal.push(clientFeature.clientFeature(clientFeature.clientFeatureProps))
+    for (const [_featureKey, clientFeature] of Object.entries(clientFeatures)) {
+      if (!clientFeature.clientFeatureProvider) {
+        continue
+      }
+      featureProvidersLocal.push(
+        clientFeature.clientFeatureProvider(clientFeature.clientFeatureProps),
+      ) // Execute the clientFeatureProvider function here, as the server cannot execute functions imported from use client files
     }
 
     const finalLexicalEditorConfig = lexicalEditorConfig
@@ -52,7 +50,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
     setFinalSanitizedEditorConfig(
       sanitizeClientEditorConfig(resolvedClientFeatures, finalLexicalEditorConfig, admin),
     )
-  }, [lexicalEditorConfig, richTextComponentMap, admin, finalSanitizedEditorConfig]) // TODO: Optimize this and use useMemo for this in the future. This might break sub-richtext-blocks from the blocks feature. Need to investigate
+  }, [lexicalEditorConfig, admin, finalSanitizedEditorConfig, clientFeatures]) // TODO: Optimize this and use useMemo for this in the future. This might break sub-richtext-blocks from the blocks feature. Need to investigate
 
   return (
     <Suspense fallback={<ShimmerEffect height="35vh" />}>

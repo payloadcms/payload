@@ -1,10 +1,11 @@
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
+import type { RequestContext } from '../../../index.js'
 import type {
   JsonObject,
   PayloadRequest,
-  RequestContext,
+  PopulateType,
   SelectMode,
   SelectType,
 } from '../../../types/index.js'
@@ -26,6 +27,7 @@ type Args = {
   draft: boolean
   fallbackLocale: null | string
   field: Field | TabAsField
+  fieldIndex: number
   /**
    * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
    */
@@ -43,6 +45,7 @@ type Args = {
    * The parent's schemaPath (path without indexes).
    */
   parentSchemaPath: string[]
+  populate?: PopulateType
   populationPromises: Promise<void>[]
   req: PayloadRequest
   select?: SelectType
@@ -70,6 +73,7 @@ export const promise = async ({
   draft,
   fallbackLocale,
   field,
+  fieldIndex,
   fieldPromises,
   findMany,
   flattenLocales,
@@ -78,6 +82,7 @@ export const promise = async ({
   overrideAccess,
   parentPath,
   parentSchemaPath,
+  populate,
   populationPromises,
   req,
   select,
@@ -87,11 +92,15 @@ export const promise = async ({
   triggerAccessControl = true,
   triggerHooks = true,
 }: Args): Promise<void> => {
-  const { path: fieldPath, schemaPath: fieldSchemaPath } = getFieldPaths({
+  const { path: _fieldPath, schemaPath: _fieldSchemaPath } = getFieldPaths({
     field,
-    parentPath,
-    parentSchemaPath,
+    index: fieldIndex,
+    parentIndexPath: '', // Doesn't matter, as unnamed fields do not affect data, and hooks are only run on fields that affect data
+    parentPath: parentPath.join('.'),
+    parentSchemaPath: parentSchemaPath.join('.'),
   })
+  const fieldPath = _fieldPath ? _fieldPath.split('.') : []
+  const fieldSchemaPath = _fieldSchemaPath ? _fieldSchemaPath.split('.') : []
 
   if (
     fieldAffectsData(field) &&
@@ -328,6 +337,7 @@ export const promise = async ({
           field,
           locale,
           overrideAccess,
+          populate,
           req,
           showHiddenFields,
           siblingDoc,
@@ -361,6 +371,7 @@ export const promise = async ({
         locale,
         overrideAccess,
         path: fieldPath,
+        populate,
         populationPromises,
         req,
         schemaPath: fieldSchemaPath,
@@ -402,6 +413,7 @@ export const promise = async ({
             locale,
             overrideAccess,
             path: [...fieldPath, i],
+            populate,
             populationPromises,
             req,
             schemaPath: fieldSchemaPath,
@@ -433,6 +445,7 @@ export const promise = async ({
                 locale,
                 overrideAccess,
                 path: [...fieldPath, i],
+                populate,
                 populationPromises,
                 req,
                 schemaPath: fieldSchemaPath,
@@ -502,6 +515,7 @@ export const promise = async ({
               locale,
               overrideAccess,
               path: [...fieldPath, i],
+              populate,
               populationPromises,
               req,
               schemaPath: fieldSchemaPath,
@@ -539,6 +553,7 @@ export const promise = async ({
                   locale,
                   overrideAccess,
                   path: [...fieldPath, i],
+                  populate,
                   populationPromises,
                   req,
                   schemaPath: fieldSchemaPath,
@@ -576,6 +591,7 @@ export const promise = async ({
         locale,
         overrideAccess,
         path: fieldPath,
+        populate,
         populationPromises,
         req,
         schemaPath: fieldSchemaPath,
@@ -622,6 +638,7 @@ export const promise = async ({
         locale,
         overrideAccess,
         path: fieldPath,
+        populate,
         populationPromises,
         req,
         schemaPath: fieldSchemaPath,
@@ -653,6 +670,7 @@ export const promise = async ({
         locale,
         overrideAccess,
         path: fieldPath,
+        populate,
         populationPromises,
         req,
         schemaPath: fieldSchemaPath,
@@ -706,6 +724,7 @@ export const promise = async ({
                   originalDoc: doc,
                   overrideAccess,
                   path: fieldPath,
+                  populate,
                   populationPromises,
                   req,
                   schemaPath: fieldSchemaPath,
@@ -742,6 +761,7 @@ export const promise = async ({
               originalDoc: doc,
               overrideAccess,
               path: fieldPath,
+              populate,
               populationPromises,
               req,
               schemaPath: fieldSchemaPath,

@@ -28,33 +28,63 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
-      name: 'richText',
-      type: 'richText',
+      name: 'relationToSelf',
+      type: 'relationship',
+      relationTo: postsSlug,
     },
     {
-      name: 'myBlocks',
-      type: 'blocks',
-      blocks: [
+      name: 'myArray',
+      type: 'array',
+      fields: [
         {
-          slug: 'test',
-          fields: [
-            {
-              name: 'test',
-              type: 'text',
+          admin: {
+            components: {
+              Field: '/collections/Posts/MyServerField.js#MyServerFieldComponent',
             },
-          ],
+          },
+          name: 'serverTextField',
+          type: 'text',
         },
         {
-          slug: 'someBlock2',
-          fields: [
-            {
-              name: 'test2',
-              type: 'text',
+          admin: {
+            components: {
+              Field: '/collections/Posts/MyClientField.js#MyClientFieldComponent',
             },
-          ],
+          },
+          name: 'text',
+          label: 'Client Text Field',
+          type: 'text',
         },
       ],
     },
+    // {
+    //   name: 'richText',
+    //   type: 'richText',
+    // },
+    // {
+    //   name: 'myBlocks',
+    //   type: 'blocks',
+    //   blocks: [
+    //     {
+    //       slug: 'test',
+    //       fields: [
+    //         {
+    //           name: 'test',
+    //           type: 'text',
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       slug: 'someBlock2',
+    //       fields: [
+    //         {
+    //           name: 'test2',
+    //           type: 'text',
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
     // {
     //   type: 'row',
     //   fields: [],

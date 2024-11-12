@@ -1,4 +1,4 @@
-import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+// import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
@@ -23,7 +23,6 @@ export default buildConfigWithDefaults({
         },
       ],
     },
-    MediaCollection,
   ],
   admin: {
     importMap: {
@@ -33,63 +32,64 @@ export default buildConfigWithDefaults({
       Component: '/collections/Posts/MyAvatar.js#MyAvatar',
     },
   },
-  editor: lexicalEditor({
-    features: ({ defaultFeatures }) => [
-      ...defaultFeatures,
-      BlocksFeature({
-        blocks: [
-          {
-            admin: {
-              components: {
-                Label: '/collections/Posts/MyComponent2.js#MyComponent2',
-              },
-            },
-            slug: 'test',
-            fields: [
-              {
-                name: 'test',
-                type: 'text',
-              },
-            ],
-          },
-          {
-            slug: 'someBlock2',
-            fields: [
-              {
-                name: 'test2',
-                type: 'text',
-              },
-            ],
-          },
-        ],
-        inlineBlocks: [
-          {
-            admin: {
-              components: {
-                Label: '/collections/Posts/MyComponent2.js#MyComponent2',
-              },
-            },
-            slug: 'test',
-            fields: [
-              {
-                name: 'test',
-                type: 'text',
-              },
-            ],
-          },
-          {
-            slug: 'someBlock2',
-            fields: [
-              {
-                name: 'test2',
-                type: 'text',
-              },
-            ],
-          },
-        ],
-      }),
-    ],
-  }),
+  editor: null,
+  // editor: lexicalEditor({
+  //   features: ({ defaultFeatures }) => [
+  //     ...defaultFeatures,
+  //     BlocksFeature({
+  //       blocks: [
+  //         {
+  //           admin: {
+  //             components: {
+  //               Label: '/collections/Posts/MyComponent2.js#MyComponent2',
+  //             },
+  //           },
+  //           slug: 'test',
+  //           fields: [
+  //             {
+  //               name: 'test',
+  //               type: 'text',
+  //             },
+  //           ],
+  //         },
+  //         {
+  //           slug: 'someBlock2',
+  //           fields: [
+  //             {
+  //               name: 'test2',
+  //               type: 'text',
+  //             },
+  //           ],
+  //         },
+  //       ],
+  //       inlineBlocks: [
+  //         {
+  //           admin: {
+  //             components: {
+  //               Label: '/collections/Posts/MyComponent2.js#MyComponent2',
+  //             },
+  //           },
+  //           slug: 'test',
+  //           fields: [
+  //             {
+  //               name: 'test',
+  //               type: 'text',
+  //             },
+  //           ],
+  //         },
+  //         {
+  //           slug: 'someBlock2',
+  //           fields: [
+  //             {
+  //               name: 'test2',
+  //               type: 'text',
+  //             },
+  //           ],
+  //         },
+  //       ],
+  //     }),
+  //   ],
+  // }),
   cors: ['http://localhost:3000', 'http://localhost:3001'],
   globals: [
     MenuGlobal,

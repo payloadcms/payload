@@ -61,7 +61,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               '@lexical/selection',
               '@lexical/utils',
             ],
-            targetVersion: '0.18.0',
+            targetVersion: '0.20.0',
           },
         ],
       })
@@ -134,25 +134,19 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
     return {
       CellComponent: {
-        clientProps: {
+        path: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell',
+        serverProps: {
           admin: props?.admin,
-          lexicalEditorConfig: finalSanitizedEditorConfig.lexical,
+          sanitizedEditorConfig: finalSanitizedEditorConfig,
         },
-        path: '@payloadcms/richtext-lexical/client#RichTextCell',
       },
       editorConfig: finalSanitizedEditorConfig,
       features,
       FieldComponent: {
-        clientProps: {
-          admin: props?.admin,
-          lexicalEditorConfig: finalSanitizedEditorConfig.lexical,
-        },
-        path: '@payloadcms/richtext-lexical/client#RichTextField',
-      },
-      generateComponentMap: {
-        path: '@payloadcms/richtext-lexical/generateComponentMap#getGenerateComponentMap',
+        path: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalField',
         serverProps: {
-          resolvedFeatureMap,
+          admin: props?.admin,
+          sanitizedEditorConfig: finalSanitizedEditorConfig,
         },
       },
       generateImportMap: getGenerateImportMap({
@@ -313,6 +307,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               locale,
               overrideAccess,
               path,
+              populate,
               populationPromises,
               req,
               schemaPath,
@@ -360,6 +355,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     overrideAccess: overrideAccess!,
                     parentRichTextFieldPath: path,
                     parentRichTextFieldSchemaPath: schemaPath,
+                    populateArg: populate,
                     populationPromises: populationPromises!,
                     req,
                     showHiddenFields: showHiddenFields!,
@@ -394,6 +390,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     locale: locale!,
                     overrideAccess: overrideAccess!,
                     path,
+                    populate,
                     populationPromises: populationPromises!,
                     req,
                     schemaPath,

@@ -8,15 +8,17 @@ import type { CollectionRouteHandler } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { sanitizeJoinParams } from '../utilities/sanitizeJoinParams.js'
+import { sanitizePopulate } from '../utilities/sanitizePopulate.js'
 import { sanitizeSelect } from '../utilities/sanitizeSelect.js'
 
 export const find: CollectionRouteHandler = async ({ collection, req }) => {
-  const { depth, draft, joins, limit, page, select, sort, where } = req.query as {
+  const { depth, draft, joins, limit, page, populate, select, sort, where } = req.query as {
     depth?: string
     draft?: string
     joins?: JoinQuery
     limit?: string
     page?: string
+    populate?: Record<string, unknown>
     select?: Record<string, unknown>
     sort?: string
     where?: Where
@@ -29,6 +31,7 @@ export const find: CollectionRouteHandler = async ({ collection, req }) => {
     joins: sanitizeJoinParams(joins),
     limit: isNumber(limit) ? Number(limit) : undefined,
     page: isNumber(page) ? Number(page) : undefined,
+    populate: sanitizePopulate(populate),
     req,
     select: sanitizeSelect(select),
     sort: typeof sort === 'string' ? sort.split(',') : undefined,

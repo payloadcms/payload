@@ -69,10 +69,10 @@ export const registerLocalStrategy = async ({
       errors: [
         loginWithUsername
           ? {
-              field: 'username',
               message: req.t('error:usernameAlreadyRegistered'),
+              path: 'username',
             }
-          : { field: 'email', message: req.t('error:userEmailAlreadyRegistered') },
+          : { message: req.t('error:userEmailAlreadyRegistered'), path: 'email' },
       ],
     })
   }

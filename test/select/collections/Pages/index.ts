@@ -11,13 +11,14 @@ export const Pages: CollectionConfig<'pages'> = {
   defaultPopulate: {
     slug: true,
   },
+  access: { read: () => true },
   fields: [
     {
       name: 'content',
       type: 'blocks',
       blocks: [
         {
-          slug: 'cta',
+          slug: 'introduction',
           fields: [
             {
               name: 'title',
@@ -79,6 +80,10 @@ export const Pages: CollectionConfig<'pages'> = {
       name: 'slug',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'additional',
+      type: 'text',
     },
   ],
 }

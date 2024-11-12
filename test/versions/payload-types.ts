@@ -24,7 +24,8 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsSelect?: {
+  collectionsJoins: {};
+  collectionsSelect: {
     'disable-publish': DisablePublishSelect<false> | DisablePublishSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
@@ -48,7 +49,7 @@ export interface Config {
     'disable-publish-global': DisablePublishGlobal;
     'localized-global': LocalizedGlobal;
   };
-  globalsSelect?: {
+  globalsSelect: {
     'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
     'draft-global': DraftGlobalSelect<false> | DraftGlobalSelect<true>;
     'draft-with-max-global': DraftWithMaxGlobalSelect<false> | DraftWithMaxGlobalSelect<true>;

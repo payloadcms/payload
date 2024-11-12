@@ -309,6 +309,7 @@ export const csTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Úspěšně aktualizováno.',
     updating: 'Aktualizace',
     uploading: 'Nahrávání',
+    uploadingBulk: 'Nahrávání {{current}} z {{total}}',
     user: 'Uživatel',
     username: 'Uživatelské jméno',
     users: 'Uživatelé',

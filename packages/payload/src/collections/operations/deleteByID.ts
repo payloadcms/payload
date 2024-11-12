@@ -1,6 +1,7 @@
 import type { CollectionSlug } from '../../index.js'
 import type {
   PayloadRequest,
+  PopulateType,
   SelectType,
   TransformCollectionWithSelect,
 } from '../../types/index.js'
@@ -27,6 +28,7 @@ export type Arguments = {
   id: number | string
   overrideAccess?: boolean
   overrideLock?: boolean
+  populate?: PopulateType
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
@@ -66,6 +68,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       depth,
       overrideAccess,
       overrideLock,
+      populate,
       req: {
         fallbackLocale,
         locale,
@@ -188,6 +191,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       global: null,
       locale,
       overrideAccess,
+      populate,
       req,
       select,
       showHiddenFields,

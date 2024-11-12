@@ -318,6 +318,7 @@ export const frTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Mis à jour avec succès.',
     updating: 'Mise à jour',
     uploading: 'Téléchargement',
+    uploadingBulk: 'Téléchargement de {{current}} sur {{total}}',
     user: 'Utilisateur',
     username: "Nom d'utilisateur",
     users: 'Utilisateurs',

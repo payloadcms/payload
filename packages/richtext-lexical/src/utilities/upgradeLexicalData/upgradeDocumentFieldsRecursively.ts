@@ -86,7 +86,12 @@ export const upgradeDocumentFieldsRecursively = ({
               editorConfig: editor.editorConfig,
             }),
           })
-          headlessEditor.setEditorState(headlessEditor.parseEditorState(editorState))
+          headlessEditor.update(
+            () => {
+              headlessEditor.setEditorState(headlessEditor.parseEditorState(editorState))
+            },
+            { discrete: true },
+          )
 
           // get editor state
           data[field.name] = headlessEditor.getEditorState().toJSON()

@@ -1,0 +1,15 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .default-cell {
+    &__first-cell {
+      border: 0;
+      background-color: transparent;
+      padding: 0;
+      cursor: pointer;
+      text-decoration: underline;
+      text-align: left;
+      white-space: nowrap;
+    }
+  }
+}

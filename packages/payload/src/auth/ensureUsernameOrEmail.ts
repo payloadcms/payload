@@ -59,12 +59,12 @@ export const ensureUsernameOrEmail = <TSlug extends CollectionSlug>({
           collection: collectionSlug,
           errors: [
             {
-              field: 'username',
               message: 'Username or email is required',
+              path: 'username',
             },
             {
-              field: 'email',
               message: 'Username or email is required',
+              path: 'email',
             },
           ],
         },

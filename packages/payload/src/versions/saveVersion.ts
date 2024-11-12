@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { FindVersionsArgs, Payload } from '../index.js'
+import type { Payload } from '../index.js'
 import type { PayloadRequest, SelectType } from '../types/index.js'
 
 import { deepCopyObjectSimple } from '../index.js'
@@ -180,14 +180,7 @@ export const saveVersion = async ({
     return
   }
 
-  let max = 100
-
-  if (collection && typeof collection.versions.maxPerDoc === 'number') {
-    max = collection.versions.maxPerDoc
-  }
-  if (global && typeof global.versions.max === 'number') {
-    max = global.versions.max
-  }
+  const max = collection ? collection.versions.maxPerDoc : global.versions.max
 
   if (createNewVersion && max > 0) {
     await enforceMaxVersions({

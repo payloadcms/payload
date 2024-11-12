@@ -10,8 +10,6 @@ import type {
 } from 'payload'
 import type React from 'react'
 
-import { notFound } from 'next/navigation.js'
-
 import { APIView as DefaultAPIView } from '../API/index.js'
 import { EditView as DefaultEditView } from '../Edit/index.js'
 import { LivePreviewView as DefaultLivePreviewView } from '../LivePreview/index.js'
@@ -23,7 +21,7 @@ import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 
 export type ViewFromConfig<TProps extends object> = {
   Component?: React.FC<TProps>
-  payloadComponent?: PayloadComponent<TProps>
+  ComponentConfig?: PayloadComponent<TProps>
 }
 
 export const getViewsFromConfig = ({
@@ -81,7 +79,7 @@ export const getViewsFromConfig = ({
       routeSegments
 
     if (!overrideDocPermissions && !docPermissions?.read?.permission) {
-      notFound()
+      throw new Error('not-found')
     } else {
       // `../:id`, or `../create`
       switch (routeSegments.length) {
@@ -94,7 +92,7 @@ export const getViewsFromConfig = ({
                 docPermissions?.create?.permission
               ) {
                 CustomView = {
-                  payloadComponent: getCustomViewByKey(views, 'default'),
+                  ComponentConfig: getCustomViewByKey(views, 'default'),
                 }
                 DefaultView = {
                   Component: DefaultEditView,
@@ -132,11 +130,11 @@ export const getViewsFromConfig = ({
                 viewKey = customViewKey
 
                 CustomView = {
-                  payloadComponent: CustomViewComponent,
+                  ComponentConfig: CustomViewComponent,
                 }
               } else {
                 CustomView = {
-                  payloadComponent: getCustomViewByKey(views, 'default'),
+                  ComponentConfig: getCustomViewByKey(views, 'default'),
                 }
 
                 DefaultView = {
@@ -156,7 +154,7 @@ export const getViewsFromConfig = ({
             case 'api': {
               if (collectionConfig?.admin?.hideAPIURL !== true) {
                 CustomView = {
-                  payloadComponent: getCustomViewByKey(views, 'api'),
+                  ComponentConfig: getCustomViewByKey(views, 'api'),
                 }
                 DefaultView = {
                   Component: DefaultAPIView,
@@ -171,7 +169,7 @@ export const getViewsFromConfig = ({
                   Component: DefaultLivePreviewView,
                 }
                 CustomView = {
-                  payloadComponent: getCustomViewByKey(views, 'livePreview'),
+                  ComponentConfig: getCustomViewByKey(views, 'livePreview'),
                 }
               }
               break
@@ -180,7 +178,7 @@ export const getViewsFromConfig = ({
             case 'versions': {
               if (!overrideDocPermissions && docPermissions?.readVersions?.permission) {
                 CustomView = {
-                  payloadComponent: getCustomViewByKey(views, 'versions'),
+                  ComponentConfig: getCustomViewByKey(views, 'versions'),
                 }
                 DefaultView = {
                   Component: DefaultVersionsView,
@@ -218,7 +216,7 @@ export const getViewsFromConfig = ({
                 viewKey = customViewKey
 
                 CustomView = {
-                  payloadComponent: CustomViewComponent,
+                  ComponentConfig: CustomViewComponent,
                 }
               }
 
@@ -233,7 +231,7 @@ export const getViewsFromConfig = ({
           if (segment4 === 'versions') {
             if (!overrideDocPermissions && docPermissions?.readVersions?.permission) {
               CustomView = {
-                payloadComponent: getCustomViewByKey(views, 'version'),
+                ComponentConfig: getCustomViewByKey(views, 'version'),
               }
               DefaultView = {
                 Component: DefaultVersionView,
@@ -269,7 +267,7 @@ export const getViewsFromConfig = ({
               viewKey = customViewKey
 
               CustomView = {
-                payloadComponent: CustomViewComponent,
+                ComponentConfig: CustomViewComponent,
               }
             }
           }
@@ -284,12 +282,12 @@ export const getViewsFromConfig = ({
     const [globalEntity, globalSlug, segment3, ...remainingSegments] = routeSegments
 
     if (!overrideDocPermissions && !docPermissions?.read?.permission) {
-      notFound()
+      throw new Error('not-found')
     } else {
       switch (routeSegments.length) {
         case 2: {
           CustomView = {
-            payloadComponent: getCustomViewByKey(views, 'default'),
+            ComponentConfig: getCustomViewByKey(views, 'default'),
           }
           DefaultView = {
             Component: DefaultEditView,
@@ -303,7 +301,7 @@ export const getViewsFromConfig = ({
             case 'api': {
               if (globalConfig?.admin?.hideAPIURL !== true) {
                 CustomView = {
-                  payloadComponent: getCustomViewByKey(views, 'api'),
+                  ComponentConfig: getCustomViewByKey(views, 'api'),
                 }
                 DefaultView = {
                   Component: DefaultAPIView,
@@ -318,7 +316,7 @@ export const getViewsFromConfig = ({
                   Component: DefaultLivePreviewView,
                 }
                 CustomView = {
-                  payloadComponent: getCustomViewByKey(views, 'livePreview'),
+                  ComponentConfig: getCustomViewByKey(views, 'livePreview'),
                 }
               }
               break
@@ -327,7 +325,7 @@ export const getViewsFromConfig = ({
             case 'versions': {
               if (!overrideDocPermissions && docPermissions?.readVersions?.permission) {
                 CustomView = {
-                  payloadComponent: getCustomViewByKey(views, 'versions'),
+                  ComponentConfig: getCustomViewByKey(views, 'versions'),
                 }
 
                 DefaultView = {
@@ -362,7 +360,7 @@ export const getViewsFromConfig = ({
                   viewKey = customViewKey
 
                   CustomView = {
-                    payloadComponent: CustomViewComponent,
+                    ComponentConfig: CustomViewComponent,
                   }
                 } else {
                   DefaultView = {
@@ -385,7 +383,7 @@ export const getViewsFromConfig = ({
           if (segment3 === 'versions') {
             if (!overrideDocPermissions && docPermissions?.readVersions?.permission) {
               CustomView = {
-                payloadComponent: getCustomViewByKey(views, 'version'),
+                ComponentConfig: getCustomViewByKey(views, 'version'),
               }
               DefaultView = {
                 Component: DefaultVersionView,
@@ -416,7 +414,7 @@ export const getViewsFromConfig = ({
               viewKey = customViewKey
 
               CustomView = {
-                payloadComponent: CustomViewComponent,
+                ComponentConfig: CustomViewComponent,
               }
             }
           }

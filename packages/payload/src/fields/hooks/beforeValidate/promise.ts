@@ -1,7 +1,8 @@
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { JsonObject, JsonValue, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { RequestContext } from '../../../index.js'
+import type { JsonObject, JsonValue, PayloadRequest } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
@@ -21,6 +22,7 @@ type Args<T> = {
    */
   doc: T
   field: Field | TabAsField
+  fieldIndex: number
   global: null | SanitizedGlobalConfig
   id?: number | string
   operation: 'create' | 'update'
@@ -49,6 +51,7 @@ export const promise = async <T>({
   data,
   doc,
   field,
+  fieldIndex,
   global,
   operation,
   overrideAccess,
@@ -58,11 +61,15 @@ export const promise = async <T>({
   siblingData,
   siblingDoc,
 }: Args<T>): Promise<void> => {
-  const { path: fieldPath, schemaPath: fieldSchemaPath } = getFieldPaths({
+  const { path: _fieldPath, schemaPath: _fieldSchemaPath } = getFieldPaths({
     field,
-    parentPath,
-    parentSchemaPath,
+    index: fieldIndex,
+    parentIndexPath: '', // Doesn't matter, as unnamed fields do not affect data, and hooks are only run on fields that affect data
+    parentPath: parentPath.join('.'),
+    parentSchemaPath: parentSchemaPath.join('.'),
   })
+  const fieldPath = _fieldPath ? _fieldPath.split('.') : []
+  const fieldSchemaPath = _fieldSchemaPath ? _fieldSchemaPath.split('.') : []
 
   if (fieldAffectsData(field)) {
     if (field.name === 'id') {

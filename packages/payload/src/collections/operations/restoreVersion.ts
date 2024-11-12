@@ -1,7 +1,7 @@
 import httpStatus from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
-import type { PayloadRequest, SelectType } from '../../types/index.js'
+import type { PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
 import type { Collection, TypeWithID } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
@@ -21,6 +21,7 @@ export type Arguments = {
   draft?: boolean
   id: number | string
   overrideAccess?: boolean
+  populate?: PopulateType
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
@@ -35,6 +36,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     depth,
     draft,
     overrideAccess = false,
+    populate,
     req,
     req: { fallbackLocale, locale, payload },
     select,
@@ -152,6 +154,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       global: null,
       locale,
       overrideAccess,
+      populate,
       req,
       select,
       showHiddenFields,

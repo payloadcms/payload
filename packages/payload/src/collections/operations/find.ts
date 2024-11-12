@@ -3,6 +3,7 @@ import type { PaginatedDocs } from '../../database/types.js'
 import type { CollectionSlug, JoinQuery } from '../../index.js'
 import type {
   PayloadRequest,
+  PopulateType,
   SelectType,
   Sort,
   TransformCollectionWithSelect,
@@ -17,6 +18,7 @@ import type {
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
+import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
@@ -37,6 +39,7 @@ export type Arguments = {
   overrideAccess?: boolean
   page?: number
   pagination?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
@@ -83,6 +86,7 @@ export const findOperation = async <
       overrideAccess,
       page,
       pagination = true,
+      populate,
       req: { fallbackLocale, locale, payload },
       req,
       select,
@@ -129,6 +133,13 @@ export const findOperation = async <
 
     let fullWhere = combineQueries(where, accessResult)
 
+    const sanitizedJoins = await sanitizeJoinQuery({
+      collectionConfig,
+      joins,
+      overrideAccess,
+      req,
+    })
+
     if (collectionConfig.versions?.drafts && draftsEnabled) {
       fullWhere = appendVersionToQueryKey(fullWhere)
 
@@ -142,7 +153,7 @@ export const findOperation = async <
 
       result = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
-        joins: req.payloadAPI === 'GraphQL' ? false : joins,
+        joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
         limit: sanitizedLimit,
         locale,
         page: sanitizedPage,
@@ -162,7 +173,7 @@ export const findOperation = async <
 
       result = await payload.db.find<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
-        joins: req.payloadAPI === 'GraphQL' ? false : joins,
+        joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
         limit: sanitizedLimit,
         locale,
         page: sanitizedPage,
@@ -286,6 +297,7 @@ export const findOperation = async <
             global: null,
             locale,
             overrideAccess,
+            populate,
             req,
             select,
             showHiddenFields,
