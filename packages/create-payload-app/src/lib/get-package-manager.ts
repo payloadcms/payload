@@ -54,7 +54,7 @@ function getEnvironmentPackageManager(): PackageManager {
 
 async function commandExists(command: string): Promise<boolean> {
   try {
-    await execa.command(`command -v ${command}`)
+    await execa.command(process.platform === 'win32' ? `where ${command}` : `command -v ${command}`)
     return true
   } catch {
     return false

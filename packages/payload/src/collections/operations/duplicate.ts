@@ -4,8 +4,17 @@ import httpStatus from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
 import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequest } from '../../types/index.js'
-import type { Collection, DataFromCollectionSlug } from '../config/types.js'
+import type {
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  TransformCollectionWithSelect,
+} from '../../types/index.js'
+import type {
+  Collection,
+  DataFromCollectionSlug,
+  SelectFromCollectionSlug,
+} from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
@@ -21,6 +30,7 @@ import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utils.js'
@@ -32,13 +42,18 @@ export type Arguments = {
   draft?: boolean
   id: number | string
   overrideAccess?: boolean
+  populate?: PopulateType
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
 }
 
-export const duplicateOperation = async <TSlug extends CollectionSlug>(
+export const duplicateOperation = async <
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   incomingArgs: Arguments,
-): Promise<DataFromCollectionSlug<TSlug>> => {
+): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
   const operation = 'create'
 
@@ -68,8 +83,10 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
       depth,
       draft: draftArg = true,
       overrideAccess,
+      populate,
       req: { fallbackLocale, locale: localeArg, payload },
       req,
+      select,
       showHiddenFields,
     } = args
 
@@ -254,11 +271,14 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
       await uploadFiles(payload, filesToUpload, req)
     }
 
-    const versionDoc = await payload.db.create({
+    let versionDoc = await payload.db.create({
       collection: collectionConfig.slug,
       data: result,
       req,
+      select,
     })
+
+    versionDoc = sanitizeInternalFields(versionDoc)
 
     // /////////////////////////////////////
     // Create version
@@ -289,7 +309,9 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
       global: null,
       locale: localeArg,
       overrideAccess,
+      populate,
       req,
+      select,
       showHiddenFields,
     })
 

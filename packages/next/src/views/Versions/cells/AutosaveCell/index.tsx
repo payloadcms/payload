@@ -1,10 +1,17 @@
 'use client'
-import { Pill, useConfig, useTableCell, useTranslation } from '@payloadcms/ui'
+import { Pill, useConfig, useTranslation } from '@payloadcms/ui'
 import React, { Fragment } from 'react'
 
 type AutosaveCellProps = {
   latestDraftVersion?: string
   latestPublishedVersion?: string
+  rowData?: {
+    autosave?: boolean
+    publishedLocale?: string
+    version: {
+      _status?: string
+    }
+  }
 }
 
 export const renderPill = (data, latestVersion, currentLabel, previousLabel, pillStyle) => {
@@ -23,9 +30,10 @@ export const renderPill = (data, latestVersion, currentLabel, previousLabel, pil
 export const AutosaveCell: React.FC<AutosaveCellProps> = ({
   latestDraftVersion,
   latestPublishedVersion,
+  rowData = { autosave: undefined, publishedLocale: undefined, version: undefined },
 }) => {
   const { i18n, t } = useTranslation()
-  const { rowData } = useTableCell()
+
   const {
     config: { localization },
   } = useConfig()

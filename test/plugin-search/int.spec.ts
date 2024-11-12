@@ -193,7 +193,7 @@ describe('@payloadcms/plugin-search', () => {
     const createdDoc = await payload.create({
       collection: 'posts',
       data: {
-        _status: 'draft',
+        _status: 'published',
         title: 'test title',
         slug: 'es',
       },

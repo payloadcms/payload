@@ -1,6 +1,6 @@
 'use client'
 
-import { useConfig } from '@payloadcms/ui'
+import { useConfig, useField } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import React from 'react'
 // TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
@@ -16,13 +16,19 @@ export const LinkToDocClient: React.FC = () => {
     serverURL,
   } = config
 
+  const { value } = useField<{ relationTo?: string; value?: string }>({ path: 'doc' })
+
   const href = `${serverURL}${formatAdminURL({
     adminRoute,
-    path: '/collections/${relationTo}/${docId}',
+    path: `/collections/${value.relationTo || ''}/${value.value || ''}`,
   })}`
 
+  if (!value.relationTo || !value.value) {
+    return null
+  }
+
   return (
-    <div>
+    <div style={{ marginBottom: 'var(--spacing-field, 1rem)' }}>
       <div>
         <span
           className="label"
@@ -41,7 +47,9 @@ export const LinkToDocClient: React.FC = () => {
           textOverflow: 'ellipsis',
         }}
       >
-        <a href={href}>{href}</a>
+        <a href={href} target="_blank">
+          {href}
+        </a>
       </div>
     </div>
   )

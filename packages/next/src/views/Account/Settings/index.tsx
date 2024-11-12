@@ -22,7 +22,7 @@ export const Settings: React.FC<{
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       <h3>{i18n.t('general:payloadSettings')}</h3>
       <div className={`${baseClass}__language`}>
-        <FieldLabel field={null} htmlFor="language-select" label={i18n.t('general:language')} />
+        <FieldLabel htmlFor="language-select" label={i18n.t('general:language')} />
         <LanguageSelector languageOptions={languageOptions} />
       </div>
       {theme === 'all' && <ToggleTheme />}

@@ -982,87 +982,96 @@ describe('Fields', () => {
         expect(definitions['version.text']).toEqual(1)
       })
     })
-
-    describe('point', () => {
-      let doc
-      const point = [7, -7]
-      const localized = [5, -2]
-      const group = { point: [1, 9] }
-
-      beforeEach(async () => {
-        const findDoc = await payload.find({
-          collection: 'point-fields',
-          pagination: false,
-        })
-        ;[doc] = findDoc.docs
-      })
-
-      it('should read', async () => {
-        const find = await payload.find({
-          collection: 'point-fields',
-          pagination: false,
-        })
-
-        ;[doc] = find.docs
-
-        expect(doc.point).toEqual(pointDoc.point)
-        expect(doc.localized).toEqual(pointDoc.localized)
-        expect(doc.group).toMatchObject(pointDoc.group)
-      })
-
-      it('should create', async () => {
-        doc = await payload.create({
-          collection: 'point-fields',
-          data: {
-            group,
-            localized,
-            point,
-          },
-        })
-
-        expect(doc.point).toEqual(point)
-        expect(doc.localized).toEqual(localized)
-        expect(doc.group).toMatchObject(group)
-      })
-
-      it('should not create duplicate point when unique', async () => {
-        // first create the point field
-        doc = await payload.create({
-          collection: 'point-fields',
-          data: {
-            group,
-            localized,
-            point,
-          },
-        })
-
-        // Now make sure we can't create a duplicate (since 'localized' is a unique field)
-        await expect(() =>
-          payload.create({
-            collection: 'point-fields',
-            data: {
-              group,
-              localized,
-              point,
-            },
-          }),
-        ).rejects.toThrow(Error)
-
-        await expect(async () =>
-          payload.create({
-            collection: 'number-fields',
-            data: {
-              min: 5,
-            },
-          }),
-        ).rejects.toThrow('The following field is invalid: min')
-
-        expect(doc.point).toEqual(point)
-        expect(doc.localized).toEqual(localized)
-        expect(doc.group).toMatchObject(group)
-      })
-    })
   }
+
+  describe('point', () => {
+    let doc
+    const point = [7, -7]
+    const localized = [5, -2]
+    const group = { point: [1, 9] }
+
+    beforeEach(async () => {
+      const findDoc = await payload.find({
+        collection: 'point-fields',
+        pagination: false,
+      })
+      ;[doc] = findDoc.docs
+    })
+
+    it('should read', async () => {
+      if (payload.db.name === 'sqlite') {
+        return
+      }
+      const find = await payload.find({
+        collection: 'point-fields',
+        pagination: false,
+      })
+
+      ;[doc] = find.docs
+
+      expect(doc.point).toEqual(pointDoc.point)
+      expect(doc.localized).toEqual(pointDoc.localized)
+      expect(doc.group).toMatchObject(pointDoc.group)
+    })
+
+    it('should create', async () => {
+      if (payload.db.name === 'sqlite') {
+        return
+      }
+      doc = await payload.create({
+        collection: 'point-fields',
+        data: {
+          group,
+          localized,
+          point,
+        },
+      })
+
+      expect(doc.point).toEqual(point)
+      expect(doc.localized).toEqual(localized)
+      expect(doc.group).toMatchObject(group)
+    })
+
+    it('should not create duplicate point when unique', async () => {
+      if (payload.db.name === 'sqlite') {
+        return
+      }
+      // first create the point field
+      doc = await payload.create({
+        collection: 'point-fields',
+        data: {
+          group,
+          localized,
+          point,
+        },
+      })
+
+      // Now make sure we can't create a duplicate (since 'localized' is a unique field)
+      await expect(() =>
+        payload.create({
+          collection: 'point-fields',
+          data: {
+            group,
+            localized,
+            point,
+          },
+        }),
+      ).rejects.toThrow(Error)
+
+      await expect(async () =>
+        payload.create({
+          collection: 'number-fields',
+          data: {
+            min: 5,
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: min')
+
+      expect(doc.point).toEqual(point)
+      expect(doc.localized).toEqual(localized)
+      expect(doc.group).toMatchObject(group)
+    })
+  })
 
   describe('unique indexes', () => {
     it('should throw validation error saving on unique fields', async () => {
@@ -1096,7 +1105,7 @@ describe('Fields', () => {
             uniqueRelationship: textDoc.id,
           },
         })
-        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
             locale: 'es',
@@ -1132,7 +1141,7 @@ describe('Fields', () => {
             uniqueHasManyRelationship: [textDoc.id],
           },
         })
-        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
             locale: 'es',
@@ -1153,7 +1162,7 @@ describe('Fields', () => {
             uniqueHasManyRelationship_2: [textDoc.id],
           },
         })
-        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
             locale: 'es',
@@ -1176,7 +1185,7 @@ describe('Fields', () => {
       ).rejects.toBeTruthy()
     })
 
-    it('should throw validation error saving on unique relationship fields polymorphic', async () => {
+    it('should throw validation error saving on unique relationship fields polymorphic not hasMany', async () => {
       const textDoc = await payload.create({ collection: 'text-fields', data: { text: 'asd' } })
 
       await payload
@@ -1189,7 +1198,7 @@ describe('Fields', () => {
             uniquePolymorphicRelationship: { relationTo: 'text-fields', value: textDoc.id },
           },
         })
-        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
             locale: 'es',
@@ -1210,7 +1219,7 @@ describe('Fields', () => {
             uniquePolymorphicRelationship_2: { relationTo: 'text-fields', value: textDoc.id },
           },
         })
-        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
             locale: 'es',
@@ -1270,7 +1279,7 @@ describe('Fields', () => {
             ],
           },
         })
-        // Skip mongodb uniuqe error because it threats localizedUniqueRequriedText.es as undefined
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
             locale: 'es',
@@ -1545,6 +1554,50 @@ describe('Fields', () => {
       expect(esDoc.localized[0].text).toStrictEqual(esText)
       expect(allLocales.localized.en[0].text).toStrictEqual(enText)
       expect(allLocales.localized.es[0].text).toStrictEqual(esText)
+    })
+
+    it('should query by the same array', async () => {
+      const doc = await payload.create({
+        collection,
+        data: {
+          items: [
+            {
+              localizedText: 'test',
+              text: 'required',
+              anotherText: 'another',
+            },
+          ],
+          localized: [{ text: 'a' }],
+        },
+      })
+
+      // left join collection_items + left join collection_items_locales
+      const {
+        docs: [res],
+      } = await payload.find({
+        collection,
+        where: {
+          and: [
+            {
+              'items.localizedText': {
+                equals: 'test',
+              },
+            },
+            {
+              'items.anotherText': {
+                equals: 'another',
+              },
+            },
+            {
+              'items.text': {
+                equals: 'required',
+              },
+            },
+          ],
+        },
+      })
+
+      expect(res.id).toBe(doc.id)
     })
   })
 
@@ -2603,6 +2656,66 @@ describe('Fields', () => {
         expect(docIDs).not.toContain(1)
         expect(docIDs).not.toContain(3)
         expect(docIDs).toContain(2)
+      })
+
+      it('should query deeply', async () => {
+        // eslint-disable-next-line jest/no-conditional-in-test
+        if (payload.db.name === 'sqlite') {
+          return
+        }
+
+        const json_1 = await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: {
+              array: [
+                {
+                  text: 'some-text',
+                  object: {
+                    text: 'deep-text',
+                    array: [10],
+                  },
+                },
+              ],
+            },
+          },
+        })
+
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            and: [
+              {
+                'json.array.text': {
+                  equals: 'some-text',
+                },
+              },
+              {
+                'json.array.object.text': {
+                  equals: 'deep-text',
+                },
+              },
+              {
+                'json.array.object.array': {
+                  in: [10, 20],
+                },
+              },
+              {
+                'json.array.object.array': {
+                  exists: true,
+                },
+              },
+              {
+                'json.array.object.notexists': {
+                  exists: false,
+                },
+              },
+            ],
+          },
+        })
+
+        expect(docs).toHaveLength(1)
+        expect(docs[0].id).toBe(json_1.id)
       })
     })
   })

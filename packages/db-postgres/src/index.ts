@@ -4,6 +4,8 @@ import {
   beginTransaction,
   commitTransaction,
   count,
+  countGlobalVersions,
+  countVersions,
   create,
   createGlobal,
   createGlobalVersion,
@@ -33,9 +35,9 @@ import {
   updateVersion,
 } from '@payloadcms/drizzle'
 import {
-  convertPathToJSONTraversal,
   countDistinct,
   createDatabase,
+  createExtensions,
   createJSONQuery,
   createMigration,
   defaultDrizzleSnapshot,
@@ -75,15 +77,22 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       adapterSchema = { enum: pgEnum, table: pgTable }
     }
 
+    const extensions = (args.extensions ?? []).reduce((acc, name) => {
+      acc[name] = true
+      return acc
+    }, {})
+
     return createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
       afterSchemaInit: args.afterSchemaInit ?? [],
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       createDatabase,
+      createExtensions,
       defaultDrizzleSnapshot,
       disableCreateDatabase: args.disableCreateDatabase ?? false,
       drizzle: undefined,
       enums: {},
+      extensions,
       features: {
         json: true,
       },
@@ -106,6 +115,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       sessions: {},
       tableNameMap: new Map<string, string>(),
       tables: {},
+      tablesFilter: args.tablesFilter,
       transactionOptions: args.transactionOptions || undefined,
       versionsSuffix: args.versionsSuffix || '_v',
 
@@ -114,9 +124,10 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
         args.transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
       commitTransaction,
       connect,
-      convertPathToJSONTraversal,
       count,
       countDistinct,
+      countGlobalVersions,
+      countVersions,
       create,
       createGlobal,
       createGlobalVersion,

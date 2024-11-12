@@ -3,7 +3,7 @@ import { type Payload, type Where } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { LocalizedPost, WithLocalizedRelationship } from './payload-types.js'
+import type { LocalizedPost, LocalizedSort, WithLocalizedRelationship } from './payload-types.js'
 
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -369,6 +369,7 @@ describe('Localization', () => {
 
   describe('Localized Sort Count', () => {
     const expectedTotalDocs = 5
+    const posts: LocalizedSort[] = []
     beforeAll(async () => {
       for (let i = 1; i <= expectedTotalDocs; i++) {
         const post = await payload.create({
@@ -379,6 +380,8 @@ describe('Localization', () => {
           },
           locale: englishLocale,
         })
+
+        posts.push(post)
 
         await payload.update({
           id: post.id,
@@ -418,6 +421,118 @@ describe('Localization', () => {
 
       expect(sortByTitleQuery.totalDocs).toEqual(expectedTotalDocs)
       expect(sortByDateQuery.totalDocs).toEqual(expectedTotalDocs)
+    })
+
+    it('should return correct order when sorted by localized fields', async () => {
+      const { docs: docsAsc } = await payload.find({ collection: localizedSortSlug, sort: 'title' })
+      docsAsc.forEach((doc, i) => {
+        expect(posts[i].id).toBe(doc.id)
+      })
+
+      const { docs: docsDesc } = await payload.find({
+        collection: localizedSortSlug,
+        sort: '-title',
+      })
+      docsDesc.forEach((doc, i) => {
+        expect(posts.at(posts.length - i - 1).id).toBe(doc.id)
+      })
+
+      // Test with words
+      const randomWords = [
+        'sunset',
+        'whisper',
+        'lighthouse',
+        'harmony',
+        'crystal',
+        'thunder',
+        'meadow',
+        'voyage',
+        'echo',
+        'quicksand',
+      ]
+
+      const randomWordsSpanish = [
+        'atardecer',
+        'susurro',
+        'faro',
+        'armonía',
+        'cristal',
+        'trueno',
+        'pradera',
+        'viaje',
+        'eco',
+        'arenas movedizas',
+      ]
+
+      expect(randomWords).toHaveLength(randomWordsSpanish.length)
+
+      const randomWordsPosts: (number | string)[] = []
+
+      for (let i = 0; i < randomWords.length; i++) {
+        const en = randomWords[i]
+        const post = await payload.create({ collection: 'localized-sort', data: { title: en } })
+        const es = randomWordsSpanish[i]
+        await payload.update({
+          collection: 'localized-sort',
+          data: { title: es },
+          id: post.id,
+          locale: 'es',
+        })
+
+        randomWordsPosts.push(post.id)
+      }
+
+      const ascSortedWordsEn = randomWords.toSorted((a, b) => a.localeCompare(b))
+      const descSortedWordsEn = randomWords.toSorted((a, b) => b.localeCompare(a))
+
+      const q = { id: { in: randomWordsPosts } }
+
+      const { docs: randomWordsEnAsc } = await payload.find({
+        collection: localizedSortSlug,
+        sort: 'title',
+        where: q,
+      })
+      randomWordsEnAsc.forEach((doc, i) => {
+        expect(ascSortedWordsEn[i]).toBe(doc.title)
+      })
+
+      const { docs: randomWordsEnDesc } = await payload.find({
+        collection: localizedSortSlug,
+        sort: '-title',
+        where: q,
+      })
+
+      randomWordsEnDesc.forEach((doc, i) => {
+        expect(descSortedWordsEn[i]).toBe(doc.title)
+      })
+
+      // Test sorting for Spanish locale
+      const ascSortedWordsEs = randomWordsSpanish.toSorted((a, b) => a.localeCompare(b))
+      const descSortedWordsEs = randomWordsSpanish.toSorted((a, b) => b.localeCompare(a))
+
+      // Fetch sorted words in Spanish (ascending)
+      const { docs: randomWordsEsAsc } = await payload.find({
+        collection: localizedSortSlug,
+        sort: 'title',
+        where: q,
+        locale: 'es',
+      })
+
+      randomWordsEsAsc.forEach((doc, i) => {
+        expect(ascSortedWordsEs[i]).toBe(doc.title)
+      })
+
+      // Fetch sorted words in Spanish (descending)
+      const { docs: randomWordsEsDesc } = await payload.find({
+        collection: localizedSortSlug,
+        sort: '-title',
+        where: q,
+        locale: 'es',
+      })
+
+      randomWordsEsDesc.forEach((doc, i) => {
+        expect(descSortedWordsEs[i]).toBe(doc.title)
+      })
     })
   })
 

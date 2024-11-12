@@ -8,9 +8,8 @@ export const getGenerateImportMap =
   (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): RichTextAdapter['generateImportMap'] =>
   // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   ({ addToImportMap, baseDir, config, importMap, imports }) => {
-    addToImportMap('@payloadcms/richtext-lexical/client#RichTextCell')
-    addToImportMap('@payloadcms/richtext-lexical/client#RichTextField')
-    addToImportMap('@payloadcms/richtext-lexical/generateComponentMap#getGenerateComponentMap')
+    addToImportMap('@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell')
+    addToImportMap('@payloadcms/richtext-lexical/rsc#RscEntryLexicalField')
 
     // iterate just through args.resolvedFeatureMap.values()
     for (const resolvedFeature of args.resolvedFeatureMap.values()) {

@@ -420,7 +420,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
       }
 
       if (field.type === 'join') {
-        const { limit = 10 } = joinQuery?.[`${fieldPrefix.replaceAll('_', '.')}${field.name}`] || {}
+        const { limit = field.defaultLimit ?? 10 } =
+          joinQuery?.[`${fieldPrefix.replaceAll('_', '.')}${field.name}`] || {}
 
         // raw hasMany results from SQLite
         if (typeof fieldData === 'string') {
@@ -592,8 +593,16 @@ export const traverseFields = <T extends Record<string, unknown>>({
         let val = fieldData
 
         switch (field.type) {
-          case 'tab':
-          case 'group': {
+          case 'date': {
+            if (typeof fieldData === 'string') {
+              val = new Date(fieldData).toISOString()
+            }
+
+            break
+          }
+          case 'group':
+
+          case 'tab': {
             const groupFieldPrefix = `${fieldPrefix || ''}${field.name}_`
             const groupData = {}
             const locale = table._locale as string
@@ -625,14 +634,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
             return
           }
 
-          case 'text': {
-            if (typeof fieldData === 'string') {
-              val = String(fieldData)
-            }
-
-            break
-          }
-
           case 'number': {
             if (typeof fieldData === 'string') {
               val = Number.parseFloat(fieldData)
@@ -641,15 +642,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
             break
           }
 
-          case 'date': {
-            if (typeof fieldData === 'string') {
-              val = new Date(fieldData).toISOString()
-            }
-
-            break
-          }
-
           case 'relationship':
+
           case 'upload': {
             if (
               val &&
@@ -657,6 +651,13 @@ export const traverseFields = <T extends Record<string, unknown>>({
               adapter.payload.collections[field.relationTo].customIDType === 'number'
             ) {
               val = Number(val)
+            }
+
+            break
+          }
+          case 'text': {
+            if (typeof fieldData === 'string') {
+              val = String(fieldData)
             }
 
             break

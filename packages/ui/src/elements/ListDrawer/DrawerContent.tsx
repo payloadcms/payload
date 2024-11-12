@@ -1,428 +1,162 @@
 'use client'
-import type { ClientCollectionConfig, Where } from 'payload'
+import type { ClientCollectionConfig, ListQuery } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import type { ListDrawerProps } from './types.js'
 
-import { SelectMany } from '../../elements/SelectMany/index.js'
-import { FieldLabel } from '../../fields/FieldLabel/index.js'
-import { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
-import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
-import { XIcon } from '../../icons/X/index.js'
-import { useAuth } from '../../providers/Auth/index.js'
+import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
-import { ListInfoProvider } from '../../providers/ListInfo/index.js'
-import { ListQueryProvider } from '../../providers/ListQuery/index.js'
-import { usePreferences } from '../../providers/Preferences/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
-import { useDocumentDrawer } from '../DocumentDrawer/index.js'
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
+import { hoistQueryParamsToAnd } from '../../utilities/mergeListSearchAndWhere.js'
+import { ListDrawerContextProvider } from '../ListDrawer/Provider.js'
 import { LoadingOverlay } from '../Loading/index.js'
-import { Pill } from '../Pill/index.js'
-import { type Option, ReactSelect } from '../ReactSelect/index.js'
-import { TableColumnsProvider } from '../TableColumns/index.js'
-import { ViewDescription } from '../ViewDescription/index.js'
-import { baseClass } from './index.js'
-
-export const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
-  if ('and' in where) {
-    where.and.push(queryParams)
-  } else if ('or' in where) {
-    where = {
-      and: [where, queryParams],
-    }
-  } else {
-    where = {
-      and: [where, queryParams],
-    }
-  }
-
-  return where
-}
+import { type Option } from '../ReactSelect/index.js'
 
 export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   allowCreate = true,
   collectionSlugs,
-  customHeader,
   drawerSlug,
   enableRowSelections,
   filterOptions,
   onBulkSelect,
   onSelect,
-  selectedCollection,
+  selectedCollection: selectedCollectionFromProps,
 }) => {
-  const { i18n, t } = useTranslation()
-  const { permissions } = useAuth()
-  const { getPreference, setPreference } = usePreferences()
   const { closeModal, isModalOpen } = useModal()
-  const [limit, setLimit] = useState<number>()
-  // Track the page limit so we can reset the page number when it changes
-  const previousLimit = useRef<number>(limit || null)
-  const [sort, setSort] = useState<string>(null)
-  const [page, setPage] = useState<number>(1)
-  const [where, setWhere] = useState<Where>(null)
-  const [search, setSearch] = useState<string>('')
-  const [showLoadingOverlay, setShowLoadingOverlay] = useState<boolean>(true)
-  const hasInitialised = useRef(false)
 
-  const params = {
-    limit,
-    page,
-    search,
-    sort,
-    where,
-  }
+  const { serverFunction } = useServerFunctions()
+  const [ListView, setListView] = useState<React.ReactNode>(undefined)
+  const [isLoading, setIsLoading] = useState(true)
 
   const {
-    config: {
-      collections,
-      routes: { api },
-      serverURL,
-    },
+    config: { collections },
+    getEntityConfig,
   } = useConfig()
 
-  const enabledCollectionConfigs = collections.filter(({ slug }) => {
+  const isOpen = isModalOpen(drawerSlug)
+
+  const enabledCollections = collections.filter(({ slug }) => {
     return collectionSlugs.includes(slug)
   })
 
-  const [selectedCollectionConfig, setSelectedCollectionConfig] = useState<ClientCollectionConfig>(
-    () => {
-      return (
-        enabledCollectionConfigs.find(({ slug }) => slug === selectedCollection) ||
-        enabledCollectionConfigs?.[0]
-      )
-    },
-  )
+  const [selectedOption, setSelectedOption] = useState<Option<string>>(() => {
+    const initialSelection = selectedCollectionFromProps || enabledCollections[0]?.slug
+    const found = getEntityConfig({ collectionSlug: initialSelection }) as ClientCollectionConfig
 
-  const List = selectedCollectionConfig?.admin?.components.views.list.Component
-
-  const [selectedOption, setSelectedOption] = useState<Option | Option[]>(() =>
-    selectedCollectionConfig
+    return found
       ? {
-          label: getTranslation(selectedCollectionConfig.labels.singular, i18n),
-          value: selectedCollectionConfig.slug,
+          label: found.labels,
+          value: found.slug,
         }
-      : undefined,
-  )
+      : undefined
+  })
 
-  // allow external control of selected collection, same as the initial state logic above
-  useEffect(() => {
-    if (selectedCollection) {
-      // if passed a selection, find it and check if it's enabled
-      const selectedConfig =
-        enabledCollectionConfigs.find(({ slug }) => slug === selectedCollection) ||
-        enabledCollectionConfigs?.[0]
-      setSelectedCollectionConfig(selectedConfig)
-    }
-  }, [selectedCollection, enabledCollectionConfigs, onSelect, t])
-
-  const preferencesKey = `${selectedCollectionConfig.slug}-list`
-
-  // this is the 'create new' drawer
   const [DocumentDrawer, DocumentDrawerToggler, { drawerSlug: documentDrawerSlug }] =
     useDocumentDrawer({
-      collectionSlug: selectedCollectionConfig.slug,
+      collectionSlug: selectedOption.value,
     })
 
   useEffect(() => {
-    if (selectedOption && !Array.isArray(selectedOption)) {
-      setSelectedCollectionConfig(
-        enabledCollectionConfigs.find(({ slug }) => selectedOption.value === slug),
-      )
+    if (selectedCollectionFromProps && selectedCollectionFromProps !== selectedOption?.value) {
+      setSelectedOption({
+        label: collections.find(({ slug }) => slug === selectedCollectionFromProps).labels,
+        value: selectedCollectionFromProps,
+      })
     }
-  }, [selectedOption, enabledCollectionConfigs])
+  }, [selectedCollectionFromProps, collections, selectedOption])
 
-  const collectionPermissions = permissions?.collections?.[selectedCollectionConfig?.slug]
-  const hasCreatePermission = collectionPermissions?.create?.permission && allowCreate
+  const renderList = useCallback(
+    async (slug: string, query?: ListQuery) => {
+      try {
+        const newQuery: ListQuery = { ...(query || {}), where: { ...(query?.where || {}) } }
 
-  // If modal is open, get active page of upload gallery
-  const isOpen = isModalOpen(drawerSlug)
-  const apiURL = isOpen ? `${serverURL}${api}/${selectedCollectionConfig.slug}` : null
-  const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0) // used to force a re-fetch even when apiURL is unchanged
-  const [{ data, isError, isLoading: isLoadingList }, { setParams }] = usePayloadAPI(apiURL, {
-    initialParams: {
-      depth: 0,
-    },
-  })
-  const moreThanOneAvailableCollection = enabledCollectionConfigs.length > 1
+        const filterOption = filterOptions?.[slug]
 
-  useEffect(() => {
-    const {
-      slug,
-      admin: { listSearchableFields, useAsTitle } = {},
-      versions,
-    } = selectedCollectionConfig
+        if (filterOptions && typeof filterOption !== 'boolean') {
+          newQuery.where = hoistQueryParamsToAnd(newQuery.where, filterOption)
+        }
 
-    const params: {
-      cacheBust?: number
-      depth?: number
-      draft?: string
-      limit?: number
-      page?: number
-      search?: string
-      sort?: string
-      where?: unknown
-    } = {
-      depth: 0,
-    }
-
-    let copyOfWhere = { ...(where || {}) }
-    const filterOption = filterOptions?.[slug]
-
-    if (filterOptions && typeof filterOption !== 'boolean') {
-      copyOfWhere = hoistQueryParamsToAnd(copyOfWhere, filterOption)
-    }
-
-    if (search) {
-      const searchAsConditions = (listSearchableFields || [useAsTitle]).map((fieldName) => {
-        return {
-          [fieldName]: {
-            like: search,
+        const { List: ViewResult } = (await serverFunction({
+          name: 'render-list',
+          args: {
+            collectionSlug: slug,
+            disableBulkDelete: true,
+            disableBulkEdit: true,
+            drawerSlug,
+            enableRowSelections,
+            query: newQuery,
           },
+        })) as { List: React.ReactNode }
+
+        setListView(ViewResult)
+        setIsLoading(false)
+      } catch (_err) {
+        console.error('Error rendering List View: ', _err) // eslint-disable-line no-console
+
+        if (isOpen) {
+          closeModal(drawerSlug)
         }
-      }, [])
-
-      if (searchAsConditions.length > 0) {
-        const searchFilter: Where = {
-          or: [...searchAsConditions],
-        }
-
-        copyOfWhere = hoistQueryParamsToAnd(copyOfWhere, searchFilter)
-      }
-    }
-
-    if (page) {
-      params.page = page
-    }
-    if (sort) {
-      params.sort = sort
-    }
-    if (cacheBust) {
-      params.cacheBust = cacheBust
-    }
-    if (limit) {
-      params.limit = limit
-
-      if (limit !== previousLimit.current) {
-        previousLimit.current = limit
-
-        // Reset page if limit changes
-        // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
-        setPage(1)
-      }
-    }
-    if (copyOfWhere) {
-      params.where = copyOfWhere
-    }
-    if (versions?.drafts) {
-      params.draft = 'true'
-    }
-
-    setParams(params)
-  }, [
-    page,
-    sort,
-    where,
-    search,
-    limit,
-    cacheBust,
-    filterOptions,
-    selectedCollectionConfig,
-    t,
-    setParams,
-  ])
-
-  useEffect(() => {
-    const newPreferences = {
-      limit,
-      sort,
-    }
-
-    if (limit || sort) {
-      void setPreference(preferencesKey, newPreferences, true)
-    }
-  }, [sort, limit, setPreference, preferencesKey])
-
-  // Get existing preferences if they exist
-  useEffect(() => {
-    if (preferencesKey && !limit) {
-      const getInitialPref = async () => {
-        const existingPreferences = await getPreference<{ limit?: number }>(preferencesKey)
-
-        if (existingPreferences?.limit) {
-          setLimit(existingPreferences?.limit)
-        }
-      }
-      void getInitialPref()
-    }
-  }, [getPreference, limit, preferencesKey])
-
-  useThrottledEffect(
-    () => {
-      if (isLoadingList) {
-        setShowLoadingOverlay(true)
       }
     },
-    1750,
-    [isLoadingList, setShowLoadingOverlay],
+    [serverFunction, closeModal, drawerSlug, isOpen, enableRowSelections, filterOptions],
   )
 
   useEffect(() => {
-    if (isOpen) {
-      hasInitialised.current = true
-    } else {
-      hasInitialised.current = false
+    if (!ListView) {
+      void renderList(selectedOption.value)
     }
-  }, [isOpen])
-
-  useEffect(() => {
-    if (!isLoadingList && showLoadingOverlay) {
-      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
-      setShowLoadingOverlay(false)
-    }
-  }, [isLoadingList, showLoadingOverlay])
+  }, [renderList, ListView, selectedOption.value])
 
   const onCreateNew = useCallback(
     ({ doc }) => {
       if (typeof onSelect === 'function') {
         onSelect({
-          collectionSlug: selectedCollectionConfig.slug,
+          collectionSlug: selectedOption.value,
           docID: doc.id,
         })
       }
-      dispatchCacheBust()
+
       closeModal(documentDrawerSlug)
       closeModal(drawerSlug)
     },
-    [closeModal, documentDrawerSlug, drawerSlug, onSelect, selectedCollectionConfig],
+    [closeModal, documentDrawerSlug, drawerSlug, onSelect, selectedOption.value],
   )
 
-  if (!selectedCollectionConfig || isError) {
-    return null
-  }
-
-  /**
-   * Cell props for the table columns, we want the first item to be a clickable cell
-   */
-  const tableColumnCellProps = [
-    {
-      className: `${baseClass}__first-cell`,
-      link: false,
-      onClick: ({ collectionSlug: rowColl, rowData }) => {
-        if (typeof onSelect === 'function') {
-          onSelect({
-            collectionSlug: rowColl,
-            docID: rowData.id as string,
-          })
-        }
-      },
+  const onQueryChange = useCallback(
+    (query: ListQuery) => {
+      void renderList(selectedOption.value, query)
     },
-  ]
+    [renderList, selectedOption.value],
+  )
 
-  /**
-   * Table column cell props are being assigned by the column index
-   * so if enableRowSelections is true, we need to add an extra cellProps object to the start of the array
-   * to account for the first cell being the checkbox for row selection.
-   */
-  if (enableRowSelections) {
-    tableColumnCellProps.unshift(undefined)
+  const setMySelectedOption = useCallback(
+    (incomingSelection: Option<string>) => {
+      setSelectedOption(incomingSelection)
+      void renderList(incomingSelection.value)
+    },
+    [renderList],
+  )
+
+  if (isLoading) {
+    return <LoadingOverlay />
   }
 
   return (
-    <>
-      {showLoadingOverlay && <LoadingOverlay />}
-      <ListInfoProvider
-        beforeActions={
-          enableRowSelections
-            ? [<SelectMany key="select-many" onClick={onBulkSelect} />]
-            : undefined
-        }
-        collectionConfig={selectedCollectionConfig}
-        collectionSlug={selectedCollectionConfig.slug}
-        disableBulkDelete
-        disableBulkEdit
-        hasCreatePermission={hasCreatePermission}
-        Header={
-          <header className={`${baseClass}__header`}>
-            <div className={`${baseClass}__header-wrap`}>
-              <div className={`${baseClass}__header-content`}>
-                <h2 className={`${baseClass}__header-text`}>
-                  {!customHeader
-                    ? getTranslation(selectedCollectionConfig?.labels?.plural, i18n)
-                    : customHeader}
-                </h2>
-                {hasCreatePermission && (
-                  <DocumentDrawerToggler className={`${baseClass}__create-new-button`}>
-                    <Pill>{t('general:createNew')}</Pill>
-                  </DocumentDrawerToggler>
-                )}
-              </div>
-              <button
-                aria-label={t('general:close')}
-                className={`${baseClass}__header-close`}
-                onClick={() => {
-                  closeModal(drawerSlug)
-                }}
-                type="button"
-              >
-                <XIcon />
-              </button>
-            </div>
-            {(selectedCollectionConfig?.admin?.description ||
-              selectedCollectionConfig?.admin?.components?.Description) && (
-              <div className={`${baseClass}__sub-header`}>
-                <ViewDescription
-                  Description={selectedCollectionConfig.admin?.components?.Description}
-                  description={selectedCollectionConfig.admin?.description}
-                />
-              </div>
-            )}
-            {moreThanOneAvailableCollection && (
-              <div className={`${baseClass}__select-collection-wrap`}>
-                <FieldLabel field={null} label={t('upload:selectCollectionToBrowse')} />
-                <ReactSelect
-                  className={`${baseClass}__select-collection`}
-                  onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect
-                  options={enabledCollectionConfigs.map((coll) => ({
-                    label: getTranslation(coll.labels.singular, i18n),
-                    value: coll.slug,
-                  }))}
-                  value={selectedOption}
-                />
-              </div>
-            )}
-          </header>
-        }
-        newDocumentURL={null}
-      >
-        <ListQueryProvider
-          data={data}
-          defaultLimit={limit || selectedCollectionConfig?.admin?.pagination?.defaultLimit}
-          defaultSort={sort}
-          handlePageChange={setPage}
-          handlePerPageChange={setLimit}
-          handleSearchChange={setSearch}
-          handleSortChange={setSort}
-          handleWhereChange={setWhere}
-          modifySearchParams={false}
-          // @ts-expect-error todo: fix types
-          params={params}
-          preferenceKey={preferencesKey}
-        >
-          <TableColumnsProvider
-            cellProps={tableColumnCellProps}
-            collectionSlug={selectedCollectionConfig.slug}
-            enableRowSelections={enableRowSelections}
-            preferenceKey={preferencesKey}
-          >
-            <RenderComponent mappedComponent={List} />
-            <DocumentDrawer onSave={onCreateNew} />
-          </TableColumnsProvider>
-        </ListQueryProvider>
-      </ListInfoProvider>
-    </>
+    <ListDrawerContextProvider
+      createNewDrawerSlug={documentDrawerSlug}
+      DocumentDrawerToggler={DocumentDrawerToggler}
+      drawerSlug={drawerSlug}
+      enabledCollections={collectionSlugs}
+      onBulkSelect={onBulkSelect}
+      onQueryChange={onQueryChange}
+      onSelect={onSelect}
+      selectedOption={selectedOption}
+      setSelectedOption={setMySelectedOption}
+    >
+      {ListView}
+      <DocumentDrawer onSave={onCreateNew} />
+    </ListDrawerContextProvider>
   )
 }
