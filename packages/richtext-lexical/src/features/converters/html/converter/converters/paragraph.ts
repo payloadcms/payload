@@ -36,7 +36,7 @@ export const ParagraphHTMLConverter: HTMLConverter<SerializedParagraphNode> = {
     ]
       .filter(Boolean)
       .join(' ')
-    return `<p${style ? ` style="${style}"` : ''}>${childrenText}</p>`
+    return `<p${style ? ` style='${style}'` : ''}>${childrenText}</p>`
   },
   nodeTypes: ['paragraph'],
 }

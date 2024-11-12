@@ -19,7 +19,7 @@ export const HeadingHTMLConverter: HTMLConverter<any> = {
     ]
       .filter(Boolean)
       .join(' ')
-    return `<${node?.tag}${style ? ` style="${style}"` : ''}>${childrenText}</${node?.tag}>`
+    return `<${node?.tag}${style ? ` style='${style}'` : ''}>${childrenText}</${node?.tag}>`
   },
   nodeTypes: ['heading'],
 }

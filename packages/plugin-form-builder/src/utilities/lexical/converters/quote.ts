@@ -20,7 +20,7 @@ export const QuoteHTMLConverter: HTMLConverter<any> = {
       .filter(Boolean)
       .join(' ')
 
-    return `<blockquote${style ? ` style="${style}"` : ''}>${childrenText}</blockquote>`
+    return `<blockquote${style ? ` style='${style}'` : ''}>${childrenText}</blockquote>`
   },
   nodeTypes: ['quote'],
 }
