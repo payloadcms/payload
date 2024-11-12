@@ -65,21 +65,6 @@ export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
     case 'migrate':
       await adapter.migrate()
       break
-    case 'migrate:status':
-      await adapter.migrateStatus()
-      break
-    case 'migrate:down':
-      await adapter.migrateDown()
-      break
-    case 'migrate:refresh':
-      await adapter.migrateRefresh()
-      break
-    case 'migrate:reset':
-      await adapter.migrateReset()
-      break
-    case 'migrate:fresh':
-      await adapter.migrateFresh({ forceAcceptWarning })
-      break
     case 'migrate:create':
       try {
         await adapter.createMigration({
@@ -91,6 +76,21 @@ export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
       } catch (err) {
         throw new Error(`Error creating migration: ${err.message}`)
       }
+      break
+    case 'migrate:down':
+      await adapter.migrateDown()
+      break
+    case 'migrate:fresh':
+      await adapter.migrateFresh({ forceAcceptWarning })
+      break
+    case 'migrate:refresh':
+      await adapter.migrateRefresh()
+      break
+    case 'migrate:reset':
+      await adapter.migrateReset()
+      break
+    case 'migrate:status':
+      await adapter.migrateStatus()
       break
 
     default:

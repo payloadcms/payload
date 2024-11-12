@@ -7,6 +7,15 @@
     "url": "https://github.com/payloadcms/payload.git",
     "directory": "packages/ui"
   },
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
   "sideEffects": false,
   "type": "module",
   "exports": {
@@ -122,7 +131,7 @@
     "babel-plugin-react-compiler": "0.0.0-experimental-24ec0eb-20240918",
     "esbuild": "0.23.1",
     "esbuild-sass-plugin": "3.3.1",
-    "eslint-plugin-react-compiler": "0.0.0-experimental-7670337-20240918",
+    "eslint-plugin-react-compiler": "19.0.0-beta-a7bf2bd-20241110",
     "payload": "workspace:*"
   },
   "peerDependencies": {

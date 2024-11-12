@@ -17,36 +17,53 @@ const ObjectId = (ObjectIdImport.default ||
  */
 export function fieldReducer(state: FormState, action: FieldAction): FormState {
   switch (action.type) {
-    case 'REPLACE_STATE': {
-      if (action.optimize !== false) {
-        // Only update fields that have changed
-        // by comparing old value / initialValue to new
-        // ..
-        // This is a performance enhancement for saving
-        // large documents with hundreds of fields
-        const newState = {}
+    case 'ADD_ROW': {
+      const { blockType, path, rowIndex: rowIndexFromArgs, subFieldState = {} } = action
 
-        Object.entries(action.state).forEach(([path, field]) => {
-          const oldField = state[path]
-          const newField = field
+      const rowIndex =
+        typeof rowIndexFromArgs === 'number' ? rowIndexFromArgs : state[path]?.rows?.length || 0
 
-          if (!dequal(oldField, newField)) {
-            newState[path] = newField
-          } else if (oldField) {
-            newState[path] = oldField
-          }
-        })
-        return newState
+      const withNewRow = [...(state[path]?.rows || [])]
+
+      const newRow: Row = {
+        id: (subFieldState?.id?.value as string) || new ObjectId().toHexString(),
+        blockType: blockType || undefined,
+        collapsed: false,
       }
-      // If we're not optimizing, just set the state to the new state
-      return action.state
-    }
 
-    case 'REMOVE': {
-      const newState = { ...state }
-      if (newState[action.path]) {
-        delete newState[action.path]
+      withNewRow.splice(rowIndex, 0, newRow)
+
+      if (blockType) {
+        subFieldState.blockType = {
+          initialValue: blockType,
+          valid: true,
+          value: blockType,
+        }
       }
+
+      // add new row to array _field state_
+      const { remainingFields, rows: siblingRows } = separateRows(path, state)
+      siblingRows.splice(rowIndex, 0, subFieldState)
+
+      const newState: FormState = {
+        ...remainingFields,
+        ...flattenRows(path, siblingRows),
+        [`${path}.${rowIndex}.id`]: {
+          initialValue: newRow.id,
+          passesCondition: true,
+          requiresRender: true,
+          valid: true,
+          value: newRow.id,
+        },
+        [path]: {
+          ...state[path],
+          disableFormData: true,
+          requiresRender: true,
+          rows: withNewRow,
+          value: siblingRows.length,
+        },
+      }
+
       return newState
     }
 
@@ -108,160 +125,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
         return acc
       }, {})
-
-      return newState
-    }
-
-    case 'UPDATE': {
-      const newField = Object.entries(action).reduce(
-        (field, [key, value]) => {
-          if (
-            [
-              'disableFormData',
-              'errorMessage',
-              'initialValue',
-              'rows',
-              'valid',
-              'validate',
-              'value',
-            ].includes(key)
-          ) {
-            return {
-              ...field,
-              [key]: value,
-            }
-          }
-
-          return field
-        },
-        state[action.path] || ({} as FormField),
-      )
-
-      const newState = {
-        ...state,
-        [action.path]: newField,
-      }
-
-      return newState
-    }
-
-    case 'UPDATE_MANY': {
-      const newState = { ...state }
-
-      Object.entries(action.formState).forEach(([path, field]) => {
-        newState[path] = field
-      })
-
-      return newState
-    }
-
-    case 'REMOVE_ROW': {
-      const { path, rowIndex } = action
-      const { remainingFields, rows } = separateRows(path, state)
-      const rowsMetadata = [...(state[path]?.rows || [])]
-
-      rows.splice(rowIndex, 1)
-      rowsMetadata.splice(rowIndex, 1)
-
-      const newState: FormState = {
-        ...remainingFields,
-        [path]: {
-          ...state[path],
-          disableFormData: rows.length > 0,
-          requiresRender: true,
-          rows: rowsMetadata,
-          value: rows.length,
-        },
-        ...flattenRows(path, rows),
-      }
-
-      return newState
-    }
-
-    case 'ADD_ROW': {
-      const { blockType, path, rowIndex: rowIndexFromArgs, subFieldState = {} } = action
-
-      const rowIndex =
-        typeof rowIndexFromArgs === 'number' ? rowIndexFromArgs : state[path]?.rows?.length || 0
-
-      const withNewRow = [...(state[path]?.rows || [])]
-
-      const newRow: Row = {
-        id: (subFieldState?.id?.value as string) || new ObjectId().toHexString(),
-        blockType: blockType || undefined,
-        collapsed: false,
-      }
-
-      withNewRow.splice(rowIndex, 0, newRow)
-
-      if (blockType) {
-        subFieldState.blockType = {
-          initialValue: blockType,
-          valid: true,
-          value: blockType,
-        }
-      }
-
-      // add new row to array _field state_
-      const { remainingFields, rows: siblingRows } = separateRows(path, state)
-      siblingRows.splice(rowIndex, 0, subFieldState)
-
-      const newState: FormState = {
-        ...remainingFields,
-        ...flattenRows(path, siblingRows),
-        [`${path}.${rowIndex}.id`]: {
-          initialValue: newRow.id,
-          passesCondition: true,
-          requiresRender: true,
-          valid: true,
-          value: newRow.id,
-        },
-        [path]: {
-          ...state[path],
-          disableFormData: true,
-          requiresRender: true,
-          rows: withNewRow,
-          value: siblingRows.length,
-        },
-      }
-
-      return newState
-    }
-
-    case 'REPLACE_ROW': {
-      const { blockType, path, rowIndex: rowIndexArg, subFieldState = {} } = action
-
-      const { remainingFields, rows: siblingRows } = separateRows(path, state)
-      const rowIndex = Math.max(0, Math.min(rowIndexArg, siblingRows?.length - 1 || 0))
-
-      const rowsMetadata = [...(state[path]?.rows || [])]
-      rowsMetadata[rowIndex] = {
-        id: new ObjectId().toHexString(),
-        blockType: blockType || undefined,
-        collapsed: false,
-      }
-
-      if (blockType) {
-        subFieldState.blockType = {
-          initialValue: blockType,
-          valid: true,
-          value: blockType,
-        }
-      }
-
-      // replace form _field state_
-      siblingRows[rowIndex] = subFieldState
-
-      const newState: FormState = {
-        ...remainingFields,
-        ...flattenRows(path, siblingRows),
-        [path]: {
-          ...state[path],
-          disableFormData: true,
-          rows: rowsMetadata,
-          value: siblingRows.length,
-        },
-      }
 
       return newState
     }
@@ -342,6 +205,112 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       return newState
     }
 
+    case 'REMOVE': {
+      const newState = { ...state }
+      if (newState[action.path]) {
+        delete newState[action.path]
+      }
+      return newState
+    }
+
+    case 'REMOVE_ROW': {
+      const { path, rowIndex } = action
+      const { remainingFields, rows } = separateRows(path, state)
+      const rowsMetadata = [...(state[path]?.rows || [])]
+
+      rows.splice(rowIndex, 1)
+      rowsMetadata.splice(rowIndex, 1)
+
+      const newState: FormState = {
+        ...remainingFields,
+        [path]: {
+          ...state[path],
+          disableFormData: rows.length > 0,
+          requiresRender: true,
+          rows: rowsMetadata,
+          value: rows.length,
+        },
+        ...flattenRows(path, rows),
+      }
+
+      return newState
+    }
+
+    case 'REPLACE_ROW': {
+      const { blockType, path, rowIndex: rowIndexArg, subFieldState = {} } = action
+
+      const { remainingFields, rows: siblingRows } = separateRows(path, state)
+      const rowIndex = Math.max(0, Math.min(rowIndexArg, siblingRows?.length - 1 || 0))
+
+      const rowsMetadata = [...(state[path]?.rows || [])]
+      rowsMetadata[rowIndex] = {
+        id: new ObjectId().toHexString(),
+        blockType: blockType || undefined,
+        collapsed: false,
+      }
+
+      if (blockType) {
+        subFieldState.blockType = {
+          initialValue: blockType,
+          valid: true,
+          value: blockType,
+        }
+      }
+
+      // replace form _field state_
+      siblingRows[rowIndex] = subFieldState
+
+      const newState: FormState = {
+        ...remainingFields,
+        ...flattenRows(path, siblingRows),
+        [path]: {
+          ...state[path],
+          disableFormData: true,
+          rows: rowsMetadata,
+          value: siblingRows.length,
+        },
+      }
+
+      return newState
+    }
+
+    case 'REPLACE_STATE': {
+      if (action.optimize !== false) {
+        // Only update fields that have changed
+        // by comparing old value / initialValue to new
+        // ..
+        // This is a performance enhancement for saving
+        // large documents with hundreds of fields
+        const newState = {}
+
+        Object.entries(action.state).forEach(([path, field]) => {
+          const oldField = state[path]
+          const newField = field
+
+          if (!dequal(oldField, newField)) {
+            newState[path] = newField
+          } else if (oldField) {
+            newState[path] = oldField
+          }
+        })
+        return newState
+      }
+      // If we're not optimizing, just set the state to the new state
+      return action.state
+    }
+
+    case 'SET_ALL_ROWS_COLLAPSED': {
+      const { path, updatedRows } = action
+
+      return {
+        ...state,
+        [path]: {
+          ...state[path],
+          rows: updatedRows,
+        },
+      }
+    }
+
     case 'SET_ROW_COLLAPSED': {
       const { path, updatedRows } = action
 
@@ -356,16 +325,47 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       return newState
     }
 
-    case 'SET_ALL_ROWS_COLLAPSED': {
-      const { path, updatedRows } = action
+    case 'UPDATE': {
+      const newField = Object.entries(action).reduce(
+        (field, [key, value]) => {
+          if (
+            [
+              'disableFormData',
+              'errorMessage',
+              'initialValue',
+              'rows',
+              'valid',
+              'validate',
+              'value',
+            ].includes(key)
+          ) {
+            return {
+              ...field,
+              [key]: value,
+            }
+          }
 
-      return {
-        ...state,
-        [path]: {
-          ...state[path],
-          rows: updatedRows,
+          return field
         },
+        state[action.path] || ({} as FormField),
+      )
+
+      const newState = {
+        ...state,
+        [action.path]: newField,
       }
+
+      return newState
+    }
+
+    case 'UPDATE_MANY': {
+      const newState = { ...state }
+
+      Object.entries(action.formState).forEach(([path, field]) => {
+        newState[path] = field
+      })
+
+      return newState
     }
 
     default: {

@@ -124,14 +124,14 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
       if (element.textAlign) {
         if (element.type === 'relationship' || element.type === 'upload') {
           switch (element.textAlign) {
+            case 'center':
+              attr = { ...attr, style: { marginLeft: 'auto', marginRight: 'auto' } }
+              break
             case 'left':
               attr = { ...attr, style: { marginRight: 'auto' } }
               break
             case 'right':
               attr = { ...attr, style: { marginLeft: 'auto' } }
-              break
-            case 'center':
-              attr = { ...attr, style: { marginLeft: 'auto', marginRight: 'auto' } }
               break
             default:
               attr = { ...attr, style: { textAlign: element.textAlign } }
@@ -139,11 +139,11 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
           }
         } else if (element.type === 'li') {
           switch (element.textAlign) {
-            case 'right':
-              attr = { ...attr, style: { listStylePosition: 'inside', textAlign: 'right' } }
-              break
             case 'center':
               attr = { ...attr, style: { listStylePosition: 'inside', textAlign: 'center' } }
+              break
+            case 'right':
+              attr = { ...attr, style: { listStylePosition: 'inside', textAlign: 'right' } }
               break
             case 'left':
             default:

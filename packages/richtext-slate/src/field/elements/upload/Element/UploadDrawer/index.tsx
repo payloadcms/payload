@@ -77,7 +77,6 @@ export const UploadDrawer: React.FC<{
         data,
         docPermissions,
         docPreferences: await getDocPreferences(),
-        doNotAbort: true,
         globalSlug,
         operation: 'update',
         renderAllFields: true,

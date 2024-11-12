@@ -42,6 +42,9 @@ export const getGenerateSchemaMap =
             break
           }
 
+          case 'relationship':
+            break
+
           case 'upload': {
             const uploadEnabledCollections = config.collections.filter(
               ({ admin: { enableRichTextRelationship, hidden }, upload }) => {
@@ -73,9 +76,6 @@ export const getGenerateSchemaMap =
 
             break
           }
-
-          case 'relationship':
-            break
         }
       }
     })

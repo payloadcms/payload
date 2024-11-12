@@ -61,7 +61,9 @@ export const handleFormStateLocking = async ({
         collection: 'payload-locked-documents',
         depth: 1,
         limit: 1,
+        overrideAccess: false,
         pagination: false,
+        req,
         where: lockedDocumentQuery,
       })
 
@@ -125,13 +127,13 @@ export const handleFormStateLocking = async ({
           data: {
             document: collectionSlug
               ? {
-                  relationTo: [collectionSlug],
+                  relationTo: collectionSlug,
                   value: id,
                 }
               : undefined,
             globalSlug: globalSlug ? globalSlug : undefined,
             user: {
-              relationTo: [req.user.collection],
+              relationTo: req.user.collection,
               value: req.user.id,
             },
           },

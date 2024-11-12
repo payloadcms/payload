@@ -481,10 +481,8 @@ describe('access control', () => {
 
       await expect(page.locator('.unauthorized')).toBeVisible()
 
-      await page.goto(logoutURL)
-      await page.waitForURL(logoutURL)
-
       // Log back in for the next test
+      await page.goto(logoutURL)
       await login({
         data: {
           email: devUser.email,
@@ -528,6 +526,19 @@ describe('access control', () => {
       await page.waitForURL(unauthorizedURL)
 
       await expect(page.locator('.unauthorized')).toBeVisible()
+
+      // Log back in for the next test
+      await context.clearCookies()
+      await page.goto(logoutURL)
+      await page.waitForURL(logoutURL)
+      await login({
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+        page,
+        serverURL,
+      })
     })
   })
 
