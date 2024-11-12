@@ -13,16 +13,6 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
   const workflowSlugs: Set<string> = new Set()
   const taskSlugs: Set<string> = new Set(['inline'])
 
-  const queueNames: Set<string> = new Set(['default'])
-
-  config.jobs?.workflows.forEach((workflow) => {
-    workflowSlugs.add(workflow.slug)
-
-    if (workflow.queue) {
-      queueNames.add(workflow.queue)
-    }
-  })
-
   config.jobs.tasks.forEach((task) => {
     if (workflowSlugs.has(task.slug)) {
       throw new Error(
@@ -168,13 +158,12 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
       },
       {
         name: 'queue',
-        type: 'select',
+        type: 'text',
         admin: {
           position: 'sidebar',
         },
         defaultValue: 'default',
         index: true,
-        options: [...queueNames],
       },
       {
         name: 'waitUntil',
