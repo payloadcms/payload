@@ -19,7 +19,7 @@ import { findVersionsOperation } from '../findVersions.js'
 export type Options<TSlug extends GlobalSlug> = {
   context?: RequestContext
   depth?: number
-  fallbackLocale?: 'none' | TypedLocale
+  fallbackLocale?: false | TypedLocale
   limit?: number
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean

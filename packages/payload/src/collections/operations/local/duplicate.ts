@@ -22,7 +22,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   depth?: number
   disableTransaction?: boolean
   draft?: boolean
-  fallbackLocale?: 'none' | TypedLocale
+  fallbackLocale?: false | TypedLocale
   id: number | string
   locale?: TypedLocale
   overrideAccess?: boolean

@@ -1,5 +1,5 @@
 import type { User } from '../auth/types.js'
-import type { Payload, RequestContext } from '../index.js'
+import type { Payload, RequestContext, TypedLocale } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { getDataLoader } from '../collections/dataloader.js'
@@ -72,7 +72,7 @@ const attachFakeURLProperties = (req: Partial<PayloadRequest>) => {
 type CreateLocalReq = (
   options: {
     context?: RequestContext
-    fallbackLocale?: string
+    fallbackLocale?: false | TypedLocale
     locale?: string
     req?: Partial<PayloadRequest>
     user?: User

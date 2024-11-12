@@ -16,7 +16,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   context?: RequestContext
   depth?: number
   draft?: boolean
-  fallbackLocale?: 'none' | TypedLocale
+  fallbackLocale?: false | TypedLocale
   includeLockStatus?: boolean
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean

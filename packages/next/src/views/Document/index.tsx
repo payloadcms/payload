@@ -149,6 +149,7 @@ export const renderDocument = async ({
       data: doc,
       docPermissions,
       docPreferences,
+      fallbackLocale: false,
       globalSlug,
       locale: locale?.code,
       operation: (collectionSlug && id) || globalSlug ? 'update' : 'create',

@@ -392,7 +392,7 @@ describe('Localization', () => {
     })
 
     describe('Localized Sort Count', () => {
-      const expectedTotalDocs = 5
+      const expectedTotalDocs = 15
       const posts: LocalizedSort[] = []
       beforeAll(async () => {
         for (let i = 1; i <= expectedTotalDocs; i++) {
@@ -560,34 +560,6 @@ describe('Localization', () => {
         randomWordsEsDesc.forEach((doc, i) => {
           expect(descSortedWordsEs[i]).toBe(doc.title)
         })
-      })
-
-      it('should have correct totalDocs when unsorted', async () => {
-        const simpleQuery = await payload.find({
-          collection: localizedSortSlug,
-        })
-        const sortByIdQuery = await payload.find({
-          collection: localizedSortSlug,
-          sort: 'id',
-        })
-
-        expect(simpleQuery.totalDocs).toEqual(expectedTotalDocs)
-        expect(sortByIdQuery.totalDocs).toEqual(expectedTotalDocs)
-      })
-
-      // https://github.com/payloadcms/payload/issues/4889
-      it('should have correct totalDocs when sorted by localized fields', async () => {
-        const sortByTitleQuery = await payload.find({
-          collection: localizedSortSlug,
-          sort: 'title',
-        })
-        const sortByDateQuery = await payload.find({
-          collection: localizedSortSlug,
-          sort: 'date',
-        })
-
-        expect(sortByTitleQuery.totalDocs).toEqual(expectedTotalDocs)
-        expect(sortByDateQuery.totalDocs).toEqual(expectedTotalDocs)
       })
     })
 

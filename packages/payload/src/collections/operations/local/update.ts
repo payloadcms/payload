@@ -33,7 +33,7 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
   depth?: number
   disableTransaction?: boolean
   draft?: boolean
-  fallbackLocale?: 'none' | TypedLocale
+  fallbackLocale?: false | TypedLocale
   file?: File
   filePath?: string
   locale?: TypedLocale

@@ -22,7 +22,7 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
   context?: RequestContext
   depth?: number
   disableTransaction?: boolean
-  fallbackLocale?: 'none' | TypedLocale
+  fallbackLocale?: false | TypedLocale
   locale?: TypedLocale
   overrideAccess?: boolean
   overrideLock?: boolean
