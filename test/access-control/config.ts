@@ -17,6 +17,7 @@ import {
   hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
+  localizedSlug,
   noAdminAccessEmail,
   nonAdminUserEmail,
   nonAdminUserSlug,
@@ -70,6 +71,10 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
+  localization: {
+    locales: ['en', 'es', 'fr'],
+    defaultLocale: 'en',
+  },
   collections: [
     {
       slug: 'users',
@@ -110,6 +115,37 @@ export default buildConfigWithDefaults({
       fields: [],
     },
     {
+      slug: localizedSlug,
+      access: {
+        update: ({ locale }) => {
+          if (locale === 'en') {
+            return true
+          }
+          return false
+        },
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          localized: true,
+        },
+        {
+          name: 'content',
+          type: 'text',
+          localized: true,
+        },
+        {
+          name: 'noAccess',
+          type: 'text',
+          localized: true,
+          access: {
+            read: () => true,
+          },
+        },
+      ],
+    },
+    {
       slug,
       access: {
         ...openAccess,
@@ -139,6 +175,7 @@ export default buildConfigWithDefaults({
             },
           ],
         },
+
         {
           type: 'row',
           fields: [

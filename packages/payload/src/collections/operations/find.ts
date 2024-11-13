@@ -102,7 +102,10 @@ export const findOperation = async <
     let accessResult: AccessResult
 
     if (!overrideAccess) {
-      accessResult = await executeAccess({ disableErrors, req }, collectionConfig.access.read)
+      accessResult = await executeAccess(
+        { disableErrors, locale, req },
+        collectionConfig.access.read,
+      )
 
       // If errors are disabled, and access returns false, return empty results
       if (accessResult === false) {

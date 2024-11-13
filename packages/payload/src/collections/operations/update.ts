@@ -116,7 +116,7 @@ export const updateOperation = async <
 
     let accessResult: AccessResult
     if (!overrideAccess) {
-      accessResult = await executeAccess({ req }, collectionConfig.access.update)
+      accessResult = await executeAccess({ locale, req }, collectionConfig.access.update)
     }
 
     await validateQueryPaths({

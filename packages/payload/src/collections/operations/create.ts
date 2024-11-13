@@ -120,7 +120,7 @@ export const createOperation = async <
     // /////////////////////////////////////
 
     if (!overrideAccess) {
-      await executeAccess({ data, req }, collectionConfig.access.create)
+      await executeAccess({ data, locale, req }, collectionConfig.access.create)
     }
 
     // /////////////////////////////////////

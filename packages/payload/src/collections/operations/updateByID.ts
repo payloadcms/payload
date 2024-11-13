@@ -128,7 +128,7 @@ export const updateByIDOperation = async <
     // /////////////////////////////////////
 
     const accessResults = !overrideAccess
-      ? await executeAccess({ id, data, req }, collectionConfig.access.update)
+      ? await executeAccess({ id, data, locale, req }, collectionConfig.access.update)
       : true
     const hasWherePolicy = hasWhereAccessResult(accessResults)
 
