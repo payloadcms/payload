@@ -14,7 +14,6 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { useFieldProps } from '../FieldPropsProvider/index.js'
 import {
   useForm,
   useFormFields,
@@ -29,13 +28,8 @@ import {
  *
  * @see https://payloadcms.com/docs/admin/hooks#usefield
  */
-export const useField = <T,>(options: Options): FieldType<T> => {
-  const { disableFormData = false, hasRows, validate } = options
-
-  const { path: pathFromContext, permissions, readOnly, schemaPath } = useFieldProps()
-
-  // Prioritize passed in path over context path. If the context path should be prioritized (which is the case for top-level useField calls in fields), it should be passed in as the options path.
-  const path = options.path || pathFromContext
+export const useField = <TValue,>(options: Options): FieldType<TValue> => {
+  const { disableFormData = false, hasRows, path, validate } = options
 
   const submitted = useFormSubmitted()
   const processing = useFormProcessing()
@@ -56,8 +50,8 @@ export const useField = <T,>(options: Options): FieldType<T> => {
   const modified = useFormModified()
 
   const filterOptions = field?.filterOptions
-  const value = field?.value as T
-  const initialValue = field?.initialValue as T
+  const value = field?.value as TValue
+  const initialValue = field?.initialValue as TValue
   const valid = typeof field?.valid === 'boolean' ? field.valid : true
   const showError = valid === false && submitted
 
@@ -106,8 +100,9 @@ export const useField = <T,>(options: Options): FieldType<T> => {
 
   // Store result from hook as ref
   // to prevent unnecessary rerenders
-  const result: FieldType<T> = useMemo(
+  const result: FieldType<TValue> = useMemo(
     () => ({
+      customComponents: field?.customComponents,
       errorMessage: field?.errorMessage,
       errorPaths: field?.errorPaths || [],
       filterOptions,
@@ -116,10 +111,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
       formSubmitted: submitted,
       initialValue,
       path,
-      permissions,
-      readOnly: readOnly || false,
       rows: field?.rows,
-      schemaPath,
       setValue,
       showError,
       valid: field?.valid,
@@ -137,11 +129,9 @@ export const useField = <T,>(options: Options): FieldType<T> => {
       value,
       initialValue,
       path,
-      schemaPath,
-      readOnly,
-      permissions,
       filterOptions,
       initializing,
+      field?.customComponents,
     ],
   )
 

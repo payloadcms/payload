@@ -3,7 +3,6 @@
 
 export { slashMenuBasicGroupWithItems } from '../../features/shared/slashMenu/basicGroup.js'
 
-export { RichTextCell } from '../../cell/index.js'
 export { AlignFeatureClient } from '../../features/align/client/index.js'
 export { BlockquoteFeatureClient } from '../../features/blockquote/client/index.js'
 export { BlocksFeatureClient } from '../../features/blocks/client/index.js'

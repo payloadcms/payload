@@ -1,5 +1,6 @@
 'use client'
 
+import { $isTableSelection } from '@lexical/table'
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import type { ToolbarGroup } from '../../toolbars/types.js'
@@ -13,7 +14,7 @@ const toolbarGroups: ToolbarGroup[] = [
     {
       ChildComponent: SubscriptIcon,
       isActive: ({ selection }) => {
-        if ($isRangeSelection(selection)) {
+        if ($isRangeSelection(selection) || $isTableSelection(selection)) {
           return selection.hasFormat('subscript')
         }
         return false

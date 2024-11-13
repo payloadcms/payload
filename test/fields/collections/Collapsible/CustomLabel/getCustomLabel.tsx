@@ -1,4 +1,4 @@
-import type { RowLabelComponent } from 'payload'
+import type { CollapsibleField } from 'payload'
 import type React from 'react'
 
 export const getCustomLabel = ({
@@ -9,7 +9,7 @@ export const getCustomLabel = ({
   fallback?: string
   path: string
   style: React.CSSProperties
-}): RowLabelComponent => {
+}): CollapsibleField['admin']['components']['Label'] => {
   return {
     clientProps: {
       fallback,

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-gcs",
-  "version": "3.0.0-beta.117",
+  "version": "3.0.0-beta.129",
   "description": "Payload storage adapter for Google Cloud Storage",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -10,6 +10,13 @@
   },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
   "type": "module",
   "exports": {
     ".": {

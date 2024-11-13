@@ -1,7 +1,8 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
-import type { Field, JoinQuery } from 'payload'
+import type { Field, JoinQuery, SelectMode, SelectType, TabAsField } from 'payload'
 
 import { and, eq, sql } from 'drizzle-orm'
+import { combineQueries } from 'payload'
 import { fieldAffectsData, fieldIsVirtual, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
@@ -17,15 +18,24 @@ type TraverseFieldArgs = {
   currentArgs: Result
   currentTableName: string
   depth?: number
-  fields: Field[]
+  fields: (Field | TabAsField)[]
   joinQuery: JoinQuery
   joins?: BuildQueryJoinAliases
   locale?: string
   path: string
+  select?: SelectType
+  selectAllOnCurrentLevel?: boolean
+  selectMode?: SelectMode
   tablePath: string
   topLevelArgs: Record<string, unknown>
   topLevelTableName: string
   versions?: boolean
+  withinLocalizedField?: boolean
+  withTabledFields: {
+    numbers?: boolean
+    rels?: boolean
+    texts?: boolean
+  }
 }
 
 export const traverseFields = ({
@@ -39,10 +49,15 @@ export const traverseFields = ({
   joins,
   locale,
   path,
+  select,
+  selectAllOnCurrentLevel = false,
+  selectMode,
   tablePath,
   topLevelArgs,
   topLevelTableName,
   versions,
+  withinLocalizedField = false,
+  withTabledFields,
 }: TraverseFieldArgs) => {
   fields.forEach((field) => {
     if (fieldIsVirtual(field)) {
@@ -63,7 +78,11 @@ export const traverseFields = ({
       }
     }
 
-    if (field.type === 'collapsible' || field.type === 'row') {
+    if (
+      field.type === 'collapsible' ||
+      field.type === 'row' ||
+      (field.type === 'tab' && !tabHasName(field))
+    ) {
       traverseFields({
         _locales,
         adapter,
@@ -74,34 +93,36 @@ export const traverseFields = ({
         joinQuery,
         joins,
         path,
+        select,
+        selectMode,
         tablePath,
         topLevelArgs,
         topLevelTableName,
+        withTabledFields,
       })
 
       return
     }
 
     if (field.type === 'tabs') {
-      field.tabs.forEach((tab) => {
-        const tabPath = tabHasName(tab) ? `${path}${tab.name}_` : path
-        const tabTablePath = tabHasName(tab) ? `${tablePath}${toSnakeCase(tab.name)}_` : tablePath
-
-        traverseFields({
-          _locales,
-          adapter,
-          currentArgs,
-          currentTableName,
-          depth,
-          fields: tab.fields,
-          joinQuery,
-          joins,
-          path: tabPath,
-          tablePath: tabTablePath,
-          topLevelArgs,
-          topLevelTableName,
-          versions,
-        })
+      traverseFields({
+        _locales,
+        adapter,
+        currentArgs,
+        currentTableName,
+        depth,
+        fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+        joinQuery,
+        joins,
+        path,
+        select,
+        selectAllOnCurrentLevel,
+        selectMode,
+        tablePath,
+        topLevelArgs,
+        topLevelTableName,
+        versions,
+        withTabledFields,
       })
 
       return
@@ -110,10 +131,27 @@ export const traverseFields = ({
     if (fieldAffectsData(field)) {
       switch (field.type) {
         case 'array': {
+          const arraySelect = selectAllOnCurrentLevel ? true : select?.[field.name]
+
+          if (select) {
+            if (
+              (selectMode === 'include' && typeof arraySelect === 'undefined') ||
+              (selectMode === 'exclude' && arraySelect === false)
+            ) {
+              break
+            }
+          }
+
           const withArray: Result = {
-            columns: {
-              _parentID: false,
-            },
+            columns:
+              typeof arraySelect === 'object'
+                ? {
+                    id: true,
+                    _order: true,
+                  }
+                : {
+                    _parentID: false,
+                  },
             orderBy: ({ _order }, { asc }) => [asc(_order)],
             with: {},
           }
@@ -122,17 +160,33 @@ export const traverseFields = ({
             `${currentTableName}_${tablePath}${toSnakeCase(field.name)}`,
           )
 
+          if (typeof arraySelect === 'object') {
+            if (adapter.tables[arrayTableName]._locale) {
+              withArray.columns._locale = true
+            }
+
+            if (adapter.tables[arrayTableName]._uuid) {
+              withArray.columns._uuid = true
+            }
+          }
+
           const arrayTableNameWithLocales = `${arrayTableName}${adapter.localesSuffix}`
 
           if (adapter.tables[arrayTableNameWithLocales]) {
             withArray.with._locales = {
-              columns: {
-                id: false,
-                _parentID: false,
-              },
+              columns:
+                typeof arraySelect === 'object'
+                  ? {
+                      _locale: true,
+                    }
+                  : {
+                      id: false,
+                      _parentID: false,
+                    },
               with: {},
             }
           }
+
           currentArgs.with[`${path}${field.name}`] = withArray
 
           traverseFields({
@@ -144,40 +198,75 @@ export const traverseFields = ({
             fields: field.fields,
             joinQuery,
             path: '',
+            select: typeof arraySelect === 'object' ? arraySelect : undefined,
+            selectMode,
             tablePath: '',
             topLevelArgs,
             topLevelTableName,
+            withinLocalizedField: withinLocalizedField || field.localized,
+            withTabledFields,
           })
 
-          break
-        }
-
-        case 'select': {
-          if (field.hasMany) {
-            const withSelect: Result = {
-              columns: {
-                id: false,
-                order: false,
-                parent: false,
-              },
-              orderBy: ({ order }, { asc }) => [asc(order)],
-            }
-
-            currentArgs.with[`${path}${field.name}`] = withSelect
+          if (
+            typeof arraySelect === 'object' &&
+            withArray.with._locales &&
+            Object.keys(withArray.with._locales).length === 1
+          ) {
+            delete withArray.with._locales
           }
 
           break
         }
 
-        case 'blocks':
+        case 'blocks': {
+          const blocksSelect = selectAllOnCurrentLevel ? true : select?.[field.name]
+
+          if (select) {
+            if (
+              (selectMode === 'include' && !blocksSelect) ||
+              (selectMode === 'exclude' && blocksSelect === false)
+            ) {
+              break
+            }
+          }
+
           field.blocks.forEach((block) => {
             const blockKey = `_blocks_${block.slug}`
 
+            let blockSelect: boolean | SelectType | undefined
+
+            let blockSelectMode = selectMode
+
+            if (selectMode === 'include' && blocksSelect === true) {
+              blockSelect = true
+            }
+
+            if (typeof blocksSelect === 'object') {
+              if (typeof blocksSelect[block.slug] === 'object') {
+                blockSelect = blocksSelect[block.slug]
+              } else if (
+                (selectMode === 'include' && typeof blocksSelect[block.slug] === 'undefined') ||
+                (selectMode === 'exclude' && blocksSelect[block.slug] === false)
+              ) {
+                blockSelect = {}
+                blockSelectMode = 'include'
+              } else if (selectMode === 'include' && blocksSelect[block.slug] === true) {
+                blockSelect = true
+              }
+            }
+
             if (!topLevelArgs[blockKey]) {
               const withBlock: Result = {
-                columns: {
-                  _parentID: false,
-                },
+                columns:
+                  typeof blockSelect === 'object'
+                    ? {
+                        id: true,
+                        _order: true,
+                        _path: true,
+                      }
+                    : {
+                        _parentID: false,
+                      },
                 orderBy: ({ _order }, { asc }) => [asc(_order)],
                 with: {},
               }
@@ -186,9 +275,25 @@ export const traverseFields = ({
                 `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`,
               )
 
+              if (typeof blockSelect === 'object') {
+                if (adapter.tables[tableName]._locale) {
+                  withBlock.columns._locale = true
+                }
+
+                if (adapter.tables[tableName]._uuid) {
+                  withBlock.columns._uuid = true
+                }
+              }
+
               if (adapter.tables[`${tableName}${adapter.localesSuffix}`]) {
                 withBlock.with._locales = {
                   with: {},
+                }
+
+                if (typeof blockSelect === 'object') {
+                  withBlock.with._locales.columns = {
+                    _locale: true,
+                  }
                 }
               }
               topLevelArgs.with[blockKey] = withBlock
@@ -202,16 +307,37 @@ export const traverseFields = ({
                 fields: block.fields,
                 joinQuery,
                 path: '',
+                select: typeof blockSelect === 'object' ? blockSelect : undefined,
+                selectMode: blockSelectMode,
                 tablePath: '',
                 topLevelArgs,
                 topLevelTableName,
+                withinLocalizedField: withinLocalizedField || field.localized,
+                withTabledFields,
               })
+
+              if (
+                typeof blockSelect === 'object' &&
+                withBlock.with._locales &&
+                Object.keys(withBlock.with._locales.columns).length === 1
+              ) {
+                delete withBlock.with._locales
+              }
             }
           })
 
           break
+        }
 
-        case 'group': {
+        case 'group':
+
+        case 'tab': {
+          const fieldSelect = select?.[field.name]
+
+          if (fieldSelect === false) {
+            break
+          }
+
           traverseFields({
             _locales,
             adapter,
@@ -222,26 +348,46 @@ export const traverseFields = ({
             joinQuery,
             joins,
             path: `${path}${field.name}_`,
+            select: typeof fieldSelect === 'object' ? fieldSelect : undefined,
+            selectAllOnCurrentLevel:
+              selectAllOnCurrentLevel ||
+              fieldSelect === true ||
+              (selectMode === 'exclude' && typeof fieldSelect === 'undefined'),
+            selectMode,
             tablePath: `${tablePath}${toSnakeCase(field.name)}_`,
             topLevelArgs,
             topLevelTableName,
             versions,
+            withinLocalizedField: withinLocalizedField || field.localized,
+            withTabledFields,
           })
 
           break
         }
-
         case 'join': {
           // when `joinsQuery` is false, do not join
           if (joinQuery === false) {
             break
           }
 
+          if (
+            (select && selectMode === 'include' && !select[field.name]) ||
+            (selectMode === 'exclude' && select[field.name] === false)
+          ) {
+            break
+          }
+
+          const joinSchemaPath = `${path.replaceAll('_', '.')}${field.name}`
+
+          if (joinQuery[joinSchemaPath] === false) {
+            break
+          }
+
           const {
-            limit: limitArg = 10,
-            sort,
+            limit: limitArg = field.defaultLimit ?? 10,
+            sort = field.defaultSort,
             where,
-          } = joinQuery[`${path.replaceAll('_', '.')}${field.name}`] || {}
+          } = joinQuery[joinSchemaPath] || {}
           let limit = limitArg
 
           if (limit !== 0) {
@@ -285,7 +431,9 @@ export const traverseFields = ({
             let columnReferenceToCurrentID: string
 
             if (versions) {
-              columnReferenceToCurrentID = `${topLevelTableName.replace('_', '').replace(new RegExp(`${adapter.versionsSuffix}$`), '')}_id`
+              columnReferenceToCurrentID = `${topLevelTableName
+                .replace('_', '')
+                .replace(new RegExp(`${adapter.versionsSuffix}$`), '')}_id`
             } else {
               columnReferenceToCurrentID = `${topLevelTableName}_id`
             }
@@ -373,7 +521,7 @@ export const traverseFields = ({
               })
               .from(adapter.tables[joinCollectionTableName])
               .where(subQueryWhere)
-              .orderBy(orderBy.order(orderBy.column)),
+              .orderBy(() => orderBy.map(({ column, order }) => order(column))),
           })
 
           const columnName = `${path.replaceAll('.', '_')}${field.name}`
@@ -407,7 +555,107 @@ export const traverseFields = ({
           break
         }
 
+        case 'point': {
+          if (adapter.name === 'sqlite') {
+            break
+          }
+
+          const args = field.localized ? _locales : currentArgs
+          if (!args.columns) {
+            args.columns = {}
+          }
+
+          if (!args.extras) {
+            args.extras = {}
+          }
+
+          const name = `${path}${field.name}`
+
+          // Drizzle handles that poorly. See https://github.com/drizzle-team/drizzle-orm/issues/2526
+          // Additionally, this way we format the column value straight in the database using ST_AsGeoJSON
+          args.columns[name] = false
+
+          let shouldSelect = false
+
+          if (select || selectAllOnCurrentLevel) {
+            if (
+              selectAllOnCurrentLevel ||
+              (selectMode === 'include' && select[field.name] === true) ||
+              (selectMode === 'exclude' && typeof select[field.name] === 'undefined')
+            ) {
+              shouldSelect = true
+            }
+          } else {
+            shouldSelect = true
+          }
+
+          if (shouldSelect) {
+            args.extras[name] = sql.raw(`ST_AsGeoJSON(${toSnakeCase(name)})::jsonb`).as(name)
+          }
+          break
+        }
+
+        case 'select': {
+          if (field.hasMany) {
+            if (select) {
+              if (
+                (selectMode === 'include' && !select[field.name]) ||
+                (selectMode === 'exclude' && select[field.name] === false)
+              ) {
+                break
+              }
+            }
+
+            const withSelect: Result = {
+              columns: {
+                id: false,
+                order: false,
+                parent: false,
+              },
+              orderBy: ({ order }, { asc }) => [asc(order)],
+            }
+
+            currentArgs.with[`${path}${field.name}`] = withSelect
+          }
+
+          break
+        }
+
         default: {
+          if (!select && !selectAllOnCurrentLevel) {
+            break
+          }
+
+          if (
+            selectAllOnCurrentLevel ||
+            (selectMode === 'include' && select[field.name] === true) ||
+            (selectMode === 'exclude' && typeof select[field.name] === 'undefined')
+          ) {
+            const fieldPath = `${path}${field.name}`
+
+            if ((field.localized || withinLocalizedField) && _locales) {
+              _locales.columns[fieldPath] = true
+            } else if (adapter.tables[currentTableName]?.[fieldPath]) {
+              currentArgs.columns[fieldPath] = true
+            }
+
+            if (
+              !withTabledFields.rels &&
+              field.type === 'relationship' &&
+              (field.hasMany || Array.isArray(field.relationTo))
+            ) {
+              withTabledFields.rels = true
+            }
+
+            if (!withTabledFields.numbers && field.type === 'number' && field.hasMany) {
+              withTabledFields.numbers = true
+            }
+
+            if (!withTabledFields.texts && field.type === 'text' && field.hasMany) {
+              withTabledFields.texts = true
+            }
+          }
+
           break
         }
       }

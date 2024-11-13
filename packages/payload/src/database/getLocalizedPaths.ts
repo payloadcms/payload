@@ -92,8 +92,8 @@ export async function getLocalizedPaths({
 
         switch (matchedField.type) {
           case 'blocks':
-          case 'richText':
-          case 'json': {
+          case 'json':
+          case 'richText': {
             const upcomingSegments = pathSegments.slice(i + 1).join('.')
             lastIncompletePath.complete = true
             lastIncompletePath.path = upcomingSegments

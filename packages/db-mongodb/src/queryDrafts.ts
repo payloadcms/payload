@@ -1,12 +1,13 @@
 import type { PaginateOptions } from 'mongoose'
 import type { PayloadRequest, QueryDrafts } from 'payload'
 
-import { combineQueries, flattenWhereToOperators } from 'payload'
+import { buildVersionCollectionFields, combineQueries, flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
@@ -20,6 +21,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     page,
     pagination,
     req = {} as PayloadRequest,
+    select,
     sort: sortArg,
     where,
   },
@@ -54,6 +56,11 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     where: combinedWhere,
   })
 
+  const projection = buildProjectionFromSelect({
+    adapter: this,
+    fields: buildVersionCollectionFields(this.payload.config, collectionConfig),
+    select,
+  })
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount =
     hasNearConstraint || !versionQuery || Object.keys(versionQuery).length === 0
@@ -64,6 +71,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     options,
     page,
     pagination,
+    projection,
     sort,
     useEstimatedCount,
   }
@@ -107,8 +115,8 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     collection,
     collectionConfig,
     joins,
-    limit,
     locale,
+    projection,
     query: versionQuery,
     versions: true,
   })

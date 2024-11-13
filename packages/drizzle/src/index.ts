@@ -1,4 +1,6 @@
 export { count } from './count.js'
+export { countGlobalVersions } from './countGlobalVersions.js'
+export { countVersions } from './countVersions.js'
 export { create } from './create.js'
 export { createGlobal } from './createGlobal.js'
 export { createGlobalVersion } from './createGlobalVersion.js'

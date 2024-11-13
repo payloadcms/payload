@@ -26,6 +26,7 @@ export const findMany = async function find({
   page = 1,
   pagination,
   req = {} as PayloadRequest,
+  select,
   skip,
   sort,
   tableName,
@@ -59,9 +60,9 @@ export const findMany = async function find({
 
   const selectDistinctMethods: ChainedMethods = []
 
-  if (orderBy?.order && orderBy?.column) {
+  if (orderBy) {
     selectDistinctMethods.push({
-      args: [orderBy.order(orderBy.column)],
+      args: [() => orderBy.map(({ column, order }) => order(column))],
       method: 'orderBy',
     })
   }
@@ -72,6 +73,7 @@ export const findMany = async function find({
     fields,
     joinQuery,
     joins,
+    select,
     tableName,
     versions,
   })
@@ -114,7 +116,7 @@ export const findMany = async function find({
   } else {
     findManyArgs.limit = limit
     findManyArgs.offset = offset
-    findManyArgs.orderBy = orderBy.order(orderBy.column)
+    findManyArgs.orderBy = () => orderBy.map(({ column, order }) => order(column))
 
     if (where) {
       findManyArgs.where = where

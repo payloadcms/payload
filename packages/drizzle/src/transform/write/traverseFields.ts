@@ -1,5 +1,6 @@
 import type { Field } from 'payload'
 
+import { sql } from 'drizzle-orm'
 import { fieldAffectsData, fieldIsVirtual } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
@@ -591,6 +592,9 @@ export const traverseFields = ({
       valuesToTransform.forEach(({ localeKey, ref, value }) => {
         if (typeof value !== 'undefined') {
           let formattedValue = value
+          if (value && field.type === 'point' && adapter.name !== 'sqlite') {
+            formattedValue = sql`ST_GeomFromGeoJSON(${JSON.stringify(value)})`
+          }
 
           if (field.type === 'date') {
             if (typeof value === 'number' && !Number.isNaN(value)) {

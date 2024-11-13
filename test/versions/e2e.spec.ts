@@ -45,6 +45,7 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
+import { waitForAutoSaveToRunAndComplete } from '../helpers/waitForAutoSaveToRunAndComplete.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { titleToDelete } from './shared.js'
 import {
@@ -71,26 +72,6 @@ let payload: PayloadTestSDK<Config>
 let global: AdminUrlUtil
 let id: string
 
-const waitForAutoSaveToComplete = async (page: Page) => {
-  await expect(async () => {
-    await expect(
-      page.locator('.autosave:has-text("Last saved less than a minute ago")'),
-    ).toBeVisible()
-  }).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-}
-
-const waitForAutoSaveToRunAndComplete = async (page: Page) => {
-  await expect(async () => {
-    await expect(page.locator('.autosave:has-text("Saving...")')).toBeVisible()
-  }).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-
-  await waitForAutoSaveToComplete(page)
-}
-
 let context: BrowserContext
 
 describe('versions', () => {
@@ -113,9 +94,15 @@ describe('versions', () => {
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   beforeEach(async () => {
+    /* await throttleTest({
+      page,
+      context,
+      delay: 'Slow 4G',
+    }) */
     await reInitializeDB({
       serverURL,
       snapshotKey: 'versionsTest',
@@ -425,7 +412,6 @@ describe('versions', () => {
       const spanishTitle = 'spanish title'
       const newDescription = 'new description'
       await page.goto(autosaveURL.create)
-      await waitForAutoSaveToComplete(page)
       const titleField = page.locator('#field-title')
       await expect(titleField).toBeEnabled()
       await titleField.fill(englishTitle)
@@ -489,22 +475,18 @@ describe('versions', () => {
 
     test('collection — autosave should only update the current document', async () => {
       await page.goto(autosaveURL.create)
-      await waitForAutoSaveToComplete(page)
       await expect(page.locator('#field-title')).toBeEnabled()
       await page.locator('#field-title').fill('first post title')
       await expect(page.locator('#field-description')).toBeEnabled()
       await page.locator('#field-description').fill('first post description')
       await saveDocAndAssert(page)
-      await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
       await page.goto(autosaveURL.create)
-      await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
       await wait(500)
       await expect(page.locator('#field-title')).toBeEnabled()
       await page.locator('#field-title').fill('second post title')
       await expect(page.locator('#field-description')).toBeEnabled()
       await page.locator('#field-description').fill('second post description')
       await saveDocAndAssert(page)
-      await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
       await page.locator('#field-title').fill('updated second post title')
       await page.locator('#field-description').fill('updated second post description')
       await waitForAutoSaveToRunAndComplete(page)

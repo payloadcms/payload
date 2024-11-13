@@ -39,7 +39,7 @@ This plugin is a great way to implement a fast, immersive search experience such
 Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
 
 ```bash
-  pnpm add @payloadcms/plugin-search
+  pnpm add @payloadcms/plugin-search@beta
 ```
 
 ## Basic Usage
@@ -80,6 +80,10 @@ export default config
 #### `collections`
 
 The `collections` property is an array of collection slugs to enable syncing to search. Enabled collections receive a `beforeChange` and `afterDelete` hook that creates, updates, and deletes its respective search record as it changes over time.
+
+### `localize`
+
+By default, the search plugin will add `localization: true` to the `title` field of the newly added `search` collection if you have localization enabled. If you would like to disable this behavior, you can set this to `false`.
 
 #### `defaultPriorities`
 
@@ -139,7 +143,8 @@ Before creating or updating a search record, the `beforeSync` function runs. Thi
   searchPlugin({
     beforeSync: ({ originalDoc, searchDoc }) => ({
       ...searchDoc,
-      // Modify your docs in any way here, this can be async
+      // - Modify your docs in any way here, this can be async
+      // - You also need to add the `excerpt` field in the `searchOverrides` config
       excerpt: originalDoc?.excerpt || 'This is a fallback excerpt',
     }),
   }),

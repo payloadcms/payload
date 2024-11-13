@@ -181,6 +181,7 @@ export const itTranslations: DefaultTranslationsObject = {
     addFilter: 'Aggiungi Filtro',
     adminTheme: 'Tema Admin',
     and: 'E',
+    anotherUser: 'Un altro utente',
     anotherUserTakenOver:
       'Un altro utente ha preso il controllo della modifica di questo documento.',
     applyChanges: 'Applica modifiche',
@@ -316,6 +317,7 @@ export const itTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Aggiornato con successo.',
     updating: 'Aggiornamento',
     uploading: 'Caricamento',
+    uploadingBulk: 'Caricamento {{current}} di {{total}}',
     user: 'Utente',
     username: 'Nome utente',
     users: 'Utenti',

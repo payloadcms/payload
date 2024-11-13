@@ -13,9 +13,11 @@ const Editor = (EditorImport.default || EditorImport) as unknown as typeof Edito
 const baseClass = 'code-editor'
 
 const CodeEditor: React.FC<Props> = (props) => {
-  const { className, options, readOnly, ...rest } = props
+  const { className, maxHeight, options, readOnly, ...rest } = props
   const [dynamicHeight, setDynamicHeight] = useState(20)
   const { theme } = useTheme()
+
+  const MIN_HEIGHT = 56 // equivalent to 3 lines
 
   const classes = [
     baseClass,
@@ -52,14 +54,14 @@ const CodeEditor: React.FC<Props> = (props) => {
       // can already have scrolling, we want the height of the
       // editor to fit its content.
       // See: https://github.com/microsoft/monaco-editor/discussions/3677
-      height={dynamicHeight}
+      height={maxHeight ? Math.min(dynamicHeight, maxHeight) : dynamicHeight}
       onChange={(value, ev) => {
         rest.onChange?.(value, ev)
-        setDynamicHeight(value.split('\n').length * 18 + 2)
+        setDynamicHeight(Math.max(MIN_HEIGHT, value.split('\n').length * 18 + 2))
       }}
       onMount={(editor, monaco) => {
         rest.onMount?.(editor, monaco)
-        setDynamicHeight(editor.getValue().split('\n').length * 18 + 2)
+        setDynamicHeight(Math.max(MIN_HEIGHT, editor.getValue().split('\n').length * 18 + 2))
       }}
     />
   )

@@ -3,6 +3,8 @@ import type { LexicalEditor, Spread } from 'lexical'
 import type React from 'react'
 import type { RefObject } from 'react'
 
+import type { FeatureClientSchemaMap } from '../../../../types.js'
+
 export type SlashMenuItem = {
   /** The icon which is rendered in your slash menu item. */
   Icon: React.FC
@@ -17,8 +19,8 @@ export type SlashMenuItem = {
   /** The label will be displayed in your slash menu item. In order to make use of i18n, this can be a function. */
   label?:
     | ((args: {
+        featureClientSchemaMap: FeatureClientSchemaMap
         i18n: I18nClient<{}, string>
-        richTextComponentMap?: Map<string, React.ReactNode>
         schemaPath: string
       }) => string)
     | string
@@ -38,8 +40,8 @@ export type SlashMenuGroup = {
   /** The label will be displayed before your Slash Menu group. In order to make use of i18n, this can be a function. */
   label?:
     | ((args: {
+        featureClientSchemaMap: FeatureClientSchemaMap
         i18n: I18nClient<{}, string>
-        richTextComponentMap: Map<string, React.ReactNode>
         schemaPath: string
       }) => string)
     | string

@@ -110,12 +110,7 @@ export type TypeaheadMenuPluginProps = {
   onClose?: () => void
   onOpen?: (resolution: MenuResolution) => void
   onQueryChange: (matchingString: null | string) => void
-  onSelectItem: (
-    item: SlashMenuItem,
-    textNodeContainingQuery: null | TextNode,
-    closeMenu: () => void,
-    matchingString: string,
-  ) => void
+  onSelectItem: (item: SlashMenuItem, closeMenu: () => void, matchingString: string) => void
   triggerFn: TriggerFn
 }
 
@@ -242,7 +237,7 @@ export function LexicalTypeaheadMenuPlugin({
     }
   }, [editor, triggerFn, onQueryChange, resolution, closeTypeahead, openTypeahead])
 
-  return resolution === null || editor === null ? null : (
+  return anchorElementRef.current === null || resolution === null || editor === null ? null : (
     <LexicalMenu
       anchorElementRef={anchorElementRef}
       close={closeTypeahead}

@@ -296,6 +296,7 @@ export function AuthProvider({
 
       forceLogOut = setTimeout(() => {
         setNewUser(null)
+        redirectToInactivityRoute()
       }, forceLogOutInTimeFromNow)
     }
 
