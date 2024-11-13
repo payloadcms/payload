@@ -272,7 +272,11 @@ export {
   type ListViewClientProps,
   type ListViewSlots,
 } from '../../views/List/index.js'
-export type { ListPreferences } from '../../views/List/types.js'
+export type {
+  ListComponentClientProps,
+  ListComponentServerProps,
+  ListPreferences,
+} from '../../views/List/types.js'
 
 export { DefaultEditView } from '../../views/Edit/index.js'
 export { SetDocumentStepNav } from '../../views/Edit/SetDocumentStepNav/index.js'

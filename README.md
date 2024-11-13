@@ -7,6 +7,8 @@
   &nbsp;
   <a href="https://discord.gg/payload"><img alt="Discord" src="https://img.shields.io/discord/967097582721572934?label=Discord&color=7289da&style=flat-square" /></a>
   &nbsp;
+  <a href="https://www.npmjs.com/package/payload"><img alt="npm" src="https://img.shields.io/npm/dw/payload?style=flat-square" /></a>
+  &nbsp;
   <a href="https://www.npmjs.com/package/payload"><img alt="npm" src="https://img.shields.io/npm/v/payload?style=flat-square" /></a>
   &nbsp;
   <a href="https://twitter.com/payloadcms"><img src="https://img.shields.io/badge/follow-payloadcms-1DA1F2?logo=twitter&style=flat-square" alt="Payload Twitter" /></a>
@@ -51,10 +53,6 @@ Jumpstart your next project by starting with a pre-made template. These are prod
 ### [🌐 Website](https://github.com/payloadcms/payload/tree/beta/templates/website)
 
 Build any kind of website, blog, or portfolio from small to enterprise. Comes with a fully functional front-end built with RSCs and Tailwind.
-
-### [🛒 E-Commerce](https://github.com/payloadcms/payload/tree/beta/templates/ecommerce)
-
-Eliminate the need to combine Shopify and a CMS, and instead do it all with Payload + Stripe. Comes with a beautiful, fully functional front-end complete with shopping cart, checkout, orders, and much more.
 
 We're constantly adding more templates to our [Templates Directory](https://github.com/payloadcms/payload/tree/beta/templates). If you maintain your own template, consider adding the `payload-template` topic to your GitHub repository for others to find.
 

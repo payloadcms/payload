@@ -8,6 +8,7 @@ import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
 import { checkDependencies, parseCookies } from 'payload'
 import React from 'react'
 
+import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage.js'
@@ -131,38 +132,7 @@ export const RootLayout = async ({
     })
   }
 
-  const navPreferences = user
-    ? (
-        await payload.find({
-          collection: 'payload-preferences',
-          depth: 0,
-          limit: 1,
-          req,
-          user,
-          where: {
-            and: [
-              {
-                key: {
-                  equals: 'nav',
-                },
-              },
-              {
-                'user.relationTo': {
-                  equals: user.collection,
-                },
-              },
-              {
-                'user.value': {
-                  equals: user.id,
-                },
-              },
-            ],
-          },
-        })
-      )?.docs?.[0]
-    : null
-
-  const isNavOpen = navPreferences?.value?.open ?? true
+  const navPrefs = await getNavPrefs({ payload, user })
 
   const clientConfig = await getClientConfig({
     config,
@@ -176,7 +146,7 @@ export const RootLayout = async ({
           config={clientConfig}
           dateFNSKey={i18n.dateFNSKey}
           fallbackLang={config.i18n.fallbackLanguage}
-          isNavOpen={isNavOpen}
+          isNavOpen={navPrefs?.open}
           languageCode={languageCode}
           languageOptions={languageOptions}
           permissions={permissions}
