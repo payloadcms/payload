@@ -215,12 +215,6 @@ export const DocumentControls: React.FC<{
         </div>
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
-            {localization && hasLocalizedFields && (
-              <RenderCustomComponent
-                CustomComponent={CustomCopyLocaleButton}
-                Fallback={<CopyLocaleData />}
-              />
-            )}
             {(collectionConfig?.admin.preview || globalConfig?.admin.preview) && (
               <RenderCustomComponent
                 CustomComponent={CustomPreviewButton}
@@ -277,6 +271,7 @@ export const DocumentControls: React.FC<{
               verticalAlign="bottom"
             >
               <PopupList.ButtonGroup>
+                {localization && hasLocalizedFields && <CopyLocaleData />}
                 {hasCreatePermission && (
                   <React.Fragment>
                     {!disableCreate && (

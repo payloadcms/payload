@@ -29,6 +29,7 @@ const formatOptions = (options: Option[]): OptionObject[] =>
 
 const SelectFieldComponent: SelectFieldClientComponent = (props) => {
   const {
+    defaultValue,
     field: {
       name,
       admin: {
@@ -102,6 +103,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       AfterInput={AfterInput}
       BeforeInput={BeforeInput}
       className={className}
+      defaultValue={defaultValue}
       Description={Description}
       description={description}
       Error={Error}

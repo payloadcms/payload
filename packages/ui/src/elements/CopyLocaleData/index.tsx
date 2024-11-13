@@ -1,33 +1,28 @@
 'use client'
 
-import type { MappedComponent } from 'payload'
-
-import { Modal, useModal } from '@faceless-ui/modal'
+import { useModal } from '@faceless-ui/modal'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
+import { CheckboxField } from '../../fields/Checkbox/index.js'
+import { SelectField } from '../../fields/Select/index.js'
 import { useForm, useFormModified } from '../../forms/Form/context.js'
-import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { DrawerHeader } from '../BulkUpload/Header/index.js'
 import { Button } from '../Button/index.js'
-import { drawerZBase } from '../Drawer/index.js'
-import { Pill } from '../Pill/index.js'
-import { Popup, PopupList } from '../Popup/index.js'
+import { Drawer } from '../Drawer/index.js'
+import { PopupList } from '../Popup/index.js'
 import './index.scss'
 
 const baseClass = 'copy-locale-data'
 
-const modalSlug = 'confirm-copy-locale'
-export const DefaultComponent: React.FC = () => {
+const drawerSlug = 'copy-locale'
+export const CopyLocaleData: React.FC = () => {
   const {
     config: {
-      collections,
-      globals,
       localization,
       routes: { api },
       serverURL,
@@ -35,20 +30,18 @@ export const DefaultComponent: React.FC = () => {
   } = useConfig()
   const { code: currentLocale } = useLocale()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
-  const { i18n, t } = useTranslation()
+  const { t } = useTranslation()
   const { submit } = useForm()
   const modified = useFormModified()
-  const [visibleDropdown, setVisibleDropdown] = React.useState(false)
-
   const { toggleModal } = useModal()
+  const localeOptions =
+    localization &&
+    localization.locales.map((locale) => ({ label: locale.label, value: locale.code }))
 
   const [copying, setCopying] = React.useState(false)
-  const [formattedDestination, setFormattedDestination] = React.useState<null | string>(null)
-  const [destinationLocale, setDestinationLocale] = React.useState<null | string>(null)
-  const editDepth = useEditDepth()
-
-  const collectionLabel = collections.find((c) => c.slug === collectionSlug)?.labels.singular
-  const globalLabel = globals.find((g) => g.slug === globalSlug)?.label
+  const [toLocale, setToLocale] = React.useState<null | string>(null)
+  const [fromLocale, setFromLocale] = React.useState<null | string>(currentLocale)
+  const [overwriteExisting, setOverwriteExisting] = React.useState(false)
 
   const copyLocaleData = useCallback(
     async ({ from, to }) => {
@@ -80,12 +73,13 @@ export const DefaultComponent: React.FC = () => {
           },
           skipValidation: true,
         })
-        setCopying(false)
-        toggleModal(modalSlug)
 
-        if (response.ok) {
-          window.open(redirect, '_self')
-        }
+        setCopying(false)
+        // toggleModal(drawerSlug)
+
+        // if (response.ok) {
+        //   window.open(redirect, '_self')
+        // }
       } catch (error) {
         toast.error(error.message)
       }
@@ -93,145 +87,111 @@ export const DefaultComponent: React.FC = () => {
     [collectionSlug, globalSlug, submit, serverURL, api, id, toggleModal],
   )
 
-  if (!localization) {
-    return null
-  }
-
-  const formattedCurrentLocale = localization?.locales
-    .map((locale) => {
-      const isMatchingLocale =
-        typeof locale === 'string' ? locale === currentLocale : locale.code === currentLocale
-
-      if (isMatchingLocale) {
-        return typeof locale.label === 'string' ? locale.label : locale.label?.[i18n?.language]
-      }
-    })
-    .filter(Boolean)
-
   if (!id && !globalSlug) {
     return null
   }
 
   return (
-    <div className={baseClass}>
-      {modified && (
-        <button
-          aria-label={t('general:unsavedChanges')}
-          className={`${baseClass}__overlay`}
-          onClick={() => {
-            if (modified) {
-              toast.info(t('general:unsavedChanges'))
-            }
-          }}
-          type="button"
-        />
-      )}
-      <Popup
-        button={
-          <Pill
-            className={`${baseClass}__pill`}
-            icon={
-              <ChevronIcon
-                className={`${baseClass}__icon`}
-                direction={visibleDropdown ? 'up' : 'down'}
-              />
-            }
-            pillStyle="light"
-          >
-            {t('general:copy')}
-          </Pill>
+    <React.Fragment>
+      <PopupList.Button
+        id={`${baseClass}__button`}
+        onClick={() => {
+          if (modified) {
+            toast.info(t('general:unsavedChanges'))
+          } else {
+            toggleModal(drawerSlug)
+          }
+        }}
+      >
+        Copy to Locale
+      </PopupList.Button>
+      <Drawer
+        className={baseClass}
+        gutter={false}
+        Header={
+          <DrawerHeader
+            onClose={() => {
+              toggleModal(drawerSlug)
+            }}
+            title="Copy to Locale"
+          />
         }
-        disabled={modified}
-        onToggleOpen={(active) => {
-          setVisibleDropdown(active)
-        }}
+        slug={drawerSlug}
       >
-        <PopupList.ButtonGroup>
-          {localization.locales.map((locale) => {
-            const formattedLabel =
-              typeof locale.label === 'string'
-                ? locale.label
-                : locale.label && locale.label[i18n?.language]
+        <div className={`${baseClass}__sub-header`}>
+          {/* TODO: translate */}
+          <span>
+            {fromLocale && toLocale ? (
+              <div>
+                Copying from <strong>{fromLocale}</strong> to <strong>{toLocale}</strong>
+              </div>
+            ) : (
+              'Select locale to copy'
+            )}
+          </span>
+          <Button
+            buttonStyle="pill"
+            disabled={!fromLocale || !toLocale}
+            iconPosition="left"
+            onClick={async () => {
+              if (fromLocale === toLocale) {
+                toast.error('Cannot copy to the same locale')
+                return
+              }
+              if (!copying) {
+                await copyLocaleData({
+                  from: fromLocale,
+                  to: toLocale,
+                })
+              }
+            }}
+            size="small"
+          >
+            {copying ? t('general:copying') + '...' : t('general:copy')}
+          </Button>
+        </div>
 
-            const isActive =
-              typeof locale === 'string' ? locale === currentLocale : locale.code === currentLocale
-
-            if (isActive) {
-              return null
-            }
-
-            return (
-              <PopupList.Button
-                key={locale.code}
-                onClick={() => {
-                  setDestinationLocale(typeof locale === 'string' ? locale : locale.code)
-                  setFormattedDestination(formattedLabel)
-                  toggleModal(modalSlug)
-                }}
-              >
-                {formattedCurrentLocale} to {formattedLabel}
-              </PopupList.Button>
-            )
-          })}
-        </PopupList.ButtonGroup>
-      </Popup>
-      <Modal
-        className={`${baseClass}__modal`}
-        slug={modalSlug}
-        style={{
-          zIndex: drawerZBase + editDepth,
-        }}
-      >
-        <div className={`${baseClass}__wrapper`}>
-          <div className={`${baseClass}__content`}>
-            <h1>{t('general:confirmCopy')}</h1>
-            <p>
-              {t('general:copyWarning', {
-                from: formattedCurrentLocale,
-                label: collectionSlug ? collectionLabel : globalLabel,
-                title: collectionSlug ? id : '',
-                to: formattedDestination,
-              })}
-            </p>
-          </div>
-          <div className={`${baseClass}__controls`}>
-            <Button
-              buttonStyle="secondary"
-              id="confirm-cancel"
-              onClick={() => toggleModal(modalSlug)}
-              size="large"
-              type="button"
-            >
-              {t('general:cancel')}
-            </Button>
-            <Button
-              id="confirm-copy"
-              onClick={async () => {
-                if (!copying) {
-                  await copyLocaleData({
-                    from: currentLocale,
-                    to: destinationLocale,
-                  })
-                }
+        <div className={`${baseClass}__content`}>
+          <div>
+            Copy From
+            <SelectField
+              defaultValue={
+                fromLocale
+                  ? {
+                      label: localeOptions.find((option) => option.value === fromLocale)?.label,
+                      value: fromLocale,
+                    }
+                  : undefined
+              }
+              field={{
+                name: 'fromLocale',
+                options: localeOptions,
               }}
-              size="large"
-            >
-              {copying ? `${t('general:copying')}...` : t('general:confirm')}
-            </Button>
+              onChange={(value: string) => setFromLocale(value)}
+            />
+          </div>
+          <div>
+            Copy To
+            <SelectField
+              field={{
+                name: 'toLocale',
+                options: localeOptions,
+              }}
+              onChange={(value: string) => setToLocale(value)}
+            />
+          </div>
+          <div>
+            <CheckboxField
+              checked={overwriteExisting}
+              field={{
+                name: 'overwriteExisting',
+                label: 'Overwrite existing field data',
+              }}
+              onChange={() => setOverwriteExisting(!overwriteExisting)}
+            />
           </div>
         </div>
-      </Modal>
-    </div>
+      </Drawer>
+    </React.Fragment>
   )
-}
-
-type Props = {
-  CustomComponent?: MappedComponent
-}
-
-export const CopyLocaleData: React.FC<Props> = ({ CustomComponent }) => {
-  if (CustomComponent) {
-    return <RenderComponent mappedComponent={CustomComponent} />
-  }
-  return <DefaultComponent />
 }

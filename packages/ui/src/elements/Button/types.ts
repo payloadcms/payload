@@ -20,7 +20,6 @@ export type Props = {
   Link?: React.ElementType
   newTab?: boolean
   onClick?: (event: MouseEvent) => void
-  popupClassName?: string
   round?: boolean
   secondaryActions?: secondaryAction | secondaryAction[]
   size?: 'large' | 'medium' | 'small'

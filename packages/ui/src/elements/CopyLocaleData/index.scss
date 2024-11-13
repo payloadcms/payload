@@ -1,58 +1,24 @@
 @import '../../scss/styles.scss';
 
 .copy-locale-data {
-  position: relative;
-
-  &__pill {
-    padding: 4px 12px;
-  }
-
-  &__icon {
-    transition: all 200ms ease-in-out;
-  }
-
-  &__overlay {
-    @include btn-reset;
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    z-index: 9;
-  }
-
-  &__modal {
-    @include blur-bg;
+  &__sub-header {
+    padding: 0 var(--gutter-h);
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    height: 100%;
-  }
-
-  &__wrapper {
-    z-index: 1;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: base(0.8);
-    padding: base(2);
-    max-width: base(36);
+    border-bottom: 1px solid var(--theme-border-color);
   }
 
   &__content {
+    padding: calc(var(--base) * 1.5) var(--gutter-h);
     display: flex;
     flex-direction: column;
-    gap: base(0.4);
+    gap: var(--base);
 
     > * {
-      margin: 0;
-    }
-  }
-
-  &__controls {
-    display: flex;
-    gap: base(0.4);
-
-    .btn {
-      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--base) * 0.25);
     }
   }
 }

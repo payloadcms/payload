@@ -130,7 +130,6 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
       buttonId="action-save"
       disabled={!canPublish}
       onClick={publish}
-      popupClassName={baseClass}
       size="medium"
       SubMenuPopupContent={
         localization
