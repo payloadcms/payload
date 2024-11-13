@@ -105,6 +105,7 @@ export const CreateFirstUserClient: React.FC<{
           label: t('authentication:newPassword'),
           required: true,
         }}
+        path="password"
       />
       <ConfirmPasswordField />
       <RenderFields
