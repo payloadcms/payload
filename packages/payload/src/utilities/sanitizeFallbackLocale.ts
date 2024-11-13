@@ -7,10 +7,6 @@ interface Args {
   localization: SanitizedLocalizationConfig
 }
 
-interface ReturnArgs {
-  fallbackLocale: string
-}
-
 /**
  * Sanitizes fallbackLocale based on a provided fallbackLocale, locale and localization config
  *
@@ -19,11 +15,7 @@ interface ReturnArgs {
  * - determines if a locale specific fallback should be used in place of the default locale
  * - sets the fallbackLocale to 'null' if no fallback locale should be used
  */
-export const sanitizeFallbackLocale = ({
-  fallbackLocale,
-  locale,
-  localization,
-}: Args): ReturnArgs => {
+export const sanitizeFallbackLocale = ({ fallbackLocale, locale, localization }: Args): string => {
   const shouldFallback = Boolean(
     (localization && localization.fallback) ||
       (fallbackLocale && !['false', 'none', 'null'].includes(fallbackLocale)),
@@ -51,5 +43,5 @@ export const sanitizeFallbackLocale = ({
     fallbackLocale = 'null'
   }
 
-  return { fallbackLocale }
+  return fallbackLocale
 }

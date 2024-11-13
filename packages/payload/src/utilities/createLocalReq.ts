@@ -99,7 +99,7 @@ export const createLocalReq: CreateLocalReq = async (
       localization,
     })
 
-    req.fallbackLocale = sanitizedFallback.fallbackLocale
+    req.fallbackLocale = sanitizedFallback
   }
 
   const i18n =
