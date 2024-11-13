@@ -75,9 +75,6 @@ export const ResetPasswordForm: React.FC<Args> = ({ token }) => {
             label: i18n.t('authentication:newPassword'),
             required: true,
           }}
-          indexPath=""
-          parentPath=""
-          parentSchemaPath=""
           path="password"
           schemaPath={`${userSlug}.password`}
         />
@@ -90,9 +87,6 @@ export const ResetPasswordForm: React.FC<Args> = ({ token }) => {
               hidden: true,
             },
           }}
-          indexPath=""
-          parentPath={userSlug}
-          parentSchemaPath={userSlug}
           path="token"
           schemaPath={`${userSlug}.token`}
           value={token}

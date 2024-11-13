@@ -159,6 +159,7 @@ export const APIViewClient: React.FC = () => {
                     label: t('version:draft'),
                   }}
                   onChange={() => setDraft(!draft)}
+                  path="draft"
                 />
               )}
               <CheckboxField
@@ -167,6 +168,7 @@ export const APIViewClient: React.FC = () => {
                   label: t('authentication:authenticated'),
                 }}
                 onChange={() => setAuthenticated(!authenticated)}
+                path="authenticated"
               />
             </div>
             {localeOptions && <LocaleSelector localeOptions={localeOptions} onChange={setLocale} />}
@@ -181,6 +183,7 @@ export const APIViewClient: React.FC = () => {
                 min: 0,
               }}
               onChange={(value) => setDepth(value?.toString())}
+              path="depth"
             />
           </div>
         </Form>
