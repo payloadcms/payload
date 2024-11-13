@@ -27,6 +27,24 @@ export const seed = async (_payload) => {
           depth: 0,
           overrideAccess: true,
         }),
+      () =>
+        _payload.create({
+          collection: 'base-list-filters',
+          data: {
+            title: 'show me',
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
+      () =>
+        _payload.create({
+          collection: 'base-list-filters',
+          data: {
+            title: 'hide me',
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
       ...[...Array(11)].map((_, i) => async () => {
         const postDoc = await _payload.create({
           collection: postsCollectionSlug,

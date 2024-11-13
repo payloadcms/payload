@@ -117,7 +117,7 @@ export const renderListView = async (
 
     const page = isNumber(query?.page) ? Number(query.page) : 0
 
-    const whereQuery = mergeListSearchAndWhere({
+    let whereQuery = mergeListSearchAndWhere({
       collectionConfig,
       search: typeof query?.search === 'string' ? query.search : undefined,
       where: (query?.where as Where) || undefined,
@@ -134,6 +134,21 @@ export const renderListView = async (
           (typeof collectionConfig.defaultSort === 'string'
             ? collectionConfig.defaultSort
             : undefined)
+
+    if (typeof collectionConfig.admin?.baseListFilter === 'function') {
+      const baseListFilter = await collectionConfig.admin.baseListFilter({
+        limit,
+        page,
+        req,
+        sort,
+      })
+
+      if (baseListFilter) {
+        whereQuery = {
+          and: [whereQuery, baseListFilter].filter(Boolean),
+        }
+      }
+    }
 
     const data = await payload.find({
       collection: collectionSlug,
