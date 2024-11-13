@@ -493,7 +493,7 @@ export type LocalizationConfig = Prettify<
   LocalizationConfigWithLabels | LocalizationConfigWithNoLabels
 >
 
-export type LabelFunction = ({ t }: { t: TFunction }) => string
+export type LabelFunction<T = unknown> = (args: { path: string; t: TFunction; value?: T }) => string
 
 export type StaticLabel = Record<string, string> | string
 

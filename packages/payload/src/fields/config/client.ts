@@ -88,7 +88,8 @@ export const createClientField = ({
     'label' in incomingField &&
     typeof incomingField.label === 'function'
   ) {
-    clientField.label = incomingField.label({ t: i18n.t })
+    // label functions are rendered into `customComponents.Description` within form state
+    delete clientField.label
   }
 
   if (!(clientField.admin instanceof Object)) {
@@ -152,12 +153,12 @@ export const createClientField = ({
             clientBlock.labels = {} as unknown as LabelsClient
             if (block.labels.singular) {
               if (typeof block.labels.singular === 'function') {
-                clientBlock.labels.singular = block.labels.singular({ t: i18n.t })
+                clientBlock.labels.singular = block.labels.singular({ path: undefined, t: i18n.t })
               } else {
                 clientBlock.labels.singular = block.labels.singular
               }
               if (typeof block.labels.plural === 'function') {
-                clientBlock.labels.plural = block.labels.plural({ t: i18n.t })
+                clientBlock.labels.plural = block.labels.plural({ path: undefined, t: i18n.t })
               } else {
                 clientBlock.labels.plural = block.labels.plural
               }
@@ -182,7 +183,17 @@ export const createClientField = ({
       break
     }
 
-    case 'radio':
+    case 'richText': {
+      if (!incomingField?.editor) {
+        throw new MissingEditorProp(incomingField) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+      }
+
+      if (typeof incomingField?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
+
+      break
+    }
 
     case 'select': {
       const field = clientField as RadioFieldClient | SelectFieldClient
@@ -197,23 +208,11 @@ export const createClientField = ({
             }
 
             field.options[i] = {
-              label: option.label({ t: i18n.t }),
+              label: option.label({ path: undefined, t: i18n.t }),
               value: option.value,
             }
           }
         }
-      }
-
-      break
-    }
-
-    case 'richText': {
-      if (!incomingField?.editor) {
-        throw new MissingEditorProp(incomingField) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
-      }
-
-      if (typeof incomingField?.editor === 'function') {
-        throw new Error('Attempted to access unsanitized rich text editor.')
       }
 
       break
@@ -266,16 +265,8 @@ export const createClientField = ({
   } & ClientField
 
   if (incomingField.admin && 'description' in incomingField.admin) {
-    if (
-      typeof incomingField.admin?.description === 'string' ||
-      typeof incomingField.admin?.description === 'object'
-    ) {
-      ;(clientField as FieldWithDescription).admin.description = incomingField.admin.description
-    } else if (typeof incomingField.admin?.description === 'function') {
-      ;(clientField as FieldWithDescription).admin.description = incomingField.admin?.description({
-        t: i18n.t,
-      })
-    }
+    // Description functions are rendered into `customComponents.Description` within form state
+    delete (clientField as FieldWithDescription).admin.description
   }
 
   return clientField

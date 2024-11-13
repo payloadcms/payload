@@ -28,7 +28,7 @@ export const FieldLabel: React.FC<GenericLabelProps> = (props) => {
   const editDepth = useEditDepth()
   const htmlFor = htmlForFromProps || generateFieldID(path, editDepth, uuid)
   const { i18n } = useTranslation()
-  const { code, label: localLabel } = useLocale()
+  const { code, label: localeLabel } = useLocale()
 
   if (label) {
     return (
@@ -37,7 +37,7 @@ export const FieldLabel: React.FC<GenericLabelProps> = (props) => {
         {required && !unstyled && <span className="required">*</span>}
         {localized && !hideLocale && (
           <span className="localized">
-            &mdash; {typeof localLabel === 'string' ? localLabel : code}
+            &mdash; {typeof localeLabel === 'string' ? localeLabel : code}
           </span>
         )}
       </Element>

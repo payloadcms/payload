@@ -11,6 +11,12 @@ export const PostsCollection: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
+      label: ({ value }) => value as string,
+      admin: {
+        components: {
+          Label: '/collections/Posts/FieldLabel.tsx#FieldLabel',
+        },
+      },
     },
   ],
   versions: {

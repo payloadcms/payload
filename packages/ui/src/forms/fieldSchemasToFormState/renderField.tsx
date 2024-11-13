@@ -15,6 +15,7 @@ import type { RenderFieldMethod } from './types.js'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 
 export const renderField: RenderFieldMethod = ({
   data,
@@ -46,6 +47,10 @@ export const renderField: RenderFieldMethod = ({
     ? incomingPermissions?.[fieldConfig.name]
     : ({} as FieldPermissions)
 
+  if (!fieldState?.customComponents) {
+    fieldState.customComponents = {}
+  }
+
   const clientProps: ClientComponentProps & Partial<FieldPaths> = {
     customComponents: fieldState?.customComponents || {},
     field: clientField,
@@ -74,10 +79,6 @@ export const renderField: RenderFieldMethod = ({
     payload: req.payload,
     siblingData,
     user: req.user,
-  }
-
-  if (!fieldState?.customComponents) {
-    fieldState.customComponents = {}
   }
 
   switch (fieldConfig.type) {
@@ -160,43 +161,32 @@ export const renderField: RenderFieldMethod = ({
   }
 
   if (fieldConfig.admin) {
-    if ('description' in fieldConfig.admin) {
-      // @TODO move this to client, only render if it is a function
+    if ('description' in fieldConfig && typeof fieldConfig.description === 'function') {
       fieldState.customComponents.Description = (
         <FieldDescription
-          description={
-            typeof fieldConfig.admin?.description === 'string' ||
-            typeof fieldConfig.admin?.description === 'object'
-              ? fieldConfig.admin.description
-              : typeof fieldConfig.admin?.description === 'function'
-                ? fieldConfig.admin?.description({ t: req.i18n.t })
-                : ''
-          }
+          description={fieldConfig.description({ path, t: req.i18n.t, value: fieldState.value })}
+          path={path}
+        />
+      )
+    }
+
+    if ('label' in fieldConfig && typeof fieldConfig.label === 'function') {
+      fieldState.customComponents.Label = (
+        <FieldLabel
+          label={fieldConfig.label({ path, t: req.i18n.t, value: fieldState.value })}
           path={path}
         />
       )
     }
 
     if (fieldConfig.admin?.components) {
-      if ('afterInput' in fieldConfig.admin.components) {
-        fieldState.customComponents.AfterInput = (
+      if ('Label' in fieldConfig.admin.components) {
+        fieldState.customComponents.Label = (
           <RenderServerComponent
             clientProps={clientProps}
-            Component={fieldConfig.admin.components.afterInput}
+            Component={fieldConfig.admin.components.Label}
             importMap={req.payload.importMap}
-            key="field.admin.components.afterInput"
-            serverProps={serverProps}
-          />
-        )
-      }
-
-      if ('beforeInput' in fieldConfig.admin.components) {
-        fieldState.customComponents.BeforeInput = (
-          <RenderServerComponent
-            clientProps={clientProps}
-            Component={fieldConfig.admin.components.beforeInput}
-            importMap={req.payload.importMap}
-            key="field.admin.components.beforeInput"
+            key="field.admin.components.Label"
             serverProps={serverProps}
           />
         )
@@ -226,13 +216,25 @@ export const renderField: RenderFieldMethod = ({
         )
       }
 
-      if ('Label' in fieldConfig.admin.components) {
-        fieldState.customComponents.Label = (
+      if ('afterInput' in fieldConfig.admin.components) {
+        fieldState.customComponents.AfterInput = (
           <RenderServerComponent
             clientProps={clientProps}
-            Component={fieldConfig.admin.components.Label}
+            Component={fieldConfig.admin.components.afterInput}
             importMap={req.payload.importMap}
-            key="field.admin.components.Label"
+            key="field.admin.components.afterInput"
+            serverProps={serverProps}
+          />
+        )
+      }
+
+      if ('beforeInput' in fieldConfig.admin.components) {
+        fieldState.customComponents.BeforeInput = (
+          <RenderServerComponent
+            clientProps={clientProps}
+            Component={fieldConfig.admin.components.beforeInput}
+            importMap={req.payload.importMap}
+            key="field.admin.components.beforeInput"
             serverProps={serverProps}
           />
         )
