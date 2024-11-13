@@ -20,7 +20,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   depth?: number
   draft?: boolean
   fallbackLocale?: false | TypedLocale
-  locale?: TypedLocale
+  locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   overrideLock?: boolean
   populate?: PopulateType

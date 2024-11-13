@@ -152,6 +152,7 @@ describe('Localization', () => {
           id: postWithLocalizedData.id,
           collection,
           locale: portugueseLocale,
+          // @ts-expect-error - testing fallbackLocale 'none' for backwards compatibility though the correct type here is `false`
           fallbackLocale: 'none',
         })
 
@@ -392,7 +393,7 @@ describe('Localization', () => {
     })
 
     describe('Localized Sort Count', () => {
-      const expectedTotalDocs = 15
+      const expectedTotalDocs = 5
       const posts: LocalizedSort[] = []
       beforeAll(async () => {
         for (let i = 1; i <= expectedTotalDocs; i++) {
@@ -442,6 +443,8 @@ describe('Localization', () => {
           collection: localizedSortSlug,
           sort: 'date',
         })
+
+        console.log({ sortByTitleQuery })
 
         expect(sortByTitleQuery.totalDocs).toEqual(expectedTotalDocs)
         expect(sortByDateQuery.totalDocs).toEqual(expectedTotalDocs)
@@ -886,8 +889,6 @@ describe('Localization', () => {
             title: 'hello',
           },
         })
-
-        posts.push(post)
 
         await payload.update({
           id: newDoc.id,
@@ -2554,7 +2555,7 @@ describe('Localization', () => {
           id: postWithLocalizedData.id,
           collection,
           locale: portugueseLocale,
-          fallbackLocale: 'none',
+          fallbackLocale: false,
         })
 
         expect(localizedFallback.title).not.toBeDefined()

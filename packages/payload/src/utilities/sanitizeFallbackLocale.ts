@@ -21,7 +21,7 @@ export const sanitizeFallbackLocale = ({ fallbackLocale, locale, localization }:
       (fallbackLocale && !['false', 'none', 'null'].includes(fallbackLocale)),
   )
 
-  if (shouldFallback && fallbackLocale) {
+  if (shouldFallback) {
     if (!fallbackLocale) {
       // Check for locale specific fallback
       const localeSpecificFallback =
@@ -43,5 +43,5 @@ export const sanitizeFallbackLocale = ({ fallbackLocale, locale, localization }:
     fallbackLocale = 'null'
   }
 
-  return fallbackLocale
+  return fallbackLocale as string
 }
