@@ -67,7 +67,7 @@
     "docker:stop": "docker compose -f packages/plugin-cloud-storage/docker-compose.yml down",
     "force:build": "pnpm run build:core:force",
     "lint": "turbo run lint --concurrency 1 --continue",
-    "lint-staged": "node ./scripts/run-lint-staged.js",
+    "lint-staged": "lint-staged",
     "lint:fix": "turbo run lint:fix --concurrency 1 --continue",
     "obliterate-playwright-cache-macos": "rm -rf ~/Library/Caches/ms-playwright && find /System/Volumes/Data/private/var/folders -type d -name 'playwright*' -exec rm -rf {} +",
     "prepare": "husky",
