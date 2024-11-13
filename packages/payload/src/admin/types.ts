@@ -301,7 +301,12 @@ export type {
   TextareaFieldServerProps,
 } from './fields/Textarea.js'
 
-export type { UIFieldClientComponent, UIFieldServerComponent } from './fields/UI.js'
+export type {
+  UIFieldClientComponent,
+  UIFieldClientProps,
+  UIFieldServerComponent,
+  UIFieldServerProps,
+} from './fields/UI.js'
 
 export type {
   UploadFieldClientComponent,
@@ -351,6 +356,7 @@ export type {
   ClientFieldBase,
   ClientFieldWithOptionalType,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerComponentProps,
   ServerFieldBase,

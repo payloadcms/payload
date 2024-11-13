@@ -1,5 +1,5 @@
 'use client'
-import type { ClientFieldProps } from 'payload'
+import type { ClientFieldProps, FieldPaths } from 'payload'
 import type { MarkOptional } from 'ts-essentials'
 
 import React from 'react'
@@ -7,10 +7,7 @@ import React from 'react'
 import { WatchCondition } from './WatchCondition.js'
 
 export const withCondition = <
-  P extends MarkOptional<
-    Pick<ClientFieldProps, 'field' | 'indexPath' | 'path'>,
-    'indexPath' | 'path'
-  >,
+  P extends MarkOptional<FieldPaths & Pick<ClientFieldProps, 'field'>, 'indexPath' | 'path'>,
 >(
   Field: React.ComponentType<P>,
 ): React.FC<P> => {

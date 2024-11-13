@@ -19,6 +19,7 @@ export const LocaleSelector: React.FC<{
         options: localeOptions,
       }}
       onChange={(value: string) => onChange(value)}
+      path="locale"
     />
   )
 }

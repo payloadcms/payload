@@ -28,11 +28,10 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
       minLength,
       required,
     },
-    path: pathFromProps,
+    path,
     readOnly,
     validate,
   } = props
-  const path = pathFromProps ?? name
 
   const { i18n } = useTranslation()
 

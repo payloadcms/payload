@@ -1,4 +1,9 @@
-import type { ClientComponentProps, RichTextFieldClient, ServerComponentProps } from 'payload'
+import type {
+  ClientComponentProps,
+  FieldPaths,
+  RichTextFieldClient,
+  ServerComponentProps,
+} from 'payload'
 
 import React from 'react'
 
@@ -13,6 +18,7 @@ export const RscEntryLexicalField: React.FC<
     admin: LexicalFieldAdminProps
     sanitizedEditorConfig: SanitizedServerEditorConfig
   } & ClientComponentProps &
+    Pick<FieldPaths, 'path'> &
     ServerComponentProps
 > = (args) => {
   const path = args.path ?? (args.clientField as RichTextFieldClient).name
@@ -32,10 +38,7 @@ export const RscEntryLexicalField: React.FC<
       featureClientSchemaMap={featureClientSchemaMap}
       field={args.clientField as RichTextFieldClient}
       forceRender={args.forceRender}
-      indexPath={args.indexPath}
       lexicalEditorConfig={args.sanitizedEditorConfig.lexical}
-      parentPath={args.parentPath}
-      parentSchemaPath={args.parentSchemaPath}
       path={path}
       permissions={args.permissions}
       readOnly={args.readOnly}

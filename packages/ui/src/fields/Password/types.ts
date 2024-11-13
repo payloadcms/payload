@@ -27,7 +27,7 @@ export type PasswordFieldProps = {
   /**
    * @default field.name
    */
-  readonly path?: string
+  readonly path: string
   /**
    * @default field.name
    */
