@@ -97,6 +97,17 @@ You can specify more options within the Local API vs. REST or GraphQL due to the
 
 _There are more options available on an operation by operation basis outlined below._
 
+## Transactions
+
+When your database uses transactions you need to thread req through to all local operations. Postgres uses transactions and MongoDB uses transactions when you are using replica sets. Passing req without transactions is still recommended.
+
+```js
+const post = await payload.find({
+  collection: 'posts',
+  req, // passing req is recommended
+})
+```
+
 <Banner type="warning">
   <strong>Note:</strong>
   <br />
