@@ -1,3 +1,8 @@
+/**
+ * Converts an object of props to a JSX props string.
+ *
+ * This function is the inverse of `extractPropsFromJSXPropsString`.
+ */
 export function propsToJSXString({ props }: { props: Record<string, any> }): string {
   const propsArray: string[] = []
 

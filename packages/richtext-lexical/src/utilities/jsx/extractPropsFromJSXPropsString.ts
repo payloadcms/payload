@@ -1,4 +1,11 @@
-// Example input: type="info" hello={{heyyy: 'test', someNumber: 2}}
+/**
+ * Turns a JSX props string into an object.
+ *
+ * @example
+ *
+ * Input: type="info" hello={{heyyy: 'test', someNumber: 2}}
+ * Output: { type: 'info', hello: { heyyy: 'test', someNumber: 2 } }
+ */
 export function extractPropsFromJSXPropsString({
   propsString,
 }: {

@@ -8,7 +8,7 @@ import { createTagRegexes } from '../../features/blocks/server/markdownTransform
  * While this is not used within payload, this can be used for certain payload blocks that need to
  * be serializable and deserializable to and from JSX.
  *
- * @Example:
+ * @example:
  *
  * Say you have Steps block that contains a steps array. Its JSX representation may look like this:
  *
