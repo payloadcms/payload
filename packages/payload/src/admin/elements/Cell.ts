@@ -31,4 +31,4 @@ export type DefaultServerCellComponentProps<
   field: Field
   i18n: I18nClient
   payload: Payload
-} & DefaultCellComponentProps<TCellData, TField>
+} & Omit<DefaultCellComponentProps<TCellData, TField>, 'field'>
