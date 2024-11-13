@@ -66,7 +66,15 @@ export const RenderServerComponent: React.FC<{
   if (typeof Component === 'function') {
     const isRSC = isReactServerComponentOrFunction(Component)
 
-    return <Component {...clientProps} {...(isRSC ? serverProps : {})} />
+    // prevent $undefined from being passed through the network
+    const sanitizedProps = Object.fromEntries(
+      Object.entries({
+        ...clientProps,
+        ...(isRSC ? serverProps : {}),
+      }).filter(([, value]) => value !== undefined),
+    )
+
+    return <Component {...sanitizedProps} />
   }
 
   if (typeof Component === 'string' || isPlainObject(Component)) {
@@ -79,18 +87,19 @@ export const RenderServerComponent: React.FC<{
     if (ResolvedComponent) {
       const isRSC = isReactServerComponentOrFunction(ResolvedComponent)
 
-      return (
-        <ResolvedComponent
-          {...clientProps}
-          {...(isRSC ? serverProps : {})}
-          {...(isRSC && typeof Component === 'object' && Component?.serverProps
+      // prevent $undefined from being passed through the network
+      const sanitizedProps = Object.fromEntries(
+        Object.entries({
+          ...clientProps,
+          ...(isRSC ? serverProps : {}),
+          ...(isRSC && typeof Component === 'object' && Component?.serverProps
             ? Component.serverProps
-            : {})}
-          {...(typeof Component === 'object' && Component?.clientProps
-            ? Component.clientProps
-            : {})}
-        />
+            : {}),
+          ...(typeof Component === 'object' && Component?.clientProps ? Component.clientProps : {}),
+        }).filter(([, value]) => value !== undefined),
       )
+
+      return <ResolvedComponent {...sanitizedProps} />
     }
   }
 
