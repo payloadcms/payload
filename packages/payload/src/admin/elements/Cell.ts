@@ -1,6 +1,10 @@
+import type { I18nClient } from '@payloadcms/translations'
+
 import type { ClientCollectionConfig } from '../../collections/config/client.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { ClientField } from '../../fields/config/client.js'
+import type { Field } from '../../fields/config/types.js'
+import type { Payload } from '../../types/index.js'
 
 export type RowData = Record<string, any>
 
@@ -18,4 +22,10 @@ export type DefaultCellComponentProps<TCellData = any, TField extends ClientFiel
     rowData: RowData
   }) => void
   readonly rowData: RowData
+}
+
+export interface DefaultServerCellComponentProps extends Omit<DefaultCellComponentProps, 'field'> {
+  field: Field
+  i18n: I18nClient
+  payload: Payload
 }
