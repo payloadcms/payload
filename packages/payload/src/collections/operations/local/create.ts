@@ -28,7 +28,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   disableTransaction?: boolean
   disableVerificationEmail?: boolean
   draft?: boolean
-  fallbackLocale?: TypedLocale
+  fallbackLocale?: false | TypedLocale
   file?: File
   filePath?: string
   locale?: TypedLocale

@@ -139,7 +139,7 @@ export const renderListView = async (
       collection: collectionSlug,
       depth: 0,
       draft: true,
-      fallbackLocale: null,
+      fallbackLocale: false,
       includeLockStatus: true,
       limit,
       locale,
