@@ -316,7 +316,6 @@ const DocumentInfo: React.FC<
     setDocumentIsLocked,
     setDocumentTitle,
     setHasPublishedDoc,
-    setHasSavePermission,
     setLastUpdateTime,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
