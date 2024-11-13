@@ -139,7 +139,14 @@ Payload is still headless, you will still be able to leverage it completely head
     - import { TextField, useField, etc. } from 'payload'
     + import { TextField, useField, etc. } from '@payloadcms/ui'
     ```
-    *Note: for brevity, not _all_ modules are listed here (there are dozens)*
+    *Note: for brevity, not _all_ modules are listed here*
+
+1. The `BlockField` and related types have been renamed to `BlocksField` for semantic accuracy.
+
+    ```diff
+    - import type { BlockField, BlockFieldProps } from 'payload'
+    + import type { BlocksField, BlocksFieldProps } from 'payload'
+    ```
 
 1. All Custom Components are now defined as _file paths_ instead of direct imports. If you are using Custom Components in your Payload Config, remove the imported module and point to the file's path instead:
 
@@ -483,29 +490,29 @@ Payload is still headless, you will still be able to leverage it completely head
     export const PostsCollection: CollectionConfig = {
       slug: 'posts',
       endpoints: [
-   -    {
-   -      path: '/whoami/:parameter',
-   -      method: 'post',
-   -      handler: (req, res) => {
-   -        res.json({
-   -          parameter: req.params.parameter,
-   -          name: req.body.name,
-   -          age: req.body.age,
-   -        })
-   -      }
-   -    },
-   +    {
-   +      path: '/whoami/:parameter',
-   +      method: 'post',
-   +      handler: (req) => {
-   +        return Response.json({
-   +          parameter: req.routeParams.parameter,
-   +          // ^^ `params` is now `routeParams`
-   +          name: req.data.name,
-   +          age: req.data.age,
-   +        })
-   +      }
-   +    }
+    -   {
+    -     path: '/whoami/:parameter',
+    -     method: 'post',
+    -     handler: (req, res) => {
+    -       res.json({
+    -         parameter: req.params.parameter,
+    -         name: req.body.name,
+    -         age: req.body.age,
+    -       })
+    -     }
+    -   },
+    +   {
+    +     path: '/whoami/:parameter',
+    +     method: 'post',
+    +     handler: (req) => {
+    +       return Response.json({
+    +         parameter: req.routeParams.parameter,
+    +         // ^^ `params` is now `routeParams`
+    +         name: req.data.name,
+    +         age: req.data.age,
+    +       })
+    +     }
+    +   }
       ]
     }
     ```
@@ -521,30 +528,30 @@ Payload is still headless, you will still be able to leverage it completely head
     export const PostsCollection: CollectionConfig = {
       slug: 'posts',
       endpoints: [
-   -    {
-   -      path: '/whoami/:parameter',
-   -      method: 'post',
-   -      handler: async (req) => {
-   -        return Response.json({
-   -          name: req.data.name, // data will be undefined
-   -        })
-   -      }
-   -    },
-   +    {
-   +      path: '/whoami/:parameter',
-   +      method: 'post',
-   +      handler: async (req) => {
-   +        // mutates req, must be awaited
-   +        await addDataAndFileToRequest(req)
-   +        await addLocaledToRequest(req)
-   +
-   +        return Response.json({
-   +          name: req.data.name, // data is now available
-   +     	    fallbackLocale: req.fallbackLocale,
-   +          locale: req.locale,
-   +        })
-   +      }
-   +    }
+    -   {
+    -     path: '/whoami/:parameter',
+    -     method: 'post',
+    -     handler: async (req) => {
+    -       return Response.json({
+    -         name: req.data.name, // data will be undefined
+    -       })
+    -     }
+    -   },
+    +   {
+    +     path: '/whoami/:parameter',
+    +     method: 'post',
+    +     handler: async (req) => {
+    +       // mutates req, must be awaited
+    +       await addDataAndFileToRequest(req)
+    +       await addLocalesToRequest(req)
+    +
+    +       return Response.json({
+    +         name: req.data.name, // data is now available
+    +    	    fallbackLocale: req.fallbackLocale,
+    +         locale: req.locale,
+    +       })
+    +     }
+    +   }
       ]
     }
     ```
@@ -656,15 +663,16 @@ export default buildConfig({
 
 # Plugins
 
-*All* plugins have been standardized to use _named exports_ (as opposed to default exports). Most also have a suffix of `Plugin` to make it clear what is being imported.
+1. *All* plugins have been standardized to use _named exports_ (as opposed to default exports). Most also have a suffix of `Plugin` to make it clear what is being imported.
 
     ```diff
     - import seo from '@payloadcms/plugin-seo'
-    - import stripePlugin from '@payloadcms/plugin-stripe'
     + import { seoPlugin } from '@payloadcms/plugin-seo'
+
+    - import stripePlugin from '@payloadcms/plugin-stripe'
     + import { stripePlugin } from '@payloadcms/plugin-stripe'
 
-    // and so on
+    // and so on for every plugin
     ```
 
 ## `@payloadcms/plugin-cloud-storage`
@@ -729,60 +737,66 @@ plugins: [
 
 ## `@payloadcms/plugin-form-builder`
 
-- Field overrides for form and form submission collections now accept a function with a `defaultFields` inside the args instead of an array of config
+1. Field overrides for form and form submission collections now accept a function with a `defaultFields` inside the args instead of an array of config
 
-```tsx
-// ❌ Before
+    ```diff
+    // payload.config.ts
+    import { buildConfig } from 'payload'
+    import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 
-fields: [
-  {
-    name: 'custom',
-    type: 'text',
-  }
-]
-
-// ✅ After
-fields: ({ defaultFields }) => {
-  return [
-    ...defaultFields,
-    {
-      name: 'custom',
-      type: 'text',
-    },
-  ]
-}
-```
+    const config = buildConfig({
+      // ...
+      plugins: formBuilderPlugin({
+    -   fields: [
+    -     {
+    -       name: 'custom',
+    -       type: 'text',
+    -     }
+    -   ],
+    +   fields: ({ defaultFields }) => {
+    +     return [
+    +       ...defaultFields,
+    +       {
+    +         name: 'custom',
+    +         type: 'text',
+    +       },
+    +     ]
+    +   }
+      })
+    })
+    ```
 
 ## `@payloadcms/plugin-redirects`
 
-- Field overrides for the redirects collection now accepts a function with a `defaultFields` inside the args instead of an array of config
+1. Field overrides for the redirects collection now accepts a function with a `defaultFields` inside the args instead of an array of config
 
-```tsx
-// ❌ Before
+    ```diff
+    // payload.config.ts
+    import { buildConfig } from 'payload'
+    import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 
-fields: [
-  {
-    name: 'custom',
-    type: 'text',
-  }
-]
-
-// ✅ After
-fields: ({ defaultFields }) => {
-  return [
-    ...defaultFields,
-    {
-      name: 'custom',
-      type: 'text',
-    },
-  ]
-}
-```
+    const config = buildConfig({
+      // ...
+      plugins: redirectsPlugin({
+    -   fields: [
+    -     {
+    -       name: 'custom',
+    -       type: 'text',
+    -     }
+    -   ],
+    +   fields: ({ defaultFields }) => {
+    +     return [
+    +       ...defaultFields,
+    +       {
+    +         name: 'custom',
+    +         type: 'text',
+    +       },
+    +     ]
+    +   }
+      })
+    })
+    ```
 
 ## `@payloadcms/richtext-lexical`
 
-// TODO: Needs comprehensive breaking changes / migration steps
-
-### Custom Features
-
-- Previously, a Feature would contain both server code (e.g. population promises) and client code (e.g. toolbar items). Now, they have been split up into server features and client features
+// TODO: Add migration guide for `@payloadcms/richtext-lexical`
