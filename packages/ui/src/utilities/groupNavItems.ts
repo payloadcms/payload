@@ -23,7 +23,7 @@ export type EntityToGroup =
       type: EntityType.global
     }
 
-export type Group = {
+export type NavGroupType = {
   entities: {
     label: StaticLabel
     slug: string
@@ -36,7 +36,7 @@ export function groupNavItems(
   entities: EntityToGroup[],
   permissions: Permissions,
   i18n: I18nClient,
-): Group[] {
+): NavGroupType[] {
   const result = entities.reduce(
     (groups, entityToGroup) => {
       if (
@@ -48,9 +48,9 @@ export function groupNavItems(
         if (entityToGroup.entity.admin.group) {
           const existingGroup = groups.find(
             (group) => getTranslation(group.label, i18n) === translatedGroup,
-          ) as Group
+          ) as NavGroupType
 
-          let matchedGroup: Group = existingGroup
+          let matchedGroup: NavGroupType = existingGroup
 
           if (!existingGroup) {
             matchedGroup = { entities: [], label: translatedGroup }
@@ -70,7 +70,7 @@ export function groupNavItems(
         } else {
           const defaultGroup = groups.find((group) => {
             return getTranslation(group.label, i18n) === i18n.t(`general:${entityToGroup.type}`)
-          }) as Group
+          }) as NavGroupType
           defaultGroup.entities.push({
             slug: entityToGroup.entity.slug,
             type: entityToGroup.type,

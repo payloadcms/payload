@@ -2,10 +2,8 @@ import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
 import type React from 'react'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
-import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { Block, ClientField, Field, FieldTypes, Tab } from '../fields/config/types.js'
-import type { SanitizedGlobalConfig } from '../globals/config/types.js'
+import type { Block, Field, FieldTypes, Tab } from '../fields/config/types.js'
 import type { JsonObject } from '../types/index.js'
 import type {
   BuildFormStateArgs,
@@ -21,6 +19,7 @@ import type {
 export type { DefaultCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
 export type { DayPickerProps, SharedProps, TimePickerProps } from './elements/DatePicker.js'
+export type { NavGroupPreferences, NavPreferences } from './elements/Nav.js'
 export type { CustomPreviewButton } from './elements/PreviewButton.js'
 export type { CustomPublishButton } from './elements/PublishButton.js'
 export type { CustomSaveButton } from './elements/SaveButton.js'
@@ -31,6 +30,7 @@ export type {
   DocumentTabConfig,
   DocumentTabProps,
 } from './elements/Tab.js'
+
 export type { CustomUpload } from './elements/Upload.js'
 
 export type {
@@ -336,16 +336,6 @@ export type {
 } from './forms/Error.js'
 
 export type {
-  ClientComponentProps,
-  ClientFieldBase,
-  ClientFieldWithOptionalType,
-  FieldClientComponent,
-  FieldServerComponent,
-  ServerComponentProps,
-  ServerFieldBase,
-} from './forms/Field.js'
-
-export type {
   BuildFormStateArgs,
   Data,
   FieldState as FormField,
@@ -355,6 +345,16 @@ export type {
   FormStateWithoutComponents,
   Row,
 }
+
+export type {
+  ClientComponentProps,
+  ClientFieldBase,
+  ClientFieldWithOptionalType,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerComponentProps,
+  ServerFieldBase,
+} from './forms/Field.js'
 
 export type {
   FieldLabelClientComponent,
@@ -378,8 +378,6 @@ export type {
   ServerFunctionConfig,
   ServerFunctionHandler,
 } from './functions/index.js'
-
-export type { LanguageOptions } from './LanguageOptions.js'
 
 export type MappedServerComponent<TComponentClientProps extends JsonObject = JsonObject> = {
   Component?: React.ComponentType<TComponentClientProps>
@@ -459,6 +457,8 @@ export type DocumentSlots = {
   SaveDraftButton?: React.ReactNode
   Upload?: React.ReactNode
 }
+
+export type { LanguageOptions } from './LanguageOptions.js'
 
 export type { RichTextAdapter, RichTextAdapterProvider, RichTextHooks } from './RichText.js'
 
