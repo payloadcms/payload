@@ -233,10 +233,6 @@ export {
   EntityVisibilityProvider,
   useEntityVisibility,
 } from '../../providers/EntityVisibility/index.js'
-export {
-  FieldComponentsProvider,
-  useFieldComponents,
-} from '../../providers/FieldComponents/index.js'
 export { UploadEditsProvider, useUploadEdits } from '../../providers/UploadEdits/index.js'
 export {
   ListDrawerContextProvider,

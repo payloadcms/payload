@@ -1,11 +1,12 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { BlocksField, BlocksFieldClient, ClientField } from '../../fields/config/types.js'
+import type { BlocksField, BlocksFieldClient } from '../../fields/config/types.js'
 import type { BlocksFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -19,9 +20,9 @@ import type {
 type BlocksFieldClientWithoutType = MarkOptional<BlocksFieldClient, 'type'>
 
 type BlocksFieldBaseClientProps = {
-  readonly path?: string
   readonly validate?: BlocksFieldValidation
-} & Pick<ServerFieldBase, 'permissions'>
+} & FieldPaths &
+  Pick<ServerFieldBase, 'permissions'>
 
 export type BlocksFieldClientProps = BlocksFieldBaseClientProps &
   ClientFieldBase<BlocksFieldClientWithoutType>

@@ -18,13 +18,11 @@ import { LoadingOverlayProvider } from '../../elements/LoadingOverlay/index.js'
 import { NavProvider } from '../../elements/Nav/context.js'
 import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
 import { StepNavProvider } from '../../elements/StepNav/index.js'
-import { fieldComponents } from '../../fields/index.js'
 import { WindowInfoProvider } from '../../providers/WindowInfo/index.js'
 import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ConfigProvider } from '../Config/index.js'
 import { DocumentEventsProvider } from '../DocumentEvents/index.js'
-import { FieldComponentsProvider } from '../FieldComponents/index.js'
 import { LocaleProvider } from '../Locale/index.js'
 import { ParamsProvider } from '../Params/index.js'
 import { PreferencesProvider } from '../Preferences/index.js'
@@ -74,55 +72,53 @@ export const RootProvider: React.FC<Props> = ({
       <ServerFunctionsProvider serverFunction={serverFunction}>
         <RouteCacheComponent>
           <ConfigProvider config={config}>
-            <FieldComponentsProvider fieldComponents={fieldComponents}>
-              <ClientFunctionProvider>
-                <TranslationProvider
-                  dateFNSKey={dateFNSKey}
-                  fallbackLang={fallbackLang}
-                  language={languageCode}
-                  languageOptions={languageOptions}
-                  switchLanguageServerAction={switchLanguageServerAction}
-                  translations={translations}
+            <ClientFunctionProvider>
+              <TranslationProvider
+                dateFNSKey={dateFNSKey}
+                fallbackLang={fallbackLang}
+                language={languageCode}
+                languageOptions={languageOptions}
+                switchLanguageServerAction={switchLanguageServerAction}
+                translations={translations}
+              >
+                <WindowInfoProvider
+                  breakpoints={{
+                    l: '(max-width: 1440px)',
+                    m: '(max-width: 1024px)',
+                    s: '(max-width: 768px)',
+                    xs: '(max-width: 400px)',
+                  }}
                 >
-                  <WindowInfoProvider
-                    breakpoints={{
-                      l: '(max-width: 1440px)',
-                      m: '(max-width: 1024px)',
-                      s: '(max-width: 768px)',
-                      xs: '(max-width: 400px)',
-                    }}
-                  >
-                    <ScrollInfoProvider>
-                      <SearchParamsProvider>
-                        <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
-                          <AuthProvider permissions={permissions} user={user}>
-                            <PreferencesProvider>
-                              <ThemeProvider theme={theme}>
-                                <ParamsProvider>
-                                  <LocaleProvider>
-                                    <StepNavProvider>
-                                      <LoadingOverlayProvider>
-                                        <DocumentEventsProvider>
-                                          <NavProvider initialIsOpen={isNavOpen}>
-                                            {children}
-                                          </NavProvider>
-                                        </DocumentEventsProvider>
-                                      </LoadingOverlayProvider>
-                                    </StepNavProvider>
-                                  </LocaleProvider>
-                                </ParamsProvider>
-                              </ThemeProvider>
-                            </PreferencesProvider>
-                            <ModalContainer />
-                            <StayLoggedInModal />
-                          </AuthProvider>
-                        </ModalProvider>
-                      </SearchParamsProvider>
-                    </ScrollInfoProvider>
-                  </WindowInfoProvider>
-                </TranslationProvider>
-              </ClientFunctionProvider>
-            </FieldComponentsProvider>
+                  <ScrollInfoProvider>
+                    <SearchParamsProvider>
+                      <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
+                        <AuthProvider permissions={permissions} user={user}>
+                          <PreferencesProvider>
+                            <ThemeProvider theme={theme}>
+                              <ParamsProvider>
+                                <LocaleProvider>
+                                  <StepNavProvider>
+                                    <LoadingOverlayProvider>
+                                      <DocumentEventsProvider>
+                                        <NavProvider initialIsOpen={isNavOpen}>
+                                          {children}
+                                        </NavProvider>
+                                      </DocumentEventsProvider>
+                                    </LoadingOverlayProvider>
+                                  </StepNavProvider>
+                                </LocaleProvider>
+                              </ParamsProvider>
+                            </ThemeProvider>
+                          </PreferencesProvider>
+                          <ModalContainer />
+                          <StayLoggedInModal />
+                        </AuthProvider>
+                      </ModalProvider>
+                    </SearchParamsProvider>
+                  </ScrollInfoProvider>
+                </WindowInfoProvider>
+              </TranslationProvider>
+            </ClientFunctionProvider>
           </ConfigProvider>
         </RouteCacheComponent>
       </ServerFunctionsProvider>

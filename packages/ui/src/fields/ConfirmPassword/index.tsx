@@ -12,7 +12,7 @@ import './index.scss'
 
 export type ConfirmPasswordFieldProps = {
   readonly disabled?: boolean
-  readonly path?: string
+  readonly path: string
 }
 
 export const ConfirmPasswordField: React.FC<ConfirmPasswordFieldProps> = (props) => {
