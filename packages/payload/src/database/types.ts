@@ -283,6 +283,10 @@ export type FindGlobalArgs = {
 export type UpdateGlobalVersionArgs<T = TypeWithID> = {
   global: string
   locale?: string
+  /**
+   * Additional database adapter specific options to pass to the query
+   */
+  options?: Record<string, unknown>
   req: PayloadRequest
   select?: SelectType
   versionData: T
@@ -316,6 +320,10 @@ export type CreateGlobal = <T extends Record<string, unknown> = any>(
 
 export type UpdateGlobalArgs<T extends Record<string, unknown> = any> = {
   data: T
+  /**
+   * Additional database adapter specific options to pass to the query
+   */
+  options?: Record<string, unknown>
   req: PayloadRequest
   select?: SelectType
   slug: string
@@ -380,6 +388,10 @@ export type DeleteVersions = (args: DeleteVersionsArgs) => Promise<void>
 export type UpdateVersionArgs<T = TypeWithID> = {
   collection: string
   locale?: string
+  /**
+   * Additional database adapter specific options to pass to the query
+   */
+  options?: Record<string, unknown>
   req: PayloadRequest
   select?: SelectType
   versionData: T

@@ -1,3 +1,5 @@
+import type { QueryOptions } from 'mongoose'
+
 import {
   buildVersionGlobalFields,
   type PayloadRequest,
@@ -17,6 +19,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     id,
     global: globalSlug,
     locale,
+    options: optionsArgs = {},
     req = {} as PayloadRequest,
     select,
     versionData,
@@ -30,7 +33,8 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     this.payload.config.globals.find((global) => global.slug === globalSlug),
   )
 
-  const options = {
+  const options: QueryOptions = {
+    ...optionsArgs,
     ...(await withSession(this, req)),
     lean: true,
     new: true,
