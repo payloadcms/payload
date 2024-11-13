@@ -43,6 +43,7 @@ describe('admin2', () => {
   let page: Page
   let geoUrl: AdminUrlUtil
   let postsUrl: AdminUrlUtil
+  let baseListFiltersUrl: AdminUrlUtil
   let customViewsUrl: AdminUrlUtil
 
   let serverURL: string
@@ -61,6 +62,7 @@ describe('admin2', () => {
 
     geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     postsUrl = new AdminUrlUtil(serverURL, postsCollectionSlug)
+    baseListFiltersUrl = new AdminUrlUtil(serverURL, 'base-list-filters')
     customViewsUrl = new AdminUrlUtil(serverURL, customViews1CollectionSlug)
 
     const context = await browser.newContext()
@@ -775,6 +777,14 @@ describe('admin2', () => {
             hasText: exactText('Title'),
           }),
         ).toHaveText('Title')
+      })
+    })
+
+    describe('base list filters', () => {
+      test('should respect base list filters', async () => {
+        await page.goto(baseListFiltersUrl.list)
+        await page.waitForURL((url) => url.toString().startsWith(baseListFiltersUrl.list))
+        await expect(page.locator(tableRowLocator)).toHaveCount(1)
       })
     })
   })

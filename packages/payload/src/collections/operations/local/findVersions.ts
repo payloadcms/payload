@@ -23,7 +23,7 @@ export type Options<TSlug extends CollectionSlug> = {
   context?: RequestContext
   depth?: number
   draft?: boolean
-  fallbackLocale?: TypedLocale
+  fallbackLocale?: false | TypedLocale
   limit?: number
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean

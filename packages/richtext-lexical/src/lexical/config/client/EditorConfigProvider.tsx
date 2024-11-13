@@ -23,10 +23,7 @@ export interface EditorConfigContextType {
   editorConfig: SanitizedClientEditorConfig
   editorContainerRef: React.RefObject<HTMLDivElement>
 
-  fieldProps: MarkRequired<
-    LexicalRichTextFieldProps,
-    'indexPath' | 'parentPath' | 'parentSchemaPath' | 'path' | 'schemaPath'
-  >
+  fieldProps: MarkRequired<LexicalRichTextFieldProps, 'path' | 'schemaPath'>
   focusedEditor: EditorConfigContextType | null
   // Editor focus handling
   focusEditor: (editorContext: EditorConfigContextType) => void

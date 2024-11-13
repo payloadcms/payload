@@ -25,10 +25,10 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
   const {
     field,
     field: { admin: { className, description, initCollapsed = false } = {}, fields, label } = {},
-    indexPath = '',
-    parentPath = '',
-    parentSchemaPath = '',
-    path = '',
+    indexPath,
+    parentPath,
+    parentSchemaPath,
+    path,
     permissions,
     readOnly,
   } = props

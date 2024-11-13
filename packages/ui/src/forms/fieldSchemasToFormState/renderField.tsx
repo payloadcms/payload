@@ -1,6 +1,7 @@
 import type {
   ClientComponentProps,
   ClientField,
+  FieldPaths,
   FieldPermissions,
   PayloadComponent,
   ServerComponentProps,
@@ -45,15 +46,19 @@ export const renderField: RenderFieldMethod = ({
     ? incomingPermissions?.[fieldConfig.name]
     : ({} as FieldPermissions)
 
-  const clientProps: ClientComponentProps = {
+  const clientProps: ClientComponentProps & Partial<FieldPaths> = {
     customComponents: fieldState?.customComponents || {},
     field: clientField,
-    indexPath,
-    parentPath,
-    parentSchemaPath,
     path,
     readOnly: permissions?.[operation]?.permission === false,
     schemaPath,
+  }
+
+  // fields with subfields
+  if (['array', 'blocks', 'collapsible', 'group', 'row', 'tabs'].includes(fieldConfig.type)) {
+    clientProps.indexPath = indexPath
+    clientProps.parentPath = parentPath
+    clientProps.parentSchemaPath = parentSchemaPath
   }
 
   const serverProps: ServerComponentProps = {

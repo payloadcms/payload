@@ -39,7 +39,6 @@ export const initReq = cache(async function (
 
   const req = await createLocalReq(
     {
-      fallbackLocale: 'null',
       req: {
         headers,
         host: headers.get('host'),
