@@ -34,7 +34,7 @@ export type Options<
   depth?: number
   disableErrors?: TDisableErrors
   draft?: boolean
-  fallbackLocale?: TypedLocale
+  fallbackLocale?: false | TypedLocale
   id: number | string
   includeLockStatus?: boolean
   joins?: JoinQuery<TSlug>
