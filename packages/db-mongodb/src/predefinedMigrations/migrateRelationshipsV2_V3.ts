@@ -54,6 +54,38 @@ const migrateModelWithBatching = async ({
   }
 }
 
+const hasRelationshipOrUploadField = ({ fields }: { fields: Field[] }) => {
+  for (const field of fields) {
+    if (field.type === 'relationship' || field.type === 'upload') {
+      return true
+    }
+
+    if ('fields' in field) {
+      if (hasRelationshipOrUploadField({ fields: field.fields })) {
+        return true
+      }
+    }
+
+    if ('blocks' in field) {
+      for (const block of field.blocks) {
+        if (hasRelationshipOrUploadField({ fields: block.fields })) {
+          return true
+        }
+      }
+    }
+
+    if ('tabs' in field) {
+      for (const tab of field.tabs) {
+        if (hasRelationshipOrUploadField({ fields: tab.fields })) {
+          return true
+        }
+      }
+    }
+  }
+
+  return false
+}
+
 export async function migrateRelationshipsV2_V3({
   batchSize,
   req,
@@ -67,7 +99,7 @@ export async function migrateRelationshipsV2_V3({
 
   const { session } = await withSession(db, req)
 
-  for (const collection of payload.config.collections) {
+  for (const collection of payload.config.collections.filter(hasRelationshipOrUploadField)) {
     payload.logger.info(`Migrating collection "${collection.slug}"`)
 
     await migrateModelWithBatching({
@@ -97,7 +129,7 @@ export async function migrateRelationshipsV2_V3({
 
   const { globals: GlobalsModel } = db
 
-  for (const global of payload.config.globals) {
+  for (const global of payload.config.globals.filter(hasRelationshipOrUploadField)) {
     payload.logger.info(`Migrating global "${global.slug}"`)
 
     const doc = await GlobalsModel.findOne<Record<string, unknown>>(
