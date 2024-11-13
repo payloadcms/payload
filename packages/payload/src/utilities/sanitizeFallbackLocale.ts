@@ -16,12 +16,14 @@ interface Args {
  * - sets the fallbackLocale to 'null' if no fallback locale should be used
  */
 export const sanitizeFallbackLocale = ({ fallbackLocale, locale, localization }: Args): string => {
-  const shouldFallback = Boolean(
-    (localization && localization.fallback) ||
-      (fallbackLocale && !['false', 'none', 'null'].includes(fallbackLocale)),
-  )
+  const hasFallbackLocale =
+    fallbackLocale === undefined || fallbackLocale === null
+      ? localization && localization.fallback
+      : fallbackLocale
+        ? !['false', 'none', 'null'].includes(fallbackLocale)
+        : false
 
-  if (shouldFallback) {
+  if (hasFallbackLocale) {
     if (!fallbackLocale) {
       // Check for locale specific fallback
       const localeSpecificFallback =
