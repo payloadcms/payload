@@ -161,7 +161,6 @@ export function linesFromStartToContentAndPropsString({
 
   // Replace all \n with spaces
   propsString = propsString.replace(/\n/g, ' ').trim()
-  //console.log('Result:', { content, endLineIndex, lines, propsString })
 
   const afterEndLine = linesCopy[endLineIndex].trim().slice(endlineLastCharIndex)
 

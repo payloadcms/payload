@@ -6,8 +6,6 @@ $lexical-contenteditable-bottom-padding: 8px;
 @layer payload-default {
   .ContentEditable__root {
     border: 0;
-    font-size: 16px;
-    line-height: 1.4;
     display: block;
     position: relative;
     tab-size: 1;
