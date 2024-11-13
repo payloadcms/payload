@@ -1420,7 +1420,7 @@ importers:
         specifier: workspace:*
         version: link:../plugin-cloud-storage
       uploadthing:
-        specifier: ^7.0.0
+        specifier: 7.3.0
         version: 7.3.0(next@15.0.0(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(react-dom@19.0.0-rc-65a56d0e-20241020(react@19.0.0-rc-65a56d0e-20241020))(react@19.0.0-rc-65a56d0e-20241020)(sass@1.77.4))
     devDependencies:
       payload:
@@ -1780,9 +1780,6 @@ importers:
       typescript:
         specifier: 5.6.3
         version: 5.6.3
-      uploadthing:
-        specifier: ^6.10.1
-        version: 6.13.3(@effect/platform@0.69.8(effect@3.4.8))(next@15.0.0(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-65a56d0e-20241020(react@19.0.0-rc-65a56d0e-20241020))(react@19.0.0-rc-65a56d0e-20241020)(sass@1.77.4))
       uuid:
         specifier: 10.0.0
         version: 10.0.0
@@ -2723,11 +2720,6 @@ packages:
     resolution: {integrity: sha512-zhBhg0c1MHMMo+grOc/6wC2/3UETLroruwrYNZ89uDtXl6EOcP5alFP+vW3NToKDA2o0hRh22KNqq4aixA7xXg==}
     peerDependencies:
       effect: ^3.10.3
-
-  '@effect/schema@0.68.18':
-    resolution: {integrity: sha512-+knLs36muKsyqIvQTB0itGp5Lwy+5jgEC0G5P8wSsrB6EWGFirS87QjbaFYGbg32l/P51RM+9cPMiAEyICwN6g==}
-    peerDependencies:
-      effect: ^3.4.8
 
   '@emnapi/core@1.3.1':
     resolution: {integrity: sha512-pVGjBIt1Y6gg3EJN8jTcfpP/+uuRksIo055oE/OBkDNcjZqVbfkWCksG1Jp4yZnj3iKWyWX8fdG/j6UDYPbFog==}
@@ -5022,14 +5014,8 @@ packages:
     resolution: {integrity: sha512-vG0XZo8AdTH9OE6VFRwAZldNc7qtJ/6NLGWak+BtENuEUXGZgFpihILPiBvKXvJ2nFu27XNGC6rKiwuaoMbYzQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@uploadthing/mime-types@0.2.10':
-    resolution: {integrity: sha512-kz3F0oEgAyts25NAGXlUBCWh3mXonbSOQJFGFMawHuIgbUbnzXbe4w5WI+0XdneCbjNmikfWrdWrs8m/7HATfQ==}
-
   '@uploadthing/mime-types@0.3.2':
     resolution: {integrity: sha512-WP/K75S/649lM0GUcd9jq4RjeTIc/0bO2UmLx4+usTSNy/x0K8gV0JdLWeUUbmTQtJoHd4ZTSvAdG7ZQgcmXvA==}
-
-  '@uploadthing/shared@6.7.9':
-    resolution: {integrity: sha512-EsHkD31HLBHYB59ZbUVQg1pADtMNf+qjlKwniq+gxXsOOe5heD/zunJStjYWLhwB+C8+SaCPXvM7LiDmv5s/Vw==}
 
   '@uploadthing/shared@7.1.1':
     resolution: {integrity: sha512-Nem3jZ6G9AJEBzzDVvwSKV/wLdpADz8LDg+woo9diJTHj1FOjWNzCwb8wMxpEFLM88TWv5Tq8Z1mQepNmC5WIQ==}
@@ -6080,9 +6066,6 @@ packages:
 
   effect@3.10.3:
     resolution: {integrity: sha512-+Z5bUhzTeqYlfoPsfXMZG1pYadqLBKARD3xwMIoEAESsOhKFOrUsHHNCy2ZZW3/6oa4wokgT01k1zavA4BAQ4w==}
-
-  effect@3.4.8:
-    resolution: {integrity: sha512-qOQNrSSN3ITuAtARtN2Ldq6E5f42splY9VV18LqpKOXMwQCCEWkXdns4by3D2CJnDXQD2KCE0iGcRR2KowiQIA==}
 
   ejs@3.1.10:
     resolution: {integrity: sha512-UeJmFfOrAQS8OJWPZ4qtgHyWExa088/MtK5UEyoJGFH67cDEXkZSviOiKRCZ4Xij0zxI3JECgYs3oKx+AizQBA==}
@@ -9596,30 +9579,6 @@ packages:
     peerDependencies:
       browserslist: '>= 4.21.0'
 
-  uploadthing@6.13.3:
-    resolution: {integrity: sha512-MkwKeuo0cVSJ9XHZgEW67qzCmk8QF1mDNf3cDnDC4v0g7o7mnCWgATyYsKSFURQPLnRvysddDxmsaekDOomXvw==}
-    engines: {node: '>=18.13.0'}
-    peerDependencies:
-      '@effect/platform': '*'
-      express: '*'
-      fastify: '*'
-      h3: '*'
-      next: '*'
-      tailwindcss: '*'
-    peerDependenciesMeta:
-      '@effect/platform':
-        optional: true
-      express:
-        optional: true
-      fastify:
-        optional: true
-      h3:
-        optional: true
-      next:
-        optional: true
-      tailwindcss:
-        optional: true
-
   uploadthing@7.3.0:
     resolution: {integrity: sha512-ALZCOI5m5XyDD9YHCewCrhLFnELeI8xRJfJC4PvGdh9u6PcAyv851UT92JC6BLtJdgB2Fi/o9gPOXMpZkD5pSw==}
     engines: {node: '>=18.13.0'}
@@ -11517,18 +11476,6 @@ snapshots:
       effect: 3.10.3
       find-my-way-ts: 0.1.5
       multipasta: 0.2.5
-
-  '@effect/platform@0.69.8(effect@3.4.8)':
-    dependencies:
-      effect: 3.4.8
-      find-my-way-ts: 0.1.5
-      multipasta: 0.2.5
-    optional: true
-
-  '@effect/schema@0.68.18(effect@3.4.8)':
-    dependencies:
-      effect: 3.4.8
-      fast-check: 3.23.1
 
   '@emnapi/core@1.3.1':
     dependencies:
@@ -14230,15 +14177,7 @@ snapshots:
       '@typescript-eslint/types': 8.14.0
       eslint-visitor-keys: 3.4.3
 
-  '@uploadthing/mime-types@0.2.10': {}
-
   '@uploadthing/mime-types@0.3.2': {}
-
-  '@uploadthing/shared@6.7.9':
-    dependencies:
-      '@uploadthing/mime-types': 0.2.10
-      effect: 3.4.8
-      std-env: 3.7.0
 
   '@uploadthing/shared@7.1.1':
     dependencies:
@@ -15342,8 +15281,6 @@ snapshots:
   effect@3.10.3:
     dependencies:
       fast-check: 3.23.1
-
-  effect@3.4.8: {}
 
   ejs@3.1.10:
     dependencies:
@@ -19377,18 +19314,6 @@ snapshots:
       browserslist: 4.24.2
       escalade: 3.2.0
       picocolors: 1.1.1
-
-  uploadthing@6.13.3(@effect/platform@0.69.8(effect@3.4.8))(next@15.0.0(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-65a56d0e-20241020(react@19.0.0-rc-65a56d0e-20241020))(react@19.0.0-rc-65a56d0e-20241020)(sass@1.77.4)):
-    dependencies:
-      '@effect/schema': 0.68.18(effect@3.4.8)
-      '@uploadthing/mime-types': 0.2.10
-      '@uploadthing/shared': 6.7.9
-      consola: 3.2.3
-      effect: 3.4.8
-      std-env: 3.7.0
-    optionalDependencies:
-      '@effect/platform': 0.69.8(effect@3.4.8)
-      next: 15.0.0(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-65a56d0e-20241020(react@19.0.0-rc-65a56d0e-20241020))(react@19.0.0-rc-65a56d0e-20241020)(sass@1.77.4)
 
   uploadthing@7.3.0(next@15.0.0(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(react-dom@19.0.0-rc-65a56d0e-20241020(react@19.0.0-rc-65a56d0e-20241020))(react@19.0.0-rc-65a56d0e-20241020)(sass@1.77.4)):
     dependencies:
