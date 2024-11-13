@@ -132,9 +132,9 @@ export const TableColumnsProvider: React.FC<Props> = ({
         (acc, col) => {
           if (col.accessor === column) {
             acc.newColumnState.push({
+              ...col,
               accessor: col.accessor,
               active: !col.active,
-              ...col,
             })
             acc.toggledColumns.push({
               accessor: col.accessor,
@@ -280,7 +280,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
     return () => {
       abortAndIgnore(tableStateControllerRef.current)
     }
-  })
+  }, [])
 
   return (
     <TableColumnContext.Provider
