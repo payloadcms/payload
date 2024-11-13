@@ -54,7 +54,7 @@ export const CreateFirstUserClient: React.FC<{
       const controller = new AbortController()
       formStateAbortControllerRef.current = controller
 
-      const { state } = await getFormState({
+      const response = await getFormState({
         collectionSlug: userSlug,
         docPermissions,
         docPreferences,
@@ -64,7 +64,9 @@ export const CreateFirstUserClient: React.FC<{
         signal: controller.signal,
       })
 
-      return state
+      if (response && response.state) {
+        return response.state
+      }
     },
     [userSlug, getFormState, docPermissions, docPreferences],
   )
