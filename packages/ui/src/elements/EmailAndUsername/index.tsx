@@ -29,7 +29,7 @@ export function EmailAndUsernameFields(props: RenderEmailAndUsernameFieldsProps)
   const showUsernameField = Boolean(loginWithUsername)
 
   return (
-    <Fragment>
+    <div className={className}>
       {showEmailField ? (
         <EmailField
           field={{
@@ -40,9 +40,6 @@ export function EmailAndUsernameFields(props: RenderEmailAndUsernameFieldsProps)
             label: t('general:email'),
             required: !loginWithUsername || (loginWithUsername && loginWithUsername.requireEmail),
           }}
-          indexPath=""
-          parentPath=""
-          parentSchemaPath=""
           path="email"
           schemaPath="email"
           validate={email}
@@ -55,14 +52,11 @@ export function EmailAndUsernameFields(props: RenderEmailAndUsernameFieldsProps)
             label: t('authentication:username'),
             required: loginWithUsername && loginWithUsername.requireUsername,
           }}
-          indexPath=""
-          parentPath=""
-          parentSchemaPath=""
           path="username"
           schemaPath="username"
           validate={username}
         />
       )}
-    </Fragment>
+    </div>
   )
 }

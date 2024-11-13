@@ -215,9 +215,6 @@ export const Auth: React.FC<Props> = (props) => {
                 admin: { disabled, readOnly: enableAPIKeyReadOnly },
                 label: t('authentication:enableAPIKey'),
               }}
-              indexPath=""
-              parentPath=""
-              parentSchemaPath=""
               path="enableAPIKey"
               schemaPath={`${collectionSlug}.enableAPIKey`}
             />
@@ -232,9 +229,6 @@ export const Auth: React.FC<Props> = (props) => {
             admin: { disabled, readOnly },
             label: t('authentication:verified'),
           }}
-          indexPath=""
-          parentPath=""
-          parentSchemaPath=""
           path="_verified"
           schemaPath={`${collectionSlug}._verified`}
         />
