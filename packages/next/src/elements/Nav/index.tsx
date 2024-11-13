@@ -12,11 +12,12 @@ import { NavWrapper } from './NavWrapper/index.js'
 
 const baseClass = 'nav'
 
+import { getNavPrefs } from './getNavPrefs.js'
 import { DefaultNavClient } from './index.client.js'
 
 export type NavProps = ServerProps
 
-export const DefaultNav: React.FC<NavProps> = (props) => {
+export const DefaultNav: React.FC<NavProps> = async (props) => {
   const { i18n, locale, params, payload, permissions, searchParams, user, visibleEntities } = props
 
   if (!payload?.config) {
@@ -56,6 +57,8 @@ export const DefaultNav: React.FC<NavProps> = (props) => {
     i18n,
   )
 
+  const navPreferences = await getNavPrefs({ payload, user })
+
   return (
     <NavWrapper baseClass={baseClass}>
       <nav className={`${baseClass}__wrap`}>
@@ -72,7 +75,7 @@ export const DefaultNav: React.FC<NavProps> = (props) => {
             user,
           }}
         />
-        <DefaultNavClient groups={groups} />
+        <DefaultNavClient groups={groups} navPreferences={navPreferences} />
         <RenderServerComponent
           Component={afterNavLinks}
           importMap={payload.importMap}

@@ -16,8 +16,8 @@ export { formatDocTitle } from '../../utilities/formatDocTitle.js'
 export {
   type EntityToGroup,
   EntityType,
-  type Group,
   groupNavItems,
+  type NavGroupType,
 } from '../../utilities/groupNavItems.js'
 export { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
 export { handleGoBack } from '../../utilities/handleGoBack.js'

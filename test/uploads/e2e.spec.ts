@@ -17,6 +17,7 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { RESTClient } from '../helpers/rest.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
@@ -36,7 +37,7 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { beforeAll, describe } = test
+const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
 let client: RESTClient
@@ -56,9 +57,6 @@ let customFileNameURL: AdminUrlUtil
 
 describe('uploads', () => {
   let page: Page
-  let pngDoc: Media
-  let audioDoc: Media
-  let relationDoc: Relation
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -84,36 +82,15 @@ describe('uploads', () => {
 
     initPageConsoleErrorCatch(page)
     await ensureCompilationIsDone({ page, serverURL })
+  })
 
-    const findPNG = await payload.find({
-      collection: mediaSlug,
-      depth: 0,
-      pagination: false,
-      where: {
-        mimeType: {
-          equals: 'image/png',
-        },
-      },
+  beforeEach(async () => {
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'uploadsTest',
     })
 
-    pngDoc = findPNG.docs[0] as unknown as Media
-
-    const findRelationDoc = await payload.find({
-      collection: relationSlug,
-      depth: 0,
-      limit: 1,
-      pagination: false,
-    })
-
-    relationDoc = findRelationDoc.docs[0] as unknown as Relation
-
-    const findAudio = await payload.find({
-      collection: audioSlug,
-      depth: 0,
-      pagination: false,
-    })
-
-    audioDoc = findAudio.docs[0] as unknown as Media
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   test('should show upload filename in upload collection list', async () => {
@@ -139,62 +116,16 @@ describe('uploads', () => {
     await expect(field).toContainText('image')
   })
 
-  test('should show resized images', async () => {
-    await page.goto(mediaURL.edit(pngDoc.id))
-
-    await page.locator('.file-field__previewSizes').click()
-
-    const maintainedAspectRatioItem = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(1)
-      .locator('.file-meta__size-type')
-    await expect(maintainedAspectRatioItem).toContainText('1024x1024')
-
-    const differentFormatFromMainImageMeta = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(2)
-      .locator('.file-meta__size-type')
-    await expect(differentFormatFromMainImageMeta).toContainText('image/jpeg')
-
-    const maintainedImageSizeMeta = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(3)
-      .locator('.file-meta__size-type')
-    await expect(maintainedImageSizeMeta).toContainText('1600x1600')
-
-    const maintainedImageSizeWithNewFormatMeta = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(4)
-      .locator('.file-meta__size-type')
-    await expect(maintainedImageSizeWithNewFormatMeta).toContainText('1600x1600')
-    await expect(maintainedImageSizeWithNewFormatMeta).toContainText('image/jpeg')
-
-    const sameSizeMeta = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(5)
-      .locator('.file-meta__size-type')
-    await expect(sameSizeMeta).toContainText('320x80')
-
-    const tabletMeta = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(6)
-      .locator('.file-meta__size-type')
-    await expect(tabletMeta).toContainText('640x480')
-
-    const mobileMeta = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(7)
-      .locator('.file-meta__size-type')
-    await expect(mobileMeta).toContainText('320x240')
-
-    const iconMeta = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(8)
-      .locator('.file-meta__size-type')
-    await expect(iconMeta).toContainText('16x16')
-  })
-
   test('should update upload field after editing relationship in document drawer', async () => {
+    const relationDoc = (
+      await payload.find({
+        collection: relationSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
+      })
+    ).docs[0]
+
     await page.goto(relationURL.edit(relationDoc.id))
     await page.waitForURL(relationURL.edit(relationDoc.id))
 
@@ -281,6 +212,74 @@ describe('uploads', () => {
     await expect(smallSquareFilename).toContainText(/480x480\.webp$/)
   })
 
+  test('should show resized images', async () => {
+    const pngDoc = (
+      await payload.find({
+        collection: mediaSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          mimeType: {
+            equals: 'image/png',
+          },
+        },
+      })
+    ).docs[0]
+
+    await page.goto(mediaURL.edit(pngDoc.id))
+
+    await page.locator('.file-field__previewSizes').click()
+
+    const maintainedAspectRatioItem = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(1)
+      .locator('.file-meta__size-type')
+    await expect(maintainedAspectRatioItem).toContainText('1024x1024')
+
+    const differentFormatFromMainImageMeta = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(2)
+      .locator('.file-meta__size-type')
+    await expect(differentFormatFromMainImageMeta).toContainText('image/jpeg')
+
+    const maintainedImageSizeMeta = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(3)
+      .locator('.file-meta__size-type')
+    await expect(maintainedImageSizeMeta).toContainText('1600x1600')
+
+    const maintainedImageSizeWithNewFormatMeta = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(4)
+      .locator('.file-meta__size-type')
+    await expect(maintainedImageSizeWithNewFormatMeta).toContainText('1600x1600')
+    await expect(maintainedImageSizeWithNewFormatMeta).toContainText('image/jpeg')
+
+    const sameSizeMeta = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(5)
+      .locator('.file-meta__size-type')
+    await expect(sameSizeMeta).toContainText('320x80')
+
+    const tabletMeta = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(6)
+      .locator('.file-meta__size-type')
+    await expect(tabletMeta).toContainText('640x480')
+
+    const mobileMeta = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(7)
+      .locator('.file-meta__size-type')
+    await expect(mobileMeta).toContainText('320x240')
+
+    const iconMeta = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(8)
+      .locator('.file-meta__size-type')
+    await expect(iconMeta).toContainText('16x16')
+  })
+
   test('should resize and show tiff images', async () => {
     await page.goto(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image.tiff'))
@@ -338,6 +337,14 @@ describe('uploads', () => {
   })
 
   test('should restrict mimetype based on filterOptions', async () => {
+    const audioDoc = (
+      await payload.find({
+        collection: audioSlug,
+        depth: 0,
+        pagination: false,
+      })
+    ).docs[0]
+
     await page.goto(audioURL.edit(audioDoc.id))
     await page.waitForURL(audioURL.edit(audioDoc.id))
 
@@ -373,6 +380,14 @@ describe('uploads', () => {
   })
 
   test('should restrict uploads in drawer based on filterOptions', async () => {
+    const audioDoc = (
+      await payload.find({
+        collection: audioSlug,
+        depth: 0,
+        pagination: false,
+      })
+    ).docs[0]
+
     await page.goto(audioURL.edit(audioDoc.id))
     await page.waitForURL(audioURL.edit(audioDoc.id))
 

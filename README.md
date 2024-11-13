@@ -52,10 +52,6 @@ Jumpstart your next project by starting with a pre-made template. These are prod
 
 Build any kind of website, blog, or portfolio from small to enterprise. Comes with a fully functional front-end built with RSCs and Tailwind.
 
-### [🛒 E-Commerce](https://github.com/payloadcms/payload/tree/beta/templates/ecommerce)
-
-Eliminate the need to combine Shopify and a CMS, and instead do it all with Payload + Stripe. Comes with a beautiful, fully functional front-end complete with shopping cart, checkout, orders, and much more.
-
 We're constantly adding more templates to our [Templates Directory](https://github.com/payloadcms/payload/tree/beta/templates). If you maintain your own template, consider adding the `payload-template` topic to your GitHub repository for others to find.
 
 - [Official Templates](https://github.com/payloadcms/payload/tree/beta/templates)
