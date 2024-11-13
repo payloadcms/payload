@@ -2,10 +2,8 @@ import type { CreateMigration } from 'payload'
 
 import fs from 'fs'
 import { createRequire } from 'module'
-import path from 'path'
 import { getPredefinedMigration, writeMigrationIndex } from 'payload'
 import prompts from 'prompts'
-import { fileURLToPath } from 'url'
 
 import type { BasePostgresAdapter } from './types.js'
 
@@ -16,10 +14,8 @@ const require = createRequire(import.meta.url)
 
 export const createMigration: CreateMigration = async function createMigration(
   this: BasePostgresAdapter,
-  { file, forceAcceptWarning, migrationName, payload },
+  { dirname, file, forceAcceptWarning, migrationName, payload },
 ) {
-  const filename = fileURLToPath(import.meta.url)
-  const dirname = path.dirname(filename)
   const dir = payload.db.migrationDir
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
