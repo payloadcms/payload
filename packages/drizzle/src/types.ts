@@ -1,4 +1,5 @@
 import type {
+  Column,
   ColumnBaseConfig,
   ColumnDataType,
   DrizzleConfig,
@@ -121,6 +122,8 @@ export type RequireDrizzleKit = () => {
     schema: Record<string, unknown>,
     drizzle: DrizzleAdapter['drizzle'],
     filterSchema?: string[],
+    tablesFilter?: string[],
+    extensionsFilter?: string[],
   ) => Promise<{ apply; hasDataLoss; warnings }>
 }
 
@@ -146,6 +149,7 @@ export type Migration = {
 } & MigrationData
 
 export type CreateJSONQueryArgs = {
+  column?: Column | string
   operator: string
   pathSegments: string[]
   table?: string
@@ -155,7 +159,7 @@ export type CreateJSONQueryArgs = {
 }
 
 export interface DrizzleAdapter extends BaseDatabaseAdapter {
-  convertPathToJSONTraversal: (incomingSegments: string[]) => string
+  convertPathToJSONTraversal?: (incomingSegments: string[]) => string
   countDistinct: CountDistinct
   createJSONQuery: (args: CreateJSONQueryArgs) => string
   defaultDrizzleSnapshot: Record<string, unknown>
@@ -164,6 +168,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   dropDatabase: DropDatabase
   enums?: never | Record<string, unknown>
   execute: Execute<unknown>
+
   features: {
     json?: boolean
   }
@@ -187,6 +192,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   requireDrizzleKit: RequireDrizzleKit
   resolveInitializing: () => void
   schema: Record<string, unknown>
+
   schemaName?: string
   sessions: {
     [id: string]: {

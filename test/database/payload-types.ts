@@ -25,6 +25,7 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
+  collectionsJoins: {};
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     'default-values': DefaultValuesSelect<false> | DefaultValuesSelect<true>;
@@ -106,6 +107,11 @@ export interface DefaultValue {
     defaultValue?: string | null;
   };
   select?: ('option0' | 'option1' | 'default') | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point?: [number, number] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -263,6 +269,7 @@ export interface CustomId {
   id: string;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -400,6 +407,7 @@ export interface DefaultValuesSelect<T extends boolean = true> {
         defaultValue?: T;
       };
   select?: T;
+  point?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -531,6 +539,7 @@ export interface CustomIdsSelect<T extends boolean = true> {
   id?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

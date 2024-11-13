@@ -9,7 +9,7 @@ import {
   Gutter,
   MinimizeMaximizeIcon,
   NumberField,
-  SetViewActions,
+  SetDocumentStepNav,
   useConfig,
   useDocumentInfo,
   useLocale,
@@ -19,7 +19,6 @@ import { useSearchParams } from 'next/navigation.js'
 import * as React from 'react'
 import { toast } from 'sonner'
 
-import { SetDocumentStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'
 import './index.scss'
 import { LocaleSelector } from './LocaleSelector/index.js'
 import { RenderJSON } from './RenderJSON/index.js'
@@ -42,8 +41,8 @@ export const APIViewClient: React.FC = () => {
     getEntityConfig,
   } = useConfig()
 
-  const collectionClientConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
-  const globalClientConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
+  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
 
   const localeOptions =
     localization &&
@@ -52,13 +51,13 @@ export const APIViewClient: React.FC = () => {
   let draftsEnabled: boolean = false
   let docEndpoint: string = ''
 
-  if (collectionClientConfig) {
-    draftsEnabled = Boolean(collectionClientConfig.versions?.drafts)
+  if (collectionConfig) {
+    draftsEnabled = Boolean(collectionConfig.versions?.drafts)
     docEndpoint = `/${collectionSlug}/${id}`
   }
 
-  if (globalClientConfig) {
-    draftsEnabled = Boolean(globalClientConfig.versions?.drafts)
+  if (globalConfig) {
+    draftsEnabled = Boolean(globalConfig.versions?.drafts)
     docEndpoint = `/globals/${globalSlug}`
   }
 
@@ -111,18 +110,12 @@ export const APIViewClient: React.FC = () => {
     >
       <SetDocumentStepNav
         collectionSlug={collectionSlug}
-        globalLabel={globalClientConfig?.label}
+        globalLabel={globalConfig?.label}
         globalSlug={globalSlug}
         id={id}
-        pluralLabel={collectionClientConfig ? collectionClientConfig?.labels?.plural : undefined}
-        useAsTitle={collectionClientConfig ? collectionClientConfig?.admin?.useAsTitle : undefined}
+        pluralLabel={collectionConfig ? collectionConfig?.labels?.plural : undefined}
+        useAsTitle={collectionConfig ? collectionConfig?.admin?.useAsTitle : undefined}
         view="API"
-      />
-      <SetViewActions
-        actions={
-          (collectionClientConfig || globalClientConfig)?.admin?.components?.views?.edit?.api
-            ?.actions
-        }
       />
       <div className={`${baseClass}__configuration`}>
         <div className={`${baseClass}__api-url`}>
@@ -166,6 +159,7 @@ export const APIViewClient: React.FC = () => {
                     label: t('version:draft'),
                   }}
                   onChange={() => setDraft(!draft)}
+                  path="draft"
                 />
               )}
               <CheckboxField
@@ -174,6 +168,7 @@ export const APIViewClient: React.FC = () => {
                   label: t('authentication:authenticated'),
                 }}
                 onChange={() => setAuthenticated(!authenticated)}
+                path="authenticated"
               />
             </div>
             {localeOptions && <LocaleSelector localeOptions={localeOptions} onChange={setLocale} />}
@@ -188,6 +183,7 @@ export const APIViewClient: React.FC = () => {
                 min: 0,
               }}
               onChange={(value) => setDepth(value?.toString())}
+              path="depth"
             />
           </div>
         </Form>

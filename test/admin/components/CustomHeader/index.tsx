@@ -12,7 +12,7 @@ export const CustomHeader: PayloadServerReactComponent<
       className={baseClass}
       style={{
         alignItems: 'center',
-        backgroundColor: 'var(--theme-success-500)',
+        backgroundColor: 'var(--theme-success-100)',
         display: 'flex',
         minHeight: 'var(--app-header-height)',
         padding: '0 var(--gutter-h)',
@@ -22,7 +22,7 @@ export const CustomHeader: PayloadServerReactComponent<
         zIndex: 'var(--z-modal)',
       }}
     >
-      <p style={{ color: 'var(--theme-text)', margin: 0 }}>
+      <p style={{ color: 'var(--theme-success-750)', margin: 0 }}>
         Here is a custom header inserted with admin.components.header
       </p>
     </div>

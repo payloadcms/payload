@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, FormFieldBase } from 'payload'
+import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -32,12 +32,7 @@ const initialParams = {
   depth: 0,
 }
 
-type Props = {
-  name: string
-  richTextComponentMap: Map<string, React.ReactNode>
-} & FormFieldBase
-
-const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] } & Props> = ({
+const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] }> = ({
   enabledCollectionSlugs,
 }) => {
   const {
@@ -137,7 +132,7 @@ const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] } & P
   )
 
   const relatedFieldSchemaPath = `${uploadFieldsSchemaPath}.${relatedCollection.slug}`
-  const customFieldsMap = fieldProps.field.richTextComponentMap.get(relatedFieldSchemaPath)
+  const customFieldsMap = fieldProps.componentMap[relatedFieldSchemaPath]
 
   return (
     <div
@@ -159,22 +154,27 @@ const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] } & P
             </div>
             <div className={`${baseClass}__actions`}>
               {Boolean(customFieldsMap) && (
-                <DrawerToggler
-                  className={`${baseClass}__upload-drawer-toggler`}
-                  disabled={fieldProps?.field?.admin?.readOnly}
-                  slug={drawerSlug}
-                >
-                  <Button
-                    buttonStyle="icon-label"
-                    el="div"
-                    icon="edit"
-                    onClick={(e) => {
-                      e.preventDefault()
-                    }}
-                    round
-                    tooltip={t('fields:editRelationship')}
+                <>
+                  <DrawerToggler
+                    className={`${baseClass}__upload-drawer-toggler`}
+                    disabled={fieldProps?.field?.admin?.readOnly}
+                    slug={drawerSlug}
+                  >
+                    <Button
+                      buttonStyle="icon-label"
+                      el="div"
+                      icon="edit"
+                      onClick={(e) => {
+                        e.preventDefault()
+                      }}
+                      round
+                      tooltip={t('fields:editRelationship')}
+                    />
+                  </DrawerToggler>
+                  <UploadDrawer
+                    {...{ drawerSlug, element, fieldProps, relatedCollection, schemaPath }}
                   />
-                </DrawerToggler>
+                </>
               )}
               <ListDrawerToggler
                 className={`${baseClass}__list-drawer-toggler`}
@@ -216,12 +216,11 @@ const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] } & P
       {children}
       {value?.id && <DocumentDrawer onSave={updateUpload} />}
       <ListDrawer onSelect={swapUpload} />
-      <UploadDrawer {...{ drawerSlug, element, fieldProps, relatedCollection, schemaPath }} />
     </div>
   )
 }
 
-export const UploadElement = (props: Props): React.ReactNode => {
+export const UploadElement = (props: any): React.ReactNode => {
   return (
     <EnabledRelationshipsCondition {...props} uploads>
       <UploadElementComponent {...props} />

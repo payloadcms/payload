@@ -1,11 +1,13 @@
-import type { ClientField } from '../../fields/config/client.js'
-import type { FormFieldBase } from '../types.js'
+import type { ClientField } from '../../fields/config/types.js'
+import type { ClientFieldBase } from '../types.js'
 
-export type HiddenFieldProps = {
+type HiddenFieldBaseClientProps = {
   readonly disableModifyingForm?: false
   readonly field?: {
     readonly name?: string
-  } & Pick<ClientField, '_path'>
-  readonly forceUsePathFromProps?: boolean
+  } & ClientField
+  readonly path: string
   readonly value?: unknown
-} & FormFieldBase
+}
+
+export type HiddenFieldProps = ClientFieldBase & HiddenFieldBaseClientProps

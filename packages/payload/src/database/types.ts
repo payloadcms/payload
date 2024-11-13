@@ -29,6 +29,8 @@ export interface BaseDatabaseAdapter {
   connect?: Connect
 
   count: Count
+  countGlobalVersions: CountGlobalVersions
+  countVersions: CountVersions
 
   create: Create
 
@@ -158,6 +160,8 @@ export type Connect = (args?: ConnectArgs) => Promise<void>
 export type Destroy = () => Promise<void>
 
 export type CreateMigration = (args: {
+  /** dirname of the package, required in drizzle */
+  dirname?: string
   file?: string
   /**
    * Skips the prompt asking to create empty migrations
@@ -233,6 +237,17 @@ export type CountArgs = {
 }
 
 export type Count = (args: CountArgs) => Promise<{ totalDocs: number }>
+
+export type CountVersions = (args: CountArgs) => Promise<{ totalDocs: number }>
+
+export type CountGlobalVersionArgs = {
+  global: string
+  locale?: string
+  req: PayloadRequest
+  where?: Where
+}
+
+export type CountGlobalVersions = (args: CountGlobalVersionArgs) => Promise<{ totalDocs: number }>
 
 type BaseVersionArgs = {
   limit?: number

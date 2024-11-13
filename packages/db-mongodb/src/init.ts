@@ -45,25 +45,28 @@ export const init: Init = function init(this: MongooseAdapter) {
         versionSchema.plugin(mongooseAggregatePaginate)
       }
 
-      const model = mongoose.model(
+      const versionCollectionName =
+        this.autoPluralization === true && !collection.dbName ? undefined : versionModelName
+
+      this.versions[collection.slug] = mongoose.model(
         versionModelName,
         versionSchema,
-        this.autoPluralization === true ? undefined : versionModelName,
+        versionCollectionName,
       ) as CollectionModel
-
-      this.versions[collection.slug] = model
     }
 
-    const model = mongoose.model(
-      getDBName({ config: collection }),
+    const modelName = getDBName({ config: collection })
+    const collectionName =
+      this.autoPluralization === true && !collection.dbName ? undefined : modelName
+
+    this.collections[collection.slug] = mongoose.model(
+      modelName,
       schema,
-      this.autoPluralization === true ? undefined : collection.slug,
+      collectionName,
     ) as CollectionModel
-    this.collections[collection.slug] = model
   })
 
-  const model = buildGlobalModel(this.payload.config)
-  this.globals = model
+  this.globals = buildGlobalModel(this.payload.config)
 
   this.payload.config.globals.forEach((global) => {
     if (global.versions) {
@@ -85,12 +88,11 @@ export const init: Init = function init(this: MongooseAdapter) {
         .plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true })
         .plugin(getBuildQueryPlugin({ versionsFields: versionGlobalFields }))
 
-      const versionsModel = mongoose.model(
+      this.versions[global.slug] = mongoose.model(
         versionModelName,
         versionSchema,
         versionModelName,
       ) as CollectionModel
-      this.versions[global.slug] = versionsModel
     }
   })
 }
