@@ -43,9 +43,9 @@ export const DefaultFilter: React.FC<Props> = ({
   }
 
   switch (internalField?.field?.type) {
-    case 'number': {
+    case 'date': {
       return (
-        <NumberField
+        <DateField
           disabled={disabled}
           field={internalField.field}
           onChange={onChange}
@@ -55,9 +55,9 @@ export const DefaultFilter: React.FC<Props> = ({
       )
     }
 
-    case 'date': {
+    case 'number': {
       return (
-        <DateField
+        <NumberField
           disabled={disabled}
           field={internalField.field}
           onChange={onChange}

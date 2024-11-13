@@ -126,8 +126,7 @@ export const renderDocument = async ({
       collectionConfig,
       globalConfig,
       isEditing,
-      payload: req.payload,
-      user,
+      req,
     }),
   ])
 

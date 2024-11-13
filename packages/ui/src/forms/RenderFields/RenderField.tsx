@@ -78,18 +78,18 @@ export function RenderField({
       return <ArrayField {...sharedProps} field={clientFieldConfig} permissions={permissions} />
     case 'blocks':
       return <BlocksField {...sharedProps} field={clientFieldConfig} permissions={permissions} />
-    case 'group':
-      return <GroupField {...sharedProps} field={clientFieldConfig} permissions={permissions} />
-    case 'tabs':
-      return <TabsField {...sharedProps} field={clientFieldConfig} permissions={permissions} />
-
-    // unnamed fields with subfields
-    case 'row':
-      return <RowField {...sharedProps} field={clientFieldConfig} permissions={permissions} />
     case 'collapsible':
       return (
         <CollapsibleField {...sharedProps} field={clientFieldConfig} permissions={permissions} />
       )
+    case 'group':
+      return <GroupField {...sharedProps} field={clientFieldConfig} permissions={permissions} />
+
+    // unnamed fields with subfields
+    case 'row':
+      return <RowField {...sharedProps} field={clientFieldConfig} permissions={permissions} />
+    case 'tabs':
+      return <TabsField {...sharedProps} field={clientFieldConfig} permissions={permissions} />
 
     default:
       return DefaultField ? <DefaultField field={clientFieldConfig} {...sharedProps} /> : null

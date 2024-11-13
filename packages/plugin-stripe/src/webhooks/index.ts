@@ -30,8 +30,8 @@ export const handleWebhooks: StripeWebhookHandler = (args) => {
         })
         break
       }
-      case 'updated': {
-        void handleCreatedOrUpdated({
+      case 'deleted': {
+        void handleDeleted({
           ...args,
           pluginConfig,
           resourceType,
@@ -39,8 +39,8 @@ export const handleWebhooks: StripeWebhookHandler = (args) => {
         })
         break
       }
-      case 'deleted': {
-        void handleDeleted({
+      case 'updated': {
+        void handleCreatedOrUpdated({
           ...args,
           pluginConfig,
           resourceType,

@@ -473,8 +473,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         break
       }
-      case 'upload':
-      case 'relationship': {
+      case 'relationship':
+      case 'upload': {
         if (field.filterOptions) {
           if (typeof field.filterOptions === 'object') {
             if (typeof field.relationTo === 'string') {

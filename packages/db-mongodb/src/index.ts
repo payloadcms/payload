@@ -74,8 +74,14 @@ export interface Args {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
     useFacet?: boolean
   } & ConnectOptions
+
   /** Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false */
   disableIndexHints?: boolean
+  /**
+   * Set to `true` to ensure that indexes are ready before completing connection.
+   * NOTE: not recommended for production. This can slow down the initialization of Payload.
+   */
+  ensureIndexes?: boolean
   migrationDir?: string
   /**
    * typed as any to avoid dependency
@@ -96,6 +102,7 @@ export type MongooseAdapter = {
     [slug: string]: CollectionModel
   }
   connection: Connection
+  ensureIndexes: boolean
   globals: GlobalModel
   mongoMemoryServer: MongoMemoryReplSet
   prodMigrations?: {
@@ -118,6 +125,7 @@ declare module 'payload' {
       [slug: string]: CollectionModel
     }
     connection: Connection
+    ensureIndexes: boolean
     globals: GlobalModel
     mongoMemoryServer: MongoMemoryReplSet
     prodMigrations?: {
@@ -138,6 +146,7 @@ export function mongooseAdapter({
   autoPluralization = true,
   connectOptions,
   disableIndexHints = false,
+  ensureIndexes,
   migrationDir: migrationDirArg,
   mongoMemoryServer,
   prodMigrations,
@@ -157,6 +166,7 @@ export function mongooseAdapter({
       connection: undefined,
       connectOptions: connectOptions || {},
       disableIndexHints,
+      ensureIndexes,
       globals: undefined,
       mongoMemoryServer,
       sessions: {},
