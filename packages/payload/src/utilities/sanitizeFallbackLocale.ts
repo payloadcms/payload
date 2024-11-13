@@ -15,7 +15,11 @@ interface Args {
  * - determines if a locale specific fallback should be used in place of the default locale
  * - sets the fallbackLocale to 'null' if no fallback locale should be used
  */
-export const sanitizeFallbackLocale = ({ fallbackLocale, locale, localization }: Args): string => {
+export const sanitizeFallbackLocale = ({
+  fallbackLocale,
+  locale,
+  localization,
+}: Args): null | string => {
   const hasFallbackLocale =
     fallbackLocale === undefined || fallbackLocale === null
       ? localization && localization.fallback
@@ -42,8 +46,8 @@ export const sanitizeFallbackLocale = ({ fallbackLocale, locale, localization }:
       }
     }
   } else {
-    fallbackLocale = 'null'
+    fallbackLocale = null
   }
 
-  return fallbackLocale as string
+  return fallbackLocale as null | string
 }
