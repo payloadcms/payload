@@ -24,8 +24,11 @@ export type DefaultCellComponentProps<TCellData = any, TField extends ClientFiel
   readonly rowData: RowData
 }
 
-export interface DefaultServerCellComponentProps extends Omit<DefaultCellComponentProps, 'field'> {
+export type DefaultServerCellComponentProps<
+  TCellData = any,
+  TField extends ClientField = ClientField,
+> = {
   field: Field
   i18n: I18nClient
   payload: Payload
-}
+} & DefaultCellComponentProps<TCellData, TField>
