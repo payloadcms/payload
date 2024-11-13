@@ -11,35 +11,32 @@ export async function migrateVersionsV1_V2({ req }: { req: PayloadRequest }) {
   const { session } = await withSession(payload.db as MongooseAdapter, req)
 
   // For each collection
-  await Promise.all(
-    payload.config.collections.map(async ({ slug, versions }) => {
-      if (versions?.drafts) {
-        await migrateCollectionDocs({ slug, payload, session })
 
-        payload.logger.info(`Migrated the "${slug}" collection.`)
-      }
-    }),
-  )
+  for (const { slug, versions } of payload.config.collections) {
+    if (versions?.drafts) {
+      await migrateCollectionDocs({ slug, payload, session })
+
+      payload.logger.info(`Migrated the "${slug}" collection.`)
+    }
+  }
 
   // For each global
-  await Promise.all(
-    payload.config.globals.map(async ({ slug, versions }) => {
-      if (versions) {
-        const VersionsModel = payload.db.versions[slug]
+  for (const { slug, versions } of payload.config.globals) {
+    if (versions) {
+      const VersionsModel = payload.db.versions[slug]
 
-        await VersionsModel.findOneAndUpdate(
-          {},
-          { latest: true },
-          {
-            session,
-            sort: { updatedAt: -1 },
-          },
-        ).exec()
+      await VersionsModel.findOneAndUpdate(
+        {},
+        { latest: true },
+        {
+          session,
+          sort: { updatedAt: -1 },
+        },
+      ).exec()
 
-        payload.logger.info(`Migrated the "${slug}" global.`)
-      }
-    }),
-  )
+      payload.logger.info(`Migrated the "${slug}" global.`)
+    }
+  }
 }
 
 async function migrateCollectionDocs({

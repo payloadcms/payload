@@ -13,7 +13,7 @@ import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
 import { Types } from 'mongoose'
 import path from 'path'
-import { commitTransaction, initTransaction, QueryError } from 'payload'
+import { commitTransaction, initTransaction, killTransaction, QueryError } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'
@@ -264,9 +264,10 @@ describe('database', () => {
       let hasErr = false
 
       await initTransaction(req)
-      await migrateVersionsV1_V2({ req }).catch((err) => {
+      await migrateVersionsV1_V2({ req }).catch(async (err) => {
         payload.logger.error(err)
         hasErr = true
+        await killTransaction(req)
       })
       await commitTransaction(req)
 
@@ -311,7 +312,8 @@ describe('database', () => {
       expect(inserted.every((doc) => typeof doc.relationship === 'string')).toBeTruthy()
 
       await initTransaction(req)
-      await migrateRelationshipsV2_V3({ req, batchSize: 66 }).catch((err) => {
+      await migrateRelationshipsV2_V3({ req, batchSize: 66 }).catch(async (err) => {
+        await killTransaction(req)
         payload.logger.error(err)
         hasErr = true
       })
