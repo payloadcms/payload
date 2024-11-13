@@ -213,8 +213,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   /*
     Execute richText sanitization
    */
-  if (typeof incomingConfig.editor === 'function') {
-    config.editor = await incomingConfig.editor({
+  if (incomingConfig.editor && 'adapter' in incomingConfig.editor) {
+    config.editor = await incomingConfig.editor.adapter({
       config: config as SanitizedConfig,
       isRoot: true,
       parentIsLocalized: false,

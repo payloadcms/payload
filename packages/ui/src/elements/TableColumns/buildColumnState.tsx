@@ -207,7 +207,7 @@ export const buildColumnState = (args: Args): Column[] => {
                 throw new MissingEditorProp(_field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
               }
 
-              if (typeof _field?.editor === 'function') {
+              if ('adapter' in _field.editor) {
                 throw new Error('Attempted to access unsanitized rich text editor.')
               }
 

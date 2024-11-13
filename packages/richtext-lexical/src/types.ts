@@ -65,8 +65,8 @@ export type LexicalRichTextAdapter = {
   features: FeatureProviderServer<any, any, any>[]
 } & RichTextAdapter<SerializedEditorState, AdapterProps>
 
-export type LexicalRichTextAdapterProvider =
-  /**
+export type LexicalRichTextAdapterProvider = {
+  adapter: /**
    * This is being called during the payload sanitization process
    */
   ({
@@ -78,6 +78,13 @@ export type LexicalRichTextAdapterProvider =
     isRoot?: boolean
     parentIsLocalized: boolean
   }) => Promise<LexicalRichTextAdapter>
+  /**
+   * A list of features that are enabled in the richText editor.
+   *
+   * This will be a function if a function is passed to the `features` argument in the `lexicalEditor` function.
+   */
+  enabledFeatures: LexicalEditorProps['features']
+}
 
 export type FeatureClientSchemaMap = {
   [featureKey: string]: {

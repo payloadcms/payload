@@ -212,7 +212,7 @@ export const createClientField = ({
         throw new MissingEditorProp(incomingField) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
       }
 
-      if (typeof incomingField?.editor === 'function') {
+      if ('adapter' in incomingField.editor) {
         throw new Error('Attempted to access unsanitized rich text editor.')
       }
 

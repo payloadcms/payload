@@ -81,7 +81,7 @@ export const traverseFields = ({
           throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
         }
 
-        if (typeof field.editor === 'function') {
+        if ('adapter' in field.editor) {
           throw new Error('Attempted to access unsanitized rich text editor.')
         }
 

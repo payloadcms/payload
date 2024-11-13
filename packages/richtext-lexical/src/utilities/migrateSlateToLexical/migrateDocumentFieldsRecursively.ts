@@ -73,7 +73,7 @@ export const migrateDocumentFieldsRecursively = ({
     if (field.type === 'richText' && Array.isArray(data[field.name])) {
       // Slate richText
       const editor: LexicalRichTextAdapter = field.editor as LexicalRichTextAdapter
-      if (editor && typeof editor === 'object') {
+      if (editor && !('adapter' in editor)) {
         if ('features' in editor && editor.features?.length) {
           // find slatetolexical feature
           const slateToLexicalFeature = editor.editorConfig.resolvedFeatureMap.get('slateToLexical')

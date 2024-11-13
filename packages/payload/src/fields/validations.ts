@@ -395,7 +395,7 @@ export const richText: RichTextFieldValidation = async (value, options) => {
   if (!options?.editor) {
     throw new Error('richText field has no editor property.')
   }
-  if (typeof options?.editor === 'function') {
+  if ('adapter' in options.editor) {
     throw new Error('Attempted to access unsanitized rich text editor.')
   }
 

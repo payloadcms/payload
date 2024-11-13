@@ -109,7 +109,7 @@ export const renderField: RenderFieldMethod = ({
         throw new MissingEditorProp(fieldConfig) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
       }
 
-      if (typeof fieldConfig?.editor === 'function') {
+      if ('adapter' in fieldConfig.editor) {
         throw new Error('Attempted to access unsanitized rich text editor.')
       }
 

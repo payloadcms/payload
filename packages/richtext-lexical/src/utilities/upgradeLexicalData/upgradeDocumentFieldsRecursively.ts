@@ -76,7 +76,7 @@ export const upgradeDocumentFieldsRecursively = ({
     ) {
       // Lexical richText
       const editor: LexicalRichTextAdapter = field.editor as LexicalRichTextAdapter
-      if (editor && typeof editor === 'object') {
+      if (editor && !('adapter' in editor)) {
         if ('features' in editor && editor.features?.length) {
           // Load lexical editor into lexical, then save it immediately
           const editorState = data[field.name] as SerializedEditorState

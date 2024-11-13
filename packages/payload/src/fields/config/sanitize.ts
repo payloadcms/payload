@@ -205,15 +205,20 @@ export const sanitizeFields = async ({
           }
         }
 
-        if (typeof field.editor === 'function') {
-          field.editor = await field.editor({
+        if (field.editor && 'adapter' in field.editor) {
+          field.editor = await field.editor.adapter({
             config: _config,
             isRoot: requireFieldLevelRichTextEditor,
             parentIsLocalized: parentIsLocalized || field.localized,
           })
         }
 
-        if (field.editor.i18n && Object.keys(field.editor.i18n).length >= 0) {
+        if (
+          field.editor &&
+          !('adapter' in field.editor) &&
+          field.editor.i18n &&
+          Object.keys(field.editor.i18n).length >= 0
+        ) {
           config.i18n.translations = deepMergeSimple(config.i18n.translations, field.editor.i18n)
         }
       }

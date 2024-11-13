@@ -14,62 +14,51 @@ import { getGenerateSchemaMap } from './generateSchemaMap.js'
 export function slateEditor(
   args: AdapterArguments,
 ): RichTextAdapterProvider<any[], AdapterArguments, any> {
-  return async ({ config }) => {
-    const validRelationships = config.collections.map((c) => c.slug) || []
+  return {
+    adapter: async ({ config }) => {
+      const validRelationships = config.collections.map((c) => c.slug) || []
 
-    if (!args.admin) {
-      args.admin = {}
-    }
-    if (!args.admin.link) {
-      args.admin.link = {}
-    }
-    if (!args.admin.link.fields) {
-      args.admin.link.fields = []
-    }
-    args.admin.link.fields = await sanitizeFields({
-      config: config as unknown as Config,
-      fields: transformExtraFields(args.admin?.link?.fields, config),
-      parentIsLocalized: false,
-      validRelationships,
-    })
+      if (!args.admin) {
+        args.admin = {}
+      }
+      if (!args.admin.link) {
+        args.admin.link = {}
+      }
+      if (!args.admin.link.fields) {
+        args.admin.link.fields = []
+      }
+      args.admin.link.fields = await sanitizeFields({
+        config: config as unknown as Config,
+        fields: transformExtraFields(args.admin?.link?.fields, config),
+        parentIsLocalized: false,
+        validRelationships,
+      })
 
-    if (args?.admin?.upload?.collections) {
-      for (const collection of Object.keys(args.admin.upload.collections)) {
-        if (args?.admin?.upload?.collections[collection]?.fields) {
-          args.admin.upload.collections[collection].fields = await sanitizeFields({
-            config: config as unknown as Config,
-            fields: args.admin?.upload?.collections[collection]?.fields,
-            parentIsLocalized: false,
-            validRelationships,
-          })
+      if (args?.admin?.upload?.collections) {
+        for (const collection of Object.keys(args.admin.upload.collections)) {
+          if (args?.admin?.upload?.collections[collection]?.fields) {
+            args.admin.upload.collections[collection].fields = await sanitizeFields({
+              config: config as unknown as Config,
+              fields: args.admin?.upload?.collections[collection]?.fields,
+              parentIsLocalized: false,
+              validRelationships,
+            })
+          }
         }
       }
-    }
 
-    return {
-      CellComponent: '@payloadcms/richtext-slate/rsc#RscEntrySlateCell',
-      FieldComponent: {
-        path: '@payloadcms/richtext-slate/rsc#RscEntrySlateField',
-        serverProps: {
-          args,
+      return {
+        CellComponent: '@payloadcms/richtext-slate/rsc#RscEntrySlateCell',
+        FieldComponent: {
+          path: '@payloadcms/richtext-slate/rsc#RscEntrySlateField',
+          serverProps: {
+            args,
+          },
         },
-      },
-      generateImportMap: ({ addToImportMap }) => {
-        addToImportMap('@payloadcms/richtext-slate/rsc#RscEntrySlateCell')
-        addToImportMap('@payloadcms/richtext-slate/rsc#RscEntrySlateField')
-        Object.values(leafTypes).forEach((leaf) => {
-          if (leaf.Button) {
-            addToImportMap(leaf.Button)
-          }
-          if (leaf.Leaf) {
-            addToImportMap(leaf.Leaf)
-          }
-          if (Array.isArray(leaf.plugins) && leaf.plugins?.length) {
-            addToImportMap(leaf.plugins)
-          }
-        })
-        args?.admin?.leaves?.forEach((leaf) => {
-          if (typeof leaf === 'object') {
+        generateImportMap: ({ addToImportMap }) => {
+          addToImportMap('@payloadcms/richtext-slate/rsc#RscEntrySlateCell')
+          addToImportMap('@payloadcms/richtext-slate/rsc#RscEntrySlateField')
+          Object.values(leafTypes).forEach((leaf) => {
             if (leaf.Button) {
               addToImportMap(leaf.Button)
             }
@@ -79,23 +68,22 @@ export function slateEditor(
             if (Array.isArray(leaf.plugins) && leaf.plugins?.length) {
               addToImportMap(leaf.plugins)
             }
-          }
-        })
+          })
+          args?.admin?.leaves?.forEach((leaf) => {
+            if (typeof leaf === 'object') {
+              if (leaf.Button) {
+                addToImportMap(leaf.Button)
+              }
+              if (leaf.Leaf) {
+                addToImportMap(leaf.Leaf)
+              }
+              if (Array.isArray(leaf.plugins) && leaf.plugins?.length) {
+                addToImportMap(leaf.plugins)
+              }
+            }
+          })
 
-        Object.values(elementTypes).forEach((element) => {
-          if (element.Button) {
-            addToImportMap(element.Button)
-          }
-          if (element.Element) {
-            addToImportMap(element.Element)
-          }
-          if (Array.isArray(element.plugins) && element.plugins?.length) {
-            addToImportMap(element.plugins)
-          }
-        })
-
-        args?.admin?.elements?.forEach((element) => {
-          if (typeof element === 'object') {
+          Object.values(elementTypes).forEach((element) => {
             if (element.Button) {
               addToImportMap(element.Button)
             }
@@ -105,104 +93,118 @@ export function slateEditor(
             if (Array.isArray(element.plugins) && element.plugins?.length) {
               addToImportMap(element.plugins)
             }
-          }
-        })
-      },
-      generateSchemaMap: getGenerateSchemaMap(args),
-      graphQLPopulationPromises({
-        context,
-        currentDepth,
-        depth,
-        draft,
-        field,
-        fieldPromises,
-        findMany,
-        flattenLocales,
-        overrideAccess,
-        populationPromises,
-        req,
-        showHiddenFields,
-        siblingDoc,
-      }) {
-        if (
-          field.admin?.elements?.includes('relationship') ||
-          field.admin?.elements?.includes('upload') ||
-          field.admin?.elements?.includes('link') ||
-          !field?.admin?.elements
-        ) {
-          richTextRelationshipPromise({
-            context,
-            currentDepth,
-            depth,
-            draft,
-            field,
-            fieldPromises,
-            findMany,
-            flattenLocales,
-            overrideAccess,
-            populationPromises,
-            req,
-            showHiddenFields,
-            siblingDoc,
           })
-        }
-      },
-      hooks: {
-        afterRead: [
-          ({
-            context: _context,
-            currentDepth,
-            depth,
-            draft,
-            field: _field,
-            fieldPromises,
-            findMany,
-            flattenLocales,
-            overrideAccess,
-            populate,
-            populationPromises,
-            req,
-            showHiddenFields,
-            siblingData,
-          }) => {
-            const context: any = _context
-            const field = _field as any
-            if (
-              field.admin?.elements?.includes('relationship') ||
-              field.admin?.elements?.includes('upload') ||
-              field.admin?.elements?.includes('link') ||
-              !field?.admin?.elements
-            ) {
-              richTextRelationshipPromise({
-                context,
-                currentDepth,
-                depth,
-                draft,
-                field,
-                fieldPromises,
-                findMany,
-                flattenLocales,
-                overrideAccess,
-                populateArg: populate,
-                populationPromises,
-                req,
-                showHiddenFields,
-                siblingDoc: siblingData,
-              })
+
+          args?.admin?.elements?.forEach((element) => {
+            if (typeof element === 'object') {
+              if (element.Button) {
+                addToImportMap(element.Button)
+              }
+              if (element.Element) {
+                addToImportMap(element.Element)
+              }
+              if (Array.isArray(element.plugins) && element.plugins?.length) {
+                addToImportMap(element.plugins)
+              }
             }
-          },
-        ],
-      },
-      outputSchema: ({ isRequired }) => {
-        return {
-          type: withNullableJSONSchemaType('array', isRequired),
-          items: {
-            type: 'object',
-          },
-        }
-      },
-      validate: richTextValidate,
-    }
+          })
+        },
+        generateSchemaMap: getGenerateSchemaMap(args),
+        graphQLPopulationPromises({
+          context,
+          currentDepth,
+          depth,
+          draft,
+          field,
+          fieldPromises,
+          findMany,
+          flattenLocales,
+          overrideAccess,
+          populationPromises,
+          req,
+          showHiddenFields,
+          siblingDoc,
+        }) {
+          if (
+            field.admin?.elements?.includes('relationship') ||
+            field.admin?.elements?.includes('upload') ||
+            field.admin?.elements?.includes('link') ||
+            !field?.admin?.elements
+          ) {
+            richTextRelationshipPromise({
+              context,
+              currentDepth,
+              depth,
+              draft,
+              field,
+              fieldPromises,
+              findMany,
+              flattenLocales,
+              overrideAccess,
+              populationPromises,
+              req,
+              showHiddenFields,
+              siblingDoc,
+            })
+          }
+        },
+        hooks: {
+          afterRead: [
+            ({
+              context: _context,
+              currentDepth,
+              depth,
+              draft,
+              field: _field,
+              fieldPromises,
+              findMany,
+              flattenLocales,
+              overrideAccess,
+              populate,
+              populationPromises,
+              req,
+              showHiddenFields,
+              siblingData,
+            }) => {
+              const context: any = _context
+              const field = _field as any
+              if (
+                field.admin?.elements?.includes('relationship') ||
+                field.admin?.elements?.includes('upload') ||
+                field.admin?.elements?.includes('link') ||
+                !field?.admin?.elements
+              ) {
+                richTextRelationshipPromise({
+                  context,
+                  currentDepth,
+                  depth,
+                  draft,
+                  field,
+                  fieldPromises,
+                  findMany,
+                  flattenLocales,
+                  overrideAccess,
+                  populateArg: populate,
+                  populationPromises,
+                  req,
+                  showHiddenFields,
+                  siblingDoc: siblingData,
+                })
+              }
+            },
+          ],
+        },
+        outputSchema: ({ isRequired }) => {
+          return {
+            type: withNullableJSONSchemaType('array', isRequired),
+            items: {
+              type: 'object',
+            },
+          }
+        },
+        validate: richTextValidate,
+      }
+    },
   }
 }
 
