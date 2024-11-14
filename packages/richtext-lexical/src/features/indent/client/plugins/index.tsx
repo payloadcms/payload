@@ -3,7 +3,7 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin'
 import { mergeRegister } from '@lexical/utils'
-import { COMMAND_PRIORITY_LOW, FOCUS_COMMAND, KEY_ESCAPE_COMMAND } from 'lexical'
+import { COMMAND_PRIORITY_NORMAL, FOCUS_COMMAND, KEY_ESCAPE_COMMAND } from 'lexical'
 import { useEffect, useState } from 'react'
 
 import type { PluginComponent } from '../../../typesClient.js'
@@ -11,64 +11,51 @@ import type { PluginComponent } from '../../../typesClient.js'
 export const IndentPlugin: PluginComponent<undefined> = () => {
   const [editor] = useLexicalComposerContext()
 
-  const [tabIndentEnabled, setTabIndentEnabled] = useState<boolean>(true)
+  const [firefoxFlag, setFirefoxFlag] = useState<boolean>(false)
 
   useEffect(() => {
     return mergeRegister(
       editor.registerCommand<MouseEvent>(
         FOCUS_COMMAND,
         () => {
-          // Ensure the tab indent plugin is enabled on first visit to the editor
-          setTabIndentEnabled(true)
+          setFirefoxFlag(false)
           return true
         },
-        COMMAND_PRIORITY_LOW,
+        COMMAND_PRIORITY_NORMAL,
       ),
       editor.registerCommand(
         KEY_ESCAPE_COMMAND,
         () => {
-          setTabIndentEnabled(false)
+          setFirefoxFlag(true)
+          editor.getRootElement()?.blur()
           return true
         },
-        COMMAND_PRIORITY_LOW,
+        COMMAND_PRIORITY_NORMAL,
       ),
     )
-  }, [editor, setTabIndentEnabled])
+  }, [editor, setFirefoxFlag])
 
   useEffect(() => {
-    if (tabIndentEnabled) {
+    if (!firefoxFlag) {
       return
     }
 
-    const rootElement = editor.getRootElement()
-
-    // Manually blur the editor when the escape key is pressed
-    rootElement?.blur()
-
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (tabIndentEnabled || ['Escape', 'Shift'].includes(e.key)) {
-        return
+      if (!['Escape', 'Shift'].includes(e.key)) {
+        setFirefoxFlag(false)
       }
-
-      // Pressing shift + tab after blurring the editor leads to the editor being re-focused
-      // This manually sets the focus to the parent element to allow backwards tabbing to work as expected
+      // Pressing Shift+Tab after blurring refocuses the editor in Firefox
+      // we focus parent to allow exiting the editor
       if (e.shiftKey && e.key === 'Tab') {
-        rootElement?.parentElement?.focus()
+        editor.getRootElement()?.parentElement?.focus()
       }
-
-      setTabIndentEnabled(true)
     }
 
     document.addEventListener('keydown', handleKeyDown)
-
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [editor, tabIndentEnabled])
-
-  if (!tabIndentEnabled) {
-    return null
-  }
+  }, [editor, firefoxFlag])
 
   return <TabIndentationPlugin />
 }
