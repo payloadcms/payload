@@ -182,7 +182,17 @@ export const createClientField = ({
       break
     }
 
-    case 'radio':
+    case 'richText': {
+      if (!incomingField?.editor) {
+        throw new MissingEditorProp(incomingField) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+      }
+
+      if (typeof incomingField?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
+
+      break
+    }
 
     case 'select': {
       const field = clientField as RadioFieldClient | SelectFieldClient
@@ -202,18 +212,6 @@ export const createClientField = ({
             }
           }
         }
-      }
-
-      break
-    }
-
-    case 'richText': {
-      if (!incomingField?.editor) {
-        throw new MissingEditorProp(incomingField) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
-      }
-
-      if (typeof incomingField?.editor === 'function') {
-        throw new Error('Attempted to access unsanitized rich text editor.')
       }
 
       break
@@ -325,7 +323,6 @@ export const createClientFields = ({
       },
       hidden: true,
       label: 'ID',
-      localized: undefined,
     })
   }
 
