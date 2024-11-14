@@ -4,7 +4,7 @@ import type { TFunction } from '@payloadcms/translations'
 import type { FieldPermissions, LoginWithUsernameOptions } from 'payload'
 
 import { email, username } from 'payload/shared'
-import React, { Fragment } from 'react'
+import React from 'react'
 
 import { EmailField } from '../../fields/Email/index.js'
 import { TextField } from '../../fields/Text/index.js'

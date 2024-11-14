@@ -1,10 +1,4 @@
-import type {
-  CollectionConfig,
-  PayloadRequest,
-  PopulateType,
-  RichTextAdapter,
-  RichTextField,
-} from 'payload'
+import type { PayloadRequest, PopulateType, RichTextAdapter, RichTextField } from 'payload'
 
 import type { AdapterArguments } from '../types.js'
 

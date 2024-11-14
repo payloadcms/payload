@@ -5,7 +5,7 @@ import type {
   PgColumnBuilder,
   PgTableWithColumns,
 } from 'drizzle-orm/pg-core'
-import type { Field, SanitizedJoins } from 'payload'
+import type { Field } from 'payload'
 
 import { relations } from 'drizzle-orm'
 import {

@@ -2,7 +2,6 @@ import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { Field, JoinQuery, SelectMode, SelectType, TabAsField } from 'payload'
 
 import { and, eq, sql } from 'drizzle-orm'
-import { combineQueries } from 'payload'
 import { fieldAffectsData, fieldIsVirtual, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
@@ -330,7 +329,6 @@ export const traverseFields = ({
         }
 
         case 'group':
-
         case 'tab': {
           const fieldSelect = select?.[field.name]
 

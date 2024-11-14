@@ -1,4 +1,4 @@
-import type { Block, BlocksField, Config, Field, FieldSchemaMap } from 'payload'
+import type { Block, BlocksField, Config, FieldSchemaMap } from 'payload'
 
 import { fieldsToJSONSchema, sanitizeFields } from 'payload'
 

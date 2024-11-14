@@ -1,11 +1,5 @@
 'use client'
-import type {
-  LexicalCommand,
-  LexicalEditor,
-  ParagraphNode,
-  RangeSelection,
-  TextNode,
-} from 'lexical'
+import type { LexicalCommand, LexicalEditor, ParagraphNode, RangeSelection } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { mergeRegister } from '@lexical/utils'

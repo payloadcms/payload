@@ -8,7 +8,6 @@ import { v4 as uuidv4 } from 'uuid'
 
 import { CopyToClipboard } from '../../../elements/CopyToClipboard/index.js'
 import { GenerateConfirmation } from '../../../elements/GenerateConfirmation/index.js'
-import { FieldLabel } from '../../../fields/FieldLabel/index.js'
 import { useFormFields } from '../../../forms/Form/context.js'
 import { useField } from '../../../forms/useField/index.js'
 import { useConfig } from '../../../providers/Config/index.js'

@@ -2,6 +2,7 @@ import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import perfectionist from 'eslint-plugin-perfectionist'
 import { configs as regexpPluginConfigs } from 'eslint-plugin-regexp'
+import unusedImports from 'eslint-plugin-unused-imports'
 import eslintConfigPrettier from 'eslint-config-prettier'
 import payloadPlugin from '@payloadcms/eslint-plugin'
 import reactExtends from './configs/react/index.mjs'
@@ -76,19 +77,23 @@ const typescriptRules = {
 
   // ts-expect preferred over ts-ignore. It will error if the expected error is no longer present.
   '@typescript-eslint/ban-ts-comment': 'warn', // Recommended over deprecated @typescript-eslint/prefer-ts-expect-error: https://github.com/typescript-eslint/typescript-eslint/issues/8333. Set to warn to ease migration.
-  // By default, it errors for unused variables. This is annoying, warnings are enough.
-  '@typescript-eslint/no-unused-vars': [
+
+  // Use separate rules for unused imports and vars. Imports has a fixer.
+  '@typescript-eslint/no-unused-vars': 'off',
+  'unused-imports/no-unused-imports': 'error',
+  'unused-imports/no-unused-vars': [
     'warn',
     {
       vars: 'all',
       args: 'after-used',
-      ignoreRestSiblings: false,
+      ignoreRestSiblings: true,
       argsIgnorePattern: '^_',
       varsIgnorePattern: '^_',
       destructuredArrayIgnorePattern: '^_',
       caughtErrorsIgnorePattern: '^(_|ignore)',
     },
   ],
+
   '@typescript-eslint/no-base-to-string': 'warn',
   '@typescript-eslint/restrict-template-expressions': 'warn',
   '@typescript-eslint/no-redundant-type-constituents': 'warn',
@@ -135,6 +140,7 @@ export const rootEslintConfig = [
     },
     plugins: {
       'import-x': importX,
+      'unused-imports': unusedImports,
     },
   },
   {

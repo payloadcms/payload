@@ -1,16 +1,6 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
-import {
-  Button,
-  ChevronIcon,
-  Modal,
-  Pill,
-  Popup,
-  PopupList,
-  useConfig,
-  useModal,
-  useTranslation,
-} from '@payloadcms/ui'
+import { Button, Modal, PopupList, useConfig, useModal, useTranslation } from '@payloadcms/ui'
 import { formatAdminURL, requests } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import React, { Fragment, useCallback, useState } from 'react'

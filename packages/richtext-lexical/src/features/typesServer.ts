@@ -13,7 +13,6 @@ import type {
   Field,
   FieldSchemaMap,
   JsonObject,
-  Payload,
   PayloadComponent,
   PayloadRequest,
   PopulateType,

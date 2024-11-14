@@ -8,7 +8,6 @@ const baseClass = 'thumbnail'
 import type { SanitizedCollectionConfig } from 'payload'
 
 import { File } from '../../graphics/File/index.js'
-import { useIntersect } from '../../hooks/useIntersect.js'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 
 export type ThumbnailProps = {

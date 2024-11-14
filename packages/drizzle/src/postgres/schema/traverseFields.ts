@@ -1,12 +1,11 @@
 import type { Relation } from 'drizzle-orm'
 import type { IndexBuilder, PgColumnBuilder } from 'drizzle-orm/pg-core'
-import type { Field, SanitizedJoins, TabAsField } from 'payload'
+import type { Field, TabAsField } from 'payload'
 
 import { relations } from 'drizzle-orm'
 import {
   boolean,
   foreignKey,
-  geometry,
   index,
   integer,
   jsonb,
@@ -467,16 +466,15 @@ export const traverseFields = ({
         targetTable[fieldName] = withDefault(boolean(columnName), field)
         break
       }
+
       case 'code':
-
       case 'email':
-
       case 'textarea': {
         targetTable[fieldName] = withDefault(varchar(columnName), field)
         break
       }
-      case 'collapsible':
 
+      case 'collapsible':
       case 'row': {
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
         const {
@@ -653,7 +651,6 @@ export const traverseFields = ({
       }
 
       case 'json':
-
       case 'richText': {
         targetTable[fieldName] = withDefault(jsonb(columnName), field)
         break
@@ -694,8 +691,8 @@ export const traverseFields = ({
         }
         break
       }
-      case 'radio':
 
+      case 'radio':
       case 'select': {
         const enumName = createTableName({
           adapter,

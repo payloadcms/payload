@@ -5,8 +5,6 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
-import { fieldAffectsData } from 'payload/shared'
-
 import { getRouteWithoutAdmin, isAdminRoute } from './shared.js'
 
 type Args = {

@@ -60,6 +60,8 @@ export const rootEslintConfig = [
     files: ['scripts/**/*.ts'],
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
+      'unused-imports/no-unused-imports': 'off',
+      'unused-imports/no-unused-vars': 'off',
       'no-console': 'off',
       'perfectionist/sort-object-types': 'off',
       'perfectionist/sort-objects': 'off',

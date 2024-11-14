@@ -1,4 +1,4 @@
-import type { AdminViewConfig, PayloadRequest, SanitizedConfig } from 'payload'
+import type { SanitizedConfig } from 'payload'
 
 import { getRouteWithoutAdmin } from './shared.js'
 

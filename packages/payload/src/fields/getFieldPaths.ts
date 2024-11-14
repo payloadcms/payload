@@ -1,7 +1,5 @@
 import type { ClientField, Field, TabAsField } from './config/types.js'
 
-import { fieldAffectsData } from './config/types.js'
-
 type Args = {
   field: ClientField | Field | TabAsField
   index: number
