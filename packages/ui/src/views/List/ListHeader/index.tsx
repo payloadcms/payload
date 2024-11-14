@@ -20,7 +20,7 @@ import './index.scss'
 const baseClass = 'list-header'
 const drawerBaseClass = 'list-drawer'
 
-type Props = {
+export type ListHeaderProps = {
   className?: string
   collectionConfig: ClientCollectionConfig
   Description?: React.ReactNode
@@ -33,7 +33,7 @@ type Props = {
   t: TFunction
 }
 
-const DefaultListHeader: React.FC<Props> = ({
+const DefaultListHeader: React.FC<ListHeaderProps> = ({
   className,
   collectionConfig,
   Description,
@@ -82,7 +82,12 @@ const DefaultListHeader: React.FC<Props> = ({
   )
 }
 
-const ListDrawerHeader: React.FC<Props> = ({ Description, hasCreatePermission, i18n, t }) => {
+const ListDrawerHeader: React.FC<ListHeaderProps> = ({
+  Description,
+  hasCreatePermission,
+  i18n,
+  t,
+}) => {
   const {
     config: { collections },
   } = useConfig()
@@ -151,7 +156,7 @@ const ListDrawerHeader: React.FC<Props> = ({ Description, hasCreatePermission, i
   )
 }
 
-export const ListHeader: React.FC<Props> = (props) => {
+export const ListHeader: React.FC<ListHeaderProps> = (props) => {
   const { isInDrawer } = useListDrawerContext()
 
   if (isInDrawer) {
