@@ -122,6 +122,7 @@ export const traverseFields = ({
         if (!ref[field.name]) {
           return
         }
+        currentRef = ref[field.name]
       }
 
       if (
@@ -144,8 +145,9 @@ export const traverseFields = ({
       }
 
       if (
-        field.type === 'blocks' ||
-        (field.type === 'array' && currentRef && typeof currentRef === 'object')
+        (field.type === 'blocks' || field.type === 'array') &&
+        currentRef &&
+        typeof currentRef === 'object'
       ) {
         if (field.localized) {
           if (Array.isArray(currentRef)) {
@@ -173,7 +175,7 @@ export const traverseFields = ({
             parentRef: currentParentRef,
           })
         }
-      } else if (currentRef && typeof currentRef === 'object') {
+      } else if (currentRef && typeof currentRef === 'object' && 'fields' in field) {
         traverseFields({
           callback,
           fields: field.fields,
