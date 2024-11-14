@@ -34,7 +34,6 @@ export type ServerOnlyUploadProperties = keyof Pick<
 
 export type ClientCollectionConfig = {
   admin: {
-    components: null
     description?: StaticDescription
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
     preview?: boolean

@@ -18,6 +18,7 @@ import type { Payload } from '../../types/index.js'
 import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { flattenTopLevelFields } from '../../index.js'
+import { removeUndefined } from '../../utilities/removeUndefined.js'
 
 // Should not be used - ClientField should be used instead. This is why we don't export ClientField, we don't want people
 // to accidentally use it instead of ClientField and get confused
@@ -99,8 +100,9 @@ export const createClientField = ({
     clientField.admin.style = {
       ...clientField.admin.style,
       '--field-width': clientField.admin.width,
-      width: undefined, // avoid needlessly adding this to the element's style attribute
     }
+
+    delete clientField.admin.width // avoid needlessly adding this to the element's style attribute
   } else {
     if (!(clientField.admin.style instanceof Object)) {
       clientField.admin.style = {}
@@ -137,19 +139,24 @@ export const createClientField = ({
       if (incomingField.blocks?.length) {
         for (let i = 0; i < incomingField.blocks.length; i++) {
           const block = incomingField.blocks[i]
-          const clientBlock: ClientBlock = {
+
+          // prevent $undefined from being passed through the rsc requests
+          const clientBlock = removeUndefined<ClientBlock>({
             slug: block.slug,
-            admin: {
-              components: {},
-              custom: block.admin?.custom,
-            },
             fields: field.blocks?.[i]?.fields || [],
             imageAltText: block.imageAltText,
             imageURL: block.imageURL,
+          }) satisfies ClientBlock
+
+          if (block.admin?.custom) {
+            clientBlock.admin = {
+              custom: block.admin.custom,
+            }
           }
 
           if (block.labels) {
             clientBlock.labels = {} as unknown as LabelsClient
+
             if (block.labels.singular) {
               if (typeof block.labels.singular === 'function') {
                 clientBlock.labels.singular = block.labels.singular({ t: i18n.t })

@@ -7,6 +7,8 @@ import {
 } from 'payload/shared'
 import React from 'react'
 
+import { removeUndefined } from '../../utilities/removeUndefined.js'
+
 export const getFromImportMap = <TOutput,>(args: {
   importMap: ImportMap
   PayloadComponent: PayloadComponent
@@ -66,13 +68,11 @@ export const RenderServerComponent: React.FC<{
   if (typeof Component === 'function') {
     const isRSC = isReactServerComponentOrFunction(Component)
 
-    // prevent $undefined from being passed through the network
-    const sanitizedProps = Object.fromEntries(
-      Object.entries({
-        ...clientProps,
-        ...(isRSC ? serverProps : {}),
-      }).filter(([, value]) => value !== undefined),
-    )
+    // prevent $undefined from being passed through the rsc requests
+    const sanitizedProps = removeUndefined({
+      ...clientProps,
+      ...(isRSC ? serverProps : {}),
+    })
 
     return <Component {...sanitizedProps} />
   }
@@ -87,17 +87,14 @@ export const RenderServerComponent: React.FC<{
     if (ResolvedComponent) {
       const isRSC = isReactServerComponentOrFunction(ResolvedComponent)
 
-      // prevent $undefined from being passed through the network
-      const sanitizedProps = Object.fromEntries(
-        Object.entries({
-          ...clientProps,
-          ...(isRSC ? serverProps : {}),
-          ...(isRSC && typeof Component === 'object' && Component?.serverProps
-            ? Component.serverProps
-            : {}),
-          ...(typeof Component === 'object' && Component?.clientProps ? Component.clientProps : {}),
-        }).filter(([, value]) => value !== undefined),
-      )
+      // prevent $undefined from being passed through rsc requests
+      const sanitizedProps = removeUndefined({
+        ...clientProps,
+        ...(isRSC ? serverProps : {}),
+        ...(isRSC && typeof Component === 'object' && Component?.serverProps
+          ? Component.serverProps
+          : {}),
+      })
 
       return <ResolvedComponent {...sanitizedProps} />
     }
