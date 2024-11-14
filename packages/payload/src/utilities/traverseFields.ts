@@ -50,6 +50,8 @@ export type TraverseFieldsCallback = (args: {
 type TraverseFieldsArgs = {
   callback: TraverseFieldsCallback
   fields: (Field | TabAsField)[]
+  /** fill empty properties to use this without data */
+  fillEmpty?: boolean
   parentRef?: Record<string, unknown> | unknown
   ref?: Record<string, unknown> | unknown
 }
@@ -65,6 +67,7 @@ type TraverseFieldsArgs = {
 export const traverseFields = ({
   callback,
   fields,
+  fillEmpty = true,
   parentRef = {},
   ref = {},
 }: TraverseFieldsArgs): void => {
@@ -88,7 +91,11 @@ export const traverseFields = ({
       for (const tab of field.tabs) {
         if ('name' in tab && tab.name) {
           if (!ref[tab.name] || typeof ref[tab.name] !== 'object') {
-            continue
+            if (fillEmpty) {
+              ref[tab.name] = {}
+            } else {
+              continue
+            }
           }
 
           parentRef = ref
@@ -120,7 +127,19 @@ export const traverseFields = ({
       if ('name' in field && field.name) {
         currentParentRef = currentRef
         if (!ref[field.name]) {
-          return
+          if (fillEmpty) {
+            if (field.type === 'group') {
+              ref[field.name] = {}
+            } else if (field.type === 'array' || field.type === 'blocks') {
+              if (field.localized) {
+                ref[field.name] = {}
+              } else {
+                ref[field.name] = []
+              }
+            }
+          } else {
+            return
+          }
         }
         currentRef = ref[field.name]
       }

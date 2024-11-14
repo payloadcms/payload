@@ -141,7 +141,7 @@ export const sanitizeRelationshipIDs = ({
     }
   }
 
-  traverseFields({ callback: sanitize, fields, ref: data })
+  traverseFields({ callback: sanitize, fields, fillEmpty: false, ref: data })
 
   return data
 }
