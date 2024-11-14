@@ -20,7 +20,7 @@ const migrateModelWithBatching = async ({
   fields: Field[]
   Model: Model<any>
   session: ClientSession
-}) => {
+}): Promise<void> => {
   let hasNext = true
   let skip = 0
 
@@ -50,7 +50,7 @@ const migrateModelWithBatching = async ({
   }
 }
 
-const hasRelationshipOrUploadField = ({ fields }: { fields: Field[] }) => {
+const hasRelationshipOrUploadField = ({ fields }: { fields: Field[] }): boolean => {
   for (const field of fields) {
     if (field.type === 'relationship' || field.type === 'upload') {
       return true
@@ -88,7 +88,7 @@ export async function migrateRelationshipsV2_V3({
 }: {
   batchSize: number
   req: PayloadRequest
-}) {
+}): Promise<void> {
   const { payload } = req
   const db = payload.db as MongooseAdapter
   const config = payload.config
