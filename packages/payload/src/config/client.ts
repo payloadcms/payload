@@ -79,7 +79,7 @@ export const createClientConfig = ({
   i18n: I18nClient
 }): ClientConfig => {
   // We can use deepCopySimple here, as the clientConfig should be JSON serializable anyways, since it will be sent from server => client
-  const clientConfig = deepCopyObjectSimple(config) as unknown as ClientConfig
+  const clientConfig = deepCopyObjectSimple(config, true) as unknown as ClientConfig
 
   for (const key of serverOnlyConfigProperties) {
     if (key in clientConfig) {
