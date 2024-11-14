@@ -23,7 +23,7 @@ export default buildConfig({
         [mediaSlug]: true,
       },
       options: {
-        apiKey: process.env.UPLOADTHING_SECRET,
+        token: process.env.UPLOADTHING_TOKEN,
         acl: 'public-read',
       },
     }),
