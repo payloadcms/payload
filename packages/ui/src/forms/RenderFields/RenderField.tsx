@@ -67,7 +67,7 @@ export function RenderField({
   }
 
   if (clientFieldConfig.admin?.hidden) {
-    return <HiddenField {...baseFieldProps} field={clientFieldConfig} path={path} />
+    return <HiddenField {...baseFieldProps} path={path} />
   }
 
   switch (clientFieldConfig.type) {

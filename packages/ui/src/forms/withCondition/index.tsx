@@ -15,15 +15,11 @@ export const withCondition = <
     const {
       field: { type },
       indexPath,
-      path: pathFromProps,
+      path,
     } = props
 
-    const name = 'name' in props.field ? props.field.name : undefined
-
-    const path = pathFromProps ?? name
-
     return (
-      <WatchCondition indexPath={indexPath} name={name} path={path} type={type}>
+      <WatchCondition indexPath={indexPath} path={path} type={type}>
         <Field {...props} />
       </WatchCondition>
     )
