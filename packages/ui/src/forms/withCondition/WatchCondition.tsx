@@ -1,5 +1,4 @@
 'use client'
-import type { FieldTypes } from 'payload'
 
 import React, { Fragment } from 'react'
 
@@ -8,13 +7,9 @@ import { useFormFields } from '../Form/context.js'
 export const WatchCondition: React.FC<{
   children: React.ReactNode
   indexPath: string
-  name?: string
-  path?: string
-  type: FieldTypes
+  path: string
 }> = (props) => {
-  const { name, children, path: pathFromProps } = props
-
-  const path = typeof pathFromProps === 'string' ? pathFromProps : name
+  const { children, path } = props
 
   const field = useFormFields(([fields]) => (fields && fields?.[path]) || null)
 
