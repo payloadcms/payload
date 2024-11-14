@@ -5,5 +5,3 @@ const upSQL = `   await migrateRelationshipsV2_V3({
         })
 `
 export { imports, upSQL }
-
-//# sourceMappingURL=versions-v2-v3.js.map

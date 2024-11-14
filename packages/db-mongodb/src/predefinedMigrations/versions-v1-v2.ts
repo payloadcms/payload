@@ -4,5 +4,3 @@ const upSQL = `   await migrateVersionsV1_V2({
         })
 `
 export { imports, upSQL }
-
-//# sourceMappingURL=versions-v2-v3.js.map
