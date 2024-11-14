@@ -106,7 +106,6 @@ const traverseFields = ({
     switch (field.type) {
       case 'array':
       case 'group':
-
       case 'tab': {
         let fieldSelect: SelectType
 

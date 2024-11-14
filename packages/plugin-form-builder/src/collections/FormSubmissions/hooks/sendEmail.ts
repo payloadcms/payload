@@ -87,9 +87,8 @@ export const sendEmail = async (
               return emailPromise
             } catch (err: unknown) {
               payload.logger.error({
-                err: `Error while sending email to address: ${to}. Email not sent: ${JSON.stringify(
-                  err,
-                )}`,
+                err,
+                msg: `Error while sending email to address: ${to}. Email not sent.`,
               })
             }
           }),
@@ -99,7 +98,7 @@ export const sendEmail = async (
       }
     } catch (err: unknown) {
       const msg = `Error while sending one or more emails in form submission id: ${formSubmissionID}.`
-      payload.logger.error({ err: msg })
+      payload.logger.error({ err, msg })
     }
   }
 

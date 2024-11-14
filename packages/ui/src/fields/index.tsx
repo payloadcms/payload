@@ -5,6 +5,7 @@ import type {
   GenericDescriptionProps,
   GenericErrorProps,
   GenericLabelProps,
+  HiddenFieldProps,
 } from 'payload'
 import type React from 'react'
 
@@ -43,9 +44,10 @@ import { UploadField } from './Upload/index.js'
 export * from './shared/index.js'
 
 export type FieldTypesComponents = {
-  [K in 'hidden' | 'password' | FieldTypes]: React.FC<ClientFieldBase>
+  [K in 'password' | FieldTypes]: React.FC<ClientFieldBase>
 } & {
   confirmPassword: React.FC<ConfirmPasswordFieldProps>
+  hidden: React.FC<HiddenFieldProps>
 }
 
 export const fieldComponents: FieldTypesComponents = {
