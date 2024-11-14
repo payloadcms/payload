@@ -29,7 +29,6 @@
   "types": "./src/index.ts",
   "files": [
     "dist",
-    "mock.js",
     "predefinedMigrations"
   ],
   "scripts": {
