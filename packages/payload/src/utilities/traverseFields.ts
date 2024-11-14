@@ -84,21 +84,34 @@ export const traverseFields = ({
     let currentRef = ref
 
     if (field.type === 'tabs' && 'tabs' in field) {
-      field.tabs.forEach((tab) => {
+      for (const tab of field.tabs) {
         if ('name' in tab && tab.name) {
           if (typeof ref[tab.name] === 'undefined') {
             ref[tab.name] = {}
           }
+          parentRef = ref
           currentRef = ref[tab.name]
+
+          if (tab.localized) {
+            for (const key in currentRef as Record<string, unknown>) {
+              if (currentRef[key]) {
+                traverseFields({ callback, fields: tab.fields, parentRef, ref: currentRef[key] })
+              }
+            }
+            continue
+          }
         }
+
         if (
           callback &&
           callback({ field: { ...tab, type: 'tab' }, next, parentRef, ref: currentRef })
         ) {
           return true
         }
+
         traverseFields({ callback, fields: tab.fields, parentRef, ref: currentRef })
-      })
+      }
+
       return
     }
     if (field.type !== 'tab' && (fieldHasSubFields(field) || field.type === 'blocks')) {
@@ -119,10 +132,19 @@ export const traverseFields = ({
         currentRef = ref[field.name]
       }
 
+      if (field.type === 'group' && field.localized) {
+        for (const key in currentRef as Record<string, unknown>) {
+          if (currentRef[key]) {
+            traverseFields({ callback, fields: field.fields, parentRef, ref: currentRef[key] })
+          }
+        }
+        return
+      }
+
       if (field.type === 'blocks' || field.type === 'array') {
         if (field.localized) {
-          for (const key in (ref ?? {}) as Record<string, unknown>) {
-            const localeData = ref[key]
+          for (const key in (currentRef ?? {}) as Record<string, unknown>) {
+            const localeData = currentRef[key]
             if (!Array.isArray(localeData)) {
               continue
             }
@@ -134,7 +156,7 @@ export const traverseFields = ({
               parentRef,
             })
           }
-        } else if (Array.isArray(ref)) {
+        } else if (Array.isArray(currentRef)) {
           traverseArrayOrBlocksField({
             callback,
             data: currentRef as Record<string, unknown>[],
