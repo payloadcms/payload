@@ -1,15 +1,14 @@
 'use client'
-import type { NumberField as NumberFieldType } from 'payload'
+import type { NumberFieldClientComponent, NumberFieldClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { isNumber } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'
-import type { FormFieldBase } from '../shared/index.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -19,45 +18,30 @@ import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
-export type NumberFieldProps = {
-  hasMany?: boolean
-  max?: number
-  maxRows?: number
-  min?: number
-  name?: string
-  onChange?: (e: number) => void
-  path?: string
-  placeholder?: NumberFieldType['admin']['placeholder']
-  step?: number
-  width?: string
-} & FormFieldBase
-
-const _NumberField: React.FC<NumberFieldProps> = (props) => {
+const NumberFieldComponent: NumberFieldClientComponent = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
-    descriptionProps,
-    errorProps,
-    hasMany = false,
-    label,
-    labelProps,
-    max = Infinity,
-    maxRows = Infinity,
-    min = -Infinity,
+    field: {
+      name,
+      admin: {
+        className,
+        description,
+        placeholder,
+        step = 1,
+        style,
+        width,
+      } = {} as NumberFieldClientProps['field']['admin'],
+      hasMany = false,
+      label,
+      localized,
+      max = Infinity,
+      maxRows = Infinity,
+      min = -Infinity,
+      required,
+    },
     onChange: onChangeFromProps,
-    path: pathFromProps,
-    placeholder,
-    readOnly: readOnlyFromProps,
-    required,
-    step = 1,
-    style,
+    path,
+    readOnly,
     validate,
-    width,
   } = props
 
   const { i18n, t } = useTranslation()
@@ -71,16 +55,15 @@ const _NumberField: React.FC<NumberFieldProps> = (props) => {
     [validate, min, max, required],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField<
-    number | number[]
-  >({
-    path: pathFromContext ?? pathFromProps ?? name,
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    setValue,
+    showError,
+    value,
+  } = useField<number | number[]>({
+    path,
     validate: memoizedValidate,
   })
-
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const handleChange = useCallback(
     (e) => {
@@ -88,7 +71,7 @@ const _NumberField: React.FC<NumberFieldProps> = (props) => {
       let newVal = val
 
       if (Number.isNaN(val)) {
-        newVal = undefined
+        newVal = null
       }
 
       if (typeof onChangeFromProps === 'function') {
@@ -106,7 +89,7 @@ const _NumberField: React.FC<NumberFieldProps> = (props) => {
 
   const handleHasManyChange = useCallback(
     (selectedOption) => {
-      if (!disabled) {
+      if (!readOnly) {
         let newValue
         if (!selectedOption) {
           newValue = []
@@ -119,7 +102,7 @@ const _NumberField: React.FC<NumberFieldProps> = (props) => {
         setValue(newValue)
       }
     },
-    [disabled, setValue],
+    [readOnly, setValue],
   )
 
   // useEffect update valueToRender:
@@ -147,7 +130,7 @@ const _NumberField: React.FC<NumberFieldProps> = (props) => {
         'number',
         className,
         showError && 'error',
-        disabled && 'read-only',
+        readOnly && 'read-only',
         hasMany && 'has-many',
       ]
         .filter(Boolean)
@@ -157,18 +140,21 @@ const _NumberField: React.FC<NumberFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
+        />
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
-            disabled={disabled}
+            disabled={readOnly}
             filterOption={(_, rawInput) => {
               const isOverHasMany = Array.isArray(value) && value.length >= maxRows
               return isNumber(rawInput) && !isOverHasMany
@@ -195,7 +181,7 @@ const _NumberField: React.FC<NumberFieldProps> = (props) => {
           <div>
             {BeforeInput}
             <input
-              disabled={disabled}
+              disabled={readOnly}
               id={`field-${path.replace(/\./g, '__')}`}
               max={max}
               min={min}
@@ -213,14 +199,13 @@ const _NumberField: React.FC<NumberFieldProps> = (props) => {
             {AfterInput}
           </div>
         )}
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
+        />
       </div>
     </div>
   )
 }
 
-export const NumberField = withCondition(_NumberField)
+export const NumberField = withCondition(NumberFieldComponent)

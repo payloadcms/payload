@@ -1,11 +1,11 @@
-import type { Field } from '../fields/config/types.js'
+import type { Field, TextField } from '../fields/config/types.js'
 import type { IncomingAuthType } from './types.js'
 
 import { accountLockFields } from './baseFields/accountLock.js'
 import { apiKeyFields } from './baseFields/apiKey.js'
 import { baseAuthFields } from './baseFields/auth.js'
-import { emailField } from './baseFields/email.js'
-import { usernameField } from './baseFields/username.js'
+import { emailFieldConfig } from './baseFields/email.js'
+import { usernameFieldConfig } from './baseFields/username.js'
 import { verificationFields } from './baseFields/verification.js'
 
 export const getBaseAuthFields = (authConfig: IncomingAuthType): Field[] => {
@@ -16,16 +16,23 @@ export const getBaseAuthFields = (authConfig: IncomingAuthType): Field[] => {
   }
 
   if (!authConfig.disableLocalStrategy) {
-    const emailFieldIndex = authFields.push(emailField({ required: true })) - 1
+    const emailField = { ...emailFieldConfig }
+    let usernameField: TextField | undefined
 
     if (authConfig.loginWithUsername) {
-      if (
-        typeof authConfig.loginWithUsername === 'object' &&
-        authConfig.loginWithUsername.requireEmail === false
-      ) {
-        authFields[emailFieldIndex] = emailField({ required: false })
+      usernameField = { ...usernameFieldConfig }
+      if (typeof authConfig.loginWithUsername === 'object') {
+        if (authConfig.loginWithUsername.requireEmail === false) {
+          emailField.required = false
+        }
+        if (authConfig.loginWithUsername.requireUsername === false) {
+          usernameField.required = false
+        }
       }
+    }
 
+    authFields.push(emailField)
+    if (usernameField) {
       authFields.push(usernameField)
     }
 

@@ -8,27 +8,34 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { Hamburger } from '../Hamburger/index.js'
-import { LocalizerLabel } from '../Localizer/LocalizerLabel/index.js'
 import { Localizer } from '../Localizer/index.js'
-import { NavToggler } from '../Nav/NavToggler/index.js'
+import { LocalizerLabel } from '../Localizer/LocalizerLabel/index.js'
 import { useNav } from '../Nav/context.js'
+import { NavToggler } from '../Nav/NavToggler/index.js'
+import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { StepNav } from '../StepNav/index.js'
 import './index.scss'
 
 const baseClass = 'app-header'
 
-export const AppHeader: React.FC = () => {
+type Props = {
+  CustomAvatar?: React.ReactNode
+  CustomIcon?: React.ReactNode
+}
+export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
   const { t } = useTranslation()
 
-  const {
-    admin: {
-      routes: { account: accountRoute },
-    },
-    localization,
-    routes: { admin: adminRoute },
-  } = useConfig()
+  const { Actions } = useActions()
 
-  const { actions } = useActions()
+  const {
+    config: {
+      admin: {
+        routes: { account: accountRoute },
+      },
+      localization,
+      routes: { admin: adminRoute },
+    },
+  } = useConfig()
 
   const { navOpen } = useNav()
 
@@ -50,11 +57,13 @@ export const AppHeader: React.FC = () => {
     return () => {
       window.removeEventListener('resize', checkIsScrollable)
     }
-  }, [actions])
+  }, [Actions])
 
   const Link = LinkWithDefault.default
 
   const LinkElement = Link || 'a'
+
+  const ActionComponents = Actions ? Object.values(Actions) : []
 
   return (
     <header className={[baseClass, navOpen && `${baseClass}--nav-open`].filter(Boolean).join(' ')}>
@@ -66,21 +75,22 @@ export const AppHeader: React.FC = () => {
           </NavToggler>
           <div className={`${baseClass}__controls-wrapper`}>
             <div className={`${baseClass}__step-nav-wrapper`}>
-              <StepNav Link={Link} className={`${baseClass}__step-nav`} />
+              <StepNav className={`${baseClass}__step-nav`} CustomIcon={CustomIcon} Link={Link} />
             </div>
             <div className={`${baseClass}__actions-wrapper`}>
               <div className={`${baseClass}__actions`} ref={customControlsRef}>
-                {Array.isArray(actions) &&
-                  actions.map((Action, i) => (
-                    <div
-                      className={
-                        isScrollable && i === actions.length - 1 ? `${baseClass}__last-action` : ''
-                      }
-                      key={i}
-                    >
-                      {Action}
-                    </div>
-                  ))}
+                {ActionComponents.map((Action, i) => (
+                  <div
+                    className={
+                      isScrollable && i === ActionComponents.length - 1
+                        ? `${baseClass}__last-action`
+                        : ''
+                    }
+                    key={i}
+                  >
+                    {Action}
+                  </div>
+                ))}
               </div>
               {isScrollable && <div className={`${baseClass}__gradient-placeholder`} />}
             </div>
@@ -91,9 +101,10 @@ export const AppHeader: React.FC = () => {
               aria-label={t('authentication:account')}
               className={`${baseClass}__account`}
               href={formatAdminURL({ adminRoute, path: accountRoute })}
+              prefetch={Link ? false : undefined}
               tabIndex={0}
             >
-              <Account />
+              <RenderCustomComponent CustomComponent={CustomAvatar} Fallback={<Account />} />
             </LinkElement>
           </div>
         </div>

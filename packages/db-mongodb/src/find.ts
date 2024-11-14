@@ -6,12 +6,26 @@ import { flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
-import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
+import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
 export const find: Find = async function find(
   this: MongooseAdapter,
-  { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
+  {
+    collection,
+    joins = {},
+    limit = 0,
+    locale,
+    page,
+    pagination,
+    projection,
+    req = {} as PayloadRequest,
+    select,
+    sort: sortArg,
+    where,
+  },
 ) {
   const Model = this.collections[collection]
   const collectionConfig = this.payload.collections[collection].config
@@ -50,12 +64,25 @@ export const find: Find = async function find(
     options,
     page,
     pagination,
+    projection,
     sort,
     useEstimatedCount,
   }
 
-  if (locale && locale !== 'all' && locale !== '*') {
-    paginationOptions.collation = { locale, strength: 1 }
+  if (select) {
+    paginationOptions.projection = buildProjectionFromSelect({
+      adapter: this,
+      fields: collectionConfig.fields,
+      select,
+    })
+  }
+
+  if (this.collation) {
+    const defaultLocale = 'en'
+    paginationOptions.collation = {
+      locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale,
+      ...this.collation,
+    }
   }
 
   if (!useEstimatedCount && Object.keys(query).length === 0 && this.disableIndexHints !== true) {
@@ -84,7 +111,23 @@ export const find: Find = async function find(
     }
   }
 
-  const result = await Model.paginate(query, paginationOptions)
+  let result
+
+  const aggregate = await buildJoinAggregation({
+    adapter: this,
+    collection,
+    collectionConfig,
+    joins,
+    locale,
+    query,
+  })
+  // build join aggregation
+  if (aggregate) {
+    result = await Model.aggregatePaginate(Model.aggregate(aggregate), paginationOptions)
+  } else {
+    result = await Model.paginate(query, paginationOptions)
+  }
+
   const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {

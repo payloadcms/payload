@@ -1,7 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
 import { arrayFieldsSlug } from '../../slugs.js'
-import { ArrayRowLabel } from './LabelComponent.js'
 
 export const arrayDefaultValue = [{ text: 'row one' }, { text: 'row two' }]
 
@@ -23,6 +22,19 @@ const ArrayFields: CollectionConfig = {
           name: 'text',
           type: 'text',
           required: true,
+        },
+        {
+          name: 'anotherText',
+          type: 'text',
+        },
+        {
+          name: 'uiField',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: './collections/Array/LabelComponent.js#ArrayRowLabel',
+            },
+          },
         },
         {
           name: 'localizedText',
@@ -116,7 +128,7 @@ const ArrayFields: CollectionConfig = {
       name: 'rowLabelAsComponent',
       admin: {
         components: {
-          RowLabel: ArrayRowLabel,
+          RowLabel: '/collections/Array/LabelComponent.js#ArrayRowLabel',
         },
         description: 'Row labels rendered as react components.',
       },
@@ -153,6 +165,23 @@ const ArrayFields: CollectionConfig = {
         },
       ],
       type: 'array',
+    },
+    {
+      name: 'nestedArrayLocalized',
+      type: 'array',
+      fields: [
+        {
+          type: 'array',
+          name: 'array',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+              localized: true,
+            },
+          ],
+        },
+      ],
     },
   ],
   slug: arrayFieldsSlug,

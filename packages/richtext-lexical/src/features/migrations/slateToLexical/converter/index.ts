@@ -47,10 +47,11 @@ export function convertSlateNodesToLexical({
   parentNodeType: string
   slateNodes: SlateNode[]
 }): SerializedLexicalNode[] {
-  if (!converters?.length) {
+  if (!converters?.length || !slateNodes?.length) {
     return []
   }
   const unknownConverter = converters.find((converter) => converter.nodeTypes.includes('unknown'))
+  // @ts-expect-error - vestiges of the migration to strict mode. Probably not important enough in this file to fix
   return (
     slateNodes.map((slateNode, i) => {
       if (!('type' in slateNode)) {
@@ -66,7 +67,9 @@ export function convertSlateNodesToLexical({
         return convertParagraphNode(converters, slateNode)
       }
 
-      const converter = converters.find((converter) => converter.nodeTypes.includes(slateNode.type))
+      const converter = converters.find((converter) =>
+        converter.nodeTypes.includes(slateNode.type!),
+      )
 
       if (converter) {
         return converter.converter({ childIndex: i, converters, parentNodeType, slateNode })
@@ -99,6 +102,7 @@ export function convertParagraphNode(
     format: '',
     indent: 0,
     textFormat: 0,
+    textStyle: '',
     version: 1,
   }
 }

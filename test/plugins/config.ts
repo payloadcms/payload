@@ -9,6 +9,11 @@ const dirname = path.dirname(filename)
 export const pagesSlug = 'pages'
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       slug: 'users',

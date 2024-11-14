@@ -1,4 +1,6 @@
 'use client'
+import type { PayloadRequest } from 'payload'
+
 import { useCallback, useMemo, useRef } from 'react'
 
 import type { UPDATE } from '../Form/types.js'
@@ -12,7 +14,6 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { useFieldProps } from '../FieldPropsProvider/index.js'
 import {
   useForm,
   useFormFields,
@@ -27,19 +28,14 @@ import {
  *
  * @see https://payloadcms.com/docs/admin/hooks#usefield
  */
-export const useField = <T,>(options: Options): FieldType<T> => {
-  const { disableFormData = false, hasRows, validate } = options
-
-  const { path: pathFromContext, permissions, readOnly, schemaPath } = useFieldProps()
-
-  // Prioritize passed in path over context path. If the context path should be prioritized (which is the case for top-level useField calls in fields), it should be passed in as the options path.
-  const path = options.path || pathFromContext
+export const useField = <TValue,>(options: Options): FieldType<TValue> => {
+  const { disableFormData = false, hasRows, path, validate } = options
 
   const submitted = useFormSubmitted()
   const processing = useFormProcessing()
   const initializing = useFormInitializing()
   const { user } = useAuth()
-  const { id } = useDocumentInfo()
+  const { id, collectionSlug } = useDocumentInfo()
   const operation = useOperation()
 
   const { dispatchField, field } = useFormFields(([fields, dispatch]) => ({
@@ -48,14 +44,14 @@ export const useField = <T,>(options: Options): FieldType<T> => {
   }))
 
   const { t } = useTranslation()
-  const config = useConfig()
+  const { config } = useConfig()
 
   const { getData, getDataByPath, getSiblingData, setModified } = useForm()
   const modified = useFormModified()
 
   const filterOptions = field?.filterOptions
-  const value = field?.value as T
-  const initialValue = field?.initialValue as T
+  const value = field?.value as TValue
+  const initialValue = field?.initialValue as TValue
   const valid = typeof field?.valid === 'boolean' ? field.valid : true
   const showError = valid === false && submitted
 
@@ -67,7 +63,6 @@ export const useField = <T,>(options: Options): FieldType<T> => {
   const setValue = useCallback(
     (e, disableModifyingForm = false) => {
       const val = e && e.target ? e.target.value : e
-
       dispatchField({
         type: 'UPDATE',
         disableFormData: disableFormData || (hasRows && val > 0),
@@ -105,8 +100,9 @@ export const useField = <T,>(options: Options): FieldType<T> => {
 
   // Store result from hook as ref
   // to prevent unnecessary rerenders
-  const result: FieldType<T> = useMemo(
+  const result: FieldType<TValue> = useMemo(
     () => ({
+      customComponents: field?.customComponents,
       errorMessage: field?.errorMessage,
       errorPaths: field?.errorPaths || [],
       filterOptions,
@@ -115,10 +111,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
       formSubmitted: submitted,
       initialValue,
       path,
-      permissions,
-      readOnly: readOnly || false,
       rows: field?.rows,
-      schemaPath,
       setValue,
       showError,
       valid: field?.valid,
@@ -136,11 +129,9 @@ export const useField = <T,>(options: Options): FieldType<T> => {
       value,
       initialValue,
       path,
-      schemaPath,
-      readOnly,
-      permissions,
       filterOptions,
       initializing,
+      field?.customComponents,
     ],
   )
 
@@ -154,21 +145,29 @@ export const useField = <T,>(options: Options): FieldType<T> => {
           valueToValidate = getDataByPath(path)
         }
 
-        let errorMessage: string | undefined
+        let errorMessage: string | undefined = prevErrorMessage.current
         let valid: boolean | string = prevValid.current
 
         const isValid =
           typeof validate === 'function'
             ? await validate(valueToValidate, {
                 id,
-                config,
+                collectionSlug,
                 data: getData(),
                 operation,
+                preferences: {} as any,
+                req: {
+                  payload: {
+                    config,
+                  },
+                  t,
+                  user,
+                } as unknown as PayloadRequest,
                 siblingData: getSiblingData(path),
-                t,
-                user,
               })
-            : true
+            : typeof prevErrorMessage.current === 'string'
+              ? prevErrorMessage.current
+              : prevValid.current
 
         if (typeof isValid === 'string') {
           valid = false
@@ -190,7 +189,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
             path,
             rows: field?.rows,
             valid,
-            // validate,
+            validate,
             value,
           }
 
@@ -220,6 +219,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
       user,
       validate,
       field?.rows,
+      collectionSlug,
     ],
   )
 

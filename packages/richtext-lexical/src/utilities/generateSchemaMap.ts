@@ -6,7 +6,7 @@ import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
 
 export const getGenerateSchemaMap =
   (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): RichTextAdapter['generateSchemaMap'] =>
-  ({ config, i18n, schemaMap, schemaPath }) => {
+  ({ config, field, i18n, schemaMap, schemaPath }) => {
     for (const [featureKey, resolvedFeature] of args.resolvedFeatureMap.entries()) {
       if (
         !('generateSchemaMap' in resolvedFeature) ||
@@ -16,6 +16,7 @@ export const getGenerateSchemaMap =
       }
       const schemas = resolvedFeature.generateSchemaMap({
         config,
+        field,
         i18n,
         props: resolvedFeature.sanitizedServerFeatureProps,
         schemaMap,
@@ -23,17 +24,20 @@ export const getGenerateSchemaMap =
       })
 
       if (schemas) {
-        for (const [schemaKey, fields] of schemas.entries()) {
-          // generate schema map entries for sub-fields using traverseFields
-          traverseFields({
-            config,
-            fields,
-            i18n,
-            schemaMap: schemas,
-            schemaPath: schemaKey,
-          })
+        for (const [schemaKey, field] of schemas.entries()) {
+          if ('fields' in field) {
+            // generate schema map entries for sub-fields using traverseFields
+            traverseFields({
+              config,
+              fields: field.fields,
+              i18n,
+              parentIndexPath: '',
+              parentSchemaPath: `${schemaPath}.lexical_internal_feature.${featureKey}.${schemaKey}`,
+              schemaMap,
+            })
+          }
 
-          schemaMap.set(`${schemaPath}.lexical_internal_feature.${featureKey}.${schemaKey}`, fields)
+          schemaMap.set(`${schemaPath}.lexical_internal_feature.${featureKey}.${schemaKey}`, field)
         }
       }
     }

@@ -10,7 +10,6 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Media, Page, Post, Tenant } from './payload-types.js'
 
 import { Pages } from './collections/Pages.js'
-import configPromise from './config.js'
 import { postsSlug, tenantsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -31,11 +30,12 @@ describe('Collections - Live Preview', () => {
   let serverURL
 
   let testPost: Post
+  let testPostTwo: Post
   let tenant: Tenant
   let media: Media
 
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
 
     tenant = await payload.create({
       collection: tenantsSlug,
@@ -50,6 +50,15 @@ describe('Collections - Live Preview', () => {
       data: {
         slug: 'post-1',
         title: 'Test Post',
+        tenant: tenant.id,
+      },
+    })
+
+    testPostTwo = await payload.create({
+      collection: postsSlug,
+      data: {
+        slug: 'post-2',
+        title: 'Test Post 2',
         tenant: tenant.id,
       },
     })
@@ -1279,5 +1288,86 @@ describe('Collections - Live Preview', () => {
     // Check that the block has been removed
     expect(merge3.layout).toHaveLength(0)
     expect(merge3._numberOfRequests).toEqual(0)
+  })
+
+  it('properly encodes URLs in requests', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
+    let capturedEndpoint: string | undefined
+
+    const customRequestHandler = async ({ apiPath, endpoint, serverURL }) => {
+      capturedEndpoint = `${serverURL}${apiPath}/${endpoint}`
+
+      const mockResponse = {
+        ok: true,
+        status: 200,
+        headers: new Headers({ 'Content-Type': 'application/json' }),
+        json: () => ({
+          docs: [
+            {
+              id: testPost.id,
+              slug: 'post-1',
+              tenant: { id: 'tenant-id', title: 'Tenant 1' },
+              title: 'Test Post',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+            {
+              id: testPostTwo.id,
+              slug: 'post-2',
+              tenant: { id: 'tenant-id', title: 'Tenant 1' },
+              title: 'Test Post 2',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+          ],
+        }),
+      }
+
+      return Promise.resolve(mockResponse as unknown as Response)
+    }
+
+    const mergedData = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
+        relationshipPolyHasMany: [
+          { value: testPost.id, relationTo: postsSlug },
+          { value: testPostTwo.id, relationTo: postsSlug },
+        ],
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+      collectionPopulationRequestHandler: customRequestHandler,
+    })
+
+    expect(mergedData.relationshipPolyHasMany).toMatchObject([
+      {
+        value: {
+          id: testPost.id,
+          slug: 'post-1',
+          title: 'Test Post',
+        },
+        relationTo: postsSlug,
+      },
+      {
+        value: {
+          id: testPostTwo.id,
+          slug: 'post-2',
+          title: 'Test Post 2',
+        },
+        relationTo: postsSlug,
+      },
+    ])
+
+    // Verify that the request was made to the properly encoded URL
+    // Without encodeURI wrapper the request URL - would receive string: "undefined/api/posts?depth=1&where[id][in]=66ba7ab6a60a945d10c8b976,66ba7ab6a60a945d10c8b979
+    expect(capturedEndpoint).toContain(
+      encodeURI(`posts?depth=1&where[id][in]=${testPost.id},${testPostTwo.id}`),
+    )
   })
 })

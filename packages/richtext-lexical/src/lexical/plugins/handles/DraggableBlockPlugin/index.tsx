@@ -80,7 +80,7 @@ function useDraggableBlockMenu(
     boundingBox?: DOMRect
     elem: HTMLElement | null
     isBelow: boolean
-  }>(null)
+  } | null>(null)
 
   const { editorConfig } = useEditorConfigContext()
 
@@ -219,11 +219,11 @@ function useDraggableBlockMenu(
           editorConfig?.admin?.hideGutter ? '0px' : '3rem',
           blockHandleHorizontalOffset +
             (editorConfig?.admin?.hideGutter
-              ? menuRef?.current?.getBoundingClientRect()?.width ?? 0
+              ? (menuRef?.current?.getBoundingClientRect()?.width ?? 0)
               : -(menuRef?.current?.getBoundingClientRect()?.width ?? 0)),
           targetLineElem,
           targetBlockElem,
-          lastTargetBlock,
+          lastTargetBlock!,
           pageY,
           anchorElem,
           event,
@@ -243,8 +243,8 @@ function useDraggableBlockMenu(
             isBelow,
           })
         }
-      } else {
-        hideTargetLine(targetLineElem, lastTargetBlock?.elem)
+      } else if (lastTargetBlock?.elem) {
+        hideTargetLine(targetLineElem, lastTargetBlock.elem)
         setLastTargetBlock({
           boundingBox: targetBlockElem.getBoundingClientRect(),
           elem: targetBlockElem,
@@ -343,19 +343,15 @@ function useDraggableBlockMenu(
         setTimeout(() => {
           // add new temp html element to newInsertedElem with the same height and width and the class block-selected
           // to highlight the new inserted element
-          const newInsertedElemRect = newInsertedElem.getBoundingClientRect()
-
+          const newInsertedElemRect = newInsertedElem?.getBoundingClientRect()
+          if (!newInsertedElemRect) {
+            return
+          }
           const highlightElem = document.createElement('div')
           highlightElem.className = 'lexical-block-highlighter'
 
-          // if html data-theme is dark, set the highlighter color to white
-          if (document.documentElement.getAttribute('data-theme') === 'dark') {
-            highlightElem.style.backgroundColor = 'white'
-          } else {
-            highlightElem.style.backgroundColor = 'black'
-          }
-
-          highlightElem.style.transition = 'opacity 0.1s ease-in-out'
+          highlightElem.style.backgroundColor = 'var(--theme-elevation-1000'
+          highlightElem.style.transition = 'opacity 0.5s ease-in-out'
           highlightElem.style.zIndex = '1'
           highlightElem.style.pointerEvents = 'none'
           highlightElem.style.boxSizing = 'border-box'
@@ -374,8 +370,8 @@ function useDraggableBlockMenu(
             highlightElem.style.opacity = '0'
             setTimeout(() => {
               highlightElem.remove()
-            }, 1000)
-          }, 3000)
+            }, 500)
+          }, 1000)
         }, 120)
       })
 
@@ -420,7 +416,9 @@ function useDraggableBlockMenu(
 
   function onDragEnd(): void {
     isDraggingBlockRef.current = false
-    hideTargetLine(targetLineRef.current, lastTargetBlock?.elem)
+    if (lastTargetBlock?.elem) {
+      hideTargetLine(targetLineRef.current, lastTargetBlock?.elem)
+    }
   }
 
   return createPortal(

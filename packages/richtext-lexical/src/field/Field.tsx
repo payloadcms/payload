@@ -1,52 +1,43 @@
 'use client'
-import type { FormFieldBase } from '@payloadcms/ui'
 import type { SerializedEditorState } from 'lexical'
 
-import {
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-  useField,
-  useFieldProps,
-  withCondition,
-} from '@payloadcms/ui'
+import { FieldLabel, useEditDepth, useField, withCondition } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
+import type { LexicalRichTextFieldProps } from '../types.js'
 
 import { LexicalProvider } from '../lexical/LexicalProvider.js'
 import './bundled.css'
 import './index.scss'
+import '../lexical/theme/EditorTheme.scss'
 
 const baseClass = 'rich-text-lexical'
 
-const _RichText: React.FC<
+const RichTextComponent: React.FC<
   {
-    editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
-    name: string
-    richTextComponentMap: Map<string, React.ReactNode>
-    width?: string
-  } & FormFieldBase
+    readonly editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
+  } & LexicalRichTextFieldProps
 > = (props) => {
   const {
-    name,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
-    descriptionProps,
     editorConfig,
-    errorProps,
-    label,
-    labelProps,
+    field: {
+      name,
+      admin: { className, readOnly: readOnlyFromAdmin, style, width } = {},
+      label,
+      localized,
+      required,
+    },
     path: pathFromProps,
-    readOnly,
-    required,
-    style,
+    readOnly: readOnlyFromTopLevelProps,
     validate, // Users can pass in client side validation if they WANT to, but it's not required anymore
-    width,
   } = props
+
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
+  const path = pathFromProps ?? name
+
+  const editDepth = useEditDepth()
 
   const memoizedValidate = useCallback(
     (value, validationOptions) => {
@@ -59,45 +50,52 @@ const _RichText: React.FC<
     // Removing props from the dependencies array fixed this issue: https://github.com/payloadcms/payload/issues/3709
     [validate, required],
   )
-  const { path: pathFromContext } = useFieldProps()
 
-  const fieldType = useField<SerializedEditorState>({
-    path: pathFromContext ?? pathFromProps ?? name,
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    formInitializing,
+    formProcessing,
+    initialValue,
+    setValue,
+    showError,
+    value,
+  } = useField<SerializedEditorState>({
+    path,
+    // @ts-expect-error: TODO: Fix this
     validate: memoizedValidate,
   })
 
-  const { errorMessage, initialValue, path, schemaPath, setValue, showError, value } = fieldType
+  const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const classes = [
     baseClass,
     'field-type',
     className,
     showError && 'error',
-    readOnly && `${baseClass}--read-only`,
+    disabled && `${baseClass}--read-only`,
     editorConfig?.admin?.hideGutter !== true ? `${baseClass}--show-gutter` : null,
   ]
     .filter(Boolean)
     .join(' ')
 
+  const pathWithEditDepth = `${path}.${editDepth}`
+
   return (
     <div
       className={classes}
-      key={path}
+      key={pathWithEditDepth}
       style={{
         ...style,
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} alignCaret="left" />
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      {Error}
+      {Label || <FieldLabel label={label} localized={localized} required={required} />}
       <div className={`${baseClass}__wrap`}>
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
+          {BeforeInput}
           <LexicalProvider
+            composerKey={pathWithEditDepth}
             editorConfig={editorConfig}
             fieldProps={props}
             key={JSON.stringify({ initialValue, path })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
@@ -113,16 +111,12 @@ const _RichText: React.FC<
 
               setValue(serializedEditorState)
             }}
-            path={path}
-            readOnly={readOnly}
+            readOnly={disabled}
             value={value}
           />
+          {AfterInput}
         </ErrorBoundary>
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        {Description}
       </div>
     </div>
   )
@@ -139,4 +133,4 @@ function fallbackRender({ error }): React.ReactElement {
   )
 }
 
-export const RichText = withCondition(_RichText)
+export const RichText: typeof RichTextComponent = withCondition(RichTextComponent)

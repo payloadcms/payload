@@ -1,13 +1,11 @@
 'use client'
-import type { FormFieldBase } from '@payloadcms/ui'
-import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 
-import { ShimmerEffect, useClientFunctions, useFieldProps } from '@payloadcms/ui'
-import React, { Suspense, lazy, useEffect, useState } from 'react'
+import { ShimmerEffect } from '@payloadcms/ui'
+import React, { lazy, Suspense, useEffect, useState } from 'react'
 
 import type { FeatureProviderClient } from '../features/typesClient.js'
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
-import type { GeneratedFeatureProviderComponent, LexicalFieldAdminProps } from '../types.js'
+import type { LexicalRichTextFieldProps } from '../types.js'
 
 import { defaultEditorLexicalConfig } from '../lexical/config/client/default.js'
 import { loadClientFeatures } from '../lexical/config/client/loader.js'
@@ -17,126 +15,42 @@ const RichTextEditor = lazy(() =>
   import('./Field.js').then((module) => ({ default: module.RichText })),
 )
 
-export const RichTextField: React.FC<
-  {
-    admin?: LexicalFieldAdminProps
-    lexicalEditorConfig: LexicalEditorConfig
-    name: string
-    richTextComponentMap: Map<string, React.ReactNode>
-  } & FormFieldBase
-> = (props) => {
-  const { admin, lexicalEditorConfig, richTextComponentMap } = props
-  const { schemaPath } = useFieldProps()
-  const clientFunctions = useClientFunctions()
-  const [hasLoadedFeatures, setHasLoadedFeatures] = useState(false)
-
-  const [featureProviders, setFeatureProviders] = useState<
-    FeatureProviderClient<unknown, unknown>[]
-  >([])
+export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
+  const { admin = {}, clientFeatures, lexicalEditorConfig } = props
 
   const [finalSanitizedEditorConfig, setFinalSanitizedEditorConfig] =
-    useState<SanitizedClientEditorConfig>(null)
-
-  let featureProviderComponents: GeneratedFeatureProviderComponent[] = richTextComponentMap.get(
-    'features',
-  ) as GeneratedFeatureProviderComponent[]
-  // order by order
-  featureProviderComponents = featureProviderComponents.sort((a, b) => a.order - b.order)
-
-  let featureProvidersAndComponentsToLoad = 0 // feature providers and components
-  for (const featureProvider of featureProviderComponents) {
-    const featureComponentKeys = Array.from(richTextComponentMap.keys()).filter((key) =>
-      key.startsWith(
-        `lexical_internal_feature.${featureProvider.key}.lexical_internal_components.`,
-      ),
-    )
-
-    featureProvidersAndComponentsToLoad += 1
-    featureProvidersAndComponentsToLoad += featureComponentKeys.length
-  }
+    useState<null | SanitizedClientEditorConfig>(null)
 
   useEffect(() => {
-    if (!hasLoadedFeatures) {
-      const featureProvidersLocal: FeatureProviderClient<unknown, unknown>[] = []
-      let featureProvidersAndComponentsLoaded = 0
-
-      Object.entries(clientFunctions).forEach(([key, plugin]) => {
-        if (key.startsWith(`lexicalFeature.${schemaPath}.`)) {
-          if (!key.includes('.lexical_internal_components.')) {
-            featureProvidersLocal.push(plugin)
-          }
-
-          featureProvidersAndComponentsLoaded++
-        }
-      })
-
-      if (featureProvidersAndComponentsLoaded === featureProvidersAndComponentsToLoad) {
-        setFeatureProviders(featureProvidersLocal)
-        setHasLoadedFeatures(true)
-
-        /**
-         * Loaded feature provided => create the final sanitized editor config
-         */
-
-        const resolvedClientFeatures = loadClientFeatures({
-          clientFunctions,
-          schemaPath,
-          unSanitizedEditorConfig: {
-            features: featureProvidersLocal,
-            lexical: lexicalEditorConfig,
-          },
-        })
-
-        setFinalSanitizedEditorConfig(
-          sanitizeClientEditorConfig(
-            lexicalEditorConfig ? lexicalEditorConfig : defaultEditorLexicalConfig,
-            resolvedClientFeatures,
-            admin,
-          ),
-        )
-      }
+    if (finalSanitizedEditorConfig) {
+      return
     }
-  }, [
-    admin,
-    hasLoadedFeatures,
-    clientFunctions,
-    schemaPath,
-    featureProviderComponents.length,
-    featureProviders,
-    finalSanitizedEditorConfig,
-    lexicalEditorConfig,
-    featureProvidersAndComponentsToLoad,
-  ])
 
-  if (!hasLoadedFeatures) {
-    return (
-      <React.Fragment>
-        {Array.isArray(featureProviderComponents) &&
-          featureProviderComponents.map((featureProvider) => {
-            // get all components starting with key feature.${FeatureProvider.key}.components.{featureComponentKey}
-            const featureComponentKeys = Array.from(richTextComponentMap.keys()).filter((key) =>
-              key.startsWith(
-                `lexical_internal_feature.${featureProvider.key}.lexical_internal_components.`,
-              ),
-            )
-            const featureComponents: React.ReactNode[] = featureComponentKeys.map((key) => {
-              return richTextComponentMap.get(key)
-            }) // TODO: Type better
+    const featureProvidersLocal: FeatureProviderClient<any, any>[] = []
+    for (const [_featureKey, clientFeature] of Object.entries(clientFeatures)) {
+      if (!clientFeature.clientFeatureProvider) {
+        continue
+      }
+      featureProvidersLocal.push(
+        clientFeature.clientFeatureProvider(clientFeature.clientFeatureProps),
+      ) // Execute the clientFeatureProvider function here, as the server cannot execute functions imported from use client files
+    }
 
-            return (
-              <React.Fragment key={featureProvider.key}>
-                {featureComponents?.length
-                  ? featureComponents.map((FeatureComponent) => {
-                      return FeatureComponent
-                    })
-                  : null}
-                {featureProvider.ClientFeature}
-              </React.Fragment>
-            )
-          })}
-      </React.Fragment>
+    const finalLexicalEditorConfig = lexicalEditorConfig
+      ? lexicalEditorConfig
+      : defaultEditorLexicalConfig
+
+    const resolvedClientFeatures = loadClientFeatures({
+      unSanitizedEditorConfig: {
+        features: featureProvidersLocal,
+        lexical: finalLexicalEditorConfig,
+      },
+    })
+
+    setFinalSanitizedEditorConfig(
+      sanitizeClientEditorConfig(resolvedClientFeatures, finalLexicalEditorConfig, admin),
     )
-  }
+  }, [lexicalEditorConfig, admin, finalSanitizedEditorConfig, clientFeatures]) // TODO: Optimize this and use useMemo for this in the future. This might break sub-richtext-blocks from the blocks feature. Need to investigate
 
   return (
     <Suspense fallback={<ShimmerEffect height="35vh" />}>

@@ -1,94 +1,140 @@
 'use client'
 
-import type { FieldPermissions, FieldTypes } from 'payload'
+import type { ClientComponentProps, ClientField, FieldPaths, FieldPermissions } from 'payload'
 
 import React from 'react'
 
-import type {
-  FieldComponentProps,
-  MappedField,
-} from '../../providers/ComponentMap/buildComponentMap/types.js'
-
+import { ArrayField } from '../../fields/Array/index.js'
+import { BlocksField } from '../../fields/Blocks/index.js'
+import { CheckboxField } from '../../fields/Checkbox/index.js'
+import { CodeField } from '../../fields/Code/index.js'
+import { CollapsibleField } from '../../fields/Collapsible/index.js'
+import { DateTimeField } from '../../fields/DateTime/index.js'
+import { EmailField } from '../../fields/Email/index.js'
+import { GroupField } from '../../fields/Group/index.js'
 import { HiddenField } from '../../fields/Hidden/index.js'
-import { useFieldComponents } from '../../providers/FieldComponents/index.js'
-import { useOperation } from '../../providers/Operation/index.js'
-import { FieldPropsProvider, useFieldProps } from '../FieldPropsProvider/index.js'
+import { JoinField } from '../../fields/Join/index.js'
+import { JSONField } from '../../fields/JSON/index.js'
+import { NumberField } from '../../fields/Number/index.js'
+import { PointField } from '../../fields/Point/index.js'
+import { RadioGroupField } from '../../fields/RadioGroup/index.js'
+import { RelationshipField } from '../../fields/Relationship/index.js'
+import { RichTextField } from '../../fields/RichText/index.js'
+import { RowField } from '../../fields/Row/index.js'
+import { SelectField } from '../../fields/Select/index.js'
+import { TabsField } from '../../fields/Tabs/index.js'
+import { TextField } from '../../fields/Text/index.js'
+import { TextareaField } from '../../fields/Textarea/index.js'
+import { UIField } from '../../fields/UI/index.js'
+import { UploadField } from '../../fields/Upload/index.js'
+import { useFormFields } from '../../forms/Form/index.js'
 
-type Props = {
-  CustomField: MappedField['CustomField']
-  custom?: Record<any, string>
-  disabled: boolean
-  fieldComponentProps?: FieldComponentProps
-  indexPath?: string
-  isHidden?: boolean
-  name?: string
-  path: string
-  permissions?: FieldPermissions
-  readOnly?: boolean
-  schemaPath: string
-  siblingPermissions: {
-    [fieldName: string]: FieldPermissions
-  }
-  type: keyof FieldTypes
-}
+type RenderFieldProps = {
+  clientFieldConfig: ClientField
+  permissions: FieldPermissions
+} & FieldPaths &
+  Pick<ClientComponentProps, 'forceRender' | 'readOnly' | 'schemaPath'>
 
-export const RenderField: React.FC<Props> = ({
-  name,
-  type,
-  CustomField,
-  custom,
-  disabled,
-  fieldComponentProps,
+export function RenderField({
+  clientFieldConfig,
+  forceRender,
   indexPath,
-  isHidden,
-  path: pathFromProps,
+  parentPath,
+  parentSchemaPath,
+  path,
   permissions,
-  readOnly: readOnlyFromProps,
-  schemaPath: schemaPathFromProps,
-  siblingPermissions,
-}) => {
-  const operation = useOperation()
-  const { readOnly: readOnlyFromContext } = useFieldProps()
-  const fieldComponents = useFieldComponents()
+  readOnly,
+  schemaPath,
+}: RenderFieldProps) {
+  const Field = useFormFields(([fields]) => fields && fields?.[path]?.customComponents?.Field)
 
-  const path = [pathFromProps, name].filter(Boolean).join('.')
-  const schemaPath = [schemaPathFromProps, name].filter(Boolean).join('.')
-
-  // if the user cannot read the field, then filter it out
-  // this is different from `admin.readOnly` which is executed based on `operation`
-  if (permissions?.read?.permission === false || disabled) {
-    return null
+  if (Field !== undefined) {
+    return Field || null
   }
 
-  // `admin.readOnly` displays the value but prevents the field from being edited
-  let readOnly = readOnlyFromProps
-
-  // if parent field is `readOnly: true`, but this field is `readOnly: false`, the field should still be editable
-  if (readOnlyFromContext && readOnly !== false) readOnly = true
-
-  // if the user does not have access control to begin with, force it to be read-only
-  if (permissions?.[operation]?.permission === false) {
-    readOnly = true
+  const baseFieldProps: Pick<ClientComponentProps, 'forceRender' | 'readOnly' | 'schemaPath'> = {
+    forceRender,
+    readOnly,
+    schemaPath,
   }
 
-  const DefaultField = isHidden ? HiddenField : fieldComponents[type]
-
-  if (CustomField === undefined && !DefaultField) {
-    return null
+  const iterableFieldProps = {
+    ...baseFieldProps,
+    indexPath,
+    parentPath,
+    parentSchemaPath,
+    permissions,
   }
 
-  return (
-    <FieldPropsProvider
-      custom={custom}
-      indexPath={indexPath}
-      path={path}
-      permissions={permissions}
-      readOnly={readOnly}
-      schemaPath={schemaPath}
-      siblingPermissions={siblingPermissions}
-      type={type}
-    >
-      {CustomField !== undefined ? CustomField : <DefaultField {...fieldComponentProps} />}
-    </FieldPropsProvider>
-  )
+  if (clientFieldConfig.admin?.hidden) {
+    return <HiddenField {...baseFieldProps} field={clientFieldConfig} path={path} />
+  }
+
+  switch (clientFieldConfig.type) {
+    case 'array':
+      return <ArrayField {...iterableFieldProps} field={clientFieldConfig} path={path} />
+
+    case 'blocks':
+      return <BlocksField {...iterableFieldProps} field={clientFieldConfig} path={path} />
+
+    case 'checkbox':
+      return <CheckboxField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+    case 'code':
+      return <CodeField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+    case 'collapsible':
+      return <CollapsibleField {...iterableFieldProps} field={clientFieldConfig} path={path} />
+
+    case 'date':
+      return <DateTimeField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+    case 'email':
+      return <EmailField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+    case 'group':
+      return <GroupField {...iterableFieldProps} field={clientFieldConfig} path={path} />
+
+    case 'join':
+      return <JoinField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+    case 'json':
+      return <JSONField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+    case 'number':
+      return <NumberField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+    case 'point':
+      return <PointField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+    case 'radio':
+      return <RadioGroupField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+    case 'relationship':
+      return <RelationshipField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+    case 'richText':
+      return <RichTextField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+    case 'row':
+      return <RowField {...iterableFieldProps} field={clientFieldConfig} />
+
+    case 'select':
+      return <SelectField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+    case 'tabs':
+      return <TabsField {...iterableFieldProps} field={clientFieldConfig} path={path} />
+
+    case 'text':
+      return <TextField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+    case 'textarea':
+      return <TextareaField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+    case 'ui':
+      return <UIField />
+
+    case 'upload':
+      return <UploadField {...baseFieldProps} field={clientFieldConfig} path={path} />
+  }
 }

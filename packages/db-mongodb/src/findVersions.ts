@@ -1,12 +1,13 @@
 import type { PaginateOptions } from 'mongoose'
 import type { FindVersions, PayloadRequest } from 'payload'
 
-import { flattenWhereToOperators } from 'payload'
+import { buildVersionCollectionFields, flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
-import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
 export const findVersions: FindVersions = async function findVersions(
@@ -18,6 +19,7 @@ export const findVersions: FindVersions = async function findVersions(
     page,
     pagination,
     req = {} as PayloadRequest,
+    select,
     skip,
     sort: sortArg,
     where,
@@ -65,12 +67,21 @@ export const findVersions: FindVersions = async function findVersions(
     options,
     page,
     pagination,
+    projection: buildProjectionFromSelect({
+      adapter: this,
+      fields: buildVersionCollectionFields(this.payload.config, collectionConfig),
+      select,
+    }),
     sort,
     useEstimatedCount,
   }
 
-  if (locale && locale !== 'all' && locale !== '*') {
-    paginationOptions.collation = { locale, strength: 1 }
+  if (this.collation) {
+    const defaultLocale = 'en'
+    paginationOptions.collation = {
+      locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale,
+      ...this.collation,
+    }
   }
 
   if (!useEstimatedCount && Object.keys(query).length === 0 && this.disableIndexHints !== true) {

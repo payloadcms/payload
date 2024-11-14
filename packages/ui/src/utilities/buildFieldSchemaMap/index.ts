@@ -1,37 +1,83 @@
 import type { I18n } from '@payloadcms/translations'
-import type { SanitizedConfig } from 'payload'
+import type { Field, FieldSchemaMap, SanitizedConfig } from 'payload'
 
-import type { FieldSchemaMap } from './types.js'
+import { confirmPassword, password } from 'payload/shared'
 
 import { traverseFields } from './traverseFields.js'
-
+/**
+ * Flattens the config fields into a map of field schemas
+ */
 export const buildFieldSchemaMap = (args: {
+  collectionSlug?: string
   config: SanitizedConfig
+  globalSlug?: string
   i18n: I18n
-}): FieldSchemaMap => {
-  const { config, i18n } = args
+}): { fieldSchemaMap: FieldSchemaMap } => {
+  const { collectionSlug, config, globalSlug, i18n } = args
 
-  const result: FieldSchemaMap = new Map()
+  const schemaMap: FieldSchemaMap = new Map()
 
-  config.collections.forEach((collection) => {
-    traverseFields({
-      config,
-      fields: collection.fields,
-      i18n,
-      schemaMap: result,
-      schemaPath: collection.slug,
-    })
-  })
+  if (collectionSlug) {
+    const matchedCollection = config.collections.find(
+      (collection) => collection.slug === collectionSlug,
+    )
 
-  config.globals.forEach((global) => {
-    traverseFields({
-      config,
-      fields: global.fields,
-      i18n,
-      schemaMap: result,
-      schemaPath: global.slug,
-    })
-  })
+    if (matchedCollection) {
+      if (matchedCollection.auth && !matchedCollection.auth.disableLocalStrategy) {
+        // register schema with auth schemaPath
+        const baseAuthFields: Field[] = [
+          {
+            name: 'password',
+            type: 'text',
+            label: i18n.t('general:password'),
+            required: true,
+            validate: password,
+          },
+          {
+            name: 'confirm-password',
+            type: 'text',
+            label: i18n.t('authentication:confirmPassword'),
+            required: true,
+            validate: confirmPassword,
+          },
+        ]
 
-  return result
+        schemaMap.set(`_${matchedCollection.slug}.auth`, {
+          fields: [...baseAuthFields, ...matchedCollection.fields],
+        })
+      }
+
+      schemaMap.set(collectionSlug, {
+        fields: matchedCollection.fields,
+      })
+
+      traverseFields({
+        config,
+        fields: matchedCollection.fields,
+        i18n,
+        parentIndexPath: '',
+        parentSchemaPath: collectionSlug,
+        schemaMap,
+      })
+    }
+  } else if (globalSlug) {
+    const matchedGlobal = config.globals.find((global) => global.slug === globalSlug)
+
+    if (matchedGlobal) {
+      schemaMap.set(globalSlug, {
+        fields: matchedGlobal.fields,
+      })
+
+      traverseFields({
+        config,
+        fields: matchedGlobal.fields,
+        i18n,
+        parentIndexPath: '',
+        parentSchemaPath: globalSlug,
+        schemaMap,
+      })
+    }
+  }
+
+  return { fieldSchemaMap: schemaMap }
 }

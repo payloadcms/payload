@@ -1,0 +1,60 @@
+@import 'vars';
+@import 'queries';
+@layer payload-default {
+  .Toastify {
+    .Toastify__toast-container {
+      left: base(5);
+      transform: none;
+      right: base(5);
+      width: auto;
+    }
+
+    .Toastify__toast {
+      padding: base(0.5);
+      border-radius: $style-radius-m;
+      font-weight: 600;
+    }
+
+    .Toastify__close-button {
+      align-self: center;
+      opacity: 0.7;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    .Toastify__toast--success {
+      color: var(--color-success-900);
+      background: var(--color-success-500);
+
+      .Toastify__progress-bar {
+        background-color: var(--color-success-900);
+      }
+    }
+
+    .Toastify__close-button--success {
+      color: var(--color-success-900);
+    }
+
+    .Toastify__toast--error {
+      background: var(--theme-error-500);
+      color: #fff;
+
+      .Toastify__progress-bar {
+        background-color: #fff;
+      }
+    }
+
+    .Toastify__close-button--light {
+      color: inherit;
+    }
+
+    @include mid-break {
+      .Toastify__toast-container {
+        left: $baseline;
+        right: $baseline;
+      }
+    }
+  }
+}

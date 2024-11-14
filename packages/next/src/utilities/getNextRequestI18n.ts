@@ -1,10 +1,4 @@
-import type {
-  ClientTranslationsObject,
-  DefaultTranslationKeys,
-  DefaultTranslationsObject,
-  I18n,
-  I18nClient,
-} from '@payloadcms/translations'
+import type { ClientTranslationsObject, I18nClient } from '@payloadcms/translations'
 import type { SanitizedConfig } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
@@ -18,6 +12,7 @@ import { getRequestLanguage } from './getRequestLanguage.js'
  * It must be called on the server side, and within the lifecycle of a request since it relies on the request headers and cookies.
  */
 export const getNextRequestI18n = async <
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   TAdditionalTranslations = {},
   TAdditionalClientTranslationKeys extends string = never,
 >({
@@ -34,6 +29,6 @@ export const getNextRequestI18n = async <
   return (await initI18n({
     config: config.i18n,
     context: 'client',
-    language: getRequestLanguage({ config, cookies: cookies(), headers: headers() }),
+    language: getRequestLanguage({ config, cookies: await cookies(), headers: await headers() }),
   })) as any
 }

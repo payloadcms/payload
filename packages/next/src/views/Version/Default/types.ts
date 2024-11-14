@@ -8,11 +8,11 @@ export type CompareOption = {
 }
 
 export type DefaultVersionsViewProps = {
-  doc: Document
-  docPermissions: CollectionPermission | GlobalPermission
-  initialComparisonDoc: Document
-  latestDraftVersion?: string
-  latestPublishedVersion?: string
-  localeOptions: OptionObject[]
-  versionID?: string
+  readonly doc: Document
+  readonly docPermissions: CollectionPermission | GlobalPermission
+  readonly initialComparisonDoc: Document
+  readonly latestDraftVersion?: string
+  readonly latestPublishedVersion?: string
+  readonly localeOptions: OptionObject[]
+  readonly versionID?: string
 }

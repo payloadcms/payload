@@ -64,8 +64,8 @@ function tryToPositionRange(leadOffset: number, range: Range, editorWindow: Wind
   return true
 }
 
-function getQueryTextForSearch(editor: LexicalEditor): null | string {
-  let text = null
+function getQueryTextForSearch(editor: LexicalEditor): string | undefined {
+  let text
   editor.getEditorState().read(() => {
     const selection = $getSelection()
     if (!$isRangeSelection(selection)) {
@@ -110,12 +110,7 @@ export type TypeaheadMenuPluginProps = {
   onClose?: () => void
   onOpen?: (resolution: MenuResolution) => void
   onQueryChange: (matchingString: null | string) => void
-  onSelectItem: (
-    item: SlashMenuItem,
-    textNodeContainingQuery: TextNode | null,
-    closeMenu: () => void,
-    matchingString: string,
-  ) => void
+  onSelectItem: (item: SlashMenuItem, closeMenu: () => void, matchingString: string) => void
   triggerFn: TriggerFn
 }
 
@@ -207,7 +202,7 @@ export function LexicalTypeaheadMenuPlugin({
         if (
           !$isRangeSelection(selection) ||
           !selection.isCollapsed() ||
-          text === null ||
+          text === undefined ||
           range === null
         ) {
           closeTypeahead()
@@ -242,7 +237,7 @@ export function LexicalTypeaheadMenuPlugin({
     }
   }, [editor, triggerFn, onQueryChange, resolution, closeTypeahead, openTypeahead])
 
-  return resolution === null || editor === null ? null : (
+  return anchorElementRef.current === null || resolution === null || editor === null ? null : (
     <LexicalMenu
       anchorElementRef={anchorElementRef}
       close={closeTypeahead}

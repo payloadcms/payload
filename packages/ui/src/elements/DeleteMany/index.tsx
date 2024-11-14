@@ -26,12 +26,14 @@ export type Props = {
 }
 
 export const DeleteMany: React.FC<Props> = (props) => {
-  const { collection: { slug, labels: { plural } } = {} } = props
+  const { collection: { slug, labels: { plural, singular } } = {} } = props
 
   const { permissions } = useAuth()
   const {
-    routes: { api },
-    serverURL,
+    config: {
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
   const { toggleModal } = useModal()
   const { count, getQueryParams, selectAll, toggleAll } = useSelection()
@@ -63,8 +65,22 @@ export const DeleteMany: React.FC<Props> = (props) => {
         try {
           const json = await res.json()
           toggleModal(modalSlug)
-          if (res.status < 400) {
-            toast.success(json.message || t('general:deletedSuccessfully'))
+
+          const deletedDocs = json?.docs.length || 0
+          const successLabel = deletedDocs > 1 ? plural : singular
+
+          if (res.status < 400 || deletedDocs > 0) {
+            toast.success(
+              t('general:deletedCountSuccessfully', {
+                count: deletedDocs,
+                label: getTranslation(successLabel, i18n),
+              }),
+            )
+            if (json?.errors.length > 0) {
+              toast.error(json.message, {
+                description: json.errors.map((error) => error.message).join('\n'),
+              })
+            }
             toggleAll()
             router.replace(
               stringifyParams({
@@ -79,7 +95,9 @@ export const DeleteMany: React.FC<Props> = (props) => {
           }
 
           if (json.errors) {
-            toast.error(json.message)
+            toast.error(json.message, {
+              description: json.errors.map((error) => error.message).join('\n'),
+            })
           } else {
             addDefaultError()
           }
@@ -92,11 +110,13 @@ export const DeleteMany: React.FC<Props> = (props) => {
     addDefaultError,
     api,
     getQueryParams,
-    i18n.language,
+    i18n,
     modalSlug,
+    plural,
     router,
     selectAll,
     serverURL,
+    singular,
     slug,
     stringifyParams,
     t,
@@ -121,20 +141,25 @@ export const DeleteMany: React.FC<Props> = (props) => {
         {t('general:delete')}
       </Pill>
       <Modal className={baseClass} slug={modalSlug}>
-        <div className={`${baseClass}__template`}>
-          <h1>{t('general:confirmDeletion')}</h1>
-          <p>{t('general:aboutToDeleteCount', { count, label: getTranslation(plural, i18n) })}</p>
-          <Button
-            buttonStyle="secondary"
-            id="confirm-cancel"
-            onClick={deleting ? undefined : () => toggleModal(modalSlug)}
-            type="button"
-          >
-            {t('general:cancel')}
-          </Button>
-          <Button id="confirm-delete" onClick={deleting ? undefined : handleDelete}>
-            {deleting ? t('general:deleting') : t('general:confirm')}
-          </Button>
+        <div className={`${baseClass}__wrapper`}>
+          <div className={`${baseClass}__content`}>
+            <h1>{t('general:confirmDeletion')}</h1>
+            <p>{t('general:aboutToDeleteCount', { count, label: getTranslation(plural, i18n) })}</p>
+          </div>
+          <div className={`${baseClass}__controls`}>
+            <Button
+              buttonStyle="secondary"
+              id="confirm-cancel"
+              onClick={deleting ? undefined : () => toggleModal(modalSlug)}
+              size="large"
+              type="button"
+            >
+              {t('general:cancel')}
+            </Button>
+            <Button id="confirm-delete" onClick={deleting ? undefined : handleDelete} size="large">
+              {deleting ? t('general:deleting') : t('general:confirm')}
+            </Button>
+          </div>
         </div>
       </Modal>
     </React.Fragment>

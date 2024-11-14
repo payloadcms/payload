@@ -13,12 +13,12 @@ $breakpoint-l-width: 1440px !default;
 // BASELINE GRID
 //////////////////////////////
 
-$baseline-px: 25px !default;
+$baseline-px: 20px !default;
 $baseline-body-size: 13px !default;
 $baseline: math.div($baseline-px, $baseline-body-size) + rem;
 
 @function base($multiplier) {
-  @return (math.div($baseline-px, $baseline-body-size) * $multiplier) + rem;
+  @return ($baseline-px * $multiplier);
 }
 
 //////////////////////////////
@@ -40,7 +40,7 @@ $color-purple: #f3ddf3 !default;
 
 $style-radius-s: 3px !default;
 $style-radius-m: 4px !default;
-$style-radius-l: 9px !default;
+$style-radius-l: 8px !default;
 $style-stroke-width: 1px !default;
 
 $style-stroke-width-s: 1px !default;
@@ -50,8 +50,8 @@ $style-stroke-width-m: 2px !default;
 // MISC
 //////////////////////////////
 
-$top-header-offset: calc(var(--base) - 1px);
-$top-header-offset-m: calc(var(--base) * 3);
+$top-header-offset: calc(base(1) - 1px);
+$top-header-offset-m: base(3);
 $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
 
 //////////////////////////////
@@ -59,41 +59,19 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
 //////////////////////////////
 
 @mixin shadow-sm {
-  box-shadow:
-    0 2px 3px 0 rgba(0, 2, 4, 0.05),
-    0 10px 4px -8px rgba(0, 2, 4, 0.02);
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
 }
 
 @mixin shadow-m {
-  box-shadow:
-    0 0 30px 0 rgb(0 2 4 / 12%),
-    0 30px 25px -8px rgb(0 2 4 / 10%);
+  box-shadow: 0 4px 8px -3px rgba(0, 0, 0, 0.1);
 }
 
 @mixin shadow-lg {
-  box-shadow:
-    0 20px 35px -10px rgba(0, 2, 4, 0.2),
-    0 6px 4px -4px rgba(0, 2, 4, 0.02);
+  box-shadow: 0 -2px 16px -2px rgba(0, 0, 0, 0.2);
 }
 
 @mixin shadow-lg-top {
-  box-shadow:
-    0 -20px 35px -10px rgba(0, 2, 4, 0.2),
-    0 -6px 4px -4px rgba(0, 2, 4, 0.02);
-}
-
-@mixin shadow {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
-
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-}
-
-@mixin inputShadowActive {
-  box-shadow:
-    0 2px 3px 0 rgba(0, 2, 4, 0.16),
-    0 6px 4px -4px rgba(0, 2, 4, 0.13);
+  box-shadow: 0 2px 16px -2px rgba(0, 0, 0, 0.2);
 }
 
 @mixin inputShadow {
@@ -101,15 +79,7 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
 
   &:not(:disabled) {
     &:hover {
-      box-shadow:
-        0 2px 3px 0 rgba(0, 2, 4, 0.13),
-        0 6px 4px -4px rgba(0, 2, 4, 0.1);
-    }
-
-    &:active,
-    &:focus-within,
-    &:focus {
-      @include inputShadowActive;
+      box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.2);
     }
   }
 }
@@ -147,19 +117,33 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
   @include blur-bg(var(--theme-bg), 0.3);
 }
 
+@mixin readOnly {
+  background: var(--theme-elevation-100);
+  color: var(--theme-elevation-400);
+  box-shadow: none;
+
+  &:hover {
+    border-color: var(--theme-elevation-150);
+    box-shadow: none;
+  }
+}
+
 @mixin formInput() {
   @include inputShadow;
   font-family: var(--font-body);
   width: 100%;
   border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-s);
   background: var(--theme-input-bg);
   color: var(--theme-elevation-800);
-  border-radius: 0;
   font-size: 1rem;
   height: base(2);
   line-height: base(1);
-  padding: base(0.5) base(0.75);
+  padding: base(0.4) base(0.75);
   -webkit-appearance: none;
+  transition-property: border, box-shadow, background-color;
+  transition-duration: 100ms, 100ms, 500ms;
+  transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
 
   &[data-rtl='true'] {
     direction: rtl;
@@ -189,12 +173,7 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
   }
 
   &:disabled {
-    background: var(--theme-elevation-200);
-    color: var(--theme-elevation-450);
-
-    &:hover {
-      border-color: var(--theme-elevation-150);
-    }
+    @include readOnly;
   }
 }
 

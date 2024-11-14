@@ -62,6 +62,137 @@ describe('configToJSONSchema', () => {
     })
   })
 
+  it('should handle block fields with no blocks', async () => {
+    // @ts-expect-error
+    const config: Config = {
+      collections: [
+        {
+          slug: 'test',
+          fields: [
+            {
+              name: 'blockField',
+              type: 'blocks',
+              blocks: [],
+            },
+            {
+              name: 'blockFieldRequired',
+              type: 'blocks',
+              blocks: [],
+              required: true,
+            },
+            {
+              name: 'blockFieldWithFields',
+              type: 'blocks',
+              blocks: [
+                {
+                  slug: 'test',
+                  fields: [
+                    {
+                      name: 'field',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              name: 'blockFieldWithFieldsRequired',
+              type: 'blocks',
+              blocks: [
+                {
+                  slug: 'test',
+                  fields: [
+                    {
+                      name: 'field',
+                      type: 'text',
+                      required: true,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          timestamps: false,
+        },
+      ],
+    }
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    const schema = configToJSONSchema(sanitizedConfig, 'text')
+
+    expect(schema?.definitions?.test).toStrictEqual({
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        id: {
+          type: 'string',
+        },
+        blockField: {
+          type: ['array', 'null'],
+          items: {},
+        },
+        blockFieldRequired: {
+          type: 'array',
+          items: {},
+        },
+        blockFieldWithFields: {
+          type: ['array', 'null'],
+          items: {
+            oneOf: [
+              {
+                type: 'object',
+                additionalProperties: false,
+                properties: {
+                  id: {
+                    type: ['string', 'null'],
+                  },
+                  blockName: {
+                    type: ['string', 'null'],
+                  },
+                  blockType: {
+                    const: 'test',
+                  },
+                  field: {
+                    type: ['string', 'null'],
+                  },
+                },
+                required: ['blockType'],
+              },
+            ],
+          },
+        },
+        blockFieldWithFieldsRequired: {
+          type: ['array', 'null'],
+          items: {
+            oneOf: [
+              {
+                type: 'object',
+                additionalProperties: false,
+                properties: {
+                  id: {
+                    type: ['string', 'null'],
+                  },
+                  blockName: {
+                    type: ['string', 'null'],
+                  },
+                  blockType: {
+                    const: 'test',
+                  },
+                  field: {
+                    type: 'string',
+                  },
+                },
+                required: ['blockType', 'field'],
+              },
+            ],
+          },
+        },
+      },
+      required: ['id', 'blockFieldRequired'],
+      title: 'Test',
+    })
+  })
+
   it('should handle tabs and named tabs with required fields', async () => {
     // @ts-expect-error
     const config: Config = {

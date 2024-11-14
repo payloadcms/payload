@@ -1,46 +1,29 @@
 'use client'
-import type { CellComponentProps, FieldBase, FieldTypes } from 'payload'
+
+import type { ClientField } from 'payload'
 
 import React from 'react'
 
-export * from './TableCellProvider/index.js'
-
-import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
-
-import { useTableColumns } from '../TableColumns/index.js'
-import { TableCellProvider } from './TableCellProvider/index.js'
 import './index.scss'
-
-export { TableCellProvider }
 
 const baseClass = 'table'
 
 export type Column = {
-  Label: React.ReactNode
-  accessor: string
-  active: boolean
-  admin?: FieldBase['admin']
-  cellProps?: Partial<CellComponentProps>
-  components: {
-    Cell: React.ReactNode
-    Heading: React.ReactNode
-  }
-  name: FieldBase['name']
-  type: keyof FieldTypes
+  readonly accessor: string
+  readonly active: boolean
+  readonly CustomLabel?: React.ReactNode
+  readonly field: ClientField
+  readonly Heading: React.ReactNode
+  readonly renderedCells: React.ReactNode[]
 }
 
 export type Props = {
-  columns?: Column[]
-  customCellContext?: Record<string, unknown>
-  data: Record<string, unknown>[]
-  fieldMap: FieldMap
+  readonly appearance?: 'condensed' | 'default'
+  readonly columns?: Column[]
+  readonly data: Record<string, unknown>[]
 }
 
-export const Table: React.FC<Props> = ({ columns: columnsFromProps, customCellContext, data }) => {
-  const { columns: columnsFromContext } = useTableColumns()
-
-  const columns = columnsFromProps || columnsFromContext
-
+export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
   const activeColumns = columns?.filter((col) => col?.active)
 
   if (!activeColumns || activeColumns.length === 0) {
@@ -48,13 +31,17 @@ export const Table: React.FC<Props> = ({ columns: columnsFromProps, customCellCo
   }
 
   return (
-    <div className={baseClass}>
+    <div
+      className={[baseClass, appearance && `${baseClass}--appearance-${appearance}`]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <table cellPadding="0" cellSpacing="0">
         <thead>
           <tr>
             {activeColumns.map((col, i) => (
               <th id={`heading-${col.accessor}`} key={i}>
-                {col.components.Heading}
+                {col.Heading}
               </th>
             ))}
           </tr>
@@ -64,17 +51,11 @@ export const Table: React.FC<Props> = ({ columns: columnsFromProps, customCellCo
             data.map((row, rowIndex) => (
               <tr className={`row-${rowIndex + 1}`} key={rowIndex}>
                 {activeColumns.map((col, colIndex) => {
+                  const { accessor } = col
+
                   return (
-                    <td className={`cell-${col.accessor}`} key={colIndex}>
-                      <TableCellProvider
-                        cellData={row[col.accessor]}
-                        cellProps={col?.cellProps}
-                        columnIndex={colIndex}
-                        customCellContext={customCellContext}
-                        rowData={row}
-                      >
-                        {col.components.Cell}
-                      </TableCellProvider>
+                    <td className={`cell-${accessor}`} key={colIndex}>
+                      {col.renderedCells[rowIndex]}
                     </td>
                   )
                 })}

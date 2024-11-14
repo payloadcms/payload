@@ -1,14 +1,14 @@
 import type {
-  AdminViewComponent,
+  AdminViewProps,
   CollectionPermission,
-  EditViewComponent,
   GlobalPermission,
+  PayloadComponent,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
+  ServerSideEditViewProps,
 } from 'payload'
-
-import { notFound } from 'next/navigation.js'
+import type React from 'react'
 
 import { APIView as DefaultAPIView } from '../API/index.js'
 import { EditView as DefaultEditView } from '../Edit/index.js'
@@ -19,31 +19,46 @@ import { VersionsView as DefaultVersionsView } from '../Versions/index.js'
 import { getCustomViewByKey } from './getCustomViewByKey.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 
+export type ViewFromConfig<TProps extends object> = {
+  Component?: React.FC<TProps>
+  ComponentConfig?: PayloadComponent<TProps>
+}
+
 export const getViewsFromConfig = ({
   collectionConfig,
   config,
   docPermissions,
   globalConfig,
+  overrideDocPermissions,
   routeSegments,
 }: {
   collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
-
-  docPermissions: CollectionPermission | GlobalPermission
   globalConfig?: SanitizedGlobalConfig
   routeSegments: string[]
-}): {
-  CustomView: EditViewComponent
-  DefaultView: EditViewComponent
+} & (
+  | {
+      docPermissions: CollectionPermission | GlobalPermission
+      overrideDocPermissions?: false | undefined
+    }
+  | {
+      docPermissions?: never
+      overrideDocPermissions: true
+    }
+)): {
+  CustomView: ViewFromConfig<ServerSideEditViewProps>
+  DefaultView: ViewFromConfig<ServerSideEditViewProps>
   /**
    * The error view to display if CustomView or DefaultView do not exist (could be either due to not found, or unauthorized). Can be null
    */
-  ErrorView: AdminViewComponent
+  ErrorView: ViewFromConfig<AdminViewProps>
+  viewKey: string
 } | null => {
   // Conditionally import and lazy load the default view
-  let DefaultView: EditViewComponent = null
-  let CustomView: EditViewComponent = null
-  let ErrorView: AdminViewComponent = null
+  let DefaultView: ViewFromConfig<ServerSideEditViewProps> = null
+  let CustomView: ViewFromConfig<ServerSideEditViewProps> = null
+  let ErrorView: ViewFromConfig<AdminViewProps> = null
+  let viewKey: string
 
   const {
     routes: { admin: adminRoute },
@@ -60,109 +75,40 @@ export const getViewsFromConfig = ({
     config?.admin?.livePreview?.globals?.includes(globalConfig?.slug)
 
   if (collectionConfig) {
-    const editConfig = collectionConfig?.admin?.components?.views?.Edit
-    const EditOverride = typeof editConfig === 'function' ? editConfig : null
+    const [collectionEntity, collectionSlug, segment3, segment4, segment5, ...remainingSegments] =
+      routeSegments
 
-    if (EditOverride) {
-      CustomView = EditOverride
-    }
-
-    if (!EditOverride) {
-      const [collectionEntity, collectionSlug, segment3, segment4, segment5, ...remainingSegments] =
-        routeSegments
-
-      if (!docPermissions?.read?.permission) {
-        notFound()
-      } else {
-        // `../:id`, or `../create`
-        switch (routeSegments.length) {
-          case 3: {
-            switch (segment3) {
-              case 'create': {
-                if ('create' in docPermissions && docPermissions?.create?.permission) {
-                  CustomView = getCustomViewByKey(views, 'Default')
-                  DefaultView = DefaultEditView
-                } else {
-                  ErrorView = UnauthorizedView
+    if (!overrideDocPermissions && !docPermissions?.read?.permission) {
+      throw new Error('not-found')
+    } else {
+      // `../:id`, or `../create`
+      switch (routeSegments.length) {
+        case 3: {
+          switch (segment3) {
+            case 'create': {
+              if (
+                !overrideDocPermissions &&
+                'create' in docPermissions &&
+                docPermissions?.create?.permission
+              ) {
+                CustomView = {
+                  ComponentConfig: getCustomViewByKey(views, 'default'),
                 }
-                break
-              }
-
-              default: {
-                CustomView = getCustomViewByKey(views, 'Default')
-                DefaultView = DefaultEditView
-                break
-              }
-            }
-            break
-          }
-
-          // `../:id/api`, `../:id/preview`, `../:id/versions`, etc
-          case 4: {
-            switch (segment4) {
-              case 'api': {
-                if (collectionConfig?.admin?.hideAPIURL !== true) {
-                  CustomView = getCustomViewByKey(views, 'API')
-                  DefaultView = DefaultAPIView
+                DefaultView = {
+                  Component: DefaultEditView,
                 }
-                break
-              }
-
-              case 'preview': {
-                if (livePreviewEnabled) {
-                  DefaultView = DefaultLivePreviewView
-                }
-                break
-              }
-
-              case 'versions': {
-                if (docPermissions?.readVersions?.permission) {
-                  CustomView = getCustomViewByKey(views, 'Versions')
-                  DefaultView = DefaultVersionsView
-                } else {
-                  ErrorView = UnauthorizedView
-                }
-                break
-              }
-
-              default: {
-                const baseRoute = [
-                  adminRoute !== '/' && adminRoute,
-                  'collections',
-                  collectionSlug,
-                  segment3,
-                ]
-                  .filter(Boolean)
-                  .join('/')
-
-                const currentRoute = [baseRoute, segment4, segment5, ...remainingSegments]
-                  .filter(Boolean)
-                  .join('/')
-
-                CustomView = getCustomViewByRoute({
-                  baseRoute,
-                  currentRoute,
-                  views,
-                })
-                break
-              }
-            }
-            break
-          }
-
-          // `../:id/versions/:version`, etc
-          default: {
-            if (segment4 === 'versions') {
-              if (docPermissions?.readVersions?.permission) {
-                CustomView = getCustomViewByKey(views, 'Version')
-                DefaultView = DefaultVersionView
               } else {
-                ErrorView = UnauthorizedView
+                ErrorView = {
+                  Component: UnauthorizedView,
+                }
               }
-            } else {
+              break
+            }
+
+            default: {
               const baseRoute = [
                 adminRoute !== '/' && adminRoute,
-                collectionEntity,
+                'collections',
                 collectionSlug,
                 segment3,
               ]
@@ -173,119 +119,307 @@ export const getViewsFromConfig = ({
                 .filter(Boolean)
                 .join('/')
 
-              CustomView = getCustomViewByRoute({
+              const { Component: CustomViewComponent, viewKey: customViewKey } =
+                getCustomViewByRoute({
+                  baseRoute,
+                  currentRoute,
+                  views,
+                })
+
+              if (customViewKey) {
+                viewKey = customViewKey
+
+                CustomView = {
+                  ComponentConfig: CustomViewComponent,
+                }
+              } else {
+                CustomView = {
+                  ComponentConfig: getCustomViewByKey(views, 'default'),
+                }
+
+                DefaultView = {
+                  Component: DefaultEditView,
+                }
+              }
+
+              break
+            }
+          }
+          break
+        }
+
+        // `../:id/api`, `../:id/preview`, `../:id/versions`, etc
+        case 4: {
+          switch (segment4) {
+            case 'api': {
+              if (collectionConfig?.admin?.hideAPIURL !== true) {
+                CustomView = {
+                  ComponentConfig: getCustomViewByKey(views, 'api'),
+                }
+                DefaultView = {
+                  Component: DefaultAPIView,
+                }
+              }
+              break
+            }
+
+            case 'preview': {
+              if (livePreviewEnabled) {
+                DefaultView = {
+                  Component: DefaultLivePreviewView,
+                }
+                CustomView = {
+                  ComponentConfig: getCustomViewByKey(views, 'livePreview'),
+                }
+              }
+              break
+            }
+
+            case 'versions': {
+              if (!overrideDocPermissions && docPermissions?.readVersions?.permission) {
+                CustomView = {
+                  ComponentConfig: getCustomViewByKey(views, 'versions'),
+                }
+                DefaultView = {
+                  Component: DefaultVersionsView,
+                }
+              } else {
+                ErrorView = {
+                  Component: UnauthorizedView,
+                }
+              }
+              break
+            }
+
+            default: {
+              const baseRoute = [
+                adminRoute !== '/' && adminRoute,
+                'collections',
+                collectionSlug,
+                segment3,
+              ]
+                .filter(Boolean)
+                .join('/')
+
+              const currentRoute = [baseRoute, segment4, segment5, ...remainingSegments]
+                .filter(Boolean)
+                .join('/')
+
+              const { Component: CustomViewComponent, viewKey: customViewKey } =
+                getCustomViewByRoute({
+                  baseRoute,
+                  currentRoute,
+                  views,
+                })
+
+              if (customViewKey) {
+                viewKey = customViewKey
+
+                CustomView = {
+                  ComponentConfig: CustomViewComponent,
+                }
+              }
+
+              break
+            }
+          }
+          break
+        }
+
+        // `../:id/versions/:version`, etc
+        default: {
+          if (segment4 === 'versions') {
+            if (!overrideDocPermissions && docPermissions?.readVersions?.permission) {
+              CustomView = {
+                ComponentConfig: getCustomViewByKey(views, 'version'),
+              }
+              DefaultView = {
+                Component: DefaultVersionView,
+              }
+            } else {
+              ErrorView = {
+                Component: UnauthorizedView,
+              }
+            }
+          } else {
+            const baseRoute = [
+              adminRoute !== '/' && adminRoute,
+              collectionEntity,
+              collectionSlug,
+              segment3,
+            ]
+              .filter(Boolean)
+              .join('/')
+
+            const currentRoute = [baseRoute, segment4, segment5, ...remainingSegments]
+              .filter(Boolean)
+              .join('/')
+
+            const { Component: CustomViewComponent, viewKey: customViewKey } = getCustomViewByRoute(
+              {
                 baseRoute,
                 currentRoute,
                 views,
-              })
+              },
+            )
+
+            if (customViewKey) {
+              viewKey = customViewKey
+
+              CustomView = {
+                ComponentConfig: CustomViewComponent,
+              }
             }
-            break
           }
+
+          break
         }
       }
     }
   }
 
   if (globalConfig) {
-    const editConfig = globalConfig?.admin?.components?.views?.Edit
-    const EditOverride = typeof editConfig === 'function' ? editConfig : null
+    const [globalEntity, globalSlug, segment3, ...remainingSegments] = routeSegments
 
-    if (EditOverride) {
-      CustomView = EditOverride
-    }
-
-    if (!EditOverride) {
-      const [globalEntity, globalSlug, segment3, ...remainingSegments] = routeSegments
-
-      if (!docPermissions?.read?.permission) {
-        notFound()
-      } else {
-        switch (routeSegments.length) {
-          case 2: {
-            CustomView = getCustomViewByKey(views, 'Default')
-            DefaultView = DefaultEditView
-            break
+    if (!overrideDocPermissions && !docPermissions?.read?.permission) {
+      throw new Error('not-found')
+    } else {
+      switch (routeSegments.length) {
+        case 2: {
+          CustomView = {
+            ComponentConfig: getCustomViewByKey(views, 'default'),
           }
+          DefaultView = {
+            Component: DefaultEditView,
+          }
+          break
+        }
 
-          case 3: {
-            // `../:slug/api`, `../:slug/preview`, `../:slug/versions`, etc
-            switch (segment3) {
-              case 'api': {
-                if (globalConfig?.admin?.hideAPIURL !== true) {
-                  CustomView = getCustomViewByKey(views, 'API')
-                  DefaultView = DefaultAPIView
+        case 3: {
+          // `../:slug/api`, `../:slug/preview`, `../:slug/versions`, etc
+          switch (segment3) {
+            case 'api': {
+              if (globalConfig?.admin?.hideAPIURL !== true) {
+                CustomView = {
+                  ComponentConfig: getCustomViewByKey(views, 'api'),
                 }
-                break
-              }
-
-              case 'preview': {
-                if (livePreviewEnabled) {
-                  DefaultView = DefaultLivePreviewView
+                DefaultView = {
+                  Component: DefaultAPIView,
                 }
-                break
               }
+              break
+            }
 
-              case 'versions': {
-                if (docPermissions?.readVersions?.permission) {
-                  CustomView = getCustomViewByKey(views, 'Versions')
-                  DefaultView = DefaultVersionsView
-                } else {
-                  ErrorView = UnauthorizedView
+            case 'preview': {
+              if (livePreviewEnabled) {
+                DefaultView = {
+                  Component: DefaultLivePreviewView,
                 }
-                break
+                CustomView = {
+                  ComponentConfig: getCustomViewByKey(views, 'livePreview'),
+                }
               }
+              break
+            }
 
-              default: {
-                if (docPermissions?.read?.permission) {
-                  const baseRoute = [adminRoute, globalEntity, globalSlug, segment3]
-                    .filter(Boolean)
-                    .join('/')
+            case 'versions': {
+              if (!overrideDocPermissions && docPermissions?.readVersions?.permission) {
+                CustomView = {
+                  ComponentConfig: getCustomViewByKey(views, 'versions'),
+                }
 
-                  const currentRoute = [baseRoute, segment3, ...remainingSegments]
-                    .filter(Boolean)
-                    .join('/')
+                DefaultView = {
+                  Component: DefaultVersionsView,
+                }
+              } else {
+                ErrorView = {
+                  Component: UnauthorizedView,
+                }
+              }
+              break
+            }
 
-                  CustomView = getCustomViewByRoute({
+            default: {
+              if (!overrideDocPermissions && docPermissions?.read?.permission) {
+                const baseRoute = [adminRoute, globalEntity, globalSlug, segment3]
+                  .filter(Boolean)
+                  .join('/')
+
+                const currentRoute = [baseRoute, segment3, ...remainingSegments]
+                  .filter(Boolean)
+                  .join('/')
+
+                const { Component: CustomViewComponent, viewKey: customViewKey } =
+                  getCustomViewByRoute({
                     baseRoute,
                     currentRoute,
                     views,
                   })
-                  DefaultView = DefaultEditView
-                } else {
-                  ErrorView = UnauthorizedView
-                }
-                break
-              }
-            }
-            break
-          }
 
-          default: {
-            // `../:slug/versions/:version`, etc
-            if (segment3 === 'versions') {
-              if (docPermissions?.readVersions?.permission) {
-                CustomView = getCustomViewByKey(views, 'Version')
-                DefaultView = DefaultVersionView
+                if (customViewKey) {
+                  viewKey = customViewKey
+
+                  CustomView = {
+                    ComponentConfig: CustomViewComponent,
+                  }
+                } else {
+                  DefaultView = {
+                    Component: DefaultEditView,
+                  }
+                }
               } else {
-                ErrorView = UnauthorizedView
+                ErrorView = {
+                  Component: UnauthorizedView,
+                }
+              }
+              break
+            }
+          }
+          break
+        }
+
+        default: {
+          // `../:slug/versions/:version`, etc
+          if (segment3 === 'versions') {
+            if (!overrideDocPermissions && docPermissions?.readVersions?.permission) {
+              CustomView = {
+                ComponentConfig: getCustomViewByKey(views, 'version'),
+              }
+              DefaultView = {
+                Component: DefaultVersionView,
               }
             } else {
-              const baseRoute = [adminRoute !== '/' && adminRoute, 'globals', globalSlug]
-                .filter(Boolean)
-                .join('/')
+              ErrorView = {
+                Component: UnauthorizedView,
+              }
+            }
+          } else {
+            const baseRoute = [adminRoute !== '/' && adminRoute, 'globals', globalSlug]
+              .filter(Boolean)
+              .join('/')
 
-              const currentRoute = [baseRoute, segment3, ...remainingSegments]
-                .filter(Boolean)
-                .join('/')
+            const currentRoute = [baseRoute, segment3, ...remainingSegments]
+              .filter(Boolean)
+              .join('/')
 
-              CustomView = getCustomViewByRoute({
+            const { Component: CustomViewComponent, viewKey: customViewKey } = getCustomViewByRoute(
+              {
                 baseRoute,
                 currentRoute,
                 views,
-              })
+              },
+            )
+
+            if (customViewKey) {
+              viewKey = customViewKey
+
+              CustomView = {
+                ComponentConfig: CustomViewComponent,
+              }
             }
-            break
           }
+
+          break
         }
       }
     }
@@ -295,5 +429,6 @@ export const getViewsFromConfig = ({
     CustomView,
     DefaultView,
     ErrorView,
+    viewKey,
   }
 }

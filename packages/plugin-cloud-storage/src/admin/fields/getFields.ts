@@ -8,7 +8,7 @@ interface Args {
 }
 
 export const getFields = ({ collection, prefix }: Args): Field[] => {
-  const baseURLField: Field = {
+  const baseURLField: TextField = {
     name: 'url',
     type: 'text',
     admin: {
@@ -18,7 +18,7 @@ export const getFields = ({ collection, prefix }: Args): Field[] => {
     label: 'URL',
   }
 
-  const basePrefixField: Field = {
+  const basePrefixField: TextField = {
     name: 'prefix',
     type: 'text',
     admin: {
@@ -48,7 +48,7 @@ export const getFields = ({ collection, prefix }: Args): Field[] => {
   fields.push({
     ...baseURLField,
     ...(existingURLField || {}),
-  })
+  } as TextField)
 
   if (typeof collection.upload === 'object' && collection.upload.imageSizes) {
     let existingSizesFieldIndex = -1
@@ -88,7 +88,7 @@ export const getFields = ({ collection, prefix }: Args): Field[] => {
           type: 'group',
           fields: [
             {
-              ...(existingSizeURLField || {}),
+              ...(existingSizeURLField || ({} as any)),
               ...baseURLField,
             },
           ],
@@ -119,7 +119,7 @@ export const getFields = ({ collection, prefix }: Args): Field[] => {
       ...basePrefixField,
       ...(existingPrefixField || {}),
       defaultValue: path.posix.join(prefix),
-    })
+    } as TextField)
   }
 
   return fields

@@ -28,6 +28,6 @@ export const generateListMetadata = async (
     keywords,
     serverURL: config.serverURL,
     title,
-    ...(collectionConfig.admin.meta || {}),
+    ...(collectionConfig?.admin?.meta || {}),
   })
 }

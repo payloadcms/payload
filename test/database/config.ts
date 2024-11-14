@@ -2,10 +2,25 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+import type { TextField } from 'payload'
+
+import { v4 as uuid } from 'uuid'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 
+const defaultValueField: TextField = {
+  name: 'defaultValue',
+  type: 'text',
+  defaultValue: 'default value from database',
+}
+
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       slug: 'posts',
@@ -14,6 +29,16 @@ export default buildConfigWithDefaults({
           name: 'title',
           type: 'text',
           required: true,
+        },
+        {
+          name: 'hasTransaction',
+          type: 'checkbox',
+          hooks: {
+            beforeChange: [({ req }) => !!req.transactionID],
+          },
+          admin: {
+            readOnly: true,
+          },
         },
         {
           name: 'throwAfterChange',
@@ -47,16 +72,50 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: 'relation-a',
+      slug: 'default-values',
       fields: [
         {
           name: 'title',
           type: 'text',
         },
+        defaultValueField,
         {
-          name: 'relationship',
-          type: 'relationship',
-          relationTo: 'relation-b',
+          name: 'array',
+          type: 'array',
+          // default array with one object to test subfield defaultValue properties for Mongoose
+          defaultValue: [{}],
+          fields: [defaultValueField],
+        },
+        {
+          name: 'group',
+          type: 'group',
+          // we need to have to use as default in order to have subfield defaultValue properties directly for Mongoose
+          defaultValue: {},
+          fields: [defaultValueField],
+        },
+        {
+          name: 'select',
+          type: 'select',
+          defaultValue: 'default',
+          options: [
+            { value: 'option0', label: 'Option 0' },
+            { value: 'option1', label: 'Option 1' },
+            { value: 'default', label: 'Default' },
+          ],
+        },
+        {
+          name: 'point',
+          type: 'point',
+          defaultValue: [10, 20],
+        },
+      ],
+    },
+    {
+      slug: 'relation-a',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
         },
         {
           name: 'richText',
@@ -232,6 +291,100 @@ export default buildConfigWithDefaults({
       versions: {
         drafts: true,
       },
+    },
+    {
+      slug: 'places',
+      fields: [
+        {
+          name: 'country',
+          type: 'text',
+        },
+        {
+          name: 'city',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'fields-persistance',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+          virtual: true,
+        },
+        {
+          name: 'textHooked',
+          type: 'text',
+          virtual: true,
+          hooks: { afterRead: [() => 'hooked'] },
+        },
+        {
+          name: 'array',
+          type: 'array',
+          virtual: true,
+          fields: [],
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              type: 'text',
+              name: 'textWithinRow',
+              virtual: true,
+            },
+          ],
+        },
+        {
+          type: 'collapsible',
+          fields: [
+            {
+              type: 'text',
+              name: 'textWithinCollapsible',
+              virtual: true,
+            },
+          ],
+          label: 'Colllapsible',
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'tab',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'textWithinTabs',
+                  virtual: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      slug: 'custom-ids',
+      fields: [
+        {
+          name: 'id',
+          type: 'text',
+          admin: {
+            readOnly: true,
+          },
+          hooks: {
+            beforeChange: [
+              ({ value, operation }) => {
+                if (operation === 'create') {
+                  return uuid()
+                }
+                return value
+              },
+            ],
+          },
+        },
+      ],
+      versions: { drafts: true },
     },
   ],
   globals: [

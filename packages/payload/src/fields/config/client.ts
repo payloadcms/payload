@@ -1,8 +1,28 @@
-import type { TFunction } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 
-import type { Field, FieldBase } from '../../fields/config/types.js'
+import type {
+  AdminClient,
+  BlocksFieldClient,
+  ClientBlock,
+  ClientField,
+  Field,
+  FieldBase,
+  LabelsClient,
+  RadioFieldClient,
+  RowFieldClient,
+  SelectFieldClient,
+  TabsFieldClient,
+} from '../../fields/config/types.js'
+import type { Payload } from '../../types/index.js'
 
-export type ClientFieldConfig = Omit<Field, 'access' | 'defaultValue' | 'hooks' | 'validate'>
+import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
+import { fieldAffectsData } from '../../fields/config/types.js'
+import { flattenTopLevelFields } from '../../index.js'
+
+// Should not be used - ClientField should be used instead. This is why we don't export ClientField, we don't want people
+// to accidentally use it instead of ClientField and get confused
+
+export { ClientField }
 
 export type ServerOnlyFieldProperties =
   | 'dbName' // can be a function
@@ -11,100 +31,303 @@ export type ServerOnlyFieldProperties =
   | 'filterOptions' // This is a `relationship` and `upload` only property
   | 'label'
   | 'typescriptSchema'
-  | keyof Pick<FieldBase, 'access' | 'custom' | 'defaultValue' | 'hooks' | 'validate'>
+  | 'validate'
+  | keyof Pick<FieldBase, 'access' | 'custom' | 'defaultValue' | 'hooks'>
 
-export type ServerOnlyFieldAdminProperties = keyof Pick<
-  FieldBase['admin'],
-  'components' | 'condition' | 'description'
->
+export type ServerOnlyFieldAdminProperties = keyof Pick<FieldBase['admin'], 'condition'>
 
-export const createClientFieldConfig = ({
+export const createClientField = ({
+  clientField = {} as ClientField,
+  defaultIDType,
   field: incomingField,
-  t,
+  i18n,
 }: {
+  clientField?: ClientField
+  defaultIDType: Payload['config']['db']['defaultIDType']
   field: Field
-  t: TFunction
-}) => {
-  const field = { ...incomingField }
-
+  i18n: I18nClient
+}): ClientField => {
   const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
     'hooks',
     'access',
     'validate',
     'defaultValue',
-    'label',
     'filterOptions', // This is a `relationship` and `upload` only property
     'editor', // This is a `richText` only property
     'custom',
     'typescriptSchema',
     'dbName', // can be a function
     'enumName', // can be a function
+    // the following props are handled separately (see below):
+    // `label`
     // `fields`
     // `blocks`
     // `tabs`
     // `admin`
-    // are all handled separately
   ]
 
+  clientField.admin = clientField.admin || {}
+  // clientField.admin.readOnly = true
+
   serverOnlyFieldProperties.forEach((key) => {
-    if (key in field) {
-      delete field[key]
+    if (key in clientField) {
+      delete clientField[key]
     }
   })
 
-  if ('options' in field && Array.isArray(field.options)) {
-    field.options = field.options.map((option) => {
-      if (typeof option === 'object' && typeof option.label === 'function') {
-        return {
-          label: option.label({ t }),
-          value: option.value,
+  const isHidden = 'hidden' in incomingField && incomingField?.hidden
+  const disabledFromAdmin =
+    incomingField?.admin && 'disabled' in incomingField.admin && incomingField.admin.disabled
+
+  if (fieldAffectsData(clientField) && (isHidden || disabledFromAdmin)) {
+    return null
+  }
+
+  if (
+    'label' in clientField &&
+    'label' in incomingField &&
+    typeof incomingField.label === 'function'
+  ) {
+    clientField.label = incomingField.label({ t: i18n.t })
+  }
+
+  if (!(clientField.admin instanceof Object)) {
+    clientField.admin = {} as AdminClient
+  }
+
+  if ('admin' in incomingField && 'width' in incomingField.admin) {
+    clientField.admin.style = {
+      ...clientField.admin.style,
+      '--field-width': clientField.admin.width,
+      width: undefined, // avoid needlessly adding this to the element's style attribute
+    }
+  } else {
+    if (!(clientField.admin.style instanceof Object)) {
+      clientField.admin.style = {}
+    }
+
+    clientField.admin.style.flex = '1 1 auto'
+  }
+
+  switch (incomingField.type) {
+    case 'array':
+    case 'collapsible':
+    case 'group':
+    case 'row': {
+      const field = clientField as unknown as RowFieldClient
+
+      if (!field.fields) {
+        field.fields = []
+      }
+
+      field.fields = createClientFields({
+        clientFields: field.fields,
+        defaultIDType,
+        disableAddingID: incomingField.type !== 'array',
+        fields: incomingField.fields,
+        i18n,
+      })
+
+      break
+    }
+
+    case 'blocks': {
+      const field = clientField as unknown as BlocksFieldClient
+
+      if (incomingField.blocks?.length) {
+        for (let i = 0; i < incomingField.blocks.length; i++) {
+          const block = incomingField.blocks[i]
+          const clientBlock: ClientBlock = {
+            slug: block.slug,
+            admin: {
+              components: {},
+              custom: block.admin?.custom,
+            },
+            fields: field.blocks?.[i]?.fields || [],
+            imageAltText: block.imageAltText,
+            imageURL: block.imageURL,
+          }
+
+          if (block.labels) {
+            clientBlock.labels = {} as unknown as LabelsClient
+            if (block.labels.singular) {
+              if (typeof block.labels.singular === 'function') {
+                clientBlock.labels.singular = block.labels.singular({ t: i18n.t })
+              } else {
+                clientBlock.labels.singular = block.labels.singular
+              }
+              if (typeof block.labels.plural === 'function') {
+                clientBlock.labels.plural = block.labels.plural({ t: i18n.t })
+              } else {
+                clientBlock.labels.plural = block.labels.plural
+              }
+            }
+          }
+
+          clientBlock.fields = createClientFields({
+            clientFields: clientBlock.fields,
+            defaultIDType,
+            fields: block.fields,
+            i18n,
+          })
+
+          if (!field.blocks) {
+            field.blocks = []
+          }
+
+          field.blocks[i] = clientBlock
         }
       }
 
-      return option
-    })
-  }
+      break
+    }
 
-  if ('fields' in field) {
-    field.fields = createClientFieldConfigs({ fields: field.fields, t })
-  }
+    case 'radio':
 
-  if ('blocks' in field) {
-    field.blocks = field.blocks.map((block) => {
-      const sanitized = { ...block }
-      sanitized.fields = createClientFieldConfigs({ fields: sanitized.fields, t })
-      return sanitized
-    })
-  }
+    case 'select': {
+      const field = clientField as RadioFieldClient | SelectFieldClient
 
-  if ('tabs' in field) {
-    // @ts-expect-error
-    field.tabs = field.tabs.map((tab) => createClientFieldConfig({ field: tab, t }))
-  }
+      if (incomingField.options?.length) {
+        for (let i = 0; i < incomingField.options.length; i++) {
+          const option = incomingField.options[i]
 
-  if ('admin' in field) {
-    field.admin = { ...field.admin }
+          if (typeof option === 'object' && typeof option.label === 'function') {
+            if (!field.options) {
+              field.options = []
+            }
 
-    const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = [
-      'components',
-      'condition',
-      'description',
-    ]
-
-    serverOnlyFieldAdminProperties.forEach((key) => {
-      if (key in field.admin) {
-        delete field.admin[key]
+            field.options[i] = {
+              label: option.label({ t: i18n.t }),
+              value: option.value,
+            }
+          }
+        }
       }
-    })
+
+      break
+    }
+
+    case 'richText': {
+      if (!incomingField?.editor) {
+        throw new MissingEditorProp(incomingField) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+      }
+
+      if (typeof incomingField?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
+
+      break
+    }
+    case 'tabs': {
+      const field = clientField as unknown as TabsFieldClient
+
+      if (incomingField.tabs?.length) {
+        for (let i = 0; i < incomingField.tabs.length; i++) {
+          const tab = incomingField.tabs[i]
+          const clientTab = field.tabs[i]
+
+          serverOnlyFieldProperties.forEach((key) => {
+            if (key in clientTab) {
+              delete clientTab[key]
+            }
+          })
+
+          clientTab.fields = createClientFields({
+            clientFields: clientTab.fields,
+            defaultIDType,
+            disableAddingID: true,
+            fields: tab.fields,
+            i18n,
+          })
+        }
+      }
+
+      break
+    }
+
+    default:
+      break
   }
 
-  return field
+  const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = ['condition']
+
+  if (!clientField.admin) {
+    clientField.admin = {} as AdminClient
+  }
+
+  serverOnlyFieldAdminProperties.forEach((key) => {
+    if (key in clientField.admin) {
+      delete clientField.admin[key]
+    }
+  })
+
+  type FieldWithDescription = {
+    admin: AdminClient
+  } & ClientField
+
+  if (incomingField.admin && 'description' in incomingField.admin) {
+    if (
+      typeof incomingField.admin?.description === 'string' ||
+      typeof incomingField.admin?.description === 'object'
+    ) {
+      ;(clientField as FieldWithDescription).admin.description = incomingField.admin.description
+    } else if (typeof incomingField.admin?.description === 'function') {
+      ;(clientField as FieldWithDescription).admin.description = incomingField.admin?.description({
+        t: i18n.t,
+      })
+    }
+  }
+
+  return clientField
 }
 
-export const createClientFieldConfigs = ({
+export const createClientFields = ({
+  clientFields,
+  defaultIDType,
+  disableAddingID,
   fields,
-  t,
+  i18n,
 }: {
+  clientFields: ClientField[]
+  defaultIDType: Payload['config']['db']['defaultIDType']
+  disableAddingID?: boolean
   fields: Field[]
-  t: TFunction
-}): Field[] => fields.map((field) => createClientFieldConfig({ field, t }))
+  i18n: I18nClient
+}): ClientField[] => {
+  const newClientFields: ClientField[] = []
+
+  for (let i = 0; i < fields.length; i++) {
+    const field = fields[i]
+
+    const newField = createClientField({
+      clientField: clientFields[i],
+      defaultIDType,
+      field,
+      i18n,
+    })
+
+    if (newField) {
+      newClientFields.push(newField)
+    }
+  }
+
+  const hasID = flattenTopLevelFields(fields).some((f) => fieldAffectsData(f) && f.name === 'id')
+
+  if (!disableAddingID && !hasID) {
+    newClientFields.push({
+      name: 'id',
+      type: defaultIDType,
+      admin: {
+        description: 'The unique identifier for this document',
+        disableBulkEdit: true,
+        disabled: true,
+        hidden: true,
+      },
+      hidden: true,
+      label: 'ID',
+      localized: undefined,
+    })
+  }
+
+  return newClientFields
+}

@@ -1,40 +1,32 @@
-import { getTranslation } from '@payloadcms/translations'
+'use client'
 import React from 'react'
 
 import type { RowLabelProps } from './types.js'
-export type { RowLabelProps }
 
-import { RowLabelProvider } from '../RowLabel/Context/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { RowLabelProvider } from './Context/index.js'
+export type { RowLabelProps }
 
 const baseClass = 'row-label'
 
 export const RowLabel: React.FC<RowLabelProps> = (props) => {
-  const { RowLabelComponent, className, i18n, path, rowLabel, rowNumber } = props
-
-  if (RowLabelComponent) {
-    return (
-      <RowLabelProvider path={path} rowNumber={rowNumber}>
-        {RowLabelComponent}
-      </RowLabelProvider>
-    )
-  }
-
-  const label = rowLabel
-    ? typeof rowLabel === 'object'
-      ? getTranslation(rowLabel, i18n)
-      : typeof rowLabel === 'string'
-        ? rowLabel
-        : ''
-    : ''
+  const { className, CustomComponent, label, path, rowNumber } = props
 
   return (
-    <span
-      className={[baseClass, className].filter(Boolean).join(' ')}
-      style={{
-        pointerEvents: 'none',
-      }}
-    >
-      {label}
-    </span>
+    <RowLabelProvider path={path} rowNumber={rowNumber}>
+      <RenderCustomComponent
+        CustomComponent={CustomComponent}
+        Fallback={
+          <span
+            className={[baseClass, className].filter(Boolean).join(' ')}
+            style={{
+              pointerEvents: 'none',
+            }}
+          >
+            {label}
+          </span>
+        }
+      />
+    </RowLabelProvider>
   )
 }

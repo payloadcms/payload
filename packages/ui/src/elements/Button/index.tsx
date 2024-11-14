@@ -1,5 +1,5 @@
 'use client'
-import React, { Fragment, forwardRef, isValidElement } from 'react'
+import React, { forwardRef, Fragment, isValidElement } from 'react'
 
 import type { Props } from './types.js'
 
@@ -9,6 +9,7 @@ import { LinkIcon } from '../../icons/Link/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { SwapIcon } from '../../icons/Swap/index.js'
 import { XIcon } from '../../icons/X/index.js'
+import { Popup } from '../Popup/index.js'
 import { Tooltip } from '../Tooltip/index.js'
 import './index.scss'
 
@@ -50,7 +51,6 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
   const {
     id,
     type = 'button',
-    Link,
     'aria-label': ariaLabel,
     buttonStyle = 'primary',
     children,
@@ -60,10 +60,12 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
     icon,
     iconPosition = 'right',
     iconStyle = 'without-border',
+    Link,
     newTab,
     onClick,
     round,
     size = 'medium',
+    SubMenuPopupContent,
     to,
     tooltip,
     url,
@@ -74,72 +76,120 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
   const classes = [
     baseClass,
     className && className,
-    buttonStyle && `${baseClass}--style-${buttonStyle}`,
     icon && `${baseClass}--icon`,
     iconStyle && `${baseClass}--icon-style-${iconStyle}`,
     icon && !children && `${baseClass}--icon-only`,
-    disabled && `${baseClass}--disabled`,
-    round && `${baseClass}--round`,
     size && `${baseClass}--size-${size}`,
-    iconPosition && `${baseClass}--icon-position-${iconPosition}`,
+    icon && iconPosition && `${baseClass}--icon-position-${iconPosition}`,
     tooltip && `${baseClass}--has-tooltip`,
+    !SubMenuPopupContent && `${baseClass}--withoutPopup`,
   ]
     .filter(Boolean)
     .join(' ')
 
   function handleClick(event) {
     setShowTooltip(false)
-    if (type !== 'submit' && onClick) event.preventDefault()
-    if (onClick) onClick(event)
+    if (type !== 'submit' && onClick) {
+      event.preventDefault()
+    }
+    if (onClick) {
+      onClick(event)
+    }
   }
+
+  const styleClasses = [
+    buttonStyle && `${baseClass}--style-${buttonStyle}`,
+    disabled && `${baseClass}--disabled`,
+    round && `${baseClass}--round`,
+    SubMenuPopupContent ? `${baseClass}--withPopup` : `${baseClass}--withoutPopup`,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   const buttonProps = {
     id,
     type,
     'aria-disabled': disabled,
     'aria-label': ariaLabel,
-    className: classes,
+    className: !SubMenuPopupContent ? [classes, styleClasses].join(' ') : classes,
     disabled,
     onClick: !disabled ? handleClick : undefined,
-    onMouseEnter: tooltip ? () => setShowTooltip(true) : undefined,
-    onMouseLeave: tooltip ? () => setShowTooltip(false) : undefined,
+    onPointerEnter: tooltip ? () => setShowTooltip(true) : undefined,
+    onPointerLeave: tooltip ? () => setShowTooltip(false) : undefined,
     rel: newTab ? 'noopener noreferrer' : undefined,
     target: newTab ? '_blank' : undefined,
   }
 
+  let buttonElement
+  let prefetch
+
   switch (el) {
+    case 'anchor':
+      buttonElement = (
+        <a
+          {...buttonProps}
+          href={!disabled ? url : undefined}
+          ref={ref as React.Ref<HTMLAnchorElement>}
+        >
+          <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
+            {children}
+          </ButtonContents>
+        </a>
+      )
+      break
+
     case 'link':
       if (!Link) {
         console.error('Link is required when using el="link"', children)
         return null
       }
 
-      return (
-        <Link {...buttonProps} href={to || url} to={to || url}>
-          <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
-            {children}
-          </ButtonContents>
-        </Link>
-      )
+      let LinkTag = Link // eslint-disable-line no-case-declarations
 
-    case 'anchor':
-      return (
-        <a {...buttonProps} href={url} ref={ref as React.Ref<HTMLAnchorElement>}>
+      if (disabled) {
+        LinkTag = 'div'
+      } else {
+        prefetch = false
+      }
+
+      buttonElement = (
+        <LinkTag {...buttonProps} href={to || url} prefetch={prefetch} to={to || url}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>
-        </a>
+        </LinkTag>
       )
+      break
 
     default:
       const Tag = el // eslint-disable-line no-case-declarations
 
-      return (
+      buttonElement = (
         <Tag ref={ref} type="submit" {...buttonProps}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>
         </Tag>
       )
+      break
   }
+  if (SubMenuPopupContent) {
+    return (
+      <div className={styleClasses}>
+        {buttonElement}
+        <Popup
+          button={<ChevronIcon />}
+          buttonSize={size}
+          className={disabled ? `${baseClass}--popup-disabled` : ''}
+          horizontalAlign="right"
+          noBackground
+          render={({ close }) => SubMenuPopupContent({ close: () => close() })}
+          size="large"
+          verticalAlign="bottom"
+        />
+      </div>
+    )
+  }
+
+  return buttonElement
 })

@@ -8,7 +8,6 @@ import type { Config, User } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { TestButton } from './TestButton.js'
 import { Disabled } from './collections/Disabled/index.js'
 import {
   createNotUpdateCollectionSlug,
@@ -42,8 +41,12 @@ const openAccess = {
 }
 
 const PublicReadabilityAccess: FieldAccess = ({ req: { user }, siblingData }) => {
-  if (user) return true
-  if (siblingData?.allowPublicReadability) return true
+  if (user) {
+    return true
+  }
+  if (siblingData?.allowPublicReadability) {
+    return true
+  }
 
   return false
 }
@@ -63,6 +66,9 @@ export default buildConfigWithDefaults({
   admin: {
     autoLogin: false,
     user: 'users',
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
   },
   collections: [
     {
@@ -186,6 +192,23 @@ export default buildConfigWithDefaults({
       ],
     },
     {
+      slug: 'relation-restricted',
+      access: {
+        read: () => true,
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'post',
+          type: 'relationship',
+          relationTo: slug,
+        },
+      ],
+    },
+    {
       slug: fullyRestrictedSlug,
       access: {
         create: () => false,
@@ -259,7 +282,9 @@ export default buildConfigWithDefaults({
       slug: restrictedVersionsSlug,
       access: {
         read: ({ req: { user } }) => {
-          if (user) return true
+          if (user) {
+            return true
+          }
 
           return {
             hidden: {
@@ -268,7 +293,9 @@ export default buildConfigWithDefaults({
           }
         },
         readVersions: ({ req: { user } }) => {
-          if (user) return true
+          if (user) {
+            return true
+          }
 
           return {
             'version.hidden': {
@@ -426,7 +453,9 @@ export default buildConfigWithDefaults({
       slug: hiddenAccessSlug,
       access: {
         read: ({ req: { user } }) => {
-          if (user) return true
+          if (user) {
+            return true
+          }
 
           return {
             hidden: {
@@ -452,7 +481,9 @@ export default buildConfigWithDefaults({
       slug: hiddenAccessCountSlug,
       access: {
         read: ({ req: { user } }) => {
-          if (user) return true
+          if (user) {
+            return true
+          }
 
           return {
             hidden: {
@@ -482,7 +513,7 @@ export default buildConfigWithDefaults({
       admin: {
         components: {
           elements: {
-            SaveButton: TestButton,
+            SaveButton: '/TestButton.js#TestButton',
           },
         },
       },

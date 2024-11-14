@@ -1,7 +1,7 @@
 ---
 title: SEO Plugin
 label: SEO
-order: 20
+order: 30
 desc: Manage SEO metadata from your Payload admin
 keywords: plugins, seo, meta, search, engine, ranking, google
 ---
@@ -37,7 +37,7 @@ To help you visualize what your page might look like in a search engine, a previ
 Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
 
 ```bash
-  pnpm add @payloadcms/plugin-seo
+  pnpm add @payloadcms/plugin-seo@beta
 ```
 
 ## Basic Usage
@@ -89,12 +89,23 @@ An array of global slugs to enable SEO. Enabled globals receive a `meta` field w
 
 ##### `fields`
 
-An array of fields that allows you to inject your own custom fields onto the `meta` field group. The following fields are provided by default:
+A function that takes in the default fields via an object and expects an array of fields in return. You can use this to modify existing fields or add new ones.
 
-- `title`: text
-- `description`: textarea
-- `image`: upload (if an `uploadsCollection` is provided)
-- `preview`: ui
+```ts
+// payload.config.ts
+{
+  // ...
+  seoPlugin({
+    fields: ({ defaultFields }) => [
+      ...defaultFields,
+      {
+        name: 'customField',
+        type: 'text',
+      }
+    ]
+  })
+}
+```
 
 ##### `uploadsCollection`
 
@@ -119,10 +130,32 @@ A function that allows you to return any meta title, including from document's c
 {
   // ...
   seoPlugin({
-    generateTitle: ({ ...docInfo, doc, locale }) => `Website.com — ${doc?.title}`,
+    generateTitle: ({ doc }) => `Website.com — ${doc?.title}`,
   })
 }
 ```
+
+All "generate" functions receive the following arguments:
+
+| Argument | Description |
+| --- | --- |
+| **`collectionConfig`** | The configuration of the collection. |
+| **`collectionSlug`** | The slug of the collection. |
+| **`doc`** | The data of the current document. |
+| **`docPermissions`** | The permissions of the document. |
+| **`globalConfig`** | The configuration of the global. |
+| **`globalSlug`** | The slug of the global. |
+| **`hasPublishPermission`** | Whether the user has permission to publish the document. |
+| **`hasSavePermission`** | Whether the user has permission to save the document. |
+| **`id`** | The ID of the document. |
+| **`initialData`** | The initial data of the document. |
+| **`initialState`** | The initial state of the document. |
+| **`locale`** | The locale of the document. |
+| **`preferencesKey`**  | The preferences key of the document. |
+| **`publishedDoc`** | The published document. |
+| **`req`** | The Payload request object containing `user`, `payload`, `i18n`, etc. |
+| **`title`** | The title of the document. |
+| **`versionsCount`** | The number of versions of the document. |
 
 ##### `generateDescription`
 
@@ -133,10 +166,12 @@ A function that allows you to return any meta description, including from docume
 {
   // ...
   seoPlugin({
-    generateDescription: ({ ...docInfo, doc, locale }) => doc?.excerpt,
+    generateDescription: ({ doc }) => doc?.excerpt,
   })
 }
 ```
+
+For a full list of arguments, see the [`generateTitle`](#generateTitle) function.
 
 ##### `generateImage`
 
@@ -147,10 +182,12 @@ A function that allows you to return any meta image, including from document's c
 {
   // ...
   seoPlugin({
-    generateImage: ({ ...docInfo, doc, locale }) => doc?.featuredImage,
+    generateImage: ({ doc }) => doc?.featuredImage,
   })
 }
 ```
+
+For a full list of arguments, see the [`generateTitle`](#generateTitle) function.
 
 ##### `generateURL`
 
@@ -161,11 +198,13 @@ A function called by the search preview component to display the actual URL of y
 {
   // ...
   seoPlugin({
-    generateURL: ({ ...docInfo, doc, locale }) =>
-      `https://yoursite.com/${collection?.slug}/${doc?.slug}`,
+    generateURL: ({ doc, collectionSlug }) =>
+      `https://yoursite.com/${collectionSlug}/${doc?.slug}`,
   })
 }
 ```
+
+For a full list of arguments, see the [`generateTitle`](#generateTitle) function.
 
 #### `interfaceName`
 
@@ -179,25 +218,6 @@ Rename the meta group interface name that is generated for TypeScript and GraphQ
     interfaceName: 'customInterfaceNameSEO',
   })
 }
-```
-
-#### `fieldOverrides`
-
-Pass any valid field props to the base fields: Title, Description or Image.
-
-```ts
-// payload.config.ts
-seoPlugin({
-  // ...
-  fieldOverrides: {
-    title: {
-      required: true,
-    },
-    description: {
-      localized: true,
-    },
-  },
-})
 ```
 
 ## Direct use of fields
@@ -247,6 +267,10 @@ OverviewField({
   imagePath: 'meta.image',
 })
 ```
+
+<Banner type="info">
+Tip: You can override the length rules by changing the minLength and maxLength props on the fields. In the case of the OverviewField you can use `titleOverrides` and `descriptionOverrides` to override the length rules.
+</Banner>
 
 ## TypeScript
 

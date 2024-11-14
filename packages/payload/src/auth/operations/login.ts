@@ -1,5 +1,3 @@
-import jwt from 'jsonwebtoken'
-
 import type {
   AuthOperationsFromCollectionSlug,
   Collection,
@@ -12,12 +10,11 @@ import type { User } from '../types.js'
 import { buildAfterOperation } from '../../collections/operations/utils.js'
 import { AuthenticationError, LockedAuth, ValidationError } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
-import { commitTransaction } from '../../utilities/commitTransaction.js'
-import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import isLocked from '../isLocked.js'
+import { jwtSign } from '../jwt.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js'
 import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
@@ -43,8 +40,6 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
   let args = incomingArgs
 
   try {
-    const shouldCommit = await initTransaction(args.req)
-
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
@@ -99,7 +94,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     if (!canLoginWithEmail && !sanitizedUsername) {
       throw new ValidationError({
         collection: collectionConfig.slug,
-        errors: [{ field: 'username', message: req.i18n.t('validation:required') }],
+        errors: [{ message: req.i18n.t('validation:required'), path: 'username' }],
       })
     }
 
@@ -107,7 +102,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     if (!canLoginWithUsername && !sanitizedEmail) {
       throw new ValidationError({
         collection: collectionConfig.slug,
-        errors: [{ field: 'email', message: req.i18n.t('validation:required') }],
+        errors: [{ message: req.i18n.t('validation:required'), path: 'email' }],
       })
     }
 
@@ -116,8 +111,8 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       throw new ValidationError({
         collection: collectionConfig.slug,
         errors: [
-          { field: 'email', message: req.i18n.t('validation:required') },
-          { field: 'username', message: req.i18n.t('validation:required') },
+          { message: req.i18n.t('validation:required'), path: 'email' },
+          { message: req.i18n.t('validation:required'), path: 'username' },
         ],
       })
     }
@@ -126,7 +121,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     if (typeof password !== 'string' || password.trim() === '') {
       throw new ValidationError({
         collection: collectionConfig.slug,
-        errors: [{ field: 'password', message: req.i18n.t('validation:required') }],
+        errors: [{ message: req.i18n.t('validation:required'), path: 'password' }],
       })
     }
 
@@ -182,7 +177,9 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       throw new AuthenticationError(req.t, Boolean(canLoginWithUsername && sanitizedUsername))
     }
 
-    if (user && isLocked(new Date(user.lockUntil).getTime())) {
+    user.collection = collectionConfig.slug
+
+    if (isLocked(new Date(user.lockUntil).getTime())) {
       throw new LockedAuth(req.t)
     }
 
@@ -201,8 +198,6 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
           req,
         })
       }
-
-      if (shouldCommit) await commitTransaction(req)
 
       throw new AuthenticationError(req.t)
     }
@@ -238,8 +233,10 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
         })) || user
     }, Promise.resolve())
 
-    const token = jwt.sign(fieldsToSign, secret, {
-      expiresIn: collectionConfig.auth.tokenExpiration,
+    const { exp, token } = await jwtSign({
+      fieldsToSign,
+      secret,
+      tokenExpiration: collectionConfig.auth.tokenExpiration,
     })
 
     req.user = user
@@ -312,7 +309,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     }, Promise.resolve())
 
     let result: { user: DataFromCollectionSlug<TSlug> } & Result = {
-      exp: (jwt.decode(token) as jwt.JwtPayload).exp,
+      exp,
       token,
       user,
     }
@@ -331,8 +328,6 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     // /////////////////////////////////////
     // Return results
     // /////////////////////////////////////
-
-    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

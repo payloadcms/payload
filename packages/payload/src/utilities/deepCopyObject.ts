@@ -54,14 +54,20 @@ function cloneArray<T>(a: T, fn): T {
 }
 
 export const deepCopyObject = <T>(o: T): T => {
-  if (typeof o !== 'object' || o === null) return o
-  if (Array.isArray(o)) return cloneArray(o, deepCopyObject)
+  if (typeof o !== 'object' || o === null) {
+    return o
+  }
+  if (Array.isArray(o)) {
+    return cloneArray(o, deepCopyObject)
+  }
   if (o.constructor !== Object && (handler = constructorHandlers.get(o.constructor))) {
     return handler(o, deepCopyObject)
   }
   const o2 = {}
   for (const k in o) {
-    if (Object.hasOwnProperty.call(o, k) === false) continue
+    if (Object.hasOwnProperty.call(o, k) === false) {
+      continue
+    }
     const cur = o[k]
     if (typeof cur !== 'object' || cur === null) {
       o2[k as string] = cur
@@ -100,11 +106,43 @@ export function deepCopyObjectSimple<T extends JsonValue>(value: T): T {
       typeof e !== 'object' || e === null ? e : deepCopyObjectSimple(e),
     ) as T
   } else {
-    if (value instanceof Date) return new Date(value) as unknown as T
+    if (value instanceof Date) {
+      return new Date(value) as unknown as T
+    }
     const ret: { [key: string]: T } = {}
     for (const k in value) {
       const v = value[k]
       ret[k] = typeof v !== 'object' || v === null ? v : (deepCopyObjectSimple(v as T) as any)
+    }
+    return ret as unknown as T
+  }
+}
+
+export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(value: T): T {
+  if (
+    typeof value === 'object' &&
+    value !== null &&
+    '$$typeof' in value &&
+    typeof value.$$typeof === 'symbol'
+  ) {
+    return undefined
+  } else if (typeof value !== 'object' || value === null) {
+    return value
+  } else if (Array.isArray(value)) {
+    return value.map((e) =>
+      typeof e !== 'object' || e === null ? e : deepCopyObjectSimpleWithoutReactComponents(e),
+    ) as T
+  } else {
+    if (value instanceof Date) {
+      return new Date(value) as unknown as T
+    }
+    const ret: { [key: string]: T } = {}
+    for (const k in value) {
+      const v = value[k]
+      ret[k] =
+        typeof v !== 'object' || v === null
+          ? v
+          : (deepCopyObjectSimpleWithoutReactComponents(v as T) as any)
     }
     return ret as unknown as T
   }
@@ -115,10 +153,17 @@ export function deepCopyObjectSimple<T extends JsonValue>(value: T): T {
  * Can be used if correctness is more important than speed. Supports circular dependencies
  */
 export function deepCopyObjectComplex<T>(object: T, cache: WeakMap<any, any> = new WeakMap()): T {
-  if (object === null) return null
+  if (object === null) {
+    return null
+  }
 
   if (cache.has(object)) {
     return cache.get(object)
+  }
+
+  // Handle File
+  if (object instanceof File) {
+    return object as unknown as T
   }
 
   // Handle Date

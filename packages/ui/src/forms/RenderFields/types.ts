@@ -1,10 +1,8 @@
-import type { FieldPermissions, Operation } from 'payload'
-
-import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
+import type { ClientField, FieldPermissions } from 'payload'
 
 export type Props = {
-  className?: string
-  fieldMap: FieldMap
+  readonly className?: string
+  readonly fields: ClientField[]
   /**
    * Controls the rendering behavior of the fields, i.e. defers rendering until they intersect with the viewport using the Intersection Observer API.
    *
@@ -12,14 +10,16 @@ export type Props = {
    *
    * If a number is provided, will immediately render fields _up to that index_.
    */
-  forceRender?: boolean | number
-  indexPath?: string
-  margins?: 'small' | false
-  operation?: Operation
-  path: string
-  permissions?: {
-    [fieldName: string]: FieldPermissions
-  }
-  readOnly: boolean
-  schemaPath: string
+  readonly forceRender?: boolean
+  readonly margins?: 'small' | false
+  readonly parentIndexPath: string
+  readonly parentPath: string
+  readonly parentSchemaPath: string
+  readonly permissions:
+    | {
+        [fieldName: string]: FieldPermissions
+      }
+    | FieldPermissions
+    | null
+  readonly readOnly?: boolean
 }

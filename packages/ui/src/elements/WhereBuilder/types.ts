@@ -1,21 +1,19 @@
-import type { Field, Operator, SanitizedCollectionConfig, Where } from 'payload'
-
-import type { FieldMap } from '../../utilities/buildComponentMap.js'
+import type { ClientField, Operator, SanitizedCollectionConfig, Where } from 'payload'
 
 export type WhereBuilderProps = {
-  collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']
-  collectionSlug: SanitizedCollectionConfig['slug']
-  fieldMap?: FieldMap
+  readonly collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']
+  readonly collectionSlug: SanitizedCollectionConfig['slug']
+  readonly fields?: ClientField[]
+  readonly renderedFilters?: Map<string, React.ReactNode>
 }
 
 export type FieldCondition = {
-  component?: string
+  field: ClientField
   label: string
   operators: {
     label: string
     value: Operator
   }[]
-  props: Field
   value: string
 }
 

@@ -1,12 +1,25 @@
+import type { ImportMap, PayloadComponent } from 'payload'
+
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
 export const OGImage: React.FC<{
-  Icon: React.ComponentType<any>
   description?: string
+  Fallback: React.ComponentType
   fontFamily?: string
+  Icon: PayloadComponent
+  importMap: ImportMap
   leader?: string
   title?: string
-}> = ({ Icon, description, fontFamily = 'Arial, sans-serif', leader, title }) => {
+}> = ({
+  description,
+  Fallback,
+  fontFamily = 'Arial, sans-serif',
+  Icon,
+  importMap,
+  leader,
+  title,
+}) => {
   return (
     <div
       style={{
@@ -42,14 +55,14 @@ export const OGImage: React.FC<{
         )}
         <p
           style={{
-            WebkitBoxOrient: 'vertical',
-            WebkitLineClamp: 2,
             display: '-webkit-box',
             fontSize: 90,
             lineHeight: 1,
             marginBottom: 0,
             marginTop: 0,
             textOverflow: 'ellipsis',
+            WebkitBoxOrient: 'vertical',
+            WebkitLineClamp: 2,
           }}
         >
           {title}
@@ -57,8 +70,6 @@ export const OGImage: React.FC<{
         {description && (
           <p
             style={{
-              WebkitBoxOrient: 'vertical',
-              WebkitLineClamp: 2,
               display: '-webkit-box',
               flexGrow: 1,
               fontSize: 30,
@@ -66,6 +77,8 @@ export const OGImage: React.FC<{
               marginBottom: 0,
               marginTop: 40,
               textOverflow: 'ellipsis',
+              WebkitBoxOrient: 'vertical',
+              WebkitLineClamp: 2,
             }}
           >
             {description}
@@ -82,7 +95,14 @@ export const OGImage: React.FC<{
           width: '38px',
         }}
       >
-        <Icon fill="white" />
+        <RenderServerComponent
+          clientProps={{
+            fill: 'white',
+          }}
+          Component={Icon}
+          Fallback={Fallback}
+          importMap={importMap}
+        />
       </div>
     </div>
   )

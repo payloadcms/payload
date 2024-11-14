@@ -69,11 +69,7 @@ describe('lexicalBlocks', () => {
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
-    await reInitializeDB({
-      serverURL,
-      snapshotKey: 'fieldsLexicalBlocksTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
-    })
+
     await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
@@ -84,7 +80,7 @@ describe('lexicalBlocks', () => {
     })*/
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsLexicalBlocksTest',
+      snapshotKey: 'fieldsTest',
       uploadsDir: [
         path.resolve(dirname, './collections/Upload/uploads'),
         path.resolve(dirname, './collections/Upload2/uploads2'),
@@ -101,9 +97,11 @@ describe('lexicalBlocks', () => {
   describe('nested lexical editor in block', () => {
     test('should type and save typed text', async () => {
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
+      // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+      await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
 
       const lexicalBlock = richTextField.locator('.lexical-block').nth(2) // third: "Block Node, with RichText Field, with Relationship Node"
       await lexicalBlock.scrollIntoViewIfNeeded()
@@ -157,9 +155,11 @@ describe('lexicalBlocks', () => {
     test('should be able to bold text using floating select toolbar', async () => {
       // Reproduces https://github.com/payloadcms/payload/issues/4025
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
+      // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+      await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
 
       const lexicalBlock = richTextField.locator('.lexical-block').nth(2) // third: "Block Node, with RichText Field, with Relationship Node"
       await lexicalBlock.scrollIntoViewIfNeeded()
@@ -239,9 +239,11 @@ describe('lexicalBlocks', () => {
     test('should be able to select text, make it an external link and receive the updated link value', async () => {
       // Reproduces https://github.com/payloadcms/payload/issues/4025
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
+      // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+      await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
 
       // Find span in contentEditable with text "Some text below relationship node"
       const spanInEditor = richTextField.locator('span').getByText('Upload Node:').first()
@@ -272,7 +274,8 @@ describe('lexicalBlocks', () => {
 
       const urlField = drawerContent.locator('input#field-url').first()
       await expect(urlField).toBeVisible()
-      // Fill with https://www.payloadcms.com
+      await expect(urlField).toHaveValue('https://')
+      await wait(1000)
       await urlField.fill('https://www.payloadcms.com')
       await expect(urlField).toHaveValue('https://www.payloadcms.com')
       await drawerContent.locator('.form-submit button').click({ delay: 100 })
@@ -323,9 +326,11 @@ describe('lexicalBlocks', () => {
     test('ensure slash menu is not hidden behind other blocks', async () => {
       // This test makes sure there are no z-index issues here
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
+      // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+      await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
 
       const lexicalBlock = richTextField.locator('.lexical-block').nth(2) // third: "Block Node, with RichText Field, with Relationship Node"
       await lexicalBlock.scrollIntoViewIfNeeded()
@@ -396,9 +401,11 @@ describe('lexicalBlocks', () => {
     })
     test('should allow adding new blocks to a sub-blocks field, part of a parent lexical blocks field', async () => {
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
+      // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+      await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
 
       const lexicalBlock = richTextField.locator('.lexical-block').nth(3) // third: "Block Node, with Blocks Field, With RichText Field, With Relationship Node"
       await lexicalBlock.scrollIntoViewIfNeeded()
@@ -471,9 +478,11 @@ describe('lexicalBlocks', () => {
     // Big test which tests a bunch of things: Creation of blocks via slash commands, creation of deeply nested sub-lexical-block fields via slash commands, properly populated deeply nested fields within those
     test('ensure creation of a lexical, lexical-field-block, which contains another lexical, lexical-and-upload-field-block, works and that the sub-upload field is properly populated', async () => {
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
+      // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+      await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
 
       const lastParagraph = richTextField.locator('p').last()
       await lastParagraph.scrollIntoViewIfNeeded()
@@ -534,7 +543,7 @@ describe('lexicalBlocks', () => {
       // Upload something
       await expect(async () => {
         const chooseExistingUploadButton = newSubLexicalAndUploadBlock
-          .locator('.upload__toggler.list-drawer__toggler')
+          .locator('.upload__listToggler')
           .first()
         await wait(300)
         await expect(chooseExistingUploadButton).toBeVisible()
@@ -554,7 +563,9 @@ describe('lexicalBlocks', () => {
         await expect(uploadListDrawer).toBeHidden()
         // Check if the upload is there
         await expect(
-          newSubLexicalAndUploadBlock.locator('.field-type.upload .file-meta__url a'),
+          newSubLexicalAndUploadBlock.locator(
+            '.field-type.upload .upload-relationship-details__filename a',
+          ),
         ).toHaveText('payload.jpg')
       }).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
@@ -567,7 +578,9 @@ describe('lexicalBlocks', () => {
       await wait(300)
 
       await expect(
-        newSubLexicalAndUploadBlock.locator('.field-type.upload .file-meta__url a'),
+        newSubLexicalAndUploadBlock.locator(
+          '.field-type.upload .upload-relationship-details__filename a',
+        ),
       ).toHaveText('payload.jpg')
       await expect(paragraphInSubEditor).toHaveText('Some subText')
       await wait(300)
@@ -578,14 +591,18 @@ describe('lexicalBlocks', () => {
       await newSubLexicalAndUploadBlock.scrollIntoViewIfNeeded()
       await expect(newSubLexicalAndUploadBlock).toBeVisible()
       await newSubLexicalAndUploadBlock
-        .locator('.field-type.upload .file-meta__url a')
+        .locator('.field-type.upload .upload-relationship-details__filename a')
         .scrollIntoViewIfNeeded()
       await expect(
-        newSubLexicalAndUploadBlock.locator('.field-type.upload .file-meta__url a'),
+        newSubLexicalAndUploadBlock.locator(
+          '.field-type.upload .upload-relationship-details__filename a',
+        ),
       ).toBeVisible()
 
       await expect(
-        newSubLexicalAndUploadBlock.locator('.field-type.upload .file-meta__url a'),
+        newSubLexicalAndUploadBlock.locator(
+          '.field-type.upload .upload-relationship-details__filename a',
+        ),
       ).toHaveText('payload.jpg')
       await expect(paragraphInSubEditor).toHaveText('Some subText')
 
@@ -682,9 +699,12 @@ describe('lexicalBlocks', () => {
       // This test ensures that https://github.com/payloadcms/payload/issues/3911 does not happen again
 
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
+      // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+      await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+      await wait(1000) // Wait for form state requests to be done, to reduce flakes
 
       const radioButtonBlock1 = richTextField.locator('.lexical-block').nth(5)
 
@@ -754,9 +774,11 @@ describe('lexicalBlocks', () => {
       // 3. In the issue, after writing one character, the cursor focuses back into the parent editor
 
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
+      // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+      await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
 
       /**
        * 1. Focus parent editor
@@ -794,9 +816,11 @@ describe('lexicalBlocks', () => {
     })
 
     const shouldRespectRowRemovalTest = async () => {
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
+      await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+      await wait(1000) // Wait for form state requests to be done, to reduce flakes
 
       const conditionalArrayBlock = richTextField.locator('.lexical-block').nth(7)
 
@@ -851,9 +875,12 @@ describe('lexicalBlocks', () => {
       await navigateToLexicalFields()
 
       // Wait for lexical to be loaded up fully
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
+      // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+      await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+      await wait(1000) // Wait for form state requests to be done, to reduce flakes
 
       const conditionalArrayBlock = richTextField.locator('.lexical-block').nth(7)
 
@@ -862,7 +889,8 @@ describe('lexicalBlocks', () => {
 
       // navigate to list view
       await page.locator('.step-nav a').nth(1).click()
-      await page.waitForURL('**/lexical-fields?limit=10')
+
+      await page.waitForURL(/^.*\/lexical-fields(\?.*)?$/)
 
       // Click on lexical document in list view (navigateToLexicalFields is client-side navigation which is what we need to reproduce the issue here)
       await navigateToLexicalFields(false)
@@ -873,9 +901,11 @@ describe('lexicalBlocks', () => {
     test('ensure pre-seeded uploads node is visible', async () => {
       // Due to issues with the relationships condition, we had issues with that not being visible. Checking for visibility ensures there is no breakage there again
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
+      // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+      await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
 
       const uploadBlock = richTextField.locator('.ContentEditable__root > div').first() // Check for the first div, as we wanna make sure it's the first div in the editor (1. node is a paragraph, second node is a div which is the upload node)
       await uploadBlock.scrollIntoViewIfNeeded()
@@ -888,10 +918,12 @@ describe('lexicalBlocks', () => {
 
     test('should respect required error state in deeply nested text field', async () => {
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
-
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
+      // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+      await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+
       await wait(300)
 
       const conditionalArrayBlock = richTextField.locator('.lexical-block').nth(7)
@@ -937,10 +969,12 @@ describe('lexicalBlocks', () => {
     // Reproduces https://github.com/payloadcms/payload/issues/6631
     test('ensure tabs field within lexical block correctly loads and saves data', async () => {
       await navigateToLexicalFields()
-      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      const richTextField = page.locator('.rich-text-lexical').nth(2) // second
 
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
+      // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+      await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
 
       const tabsBlock = richTextField.locator('.lexical-block').nth(8)
       await wait(300)
@@ -1007,6 +1041,28 @@ describe('lexicalBlocks', () => {
       }).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
+    })
+
+    test('dynamic height of code editor is correctly calculated', async () => {
+      await navigateToLexicalFields()
+
+      const codeEditor = page.locator('.code-editor')
+
+      await codeEditor.scrollIntoViewIfNeeded()
+      await expect(codeEditor).toBeVisible()
+
+      const height = (await codeEditor.boundingBox()).height
+
+      await expect(() => {
+        expect(height).toBe(56)
+      }).toPass()
+      await codeEditor.click()
+      await page.keyboard.press('Enter')
+
+      const height2 = (await codeEditor.boundingBox()).height
+      await expect(() => {
+        expect(height2).toBe(74)
+      }).toPass()
     })
   })
 })

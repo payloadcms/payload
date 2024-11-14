@@ -1,11 +1,10 @@
 'use client'
-import type { FieldPermissions, Labels, Row } from 'payload'
+import type { ClientBlock, ClientField, FieldPermissions, Labels, Row } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { UseDraggableSortableReturn } from '../../elements/DraggableSortable/useDraggableSortable/types.js'
-import type { ReducedBlock } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
@@ -18,18 +17,19 @@ import { SectionTitle } from './SectionTitle/index.js'
 
 const baseClass = 'blocks-field'
 
-type BlockFieldProps = {
-  addRow: (rowIndex: number, blockType: string) => void
-  block: ReducedBlock
-  blocks: ReducedBlock[]
+type BlocksFieldProps = {
+  addRow: (rowIndex: number, blockType: string) => Promise<void> | void
+  block: ClientBlock
+  blocks: ClientBlock[]
   duplicateRow: (rowIndex: number) => void
   errorCount: number
-  forceRender?: boolean
+  fields: ClientField[]
   hasMaxRows?: boolean
-  indexPath: string
   isSortable?: boolean
+  Label?: React.ReactNode
   labels: Labels
   moveRow: (fromIndex: number, toIndex: number) => void
+  parentPath: string
   path: string
   permissions: FieldPermissions
   readOnly: boolean
@@ -41,20 +41,22 @@ type BlockFieldProps = {
   setCollapse: (id: string, collapsed: boolean) => void
 } & UseDraggableSortableReturn
 
-export const BlockRow: React.FC<BlockFieldProps> = ({
+export const BlockRow: React.FC<BlocksFieldProps> = ({
   addRow,
   attributes,
   block,
   blocks,
   duplicateRow,
   errorCount,
-  forceRender,
+  fields,
   hasMaxRows,
   isSortable,
+  Label,
   labels,
   listeners,
   moveRow,
-  path: parentPath,
+  parentPath,
+  path,
   permissions,
   readOnly,
   removeRow,
@@ -66,7 +68,6 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
   setNodeRef,
   transform,
 }) => {
-  const path = `${parentPath}.${rowIndex}`
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
 
@@ -79,11 +80,9 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
     .filter(Boolean)
     .join(' ')
 
-  const LabelComponent = block?.LabelComponent
-
   return (
     <div
-      id={`${parentPath.split('.').join('-')}-row-${rowIndex}`}
+      id={`${parentPath?.split('.').join('-')}-row-${rowIndex}`}
       key={`${parentPath}-row-${rowIndex}`}
       ref={setNodeRef}
       style={{
@@ -95,10 +94,10 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
           !readOnly ? (
             <RowActions
               addRow={addRow}
-              blockType={row.blockType}
               blocks={blocks}
+              blockType={row.blockType}
               duplicateRow={duplicateRow}
-              fieldMap={block.fieldMap}
+              fields={block.fields}
               hasMaxRows={hasMaxRows}
               isSortable={isSortable}
               labels={labels}
@@ -121,9 +120,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
             : undefined
         }
         header={
-          LabelComponent ? (
-            <LabelComponent blockKind={'block'} formData={row} />
-          ) : (
+          Label || (
             <div className={`${baseClass}__block-header`}>
               <span className={`${baseClass}__block-number`}>
                 {String(rowIndex + 1).padStart(2, '0')}
@@ -145,13 +142,13 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
       >
         <RenderFields
           className={`${baseClass}__fields`}
-          fieldMap={block.fieldMap}
-          forceRender={forceRender}
+          fields={fields}
           margins="small"
-          path={path}
+          parentIndexPath=""
+          parentPath={path}
+          parentSchemaPath={schemaPath}
           permissions={permissions?.blocks?.[block.slug]?.fields}
           readOnly={readOnly}
-          schemaPath={`${schemaPath}.${block.slug}`}
         />
       </Collapsible>
     </div>

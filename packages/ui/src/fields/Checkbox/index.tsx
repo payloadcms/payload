@@ -1,58 +1,58 @@
 'use client'
-import type { ClientValidate } from 'payload'
+import type {
+  CheckboxFieldClientComponent,
+  CheckboxFieldClientProps,
+  CheckboxFieldValidation,
+} from 'payload'
 
 import React, { useCallback } from 'react'
 
 import type { CheckboxInputProps } from './Input.js'
-import type { CheckboxFieldProps } from './types.js'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { generateFieldID } from '../../utilities/generateFieldID.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
 import { fieldBaseClass } from '../shared/index.js'
-import { CheckboxInput } from './Input.js'
 import './index.scss'
+import { CheckboxInput } from './Input.js'
 
 const baseClass = 'checkbox'
 
-export { CheckboxFieldProps, CheckboxInput, type CheckboxInputProps }
+export { CheckboxFieldClientProps, CheckboxInput, type CheckboxInputProps }
 
-const _CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
+const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
   const {
     id,
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
     checked: checkedFromProps,
-    className,
-    descriptionProps,
     disableFormData,
-    errorProps,
-    label,
-    labelProps,
+    field: {
+      name,
+      admin: {
+        className,
+        description,
+        style,
+        width,
+      } = {} as CheckboxFieldClientProps['field']['admin'],
+      label,
+      required,
+    } = {} as CheckboxFieldClientProps['field'],
     onChange: onChangeFromProps,
     partialChecked,
-    path: pathFromProps,
-    readOnly: readOnlyFromProps,
-    required,
-    style,
+    path,
+    readOnly,
     validate,
-    width,
   } = props
 
   const { uuid } = useForm()
 
   const editDepth = useEditDepth()
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate: CheckboxFieldValidation = useCallback(
     (value, options) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })
@@ -61,22 +61,25 @@ const _CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
     [validate, required],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    setValue,
+    showError,
+    value,
+  } = useField({
     disableFormData,
-    path: pathFromContext ?? pathFromProps ?? name,
+    path,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
-
   const onToggle = useCallback(() => {
-    if (!disabled) {
+    if (!readOnly) {
       setValue(!value)
-      if (typeof onChangeFromProps === 'function') onChangeFromProps(!value)
+      if (typeof onChangeFromProps === 'function') {
+        onChangeFromProps(!value)
+      }
     }
-  }, [onChangeFromProps, disabled, setValue, value])
+  }, [onChangeFromProps, readOnly, setValue, value])
 
   const checked = checkedFromProps || Boolean(value)
 
@@ -90,7 +93,7 @@ const _CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
         showError && 'error',
         className,
         value && `${baseClass}--checked`,
-        disabled && `${baseClass}--read-only`,
+        readOnly && `${baseClass}--read-only`,
       ]
         .filter(Boolean)
         .join(' ')}
@@ -99,29 +102,30 @@ const _CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} alignCaret="left" />
+      <RenderCustomComponent
+        CustomComponent={Error}
+        Fallback={<FieldError path={path} showError={showError} />}
+      />
       <CheckboxInput
         AfterInput={AfterInput}
         BeforeInput={BeforeInput}
-        CustomLabel={CustomLabel}
         checked={checked}
         id={fieldID}
         inputRef={null}
+        Label={Label}
         label={label}
-        labelProps={labelProps}
         name={path}
         onToggle={onToggle}
         partialChecked={partialChecked}
-        readOnly={disabled}
+        readOnly={readOnly}
         required={required}
       />
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <RenderCustomComponent
+        CustomComponent={Description}
+        Fallback={<FieldDescription description={description} path={path} />}
+      />
     </div>
   )
 }
 
-export const CheckboxField = withCondition(_CheckboxField)
+export const CheckboxField = withCondition(CheckboxFieldComponent)

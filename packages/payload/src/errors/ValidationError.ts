@@ -8,13 +8,24 @@ import { APIError } from './APIError.js'
 // This gets dynamically reassigned during compilation
 export let ValidationErrorName = 'ValidationError'
 
+export type ValidationFieldError = {
+  // The error message to display for this field
+  message: string
+  path: string
+}
+
 export class ValidationError extends APIError<{
   collection?: string
-  errors: { field: string; message: string }[]
+  errors: ValidationFieldError[]
   global?: string
 }> {
   constructor(
-    results: { collection?: string; errors: { field: string; message: string }[]; global?: string },
+    results: {
+      collection?: string
+      errors: ValidationFieldError[]
+      global?: string
+      id?: number | string
+    },
     t?: TFunction,
   ) {
     const message = t
@@ -24,7 +35,7 @@ export class ValidationError extends APIError<{
         : en.translations.error.followingFieldsInvalid_other
 
     super(
-      `${message} ${results.errors.map((f) => f.field).join(', ')}`,
+      `${message} ${results.errors.map((f) => f.path).join(', ')}`,
       httpStatus.BAD_REQUEST,
       results,
     )

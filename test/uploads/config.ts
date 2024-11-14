@@ -13,10 +13,14 @@ import { Uploads2 } from './collections/Upload2/index.js'
 import {
   animatedTypeMedia,
   audioSlug,
+  customFileNameMediaSlug,
   enlargeSlug,
   focalNoSizesSlug,
   mediaSlug,
+  mediaWithoutRelationPreviewSlug,
+  mediaWithRelationPreviewSlug,
   reduceSlug,
+  relationPreviewSlug,
   relationSlug,
   unstoredMediaSlug,
   versionSlug,
@@ -25,6 +29,11 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       slug: relationSlug,
@@ -87,6 +96,36 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: 'filename-compound-index',
+      fields: [
+        {
+          name: 'alt',
+          type: 'text',
+          admin: {
+            description: 'Alt text to be used for compound index',
+          },
+        },
+      ],
+      upload: {
+        filenameCompoundIndex: ['filename', 'alt'],
+        imageSizes: [
+          {
+            name: 'small',
+            formatOptions: { format: 'gif', options: { quality: 90 } },
+            height: 100,
+            width: 100,
+          },
+          {
+            name: 'large',
+            formatOptions: { format: 'gif', options: { quality: 90 } },
+            height: 1000,
+            width: 1000,
+          },
+        ],
+        mimeTypes: ['image/*'],
+      },
+    },
+    {
       slug: 'no-image-sizes',
       fields: [],
       upload: {
@@ -131,6 +170,60 @@ export default buildConfigWithDefaults({
         ],
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: path.resolve(dirname, './object-fit'),
+      },
+    },
+    {
+      slug: 'with-meta-data',
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'sizeOne',
+            height: 300,
+            width: 400,
+          },
+        ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './with-meta-data'),
+        withMetadata: true,
+      },
+    },
+    {
+      slug: 'without-meta-data',
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'sizeTwo',
+            height: 400,
+            width: 300,
+          },
+        ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './without-meta-data'),
+        withMetadata: false,
+      },
+    },
+    {
+      slug: 'with-only-jpeg-meta-data',
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'sizeThree',
+            height: 400,
+            width: 300,
+            withoutEnlargement: false,
+          },
+        ],
+        staticDir: path.resolve(dirname, './with-only-jpeg-meta-data'),
+        // eslint-disable-next-line @typescript-eslint/require-await
+        withMetadata: async ({ metadata }) => {
+          if (metadata.format === 'jpeg') {
+            return true
+          }
+          return false
+        },
       },
     },
     {
@@ -449,6 +542,23 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: customFileNameMediaSlug,
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'custom',
+            height: 500,
+            width: 500,
+            generateImageName: ({ extension, height, width, sizeName }) =>
+              `${sizeName}-${width}x${height}.${extension}`,
+          },
+        ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, `./${customFileNameMediaSlug}`),
+      },
+    },
+    {
       slug: unstoredMediaSlug,
       fields: [],
       upload: {
@@ -500,6 +610,67 @@ export default buildConfigWithDefaults({
       },
     },
     CustomUploadFieldCollection,
+    {
+      slug: mediaWithRelationPreviewSlug,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+      upload: {
+        displayPreview: true,
+      },
+    },
+    {
+      slug: mediaWithoutRelationPreviewSlug,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+      upload: true,
+    },
+    {
+      slug: relationPreviewSlug,
+      fields: [
+        {
+          name: 'imageWithPreview1',
+          type: 'upload',
+          relationTo: mediaWithRelationPreviewSlug,
+        },
+        {
+          name: 'imageWithPreview2',
+          type: 'upload',
+          relationTo: mediaWithRelationPreviewSlug,
+          displayPreview: true,
+        },
+        {
+          name: 'imageWithoutPreview1',
+          type: 'upload',
+          relationTo: mediaWithRelationPreviewSlug,
+          displayPreview: false,
+        },
+        {
+          name: 'imageWithoutPreview2',
+          type: 'upload',
+          relationTo: mediaWithoutRelationPreviewSlug,
+        },
+        {
+          name: 'imageWithPreview3',
+          type: 'upload',
+          relationTo: mediaWithoutRelationPreviewSlug,
+          displayPreview: true,
+        },
+        {
+          name: 'imageWithoutPreview3',
+          type: 'upload',
+          relationTo: mediaWithoutRelationPreviewSlug,
+          displayPreview: false,
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(dirname, './media')
@@ -620,6 +791,39 @@ export default buildConfigWithDefaults({
         ...imageFile,
         name: `function-image-${imageFile.name}`,
       },
+    })
+
+    // Create media with and without relation preview
+    const { id: uploadedImageWithPreview } = await payload.create({
+      collection: mediaWithRelationPreviewSlug,
+      data: {},
+      file: imageFile,
+    })
+
+    const { id: uploadedImageWithoutPreview } = await payload.create({
+      collection: mediaWithoutRelationPreviewSlug,
+      data: {},
+      file: imageFile,
+    })
+
+    await payload.create({
+      collection: relationPreviewSlug,
+      data: {
+        imageWithPreview1: uploadedImageWithPreview,
+        imageWithPreview2: uploadedImageWithPreview,
+        imageWithoutPreview1: uploadedImageWithPreview,
+        imageWithoutPreview2: uploadedImageWithoutPreview,
+        imageWithPreview3: uploadedImageWithoutPreview,
+        imageWithoutPreview3: uploadedImageWithoutPreview,
+      },
+    })
+
+    await payload.create({
+      collection: 'filename-compound-index',
+      data: {
+        alt: 'alt-1',
+      },
+      file: imageFile,
     })
   },
   serverURL: undefined,

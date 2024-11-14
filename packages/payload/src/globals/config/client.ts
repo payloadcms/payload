@@ -1,86 +1,116 @@
-import type { TFunction } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 
 import type {
   LivePreviewConfig,
   SanitizedConfig,
   ServerOnlyLivePreviewProperties,
 } from '../../config/types.js'
-import type { ClientFieldConfig } from '../../fields/config/client.js'
+import type { Payload } from '../../types/index.js'
 import type { SanitizedGlobalConfig } from './types.js'
 
-import { createClientFieldConfigs } from '../../fields/config/client.js'
+import { type ClientField, createClientFields } from '../../fields/config/client.js'
+import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 
 export type ServerOnlyGlobalProperties = keyof Pick<
   SanitizedGlobalConfig,
   'access' | 'admin' | 'custom' | 'endpoints' | 'fields' | 'hooks'
 >
-export type ServerOnlyGlobalAdminProperties = keyof Pick<
-  SanitizedGlobalConfig['admin'],
-  'components' | 'hidden' | 'preview'
->
+
+export type ServerOnlyGlobalAdminProperties = keyof Pick<SanitizedGlobalConfig['admin'], 'hidden'>
 
 export type ClientGlobalConfig = {
   admin: {
+    components: null
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
+    preview?: boolean
   } & Omit<
     SanitizedGlobalConfig['admin'],
-    'fields' & 'livePreview' & ServerOnlyGlobalAdminProperties
+    'components' | 'livePreview' | 'preview' | ServerOnlyGlobalAdminProperties
   >
-  fields: ClientFieldConfig[]
+  fields: ClientField[]
 } & Omit<SanitizedGlobalConfig, 'admin' | 'fields' | ServerOnlyGlobalProperties>
 
-export const createClientGlobalConfig = ({
-  global,
-  t,
-}: {
-  global: SanitizedConfig['globals'][0]
-  t: TFunction
-}): ClientGlobalConfig => {
-  const sanitized = { ...global }
-  sanitized.fields = createClientFieldConfigs({ fields: sanitized.fields, t })
+const serverOnlyProperties: Partial<ServerOnlyGlobalProperties>[] = [
+  'hooks',
+  'access',
+  'endpoints',
+  'custom',
+  // `admin` is handled separately
+]
 
-  const serverOnlyProperties: Partial<ServerOnlyGlobalProperties>[] = [
-    'hooks',
-    'access',
-    'endpoints',
-    'custom',
-    // `admin` is handled separately
-  ]
+const serverOnlyGlobalAdminProperties: Partial<ServerOnlyGlobalAdminProperties>[] = ['hidden']
+
+export const createClientGlobalConfig = ({
+  defaultIDType,
+  global,
+  i18n,
+}: {
+  defaultIDType: Payload['config']['db']['defaultIDType']
+  global: SanitizedConfig['globals'][0]
+  i18n: I18nClient
+}): ClientGlobalConfig => {
+  const clientGlobal = deepCopyObjectSimple(global) as unknown as ClientGlobalConfig
+
+  clientGlobal.fields = createClientFields({
+    clientFields: clientGlobal?.fields || [],
+    defaultIDType,
+    fields: global.fields,
+    i18n,
+  })
 
   serverOnlyProperties.forEach((key) => {
-    if (key in sanitized) {
-      delete sanitized[key]
+    if (key in clientGlobal) {
+      delete clientGlobal[key]
     }
   })
 
-  if ('admin' in sanitized) {
-    sanitized.admin = { ...sanitized.admin }
-
-    const serverOnlyGlobalAdminProperties: Partial<ServerOnlyGlobalAdminProperties>[] = [
-      'components',
-      'hidden',
-      'preview',
-    ]
-
-    serverOnlyGlobalAdminProperties.forEach((key) => {
-      if (key in sanitized.admin) {
-        delete sanitized.admin[key]
-      }
-    })
-
-    if ('livePreview' in sanitized.admin) {
-      sanitized.admin.livePreview = { ...sanitized.admin.livePreview }
-      delete sanitized.admin.livePreview.url
-    }
+  if (!clientGlobal.admin) {
+    clientGlobal.admin = {} as ClientGlobalConfig['admin']
   }
 
-  return sanitized
+  serverOnlyGlobalAdminProperties.forEach((key) => {
+    if (key in clientGlobal.admin) {
+      delete clientGlobal.admin[key]
+    }
+  })
+
+  if (global.admin.preview) {
+    clientGlobal.admin.preview = true
+  }
+
+  clientGlobal.admin.components = null
+
+  if (
+    'livePreview' in clientGlobal.admin &&
+    clientGlobal.admin.livePreview &&
+    'url' in clientGlobal.admin.livePreview
+  ) {
+    delete clientGlobal.admin.livePreview.url
+  }
+
+  return clientGlobal
 }
 
 export const createClientGlobalConfigs = ({
+  defaultIDType,
   globals,
-  t,
+  i18n,
 }: {
+  defaultIDType: Payload['config']['db']['defaultIDType']
   globals: SanitizedConfig['globals']
-  t: TFunction
-}): ClientGlobalConfig[] => globals.map((global) => createClientGlobalConfig({ global, t }))
+  i18n: I18nClient
+}): ClientGlobalConfig[] => {
+  const clientGlobals = new Array(globals.length)
+
+  for (let i = 0; i < globals.length; i++) {
+    const global = globals[i]
+
+    clientGlobals[i] = createClientGlobalConfig({
+      defaultIDType,
+      global,
+      i18n,
+    })
+  }
+
+  return clientGlobals
+}

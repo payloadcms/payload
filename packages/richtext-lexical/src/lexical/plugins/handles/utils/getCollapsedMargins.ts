@@ -1,3 +1,4 @@
+'use client'
 export function getCollapsedMargins(elem: HTMLElement): {
   marginBottom: number
   marginTop: number

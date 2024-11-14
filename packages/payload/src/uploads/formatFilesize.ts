@@ -1,5 +1,7 @@
 export function formatFilesize(bytes: number, decimals = 0): string {
-  if (bytes === 0) return '0 bytes'
+  if (bytes === 0) {
+    return '0 bytes'
+  }
 
   const k = 1024
   const dm = decimals < 0 ? 0 : decimals

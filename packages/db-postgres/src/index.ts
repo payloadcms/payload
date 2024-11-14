@@ -1,46 +1,65 @@
 import type { DatabaseAdapterObj, Payload } from 'payload'
 
-import fs from 'fs'
+import {
+  beginTransaction,
+  commitTransaction,
+  count,
+  countGlobalVersions,
+  countVersions,
+  create,
+  createGlobal,
+  createGlobalVersion,
+  createVersion,
+  deleteMany,
+  deleteOne,
+  deleteVersions,
+  destroy,
+  find,
+  findGlobal,
+  findGlobalVersions,
+  findMigrationDir,
+  findOne,
+  findVersions,
+  migrate,
+  migrateDown,
+  migrateFresh,
+  migrateRefresh,
+  migrateReset,
+  migrateStatus,
+  operatorMap,
+  queryDrafts,
+  rollbackTransaction,
+  updateGlobal,
+  updateGlobalVersion,
+  updateOne,
+  updateVersion,
+} from '@payloadcms/drizzle'
+import {
+  countDistinct,
+  createDatabase,
+  createExtensions,
+  createJSONQuery,
+  createMigration,
+  defaultDrizzleSnapshot,
+  deleteWhere,
+  dropDatabase,
+  execute,
+  getMigrationTemplate,
+  init,
+  insert,
+  requireDrizzleKit,
+} from '@payloadcms/drizzle/postgres'
+import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
 import path from 'path'
-import { createDatabaseAdapter } from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
+import { fileURLToPath } from 'url'
 
 import type { Args, PostgresAdapter } from './types.js'
 
 import { connect } from './connect.js'
-import { count } from './count.js'
-import { create } from './create.js'
-import { createGlobal } from './createGlobal.js'
-import { createGlobalVersion } from './createGlobalVersion.js'
-import { createMigration } from './createMigration.js'
-import { createVersion } from './createVersion.js'
-import { deleteMany } from './deleteMany.js'
-import { deleteOne } from './deleteOne.js'
-import { deleteVersions } from './deleteVersions.js'
-import { destroy } from './destroy.js'
-import { find } from './find.js'
-import { findGlobal } from './findGlobal.js'
-import { findGlobalVersions } from './findGlobalVersions.js'
-import { findOne } from './findOne.js'
-import { findVersions } from './findVersions.js'
-import { init } from './init.js'
-import { migrate } from './migrate.js'
-import { migrateDown } from './migrateDown.js'
-import { migrateFresh } from './migrateFresh.js'
-import { migrateRefresh } from './migrateRefresh.js'
-import { migrateReset } from './migrateReset.js'
-import { migrateStatus } from './migrateStatus.js'
-import { queryDrafts } from './queryDrafts.js'
-import { beginTransaction } from './transactions/beginTransaction.js'
-import { commitTransaction } from './transactions/commitTransaction.js'
-import { rollbackTransaction } from './transactions/rollbackTransaction.js'
-import { updateOne } from './update.js'
-import { updateGlobal } from './updateGlobal.js'
-import { updateGlobalVersion } from './updateGlobalVersion.js'
-import { updateVersion } from './updateVersion.js'
 
-export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
-
-export { sql } from 'drizzle-orm'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
@@ -50,24 +69,52 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
     const migrationDir = findMigrationDir(args.migrationDir)
     let resolveInitializing
     let rejectInitializing
+    let adapterSchema: PostgresAdapter['pgSchema']
 
     const initializing = new Promise<void>((res, rej) => {
       resolveInitializing = res
       rejectInitializing = rej
     })
 
+    if (args.schemaName) {
+      adapterSchema = pgSchema(args.schemaName)
+    } else {
+      adapterSchema = { enum: pgEnum, table: pgTable }
+    }
+
+    const extensions = (args.extensions ?? []).reduce((acc, name) => {
+      acc[name] = true
+      return acc
+    }, {})
+
     return createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
+      afterSchemaInit: args.afterSchemaInit ?? [],
+      beforeSchemaInit: args.beforeSchemaInit ?? [],
+      createDatabase,
+      createExtensions,
+      createMigration(args) {
+        return createMigration.bind(this)({ ...args, dirname })
+      },
+      defaultDrizzleSnapshot,
+      disableCreateDatabase: args.disableCreateDatabase ?? false,
       drizzle: undefined,
       enums: {},
+      extensions,
+      features: {
+        json: true,
+      },
       fieldConstraints: {},
+      getMigrationTemplate,
       idType: postgresIDType,
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
-      pgSchema: undefined,
+      operators: operatorMap,
+      pgSchema: adapterSchema,
       pool: undefined,
       poolOptions: args.pool,
+      prodMigrations: args.prodMigrations,
       push: args.push,
       relations: {},
       relationshipsSuffix: args.relationshipsSuffix || '_rels',
@@ -76,29 +123,40 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       sessions: {},
       tableNameMap: new Map<string, string>(),
       tables: {},
+      tablesFilter: args.tablesFilter,
+      transactionOptions: args.transactionOptions || undefined,
       versionsSuffix: args.versionsSuffix || '_v',
 
       // DatabaseAdapter
-      beginTransaction,
+      beginTransaction:
+        args.transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
       commitTransaction,
       connect,
       count,
+      countDistinct,
+      countGlobalVersions,
+      countVersions,
       create,
       createGlobal,
       createGlobalVersion,
-      createMigration,
+      createJSONQuery,
       createVersion,
       defaultIDType: payloadIDType,
       deleteMany,
       deleteOne,
       deleteVersions,
+      deleteWhere,
       destroy,
+      dropDatabase,
+      execute,
       find,
       findGlobal,
       findGlobalVersions,
       findOne,
       findVersions,
+      indexes: new Set<string>(),
       init,
+      insert,
       migrate,
       migrateDown,
       migrateFresh,
@@ -106,15 +164,18 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       migrateReset,
       migrateStatus,
       migrationDir,
+      packageName: '@payloadcms/db-postgres',
       payload,
       queryDrafts,
       rejectInitializing,
+      requireDrizzleKit,
       resolveInitializing,
       rollbackTransaction,
       updateGlobal,
       updateGlobalVersion,
       updateOne,
       updateVersion,
+      upsert: updateOne,
     })
   }
 
@@ -124,41 +185,5 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
   }
 }
 
-/**
- * Attempt to find migrations directory.
- *
- * Checks for the following directories in order:
- * - `migrationDir` argument from Payload config
- * - `src/migrations`
- * - `dist/migrations`
- * - `migrations`
- *
- * Defaults to `src/migrations`
- *
- * @param migrationDir
- * @returns
- */
-function findMigrationDir(migrationDir?: string): string {
-  const cwd = process.cwd()
-  const srcDir = path.resolve(cwd, 'src/migrations')
-  const distDir = path.resolve(cwd, 'dist/migrations')
-  const relativeMigrations = path.resolve(cwd, 'migrations')
-
-  // Use arg if provided
-  if (migrationDir) return migrationDir
-
-  // Check other common locations
-  if (fs.existsSync(srcDir)) {
-    return srcDir
-  }
-
-  if (fs.existsSync(distDir)) {
-    return distDir
-  }
-
-  if (fs.existsSync(relativeMigrations)) {
-    return relativeMigrations
-  }
-
-  return srcDir
-}
+export type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/drizzle/postgres'
+export { sql } from 'drizzle-orm'

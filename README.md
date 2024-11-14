@@ -1,10 +1,13 @@
-<a href="https://payloadcms.com"><img width="100%" src="https://github.com/payloadcms/payload/blob/main/packages/payload/src/admin/assets/images/github-banner-alt.jpg?raw=true" alt="Payload headless CMS Admin panel built with React" /></a>
+<a href="https://payloadcms.com"><img width="100%" src="https://github.com/payloadcms/payload/blob/beta/packages/payload/src/assets/images/github-banner-nextjs-native.jpg" alt="Payload headless CMS Admin panel built with React" /></a>
 <br />
 <br />
+
 <p align="left">
   <a href="https://github.com/payloadcms/payload/actions"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/payloadcms/payload/main.yml?style=flat-square"></a>
   &nbsp;
   <a href="https://discord.gg/payload"><img alt="Discord" src="https://img.shields.io/discord/967097582721572934?label=Discord&color=7289da&style=flat-square" /></a>
+  &nbsp;
+  <a href="https://www.npmjs.com/package/payload"><img alt="npm" src="https://img.shields.io/npm/dw/payload?style=flat-square" /></a>
   &nbsp;
   <a href="https://www.npmjs.com/package/payload"><img alt="npm" src="https://img.shields.io/npm/v/payload?style=flat-square" /></a>
   &nbsp;
@@ -12,74 +15,66 @@
 </p>
 <hr/>
 <h4>
-<a target="_blank" href="https://payloadcms.com/docs/getting-started/what-is-payload" rel="dofollow"><strong>Explore the Docs</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://payloadcms.com/community-help" rel="dofollow"><strong>Community Help</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://demo.payloadcms.com/" rel="dofollow"><strong>Try Live Demo</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://github.com/payloadcms/payload/discussions/1539" rel="dofollow"><strong>Roadmap</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://www.g2.com/products/payload-cms/reviews#reviews" rel="dofollow"><strong>View G2 Reviews</strong></a>
+<a target="_blank" href="https://payloadcms.com/docs/beta/getting-started/what-is-payload" rel="dofollow"><strong>Explore the Docs</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://payloadcms.com/community-help" rel="dofollow"><strong>Community Help</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://github.com/payloadcms/payload/discussions/1539" rel="dofollow"><strong>Roadmap</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://www.g2.com/products/payload-cms/reviews#reviews" rel="dofollow"><strong>View G2 Reviews</strong></a>
 </h4>
 <hr/>
 
 > [!IMPORTANT]
-> 🎉 <strong>Payload 2.0 is now available!</strong> Read more in the <a target="_blank" href="https://payloadcms.com/blog/payload-2-0" rel="dofollow"><strong>announcement post</strong></a>.
+> 🚨 <strong>We're about to release 3.0 stable.</strong> Star this repo or keep an eye on it to follow along.
+
+Payload is the first-ever Next.js native CMS that can install directly in your existing `/app` folder. It's the start of a new era for headless CMS.
 
 <h3>Benefits over a regular CMS</h3>
 <ul>
-  <li>Don’t hit some third-party SaaS API, hit your own API</li>
-  <li>Use your own database and own your data</li>
-  <li>It's just Express - do what you want outside of Payload</li>
-  <li>No need to learn how Payload works - if you know JS, you know Payload</li>
+  <li>Deploy anywhere, including serverless on Vercel for free</li>
+  <li>Combine your front+backend in the same <code>/app</code> folder if you want</li>
+  <li>Don't sign up for yet another SaaS - Payload is open source</li>
+  <li>Query your database in React Server Components</li>
+  <li>Both admin and backend are 100% extensible</li>
   <li>No vendor lock-in</li>
-  <li>Avoid microservices hell - get everything (even auth) in one place</li>
   <li>Never touch ancient WP code again</li>
   <li>Build faster, never hit a roadblock</li>
-  <li>Both admin and backend are 100% extensible</li>
 </ul>
 
-## ☁️ Deploy instantly with Payload Cloud.
+## Quickstart
 
-Create a cloud account, connect your GitHub, and [deploy in minutes](https://payloadcms.com/new).
-
-## 🚀 Get started by self-hosting completely free, forever.
-
-Before beginning to work with Payload, make sure you have all of the [required software](https://payloadcms.com/docs/getting-started/installation).
+Before beginning to work with Payload, make sure you have all of the [required software](https://payloadcms.com/docs/beta/getting-started/installation).
 
 ```text
-npx create-payload-app@latest
+pnpx create-payload-app@beta
 ```
 
-Alternatively, it only takes about five minutes to [create an app from scratch](https://payloadcms.com/docs/getting-started/installation#from-scratch).
+**If you're new to Payload, you should start with the 3.0 beta website template** (`pnpx create-payload-app@beta -t website`). It shows how to do _everything_ - including custom Rich Text blocks, on-demand revalidation, live preview, and more. It comes with a frontend built with Tailwind all in one `/app` folder.
 
-## 🖱️ One-click templates
+## One-click templates
 
 Jumpstart your next project by starting with a pre-made template. These are production-ready, end-to-end solutions designed to get you to market as fast as possible.
 
-### [🛒 E-Commerce](https://github.com/payloadcms/payload/tree/main/templates/ecommerce)
+### [🌐 Website](https://github.com/payloadcms/payload/tree/beta/templates/website)
 
-Eliminate the need to combine Shopify and a CMS, and instead do it all with Payload + Stripe. Comes with a beautiful, fully functional front-end complete with shopping cart, checkout, orders, and much more.
+Build any kind of website, blog, or portfolio from small to enterprise. Comes with a fully functional front-end built with RSCs and Tailwind.
 
-### [🌐 Website](https://github.com/payloadcms/payload/tree/main/templates/website)
+We're constantly adding more templates to our [Templates Directory](https://github.com/payloadcms/payload/tree/beta/templates). If you maintain your own template, consider adding the `payload-template` topic to your GitHub repository for others to find.
 
-Build any kind of website, blog, or portfolio from small to enterprise. Comes with a beautiful, fully functional front-end complete with posts, projects, comments, and much more.
-
-We're constantly adding more templates to our [Templates Directory](https://github.com/payloadcms/payload/tree/main/templates). If you maintain your own template, consider adding the `payload-template` topic to your GitHub repository for others to find.
-
-- [Official Templates](https://github.com/payloadcms/payload/tree/main/templates)
+- [Official Templates](https://github.com/payloadcms/payload/tree/beta/templates)
 - [Community Templates](https://github.com/topics/payload-template)
 
 ## ✨ Features
 
 - Completely free and open-source
-- [GraphQL](https://payloadcms.com/docs/graphql/overview), [REST](https://payloadcms.com/docs/rest-api/overview), and [Local](https://payloadcms.com/docs/local-api/overview) APIs
-- [Easily customizable ReactJS Admin](https://payloadcms.com/docs/admin/overview)
-- [Fully self-hosted](https://payloadcms.com/docs/production/deployment)
-- [Extensible Authentication](https://payloadcms.com/docs/authentication/overview)
-- [Local file storage & upload](https://payloadcms.com/docs/upload/overview)
-- [Version History and Drafts](https://payloadcms.com/docs/versions/overview)
-- [Field-based Localization](https://payloadcms.com/docs/configuration/localization)
-- [Block-based Layout Builder](https://payloadcms.com/docs/fields/blocks)
-- [Extensible SlateJS rich text editor](https://payloadcms.com/docs/fields/rich-text)
-- [Array field type](https://payloadcms.com/docs/fields/array)
-- [Field conditional logic](https://payloadcms.com/docs/fields/overview#conditional-logic)
-- Extremely granular [Access Control](https://payloadcms.com/docs/access-control/overview)
-- [Document and field-level hooks](https://payloadcms.com/docs/hooks/overview) for every action Payload provides
-- Built with Typescript & very Typescript-friendly
+- Next.js native, built to run inside _your_ `/app` folder
+- Use server components to extend Payload UI
+- Query your database directly in server components, no need for REST / GraphQL
+- Fully TypeScript with automatic types for your data
+- [Auth out of the box](https://payloadcms.com/docs/beta/authentication/overview)
+- [Versions and drafts](https://payloadcms.com/docs/beta/versions/overview)
+- [Localization](https://payloadcms.com/docs/beta/configuration/localization)
+- [Block-based kayout builder](https://payloadcms.com/docs/beta/fields/blocks)
+- [Customizable React admin](https://payloadcms.com/docs/beta/admin/overview)
+- [Lexical rich text editor](https://payloadcms.com/docs/beta/fields/rich-text)
+- [Conditional field logic](https://payloadcms.com/docs/beta/fields/overview#conditional-logic)
+- Extremely granular [Access Control](https://payloadcms.com/docs/beta/access-control/overview)
+- [Document and field-level hooks](https://payloadcms.com/docs/beta/hooks/overview) for every action Payload provides
 - Intensely fast API
 - Highly secure thanks to HTTP-only cookies, CSRF protection, and more
 
@@ -87,7 +82,7 @@ We're constantly adding more templates to our [Templates Directory](https://gith
 
 ## 🗒️ Documentation
 
-Check out the [Payload website](https://payloadcms.com/docs/getting-started/what-is-payload) to find in-depth documentation for everything that Payload offers.
+Check out the [Payload website](https://payloadcms.com/docs/beta/getting-started/what-is-payload) to find in-depth documentation for everything that Payload offers.
 
 Migrating from v1 to v2? Check out the [2.0 Release Notes](https://github.com/payloadcms/payload/releases/tag/v2.0.0) on how to do it.
 
@@ -98,6 +93,10 @@ If you want to add contributions to this repository, please follow the instructi
 ## 📚 Examples
 
 The [Examples Directory](./examples) is a great resource for learning how to setup Payload in a variety of different ways, but you can also find great examples in our blog and throughout our social media.
+
+If you'd like to run the examples, you can either copy them to a folder outside this repo or run them directly by (1) navigating to the example's subfolder (`cd examples/your-example-folder`) and (2) using the `--ignore-workspace` flag to bypass workspace restrictions (e.g., `pnpm --ignore-workspace install` or `pnpm --ignore-workspace dev`).
+
+You can see more examples at:
 
 - [Examples Directory](./examples)
 - [Payload Blog](https://payloadcms.com/blog)

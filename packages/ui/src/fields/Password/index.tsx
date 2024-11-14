@@ -1,100 +1,117 @@
 'use client'
-import type { ClientValidate, Description, Validate } from 'payload'
+import type { PasswordFieldValidation, PayloadRequest } from 'payload'
 
+import { password } from 'payload/shared'
 import React, { useCallback } from 'react'
 
-import type { FormFieldBase } from '../shared/index.js'
+import type { PasswordFieldProps } from './types.js'
 
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
-import { fieldBaseClass } from '../shared/index.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { isFieldRTL } from '../shared/index.js'
 import './index.scss'
+import { PasswordInput } from './input.js'
 
-export type PasswordFieldProps = {
-  autoComplete?: string
-  className?: string
-  description?: Description
-  disabled?: boolean
-  name: string
-  path?: string
-  required?: boolean
-  style?: React.CSSProperties
-  validate?: Validate
-  width?: string
-} & FormFieldBase
-
-const _PasswordField: React.FC<PasswordFieldProps> = (props) => {
+const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
   const {
-    name,
-    CustomError,
-    CustomLabel,
     autoComplete,
-    className,
-    disabled: disabledFromProps,
-    errorProps,
-    label,
-    labelProps,
-    path: pathFromProps,
-    required,
-    style,
+    field: {
+      name,
+      admin: {
+        className,
+        disabled: disabledFromProps,
+        placeholder,
+        rtl,
+        style,
+        width,
+      } = {} as PasswordFieldProps['field']['admin'],
+      label,
+      localized,
+      required,
+    } = {} as PasswordFieldProps['field'],
+    inputRef,
+    path,
     validate,
-    width,
   } = props
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const { t } = useTranslation()
+  const locale = useLocale()
+  const { config } = useConfig()
+
+  const memoizedValidate: PasswordFieldValidation = useCallback(
     (value, options) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })
       }
+
+      return password(value, {
+        name: 'password',
+        type: 'text',
+        data: {},
+        preferences: { fields: {} },
+        req: {
+          payload: {
+            config,
+          },
+          t,
+        } as unknown as PayloadRequest,
+        required: true,
+        siblingData: {},
+      })
     },
-    [validate, required],
+    [validate, config, t, required],
   )
 
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
-    path: pathFromProps || name,
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    formInitializing,
+    formProcessing,
+    setValue,
+    showError,
+    value,
+  } = useField({
+    path,
     validate: memoizedValidate,
   })
 
   const disabled = disabledFromProps || formInitializing || formProcessing
 
+  const renderRTL = isFieldRTL({
+    fieldLocalized: false,
+    fieldRTL: rtl,
+    locale,
+    localizationConfig: config.localization || undefined,
+  })
+
   return (
-    <div
-      className={[
-        fieldBaseClass,
-        'password',
-        className,
-        showError && 'error',
-        disabled && 'read-only',
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      style={{
-        ...style,
-        width,
+    <PasswordInput
+      AfterInput={AfterInput}
+      autoComplete={autoComplete}
+      BeforeInput={BeforeInput}
+      className={className}
+      Description={Description}
+      Error={Error}
+      inputRef={inputRef}
+      Label={Label}
+      label={label}
+      localized={localized}
+      onChange={(e) => {
+        setValue(e.target.value)
       }}
-    >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
-      <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        <input
-          autoComplete={autoComplete}
-          disabled={disabled}
-          id={`field-${path.replace(/\./g, '__')}`}
-          name={path}
-          onChange={setValue}
-          type="password"
-          value={(value as string) || ''}
-        />
-      </div>
-    </div>
+      path={path}
+      placeholder={placeholder}
+      readOnly={disabled}
+      required={required}
+      rtl={renderRTL}
+      showError={showError}
+      style={style}
+      value={(value as string) || ''}
+      width={width}
+    />
   )
 }
 
-export const PasswordField = withCondition(_PasswordField)
+export const PasswordField = withCondition(PasswordFieldComponent)

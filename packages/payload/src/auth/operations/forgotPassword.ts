@@ -128,7 +128,9 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
     // We don't want to indicate specifically that an email was not found,
     // as doing so could lead to the exposure of registered emails.
     // Therefore, we prefer to fail silently.
-    if (!user) return null
+    if (!user) {
+      return null
+    }
 
     user.resetPasswordToken = token
     user.resetPasswordExpiration = new Date(expiration || Date.now() + 3600000).toISOString() // 1 hour
@@ -148,7 +150,7 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
           : `${protocol}//${req.headers.get('host')}`
 
       let html = `${req.t('authentication:youAreReceivingResetPassword')}
-    <a href="${serverURL}${config.routes.admin}/${config.admin.routes.reset}/${token}">${serverURL}${config.routes.admin}/${config.admin.routes.reset}/${token}</a>
+    <a href="${serverURL}${config.routes.admin}${config.admin.routes.reset}/${token}">${serverURL}${config.routes.admin}${config.admin.routes.reset}/${token}</a>
     ${req.t('authentication:youDidNotRequestPassword')}`
 
       if (typeof collectionConfig.auth.forgotPassword.generateEmailHTML === 'function') {
@@ -197,7 +199,9 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
       result: token,
     })
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return token
   } catch (error: unknown) {

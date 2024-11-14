@@ -1,6 +1,5 @@
-import React from 'react'
-
-import { CustomLabelComponent } from './index.js'
+import type { CollapsibleField } from 'payload'
+import type React from 'react'
 
 export const getCustomLabel = ({
   fallback,
@@ -10,6 +9,13 @@ export const getCustomLabel = ({
   fallback?: string
   path: string
   style: React.CSSProperties
-}) => {
-  return <CustomLabelComponent fallback={fallback} path={path} style={style} />
+}): CollapsibleField['admin']['components']['Label'] => {
+  return {
+    clientProps: {
+      fallback,
+      path,
+      style,
+    },
+    path: '/collections/Collapsible/CustomLabel/index.js#CustomLabelComponent',
+  }
 }

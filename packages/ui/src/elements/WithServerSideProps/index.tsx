@@ -12,7 +12,7 @@ export const WithServerSideProps: WithServerSidePropsComponent = ({
     const WithServerSideProps: React.FC = (passedProps) => {
       const propsWithServerOnlyProps = {
         ...passedProps,
-        ...(isReactServerComponentOrFunction(Component) ? serverOnlyProps ?? {} : {}),
+        ...(isReactServerComponentOrFunction(Component) ? (serverOnlyProps ?? {}) : {}),
       }
 
       return <Component {...propsWithServerOnlyProps} />

@@ -9,7 +9,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
-export const DefaultSaveButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
+export const SaveButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
   const { t } = useTranslation()
   const { submit } = useForm()
   const modified = useFormModified()
@@ -36,21 +36,14 @@ export const DefaultSaveButton: React.FC<{ label?: string }> = ({ label: labelPr
     <FormSubmit
       buttonId="action-save"
       disabled={forceDisable}
-      onClick={() => submit()}
+      onClick={() => {
+        return void submit()
+      }}
       ref={ref}
-      size="small"
+      size="medium"
       type="button"
     >
       {label}
     </FormSubmit>
   )
-}
-
-type Props = {
-  CustomComponent?: React.ReactNode
-}
-
-export const SaveButton: React.FC<Props> = ({ CustomComponent }) => {
-  if (CustomComponent) return CustomComponent
-  return <DefaultSaveButton />
 }

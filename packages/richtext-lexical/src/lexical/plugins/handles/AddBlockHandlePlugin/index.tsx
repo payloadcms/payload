@@ -4,7 +4,7 @@ import type { LexicalEditor, LexicalNode, ParagraphNode } from 'lexical'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $createParagraphNode } from 'lexical'
 import * as React from 'react'
-import { type JSX, useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { useEditorConfigContext } from '../../../config/client/EditorConfigProvider.js'
@@ -93,7 +93,10 @@ function useAddBlockHandle(
       if (!_emptyBlockElem) {
         return
       }
-      if (hoveredElement?.node !== blockNode || hoveredElement?.elem !== _emptyBlockElem) {
+      if (
+        blockNode &&
+        (hoveredElement?.node !== blockNode || hoveredElement?.elem !== _emptyBlockElem)
+      ) {
         setHoveredElement({
           elem: _emptyBlockElem,
           node: blockNode,
@@ -134,7 +137,7 @@ function useAddBlockHandle(
         // Check if blockNode is an empty text node
         let isEmptyParagraph = true
         if (
-          hoveredElementToUse.node.getType() !== 'paragraph' ||
+          hoveredElementToUse?.node.getType() !== 'paragraph' ||
           hoveredElementToUse.node.getTextContent() !== ''
         ) {
           isEmptyParagraph = false
@@ -142,11 +145,11 @@ function useAddBlockHandle(
 
         if (!isEmptyParagraph) {
           const newParagraph = $createParagraphNode()
-          hoveredElementToUse.node.insertAfter(newParagraph)
+          hoveredElementToUse?.node.insertAfter(newParagraph)
 
           setTimeout(() => {
             hoveredElementToUse = {
-              elem: editor.getElementByKey(newParagraph.getKey()),
+              elem: editor.getElementByKey(newParagraph.getKey())!,
               node: newParagraph,
             }
             setHoveredElement(hoveredElementToUse)
@@ -160,7 +163,7 @@ function useAddBlockHandle(
           editor.focus()
 
           if (
-            hoveredElementToUse.node &&
+            hoveredElementToUse?.node &&
             'select' in hoveredElementToUse.node &&
             typeof hoveredElementToUse.node.select === 'function'
           ) {
@@ -173,7 +176,7 @@ function useAddBlockHandle(
       // Otherwise, this won't work
       setTimeout(() => {
         editor.dispatchCommand(ENABLE_SLASH_MENU_COMMAND, {
-          node: hoveredElementToUse.node as ParagraphNode,
+          node: hoveredElementToUse?.node as ParagraphNode,
         })
       }, 2)
 

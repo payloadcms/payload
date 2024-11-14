@@ -19,6 +19,7 @@ import { getImageSize } from './getImageSize.js'
 import { getSafeFileName } from './getSafeFilename.js'
 import { resizeAndTransformImageSizes } from './imageResizer.js'
 import { isImage } from './isImage.js'
+import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 
 type Args<T> = {
   collection: Collection
@@ -26,7 +27,8 @@ type Args<T> = {
   data: T
   operation: 'create' | 'update'
   originalDoc?: T
-  overwriteExistingFiles?: boolean
+  /** pass forceDisable to not overwrite existing files even if they already exist in `data` */
+  overwriteExistingFiles?: 'forceDisable' | boolean
   req: PayloadRequest
   throwOnMissingFile?: boolean
 }
@@ -71,6 +73,7 @@ export const generateFileData = async <T>({
     resizeOptions,
     staticDir,
     trimOptions,
+    withMetadata,
   } = collectionConfig.upload
 
   const staticPath = staticDir
@@ -83,22 +86,32 @@ export const generateFileData = async <T>({
         const filePath = `${staticPath}/${filename}`
         const response = await getFileByPath(filePath)
         file = response
-        overwriteExistingFiles = true
+        if (overwriteExistingFiles !== 'forceDisable') {
+          overwriteExistingFiles = true
+        }
       } else if (filename && url) {
         file = await getExternalFile({
           data: data as FileData,
           req,
           uploadConfig: collectionConfig.upload,
         })
-        overwriteExistingFiles = true
+        if (overwriteExistingFiles !== 'forceDisable') {
+          overwriteExistingFiles = true
+        }
       }
     } catch (err: unknown) {
       throw new FileRetrievalError(req.t, err instanceof Error ? err.message : undefined)
     }
   }
 
+  if (overwriteExistingFiles === 'forceDisable') {
+    overwriteExistingFiles = false
+  }
+
   if (!file) {
-    if (throwOnMissingFile) throw new MissingFile(req.t)
+    if (throwOnMissingFile) {
+      throw new MissingFile(req.t)
+    }
 
     return {
       data,
@@ -131,7 +144,9 @@ export const generateFileData = async <T>({
 
     const sharpOptions: SharpOptions = {}
 
-    if (fileIsAnimatedType) sharpOptions.animated = true
+    if (fileIsAnimatedType) {
+      sharpOptions.animated = true
+    }
 
     if (sharp && (fileIsAnimatedType || fileHasAdjustments)) {
       if (file.tempFilePath) {
@@ -161,6 +176,11 @@ export const generateFileData = async <T>({
 
     if (sharpFile) {
       const metadata = await sharpFile.metadata()
+      sharpFile = await optionallyAppendMetadata({
+        req,
+        sharpFile,
+        withMetadata,
+      })
       fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true })
       ;({ ext, mime } = await fileTypeFromBuffer(fileBuffer.data)) // This is getting an incorrect gif height back.
       fileData.width = fileBuffer.info.width
@@ -184,7 +204,9 @@ export const generateFileData = async <T>({
     }
 
     // Adjust SVG mime type. fromBuffer modifies it.
-    if (mime === 'application/xml' && ext === 'svg') mime = 'image/svg+xml'
+    if (mime === 'application/xml' && ext === 'svg') {
+      mime = 'image/svg+xml'
+    }
     fileData.mimeType = mime
 
     const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name)
@@ -208,27 +230,64 @@ export const generateFileData = async <T>({
         dimensions,
         file,
         heightInPixels: uploadEdits.heightInPixels,
+        req,
         sharp,
         widthInPixels: uploadEdits.widthInPixels,
+        withMetadata,
       })
 
-      filesToSave.push({
-        buffer: croppedImage,
-        path: `${staticPath}/${fsSafeName}`,
-      })
+      // Apply resize after cropping to ensure it conforms to resizeOptions
+      if (resizeOptions) {
+        const resizedAfterCrop = await sharp(croppedImage)
+          .resize({
+            fit: resizeOptions?.fit || 'cover',
+            height: resizeOptions?.height,
+            position: resizeOptions?.position || 'center',
+            width: resizeOptions?.width,
+          })
+          .toBuffer({ resolveWithObject: true })
 
-      fileForResize = {
-        ...file,
-        data: croppedImage,
-        size: info.size,
+        filesToSave.push({
+          buffer: resizedAfterCrop.data,
+          path: `${staticPath}/${fsSafeName}`,
+        })
+
+        fileForResize = {
+          ...fileForResize,
+          data: resizedAfterCrop.data,
+          size: resizedAfterCrop.info.size,
+        }
+
+        fileData.width = resizedAfterCrop.info.width
+        fileData.height = resizedAfterCrop.info.height
+        if (fileIsAnimatedType) {
+          const metadata = await sharpFile.metadata()
+          fileData.height = metadata.pages
+            ? resizedAfterCrop.info.height / metadata.pages
+            : resizedAfterCrop.info.height
+        }
+        fileData.filesize = resizedAfterCrop.info.size
+      } else {
+        // If resizeOptions is not present, just save the cropped image
+        filesToSave.push({
+          buffer: croppedImage,
+          path: `${staticPath}/${fsSafeName}`,
+        })
+
+        fileForResize = {
+          ...file,
+          data: croppedImage,
+          size: info.size,
+        }
+
+        fileData.width = info.width
+        fileData.height = info.height
+        if (fileIsAnimatedType) {
+          const metadata = await sharpFile.metadata()
+          fileData.height = metadata.pages ? info.height / metadata.pages : info.height
+        }
+        fileData.filesize = info.size
       }
-      fileData.width = info.width
-      fileData.height = info.height
-      if (fileIsAnimatedType) {
-        const metadata = await sharpFile.metadata()
-        fileData.height = metadata.pages ? info.height / metadata.pages : info.height
-      }
-      fileData.filesize = info.size
 
       if (file.tempFilePath) {
         await fs.promises.writeFile(file.tempFilePath, croppedImage) // write fileBuffer to the temp path
@@ -274,6 +333,7 @@ export const generateFileData = async <T>({
         sharp,
         staticPath,
         uploadEdits,
+        withMetadata,
       })
 
       fileData.sizes = sizeData
@@ -314,7 +374,9 @@ function parseUploadEditsFromReqOrIncomingData(args: {
       ? (req.query.uploadEdits as UploadEdits)
       : {}
 
-  if (uploadEdits.focalPoint) return uploadEdits
+  if (uploadEdits.focalPoint) {
+    return uploadEdits
+  }
 
   const incomingData = data as FileData
   const origDoc = originalDoc as FileData

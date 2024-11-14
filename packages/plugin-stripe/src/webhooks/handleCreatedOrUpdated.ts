@@ -9,7 +9,7 @@ type HandleCreatedOrUpdated = (
     resourceType: string
     syncConfig: SanitizedStripePluginConfig['sync'][0]
   } & Parameters<StripeWebhookHandler>[0],
-) => void
+) => Promise<void>
 
 export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
   const { config: payloadConfig, event, payload, pluginConfig, resourceType, syncConfig } = args
@@ -31,17 +31,19 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
   // }
 
   if (isNestedChange) {
-    if (logs)
+    if (logs) {
       payload.logger.info(
         `- This change occurred on a nested field of ${resourceType}. Nested fields are not yet supported in auto-sync but can be manually setup.`,
       )
+    }
   }
 
   if (!isNestedChange) {
-    if (logs)
+    if (logs) {
       payload.logger.info(
         `- A new document was created or updated in Stripe, now syncing to Payload...`,
       )
+    }
 
     const collectionSlug = syncConfig?.collection
 
@@ -79,10 +81,11 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
     })
 
     if (!foundDoc) {
-      if (logs)
+      if (logs) {
         payload.logger.info(
           `- No existing '${collectionSlug}' document found with Stripe ID: '${stripeID}', creating new...`,
         )
+      }
 
       // auth docs must use unique emails
       let authDoc = null
@@ -102,10 +105,11 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
             authDoc = authQuery.docs[0] as any
 
             if (authDoc) {
-              if (logs)
+              if (logs) {
                 payload.logger.info(
                   `- Account already exists with e-mail: ${stripeDoc.email}, updating now...`,
                 )
+              }
 
               // account exists by email, so update it instead
               try {
@@ -115,37 +119,42 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
                   data: syncedData,
                 })
 
-                if (logs)
+                if (logs) {
                   payload.logger.info(
                     `✅ Successfully updated '${collectionSlug}' document in Payload with ID: '${authDoc.id}.'`,
                   )
+                }
               } catch (err: unknown) {
                 const msg = err instanceof Error ? err.message : err
-                if (logs)
+                if (logs) {
                   payload.logger.error(
                     `- Error updating existing '${collectionSlug}' document: ${msg}`,
                   )
+                }
               }
             }
           } else {
-            if (logs)
+            if (logs) {
               payload.logger.error(
                 `No email was provided from Stripe, cannot create new '${collectionSlug}' document.`,
               )
+            }
           }
         } catch (error: unknown) {
           const msg = error instanceof Error ? error.message : error
-          if (logs)
+          if (logs) {
             payload.logger.error(`Error looking up '${collectionSlug}' document in Payload: ${msg}`)
+          }
         }
       }
 
       if (!isAuthCollection || (isAuthCollection && !authDoc)) {
         try {
-          if (logs)
+          if (logs) {
             payload.logger.info(
               `- Creating new '${collectionSlug}' document in Payload with Stripe ID: '${stripeID}'.`,
             )
+          }
 
           // generate a strong, unique password for the new user
           const password: string = uuid()
@@ -160,20 +169,24 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
             disableVerificationEmail: isAuthCollection ? true : undefined,
           })
 
-          if (logs)
+          if (logs) {
             payload.logger.info(
               `✅ Successfully created new '${collectionSlug}' document in Payload with Stripe ID: '${stripeID}'.`,
             )
+          }
         } catch (error: unknown) {
           const msg = error instanceof Error ? error.message : error
-          if (logs) payload.logger.error(`Error creating new document in Payload: ${msg}`)
+          if (logs) {
+            payload.logger.error(`Error creating new document in Payload: ${msg}`)
+          }
         }
       }
     } else {
-      if (logs)
+      if (logs) {
         payload.logger.info(
           `- Existing '${collectionSlug}' document found in Payload with Stripe ID: '${stripeID}', updating now...`,
         )
+      }
 
       try {
         await payload.update({
@@ -182,14 +195,16 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
           data: syncedData,
         })
 
-        if (logs)
+        if (logs) {
           payload.logger.info(
             `✅ Successfully updated '${collectionSlug}' document in Payload from Stripe ID: '${stripeID}'.`,
           )
+        }
       } catch (error: unknown) {
         const msg = error instanceof Error ? error.message : error
-        if (logs)
+        if (logs) {
           payload.logger.error(`Error updating '${collectionSlug}' document in Payload: ${msg}`)
+        }
       }
     }
   }

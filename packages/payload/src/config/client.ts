@@ -1,17 +1,17 @@
-import type { TFunction } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 
-import type { ClientCollectionConfig } from '../collections/config/client.js'
-import type { SanitizedCollectionConfig } from '../collections/config/types.js'
-import type { ClientGlobalConfig } from '../globals/config/client.js'
-import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type {
   LivePreviewConfig,
   SanitizedConfig,
   ServerOnlyLivePreviewProperties,
 } from './types.js'
 
-import { createClientCollectionConfigs } from '../collections/config/client.js'
-import { createClientGlobalConfigs } from '../globals/config/client.js'
+import {
+  type ClientCollectionConfig,
+  createClientCollectionConfigs,
+} from '../collections/config/client.js'
+import { type ClientGlobalConfig, createClientGlobalConfigs } from '../globals/config/client.js'
+import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
 
 export type ServerOnlyRootProperties = keyof Pick<
   SanitizedConfig,
@@ -25,6 +25,8 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'endpoints'
   | 'graphQL'
   | 'hooks'
+  | 'jobs'
+  | 'logger'
   | 'onInit'
   | 'plugins'
   | 'secret'
@@ -36,14 +38,18 @@ export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'],
 
 export type ClientConfig = {
   admin: {
+    components: null
+    dependencies?: Record<string, React.ReactNode>
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
-  } & Omit<SanitizedConfig['admin'], 'livePreview' & ServerOnlyRootAdminProperties>
+  } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
   collections: ClientCollectionConfig[]
   custom?: Record<string, any>
   globals: ClientGlobalConfig[]
 } & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | ServerOnlyRootProperties>
 
-const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperties>[] = [
+export const serverOnlyAdminConfigProperties: readonly Partial<ServerOnlyRootAdminProperties>[] = []
+
+export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperties>[] = [
   'endpoints',
   'db',
   'editor',
@@ -59,20 +65,20 @@ const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperties>[] =
   'email',
   'custom',
   'graphQL',
+  'jobs',
+  'logger',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
 
-const serverOnlyAdminProperties: readonly Partial<ServerOnlyRootAdminProperties>[] = ['components']
-
-export const createClientConfig = async ({
+export const createClientConfig = ({
   config,
-  t,
+  i18n,
 }: {
   config: SanitizedConfig
-  t: TFunction
-  // eslint-disable-next-line @typescript-eslint/require-await
-}): Promise<ClientConfig> => {
-  const clientConfig: ClientConfig = { ...config }
+  i18n: I18nClient
+}): ClientConfig => {
+  // We can use deepCopySimple here, as the clientConfig should be JSON serializable anyways, since it will be sent from server => client
+  const clientConfig = deepCopyObjectSimple(config) as unknown as ClientConfig
 
   for (const key of serverOnlyConfigProperties) {
     if (key in clientConfig) {
@@ -81,36 +87,35 @@ export const createClientConfig = async ({
   }
 
   if ('localization' in clientConfig && clientConfig.localization) {
-    clientConfig.localization = { ...clientConfig.localization }
-
     for (const locale of clientConfig.localization.locales) {
       delete locale.toString
     }
   }
 
-  if ('admin' in clientConfig) {
-    clientConfig.admin = { ...clientConfig.admin }
+  if (!clientConfig.admin) {
+    clientConfig.admin = {} as ClientConfig['admin']
+  }
 
-    for (const key of serverOnlyAdminProperties) {
-      if (key in clientConfig.admin) {
-        delete clientConfig.admin[key]
-      }
-    }
+  clientConfig.admin.components = null
 
-    if ('livePreview' in clientConfig.admin) {
-      clientConfig.admin.livePreview = { ...clientConfig.admin.livePreview }
-      delete clientConfig.admin.livePreview.url
-    }
+  if (
+    'livePreview' in clientConfig.admin &&
+    clientConfig.admin.livePreview &&
+    'url' in clientConfig.admin.livePreview
+  ) {
+    delete clientConfig.admin.livePreview.url
   }
 
   clientConfig.collections = createClientCollectionConfigs({
-    collections: clientConfig.collections as SanitizedCollectionConfig[],
-    t,
+    collections: config.collections,
+    defaultIDType: config.db.defaultIDType,
+    i18n,
   })
 
   clientConfig.globals = createClientGlobalConfigs({
-    globals: clientConfig.globals as SanitizedGlobalConfig[],
-    t,
+    defaultIDType: config.db.defaultIDType,
+    globals: config.globals,
+    i18n,
   })
 
   return clientConfig

@@ -2,7 +2,6 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { mapAsync } from 'payload'
-import { wait } from 'payload/shared'
 import * as qs from 'qs-esm'
 
 import type { Config, Geo, Post } from '../../payload-types.js'
@@ -10,7 +9,7 @@ import type { Config, Geo, Post } from '../../payload-types.js'
 import {
   ensureCompilationIsDone,
   exactText,
-  getAdminRoutes,
+  getRoutes,
   initPageConsoleErrorCatch,
   openDocDrawer,
   openNav,
@@ -18,7 +17,7 @@ import {
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { customAdminRoutes } from '../../shared.js'
-import { geoCollectionSlug, postsCollectionSlug } from '../../slugs.js'
+import { customViews1CollectionSlug, geoCollectionSlug, postsCollectionSlug } from '../../slugs.js'
 
 const { beforeAll, beforeEach, describe } = test
 
@@ -28,10 +27,12 @@ const description = 'Description'
 let payload: PayloadTestSDK<Config>
 
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 
+import { reorderColumns } from '../../../helpers/e2e/reorderColumns.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 const filename = fileURLToPath(import.meta.url)
@@ -42,12 +43,14 @@ describe('admin2', () => {
   let page: Page
   let geoUrl: AdminUrlUtil
   let postsUrl: AdminUrlUtil
+  let baseListFiltersUrl: AdminUrlUtil
+  let customViewsUrl: AdminUrlUtil
 
   let serverURL: string
-  let adminRoutes: ReturnType<typeof getAdminRoutes>
+  let adminRoutes: ReturnType<typeof getRoutes>
 
   beforeAll(async ({ browser }, testInfo) => {
-    const prebuild = Boolean(process.env.CI)
+    const prebuild = false // Boolean(process.env.CI)
 
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
@@ -56,25 +59,24 @@ describe('admin2', () => {
       dirname,
       prebuild,
     }))
+
     geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     postsUrl = new AdminUrlUtil(serverURL, postsCollectionSlug)
+    baseListFiltersUrl = new AdminUrlUtil(serverURL, 'base-list-filters')
+    customViewsUrl = new AdminUrlUtil(serverURL, customViews1CollectionSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await reInitializeDB({
-      serverURL,
-      snapshotKey: 'adminTests2',
-    })
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
 
-    adminRoutes = getAdminRoutes({ customAdminRoutes })
+    adminRoutes = getRoutes({ customAdminRoutes })
   })
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'adminTests2',
+      snapshotKey: 'adminTests',
     })
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
@@ -104,6 +106,26 @@ describe('admin2', () => {
       await createPost({ title: 'post2' })
       await page.reload()
       await expect(page.locator(tableRowLocator)).toHaveCount(2)
+    })
+
+    describe('list view descriptions', () => {
+      test('should render static collection descriptions', async () => {
+        await page.goto(postsUrl.list)
+        await expect(
+          page.locator('.view-description', {
+            hasText: exactText('This is a custom collection description.'),
+          }),
+        ).toBeVisible()
+      })
+
+      test('should render dynamic collection description components', async () => {
+        await page.goto(customViewsUrl.list)
+        await expect(
+          page.locator('.view-description', {
+            hasText: exactText('This is a custom view description component.'),
+          }),
+        ).toBeVisible()
+      })
     })
 
     describe('filtering', () => {
@@ -171,13 +193,8 @@ describe('admin2', () => {
       test('should toggle columns', async () => {
         const columnCountLocator = 'table > thead > tr > th'
         await createPost()
-
         await page.locator('.list-controls__toggle-columns').click()
-
-        // track the number of columns before manipulating toggling any
         const numberOfColumns = await page.locator(columnCountLocator).count()
-
-        // wait until the column toggle UI is visible and fully expanded
         await expect(page.locator('.column-selector')).toBeVisible()
         await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
 
@@ -185,19 +202,13 @@ describe('admin2', () => {
           hasText: exactText('ID'),
         })
 
-        // Remove ID column
         await idButton.click()
-
-        // wait until .cell-id is not present on the page:
-        await page.locator('.cell-id').waitFor({ state: 'detached' })
-
+        await page.locator('#heading-id').waitFor({ state: 'detached' })
+        await page.locator('.cell-id').first().waitFor({ state: 'detached' })
         await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1)
         await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('Number')
-
-        // Add back ID column
         await idButton.click()
         await expect(page.locator('.cell-id').first()).toBeVisible()
-
         await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns)
         await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
       })
@@ -206,27 +217,24 @@ describe('admin2', () => {
         const { id } = await createPost()
         await page.reload()
         const linkCell = page.locator(`${tableRowLocator} td`).nth(1).locator('a')
+
         await expect(linkCell).toHaveAttribute(
           'href',
           `${adminRoutes.routes.admin}/collections/posts/${id}`,
         )
 
-        // open the column controls
         await page.locator('.list-controls__toggle-columns').click()
-        // wait until the column toggle UI is visible and fully expanded
         await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
 
-        // toggle off the ID column
         await page
           .locator('.column-selector .column-selector__column', {
             hasText: exactText('ID'),
           })
           .click()
 
-        // wait until .cell-id is not present on the page:
-        await page.locator('.cell-id').waitFor({ state: 'detached' })
+        await page.locator('#heading-id').waitFor({ state: 'detached' })
+        await page.locator('.cell-id').first().waitFor({ state: 'detached' })
 
-        // recheck that the 2nd cell is still a link
         await expect(linkCell).toHaveAttribute(
           'href',
           `${adminRoutes.routes.admin}/collections/posts/${id}`,
@@ -421,52 +429,49 @@ describe('admin2', () => {
         await expect(page.getByPlaceholder('Enter a value')).toHaveValue('[object Object]')
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
       })
+
+      test('should reset page when filters are applied', async () => {
+        await deleteAllPosts()
+        await mapAsync([...Array(6)], async () => {
+          await createPost()
+        })
+        await page.reload()
+        await mapAsync([...Array(6)], async () => {
+          await createPost({ title: 'test' })
+        })
+        await page.reload()
+
+        const pageInfo = page.locator('.collection-list__page-info')
+        const perPage = page.locator('.per-page')
+        const tableItems = page.locator(tableRowLocator)
+
+        await expect(tableItems).toHaveCount(10)
+        await expect(pageInfo).toHaveText('1-10 of 12')
+        await expect(perPage).toContainText('Per Page: 10')
+
+        // go to page 2
+        await page.goto(`${postsUrl.list}?limit=10&page=2`)
+
+        // add filter
+        await page.locator('.list-controls__toggle-where').click()
+        await page.locator('.where-builder__add-first-filter').click()
+        await page.locator('.condition__field .rs__control').click()
+        const options = page.locator('.rs__option')
+        await options.locator('text=Tab 1 > Title').click()
+        await page.locator('.condition__operator .rs__control').click()
+        await options.locator('text=equals').click()
+        await page.locator('.condition__value input').fill('test')
+
+        // expect to be on page 1
+        await expect(pageInfo).toHaveText('1-6 of 6')
+      })
     })
 
     describe('table columns', () => {
-      const reorderColumns = async () => {
-        // open the column controls
-        await page.locator('.list-controls__toggle-columns').click()
-        // wait until the column toggle UI is visible and fully expanded
-        await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
-
-        const numberBoundingBox = await page
-          .locator(`.column-selector .column-selector__column`, {
-            hasText: exactText('Number'),
-          })
-
-          .boundingBox()
-
-        const idBoundingBox = await page
-          .locator(`.column-selector .column-selector__column`, {
-            hasText: exactText('ID'),
-          })
-          .boundingBox()
-
-        if (!numberBoundingBox || !idBoundingBox) return
-
-        // drag the "number" column to the left of the "ID" column
-        await page.mouse.move(numberBoundingBox.x + 2, numberBoundingBox.y + 2, { steps: 10 })
-        await page.mouse.down()
-        await wait(300)
-
-        await page.mouse.move(idBoundingBox.x - 2, idBoundingBox.y - 2, { steps: 10 })
-        await page.mouse.up()
-
-        // ensure the "number" column is now first
-        await expect(
-          page.locator('.list-controls .column-selector .column-selector__column').first(),
-        ).toHaveText('Number')
-        await expect(page.locator('table thead tr th').nth(1)).toHaveText('Number')
-
-        // TODO: This wait makes sure the preferences are actually saved. Just waiting for the UI to update is not enough. We should replace this wait
-        await wait(1000)
-      }
-
       test('should drag to reorder columns and save to preferences', async () => {
         await createPost()
 
-        await reorderColumns()
+        await reorderColumns(page, { fromColumn: 'Number', toColumn: 'ID' })
 
         // reload to ensure the preferred order was stored in the database
         await page.reload()
@@ -479,7 +484,7 @@ describe('admin2', () => {
       test('should render drawer columns in order', async () => {
         // Re-order columns like done in the previous test
         await createPost()
-        await reorderColumns()
+        await reorderColumns(page, { fromColumn: 'Number', toColumn: 'ID' })
 
         await page.reload()
 
@@ -492,14 +497,14 @@ describe('admin2', () => {
         await expect(listDrawer).toBeVisible()
 
         const collectionSelector = page.locator(
-          '[id^=list-drawer_1_] .list-drawer__select-collection.react-select',
+          '[id^=list-drawer_1_] .list-header__select-collection.react-select',
         )
 
         // select the "Post" collection
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            '[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option',
             {
               hasText: exactText('Post'),
             },
@@ -531,7 +536,7 @@ describe('admin2', () => {
         await expect(listDrawer).toBeVisible()
 
         const collectionSelector = page.locator(
-          '[id^=list-drawer_1_] .list-drawer__select-collection.react-select',
+          '[id^=list-drawer_1_] .list-header__select-collection.react-select',
         )
         const columnSelector = page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns')
 
@@ -554,7 +559,7 @@ describe('admin2', () => {
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            '[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option',
             {
               hasText: exactText('Post'),
             },
@@ -575,7 +580,7 @@ describe('admin2', () => {
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            '[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option',
             {
               hasText: exactText('User'),
             },
@@ -596,7 +601,7 @@ describe('admin2', () => {
 
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            '[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option',
             {
               hasText: exactText('Post'),
             },
@@ -728,15 +733,8 @@ describe('admin2', () => {
     describe('i18n', () => {
       test('should display translated collections and globals config options', async () => {
         await page.goto(postsUrl.list)
-
-        // collection label
         await expect(page.locator('#nav-posts')).toContainText('Posts')
-
-        // global label
         await expect(page.locator('#nav-global-global')).toContainText('Global')
-
-        // view description
-        await expect(page.locator('.view-description')).toContainText('Description')
       })
 
       test('should display translated field titles', async () => {
@@ -781,28 +779,13 @@ describe('admin2', () => {
         ).toHaveText('Title')
       })
     })
-  })
 
-  describe('field descriptions', () => {
-    test('should render static field description', async () => {
-      await page.goto(postsUrl.create)
-      await expect(page.locator('.field-description-descriptionAsString')).toContainText(
-        'Static field description.',
-      )
-    })
-    test('should render functional field description', async () => {
-      await page.goto(postsUrl.create)
-      await page.locator('#field-descriptionAsFunction').fill('functional')
-      await expect(page.locator('.field-description-descriptionAsFunction')).toContainText(
-        'Function description',
-      )
-    })
-    test('should render component field description', async () => {
-      await page.goto(postsUrl.create)
-      await page.locator('#field-descriptionAsComponent').fill('component')
-      await expect(page.locator('.field-description-descriptionAsComponent')).toContainText(
-        'Component description: descriptionAsComponent - component',
-      )
+    describe('base list filters', () => {
+      test('should respect base list filters', async () => {
+        await page.goto(baseListFiltersUrl.list)
+        await page.waitForURL((url) => url.toString().startsWith(baseListFiltersUrl.list))
+        await expect(page.locator(tableRowLocator)).toHaveCount(1)
+      })
     })
   })
 })

@@ -15,8 +15,8 @@ import type {
 } from './LexicalTypeaheadMenuPlugin/types.js'
 
 import { useEditorConfigContext } from '../../config/client/EditorConfigProvider.js'
-import { LexicalTypeaheadMenuPlugin } from './LexicalTypeaheadMenuPlugin/index.js'
 import './index.scss'
+import { LexicalTypeaheadMenuPlugin } from './LexicalTypeaheadMenuPlugin/index.js'
 import { useMenuTriggerMatch } from './useMenuTriggerMatch.js'
 
 const baseClass = 'slash-menu-popup'
@@ -33,6 +33,10 @@ function SlashMenuItem({
   onClick: () => void
   onMouseEnter: () => void
 }) {
+  const {
+    fieldProps: { featureClientSchemaMap, schemaPath },
+  } = useEditorConfigContext()
+
   const { i18n } = useTranslation()
 
   let className = `${baseClass}__item ${baseClass}__item-${item.key}`
@@ -42,7 +46,10 @@ function SlashMenuItem({
 
   let title = item.key
   if (item.label) {
-    title = typeof item.label === 'function' ? item.label({ i18n }) : item.label
+    title =
+      typeof item.label === 'function'
+        ? item.label({ featureClientSchemaMap, i18n, schemaPath })
+        : item.label
   }
   // Crop title to max. 25 characters
   if (title.length > 25) {
@@ -80,6 +87,9 @@ export function SlashMenuPlugin({
   const [queryString, setQueryString] = useState<null | string>(null)
   const { editorConfig } = useEditorConfigContext()
   const { i18n } = useTranslation()
+  const {
+    fieldProps: { featureClientSchemaMap, schemaPath },
+  } = useEditorConfigContext()
 
   const checkForTriggerMatch = useMenuTriggerMatch('/', {
     minLength: 0,
@@ -89,11 +99,13 @@ export function SlashMenuPlugin({
     let groupWithItems: Array<SlashMenuGroup> = []
 
     for (const dynamicItem of editorConfig.features.slashMenu.dynamicGroups) {
-      const dynamicGroupWithItems = dynamicItem({
-        editor,
-        queryString,
-      })
-      groupWithItems = groupWithItems.concat(dynamicGroupWithItems)
+      if (queryString) {
+        const dynamicGroupWithItems = dynamicItem({
+          editor,
+          queryString,
+        })
+        groupWithItems = groupWithItems.concat(dynamicGroupWithItems)
+      }
     }
 
     return groupWithItems
@@ -107,11 +119,15 @@ export function SlashMenuPlugin({
 
     if (queryString) {
       // Filter current groups first
+      // @ts-expect-error - TODO: fix this
       groupsWithItems = groupsWithItems.map((group) => {
         const filteredItems = group.items.filter((item) => {
           let itemTitle = item.key
           if (item.label) {
-            itemTitle = typeof item.label === 'function' ? item.label({ i18n }) : item.label
+            itemTitle =
+              typeof item.label === 'function'
+                ? item.label({ featureClientSchemaMap, i18n, schemaPath })
+                : item.label
           }
 
           if (new RegExp(queryString, 'gi').exec(itemTitle)) {
@@ -158,23 +174,20 @@ export function SlashMenuPlugin({
     }
 
     return groupsWithItems
-  }, [getDynamicItems, queryString, editorConfig?.features, i18n])
+  }, [
+    queryString,
+    editorConfig?.features.slashMenu.groups,
+    getDynamicItems,
+    featureClientSchemaMap,
+    i18n,
+    schemaPath,
+  ])
 
   const onSelectItem = useCallback(
-    (
-      selectedItem: SlashMenuItemType,
-      nodeToRemove: TextNode | null,
-      closeMenu: () => void,
-      matchingString: string,
-    ) => {
-      if (nodeToRemove) {
-        editor.update(() => {
-          nodeToRemove.remove()
-        })
-      }
-      selectedItem.onSelect({ editor, queryString: matchingString })
-
+    (selectedItem: SlashMenuItemType, closeMenu: () => void, matchingString: string) => {
       closeMenu()
+
+      selectedItem.onSelect({ editor, queryString: matchingString })
     },
     [editor],
   )
@@ -185,16 +198,18 @@ export function SlashMenuPlugin({
       groups={groups as SlashMenuGroupInternal[]}
       menuRenderFn={(
         anchorElementRef,
-        { selectItemAndCleanUp, selectedItemKey, setSelectedItemKey },
+        { selectedItemKey, selectItemAndCleanUp, setSelectedItemKey },
       ) =>
         anchorElementRef.current && groups.length
           ? ReactDOM.createPortal(
               <div className={baseClass}>
                 {groups.map((group) => {
                   let groupTitle = group.key
-                  if (group.label) {
+                  if (group.label && featureClientSchemaMap) {
                     groupTitle =
-                      typeof group.label === 'function' ? group.label({ i18n }) : group.label
+                      typeof group.label === 'function'
+                        ? group.label({ featureClientSchemaMap, i18n, schemaPath })
+                        : group.label
                   }
 
                   return (

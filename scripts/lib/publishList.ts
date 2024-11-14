@@ -9,8 +9,6 @@ export const packagePublishList = [
   'ui',
   'next',
   'graphql',
-  'db-mongodb',
-  'db-postgres',
   'live-preview',
   'live-preview-react',
   'live-preview-vue',
@@ -18,6 +16,13 @@ export const packagePublishList = [
   'richtext-lexical',
 
   'create-payload-app',
+
+  // DB Adapters
+  'drizzle',
+  'db-mongodb',
+  'db-postgres',
+  'db-sqlite',
+  'db-vercel-postgres',
 
   // Adapters
   'email-nodemailer',
@@ -31,18 +36,18 @@ export const packagePublishList = [
   'storage-uploadthing',
 
   // Plugins
+  'payload-cloud',
   'plugin-cloud',
   'plugin-cloud-storage',
   'plugin-form-builder',
   'plugin-nested-docs',
   'plugin-redirects',
   'plugin-search',
+  'plugin-sentry',
   'plugin-seo',
   'plugin-stripe',
-  'plugin-relationship-object-ids',
 
   // Unpublished
-  // 'plugin-sentry'
   // 'storage-uploadthing',
   // 'eslint-config',
   // 'eslint-plugin',

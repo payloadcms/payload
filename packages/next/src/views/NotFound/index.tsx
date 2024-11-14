@@ -1,10 +1,14 @@
 import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { AdminViewComponent, SanitizedConfig } from 'payload'
+import type {
+  AdminViewComponent,
+  ImportMap,
+  PayloadServerReactComponent,
+  SanitizedConfig,
+} from 'payload'
 
-import { HydrateClientUser } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
-import React, { Fragment } from 'react'
+import React from 'react'
 
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
@@ -36,46 +40,53 @@ export type GenerateViewMetadata = (args: {
 
 export const NotFoundPage = async ({
   config: configPromise,
-  params,
-  searchParams,
+  importMap,
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
 }: {
   config: Promise<SanitizedConfig>
-  params: {
+  importMap: ImportMap
+  params: Promise<{
     segments: string[]
-  }
-  searchParams: {
+  }>
+  searchParams: Promise<{
     [key: string]: string | string[]
-  }
+  }>
 }) => {
   const config = await configPromise
   const { routes: { admin: adminRoute } = {} } = config
 
+  const searchParams = await searchParamsPromise
   const initPageResult = await initPage({
     config,
+    importMap,
     redirectUnauthenticatedUser: true,
     route: formatAdminURL({ adminRoute, path: '/not-found' }),
     searchParams,
   })
 
+  const params = await paramsPromise
+
+  if (!initPageResult.req.user || !initPageResult.permissions.canAccessAdmin) {
+    return <NotFoundClient />
+  }
+
   return (
-    <Fragment>
-      <HydrateClientUser permissions={initPageResult.permissions} user={initPageResult.req.user} />
-      <DefaultTemplate
-        i18n={initPageResult.req.i18n}
-        locale={initPageResult.locale}
-        params={params}
-        payload={initPageResult.req.payload}
-        permissions={initPageResult.permissions}
-        searchParams={searchParams}
-        user={initPageResult.req.user}
-        visibleEntities={initPageResult.visibleEntities}
-      >
-        <NotFoundClient />
-      </DefaultTemplate>
-    </Fragment>
+    <DefaultTemplate
+      i18n={initPageResult.req.i18n}
+      locale={initPageResult.locale}
+      params={params}
+      payload={initPageResult.req.payload}
+      permissions={initPageResult.permissions}
+      searchParams={searchParams}
+      user={initPageResult.req.user}
+      visibleEntities={initPageResult.visibleEntities}
+    >
+      <NotFoundClient />
+    </DefaultTemplate>
   )
 }
 
-export const NotFoundView: AdminViewComponent = () => {
+export const NotFoundView: PayloadServerReactComponent<AdminViewComponent> = () => {
   return <NotFoundClient marginTop="large" />
 }

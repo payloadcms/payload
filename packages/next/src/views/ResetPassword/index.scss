@@ -1,5 +1,11 @@
-.reset-password {
-  form > .field-type {
-    margin-bottom: var(--base);
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .reset-password__wrap {
+    .inputWrap {
+      display: flex;
+      flex-direction: column;
+      gap: base(0.8);
+    }
   }
 }

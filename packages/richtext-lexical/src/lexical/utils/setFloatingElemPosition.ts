@@ -1,5 +1,6 @@
+'use client'
 const VERTICAL_GAP = 10
-const HORIZONTAL_OFFSET = 5
+const HORIZONTAL_OFFSET = 32
 
 // TODO: needs refactoring
 // This is supposed to position the floatingElem based on the parent (anchorElem) and the target (targetRect) which is usually the selected text.
@@ -15,7 +16,7 @@ export function setFloatingElemPosition(args: {
   specialHandlingForCaret?: boolean
   targetRect: ClientRect | null
   verticalGap?: number
-}): number {
+}): number | undefined {
   const {
     alwaysDisplayOnTop = false,
     anchorElem,

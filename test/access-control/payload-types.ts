@@ -16,6 +16,7 @@ export interface Config {
     'non-admin-user': NonAdminUser;
     posts: Post;
     unrestricted: Unrestricted;
+    'relation-restricted': RelationRestricted;
     'fully-restricted': FullyRestricted;
     'read-only-collection': ReadOnlyCollection;
     'user-restricted-collection': UserRestrictedCollection;
@@ -28,8 +29,35 @@ export interface Config {
     'hidden-access': HiddenAccess;
     'hidden-access-count': HiddenAccessCount;
     disabled: Disabled;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+  };
+  collectionsJoins: {};
+  collectionsSelect: {
+    users: UsersSelect<false> | UsersSelect<true>;
+    'non-admin-user': NonAdminUserSelect<false> | NonAdminUserSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    unrestricted: UnrestrictedSelect<false> | UnrestrictedSelect<true>;
+    'relation-restricted': RelationRestrictedSelect<false> | RelationRestrictedSelect<true>;
+    'fully-restricted': FullyRestrictedSelect<false> | FullyRestrictedSelect<true>;
+    'read-only-collection': ReadOnlyCollectionSelect<false> | ReadOnlyCollectionSelect<true>;
+    'user-restricted-collection': UserRestrictedCollectionSelect<false> | UserRestrictedCollectionSelect<true>;
+    'create-not-update-collection': CreateNotUpdateCollectionSelect<false> | CreateNotUpdateCollectionSelect<true>;
+    'restricted-versions': RestrictedVersionsSelect<false> | RestrictedVersionsSelect<true>;
+    'sibling-data': SiblingDataSelect<false> | SiblingDataSelect<true>;
+    'rely-on-request-headers': RelyOnRequestHeadersSelect<false> | RelyOnRequestHeadersSelect<true>;
+    'doc-level-access': DocLevelAccessSelect<false> | DocLevelAccessSelect<true>;
+    'hidden-fields': HiddenFieldsSelect<false> | HiddenFieldsSelect<true>;
+    'hidden-access': HiddenAccessSelect<false> | HiddenAccessSelect<true>;
+    'hidden-access-count': HiddenAccessCountSelect<false> | HiddenAccessCountSelect<true>;
+    disabled: DisabledSelect<false> | DisabledSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+  };
+  db: {
+    defaultIDType: string;
   };
   globals: {
     settings: Setting;
@@ -37,6 +65,13 @@ export interface Config {
     'read-only-global': ReadOnlyGlobal;
     'user-restricted-global': UserRestrictedGlobal;
     'read-not-update-global': ReadNotUpdateGlobal;
+  };
+  globalsSelect: {
+    settings: SettingsSelect<false> | SettingsSelect<true>;
+    test: TestSelect<false> | TestSelect<true>;
+    'read-only-global': ReadOnlyGlobalSelect<false> | ReadOnlyGlobalSelect<true>;
+    'user-restricted-global': UserRestrictedGlobalSelect<false> | UserRestrictedGlobalSelect<true>;
+    'read-not-update-global': ReadNotUpdateGlobalSelect<false> | ReadNotUpdateGlobalSelect<true>;
   };
   locale: null;
   user:
@@ -46,16 +81,25 @@ export interface Config {
     | (NonAdminUser & {
         collection: 'non-admin-user';
       });
+  jobs?: {
+    tasks: unknown;
+    workflows?: unknown;
+  };
 }
 export interface UserAuthOperations {
   forgotPassword: {
     email: string;
+    password: string;
   };
   login: {
-    password: string;
     email: string;
+    password: string;
   };
   registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
     email: string;
     password: string;
   };
@@ -63,12 +107,17 @@ export interface UserAuthOperations {
 export interface NonAdminUserAuthOperations {
   forgotPassword: {
     email: string;
+    password: string;
   };
   login: {
-    password: string;
     email: string;
+    password: string;
   };
   registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
     email: string;
     password: string;
   };
@@ -152,6 +201,17 @@ export interface UserRestrictedCollection {
 export interface CreateNotUpdateCollection {
   id: string;
   name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-restricted".
+ */
+export interface RelationRestricted {
+  id: string;
+  name?: string | null;
+  post?: (string | null) | Post;
   updatedAt: string;
   createdAt: string;
 }
@@ -292,6 +352,94 @@ export interface Disabled {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'non-admin-user';
+        value: string | NonAdminUser;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'unrestricted';
+        value: string | Unrestricted;
+      } | null)
+    | ({
+        relationTo: 'relation-restricted';
+        value: string | RelationRestricted;
+      } | null)
+    | ({
+        relationTo: 'fully-restricted';
+        value: string | FullyRestricted;
+      } | null)
+    | ({
+        relationTo: 'read-only-collection';
+        value: string | ReadOnlyCollection;
+      } | null)
+    | ({
+        relationTo: 'user-restricted-collection';
+        value: string | UserRestrictedCollection;
+      } | null)
+    | ({
+        relationTo: 'create-not-update-collection';
+        value: string | CreateNotUpdateCollection;
+      } | null)
+    | ({
+        relationTo: 'restricted-versions';
+        value: string | RestrictedVersion;
+      } | null)
+    | ({
+        relationTo: 'sibling-data';
+        value: string | SiblingDatum;
+      } | null)
+    | ({
+        relationTo: 'rely-on-request-headers';
+        value: string | RelyOnRequestHeader;
+      } | null)
+    | ({
+        relationTo: 'doc-level-access';
+        value: string | DocLevelAccess;
+      } | null)
+    | ({
+        relationTo: 'hidden-fields';
+        value: string | HiddenField;
+      } | null)
+    | ({
+        relationTo: 'hidden-access';
+        value: string | HiddenAccess;
+      } | null)
+    | ({
+        relationTo: 'hidden-access-count';
+        value: string | HiddenAccessCount;
+      } | null)
+    | ({
+        relationTo: 'disabled';
+        value: string | Disabled;
+      } | null);
+  globalSlug?: string | null;
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'non-admin-user';
+        value: string | NonAdminUser;
+      };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
@@ -328,6 +476,255 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  roles?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "non-admin-user_select".
+ */
+export interface NonAdminUserSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  restrictedField?: T;
+  group?:
+    | T
+    | {
+        restrictedGroupText?: T;
+      };
+  restrictedRowText?: T;
+  restrictedCollapsibleText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unrestricted_select".
+ */
+export interface UnrestrictedSelect<T extends boolean = true> {
+  name?: T;
+  userRestrictedDocs?: T;
+  createNotUpdateDocs?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-restricted_select".
+ */
+export interface RelationRestrictedSelect<T extends boolean = true> {
+  name?: T;
+  post?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fully-restricted_select".
+ */
+export interface FullyRestrictedSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "read-only-collection_select".
+ */
+export interface ReadOnlyCollectionSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "user-restricted-collection_select".
+ */
+export interface UserRestrictedCollectionSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "create-not-update-collection_select".
+ */
+export interface CreateNotUpdateCollectionSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-versions_select".
+ */
+export interface RestrictedVersionsSelect<T extends boolean = true> {
+  name?: T;
+  hidden?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sibling-data_select".
+ */
+export interface SiblingDataSelect<T extends boolean = true> {
+  array?:
+    | T
+    | {
+        allowPublicReadability?: T;
+        text?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rely-on-request-headers_select".
+ */
+export interface RelyOnRequestHeadersSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "doc-level-access_select".
+ */
+export interface DocLevelAccessSelect<T extends boolean = true> {
+  approvedForRemoval?: T;
+  approvedTitle?: T;
+  lockTitle?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hidden-fields_select".
+ */
+export interface HiddenFieldsSelect<T extends boolean = true> {
+  title?: T;
+  partiallyHiddenGroup?:
+    | T
+    | {
+        name?: T;
+        value?: T;
+      };
+  partiallyHiddenArray?:
+    | T
+    | {
+        name?: T;
+        value?: T;
+        id?: T;
+      };
+  hidden?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hidden-access_select".
+ */
+export interface HiddenAccessSelect<T extends boolean = true> {
+  title?: T;
+  hidden?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hidden-access-count_select".
+ */
+export interface HiddenAccessCountSelect<T extends boolean = true> {
+  title?: T;
+  hidden?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disabled_select".
+ */
+export interface DisabledSelect<T extends boolean = true> {
+  group?:
+    | T
+    | {
+        text?: T;
+      };
+  namedTab?:
+    | T
+    | {
+        text?: T;
+      };
+  unnamedTab?: T;
+  array?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_select".
+ */
+export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_select".
+ */
+export interface PayloadPreferencesSelect<T extends boolean = true> {
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select".
+ */
+export interface PayloadMigrationsSelect<T extends boolean = true> {
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -377,6 +774,55 @@ export interface ReadNotUpdateGlobal {
   name?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "settings_select".
+ */
+export interface SettingsSelect<T extends boolean = true> {
+  test?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "test_select".
+ */
+export interface TestSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "read-only-global_select".
+ */
+export interface ReadOnlyGlobalSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "user-restricted-global_select".
+ */
+export interface UserRestrictedGlobalSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "read-not-update-global_select".
+ */
+export interface ReadNotUpdateGlobalSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

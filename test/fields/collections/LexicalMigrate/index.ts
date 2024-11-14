@@ -2,14 +2,16 @@ import type { CollectionConfig } from 'payload'
 
 import {
   HTMLConverterFeature,
-  LexicalPluginToLexicalFeature,
-  LinkFeature,
-  SlateToLexicalFeature,
-  TreeViewFeature,
-  UploadFeature,
   lexicalEditor,
   lexicalHTML,
+  LinkFeature,
+  TreeViewFeature,
+  UploadFeature,
 } from '@payloadcms/richtext-lexical'
+import {
+  LexicalPluginToLexicalFeature,
+  SlateToLexicalFeature,
+} from '@payloadcms/richtext-lexical/migrate'
 
 import { lexicalMigrateFieldsSlug } from '../../slugs.js'
 import { getSimpleLexicalData } from './data.js'
@@ -35,7 +37,7 @@ export const LexicalMigrateFields: CollectionConfig = {
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
-          LexicalPluginToLexicalFeature(),
+          LexicalPluginToLexicalFeature({ quiet: true }),
           TreeViewFeature(),
           HTMLConverterFeature(),
           LinkFeature({

@@ -5,7 +5,6 @@ import React from 'react'
 import ReactDatePickerDefaultImport, { registerLocale } from 'react-datepicker'
 const ReactDatePicker = (ReactDatePickerDefaultImport.default ||
   ReactDatePickerDefaultImport) as unknown as typeof ReactDatePickerDefaultImport.default
-import 'react-datepicker/dist/react-datepicker.css'
 
 import type { Props } from './types.js'
 
@@ -13,6 +12,7 @@ import { CalendarIcon } from '../../icons/Calendar/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { getFormattedLocale } from './getFormattedLocale.js'
+import './library.scss'
 import './index.scss'
 
 const baseClass = 'date-time-picker'
@@ -50,11 +50,17 @@ const DatePicker: React.FC<Props> = (props) => {
 
   if (!customDisplayFormat) {
     // when no displayFormat is provided, determine format based on the picker appearance
-    if (pickerAppearance === 'default') dateFormat = 'MM/dd/yyyy'
-    else if (pickerAppearance === 'dayAndTime') dateFormat = 'MMM d, yyy h:mm a'
-    else if (pickerAppearance === 'timeOnly') dateFormat = 'h:mm a'
-    else if (pickerAppearance === 'dayOnly') dateFormat = 'MMM dd'
-    else if (pickerAppearance === 'monthOnly') dateFormat = 'MMMM'
+    if (pickerAppearance === 'default') {
+      dateFormat = 'MM/dd/yyyy'
+    } else if (pickerAppearance === 'dayAndTime') {
+      dateFormat = 'MMM d, yyy h:mm a'
+    } else if (pickerAppearance === 'timeOnly') {
+      dateFormat = 'h:mm a'
+    } else if (pickerAppearance === 'dayOnly') {
+      dateFormat = 'MMM dd'
+    } else if (pickerAppearance === 'monthOnly') {
+      dateFormat = 'MMMM'
+    }
   }
 
   const onChange = (incomingDate: Date) => {
@@ -63,7 +69,9 @@ const DatePicker: React.FC<Props> = (props) => {
       const tzOffset = incomingDate.getTimezoneOffset() / 60
       newDate.setHours(12 - tzOffset, 0)
     }
-    if (typeof onChangeFromProps === 'function') onChangeFromProps(newDate)
+    if (typeof onChangeFromProps === 'function') {
+      onChangeFromProps(newDate)
+    }
   }
 
   const dateTimePickerProps: ReactDatePickerProps = {

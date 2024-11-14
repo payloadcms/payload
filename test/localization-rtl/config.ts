@@ -10,6 +10,11 @@ import { Users } from './collections/users.js'
 import deepMerge from './deepMerge.js'
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [Users, Posts],
   /*i18n: {
     fallbackLng: 'en', // default

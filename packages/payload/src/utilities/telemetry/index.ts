@@ -1,7 +1,6 @@
 import { execSync } from 'child_process'
 import ciInfo from 'ci-info'
 import { randomBytes } from 'crypto'
-import { findUp } from 'find-up'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -10,6 +9,7 @@ import type { Payload } from '../../types/index.js'
 import type { AdminInitEvent } from './events/adminInit.js'
 import type { ServerInitEvent } from './events/serverInit.js'
 
+import { findUp } from '../findUp.js'
 import { Conf } from './conf/index.js'
 import { oneWayHash } from './oneWayHash.js'
 
@@ -26,6 +26,7 @@ export type BaseEvent = {
   nodeVersion: string
   payloadVersion: string
   projectID: string
+  projectIDSource: 'cwd' | 'git' | 'packageJSON' | 'serverURL'
   uploadAdapters: string[]
 }
 
@@ -49,6 +50,7 @@ export const sendEvent = async ({ event, payload }: Args): Promise<void> => {
 
     // Only generate the base event once
     if (!baseEvent) {
+      const { projectID, source: projectIDSource } = getProjectID(payload, packageJSON)
       baseEvent = {
         ciName: ciInfo.isCI ? ciInfo.name : null,
         envID: getEnvID(),
@@ -56,7 +58,8 @@ export const sendEvent = async ({ event, payload }: Args): Promise<void> => {
         nodeEnv: process.env.NODE_ENV || 'development',
         nodeVersion: process.version,
         payloadVersion: getPayloadVersion(packageJSON),
-        projectID: getProjectID(payload, packageJSON),
+        projectID,
+        projectIDSource,
         ...getLocalizationInfo(payload),
         dbAdapter: payload.db.name,
         emailAdapter: payload.email?.name || null,
@@ -104,13 +107,27 @@ const getEnvID = (): string => {
   return generated
 }
 
-const getProjectID = (payload: Payload, packageJSON: PackageJSON): string => {
-  const projectID =
-    getGitID(payload) ||
-    getPackageJSONID(payload, packageJSON) ||
-    payload.config.serverURL ||
-    process.cwd()
-  return oneWayHash(projectID, payload.secret)
+const getProjectID = (
+  payload: Payload,
+  packageJSON: PackageJSON,
+): { projectID: string; source: BaseEvent['projectIDSource'] } => {
+  const gitID = getGitID(payload)
+  if (gitID) {
+    return { projectID: oneWayHash(gitID, payload.secret), source: 'git' }
+  }
+
+  const packageJSONID = getPackageJSONID(payload, packageJSON)
+  if (packageJSONID) {
+    return { projectID: oneWayHash(packageJSONID, payload.secret), source: 'packageJSON' }
+  }
+
+  const serverURL = payload.config.serverURL
+  if (serverURL) {
+    return { projectID: oneWayHash(serverURL, payload.secret), source: 'serverURL' }
+  }
+
+  const cwd = process.cwd()
+  return { projectID: oneWayHash(cwd, payload.secret), source: 'cwd' }
 }
 
 const getGitID = (payload: Payload) => {
@@ -136,13 +153,15 @@ const getPackageJSON = async (): Promise<{
     // Old logic
     const filename = fileURLToPath(import.meta.url)
     const dirname = path.dirname(filename)
-    packageJSONPath = await findUp('package.json', { cwd: dirname })
-    const jsonContent: PackageJSON = JSON.parse(fs.readFileSync(packageJSONPath, 'utf-8'))
-    return { packageJSON: jsonContent, packageJSONPath }
+    packageJSONPath = await findUp({
+      dir: dirname,
+      fileNames: ['package.json'],
+    })
   }
 
-  const packageJSON: PackageJSON = JSON.parse(fs.readFileSync(packageJSONPath, 'utf-8'))
-  return { packageJSON, packageJSONPath }
+  const jsonContentString = await fs.promises.readFile(packageJSONPath, 'utf-8')
+  const jsonContent: PackageJSON = JSON.parse(jsonContentString)
+  return { packageJSON: jsonContent, packageJSONPath }
 }
 
 const getPackageJSONID = (payload: Payload, packageJSON: PackageJSON): string => {

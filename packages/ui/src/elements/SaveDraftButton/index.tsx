@@ -14,12 +14,14 @@ import { useTranslation } from '../../providers/Translation/index.js'
 
 const baseClass = 'save-draft'
 
-export const DefaultSaveDraftButton: React.FC = () => {
+export const SaveDraftButton: React.FC = () => {
   const {
-    routes: { api },
-    serverURL,
+    config: {
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
-  const { id, collectionSlug, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug, setUnpublishedVersionCount } = useDocumentInfo()
   const modified = useFormModified()
   const { code: locale } = useLocale()
   const ref = useRef<HTMLButtonElement>(null)
@@ -31,7 +33,9 @@ export const DefaultSaveDraftButton: React.FC = () => {
   const forceDisable = operation === 'update' && !modified
 
   const saveDraft = useCallback(async () => {
-    if (forceDisable) return
+    if (forceDisable) {
+      return
+    }
 
     const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`
     let action
@@ -39,7 +43,9 @@ export const DefaultSaveDraftButton: React.FC = () => {
 
     if (collectionSlug) {
       action = `${serverURL}${api}/${collectionSlug}${id ? `/${id}` : ''}${search}`
-      if (id) method = 'PATCH'
+      if (id) {
+        method = 'PATCH'
+      }
     }
 
     if (globalSlug) {
@@ -54,7 +60,19 @@ export const DefaultSaveDraftButton: React.FC = () => {
       },
       skipValidation: true,
     })
-  }, [submit, collectionSlug, globalSlug, serverURL, api, locale, id, forceDisable])
+
+    setUnpublishedVersionCount((count) => count + 1)
+  }, [
+    submit,
+    collectionSlug,
+    globalSlug,
+    serverURL,
+    api,
+    locale,
+    id,
+    forceDisable,
+    setUnpublishedVersionCount,
+  ])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     if (forceDisable) {
@@ -74,21 +92,14 @@ export const DefaultSaveDraftButton: React.FC = () => {
       buttonStyle="secondary"
       className={baseClass}
       disabled={forceDisable}
-      onClick={saveDraft}
+      onClick={() => {
+        return void saveDraft()
+      }}
       ref={ref}
-      size="small"
+      size="medium"
       type="button"
     >
       {t('version:saveDraft')}
     </FormSubmit>
   )
-}
-
-type Props = {
-  CustomComponent?: React.ReactNode
-}
-
-export const SaveDraftButton: React.FC<Props> = ({ CustomComponent }) => {
-  if (CustomComponent) return CustomComponent
-  return <DefaultSaveDraftButton />
 }

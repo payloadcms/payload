@@ -1,27 +1,32 @@
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { JsonObject, Operation, PayloadRequest, RequestContext } from '../../../types/index.js'
-import type { Field, FieldHookArgs, TabAsField, ValidateOptions } from '../../config/types.js'
+import type { RequestContext } from '../../../index.js'
+import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
+import type { Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
-import { beforeDuplicate } from './beforeDuplicate.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: JsonObject
   doc: JsonObject
   docWithLocales: JsonObject
-  duplicate: boolean
-  errors: { field: string; message: string }[]
+  errors: ValidationFieldError[]
   field: Field | TabAsField
-  global: SanitizedGlobalConfig | null
+  /**
+   * The index of the field as it appears in the parent's fields array. This is used to construct the field path / schemaPath
+   * for unnamed fields like rows and collapsibles.
+   */
+  fieldIndex: number
+  global: null | SanitizedGlobalConfig
   id?: number | string
   mergeLocaleActions: (() => Promise<void>)[]
   operation: Operation
@@ -55,9 +60,9 @@ export const promise = async ({
   data,
   doc,
   docWithLocales,
-  duplicate,
   errors,
   field,
+  fieldIndex,
   global,
   mergeLocaleActions,
   operation,
@@ -77,11 +82,15 @@ export const promise = async ({
   const defaultLocale = localization ? localization?.defaultLocale : 'en'
   const operationLocale = req.locale || defaultLocale
 
-  const { path: fieldPath, schemaPath: fieldSchemaPath } = getFieldPaths({
+  const { path: _fieldPath, schemaPath: _fieldSchemaPath } = getFieldPaths({
     field,
-    parentPath,
-    parentSchemaPath,
+    index: fieldIndex,
+    parentIndexPath: '', // Doesn't matter, as unnamed fields do not affect data, and hooks are only run on fields that affect data
+    parentPath: parentPath.join('.'),
+    parentSchemaPath: parentSchemaPath.join('.'),
   })
+  const fieldPath = _fieldPath ? _fieldPath.split('.') : []
+  const fieldSchemaPath = _fieldSchemaPath ? _fieldSchemaPath.split('.') : []
 
   if (fieldAffectsData(field)) {
     // skip validation if the field is localized and the incoming data is null
@@ -121,7 +130,7 @@ export const promise = async ({
     }
 
     // Validate
-    if (!skipValidationFromHere && field.validate) {
+    if (!skipValidationFromHere && 'validate' in field && field.validate) {
       const valueToValidate = siblingData[field.name]
       let jsonError: object
 
@@ -133,39 +142,28 @@ export const promise = async ({
         }
       }
 
-      const validationResult = await field.validate(valueToValidate, {
-        ...field,
-        id,
-        data: deepMergeWithSourceArrays(doc, data),
-        jsonError,
-        operation,
-        preferences: { fields: {} },
-        req,
-        siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
-      } as ValidateOptions<any, any, { jsonError: object }>)
+      const validationResult = await field.validate(
+        valueToValidate as never,
+        {
+          ...field,
+          id,
+          collectionSlug: collection?.slug,
+          data: deepMergeWithSourceArrays(doc, data),
+          jsonError,
+          operation,
+          preferences: { fields: {} },
+          previousValue: siblingDoc[field.name],
+          req,
+          siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
+        } as any,
+      )
 
       if (typeof validationResult === 'string') {
         errors.push({
-          field: fieldPath.join('.'),
           message: validationResult,
+          path: fieldPath.join('.'),
         })
       }
-    }
-
-    const beforeDuplicateArgs: FieldHookArgs = {
-      collection,
-      context,
-      data,
-      field,
-      global: undefined,
-      path: fieldPath,
-      previousSiblingDoc: siblingDoc,
-      previousValue: siblingDoc[field.name],
-      req,
-      schemaPath: parentSchemaPath,
-      siblingData,
-      siblingDocWithLocales,
-      value: siblingData[field.name],
     }
 
     // Push merge locale action if applicable
@@ -174,15 +172,10 @@ export const promise = async ({
         const localeData = await localization.localeCodes.reduce(
           async (localizedValuesPromise: Promise<JsonObject>, locale) => {
             const localizedValues = await localizedValuesPromise
-            let fieldValue =
+            const fieldValue =
               locale === req.locale
                 ? siblingData[field.name]
                 : siblingDocWithLocales?.[field.name]?.[locale]
-
-            if (duplicate && field.hooks?.beforeDuplicate?.length) {
-              beforeDuplicateArgs.value = fieldValue
-              fieldValue = await beforeDuplicate(beforeDuplicateArgs)
-            }
 
             // const result = await localizedValues
             // update locale value if it's not undefined
@@ -203,64 +196,10 @@ export const promise = async ({
           siblingData[field.name] = localeData
         }
       })
-    } else if (duplicate && field.hooks?.beforeDuplicate?.length) {
-      mergeLocaleActions.push(async () => {
-        siblingData[field.name] = await beforeDuplicate(beforeDuplicateArgs)
-      })
     }
   }
 
   switch (field.type) {
-    case 'point': {
-      // Transform point data for storage
-      if (
-        Array.isArray(siblingData[field.name]) &&
-        siblingData[field.name][0] !== null &&
-        siblingData[field.name][1] !== null
-      ) {
-        siblingData[field.name] = {
-          type: 'Point',
-          coordinates: [
-            parseFloat(siblingData[field.name][0]),
-            parseFloat(siblingData[field.name][1]),
-          ],
-        }
-      }
-
-      break
-    }
-
-    case 'group': {
-      if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {}
-      if (typeof siblingDoc[field.name] !== 'object') siblingDoc[field.name] = {}
-      if (typeof siblingDocWithLocales[field.name] !== 'object')
-        siblingDocWithLocales[field.name] = {}
-
-      await traverseFields({
-        id,
-        collection,
-        context,
-        data,
-        doc,
-        docWithLocales,
-        duplicate,
-        errors,
-        fields: field.fields,
-        global,
-        mergeLocaleActions,
-        operation,
-        path: fieldPath,
-        req,
-        schemaPath: fieldSchemaPath,
-        siblingData: siblingData[field.name] as JsonObject,
-        siblingDoc: siblingDoc[field.name] as JsonObject,
-        siblingDocWithLocales: siblingDocWithLocales[field.name] as JsonObject,
-        skipValidation: skipValidationFromHere,
-      })
-
-      break
-    }
-
     case 'array': {
       const rows = siblingData[field.name]
 
@@ -275,7 +214,6 @@ export const promise = async ({
               data,
               doc,
               docWithLocales,
-              duplicate,
               errors,
               fields: field.fields,
               global,
@@ -303,14 +241,13 @@ export const promise = async ({
 
     case 'blocks': {
       const rows = siblingData[field.name]
-
       if (Array.isArray(rows)) {
         const promises = []
         rows.forEach((row, i) => {
           const rowSiblingDoc = getExistingRowDoc(row as JsonObject, siblingDoc[field.name])
           const rowSiblingDocWithLocales = getExistingRowDoc(
             row as JsonObject,
-            siblingDocWithLocales[field.name],
+            siblingDocWithLocales ? siblingDocWithLocales[field.name] : {},
           )
 
           const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
@@ -325,7 +262,6 @@ export const promise = async ({
                 data,
                 doc,
                 docWithLocales,
-                duplicate,
                 errors,
                 fields: block.fields,
                 global,
@@ -349,8 +285,9 @@ export const promise = async ({
       break
     }
 
-    case 'row':
-    case 'collapsible': {
+    case 'collapsible':
+
+    case 'row': {
       await traverseFields({
         id,
         collection,
@@ -358,7 +295,6 @@ export const promise = async ({
         data,
         doc,
         docWithLocales,
-        duplicate,
         errors,
         fields: field.fields,
         global,
@@ -376,16 +312,119 @@ export const promise = async ({
       break
     }
 
+    case 'group': {
+      if (typeof siblingData[field.name] !== 'object') {
+        siblingData[field.name] = {}
+      }
+      if (typeof siblingDoc[field.name] !== 'object') {
+        siblingDoc[field.name] = {}
+      }
+      if (typeof siblingDocWithLocales[field.name] !== 'object') {
+        siblingDocWithLocales[field.name] = {}
+      }
+
+      await traverseFields({
+        id,
+        collection,
+        context,
+        data,
+        doc,
+        docWithLocales,
+        errors,
+        fields: field.fields,
+        global,
+        mergeLocaleActions,
+        operation,
+        path: fieldPath,
+        req,
+        schemaPath: fieldSchemaPath,
+        siblingData: siblingData[field.name] as JsonObject,
+        siblingDoc: siblingDoc[field.name] as JsonObject,
+        siblingDocWithLocales: siblingDocWithLocales[field.name] as JsonObject,
+        skipValidation: skipValidationFromHere,
+      })
+
+      break
+    }
+    case 'point': {
+      // Transform point data for storage
+      if (
+        Array.isArray(siblingData[field.name]) &&
+        siblingData[field.name][0] !== null &&
+        siblingData[field.name][1] !== null
+      ) {
+        siblingData[field.name] = {
+          type: 'Point',
+          coordinates: [
+            parseFloat(siblingData[field.name][0]),
+            parseFloat(siblingData[field.name][1]),
+          ],
+        }
+      }
+
+      break
+    }
+
+    case 'richText': {
+      if (!field?.editor) {
+        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+      }
+      if (typeof field?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
+
+      const editor: RichTextAdapter = field?.editor
+
+      if (editor?.hooks?.beforeChange?.length) {
+        await editor.hooks.beforeChange.reduce(async (priorHook, currentHook) => {
+          await priorHook
+
+          const hookedValue = await currentHook({
+            collection,
+            context,
+            data,
+            docWithLocales,
+            errors,
+            field,
+            global,
+            mergeLocaleActions,
+            operation,
+            originalDoc: doc,
+            path: fieldPath,
+            previousSiblingDoc: siblingDoc,
+            previousValue: siblingDoc[field.name],
+            req,
+            schemaPath: parentSchemaPath,
+            siblingData,
+            siblingDocWithLocales,
+            skipValidation,
+            value: siblingData[field.name],
+          })
+
+          if (hookedValue !== undefined) {
+            siblingData[field.name] = hookedValue
+          }
+        }, Promise.resolve())
+      }
+
+      break
+    }
+
     case 'tab': {
       let tabSiblingData = siblingData
       let tabSiblingDoc = siblingDoc
       let tabSiblingDocWithLocales = siblingDocWithLocales
 
       if (tabHasName(field)) {
-        if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {}
-        if (typeof siblingDoc[field.name] !== 'object') siblingDoc[field.name] = {}
-        if (typeof siblingDocWithLocales[field.name] !== 'object')
+        if (typeof siblingData[field.name] !== 'object') {
+          siblingData[field.name] = {}
+        }
+        if (typeof siblingDoc[field.name] !== 'object') {
+          siblingDoc[field.name] = {}
+        }
+        if (typeof siblingDocWithLocales[field.name] !== 'object') {
           siblingDocWithLocales[field.name] = {}
+        }
 
         tabSiblingData = siblingData[field.name] as JsonObject
         tabSiblingDoc = siblingDoc[field.name] as JsonObject
@@ -399,7 +438,6 @@ export const promise = async ({
         data,
         doc,
         docWithLocales,
-        duplicate,
         errors,
         fields: field.fields,
         global,
@@ -425,7 +463,6 @@ export const promise = async ({
         data,
         doc,
         docWithLocales,
-        duplicate,
         errors,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         global,
@@ -439,52 +476,6 @@ export const promise = async ({
         siblingDocWithLocales,
         skipValidation: skipValidationFromHere,
       })
-
-      break
-    }
-
-    case 'richText': {
-      if (!field?.editor) {
-        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
-      }
-      if (typeof field?.editor === 'function') {
-        throw new Error('Attempted to access unsanitized rich text editor.')
-      }
-
-      const editor: RichTextAdapter = field?.editor
-
-      if (editor?.hooks?.beforeChange?.length) {
-        await editor.hooks.beforeChange.reduce(async (priorHook, currentHook) => {
-          await priorHook
-
-          const hookedValue = await currentHook({
-            collection,
-            context,
-            data,
-            docWithLocales,
-            duplicate,
-            errors,
-            field,
-            global,
-            mergeLocaleActions,
-            operation,
-            originalDoc: doc,
-            path: fieldPath,
-            previousSiblingDoc: siblingDoc,
-            previousValue: siblingDoc[field.name],
-            req,
-            schemaPath: parentSchemaPath,
-            siblingData,
-            siblingDocWithLocales,
-            skipValidation,
-            value: siblingData[field.name],
-          })
-
-          if (hookedValue !== undefined) {
-            siblingData[field.name] = hookedValue
-          }
-        }, Promise.resolve())
-      }
 
       break
     }

@@ -6,12 +6,14 @@ import type {
   RequiredDataFromCollectionSlug,
 } from 'payload'
 
+import path from 'path'
 import { Forbidden } from 'payload'
+import { fileURLToPath } from 'url'
 
 import type { FullyRestricted, Post } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import configPromise, { requestHeaders } from './config.js'
+import { requestHeaders } from './config.js'
 import {
   firstArrayText,
   fullyRestrictedSlug,
@@ -26,13 +28,14 @@ import {
 } from './shared.js'
 
 let payload: Payload
-
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 describe('Access Control', () => {
   let post1: Post
   let restricted: FullyRestricted
 
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(configPromise))
+    ;({ payload } = await initPayloadInt(dirname))
   })
 
   beforeEach(async () => {
@@ -170,6 +173,47 @@ describe('Access Control', () => {
         const retrievedDoc = await payload.findByID({ id, collection: slug, overrideAccess: false })
 
         expect(retrievedDoc.restrictedField).toBeUndefined()
+      })
+
+      it('should error when querying field without read access', async () => {
+        const { id } = await createDoc({ restrictedField: 'restricted' })
+
+        await expect(
+          async () =>
+            await payload.find({
+              collection: slug,
+              overrideAccess: false,
+              where: {
+                and: [
+                  {
+                    id: { equals: id },
+                  },
+                  {
+                    restrictedField: {
+                      equals: 'restricted',
+                    },
+                  },
+                ],
+              },
+            }),
+        ).rejects.toThrow('The following path cannot be queried: restrictedField')
+      })
+
+      it('should respect access control for join request where queries of relationship properties', async () => {
+        const post = await createDoc({})
+        await createDoc({ post: post.id, name: 'test' }, 'relation-restricted')
+        await expect(
+          async () =>
+            await payload.find({
+              collection: 'relation-restricted',
+              overrideAccess: false,
+              where: {
+                'post.restrictedField': {
+                  equals: 'restricted',
+                },
+              },
+            }),
+        ).rejects.toThrow('The following path cannot be queried: restrictedField')
       })
 
       it('field without read access should not show when overrideAccess: true', async () => {

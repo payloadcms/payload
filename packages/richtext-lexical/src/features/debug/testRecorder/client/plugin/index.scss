@@ -1,0 +1,53 @@
+@import '../../../../../scss/styles';
+
+@layer payload-default {
+  .test-recorder-output {
+    margin: 20px auto 20px auto;
+    width: 100%;
+  }
+  .test-recorder-toolbar {
+    display: flex;
+  }
+
+  .test-recorder-button {
+    position: relative;
+    display: block;
+    font-size: 10px;
+    padding: 6px 6px;
+    border-radius: $style-radius-m;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.4);
+    background-color: #222;
+    color: white;
+    transition: box-shadow 50ms ease-out;
+  }
+
+  .test-recorder-button:active {
+    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.4);
+  }
+
+  .test-recorder-button + .test-recorder-button {
+    margin-left: 4px;
+  }
+
+  .test-recorder-button::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    display: block;
+    background-size: contain;
+    filter: invert(1);
+  }
+  #test-recorder-button {
+    position: relative;
+  }
+
+  #test-recorder-button-snapshot {
+    margin-right: auto;
+  }
+}

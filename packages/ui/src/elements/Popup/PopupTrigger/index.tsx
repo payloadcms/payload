@@ -10,13 +10,24 @@ export type PopupTriggerProps = {
   button: React.ReactNode
   buttonType: 'custom' | 'default' | 'none'
   className?: string
+  disabled?: boolean
+  noBackground?: boolean
   setActive: (active: boolean) => void
+  size?: 'large' | 'medium' | 'small'
 }
 
 export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
-  const { active, button, buttonType, className, setActive } = props
+  const { active, button, buttonType, className, disabled, noBackground, setActive, size } = props
 
-  const classes = [baseClass, className, `${baseClass}--${buttonType}`].filter(Boolean).join(' ')
+  const classes = [
+    baseClass,
+    className,
+    `${baseClass}--${buttonType}`,
+    !noBackground && `${baseClass}--background`,
+    size && `${baseClass}--size-${size}`,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   const handleClick = () => {
     setActive(!active)
@@ -32,7 +43,9 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
         className={classes}
         onClick={handleClick}
         onKeyDown={(e) => {
-          if (e.key === 'Enter') handleClick()
+          if (e.key === 'Enter') {
+            handleClick()
+          }
         }}
         role="button"
         tabIndex={0}
@@ -43,7 +56,13 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
   }
 
   return (
-    <button className={classes} onClick={() => setActive(!active)} tabIndex={0} type="button">
+    <button
+      className={classes}
+      disabled={disabled}
+      onClick={handleClick}
+      tabIndex={0}
+      type="button"
+    >
       {button}
     </button>
   )

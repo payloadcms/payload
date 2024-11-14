@@ -4,8 +4,17 @@ import httpStatus from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
 import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequest } from '../../types/index.js'
-import type { Collection, DataFromCollectionSlug } from '../config/types.js'
+import type {
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  TransformCollectionWithSelect,
+} from '../../types/index.js'
+import type {
+  Collection,
+  DataFromCollectionSlug,
+  SelectFromCollectionSlug,
+} from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
@@ -14,10 +23,14 @@ import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
+import { beforeDuplicate } from '../../fields/hooks/beforeDuplicate/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
+import { generateFileData } from '../../uploads/generateFileData.js'
+import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utils.js'
@@ -25,21 +38,27 @@ import { buildAfterOperation } from './utils.js'
 export type Arguments = {
   collection: Collection
   depth?: number
+  disableTransaction?: boolean
   draft?: boolean
   id: number | string
   overrideAccess?: boolean
+  populate?: PopulateType
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
 }
 
-export const duplicateOperation = async <TSlug extends CollectionSlug>(
+export const duplicateOperation = async <
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   incomingArgs: Arguments,
-): Promise<DataFromCollectionSlug<TSlug>> => {
+): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
   const operation = 'create'
 
   try {
-    const shouldCommit = await initTransaction(args.req)
+    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -64,8 +83,10 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
       depth,
       draft: draftArg = true,
       overrideAccess,
+      populate,
       req: { fallbackLocale, locale: localeArg, payload },
       req,
+      select,
       showHiddenFields,
     } = args
 
@@ -93,7 +114,7 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
       where: combineQueries({ id: { equals: id } }, accessResults),
     }
 
-    const docWithLocales = await getLatestCollectionVersion({
+    let docWithLocales = await getLatestCollectionVersion({
       id,
       config: collectionConfig,
       payload,
@@ -101,12 +122,25 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
       req,
     })
 
-    if (!docWithLocales && !hasWherePolicy) throw new NotFound(req.t)
-    if (!docWithLocales && hasWherePolicy) throw new Forbidden(req.t)
+    if (!docWithLocales && !hasWherePolicy) {
+      throw new NotFound(req.t)
+    }
+    if (!docWithLocales && hasWherePolicy) {
+      throw new Forbidden(req.t)
+    }
 
     // remove the createdAt timestamp and id to rely on the db to set the default it
     delete docWithLocales.createdAt
     delete docWithLocales.id
+
+    docWithLocales = await beforeDuplicate({
+      id,
+      collection: collectionConfig,
+      context: req.context,
+      doc: docWithLocales,
+      overrideAccess,
+      req,
+    })
 
     // for version enabled collections, override the current status with draft, unless draft is explicitly set to false
     if (shouldSaveDraft) {
@@ -115,7 +149,7 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
 
     let result
 
-    const originalDoc = await afterRead({
+    let originalDoc = await afterRead({
       collection: collectionConfig,
       context: req.context,
       depth: 0,
@@ -128,6 +162,18 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
       req,
       showHiddenFields: true,
     })
+
+    const { data: newFileData, files: filesToUpload } = await generateFileData({
+      collection: args.collection,
+      config: req.payload.config,
+      data: originalDoc,
+      operation: 'create',
+      overwriteExistingFiles: 'forceDisable',
+      req,
+      throwOnMissingFile: true,
+    })
+
+    originalDoc = newFileData
 
     // /////////////////////////////////////
     // Create Access
@@ -201,7 +247,6 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
       data,
       doc: originalDoc,
       docWithLocales,
-      duplicate: true,
       global: null,
       operation,
       req,
@@ -218,11 +263,22 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
     // Create / Update
     // /////////////////////////////////////
 
-    const versionDoc = await payload.db.create({
+    // /////////////////////////////////////
+    // Write files to local storage
+    // /////////////////////////////////////
+
+    if (!collectionConfig.upload.disableLocalStorage) {
+      await uploadFiles(payload, filesToUpload, req)
+    }
+
+    let versionDoc = await payload.db.create({
       collection: collectionConfig.slug,
       data: result,
       req,
+      select,
     })
+
+    versionDoc = sanitizeInternalFields(versionDoc)
 
     // /////////////////////////////////////
     // Create version
@@ -232,10 +288,7 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
       result = await saveVersion({
         id: versionDoc.id,
         collection: collectionConfig,
-        docWithLocales: {
-          ...versionDoc,
-          createdAt: result.createdAt,
-        },
+        docWithLocales: versionDoc,
         draft: shouldSaveDraft,
         payload,
         req,
@@ -256,7 +309,9 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
       global: null,
       locale: localeArg,
       overrideAccess,
+      populate,
       req,
+      select,
       showHiddenFields,
     })
 
@@ -324,7 +379,9 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return result
   } catch (error: unknown) {

@@ -1,9 +1,11 @@
-import type { AdminViewComponent } from 'payload'
+import type { AdminViewComponent, PayloadServerReactComponent } from 'payload'
 
-import { Button, Gutter } from '@payloadcms/ui'
+import { Button } from '@payloadcms/ui'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React from 'react'
 
+import { FormHeader } from '../../elements/FormHeader/index.js'
 import './index.scss'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
@@ -12,7 +14,9 @@ export { generateUnauthorizedMetadata } from './meta.js'
 
 const baseClass = 'unauthorized'
 
-export const UnauthorizedView: AdminViewComponent = ({ initPageResult }) => {
+export const UnauthorizedView: PayloadServerReactComponent<AdminViewComponent> = ({
+  initPageResult,
+}) => {
   const {
     req: {
       i18n,
@@ -21,18 +25,31 @@ export const UnauthorizedView: AdminViewComponent = ({ initPageResult }) => {
           admin: {
             routes: { logout: logoutRoute },
           },
+          routes: { admin: adminRoute },
         },
       },
     },
   } = initPageResult
 
   return (
-    <Gutter className={baseClass}>
-      <h2>{i18n.t('error:unauthorized')}</h2>
-      <p>{i18n.t('error:notAllowedToAccessPage')}</p>
-      <Button Link={Link} className={`${baseClass}__button`} el="link" to={logoutRoute}>
+    <div className={baseClass}>
+      <FormHeader
+        description={i18n.t('error:notAllowedToAccessPage')}
+        heading={i18n.t('error:unauthorized')}
+      />
+
+      <Button
+        className={`${baseClass}__button`}
+        el="link"
+        Link={Link}
+        size="large"
+        to={formatAdminURL({
+          adminRoute,
+          path: logoutRoute,
+        })}
+      >
         {i18n.t('authentication:logOut')}
       </Button>
-    </Gutter>
+    </div>
   )
 }

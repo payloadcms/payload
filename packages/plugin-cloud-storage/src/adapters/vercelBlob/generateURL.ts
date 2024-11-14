@@ -1,6 +1,6 @@
-import type { GenerateURL } from '@payloadcms/plugin-cloud-storage/types'
-
 import path from 'path'
+
+import type { GenerateURL } from '../../types.js'
 
 type GenerateUrlArgs = {
   baseUrl: string

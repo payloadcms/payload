@@ -6,7 +6,8 @@ import { buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
-import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
@@ -18,6 +19,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     page,
     pagination,
     req = {} as PayloadRequest,
+    select,
     skip,
     sort: sortArg,
     where,
@@ -25,6 +27,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
 ) {
   const Model = this.versions[global]
   const versionFields = buildVersionGlobalFields(
+    this.payload.config,
     this.payload.globals.config.find(({ slug }) => slug === global),
   )
   const options = {
@@ -64,16 +67,21 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
-    offset: skip,
+    limit,
     options,
     page,
     pagination,
+    projection: buildProjectionFromSelect({ adapter: this, fields: versionFields, select }),
     sort,
     useEstimatedCount,
   }
 
-  if (locale && locale !== 'all' && locale !== '*') {
-    paginationOptions.collation = { locale, strength: 1 }
+  if (this.collation) {
+    const defaultLocale = 'en'
+    paginationOptions.collation = {
+      locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale,
+      ...this.collation,
+    }
   }
 
   if (!useEstimatedCount && Object.keys(query).length === 0 && this.disableIndexHints !== true) {

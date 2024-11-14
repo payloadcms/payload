@@ -7,9 +7,8 @@ import { Archive } from '../blocks/ArchiveBlock/index.js'
 import { CallToAction } from '../blocks/CallToAction/index.js'
 import { Content } from '../blocks/Content/index.js'
 import { MediaBlock } from '../blocks/MediaBlock/index.js'
-import CollectionLivePreviewButton from '../components/CollectionLivePreviewButton/index.js'
 import { hero } from '../fields/hero.js'
-import { pagesSlug, postsSlug, tenantsSlug } from '../shared.js'
+import { mediaSlug, pagesSlug, postsSlug, tenantsSlug } from '../shared.js'
 
 export const Pages: CollectionConfig = {
   slug: pagesSlug,
@@ -24,9 +23,11 @@ export const Pages: CollectionConfig = {
     defaultColumns: ['id', 'title', 'slug', 'createdAt'],
     components: {
       views: {
-        Edit: {
-          LivePreview: {
-            actions: [CollectionLivePreviewButton],
+        edit: {
+          livePreview: {
+            actions: [
+              '/components/CollectionLivePreviewButton/index.js#CollectionLivePreviewButton',
+            ],
           },
         },
       },
@@ -186,7 +187,7 @@ export const Pages: CollectionConfig = {
         {
           name: 'image',
           type: 'upload',
-          relationTo: 'media',
+          relationTo: mediaSlug,
         },
       ],
     },

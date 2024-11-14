@@ -4,12 +4,11 @@ import { sanitizeFields, withNullableJSONSchemaType } from 'payload'
 
 import type { AdapterArguments } from './types.js'
 
-import { RichTextCell } from './cell/index.js'
 import { richTextRelationshipPromise } from './data/richTextRelationshipPromise.js'
 import { richTextValidate } from './data/validation.js'
+import { elements as elementTypes } from './field/elements/index.js'
 import { transformExtraFields } from './field/elements/link/utilities.js'
-import { RichTextField } from './field/index.js'
-import { getGenerateComponentMap } from './generateComponentMap.js'
+import { defaultLeaves as leafTypes } from './field/leaves/index.js'
 import { getGenerateSchemaMap } from './generateSchemaMap.js'
 
 export function slateEditor(
@@ -30,6 +29,7 @@ export function slateEditor(
     args.admin.link.fields = await sanitizeFields({
       config: config as unknown as Config,
       fields: transformExtraFields(args.admin?.link?.fields, config),
+      parentIsLocalized: false,
       validRelationships,
     })
 
@@ -39,6 +39,7 @@ export function slateEditor(
           args.admin.upload.collections[collection].fields = await sanitizeFields({
             config: config as unknown as Config,
             fields: args.admin?.upload?.collections[collection]?.fields,
+            parentIsLocalized: false,
             validRelationships,
           })
         }
@@ -46,9 +47,67 @@ export function slateEditor(
     }
 
     return {
-      CellComponent: RichTextCell,
-      FieldComponent: RichTextField,
-      generateComponentMap: getGenerateComponentMap(args),
+      CellComponent: '@payloadcms/richtext-slate/rsc#RscEntrySlateCell',
+      FieldComponent: {
+        path: '@payloadcms/richtext-slate/rsc#RscEntrySlateField',
+        serverProps: {
+          args,
+        },
+      },
+      generateImportMap: ({ addToImportMap }) => {
+        addToImportMap('@payloadcms/richtext-slate/rsc#RscEntrySlateCell')
+        addToImportMap('@payloadcms/richtext-slate/rsc#RscEntrySlateField')
+        Object.values(leafTypes).forEach((leaf) => {
+          if (leaf.Button) {
+            addToImportMap(leaf.Button)
+          }
+          if (leaf.Leaf) {
+            addToImportMap(leaf.Leaf)
+          }
+          if (Array.isArray(leaf.plugins) && leaf.plugins?.length) {
+            addToImportMap(leaf.plugins)
+          }
+        })
+        args?.admin?.leaves?.forEach((leaf) => {
+          if (typeof leaf === 'object') {
+            if (leaf.Button) {
+              addToImportMap(leaf.Button)
+            }
+            if (leaf.Leaf) {
+              addToImportMap(leaf.Leaf)
+            }
+            if (Array.isArray(leaf.plugins) && leaf.plugins?.length) {
+              addToImportMap(leaf.plugins)
+            }
+          }
+        })
+
+        Object.values(elementTypes).forEach((element) => {
+          if (element.Button) {
+            addToImportMap(element.Button)
+          }
+          if (element.Element) {
+            addToImportMap(element.Element)
+          }
+          if (Array.isArray(element.plugins) && element.plugins?.length) {
+            addToImportMap(element.plugins)
+          }
+        })
+
+        args?.admin?.elements?.forEach((element) => {
+          if (typeof element === 'object') {
+            if (element.Button) {
+              addToImportMap(element.Button)
+            }
+            if (element.Element) {
+              addToImportMap(element.Element)
+            }
+            if (Array.isArray(element.plugins) && element.plugins?.length) {
+              addToImportMap(element.plugins)
+            }
+          }
+        })
+      },
       generateSchemaMap: getGenerateSchemaMap(args),
       graphQLPopulationPromises({
         context,
@@ -100,6 +159,7 @@ export function slateEditor(
             findMany,
             flattenLocales,
             overrideAccess,
+            populate,
             populationPromises,
             req,
             showHiddenFields,
@@ -123,6 +183,7 @@ export function slateEditor(
                 findMany,
                 flattenLocales,
                 overrideAccess,
+                populateArg: populate,
                 populationPromises,
                 req,
                 showHiddenFields,
@@ -145,20 +206,16 @@ export function slateEditor(
   }
 }
 
-export { ElementButton } from './field/elements/Button.js'
-
-export { toggleElement } from './field/elements/toggle.js'
-export { LeafButton } from './field/leaves/Button.js'
-export { useLeaf } from './field/providers/LeafProvider.js'
-
 export type {
   AdapterArguments,
   ElementNode,
-  FieldProps,
   RichTextCustomElement,
   RichTextCustomLeaf,
   RichTextElement,
   RichTextLeaf,
+  RichTextPlugin,
+  RichTextPluginComponent,
+  SlateFieldProps,
   TextNode,
 } from './types.js'
 

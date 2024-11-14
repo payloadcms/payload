@@ -21,7 +21,7 @@ import { envPaths } from './envPaths.js'
 const createPlainObject = <T = Record<string, unknown>>(): T => Object.create(null)
 
 const checkValueType = (key: string, value: unknown): void => {
-  const nonJsonTypes = new Set(['undefined', 'symbol', 'function'])
+  const nonJsonTypes = new Set(['function', 'symbol', 'undefined'])
 
   const type = typeof value
 
@@ -76,15 +76,9 @@ export class Conf<T extends Record<string, any> = Record<string, unknown>>
   }
 
   private _write(value: T): void {
-    const data: Uint8Array | string = this._serialize(value)
+    const data: string | Uint8Array = this._serialize(value)
 
     fs.writeFileSync(this.path, data, { mode: this.#options.configFileMode })
-  }
-
-  *[Symbol.iterator](): IterableIterator<[keyof T, T[keyof T]]> {
-    for (const [key, value] of Object.entries(this.store)) {
-      yield [key, value]
-    }
   }
 
   /**
@@ -143,6 +137,12 @@ export class Conf<T extends Record<string, any> = Record<string, unknown>>
     }
 
     this.store = store
+  }
+
+  *[Symbol.iterator](): IterableIterator<[keyof T, T[keyof T]]> {
+    for (const [key, value] of Object.entries(this.store)) {
+      yield [key, value]
+    }
   }
   get size(): number {
     return Object.keys(this.store).length

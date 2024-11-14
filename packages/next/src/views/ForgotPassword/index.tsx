@@ -1,10 +1,11 @@
 import type { AdminViewProps } from 'payload'
 
-import { Button, Translation } from '@payloadcms/ui'
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import { Button } from '@payloadcms/ui'
+import { formatAdminURL, Translation } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'
 
+import { FormHeader } from '../../elements/FormHeader/index.js'
 import { ForgotPasswordForm } from './ForgotPasswordForm/index.js'
 
 export { generateForgotPasswordMetadata } from './meta.js'
@@ -31,27 +32,29 @@ export const ForgotPasswordView: React.FC<AdminViewProps> = ({ initPageResult })
   if (user) {
     return (
       <Fragment>
-        <h1>{i18n.t('authentication:alreadyLoggedIn')}</h1>
-        <p>
-          <Translation
-            elements={{
-              '0': ({ children }) => (
-                <Link
-                  href={formatAdminURL({
-                    adminRoute,
-                    path: accountRoute,
-                  })}
-                >
-                  {children}
-                </Link>
-              ),
-            }}
-            i18nKey="authentication:loggedInChangePassword"
-            t={i18n.t}
-          />
-        </p>
-        <br />
-        <Button Link={Link} buttonStyle="secondary" el="link" to={adminRoute}>
+        <FormHeader
+          description={
+            <Translation
+              elements={{
+                '0': ({ children }) => (
+                  <Link
+                    href={formatAdminURL({
+                      adminRoute,
+                      path: accountRoute,
+                    })}
+                    prefetch={false}
+                  >
+                    {children}
+                  </Link>
+                ),
+              }}
+              i18nKey="authentication:loggedInChangePassword"
+              t={i18n.t}
+            />
+          }
+          heading={i18n.t('authentication:alreadyLoggedIn')}
+        />
+        <Button buttonStyle="secondary" el="link" Link={Link} size="large" to={adminRoute}>
           {i18n.t('general:backToDashboard')}
         </Button>
       </Fragment>
@@ -66,6 +69,7 @@ export const ForgotPasswordView: React.FC<AdminViewProps> = ({ initPageResult })
           adminRoute,
           path: loginRoute,
         })}
+        prefetch={false}
       >
         {i18n.t('authentication:backToLogin')}
       </Link>

@@ -1,19 +1,19 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { JsonObject, Operation, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { RequestContext } from '../../../index.js'
+import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
 
 import { ValidationError } from '../../../errors/index.js'
 import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
-
-type Args<T extends JsonObject> = {
-  collection: SanitizedCollectionConfig | null
+export type Args<T extends JsonObject> = {
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: T
   doc: T
   docWithLocales: JsonObject
-  duplicate?: boolean
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
   id?: number | string
   operation: Operation
   req: PayloadRequest
@@ -26,7 +26,6 @@ type Args<T extends JsonObject> = {
  * - Execute field hooks
  * - Validate data
  * - Transform data for storage
- * - beforeDuplicate hooks (if duplicate)
  * - Unflatten locales. The input `data` is the normal document for one locale. The output result will become the document with locales.
  */
 export const beforeChange = async <T extends JsonObject>({
@@ -36,7 +35,6 @@ export const beforeChange = async <T extends JsonObject>({
   data: incomingData,
   doc,
   docWithLocales,
-  duplicate = false,
   global,
   operation,
   req,
@@ -44,7 +42,7 @@ export const beforeChange = async <T extends JsonObject>({
 }: Args<T>): Promise<T> => {
   const data = deepCopyObjectSimple(incomingData)
   const mergeLocaleActions = []
-  const errors: { field: string; message: string }[] = []
+  const errors: ValidationFieldError[] = []
 
   await traverseFields({
     id,
@@ -53,7 +51,6 @@ export const beforeChange = async <T extends JsonObject>({
     data,
     doc,
     docWithLocales,
-    duplicate,
     errors,
     fields: collection?.fields || global?.fields,
     global,
@@ -71,6 +68,7 @@ export const beforeChange = async <T extends JsonObject>({
   if (errors.length > 0) {
     throw new ValidationError(
       {
+        id,
         collection: collection?.slug,
         errors,
         global: global?.slug,

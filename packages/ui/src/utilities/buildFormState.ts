@@ -1,204 +1,274 @@
-import type { DocumentPreferences, Field, FormState, PayloadRequest, TypeWithID } from 'payload'
+import type { I18n, I18nClient } from '@payloadcms/translations'
+import type {
+  BuildFormStateArgs,
+  ClientConfig,
+  ClientUser,
+  ErrorResult,
+  FieldSchemaMap,
+  FormState,
+  SanitizedConfig,
+} from 'payload'
 
+import { createClientConfig, formatErrors } from 'payload'
 import { reduceFieldsToValues } from 'payload/shared'
 
-import type { BuildFormStateArgs } from '../forms/buildStateFromSchema/index.js'
-import type { FieldSchemaMap } from './buildFieldSchemaMap/types.js'
-
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import {} from '../exports/client/index.js'
-import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
+import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
+import { renderField } from '../forms/fieldSchemasToFormState/renderField.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
+import { handleFormStateLocking } from './handleFormStateLocking.js'
 
-let cached = global._payload_fieldSchemaMap
+let cachedFieldMap = global._payload_fieldMap
+let cachedClientConfig = global._payload_clientConfig
 
-if (!cached) {
-  cached = global._payload_fieldSchemaMap = null
+if (!cachedFieldMap) {
+  cachedFieldMap = global._payload_fieldMap = null
 }
 
-export const getFieldSchemaMap = (req: PayloadRequest): FieldSchemaMap => {
-  if (cached && process.env.NODE_ENV !== 'development') {
-    return cached
+if (!cachedClientConfig) {
+  cachedClientConfig = global._payload_clientConfig = null
+}
+
+export const getFieldSchemaMap = (args: {
+  collectionSlug?: string
+  config: SanitizedConfig
+  globalSlug?: string
+  i18n: I18nClient
+}): FieldSchemaMap => {
+  const { collectionSlug, config, globalSlug, i18n } = args
+
+  if (process.env.NODE_ENV !== 'development') {
+    if (!cachedFieldMap) {
+      cachedFieldMap = new Map()
+    }
+    const cachedEntityFieldMap = cachedFieldMap.get(collectionSlug || globalSlug)
+    if (cachedEntityFieldMap) {
+      return cachedEntityFieldMap
+    }
   }
 
-  cached = buildFieldSchemaMap({
-    config: req.payload.config,
-    i18n: req.i18n,
+  const { fieldSchemaMap: entityFieldMap } = buildFieldSchemaMap({
+    collectionSlug,
+    config,
+    globalSlug,
+    i18n: i18n as I18n,
   })
 
-  return cached
+  if (process.env.NODE_ENV !== 'development') {
+    cachedFieldMap.set(collectionSlug || globalSlug, entityFieldMap)
+  }
+
+  return entityFieldMap
 }
 
-export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<FormState> => {
-  const reqData: BuildFormStateArgs = (req.data || {}) as BuildFormStateArgs
-  const { collectionSlug, formState, globalSlug, locale, operation, schemaPath } = reqData
+export const getClientConfig = (args: {
+  config: SanitizedConfig
+  i18n: I18nClient
+}): ClientConfig => {
+  const { config, i18n } = args
+
+  if (cachedClientConfig && process.env.NODE_ENV !== 'development') {
+    return cachedClientConfig
+  }
+
+  cachedClientConfig = createClientConfig({
+    config,
+    i18n,
+  })
+
+  return cachedClientConfig
+}
+
+type BuildFormStateSuccessResult = {
+  clientConfig?: ClientConfig
+  errors?: never
+  indexPath?: string
+  lockedState?: { isLocked: boolean; lastEditedAt: string; user: ClientUser | number | string }
+  state: FormState
+}
+
+type BuildFormStateErrorResult = {
+  lockedState?: never
+  state?: never
+} & (
+  | {
+      message: string
+    }
+  | ErrorResult
+)
+
+export type BuildFormStateResult = BuildFormStateErrorResult | BuildFormStateSuccessResult
+
+export const buildFormStateHandler = async (
+  args: BuildFormStateArgs,
+): Promise<BuildFormStateResult> => {
+  const { req } = args
 
   const incomingUserSlug = req.user?.collection
   const adminUserSlug = req.payload.config.admin.user
 
-  // If we have a user slug, test it against the functions
-  if (incomingUserSlug) {
-    const adminAccessFunction = req.payload.collections[incomingUserSlug].config.access?.admin
+  try {
+    // If we have a user slug, test it against the functions
+    if (incomingUserSlug) {
+      const adminAccessFunction = req.payload.collections[incomingUserSlug].config.access?.admin
 
-    // Run the admin access function from the config if it exists
-    if (adminAccessFunction) {
-      const canAccessAdmin = await adminAccessFunction({ req })
+      // Run the admin access function from the config if it exists
+      if (adminAccessFunction) {
+        const canAccessAdmin = await adminAccessFunction({ req })
 
-      if (!canAccessAdmin) {
+        if (!canAccessAdmin) {
+          throw new Error('Unauthorized')
+        }
+        // Match the user collection to the global admin config
+      } else if (adminUserSlug !== incomingUserSlug) {
         throw new Error('Unauthorized')
       }
-      // Match the user collection to the global admin config
-    } else if (adminUserSlug !== incomingUserSlug) {
-      throw new Error('Unauthorized')
-    }
-  } else {
-    const hasUsers = await req.payload.find({
-      collection: adminUserSlug,
-      depth: 0,
-      limit: 1,
-      pagination: false,
-    })
-    // If there are users, we should not allow access because of /create-first-user
-    if (hasUsers.docs.length) {
-      throw new Error('Unauthorized')
-    }
-  }
-
-  const fieldSchemaMap = getFieldSchemaMap(req)
-
-  const id = collectionSlug ? reqData.id : undefined
-  const schemaPathSegments = schemaPath && schemaPath.split('.')
-
-  let fieldSchema: Field[]
-
-  if (schemaPathSegments.length === 1) {
-    if (req.payload.collections[schemaPath]) {
-      fieldSchema = req.payload.collections[schemaPath].config.fields
     } else {
-      fieldSchema = req.payload.config.globals.find((global) => global.slug === schemaPath)?.fields
-    }
-  } else if (fieldSchemaMap.has(schemaPath)) {
-    fieldSchema = fieldSchemaMap.get(schemaPath)
-  }
+      const hasUsers = await req.payload.find({
+        collection: adminUserSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
+      })
 
-  if (!fieldSchema) {
-    throw new Error('Could not find field schema for given path')
-  }
-
-  let docPreferences = reqData.docPreferences
-  let data = reqData.data
-
-  const promises: {
-    data?: Promise<void>
-    preferences?: Promise<void>
-  } = {}
-
-  // If the request does not include doc preferences,
-  // we should fetch them. This is useful for DocumentInfoProvider
-  // as it reduces the amount of client-side fetches necessary
-  // when we fetch data for the Edit view
-  if (!docPreferences) {
-    let preferencesKey
-
-    if (collectionSlug && id) {
-      preferencesKey = `collection-${collectionSlug}-${id}`
-    }
-
-    if (globalSlug) {
-      preferencesKey = `global-${globalSlug}`
-    }
-
-    if (preferencesKey) {
-      const fetchPreferences = async () => {
-        const preferencesResult = (await req.payload.find({
-          collection: 'payload-preferences',
-          depth: 0,
-          limit: 1,
-          where: {
-            key: {
-              equals: preferencesKey,
-            },
-          },
-        })) as unknown as { docs: { value: DocumentPreferences }[] }
-
-        if (preferencesResult?.docs?.[0]?.value) docPreferences = preferencesResult.docs[0].value
+      // If there are users, we should not allow access because of /create-first-user
+      if (hasUsers.docs.length) {
+        throw new Error('Unauthorized')
       }
-
-      promises.preferences = fetchPreferences()
     }
+
+    const res = await buildFormState(args)
+    return res
+  } catch (err) {
+    req.payload.logger.error({ err, msg: `There was an error building form state` })
+
+    if (err.message === 'Could not find field schema for given path') {
+      return {
+        message: err.message,
+      }
+    }
+
+    if (err.message === 'Unauthorized') {
+      return null
+    }
+
+    return formatErrors(err)
+  }
+}
+
+export const buildFormState = async (
+  args: BuildFormStateArgs,
+): Promise<BuildFormStateSuccessResult> => {
+  const {
+    id: idFromArgs,
+    collectionSlug,
+    data: incomingData,
+    docPermissions,
+    docPreferences,
+    formState,
+    globalSlug,
+    operation,
+    renderAllFields,
+    req,
+    req: {
+      i18n,
+      payload,
+      payload: { config },
+    },
+    returnLockStatus,
+    schemaPath = collectionSlug || globalSlug,
+    updateLastEdited,
+  } = args
+
+  let data = incomingData
+
+  if (!collectionSlug && !globalSlug) {
+    throw new Error('Either collectionSlug or globalSlug must be provided')
+  }
+
+  const fieldSchemaMap = getFieldSchemaMap({
+    collectionSlug,
+    config,
+    globalSlug,
+    i18n,
+  })
+
+  const id = collectionSlug ? idFromArgs : undefined
+  const fieldOrEntityConfig = fieldSchemaMap.get(schemaPath)
+
+  if (!fieldOrEntityConfig) {
+    throw new Error(`Could not find "${schemaPath}" in the fieldSchemaMap`)
+  }
+
+  if (
+    (!('fields' in fieldOrEntityConfig) ||
+      !fieldOrEntityConfig.fields ||
+      !fieldOrEntityConfig.fields.length) &&
+    'type' in fieldOrEntityConfig &&
+    fieldOrEntityConfig.type !== 'blocks'
+  ) {
+    throw new Error(
+      `The field found in fieldSchemaMap for "${schemaPath}" does not contain any subfields.`,
+    )
   }
 
   // If there is a form state,
   // then we can deduce data from that form state
-  if (formState) data = reduceFieldsToValues(formState, true)
-
-  // If we do not have data at this point,
-  // we can fetch it. This is useful for DocumentInfoProvider
-  // to reduce the amount of fetches required
-  if (!data) {
-    const fetchData = async () => {
-      let resolvedData: Record<string, unknown> | TypeWithID
-
-      if (collectionSlug && id) {
-        resolvedData = await req.payload.findByID({
-          id,
-          collection: collectionSlug,
-          depth: 0,
-          draft: true,
-          fallbackLocale: null,
-          locale,
-          overrideAccess: false,
-          user: req.user,
-        })
-      }
-
-      if (globalSlug && schemaPath === globalSlug) {
-        resolvedData = await req.payload.findGlobal({
-          slug: globalSlug,
-          depth: 0,
-          draft: true,
-          fallbackLocale: null,
-          locale,
-          overrideAccess: false,
-          user: req.user,
-        })
-      }
-
-      data = resolvedData
-    }
-
-    promises.data = fetchData()
+  if (formState) {
+    data = reduceFieldsToValues(formState, true)
   }
 
-  if (Object.keys(promises).length > 0) {
-    await Promise.all(Object.values(promises))
-  }
+  /**
+   * When building state for sub schemas we need to adjust:
+   * - `fields`
+   * - `parentSchemaPath`
+   * - `parentPath`
+   *
+   * Type assertion is fine because we wrap sub schemas in an array
+   * so we can safely map over them within `fieldSchemasToFormState`
+   */
+  const fields = Array.isArray(fieldOrEntityConfig)
+    ? fieldOrEntityConfig
+    : 'fields' in fieldOrEntityConfig
+      ? fieldOrEntityConfig.fields
+      : [fieldOrEntityConfig]
 
-  const result = await buildStateFromSchema({
+  const formStateResult = await fieldSchemasToFormState({
     id,
+    collectionSlug,
     data,
-    fieldSchema,
+    fields,
+    fieldSchemaMap,
     operation,
+    permissions: docPermissions?.fields || {},
     preferences: docPreferences || { fields: {} },
+    previousFormState: formState,
+    renderAllFields,
+    renderFieldFn: renderField,
     req,
+    schemaPath,
   })
 
   // Maintain form state of auth / upload fields
   if (collectionSlug && formState) {
-    if (req.payload.collections[collectionSlug]?.config?.upload && formState.file) {
-      result.file = formState.file
-    }
-
-    if (
-      req.payload.collections[collectionSlug]?.config?.auth &&
-      !req.payload.collections[collectionSlug].config.auth.disableLocalStrategy
-    ) {
-      if (formState.username) result.username = formState.username
-      if (formState.password) result.password = formState.password
-      if (formState['confirm-password']) result['confirm-password'] = formState['confirm-password']
-      if (formState.email) result.email = formState.email
+    if (payload.collections[collectionSlug]?.config?.upload && formState.file) {
+      formStateResult.file = formState.file
     }
   }
 
-  return result
+  let lockedStateResult
+
+  if (returnLockStatus) {
+    lockedStateResult = await handleFormStateLocking({
+      id,
+      collectionSlug,
+      globalSlug,
+      req,
+      updateLastEdited,
+    })
+  }
+
+  return {
+    lockedState: lockedStateResult,
+    state: formStateResult,
+  }
 }

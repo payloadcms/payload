@@ -48,17 +48,13 @@ describe('Text', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await reInitializeDB({
-      serverURL,
-      snapshotKey: 'fieldsTextTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
-    })
+
     await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTextTest',
+      snapshotKey: 'fieldsTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
@@ -152,40 +148,6 @@ describe('Text', () => {
     await page.goto(url.create)
     const description = page.locator('.field-description-i18nText')
     await expect(description).toHaveText('en description')
-  })
-
-  test('should render custom label', async () => {
-    await page.goto(url.create)
-    const label = page.locator('label.custom-label[for="field-customLabel"]')
-    await expect(label).toHaveText('#label')
-  })
-
-  test('should render custom error', async () => {
-    await page.goto(url.create)
-    const input = page.locator('input[id="field-customError"]')
-    await input.fill('ab')
-    await expect(input).toHaveValue('ab')
-    const error = page.locator('.custom-error:near(input[id="field-customError"])')
-    const submit = page.locator('button[type="button"][id="action-save"]')
-    await submit.click()
-    await expect(error).toHaveText('#custom-error')
-  })
-
-  test('should render beforeInput and afterInput', async () => {
-    await page.goto(url.create)
-    const input = page.locator('input[id="field-beforeAndAfterInput"]')
-
-    const prevSibling = await input.evaluateHandle((el) => {
-      return el.previousElementSibling
-    })
-    const prevSiblingText = await page.evaluate((el) => el.textContent, prevSibling)
-    expect(prevSiblingText).toEqual('#before-input')
-
-    const nextSibling = await input.evaluateHandle((el) => {
-      return el.nextElementSibling
-    })
-    const nextSiblingText = await page.evaluate((el) => el.textContent, nextSibling)
-    expect(nextSiblingText).toEqual('#after-input')
   })
 
   test('should create hasMany with multiple texts', async () => {

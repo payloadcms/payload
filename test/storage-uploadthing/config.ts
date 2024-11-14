@@ -19,6 +19,11 @@ dotenv.config({
 })
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [Media, MediaWithPrefix, Users],
   onInit: async (payload) => {
     await payload.create({
@@ -35,7 +40,7 @@ export default buildConfigWithDefaults({
         [mediaSlug]: true,
       },
       options: {
-        apiKey: process.env.UPLOADTHING_SECRET,
+        token: process.env.UPLOADTHING_TOKEN,
         acl: 'public-read',
       },
     }),

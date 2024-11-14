@@ -44,7 +44,7 @@ The `useField` hook accepts the following arguments:
 
 | Property          | Description                                                                                                                                                                                                                   |
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `path`            | If you do not provide a `path` or a `name`, this hook will look for one using the [`useFieldProps`](#usefieldprops) hook.                                                                                                                         |
+| `path`            | If you do not provide a `path`, `name` will be used instead. This is the path to the field in the form data.                                                                                                                  |
 | `validate`        | A validation function executed client-side _before_ submitting the form to the server. Different than [Field-level Validation](../fields/overview#validation) which runs strictly on the server. |
 | `disableFormData` | If `true`, the field will not be included in the form data when the form is submitted.                                                                                                                                         |
 | `hasRows` | If `true`, the field will be treated as a field with rows. This is useful for fields like `array` and `blocks`.                                                                                                                                         |
@@ -52,7 +52,7 @@ The `useField` hook accepts the following arguments:
 The `useField` hook returns the following object:
 
 ```ts
-type FieldResult<T> = {
+type FieldType<T> = {
   errorMessage?: string
   errorPaths?: string[]
   filterOptions?: FilterOptionsResult
@@ -65,38 +65,12 @@ type FieldResult<T> = {
   readOnly?: boolean
   rows?: Row[]
   schemaPath: string
-  setValue: (val: unknown, disableModifyingForm?: boolean) => voi
+  setValue: (val: unknown, disableModifyingForm?: boolean) => void
   showError: boolean
   valid?: boolean
   value: T
 }
 ```
-
-## useFieldProps
-
-All [Custom Field Components](./fields#the-field-component) are rendered on the server, and as such, only have access to static props at render time. But, some fields can be dynamic, such as when nested in an [`array`](../fields/array) or [`blocks`](../fields/block) field. For example, items can be added, re-ordered, or deleted on-the-fly.
-
-For this reason, dynamic props like `path` are managed in their own React context, which can be accessed using the `useFieldProps` hook:
-
-```tsx
-'use client'
-import { useFieldProps } from '@payloadcms/ui'
-
-const CustomTextField: React.FC = () => {
-  const { path } = useFieldProps() // highlight-line
-
-  return (
-    <div>
-      {path}
-    </div>
-  )
-}
-```
-
-<Banner type="success">
-  <strong>Tip:</strong>
-  The [`useField`](#usefield) hook calls the `useFieldProps` hook internally, so you don't need to use both in the same component unless explicitly needed.
-</Banner>
 
 ## useFormFields
 
@@ -113,7 +87,7 @@ You can pass a Redux-like selector into the hook, which will ensure that you ret
 
 ```tsx
 'use client'
-import type { useFormFields } from '@payloadcms/ui'
+import { useFormFields } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // Get only the `amount` field state, and only cause a rerender when that field changes
@@ -463,7 +437,7 @@ export const CustomArrayManager = () => {
       name: "customArrayManager",
       admin: {
         components: {
-          Field: CustomArrayManager,
+          Field: '/path/to/CustomArrayManagerField',
         },
       },
     },
@@ -560,7 +534,7 @@ export const CustomArrayManager = () => {
       name: "customArrayManager",
       admin: {
         components: {
-          Field: CustomArrayManager,
+          Field: '/path/to/CustomArrayManagerField',
         },
       },
     },
@@ -670,7 +644,7 @@ export const CustomArrayManager = () => {
       name: "customArrayManager",
       admin: {
         components: {
-          Field: CustomArrayManager,
+          Field: '/path/to/CustomArrayManagerField',
         },
       },
     },
@@ -760,7 +734,7 @@ const LinkFromCategoryToPosts: React.FC = () => {
 
 ## useLocale
 
-In any Custom Component you can get the selected locale object with the `useLocale` hook. `useLocale`gives you the full locale object, consisting of a `label`, `rtl`(right-to-left) property, and then `code`. Here is a simple example:
+In any Custom Component you can get the selected locale object with the `useLocale` hook. `useLocale` gives you the full locale object, consisting of a `label`, `rtl`(right-to-left) property, and then `code`. Here is a simple example:
 
 ```tsx
 'use client'
@@ -818,7 +792,7 @@ import { useConfig } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // highlight-start
-  const config = useConfig()
+  const { config } = useConfig()
   // highlight-end
 
   return <span>{config.serverURL}</span>
@@ -896,27 +870,6 @@ const MyComponent: React.FC = () => {
     <button type="button" onClick={resetColumns}>
       Reset columns
     </button>
-  )
-}
-```
-
-## useTableCell
-
-Similar to [`useFieldProps`](#usefieldprops), all [Custom Cell Components](./fields#the-cell-component) are rendered on the server, and as such, only have access to static props at render time. But, some props need to be dynamic, such as the field value itself.
-
-For this reason, dynamic props like `cellData` are managed in their own React context, which can be accessed using the `useTableCell` hook.
-
-```tsx
-'use client'
-import { useTableCell } from '@payloadcms/ui'
-
-const MyComponent: React.FC = () => {
-  const { cellData } = useTableCell() // highlight-line
-
-  return (
-    <div>
-      {cellData}
-    </div>
   )
 }
 ```

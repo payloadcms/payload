@@ -1,79 +1,28 @@
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-// import { MediaCollection } from './collections/Media/index.js'
+import { MediaCollection } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
   // ...extend config here
-  collections: [
-    PostsCollection,
-    // MediaCollection
-  ],
-  cors: ['http://localhost:3000', 'http://localhost:3001'],
-  globals: [
-    MenuGlobal,
-    {
-      slug: 'custom-ts',
-      fields: [
-        {
-          name: 'custom',
-          type: 'text',
-          typescriptSchema: [
-            () => ({
-              enum: ['hello', 'world'],
-            }),
-          ],
-        },
-        {
-          name: 'withDefinitionsUsage',
-          type: 'text',
-          typescriptSchema: [
-            () => ({
-              type: 'array',
-              items: {
-                $ref: `#/definitions/objectWithNumber`,
-              },
-            }),
-          ],
-        },
-        {
-          name: 'json',
-          type: 'json',
-          jsonSchema: {
-            fileMatch: ['a://b/foo.json'],
-            schema: {
-              type: 'array',
-              items: {
-                type: 'object',
-                additionalProperties: false,
-                properties: {
-                  id: {
-                    type: 'string',
-                  },
-                  name: {
-                    type: 'string',
-                  },
-                  age: {
-                    type: 'integer',
-                  },
-                  // Add other properties here
-                },
-                required: ['id', 'name'], // Specify which properties are required
-              },
-            },
-            uri: 'a://b/foo.json',
-          },
-          required: true,
-        },
-      ],
+  collections: [PostsCollection, MediaCollection],
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
     },
+  },
+  editor: lexicalEditor({}),
+  globals: [
     // ...add more globals here
+    MenuGlobal,
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -87,37 +36,11 @@ export default buildConfigWithDefaults({
     await payload.create({
       collection: postsSlug,
       data: {
-        text: 'example post',
+        title: 'example post',
       },
     })
-
-    // // Create image
-    // const imageFilePath = path.resolve(dirname, '../uploads/image.png')
-    // const imageFile = await getFileByPath(imageFilePath)
-
-    // await payload.create({
-    //   collection: 'media',
-    //   data: {},
-    //   file: imageFile,
-    // })
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
-    schema: [
-      ({ jsonSchema }) => {
-        jsonSchema.definitions.objectWithNumber = {
-          type: 'object',
-          additionalProperties: false,
-          properties: {
-            id: {
-              type: 'number',
-              required: true,
-            },
-          },
-          required: true,
-        }
-        return jsonSchema
-      },
-    ],
   },
 })

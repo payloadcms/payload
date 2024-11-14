@@ -6,21 +6,21 @@ import { createHeadlessEditor } from '@lexical/headless'
 import { $convertToMarkdownString } from '@lexical/markdown'
 import {
   BlocksFeature,
+  defaultEditorFeatures,
   EXPERIMENTAL_TableFeature,
   FixedToolbarFeature,
+  getEnabledNodes,
   HeadingFeature,
+  lexicalEditor,
   LinkFeature,
+  sanitizeServerEditorConfig,
   TreeViewFeature,
   UploadFeature,
-  defaultEditorFeatures,
-  getEnabledNodes,
-  lexicalEditor,
-  sanitizeServerEditorConfig,
 } from '@payloadcms/richtext-lexical'
 
 import { lexicalFieldsSlug } from '../../slugs.js'
-import { LabelComponent } from './LabelComponent.js'
 import {
+  CodeBlock,
   ConditionalLayoutBlock,
   RadioButtonsBlock,
   RelationshipBlock,
@@ -81,18 +81,22 @@ const editorConfig: ServerEditorConfig = {
         RadioButtonsBlock,
         ConditionalLayoutBlock,
         TabBlock,
+        CodeBlock,
       ],
       inlineBlocks: [
         {
           slug: 'myInlineBlock',
           admin: {
             components: {
-              Label: LabelComponent,
+              Label: '/collections/Lexical/LabelComponent.js#LabelComponent',
             },
           },
           fields: [
             {
               name: 'key',
+              label: () => {
+                return 'Key'
+              },
               type: 'select',
               options: ['value1', 'value2', 'value3'],
             },
@@ -118,6 +122,10 @@ export const LexicalFields: CollectionConfig = {
       name: 'title',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'lexicalRootEditor',
+      type: 'richText',
     },
     {
       name: 'lexicalSimple',
@@ -173,7 +181,12 @@ export const LexicalFields: CollectionConfig = {
 
             const yourEditorState: SerializedEditorState = siblingData.lexicalWithBlocks
             try {
-              headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
+              headlessEditor.update(
+                () => {
+                  headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
+                },
+                { discrete: true },
+              )
             } catch (e) {
               /* empty */
             }

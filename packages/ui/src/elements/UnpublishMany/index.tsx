@@ -26,12 +26,15 @@ export type UnpublishManyProps = {
 }
 
 export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
-  const { collection: { slug, labels: { plural }, versions } = {} } = props
+  const { collection: { slug, labels: { plural, singular }, versions } = {} } = props
 
   const {
-    routes: { api },
-    serverURL,
+    config: {
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
+
   const { permissions } = useAuth()
   const { toggleModal } = useModal()
   const { i18n, t } = useTranslation()
@@ -66,8 +69,22 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
         try {
           const json = await res.json()
           toggleModal(modalSlug)
-          if (res.status < 400) {
-            toast.success(t('general:updatedSuccessfully'))
+
+          const deletedDocs = json?.docs.length || 0
+          const successLabel = deletedDocs > 1 ? plural : singular
+
+          if (res.status < 400 || deletedDocs > 0) {
+            toast.success(
+              t('general:updatedCountSuccessfully', {
+                count: deletedDocs,
+                label: getTranslation(successLabel, i18n),
+              }),
+            )
+            if (json?.errors.length > 0) {
+              toast.error(json.message, {
+                description: json.errors.map((error) => error.message).join('\n'),
+              })
+            }
             router.replace(
               stringifyParams({
                 params: {
@@ -75,7 +92,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
                 },
               }),
             )
-            clearRouteCache()
+            clearRouteCache() // Use clearRouteCache instead of router.refresh, as we only need to clear the cache if the user has route caching enabled - clearRouteCache checks for this
             return null
           }
 
@@ -93,10 +110,12 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
     addDefaultError,
     api,
     getQueryParams,
-    i18n.language,
+    i18n,
     modalSlug,
+    plural,
     selectAll,
     serverURL,
+    singular,
     slug,
     t,
     toggleModal,
@@ -121,20 +140,29 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
         {t('version:unpublish')}
       </Pill>
       <Modal className={baseClass} slug={modalSlug}>
-        <div className={`${baseClass}__template`}>
-          <h1>{t('version:confirmUnpublish')}</h1>
-          <p>{t('version:aboutToUnpublishSelection', { label: getTranslation(plural, i18n) })}</p>
-          <Button
-            buttonStyle="secondary"
-            id="confirm-cancel"
-            onClick={submitted ? undefined : () => toggleModal(modalSlug)}
-            type="button"
-          >
-            {t('general:cancel')}
-          </Button>
-          <Button id="confirm-unpublish" onClick={submitted ? undefined : handleUnpublish}>
-            {submitted ? t('version:unpublishing') : t('general:confirm')}
-          </Button>
+        <div className={`${baseClass}__wrapper`}>
+          <div className={`${baseClass}__content`}>
+            <h1>{t('version:confirmUnpublish')}</h1>
+            <p>{t('version:aboutToUnpublishSelection', { label: getTranslation(plural, i18n) })}</p>
+          </div>
+          <div className={`${baseClass}__controls`}>
+            <Button
+              buttonStyle="secondary"
+              id="confirm-cancel"
+              onClick={submitted ? undefined : () => toggleModal(modalSlug)}
+              size="large"
+              type="button"
+            >
+              {t('general:cancel')}
+            </Button>
+            <Button
+              id="confirm-unpublish"
+              onClick={submitted ? undefined : handleUnpublish}
+              size="large"
+            >
+              {submitted ? t('version:unpublishing') : t('general:confirm')}
+            </Button>
+          </div>
         </div>
       </Modal>
     </React.Fragment>

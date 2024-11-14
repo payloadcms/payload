@@ -2,7 +2,6 @@ import type { CollectionConfig } from 'payload'
 
 import { tabsFieldsSlug } from '../../slugs.js'
 import { getBlocksField } from '../Blocks/index.js'
-import { UIField } from './UIField.js'
 import { namedTabDefaultValue } from './constants.js'
 
 const TabsFields: CollectionConfig = {
@@ -35,7 +34,7 @@ const TabsFields: CollectionConfig = {
               label: 'Demo UI Field',
               admin: {
                 components: {
-                  Field: UIField,
+                  Field: '/collections/Tabs/UIField.js#UIField',
                 },
               },
             },
@@ -200,14 +199,18 @@ const TabsFields: CollectionConfig = {
           hooks: {
             beforeValidate: [
               ({ data = {} }) => {
-                if (!data.hooksTab) data.hooksTab = {}
+                if (!data.hooksTab) {
+                  data.hooksTab = {}
+                }
                 data.hooksTab.beforeValidate = true
                 return data.hooksTab
               },
             ],
             beforeChange: [
               ({ data = {} }) => {
-                if (!data.hooksTab) data.hooksTab = {}
+                if (!data.hooksTab) {
+                  data.hooksTab = {}
+                }
                 data.hooksTab.beforeChange = true
                 return data.hooksTab
               },
@@ -220,7 +223,9 @@ const TabsFields: CollectionConfig = {
             ],
             afterRead: [
               ({ data = {} }) => {
-                if (!data.hooksTab) data.hooksTab = {}
+                if (!data.hooksTab) {
+                  data.hooksTab = {}
+                }
                 data.hooksTab.afterRead = true
                 return data.hooksTab
               },
@@ -243,6 +248,32 @@ const TabsFields: CollectionConfig = {
             {
               name: 'afterRead',
               type: 'checkbox',
+            },
+          ],
+        },
+        {
+          name: 'camelCaseTab',
+          fields: [
+            {
+              name: 'array',
+              type: 'array',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                  localized: true,
+                },
+                {
+                  type: 'array',
+                  name: 'array',
+                  fields: [
+                    {
+                      type: 'text',
+                      name: 'text',
+                    },
+                  ],
+                },
+              ],
             },
           ],
         },

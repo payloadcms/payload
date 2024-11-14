@@ -1,5 +1,5 @@
-import type { FieldTypes } from '../admin/forms/FieldTypes.js'
-import type { ClientFieldConfig } from '../fields/config/client.js'
+import type { ClientField } from '../fields/config/client.js'
+import type { FieldTypes } from '../fields/config/types.js'
 
 export type FieldSchemaJSON = {
   blocks?: FieldSchemaJSON // TODO: conditionally add based on `type`
@@ -8,32 +8,19 @@ export type FieldSchemaJSON = {
   name: string
   relationTo?: string // TODO: conditionally add based on `type`
   slug?: string // TODO: conditionally add based on `type`
-  type: keyof FieldTypes
+  type: FieldTypes
 }[]
 
-export const fieldSchemaToJSON = (fields: ClientFieldConfig[]): FieldSchemaJSON => {
+export const fieldSchemaToJSON = (fields: ClientField[]): FieldSchemaJSON => {
   return fields.reduce((acc, field) => {
     let result = acc
 
     switch (field.type) {
-      case 'group':
-        acc.push({
-          // @ts-expect-error
-          name: field.name,
-          type: field.type,
-          // @ts-expect-error
-          fields: fieldSchemaToJSON(field.fields),
-        })
-
-        break
-
       case 'array':
         acc.push({
-          // @ts-expect-error
           name: field.name,
           type: field.type,
           fields: fieldSchemaToJSON([
-            // @ts-expect-error
             ...field.fields,
             {
               name: 'id',
@@ -46,10 +33,8 @@ export const fieldSchemaToJSON = (fields: ClientFieldConfig[]): FieldSchemaJSON 
 
       case 'blocks':
         acc.push({
-          // @ts-expect-error
           name: field.name,
           type: field.type,
-          // @ts-expect-error
           blocks: field.blocks.reduce((acc, block) => {
             acc[block.slug] = {
               fields: fieldSchemaToJSON([
@@ -67,16 +52,34 @@ export const fieldSchemaToJSON = (fields: ClientFieldConfig[]): FieldSchemaJSON 
 
         break
 
-      case 'row':
       case 'collapsible':
-        // @ts-expect-error
+
+      case 'row':
         result = result.concat(fieldSchemaToJSON(field.fields))
         break
+      case 'group':
+        acc.push({
+          name: field.name,
+          type: field.type,
+          fields: fieldSchemaToJSON(field.fields),
+        })
 
+        break
+
+      case 'relationship':
+
+      case 'upload':
+        acc.push({
+          name: field.name,
+          type: field.type,
+          hasMany: 'hasMany' in field ? Boolean(field.hasMany) : false, // TODO: type this
+          relationTo: field.relationTo,
+        })
+
+        break
       case 'tabs': {
         let tabFields = []
 
-        // @ts-expect-error
         field.tabs.forEach((tab) => {
           if ('name' in tab) {
             tabFields.push({
@@ -94,19 +97,6 @@ export const fieldSchemaToJSON = (fields: ClientFieldConfig[]): FieldSchemaJSON 
 
         break
       }
-
-      case 'relationship':
-      case 'upload':
-        acc.push({
-          // @ts-expect-error
-          name: field.name,
-          type: field.type,
-          hasMany: 'hasMany' in field ? Boolean(field.hasMany) : false, // TODO: type this
-          // @ts-expect-error
-          relationTo: field.relationTo,
-        })
-
-        break
 
       default:
         if ('name' in field) {

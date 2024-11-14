@@ -37,6 +37,7 @@ export default buildConfig({
 | `disableIndexHints`  | Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination, as it increases the speed of the count function used in that query. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false |
 | `migrationDir`       | Customize the directory that migrations are stored. |
 | `transactionOptions` | An object with configuration properties used in [transactions](https://www.mongodb.com/docs/manual/core/transactions/) or `false` which will disable the use of transactions. |
+| `collation`          | Enable language-specific string comparison with customizable options. Available on MongoDB 3.4+. Defaults locale to "en". Example: `{ strength: 3 }`. For a full list of collation options and their definitions, see the [MongoDB documentation](https://www.mongodb.com/docs/manual/reference/collation/). |
 
 ## Access to Mongoose models
 

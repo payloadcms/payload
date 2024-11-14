@@ -4,7 +4,7 @@ import type { SlateNodeConverter } from '../../types.js'
 
 import { convertSlateNodesToLexical } from '../../index.js'
 
-export const _SlateIndentConverter: SlateNodeConverter = {
+export const SlateIndentConverter: SlateNodeConverter = {
   converter({ converters, slateNode }) {
     const convertChildren = (node: any, indentLevel: number = 0): SerializedLexicalNode => {
       if (

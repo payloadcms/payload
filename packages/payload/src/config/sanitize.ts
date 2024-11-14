@@ -15,13 +15,24 @@ import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { InvalidConfiguration } from '../errors/index.js'
 import { sanitizeGlobals } from '../globals/config/sanitize.js'
+import { getLockedDocumentsCollection } from '../lockedDocuments/lockedDocumentsCollection.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
+import { getDefaultJobsCollection } from '../queues/config/jobsCollection.js'
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections.js'
-import { deepMergeWithReactComponents } from '../utilities/deepMerge.js'
 import { defaults } from './defaults.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
   const sanitizedConfig = { ...configToSanitize }
+
+  // default logging level will be 'error' if not provided
+  sanitizedConfig.loggingLevels = {
+    Forbidden: 'info',
+    Locked: 'info',
+    MissingFile: 'info',
+    NotFound: 'info',
+    ValidationError: 'info',
+    ...(sanitizedConfig.loggingLevels || {}),
+  }
 
   // add default user collection if none provided
   if (!sanitizedConfig?.admin?.user) {
@@ -47,7 +58,44 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
 }
 
 export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
-  const configWithDefaults: Config = deepMergeWithReactComponents(defaults, incomingConfig)
+  const configWithDefaults = {
+    ...defaults,
+    ...incomingConfig,
+    admin: {
+      ...defaults.admin,
+      ...incomingConfig?.admin,
+      meta: {
+        ...defaults.admin.meta,
+        ...incomingConfig?.admin?.meta,
+      },
+      routes: {
+        ...defaults.admin.routes,
+        ...incomingConfig?.admin?.routes,
+      },
+    },
+    graphQL: {
+      ...defaults.graphQL,
+      ...incomingConfig?.graphQL,
+    },
+    jobs: {
+      ...defaults.jobs,
+      ...incomingConfig?.jobs,
+      access: {
+        ...defaults.jobs.access,
+        ...incomingConfig?.jobs?.access,
+      },
+      tasks: incomingConfig?.jobs?.tasks || [],
+      workflows: incomingConfig?.jobs?.workflows || [],
+    },
+    routes: {
+      ...defaults.routes,
+      ...incomingConfig?.routes,
+    },
+    typescript: {
+      ...defaults.typescript,
+      ...incomingConfig?.typescript,
+    },
+  }
 
   if (!configWithDefaults?.serverURL) {
     configWithDefaults.serverURL = ''
@@ -93,6 +141,9 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         toString: () => locale.code,
       }))
     }
+
+    // Default fallback to true if not provided
+    config.localization.fallback = config.localization?.fallback ?? true
   }
 
   const i18nConfig: SanitizedConfig['i18n'] = {
@@ -120,6 +171,20 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   config.i18n = i18nConfig
 
+  // Need to add default jobs collection before locked documents collections
+  if (Array.isArray(configWithDefaults.jobs?.tasks) && configWithDefaults.jobs.tasks.length > 0) {
+    let defaultJobsCollection = getDefaultJobsCollection(config as unknown as Config)
+
+    if (typeof configWithDefaults.jobs.jobsCollectionOverrides === 'function') {
+      defaultJobsCollection = configWithDefaults.jobs.jobsCollectionOverrides({
+        defaultJobsCollection,
+      })
+    }
+
+    configWithDefaults.collections.push(defaultJobsCollection)
+  }
+
+  configWithDefaults.collections.push(getLockedDocumentsCollection(config as unknown as Config))
   configWithDefaults.collections.push(getPreferencesCollection(config as unknown as Config))
   configWithDefaults.collections.push(migrationsCollection)
 
@@ -146,10 +211,17 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   }
 
   // Get deduped list of upload adapters
-  if (!config.upload) config.upload = { adapters: [] }
+  if (!config.upload) {
+    config.upload = { adapters: [] }
+  }
   config.upload.adapters = Array.from(
     new Set(config.collections.map((c) => c.upload?.adapter).filter(Boolean)),
   )
+
+  // Pass through the email config as is so adapters don't break
+  if (incomingConfig.email) {
+    config.email = incomingConfig.email
+  }
 
   /*
     Execute richText sanitization
@@ -158,6 +230,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     config.editor = await incomingConfig.editor({
       config: config as SanitizedConfig,
       isRoot: true,
+      parentIsLocalized: false,
     })
     if (config.editor.i18n && Object.keys(config.editor.i18n).length >= 0) {
       config.i18n.translations = deepMergeSimple(config.i18n.translations, config.editor.i18n)

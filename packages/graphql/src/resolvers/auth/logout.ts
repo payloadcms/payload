@@ -4,7 +4,7 @@ import { generateExpiredPayloadCookie, isolateObjectProperty, logoutOperation } 
 
 import type { Context } from '../types.js'
 
-function logoutResolver(collection: Collection): any {
+export function logout(collection: Collection): any {
   async function resolver(_, args, context: Context) {
     const options = {
       collection,
@@ -13,8 +13,9 @@ function logoutResolver(collection: Collection): any {
 
     const result = await logoutOperation(options)
     const expiredCookie = generateExpiredPayloadCookie({
-      collectionConfig: collection.config,
-      payload: context.req.payload,
+      collectionAuthConfig: collection.config.auth,
+      config: context.req.payload.config,
+      cookiePrefix: context.req.payload.config.cookiePrefix,
     })
     context.headers['Set-Cookie'] = expiredCookie
     return result
@@ -22,5 +23,3 @@ function logoutResolver(collection: Collection): any {
 
   return resolver
 }
-
-export default logoutResolver

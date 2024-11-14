@@ -13,12 +13,14 @@ import type { Config } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
-  getAdminRoutes,
+  exactText,
+  getRoutes,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { apiKeysSlug, slug } from './shared.js'
 
@@ -34,8 +36,6 @@ const headers = {
 }
 
 const createFirstUser = async ({
-  customAdminRoutes,
-  customRoutes,
   page,
   serverURL,
 }: {
@@ -49,19 +49,32 @@ const createFirstUser = async ({
       routes: { createFirstUser: createFirstUserRoute },
     },
     routes: { admin: adminRoute },
-  } = getAdminRoutes({
-    customAdminRoutes,
-    customRoutes,
-  })
+  } = getRoutes({})
 
+  // wait for create first user route
   await page.goto(serverURL + `${adminRoute}${createFirstUserRoute}`)
+
+  // forget to fill out confirm password
+  await page.locator('#field-email').fill(devUser.email)
+  await page.locator('#field-password').fill(devUser.password)
+  await page.locator('.form-submit > button').click()
+  await expect(page.locator('.field-type.confirm-password .field-error')).toHaveText(
+    'This field is required.',
+  )
+
+  // make them match, but does not pass password validation
+  await page.locator('#field-email').fill(devUser.email)
+  await page.locator('#field-password').fill('12')
+  await page.locator('#field-confirm-password').fill('12')
+  await page.locator('.form-submit > button').click()
+  await expect(page.locator('.field-type.password .field-error')).toHaveText(
+    'This value must be longer than the minimum length of 3 characters.',
+  )
+
   await page.locator('#field-email').fill(devUser.email)
   await page.locator('#field-password').fill(devUser.password)
   await page.locator('#field-confirm-password').fill(devUser.password)
   await page.locator('#field-custom').fill('Hello, world!')
-
-  await wait(500)
-
   await page.locator('.form-submit > button').click()
 
   await expect
@@ -75,9 +88,6 @@ describe('auth', () => {
   let serverURL: string
   let apiURL: string
 
-  // Allows for testing create-first-user
-  process.env.SKIP_ON_INIT = 'true'
-
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
@@ -88,28 +98,38 @@ describe('auth', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
+    await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
+
+    // Undo onInit seeding, as we need to test this without having a user created, or testing create-first-user
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'auth',
+      deleteOnly: true,
+    })
+
+    await payload.create({
+      collection: 'api-keys',
+      data: {
+        apiKey: uuid(),
+        enableAPIKey: true,
+      },
+    })
+
+    await payload.create({
+      collection: 'api-keys',
+      data: {
+        apiKey: uuid(),
+        enableAPIKey: true,
+      },
+    })
+
     await createFirstUser({ page, serverURL })
 
-    await payload.create({
-      collection: 'api-keys',
-      data: {
-        apiKey: uuid(),
-        enableAPIKey: true,
-      },
-    })
-
-    await payload.create({
-      collection: 'api-keys',
-      data: {
-        apiKey: uuid(),
-        enableAPIKey: true,
-      },
-    })
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  describe('authenticated users', () => {
-    beforeAll(({ browser }) => {
+  describe('passwords', () => {
+    beforeAll(() => {
       url = new AdminUrlUtil(serverURL, slug)
     })
 
@@ -118,9 +138,52 @@ describe('auth', () => {
       const emailBeforeSave = await page.locator('#field-email').inputValue()
       await page.locator('#change-password').click()
       await page.locator('#field-password').fill('password')
+      // should fail to save without confirm password
+      await page.locator('#action-save').click()
+      await expect(
+        page.locator('.field-type.confirm-password .tooltip--show', {
+          hasText: exactText('This field is required.'),
+        }),
+      ).toBeVisible()
+
+      // should fail to save with incorrect confirm password
+      await page.locator('#field-confirm-password').fill('wrong password')
+      await page.locator('#action-save').click()
+      await expect(
+        page.locator('.field-type.confirm-password .tooltip--show', {
+          hasText: exactText('Passwords do not match.'),
+        }),
+      ).toBeVisible()
+
+      // should succeed with matching confirm password
       await page.locator('#field-confirm-password').fill('password')
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#action-save')
+
+      // should still have the same email
       await expect(page.locator('#field-email')).toHaveValue(emailBeforeSave)
+    })
+
+    test('should prevent new user creation without confirm password', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-email').fill('dev2@payloadcms.com')
+      await page.locator('#field-password').fill('password')
+      // should fail to save without confirm password
+      await page.locator('#action-save').click()
+      await expect(
+        page.locator('.field-type.confirm-password .tooltip--show', {
+          hasText: exactText('This field is required.'),
+        }),
+      ).toBeVisible()
+
+      // should succeed with matching confirm password
+      await page.locator('#field-confirm-password').fill('password')
+      await saveDocAndAssert(page, '#action-save')
+    })
+  })
+
+  describe('authenticated users', () => {
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, slug)
     })
 
     test('should have up-to-date user in `useAuth` hook', async () => {

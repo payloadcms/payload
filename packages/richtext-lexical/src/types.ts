@@ -1,13 +1,18 @@
 import type { EditorConfig as LexicalEditorConfig, SerializedEditorState } from 'lexical'
 import type {
-  FieldPermissions,
-  FieldTypes,
+  ClientField,
+  DefaultCellComponentProps,
   RichTextAdapter,
-  RichTextFieldProps,
+  RichTextFieldClient,
+  RichTextFieldClientProps,
   SanitizedConfig,
+  ServerFieldBase,
 } from 'payload'
-import type React from 'react'
 
+import type {
+  BaseClientFeatureProps,
+  FeatureProviderProviderClient,
+} from './features/typesClient.js'
 import type { FeatureProviderServer } from './features/typesServer.js'
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
 
@@ -58,7 +63,7 @@ export type LexicalEditorProps = {
 export type LexicalRichTextAdapter = {
   editorConfig: SanitizedServerEditorConfig
   features: FeatureProviderServer<any, any, any>[]
-} & RichTextAdapter<SerializedEditorState, AdapterProps, any>
+} & RichTextAdapter<SerializedEditorState, AdapterProps>
 
 export type LexicalRichTextAdapterProvider =
   /**
@@ -67,24 +72,43 @@ export type LexicalRichTextAdapterProvider =
   ({
     config,
     isRoot,
+    parentIsLocalized,
   }: {
     config: SanitizedConfig
     isRoot?: boolean
+    parentIsLocalized: boolean
   }) => Promise<LexicalRichTextAdapter>
 
-export type FieldProps = {
-  fieldTypes: FieldTypes
-  indexPath: string
-  path?: string
-  permissions: FieldPermissions
-} & RichTextFieldProps<SerializedEditorState, AdapterProps, AdapterProps>
+export type FeatureClientSchemaMap = {
+  [featureKey: string]: {
+    [key: string]: ClientField[]
+  }
+}
+
+export type LexicalRichTextFieldProps = {
+  admin: LexicalFieldAdminProps
+  // clientFeatures is added through the rsc field
+  clientFeatures: {
+    [featureKey: string]: {
+      clientFeatureProps?: object
+      clientFeatureProvider?: FeatureProviderProviderClient<any, any>
+    }
+  }
+  featureClientSchemaMap: FeatureClientSchemaMap
+  lexicalEditorConfig: LexicalEditorConfig
+} & Pick<ServerFieldBase, 'permissions'> &
+  RichTextFieldClientProps<SerializedEditorState, AdapterProps, object>
+
+export type LexicalRichTextCellProps = DefaultCellComponentProps<
+  SerializedEditorState,
+  RichTextFieldClient<SerializedEditorState, AdapterProps, object>
+>
 
 export type AdapterProps = {
   editorConfig: SanitizedServerEditorConfig
 }
 
 export type GeneratedFeatureProviderComponent = {
-  ClientFeature: React.ReactNode
-  key: string
-  order: number
+  clientFeature: FeatureProviderProviderClient<any, any>
+  clientFeatureProps: BaseClientFeatureProps<object>
 }

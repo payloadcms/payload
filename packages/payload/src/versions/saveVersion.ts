@@ -1,10 +1,11 @@
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { Payload } from '../index.js';
-import type { PayloadRequest } from '../types/index.js'
+import type { Payload } from '../index.js'
+import type { PayloadRequest, SelectType } from '../types/index.js'
 
 import { deepCopyObjectSimple } from '../index.js'
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields.js'
+import { getQueryDraftsSelect } from './drafts/getQueryDraftsSelect.js'
 import { enforceMaxVersions } from './enforceMaxVersions.js'
 
 type Args = {
@@ -15,7 +16,10 @@ type Args = {
   global?: SanitizedGlobalConfig
   id?: number | string
   payload: Payload
+  publishSpecificLocale?: string
   req?: PayloadRequest
+  select?: SelectType
+  snapshot?: any
 }
 
 export const saveVersion = async ({
@@ -26,14 +30,21 @@ export const saveVersion = async ({
   draft,
   global,
   payload,
+  publishSpecificLocale,
   req,
+  select,
+  snapshot,
 }: Args): Promise<TypeWithID> => {
   let result
   let createNewVersion = true
   const now = new Date().toISOString()
   const versionData = deepCopyObjectSimple(doc)
-  if (draft) versionData._status = 'draft'
-  if (versionData._id) delete versionData._id
+  if (draft) {
+    versionData._status = 'draft'
+  }
+  if (versionData._id) {
+    delete versionData._id
+  }
 
   try {
     if (autosave) {
@@ -44,10 +55,13 @@ export const saveVersion = async ({
         req,
         sort: '-updatedAt',
       }
+
       if (collection) {
         ;({ docs } = await payload.db.findVersions({
           ...findVersionArgs,
           collection: collection.slug,
+          limit: 1,
+          pagination: false,
           req,
           where: {
             parent: {
@@ -59,6 +73,8 @@ export const saveVersion = async ({
         ;({ docs } = await payload.db.findGlobalVersions({
           ...findVersionArgs,
           global: global.slug,
+          limit: 1,
+          pagination: false,
           req,
         }))
       }
@@ -70,8 +86,12 @@ export const saveVersion = async ({
 
         const data: Record<string, unknown> = {
           createdAt: new Date(latestVersion.createdAt).toISOString(),
-          updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
-          version: versionData,
+          latest: true,
+          parent: id,
+          updatedAt: now,
+          version: {
+            ...versionData,
+          },
         }
 
         const updateVersionArgs = {
@@ -97,47 +117,70 @@ export const saveVersion = async ({
     }
 
     if (createNewVersion) {
+      const createVersionArgs = {
+        autosave: Boolean(autosave),
+        collectionSlug: undefined,
+        createdAt: now,
+        globalSlug: undefined,
+        parent: collection ? id : undefined,
+        publishedLocale: publishSpecificLocale || undefined,
+        req,
+        select: getQueryDraftsSelect({ select }),
+        updatedAt: now,
+        versionData,
+      }
+
       if (collection) {
-        result = await payload.db.createVersion({
-          autosave: Boolean(autosave),
-          collectionSlug: collection.slug,
-          createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
-          parent: collection ? id : undefined,
-          req,
-          updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
-          versionData,
-        })
+        createVersionArgs.collectionSlug = collection.slug
+        result = await payload.db.createVersion(createVersionArgs)
       }
 
       if (global) {
-        result = await payload.db.createGlobalVersion({
-          autosave: Boolean(autosave),
-          createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
-          globalSlug: global.slug,
-          parent: collection ? id : undefined,
-          req,
-          updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
-          versionData,
-        })
+        createVersionArgs.globalSlug = global.slug
+        result = await payload.db.createGlobalVersion(createVersionArgs)
+      }
+
+      if (publishSpecificLocale && snapshot) {
+        const snapshotData = deepCopyObjectSimple(snapshot)
+        if (snapshotData._id) {
+          delete snapshotData._id
+        }
+
+        snapshotData._status = 'draft'
+
+        const snapshotDate = new Date().toISOString()
+
+        const updatedArgs = {
+          ...createVersionArgs,
+          createdAt: snapshotDate,
+          snapshot: true,
+          updatedAt: snapshotDate,
+          versionData: snapshotData,
+        } as any
+
+        if (collection) {
+          await payload.db.createVersion(updatedArgs)
+        }
+        if (global) {
+          await payload.db.createGlobalVersion(updatedArgs)
+        }
       }
     }
   } catch (err) {
     let errorMessage: string
 
-    if (collection)
+    if (collection) {
       errorMessage = `There was an error while saving a version for the ${collection.labels.singular} with ID ${id}.`
-    if (global)
+    }
+    if (global) {
       errorMessage = `There was an error while saving a version for the global ${global.label}.`
+    }
     payload.logger.error(errorMessage)
     payload.logger.error(err)
     return
   }
 
-  let max = 100
-
-  if (collection && typeof collection.versions.maxPerDoc === 'number')
-    max = collection.versions.maxPerDoc
-  if (global && typeof global.versions.max === 'number') max = global.versions.max
+  const max = collection ? collection.versions.maxPerDoc : global.versions.max
 
   if (createNewVersion && max > 0) {
     await enforceMaxVersions({
@@ -151,8 +194,6 @@ export const saveVersion = async ({
   }
 
   let createdVersion = result.version
-  createdVersion.createdAt = result.createdAt
-  createdVersion.updatedAt = result.updatedAt
 
   createdVersion = sanitizeInternalFields(createdVersion)
   createdVersion.id = result.parent

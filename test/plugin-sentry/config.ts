@@ -3,17 +3,21 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { sentryPlugin } from '@payloadcms/plugin-sentry'
+import * as Sentry from '@sentry/nextjs'
+import { APIError } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Posts } from './collections/Posts.js'
 import { Users } from './collections/Users.js'
-import { testErrors } from './components.js'
 
 export default buildConfigWithDefaults({
   admin: {
     components: {
-      beforeDashboard: [testErrors],
+      beforeDashboard: ['/TestErrors.js#TestErrors'],
+    },
+    importMap: {
+      baseDir: path.resolve(dirname),
     },
     user: Users.slug,
   },
@@ -27,17 +31,21 @@ export default buildConfigWithDefaults({
       },
     })
   },
+  endpoints: [
+    {
+      path: '/exception',
+      handler: () => {
+        throw new APIError('Test Plugin-Sentry Exception', 500)
+      },
+      method: 'get',
+    },
+  ],
   plugins: [
     sentryPlugin({
-      dsn: 'https://61edebe5ee6d4d38a9d6459c7323d777@o4505289711681536.ingest.sentry.io/4505357688242176',
+      Sentry,
       options: {
+        debug: true,
         captureErrors: [400, 403, 404],
-        init: {
-          debug: true,
-        },
-        requestHandler: {
-          serverName: false,
-        },
       },
     }),
   ],

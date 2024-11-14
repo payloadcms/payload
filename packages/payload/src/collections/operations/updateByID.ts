@@ -3,14 +3,22 @@ import type { DeepPartial } from 'ts-essentials'
 import httpStatus from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
-import type { CollectionSlug, GeneratedTypes } from '../../index.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { Args } from '../../fields/hooks/beforeChange/index.js'
+import type { CollectionSlug } from '../../index.js'
+import type {
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  TransformCollectionWithSelect,
+} from '../../types/index.js'
 import type {
   Collection,
   DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
+  SelectFromCollectionSlug,
 } from '../config/types.js'
 
+import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
 import executeAccess from '../../auth/executeAccess.js'
 import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
@@ -24,6 +32,7 @@ import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
+import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -36,22 +45,30 @@ export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
   data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
   depth?: number
+  disableTransaction?: boolean
   disableVerificationEmail?: boolean
   draft?: boolean
   id: number | string
   overrideAccess?: boolean
+  overrideLock?: boolean
   overwriteExistingFiles?: boolean
+  populate?: PopulateType
+  publishSpecificLocale?: string
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
 }
 
-export const updateByIDOperation = async <TSlug extends CollectionSlug>(
+export const updateByIDOperation = async <
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug> = SelectType,
+>(
   incomingArgs: Arguments<TSlug>,
-): Promise<DataFromCollectionSlug<TSlug>> => {
+): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
 
   try {
-    const shouldCommit = await initTransaction(args.req)
+    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -70,6 +87,10 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
         })) || args
     }, Promise.resolve())
 
+    if (args.publishSpecificLocale) {
+      args.req.locale = args.publishSpecificLocale
+    }
+
     const {
       id,
       autosave = false,
@@ -78,7 +99,10 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       depth,
       draft: draftArg = false,
       overrideAccess,
+      overrideLock,
       overwriteExistingFiles = false,
+      populate,
+      publishSpecificLocale,
       req: {
         fallbackLocale,
         locale,
@@ -86,6 +110,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
         payload,
       },
       req,
+      select,
       showHiddenFields,
     } = args
 
@@ -126,8 +151,24 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       req,
     })
 
-    if (!docWithLocales && !hasWherePolicy) throw new NotFound(req.t)
-    if (!docWithLocales && hasWherePolicy) throw new Forbidden(req.t)
+    if (!docWithLocales && !hasWherePolicy) {
+      throw new NotFound(req.t)
+    }
+    if (!docWithLocales && hasWherePolicy) {
+      throw new Forbidden(req.t)
+    }
+
+    // /////////////////////////////////////
+    // Handle potentially locked documents
+    // /////////////////////////////////////
+
+    await checkDocumentLockStatus({
+      id,
+      collectionSlug: collectionConfig.slug,
+      lockErrorMessage: `Document with ID ${id} is currently locked by another user and cannot be updated.`,
+      overrideLock,
+      req,
+    })
 
     const originalDoc = await afterRead({
       collection: collectionConfig,
@@ -142,6 +183,17 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       req,
       showHiddenFields: true,
     })
+
+    if (args.collection.config.auth) {
+      ensureUsernameOrEmail<TSlug>({
+        authOptions: args.collection.config.auth,
+        collectionSlug: args.collection.config.slug,
+        data: args.data,
+        operation: 'update',
+        originalDoc,
+        req: args.req,
+      })
+    }
 
     // /////////////////////////////////////
     // Generate data for all files and sizes
@@ -236,13 +288,16 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
     // beforeChange - Fields
     // /////////////////////////////////////
 
-    let result = await beforeChange({
+    let publishedDocWithLocales = docWithLocales
+    let versionSnapshotResult
+
+    const beforeChangeArgs: Args<DataFromCollectionSlug<TSlug>> = {
       id,
       collection: collectionConfig,
       context: req.context,
-      data,
+      data: { ...data, id },
       doc: originalDoc,
-      docWithLocales,
+      docWithLocales: undefined,
       global: null,
       operation: 'update',
       req,
@@ -251,6 +306,29 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
         collectionConfig.versions.drafts &&
         !collectionConfig.versions.drafts.validate &&
         data._status !== 'published',
+    }
+
+    if (publishSpecificLocale) {
+      versionSnapshotResult = await beforeChange({
+        ...beforeChangeArgs,
+        docWithLocales,
+      })
+
+      const lastPublished = await getLatestCollectionVersion({
+        id,
+        config: collectionConfig,
+        payload,
+        published: true,
+        query: findOneArgs,
+        req,
+      })
+
+      publishedDocWithLocales = lastPublished ? lastPublished : {}
+    }
+
+    let result = await beforeChange({
+      ...beforeChangeArgs,
+      docWithLocales: publishedDocWithLocales,
     })
 
     // /////////////////////////////////////
@@ -263,6 +341,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       const { hash, salt } = await generatePasswordSaltHash({
         collection: collectionConfig,
         password,
+        req,
       })
       dataToUpdate.salt = salt
       dataToUpdate.hash = hash
@@ -281,6 +360,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
         data: dataToUpdate,
         locale,
         req,
+        select,
       })
     }
 
@@ -293,13 +373,13 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
         id,
         autosave,
         collection: collectionConfig,
-        docWithLocales: {
-          ...result,
-          createdAt: docWithLocales.createdAt,
-        },
+        docWithLocales: result,
         draft: shouldSaveDraft,
         payload,
+        publishSpecificLocale,
         req,
+        select,
+        snapshot: versionSnapshotResult,
       })
     }
 
@@ -317,7 +397,9 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       global: null,
       locale,
       overrideAccess,
+      populate,
       req,
+      select,
       showHiddenFields,
     })
 
@@ -391,9 +473,11 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
-    return result
+    return result as TransformCollectionWithSelect<TSlug, TSelect>
   } catch (error: unknown) {
     await killTransaction(args.req)
     throw error

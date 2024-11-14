@@ -1,27 +1,29 @@
-import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
-import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
+import type { ClientField, Field } from 'payload'
 
-export function fieldAffectsData(field: MappedField): boolean {
-  return 'name' in field && field.type !== 'ui'
-}
+import { fieldAffectsData } from 'payload/shared'
 
-const getRemainingColumns = (fieldMap: FieldMap, useAsTitle: string): ColumnPreferences =>
-  fieldMap.reduce((remaining, field) => {
+import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
+
+const getRemainingColumns = <T extends ClientField[] | Field[]>(
+  fields: T,
+  useAsTitle: string,
+): ColumnPreferences =>
+  fields?.reduce((remaining, field) => {
     if (fieldAffectsData(field) && field.name === useAsTitle) {
       return remaining
     }
 
-    if (!fieldAffectsData(field) && 'fieldMap' in field.fieldComponentProps) {
-      return [...remaining, ...getRemainingColumns(field.fieldComponentProps.fieldMap, useAsTitle)]
+    if (!fieldAffectsData(field) && 'fields' in field) {
+      return [...remaining, ...getRemainingColumns(field.fields, useAsTitle)]
     }
 
-    if (field.type === 'tabs' && 'tabs' in field.fieldComponentProps) {
+    if (field.type === 'tabs' && 'tabs' in field) {
       return [
         ...remaining,
-        ...field.fieldComponentProps.tabs.reduce(
+        ...field.tabs.reduce(
           (tabFieldColumns, tab) => [
             ...tabFieldColumns,
-            ...('name' in tab ? [tab.name] : getRemainingColumns(tab.fieldMap, useAsTitle)),
+            ...('name' in tab ? [tab.name] : getRemainingColumns(tab.fields, useAsTitle)),
           ],
           [],
         ),
@@ -31,8 +33,8 @@ const getRemainingColumns = (fieldMap: FieldMap, useAsTitle: string): ColumnPref
     return [...remaining, field.name]
   }, [])
 
-export const getInitialColumns = (
-  fieldMap: FieldMap,
+export const getInitialColumns = <T extends ClientField[] | Field[]>(
+  fields: T,
   useAsTitle: string,
   defaultColumns: string[],
 ): ColumnPreferences => {
@@ -45,7 +47,7 @@ export const getInitialColumns = (
       initialColumns.push(useAsTitle)
     }
 
-    const remainingColumns = getRemainingColumns(fieldMap, useAsTitle)
+    const remainingColumns = getRemainingColumns(fields, useAsTitle)
 
     initialColumns = initialColumns.concat(remainingColumns)
     initialColumns = initialColumns.slice(0, 4)

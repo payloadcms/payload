@@ -1,13 +1,27 @@
 import type { PaginatedDocs } from '../../../database/types.js'
-import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
-import type { Document, PayloadRequest, RequestContext, Where } from '../../../types/index.js'
-import type { DataFromCollectionSlug } from '../../config/types.js'
+import type {
+  CollectionSlug,
+  JoinQuery,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
+import type {
+  Document,
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  Sort,
+  TransformCollectionWithSelect,
+  Where,
+} from '../../../types/index.js'
+import type { SelectFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findOperation } from '../find.js'
 
-export type Options<TSlug extends CollectionSlug> = {
+export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
@@ -17,33 +31,44 @@ export type Options<TSlug extends CollectionSlug> = {
   depth?: number
   disableErrors?: boolean
   draft?: boolean
-  fallbackLocale?: TypedLocale
+  fallbackLocale?: false | TypedLocale
+  includeLockStatus?: boolean
+  joins?: JoinQuery<TSlug>
   limit?: number
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   page?: number
   pagination?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
+  select?: TSelect
   showHiddenFields?: boolean
-  sort?: string
+  sort?: Sort
   user?: Document
   where?: Where
 }
 
-export async function findLocal<TSlug extends CollectionSlug>(
+export async function findLocal<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   payload: Payload,
-  options: Options<TSlug>,
-): Promise<PaginatedDocs<DataFromCollectionSlug<TSlug>>> {
+  options: Options<TSlug, TSelect>,
+): Promise<PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>> {
   const {
     collection: collectionSlug,
     currentDepth,
     depth,
     disableErrors,
     draft = false,
+    includeLockStatus,
+    joins,
     limit,
     overrideAccess = true,
     page,
     pagination = true,
+    populate,
+    select,
     showHiddenFields,
     sort,
     where,
@@ -57,17 +82,21 @@ export async function findLocal<TSlug extends CollectionSlug>(
     )
   }
 
-  return findOperation<TSlug>({
+  return findOperation<TSlug, TSelect>({
     collection,
     currentDepth,
     depth,
     disableErrors,
     draft,
+    includeLockStatus,
+    joins,
     limit,
     overrideAccess,
     page,
     pagination,
+    populate,
     req: await createLocalReq(options, payload),
+    select,
     showHiddenFields,
     sort,
     where,

@@ -20,6 +20,7 @@ import {
   blockFieldsSlug,
   collapsibleFieldsSlug,
   tabsFields2Slug,
+  tabsFieldsSlug,
 } from './slugs.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -44,11 +45,7 @@ describe('fields', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await reInitializeDB({
-      serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
-    })
+
     await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
@@ -76,16 +73,25 @@ describe('fields', () => {
     // TODO - This test is flaky. Rarely, but sometimes it randomly fails.
     test('should display unique constraint error in ui', async () => {
       const uniqueText = 'uniqueText'
-      await payload.create({
+      const doc = await payload.create({
         collection: 'indexed-fields',
         data: {
           group: {
             unique: uniqueText,
           },
+          localizedUniqueRequiredText: 'text',
           text: 'text',
           uniqueRequiredText: 'text',
           uniqueText,
         },
+      })
+      await payload.update({
+        id: doc.id,
+        collection: 'indexed-fields',
+        data: {
+          localizedUniqueRequiredText: 'es text',
+        },
+        locale: 'es',
       })
 
       await page.goto(url.create)
@@ -233,7 +239,7 @@ describe('fields', () => {
     test('should render collapsible as collapsed if initCollapsed is true', async () => {
       await page.goto(url.create)
       const collapsedCollapsible = page.locator(
-        '#field-collapsible-1 .collapsible__toggle--collapsed',
+        '#field-collapsible-_index-1 .collapsible__toggle--collapsed',
       )
       await expect(collapsedCollapsible).toBeVisible()
     })
@@ -241,10 +247,10 @@ describe('fields', () => {
     test('should render CollapsibleLabel using a function', async () => {
       const label = 'custom row label'
       await page.goto(url.create)
-      await page.locator('#field-collapsible-3__1 #field-nestedTitle').fill(label)
+      await page.locator('#field-collapsible-_index-3-1 #field-nestedTitle').fill(label)
       await wait(100)
       const customCollapsibleLabel = page.locator(
-        `#field-collapsible-3__1 .collapsible-field__row-label-wrap :text("${label}")`,
+        `#field-collapsible-_index-3-1 .collapsible-field__row-label-wrap :text("${label}")`,
       )
       await expect(customCollapsibleLabel).toContainText(label)
     })
@@ -261,7 +267,7 @@ describe('fields', () => {
 
       await page
         .locator(
-          '#arrayWithCollapsibles-row-0 #field-collapsible-4__0-arrayWithCollapsibles__0 #field-arrayWithCollapsibles__0__innerCollapsible',
+          '#arrayWithCollapsibles-row-0 #field-collapsible-arrayWithCollapsibles__0___index-0 #field-arrayWithCollapsibles__0__innerCollapsible',
         )
         .fill(label)
       await wait(100)
@@ -364,20 +370,89 @@ describe('fields', () => {
     test('should render row fields inline and with explicit widths', async () => {
       await page.goto(url.create)
       const fieldA = page.locator('input#field-field_with_width_a')
-      await expect(fieldA).toBeVisible()
       const fieldB = page.locator('input#field-field_with_width_b')
+
+      await expect(fieldA).toBeVisible()
       await expect(fieldB).toBeVisible()
+
       const fieldABox = await fieldA.boundingBox()
       const fieldBBox = await fieldB.boundingBox()
 
-      // Check that the top value of the fields are the same
-      // Give it some wiggle room of like 2px to account for differences in rendering
-      const tolerance = 2
-      expect(fieldABox.y).toBeLessThanOrEqual(fieldBBox.y + tolerance)
+      await expect(() => {
+        expect(fieldABox.y).toEqual(fieldBBox.y)
+        expect(fieldABox.width).toEqual(fieldBBox.width)
+      }).toPass()
 
-      // Check that the widths of the fields are the same
-      const difference = Math.abs(fieldABox.width - fieldBBox.width)
-      expect(difference).toBeLessThanOrEqual(tolerance)
+      const field_30_percent = page.locator(
+        '.field-type.text:has(input#field-field_with_width_30_percent)',
+      )
+      const field_60_percent = page.locator(
+        '.field-type.text:has(input#field-field_with_width_60_percent)',
+      )
+      const field_20_percent = page.locator(
+        '.field-type.text:has(input#field-field_with_width_20_percent)',
+      )
+      const collapsible_30_percent = page.locator(
+        '.collapsible-field:has(#field-field_within_collapsible_a)',
+      )
+
+      const field_20_percent_width_within_row_a = page.locator(
+        '.field-type.text:has(input#field-field_20_percent_width_within_row_a)',
+      )
+      const field_no_set_width_within_row_b = page.locator(
+        '.field-type.text:has(input#field-no_set_width_within_row_b)',
+      )
+      const field_no_set_width_within_row_c = page.locator(
+        '.field-type.text:has(input#field-no_set_width_within_row_c)',
+      )
+      const field_20_percent_width_within_row_d = page.locator(
+        '.field-type.text:has(input#field-field_20_percent_width_within_row_d)',
+      )
+
+      await expect(field_30_percent).toBeVisible()
+      await expect(field_60_percent).toBeVisible()
+      await expect(field_20_percent).toBeVisible()
+      await expect(collapsible_30_percent).toBeVisible()
+      await expect(field_20_percent_width_within_row_a).toBeVisible()
+      await expect(field_no_set_width_within_row_b).toBeVisible()
+      await expect(field_no_set_width_within_row_c).toBeVisible()
+      await expect(field_20_percent_width_within_row_d).toBeVisible()
+
+      const field_30_boundingBox = await field_30_percent.boundingBox()
+      const field_60_boundingBox = await field_60_percent.boundingBox()
+      const field_20_boundingBox = await field_20_percent.boundingBox()
+      const collapsible_30_boundingBox = await collapsible_30_percent.boundingBox()
+      const field_20_percent_width_within_row_a_box =
+        await field_20_percent_width_within_row_a.boundingBox()
+      const field_no_set_width_within_row_b_box =
+        await field_no_set_width_within_row_b.boundingBox()
+      const field_no_set_width_within_row_c_box =
+        await field_no_set_width_within_row_c.boundingBox()
+      const field_20_percent_width_within_row_d_box =
+        await field_20_percent_width_within_row_d.boundingBox()
+
+      await expect(() => {
+        expect(field_30_boundingBox.y).toEqual(field_60_boundingBox.y)
+        expect(field_30_boundingBox.x).toEqual(field_20_boundingBox.x)
+        expect(field_30_boundingBox.y).not.toEqual(field_20_boundingBox.y)
+        expect(field_30_boundingBox.height).toEqual(field_60_boundingBox.height)
+        expect(collapsible_30_boundingBox.width).toEqual(field_30_boundingBox.width)
+
+        expect(field_20_percent_width_within_row_a_box.y).toEqual(
+          field_no_set_width_within_row_b_box.y,
+        )
+        expect(field_no_set_width_within_row_b_box.y).toEqual(field_no_set_width_within_row_c_box.y)
+        expect(field_no_set_width_within_row_c_box.y).toEqual(
+          field_20_percent_width_within_row_d_box.y,
+        )
+
+        expect(field_20_percent_width_within_row_a_box.width).toEqual(
+          field_20_percent_width_within_row_d_box.width,
+        )
+        expect(field_no_set_width_within_row_b_box.width).toEqual(
+          field_no_set_width_within_row_c_box.width,
+        )
+      }).toPass()
     })
 
     test('should render nested row fields in the correct position', async () => {
@@ -392,15 +467,11 @@ describe('fields', () => {
       const fieldABox = await fieldA.boundingBox()
       const fieldBBox = await fieldB.boundingBox()
 
-      // Check that the top value of the fields are the same
-      // Give it some wiggle room of like 2px to account for differences in rendering
-      const tolerance = 2
-      expect(fieldABox.y).toBeLessThanOrEqual(fieldBBox.y + tolerance)
-
-      // Check that the widths of the fields are the same
-      const collapsibleDifference = Math.abs(fieldABox.width - fieldBBox.width)
-
-      expect(collapsibleDifference).toBeLessThanOrEqual(tolerance)
+      await expect(() => {
+        // Check that the top value of the fields are the same
+        expect(fieldABox.y).toEqual(fieldBBox.y)
+        expect(fieldABox.height).toEqual(fieldBBox.height)
+      }).toPass()
     })
   })
 
@@ -470,13 +541,18 @@ describe('fields', () => {
   })
 
   describe('tabs', () => {
-    let url: AdminUrlUtil
+    // tabsFieldsSlug is used for testing tabs
+    let tabsFieldsUrl: AdminUrlUtil
+    // tabsFields2Slug is used for testing nested tabs
+    let tabsFieldsUrl2: AdminUrlUtil
+
     beforeAll(() => {
-      url = new AdminUrlUtil(serverURL, tabsFields2Slug)
+      tabsFieldsUrl = new AdminUrlUtil(serverURL, tabsFieldsSlug)
+      tabsFieldsUrl2 = new AdminUrlUtil(serverURL, tabsFields2Slug)
     })
 
     test('should correctly save nested unnamed and named tabs', async () => {
-      await page.goto(url.create)
+      await page.goto(tabsFieldsUrl2.create)
 
       await page.locator('#field-tabsInArray .array-field__add-row').click()
       await page.locator('#field-tabsInArray__0__text').fill('tab 1 text')
@@ -488,6 +564,28 @@ describe('fields', () => {
       await expect(page.locator('#field-tabsInArray__0__text')).toHaveValue('tab 1 text')
       await page.locator('.tabs-field__tabs button:nth-child(2)').click()
       await expect(page.locator('#field-tabsInArray__0__tab2__text2')).toHaveValue('tab 2 text')
+    })
+
+    test('should save preferences for tab order', async () => {
+      await page.goto(tabsFieldsUrl.list)
+
+      const firstItem = page.locator('.cell-id a').nth(0)
+      const href = await firstItem.getAttribute('href')
+      await firstItem.click()
+
+      const regex = new RegExp(href.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+
+      await page.waitForURL(regex)
+
+      await page.locator('.tabs-field__tabs button:nth-child(2)').nth(0).click()
+
+      await page.reload()
+
+      const tab2 = page.locator('.tabs-field__tabs button:nth-child(2)').nth(0)
+
+      await expect(async () => await expect(tab2).toHaveClass(/--active/)).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
     })
   })
 })

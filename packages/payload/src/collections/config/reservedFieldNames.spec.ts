@@ -77,12 +77,12 @@ describe('reservedFieldNames - collections -', () => {
   describe('auth -', () => {
     const collectionWithAuth: CollectionConfig = {
       slug: 'collection-with-auth',
-      fields: [],
       auth: {
-        verify: true,
-        useAPIKey: true,
         loginWithUsername: true,
+        useAPIKey: true,
+        verify: true,
       },
+      fields: [],
     }
 
     it('should throw on hash', async () => {

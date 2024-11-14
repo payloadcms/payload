@@ -1,3 +1,4 @@
+'use client'
 type Force = [number, number]
 type Listener = (force: Force, e: TouchEvent) => void
 interface ElementValues {

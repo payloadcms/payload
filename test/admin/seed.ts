@@ -15,19 +15,6 @@ import {
 } from './slugs.js'
 
 export const seed = async (_payload) => {
-  if (_payload.db.name === 'mongoose') {
-    await Promise.all(
-      _payload.config.collections.map(async (coll) => {
-        await new Promise((resolve, reject) => {
-          _payload.db?.collections[coll.slug]?.ensureIndexes(function (err) {
-            if (err) reject(err)
-            resolve(true)
-          })
-        })
-      }),
-    )
-  }
-
   await executePromises(
     [
       () =>
@@ -40,18 +27,49 @@ export const seed = async (_payload) => {
           depth: 0,
           overrideAccess: true,
         }),
-      ...[...Array(11)].map(
-        () => () =>
-          _payload.create({
-            collection: postsCollectionSlug,
-            data: {
-              description: 'Description',
-              title: 'Title',
+      () =>
+        _payload.create({
+          collection: 'base-list-filters',
+          data: {
+            title: 'show me',
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
+      () =>
+        _payload.create({
+          collection: 'base-list-filters',
+          data: {
+            title: 'hide me',
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
+      ...[...Array(11)].map((_, i) => async () => {
+        const postDoc = await _payload.create({
+          collection: postsCollectionSlug,
+          data: {
+            description: 'Description',
+            title: `Post ${i + 1}`,
+          },
+          depth: 0,
+          overrideAccess: true,
+        })
+
+        return await _payload.update({
+          collection: postsCollectionSlug,
+          where: {
+            id: {
+              equals: postDoc.id,
             },
-            depth: 0,
-            overrideAccess: true,
-          }),
-      ),
+          },
+          data: {
+            relationship: postDoc.id,
+          },
+          depth: 0,
+          overrideAccess: true,
+        })
+      }),
       () =>
         _payload.create({
           collection: customViews1CollectionSlug,
@@ -125,6 +143,6 @@ export async function clearAndSeedEverything(_payload: Payload) {
     _payload,
     collectionSlugs,
     seedFunction: seed,
-    snapshotKey: 'adminTest',
+    snapshotKey: 'adminTests',
   })
 }

@@ -1,6 +1,6 @@
 import type { Collection, PayloadRequest, TypeWithID, Where } from 'payload'
 
-import { Forbidden, executeAccess } from 'payload'
+import { executeAccess, Forbidden } from 'payload'
 
 import { endpointsAreDisabled } from '../checkEndpoints.js'
 
@@ -15,7 +15,13 @@ export async function checkFileAccess({
 }): Promise<Response | TypeWithID> {
   const { config } = collection
   const disableEndpoints = endpointsAreDisabled({ endpoints: config.endpoints, request: req })
-  if (disableEndpoints) return disableEndpoints
+  if (disableEndpoints) {
+    return disableEndpoints
+  }
+
+  if (filename.includes('../') || filename.includes('..\\')) {
+    throw new Forbidden(req.t)
+  }
 
   const accessResult = await executeAccess({ isReadingStaticFile: true, req }, config.access.read)
 

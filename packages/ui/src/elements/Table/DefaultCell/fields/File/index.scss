@@ -1,23 +1,25 @@
 @import '../../../../../scss/styles.scss';
 
-.file {
-  display: flex;
-  flex-wrap: nowrap;
-  margin: base(-0.25) 0;
+@layer payload-default {
+  .file {
+    display: flex;
+    flex-wrap: nowrap;
 
-  &__thumbnail {
-    display: inline-block;
-    max-width: base(3);
-    height: base(3);
-  }
-
-  &__filename {
-    align-self: center;
-    [dir='ltr'] & {
-      margin-left: base(1);
+    &__thumbnail {
+      display: inline-block;
+      max-width: calc(var(--base) * 2);
+      height: calc(var(--base) * 2);
+      border-radius: var(--style-radius-s);
     }
-    [dir='rtl'] & {
-      margin-right: base(1);
+
+    &__filename {
+      align-self: center;
+      [dir='ltr'] & {
+        margin-left: var(--base);
+      }
+      [dir='rtl'] & {
+        margin-right: var(--base);
+      }
     }
   }
 }

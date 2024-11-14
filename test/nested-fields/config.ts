@@ -16,6 +16,11 @@ import { devUser } from '../credentials.js'
 // - tabs -> named-tab -> fields
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       slug: 'nested-fields',

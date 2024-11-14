@@ -1,13 +1,13 @@
-import type { Field } from '../../fields/config/types.js'
+import type { TextField } from '../../fields/config/types.js'
 
 import { username } from '../../fields/validations.js'
 
-export const usernameField: Field = {
+export const usernameFieldConfig: TextField = {
   name: 'username',
   type: 'text',
   admin: {
     components: {
-      Field: () => null,
+      Field: false,
     },
   },
   hooks: {

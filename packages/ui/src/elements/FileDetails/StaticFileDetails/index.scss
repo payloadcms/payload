@@ -1,0 +1,134 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .file-details {
+    background: var(--theme-elevation-50);
+    border: 1px solid var(--theme-border-color);
+    border-radius: var(--style-radius-m);
+    @include inputShadow;
+
+    header {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    &__remove {
+      position: absolute;
+      margin: 0;
+      top: $baseline;
+      right: $baseline;
+
+      & .btn__icon {
+        border: 1px solid var(--theme-border-color);
+        background: var(--theme-input-bg);
+        @include inputShadow;
+        transition: border 100ms cubic-bezier(0, 0.2, 0.2, 1);
+
+        &:hover {
+          border: 1px solid var(--theme-elevation-400);
+        }
+      }
+    }
+
+    &__main-detail {
+      padding: base(0.8) base(1.2);
+      width: auto;
+      flex-grow: 1;
+      min-width: 280px;
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-self: stretch;
+      gap: base(0.2);
+    }
+
+    &__toggle-more-info {
+      font-weight: 600;
+      text-decoration: none;
+
+      &:hover,
+      &:focus-visible {
+        text-decoration: underline;
+      }
+    }
+
+    &__toggle-icon {
+      padding: calc(var(--base) / 4);
+    }
+
+    &__sizes {
+      margin: 0;
+      padding: base(1.5) $baseline 0;
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+
+      li {
+        width: 50%;
+        padding: 0 base(0.5);
+        margin-bottom: $baseline;
+      }
+    }
+
+    &__size-label {
+      color: var(--theme-elevation-400);
+    }
+
+    &__file-mutation {
+      display: flex;
+      margin-top: base(0.25);
+      gap: calc(var(--base) / 2);
+    }
+
+    &__edit {
+      cursor: pointer;
+      background-color: var(--theme-elevation-150);
+      border: none;
+      border-radius: $style-radius-m;
+      padding: base(0.25) base(0.5);
+
+      &:hover {
+        background-color: var(--theme-elevation-100);
+      }
+    }
+
+    @include large-break {
+      &__main-detail {
+        padding: $baseline;
+      }
+
+      &__sizes {
+        display: block;
+        padding: $baseline $baseline base(0.5);
+
+        li {
+          padding: 0;
+          width: 100%;
+        }
+      }
+    }
+
+    @include mid-break {
+      header {
+        flex-wrap: wrap;
+      }
+
+      .thumbnail {
+        width: 50%;
+        order: 1;
+      }
+
+      &__remove {
+        order: 2;
+      }
+
+      &__main-detail {
+        order: 3;
+        width: 100%;
+      }
+    }
+  }
+}

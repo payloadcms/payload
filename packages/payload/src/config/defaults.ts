@@ -1,4 +1,7 @@
+import type { JobsConfig } from '../queues/config/types/index.js'
 import type { Config } from './types.js'
+
+import defaultAccess from '../auth/defaultAccess.js'
 
 export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   admin: {
@@ -6,7 +9,11 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     components: {},
     custom: {},
     dateFormat: 'MMMM do yyyy, h:mm a',
+    dependencies: {},
     disable: false,
+    importMap: {
+      baseDir: `${typeof process?.cwd === 'function' ? process.cwd() : ''}`,
+    },
     meta: {
       defaultOGImageType: 'dynamic',
       titleSuffix: '- Payload',
@@ -21,6 +28,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
       reset: '/reset',
       unauthorized: '/unauthorized',
     },
+    theme: 'all',
   },
   bin: [],
   collections: [],
@@ -39,6 +47,13 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   },
   hooks: {},
   i18n: {},
+  jobs: {
+    access: {
+      run: defaultAccess,
+    },
+    deleteJobOnComplete: true,
+    depth: 0,
+  } as JobsConfig,
   localization: false,
   maxDepth: 10,
   routes: {

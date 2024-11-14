@@ -1,10 +1,10 @@
-import type { FieldMap } from '@payloadcms/ui'
-import type { FormState } from 'payload'
+import type { ClientField, FormState } from 'payload'
 
 export type Props = {
-  drawerSlug: string
-  fieldMap: FieldMap
-  handleClose: () => void
-  handleModalSubmit: (fields: FormState, data: Record<string, unknown>) => void
-  initialState?: FormState
+  readonly drawerSlug: string
+  readonly fields: ClientField[]
+  readonly handleClose: () => void
+  readonly handleModalSubmit: (fields: FormState, data: Record<string, unknown>) => void
+  readonly initialState?: FormState
+  readonly schemaPath: string
 }

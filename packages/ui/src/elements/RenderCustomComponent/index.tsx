@@ -1,46 +1,19 @@
-import type { ServerProps } from 'payload'
-
-import React from 'react'
-
-import { WithServerSideProps } from '../WithServerSideProps/index.js'
-
-export type RenderCustomComponentProps = {
-  CustomComponent?: React.ComponentType<any>
-  DefaultComponent: React.ComponentType<any>
-  componentProps?: Record<string, any>
-  /**
-   * Server-only props automatically get added to the component if it's an RSC
-   */
-  serverOnlyProps?: ServerProps
+type Args = {
+  CustomComponent?: React.ReactNode
+  Fallback: React.ReactNode
 }
 
 /**
- * If you are passing dynamic props or function props to this component,
- * you should instead use the <RenderCustomClientComponent/>
+ * Renders a CustomComponent or a Fallback component.
+ * Only fallback if the Custom Component is undefined.
+ *
+ * If the CustomComponent is null, render null.
+ *
+ * @param {Object} args - Arguments object.
+ * @param {React.ReactNode} [args.CustomComponent] - Optional custom component to render.
+ * @param {React.ReactNode} args.Fallback - Fallback component to render if CustomComponent is undefined.
+ * @returns {React.ReactNode} Rendered component.
  */
-
-export const RenderCustomComponent: React.FC<RenderCustomComponentProps> = (props) => {
-  const { CustomComponent, DefaultComponent, componentProps, serverOnlyProps } = props
-
-  if (CustomComponent) {
-    return (
-      <WithServerSideProps
-        Component={CustomComponent}
-        serverOnlyProps={serverOnlyProps}
-        {...componentProps}
-      />
-    )
-  }
-
-  if (DefaultComponent) {
-    return (
-      <WithServerSideProps
-        Component={DefaultComponent}
-        serverOnlyProps={serverOnlyProps}
-        {...componentProps}
-      />
-    )
-  }
-
-  return null
+export function RenderCustomComponent({ CustomComponent, Fallback }: Args): React.ReactNode {
+  return CustomComponent !== undefined ? CustomComponent : Fallback
 }

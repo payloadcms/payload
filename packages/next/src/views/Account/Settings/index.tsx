@@ -1,21 +1,22 @@
 import type { I18n } from '@payloadcms/translations'
-import type { LanguageOptions } from 'payload'
+import type { Config, LanguageOptions } from 'payload'
 
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
 import { ToggleTheme } from '../ToggleTheme/index.js'
-import { LanguageSelector } from './LanguageSelector.js'
 import './index.scss'
+import { LanguageSelector } from './LanguageSelector.js'
 
 const baseClass = 'payload-settings'
 
 export const Settings: React.FC<{
-  className?: string
-  i18n: I18n
-  languageOptions: LanguageOptions
+  readonly className?: string
+  readonly i18n: I18n
+  readonly languageOptions: LanguageOptions
+  readonly theme: Config['admin']['theme']
 }> = (props) => {
-  const { className, i18n, languageOptions } = props
+  const { className, i18n, languageOptions, theme } = props
 
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
@@ -24,7 +25,7 @@ export const Settings: React.FC<{
         <FieldLabel htmlFor="language-select" label={i18n.t('general:language')} />
         <LanguageSelector languageOptions={languageOptions} />
       </div>
-      <ToggleTheme />
+      {theme === 'all' && <ToggleTheme />}
     </div>
   )
 }

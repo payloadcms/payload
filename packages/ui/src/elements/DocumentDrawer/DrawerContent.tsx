@@ -6,64 +6,99 @@ import { toast } from 'sonner'
 
 import type { DocumentDrawerProps } from './types.js'
 
-import { useRelatedCollections } from '../../fields/Relationship/AddNew/useRelatedCollections.js'
-import { XIcon } from '../../icons/X/index.js'
-import { useComponentMap } from '../../providers/ComponentMap/index.js'
+import { LoadingOverlay } from '../../elements/Loading/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useLocale } from '../../providers/Locale/index.js'
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { Gutter } from '../Gutter/index.js'
-import { IDLabel } from '../IDLabel/index.js'
-import { RenderTitle } from '../RenderTitle/index.js'
-import { baseClass } from './index.js'
+import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
+import { DocumentDrawerContextProvider } from './Provider.js'
 
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   id: existingDocID,
-  Header,
+  AfterFields,
   collectionSlug,
+  disableActions,
   drawerSlug,
+  Header,
+  initialData,
+  initialState,
+  onDelete: onDeleteFromProps,
+  onDuplicate: onDuplicateFromProps,
   onSave: onSaveFromProps,
+  redirectAfterDelete,
+  redirectAfterDuplicate,
 }) => {
-  const config = useConfig()
-
   const {
-    routes: { api: apiRoute },
-    serverURL,
-  } = config
+    config: { collections },
+  } = useConfig()
 
-  const { closeModal, modalState, toggleModal } = useModal()
-  const locale = useLocale()
+  const [collectionConfig] = useState(() =>
+    collections.find((collection) => collection.slug === collectionSlug),
+  )
+
+  const documentViewAbortControllerRef = React.useRef<AbortController>(null)
+
+  const { closeModal } = useModal()
   const { t } = useTranslation()
-  const [docID, setDocID] = useState(existingDocID)
-  const [isOpen, setIsOpen] = useState(false)
-  const [collectionConfig] = useRelatedCollections(collectionSlug)
 
-  const { componentMap } = useComponentMap()
+  const { renderDocument } = useServerFunctions()
 
-  const { Edit } = componentMap[`${collectionSlug ? 'collections' : 'globals'}`][collectionSlug]
-  const isEditing = Boolean(docID)
-  const apiURL = docID
-    ? `${serverURL}${apiRoute}/${collectionSlug}/${docID}${locale?.code ? `?locale=${locale.code}` : ''}`
-    : null
+  const [DocumentView, setDocumentView] = useState<React.ReactNode>(undefined)
+  const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    setIsOpen(Boolean(modalState[drawerSlug]?.isOpen))
-  }, [modalState, drawerSlug])
+  const getDocumentView = useCallback(
+    (docID?: number | string) => {
+      abortAndIgnore(documentViewAbortControllerRef.current)
 
-  const onLoadError = React.useCallback(
-    (data) => {
-      if (isOpen) {
-        closeModal(drawerSlug)
-        toast.error(data.errors?.[0].message || t('error:unspecific'))
+      const controller = new AbortController()
+      documentViewAbortControllerRef.current = controller
+
+      const fetchDocumentView = async () => {
+        setIsLoading(true)
+
+        try {
+          const result = await renderDocument({
+            collectionSlug,
+            disableActions,
+            docID,
+            drawerSlug,
+            initialData,
+            redirectAfterDelete: redirectAfterDelete !== undefined ? redirectAfterDelete : false,
+            redirectAfterDuplicate:
+              redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false,
+            signal: controller.signal,
+          })
+
+          if (result?.Document) {
+            setDocumentView(result.Document)
+            setIsLoading(false)
+          }
+        } catch (error) {
+          toast.error(error?.message || t('error:unspecific'))
+          closeModal(drawerSlug)
+          // toast.error(data?.errors?.[0].message || t('error:unspecific'))
+        }
       }
+
+      void fetchDocumentView()
     },
-    [closeModal, drawerSlug, isOpen, t],
+    [
+      collectionSlug,
+      disableActions,
+      drawerSlug,
+      initialData,
+      redirectAfterDelete,
+      redirectAfterDuplicate,
+      renderDocument,
+      closeModal,
+      t,
+    ],
   )
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
-      setDocID(args.doc.id)
+      getDocumentView(args.doc.id)
+
       if (typeof onSaveFromProps === 'function') {
         void onSaveFromProps({
           ...args,
@@ -71,47 +106,67 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
         })
       }
     },
-    [onSaveFromProps, collectionConfig],
+    [onSaveFromProps, collectionConfig, getDocumentView],
   )
+
+  const onDuplicate = useCallback<DocumentDrawerProps['onDuplicate']>(
+    (args) => {
+      getDocumentView(args.doc.id)
+
+      if (typeof onDuplicateFromProps === 'function') {
+        void onDuplicateFromProps({
+          ...args,
+          collectionConfig,
+        })
+      }
+    },
+    [onDuplicateFromProps, collectionConfig, getDocumentView],
+  )
+
+  const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
+    (args) => {
+      if (typeof onDeleteFromProps === 'function') {
+        void onDeleteFromProps({
+          ...args,
+          collectionConfig,
+        })
+      }
+
+      closeModal(drawerSlug)
+    },
+    [onDeleteFromProps, closeModal, drawerSlug, collectionConfig],
+  )
+
+  const clearDoc = useCallback(() => {
+    getDocumentView()
+  }, [getDocumentView])
+
+  useEffect(() => {
+    if (!DocumentView) {
+      getDocumentView(existingDocID)
+    }
+  }, [DocumentView, getDocumentView, existingDocID])
+
+  // Cleanup any pending requests when the component unmounts
+  useEffect(() => {
+    return () => {
+      abortAndIgnore(documentViewAbortControllerRef.current)
+    }
+  }, [])
+
+  if (isLoading) {
+    return <LoadingOverlay />
+  }
 
   return (
-    <DocumentInfoProvider
-      BeforeDocument={
-        <Gutter className={`${baseClass}__header`}>
-          <div className={`${baseClass}__header-content`}>
-            <h2 className={`${baseClass}__header-text`}>
-              {Header || <RenderTitle element="span" />}
-            </h2>
-            {/* TODO: the `button` HTML element breaks CSS transitions on the drawer for some reason...
-            i.e. changing to a `div` element will fix the animation issue but will break accessibility
-          */}
-            <button
-              aria-label={t('general:close')}
-              className={`${baseClass}__header-close`}
-              onClick={() => toggleModal(drawerSlug)}
-              type="button"
-            >
-              <XIcon />
-            </button>
-          </div>
-          <DocumentTitle />
-        </Gutter>
-      }
-      apiURL={apiURL}
-      collectionSlug={collectionConfig.slug}
-      disableActions
-      disableLeaveWithoutSaving
-      id={docID}
-      isEditing={isEditing}
-      onLoadError={onLoadError}
+    <DocumentDrawerContextProvider
+      clearDoc={clearDoc}
+      drawerSlug={drawerSlug}
+      onDelete={onDelete}
+      onDuplicate={onDuplicate}
       onSave={onSave}
     >
-      {Edit}
-    </DocumentInfoProvider>
+      {DocumentView}
+    </DocumentDrawerContextProvider>
   )
-}
-
-const DocumentTitle: React.FC = () => {
-  const { id, title } = useDocumentInfo()
-  return id && id !== title ? <IDLabel id={id.toString()} /> : null
 }

@@ -1,9 +1,5 @@
 import type { CollectionConfig } from 'payload'
 
-import { AfterInput } from './AfterInput.js'
-import { BeforeInput } from './BeforeInput.js'
-import CustomError from './CustomError.js'
-import CustomLabel from './CustomLabel.js'
 import { defaultText, textFieldsSlug } from './shared.js'
 
 const TextFields: CollectionConfig = {
@@ -17,6 +13,9 @@ const TextFields: CollectionConfig = {
       name: 'text',
       type: 'text',
       required: true,
+      hooks: {
+        beforeDuplicate: [({ value }) => `${value} - duplicate`],
+      },
     },
     {
       name: 'localizedText',
@@ -94,35 +93,6 @@ const TextFields: CollectionConfig = {
       },
     },
     {
-      name: 'customLabel',
-      type: 'text',
-      admin: {
-        components: {
-          Label: CustomLabel,
-        },
-      },
-    },
-    {
-      name: 'customError',
-      type: 'text',
-      admin: {
-        components: {
-          Error: CustomError,
-        },
-      },
-      minLength: 3,
-    },
-    {
-      name: 'beforeAndAfterInput',
-      type: 'text',
-      admin: {
-        components: {
-          afterInput: [AfterInput],
-          beforeInput: [BeforeInput],
-        },
-      },
-    },
-    {
       name: 'hasMany',
       type: 'text',
       hasMany: true,
@@ -166,6 +136,33 @@ const TextFields: CollectionConfig = {
         disableListColumn: false,
         disableListFilter: true,
       },
+    },
+    {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'texts',
+          type: 'text',
+          hasMany: true,
+        },
+      ],
+    },
+    {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'block',
+          fields: [
+            {
+              name: 'texts',
+              type: 'text',
+              hasMany: true,
+            },
+          ],
+        },
+      ],
     },
   ],
 }

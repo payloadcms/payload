@@ -4,10 +4,14 @@ import { generatePayloadCookie, isolateObjectProperty, resetPasswordOperation } 
 
 import type { Context } from '../types.js'
 
-function resetPasswordResolver(collection: Collection): any {
+export function resetPassword(collection: Collection): any {
   async function resolver(_, args, context: Context) {
-    if (args.locale) context.req.locale = args.locale
-    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
+    if (args.locale) {
+      context.req.locale = args.locale
+    }
+    if (args.fallbackLocale) {
+      context.req.fallbackLocale = args.fallbackLocale
+    }
 
     const options = {
       api: 'GraphQL',
@@ -19,8 +23,8 @@ function resetPasswordResolver(collection: Collection): any {
 
     const result = await resetPasswordOperation(options)
     const cookie = generatePayloadCookie({
-      collectionConfig: collection.config,
-      payload: context.req.payload,
+      collectionAuthConfig: collection.config.auth,
+      cookiePrefix: context.req.payload.config.cookiePrefix,
       token: result.token,
     })
     context.headers['Set-Cookie'] = cookie
@@ -34,5 +38,3 @@ function resetPasswordResolver(collection: Collection): any {
 
   return resolver
 }
-
-export default resetPasswordResolver

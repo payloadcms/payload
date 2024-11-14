@@ -74,6 +74,7 @@ const getPreferencesCollection = (config: Config): CollectionConfig => ({
       type: 'json',
     },
   ],
+  lockDocuments: false,
 })
 
 export default getPreferencesCollection

@@ -34,7 +34,9 @@ export const getTranslationString = <
   let keySuffix = ''
 
   const translation: string = keys.reduce((acc: any, key, index) => {
-    if (typeof acc === 'string') return acc
+    if (typeof acc === 'string') {
+      return acc
+    }
 
     if (typeof count === 'number') {
       if (count === 0 && `${key}_zero` in acc) {

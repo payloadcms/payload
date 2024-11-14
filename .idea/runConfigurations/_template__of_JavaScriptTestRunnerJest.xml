@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="true" type="JavaScriptTestRunnerJest">
     <node-interpreter value="project" />
-    <node-options value="--experimental-vm-modules --no-deprecation" />
+    <node-options value="--no-deprecation" />
     <envs />
     <scope-kind value="ALL" />
     <method v="2" />

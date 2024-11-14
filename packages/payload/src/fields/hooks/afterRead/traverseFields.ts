@@ -1,12 +1,19 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { RequestContext } from '../../../index.js'
+import type {
+  JsonObject,
+  PayloadRequest,
+  PopulateType,
+  SelectMode,
+  SelectType,
+} from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { promise } from './promise.js'
 
 type Args = {
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   currentDepth: number
   depth: number
@@ -20,13 +27,16 @@ type Args = {
   fields: (Field | TabAsField)[]
   findMany: boolean
   flattenLocales: boolean
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
   locale: null | string
   overrideAccess: boolean
   path: (number | string)[]
+  populate?: PopulateType
   populationPromises: Promise<void>[]
   req: PayloadRequest
   schemaPath: string[]
+  select?: SelectType
+  selectMode?: SelectMode
   showHiddenFields: boolean
   siblingDoc: JsonObject
   triggerAccessControl?: boolean
@@ -49,15 +59,18 @@ export const traverseFields = ({
   locale,
   overrideAccess,
   path,
+  populate,
   populationPromises,
   req,
   schemaPath,
+  select,
+  selectMode,
   showHiddenFields,
   siblingDoc,
   triggerAccessControl = true,
   triggerHooks = true,
 }: Args): void => {
-  fields.forEach((field) => {
+  fields.forEach((field, fieldIndex) => {
     fieldPromises.push(
       promise({
         collection,
@@ -68,6 +81,7 @@ export const traverseFields = ({
         draft,
         fallbackLocale,
         field,
+        fieldIndex,
         fieldPromises,
         findMany,
         flattenLocales,
@@ -76,8 +90,11 @@ export const traverseFields = ({
         overrideAccess,
         parentPath: path,
         parentSchemaPath: schemaPath,
+        populate,
         populationPromises,
         req,
+        select,
+        selectMode,
         showHiddenFields,
         siblingDoc,
         triggerAccessControl,

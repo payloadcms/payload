@@ -9,21 +9,27 @@ import type {
   SerializedLexicalNode,
 } from 'lexical'
 import type {
+  Config,
   Field,
+  FieldSchemaMap,
   JsonObject,
+  Payload,
+  PayloadComponent,
   PayloadRequest,
+  PopulateType,
   ReplaceAny,
   RequestContext,
   RichTextField,
+  RichTextHooks,
   SanitizedConfig,
   ValidateOptions,
+  ValidationFieldError,
 } from 'payload'
-import type React from 'react'
 
 import type { ServerEditorConfig } from '../lexical/config/types.js'
 import type { AdapterProps } from '../types.js'
 import type { HTMLConverter } from './converters/html/converter/types.js'
-import type { ClientComponentProps } from './typesClient.js'
+import type { BaseClientFeatureProps } from './typesClient.js'
 
 export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
   context,
@@ -73,7 +79,7 @@ export type NodeValidation<T extends SerializedLexicalNode = SerializedLexicalNo
   node: T
   nodeValidations: Map<string, Array<NodeValidation>>
   validation: {
-    options: ValidateOptions<unknown, unknown, RichTextField>
+    options: ValidateOptions<unknown, unknown, RichTextField, SerializedEditorState>
     value: SerializedEditorState
   }
 }) => Promise<string | true> | string | true
@@ -107,6 +113,7 @@ export type FeatureProviderServer<
         /** unSanitizedEditorConfig.features, but mapped */
         featureProviderMap: ServerFeatureProviderMap
         isRoot?: boolean
+        parentIsLocalized: boolean
         // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
         resolvedFeatures: ResolvedServerFeatureMap
         // unSanitized EditorConfig,
@@ -144,6 +151,10 @@ export type AfterReadNodeHookArgs<T extends SerializedLexicalNode> = {
   locale: string
   overrideAccess: boolean
   /**
+   * Only available in `afterRead` hooks.
+   */
+  populateArg?: PopulateType
+  /**
    *  Only available in `afterRead` field hooks.
    */
   populationPromises: Promise<void>[]
@@ -176,11 +187,10 @@ export type BeforeValidateNodeHookArgs<T extends SerializedLexicalNode> = {
 }
 
 export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
-  duplicate: boolean
   /**
    * Only available in `beforeChange` hooks.
    */
-  errors: { field: string; message: string }[]
+  errors: ValidationFieldError[]
   mergeLocaleActions: (() => Promise<void>)[]
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation: 'create' | 'delete' | 'read' | 'update'
@@ -230,11 +240,14 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
   }
   /**
    * If a node includes sub-fields (e.g. block and link nodes), passing those subFields here will make payload
-   * automatically populate & run hooks for them
+   * automatically populate, run hooks, and generate component import maps for them
    */
   getSubFields?: (args: {
-    node: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
-    req: PayloadRequest
+    /**
+     * Optional. If not provided, all possible sub-fields should be returned.
+     */
+    node?: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
+    req?: PayloadRequest
   }) => Field[] | null
   /**
    * If a node includes sub-fields, the sub-fields data needs to be returned here, alongside `getSubFields` which returns their schema.
@@ -275,26 +288,13 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
 }
 
 export type ServerFeature<ServerProps, ClientFeatureProps> = {
-  ClientFeature?: React.FC<ClientComponentProps<ClientFeatureProps>>
+  ClientFeature?: PayloadComponent<never, BaseClientFeatureProps<ClientFeatureProps>>
   /**
    * This determines what props will be available on the Client.
    */
   clientFeatureProps?: ClientFeatureProps
-  generateComponentMap?: (args: {
-    config: SanitizedConfig
-    i18n: I18nClient
-    props: ServerProps
-    schemaPath: string
-  }) => {
-    [key: string]: React.FC<{ componentKey: string; featureKey: string }>
-  }
-  generateSchemaMap?: (args: {
-    config: SanitizedConfig
-    i18n: I18nClient
-    props: ServerProps
-    schemaMap: Map<string, Field[]>
-    schemaPath: string
-  }) => Map<string, Field[]> | null
+  // @ts-expect-error - TODO: fix this
+  componentImports?: Config['admin']['importMap']['generators'][0] | PayloadComponent[]
   generatedTypes?: {
     modifyOutputSchema: ({
       collectionIDFieldTypes,
@@ -318,6 +318,15 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
       isRequired: boolean
     }) => JSONSchema4
   }
+  generateSchemaMap?: (args: {
+    config: SanitizedConfig
+    field: RichTextField
+    i18n: I18nClient
+    props: ServerProps
+    schemaMap: FieldSchemaMap
+    schemaPath: string
+  }) => FieldSchemaMap | null
+  hooks?: RichTextHooks
   /**
    * Here you can provide i18n translations for your feature. These will only be available on the server and client.
    *
@@ -401,7 +410,8 @@ export type SanitizedServerFeatures = {
     (args: { node: SerializedLexicalNode; req: PayloadRequest }) => JsonObject
   >
   graphQLPopulationPromises: Map<string, Array<PopulationPromise>>
-  hooks?: {
+  hooks: RichTextHooks
+  nodeHooks?: {
     afterChange?: Map<string, Array<AfterChangeNodeHook<SerializedLexicalNode>>>
     afterRead?: Map<string, Array<AfterReadNodeHook<SerializedLexicalNode>>>
     beforeChange?: Map<string, Array<BeforeChangeNodeHook<SerializedLexicalNode>>>

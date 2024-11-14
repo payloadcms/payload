@@ -1,4 +1,4 @@
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequest, PopulateType } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
@@ -12,9 +12,11 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 
 export type Arguments = {
   depth?: number
+  draft?: boolean
   globalConfig: SanitizedGlobalConfig
   id: number | string
   overrideAccess?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
   showHiddenFields?: boolean
 }
@@ -25,8 +27,10 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
   const {
     id,
     depth,
+    draft,
     globalConfig,
     overrideAccess,
+    populate,
     req: { fallbackLocale, locale, payload },
     req,
     showHiddenFields,
@@ -63,6 +67,11 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     // Patch globalType onto version doc
     rawVersion.version.globalType = globalConfig.slug
 
+    // Overwrite draft status if draft is true
+
+    if (draft) {
+      rawVersion.version._status = 'draft'
+    }
     // /////////////////////////////////////
     // fetch previousDoc
     // /////////////////////////////////////
@@ -90,6 +99,18 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
         data: result,
         req,
       })
+
+      const now = new Date().toISOString()
+
+      result = await payload.db.createGlobalVersion({
+        autosave: false,
+        createdAt: result.createdAt ? new Date(result.createdAt).toISOString() : now,
+        globalSlug: globalConfig.slug,
+        parent: id,
+        req,
+        updatedAt: draft ? now : new Date(result.updatedAt).toISOString(),
+        versionData: result,
+      })
     } else {
       result = await payload.db.createGlobal({
         slug: globalConfig.slug,
@@ -112,6 +133,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
       global: globalConfig,
       locale,
       overrideAccess,
+      populate,
       req,
       showHiddenFields,
     })
@@ -164,7 +186,9 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
         })) || result
     }, Promise.resolve())
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return result
   } catch (error: unknown) {

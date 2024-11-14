@@ -1,7 +1,5 @@
 import type { Config, SanitizedConfig } from 'payload'
 
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
-import { postgresAdapter } from '@payloadcms/db-postgres'
 import {
   AlignFeature,
   BlockquoteFeature,
@@ -11,7 +9,9 @@ import {
   HeadingFeature,
   IndentFeature,
   InlineCodeFeature,
+  InlineToolbarFeature,
   ItalicFeature,
+  lexicalEditor,
   LinkFeature,
   OrderedListFeature,
   ParagraphFeature,
@@ -23,7 +23,6 @@ import {
   UnderlineFeature,
   UnorderedListFeature,
   UploadFeature,
-  lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 // import { slateEditor } from '@payloadcms/richtext-slate'
 import { buildConfig } from 'payload'
@@ -32,48 +31,23 @@ import { en } from 'payload/i18n/en'
 import { es } from 'payload/i18n/es'
 import sharp from 'sharp'
 
+import { databaseAdapter } from './databaseAdapter.js'
 import { reInitEndpoint } from './helpers/reInit.js'
 import { localAPIEndpoint } from './helpers/sdk/endpoint.js'
 import { testEmailAdapter } from './testEmailAdapter.js'
+
+// process.env.POSTGRES_URL = 'postgres://postgres:postgres@127.0.0.1:5432/payloadtests'
 // process.env.PAYLOAD_DATABASE = 'postgres'
+// process.env.PAYLOAD_DATABASE = 'sqlite'
 
 export async function buildConfigWithDefaults(
   testConfig?: Partial<Config>,
+  options?: {
+    disableAutoLogin?: boolean
+  },
 ): Promise<SanitizedConfig> {
-  const databaseAdapters = {
-    mongodb: mongooseAdapter({
-      url:
-        process.env.MONGODB_MEMORY_SERVER_URI ||
-        process.env.DATABASE_URI ||
-        'mongodb://127.0.0.1/payloadtests',
-    }),
-    postgres: postgresAdapter({
-      pool: {
-        connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
-      },
-    }),
-    'postgres-custom-schema': postgresAdapter({
-      pool: {
-        connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
-      },
-      schemaName: 'custom',
-    }),
-    'postgres-uuid': postgresAdapter({
-      idType: 'uuid',
-      pool: {
-        connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
-      },
-    }),
-    supabase: postgresAdapter({
-      pool: {
-        connectionString:
-          process.env.POSTGRES_URL || 'postgresql://postgres:postgres@127.0.0.1:54322/postgres',
-      },
-    }),
-  }
-
   const config: Config = {
-    db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongodb'],
+    db: databaseAdapter,
     editor: lexicalEditor({
       features: [
         ParagraphFeature(),
@@ -111,6 +85,7 @@ export async function buildConfigWithDefaults(
         SubscriptFeature(),
         SuperscriptFeature(),
         InlineCodeFeature(),
+        InlineToolbarFeature(),
         TreeViewFeature(),
         HeadingFeature(),
         IndentFeature(),
@@ -183,7 +158,7 @@ export async function buildConfigWithDefaults(
 
   if (config.admin.autoLogin === undefined) {
     config.admin.autoLogin =
-      process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true'
+      process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true' || options?.disableAutoLogin
         ? false
         : {
             email: 'dev@payloadcms.com',
@@ -191,7 +166,9 @@ export async function buildConfigWithDefaults(
   }
 
   if (process.env.PAYLOAD_DISABLE_ADMIN === 'true') {
-    if (typeof config.admin !== 'object') config.admin = {}
+    if (typeof config.admin !== 'object') {
+      config.admin = {}
+    }
     config.admin.disable = true
   }
 

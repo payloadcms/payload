@@ -3,20 +3,16 @@ import type { ClientCollectionConfig, Where } from 'payload'
 
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { Fragment, useEffect, useRef, useState } from 'react'
 import AnimateHeightImport from 'react-animate-height'
 
 const AnimateHeight = (AnimateHeightImport.default ||
   AnimateHeightImport) as typeof AnimateHeightImport.default
 
-import { useListInfo } from '@payloadcms/ui'
-
-import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
-
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { SearchIcon } from '../../icons/Search/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
-import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { DeleteMany } from '../DeleteMany/index.js'
@@ -33,13 +29,17 @@ import './index.scss'
 const baseClass = 'list-controls'
 
 export type ListControlsProps = {
-  collectionConfig: ClientCollectionConfig
-  enableColumns?: boolean
-  enableSort?: boolean
-  fieldMap: FieldMap
-  handleSearchChange?: (search: string) => void
-  handleSortChange?: (sort: string) => void
-  handleWhereChange?: (where: Where) => void
+  readonly beforeActions?: React.ReactNode[]
+  readonly collectionConfig: ClientCollectionConfig
+  readonly collectionSlug: string
+  readonly disableBulkDelete?: boolean
+  readonly disableBulkEdit?: boolean
+  readonly enableColumns?: boolean
+  readonly enableSort?: boolean
+  readonly handleSearchChange?: (search: string) => void
+  readonly handleSortChange?: (sort: string) => void
+  readonly handleWhereChange?: (where: Where) => void
+  readonly renderedFilters?: Map<string, React.ReactNode>
 }
 
 /**
@@ -48,66 +48,67 @@ export type ListControlsProps = {
  * the collection's documents.
  */
 export const ListControls: React.FC<ListControlsProps> = (props) => {
-  const { collectionConfig, enableColumns = true, enableSort = false, fieldMap } = props
+  const {
+    beforeActions,
+    collectionConfig,
+    collectionSlug,
+    disableBulkDelete,
+    disableBulkEdit,
+    enableColumns = true,
+    enableSort = false,
+    renderedFilters,
+  } = props
 
-  const { handleSearchChange } = useListQuery()
-  const { collectionSlug } = useListInfo()
-  const { searchParams } = useSearchParams()
-  const titleField = useUseTitleField(collectionConfig, fieldMap)
+  const { handleSearchChange, query } = useListQuery()
+  const titleField = useUseTitleField(collectionConfig)
   const { i18n, t } = useTranslation()
   const {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
-  const [search, setSearch] = useState(
-    typeof searchParams?.search === 'string' ? searchParams?.search : '',
-  )
 
   const searchLabel =
     (titleField &&
       getTranslation(
-        'label' in titleField.fieldComponentProps &&
-          typeof titleField.fieldComponentProps.label === 'string'
-          ? titleField.fieldComponentProps.label
-          : titleField.name,
+        'label' in titleField && typeof titleField.label === 'string'
+          ? titleField.label
+          : 'name' in titleField
+            ? titleField.name
+            : null,
         i18n,
       )) ??
     'ID'
 
   const listSearchableFields = getTextFieldsToBeSearched(
     collectionConfig.admin.listSearchableFields,
-    fieldMap,
+    collectionConfig.fields,
   )
 
   const searchLabelTranslated = useRef(
     t('general:searchBy', { label: getTranslation(searchLabel, i18n) }),
   )
 
-  const hasWhereParam = useRef(Boolean(searchParams?.where))
+  const hasWhereParam = useRef(Boolean(query?.where))
 
-  const shouldInitializeWhereOpened = validateWhereQuery(searchParams?.where)
+  const shouldInitializeWhereOpened = validateWhereQuery(query?.where)
   const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(
     shouldInitializeWhereOpened ? 'where' : undefined,
   )
 
   useEffect(() => {
-    if (hasWhereParam.current && !searchParams?.where) {
+    if (hasWhereParam.current && !query?.where) {
       setVisibleDrawer(undefined)
       hasWhereParam.current = false
-    } else if (searchParams?.where) {
+    } else if (query?.where) {
       hasWhereParam.current = true
     }
-  }, [setVisibleDrawer, searchParams?.where])
+  }, [setVisibleDrawer, query?.where])
 
   useEffect(() => {
     if (listSearchableFields?.length > 0) {
       searchLabelTranslated.current = listSearchableFields.reduce(
         (placeholderText: string, field, i: number) => {
           const label =
-            'fieldComponentProps' in field &&
-            'label' in field.fieldComponentProps &&
-            field.fieldComponentProps.label
-              ? field.fieldComponentProps.label
-              : field.name
+            'label' in field && field.label ? field.label : 'name' in field ? field.name : null
 
           if (i === 0) {
             return `${t('general:searchBy', {
@@ -133,33 +134,38 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
+        <SearchIcon />
         <SearchFilter
-          fieldName={titleField?.name}
-          handleChange={handleSearchChange}
-          initialParams={searchParams}
+          fieldName={titleField && 'name' in titleField ? titleField?.name : null}
+          handleChange={(search) => {
+            return void handleSearchChange(search)
+          }}
+          // @ts-expect-error @todo: fix types
+          initialParams={query}
           key={collectionSlug}
           label={searchLabelTranslated.current}
-          setValue={setSearch}
-          value={search}
         />
         <div className={`${baseClass}__buttons`}>
           <div className={`${baseClass}__buttons-wrap`}>
             {!smallBreak && (
               <React.Fragment>
-                <EditMany collection={collectionConfig} fieldMap={fieldMap} />
-                <PublishMany collection={collectionConfig} />
-                <UnpublishMany collection={collectionConfig} />
-                <DeleteMany collection={collectionConfig} />
+                {beforeActions && beforeActions}
+                {!disableBulkEdit && (
+                  <Fragment>
+                    <EditMany collection={collectionConfig} />
+                    <PublishMany collection={collectionConfig} />
+                    <UnpublishMany collection={collectionConfig} />
+                  </Fragment>
+                )}
+                {!disableBulkDelete && <DeleteMany collection={collectionConfig} />}
               </React.Fragment>
             )}
             {enableColumns && (
               <Pill
                 aria-controls={`${baseClass}-columns`}
                 aria-expanded={visibleDrawer === 'columns'}
-                className={`${baseClass}__toggle-columns ${
-                  visibleDrawer === 'columns' ? `${baseClass}__buttons-active` : ''
-                }`}
-                icon={<ChevronIcon />}
+                className={`${baseClass}__toggle-columns`}
+                icon={<ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} />}
                 onClick={() =>
                   setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
                 }
@@ -171,10 +177,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             <Pill
               aria-controls={`${baseClass}-where`}
               aria-expanded={visibleDrawer === 'where'}
-              className={`${baseClass}__toggle-where ${
-                visibleDrawer === 'where' ? `${baseClass}__buttons-active` : ''
-              }`}
-              icon={<ChevronIcon />}
+              className={`${baseClass}__toggle-where`}
+              icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
               onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
               pillStyle="light"
             >
@@ -212,8 +216,9 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
         <WhereBuilder
           collectionPluralLabel={collectionConfig?.labels?.plural}
           collectionSlug={collectionConfig.slug}
-          fieldMap={fieldMap}
-          key={String(hasWhereParam.current && !searchParams?.where)}
+          fields={collectionConfig?.fields}
+          key={String(hasWhereParam.current && !query?.where)}
+          renderedFilters={renderedFilters}
         />
       </AnimateHeight>
       {enableSort && (

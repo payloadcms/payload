@@ -33,6 +33,7 @@ export const enforceMaxVersions = async ({
 
       const query = await payload.db.findVersions({
         collection: collection.slug,
+        limit: 1,
         pagination: false,
         req,
         skip: max,
@@ -44,6 +45,7 @@ export const enforceMaxVersions = async ({
     } else if (global) {
       const query = await payload.db.findGlobalVersions({
         global: global.slug,
+        limit: 1,
         pagination: false,
         req,
         skip: max,

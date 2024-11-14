@@ -1,8 +1,13 @@
 'use client'
-import { Button, useAuth, useTranslation } from '@payloadcms/ui'
+import { Button, LoadingOverlay, toast, useAuth, useTranslation } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
-import React, { Fragment, useEffect } from 'react'
+import { useRouter } from 'next/navigation.js'
+import React, { useEffect } from 'react'
+
+import './index.scss'
+
+const baseClass = 'logout'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
@@ -13,38 +18,50 @@ export const LogoutClient: React.FC<{
 }> = (props) => {
   const { adminRoute, inactivity, redirect } = props
 
-  const [isLoggingOut, setIsLoggingOut] = React.useState<boolean | undefined>(undefined)
-  const { logOut } = useAuth()
+  const { logOut, user } = useAuth()
+  const [isLoggedOut, setIsLoggedOut] = React.useState<boolean>(!user)
+  const logOutSuccessRef = React.useRef(false)
+  const [loginRoute] = React.useState(() =>
+    formatAdminURL({
+      adminRoute,
+      path: `/login${
+        inactivity && redirect && redirect.length > 0
+          ? `?redirect=${encodeURIComponent(redirect)}`
+          : ''
+      }`,
+    }),
+  )
+
   const { t } = useTranslation()
+  const router = useRouter()
+
+  const handleLogOut = React.useCallback(async () => {
+    const loggedOut = await logOut()
+    setIsLoggedOut(loggedOut)
+    if (!inactivity && loggedOut && !logOutSuccessRef.current) {
+      toast.success(t('authentication:loggedOutSuccessfully'))
+      logOutSuccessRef.current = true
+      router.push(loginRoute)
+      return
+    }
+  }, [inactivity, logOut, loginRoute, router, t])
 
   useEffect(() => {
-    if (!isLoggingOut) {
-      setIsLoggingOut(true)
-      logOut()
+    if (!isLoggedOut) {
+      void handleLogOut()
     }
-  }, [isLoggingOut, logOut])
+  }, [handleLogOut, isLoggedOut])
 
-  if (isLoggingOut) {
+  if (isLoggedOut && inactivity) {
     return (
-      <Fragment>
-        {inactivity && <h2>{t('authentication:loggedOutInactivity')}</h2>}
-        {!inactivity && <h2>{t('authentication:loggedOutSuccessfully')}</h2>}
-        <Button
-          Link={Link}
-          buttonStyle="secondary"
-          el="link"
-          url={formatAdminURL({
-            adminRoute,
-            path: `/login${
-              redirect && redirect.length > 0 ? `?redirect=${encodeURIComponent(redirect)}` : ''
-            }`,
-          })}
-        >
+      <div className={`${baseClass}__wrap`}>
+        <h2>{t('authentication:loggedOutInactivity')}</h2>
+        <Button buttonStyle="secondary" el="link" Link={Link} size="large" url={loginRoute}>
           {t('authentication:logBackIn')}
         </Button>
-      </Fragment>
+      </div>
     )
   }
 
-  return <Fragment>{t('authentication:loggingOut')}</Fragment>
+  return <LoadingOverlay animationDuration={'0ms'} loadingText={t('authentication:loggingOut')} />
 }

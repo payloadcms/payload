@@ -1,26 +1,52 @@
-import type { AdminViewComponent, AdminViewProps, EditViewComponent } from 'payload'
+import type {
+  AdminViewProps,
+  Data,
+  PayloadComponent,
+  ServerProps,
+  ServerSideEditViewProps,
+} from 'payload'
 
-import { DocumentInfoProvider, EditDepthProvider, HydrateClientUser } from '@payloadcms/ui'
-import { RenderCustomComponent, formatAdminURL , isEditing as getIsEditing } from '@payloadcms/ui/shared'
+import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { formatAdminURL, isEditing as getIsEditing } from '@payloadcms/ui/shared'
+import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
+import { isRedirectError } from 'next/dist/client/components/redirect.js'
 import { notFound, redirect } from 'next/navigation.js'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
+import type { ViewFromConfig } from './getViewsFromConfig.js'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { NotFoundView } from '../NotFound/index.js'
+import { getDocPreferences } from './getDocPreferences.js'
 import { getDocumentData } from './getDocumentData.js'
 import { getDocumentPermissions } from './getDocumentPermissions.js'
+import { getIsLocked } from './getIsLocked.js'
 import { getMetaBySegment } from './getMetaBySegment.js'
+import { getVersions } from './getVersions.js'
 import { getViewsFromConfig } from './getViewsFromConfig.js'
+import { renderDocumentSlots } from './renderDocumentSlots.js'
 
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
 
-export const Document: React.FC<AdminViewProps> = async ({
+// This function will be responsible for rendering an Edit Document view
+// it will be called on the server for Edit page views as well as
+// called on-demand from document drawers
+export const renderDocument = async ({
+  disableActions,
+  drawerSlug,
+  importMap,
+  initialData,
   initPageResult,
   params,
+  redirectAfterDelete,
+  redirectAfterDuplicate,
   searchParams,
-}) => {
+}: AdminViewProps): Promise<{
+  data: Data
+  Document: React.ReactNode
+}> => {
   const {
     collectionConfig,
     docID: id,
@@ -46,35 +72,108 @@ export const Document: React.FC<AdminViewProps> = async ({
   const segments = Array.isArray(params?.segments) ? params.segments : []
   const collectionSlug = collectionConfig?.slug || undefined
   const globalSlug = globalConfig?.slug || undefined
-
   const isEditing = getIsEditing({ id, collectionSlug, globalSlug })
 
-  let ViewOverride: EditViewComponent
-  let CustomView: EditViewComponent
-  let DefaultView: EditViewComponent
-  let ErrorView: AdminViewComponent
+  let RootViewOverride: PayloadComponent
+  let CustomView: ViewFromConfig<ServerSideEditViewProps>
+  let DefaultView: ViewFromConfig<ServerSideEditViewProps>
+  let ErrorView: ViewFromConfig<AdminViewProps>
 
   let apiURL: string
 
-  const { data, formState } = await getDocumentData({
-    id,
-    collectionConfig,
-    globalConfig,
-    locale,
-    req,
-  })
+  // Fetch the doc required for the view
+  const doc =
+    initialData ||
+    (await getDocumentData({
+      id,
+      collectionSlug,
+      globalSlug,
+      locale,
+      payload,
+      user,
+    }))
 
-  const { docPermissions, hasPublishPermission, hasSavePermission } = await getDocumentPermissions({
-    id,
-    collectionConfig,
-    data,
-    globalConfig,
-    req,
-  })
+  if (isEditing && !doc) {
+    throw new Error('not-found')
+  }
+
+  const [
+    docPreferences,
+    { docPermissions, hasPublishPermission, hasSavePermission },
+    { currentEditor, isLocked, lastUpdateTime },
+  ] = await Promise.all([
+    // Get document preferences
+    getDocPreferences({
+      id,
+      collectionSlug,
+      globalSlug,
+      payload,
+      user,
+    }),
+
+    // Get permissions
+    getDocumentPermissions({
+      id,
+      collectionConfig,
+      data: doc,
+      globalConfig,
+      req,
+    }),
+
+    // Fetch document lock state
+    getIsLocked({
+      id,
+      collectionConfig,
+      globalConfig,
+      isEditing,
+      req,
+    }),
+  ])
+
+  const [
+    { hasPublishedDoc, mostRecentVersionIsAutosaved, unpublishedVersionCount, versionCount },
+    { state: formState },
+  ] = await Promise.all([
+    getVersions({
+      id,
+      collectionConfig,
+      docPermissions,
+      globalConfig,
+      locale: locale?.code,
+      payload,
+      user,
+    }),
+    buildFormState({
+      id,
+      collectionSlug,
+      data: doc,
+      docPermissions,
+      docPreferences,
+      fallbackLocale: false,
+      globalSlug,
+      locale: locale?.code,
+      operation: (collectionSlug && id) || globalSlug ? 'update' : 'create',
+      renderAllFields: true,
+      req,
+      schemaPath: collectionSlug || globalSlug,
+    }),
+  ])
+
+  const serverProps: ServerProps = {
+    i18n,
+    initPageResult,
+    locale,
+    params,
+    payload,
+    permissions,
+    routeSegments: segments,
+    searchParams,
+    user,
+  }
 
   if (collectionConfig) {
     if (!visibleEntities?.collections?.find((visibleSlug) => visibleSlug === collectionSlug)) {
-      notFound()
+      throw new Error('not-found')
     }
 
     const params = new URLSearchParams()
@@ -89,10 +188,13 @@ export const Document: React.FC<AdminViewProps> = async ({
 
     apiURL = `${serverURL}${apiRoute}/${collectionSlug}/${id}${apiQueryParams}`
 
-    const editConfig = collectionConfig?.admin?.components?.views?.Edit
-    ViewOverride = typeof editConfig === 'function' ? editConfig : null
+    RootViewOverride =
+      collectionConfig?.admin?.components?.views?.edit?.root &&
+      'Component' in collectionConfig.admin.components.views.edit.root
+        ? collectionConfig?.admin?.components?.views?.edit?.root?.Component
+        : null
 
-    if (!ViewOverride) {
+    if (!RootViewOverride) {
       const collectionViews = getViewsFromConfig({
         collectionConfig,
         config,
@@ -105,22 +207,26 @@ export const Document: React.FC<AdminViewProps> = async ({
       ErrorView = collectionViews?.ErrorView
     }
 
-    if (!CustomView && !DefaultView && !ViewOverride && !ErrorView) {
-      ErrorView = NotFoundView
+    if (!CustomView && !DefaultView && !RootViewOverride && !ErrorView) {
+      ErrorView = {
+        Component: NotFoundView,
+      }
     }
   }
 
   if (globalConfig) {
     if (!visibleEntities?.globals?.find((visibleSlug) => visibleSlug === globalSlug)) {
-      notFound()
+      throw new Error('not-found')
     }
 
     const params = new URLSearchParams({
       locale: locale?.code,
     })
+
     if (globalConfig.versions?.drafts) {
       params.append('draft', 'true')
     }
+
     if (locale?.code) {
       params.append('locale', locale.code)
     }
@@ -129,10 +235,13 @@ export const Document: React.FC<AdminViewProps> = async ({
 
     apiURL = `${serverURL}${apiRoute}/${globalSlug}${apiQueryParams}`
 
-    const editConfig = globalConfig?.admin?.components?.views?.Edit
-    ViewOverride = typeof editConfig === 'function' ? editConfig : null
+    RootViewOverride =
+      globalConfig?.admin?.components?.views?.edit?.root &&
+      'Component' in globalConfig.admin.components.views.edit.root
+        ? globalConfig?.admin?.components?.views?.edit?.root?.Component
+        : null
 
-    if (!ViewOverride) {
+    if (!RootViewOverride) {
       const globalViews = getViewsFromConfig({
         config,
         docPermissions,
@@ -144,8 +253,10 @@ export const Document: React.FC<AdminViewProps> = async ({
       DefaultView = globalViews?.DefaultView
       ErrorView = globalViews?.ErrorView
 
-      if (!CustomView && !DefaultView && !ViewOverride && !ErrorView) {
-        ErrorView = NotFoundView
+      if (!CustomView && !DefaultView && !RootViewOverride && !ErrorView) {
+        ErrorView = {
+          Component: NotFoundView,
+        }
       }
     }
   }
@@ -158,16 +269,17 @@ export const Document: React.FC<AdminViewProps> = async ({
     hasSavePermission &&
     ((collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
       (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave))
+
   const validateDraftData =
     collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.validate
 
   if (shouldAutosave && !validateDraftData && !id && collectionSlug) {
     const doc = await payload.create({
       collection: collectionSlug,
-      data: {},
+      data: initialData || {},
       depth: 0,
       draft: true,
-      fallbackLocale: null,
+      fallbackLocale: false,
       locale: locale?.code,
       req,
       user,
@@ -181,58 +293,96 @@ export const Document: React.FC<AdminViewProps> = async ({
       })
       redirect(redirectURL)
     } else {
-      notFound()
+      throw new Error('not-found')
     }
   }
 
-  return (
-    <DocumentInfoProvider
-      apiURL={apiURL}
-      collectionSlug={collectionConfig?.slug}
-      disableActions={false}
-      docPermissions={docPermissions}
-      globalSlug={globalConfig?.slug}
-      hasPublishPermission={hasPublishPermission}
-      hasSavePermission={hasSavePermission}
-      id={id}
-      initialData={data}
-      initialState={formState}
-      isEditing={isEditing}
-    >
-      {!ViewOverride && (
-        <DocumentHeader
-          collectionConfig={collectionConfig}
-          config={payload.config}
-          globalConfig={globalConfig}
-          i18n={i18n}
-          permissions={permissions}
-        />
-      )}
-      <HydrateClientUser permissions={permissions} user={user} />
-      <EditDepthProvider
-        depth={1}
-        key={`${collectionSlug || globalSlug}${locale?.code ? `-${locale?.code}` : ''}`}
+  const documentSlots = renderDocumentSlots({
+    collectionConfig,
+    globalConfig,
+    hasSavePermission,
+    permissions: docPermissions,
+    req,
+  })
+
+  const clientProps = { formState, ...documentSlots }
+
+  return {
+    data: doc,
+    Document: (
+      <DocumentInfoProvider
+        apiURL={apiURL}
+        collectionSlug={collectionConfig?.slug}
+        currentEditor={currentEditor}
+        disableActions={disableActions ?? false}
+        docPermissions={docPermissions}
+        globalSlug={globalConfig?.slug}
+        hasPublishedDoc={hasPublishedDoc}
+        hasPublishPermission={hasPublishPermission}
+        hasSavePermission={hasSavePermission}
+        id={id}
+        initialData={doc}
+        initialState={formState}
+        isEditing={isEditing}
+        isLocked={isLocked}
+        key={locale?.code}
+        lastUpdateTime={lastUpdateTime}
+        mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}
+        redirectAfterDelete={redirectAfterDelete}
+        redirectAfterDuplicate={redirectAfterDuplicate}
+        unpublishedVersionCount={unpublishedVersionCount}
+        versionCount={versionCount}
       >
-        {ErrorView ? (
-          <ErrorView initPageResult={initPageResult} searchParams={searchParams} />
-        ) : (
-          <RenderCustomComponent
-            CustomComponent={ViewOverride || CustomView}
-            DefaultComponent={DefaultView}
-            serverOnlyProps={{
-              i18n,
-              initPageResult,
-              locale,
-              params,
-              payload,
-              permissions,
-              routeSegments: segments,
-              searchParams,
-              user,
-            }}
+        {!RootViewOverride && !drawerSlug && (
+          <DocumentHeader
+            collectionConfig={collectionConfig}
+            globalConfig={globalConfig}
+            i18n={i18n}
+            payload={payload}
+            permissions={permissions}
           />
         )}
-      </EditDepthProvider>
-    </DocumentInfoProvider>
-  )
+        <HydrateAuthProvider permissions={permissions} />
+        <EditDepthProvider>
+          {ErrorView ? (
+            <RenderServerComponent
+              clientProps={clientProps}
+              Component={ErrorView.ComponentConfig || ErrorView.Component}
+              importMap={importMap}
+              serverProps={serverProps}
+            />
+          ) : (
+            <RenderServerComponent
+              clientProps={clientProps}
+              Component={
+                RootViewOverride
+                  ? RootViewOverride
+                  : CustomView?.ComponentConfig || CustomView?.Component
+                    ? CustomView?.ComponentConfig || CustomView?.Component
+                    : DefaultView?.ComponentConfig || DefaultView?.Component
+              }
+              importMap={importMap}
+              serverProps={serverProps}
+            />
+          )}
+        </EditDepthProvider>
+      </DocumentInfoProvider>
+    ),
+  }
+}
+
+export const Document: React.FC<AdminViewProps> = async (args) => {
+  try {
+    const { Document: RenderedDocument } = await renderDocument(args)
+    return RenderedDocument
+  } catch (error) {
+    if (isRedirectError(error)) {
+      throw error
+    }
+    args.initPageResult.req.payload.logger.error(error)
+
+    if (error.message === 'not-found') {
+      notFound()
+    }
+  }
 }

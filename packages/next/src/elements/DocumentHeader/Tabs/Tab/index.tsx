@@ -1,28 +1,33 @@
 import type { DocumentTabConfig, DocumentTabProps } from 'payload'
+import type React from 'react'
 
-import React, { Fragment } from 'react'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { Fragment } from 'react'
 
-import { DocumentTabLink } from './TabLink.js'
 import './index.scss'
+import { DocumentTabLink } from './TabLink.js'
 
 export const baseClass = 'doc-tab'
 
-export const DocumentTab: React.FC<DocumentTabConfig & DocumentTabProps> = (props) => {
+export const DocumentTab: React.FC<
+  { readonly Pill_Component?: React.FC } & DocumentTabConfig & DocumentTabProps
+> = (props) => {
   const {
-    Pill,
     apiURL,
     collectionConfig,
     condition,
-    config,
     globalConfig,
     href: tabHref,
     i18n,
     isActive: tabIsActive,
     label,
     newTab,
+    payload,
     permissions,
+    Pill,
+    Pill_Component,
   } = props
-
+  const { config } = payload
   const { routes } = config
 
   let href = typeof tabHref === 'string' ? tabHref : ''
@@ -67,12 +72,21 @@ export const DocumentTab: React.FC<DocumentTabConfig & DocumentTabProps> = (prop
       >
         <span className={`${baseClass}__label`}>
           {labelToRender}
-          {Pill && (
+          {Pill || Pill_Component ? (
             <Fragment>
               &nbsp;
-              <Pill />
+              <RenderServerComponent
+                Component={Pill}
+                Fallback={Pill_Component}
+                importMap={payload.importMap}
+                serverProps={{
+                  i18n,
+                  payload,
+                  permissions,
+                }}
+              />
             </Fragment>
-          )}
+          ) : null}
         </span>
       </DocumentTabLink>
     )

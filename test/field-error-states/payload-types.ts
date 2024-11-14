@@ -16,27 +16,59 @@ export interface Config {
     'validate-drafts-on': ValidateDraftsOn;
     'validate-drafts-off': ValidateDraftsOff;
     'validate-drafts-on-autosave': ValidateDraftsOnAutosave;
+    'prev-value': PrevValue;
+    'prev-value-relation': PrevValueRelation;
     users: User;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
+  collectionsJoins: {};
+  collectionsSelect: {
+    'error-fields': ErrorFieldsSelect<false> | ErrorFieldsSelect<true>;
+    uploads: UploadsSelect<false> | UploadsSelect<true>;
+    'validate-drafts-on': ValidateDraftsOnSelect<false> | ValidateDraftsOnSelect<true>;
+    'validate-drafts-off': ValidateDraftsOffSelect<false> | ValidateDraftsOffSelect<true>;
+    'validate-drafts-on-autosave': ValidateDraftsOnAutosaveSelect<false> | ValidateDraftsOnAutosaveSelect<true>;
+    'prev-value': PrevValueSelect<false> | PrevValueSelect<true>;
+    'prev-value-relation': PrevValueRelationSelect<false> | PrevValueRelationSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+  };
+  db: {
+    defaultIDType: string;
+  };
   globals: {
     'global-validate-drafts-on': GlobalValidateDraftsOn;
+  };
+  globalsSelect: {
+    'global-validate-drafts-on': GlobalValidateDraftsOnSelect<false> | GlobalValidateDraftsOnSelect<true>;
   };
   locale: null;
   user: User & {
     collection: 'users';
   };
+  jobs?: {
+    tasks: unknown;
+    workflows?: unknown;
+  };
 }
 export interface UserAuthOperations {
   forgotPassword: {
     email: string;
+    password: string;
   };
   login: {
-    password: string;
     email: string;
+    password: string;
   };
   registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
     email: string;
     password: string;
   };
@@ -251,7 +283,7 @@ export interface User {
 export interface Upload {
   id: string;
   text?: string | null;
-  media?: string | Upload | null;
+  media?: (string | null) | Upload;
   richText?: {
     root: {
       type: string;
@@ -314,6 +346,74 @@ export interface ValidateDraftsOnAutosave {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "prev-value".
+ */
+export interface PrevValue {
+  id: string;
+  title: string;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "prev-value-relation".
+ */
+export interface PrevValueRelation {
+  id: string;
+  previousValueRelation?: (string | null) | PrevValue;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'error-fields';
+        value: string | ErrorField;
+      } | null)
+    | ({
+        relationTo: 'uploads';
+        value: string | Upload;
+      } | null)
+    | ({
+        relationTo: 'validate-drafts-on';
+        value: string | ValidateDraftsOn;
+      } | null)
+    | ({
+        relationTo: 'validate-drafts-off';
+        value: string | ValidateDraftsOff;
+      } | null)
+    | ({
+        relationTo: 'validate-drafts-on-autosave';
+        value: string | ValidateDraftsOnAutosave;
+      } | null)
+    | ({
+        relationTo: 'prev-value';
+        value: string | PrevValue;
+      } | null)
+    | ({
+        relationTo: 'prev-value-relation';
+        value: string | PrevValueRelation;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
@@ -348,6 +448,244 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "error-fields_select".
+ */
+export interface ErrorFieldsSelect<T extends boolean = true> {
+  parentArray?:
+    | T
+    | {
+        childArray?:
+          | T
+          | {
+              childArrayText?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  home?:
+    | T
+    | {
+        tabText?: T;
+        text?: T;
+        array?:
+          | T
+          | {
+              requiredArrayText?: T;
+              arrayText?: T;
+              group?:
+                | T
+                | {
+                    text?: T;
+                    number?: T;
+                    date?: T;
+                    checkbox?: T;
+                  };
+              code?: T;
+              json?: T;
+              email?: T;
+              point?: T;
+              radio?: T;
+              relationship?: T;
+              richtext?: T;
+              select?: T;
+              upload?: T;
+              text?: T;
+              textarea?: T;
+              id?: T;
+            };
+      };
+  tabText?: T;
+  text?: T;
+  array?:
+    | T
+    | {
+        requiredArrayText?: T;
+        arrayText?: T;
+        group?:
+          | T
+          | {
+              text?: T;
+              number?: T;
+              date?: T;
+              checkbox?: T;
+            };
+        code?: T;
+        json?: T;
+        email?: T;
+        point?: T;
+        radio?: T;
+        relationship?: T;
+        richtext?: T;
+        select?: T;
+        upload?: T;
+        text?: T;
+        textarea?: T;
+        id?: T;
+      };
+  layout?:
+    | T
+    | {
+        block1?:
+          | T
+          | {
+              tabText?: T;
+              text?: T;
+              array?:
+                | T
+                | {
+                    requiredArrayText?: T;
+                    arrayText?: T;
+                    group?:
+                      | T
+                      | {
+                          text?: T;
+                          number?: T;
+                          date?: T;
+                          checkbox?: T;
+                        };
+                    code?: T;
+                    json?: T;
+                    email?: T;
+                    point?: T;
+                    radio?: T;
+                    relationship?: T;
+                    richtext?: T;
+                    select?: T;
+                    upload?: T;
+                    text?: T;
+                    textarea?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  group?:
+    | T
+    | {
+        text?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads_select".
+ */
+export interface UploadsSelect<T extends boolean = true> {
+  text?: T;
+  media?: T;
+  richText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "validate-drafts-on_select".
+ */
+export interface ValidateDraftsOnSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "validate-drafts-off_select".
+ */
+export interface ValidateDraftsOffSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "validate-drafts-on-autosave_select".
+ */
+export interface ValidateDraftsOnAutosaveSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "prev-value_select".
+ */
+export interface PrevValueSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "prev-value-relation_select".
+ */
+export interface PrevValueRelationSelect<T extends boolean = true> {
+  previousValueRelation?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_select".
+ */
+export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_select".
+ */
+export interface PayloadPreferencesSelect<T extends boolean = true> {
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select".
+ */
+export interface PayloadMigrationsSelect<T extends boolean = true> {
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-validate-drafts-on".
  */
 export interface GlobalValidateDraftsOn {
@@ -358,6 +696,21 @@ export interface GlobalValidateDraftsOn {
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-validate-drafts-on_select".
+ */
+export interface GlobalValidateDraftsOnSelect<T extends boolean = true> {
+  group?:
+    | T
+    | {
+        title?: T;
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

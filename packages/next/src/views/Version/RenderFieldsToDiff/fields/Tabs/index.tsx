@@ -1,19 +1,25 @@
-import type { MappedField, TabsFieldProps } from '@payloadcms/ui'
+'use client'
+import type { TabsFieldClient } from 'payload'
 
 import React from 'react'
 
-import type { Props } from '../types.js'
+import type { DiffComponentProps } from '../types.js'
 
 import RenderFieldsToDiff from '../../index.js'
 import Nested from '../Nested/index.js'
 
 const baseClass = 'tabs-diff'
 
-const Tabs: React.FC<
-  {
-    field: MappedField & TabsFieldProps
-  } & Omit<Props, 'field'>
-> = ({ comparison, diffComponents, field, i18n, locale, locales, permissions, version }) => {
+const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = ({
+  comparison,
+  diffComponents,
+  field,
+  i18n,
+  locale,
+  locales,
+  permissions,
+  version,
+}) => {
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
@@ -24,7 +30,7 @@ const Tabs: React.FC<
                 comparison={comparison?.[tab.name]}
                 diffComponents={diffComponents}
                 field={field}
-                fieldMap={tab.fieldMap}
+                fields={tab.fields}
                 i18n={i18n}
                 key={i}
                 locale={locale}
@@ -39,8 +45,8 @@ const Tabs: React.FC<
             <RenderFieldsToDiff
               comparison={comparison}
               diffComponents={diffComponents}
-              fieldMap={tab.fieldMap}
               fieldPermissions={permissions}
+              fields={tab.fields}
               i18n={i18n}
               key={i}
               locales={locales}

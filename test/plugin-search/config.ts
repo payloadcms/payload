@@ -18,6 +18,11 @@ export default buildConfigWithDefaults({
     fallback: true,
     locales: ['en', 'es', 'de'],
   },
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

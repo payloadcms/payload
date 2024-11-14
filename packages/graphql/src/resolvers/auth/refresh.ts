@@ -4,7 +4,7 @@ import { generatePayloadCookie, isolateObjectProperty, refreshOperation } from '
 
 import type { Context } from '../types.js'
 
-function refreshResolver(collection: Collection): any {
+export function refresh(collection: Collection): any {
   async function resolver(_, __, context: Context) {
     const options = {
       collection,
@@ -14,8 +14,8 @@ function refreshResolver(collection: Collection): any {
 
     const result = await refreshOperation(options)
     const cookie = generatePayloadCookie({
-      collectionConfig: collection.config,
-      payload: context.req.payload,
+      collectionAuthConfig: collection.config.auth,
+      cookiePrefix: context.req.payload.config.cookiePrefix,
       token: result.refreshedToken,
     })
     context.headers['Set-Cookie'] = cookie
@@ -29,5 +29,3 @@ function refreshResolver(collection: Collection): any {
 
   return resolver
 }
-
-export default refreshResolver

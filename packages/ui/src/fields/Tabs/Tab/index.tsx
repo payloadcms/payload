@@ -1,8 +1,10 @@
 'use client'
-import { getTranslation } from '@payloadcms/translations'
-import React, { useState } from 'react'
 
-import type { MappedTab } from '../../../providers/ComponentMap/buildComponentMap/types.js'
+import type { ClientTab } from 'payload'
+
+import { getTranslation } from '@payloadcms/translations'
+import { tabHasName } from 'payload/shared'
+import React, { useState } from 'react'
 
 import { ErrorPill } from '../../../elements/ErrorPill/index.js'
 import { WatchChildErrors } from '../../../forms/WatchChildErrors/index.js'
@@ -12,25 +14,26 @@ import './index.scss'
 const baseClass = 'tabs-field__tab-button'
 
 type TabProps = {
-  isActive?: boolean
-  parentPath: string
-  setIsActive: () => void
-  tab: MappedTab
+  readonly isActive?: boolean
+  readonly parentPath: string
+  readonly setIsActive: () => void
+  readonly tab: ClientTab
 }
 
 export const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsActive, tab }) => {
-  const { name, label } = tab
-
   const { i18n } = useTranslation()
   const [errorCount, setErrorCount] = useState(undefined)
-  const hasName = 'name' in tab
 
-  const path = `${parentPath ? `${parentPath}.` : ''}${'name' in tab ? name : ''}`
+  const path = [
+    ...(parentPath ? parentPath.split('.') : []),
+    ...(tabHasName(tab) ? [tab.name] : []),
+  ].join('.')
+
   const fieldHasErrors = errorCount > 0
 
   return (
     <React.Fragment>
-      <WatchChildErrors fieldMap={tab.fieldMap} path={path} setErrorCount={setErrorCount} />
+      <WatchChildErrors fields={tab.fields} path={path.split('.')} setErrorCount={setErrorCount} />
       <button
         className={[
           baseClass,
@@ -42,7 +45,7 @@ export const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsAc
         onClick={setIsActive}
         type="button"
       >
-        {label ? getTranslation(label, i18n) : hasName && name}
+        {tab.label ? getTranslation(tab.label, i18n) : tabHasName(tab) ? tab.name : ''}
         {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} />}
       </button>
     </React.Fragment>

@@ -1,11 +1,10 @@
 'use client'
-import type { ArrayField, FieldPermissions, Row } from 'payload'
+import type { ArrayField, ClientField, FieldPermissions, Row } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { UseDraggableSortableReturn } from '../../elements/DraggableSortable/useDraggableSortable/types.js'
-import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { ArrayAction } from '../../elements/ArrayAction/index.js'
 import { Collapsible } from '../../elements/Collapsible/index.js'
@@ -19,43 +18,44 @@ import './index.scss'
 const baseClass = 'array-field'
 
 type ArrayRowProps = {
-  CustomRowLabel?: React.ReactNode
-  addRow: (rowIndex: number) => void
-  duplicateRow: (rowIndex: number) => void
-  errorCount: number
-  fieldMap: FieldMap
-  forceRender?: boolean
-  hasMaxRows?: boolean
-  indexPath: string
-  isSortable?: boolean
-  labels: ArrayField['labels']
-  moveRow: (fromIndex: number, toIndex: number) => void
-  path: string
-  permissions: FieldPermissions
-  readOnly?: boolean
-  removeRow: (rowIndex: number) => void
-  row: Row
-  rowCount: number
-  rowIndex: number
-  schemaPath: string
-  setCollapse: (rowID: string, collapsed: boolean) => void
+  readonly addRow: (rowIndex: number) => Promise<void> | void
+  readonly CustomRowLabel?: React.ReactNode
+  readonly duplicateRow: (rowIndex: number) => void
+  readonly errorCount: number
+  readonly fields: ClientField[]
+  readonly forceRender?: boolean
+  readonly hasMaxRows?: boolean
+  readonly isSortable?: boolean
+  readonly labels: Partial<ArrayField['labels']>
+  readonly moveRow: (fromIndex: number, toIndex: number) => void
+  readonly parentPath: string
+  readonly path: string
+  readonly permissions: FieldPermissions
+  readonly readOnly?: boolean
+  readonly removeRow: (rowIndex: number) => void
+  readonly row: Row
+  readonly rowCount: number
+  readonly rowIndex: number
+  readonly schemaPath: string
+  readonly setCollapse: (rowID: string, collapsed: boolean) => void
 } & UseDraggableSortableReturn
 
 export const ArrayRow: React.FC<ArrayRowProps> = ({
-  CustomRowLabel,
   addRow,
   attributes,
+  CustomRowLabel,
   duplicateRow,
   errorCount,
-  fieldMap,
+  fields,
   forceRender = false,
   hasMaxRows,
-  indexPath,
+  isDragging,
   isSortable,
   labels,
   listeners,
   moveRow,
-  path: parentPath,
+  parentPath,
+  path,
   permissions,
   readOnly,
   removeRow,
@@ -66,8 +66,8 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   setCollapse,
   setNodeRef,
   transform,
+  transition,
 }) => {
-  const path = `${parentPath}.${rowIndex}`
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
 
@@ -92,6 +92,8 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
       ref={setNodeRef}
       style={{
         transform,
+        transition,
+        zIndex: isDragging ? 1 : undefined,
       }}
     >
       <Collapsible
@@ -123,11 +125,10 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         header={
           <div className={`${baseClass}__row-header`}>
             <RowLabel
-              RowLabelComponent={CustomRowLabel}
-              i18n={i18n}
+              CustomComponent={CustomRowLabel}
+              label={fallbackLabel}
               path={path}
-              rowLabel={fallbackLabel}
-              rowNumber={rowIndex + 1}
+              rowNumber={rowIndex}
             />
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
@@ -137,14 +138,14 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
       >
         <RenderFields
           className={`${baseClass}__fields`}
-          fieldMap={fieldMap}
+          fields={fields}
           forceRender={forceRender}
-          indexPath={indexPath}
           margins="small"
-          path={path}
+          parentIndexPath=""
+          parentPath={path}
+          parentSchemaPath={schemaPath}
           permissions={permissions?.fields}
           readOnly={readOnly}
-          schemaPath={schemaPath}
         />
       </Collapsible>
     </div>

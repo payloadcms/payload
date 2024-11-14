@@ -1,7 +1,13 @@
+import type { SanitizedConfig } from '../config/types.js'
 import type { Field } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 
-export const buildVersionGlobalFields = (global: SanitizedGlobalConfig): Field[] => {
+import { versionSnapshotField } from './baseFields.js'
+
+export const buildVersionGlobalFields = (
+  config: SanitizedConfig,
+  global: SanitizedGlobalConfig,
+): Field[] => {
   const fields: Field[] = [
     {
       name: 'version',
@@ -14,6 +20,7 @@ export const buildVersionGlobalFields = (global: SanitizedGlobalConfig): Field[]
       admin: {
         disabled: true,
       },
+      index: true,
     },
     {
       name: 'updatedAt',
@@ -21,10 +28,32 @@ export const buildVersionGlobalFields = (global: SanitizedGlobalConfig): Field[]
       admin: {
         disabled: true,
       },
+      index: true,
     },
   ]
 
   if (global?.versions?.drafts) {
+    if (config.localization) {
+      fields.push(versionSnapshotField)
+
+      fields.push({
+        name: 'publishedLocale',
+        type: 'select',
+        admin: {
+          disableBulkEdit: true,
+          disabled: true,
+        },
+        index: true,
+        options: config.localization.locales.map((locale) => {
+          if (typeof locale === 'string') {
+            return locale
+          }
+
+          return locale.code
+        }),
+      })
+    }
+
     fields.push({
       name: 'latest',
       type: 'checkbox',
@@ -33,14 +62,14 @@ export const buildVersionGlobalFields = (global: SanitizedGlobalConfig): Field[]
       },
       index: true,
     })
-  }
 
-  if (global?.versions?.drafts && global?.versions?.drafts?.autosave) {
-    fields.push({
-      name: 'autosave',
-      type: 'checkbox',
-      index: true,
-    })
+    if (global?.versions?.drafts?.autosave) {
+      fields.push({
+        name: 'autosave',
+        type: 'checkbox',
+        index: true,
+      })
+    }
   }
 
   return fields

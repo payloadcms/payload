@@ -5,6 +5,7 @@ import React, { useId } from 'react'
 
 import type { Column } from '../Table/index.js'
 
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
@@ -16,12 +17,12 @@ import './index.scss'
 const baseClass = 'column-selector'
 
 export type Props = {
-  collectionSlug: SanitizedCollectionConfig['slug']
+  readonly collectionSlug: SanitizedCollectionConfig['slug']
 }
 
-const filterColumnFields = (fields: Column[]): Column[] => {
-  return fields.filter((field) => {
-    return !field.admin?.disableListColumn
+const filterColumnFields = (columns: Column[]): Column[] => {
+  return columns.filter((c) => {
+    return !c?.field?.admin?.disableListColumn
   })
 }
 
@@ -42,18 +43,27 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
       className={baseClass}
       ids={filteredColumns.map((col) => col?.accessor)}
       onDragEnd={({ moveFromIndex, moveToIndex }) => {
-        moveColumn({
+        void moveColumn({
           fromIndex: moveFromIndex,
           toIndex: moveToIndex,
         })
       }}
     >
       {filteredColumns.map((col, i) => {
-        if (!col) return null
+        if (!col) {
+          return null
+        }
 
-        const { Label, accessor, active } = col
+        const { accessor, active, field } = col
 
-        if (col.accessor === '_select') return null
+        if (
+          col.accessor === '_select' ||
+          !field ||
+          col.CustomLabel === null ||
+          (col.CustomLabel === undefined && !('label' in field))
+        ) {
+          return null
+        }
 
         return (
           <Pill
@@ -65,12 +75,12 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
             draggable
             icon={active ? <XIcon /> : <PlusIcon />}
             id={accessor}
-            key={`${collectionSlug}-${col.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
+            key={`${collectionSlug}-${field && 'name' in field ? field?.name : i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
             onClick={() => {
-              toggleColumn(accessor)
+              void toggleColumn(accessor)
             }}
           >
-            {Label}
+            {col.CustomLabel ?? <FieldLabel label={'label' in field && field.label} unstyled />}
           </Pill>
         )
       })}

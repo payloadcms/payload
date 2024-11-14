@@ -4,7 +4,7 @@ import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { EntityPolicies, PathToQuery } from './types.js'
 
-import { fieldAffectsData } from '../../fields/config/types.js'
+import { fieldAffectsData, fieldIsVirtual } from '../../fields/config/types.js'
 import { getEntityPolicies } from '../../utilities/getEntityPolicies.js'
 import isolateObjectProperty from '../../utilities/isolateObjectProperty.js'
 import { getLocalizedPaths } from '../getLocalizedPaths.js'
@@ -73,11 +73,28 @@ export async function validateSearchParam({
     })
   }
   const promises = []
+
+  // Sanitize relation.otherRelation.id to relation.otherRelation
+  if (paths.at(-1)?.path === 'id') {
+    const previousField = paths.at(-2)?.field
+    if (
+      previousField &&
+      (previousField.type === 'relationship' || previousField.type === 'upload') &&
+      typeof previousField.relationTo === 'string'
+    ) {
+      paths.pop()
+    }
+  }
+
   promises.push(
     ...paths.map(async ({ collectionSlug, field, invalid, path }, i) => {
       if (invalid) {
         errors.push({ path })
         return
+      }
+
+      if (fieldIsVirtual(field)) {
+        errors.push({ path })
       }
 
       if (!overrideAccess && fieldAffectsData(field)) {
@@ -105,9 +122,13 @@ export async function validateSearchParam({
           fieldPath = path.slice(0, -(req.locale.length + 1))
         }
         // remove ".value" from ends of polymorphic relationship paths
-        if (field.type === 'relationship' && Array.isArray(field.relationTo)) {
+        if (
+          (field.type === 'relationship' || field.type === 'upload') &&
+          Array.isArray(field.relationTo)
+        ) {
           fieldPath = fieldPath.replace('.value', '')
         }
+
         const entityType: 'collections' | 'globals' = globalConfig ? 'globals' : 'collections'
         const entitySlug = collectionSlug || globalConfig.slug
         const segments = fieldPath.split('.')

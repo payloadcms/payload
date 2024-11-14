@@ -1,11 +1,8 @@
-import type { UploadField } from 'payload'
+import type { PaginatedDocs } from 'payload'
 
-import type { FormFieldBase } from '../shared/index.js'
+export type PopulateDocs = (
+  ids: (number | string)[],
+  relatedCollectionSlug: string,
+) => Promise<null | PaginatedDocs>
 
-export type UploadFieldProps = {
-  filterOptions?: UploadField['filterOptions']
-  name?: string
-  path?: string
-  relationTo?: UploadField['relationTo']
-  width?: string
-} & FormFieldBase
+export type ReloadDoc = (docID: number | string, collectionSlug: string) => Promise<void>

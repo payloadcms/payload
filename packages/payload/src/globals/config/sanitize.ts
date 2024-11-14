@@ -28,30 +28,55 @@ export const sanitizeGlobals = async (
     // /////////////////////////////////
 
     global.endpoints = global.endpoints ?? []
-    if (!global.hooks) global.hooks = {}
-    if (!global.access) global.access = {}
-    if (!global.admin) global.admin = {}
+    if (!global.hooks) {
+      global.hooks = {}
+    }
+    if (!global.access) {
+      global.access = {}
+    }
+    if (!global.admin) {
+      global.admin = {}
+    }
 
-    if (!global.access.read) global.access.read = defaultAccess
-    if (!global.access.update) global.access.update = defaultAccess
+    if (!global.access.read) {
+      global.access.read = defaultAccess
+    }
+    if (!global.access.update) {
+      global.access.update = defaultAccess
+    }
 
-    if (!global.hooks.beforeValidate) global.hooks.beforeValidate = []
-    if (!global.hooks.beforeChange) global.hooks.beforeChange = []
-    if (!global.hooks.afterChange) global.hooks.afterChange = []
-    if (!global.hooks.beforeRead) global.hooks.beforeRead = []
-    if (!global.hooks.afterRead) global.hooks.afterRead = []
+    if (!global.hooks.beforeValidate) {
+      global.hooks.beforeValidate = []
+    }
+    if (!global.hooks.beforeChange) {
+      global.hooks.beforeChange = []
+    }
+    if (!global.hooks.afterChange) {
+      global.hooks.afterChange = []
+    }
+    if (!global.hooks.beforeRead) {
+      global.hooks.beforeRead = []
+    }
+    if (!global.hooks.afterRead) {
+      global.hooks.afterRead = []
+    }
 
     // Sanitize fields
     const validRelationships = collections.map((c) => c.slug) || []
     global.fields = await sanitizeFields({
       config,
       fields: global.fields,
+      parentIsLocalized: false,
       richTextSanitizationPromises,
       validRelationships,
     })
 
     if (global.versions) {
-      if (global.versions === true) global.versions = { drafts: false }
+      if (global.versions === true) {
+        global.versions = { drafts: false, max: 100 }
+      }
+
+      global.versions.max = typeof global.versions.max === 'number' ? global.versions.max : 100
 
       if (global.versions.drafts) {
         if (global.versions.drafts === true) {
@@ -75,7 +100,9 @@ export const sanitizeGlobals = async (
       }
     }
 
-    if (!global.custom) global.custom = {}
+    if (!global.custom) {
+      global.custom = {}
+    }
 
     // /////////////////////////////////
     // Sanitize fields
@@ -84,8 +111,12 @@ export const sanitizeGlobals = async (
     let hasCreatedAt = null
     global.fields.some((field) => {
       if (fieldAffectsData(field)) {
-        if (field.name === 'updatedAt') hasUpdatedAt = true
-        if (field.name === 'createdAt') hasCreatedAt = true
+        if (field.name === 'updatedAt') {
+          hasUpdatedAt = true
+        }
+        if (field.name === 'createdAt') {
+          hasCreatedAt = true
+        }
       }
       return hasCreatedAt && hasUpdatedAt
     })

@@ -1,6 +1,5 @@
 import * as p from '@clack/prompts'
 import chalk from 'chalk'
-import degit from 'degit'
 import execa from 'execa'
 import fse from 'fs-extra'
 import { fileURLToPath } from 'node:url'
@@ -11,6 +10,7 @@ import type { CliArgs, DbDetails, PackageManager, ProjectTemplate } from '../typ
 import { tryInitRepoAndCommit } from '../utils/git.js'
 import { debug, error, info, warning } from '../utils/log.js'
 import { configurePayloadConfig } from './configure-payload-config.js'
+import { downloadTemplate } from './download-template.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -37,6 +37,8 @@ async function installDeps(args: {
     installCmd = 'yarn'
   } else if (packageManager === 'pnpm') {
     installCmd = 'pnpm install'
+  } else if (packageManager === 'bun') {
+    installCmd = 'bun install'
   }
 
   try {
@@ -76,13 +78,15 @@ export async function createProject(args: {
     )
     await fse.copy(localTemplate, projectDir)
   } else if ('url' in template) {
-    let templateUrl = template.url
     if (cliArgs['--template-branch']) {
-      templateUrl = `${template.url}#${cliArgs['--template-branch']}`
-      debug(`Using template url: ${templateUrl}`)
+      template.url = `${template.url.split('#')?.[0]}#${cliArgs['--template-branch']}`
     }
-    const emitter = degit(templateUrl)
-    await emitter.clone(projectDir)
+
+    await downloadTemplate({
+      debug: cliArgs['--debug'],
+      projectDir,
+      template,
+    })
   }
 
   const spinner = p.spinner()
@@ -96,7 +100,7 @@ export async function createProject(args: {
   })
 
   // Remove yarn.lock file. This is only desired in Payload Cloud.
-  const lockPath = path.resolve(projectDir, 'yarn.lock')
+  const lockPath = path.resolve(projectDir, 'pnpm-lock.yaml')
   if (fse.existsSync(lockPath)) {
     await fse.remove(lockPath)
   }

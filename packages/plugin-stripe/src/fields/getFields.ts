@@ -2,8 +2,6 @@ import type { CollectionConfig, Field } from 'payload'
 
 import type { SanitizedStripePluginConfig } from '../types.js'
 
-import { LinkToDoc } from '../ui/LinkToDoc.js'
-
 interface Args {
   collection: CollectionConfig
   pluginConfig: SanitizedStripePluginConfig
@@ -39,7 +37,7 @@ export const getFields = ({ collection, pluginConfig, syncConfig }: Args): Field
     type: 'ui',
     admin: {
       components: {
-        Field: LinkToDoc,
+        Field: '@payloadcms/plugin-stripe/client#LinkToDoc',
       },
       custom: {
         isTestKey: pluginConfig.isTestKey,

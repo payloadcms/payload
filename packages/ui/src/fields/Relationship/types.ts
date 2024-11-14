@@ -1,19 +1,8 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { ClientCollectionConfig, RelationshipField, SanitizedConfig } from 'payload'
-
-import type { FormFieldBase } from '../shared/index.js'
-
-export type RelationshipFieldProps = {
-  allowCreate?: RelationshipField['admin']['allowCreate']
-  hasMany?: boolean
-  isSortable?: boolean
-  name: string
-  relationTo?: RelationshipField['relationTo']
-  sortOptions?: RelationshipField['admin']['sortOptions']
-  width?: string
-} & FormFieldBase
+import type { ClientCollectionConfig, ClientConfig, FilterOptionsResult } from 'payload'
 
 export type Option = {
+  allowEdit: boolean
   label: string
   options?: Option[]
   relationTo?: string
@@ -30,15 +19,16 @@ export type ValueWithRelation = {
   value: number | string
 }
 
-export type Value = ValueWithRelation | number | string
+export type Value = number | string | ValueWithRelation
 
 type CLEAR = {
+  exemptValues?: Value | Value[]
   type: 'CLEAR'
 }
 
 type UPDATE = {
   collection: ClientCollectionConfig
-  config: SanitizedConfig
+  config: ClientConfig
   doc: any
   i18n: I18nClient
   type: 'UPDATE'
@@ -46,7 +36,7 @@ type UPDATE = {
 
 type ADD = {
   collection: ClientCollectionConfig
-  config: SanitizedConfig
+  config: ClientConfig
   docs: any[]
   i18n: I18nClient
   ids?: (number | string)[]
@@ -54,9 +44,18 @@ type ADD = {
   type: 'ADD'
 }
 
-export type Action = ADD | CLEAR | UPDATE
+type REMOVE = {
+  collection: ClientCollectionConfig
+  config: ClientConfig
+  i18n: I18nClient
+  id: string
+  type: 'REMOVE'
+}
+
+export type Action = ADD | CLEAR | REMOVE | UPDATE
 
 export type GetResults = (args: {
+  filterOptions?: FilterOptionsResult
   lastFullyLoadedRelation?: number
   lastLoadedPage: Record<string, number>
   onSuccess?: () => void

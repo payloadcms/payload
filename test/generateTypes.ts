@@ -11,20 +11,27 @@ import type { SanitizedConfig } from 'payload'
 
 import { fileURLToPath } from 'url'
 
-import { load } from './loader/load.js'
+import { generateDatabaseAdapter } from './generateDatabaseAdapter.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 let testDir: string
 
+const writeDBAdapter = process.env.WRITE_DB_ADAPTER !== 'false'
 async function run() {
+  if (writeDBAdapter) {
+    generateDatabaseAdapter(process.env.PAYLOAD_DATABASE || 'mongodb')
+    process.env.WRITE_DB_ADAPTER = 'false'
+  }
+
   if (testConfigDir) {
     testDir = path.resolve(dirname, testConfigDir)
 
     const pathWithConfig = path.resolve(testDir, 'config.ts')
     console.log('Generating types for config:', pathWithConfig)
 
-    const config: SanitizedConfig = (await load(pathWithConfig)) as unknown as SanitizedConfig
+    const config: SanitizedConfig = await (await import(pathWithConfig)).default
 
     setTestEnvPaths(testDir)
     await generateTypes(config)
@@ -46,12 +53,19 @@ async function run() {
     for (const suiteDir of foundDirs) {
       i++
       const pathWithConfig = path.resolve(suiteDir, 'config.ts')
+
       console.log(`Generating types for config ${i} / ${foundDirs.length}:`, pathWithConfig)
 
       // start a new node process which runs test/generateTypes with pathWithConfig as argument. Can't run it in this process, as there could otherwise be
       // breakage between tests, as node can cache things in between runs.
       // Make sure to wait until the process is done before starting the next one.
-      const child = spawn('tsx', ['test/generateTypes.ts', suiteDir])
+      const child = spawn('node', [
+        '--no-deprecation',
+        '--import',
+        '@swc-node/register/esm-register',
+        'test/generateTypes.ts',
+        suiteDir,
+      ])
 
       child.stdout.setEncoding('utf8')
       child.stdout.on('data', function (data) {

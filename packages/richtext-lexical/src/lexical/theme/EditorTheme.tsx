@@ -1,7 +1,5 @@
 import type { EditorThemeClasses } from 'lexical'
 
-import './EditorTheme.scss'
-
 export const LexicalEditorTheme: EditorThemeClasses = {
   block: 'LexicalEditorTheme__block',
   blockCursor: 'LexicalEditorTheme__blockCursor',
@@ -93,6 +91,7 @@ export const LexicalEditorTheme: EditorThemeClasses = {
   tableCellSelected: 'LexicalEditorTheme__tableCellSelected',
   tableCellSortedIndicator: 'LexicalEditorTheme__tableCellSortedIndicator',
   tableResizeRuler: 'LexicalEditorTheme__tableCellResizeRuler',
+  tableRowStriping: 'LexicalEditorTheme__tableRowStriping',
   tableSelected: 'LexicalEditorTheme__tableSelected',
   text: {
     bold: 'LexicalEditorTheme__textBold',

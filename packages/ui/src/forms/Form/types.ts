@@ -1,4 +1,12 @@
-import type { Data, Field, FormField, FormState, User } from 'payload'
+import type {
+  ClientField,
+  Data,
+  FormField,
+  FormState,
+  Row,
+  User,
+  ValidationFieldError,
+} from 'payload'
 import type React from 'react'
 import type { Dispatch } from 'react'
 
@@ -10,19 +18,19 @@ export type FormProps = {
   beforeSubmit?: ((args: { formState: FormState }) => Promise<FormState>)[]
   children?: React.ReactNode
   className?: string
+  disabled?: boolean
   disableSuccessStatus?: boolean
   /**
    * If you would like to solely leverage server-side validation on submit,
    * you can disable checks that the form makes before it submits
    */
   disableValidationOnSubmit?: boolean
-  disabled?: boolean
   /**
    * By default, the form will get the field schema (not data) from the current document. If you pass this in, you can override that behavior.
    * This is very useful for sub-forms, where the form's field schema is not necessarily the field schema of the current document (e.g. for the Blocks
    * feature of the Lexical Rich Text field)
    */
-  fields?: Field[]
+  fields?: ClientField[]
   handleResponse?: (
     res: Response,
     successToast: (value: string) => void,
@@ -97,6 +105,11 @@ export type UPDATE = {
   type: 'UPDATE'
 } & Partial<FormField>
 
+export type UPDATE_MANY = {
+  formState: FormState
+  type: 'UPDATE_MANY'
+}
+
 export type REMOVE_ROW = {
   path: string
   rowIndex: number
@@ -133,26 +146,20 @@ export type MOVE_ROW = {
 }
 
 export type ADD_SERVER_ERRORS = {
-  errors: {
-    field: string
-    message: string
-  }[]
+  errors: ValidationFieldError[]
   type: 'ADD_SERVER_ERRORS'
 }
 
 export type SET_ROW_COLLAPSED = {
-  collapsed: boolean
   path: string
-  rowID: string
-  setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
   type: 'SET_ROW_COLLAPSED'
+  updatedRows: Row[]
 }
 
 export type SET_ALL_ROWS_COLLAPSED = {
-  collapsed: boolean
   path: string
-  setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
   type: 'SET_ALL_ROWS_COLLAPSED'
+  updatedRows: Row[]
 }
 
 export type FieldAction =
@@ -168,24 +175,24 @@ export type FieldAction =
   | SET_ALL_ROWS_COLLAPSED
   | SET_ROW_COLLAPSED
   | UPDATE
+  | UPDATE_MANY
 
 export type FormFieldsContext = [FormState, Dispatch<FieldAction>]
 
 export type Context = {
   addFieldRow: ({
-    data,
+    blockType,
     path,
     rowIndex,
     schemaPath,
+    subFieldState,
   }: {
-    data?: Data
+    blockType?: string
     path: string
-    /*
-     * by default the new row will be added to the end of the list
-     */
     rowIndex?: number
     schemaPath: string
-  }) => Promise<void>
+    subFieldState?: FormState
+  }) => void
   buildRowErrors: () => void
   createFormData: CreateFormData
   disabled: boolean
@@ -194,7 +201,7 @@ export type Context = {
    * Form context fields may be outdated and should not be relied on. Instead, prefer `useFormFields`.
    */
   fields: FormState
-  formRef: React.MutableRefObject<HTMLFormElement>
+  formRef: React.RefObject<HTMLFormElement>
   getData: GetData
   getDataByPath: GetDataByPath
   getField: GetField
@@ -203,16 +210,18 @@ export type Context = {
   initializing: boolean
   removeFieldRow: ({ path, rowIndex }: { path: string; rowIndex: number }) => void
   replaceFieldRow: ({
-    data,
+    blockType,
     path,
     rowIndex,
     schemaPath,
+    subFieldState,
   }: {
-    data?: Data
+    blockType?: string
     path: string
     rowIndex: number
     schemaPath: string
-  }) => Promise<void>
+    subFieldState?: FormState
+  }) => void
   replaceState: (state: FormState) => void
   reset: Reset
   setDisabled: (disabled: boolean) => void

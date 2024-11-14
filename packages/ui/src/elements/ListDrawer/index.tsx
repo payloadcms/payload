@@ -10,10 +10,8 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { ListDrawerContent } from './DrawerContent.js'
-import './index.scss'
 
 export const baseClass = 'list-drawer'
-
 export const formatListDrawerSlug = ({
   depth,
   uuid,
@@ -27,12 +25,14 @@ export const ListDrawerToggler: React.FC<ListTogglerProps> = ({
   className,
   disabled,
   drawerSlug,
+  onClick,
   ...rest
 }) => {
   return (
     <DrawerToggler
       className={[className, `${baseClass}__toggler`].filter(Boolean).join(' ')}
       disabled={disabled}
+      onClick={onClick}
       slug={drawerSlug}
       {...rest}
     >
@@ -45,7 +45,7 @@ export const ListDrawer: React.FC<ListDrawerProps> = (props) => {
   const { drawerSlug } = props
 
   return (
-    <Drawer Header={null} className={baseClass} gutter={false} slug={drawerSlug}>
+    <Drawer className={baseClass} gutter={false} Header={null} slug={drawerSlug}>
       <ListDrawerContent {...props} />
     </Drawer>
   )
@@ -57,7 +57,9 @@ export const useListDrawer: UseListDrawer = ({
   selectedCollection,
   uploads,
 }) => {
-  const { collections } = useConfig()
+  const {
+    config: { collections },
+  } = useConfig()
   const drawerDepth = useEditDepth()
   const uuid = useId()
   const { closeModal, modalState, openModal, toggleModal } = useModal()
@@ -85,6 +87,7 @@ export const useListDrawer: UseListDrawer = ({
       setCollectionSlugs(filteredCollectionSlugs.map(({ slug }) => slug))
     }
   }, [collectionSlugs, uploads, collections])
+
   const toggleDrawer = useCallback(() => {
     toggleModal(drawerSlug)
   }, [toggleModal, drawerSlug])
@@ -119,13 +122,24 @@ export const useListDrawer: UseListDrawer = ({
   const MemoizedDrawerState = useMemo(
     () => ({
       closeDrawer,
+      collectionSlugs,
       drawerDepth,
       drawerSlug,
       isDrawerOpen: isOpen,
       openDrawer,
+      setCollectionSlugs,
       toggleDrawer,
     }),
-    [drawerDepth, drawerSlug, isOpen, toggleDrawer, closeDrawer, openDrawer],
+    [
+      drawerDepth,
+      drawerSlug,
+      isOpen,
+      toggleDrawer,
+      closeDrawer,
+      openDrawer,
+      setCollectionSlugs,
+      collectionSlugs,
+    ],
   )
 
   return [MemoizedDrawer, MemoizedDrawerToggler, MemoizedDrawerState]

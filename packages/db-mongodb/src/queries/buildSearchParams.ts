@@ -48,7 +48,9 @@ export async function buildSearchParam({
 }): Promise<SearchParam> {
   // Replace GraphQL nested field double underscore formatting
   let sanitizedPath = incomingPath.replace(/__/g, '.')
-  if (sanitizedPath === 'id') sanitizedPath = '_id'
+  if (sanitizedPath === 'id') {
+    sanitizedPath = '_id'
+  }
 
   let paths: PathToQuery[] = []
 
@@ -87,11 +89,7 @@ export async function buildSearchParam({
   const [{ field, path }] = paths
 
   if (path) {
-    const {
-      operator: formattedOperator,
-      rawQuery,
-      val: formattedValue,
-    } = sanitizeQueryValue({
+    const sanitizedQueryValue = sanitizeQueryValue({
       field,
       hasCustomID,
       operator,
@@ -99,7 +97,15 @@ export async function buildSearchParam({
       val,
     })
 
-    if (rawQuery) return { value: rawQuery }
+    if (!sanitizedQueryValue) {
+      return undefined
+    }
+
+    const { operator: formattedOperator, rawQuery, val: formattedValue } = sanitizedQueryValue
+
+    if (rawQuery) {
+      return { value: rawQuery }
+    }
 
     // If there are multiple collections to search through,
     // Recursively build up a list of query constraints
@@ -161,7 +167,7 @@ export async function buildSearchParam({
           const subQuery = priorQueryResult.value
           const result = await SubModel.find(subQuery, subQueryOptions)
 
-          const $in = result.map((doc) => doc._id.toString())
+          const $in = result.map((doc) => doc._id)
 
           // If it is the last recursion
           // then pass through the search param
@@ -190,7 +196,9 @@ export async function buildSearchParam({
       if (field.type === 'relationship' || field.type === 'upload') {
         let hasNumberIDRelation
         let multiIDCondition = '$or'
-        if (operatorKey === '$ne') multiIDCondition = '$and'
+        if (operatorKey === '$ne') {
+          multiIDCondition = '$and'
+        }
 
         const result = {
           value: {
@@ -215,10 +223,11 @@ export async function buildSearchParam({
               },
             )
 
-            if (hasNumberIDRelation)
+            if (hasNumberIDRelation) {
               result.value[multiIDCondition].push({
                 [path]: { [operatorKey]: parseFloat(formattedValue) },
               })
+            }
           }
         }
 

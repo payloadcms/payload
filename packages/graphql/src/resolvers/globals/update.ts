@@ -1,4 +1,10 @@
-import type { DataFromGlobalSlug, GlobalSlug, PayloadRequest, SanitizedGlobalConfig } from 'payload'
+import type {
+  DataFromGlobalSlug,
+  GlobalSlug,
+  PayloadRequest,
+  SanitizedGlobalConfig,
+  SelectType,
+} from 'payload'
 import type { DeepPartial } from 'ts-essentials'
 
 import { isolateObjectProperty, updateOperationGlobal } from 'payload'
@@ -18,12 +24,16 @@ type Resolver<TSlug extends GlobalSlug> = (
   },
 ) => Promise<DataFromGlobalSlug<TSlug>>
 
-export default function updateResolver<TSlug extends GlobalSlug>(
+export function update<TSlug extends GlobalSlug>(
   globalConfig: SanitizedGlobalConfig,
 ): Resolver<TSlug> {
   return async function resolver(_, args, context: Context) {
-    if (args.locale) context.req.locale = args.locale
-    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
+    if (args.locale) {
+      context.req.locale = args.locale
+    }
+    if (args.fallbackLocale) {
+      context.req.fallbackLocale = args.fallbackLocale
+    }
 
     const { slug } = globalConfig
 
@@ -36,7 +46,7 @@ export default function updateResolver<TSlug extends GlobalSlug>(
       req: isolateObjectProperty(context.req, 'transactionID'),
     }
 
-    const result = await updateOperationGlobal<TSlug>(options)
+    const result = await updateOperationGlobal<TSlug, SelectType>(options)
     return result
   }
 }

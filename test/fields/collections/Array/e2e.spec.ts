@@ -43,17 +43,13 @@ describe('Array', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await reInitializeDB({
-      serverURL,
-      snapshotKey: 'fieldsArrayTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
-    })
+
     await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsArrayTest',
+      snapshotKey: 'fieldsTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
@@ -110,6 +106,11 @@ describe('Array', () => {
     await expect(page.locator('.payload-toast-container')).toContainText(
       'The following field is invalid: arrayWithMinRows',
     )
+  })
+
+  test('should show singular label for array rows', async () => {
+    await page.goto(url.create)
+    await expect(page.locator('#field-items #items-row-0 .row-label')).toContainText('Item 01')
   })
 
   describe('row manipulation', () => {

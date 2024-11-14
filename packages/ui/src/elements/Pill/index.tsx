@@ -95,8 +95,12 @@ const StaticPill: React.FC<PillProps> = (props) => {
 
   let Element: ElementType | React.FC<RenderedTypeProps> = 'div'
 
-  if (onClick && !to) Element = 'button'
-  if (to) Element = Link
+  if (onClick && !to) {
+    Element = 'button'
+  }
+  if (to) {
+    Element = Link
+  }
 
   return (
     <Element
@@ -110,9 +114,8 @@ const StaticPill: React.FC<PillProps> = (props) => {
       onClick={onClick}
       type={Element === 'button' ? 'button' : undefined}
     >
-      {icon && alignIcon === 'left' && <span className={`${baseClass}__icon`}>{icon}</span>}
       <span className={`${baseClass}__label`}>{children}</span>
-      {icon && alignIcon === 'right' && <span className={`${baseClass}__icon`}>{icon}</span>}
+      {icon && <span className={`${baseClass}__icon`}>{icon}</span>}
     </Element>
   )
 }
@@ -120,6 +123,8 @@ const StaticPill: React.FC<PillProps> = (props) => {
 export const Pill: React.FC<PillProps> = (props) => {
   const { draggable } = props
 
-  if (draggable) return <DraggablePill {...props} />
+  if (draggable) {
+    return <DraggablePill {...props} />
+  }
   return <StaticPill {...props} />
 }

@@ -1,12 +1,11 @@
 'use client'
-import type { ClientValidate } from 'payload'
+import type { TextFieldClientComponent } from 'payload'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'
-import type { TextFieldProps, TextInputProps } from './types.js'
+import type { TextInputProps } from './types.js'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -15,58 +14,52 @@ import { isFieldRTL } from '../shared/index.js'
 import { TextInput } from './Input.js'
 import './index.scss'
 
-export { TextFieldProps, TextInput, TextInputProps }
+export { TextInput, TextInputProps }
 
-const _TextField: React.FC<TextFieldProps> = (props) => {
+const TextFieldComponent: TextFieldClientComponent = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
-    descriptionProps,
-    errorProps,
-    hasMany,
+    field: {
+      name,
+      admin: { className, description, placeholder, rtl, style, width } = {},
+      hasMany,
+      label,
+      localized,
+      maxLength,
+      maxRows,
+      minLength,
+      minRows,
+      required,
+    },
     inputRef,
-    label,
-    labelProps,
-    localized,
-    maxLength,
-    maxRows,
-    minLength,
-    minRows,
-    path: pathFromProps,
-    placeholder,
-    readOnly: readOnlyFromProps,
-    required,
-    rtl,
-    style,
+    path,
+    readOnly,
     validate,
-    width,
   } = props
 
   const locale = useLocale()
 
-  const { localization: localizationConfig } = useConfig()
+  const {
+    config: { localization: localizationConfig },
+  } = useConfig()
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate = useCallback(
     (value, options) => {
-      if (typeof validate === 'function')
+      if (typeof validate === 'function') {
         return validate(value, { ...options, maxLength, minLength, required })
+      }
     },
     [validate, minLength, maxLength, required],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
-    path: pathFromContext ?? pathFromProps ?? name,
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    setValue,
+    showError,
+    value,
+  } = useField({
+    path,
     validate: memoizedValidate,
   })
-
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const renderRTL = isFieldRTL({
     fieldLocalized: localized,
@@ -81,7 +74,7 @@ const _TextField: React.FC<TextFieldProps> = (props) => {
 
   const handleHasManyChange = useCallback(
     (selectedOption) => {
-      if (!disabled) {
+      if (!readOnly) {
         let newValue
         if (!selectedOption) {
           newValue = []
@@ -94,7 +87,7 @@ const _TextField: React.FC<TextFieldProps> = (props) => {
         setValue(newValue)
       }
     },
-    [disabled, setValue],
+    [readOnly, setValue],
   )
 
   // useEffect update valueToRender:
@@ -120,16 +113,15 @@ const _TextField: React.FC<TextFieldProps> = (props) => {
     <TextInput
       AfterInput={AfterInput}
       BeforeInput={BeforeInput}
-      CustomDescription={CustomDescription}
-      CustomError={CustomError}
-      CustomLabel={CustomLabel}
       className={className}
-      descriptionProps={descriptionProps}
-      errorProps={errorProps}
+      Description={Description}
+      description={description}
+      Error={Error}
       hasMany={hasMany}
       inputRef={inputRef}
+      Label={Label}
       label={label}
-      labelProps={labelProps}
+      localized={localized}
       maxRows={maxRows}
       minRows={minRows}
       onChange={
@@ -141,7 +133,7 @@ const _TextField: React.FC<TextFieldProps> = (props) => {
       }
       path={path}
       placeholder={placeholder}
-      readOnly={disabled}
+      readOnly={readOnly}
       required={required}
       rtl={renderRTL}
       showError={showError}
@@ -153,4 +145,4 @@ const _TextField: React.FC<TextFieldProps> = (props) => {
   )
 }
 
-export const TextField = withCondition(_TextField)
+export const TextField = withCondition(TextFieldComponent)

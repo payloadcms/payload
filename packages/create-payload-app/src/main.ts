@@ -8,6 +8,7 @@ import path from 'path'
 import type { CliArgs } from './types.js'
 
 import { configurePayloadConfig } from './lib/configure-payload-config.js'
+import { PACKAGE_VERSION } from './lib/constants.js'
 import { createProject } from './lib/create-project.js'
 import { generateSecret } from './lib/generate-secret.js'
 import { getPackageManager } from './lib/get-package-manager.js'
@@ -18,13 +19,13 @@ import { selectDb } from './lib/select-db.js'
 import { getValidTemplates, validateTemplate } from './lib/templates.js'
 import { updatePayloadInProject } from './lib/update-payload-in-project.js'
 import { writeEnvFile } from './lib/write-env-file.js'
-import { error, info } from './utils/log.js'
+import { debug, error, info } from './utils/log.js'
 import {
   feedbackOutro,
   helpMessage,
   moveMessage,
-  successMessage,
   successfulNextInit,
+  successMessage,
 } from './utils/messages.js'
 
 export class Main {
@@ -49,6 +50,7 @@ export class Main {
 
         // Package manager
         '--no-deps': Boolean,
+        '--use-bun': Boolean,
         '--use-npm': Boolean,
         '--use-pnpm': Boolean,
         '--use-yarn': Boolean,
@@ -78,6 +80,8 @@ export class Main {
         process.exit(0)
       }
 
+      const debugFlag = this.args['--debug']
+
       // eslint-disable-next-line no-console
       console.log('\n')
       p.intro(chalk.bgCyan(chalk.black(' create-payload-app ')))
@@ -85,7 +89,22 @@ export class Main {
 
       // Detect if inside Next.js project
       const nextAppDetails = await getNextAppDetails(process.cwd())
-      const { hasTopLevelLayout, isPayloadInstalled, nextAppDir, nextConfigPath } = nextAppDetails
+      const {
+        hasTopLevelLayout,
+        isPayloadInstalled,
+        isSupportedNextVersion,
+        nextAppDir,
+        nextConfigPath,
+        nextVersion,
+      } = nextAppDetails
+
+      if (nextConfigPath && !isSupportedNextVersion) {
+        p.log.warn(
+          `Next.js v${nextVersion} is unsupported. Next.js >= 15 is required to use Payload.`,
+        )
+        p.outro(feedbackOutro())
+        process.exit(0)
+      }
 
       // Upgrade Payload in existing project
       if (isPayloadInstalled && nextConfigPath) {
@@ -164,6 +183,7 @@ export class Main {
 
         await writeEnvFile({
           cliArgs: this.args,
+          databaseType: dbDetails.type,
           databaseUri: dbDetails.dbUri,
           payloadSecret: generateSecret(),
           projectDir,
@@ -184,6 +204,10 @@ export class Main {
         }
       }
 
+      if (debugFlag) {
+        debug(`Using templates from git tag: v${PACKAGE_VERSION}`)
+      }
+
       const validTemplates = getValidTemplates()
       const template = await parseTemplate(this.args, validTemplates)
       if (!template) {
@@ -193,6 +217,16 @@ export class Main {
       }
 
       switch (template.type) {
+        case 'plugin': {
+          await createProject({
+            cliArgs: this.args,
+            packageManager,
+            projectDir,
+            projectName,
+            template,
+          })
+          break
+        }
         case 'starter': {
           const dbDetails = await selectDb(this.args, projectName)
           const payloadSecret = generateSecret()
@@ -206,19 +240,10 @@ export class Main {
           })
           await writeEnvFile({
             cliArgs: this.args,
+            databaseType: dbDetails.type,
             databaseUri: dbDetails.dbUri,
             payloadSecret,
             projectDir,
-            template,
-          })
-          break
-        }
-        case 'plugin': {
-          await createProject({
-            cliArgs: this.args,
-            packageManager,
-            projectDir,
-            projectName,
             template,
           })
           break

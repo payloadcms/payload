@@ -13,6 +13,7 @@ export const jsonFieldsSlug = 'json-fields'
 export const lexicalFieldsSlug = 'lexical-fields'
 export const lexicalLocalizedFieldsSlug = 'lexical-localized-fields'
 export const lexicalMigrateFieldsSlug = 'lexical-migrate-fields'
+export const lexicalRelationshipFieldsSlug = 'lexical-relationship-fields'
 export const numberFieldsSlug = 'number-fields'
 export const pointFieldsSlug = 'point-fields'
 export const radioFieldsSlug = 'radio-fields'
@@ -26,34 +27,39 @@ export const textFieldsSlug = 'text-fields'
 export const uploadsSlug = 'uploads'
 export const uploads2Slug = 'uploads2'
 export const uploads3Slug = 'uploads3'
+export const uploadsMulti = 'uploads-multi'
+export const uploadsMultiPoly = 'uploads-multi-poly'
+export const uploadsPoly = 'uploads-poly'
+export const uploadsRestricted = 'uploads-restricted'
 export const uiSlug = 'ui-fields'
 
 export const collectionSlugs = [
   usersSlug,
-  arrayFieldsSlug,
-  blockFieldsSlug,
-  checkboxFieldsSlug,
-  codeFieldsSlug,
-  collapsibleFieldsSlug,
-  conditionalLogicSlug,
-  dateFieldsSlug,
-  groupFieldsSlug,
-  indexedFieldsSlug,
-  jsonFieldsSlug,
-  lexicalFieldsSlug,
-  lexicalMigrateFieldsSlug,
-  numberFieldsSlug,
-  pointFieldsSlug,
-  radioFieldsSlug,
-  relationshipFieldsSlug,
-  richTextFieldsSlug,
-  rowFieldsSlug,
-  selectFieldsSlug,
-  tabsFieldsSlug,
-  tabsFields2Slug,
-  textFieldsSlug,
-  uploadsSlug,
-  uploads2Slug,
-  uploads3Slug,
-  uiSlug,
+  // arrayFieldsSlug,
+  // blockFieldsSlug,
+  // checkboxFieldsSlug,
+  // codeFieldsSlug,
+  // collapsibleFieldsSlug,
+  // conditionalLogicSlug,
+  // dateFieldsSlug,
+  // groupFieldsSlug,
+  // indexedFieldsSlug,
+  // jsonFieldsSlug,
+  // lexicalFieldsSlug,
+  // lexicalMigrateFieldsSlug,
+  // lexicalRelationshipFieldsSlug,
+  // numberFieldsSlug,
+  // pointFieldsSlug,
+  // radioFieldsSlug,
+  // relationshipFieldsSlug,
+  // richTextFieldsSlug,
+  // rowFieldsSlug,
+  // selectFieldsSlug,
+  // tabsFieldsSlug,
+  // tabsFields2Slug,
+  // textFieldsSlug,
+  // uploadsSlug,
+  // uploads2Slug,
+  // uploads3Slug,
+  // uiSlug,
 ]

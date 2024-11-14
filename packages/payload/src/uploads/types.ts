@@ -2,6 +2,7 @@ import type { ResizeOptions, Sharp } from 'sharp'
 
 import type { TypeWithID } from '../collections/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
+import type { WithMetadata } from './optionallyAppendMetadata.js'
 
 export type FileSize = {
   filename: null | string
@@ -48,12 +49,24 @@ export type ImageUploadFormatOptions = {
  */
 export type ImageUploadTrimOptions = Parameters<Sharp['trim']>[0]
 
+export type GenerateImageName = (args: {
+  extension: string
+  height: number
+  originalName: string
+  sizeName: string
+  width: number
+}) => string
+
 export type ImageSize = {
   /**
    * @deprecated prefer position
    */
   crop?: string // comes from sharp package
   formatOptions?: ImageUploadFormatOptions
+  /**
+   * Generate a custom name for the file of this image size.
+   */
+  generateImageName?: GenerateImageName
   name: string
   trimOptions?: ImageUploadTrimOptions
   /**
@@ -83,6 +96,11 @@ export type UploadConfig = {
    **/
   adminThumbnail?: GetAdminThumbnail | string
   /**
+   * Enables bulk upload of files from the list view.
+   * @default true
+   */
+  bulkUpload?: boolean
+  /**
    * Enables cropping of images.
    * @default true
    */
@@ -93,12 +111,22 @@ export type UploadConfig = {
    */
   disableLocalStorage?: boolean
   /**
+   * Enable displaying preview of the uploaded file in Upload fields related to this Collection.
+   * Can be locally overridden by `displayPreview` option in Upload field.
+   * @default false
+   */
+  displayPreview?: boolean
+  /**
    * Ability to filter/modify Request Headers when fetching a file.
    *
    * Useful for adding custom headers to fetch from external providers.
    * @default undefined
    */
   externalFileHeaderFilter?: (headers: Record<string, string>) => Record<string, string>
+  /**
+   * Field slugs to use for a compount index instead of the default filename index.
+   */
+  filenameCompoundIndex?: string[]
   /**
    * Require files to be uploaded when creating a document.
    * @default true
@@ -153,6 +181,17 @@ export type UploadConfig = {
    */
   staticDir?: string
   trimOptions?: ImageUploadTrimOptions
+  /**
+   * Optionally append metadata to the image during processing.
+   *
+   * Can be a boolean or a function.
+   *
+   * If true, metadata will be appended to the image.
+   * If false, no metadata will be appended.
+   * If a function, it will receive an object containing the metadata and should return a boolean indicating whether to append the metadata.
+   * @default false
+   */
+  withMetadata?: WithMetadata
 }
 
 export type SanitizedUploadConfig = {

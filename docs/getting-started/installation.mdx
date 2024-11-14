@@ -35,6 +35,10 @@ Adding Payload to an existing Next.js app is super straightforward. You can eith
 
 If you don't have a Next.js app already, but you still want to start a project from a blank Next.js app, you can create a new Next.js app using `npx create-next-app` - and then just follow the steps below to install Payload.
 
+<Banner type="info">
+  <strong>Note:</strong> Next.js version 15 or higher is required for Payload.
+</Banner>
+
 #### 1. Install the relevant packages
 
 First, you'll want to add the required Payload packages to your project and can do so by running the command below:
@@ -54,12 +58,12 @@ To install a Database Adapter, you can run **one** of the following commands:
 
 - To install the [MongoDB Adapter](../database/mongodb), run:
     ```bash
-    pnpm i @payloadcms/db-mongodb
+    pnpm i @payloadcms/db-mongodb@beta
     ```
 
 - To install the [Postgres Adapter](../database/postgres), run:
     ```bash
-    pnpm i @payloadcms/db-postgres
+    pnpm i @payloadcms/db-postgres@beta
     ```
 
 <Banner type="success">
@@ -69,7 +73,7 @@ To install a Database Adapter, you can run **one** of the following commands:
 
 #### 2. Copy Payload files into your Next.js app folder
 
-Payload installs directly in your Next.js `/app` folder, and you'll need to place some files into that folder for Payload to run. You can copy these files from the [Blank Template](https://github.com/payloadcms/payload/tree/beta/templates/blank-3.0/src/app/(payload)) on GitHub. Once you have the required Payload files in place in your `/app` folder, you should have something like this:
+Payload installs directly in your Next.js `/app` folder, and you'll need to place some files into that folder for Payload to run. You can copy these files from the [Blank Template](https://github.com/payloadcms/payload/tree/beta/templates/blank/src/app/(payload)) on GitHub. Once you have the required Payload files in place in your `/app` folder, you should have something like this:
 
 ```plaintext
 app/

@@ -1,12 +1,12 @@
 import type { AdminViewProps } from 'payload'
 
-import { WithServerSideProps } from '@payloadcms/ui/shared'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
-import { LoginForm } from './LoginForm/index.js'
 import './index.scss'
+import { LoginForm } from './LoginForm/index.js'
 
 export { generateLoginMetadata } from './meta.js'
 
@@ -28,44 +28,8 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
     routes: { admin },
   } = config
 
-  const BeforeLogins = Array.isArray(beforeLogin)
-    ? beforeLogin.map((Component, i) => (
-        <WithServerSideProps
-          Component={Component}
-          key={i}
-          serverOnlyProps={{
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          }}
-        />
-      ))
-    : null
-
-  const AfterLogins = Array.isArray(afterLogin)
-    ? afterLogin.map((Component, i) => (
-        <WithServerSideProps
-          Component={Component}
-          key={i}
-          serverOnlyProps={{
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          }}
-        />
-      ))
-    : null
-
   if (user) {
-    redirect(admin)
+    redirect((searchParams.redirect as string) || admin)
   }
 
   const collectionConfig = collections.find(({ slug }) => slug === userSlug)
@@ -101,7 +65,19 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           user={user}
         />
       </div>
-      {Array.isArray(BeforeLogins) && BeforeLogins.map((Component) => Component)}
+      <RenderServerComponent
+        Component={beforeLogin}
+        importMap={payload.importMap}
+        serverProps={{
+          i18n,
+          locale,
+          params,
+          payload,
+          permissions,
+          searchParams,
+          user,
+        }}
+      />
       {!collectionConfig?.auth?.disableLocalStrategy && (
         <LoginForm
           prefillEmail={prefillEmail}
@@ -110,7 +86,19 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           searchParams={searchParams}
         />
       )}
-      {Array.isArray(AfterLogins) && AfterLogins.map((Component) => Component)}
+      <RenderServerComponent
+        Component={afterLogin}
+        importMap={payload.importMap}
+        serverProps={{
+          i18n,
+          locale,
+          params,
+          payload,
+          permissions,
+          searchParams,
+          user,
+        }}
+      />
     </Fragment>
   )
 }

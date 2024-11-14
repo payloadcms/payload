@@ -1,5 +1,5 @@
 import type { PaginatedDocs } from '../../database/types.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
+import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
@@ -7,8 +7,6 @@ import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
-import { commitTransaction } from '../../utilities/commitTransaction.js'
-import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
@@ -19,9 +17,12 @@ export type Arguments = {
   limit?: number
   overrideAccess?: boolean
   page?: number
+  pagination?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
-  sort?: string
+  sort?: Sort
   where?: Where
 }
 
@@ -34,18 +35,19 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     limit,
     overrideAccess,
     page,
+    pagination = true,
+    populate,
     req: { fallbackLocale, locale, payload },
     req,
+    select,
     showHiddenFields,
     sort,
     where,
   } = args
 
-  const versionFields = buildVersionGlobalFields(globalConfig)
+  const versionFields = buildVersionGlobalFields(payload.config, globalConfig)
 
   try {
-    const shouldCommit = await initTransaction(req)
-
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
@@ -73,7 +75,9 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
       limit: limit ?? 10,
       locale,
       page: page || 1,
+      pagination,
       req,
+      select,
       sort,
       where: fullWhere,
     })
@@ -85,27 +89,31 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     let result = {
       ...paginatedDocs,
       docs: await Promise.all(
-        paginatedDocs.docs.map(async (data) => ({
-          ...data,
-          version: await afterRead<T>({
-            collection: null,
-            context: req.context,
-            depth,
-            doc: {
-              ...data.version,
-              // Patch globalType onto version doc
-              globalType: globalConfig.slug,
-            },
-            draft: undefined,
-            fallbackLocale,
-            findMany: true,
-            global: globalConfig,
-            locale,
-            overrideAccess,
-            req,
-            showHiddenFields,
-          }),
-        })),
+        paginatedDocs.docs.map(async (data) => {
+          return {
+            ...data,
+            version: await afterRead<T>({
+              collection: null,
+              context: req.context,
+              depth,
+              doc: {
+                ...data.version,
+                // Patch globalType onto version doc
+                globalType: globalConfig.slug,
+              },
+              draft: undefined,
+              fallbackLocale,
+              findMany: true,
+              global: globalConfig,
+              locale,
+              overrideAccess,
+              populate,
+              req,
+              select,
+              showHiddenFields,
+            }),
+          }
+        }),
       ),
     } as PaginatedDocs<T>
 
@@ -146,8 +154,6 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
       ...result,
       docs: result.docs.map((doc) => sanitizeInternalFields<T>(doc)),
     }
-
-    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

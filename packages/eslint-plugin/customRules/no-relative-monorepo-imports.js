@@ -21,7 +21,7 @@ export const rule = {
         const importPath = node.source.value
 
         // Match imports starting with any number of "../" followed by "packages/"
-        const regex = /^(\.\.\/)*packages\/[^/]+\/src/
+        const regex = /^(\.\.\/)*((?!src\b)\w+\/)+src\//
 
         if (regex.test(importPath)) {
           context.report({

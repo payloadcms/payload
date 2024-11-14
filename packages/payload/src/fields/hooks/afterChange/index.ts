@@ -1,12 +1,13 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { RequestContext } from '../../../index.js'
+import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 
 import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T extends JsonObject> = {
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   /**
    * The data before hooks
@@ -16,7 +17,7 @@ type Args<T extends JsonObject> = {
    * The data after hooks
    */
   doc: T
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
   previousDoc: T
   req: PayloadRequest

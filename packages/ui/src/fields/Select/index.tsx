@@ -1,28 +1,19 @@
 'use client'
-import type { ClientValidate, Option, OptionObject } from 'payload'
+import type {
+  Option,
+  OptionObject,
+  SelectFieldClientComponent,
+  SelectFieldClientProps,
+} from 'payload'
 
 import React, { useCallback } from 'react'
 
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
-import type { FormFieldBase } from '../shared/index.js'
 import type { SelectInputProps } from './Input.js'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { SelectInput } from './Input.js'
-
-export type SelectFieldProps = {
-  hasMany?: boolean
-  isClearable?: boolean
-  isSortable?: boolean
-  name?: string
-  onChange?: (e: string | string[]) => void
-  options?: Option[]
-  path?: string
-  value?: string
-  width?: string
-} & FormFieldBase
 
 const formatOptions = (options: Option[]): OptionObject[] =>
   options.map((option) => {
@@ -36,54 +27,54 @@ const formatOptions = (options: Option[]): OptionObject[] =>
     } as OptionObject
   })
 
-const _SelectField: React.FC<SelectFieldProps> = (props) => {
+const SelectFieldComponent: SelectFieldClientComponent = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
-    descriptionProps,
-    errorProps,
-    hasMany = false,
-    isClearable = true,
-    isSortable = true,
-    label,
-    labelProps,
+    field: {
+      name,
+      admin: {
+        className,
+        description,
+        isClearable = true,
+        isSortable = true,
+        style,
+        width,
+      } = {} as SelectFieldClientProps['field']['admin'],
+      hasMany = false,
+      label,
+      localized,
+      options: optionsFromProps = [],
+      required,
+    },
     onChange: onChangeFromProps,
-    options: optionsFromProps = [],
-    path: pathFromProps,
-    readOnly: readOnlyFromProps,
-    required,
-    style,
+    path,
+    readOnly,
     validate,
-    width,
   } = props
 
   const options = React.useMemo(() => formatOptions(optionsFromProps), [optionsFromProps])
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate = useCallback(
     (value, validationOptions) => {
-      if (typeof validate === 'function')
+      if (typeof validate === 'function') {
         return validate(value, { ...validationOptions, hasMany, options, required })
+      }
     },
     [validate, required, hasMany, options],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
-    path: pathFromContext ?? pathFromProps ?? name,
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    setValue,
+    showError,
+    value,
+  } = useField({
+    path,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
-
   const onChange: ReactSelectAdapterProps['onChange'] = useCallback(
     (selectedOption: OptionObject | OptionObject[]) => {
-      if (!disabled) {
+      if (!readOnly) {
         let newValue: string | string[] = null
         if (selectedOption && hasMany) {
           if (Array.isArray(selectedOption)) {
@@ -102,30 +93,28 @@ const _SelectField: React.FC<SelectFieldProps> = (props) => {
         setValue(newValue)
       }
     },
-    [disabled, hasMany, setValue, onChangeFromProps],
+    [readOnly, hasMany, setValue, onChangeFromProps],
   )
 
   return (
     <SelectInput
       AfterInput={AfterInput}
       BeforeInput={BeforeInput}
-      CustomDescription={CustomDescription}
-      CustomError={CustomError}
-      CustomLabel={CustomLabel}
       className={className}
-      descriptionProps={descriptionProps}
-      errorProps={errorProps}
+      Description={Description}
+      description={description}
+      Error={Error}
       hasMany={hasMany}
       isClearable={isClearable}
       isSortable={isSortable}
+      Label={Label}
       label={label}
-      labelProps={labelProps}
+      localized={localized}
       name={name}
       onChange={onChange}
       options={options}
       path={path}
-      readOnly={disabled}
-      required={required}
+      readOnly={readOnly}
       showError={showError}
       style={style}
       value={value as string | string[]}
@@ -134,6 +123,6 @@ const _SelectField: React.FC<SelectFieldProps> = (props) => {
   )
 }
 
-export const SelectField = withCondition(_SelectField)
+export const SelectField = withCondition(SelectFieldComponent)
 
 export { SelectInput, type SelectInputProps }

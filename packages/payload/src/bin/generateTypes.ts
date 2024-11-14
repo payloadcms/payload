@@ -3,6 +3,7 @@ import { compile } from 'json-schema-to-typescript'
 
 import type { SanitizedConfig } from '../config/types.js'
 
+import { addSelectGenericsToGeneratedTypes } from '../utilities/addSelectGenericsToGeneretedTypes.js'
 import { configToJSONSchema } from '../utilities/configToJSONSchema.js'
 import { getLogger } from '../utilities/logger.js'
 
@@ -10,12 +11,14 @@ export async function generateTypes(
   config: SanitizedConfig,
   options?: { log: boolean },
 ): Promise<void> {
-  const logger = getLogger()
+  const logger = getLogger('payload', 'sync')
   const outputFile = process.env.PAYLOAD_TS_OUTPUT_PATH || config.typescript.outputFile
 
   const shouldLog = options?.log ?? true
 
-  if (shouldLog) logger.info('Compiling TS types for Collections and Globals...')
+  if (shouldLog) {
+    logger.info('Compiling TS types for Collections and Globals...')
+  }
 
   const jsonSchema = configToJSONSchema(config, config.db.defaultIDType)
 
@@ -33,6 +36,8 @@ export async function generateTypes(
     // even if it's not used by another type. Reason: the user might want to use it in their own code.
     unreachableDefinitions: true,
   })
+
+  compiled = addSelectGenericsToGeneratedTypes({ compiledGeneratedTypes: compiled })
 
   if (config.typescript.declare !== false) {
     if (config.typescript.declare?.ignoreTSError) {
@@ -54,5 +59,7 @@ export async function generateTypes(
   }
 
   fs.writeFileSync(outputFile, compiled)
-  if (shouldLog) logger.info(`Types written to ${outputFile}`)
+  if (shouldLog) {
+    logger.info(`Types written to ${outputFile}`)
+  }
 }

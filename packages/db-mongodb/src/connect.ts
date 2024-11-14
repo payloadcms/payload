@@ -29,7 +29,9 @@ export const connect: Connect = async function connect(
     useFacet: undefined,
   }
 
-  if (hotReload) connectionOptions.autoIndex = false
+  if (hotReload) {
+    connectionOptions.autoIndex = false
+  }
 
   try {
     this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection
@@ -54,9 +56,30 @@ export const connect: Connect = async function connect(
         this.payload.logger.info('---- DROPPED DATABASE ----')
       }
     }
+
+    if (this.ensureIndexes) {
+      await Promise.all(
+        this.payload.config.collections.map(async (coll) => {
+          await new Promise((resolve, reject) => {
+            this.collections[coll.slug]?.ensureIndexes(function (err) {
+              if (err) {
+                reject(err)
+              }
+              resolve(true)
+            })
+          })
+        }),
+      )
+    }
+
+    if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
+      await this.migrate({ migrations: this.prodMigrations })
+    }
   } catch (err) {
-    console.log(err)
-    this.payload.logger.error(`Error: cannot connect to MongoDB. Details: ${err.message}`, err)
+    this.payload.logger.error({
+      err,
+      msg: `Error: cannot connect to MongoDB. Details: ${err.message}`,
+    })
     process.exit(1)
   }
 }

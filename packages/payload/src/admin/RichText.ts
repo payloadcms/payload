@@ -1,17 +1,21 @@
 import type { GenericLanguages, I18n, I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
-import type React from 'react'
 
+import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
-import type { SanitizedConfig } from '../config/types.js'
-import type { Field, FieldAffectingData, RichTextField, Validate } from '../fields/config/types.js'
+import type { Config, PayloadComponent, SanitizedConfig } from '../config/types.js'
+import type { ValidationFieldError } from '../errors/ValidationError.js'
+import type {
+  FieldAffectingData,
+  RichTextField,
+  RichTextFieldClient,
+  Validate,
+} from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { JsonObject, PayloadRequest, RequestContext } from '../types/index.js'
-import type { WithServerSidePropsComponentProps } from './elements/WithServerSideProps.js'
-
-export type RichTextFieldProps<Value extends object, AdapterProps, ExtraFieldProperties = {}> = {
-  path?: string
-} & Omit<RichTextField<Value, AdapterProps, ExtraFieldProperties>, 'type'>
+import type { RequestContext } from '../index.js'
+import type { JsonObject, Payload, PayloadRequest, PopulateType } from '../types/index.js'
+import type { RichTextFieldClientProps } from './fields/RichText.js'
+import type { FieldSchemaMap } from './types.js'
 
 export type AfterReadRichTextHookArgs<
   TData extends TypeWithID = any,
@@ -25,7 +29,6 @@ export type AfterReadRichTextHookArgs<
   draft?: boolean
 
   fallbackLocale?: string
-
   fieldPromises?: Promise<void>[]
 
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
@@ -39,6 +42,8 @@ export type AfterReadRichTextHookArgs<
   operation?: 'create' | 'delete' | 'read' | 'update'
 
   overrideAccess?: boolean
+
+  populate?: PopulateType
 
   populationPromises?: Promise<void>[]
   showHiddenFields?: boolean
@@ -86,7 +91,7 @@ export type BeforeChangeRichTextHookArgs<
 
   duplicate?: boolean
 
-  errors?: { field: string; message: string }[]
+  errors?: ValidationFieldError[]
   /** Only available in `beforeChange` field hooks */
   mergeLocaleActions?: (() => Promise<void>)[]
   /** A string relating to which operation the field type is currently executing within. */
@@ -109,14 +114,14 @@ export type BaseRichTextHookArgs<
   TSiblingData = any,
 > = {
   /** The collection which the field belongs to. If the field belongs to a global, this will be null. */
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
   data?: Partial<TData>
   /** The field which the hook is running against. */
   field: FieldAffectingData
   /** The global which the field belongs to. If the field belongs to a collection, this will be null. */
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
 
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
   originalDoc?: TData
@@ -179,24 +184,19 @@ export type RichTextHooks = {
   beforeChange?: BeforeChangeRichTextHook[]
   beforeValidate?: BeforeValidateRichTextHook[]
 }
-
 type RichTextAdapterBase<
   Value extends object = object,
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
-  generateComponentMap: (args: {
-    WithServerSideProps: React.FC<Omit<WithServerSidePropsComponentProps, 'serverOnlyProps'>>
-    config: SanitizedConfig
-    i18n: I18nClient
-    schemaPath: string
-  }) => Map<string, React.ReactNode>
+  generateImportMap?: Config['admin']['importMap']['generators'][0]
   generateSchemaMap?: (args: {
     config: SanitizedConfig
+    field: RichTextField
     i18n: I18n<any, any>
-    schemaMap: Map<string, Field[]>
+    schemaMap: FieldSchemaMap
     schemaPath: string
-  }) => Map<string, Field[]>
+  }) => FieldSchemaMap
   /**
    * Like an afterRead hook, but runs only for the GraphQL resolver. For populating data, this should be used, as afterRead hooks do not have a depth in graphQL.
    *
@@ -213,6 +213,7 @@ type RichTextAdapterBase<
     findMany: boolean
     flattenLocales: boolean
     overrideAccess?: boolean
+    populateArg?: PopulateType
     populationPromises: Promise<void>[]
     req: PayloadRequest
     showHiddenFields: boolean
@@ -245,12 +246,12 @@ type RichTextAdapterBase<
 }
 
 export type RichTextAdapter<
-  Value extends object = object,
+  Value extends object = any,
   AdapterProps = any,
-  ExtraFieldProperties = {},
+  ExtraFieldProperties = any,
 > = {
-  CellComponent: React.FC<any>
-  FieldComponent: React.FC<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
+  CellComponent: PayloadComponent<never>
+  FieldComponent: PayloadComponent<never, RichTextFieldClientProps>
 } & RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties>
 
 export type RichTextAdapterProvider<
@@ -260,6 +261,7 @@ export type RichTextAdapterProvider<
 > = ({
   config,
   isRoot,
+  parentIsLocalized,
 }: {
   config: SanitizedConfig
   /**
@@ -268,6 +270,7 @@ export type RichTextAdapterProvider<
    * @default false
    */
   isRoot?: boolean
+  parentIsLocalized: boolean
 }) =>
   | Promise<RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>>
   | RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>

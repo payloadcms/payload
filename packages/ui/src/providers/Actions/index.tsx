@@ -1,40 +1,31 @@
 'use client'
-import React, { createContext, useContext, useEffect, useState } from 'react'
 
-import type { ActionMap } from '../ComponentMap/buildComponentMap/types.js'
-
-import { useComponentMap } from '../ComponentMap/index.js'
-
-export { SetViewActions } from './SetViewActions/index.js'
+import React, { createContext, useContext, useState } from 'react'
 
 type ActionsContextType = {
-  actions: ActionMap['Edit'][string]
-  setViewActions: (actions: ActionMap['Edit'][string]) => void
+  Actions: {
+    [key: string]: React.ReactNode
+  }
+  setViewActions: (actions: ActionsContextType['Actions']) => void
 }
 
 const ActionsContext = createContext<ActionsContextType>({
-  actions: [],
+  Actions: {},
   setViewActions: () => {},
 })
 
 export const useActions = () => useContext(ActionsContext)
 
-export const ActionsProvider = ({ children }) => {
-  const [viewActions, setViewActions] = useState([])
-  const [adminActions, setAdminActions] = useState([])
-
-  const {
-    componentMap: { actions },
-  } = useComponentMap()
-
-  useEffect(() => {
-    setAdminActions(actions || [])
-  }, [actions])
-
-  const combinedActions = [...(viewActions || []), ...(adminActions || [])]
+export const ActionsProvider: React.FC<{
+  readonly Actions?: {
+    [key: string]: React.ReactNode
+  }
+  readonly children: React.ReactNode
+}> = ({ Actions, children }) => {
+  const [viewActions, setViewActions] = useState(Actions)
 
   return (
-    <ActionsContext.Provider value={{ actions: combinedActions, setViewActions }}>
+    <ActionsContext.Provider value={{ Actions: viewActions, setViewActions }}>
       {children}
     </ActionsContext.Provider>
   )

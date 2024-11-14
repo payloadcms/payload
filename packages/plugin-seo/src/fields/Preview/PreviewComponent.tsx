@@ -4,29 +4,39 @@ import type { FormField, UIField } from 'payload'
 
 import {
   useAllFormFields,
+  useConfig,
   useDocumentInfo,
   useForm,
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
-import { get } from 'http'
+import { reduceToSerializableFields } from '@payloadcms/ui/shared'
 import React, { useEffect, useState } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
 import type { GenerateURL } from '../../types.js'
 
 type PreviewProps = {
-  descriptionPath?: string
-  hasGenerateURLFn: boolean
-  titlePath?: string
+  readonly descriptionPath?: string
+  readonly hasGenerateURLFn: boolean
+  readonly titlePath?: string
 } & UIField
 
-export const PreviewComponent: React.FC<PreviewProps> = ({
-  descriptionPath: descriptionPathFromContext,
-  hasGenerateURLFn,
-  titlePath: titlePathFromContext,
-}) => {
+export const PreviewComponent: React.FC<PreviewProps> = (props) => {
+  const {
+    descriptionPath: descriptionPathFromContext,
+    hasGenerateURLFn,
+    titlePath: titlePathFromContext,
+  } = props
+
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
+
+  const {
+    config: {
+      routes: { api },
+      serverURL,
+    },
+  } = useConfig()
 
   const locale = useLocale()
   const [fields] = useAllFormFields()
@@ -44,13 +54,26 @@ export const PreviewComponent: React.FC<PreviewProps> = ({
   const [href, setHref] = useState<string>()
 
   useEffect(() => {
+    const endpoint = `${serverURL}${api}/plugin-seo/generate-url`
+
     const getHref = async () => {
-      const genURLResponse = await fetch('/api/plugin-seo/generate-url', {
+      const genURLResponse = await fetch(endpoint, {
         body: JSON.stringify({
-          ...docInfo,
-          doc: { ...getData() },
+          id: docInfo.id,
+          collectionSlug: docInfo.collectionSlug,
+          doc: getData(),
+          docPermissions: docInfo.docPermissions,
+          globalSlug: docInfo.globalSlug,
+          hasPublishPermission: docInfo.hasPublishPermission,
+          hasSavePermission: docInfo.hasSavePermission,
+          initialData: docInfo.initialData,
+          initialState: reduceToSerializableFields(docInfo.initialState),
           locale: typeof locale === 'object' ? locale?.code : locale,
-        } satisfies Parameters<GenerateURL>[0]),
+          title: docInfo.title,
+        } satisfies Omit<
+          Parameters<GenerateURL>[0],
+          'collectionConfig' | 'globalConfig' | 'hasPublishedDoc' | 'req' | 'versionCount'
+        >),
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -66,10 +89,14 @@ export const PreviewComponent: React.FC<PreviewProps> = ({
     if (hasGenerateURLFn && !href) {
       void getHref()
     }
-  }, [fields, href, locale, docInfo, hasGenerateURLFn, getData])
+  }, [fields, href, locale, docInfo, hasGenerateURLFn, getData, serverURL, api])
 
   return (
-    <div>
+    <div
+      style={{
+        marginBottom: '20px',
+      }}
+    >
       <div>{t('plugin-seo:preview')}</div>
       <div
         style={{

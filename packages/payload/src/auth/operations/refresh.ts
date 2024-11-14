@@ -1,4 +1,3 @@
-import jwt from 'jsonwebtoken'
 import url from 'url'
 
 import type { BeforeOperationHook, Collection } from '../../collections/config/types.js'
@@ -10,6 +9,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
+import { jwtSign } from '../jwt.js'
 
 export type Result = {
   exp: number
@@ -62,7 +62,9 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       },
     } = args
 
-    if (!args.req.user) throw new Forbidden(args.req.t)
+    if (!args.req.user) {
+      throw new Forbidden(args.req.t)
+    }
 
     const parsedURL = url.parse(args.req.url)
     const isGraphQL = parsedURL.pathname === config.routes.graphQL
@@ -73,6 +75,10 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       depth: isGraphQL ? 0 : args.collection.config.auth.depth,
       req: args.req,
     })
+
+    if (user) {
+      user.collection = args.req.user.collection
+    }
 
     let result: Result
 
@@ -96,11 +102,11 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
         user: args?.req?.user,
       })
 
-      const refreshedToken = jwt.sign(fieldsToSign, secret, {
-        expiresIn: collectionConfig.auth.tokenExpiration,
+      const { exp, token: refreshedToken } = await jwtSign({
+        fieldsToSign,
+        secret,
+        tokenExpiration: collectionConfig.auth.tokenExpiration,
       })
-
-      const exp = (jwt.decode(refreshedToken) as Record<string, unknown>).exp as number
 
       result = {
         exp,
@@ -143,7 +149,9 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return result
   } catch (error: unknown) {

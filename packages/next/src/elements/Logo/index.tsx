@@ -1,6 +1,7 @@
 import type { ServerProps } from 'payload'
 
-import { PayloadLogo, RenderCustomComponent } from '@payloadcms/ui/shared'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { PayloadLogo } from '@payloadcms/ui/shared'
 import React from 'react'
 
 export const Logo: React.FC<ServerProps> = (props) => {
@@ -17,10 +18,11 @@ export const Logo: React.FC<ServerProps> = (props) => {
   } = payload.config
 
   return (
-    <RenderCustomComponent
-      CustomComponent={CustomLogo}
-      DefaultComponent={PayloadLogo}
-      serverOnlyProps={{
+    <RenderServerComponent
+      Component={CustomLogo}
+      Fallback={PayloadLogo}
+      importMap={payload.importMap}
+      serverProps={{
         i18n,
         locale,
         params,

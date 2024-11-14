@@ -18,6 +18,11 @@ import TransformHooks from './collections/Transform/index.js'
 import Users, { seedHooksUsers } from './collections/Users/index.js'
 import { DataHooksGlobal } from './globals/Data/index.js'
 export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     AfterOperationCollection,
     ContextHooks,
@@ -40,14 +45,14 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     },
   ],
   hooks: {
-    afterError: () => console.log('Running afterError hook'),
+    afterError: [() => console.log('Running afterError hook')],
   },
   onInit: async (payload) => {
     await seedHooksUsers(payload)
     await payload.create({
       collection: hooksSlug,
       data: {
-        check: 'update',
+        check: true,
         fieldBeforeValidate: false,
         collectionBeforeValidate: false,
         fieldBeforeChange: false,

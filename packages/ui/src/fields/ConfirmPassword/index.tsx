@@ -1,9 +1,8 @@
 'use client'
-import type { FormField } from 'payload'
 
-import React, { useCallback } from 'react'
+import { confirmPassword } from 'payload/shared'
+import React from 'react'
 
-import { useFormFields } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldError } from '../FieldError/index.js'
@@ -12,36 +11,24 @@ import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 export type ConfirmPasswordFieldProps = {
-  disabled?: boolean
+  readonly disabled?: boolean
+  readonly path?: string
 }
 
 export const ConfirmPasswordField: React.FC<ConfirmPasswordFieldProps> = (props) => {
-  const { disabled } = props
-
-  const password = useFormFields<FormField>(([fields]) => fields?.password)
+  const { disabled, path = 'confirm-password' } = props
   const { t } = useTranslation()
 
-  const validate = useCallback(
-    (value: string) => {
-      if (!value) {
-        return t('validation:required')
-      }
-
-      if (value === password?.value) {
-        return true
-      }
-
-      return t('fields:passwordsDoNotMatch')
-    },
-    [password, t],
-  )
-
-  const path = 'confirm-password'
-
   const { setValue, showError, value } = useField({
-    disableFormData: true,
     path,
-    validate,
+    validate: (value, options) => {
+      return confirmPassword(value, {
+        name: 'confirm-password',
+        type: 'text',
+        required: true,
+        ...options,
+      })
+    },
   })
 
   return (
@@ -58,6 +45,7 @@ export const ConfirmPasswordField: React.FC<ConfirmPasswordFieldProps> = (props)
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError path={path} />
         <input
+          aria-label={t('authentication:confirmPassword')}
           autoComplete="off"
           disabled={!!disabled}
           id="field-confirm-password"

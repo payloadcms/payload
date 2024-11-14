@@ -14,6 +14,7 @@ import { getValidTemplates } from './templates.js'
 describe('createProject', () => {
   let projectDir: string
   beforeAll(() => {
+    // eslint-disable-next-line no-console
     console.log = jest.fn()
   })
 
@@ -32,7 +33,7 @@ describe('createProject', () => {
     const args = {
       _: ['project-name'],
       '--db': 'mongodb',
-      '--local-template': 'blank-3.0',
+      '--local-template': 'blank',
       '--no-deps': true,
     } as CliArgs
     const packageManager = 'yarn'
@@ -57,15 +58,15 @@ describe('createProject', () => {
       const packageJson = fse.readJsonSync(packageJsonPath)
 
       // Check package name and description
-      expect(packageJson.name).toEqual(projectName)
+      expect(packageJson.name).toStrictEqual(projectName)
     })
 
     describe('creates project from template', () => {
       const templates = getValidTemplates()
 
       it.each([
-        ['blank-3.0', 'mongodb'],
-        ['blank-3.0', 'postgres'],
+        ['blank', 'mongodb'],
+        ['blank', 'postgres'],
 
         // TODO: Re-enable these once 3.0 is stable and templates updated
         // ['website', 'mongodb'],
@@ -114,10 +115,6 @@ describe('createProject', () => {
             cwd: projectDir,
           })
         )?.[0]
-
-        if (!payloadConfigPath) {
-          throw new Error(`Could not find payload.config.ts inside ${projectDir}`)
-        }
 
         const content = fse.readFileSync(payloadConfigPath, 'utf-8')
 

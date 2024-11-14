@@ -1,59 +1,39 @@
 'use client'
-import type { ClientValidate, DateField } from 'payload'
+import type { DateFieldClientComponent, DateFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
 import { DatePickerField } from '../../elements/DatePicker/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
+import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 const baseClass = 'date-time-field'
 
-import type { FormFieldBase } from '../shared/index.js'
-
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-import { withCondition } from '../../forms/withCondition/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-
-export type DateFieldProps = {
-  date?: DateField['admin']['date']
-  name?: string
-  path?: string
-  placeholder?: DateField['admin']['placeholder'] | string
-  width?: string
-} & FormFieldBase
-
-const _DateTimeField: React.FC<DateFieldProps> = (props) => {
+const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
-    date: datePickerProps,
-    descriptionProps,
-    errorProps,
-    label,
-    labelProps,
-    path: pathFromProps,
-    placeholder,
-    readOnly: readOnlyFromProps,
-    required,
-    style,
+    field: {
+      name,
+      admin: { className, date: datePickerProps, description, placeholder, style, width } = {},
+      label,
+      localized,
+      required,
+    },
+    path,
+    readOnly,
     validate,
-    width,
   } = props
 
   const { i18n } = useTranslation()
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate: DateFieldValidation = useCallback(
     (value, options) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })
@@ -62,14 +42,15 @@ const _DateTimeField: React.FC<DateFieldProps> = (props) => {
     [validate, required],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField<Date>({
-    path: pathFromContext ?? pathFromProps ?? name,
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    setValue,
+    showError,
+    value,
+  } = useField<Date>({
+    path,
     validate: memoizedValidate,
   })
-
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   return (
     <div
@@ -78,7 +59,7 @@ const _DateTimeField: React.FC<DateFieldProps> = (props) => {
         baseClass,
         className,
         showError && `${baseClass}--has-error`,
-        disabled && 'read-only',
+        readOnly && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -87,33 +68,35 @@ const _DateTimeField: React.FC<DateFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={<FieldLabel label={label} localized={localized} required={required} />}
       />
       <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
+        />
         {BeforeInput}
         <DatePickerField
           {...datePickerProps}
           onChange={(incomingDate) => {
-            if (!disabled) setValue(incomingDate?.toISOString() || null)
+            if (!readOnly) {
+              setValue(incomingDate?.toISOString() || null)
+            }
           }}
           placeholder={getTranslation(placeholder, i18n)}
-          readOnly={disabled}
+          readOnly={readOnly}
           value={value}
         />
         {AfterInput}
       </div>
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <RenderCustomComponent
+        CustomComponent={Description}
+        Fallback={<FieldDescription description={description} path={path} />}
+      />
     </div>
   )
 }
 
-export const DateTimeField = withCondition(_DateTimeField)
+export const DateTimeField = withCondition(DateTimeFieldComponent)

@@ -1,3 +1,4 @@
+'use client'
 import type { LexicalEditor, LexicalNode } from 'lexical'
 
 import { $getNodeByKey } from 'lexical'
@@ -42,8 +43,8 @@ type Output = {
 }
 
 const cache = {
-  props: null as Props | null,
-  result: null as Output | null,
+  props: null as null | Props,
+  result: null as null | Output,
 }
 
 function isPointClose(previous: Point, current: Point, threshold: number = 20): boolean {
@@ -62,7 +63,6 @@ export function getNodeCloseToPoint(props: Props): Output {
     point: { x, y },
     startIndex = 0,
     useEdgeAsDefault = false,
-    verbose = false,
   } = props
 
   // Use cache
@@ -103,12 +103,12 @@ export function getNodeCloseToPoint(props: Props): Output {
         editor.getElementByKey(topLevelNodeKeys[topLevelNodeKeys.length - 1]),
       ]
 
-      const [firstNodeRect, lastNodeRect] = [
-        getBoundingClientRectWithoutTransform(firstNode),
-        getBoundingClientRectWithoutTransform(lastNode),
-      ]
+      if (firstNode && lastNode) {
+        const [firstNodeRect, lastNodeRect] = [
+          getBoundingClientRectWithoutTransform(firstNode),
+          getBoundingClientRectWithoutTransform(lastNode),
+        ]
 
-      if (firstNodeRect && lastNodeRect) {
         if (y < firstNodeRect.top) {
           closestBlockElem.blockElem = firstNode
           closestBlockElem.distance = firstNodeRect.top - y

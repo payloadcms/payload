@@ -87,6 +87,11 @@ if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'r2') {
 }
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [Media, MediaWithPrefix, Users],
   onInit: async (payload) => {
     /*const client = new AWS.S3({

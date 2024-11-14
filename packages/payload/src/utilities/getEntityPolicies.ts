@@ -5,6 +5,7 @@ import type { Field, FieldAccess } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { AllOperations, Document, PayloadRequest, Where } from '../types/index.js'
 
+import { combineQueries } from '../database/combineQueries.js'
 import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
 
 type Args = {
@@ -31,7 +32,7 @@ type CreateAccessPromise = (args: {
 
 export async function getEntityPolicies<T extends Args>(args: T): Promise<ReturnType<T>> {
   const { id, type, entity, operations, req } = args
-  const { data, payload, user } = req
+  const { data, locale, payload, user } = req
   const isLoggedIn = !!user
 
   const policies = {
@@ -45,6 +46,8 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
       if (type === 'global') {
         return payload.findGlobal({
           slug: entity.slug,
+          fallbackLocale: null,
+          locale,
           overrideAccess: true,
           req,
         })
@@ -55,21 +58,13 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
           const paginatedRes = await payload.find({
             collection: entity.slug,
             depth: 0,
+            fallbackLocale: null,
             limit: 1,
+            locale,
             overrideAccess: true,
             pagination: false,
             req,
-            where: {
-              ...where,
-              and: [
-                ...(where.and || []),
-                {
-                  id: {
-                    equals: id,
-                  },
-                },
-              ],
-            },
+            where: combineQueries(where, { id: { equals: id } }),
           })
 
           return paginatedRes?.docs?.[0] || undefined
@@ -79,6 +74,8 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
           id,
           collection: entity.slug,
           depth: 0,
+          fallbackLocale: null,
+          locale,
           overrideAccess: true,
           req,
         })
@@ -128,10 +125,10 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     operation,
     policiesObj,
   }: {
-    entityPermission: any
+    entityPermission
     fields: Field[]
     operation: AllOperations
-    policiesObj: any
+    policiesObj
   }) => {
     const mutablePolicies = policiesObj.fields
 
@@ -141,9 +138,11 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     await Promise.all(
       fields.map(async (field) => {
         if (fieldAffectsData(field) && field.name) {
-          if (!mutablePolicies[field.name]) mutablePolicies[field.name] = {}
+          if (!mutablePolicies[field.name]) {
+            mutablePolicies[field.name] = {}
+          }
 
-          if (field.access && typeof field.access[operation] === 'function') {
+          if ('access' in field && field.access && typeof field.access[operation] === 'function') {
             await createAccessPromise({
               access: field.access[operation],
               accessLevel: 'field',
@@ -158,7 +157,9 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
           }
 
           if ('fields' in field && field.fields) {
-            if (!mutablePolicies[field.name].fields) mutablePolicies[field.name].fields = {}
+            if (!mutablePolicies[field.name].fields) {
+              mutablePolicies[field.name].fields = {}
+            }
 
             await executeFieldPolicies({
               entityPermission,
@@ -169,7 +170,9 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
           }
 
           if ('blocks' in field && field.blocks) {
-            if (!mutablePolicies[field.name]?.blocks) mutablePolicies[field.name].blocks = {}
+            if (!mutablePolicies[field.name]?.blocks) {
+              mutablePolicies[field.name].blocks = {}
+            }
 
             await Promise.all(
               field.blocks.map(async (block) => {

@@ -7,10 +7,11 @@ import React from 'react'
 import type { TextInputProps } from './types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
@@ -18,16 +19,15 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
   const {
     AfterInput,
     BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
     className,
-    descriptionProps,
-    errorProps,
+    Description,
+    description,
+    Error,
     hasMany,
     inputRef,
+    Label,
     label,
-    labelProps,
+    localized,
     maxRows,
     onChange,
     onKeyDown,
@@ -62,15 +62,18 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
+        />
+        {BeforeInput}
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
@@ -97,28 +100,24 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
             value={valueToRender}
           />
         ) : (
-          <div>
-            {BeforeInput}
-            <input
-              data-rtl={rtl}
-              disabled={readOnly}
-              id={`field-${path?.replace(/\./g, '__')}`}
-              name={path}
-              onChange={onChange as (e: ChangeEvent<HTMLInputElement>) => void}
-              onKeyDown={onKeyDown}
-              placeholder={getTranslation(placeholder, i18n)}
-              ref={inputRef}
-              type="text"
-              value={value || ''}
-            />
-            {AfterInput}
-          </div>
+          <input
+            data-rtl={rtl}
+            disabled={readOnly}
+            id={`field-${path?.replace(/\./g, '__')}`}
+            name={path}
+            onChange={onChange as (e: ChangeEvent<HTMLInputElement>) => void}
+            onKeyDown={onKeyDown}
+            placeholder={getTranslation(placeholder, i18n)}
+            ref={inputRef}
+            type="text"
+            value={value || ''}
+          />
         )}
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        {AfterInput}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
+        />
       </div>
     </div>
   )

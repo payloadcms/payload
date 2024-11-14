@@ -38,6 +38,9 @@ export const index = deepMerge(
         version: 'detect',
       },
     },
+    rules: {
+      'react-hooks/rules-of-hooks': 'error',
+    },
   },
 )
 export default index

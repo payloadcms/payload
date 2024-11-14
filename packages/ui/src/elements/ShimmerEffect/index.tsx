@@ -5,9 +5,9 @@ import { useDelay } from '../../hooks/useDelay.js'
 import './index.scss'
 
 export type ShimmerEffectProps = {
-  animationDelay?: string
-  height?: number | string
-  width?: number | string
+  readonly animationDelay?: string
+  readonly height?: number | string
+  readonly width?: number | string
 }
 
 export const ShimmerEffect: React.FC<ShimmerEffectProps> = ({
@@ -55,7 +55,9 @@ export const StaggeredShimmers: React.FC<StaggeredShimmersProps> = ({
   const shimmerDelayToPass = typeof shimmerDelay === 'number' ? `${shimmerDelay}ms` : shimmerDelay
   const [hasDelayed] = useDelay(renderDelay, true)
 
-  if (!hasDelayed) return null
+  if (!hasDelayed) {
+    return null
+  }
 
   return (
     <div className={className}>

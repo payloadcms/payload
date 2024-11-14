@@ -16,13 +16,13 @@ import { ShimmerEffect } from '../ShimmerEffect/index.js'
 import { ClearIndicator } from './ClearIndicator/index.js'
 import { Control } from './Control/index.js'
 import { DropdownIndicator } from './DropdownIndicator/index.js'
+import './index.scss'
 import { Input } from './Input/index.js'
-import { MultiValue, generateMultiValueDraggableID } from './MultiValue/index.js'
+import { generateMultiValueDraggableID, MultiValue } from './MultiValue/index.js'
 import { MultiValueLabel } from './MultiValueLabel/index.js'
 import { MultiValueRemove } from './MultiValueRemove/index.js'
 import { SingleValue } from './SingleValue/index.js'
 import { ValueContainer } from './ValueContainer/index.js'
-import './index.scss'
 
 const createOption = (label: string) => ({
   label,
@@ -106,6 +106,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         onMenuClose={onMenuClose}
         onMenuOpen={onMenuOpen}
         options={options}
+        unstyled={true}
         value={value}
       />
     )
@@ -129,7 +130,9 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         return
       }
     }
-    if (!value || !inputValue || inputValue.trim() === '') return
+    if (!value || !inputValue || inputValue.trim() === '') {
+      return
+    }
     if (filterOption && !filterOption(null, inputValue)) {
       return
     }
@@ -180,6 +183,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       onMenuClose={onMenuClose}
       onMenuOpen={onMenuOpen}
       options={options}
+      unstyled={true}
       value={value}
     />
   )

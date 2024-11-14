@@ -1,16 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
-import { AfterInput } from './AfterInput.js'
-import { BeforeInput } from './BeforeInput.js'
-import CustomError from './CustomError.js'
-import CustomLabel from './CustomLabel.js'
 import { defaultEmail, emailFieldsSlug } from './shared.js'
 
 const EmailFields: CollectionConfig = {
   slug: emailFieldsSlug,
-  admin: {
-    useAsTitle: 'text',
-  },
   defaultSort: 'id',
   fields: [
     {
@@ -79,7 +72,7 @@ const EmailFields: CollectionConfig = {
       type: 'email',
       admin: {
         components: {
-          Label: CustomLabel,
+          Label: '/collections/Email/CustomLabel.js#CustomLabel',
         },
       },
     },
@@ -88,7 +81,7 @@ const EmailFields: CollectionConfig = {
       type: 'email',
       admin: {
         components: {
-          Error: CustomError,
+          Error: '/collections/Email/CustomError.js#CustomError',
         },
       },
     },
@@ -97,8 +90,8 @@ const EmailFields: CollectionConfig = {
       type: 'email',
       admin: {
         components: {
-          afterInput: [AfterInput],
-          beforeInput: [BeforeInput],
+          afterInput: ['/collections/Email/AfterInput.js#AfterInput'],
+          beforeInput: ['/collections/Email/BeforeInput.js#BeforeInput'],
         },
       },
     },

@@ -1,15 +1,54 @@
 'use client'
-import type { ClientConfig } from 'payload'
+import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig } from 'payload'
 
-import React, { createContext, useContext } from 'react'
+import React, { createContext, useCallback, useContext, useState } from 'react'
 
-const Context = createContext<ClientConfig>({} as ClientConfig)
-
-export const ConfigProvider: React.FC<{ children: React.ReactNode; config: ClientConfig }> = ({
-  children,
-  config,
-}) => {
-  return <Context.Provider value={config}>{children}</Context.Provider>
+export type ClientConfigContext = {
+  config: ClientConfig
+  getEntityConfig: (args: {
+    collectionSlug?: string
+    globalSlug?: string
+  }) => ClientCollectionConfig | ClientGlobalConfig | null
+  setConfig: (config: ClientConfig) => void
 }
 
-export const useConfig = (): ClientConfig => useContext(Context)
+export type EntityConfigContext = {
+  collectionConfig?: ClientCollectionConfig
+  globalConfig?: ClientGlobalConfig
+  setEntityConfig: (args: {
+    collectionConfig?: ClientCollectionConfig | null
+    globalConfig?: ClientGlobalConfig | null
+  }) => void
+}
+
+const RootConfigContext = createContext<ClientConfigContext | undefined>(undefined)
+
+export const ConfigProvider: React.FC<{
+  readonly children: React.ReactNode
+  readonly config: ClientConfig
+}> = ({ children, config: configFromProps }) => {
+  const [config, setConfig] = useState<ClientConfig>(configFromProps)
+
+  const getEntityConfig = useCallback(
+    ({ collectionSlug, globalSlug }: { collectionSlug?: string; globalSlug?: string }) => {
+      if (collectionSlug) {
+        return config.collections.find((collection) => collection.slug === collectionSlug)
+      }
+
+      if (globalSlug) {
+        return config.globals.find((global) => global.slug === globalSlug)
+      }
+
+      return null
+    },
+    [config],
+  )
+
+  return (
+    <RootConfigContext.Provider value={{ config, getEntityConfig, setConfig }}>
+      {children}
+    </RootConfigContext.Provider>
+  )
+}
+
+export const useConfig = (): ClientConfigContext => useContext(RootConfigContext)

@@ -1,13 +1,16 @@
 'use client'
-import type { DocumentPreferences, FieldPermissions } from 'payload'
+import type { AdminClient, CollapsibleFieldClientComponent, DocumentPreferences } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import { Collapsible as CollapsibleElement } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { RowLabel } from '../../forms/RowLabel/index.js'
+import { useField } from '../../forms/useField/index.js'
 import { WatchChildErrors } from '../../forms/WatchChildErrors/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -18,54 +21,32 @@ import './index.scss'
 
 const baseClass = 'collapsible-field'
 
-import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
-import type { FormFieldBase } from '../shared/index.js'
-
-import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-
-export type CollapsibleFieldProps = {
-  fieldMap: FieldMap
-  initCollapsed?: boolean
-  width?: string
-} & FormFieldBase
-
-const _CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
+const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
   const {
-    CustomDescription,
-    CustomLabel,
-    className,
-    descriptionProps,
-    fieldMap,
-    initCollapsed = false,
-    label,
-    path: pathFromProps,
-    readOnly: readOnlyFromProps,
-  } = props
-
-  const {
+    field,
+    field: { admin: { className, description, initCollapsed = false } = {}, fields, label } = {},
     indexPath,
-    path: pathFromContext,
-    readOnly: readOnlyFromContext,
-    schemaPath,
-    siblingPermissions,
-  } = useFieldProps()
-
-  const formInitializing = useFormInitializing()
-  const formProcessing = useFormProcessing()
-
-  const path = pathFromContext ?? pathFromProps
+    parentPath,
+    parentSchemaPath,
+    path,
+    permissions,
+    readOnly,
+  } = props
 
   const { i18n } = useTranslation()
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
   const [collapsedOnMount, setCollapsedOnMount] = useState<boolean>()
-  const fieldPreferencesKey = `collapsible-${indexPath.replace(/\./g, '__')}`
+  const fieldPreferencesKey = `collapsible-${path?.replace(/\./g, '__')}`
   const [errorCount, setErrorCount] = useState(0)
   const fieldHasErrors = errorCount > 0
 
+  const { customComponents: { Description, Label } = {} } = useField({
+    path,
+  })
+
   const onToggle = useCallback(
-    async (newCollapsedState: boolean) => {
+    async (newCollapsedState: boolean): Promise<void> => {
       const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
 
       if (preferencesKey) {
@@ -117,13 +98,18 @@ const _CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
     void fetchInitialState()
   }, [getPreference, preferencesKey, fieldPreferencesKey, initCollapsed, path])
 
-  if (typeof collapsedOnMount !== 'boolean') return null
+  if (typeof collapsedOnMount !== 'boolean') {
+    return null
+  }
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const style: AdminClient['style'] = {
+    ...field.admin?.style,
+    '--field-width': field.admin.width,
+  }
 
   return (
     <Fragment>
-      <WatchChildErrors fieldMap={fieldMap} path={path} setErrorCount={setErrorCount} />
+      <WatchChildErrors fields={fields} path={path.split('.')} setErrorCount={setErrorCount} />
       <div
         className={[
           fieldBaseClass,
@@ -133,14 +119,15 @@ const _CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
         ]
           .filter(Boolean)
           .join(' ')}
-        id={`field-${fieldPreferencesKey}${path ? `-${path.replace(/\./g, '__')}` : ''}`}
+        id={`field-${fieldPreferencesKey}`}
+        style={style}
       >
         <CollapsibleElement
           className={`${baseClass}__collapsible`}
           collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
           header={
             <div className={`${baseClass}__row-label-wrap`}>
-              <RowLabel RowLabelComponent={CustomLabel} i18n={i18n} path={path} rowLabel={label} />
+              <RowLabel CustomComponent={Label} label={getTranslation(label, i18n)} path={path} />
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
           }
@@ -148,20 +135,22 @@ const _CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
           onToggle={onToggle}
         >
           <RenderFields
-            fieldMap={fieldMap}
-            forceRender
-            indexPath={indexPath}
+            fields={fields}
             margins="small"
-            path={path}
-            permissions={siblingPermissions}
-            readOnly={disabled}
-            schemaPath={schemaPath}
+            parentIndexPath={indexPath}
+            parentPath={parentPath}
+            parentSchemaPath={parentSchemaPath}
+            permissions={permissions}
+            readOnly={readOnly}
           />
         </CollapsibleElement>
-        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
+        />
       </div>
     </Fragment>
   )
 }
 
-export const CollapsibleField = withCondition(_CollapsibleField)
+export const CollapsibleField = withCondition(CollapsibleFieldComponent)

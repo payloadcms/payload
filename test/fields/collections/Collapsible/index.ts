@@ -2,7 +2,6 @@ import type { CollectionConfig } from 'payload'
 
 import { collapsibleFieldsSlug } from '../../slugs.js'
 import { getCustomLabel } from './CustomLabel/getCustomLabel.js'
-import { NestedCustomLabel } from './NestedCustomLabel/index.js'
 
 const CollapsibleFields: CollectionConfig = {
   slug: collapsibleFieldsSlug,
@@ -83,12 +82,11 @@ const CollapsibleFields: CollectionConfig = {
         description: 'Collapsible label rendered from a function.',
         initCollapsed: true,
         components: {
-          RowLabel: () =>
-            getCustomLabel({
-              path: 'functionTitleField',
-              fallback: 'Custom Collapsible Label',
-              style: {},
-            }),
+          Label: getCustomLabel({
+            path: 'functionTitleField',
+            fallback: 'Custom Collapsible Label',
+            style: {},
+          }),
         },
       },
       fields: [
@@ -103,7 +101,7 @@ const CollapsibleFields: CollectionConfig = {
       admin: {
         description: 'Collapsible label rendered as a react component.',
         components: {
-          RowLabel: () => getCustomLabel({ path: 'componentTitleField', style: {} }),
+          Label: getCustomLabel({ path: 'componentTitleField', style: {} }),
         },
       },
       fields: [
@@ -115,8 +113,11 @@ const CollapsibleFields: CollectionConfig = {
           type: 'collapsible',
           admin: {
             components: {
-              RowLabel: () =>
-                getCustomLabel({ path: 'nestedTitle', fallback: 'Nested Collapsible', style: {} }),
+              Label: getCustomLabel({
+                path: 'nestedTitle',
+                fallback: 'Nested Collapsible',
+                style: {},
+              }),
             },
           },
           fields: [
@@ -133,12 +134,12 @@ const CollapsibleFields: CollectionConfig = {
       type: 'array',
       fields: [
         {
+          type: 'collapsible',
           admin: {
             components: {
-              RowLabel: NestedCustomLabel,
+              Label: '/collections/Collapsible/NestedCustomLabel/index.js#NestedCustomLabel',
             },
           },
-          type: 'collapsible',
           fields: [
             {
               name: 'innerCollapsible',

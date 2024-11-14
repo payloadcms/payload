@@ -23,6 +23,11 @@ const resolveTransactionId = async (_obj, _args, context) => {
 }
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [],
   globals: [],
   graphQL: {

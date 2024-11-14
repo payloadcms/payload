@@ -3,10 +3,11 @@ import React from 'react'
 import './index.scss'
 
 export const SwapIcon: React.FC = () => (
-  <svg className="icon icon--swap" viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg">
-    <path className="stroke" d="M9.84631 4.78679L6.00004 8.63306L9.84631 12.4793" />
-    <path className="stroke" d="M15.1537 20.1059L19 16.2596L15.1537 12.4133" />
-    <line className="stroke" stroke="#333333" x1="7" x2="15" y1="8.7013" y2="8.7013" />
-    <line className="stroke" x1="18" x2="10" y1="16.1195" y2="16.1195" />
+  <svg className="icon icon--swap" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+    <path
+      className="stroke"
+      d="M7.33334 4L4.66667 6.66667M4.66667 6.66667L7.33334 9.33333M4.66667 6.66667H15.3333M12.6667 16L15.3333 13.3333M15.3333 13.3333L12.6667 10.6667M15.3333 13.3333H4.66667"
+      strokeLinecap="square"
+    />
   </svg>
 )

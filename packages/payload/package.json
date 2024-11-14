@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.0.0-beta.68",
+  "version": "3.0.0-beta.130",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -78,46 +78,43 @@
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "clean:cache": "rimraf node_modules/.cache",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "fix": "eslint \"src/**/*.ts\" --fix",
-    "lint": "eslint \"src/**/*.ts\"",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
     "pretest": "pnpm build"
   },
   "dependencies": {
-    "@next/env": "^15.0.0-canary.53",
+    "@monaco-editor/react": "4.6.0",
+    "@next/env": "^15.0.0",
     "@payloadcms/translations": "workspace:*",
-    "@swc-node/core": "1.13.1",
-    "@swc-node/sourcemap-support": "0.5.0",
-    "ajv": "8.14.0",
+    "@types/busboy": "1.5.4",
+    "ajv": "8.17.1",
     "bson-objectid": "2.0.4",
     "ci-info": "^4.0.0",
-    "console-table-printer": "2.11.2",
+    "console-table-printer": "2.12.1",
+    "croner": "9.0.0",
     "dataloader": "2.2.2",
     "deepmerge": "4.3.1",
-    "file-type": "17.1.6",
-    "find-up": "7.0.0",
-    "get-tsconfig": "^4.7.2",
+    "file-type": "19.3.0",
+    "get-tsconfig": "4.8.1",
     "http-status": "1.6.2",
     "image-size": "^1.1.1",
-    "json-schema-to-typescript": "11.0.3",
-    "jsonwebtoken": "9.0.1",
+    "jose": "5.9.6",
+    "json-schema-to-typescript": "15.0.3",
     "minimist": "1.2.8",
-    "monaco-editor": "0.38.0",
-    "pino": "9.3.1",
-    "pino-pretty": "11.2.1",
+    "pino": "9.5.0",
+    "pino-pretty": "13.0.0",
     "pluralize": "8.0.0",
     "sanitize-filename": "1.6.3",
     "scmp": "2.1.0",
-    "ts-essentials": "7.0.3",
+    "ts-essentials": "10.0.3",
+    "tsx": "4.19.2",
     "uuid": "10.0.0"
   },
   "devDependencies": {
     "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
-    "@monaco-editor/react": "4.5.1",
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/express-fileupload": "1.4.1",
     "@types/json-schema": "7.0.15",
-    "@types/jsonwebtoken": "8.5.9",
     "@types/minimist": "1.2.2",
     "@types/nodemailer": "6.4.14",
     "@types/pluralize": "0.0.33",
@@ -125,19 +122,13 @@
     "@types/uuid": "10.0.0",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
-    "esbuild": "0.23.0",
+    "esbuild": "0.23.1",
     "graphql-http": "^1.22.0",
     "rimraf": "3.0.2",
     "sharp": "0.32.6"
   },
   "peerDependencies": {
-    "@swc/core": "^1.6.13",
     "graphql": "^16.8.1"
-  },
-  "peerDependenciesMeta": {
-    "@swc/core": {
-      "optional": true
-    }
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"

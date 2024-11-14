@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -11,7 +12,6 @@ import type { Config } from '../../payload-types.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
-  navigateToListCellLink,
   saveDocAndAssert,
   switchTab,
 } from '../../../helpers.js'
@@ -48,17 +48,13 @@ describe('Tabs', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await reInitializeDB({
-      serverURL,
-      snapshotKey: 'fieldsTabsTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
-    })
+
     await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTabsTest',
+      snapshotKey: 'fieldsTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
@@ -97,8 +93,7 @@ describe('Tabs', () => {
   test('should retain updated values within tabs while switching between tabs', async () => {
     const textInRowValue = 'new value'
     const jsonValue = '{ "new": "value"}'
-    await page.goto(url.list)
-    await navigateToListCellLink(page)
+    await navigateToDoc(page, url)
 
     // Go to Row tab, update the value
     await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Row")')
@@ -125,15 +120,13 @@ describe('Tabs', () => {
   })
 
   test('should render array data within unnamed tabs', async () => {
-    await page.goto(url.list)
-    await navigateToListCellLink(page)
+    await navigateToDoc(page, url)
     await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Array")')
     await expect(page.locator('#field-array__0__text')).toHaveValue("Hello, I'm the first row")
   })
 
   test('should render array data within named tabs', async () => {
-    await page.goto(url.list)
-    await navigateToListCellLink(page)
+    await navigateToDoc(page, url)
     await switchTab(page, '.tabs-field__tab-button:nth-child(5)')
     await expect(page.locator('#field-tab__array__0__text')).toHaveValue(
       "Hello, I'm the first row, in a named tab",

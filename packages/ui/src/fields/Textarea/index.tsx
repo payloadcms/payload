@@ -1,53 +1,45 @@
 'use client'
-import type { ClientValidate } from 'payload'
+import type { TextareaFieldClientComponent, TextareaFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
-import type { TextAreaInputProps, TextareaFieldProps } from './types.js'
+import type { TextAreaInputProps } from './types.js'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { isFieldRTL } from '../shared/index.js'
-import { TextareaInput } from './Input.js'
 import './index.scss'
+import { TextareaInput } from './Input.js'
 
-export { TextAreaInputProps, TextareaFieldProps, TextareaInput }
+export { TextareaInput, TextAreaInputProps }
 
-const _TextareaField: React.FC<TextareaFieldProps> = (props) => {
+const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
-    descriptionProps,
-    errorProps,
-    label,
-    labelProps,
-    locale,
-    localized,
-    maxLength,
-    minLength,
-    path: pathFromProps,
-    placeholder,
-    readOnly: readOnlyFromProps,
-    required,
-    rows,
-    rtl,
-    style,
+    field: {
+      name,
+      admin: { className, description, placeholder, rows, rtl, style, width } = {},
+      label,
+      localized,
+      maxLength,
+      minLength,
+      required,
+    },
+    path,
+    readOnly,
     validate,
-    width,
   } = props
 
   const { i18n } = useTranslation()
 
-  const { localization } = useConfig()
+  const {
+    config: { localization },
+  } = useConfig()
+
+  const locale = useLocale()
 
   const isRTL = isFieldRTL({
     fieldLocalized: localized,
@@ -56,41 +48,42 @@ const _TextareaField: React.FC<TextareaFieldProps> = (props) => {
     localizationConfig: localization || undefined,
   })
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate: TextareaFieldValidation = useCallback(
     (value, options) => {
-      if (typeof validate === 'function')
+      if (typeof validate === 'function') {
         return validate(value, { ...options, maxLength, minLength, required })
+      }
     },
     [validate, required, maxLength, minLength],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField<string>({
-    path: pathFromContext ?? pathFromProps ?? name,
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    setValue,
+    showError,
+    value,
+  } = useField<string>({
+    path,
     validate: memoizedValidate,
   })
-
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   return (
     <TextareaInput
       AfterInput={AfterInput}
       BeforeInput={BeforeInput}
-      CustomDescription={CustomDescription}
-      CustomError={CustomError}
-      CustomLabel={CustomLabel}
       className={className}
-      descriptionProps={descriptionProps}
-      errorProps={errorProps}
+      Description={Description}
+      description={description}
+      Error={Error}
+      Label={Label}
       label={label}
-      labelProps={labelProps}
+      localized={localized}
       onChange={(e) => {
         setValue(e.target.value)
       }}
       path={path}
       placeholder={getTranslation(placeholder, i18n)}
-      readOnly={disabled}
+      readOnly={readOnly}
       required={required}
       rows={rows}
       rtl={isRTL}
@@ -102,4 +95,4 @@ const _TextareaField: React.FC<TextareaFieldProps> = (props) => {
   )
 }
 
-export const TextareaField = withCondition(_TextareaField)
+export const TextareaField = withCondition(TextareaFieldComponent)

@@ -6,7 +6,6 @@ import { v4 as uuid } from 'uuid'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { AuthDebug } from './AuthDebug.js'
 import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared.js'
 
 export default buildConfigWithDefaults({
@@ -15,6 +14,9 @@ export default buildConfigWithDefaults({
       email: devUser.email,
       password: devUser.password,
       prefillOnly: true,
+    },
+    importMap: {
+      baseDir: path.resolve(dirname),
     },
     user: 'users',
   },
@@ -165,7 +167,7 @@ export default buildConfigWithDefaults({
           type: 'ui',
           admin: {
             components: {
-              Field: AuthDebug,
+              Field: '/AuthDebug.js#AuthDebug',
             },
           },
           label: 'Auth Debug',
@@ -176,7 +178,9 @@ export default buildConfigWithDefaults({
       slug: apiKeysSlug,
       access: {
         read: ({ req: { user } }) => {
-          if (!user) return false
+          if (!user) {
+            return false
+          }
           if (user?.collection === 'api-keys') {
             return {
               id: {
@@ -220,33 +224,31 @@ export default buildConfigWithDefaults({
     },
   ],
   onInit: async (payload) => {
-    if (process.env.SKIP_ON_INIT !== 'true') {
-      await payload.create({
-        collection: 'users',
-        data: {
-          custom: 'Hello, world!',
-          email: devUser.email,
-          password: devUser.password,
-          roles: ['admin'],
-        },
-      })
+    await payload.create({
+      collection: 'users',
+      data: {
+        custom: 'Hello, world!',
+        email: devUser.email,
+        password: devUser.password,
+        roles: ['admin'],
+      },
+    })
 
-      await payload.create({
-        collection: 'api-keys',
-        data: {
-          apiKey: uuid(),
-          enableAPIKey: true,
-        },
-      })
+    await payload.create({
+      collection: 'api-keys',
+      data: {
+        apiKey: uuid(),
+        enableAPIKey: true,
+      },
+    })
 
-      await payload.create({
-        collection: 'api-keys',
-        data: {
-          apiKey: uuid(),
-          enableAPIKey: true,
-        },
-      })
-    }
+    await payload.create({
+      collection: 'api-keys',
+      data: {
+        apiKey: uuid(),
+        enableAPIKey: true,
+      },
+    })
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

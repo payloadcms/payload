@@ -1,13 +1,13 @@
 'use client'
-import type { FieldWithPath } from 'payload'
+import type { ClientField, FieldWithPath, FormState } from 'payload'
 
-import React, { Fragment, type JSX, useState } from 'react'
+import { fieldAffectsData, fieldHasSubFields } from 'payload/shared'
+import React, { Fragment, useState } from 'react'
 
-import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
-
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
-import { createNestedClientFieldPath } from '../../forms/Form/createNestedFieldPath.js'
+import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ReactSelect } from '../ReactSelect/index.js'
 import './index.scss'
@@ -15,100 +15,87 @@ import './index.scss'
 const baseClass = 'field-select'
 
 export type FieldSelectProps = {
-  fieldMap: FieldMap
-  setSelected: (fields: FieldWithPath[]) => void
+  readonly fields: ClientField[]
+  readonly setSelected: (fields: FieldWithPath[]) => void
 }
 
 export const combineLabel = ({
-  customLabel,
+  CustomLabel,
   field,
   prefix,
 }: {
-  customLabel?: string
-  field?: MappedField
-  prefix?: JSX.Element | string
-}): JSX.Element => {
-  const CustomLabelToRender =
-    field &&
-    'CustomLabel' in field.fieldComponentProps &&
-    field.fieldComponentProps.CustomLabel !== undefined
-      ? field.fieldComponentProps.CustomLabel
-      : null
-  const DefaultLabelToRender =
-    field && 'label' in field.fieldComponentProps && field.fieldComponentProps.label ? (
-      <FieldLabel
-        label={field.fieldComponentProps.label}
-        {...(field.fieldComponentProps.labelProps || {})}
-      />
-    ) : null
-
-  const LabelToRender = CustomLabelToRender || DefaultLabelToRender || customLabel
-
-  if (!LabelToRender) return null
-
+  CustomLabel?: React.ReactNode
+  field?: ClientField
+  prefix?: React.ReactNode
+}): React.ReactNode => {
   return (
     <Fragment>
-      {prefix && (
+      {prefix ? (
         <Fragment>
           <span style={{ display: 'inline-block' }}>{prefix}</span>
           {' > '}
         </Fragment>
-      )}
-      <span style={{ display: 'inline-block' }}>{LabelToRender}</span>
+      ) : null}
+      <span style={{ display: 'inline-block' }}>
+        <RenderCustomComponent
+          CustomComponent={CustomLabel}
+          Fallback={<FieldLabel label={'label' in field && field.label} />}
+        />
+      </span>
     </Fragment>
   )
 }
 
 const reduceFields = ({
-  fieldMap,
+  fields,
+  formState,
   labelPrefix = null,
   path = '',
 }: {
-  fieldMap: FieldMap
-  labelPrefix?: JSX.Element | string
+  fields: ClientField[]
+  formState?: FormState
+  labelPrefix?: React.ReactNode
   path?: string
-}): { Label: JSX.Element; value: FieldWithPath }[] => {
-  if (!fieldMap) {
+}): { Label: React.ReactNode; value: FieldWithPath }[] => {
+  if (!fields) {
     return []
   }
 
-  return fieldMap?.reduce((fieldsToUse, field) => {
-    const { isFieldAffectingData } = field
-    // escape for a variety of reasons
+  const CustomLabel = formState?.[path]?.customComponents?.Label
+
+  return fields?.reduce((fieldsToUse, field) => {
+    // escape for a variety of reasons, include ui fields as they have `name`.
     if (
-      isFieldAffectingData &&
-      (field.disableBulkEdit ||
+      (fieldAffectsData(field) || field.type === 'ui') &&
+      (field.admin.disableBulkEdit ||
         field.unique ||
-        field.isHidden ||
-        ('readOnly' in field.fieldComponentProps && field.fieldComponentProps.readOnly))
+        field.admin.hidden ||
+        ('readOnly' in field && field.readOnly))
     ) {
       return fieldsToUse
     }
 
-    if (
-      !(field.type === 'array' || field.type === 'blocks') &&
-      'fieldMap' in field.fieldComponentProps
-    ) {
+    if (!(field.type === 'array' || field.type === 'blocks') && fieldHasSubFields(field)) {
       return [
         ...fieldsToUse,
         ...reduceFields({
-          fieldMap: field.fieldComponentProps.fieldMap,
-          labelPrefix: combineLabel({ field, prefix: labelPrefix }),
+          fields: field.fields,
+          labelPrefix: combineLabel({ CustomLabel, field, prefix: labelPrefix }),
           path: createNestedClientFieldPath(path, field),
         }),
       ]
     }
 
-    if (field.type === 'tabs' && 'tabs' in field.fieldComponentProps) {
+    if (field.type === 'tabs' && 'tabs' in field) {
       return [
         ...fieldsToUse,
-        ...field.fieldComponentProps.tabs.reduce((tabFields, tab) => {
-          if ('fieldMap' in tab) {
+        ...field.tabs.reduce((tabFields, tab) => {
+          if ('fields' in tab) {
             const isNamedTab = 'name' in tab && tab.name
             return [
               ...tabFields,
               ...reduceFields({
-                fieldMap: tab.fieldMap,
+                fields: tab.fields,
                 labelPrefix,
                 path: isNamedTab ? createNestedClientFieldPath(path, field) : path,
               }),
@@ -119,7 +106,7 @@ const reduceFields = ({
     }
 
     const formattedField = {
-      label: combineLabel({ field, prefix: labelPrefix }),
+      label: combineLabel({ CustomLabel, field, prefix: labelPrefix }),
       value: {
         ...field,
         path: createNestedClientFieldPath(path, field),
@@ -130,14 +117,15 @@ const reduceFields = ({
   }, [])
 }
 
-export const FieldSelect: React.FC<FieldSelectProps> = ({ fieldMap, setSelected }) => {
+export const FieldSelect: React.FC<FieldSelectProps> = ({ fields, setSelected }) => {
   const { t } = useTranslation()
-  const [options] = useState(() => reduceFields({ fieldMap }))
-
   const { dispatchFields, getFields } = useForm()
+
+  const [options] = useState(() => reduceFields({ fields, formState: getFields() }))
 
   const handleChange = (selected) => {
     const activeFields = getFields()
+
     if (selected === null) {
       setSelected([])
     } else {

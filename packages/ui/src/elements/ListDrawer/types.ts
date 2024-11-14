@@ -2,14 +2,16 @@ import type { FilterOptionsResult, SanitizedCollectionConfig } from 'payload'
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 
+import type { ListDrawerContextProps } from './Provider.js'
+
 export type ListDrawerProps = {
-  collectionSlugs: string[]
-  customHeader?: React.ReactNode
-  drawerSlug?: string
-  filterOptions?: FilterOptionsResult
-  onSelect?: (args: { collectionSlug: SanitizedCollectionConfig['slug']; docID: string }) => void
-  selectedCollection?: string
-}
+  readonly allowCreate?: boolean
+  readonly collectionSlugs: string[]
+  readonly drawerSlug?: string
+  readonly enableRowSelections?: boolean
+  readonly filterOptions?: FilterOptionsResult
+  readonly selectedCollection?: string
+} & ListDrawerContextProps
 
 export type ListTogglerProps = {
   children?: React.ReactNode
@@ -24,14 +26,18 @@ export type UseListDrawer = (args: {
   selectedCollection?: string
   uploads?: boolean // finds all collections with upload: true
 }) => [
-  React.FC<Pick<ListDrawerProps, 'onSelect'>>, // drawer
-  React.FC<Pick<ListTogglerProps, 'children' | 'className' | 'disabled'>>, // toggler
+  React.FC<
+    Pick<ListDrawerProps, 'allowCreate' | 'enableRowSelections' | 'onBulkSelect' | 'onSelect'>
+  >, // drawer
+  React.FC<Pick<ListTogglerProps, 'children' | 'className' | 'disabled' | 'onClick'>>, // toggler
   {
     closeDrawer: () => void
+    collectionSlugs: SanitizedCollectionConfig['slug'][]
     drawerDepth: number
     drawerSlug: string
     isDrawerOpen: boolean
     openDrawer: () => void
+    setCollectionSlugs: React.Dispatch<React.SetStateAction<SanitizedCollectionConfig['slug'][]>>
     toggleDrawer: () => void
   },
 ]

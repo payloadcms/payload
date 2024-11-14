@@ -18,7 +18,7 @@ export type CollectionAfterDeleteHookWithArgs = (
     collection?: CollectionConfig
     pluginConfig?: StripePluginConfig
   } & HookArgsWithCustomCollection,
-) => void
+) => Promise<void>
 
 export const deleteFromStripe: CollectionAfterDeleteHookWithArgs = async (args) => {
   const { collection, doc, pluginConfig, req } = args
@@ -28,13 +28,16 @@ export const deleteFromStripe: CollectionAfterDeleteHookWithArgs = async (args) 
   const { payload } = req
   const { slug: collectionSlug } = collection || {}
 
-  if (logs)
+  if (logs) {
     payload.logger.info(
       `Document with ID: '${doc?.id}' in collection: '${collectionSlug}' has been deleted, deleting from Stripe...`,
     )
+  }
 
   if (process.env.NODE_ENV !== 'test') {
-    if (logs) payload.logger.info(`- Deleting Stripe document with ID: '${doc.stripeID}'...`)
+    if (logs) {
+      payload.logger.info(`- Deleting Stripe document with ID: '${doc.stripeID}'...`)
+    }
 
     const syncConfig = sync?.find((conf) => conf.collection === collectionSlug)
 
@@ -44,15 +47,17 @@ export const deleteFromStripe: CollectionAfterDeleteHookWithArgs = async (args) 
 
         if (found) {
           await stripe?.[syncConfig.stripeResourceType]?.del(doc.stripeID)
-          if (logs)
+          if (logs) {
             payload.logger.info(
               `✅ Successfully deleted Stripe document with ID: '${doc.stripeID}'.`,
             )
+          }
         } else {
-          if (logs)
+          if (logs) {
             payload.logger.info(
               `- Stripe document with ID: '${doc.stripeID}' not found, skipping...`,
             )
+          }
         }
       } catch (error: unknown) {
         const msg = error instanceof Error ? error.message : error

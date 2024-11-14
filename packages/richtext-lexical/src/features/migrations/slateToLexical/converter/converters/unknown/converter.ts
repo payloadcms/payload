@@ -3,7 +3,7 @@ import type { SlateNodeConverter } from '../../types.js'
 
 import { convertSlateNodesToLexical } from '../../index.js'
 
-export const _SlateUnknownConverter: SlateNodeConverter = {
+export const SlateUnknownConverter: SlateNodeConverter = {
   converter({ converters, slateNode }) {
     return {
       type: 'unknownConverted',
@@ -11,7 +11,7 @@ export const _SlateUnknownConverter: SlateNodeConverter = {
         canContainParagraphs: false,
         converters,
         parentNodeType: 'unknownConverted',
-        slateNodes: slateNode.children,
+        slateNodes: slateNode.children!,
       }),
       data: {
         nodeData: slateNode,

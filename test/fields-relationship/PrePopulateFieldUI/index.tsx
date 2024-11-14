@@ -7,9 +7,10 @@ import { collection1Slug } from '../collectionSlugs.js'
 export const PrePopulateFieldUI: React.FC<{
   hasMany?: boolean
   hasMultipleRelations?: boolean
-  path: string
-}> = ({ hasMany = true, hasMultipleRelations = false, path }) => {
-  const { setValue } = useField({ path })
+  path?: string
+  targetFieldPath: string
+}> = ({ hasMany = true, hasMultipleRelations = false, path, targetFieldPath }) => {
+  const { setValue } = useField({ path: targetFieldPath })
 
   const addDefaults = React.useCallback(() => {
     const fetchRelationDocs = async () => {

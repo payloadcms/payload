@@ -1,12 +1,11 @@
 import type { EntityToGroup } from '@payloadcms/ui/shared'
 import type { AdminViewProps } from 'payload'
 
-import { HydrateClientUser } from '@payloadcms/ui'
-import { EntityType, RenderCustomComponent, groupNavItems } from '@payloadcms/ui/shared'
+import { HydrateAuthProvider, SetStepNav } from '@payloadcms/ui'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'
-
-import type { DashboardProps } from './Default/index.js'
 
 import { DefaultDashboard } from './Default/index.js'
 
@@ -14,7 +13,11 @@ export { generateDashboardMetadata } from './meta.js'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult, params, searchParams }) => {
+export const Dashboard: React.FC<AdminViewProps> = async ({
+  initPageResult,
+  params,
+  searchParams,
+}) => {
   const {
     locale,
     permissions,
@@ -24,6 +27,7 @@ export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult, params, se
       payload,
       user,
     },
+    req,
     visibleEntities,
   } = initPageResult
 
@@ -40,6 +44,45 @@ export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult, params, se
       permissions?.globals?.[global.slug]?.read?.permission &&
       visibleEntities.globals.includes(global.slug),
   )
+
+  // Query locked global documents only if there are globals in the config
+  let globalData = []
+
+  if (config.globals.length > 0) {
+    const lockedDocuments = await payload.find({
+      collection: 'payload-locked-documents',
+      depth: 1,
+      overrideAccess: false,
+      pagination: false,
+      req,
+      where: {
+        globalSlug: {
+          exists: true,
+        },
+      },
+    })
+
+    // Map over globals to include `lockDuration` and lock data for each global slug
+    globalData = config.globals.map((global) => {
+      const lockDurationDefault = 300
+      const lockDuration =
+        typeof global.lockDocuments === 'object'
+          ? global.lockDocuments.duration
+          : lockDurationDefault
+
+      const lockedDoc = lockedDocuments.docs.find((doc) => doc.globalSlug === global.slug)
+
+      return {
+        slug: global.slug,
+        data: {
+          _isLocked: !!lockedDoc,
+          _lastEditedAt: lockedDoc?.updatedAt ?? null,
+          _userEditing: lockedDoc?.user?.value ?? null,
+        },
+        lockDuration,
+      }
+    })
+  }
 
   const navGroups = groupNavItems(
     [
@@ -64,36 +107,30 @@ export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult, params, se
     i18n,
   )
 
-  const viewComponentProps: DashboardProps = {
-    Link,
-    i18n,
-    locale,
-    navGroups,
-    params,
-    payload,
-    permissions,
-    searchParams,
-    user,
-    visibleEntities,
-  }
-
   return (
     <Fragment>
-      <HydrateClientUser permissions={permissions} user={user} />
-      <RenderCustomComponent
-        CustomComponent={
-          typeof CustomDashboardComponent === 'function' ? CustomDashboardComponent : undefined
-        }
-        DefaultComponent={DefaultDashboard}
-        componentProps={viewComponentProps}
-        serverOnlyProps={{
-          i18n,
+      <HydrateAuthProvider permissions={permissions} />
+      <SetStepNav nav={[]} />
+      <RenderServerComponent
+        clientProps={{
+          Link,
           locale,
+        }}
+        Component={CustomDashboardComponent}
+        Fallback={DefaultDashboard}
+        importMap={payload.importMap}
+        serverProps={{
+          globalData,
+          i18n,
+          Link,
+          locale,
+          navGroups,
           params,
           payload,
           permissions,
           searchParams,
           user,
+          visibleEntities,
         }}
       />
     </Fragment>

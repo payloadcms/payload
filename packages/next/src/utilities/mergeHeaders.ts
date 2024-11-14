@@ -1,33 +1,11 @@
-const headersToJoin = ['set-cookie', 'warning', 'www-authenticate', 'proxy-authenticate', 'vary']
+export const mergeHeaders = (sourceHeaders: Headers, destinationHeaders: Headers): Headers => {
+  // Create a new Headers object
+  const combinedHeaders = new Headers(destinationHeaders)
 
-export function mergeHeaders(sourceHeaders: Headers, destinationHeaders: Headers): void {
-  // Create a map to store combined headers
-  const combinedHeaders = new Headers()
-
-  // Add existing destination headers to the combined map
-  destinationHeaders.forEach((value, key) => {
-    combinedHeaders.set(key, value)
-  })
-
-  // Add source headers to the combined map, joining specific headers
+  // Append sourceHeaders to combinedHeaders
   sourceHeaders.forEach((value, key) => {
-    const lowerKey = key.toLowerCase()
-    if (headersToJoin.includes(lowerKey)) {
-      if (combinedHeaders.has(key)) {
-        combinedHeaders.set(key, `${combinedHeaders.get(key)}, ${value}`)
-      } else {
-        combinedHeaders.set(key, value)
-      }
-    } else {
-      combinedHeaders.set(key, value)
-    }
+    combinedHeaders.append(key, value)
   })
 
-  // Clear the destination headers and set the combined headers
-  destinationHeaders.forEach((_, key) => {
-    destinationHeaders.delete(key)
-  })
-  combinedHeaders.forEach((value, key) => {
-    destinationHeaders.append(key, value)
-  })
+  return combinedHeaders
 }

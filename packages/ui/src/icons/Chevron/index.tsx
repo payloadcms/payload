@@ -3,9 +3,9 @@ import React from 'react'
 import './index.scss'
 
 export const ChevronIcon: React.FC<{
-  className?: string
-  direction?: 'down' | 'left' | 'right' | 'up'
-  size?: 'large' | 'small'
+  readonly className?: string
+  readonly direction?: 'down' | 'left' | 'right' | 'up'
+  readonly size?: 'large' | 'small'
 }> = ({ className, direction, size }) => (
   <svg
     className={['icon icon--chevron', className, size && `icon--size-${size}`]
@@ -22,10 +22,10 @@ export const ChevronIcon: React.FC<{
               ? 'rotate(180deg)'
               : undefined,
     }}
-    viewBox="0 0 9 7"
+    viewBox="0 0 22 12"
     width="100%"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path className="stroke" d="M1.42871 1.5332L4.42707 4.96177L7.42543 1.5332" />
+    <path className="stroke" d="M1 1.12109L11 11.1211L21 1.12109" strokeLinecap="square" />
   </svg>
 )

@@ -4,7 +4,7 @@ import { generatePayloadCookie, isolateObjectProperty, loginOperation } from 'pa
 
 import type { Context } from '../types.js'
 
-function loginResolver(collection: Collection): any {
+export function login(collection: Collection): any {
   async function resolver(_, args, context: Context) {
     const options = {
       collection,
@@ -19,8 +19,8 @@ function loginResolver(collection: Collection): any {
 
     const result = await loginOperation(options)
     const cookie = generatePayloadCookie({
-      collectionConfig: collection.config,
-      payload: context.req.payload,
+      collectionAuthConfig: collection.config.auth,
+      cookiePrefix: context.req.payload.config.cookiePrefix,
       token: result.token,
     })
 
@@ -35,5 +35,3 @@ function loginResolver(collection: Collection): any {
 
   return resolver
 }
-
-export default loginResolver

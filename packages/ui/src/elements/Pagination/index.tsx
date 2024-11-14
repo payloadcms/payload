@@ -2,9 +2,9 @@
 import React from 'react'
 
 import { ClickableArrow } from './ClickableArrow/index.js'
+import './index.scss'
 import { Page } from './Page/index.js'
 import { Separator } from './Separator/index.js'
-import './index.scss'
 
 const nodeTypes = {
   ClickableArrow,
@@ -52,10 +52,14 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
     totalPages = null,
   } = props
 
-  if (!totalPages || totalPages <= 1) return null
+  if (!hasNextPage && !hasPrevPage) {
+    return null
+  }
 
   const updatePage = (page) => {
-    if (typeof onChange === 'function') onChange(page)
+    if (typeof onChange === 'function') {
+      onChange(page)
+    }
   }
 
   // Create array of integers for each page
@@ -65,7 +69,9 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
   let rangeStartIndex = currentPage - 1 - numberOfNeighbors
 
   // Sanitize rangeStartIndex in case it is less than zero for safe split
-  if (rangeStartIndex <= 0) rangeStartIndex = 0
+  if (rangeStartIndex <= 0) {
+    rangeStartIndex = 0
+  }
 
   const rangeEndIndex = currentPage - 1 + numberOfNeighbors + 1
 
@@ -73,7 +79,10 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
   const nodes: Node[] = pages.slice(rangeStartIndex, rangeEndIndex)
 
   // Add prev separator if necessary
-  if (currentPage - numberOfNeighbors - 1 >= 2) nodes.unshift({ type: 'Separator' })
+  if (currentPage - numberOfNeighbors - 1 >= 2) {
+    nodes.unshift({ type: 'Separator' })
+  }
+
   // Add first page if necessary
   if (currentPage > numberOfNeighbors + 1) {
     nodes.unshift({
@@ -87,7 +96,10 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
   }
 
   // Add next separator if necessary
-  if (currentPage + numberOfNeighbors + 1 < totalPages) nodes.push({ type: 'Separator' })
+  if (currentPage + numberOfNeighbors + 1 < totalPages) {
+    nodes.push({ type: 'Separator' })
+  }
+
   // Add last page if necessary
   if (rangeEndIndex < totalPages) {
     nodes.push({

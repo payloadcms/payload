@@ -1,17 +1,19 @@
-import type { TransactionOptions } from 'mongodb'
+import type { CollationOptions, TransactionOptions } from 'mongodb'
 import type { MongoMemoryReplSet } from 'mongodb-memory-server'
-import type { ClientSession, ConnectOptions, Connection } from 'mongoose'
-import type { BaseDatabaseAdapter, DatabaseAdapterObj, Payload } from 'payload'
+import type { ClientSession, Connection, ConnectOptions, QueryOptions } from 'mongoose'
+import type { BaseDatabaseAdapter, DatabaseAdapterObj, Payload, UpdateOneArgs } from 'payload'
 
 import fs from 'fs'
 import mongoose from 'mongoose'
 import path from 'path'
-import { createDatabaseAdapter } from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
 
-import type { CollectionModel, GlobalModel } from './types.js'
+import type { CollectionModel, GlobalModel, MigrateDownArgs, MigrateUpArgs } from './types.js'
 
 import { connect } from './connect.js'
 import { count } from './count.js'
+import { countGlobalVersions } from './countGlobalVersions.js'
+import { countVersions } from './countVersions.js'
 import { create } from './create.js'
 import { createGlobal } from './createGlobal.js'
 import { createGlobalVersion } from './createGlobalVersion.js'
@@ -36,25 +38,61 @@ import { updateGlobal } from './updateGlobal.js'
 import { updateGlobalVersion } from './updateGlobalVersion.js'
 import { updateOne } from './updateOne.js'
 import { updateVersion } from './updateVersion.js'
+import { upsert } from './upsert.js'
 
 export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
 export interface Args {
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
   autoPluralization?: boolean
+  /**
+   * If enabled, collation allows for language-specific rules for string comparison.
+   * This configuration can include the following options:
+   *
+   * - `strength` (number): Comparison level (1: Primary, 2: Secondary, 3: Tertiary (default), 4: Quaternary, 5: Identical)
+   * - `caseLevel` (boolean): Include case comparison at strength level 1 or 2.
+   * - `caseFirst` (string): Sort order of case differences during tertiary level comparisons ("upper", "lower", "off").
+   * - `numericOrdering` (boolean): Compare numeric strings as numbers.
+   * - `alternate` (string): Consider whitespace and punctuation as base characters ("non-ignorable", "shifted").
+   * - `maxVariable` (string): Characters considered ignorable when `alternate` is "shifted" ("punct", "space").
+   * - `backwards` (boolean): Sort strings with diacritics from back of the string.
+   * - `normalization` (boolean): Check if text requires normalization and perform normalization.
+   *
+   * Available on MongoDB version 3.4 and up.
+   * The locale that gets passed is your current project's locale but defaults to "en".
+   *
+   * Example:
+   * {
+   *   strength: 3
+   * }
+   *
+   * Defaults to disabled.
+   */
+  collation?: Omit<CollationOptions, 'locale'>
   /** Extra configuration options */
   connectOptions?: {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
     useFacet?: boolean
   } & ConnectOptions
+
   /** Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false */
   disableIndexHints?: boolean
+  /**
+   * Set to `true` to ensure that indexes are ready before completing connection.
+   * NOTE: not recommended for production. This can slow down the initialization of Payload.
+   */
+  ensureIndexes?: boolean
   migrationDir?: string
   /**
    * typed as any to avoid dependency
    */
   mongoMemoryServer?: MongoMemoryReplSet
-  transactionOptions?: TransactionOptions | false
+  prodMigrations?: {
+    down: (args: MigrateDownArgs) => Promise<void>
+    name: string
+    up: (args: MigrateUpArgs) => Promise<void>
+  }[]
+  transactionOptions?: false | TransactionOptions
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
 }
@@ -64,8 +102,14 @@ export type MongooseAdapter = {
     [slug: string]: CollectionModel
   }
   connection: Connection
+  ensureIndexes: boolean
   globals: GlobalModel
   mongoMemoryServer: MongoMemoryReplSet
+  prodMigrations?: {
+    down: (args: MigrateDownArgs) => Promise<void>
+    name: string
+    up: (args: MigrateUpArgs) => Promise<void>
+  }[]
   sessions: Record<number | string, ClientSession>
   versions: {
     [slug: string]: CollectionModel
@@ -81,10 +125,17 @@ declare module 'payload' {
       [slug: string]: CollectionModel
     }
     connection: Connection
+    ensureIndexes: boolean
     globals: GlobalModel
     mongoMemoryServer: MongoMemoryReplSet
+    prodMigrations?: {
+      down: (args: MigrateDownArgs) => Promise<void>
+      name: string
+      up: (args: MigrateUpArgs) => Promise<void>
+    }[]
     sessions: Record<number | string, ClientSession>
     transactionOptions: TransactionOptions
+    updateOne: (args: { options?: QueryOptions } & UpdateOneArgs) => Promise<Document>
     versions: {
       [slug: string]: CollectionModel
     }
@@ -95,8 +146,10 @@ export function mongooseAdapter({
   autoPluralization = true,
   connectOptions,
   disableIndexHints = false,
+  ensureIndexes,
   migrationDir: migrationDirArg,
   mongoMemoryServer,
+  prodMigrations,
   transactionOptions = {},
   url,
 }: Args): DatabaseAdapterObj {
@@ -110,10 +163,10 @@ export function mongooseAdapter({
       // Mongoose-specific
       autoPluralization,
       collections: {},
-      connectOptions: connectOptions || {},
       connection: undefined,
-      count,
+      connectOptions: connectOptions || {},
       disableIndexHints,
+      ensureIndexes,
       globals: undefined,
       mongoMemoryServer,
       sessions: {},
@@ -121,9 +174,12 @@ export function mongooseAdapter({
       url,
       versions: {},
       // DatabaseAdapter
-      beginTransaction: transactionOptions ? beginTransaction : undefined,
+      beginTransaction: transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
       commitTransaction,
       connect,
+      count,
+      countGlobalVersions,
+      countVersions,
       create,
       createGlobal,
       createGlobalVersion,
@@ -142,13 +198,16 @@ export function mongooseAdapter({
       init,
       migrateFresh,
       migrationDir,
+      packageName: '@payloadcms/db-mongodb',
       payload,
+      prodMigrations,
       queryDrafts,
       rollbackTransaction,
       updateGlobal,
       updateGlobalVersion,
       updateOne,
       updateVersion,
+      upsert,
     })
   }
 
@@ -179,7 +238,9 @@ function findMigrationDir(migrationDir?: string): string {
   const relativeMigrations = path.resolve(cwd, 'migrations')
 
   // Use arg if provided
-  if (migrationDir) return migrationDir
+  if (migrationDir) {
+    return migrationDir
+  }
 
   // Check other common locations
   if (fs.existsSync(srcDir)) {

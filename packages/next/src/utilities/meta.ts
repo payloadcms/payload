@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
-import type { Icon } from 'next/dist/lib/metadata/types/metadata-types.js'
-import type { MetaConfig } from 'payload'
+import type { IconConfig, MetaConfig } from 'payload'
 
 import { payloadFaviconDark, payloadFaviconLight, staticOGImage } from '@payloadcms/ui/assets'
 import * as qs from 'qs-esm'
@@ -24,7 +23,7 @@ export const meta = async (args: { serverURL: string } & MetaConfig): Promise<an
     titleSuffix,
   } = args
 
-  const payloadIcons: Icon[] = [
+  const payloadIcons: IconConfig[] = [
     {
       type: 'image/png',
       rel: 'icon',
@@ -40,13 +39,13 @@ export const meta = async (args: { serverURL: string } & MetaConfig): Promise<an
     },
   ]
 
-  let icons = customIcons ?? payloadIcons // TODO: fix this type assertion
+  let icons = payloadIcons
 
   if (customIcons && typeof customIcons === 'object' && Array.isArray(customIcons)) {
-    icons = payloadIcons.concat(customIcons) // TODO: fix this type assertion
+    icons = customIcons
   }
 
-  const metaTitle = `${title} ${titleSuffix}`
+  const metaTitle = [title, titleSuffix].filter(Boolean).join(' ')
 
   const ogTitle = `${typeof openGraphFromProps?.title === 'string' ? openGraphFromProps.title : title} ${titleSuffix}`
 

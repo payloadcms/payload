@@ -1,24 +1,28 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { postsSlug } from './collections/Posts/index.js'
-import configPromise from './config.js'
 
 let payload: Payload
 let token: string
 let restClient: NextRESTClient
 
 const { email, password } = devUser
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 describe('_Community Tests', () => {
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
   beforeAll(async () => {
-    const initialized = await initPayloadInt(configPromise)
+    const initialized = await initPayloadInt(dirname)
     ;({ payload, restClient } = initialized)
 
     const data = await restClient
@@ -48,18 +52,19 @@ describe('_Community Tests', () => {
     const newPost = await payload.create({
       collection: postsSlug,
       data: {
-        text: 'LOCAL API EXAMPLE',
+        title: 'LOCAL API EXAMPLE',
       },
+      context: {},
     })
 
-    expect(newPost.text).toEqual('LOCAL API EXAMPLE')
+    expect(newPost.title).toEqual('LOCAL API EXAMPLE')
   })
 
   it('rest API example', async () => {
     const data = await restClient
       .POST(`/${postsSlug}`, {
         body: JSON.stringify({
-          text: 'REST API EXAMPLE',
+          title: 'REST API EXAMPLE',
         }),
         headers: {
           Authorization: `JWT ${token}`,
@@ -67,6 +72,6 @@ describe('_Community Tests', () => {
       })
       .then((res) => res.json())
 
-    expect(data.doc.text).toEqual('REST API EXAMPLE')
+    expect(data.doc.title).toEqual('REST API EXAMPLE')
   })
 })

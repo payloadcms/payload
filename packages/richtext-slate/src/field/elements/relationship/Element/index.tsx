@@ -1,7 +1,5 @@
 'use client'
 
-import type { FormFieldBase } from '@payloadcms/ui'
-
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
@@ -27,12 +25,7 @@ const initialParams = {
   depth: 0,
 }
 
-type Props = {
-  name: string
-  richTextComponentMap: Map<string, React.ReactNode>
-} & FormFieldBase
-
-const RelationshipElement: React.FC<Props> = () => {
+const RelationshipElementComponent: React.FC = () => {
   const {
     attributes,
     children,
@@ -42,9 +35,11 @@ const RelationshipElement: React.FC<Props> = () => {
   } = useElement<RelationshipElementType>()
 
   const {
-    collections,
-    routes: { api },
-    serverURL,
+    config: {
+      collections,
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
   const [enabledCollectionSlugs] = useState(() =>
     collections
@@ -158,11 +153,11 @@ const RelationshipElement: React.FC<Props> = () => {
       <div className={`${baseClass}__actions`}>
         <ListDrawerToggler
           className={`${baseClass}__list-drawer-toggler`}
-          disabled={fieldProps?.readOnly}
+          disabled={fieldProps?.field?.admin?.readOnly}
         >
           <Button
             buttonStyle="icon-label"
-            disabled={fieldProps?.readOnly}
+            disabled={fieldProps?.field?.admin?.readOnly}
             el="div"
             icon="swap"
             onClick={() => {
@@ -175,7 +170,7 @@ const RelationshipElement: React.FC<Props> = () => {
         <Button
           buttonStyle="icon-label"
           className={`${baseClass}__removeButton`}
-          disabled={fieldProps?.readOnly}
+          disabled={fieldProps?.field?.admin?.readOnly}
           icon="x"
           onClick={(e) => {
             e.preventDefault()
@@ -192,10 +187,10 @@ const RelationshipElement: React.FC<Props> = () => {
   )
 }
 
-export const Element = (props: Props): React.ReactNode => {
+export const RelationshipElement = (props: any): React.ReactNode => {
   return (
     <EnabledRelationshipsCondition {...props}>
-      <RelationshipElement {...props} />
+      <RelationshipElementComponent {...props} />
     </EnabledRelationshipsCondition>
   )
 }

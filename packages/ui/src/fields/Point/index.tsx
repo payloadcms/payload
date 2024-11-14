@@ -1,9 +1,13 @@
 'use client'
-import type { ClientValidate } from 'payload'
+import type { PointFieldClientComponent, PointFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -12,47 +16,23 @@ import './index.scss'
 
 const baseClass = 'point'
 
-import type { FormFieldBase } from '../shared/index.js'
-
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
-
-export type PointFieldProps = {
-  name?: string
-  path?: string
-  placeholder?: string
-  step?: number
-  width?: string
-} & FormFieldBase
-
-export const _PointField: React.FC<PointFieldProps> = (props) => {
+export const PointFieldComponent: PointFieldClientComponent = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
-    descriptionProps,
-    errorProps,
-    label,
-    labelProps,
-    path: pathFromProps,
-    placeholder,
-    readOnly: readOnlyFromProps,
-    required,
-    step,
-    style,
+    field: {
+      name,
+      admin: { className, description, placeholder, step, style, width } = {},
+      label,
+      localized,
+      required,
+    },
+    path,
+    readOnly,
     validate,
-    width,
   } = props
 
   const { i18n, t } = useTranslation()
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate: PointFieldValidation = useCallback(
     (value, options) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })
@@ -61,16 +41,13 @@ export const _PointField: React.FC<PointFieldProps> = (props) => {
     [validate, required],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
-
   const {
-    path,
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     setValue,
     showError,
     value = [null, null],
   } = useField<[number, number]>({
-    path: pathFromContext ?? pathFromProps ?? name,
+    path,
     validate: memoizedValidate,
   })
 
@@ -91,10 +68,7 @@ export const _PointField: React.FC<PointFieldProps> = (props) => {
     const suffix = type === 'longitude' ? t('fields:longitude') : t('fields:latitude')
     const fieldLabel = label ? getTranslation(label, i18n) : ''
 
-    return {
-      ...labelProps,
-      label: `${fieldLabel}${fieldLabel ? ' - ' : ''}${suffix}`,
-    }
+    return `${fieldLabel}${fieldLabel ? ' - ' : ''}${suffix}`
   }
 
   return (
@@ -115,16 +89,24 @@ export const _PointField: React.FC<PointFieldProps> = (props) => {
     >
       <ul className={`${baseClass}__wrap`}>
         <li>
-          {CustomLabel !== undefined ? (
-            CustomLabel
-          ) : (
-            <FieldLabel {...getCoordinateFieldLabel('longitude')} />
-          )}
+          <RenderCustomComponent
+            CustomComponent={Label}
+            Fallback={
+              <FieldLabel
+                label={getCoordinateFieldLabel('longitude')}
+                localized={localized}
+                path={path}
+                required={required}
+              />
+            }
+          />
           <div className="input-wrapper">
             {BeforeInput}
+            {/* disable eslint rule because the label is dynamic */}
+            {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
               disabled={readOnly}
-              id={`field-longitude-${path.replace(/\./g, '__')}`}
+              id={`field-longitude-${path?.replace(/\./g, '__')}`}
               name={`${path}.longitude`}
               onChange={(e) => handleChange(e, 0)}
               placeholder={getTranslation(placeholder, i18n)}
@@ -136,17 +118,28 @@ export const _PointField: React.FC<PointFieldProps> = (props) => {
           </div>
         </li>
         <li>
-          {CustomLabel !== undefined ? (
-            CustomLabel
-          ) : (
-            <FieldLabel {...getCoordinateFieldLabel('latitude')} />
-          )}
+          <RenderCustomComponent
+            CustomComponent={Label}
+            Fallback={
+              <FieldLabel
+                label={getCoordinateFieldLabel('latitude')}
+                localized={localized}
+                path={path}
+                required={required}
+              />
+            }
+          />
           <div className="input-wrapper">
-            <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+            <RenderCustomComponent
+              CustomComponent={Error}
+              Fallback={<FieldError path={path} showError={showError} />}
+            />
             {BeforeInput}
+            {/* disable eslint rule because the label is dynamic */}
+            {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
               disabled={readOnly}
-              id={`field-latitude-${path.replace(/\./g, '__')}`}
+              id={`field-latitude-${path?.replace(/\./g, '__')}`}
               name={`${path}.latitude`}
               onChange={(e) => handleChange(e, 1)}
               placeholder={getTranslation(placeholder, i18n)}
@@ -158,13 +151,12 @@ export const _PointField: React.FC<PointFieldProps> = (props) => {
           </div>
         </li>
       </ul>
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <RenderCustomComponent
+        CustomComponent={Description}
+        Fallback={<FieldDescription description={description} path={path} />}
+      />
     </div>
   )
 }
 
-export const PointField = withCondition(_PointField)
+export const PointField = withCondition(PointFieldComponent)

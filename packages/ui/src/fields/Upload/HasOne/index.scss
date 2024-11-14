@@ -1,0 +1,8 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .upload {
+    position: relative;
+    max-width: 100%;
+  }
+}

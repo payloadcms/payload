@@ -1,51 +1,39 @@
 'use client'
+
+import type { FieldPermissions } from 'payload'
+
+import { getFieldPaths } from 'payload/shared'
 import React from 'react'
 
 import type { Props } from './types.js'
 
-import { useIntersect } from '../../hooks/useIntersect.js'
-import { useTranslation } from '../../providers/Translation/index.js'
-import { RenderField } from './RenderField.js'
+import { RenderIfInViewport } from '../../elements/RenderIfInViewport/index.js'
+import { useOperation } from '../../providers/Operation/index.js'
 import './index.scss'
+import { RenderField } from './RenderField.js'
 
 const baseClass = 'render-fields'
 
 export { Props }
 
 export const RenderFields: React.FC<Props> = (props) => {
-  const { className, fieldMap, forceRender, indexPath, margins, path, permissions, schemaPath } =
-    props
+  const {
+    className,
+    fields,
+    forceRender,
+    margins,
+    parentIndexPath,
+    parentPath,
+    parentSchemaPath,
+    permissions,
+    readOnly: readOnlyFromParent,
+  } = props
 
-  const { i18n } = useTranslation()
-  const [hasRendered, setHasRendered] = React.useState(Boolean(forceRender))
-  const [intersectionRef, entry] = useIntersect(
-    {
-      rootMargin: '1000px',
-    },
-    Boolean(forceRender),
-  )
+  const operation = useOperation()
 
-  const isIntersecting = Boolean(entry?.isIntersecting)
-  const isAboveViewport = entry?.boundingClientRect?.top < 0
-  const shouldRender = forceRender || isIntersecting || isAboveViewport
-
-  React.useEffect(() => {
-    if (shouldRender && !hasRendered) {
-      setHasRendered(true)
-    }
-  }, [shouldRender, hasRendered])
-
-  if (!fieldMap || (Array.isArray(fieldMap) && fieldMap.length === 0)) {
-    return null
-  }
-
-  if (!i18n) {
-    console.error('Need to implement i18n when calling RenderFields') // eslint-disable-line no-console
-  }
-
-  if (fieldMap) {
+  if (fields && fields.length > 0) {
     return (
-      <div
+      <RenderIfInViewport
         className={[
           baseClass,
           className,
@@ -54,45 +42,73 @@ export const RenderFields: React.FC<Props> = (props) => {
         ]
           .filter(Boolean)
           .join(' ')}
-        ref={intersectionRef}
+        forceRender={forceRender}
       >
-        {hasRendered &&
-          fieldMap?.map((f, fieldIndex) => {
-            const {
-              type,
-              CustomField,
-              custom,
-              disabled,
-              fieldComponentProps,
-              fieldComponentProps: { readOnly },
-              isHidden,
-            } = f
+        {fields.map((field, i) => {
+          // For sidebar fields in the main fields array, `field` will be `null`, and visa versa
+          // This is to keep the order of the fields consistent and maintain the correct index paths for the main fields (i)
+          if (!field || field?.admin?.disabled) {
+            return null
+          }
 
-            const forceRenderChildren =
-              (typeof forceRender === 'number' && fieldIndex <= forceRender) || true
+          const fieldPermissions: FieldPermissions =
+            'name' in field ? permissions?.[field.name] : permissions
 
-            const name = 'name' in f ? f.name : undefined
+          // If the user cannot read the field, then filter it out
+          // This is different from `admin.readOnly` which is executed based on `operation`
+          const lacksReadPermission =
+            fieldPermissions &&
+            'read' in fieldPermissions &&
+            'permission' in fieldPermissions.read &&
+            fieldPermissions?.read?.permission === false
 
-            return (
-              <RenderField
-                CustomField={CustomField}
-                custom={custom}
-                disabled={disabled}
-                fieldComponentProps={{ ...fieldComponentProps, forceRender: forceRenderChildren }}
-                indexPath={indexPath !== undefined ? `${indexPath}.${fieldIndex}` : `${fieldIndex}`}
-                isHidden={isHidden}
-                key={fieldIndex}
-                name={name}
-                path={path}
-                permissions={permissions?.[name]}
-                readOnly={readOnly}
-                schemaPath={schemaPath}
-                siblingPermissions={permissions}
-                type={type}
-              />
-            )
-          })}
-      </div>
+          if (lacksReadPermission) {
+            return null
+          }
+
+          // `admin.readOnly` displays the value but prevents the field from being edited
+          let isReadOnly = readOnlyFromParent || field?.admin?.readOnly
+
+          // If parent field is `readOnly: true`, but this field is `readOnly: false`, the field should still be editable
+          if (isReadOnly && field.admin?.readOnly === false) {
+            isReadOnly = false
+          }
+
+          // If the user does not have access control to begin with, force it to be read-only
+          const lacksOperationPermission =
+            fieldPermissions &&
+            operation in fieldPermissions &&
+            'permission' in fieldPermissions[operation] &&
+            fieldPermissions[operation]?.permission === false
+
+          if (lacksOperationPermission) {
+            isReadOnly = true
+          }
+
+          const { indexPath, path, schemaPath } = getFieldPaths({
+            field,
+            index: i,
+            parentIndexPath,
+            parentPath,
+            parentSchemaPath,
+          })
+
+          return (
+            <RenderField
+              clientFieldConfig={field}
+              forceRender={forceRender}
+              indexPath={indexPath}
+              key={`${path}-${i}`}
+              parentPath={parentPath}
+              parentSchemaPath={parentSchemaPath}
+              path={path}
+              permissions={fieldPermissions}
+              readOnly={isReadOnly}
+              schemaPath={schemaPath}
+            />
+          )
+        })}
+      </RenderIfInViewport>
     )
   }
 

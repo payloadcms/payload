@@ -1,15 +1,10 @@
 import crypto from 'crypto'
 
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { PayloadRequest } from '../../../types/index.js'
 
 import { ValidationError } from '../../../errors/index.js'
-
-const defaultPasswordValidator = (password: string): string | true => {
-  if (!password) return 'No password was given'
-  if (password.length < 3) return 'Password must be at least 3 characters'
-
-  return true
-}
+import { password } from '../../../fields/validations.js'
 
 function randomBytes(): Promise<Buffer> {
   return new Promise((resolve, reject) =>
@@ -28,25 +23,35 @@ function pbkdf2Promisified(password: string, salt: string): Promise<Buffer> {
 type Args = {
   collection: SanitizedCollectionConfig
   password: string
+  req: PayloadRequest
 }
 
 export const generatePasswordSaltHash = async ({
   collection,
-  password,
+  password: passwordToSet,
+  req,
 }: Args): Promise<{ hash: string; salt: string }> => {
-  const validationResult = defaultPasswordValidator(password)
+  const validationResult = password(passwordToSet, {
+    name: 'password',
+    type: 'text',
+    data: {},
+    preferences: { fields: {} },
+    req,
+    required: true,
+    siblingData: {},
+  })
 
   if (typeof validationResult === 'string') {
     throw new ValidationError({
       collection: collection?.slug,
-      errors: [{ field: 'password', message: validationResult }],
+      errors: [{ message: validationResult, path: 'password' }],
     })
   }
 
   const saltBuffer = await randomBytes()
   const salt = saltBuffer.toString('hex')
 
-  const hashRaw = await pbkdf2Promisified(password, salt)
+  const hashRaw = await pbkdf2Promisified(passwordToSet, salt)
   const hash = hashRaw.toString('hex')
 
   return { hash, salt }

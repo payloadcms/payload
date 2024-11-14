@@ -137,7 +137,7 @@ const link: LinkType = ({ appearances, disableLabel = false, overrides = {} } = 
     linkResult.fields.push({
       name: 'appearance',
       type: 'select',
-      defaultValue: 'default',
+      defaultValue: appearanceOptionsToUse[0].value,
       options: appearanceOptionsToUse,
       admin: {
         description: 'Choose how the link should be rendered.',

@@ -20,7 +20,7 @@ export type CollectionBeforeChangeHookWithArgs = (
     collection?: CollectionConfig
     pluginConfig?: StripePluginConfig
   } & HookArgsWithCustomCollection,
-) => void
+) => Promise<Partial<any>>
 
 export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async (args) => {
   const { collection, data, operation, originalDoc, pluginConfig, req } = args
@@ -49,17 +49,21 @@ export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async 
 
         syncedFields = deepen(syncedFields)
 
-        if (logs)
+        if (logs) {
           payload.logger.info(
             `A '${collectionSlug}' document has changed in Payload with ID: '${originalDoc?._id}', syncing with Stripe...`,
           )
+        }
 
         if (!data.stripeID) {
           // NOTE: the "beforeValidate" hook populates this
-          if (logs) payload.logger.error(`- There is no Stripe ID for this document, skipping.`)
+          if (logs) {
+            payload.logger.error(`- There is no Stripe ID for this document, skipping.`)
+          }
         } else {
-          if (logs)
+          if (logs) {
             payload.logger.info(`- Syncing to Stripe resource with ID: '${data.stripeID}'...`)
+          }
 
           try {
             const stripeResource = await stripe?.[syncConfig?.stripeResourceType]?.update(
@@ -67,10 +71,11 @@ export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async 
               syncedFields,
             )
 
-            if (logs)
+            if (logs) {
               payload.logger.info(
                 `✅ Successfully synced Stripe resource with ID: '${stripeResource.id}'.`,
               )
+            }
           } catch (error: unknown) {
             const msg = error instanceof Error ? error.message : error
             throw new APIError(`Failed to sync document with ID: '${data.id}' to Stripe: ${msg}`)

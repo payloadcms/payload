@@ -6,7 +6,11 @@ import type { PayloadRequest } from '../types/index.js'
 export async function killTransaction(req: PayloadRequest): Promise<void> {
   const { payload, transactionID } = req
   if (transactionID && !(transactionID instanceof Promise)) {
-    await payload.db.rollbackTransaction(req.transactionID)
+    try {
+      await payload.db.rollbackTransaction(req.transactionID)
+    } catch (error) {
+      // swallow any errors while attempting to rollback
+    }
     delete req.transactionID
   }
 }

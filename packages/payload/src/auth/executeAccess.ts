@@ -23,7 +23,9 @@ const executeAccess = async (
     })
 
     if (!result) {
-      if (!disableErrors) throw new Forbidden(req.t)
+      if (!disableErrors) {
+        throw new Forbidden(req.t)
+      }
     }
 
     return result
@@ -33,7 +35,9 @@ const executeAccess = async (
     return true
   }
 
-  if (!disableErrors) throw new Forbidden(req.t)
+  if (!disableErrors) {
+    throw new Forbidden(req.t)
+  }
   return false
 }
 

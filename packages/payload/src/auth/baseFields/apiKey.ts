@@ -13,7 +13,7 @@ export const apiKeyFields = [
     type: 'checkbox',
     admin: {
       components: {
-        Field: () => null,
+        Field: false,
       },
     },
     label: ({ t }) => t('authentication:enableAPIKey'),
@@ -23,7 +23,7 @@ export const apiKeyFields = [
     type: 'text',
     admin: {
       components: {
-        Field: () => null,
+        Field: false,
       },
     },
     hooks: {

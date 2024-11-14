@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { commonjs } from '@hyrious/esbuild-plugin-commonjs'
-
+throw new Error('asfdadsf')
 async function build() {
   const resultServer = await esbuild.build({
     entryPoints: ['src/index.ts'],
@@ -18,9 +18,9 @@ async function build() {
       '*.scss',
       '*.css',
       'drizzle-kit',
-      'libsql',
       'pg',
       '@payloadcms/translations',
+      '@payloadcms/drizzle',
       'payload',
       'payload/*',
     ],

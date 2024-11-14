@@ -1,54 +1,85 @@
 'use client'
-import type { FormState } from 'payload'
+import type { FormProps, UserWithToken } from '@payloadcms/ui'
+import type {
+  ClientCollectionConfig,
+  DocumentPermissions,
+  DocumentPreferences,
+  FormState,
+  LoginWithUsernameOptions,
+} from 'payload'
 
 import {
   ConfirmPasswordField,
+  EmailAndUsernameFields,
   Form,
-  type FormProps,
   FormSubmit,
   PasswordField,
   RenderFields,
-  useComponentMap,
+  useAuth,
   useConfig,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
-import React from 'react'
-
-import { LoginField } from '../Login/LoginField/index.js'
+import { abortAndIgnore } from '@payloadcms/ui/shared'
+import React, { useEffect } from 'react'
 
 export const CreateFirstUserClient: React.FC<{
+  docPermissions: DocumentPermissions
+  docPreferences: DocumentPreferences
   initialState: FormState
-  loginType: 'email' | 'emailOrUsername' | 'username'
-  requireEmail?: boolean
+  loginWithUsername?: false | LoginWithUsernameOptions
   userSlug: string
-}> = ({ initialState, loginType, requireEmail = true, userSlug }) => {
-  const { getFieldMap } = useComponentMap()
-
+}> = ({ docPermissions, docPreferences, initialState, loginWithUsername, userSlug }) => {
   const {
-    routes: { admin, api: apiRoute },
-    serverURL,
+    config: {
+      routes: { admin, api: apiRoute },
+      serverURL,
+    },
+    getEntityConfig,
   } = useConfig()
 
-  const { t } = useTranslation()
+  const { getFormState } = useServerFunctions()
 
-  const fieldMap = getFieldMap({ collectionSlug: userSlug })
+  const { t } = useTranslation()
+  const { setUser } = useAuth()
+
+  const formStateAbortControllerRef = React.useRef<AbortController>(null)
+
+  const collectionConfig = getEntityConfig({ collectionSlug: userSlug }) as ClientCollectionConfig
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
     async ({ formState: prevFormState }) => {
-      return getFormState({
-        apiRoute,
-        body: {
-          collectionSlug: userSlug,
-          formState: prevFormState,
-          operation: 'create',
-          schemaPath: userSlug,
-        },
-        serverURL,
+      abortAndIgnore(formStateAbortControllerRef.current)
+
+      const controller = new AbortController()
+      formStateAbortControllerRef.current = controller
+
+      const response = await getFormState({
+        collectionSlug: userSlug,
+        docPermissions,
+        docPreferences,
+        formState: prevFormState,
+        operation: 'create',
+        schemaPath: `_${userSlug}.auth`,
+        signal: controller.signal,
       })
+
+      if (response && response.state) {
+        return response.state
+      }
     },
-    [apiRoute, userSlug, serverURL],
+    [userSlug, getFormState, docPermissions, docPreferences],
   )
+
+  const handleFirstRegister = (data: UserWithToken) => {
+    setUser(data)
+  }
+
+  useEffect(() => {
+    return () => {
+      abortAndIgnore(formStateAbortControllerRef.current)
+    }
+  }, [])
 
   return (
     <Form
@@ -56,28 +87,37 @@ export const CreateFirstUserClient: React.FC<{
       initialState={initialState}
       method="POST"
       onChange={[onChange]}
+      onSuccess={handleFirstRegister}
       redirect={admin}
       validationOperation="create"
     >
-      {['emailOrUsername', 'username'].includes(loginType) && <LoginField type="username" />}
-      {['email', 'emailOrUsername'].includes(loginType) && (
-        <LoginField required={requireEmail} type="email" />
-      )}
+      <EmailAndUsernameFields
+        className="emailAndUsername"
+        loginWithUsername={loginWithUsername}
+        operation="create"
+        readOnly={false}
+        t={t}
+      />
       <PasswordField
         autoComplete="off"
-        label={t('authentication:newPassword')}
-        name="password"
-        required
+        field={{
+          name: 'password',
+          label: t('authentication:newPassword'),
+          required: true,
+        }}
+        path="password"
       />
       <ConfirmPasswordField />
       <RenderFields
-        fieldMap={fieldMap}
-        operation="create"
-        path=""
+        fields={collectionConfig.fields}
+        forceRender
+        parentIndexPath=""
+        parentPath=""
+        parentSchemaPath={userSlug}
+        permissions={null}
         readOnly={false}
-        schemaPath={userSlug}
       />
-      <FormSubmit>{t('general:create')}</FormSubmit>
+      <FormSubmit size="large">{t('general:create')}</FormSubmit>
     </Form>
   )
 }

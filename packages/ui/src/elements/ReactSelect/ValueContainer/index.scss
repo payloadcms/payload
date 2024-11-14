@@ -1,38 +1,33 @@
 @import '../../../scss/styles.scss';
 
-.value-container {
-  flex-grow: 1;
-  min-width: 0;
+@layer payload-default {
+  .value-container {
+    flex-grow: 1;
+    min-width: 0;
 
-  .rs__value-container {
-    padding: base(0.25) 0;
-    min-height: base(1.5);
-    overflow: visible;
+    .rs__value-container {
+      overflow: visible;
+      padding: 2px;
+      gap: 2px;
 
-    > * {
-      margin: 0;
-      padding-top: 0;
-      padding-bottom: 0;
-      color: currentColor;
-
-      .field-label {
+      > * {
+        margin: 0;
+        padding-top: 0;
         padding-bottom: 0;
-      }
-    }
+        color: currentColor;
 
-    &--is-multi {
-      margin-left: - base(0.25);
-      width: calc(100% + base(0.5));
-      padding-top: base(0.25);
-      padding-bottom: base(0.25);
-      padding-left: base(0.25);
-
-      .rs__multi-value {
-        margin: calc(#{base(0.125)} - #{$style-stroke-width-s * 2});
+        .field-label {
+          padding-bottom: 0;
+        }
       }
 
-      &.rs__value-container--has-value {
-        padding-left: 0;
+      &--is-multi {
+        width: calc(100% + base(0.25));
+
+        &.rs__value-container--has-value {
+          padding: 0;
+          margin-inline-start: -4px;
+        }
       }
     }
   }

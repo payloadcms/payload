@@ -1,169 +1,196 @@
 'use client'
-import type { PaginatedDocs, Where } from 'payload'
+import type { ListQuery, PaginatedDocs, Where } from 'payload'
 
 import { useRouter } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { createContext, useContext } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 import type { Column } from '../../elements/Table/index.js'
 
+import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useSearchParams } from '../SearchParams/index.js'
 
 export type ColumnPreferences = Pick<Column, 'accessor' | 'active'>[]
 
-type Handlers = {
-  handlePageChange?: (page: number) => void
-  handlePerPageChange?: (limit: number) => void
-  handleSearchChange?: (search: string) => void
-  handleSortChange?: (sort: string) => void
-  handleWhereChange?: (where: Where) => void
+type ContextHandlers = {
+  handlePageChange?: (page: number) => Promise<void>
+  handlePerPageChange?: (limit: number) => Promise<void>
+  handleSearchChange?: (search: string) => Promise<void>
+  handleSortChange?: (sort: string) => Promise<void>
+  handleWhereChange?: (where: Where) => Promise<void>
 }
 
 export type ListQueryProps = {
-  children: React.ReactNode
-  data: PaginatedDocs
-  defaultLimit?: number
-  defaultSort?: string
-  modifySearchParams?: boolean
-  preferenceKey?: string
-} & Handlers
+  readonly children: React.ReactNode
+  readonly collectionSlug: string
+  readonly data: PaginatedDocs
+  readonly defaultLimit?: number
+  readonly defaultSort?: string
+  readonly modifySearchParams?: boolean
+  readonly onQueryChange?: (query: ListQuery) => void
+  readonly preferenceKey?: string
+}
 
 export type ListQueryContext = {
   data: PaginatedDocs
   defaultLimit?: number
   defaultSort?: string
-  refineListData: (args: RefineOverrides) => void
-} & Handlers
+  query: ListQuery
+  refineListData: (args: ListQuery) => Promise<void>
+} & ContextHandlers
 
 const Context = createContext({} as ListQueryContext)
 
 export const useListQuery = (): ListQueryContext => useContext(Context)
 
-type RefineOverrides = {
-  limit?: string
-  page?: string
-  search?: string
-  sort?: string
-  where?: Where
-}
-
 export const ListQueryProvider: React.FC<ListQueryProps> = ({
   children,
+  collectionSlug,
   data,
   defaultLimit,
   defaultSort,
-  handlePageChange: handlePageChangeFromProps,
-  handlePerPageChange: handlePerPageChangeFromProps,
-  handleSearchChange: handleSearchChangeFromProps,
-  handleSortChange: handleSortChangeFromProps,
-  handleWhereChange: handleWhereChangeFromProps,
   modifySearchParams,
+  onQueryChange: onQueryChangeFromProps,
   preferenceKey,
 }) => {
+  'use no memo'
   const router = useRouter()
   const { setPreference } = usePreferences()
-  const hasSetInitialParams = React.useRef(false)
-  const { searchParams: currentQuery } = useSearchParams()
+  const { searchParams } = useSearchParams()
 
-  const refineListData = React.useCallback(
-    async (query: RefineOverrides) => {
-      if (!modifySearchParams) return
+  const { onQueryChange } = useListDrawerContext()
+
+  const [currentQuery, setCurrentQuery] = useState(() => {
+    if (modifySearchParams) {
+      return searchParams
+    } else {
+      return {}
+    }
+  })
+
+  useEffect(() => {
+    if (modifySearchParams) {
+      setCurrentQuery(searchParams)
+    }
+  }, [searchParams, modifySearchParams])
+
+  const refineListData = useCallback(
+    async (query: ListQuery) => {
+      let pageQuery = 'page' in query ? query.page : currentQuery?.page
+
+      if ('where' in query || 'search' in query) {
+        pageQuery = '1'
+      }
 
       const updatedPreferences: Record<string, unknown> = {}
       let updatePreferences = false
 
       if ('limit' in query) {
-        updatedPreferences.limit = query.limit
+        updatedPreferences.limit = Number(query.limit)
         updatePreferences = true
       }
+
       if ('sort' in query) {
         updatedPreferences.sort = query.sort
         updatePreferences = true
       }
+
       if (updatePreferences && preferenceKey) {
         await setPreference(preferenceKey, updatedPreferences)
       }
 
-      const params = {
-        limit: 'limit' in query ? query.limit : currentQuery?.limit,
-        page: 'page' in query ? query.page : currentQuery?.page,
-        search: 'search' in query ? query.search : currentQuery?.search,
-        sort: 'sort' in query ? query.sort : currentQuery?.sort,
-        where: 'where' in query ? query.where : currentQuery?.where,
+      const newQuery: ListQuery = {
+        limit: 'limit' in query ? query.limit : (currentQuery?.limit as string),
+        page: pageQuery as string,
+        search: 'search' in query ? query.search : (currentQuery?.search as string),
+        sort: 'sort' in query ? query.sort : (currentQuery?.sort as string),
+        where: 'where' in query ? query.where : (currentQuery?.where as Where),
       }
 
-      router.replace(`${qs.stringify(params, { addQueryPrefix: true })}`)
+      if (modifySearchParams) {
+        router.replace(`${qs.stringify(newQuery, { addQueryPrefix: true })}`)
+      } else if (
+        typeof onQueryChange === 'function' ||
+        typeof onQueryChangeFromProps === 'function'
+      ) {
+        const onChangeFn = onQueryChange || onQueryChangeFromProps
+        onChangeFn(newQuery)
+      }
     },
-    [preferenceKey, modifySearchParams, router, setPreference, currentQuery],
+    [
+      modifySearchParams,
+      currentQuery?.page,
+      currentQuery?.limit,
+      currentQuery?.sort,
+      currentQuery?.where,
+      currentQuery?.search,
+      preferenceKey,
+      router,
+      setPreference,
+      onQueryChange,
+      onQueryChangeFromProps,
+    ],
   )
 
-  const handlePageChange = React.useCallback(
+  const handlePageChange = useCallback(
     async (arg: number) => {
-      if (typeof handlePageChangeFromProps === 'function') {
-        handlePageChangeFromProps(arg)
-      }
       await refineListData({ page: String(arg) })
     },
-    [refineListData, handlePageChangeFromProps],
+    [refineListData],
   )
+
   const handlePerPageChange = React.useCallback(
     async (arg: number) => {
-      if (typeof handlePerPageChangeFromProps === 'function') {
-        handlePerPageChangeFromProps(arg)
-      }
-      await refineListData({ limit: String(arg) })
+      await refineListData({ limit: String(arg), page: '1' })
     },
-    [refineListData, handlePerPageChangeFromProps],
+    [refineListData],
   )
-  const handleSearchChange = React.useCallback(
+
+  const handleSearchChange = useCallback(
     async (arg: string) => {
-      if (typeof handleSearchChangeFromProps === 'function') {
-        handleSearchChangeFromProps(arg)
-      }
-      await refineListData({ search: arg })
+      const search = arg === '' ? undefined : arg
+
+      await refineListData({ search })
     },
-    [refineListData, handleSearchChangeFromProps],
+    [refineListData],
   )
-  const handleSortChange = React.useCallback(
+
+  const handleSortChange = useCallback(
     async (arg: string) => {
-      if (typeof handleSortChangeFromProps === 'function') {
-        handleSortChangeFromProps(arg)
-      }
       await refineListData({ sort: arg })
     },
-    [refineListData, handleSortChangeFromProps],
+    [refineListData],
   )
-  const handleWhereChange = React.useCallback(
+
+  const handleWhereChange = useCallback(
     async (arg: Where) => {
-      if (typeof handleWhereChangeFromProps === 'function') {
-        handleWhereChangeFromProps(arg)
-      }
       await refineListData({ where: arg })
     },
-    [refineListData, handleWhereChangeFromProps],
+    [refineListData],
   )
 
-  React.useEffect(() => {
-    if (!hasSetInitialParams.current) {
-      if (modifySearchParams) {
-        let shouldUpdateQueryString = false
+  useEffect(() => {
+    if (modifySearchParams) {
+      let shouldUpdateQueryString = false
 
-        if (isNumber(defaultLimit) && !('limit' in currentQuery)) {
-          currentQuery.limit = String(defaultLimit)
-          shouldUpdateQueryString = true
-        }
-        if (defaultSort && !('sort' in currentQuery)) {
-          currentQuery.sort = defaultSort
-          shouldUpdateQueryString = true
-        }
-        if (shouldUpdateQueryString) {
-          router.replace(`?${qs.stringify(currentQuery)}`)
-        }
+      if (isNumber(defaultLimit) && !('limit' in currentQuery)) {
+        currentQuery.limit = String(defaultLimit)
+        shouldUpdateQueryString = true
       }
 
-      hasSetInitialParams.current = true
+      if (defaultSort && !('sort' in currentQuery)) {
+        currentQuery.sort = defaultSort
+        shouldUpdateQueryString = true
+      }
+
+      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+      setCurrentQuery(currentQuery)
+
+      if (shouldUpdateQueryString) {
+        router.replace(`?${qs.stringify(currentQuery)}`)
+      }
     }
   }, [defaultSort, defaultLimit, router, modifySearchParams, currentQuery])
 
@@ -176,6 +203,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         handleSearchChange,
         handleSortChange,
         handleWhereChange,
+        query: currentQuery,
         refineListData,
       }}
     >
