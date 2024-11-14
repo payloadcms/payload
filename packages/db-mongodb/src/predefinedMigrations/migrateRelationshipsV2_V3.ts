@@ -36,18 +36,14 @@ const migrateModelWithBatching = async ({
       sanitizeRelationshipIDs({ config, data: doc, fields })
     }
 
-    await Promise.all(
-      docs.map(async (doc) => {
-        await Model.updateOne(
-          {
-            _id: {
-              $eq: doc._id,
-            },
-          },
-          doc,
-          { session },
-        )
-      }),
+    await Model.bulkWrite(
+      docs.map((doc) => ({
+        updateOne: {
+          filter: { _id: doc._id },
+          update: doc,
+        },
+      })),
+      { session },
     )
 
     skip += batchSize
