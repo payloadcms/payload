@@ -1,11 +1,11 @@
 import type {
   AdminViewProps,
-  CollectionPermission,
-  GlobalPermission,
   PayloadComponent,
   SanitizedCollectionConfig,
+  SanitizedCollectionPermission,
   SanitizedConfig,
   SanitizedGlobalConfig,
+  SanitizedGlobalPermission,
   ServerSideEditViewProps,
 } from 'payload'
 import type React from 'react'
@@ -38,7 +38,7 @@ export const getViewsFromConfig = ({
   routeSegments: string[]
 } & (
   | {
-      docPermissions: CollectionPermission | GlobalPermission
+      docPermissions: SanitizedCollectionPermission | SanitizedGlobalPermission
       overrideDocPermissions?: false | undefined
     }
   | {

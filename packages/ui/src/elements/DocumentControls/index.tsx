@@ -3,9 +3,9 @@ import type {
   ClientCollectionConfig,
   ClientGlobalConfig,
   ClientUser,
-  CollectionPermission,
-  GlobalPermission,
   SanitizedCollectionConfig,
+  SanitizedCollectionPermission,
+  SanitizedGlobalPermission,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -57,7 +57,7 @@ export const DocumentControls: React.FC<{
   readonly onDuplicate?: DocumentDrawerContextType['onDuplicate']
   readonly onSave?: DocumentDrawerContextType['onSave']
   readonly onTakeOver?: () => void
-  readonly permissions: CollectionPermission | GlobalPermission | null
+  readonly permissions: null | SanitizedCollectionPermission | SanitizedGlobalPermission
   readonly readOnlyForIncomingUser?: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
