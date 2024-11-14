@@ -1,4 +1,5 @@
 import type { EditorConfig as LexicalEditorConfig, SerializedEditorState } from 'lexical'
+import type { BlockAsFieldClient } from 'packages/payload/src/fields/config/types.js'
 import type {
   ClientField,
   DefaultCellComponentProps,
@@ -81,7 +82,7 @@ export type LexicalRichTextAdapterProvider =
 
 export type FeatureClientSchemaMap = {
   [featureKey: string]: {
-    [key: string]: ClientField[]
+    [key: string]: BlockAsFieldClient | ClientField | ClientField[]
   }
 }
 

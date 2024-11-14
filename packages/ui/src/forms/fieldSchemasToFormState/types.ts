@@ -1,4 +1,5 @@
 import type {
+  BlockAsField,
   Data,
   DocumentPermissions,
   Field,
@@ -11,7 +12,7 @@ import type {
 
 export type RenderFieldArgs = {
   data: Data
-  fieldConfig: Field
+  fieldConfig: BlockAsField | Field
   fieldSchemaMap: FieldSchemaMap
   fieldState: FieldState
   formState: FormState

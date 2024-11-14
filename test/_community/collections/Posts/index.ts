@@ -1,61 +1,42 @@
 import type { CollectionConfig } from 'payload'
 
+import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+
 export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
-  admin: {
-    useAsTitle: 'text',
-  },
   fields: [
     {
-      admin: {
-        components: {
-          Field: '/collections/Posts/MyClientField.js#MyClientFieldComponent',
-        },
-      },
-      name: 'text',
-      label: 'Client Text Field',
-      type: 'text',
-    },
-    {
-      admin: {
-        components: {
-          Field: '/collections/Posts/MyServerField.js#MyServerFieldComponent',
-        },
-      },
-      name: 'serverTextField',
-      type: 'text',
-    },
-    {
-      name: 'relationToSelf',
-      type: 'relationship',
-      relationTo: postsSlug,
-    },
-    {
-      name: 'myArray',
-      type: 'array',
-      fields: [
-        {
-          admin: {
-            components: {
-              Field: '/collections/Posts/MyServerField.js#MyServerFieldComponent',
-            },
-          },
-          name: 'serverTextField',
-          type: 'text',
-        },
-        {
-          admin: {
-            components: {
-              Field: '/collections/Posts/MyClientField.js#MyClientFieldComponent',
-            },
-          },
-          name: 'text',
-          label: 'Client Text Field',
-          type: 'text',
-        },
-      ],
+      name: 'richText',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          BlocksFeature({
+            inlineBlocks: [
+              {
+                slug: 'myInlineBlock',
+                admin: {
+                  components: {
+                    Label: '/collections/Posts/LabelComponent.js#LabelComponent',
+                  },
+                },
+                fields: [
+                  {
+                    name: 'key',
+                    label: () => {
+                      return 'Key'
+                    },
+                    type: 'select',
+                    options: ['value1', 'value2', 'value3'],
+                  },
+                ],
+              },
+            ],
+          }),
+        ],
+      }),
     },
     // {
     //   name: 'richText',

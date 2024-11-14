@@ -2,6 +2,8 @@ import type { I18nClient } from '@payloadcms/translations'
 
 import type {
   AdminClient,
+  BlockAsField,
+  BlockAsFieldClient,
   BlocksFieldClient,
   ClientBlock,
   ClientField,
@@ -42,11 +44,11 @@ export const createClientField = ({
   field: incomingField,
   i18n,
 }: {
-  clientField?: ClientField
+  clientField?: BlockAsFieldClient | ClientField
   defaultIDType: Payload['config']['db']['defaultIDType']
-  field: Field
+  field: BlockAsField | Field
   i18n: I18nClient
-}): ClientField => {
+}): BlockAsFieldClient | ClientField => {
   const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
     'hooks',
     'access',
@@ -131,51 +133,65 @@ export const createClientField = ({
       break
     }
 
+    case 'block': {
+      const field = clientField as unknown as ClientBlock
+
+      const block = incomingField
+      const clientBlock: ClientBlock = {
+        slug: block.slug,
+        admin: {
+          custom: block.admin?.custom,
+        },
+        fields: field.fields || [],
+        imageAltText: block.imageAltText,
+        imageURL: block.imageURL,
+      }
+
+      if (block.labels) {
+        clientBlock.labels = {} as unknown as LabelsClient
+        if (block.labels.singular) {
+          if (typeof block.labels.singular === 'function') {
+            clientBlock.labels.singular = block.labels.singular({ t: i18n.t })
+          } else {
+            clientBlock.labels.singular = block.labels.singular
+          }
+          if (typeof block.labels.plural === 'function') {
+            clientBlock.labels.plural = block.labels.plural({ t: i18n.t })
+          } else {
+            clientBlock.labels.plural = block.labels.plural
+          }
+        }
+      }
+
+      clientBlock.fields = createClientFields({
+        clientFields: clientBlock.fields,
+        defaultIDType,
+        fields: block.fields,
+        i18n,
+      }) as ClientField[]
+
+      break
+    }
+
     case 'blocks': {
       const field = clientField as unknown as BlocksFieldClient
 
       if (incomingField.blocks?.length) {
         for (let i = 0; i < incomingField.blocks.length; i++) {
           const block = incomingField.blocks[i]
-          const clientBlock: ClientBlock = {
-            slug: block.slug,
-            admin: {
-              components: {},
-              custom: block.admin?.custom,
+
+          field.blocks[i] = createClientField({
+            clientField: {
+              ...field.blocks[i],
+              type: 'block',
             },
-            fields: field.blocks?.[i]?.fields || [],
-            imageAltText: block.imageAltText,
-            imageURL: block.imageURL,
-          }
-
-          if (block.labels) {
-            clientBlock.labels = {} as unknown as LabelsClient
-            if (block.labels.singular) {
-              if (typeof block.labels.singular === 'function') {
-                clientBlock.labels.singular = block.labels.singular({ t: i18n.t })
-              } else {
-                clientBlock.labels.singular = block.labels.singular
-              }
-              if (typeof block.labels.plural === 'function') {
-                clientBlock.labels.plural = block.labels.plural({ t: i18n.t })
-              } else {
-                clientBlock.labels.plural = block.labels.plural
-              }
-            }
-          }
-
-          clientBlock.fields = createClientFields({
-            clientFields: clientBlock.fields,
             defaultIDType,
-            fields: block.fields,
+            field: {
+              ...block,
+              type: 'block',
+            },
             i18n,
-          })
-
-          if (!field.blocks) {
-            field.blocks = []
-          }
-
-          field.blocks[i] = clientBlock
+          }) as ClientBlock
         }
       }
 
@@ -183,7 +199,6 @@ export const createClientField = ({
     }
 
     case 'radio':
-
     case 'select': {
       const field = clientField as RadioFieldClient | SelectFieldClient
 
@@ -288,13 +303,13 @@ export const createClientFields = ({
   fields,
   i18n,
 }: {
-  clientFields: ClientField[]
+  clientFields: (BlockAsFieldClient | ClientField)[]
   defaultIDType: Payload['config']['db']['defaultIDType']
   disableAddingID?: boolean
-  fields: Field[]
+  fields: (BlockAsField | Field)[]
   i18n: I18nClient
-}): ClientField[] => {
-  const newClientFields: ClientField[] = []
+}): (BlockAsFieldClient | ClientField)[] => {
+  const newClientFields: (BlockAsFieldClient | ClientField)[] = []
 
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]

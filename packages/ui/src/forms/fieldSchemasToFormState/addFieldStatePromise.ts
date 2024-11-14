@@ -1,4 +1,5 @@
 import type {
+  BlockAsField,
   Data,
   DocumentPermissions,
   DocumentPreferences,
@@ -35,7 +36,7 @@ export type AddFieldStatePromiseArgs = {
   anyParentLocalized?: boolean
   collectionSlug?: string
   data: Data
-  field: Field
+  field: BlockAsField | Field
   fieldIndex: number
   fieldSchemaMap: FieldSchemaMap
   /**
@@ -131,10 +132,12 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   const disabledFromAdmin = field?.admin && 'disabled' in field.admin && field.admin.disabled
 
   if (fieldAffectsData(field) && !(isHiddenField || disabledFromAdmin)) {
-    let hasPermission =
-      typeof permissions?.[field.name]?.read === 'boolean' ? permissions[field.name].read : true
+    const fieldKey = 'name' in field ? field.name : field.slug
 
-    if (typeof field?.access?.read === 'function') {
+    let hasPermission =
+      typeof permissions?.[fieldKey]?.read === 'boolean' ? permissions[fieldKey].read : true
+
+    if ('access' in field && typeof field?.access?.read === 'function') {
       hasPermission = await field.access.read({ doc: fullData, req, siblingData: data })
     } else {
       hasPermission = true
@@ -144,7 +147,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       return
     }
 
-    const validate = field.validate
+    const validate = 'validate' in field ? field.validate : undefined
 
     const fieldState: FormFieldWithoutComponents = {
       errorPaths: [],
@@ -170,7 +173,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
 
       validationResult = await validate(
-        data?.[field.name] as never,
+        data?.[fieldKey] as never,
         {
           ...field,
           id,
@@ -303,9 +306,59 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         break
       }
 
+      case 'block': {
+        const blockValue = data[field.slug] || {}
+        const block = field
+
+        console.log('Fuckme', blockValue)
+
+        fieldState.value = data[field.slug]
+        fieldState.initialValue = data[field.slug]
+
+        // Add field to state
+        if (!filter || filter(args)) {
+          state[path] = fieldState
+        }
+
+        console.log('Inside block', blockValue, block)
+
+        blockValue.id = blockValue?.id || new ObjectId().toHexString()
+
+        await iterateFields({
+          id,
+          addErrorPathToParent,
+          anyParentLocalized,
+          collectionSlug,
+          data: blockValue,
+          fields: block.fields,
+          fieldSchemaMap,
+          filter,
+          forceFullValue,
+          fullData,
+          includeSchema,
+          omitParents,
+          operation,
+          parentIndexPath: '',
+          parentPassesCondition: passesCondition,
+          parentPath: path,
+          parentSchemaPath: schemaPath,
+          permissions: permissions[block.slug]?.fields || {},
+          preferences,
+          previousFormState,
+          renderAllFields: requiresRender,
+          renderFieldFn,
+          req,
+          skipConditionChecks,
+          skipValidation,
+          state,
+        })
+        break
+      }
+
       case 'blocks': {
         const blocksValue = Array.isArray(data[field.name]) ? data[field.name] : []
 
+        console.log('blocksValue', blocksValue)
         const { promises, rowMetadata } = blocksValue.reduce(
           (acc, row, i: number) => {
             const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
@@ -394,7 +447,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 blockType: row.blockType,
                 collapsed:
                   collapsedRowIDs === undefined
-                    ? field.admin.initCollapsed
+                    ? field.admin?.initCollapsed
                     : collapsedRowIDs.includes(row.id),
               })
             }

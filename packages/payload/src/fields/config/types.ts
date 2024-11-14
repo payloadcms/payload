@@ -743,6 +743,14 @@ export type TabAsField = {
   type: 'tab'
 } & Tab
 
+export type BlockAsField = {
+  type: 'block'
+} & Block
+
+export type BlockAsFieldClient = {
+  type: 'block'
+} & ClientBlock
+
 export type TabAsFieldClient = ClientTab & Pick<TabAsField, 'name' | 'type'>
 
 export type UIField = {
@@ -1188,6 +1196,10 @@ export type Block = {
   _sanitized?: boolean
   admin?: {
     components?: {
+      /**
+       * This will replace the entire block component, including the block header / collapsible.
+       */
+      Block?: PayloadComponent<any, any>
       Label?: PayloadComponent<
         never,
         {
@@ -1227,11 +1239,7 @@ export type Block = {
 }
 
 export type ClientBlock = {
-  admin?: {
-    components?: {
-      Label?: React.ReactNode
-    }
-  } & Pick<Block['admin'], 'custom'>
+  admin?: Pick<Block['admin'], 'custom'>
   fields: ClientField[]
   labels?: LabelsClient
 } & Pick<Block, 'imageAltText' | 'imageURL' | 'slug'>
@@ -1411,6 +1419,7 @@ export type FieldTypes = ExtractFieldTypes<Field>
 
 export type FieldAffectingData =
   | ArrayField
+  | BlockAsField
   | BlocksField
   | CheckboxField
   | CodeField
@@ -1432,6 +1441,7 @@ export type FieldAffectingData =
 
 export type FieldAffectingDataClient =
   | ArrayFieldClient
+  | BlockAsFieldClient
   | BlocksFieldClient
   | CheckboxFieldClient
   | CodeFieldClient
@@ -1520,14 +1530,17 @@ export type FieldWithManyClient = RelationshipFieldClient | SelectFieldClient
 export type FieldWithMaxDepth = RelationshipField | UploadField
 export type FieldWithMaxDepthClient = JoinFieldClient | RelationshipFieldClient | UploadFieldClient
 
-export function fieldHasSubFields<TField extends ClientField | Field>(
+export function fieldHasSubFields<
+  TField extends BlockAsField | BlockAsFieldClient | ClientField | Field,
+>(
   field: TField,
 ): field is TField & (TField extends ClientField ? FieldWithSubFieldsClient : FieldWithSubFields) {
   return (
     field.type === 'group' ||
     field.type === 'array' ||
     field.type === 'row' ||
-    field.type === 'collapsible'
+    field.type === 'collapsible' ||
+    field.type === 'block'
   )
 }
 
@@ -1577,26 +1590,46 @@ export function fieldHasMaxDepth<TField extends ClientField | Field>(
 }
 
 export function fieldIsPresentationalOnly<
-  TField extends ClientField | Field | TabAsField | TabAsFieldClient,
+  TField extends
+    | BlockAsField
+    | BlockAsFieldClient
+    | ClientField
+    | Field
+    | TabAsField
+    | TabAsFieldClient,
 >(
   field: TField,
 ): field is TField & (TField extends ClientField | TabAsFieldClient ? UIFieldClient : UIField) {
   return field.type === 'ui'
 }
 
-export function fieldIsSidebar<TField extends ClientField | Field | TabAsField | TabAsFieldClient>(
-  field: TField,
-): field is { admin: { position: 'sidebar' } } & TField {
+export function fieldIsSidebar<
+  TField extends
+    | BlockAsField
+    | BlockAsFieldClient
+    | ClientField
+    | Field
+    | TabAsField
+    | TabAsFieldClient,
+>(field: TField): field is { admin: { position: 'sidebar' } } & TField {
   return 'admin' in field && 'position' in field.admin && field.admin.position === 'sidebar'
 }
 
 export function fieldAffectsData<
-  TField extends ClientField | Field | TabAsField | TabAsFieldClient,
+  TField extends
+    | BlockAsField
+    | BlockAsFieldClient
+    | ClientField
+    | Field
+    | TabAsField
+    | TabAsFieldClient,
 >(
   field: TField,
 ): field is TField &
-  (TField extends ClientField | TabAsFieldClient ? FieldAffectingDataClient : FieldAffectingData) {
-  return 'name' in field && !fieldIsPresentationalOnly(field)
+  (TField extends BlockAsFieldClient | ClientField | TabAsFieldClient
+    ? FieldAffectingDataClient
+    : FieldAffectingData) {
+  return ('name' in field || 'slug' in field) && !fieldIsPresentationalOnly(field)
 }
 
 export function tabHasName<TField extends ClientTab | Tab>(tab: TField): tab is NamedTab & TField {

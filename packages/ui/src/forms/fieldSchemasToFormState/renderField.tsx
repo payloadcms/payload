@@ -1,4 +1,5 @@
 import type {
+  BlocksFieldClient,
   ClientComponentProps,
   ClientField,
   FieldPermissions,
@@ -8,11 +9,14 @@ import type {
 
 import { getTranslation } from '@payloadcms/translations'
 import { createClientField, deepCopyObjectSimple, MissingEditorProp } from 'payload'
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData, isReactServerComponentOrFunction } from 'payload/shared'
 
 import type { RenderFieldMethod } from './types.js'
 
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+import {
+  getFromImportMap,
+  RenderServerComponent,
+} from '../../elements/RenderServerComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 
 export const renderField: RenderFieldMethod = ({
@@ -103,7 +107,59 @@ export const renderField: RenderFieldMethod = ({
 
       break
     }
+    case 'block': {
+      const block = fieldConfig
 
+      if (block.admin?.components?.Label) {
+        const isRSC = isReactServerComponentOrFunction(block.admin.components.Label)
+        fieldState.customComponents.BlockLabel = isRSC
+          ? {
+              type: 'server',
+              Component: (
+                <RenderServerComponent
+                  clientProps={clientProps}
+                  Component={block.admin.components.Label}
+                  importMap={req.payload.importMap}
+                  serverProps={serverProps}
+                />
+              ),
+            }
+          : {
+              type: 'client',
+              Component: getFromImportMap<React.ComponentType<any>>({
+                importMap: req.payload.importMap,
+                PayloadComponent: block.admin.components.Label,
+                schemaPath: 'block.admin.components.Labe',
+              }),
+            }
+      }
+
+      if (block.admin?.components?.Block) {
+        const isRSC = isReactServerComponentOrFunction(block.admin.components.Block)
+        fieldState.customComponents.Block = isRSC
+          ? {
+              type: 'server',
+              Component: (
+                <RenderServerComponent
+                  clientProps={clientProps}
+                  Component={block.admin.components.Block}
+                  importMap={req.payload.importMap}
+                  serverProps={serverProps}
+                />
+              ),
+            }
+          : {
+              type: 'client',
+              Component: getFromImportMap<React.ComponentType<any>>({
+                importMap: req.payload.importMap,
+                PayloadComponent: block.admin.components.Block,
+                schemaPath: 'block.admin.components.Block',
+              }),
+            }
+      }
+
+      break
+    }
     case 'richText': {
       if (!fieldConfig?.editor) {
         throw new MissingEditorProp(fieldConfig) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
@@ -154,7 +210,7 @@ export const renderField: RenderFieldMethod = ({
     }
   }
 
-  if (fieldConfig.admin) {
+  if (fieldConfig.admin && fieldConfig.type !== 'block') {
     if ('description' in fieldConfig.admin) {
       // @TODO move this to client, only render if it is a function
       fieldState.customComponents.Description = (

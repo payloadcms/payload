@@ -1,4 +1,5 @@
 import type {
+  BlockAsField,
   Data,
   DocumentPermissions,
   DocumentPreferences,
@@ -22,7 +23,7 @@ type Args = {
   anyParentLocalized?: boolean
   collectionSlug?: string
   data: Data
-  fields: FieldSchema[]
+  fields: (BlockAsField | FieldSchema)[]
   fieldSchemaMap: FieldSchemaMap
   filter?: (args: AddFieldStatePromiseArgs) => boolean
   /**
@@ -101,7 +102,7 @@ export const iterateFields = async ({
     let passesCondition = true
     if (!skipConditionChecks) {
       passesCondition = Boolean(
-        (field?.admin?.condition
+        (field?.admin && 'condition' in field.admin && field.admin.condition
           ? Boolean(field.admin.condition(fullData || {}, data || {}, { user: req.user }))
           : true) && parentPassesCondition,
       )

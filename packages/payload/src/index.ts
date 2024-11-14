@@ -972,6 +972,8 @@ export type {
   ArrayFieldClient,
   BaseValidateOptions,
   Block,
+  BlockAsField,
+  BlockAsFieldClient,
   BlocksField,
   BlocksFieldClient,
   CheckboxField,

@@ -1,6 +1,7 @@
 import type { ClientTab } from '../admin/fields/Tabs.js'
 import type { ClientField } from '../fields/config/client.js'
 import type {
+  BlockAsField,
   Field,
   FieldAffectingData,
   FieldAffectingDataClient,
@@ -29,7 +30,7 @@ type TabType<TField> = TField extends ClientField ? ClientTab : Tab
  * @param fields
  * @param keepPresentationalFields if true, will skip flattening fields that are presentational only
  */
-function flattenFields<TField extends ClientField | Field>(
+function flattenFields<TField extends BlockAsField | ClientField | Field>(
   fields: TField[],
   keepPresentationalFields?: boolean,
 ): FlattenedField<TField>[] {

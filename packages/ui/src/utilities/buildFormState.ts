@@ -1,9 +1,11 @@
 import type { I18n, I18nClient } from '@payloadcms/translations'
 import type {
+  BlockAsField,
   BuildFormStateArgs,
   ClientConfig,
   ClientUser,
   ErrorResult,
+  Field,
   FieldSchemaMap,
   FormState,
   SanitizedConfig,
@@ -226,11 +228,17 @@ export const buildFormState = async (
    * Type assertion is fine because we wrap sub schemas in an array
    * so we can safely map over them within `fieldSchemasToFormState`
    */
-  const fields = Array.isArray(fieldOrEntityConfig)
+  const fields: Array<BlockAsField | Field> = Array.isArray(fieldOrEntityConfig)
     ? fieldOrEntityConfig
-    : 'fields' in fieldOrEntityConfig
+    : 'fields' in fieldOrEntityConfig &&
+        (!('type' in fieldOrEntityConfig) || fieldOrEntityConfig.type !== 'block')
       ? fieldOrEntityConfig.fields
       : [fieldOrEntityConfig]
+
+  const adjustedSchemaPath =
+    'type' in fieldOrEntityConfig && fieldOrEntityConfig.type === 'block'
+      ? schemaPath.split('.').slice(0, -1).join('.')
+      : schemaPath
 
   const formStateResult = await fieldSchemasToFormState({
     id,
@@ -245,8 +253,16 @@ export const buildFormState = async (
     renderAllFields,
     renderFieldFn: renderField,
     req,
-    schemaPath,
+    schemaPath: adjustedSchemaPath,
   })
+
+  if (
+    schemaPath ===
+    'posts.richText.lexical_internal_feature.blocks.lexical_inline_blocks.myInlineBlock'
+  ) {
+    console.log('Form state result')
+    console.dir(formStateResult, { depth: 5 })
+  }
 
   // Maintain form state of auth / upload fields
   if (collectionSlug && formState) {

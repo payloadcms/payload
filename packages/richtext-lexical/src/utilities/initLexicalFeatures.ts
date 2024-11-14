@@ -3,6 +3,7 @@ import type { I18nClient } from '@payloadcms/translations'
 import { getFromImportMap } from '@payloadcms/ui/elements/RenderServerComponent'
 import {
   type ClientField,
+  createClientField,
   createClientFields,
   deepCopyObjectSimple,
   type FieldSchemaMap,
@@ -103,16 +104,27 @@ export function initLexicalFeatures(args: Args): {
       for (const key in featureSchemaMap) {
         const state = featureSchemaMap[key]
 
-        const clientFields = createClientFields({
-          clientFields: ('fields' in state
-            ? deepCopyObjectSimple(state.fields)
-            : [deepCopyObjectSimple(state)]) as ClientField[],
-          defaultIDType: args.payload.config.db.defaultIDType,
-          disableAddingID: true,
-          fields: 'fields' in state ? state.fields : [state],
-          i18n: args.i18n,
-        })
-        featureClientSchemaMap[featureKey][key] = clientFields
+        if ('fields' in state && (!('type' in state) || state?.type !== 'block')) {
+          const clientFields = createClientFields({
+            clientFields: deepCopyObjectSimple(state.fields),
+            defaultIDType: args.payload.config.db.defaultIDType,
+            disableAddingID: true,
+            fields: state.fields,
+            i18n: args.i18n,
+          })
+
+          featureClientSchemaMap[featureKey][key] = clientFields
+        } else {
+          const clientField = createClientField({
+            clientField: deepCopyObjectSimple(state),
+            defaultIDType: args.payload.config.db.defaultIDType,
+            disableAddingID: true,
+            field: state,
+            i18n: args.i18n,
+          })
+
+          featureClientSchemaMap[featureKey][key] = clientField
+        }
       }
 
       /*

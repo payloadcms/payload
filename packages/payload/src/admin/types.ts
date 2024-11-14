@@ -3,7 +3,7 @@ import type React from 'react'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { Block, Field, FieldTypes, Tab } from '../fields/config/types.js'
+import type { BlockAsField, Field, FieldTypes, TabAsField } from '../fields/config/types.js'
 import type { JsonObject } from '../types/index.js'
 import type {
   BuildFormStateArgs,
@@ -479,7 +479,7 @@ export type FieldSchemaMap = Map<
   | {
       fields: Field[]
     }
-  | Block
+  | BlockAsField
   | Field
-  | Tab
+  | TabAsField
 >

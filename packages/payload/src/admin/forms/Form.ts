@@ -1,7 +1,7 @@
 import { type SupportedLanguages } from '@payloadcms/translations'
 
 import type { DocumentPermissions } from '../../auth/types.js'
-import type { Field, Validate } from '../../fields/config/types.js'
+import type { BlockAsField, Field, Validate } from '../../fields/config/types.js'
 import type { TypedLocale } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
@@ -24,6 +24,24 @@ export type FieldState = {
   customComponents?: {
     AfterInput?: React.ReactNode
     BeforeInput?: React.ReactNode
+    Block?:
+      | {
+          Component: React.ComponentType<{ formData: Data }>
+          type: 'client'
+        }
+      | {
+          Component: React.ReactNode
+          type: 'server'
+        }
+    BlockLabel?:
+      | {
+          Component: React.ComponentType<{ formData: Data }>
+          type: 'client'
+        }
+      | {
+          Component: React.ReactNode
+          type: 'server'
+        }
     Description?: React.ReactNode
     Error?: React.ReactNode
     Field?: React.ReactNode
@@ -37,7 +55,7 @@ export type FieldState = {
    * The fieldSchema may be part of the form state if `includeSchema: true` is passed to buildFormState.
    * This will never be in the form state of the client.
    */
-  fieldSchema?: Field
+  fieldSchema?: BlockAsField | Field
   filterOptions?: FilterOptionsResult
   initialValue: unknown
   isSidebar?: boolean

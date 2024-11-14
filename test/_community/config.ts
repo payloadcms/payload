@@ -1,3 +1,4 @@
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 // import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -32,7 +33,7 @@ export default buildConfigWithDefaults({
       Component: '/collections/Posts/MyAvatar.js#MyAvatar',
     },
   },
-  editor: null,
+  editor: lexicalEditor(),
   // editor: lexicalEditor({
   //   features: ({ defaultFeatures }) => [
   //     ...defaultFeatures,

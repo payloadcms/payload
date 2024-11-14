@@ -1,9 +1,7 @@
-import type { ClientField, Field, TabAsField } from './config/types.js'
-
-import { fieldAffectsData } from './config/types.js'
+import type { BlockAsField, ClientField, Field, TabAsField } from './config/types.js'
 
 type Args = {
-  field: ClientField | Field | TabAsField
+  field: BlockAsField | ClientField | Field | TabAsField
   index: number
   parentIndexPath: string
   parentPath: string
@@ -39,6 +37,12 @@ export function getFieldPaths({
       indexPath: `${parentIndexPath ? parentIndexPath + '-' : ''}${index}`,
       path: `${parentPath ? parentPath + '.' : ''}${field.name}`,
       schemaPath: `${parentSchemaPath ? parentSchemaPath + '.' : ''}${field.name}`,
+    }
+  } else if ('slug' in field && field.type === 'block') {
+    return {
+      indexPath: ``,
+      path: `${parentPath ? parentPath + '.' : ''}${field.slug}`,
+      schemaPath: `${parentSchemaPath ? parentSchemaPath + '.' : ''}${field.slug}`,
     }
   }
 

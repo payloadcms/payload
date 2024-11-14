@@ -71,16 +71,21 @@ export interface UserAuthOperations {
  */
 export interface Post {
   id: string;
-  text?: string | null;
-  serverTextField?: string | null;
-  relationToSelf?: (string | null) | Post;
-  myArray?:
-    | {
-        serverTextField?: string | null;
-        text?: string | null;
-        id?: string | null;
-      }[]
-    | null;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -178,16 +183,7 @@ export interface PayloadMigration {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
-  text?: T;
-  serverTextField?: T;
-  relationToSelf?: T;
-  myArray?:
-    | T
-    | {
-        serverTextField?: T;
-        text?: T;
-        id?: T;
-      };
+  richText?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

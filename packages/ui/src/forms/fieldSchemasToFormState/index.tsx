@@ -1,4 +1,5 @@
 import type {
+  BlockAsField,
   Data,
   DocumentPermissions,
   DocumentPreferences,
@@ -17,7 +18,7 @@ import { iterateFields } from './iterateFields.js'
 type Args = {
   collectionSlug?: string
   data?: Data
-  fields: Field[] | undefined
+  fields: (BlockAsField | Field)[] | undefined
   /**
    * The field schema map is required for field rendering.
    * If fields should not be rendered (=> `renderFieldFn` is not provided),

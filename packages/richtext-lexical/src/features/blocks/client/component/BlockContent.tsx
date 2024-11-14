@@ -42,7 +42,7 @@ type Props = {
 // does not have, even if it's undefined.
 // Currently, this happens if a block has another sub-blocks field. Inside formData, that sub-blocks field has an undefined blockName property.
 // Inside of fields.data however, that sub-blocks blockName property does not exist at all.
-function removeUndefinedAndNullAndEmptyArraysRecursively(obj: object) {
+export function removeUndefinedAndNullAndEmptyArraysRecursively(obj: object) {
   for (const key in obj) {
     const value = obj[key]
     if (Array.isArray(value) && !value?.length) {
