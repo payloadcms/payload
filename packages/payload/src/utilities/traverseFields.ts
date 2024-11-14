@@ -87,15 +87,16 @@ export const traverseFields = ({
     if (field.type === 'tabs' && 'tabs' in field) {
       for (const tab of field.tabs) {
         if ('name' in tab && tab.name) {
-          if (typeof ref[tab.name] === 'undefined') {
-            ref[tab.name] = {}
+          if (!ref[tab.name] || typeof ref[tab.name] !== 'object') {
+            continue
           }
+
           parentRef = ref
           currentRef = ref[tab.name]
 
           if (tab.localized) {
             for (const key in currentRef as Record<string, unknown>) {
-              if (currentRef[key]) {
+              if (currentRef[key] && typeof currentRef[key] === 'object') {
                 traverseFields({ callback, fields: tab.fields, parentRef, ref: currentRef[key] })
               }
             }
@@ -118,22 +119,17 @@ export const traverseFields = ({
     if (field.type !== 'tab' && (fieldHasSubFields(field) || field.type === 'blocks')) {
       if ('name' in field && field.name) {
         currentParentRef = currentRef
-        if (typeof ref[field.name] === 'undefined') {
-          if (field.type === 'array' || field.type === 'blocks') {
-            if (field.localized) {
-              ref[field.name] = {}
-            } else {
-              ref[field.name] = []
-            }
-          }
-          if (field.type === 'group') {
-            ref[field.name] = {}
-          }
+        if (!ref[field.name]) {
+          return
         }
-        currentRef = ref[field.name]
       }
 
-      if (field.type === 'group' && field.localized) {
+      if (
+        field.type === 'group' &&
+        field.localized &&
+        currentRef &&
+        typeof currentRef === 'object'
+      ) {
         for (const key in currentRef as Record<string, unknown>) {
           if (currentRef[key]) {
             traverseFields({
@@ -147,9 +143,16 @@ export const traverseFields = ({
         return
       }
 
-      if (field.type === 'blocks' || field.type === 'array') {
+      if (
+        field.type === 'blocks' ||
+        (field.type === 'array' && currentRef && typeof currentRef === 'object')
+      ) {
         if (field.localized) {
-          for (const key in (currentRef ?? {}) as Record<string, unknown>) {
+          if (Array.isArray(currentRef)) {
+            return
+          }
+
+          for (const key in currentRef as Record<string, unknown>) {
             const localeData = currentRef[key]
             if (!Array.isArray(localeData)) {
               continue
@@ -170,7 +173,7 @@ export const traverseFields = ({
             parentRef: currentParentRef,
           })
         }
-      } else {
+      } else if (currentRef && typeof currentRef === 'object') {
         traverseFields({
           callback,
           fields: field.fields,
