@@ -3,7 +3,7 @@ import fs from 'fs'
 import juice from 'juice'
 import path from 'path'
 
-export const generateEmailHTML = async (data): Promise<string> => {
+export const generateEmailHTML = async (data: any): Promise<string> => {
   const templatePath = path.join(process.cwd(), 'src/email/template.ejs')
   const templateContent = fs.readFileSync(templatePath, 'utf8')
 

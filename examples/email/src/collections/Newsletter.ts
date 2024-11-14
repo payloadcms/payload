@@ -27,10 +27,6 @@ export const Newsletter: CollectionConfig = {
               from: 'sender@example.com',
               html: await generateEmailHTML({
                 content: `<p>${doc.name ? `Hi ${doc.name}!` : 'Hi!'} We'll be in touch soon...</p>`,
-                cta: {
-                  buttonLabel: 'Visit our site',
-                  url: 'https://example.com',
-                },
                 headline: 'Welcome to the newsletter!',
               }),
               subject: 'Thanks for signing up!',

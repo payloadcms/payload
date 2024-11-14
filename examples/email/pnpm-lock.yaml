@@ -15,6 +15,9 @@ importers:
       '@payloadcms/db-mongodb':
         specifier: beta
         version: 3.0.0-beta.130(@aws-sdk/client-sso-oidc@3.687.0(@aws-sdk/client-sts@3.687.0))(payload@3.0.0-beta.130(graphql@16.9.0)(monaco-editor@0.52.0)(react-dom@19.0.0-rc-65a56d0e-20241020(react@19.0.0-rc-65a56d0e-20241020))(react@19.0.0-rc-65a56d0e-20241020)(typescript@5.5.2))
+      '@payloadcms/email-nodemailer':
+        specifier: beta
+        version: 3.0.0-beta.130(payload@3.0.0-beta.130(graphql@16.9.0)(monaco-editor@0.52.0)(react-dom@19.0.0-rc-65a56d0e-20241020(react@19.0.0-rc-65a56d0e-20241020))(react@19.0.0-rc-65a56d0e-20241020)(typescript@5.5.2))
       '@payloadcms/next':
         specifier: beta
         version: 3.0.0-beta.130(graphql@16.9.0)(monaco-editor@0.52.0)(next@15.0.0(react-dom@19.0.0-rc-65a56d0e-20241020(react@19.0.0-rc-65a56d0e-20241020))(react@19.0.0-rc-65a56d0e-20241020)(sass@1.77.4))(payload@3.0.0-beta.130(graphql@16.9.0)(monaco-editor@0.52.0)(react-dom@19.0.0-rc-65a56d0e-20241020(react@19.0.0-rc-65a56d0e-20241020))(react@19.0.0-rc-65a56d0e-20241020)(typescript@5.5.2))(react-dom@19.0.0-rc-65a56d0e-20241020(react@19.0.0-rc-65a56d0e-20241020))(react@19.0.0-rc-65a56d0e-20241020)(types-react@19.0.0-rc.1)(typescript@5.5.2)
@@ -825,6 +828,12 @@ packages:
 
   '@payloadcms/db-mongodb@3.0.0-beta.130':
     resolution: {integrity: sha512-A1hdiVKbVC0YpSmsa7rtpoExXVmpKlo7QaA/cpwhEefT+4nZzM8xMC5pjI1x5dQUSQ09t6CH0yiKj2Nu5iTENQ==}
+    peerDependencies:
+      payload: 3.0.0-beta.130
+
+  '@payloadcms/email-nodemailer@3.0.0-beta.130':
+    resolution: {integrity: sha512-yjqQOCuvtJzj6zJo3iAlLpG0+mdGWW0jT2fyr3R1IFNJhOuuLqCMhhq7aXF0kRr061b2vNSAuwPaCpRvFr6LRw==}
+    engines: {node: ^18.20.2 || >=20.9.0}
     peerDependencies:
       payload: 3.0.0-beta.130
 
@@ -2351,6 +2360,10 @@ packages:
         optional: true
       sass:
         optional: true
+
+  nodemailer@6.9.10:
+    resolution: {integrity: sha512-qtoKfGFhvIFW5kLfrkw2R6Nm6Ur4LNUMykyqu6n9BRKJuyQrqEGwdXXUAbwWEKt33dlWUGXb7rzmJP/p4+O+CA==}
+    engines: {node: '>=6.0.0'}
 
   normalize-path@3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
@@ -4155,6 +4168,11 @@ snapshots:
       - '@aws-sdk/client-sso-oidc'
       - aws-crt
       - supports-color
+
+  '@payloadcms/email-nodemailer@3.0.0-beta.130(payload@3.0.0-beta.130(graphql@16.9.0)(monaco-editor@0.52.0)(react-dom@19.0.0-rc-65a56d0e-20241020(react@19.0.0-rc-65a56d0e-20241020))(react@19.0.0-rc-65a56d0e-20241020)(typescript@5.5.2))':
+    dependencies:
+      nodemailer: 6.9.10
+      payload: 3.0.0-beta.130(graphql@16.9.0)(monaco-editor@0.52.0)(react-dom@19.0.0-rc-65a56d0e-20241020(react@19.0.0-rc-65a56d0e-20241020))(react@19.0.0-rc-65a56d0e-20241020)(typescript@5.5.2)
 
   '@payloadcms/graphql@3.0.0-beta.130(graphql@16.9.0)(payload@3.0.0-beta.130(graphql@16.9.0)(monaco-editor@0.52.0)(react-dom@19.0.0-rc-65a56d0e-20241020(react@19.0.0-rc-65a56d0e-20241020))(react@19.0.0-rc-65a56d0e-20241020)(typescript@5.5.2))(typescript@5.5.2)':
     dependencies:
@@ -6106,6 +6124,8 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
+
+  nodemailer@6.9.10: {}
 
   normalize-path@3.0.0: {}
 

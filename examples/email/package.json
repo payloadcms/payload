@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@payloadcms/db-mongodb": "beta",
+    "@payloadcms/email-nodemailer": "beta",
     "@payloadcms/next": "beta",
     "@payloadcms/richtext-lexical": "beta",
     "@payloadcms/ui": "beta",
