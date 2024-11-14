@@ -9,7 +9,7 @@ import './index.scss'
 const baseClass = 'file'
 
 export interface FileCellProps
-  extends DefaultCellComponentProps<any, TextFieldClient | UploadFieldClient> {}
+  extends DefaultCellComponentProps<TextFieldClient | UploadFieldClient> {}
 
 export const FileCell: React.FC<FileCellProps> = ({
   cellData: filename,
