@@ -39,7 +39,6 @@ const baseClass = 'doc-controls'
 export const DocumentControls: React.FC<{
   readonly apiURL: string
   readonly customComponents?: {
-    readonly CopyLocaleButton?: React.ReactNode
     readonly PreviewButton?: React.ReactNode
     readonly PublishButton?: React.ReactNode
     readonly SaveButton?: React.ReactNode
@@ -70,7 +69,6 @@ export const DocumentControls: React.FC<{
     id,
     slug,
     customComponents: {
-      CopyLocaleButton: CustomCopyLocaleButton,
       PreviewButton: CustomPreviewButton,
       PublishButton: CustomPublishButton,
       SaveButton: CustomSaveButton,

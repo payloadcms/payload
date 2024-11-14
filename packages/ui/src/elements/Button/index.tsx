@@ -63,7 +63,6 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
     Link,
     newTab,
     onClick,
-    popupClassName,
     round,
     size = 'medium',
     SubMenuPopupContent,
@@ -175,17 +174,13 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
       break
   }
   if (SubMenuPopupContent) {
-    const popupClasses = [disabled ? `${baseClass}--popup-disabled` : '', popupClassName]
-      .filter(Boolean)
-      .join(' ')
-
     return (
       <div className={styleClasses}>
         {buttonElement}
         <Popup
           button={<ChevronIcon />}
           buttonSize={size}
-          className={popupClasses}
+          className={disabled ? `${baseClass}--popup-disabled` : ''}
           horizontalAlign="right"
           noBackground
           render={({ close }) => SubMenuPopupContent({ close: () => close() })}

@@ -19,7 +19,6 @@ export type SelectInputProps = {
   readonly AfterInput?: React.ReactNode
   readonly BeforeInput?: React.ReactNode
   readonly className?: string
-  readonly defaultValue?: OptionObject | OptionObject[]
   readonly Description?: React.ReactNode
   readonly description?: StaticDescription
   readonly Error?: React.ReactNode
@@ -45,7 +44,6 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     AfterInput,
     BeforeInput,
     className,
-    defaultValue,
     Description,
     description,
     Error,
@@ -67,7 +65,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
 
   const { i18n } = useTranslation()
 
-  let valueToRender = defaultValue
+  let valueToRender
 
   if (hasMany && Array.isArray(value)) {
     valueToRender = value.map((val) => {

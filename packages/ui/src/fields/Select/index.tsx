@@ -102,7 +102,6 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       AfterInput={AfterInput}
       BeforeInput={BeforeInput}
       className={className}
-      defaultValue={defaultValue}
       Description={Description}
       description={description}
       Error={Error}
