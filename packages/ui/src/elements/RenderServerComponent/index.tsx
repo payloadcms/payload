@@ -94,6 +94,7 @@ export const RenderServerComponent: React.FC<{
         ...(isRSC && typeof Component === 'object' && Component?.serverProps
           ? Component.serverProps
           : {}),
+        ...(typeof Component === 'object' && Component?.clientProps ? Component.clientProps : {}),
       })
 
       return <ResolvedComponent {...sanitizedProps} />

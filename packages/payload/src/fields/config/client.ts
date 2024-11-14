@@ -102,7 +102,7 @@ export const createClientField = ({
       '--field-width': clientField.admin.width,
     }
 
-    delete clientField.admin.width // avoid needlessly adding this to the element's style attribute
+    delete clientField.admin.style.width // avoid needlessly adding this to the element's style attribute
   } else {
     if (!(clientField.admin.style instanceof Object)) {
       clientField.admin.style = {}
@@ -223,6 +223,7 @@ export const createClientField = ({
 
       break
     }
+
     case 'tabs': {
       const field = clientField as unknown as TabsFieldClient
 
