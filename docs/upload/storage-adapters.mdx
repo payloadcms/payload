@@ -14,7 +14,7 @@ Payload offers additional storage adapters to handle file uploads. These adapter
 | AWS S3               | [`@payloadcms/storage-s3`](https://github.com/payloadcms/payload/tree/beta/packages/storage-s3)                   |
 | Azure                | [`@payloadcms/storage-azure`](https://github.com/payloadcms/payload/tree/beta/packages/storage-azure)             |
 | Google Cloud Storage | [`@payloadcms/storage-gcs`](https://github.com/payloadcms/payload/tree/beta/packages/storage-gcs)                 |
-
+| Uploadthing          | [`@payloadcms/storage-uploadthing`](https://github.com/payloadcms/payload/tree/beta/packages/uploadthing)         |
 
 ## Vercel Blob Storage
 [`@payloadcms/storage-vercel-blob`](https://www.npmjs.com/package/@payloadcms/storage-vercel-blob)
@@ -224,7 +224,7 @@ pnpm add @payloadcms/storage-uploadthing@beta
 ### Usage
 
 - Configure the `collections` object to specify which collections should use uploadthing. The slug _must_ match one of your existing collection slugs and be an `upload` type.
-- Get an API key from Uploadthing and set it as `apiKey` in the `options` object.
+- Get a token from Uploadthing and set it as `token` in the `options` object.
 - `acl` is optional and defaults to `public-read`.
 
 ```ts
@@ -236,7 +236,7 @@ export default buildConfig({
         [mediaSlug]: true,
       },
       options: {
-        apiKey: process.env.UPLOADTHING_SECRET,
+        token: process.env.UPLOADTHING_TOKEN,
         acl: 'public-read',
       },
     }),
@@ -248,7 +248,7 @@ export default buildConfig({
 
 | Option           | Description                                     | Default       |
 | ---------------- | ----------------------------------------------- | ------------- |
-| `apiKey`         | API key from Uploadthing. Required.             |               |
+| `token`          | Token from Uploadthing. Required.               |               |
 | `acl`            | Access control list for files that are uploaded | `public-read` |
 | `logLevel`       | Log level for Uploadthing                       | `info`        |
 | `fetch`          | Custom fetch function                           | `fetch`       |

@@ -213,7 +213,6 @@ export const buildTableState = async (
   }
 
   const fields = collectionConfig.fields
-  const clientFields = clientCollectionConfig?.fields || []
 
   let docs = docsFromArgs
   let data: PaginatedDocs

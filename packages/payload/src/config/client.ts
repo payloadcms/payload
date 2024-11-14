@@ -45,7 +45,8 @@ export type ClientConfig = {
   collections: ClientCollectionConfig[]
   custom?: Record<string, any>
   globals: ClientGlobalConfig[]
-} & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | ServerOnlyRootProperties>
+  i18n?: Omit<SanitizedConfig['i18n'], 'supportedLanguages'>
+} & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties>
 
 export const serverOnlyAdminConfigProperties: readonly Partial<ServerOnlyRootAdminProperties>[] = []
 
@@ -78,7 +79,7 @@ export const createClientConfig = ({
   i18n: I18nClient
 }): ClientConfig => {
   // We can use deepCopySimple here, as the clientConfig should be JSON serializable anyways, since it will be sent from server => client
-  const clientConfig = deepCopyObjectSimple(config) as unknown as ClientConfig
+  const clientConfig = deepCopyObjectSimple(config, true) as unknown as ClientConfig
 
   for (const key of serverOnlyConfigProperties) {
     if (key in clientConfig) {
@@ -90,6 +91,14 @@ export const createClientConfig = ({
     for (const locale of clientConfig.localization.locales) {
       delete locale.toString
     }
+  }
+
+  if (
+    'i18n' in clientConfig &&
+    'supportedLanguages' in clientConfig.i18n &&
+    clientConfig.i18n.supportedLanguages
+  ) {
+    delete clientConfig.i18n.supportedLanguages
   }
 
   if (!clientConfig.admin) {

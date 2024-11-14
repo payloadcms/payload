@@ -100,8 +100,8 @@ export type LexicalRichTextFieldProps = {
   RichTextFieldClientProps<SerializedEditorState, AdapterProps, object>
 
 export type LexicalRichTextCellProps = DefaultCellComponentProps<
-  SerializedEditorState,
-  RichTextFieldClient<SerializedEditorState, AdapterProps, object>
+  RichTextFieldClient<SerializedEditorState, AdapterProps, object>,
+  SerializedEditorState
 >
 
 export type AdapterProps = {

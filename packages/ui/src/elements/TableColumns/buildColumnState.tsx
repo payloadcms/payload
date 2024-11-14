@@ -1,16 +1,17 @@
 import type { I18nClient } from '@payloadcms/translations'
-
-import {
-  type ClientCollectionConfig,
-  type DefaultCellComponentProps,
-  type Field,
-  MissingEditorProp,
-  type PaginatedDocs,
-  type Payload,
-  type PayloadComponent,
-  type SanitizedCollectionConfig,
-  type StaticLabel,
+import type {
+  ClientCollectionConfig,
+  DefaultCellComponentProps,
+  DefaultServerCellComponentProps,
+  Field,
+  PaginatedDocs,
+  Payload,
+  PayloadComponent,
+  SanitizedCollectionConfig,
+  StaticLabel,
 } from 'payload'
+
+import { MissingEditorProp } from 'payload'
 import { deepCopyObjectSimple, fieldIsPresentationalOnly } from 'payload/shared'
 import React from 'react'
 
@@ -177,7 +178,7 @@ export const buildColumnState = (args: Args): Column[] => {
       rowData: undefined,
     }
 
-    const serverProps = {
+    const serverProps: Pick<DefaultServerCellComponentProps, 'field' | 'i18n' | 'payload'> = {
       field: _field,
       i18n,
       payload,

@@ -113,7 +113,10 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
               where: { id: { in: duplicativeDocIDs } },
             })
           } catch (err: unknown) {
-            payload.logger.error(`Error deleting duplicative ${searchSlug} documents.`)
+            payload.logger.error({
+              err,
+              msg: `Error deleting duplicative ${searchSlug} documents.`,
+            })
           }
         }
 
@@ -134,7 +137,7 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
                 req,
               })
             } catch (err: unknown) {
-              payload.logger.error(`Error updating ${searchSlug} document.`)
+              payload.logger.error({ err, msg: `Error updating ${searchSlug} document.` })
             }
           }
           if (deleteDrafts && status === 'draft') {

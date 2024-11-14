@@ -23,9 +23,17 @@
     &--read-only {
       .editor-container {
         .editor {
-          background: var(--theme-elevation-200);
+          @keyframes fadeInBackground {
+            from {
+              background-color: transparent;
+            }
+            to {
+              background-color: var(--theme-elevation-100);
+            }
+          }
+
+          animation: fadeInBackground 0.5s ease forwards;
           color: var(--theme-elevation-450);
-          padding: calc(var(--base) * 0.5);
         }
       }
     }
