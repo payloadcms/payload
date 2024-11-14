@@ -3,9 +3,12 @@ import type { DeepRequired } from 'ts-essentials'
 import type { Payload } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 
+/**
+ * A permission object that can be used to determine if a user has access to a specific operation.
+ */
 export type Permission = {
   permission: boolean
-  where?: Record<string, unknown>
+  where?: Where
 }
 
 export type FieldPermissions = {
@@ -29,6 +32,24 @@ export type FieldPermissions = {
     permission: boolean
   }
 }
+
+export type SanitizedFieldPermissions =
+  | {
+      blocks?: {
+        [blockSlug: string]: {
+          fields: {
+            [fieldName: string]: SanitizedFieldPermissions
+          }
+        }
+      }
+      create: true
+      fields?: {
+        [fieldName: string]: SanitizedFieldPermissions
+      }
+      read: true
+      update: true
+    }
+  | true
 
 export type CollectionPermission = {
   create: Permission
@@ -58,6 +79,32 @@ export type Permissions = {
   }
   globals?: {
     [globalSlug: string]: GlobalPermission
+  }
+}
+
+export type SanitizedPermissions = {
+  canAccessAdmin?: boolean
+  collections?: {
+    [collectionSlug: string]: {
+      create?: true
+      delete?: true
+      fields: {
+        [fieldName: string]: SanitizedFieldPermissions
+      }
+      read?: true
+      readVersions?: true
+      update?: true
+    }
+  }
+  globals?: {
+    [globalSlug: string]: {
+      fields: {
+        [fieldName: string]: SanitizedFieldPermissions
+      }
+      read?: true
+      readVersions?: true
+      update?: true
+    }
   }
 }
 

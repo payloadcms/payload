@@ -102,9 +102,21 @@ describe('recursivelySanitizePermissions', () => {
   })
 
   it('should sanitize a collection with nested fields in blocks', () => {
-    const permissions: Partial<CollectionPermission> = {
+    const permissions: CollectionPermission = {
+      create: {
+        permission: true,
+      },
+      delete: {
+        permission: true,
+      },
+      read: {
+        permission: true,
+      },
+      update: {
+        permission: true,
+      },
       fields: {
-        blocks: {
+        layout: {
           create: {
             permission: true,
           },
@@ -160,15 +172,101 @@ describe('recursivelySanitizePermissions', () => {
     recursivelySanitizePermissions(permissions)
 
     expect(permissions).toStrictEqual({
+      create: true,
+      delete: true,
+      fields: true,
+      read: true,
+      update: true,
+    })
+  })
+
+  it('should sanitize a collection with nested fields in blocks without truncating', () => {
+    const permissions: CollectionPermission = {
+      create: {
+        permission: true,
+      },
+      delete: {
+        permission: true,
+      },
+      read: {
+        permission: true,
+      },
+      update: {
+        permission: true,
+      },
       fields: {
-        blocks: {
+        layout: {
+          create: {
+            permission: true,
+          },
+          blocks: {
+            blockWithTitle: {
+              fields: {
+                blockTitle: {
+                  create: {
+                    permission: true,
+                  },
+                  read: {
+                    permission: true,
+                  },
+                  update: {
+                    permission: true,
+                  },
+                },
+                id: {
+                  create: {
+                    permission: true,
+                  },
+                  read: {
+                    permission: true,
+                  },
+                  update: {
+                    permission: true,
+                  },
+                },
+                blockName: {
+                  create: {
+                    permission: false,
+                  },
+                  read: {
+                    permission: true,
+                  },
+                  update: {
+                    permission: false,
+                  },
+                },
+              },
+            },
+          },
+          read: {
+            permission: true,
+          },
+          update: {
+            permission: true,
+          },
+        },
+      },
+    }
+
+    recursivelySanitizePermissions(permissions)
+
+    expect(permissions).toStrictEqual({
+      create: true,
+      delete: true,
+      read: true,
+      update: true,
+      fields: {
+        layout: {
           create: true,
           blocks: {
             blockWithTitle: {
-              fields: true,
-              create: true,
-              read: true,
-              update: true,
+              fields: {
+                blockTitle: true,
+                id: true,
+                blockName: {
+                  read: true,
+                },
+              },
             },
           },
           read: true,
