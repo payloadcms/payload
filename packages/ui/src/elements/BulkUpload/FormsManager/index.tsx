@@ -188,7 +188,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       }),
     )
 
-    setHasPublishPermission(publishedAccessJSON?.update?.permission)
+    setHasPublishPermission(publishedAccessJSON?.update)
     setHasInitializedDocPermissions(true)
   }, [api, code, collectionSlug, i18n.language, serverURL])
 

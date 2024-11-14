@@ -78,7 +78,7 @@ export const getViewsFromConfig = ({
     const [collectionEntity, collectionSlug, segment3, segment4, segment5, ...remainingSegments] =
       routeSegments
 
-    if (!overrideDocPermissions && !docPermissions?.read?.permission) {
+    if (!overrideDocPermissions && !docPermissions?.read) {
       throw new Error('not-found')
     } else {
       // `../:id`, or `../create`
@@ -86,11 +86,7 @@ export const getViewsFromConfig = ({
         case 3: {
           switch (segment3) {
             case 'create': {
-              if (
-                !overrideDocPermissions &&
-                'create' in docPermissions &&
-                docPermissions?.create?.permission
-              ) {
+              if (!overrideDocPermissions && 'create' in docPermissions && docPermissions.create) {
                 CustomView = {
                   ComponentConfig: getCustomViewByKey(views, 'default'),
                 }
@@ -176,7 +172,7 @@ export const getViewsFromConfig = ({
             }
 
             case 'versions': {
-              if (!overrideDocPermissions && docPermissions?.readVersions?.permission) {
+              if (!overrideDocPermissions && docPermissions?.readVersions) {
                 CustomView = {
                   ComponentConfig: getCustomViewByKey(views, 'versions'),
                 }
@@ -229,7 +225,7 @@ export const getViewsFromConfig = ({
         // `../:id/versions/:version`, etc
         default: {
           if (segment4 === 'versions') {
-            if (!overrideDocPermissions && docPermissions?.readVersions?.permission) {
+            if (!overrideDocPermissions && docPermissions?.readVersions) {
               CustomView = {
                 ComponentConfig: getCustomViewByKey(views, 'version'),
               }
@@ -281,7 +277,7 @@ export const getViewsFromConfig = ({
   if (globalConfig) {
     const [globalEntity, globalSlug, segment3, ...remainingSegments] = routeSegments
 
-    if (!overrideDocPermissions && !docPermissions?.read?.permission) {
+    if (!overrideDocPermissions && !docPermissions?.read) {
       throw new Error('not-found')
     } else {
       switch (routeSegments.length) {
@@ -323,7 +319,7 @@ export const getViewsFromConfig = ({
             }
 
             case 'versions': {
-              if (!overrideDocPermissions && docPermissions?.readVersions?.permission) {
+              if (!overrideDocPermissions && docPermissions?.readVersions) {
                 CustomView = {
                   ComponentConfig: getCustomViewByKey(views, 'versions'),
                 }
@@ -340,7 +336,7 @@ export const getViewsFromConfig = ({
             }
 
             default: {
-              if (!overrideDocPermissions && docPermissions?.read?.permission) {
+              if (!overrideDocPermissions && docPermissions?.read) {
                 const baseRoute = [adminRoute, globalEntity, globalSlug, segment3]
                   .filter(Boolean)
                   .join('/')
@@ -381,7 +377,7 @@ export const getViewsFromConfig = ({
         default: {
           // `../:slug/versions/:version`, etc
           if (segment3 === 'versions') {
-            if (!overrideDocPermissions && docPermissions?.readVersions?.permission) {
+            if (!overrideDocPermissions && docPermissions?.readVersions) {
               CustomView = {
                 ComponentConfig: getCustomViewByKey(views, 'version'),
               }

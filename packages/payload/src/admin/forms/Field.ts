@@ -1,7 +1,7 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { MarkOptional } from 'ts-essentials'
 
-import type { FieldPermissions, User } from '../../auth/types.js'
+import type { SanitizedFieldPermissions, User } from '../../auth/types.js'
 import type { ClientBlock, ClientField, Field } from '../../fields/config/types.js'
 import type { Payload } from '../../types/index.js'
 import type {
@@ -79,7 +79,7 @@ export type ServerComponentProps = {
   formState: FormState
   i18n: I18nClient
   payload: Payload
-  permissions: FieldPermissions
+  permissions: SanitizedFieldPermissions
   siblingData: Data
   user: User
 }

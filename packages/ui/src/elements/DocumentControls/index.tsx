@@ -118,11 +118,9 @@ export const DocumentControls: React.FC<{
     }
   }, [data, i18n, dateFormat])
 
-  const hasCreatePermission =
-    permissions && 'create' in permissions && permissions.create?.permission
+  const hasCreatePermission = permissions && 'create' in permissions && permissions.create
 
-  const hasDeletePermission =
-    permissions && 'delete' in permissions && permissions.delete?.permission
+  const hasDeletePermission = permissions && 'delete' in permissions && permissions.delete
 
   const showDotMenu = Boolean(
     collectionConfig && id && !disableActions && (hasCreatePermission || hasDeletePermission),

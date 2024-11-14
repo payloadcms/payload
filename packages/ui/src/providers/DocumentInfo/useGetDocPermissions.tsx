@@ -90,7 +90,7 @@ export const useGetDocPermissions = ({
             }),
           )
 
-          setHasPublishPermission(publishedAccessJSON?.update?.permission)
+          setHasPublishPermission(publishedAccessJSON?.update)
         }
       } else {
         // when creating new documents, there is no permissions saved for this document yet

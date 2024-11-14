@@ -94,7 +94,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                           path: `/collections/${slug}/create`,
                         })
 
-                        hasCreatePermission = permissions?.collections?.[slug]?.create?.permission
+                        hasCreatePermission = permissions?.collections?.[slug]?.create
                       }
 
                       if (type === EntityType.global) {

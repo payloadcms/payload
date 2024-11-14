@@ -39,10 +39,7 @@ export function groupNavItems(
 ): NavGroupType[] {
   const result = entities.reduce(
     (groups, entityToGroup) => {
-      if (
-        permissions?.[entityToGroup.type.toLowerCase()]?.[entityToGroup.entity.slug]?.read
-          ?.permission
-      ) {
+      if (permissions?.[entityToGroup.type.toLowerCase()]?.[entityToGroup.entity.slug]?.read) {
         const translatedGroup = getTranslation(entityToGroup.entity.admin.group, i18n)
 
         if (entityToGroup.entity.admin.group) {

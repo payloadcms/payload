@@ -44,7 +44,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
   const { clearRouteCache } = useRouteCache()
 
   const collectionPermissions = permissions?.collections?.[slug]
-  const hasDeletePermission = collectionPermissions?.delete?.permission
+  const hasDeletePermission = collectionPermissions?.delete
 
   const modalSlug = `delete-${slug}`
 

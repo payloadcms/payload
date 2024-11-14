@@ -132,7 +132,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   const { clearRouteCache } = useRouteCache()
 
   const collectionPermissions = permissions?.collections?.[slug]
-  const hasUpdatePermission = collectionPermissions?.update?.permission
+  const hasUpdatePermission = collectionPermissions?.update
 
   const drawerSlug = `edit-${slug}`
 

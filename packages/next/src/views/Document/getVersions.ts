@@ -43,7 +43,7 @@ export const getVersions = async ({
   const entityConfig = collectionConfig || globalConfig
   const versionsConfig = entityConfig?.versions
 
-  const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions?.permission)
+  const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions)
 
   if (!shouldFetchVersions) {
     const hasPublishedDoc = Boolean((collectionConfig && id) || globalConfig)

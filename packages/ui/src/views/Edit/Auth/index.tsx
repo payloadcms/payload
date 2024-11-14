@@ -70,11 +70,11 @@ export const Auth: React.FC<Props> = (props) => {
     return false
   }, [permissions, collectionSlug])
 
-  const apiKeyReadOnly = readOnly || !docPermissions?.fields?.apiKey?.update?.permission
-  const enableAPIKeyReadOnly = readOnly || !docPermissions?.fields?.enableAPIKey?.update?.permission
+  const apiKeyReadOnly = readOnly || !docPermissions?.fields?.apiKey?.update
+  const enableAPIKeyReadOnly = readOnly || !docPermissions?.fields?.enableAPIKey?.update
 
-  const canReadApiKey = docPermissions?.fields?.apiKey?.read?.permission
-  const canReadEnableAPIKey = docPermissions?.fields?.enableAPIKey?.read?.permission
+  const canReadApiKey = docPermissions?.fields?.apiKey?.read
+  const canReadEnableAPIKey = docPermissions?.fields?.enableAPIKey?.read
 
   const handleChangePassword = useCallback(
     (showPasswordFields: boolean) => {
