@@ -1,5 +1,4 @@
 'use client'
-import type { FieldTypes } from 'payload'
 
 import React, { Fragment } from 'react'
 
@@ -9,7 +8,6 @@ export const WatchCondition: React.FC<{
   children: React.ReactNode
   indexPath: string
   path: string
-  type: FieldTypes
 }> = (props) => {
   const { children, path } = props
 
