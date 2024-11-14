@@ -27,6 +27,7 @@ import {
 } from 'lexical'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
+import type { LinkNode } from '../../../../nodes/LinkNode.js'
 import type { LinkFields } from '../../../../nodes/types.js'
 import type { LinkPayload } from '../types.js'
 
@@ -41,6 +42,9 @@ import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './commands.js'
 
 export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.ReactNode {
   const [editor] = useLexicalComposerContext()
+  // TO-DO: There are several states that should not be state, because they
+  // are derived from linkNode (linkUrl, linkLabel, stateData, isLink, isAutoLink...)
+  const [linkNode, setLinkNode] = useState<LinkNode>()
 
   const editorRef = useRef<HTMLDivElement | null>(null)
   const [linkUrl, setLinkUrl] = useState<null | string>(null)
@@ -117,6 +121,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       setNotLink()
       return
     }
+    setLinkNode(focusLinkParent)
 
     const fields = focusLinkParent.getFields()
 
@@ -329,12 +334,12 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         <div className="link-input">
           {linkUrl && linkUrl.length > 0 ? (
             <a href={linkUrl} rel="noopener noreferrer" target="_blank">
-              <ExternalLinkIcon />
+              {linkNode?.__fields.newTab ? <ExternalLinkIcon /> : null}
               {linkLabel != null && linkLabel.length > 0 ? linkLabel : linkUrl}
             </a>
           ) : linkLabel != null && linkLabel.length > 0 ? (
             <>
-              <ExternalLinkIcon />
+              {linkNode?.__fields.newTab ? <ExternalLinkIcon /> : null}
               <span className="link-input__label-pure">{linkLabel}</span>
             </>
           ) : null}

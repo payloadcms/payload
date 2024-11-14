@@ -1,12 +1,14 @@
 import React from 'react'
 
+import './index.scss'
+
 export const ExternalLinkIcon: React.FC<{
   className?: string
 }> = (props) => {
   const { className } = props
   return (
     <svg
-      className={[className, 'icon icon--edit'].filter(Boolean).join(' ')}
+      className={[className, 'icon icon--externalLink'].filter(Boolean).join(' ')}
       viewBox="0 0 20 20"
       xmlns="http://www.w3.org/2000/svg"
     >
