@@ -1,5 +1,6 @@
 import type {
   Data,
+  DocumentPermissions,
   PayloadRequest,
   SanitizedCollectionConfig,
   SanitizedDocumentPermissions,
@@ -10,7 +11,7 @@ import {
   hasSavePermission as getHasSavePermission,
   isEditing as getIsEditing,
 } from '@payloadcms/ui/shared'
-import { docAccessOperation, docAccessOperationGlobal } from 'payload'
+import { docAccessOperation, docAccessOperationGlobal, sanitizePermissions } from 'payload'
 
 export const getDocumentPermissions = async (args: {
   collectionConfig?: SanitizedCollectionConfig
@@ -25,7 +26,7 @@ export const getDocumentPermissions = async (args: {
 }> => {
   const { id, collectionConfig, data = {}, globalConfig, req } = args
 
-  let docPermissions: SanitizedDocumentPermissions
+  let docPermissions: DocumentPermissions
   let hasPublishPermission = false
 
   if (collectionConfig) {
@@ -57,7 +58,7 @@ export const getDocumentPermissions = async (args: {
               _status: 'published',
             },
           },
-        }).then(({ update }) => update)
+        }).then(({ update }) => update?.permission)
       }
     } catch (error) {
       req.payload.logger.error(error)
@@ -84,16 +85,20 @@ export const getDocumentPermissions = async (args: {
               _status: 'published',
             },
           },
-        }).then(({ update }) => update)
+        }).then(({ update }) => update?.permission)
       }
     } catch (error) {
       req.payload.logger.error(error)
     }
   }
 
+  // TODO: do this in a better way. Only doing this bc this is how the fn was written (mutates the original object)
+  const sanitizedDocPermissions = { ...docPermissions } as any as SanitizedDocumentPermissions
+  sanitizePermissions(sanitizedDocPermissions)
+
   const hasSavePermission = getHasSavePermission({
     collectionSlug: collectionConfig?.slug,
-    docPermissions,
+    docPermissions: sanitizedDocPermissions,
     globalSlug: globalConfig?.slug,
     isEditing: getIsEditing({
       id,
@@ -103,7 +108,7 @@ export const getDocumentPermissions = async (args: {
   })
 
   return {
-    docPermissions,
+    docPermissions: sanitizedDocPermissions,
     hasPublishPermission,
     hasSavePermission,
   }
