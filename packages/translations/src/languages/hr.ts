@@ -275,6 +275,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     open: 'Otvori',
     or: 'ili',
     order: 'Poredak',
+    overwriteExistingData: undefined,
     pageNotFound: 'Stranica nije pronađena',
     password: 'Lozinka',
     payloadSettings: 'Payload postavke',
@@ -322,6 +323,14 @@ export const hrTranslations: DefaultTranslationsObject = {
     value: 'Vrijednost',
     viewReadOnly: 'Pogledaj samo za čitanje',
     welcome: 'Dobrodošli',
+  },
+  localization: {
+    cannotCopySameLocale: undefined,
+    copyFrom: undefined,
+    copyFromTo: undefined,
+    copyTo: undefined,
+    copyToLocale: undefined,
+    selectLocaleToCopy: undefined,
   },
   operators: {
     contains: 'sadrži',

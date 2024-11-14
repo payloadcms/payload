@@ -272,6 +272,7 @@ export const arTranslations: DefaultTranslationsObject = {
     open: 'فتح',
     or: 'أو',
     order: 'التّرتيب',
+    overwriteExistingData: undefined,
     pageNotFound: 'الصّفحة غير موجودة',
     password: 'كلمة المرور',
     payloadSettings: 'الإعدادات',
@@ -319,6 +320,14 @@ export const arTranslations: DefaultTranslationsObject = {
     value: 'القيمة',
     viewReadOnly: 'عرض للقراءة فقط',
     welcome: 'مرحبًا',
+  },
+  localization: {
+    cannotCopySameLocale: undefined,
+    copyFrom: undefined,
+    copyFromTo: undefined,
+    copyTo: undefined,
+    copyToLocale: undefined,
+    selectLocaleToCopy: undefined,
   },
   operators: {
     contains: 'يحتوي',

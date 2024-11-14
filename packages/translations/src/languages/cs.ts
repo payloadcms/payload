@@ -273,6 +273,7 @@ export const csTranslations: DefaultTranslationsObject = {
     open: 'Otevřít',
     or: 'Nebo',
     order: 'Pořadí',
+    overwriteExistingData: undefined,
     pageNotFound: 'Stránka nenalezena',
     password: 'Heslo',
     payloadSettings: 'Payload nastavení',
@@ -320,6 +321,14 @@ export const csTranslations: DefaultTranslationsObject = {
     value: 'Hodnota',
     viewReadOnly: 'Zobrazit pouze pro čtení',
     welcome: 'Vítejte',
+  },
+  localization: {
+    cannotCopySameLocale: undefined,
+    copyFrom: undefined,
+    copyFromTo: undefined,
+    copyTo: undefined,
+    copyToLocale: undefined,
+    selectLocaleToCopy: undefined,
   },
   operators: {
     contains: 'obsahuje',

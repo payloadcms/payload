@@ -269,6 +269,7 @@ export const heTranslations: DefaultTranslationsObject = {
     open: 'פתח',
     or: 'או',
     order: 'סדר',
+    overwriteExistingData: undefined,
     pageNotFound: 'הדף לא נמצא',
     password: 'סיסמה',
     payloadSettings: 'הגדרות מערכת Payload',
@@ -316,6 +317,14 @@ export const heTranslations: DefaultTranslationsObject = {
     value: 'ערך',
     viewReadOnly: 'הצג קריאה בלבד',
     welcome: 'ברוך הבא',
+  },
+  localization: {
+    cannotCopySameLocale: undefined,
+    copyFrom: undefined,
+    copyFromTo: undefined,
+    copyTo: undefined,
+    copyToLocale: undefined,
+    selectLocaleToCopy: undefined,
   },
   operators: {
     contains: 'מכיל',

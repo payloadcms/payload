@@ -277,6 +277,7 @@ export const huTranslations: DefaultTranslationsObject = {
     open: 'Megnyitás',
     or: 'Vagy',
     order: 'Sorrend',
+    overwriteExistingData: undefined,
     pageNotFound: 'Az oldal nem található',
     password: 'Jelszó',
     payloadSettings: 'Payload beállítások',
@@ -324,6 +325,14 @@ export const huTranslations: DefaultTranslationsObject = {
     value: 'Érték',
     viewReadOnly: 'Csak olvasható nézet',
     welcome: 'Üdvözöljük',
+  },
+  localization: {
+    cannotCopySameLocale: undefined,
+    copyFrom: undefined,
+    copyFromTo: undefined,
+    copyTo: undefined,
+    copyToLocale: undefined,
+    selectLocaleToCopy: undefined,
   },
   operators: {
     contains: 'tartalmaz',

@@ -277,6 +277,7 @@ export const myTranslations: DefaultTranslationsObject = {
     open: 'ဖွင့်မည်။',
     or: 'သို့မဟုတ်',
     order: 'အစဉ်လိုက်',
+    overwriteExistingData: undefined,
     pageNotFound: 'ရောက်ရှိနေသော စာမျက်နှာသည် မရှိပါ။',
     password: 'စကားဝှက်',
     payloadSettings: 'ရွေးချယ်စရာများ',
@@ -326,6 +327,14 @@ export const myTranslations: DefaultTranslationsObject = {
     value: 'တန်ဖိုး',
     viewReadOnly: 'ဖတ်ရှုရန်သာကြည့်ပါ',
     welcome: 'ကြိုဆိုပါတယ်။',
+  },
+  localization: {
+    cannotCopySameLocale: undefined,
+    copyFrom: undefined,
+    copyFromTo: undefined,
+    copyTo: undefined,
+    copyToLocale: undefined,
+    selectLocaleToCopy: undefined,
   },
   operators: {
     contains: 'ပါဝင်သည်',

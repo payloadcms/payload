@@ -274,6 +274,7 @@ export const faTranslations: DefaultTranslationsObject = {
     open: 'باز کردن',
     or: 'یا',
     order: 'چیدمان',
+    overwriteExistingData: undefined,
     pageNotFound: 'برگه یافت نشد',
     password: 'گذرواژه',
     payloadSettings: 'تنظیمات پی‌لود',
@@ -321,6 +322,14 @@ export const faTranslations: DefaultTranslationsObject = {
     value: 'مقدار',
     viewReadOnly: 'فقط برای خواندن مشاهده کنید',
     welcome: 'خوش‌آمدید',
+  },
+  localization: {
+    cannotCopySameLocale: undefined,
+    copyFrom: undefined,
+    copyFromTo: undefined,
+    copyTo: undefined,
+    copyToLocale: undefined,
+    selectLocaleToCopy: undefined,
   },
   operators: {
     contains: 'شامل',

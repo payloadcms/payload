@@ -275,6 +275,7 @@ export const azTranslations: DefaultTranslationsObject = {
     open: 'Aç',
     or: 'Və ya',
     order: 'Sıra',
+    overwriteExistingData: undefined,
     pageNotFound: 'Səhifə tapılmadı',
     password: 'Şifrə',
     payloadSettings: 'Payload Parametrləri',
@@ -324,6 +325,14 @@ export const azTranslations: DefaultTranslationsObject = {
     value: 'Dəyər',
     viewReadOnly: 'Yalnız oxu rejimində bax',
     welcome: 'Xoş gəldiniz',
+  },
+  localization: {
+    cannotCopySameLocale: undefined,
+    copyFrom: undefined,
+    copyFromTo: undefined,
+    copyTo: undefined,
+    copyToLocale: undefined,
+    selectLocaleToCopy: undefined,
   },
   operators: {
     contains: 'daxilində',

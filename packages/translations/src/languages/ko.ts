@@ -273,6 +273,7 @@ export const koTranslations: DefaultTranslationsObject = {
     open: '열기',
     or: '또는',
     order: '순서',
+    overwriteExistingData: undefined,
     pageNotFound: '페이지를 찾을 수 없음',
     password: '비밀번호',
     payloadSettings: 'Payload 설정',
@@ -320,6 +321,14 @@ export const koTranslations: DefaultTranslationsObject = {
     value: '값',
     viewReadOnly: '읽기 전용으로 보기',
     welcome: '환영합니다',
+  },
+  localization: {
+    cannotCopySameLocale: undefined,
+    copyFrom: undefined,
+    copyFromTo: undefined,
+    copyTo: undefined,
+    copyToLocale: undefined,
+    selectLocaleToCopy: undefined,
   },
   operators: {
     contains: '포함',

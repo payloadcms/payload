@@ -277,6 +277,7 @@ export const itTranslations: DefaultTranslationsObject = {
     open: 'Apri',
     or: 'Oppure',
     order: 'Ordine',
+    overwriteExistingData: undefined,
     pageNotFound: 'Pagina non trovata',
     password: 'Password',
     payloadSettings: 'Impostazioni di Payload',
@@ -324,6 +325,14 @@ export const itTranslations: DefaultTranslationsObject = {
     value: 'Valore',
     viewReadOnly: 'Visualizza solo lettura',
     welcome: 'Benvenuto',
+  },
+  localization: {
+    cannotCopySameLocale: undefined,
+    copyFrom: undefined,
+    copyFromTo: undefined,
+    copyTo: undefined,
+    copyToLocale: undefined,
+    selectLocaleToCopy: undefined,
   },
   operators: {
     contains: 'contiene',

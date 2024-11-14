@@ -275,6 +275,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     open: '開く',
     or: 'または',
     order: '表示順',
+    overwriteExistingData: undefined,
     pageNotFound: 'ページが見つかりません',
     password: 'パスワード',
     payloadSettings: 'Payload 設定',
@@ -322,6 +323,14 @@ export const jaTranslations: DefaultTranslationsObject = {
     value: '値',
     viewReadOnly: '読み取り専用で表示',
     welcome: 'ようこそ',
+  },
+  localization: {
+    cannotCopySameLocale: undefined,
+    copyFrom: undefined,
+    copyFromTo: undefined,
+    copyTo: undefined,
+    copyToLocale: undefined,
+    selectLocaleToCopy: undefined,
   },
   operators: {
     contains: '含む',

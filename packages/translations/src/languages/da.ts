@@ -273,6 +273,7 @@ export const daTranslations: DefaultTranslationsObject = {
     open: 'Åben',
     or: 'Eller',
     order: 'Rækkefølge',
+    overwriteExistingData: undefined,
     pageNotFound: 'Siden blev ikke fundet',
     password: 'Adgangskode',
     payloadSettings: 'Payload-indstillinger',
@@ -320,6 +321,14 @@ export const daTranslations: DefaultTranslationsObject = {
     value: 'Værdi',
     viewReadOnly: 'Vis kun-læsning',
     welcome: 'Velkommen',
+  },
+  localization: {
+    cannotCopySameLocale: undefined,
+    copyFrom: undefined,
+    copyFromTo: undefined,
+    copyTo: undefined,
+    copyToLocale: undefined,
+    selectLocaleToCopy: undefined,
   },
   operators: {
     contains: 'Indeholder',

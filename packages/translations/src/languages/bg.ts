@@ -274,6 +274,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     open: 'Отвори',
     or: 'Или',
     order: 'Ред',
+    overwriteExistingData: undefined,
     pageNotFound: 'Страницата не беше открита',
     password: 'Парола',
     payloadSettings: 'Настройки на Payload',
@@ -321,6 +322,14 @@ export const bgTranslations: DefaultTranslationsObject = {
     value: 'Стойност',
     viewReadOnly: 'Преглед само за четене',
     welcome: 'Добре дошъл',
+  },
+  localization: {
+    cannotCopySameLocale: undefined,
+    copyFrom: undefined,
+    copyFromTo: undefined,
+    copyTo: undefined,
+    copyToLocale: undefined,
+    selectLocaleToCopy: undefined,
   },
   operators: {
     contains: 'съдържа',

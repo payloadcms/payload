@@ -282,6 +282,7 @@ export const frTranslations: DefaultTranslationsObject = {
     open: 'Ouvrir',
     or: 'ou',
     order: 'Ordre',
+    overwriteExistingData: undefined,
     pageNotFound: 'Page non trouvée',
     password: 'Mot de passe',
     payloadSettings: 'Paramètres de Payload',
@@ -331,6 +332,14 @@ export const frTranslations: DefaultTranslationsObject = {
     value: 'Valeur',
     viewReadOnly: 'Afficher en lecture seule',
     welcome: 'Bienvenue',
+  },
+  localization: {
+    cannotCopySameLocale: undefined,
+    copyFrom: undefined,
+    copyFromTo: undefined,
+    copyTo: undefined,
+    copyToLocale: undefined,
+    selectLocaleToCopy: undefined,
   },
   operators: {
     contains: 'contient',
