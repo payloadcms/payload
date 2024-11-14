@@ -25,7 +25,21 @@ const migrateModelWithBatching = async ({
   let skip = 0
 
   while (hasNext) {
-    const docs = await Model.find({}, {}, { lean: true, limit: batchSize + 1, session, skip })
+    const docs = await Model.find(
+      {},
+      {},
+      {
+        lean: true,
+        limit: batchSize + 1,
+        session,
+        skip,
+      },
+    )
+
+    if (docs.length === 0) {
+      break
+    }
+
     hasNext = docs.length > batchSize
 
     if (hasNext) {
@@ -36,11 +50,13 @@ const migrateModelWithBatching = async ({
       sanitizeRelationshipIDs({ config, data: doc, fields })
     }
 
-    await Model.bulkWrite(
+    await Model.collection.bulkWrite(
       docs.map((doc) => ({
         updateOne: {
           filter: { _id: doc._id },
-          update: doc,
+          update: {
+            $set: doc,
+          },
         },
       })),
       { session },
@@ -140,13 +156,11 @@ export async function migrateRelationshipsV2_V3({
 
     sanitizeRelationshipIDs({ config, data: doc, fields: global.fields })
 
-    await GlobalsModel.updateOne(
+    await GlobalsModel.collection.updateOne(
       {
-        globalType: {
-          $eq: global.slug,
-        },
+        globalType: global.slug,
       },
-      doc,
+      { $set: doc },
       { session },
     )
 
