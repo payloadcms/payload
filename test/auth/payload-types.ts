@@ -17,13 +17,25 @@ export interface Config {
     'api-keys': ApiKey;
     'public-users': PublicUser;
     relationsCollection: RelationsCollection;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+  };
+  collectionsJoins: {};
+  collectionsSelect: {
+    users: UsersSelect<false> | UsersSelect<true>;
+    'api-keys': ApiKeysSelect<false> | ApiKeysSelect<true>;
+    'public-users': PublicUsersSelect<false> | PublicUsersSelect<true>;
+    relationsCollection: RelationsCollectionSelect<false> | RelationsCollectionSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
     defaultIDType: string;
   };
   globals: {};
+  globalsSelect: {};
   locale: null;
   user:
     | (User & {
@@ -35,6 +47,10 @@ export interface Config {
     | (PublicUser & {
         collection: 'public-users';
       });
+  jobs?: {
+    tasks: unknown;
+    workflows?: unknown;
+  };
 }
 export interface UserAuthOperations {
   forgotPassword: {
@@ -174,6 +190,46 @@ export interface RelationsCollection {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'relationsCollection';
+        value: string | RelationsCollection;
+      } | null);
+  globalSlug?: string | null;
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      }
+    | {
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
@@ -214,6 +270,123 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  adminOnlyField?: T;
+  roles?: T;
+  namedSaveToJWT?: T;
+  group?:
+    | T
+    | {
+        liftedSaveToJWT?: T;
+      };
+  groupSaveToJWT?:
+    | T
+    | {
+        saveToJWTString?: T;
+        saveToJWTFalse?: T;
+      };
+  saveToJWTTab?:
+    | T
+    | {
+        test?: T;
+      };
+  tabSaveToJWTString?:
+    | T
+    | {
+        includedByDefault?: T;
+      };
+  tabLiftedSaveToJWT?: T;
+  unnamedTabSaveToJWTString?: T;
+  unnamedTabSaveToJWTFalse?: T;
+  custom?: T;
+  authDebug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-keys_select".
+ */
+export interface ApiKeysSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "public-users_select".
+ */
+export interface PublicUsersSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  _verified?: T;
+  _verificationToken?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationsCollection_select".
+ */
+export interface RelationsCollectionSelect<T extends boolean = true> {
+  rel?: T;
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_select".
+ */
+export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_select".
+ */
+export interface PayloadPreferencesSelect<T extends boolean = true> {
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select".
+ */
+export interface PayloadMigrationsSelect<T extends boolean = true> {
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

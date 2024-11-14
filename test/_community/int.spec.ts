@@ -52,18 +52,19 @@ describe('_Community Tests', () => {
     const newPost = await payload.create({
       collection: postsSlug,
       data: {
-        text: 'LOCAL API EXAMPLE',
+        title: 'LOCAL API EXAMPLE',
       },
+      context: {},
     })
 
-    expect(newPost.text).toEqual('LOCAL API EXAMPLE')
+    expect(newPost.title).toEqual('LOCAL API EXAMPLE')
   })
 
   it('rest API example', async () => {
     const data = await restClient
       .POST(`/${postsSlug}`, {
         body: JSON.stringify({
-          text: 'REST API EXAMPLE',
+          title: 'REST API EXAMPLE',
         }),
         headers: {
           Authorization: `JWT ${token}`,
@@ -71,6 +72,6 @@ describe('_Community Tests', () => {
       })
       .then((res) => res.json())
 
-    expect(data.doc.text).toEqual('REST API EXAMPLE')
+    expect(data.doc.title).toEqual('REST API EXAMPLE')
   })
 })

@@ -1,5 +1,7 @@
 import type { Field, RichTextAdapter } from 'payload'
 
+import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
+
 import type { AdapterArguments, RichTextCustomElement } from './types.js'
 
 import { elements as elementTypes } from './field/elements/index.js'
@@ -8,7 +10,7 @@ import { uploadFieldsSchemaPath } from './field/elements/upload/shared.js'
 
 export const getGenerateSchemaMap =
   (args: AdapterArguments): RichTextAdapter['generateSchemaMap'] =>
-  ({ config, schemaMap, schemaPath }) => {
+  ({ config, i18n, schemaMap, schemaPath }) => {
     ;(args?.admin?.elements || Object.values(elementTypes)).forEach((el) => {
       let element: RichTextCustomElement
 
@@ -21,13 +23,27 @@ export const getGenerateSchemaMap =
       if (element) {
         switch (element.name) {
           case 'link': {
-            schemaMap.set(
-              `${schemaPath}.${linkFieldsSchemaPath}`,
-              args.admin?.link?.fields as Field[],
-            )
+            if (args.admin?.link?.fields) {
+              schemaMap.set(`${schemaPath}.${linkFieldsSchemaPath}`, {
+                fields: args.admin?.link?.fields as Field[],
+              })
+
+              // generate schema map entries for sub-fields using traverseFields
+              traverseFields({
+                config,
+                fields: args.admin?.link?.fields as Field[],
+                i18n,
+                parentIndexPath: '',
+                parentSchemaPath: `${schemaPath}.${linkFieldsSchemaPath}`,
+                schemaMap,
+              })
+            }
 
             break
           }
+
+          case 'relationship':
+            break
 
           case 'upload': {
             const uploadEnabledCollections = config.collections.filter(
@@ -42,18 +58,24 @@ export const getGenerateSchemaMap =
 
             uploadEnabledCollections.forEach((collection) => {
               if (args?.admin?.upload?.collections[collection.slug]?.fields) {
-                schemaMap.set(
-                  `${schemaPath}.${uploadFieldsSchemaPath}.${collection.slug}`,
-                  args?.admin?.upload?.collections[collection.slug]?.fields,
-                )
+                schemaMap.set(`${schemaPath}.${uploadFieldsSchemaPath}.${collection.slug}`, {
+                  fields: args?.admin?.upload?.collections[collection.slug]?.fields,
+                })
+
+                // generate schema map entries for sub-fields using traverseFields
+                traverseFields({
+                  config,
+                  fields: args?.admin?.upload?.collections[collection.slug]?.fields,
+                  i18n,
+                  parentIndexPath: '',
+                  parentSchemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${collection.slug}`,
+                  schemaMap,
+                })
               }
             })
 
             break
           }
-
-          case 'relationship':
-            break
         }
       }
     })

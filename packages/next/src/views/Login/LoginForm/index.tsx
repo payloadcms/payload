@@ -98,6 +98,7 @@ export const LoginForm: React.FC<{
             label: t('general:password'),
             required: true,
           }}
+          path="password"
         />
       </div>
       <Link
@@ -105,6 +106,7 @@ export const LoginForm: React.FC<{
           adminRoute,
           path: forgotRoute,
         })}
+        prefetch={false}
       >
         {t('authentication:forgotPasswordQuestion')}
       </Link>

@@ -84,7 +84,7 @@ export default buildConfig({
 
 ## Email
 
-Powered by [Resend](https://resend.com), Payload Cloud comes with integrated email support out of the box. No configuration is needed, and you can use `payload.sendEmail()` to send email right from your Payload app. To learn more about sending email with Payload, checkout the [Email Configuration](https://payloadcms.com/docs/email/overview) overview.
+Powered by [Resend](https://resend.com), Payload Cloud comes with integrated email support out of the box. No configuration is needed, and you can use `payload.sendEmail()` to send email right from your Payload app. To learn more about sending email with Payload, checkout the [Email Configuration](../email/overview) overview.
 
 If you are on the Pro or Enterprise plan, you can add your own custom Email domain name. From the Email page of your project’s Settings, add the domain you wish to use for email delivery. This will generate a set of DNS records. Add these records to your DNS provider and click verify to check that your records are resolving properly. Once verified, your emails will now be sent from your custom domain name.
 
@@ -98,14 +98,14 @@ From there, you are ready to make updates to your project. When you are ready to
 
 Projects generated from a template will come pre-configured with the official Cloud Plugin, but if you are using your own repository you will need to add this into your project. To do so, add the plugin to your Payload Config:
 
-`yarn add @payloadcms/plugin-cloud`
+`yarn add @payloadcms/payload-cloud`
 
 ```js
-import { payloadCloud } from '@payloadcms/plugin-cloud'
+import { payloadCloudPlugin } from '@payloadcms/payload-cloud'
 import { buildConfig } from 'payload'
 
 export default buildConfig({
-  plugins: [payloadCloud()],
+  plugins: [payloadCloudPlugin()],
   // rest of config
 })
 ```
@@ -113,6 +113,11 @@ export default buildConfig({
 <Banner type="warning">
   **Note:** If your Payload Config already has an email with transport, this will take precedence
   over Payload Cloud's email service.
+</Banner>
+
+<Banner type="info">
+  Good to know: the Payload Cloud Plugin was previously named `@payloadcms/plugin-cloud`. If you are
+  using this plugin, you should update to the new package name.
 </Banner>
 
 #### **Optional configuration**

@@ -1,5 +1,11 @@
 import type { I18n } from '@payloadcms/translations'
-import type { SanitizedCollectionConfig, SanitizedConfig, SanitizedGlobalConfig } from 'payload'
+import type {
+  PaginatedDocs,
+  SanitizedCollectionConfig,
+  SanitizedConfig,
+  SanitizedGlobalConfig,
+  TypeWithVersion,
+} from 'payload'
 
 import { type Column, SortColumn } from '@payloadcms/ui'
 import React from 'react'
@@ -11,6 +17,7 @@ import { IDCell } from './cells/ID/index.js'
 export const buildVersionColumns = ({
   collectionConfig,
   docID,
+  docs,
   globalConfig,
   i18n: { t },
   latestDraftVersion,
@@ -19,6 +26,7 @@ export const buildVersionColumns = ({
   collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
   docID?: number | string
+  docs: PaginatedDocs<TypeWithVersion<any>>['docs']
   globalConfig?: SanitizedGlobalConfig
   i18n: I18n
   latestDraftVersion?: string
@@ -30,56 +38,37 @@ export const buildVersionColumns = ({
     {
       accessor: 'updatedAt',
       active: true,
-      cellProps: {
-        field: {
-          name: '',
-          type: 'date',
-          admin: {
-            components: {
-              Cell: {
-                type: 'client',
-                Component: null,
-                RenderedComponent: (
-                  <CreatedAtCell
-                    collectionSlug={collectionConfig?.slug}
-                    docID={docID}
-                    globalSlug={globalConfig?.slug}
-                  />
-                ),
-              },
-              Label: {
-                type: 'client',
-                Component: null,
-              },
-            },
-          },
-        },
+      field: {
+        name: '',
+        type: 'date',
       },
       Heading: <SortColumn Label={t('general:updatedAt')} name="updatedAt" />,
+      renderedCells: docs.map((doc, i) => {
+        return (
+          <CreatedAtCell
+            collectionSlug={collectionConfig?.slug}
+            docID={docID}
+            globalSlug={globalConfig?.slug}
+            key={i}
+            rowData={{
+              id: doc.id,
+              updatedAt: doc.updatedAt,
+            }}
+          />
+        )
+      }),
     },
     {
       accessor: 'id',
       active: true,
-      cellProps: {
-        field: {
-          name: '',
-          type: 'text',
-          admin: {
-            components: {
-              Cell: {
-                type: 'client',
-                Component: null,
-                RenderedComponent: <IDCell />,
-              },
-              Label: {
-                type: 'client',
-                Component: null,
-              },
-            },
-          },
-        },
+      field: {
+        name: '',
+        type: 'text',
       },
       Heading: <SortColumn disable Label={t('version:versionID')} name="id" />,
+      renderedCells: docs.map((doc, i) => {
+        return <IDCell id={doc.id} key={i} />
+      }),
     },
   ]
 
@@ -90,31 +79,21 @@ export const buildVersionColumns = ({
     columns.push({
       accessor: '_status',
       active: true,
-      cellProps: {
-        field: {
-          name: '',
-          type: 'checkbox',
-          admin: {
-            components: {
-              Cell: {
-                type: 'client',
-                Component: null,
-                RenderedComponent: (
-                  <AutosaveCell
-                    latestDraftVersion={latestDraftVersion}
-                    latestPublishedVersion={latestPublishedVersion}
-                  />
-                ),
-              },
-              Label: {
-                type: 'client',
-                Component: null,
-              },
-            },
-          },
-        },
+      field: {
+        name: '',
+        type: 'checkbox',
       },
       Heading: <SortColumn disable Label={t('version:status')} name="status" />,
+      renderedCells: docs.map((doc, i) => {
+        return (
+          <AutosaveCell
+            key={i}
+            latestDraftVersion={latestDraftVersion}
+            latestPublishedVersion={latestPublishedVersion}
+            rowData={doc}
+          />
+        )
+      }),
     })
   }
 

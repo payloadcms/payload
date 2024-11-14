@@ -12,6 +12,8 @@ import type { CollectionModel, GlobalModel, MigrateDownArgs, MigrateUpArgs } fro
 
 import { connect } from './connect.js'
 import { count } from './count.js'
+import { countGlobalVersions } from './countGlobalVersions.js'
+import { countVersions } from './countVersions.js'
 import { create } from './create.js'
 import { createGlobal } from './createGlobal.js'
 import { createGlobalVersion } from './createGlobalVersion.js'
@@ -72,8 +74,14 @@ export interface Args {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
     useFacet?: boolean
   } & ConnectOptions
+
   /** Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false */
   disableIndexHints?: boolean
+  /**
+   * Set to `true` to ensure that indexes are ready before completing connection.
+   * NOTE: not recommended for production. This can slow down the initialization of Payload.
+   */
+  ensureIndexes?: boolean
   migrationDir?: string
   /**
    * typed as any to avoid dependency
@@ -94,6 +102,7 @@ export type MongooseAdapter = {
     [slug: string]: CollectionModel
   }
   connection: Connection
+  ensureIndexes: boolean
   globals: GlobalModel
   mongoMemoryServer: MongoMemoryReplSet
   prodMigrations?: {
@@ -116,6 +125,7 @@ declare module 'payload' {
       [slug: string]: CollectionModel
     }
     connection: Connection
+    ensureIndexes: boolean
     globals: GlobalModel
     mongoMemoryServer: MongoMemoryReplSet
     prodMigrations?: {
@@ -136,6 +146,7 @@ export function mongooseAdapter({
   autoPluralization = true,
   connectOptions,
   disableIndexHints = false,
+  ensureIndexes,
   migrationDir: migrationDirArg,
   mongoMemoryServer,
   prodMigrations,
@@ -154,8 +165,8 @@ export function mongooseAdapter({
       collections: {},
       connection: undefined,
       connectOptions: connectOptions || {},
-      count,
       disableIndexHints,
+      ensureIndexes,
       globals: undefined,
       mongoMemoryServer,
       sessions: {},
@@ -166,6 +177,9 @@ export function mongooseAdapter({
       beginTransaction: transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
       commitTransaction,
       connect,
+      count,
+      countGlobalVersions,
+      countVersions,
       create,
       createGlobal,
       createGlobalVersion,

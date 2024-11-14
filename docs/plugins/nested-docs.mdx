@@ -48,7 +48,7 @@ Install the plugin using any JavaScript package manager like [Yarn](https://yarn
 or [PNPM](https://pnpm.io):
 
 ```bash
-  pnpm add @payloadcms/plugin-nested-docs
+  pnpm add @payloadcms/plugin-nested-docs@beta
 ```
 
 ## Basic Usage
@@ -177,7 +177,7 @@ You can also extend the built-in `parent` and `breadcrumbs` fields per collectio
 and `createBreadcrumbField` methods. They will merge your customizations overtop the plugin's base field configurations.
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 import { createParentField } from '@payloadcms/plugin-nested-docs/fields'
 import { createBreadcrumbsField } from '@payloadcms/plugin-nested-docs/fields'
 

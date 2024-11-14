@@ -124,6 +124,10 @@ export const LexicalFields: CollectionConfig = {
       required: true,
     },
     {
+      name: 'lexicalRootEditor',
+      type: 'richText',
+    },
+    {
       name: 'lexicalSimple',
       type: 'richText',
       editor: lexicalEditor({
@@ -177,7 +181,12 @@ export const LexicalFields: CollectionConfig = {
 
             const yourEditorState: SerializedEditorState = siblingData.lexicalWithBlocks
             try {
-              headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
+              headlessEditor.update(
+                () => {
+                  headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
+                },
+                { discrete: true },
+              )
             } catch (e) {
               /* empty */
             }

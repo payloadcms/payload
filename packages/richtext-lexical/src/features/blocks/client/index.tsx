@@ -38,17 +38,19 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                 Icon: BlockIcon,
                 key: 'block-' + blockSlug,
                 keywords: ['block', 'blocks', blockSlug],
-                label: ({ i18n, richTextComponentMap }) => {
-                  if (!richTextComponentMap) {
+                label: ({ featureClientSchemaMap, i18n, schemaPath }) => {
+                  if (!featureClientSchemaMap) {
                     return blockSlug
                   }
 
-                  const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
-                  const blocksField: BlocksFieldClient = richTextComponentMap.get(
-                    componentMapRenderedBlockPath,
-                  )?.[0]
+                  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockSlug}`
+                  const clientSchemaMap = featureClientSchemaMap['blocks']
 
-                  const clientBlock = blocksField.blocks.find((_block) => _block.slug === blockSlug)
+                  const blocksField: BlocksFieldClient = clientSchemaMap[
+                    componentMapRenderedBlockPath
+                  ][0] as BlocksFieldClient
+
+                  const clientBlock = blocksField.blocks[0]
 
                   const blockDisplayName = clientBlock?.labels?.singular
                     ? getTranslation(clientBlock.labels.singular, i18n)
@@ -77,20 +79,15 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                 Icon: InlineBlocksIcon,
                 key: 'inlineBlocks-' + inlineBlockSlug,
                 keywords: ['inlineBlock', 'inline block', inlineBlockSlug],
-                label: ({ i18n, richTextComponentMap }) => {
-                  if (!richTextComponentMap) {
-                    return inlineBlockSlug
-                  }
+                label: ({ featureClientSchemaMap, i18n, schemaPath }) => {
+                  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${inlineBlockSlug}`
+                  const clientSchemaMap = featureClientSchemaMap['blocks']
 
-                  const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
+                  const blocksField: BlocksFieldClient = clientSchemaMap[
+                    componentMapRenderedBlockPath
+                  ][0] as BlocksFieldClient
 
-                  const blocksField: BlocksFieldClient = richTextComponentMap.get(
-                    componentMapRenderedBlockPath,
-                  )?.[0]
-
-                  const clientBlock = blocksField.blocks.find(
-                    (_block) => _block.slug === inlineBlockSlug,
-                  )
+                  const clientBlock = blocksField.blocks[0]
 
                   const blockDisplayName = clientBlock?.labels?.singular
                     ? getTranslation(clientBlock.labels.singular, i18n)
@@ -127,16 +124,15 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                 ChildComponent: BlockIcon,
                 isActive: undefined, // At this point, we would be inside a sub-richtext-editor. And at this point this will be run against the focused sub-editor, not the parent editor which has the actual block. Thus, no point in running this
                 key: 'block-' + blockSlug,
-                label: ({ i18n, richTextComponentMap }) => {
-                  if (!richTextComponentMap) {
-                    return blockSlug
-                  }
-                  const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
-                  const blocksField: BlocksFieldClient = richTextComponentMap.get(
-                    componentMapRenderedBlockPath,
-                  )?.[0]
+                label: ({ featureClientSchemaMap, i18n, schemaPath }) => {
+                  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockSlug}`
+                  const clientSchemaMap = featureClientSchemaMap['blocks']
 
-                  const clientBlock = blocksField.blocks.find((_block) => _block.slug === blockSlug)
+                  const blocksField: BlocksFieldClient = clientSchemaMap[
+                    componentMapRenderedBlockPath
+                  ][0] as BlocksFieldClient
+
+                  const clientBlock = blocksField.blocks[0]
 
                   const blockDisplayName = clientBlock?.labels?.singular
                     ? getTranslation(clientBlock.labels.singular, i18n)
@@ -166,19 +162,19 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                 ChildComponent: InlineBlocksIcon,
                 isActive: undefined,
                 key: 'inlineBlock-' + inlineBlockSlug,
-                label: ({ i18n, richTextComponentMap }) => {
-                  if (!richTextComponentMap) {
+                label: ({ featureClientSchemaMap, i18n, schemaPath }) => {
+                  if (!featureClientSchemaMap) {
                     return inlineBlockSlug
                   }
 
-                  const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
-                  const blocksField: BlocksFieldClient = richTextComponentMap.get(
-                    componentMapRenderedBlockPath,
-                  )?.[0]
+                  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${inlineBlockSlug}`
+                  const clientSchemaMap = featureClientSchemaMap['blocks']
 
-                  const clientBlock = blocksField.blocks.find(
-                    (_block) => _block.slug === inlineBlockSlug,
-                  )
+                  const blocksField: BlocksFieldClient = clientSchemaMap[
+                    componentMapRenderedBlockPath
+                  ][0] as BlocksFieldClient
+
+                  const clientBlock = blocksField.blocks[0]
 
                   const blockDisplayName = clientBlock?.labels?.singular
                     ? getTranslation(clientBlock.labels.singular, i18n)

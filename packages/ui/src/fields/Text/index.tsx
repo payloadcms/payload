@@ -6,33 +6,23 @@ import React, { useCallback, useEffect, useState } from 'react'
 import type { Option } from '../../elements/ReactSelect/types.js'
 import type { TextInputProps } from './types.js'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { isFieldRTL } from '../shared/index.js'
-import './index.scss'
 import { TextInput } from './Input.js'
+import './index.scss'
 
 export { TextInput, TextInputProps }
 
 const TextFieldComponent: TextFieldClientComponent = (props) => {
   const {
-    field,
     field: {
       name,
-      _path: pathFromProps,
-      admin: {
-        className,
-        description,
-        placeholder,
-        readOnly: readOnlyFromAdmin,
-        rtl,
-        style,
-        width,
-      } = {},
+      admin: { className, description, placeholder, rtl, style, width } = {},
       hasMany,
+      label,
       localized,
       maxLength,
       maxRows,
@@ -41,10 +31,10 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
       required,
     },
     inputRef,
-    readOnly: readOnlyFromTopLevelProps,
+    path,
+    readOnly,
     validate,
   } = props
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const locale = useLocale()
 
@@ -61,14 +51,15 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
     [validate, minLength, maxLength, required],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
-    path: pathFromContext ?? pathFromProps ?? name,
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    setValue,
+    showError,
+    value,
+  } = useField({
+    path,
     validate: memoizedValidate,
   })
-
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const renderRTL = isFieldRTL({
     fieldLocalized: localized,
@@ -83,7 +74,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
 
   const handleHasManyChange = useCallback(
     (selectedOption) => {
-      if (!disabled) {
+      if (!readOnly) {
         let newValue
         if (!selectedOption) {
           newValue = []
@@ -96,7 +87,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
         setValue(newValue)
       }
     },
-    [disabled, setValue],
+    [readOnly, setValue],
   )
 
   // useEffect update valueToRender:
@@ -120,16 +111,17 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
 
   return (
     <TextInput
-      afterInput={field?.admin?.components?.afterInput}
-      beforeInput={field?.admin?.components?.beforeInput}
+      AfterInput={AfterInput}
+      BeforeInput={BeforeInput}
       className={className}
-      Description={field?.admin?.components?.Description}
+      Description={Description}
       description={description}
-      Error={field?.admin?.components?.Error}
-      field={field}
+      Error={Error}
       hasMany={hasMany}
       inputRef={inputRef}
-      Label={field?.admin?.components?.Label}
+      Label={Label}
+      label={label}
+      localized={localized}
       maxRows={maxRows}
       minRows={minRows}
       onChange={
@@ -141,7 +133,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
       }
       path={path}
       placeholder={placeholder}
-      readOnly={disabled}
+      readOnly={readOnly}
       required={required}
       rtl={renderRTL}
       showError={showError}

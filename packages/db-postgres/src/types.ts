@@ -29,6 +29,7 @@ export type Args = {
    * @default false
    */
   disableCreateDatabase?: boolean
+  extensions?: string[]
   idType?: 'serial' | 'uuid'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
@@ -46,6 +47,7 @@ export type Args = {
    * @experimental This only works when there are not other tables or enums of the same name in the database under a different schema. Awaiting fix from Drizzle.
    */
   schemaName?: string
+  tablesFilter?: string[]
   transactionOptions?: false | PgTransactionConfig
   versionsSuffix?: string
 }
@@ -60,10 +62,12 @@ declare module 'payload' {
     extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
       DrizzleAdapter {
     afterSchemaInit: PostgresSchemaHook[]
+
     beforeSchemaInit: PostgresSchemaHook[]
     beginTransaction: (options?: PgTransactionConfig) => Promise<null | number | string>
     drizzle: PostgresDB
     enums: Record<string, GenericEnum>
+    extensions: Record<string, boolean>
     /**
      * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
      * Used for returning properly formed errors from unique fields
@@ -88,6 +92,7 @@ declare module 'payload' {
     schema: Record<string, unknown>
     schemaName?: Args['schemaName']
     tableNameMap: Map<string, string>
+    tablesFilter?: string[]
     versionsSuffix?: string
   }
 }

@@ -24,25 +24,28 @@ export const getPredefinedMigration = async ({
   if (file || migrationNameArg?.startsWith('@payloadcms/')) {
     // removes the package name from the migrationName.
     const migrationName = (file || migrationNameArg).split('/').slice(2).join('/')
-    let cleanPath = path.join(dirname, `./predefinedMigrations/${migrationName}.mjs`)
+    let cleanPath = path.join(dirname, `./predefinedMigrations/${migrationName}`)
 
-    // Check if predefined migration exists
-    if (fs.existsSync(cleanPath)) {
-      cleanPath = cleanPath.replaceAll('\\', '/')
-      const moduleURL = pathToFileURL(cleanPath)
-      try {
-        const { downSQL, imports, upSQL } = await eval(`import('${moduleURL.href}')`)
-        return { downSQL, imports, upSQL }
-      } catch (error) {
-        payload.logger.error({
-          error,
-          msg: `Error loading predefined migration ${migrationName}`,
-        })
-        process.exit(1)
-      }
+    if (fs.existsSync(`${cleanPath}.mjs`)) {
+      cleanPath = `${cleanPath}.mjs`
+    } else if (fs.existsSync(`${cleanPath}.js`)) {
+      cleanPath = `${cleanPath}.js`
     } else {
       payload.logger.error({
         msg: `Canned migration ${migrationName} not found.`,
+      })
+      process.exit(1)
+    }
+
+    cleanPath = cleanPath.replaceAll('\\', '/')
+    const moduleURL = pathToFileURL(cleanPath)
+    try {
+      const { downSQL, imports, upSQL } = await eval(`import('${moduleURL.href}')`)
+      return { downSQL, imports, upSQL }
+    } catch (err) {
+      payload.logger.error({
+        err,
+        msg: `Error loading predefined migration ${migrationName}`,
       })
       process.exit(1)
     }

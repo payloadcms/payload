@@ -1,4 +1,4 @@
-import type { I18nClient } from '@payloadcms/translations'
+import type { I18n, I18nClient } from '@payloadcms/translations'
 import type { PayloadRequest, Permissions, SanitizedConfig, User } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
@@ -16,7 +16,10 @@ type Result = {
   user: User
 }
 
-export const initReq = cache(async function (config: SanitizedConfig): Promise<Result> {
+export const initReq = cache(async function (
+  configPromise: Promise<SanitizedConfig> | SanitizedConfig,
+): Promise<Result> {
+  const config = await configPromise
   const payload = await getPayloadHMR({ config })
 
   const headers = await getHeaders()
@@ -36,13 +39,12 @@ export const initReq = cache(async function (config: SanitizedConfig): Promise<R
 
   const req = await createLocalReq(
     {
-      fallbackLocale: 'null',
       req: {
         headers,
         host: headers.get('host'),
-        i18n,
+        i18n: i18n as I18n,
         url: `${payload.config.serverURL}`,
-      } as PayloadRequest,
+      },
     },
     payload,
   )

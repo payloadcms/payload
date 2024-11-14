@@ -1,5 +1,6 @@
 import type { Field } from 'payload'
 
+import { sql } from 'drizzle-orm'
 import { fieldAffectsData, fieldIsVirtual } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
@@ -212,6 +213,9 @@ export const traverseFields = ({
       if (typeof data[field.name] === 'object' && data[field.name] !== null) {
         if (field.localized) {
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
+            // preserve array ID if there is
+            localeData._uuid = data.id || data._uuid
+
             traverseFields({
               adapter,
               arrays,
@@ -237,6 +241,10 @@ export const traverseFields = ({
             })
           })
         } else {
+          // preserve array ID if there is
+          const groupData = data[field.name] as Record<string, unknown>
+          groupData._uuid = data.id || data._uuid
+
           traverseFields({
             adapter,
             arrays,
@@ -244,7 +252,7 @@ export const traverseFields = ({
             blocks,
             blocksToDelete,
             columnPrefix: `${columnName}_`,
-            data: data[field.name] as Record<string, unknown>,
+            data: groupData,
             existingLocales,
             fieldPrefix: `${fieldName}_`,
             fields: field.fields,
@@ -275,6 +283,9 @@ export const traverseFields = ({
           if (typeof data[tab.name] === 'object' && data[tab.name] !== null) {
             if (tab.localized) {
               Object.entries(data[tab.name]).forEach(([localeKey, localeData]) => {
+                // preserve array ID if there is
+                localeData._uuid = data.id || data._uuid
+
                 traverseFields({
                   adapter,
                   arrays,
@@ -300,6 +311,10 @@ export const traverseFields = ({
                 })
               })
             } else {
+              const tabData = data[tab.name] as Record<string, unknown>
+              // preserve array ID if there is
+              tabData._uuid = data.id || data._uuid
+
               traverseFields({
                 adapter,
                 arrays,
@@ -307,7 +322,7 @@ export const traverseFields = ({
                 blocks,
                 blocksToDelete,
                 columnPrefix: `${columnPrefix || ''}${toSnakeCase(tab.name)}_`,
-                data: data[tab.name] as Record<string, unknown>,
+                data: tabData,
                 existingLocales,
                 fieldPrefix: `${fieldPrefix || ''}${tab.name}_`,
                 fields: tab.fields,
@@ -577,6 +592,9 @@ export const traverseFields = ({
       valuesToTransform.forEach(({ localeKey, ref, value }) => {
         if (typeof value !== 'undefined') {
           let formattedValue = value
+          if (value && field.type === 'point' && adapter.name !== 'sqlite') {
+            formattedValue = sql`ST_GeomFromGeoJSON(${JSON.stringify(value)})`
+          }
 
           if (field.type === 'date') {
             if (typeof value === 'number' && !Number.isNaN(value)) {

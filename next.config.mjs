@@ -19,6 +19,11 @@ const config = withBundleAnalyzer(
     typescript: {
       ignoreBuildErrors: true,
     },
+    experimental: {
+      serverActions: {
+        bodySizeLimit: '5mb',
+      },
+    },
     env: {
       PAYLOAD_CORE_DEV: 'true',
       ROOT_DIR: path.resolve(dirname),

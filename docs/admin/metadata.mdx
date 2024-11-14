@@ -36,7 +36,7 @@ To customize Root Metadata, use the `admin.meta` key in your Payload Config:
         {
           rel: 'icon',
           type: 'image/png',
-          href: '/favicon.png',
+          url: '/favicon.png',
         },
       ],
     },
@@ -80,12 +80,12 @@ To customize icons, use the `icons` key within the `admin.meta` object in your P
         {
           rel: 'icon',
           type: 'image/png',
-          href: '/favicon.png',
+          url: '/favicon.png',
         },
         {
           rel: 'apple-touch-icon',
           type: 'image/png',
-          href: '/apple-touch-icon.png',
+          url: '/apple-touch-icon.png',
         },
       ],
     },
@@ -140,7 +140,7 @@ The following options are available for Open Graph Metadata:
 | Key | Type | Description |
 | --- | --- | --- |
 | **`description`** | `string` | The description of the Admin Panel. |
-| **`images`** | `OGImageConfig | OGImageConfig[]` | An array of image objects. |
+| **`images`** | `OGImageConfig` or `OGImageConfig[]` | An array of image objects. |
 | **`siteName`** | `string` | The name of the site. |
 | **`title`** | `string` | The title of the Admin Panel. |
 
@@ -151,7 +151,7 @@ Collection Metadata is the metadata that is applied to all pages within any give
 To customize Collection Metadata, use the `admin.meta` key within your Collection Config:
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const MyCollection: CollectionConfig = {
   // ...

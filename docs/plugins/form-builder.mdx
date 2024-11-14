@@ -36,7 +36,7 @@ Forms can be as simple or complex as you need, from a basic contact form, to a m
 Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
 
 ```bash
-pnpm add @payloadcms/plugin-form-builder
+pnpm add @payloadcms/plugin-form-builder@beta
 ```
 
 ## Basic Usage
@@ -138,7 +138,7 @@ const beforeEmail: BeforeEmail<FormSubmission> = (emailsToSend, beforeChangePara
 
 ### `defaultToEmail`
 
-Provide a fallback for the email address to send form submissions to. If the email in form configuration does not have a to email set, this email address will be used. If this is not provided then it falls back to the `defaultFromAddress` in your [email configuration](https://payloadcms.com/docs/beta/email/overview).
+Provide a fallback for the email address to send form submissions to. If the email in form configuration does not have a to email set, this email address will be used. If this is not provided then it falls back to the `defaultFromAddress` in your [email configuration](../email/overview).
 
 ```ts
 // payload.config.ts
@@ -343,12 +343,12 @@ Maps to a `checkbox` input on your front-end. Used to collect a boolean value.
 Maps to a `number` input on your front-end. Used to collect a number.
 
 | Property       | Type     | Description                                          |
-| -------------- | -------- | ---------------------------------------------------- | --- | -------------- | ------ | ------------------------------- |
+| -------------- | -------- | ---------------------------------------------------- |
 | `name`         | string   | The name of the field.                               |
 | `label`        | string   | The label of the field.                              |
-| `defaultValue` | string   | The default value of the field.                      |
+| `defaultValue` | number   | The default value of the field.                      |
 | `width`        | string   | The width of the field on the front-end.             |
-| `required`     | checkbox | Whether or not the field is required when submitted. |     | `defaultValue` | number | The default value of the field. |
+| `required`     | checkbox | Whether or not the field is required when submitted. |
 
 ### Message
 
@@ -412,11 +412,11 @@ formBuilder({
 
 ## Email
 
-This plugin relies on the [email configuration](https://payloadcms.com/docs/beta/email/overview) defined in your payload configuration. It will read from your config and attempt to send your emails using the credentials provided.
+This plugin relies on the [email configuration](../email/overview) defined in your payload configuration. It will read from your config and attempt to send your emails using the credentials provided.
 
 ### Email formatting
 
-The email contents supports rich text which will be serialised to HTML on the server before being sent. By default it reads the global configuration of your rich text editor.
+The email contents supports rich text which will be serialized to HTML on the server before being sent. By default it reads the global configuration of your rich text editor.
 
 The email subject and body supports inserting dynamic fields from the form submission data using the `{{field_name}}` syntax. For example, if you have a field called `name` in your form, you can include this in the email body like so:
 

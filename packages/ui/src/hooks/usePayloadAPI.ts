@@ -94,7 +94,7 @@ export const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
     return () => {
       try {
         abortController.abort()
-      } catch (error) {
+      } catch (_err) {
         // swallow error
       }
     }

@@ -6,11 +6,18 @@
   }
 
   .react-select {
+    &:focus-within {
+      z-index: 3;
+    }
     .rs__control {
       @include formInput;
       height: auto;
       padding: base(0.35) base(0.6);
       flex-wrap: nowrap;
+    }
+
+    .rs__menu-notice {
+      padding: base(0.5) base(0.6);
     }
 
     .rs__indicators {
