@@ -163,6 +163,23 @@ const config = {
           localized: true,
         },
         {
+          name: 'groupAndRow',
+          type: 'group',
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                ...relsFields,
+                {
+                  type: 'array',
+                  name: 'array',
+                  fields: relsFields,
+                },
+              ],
+            },
+          ],
+        },
+        {
           type: 'tabs',
           tabs: [
             {
@@ -291,6 +308,10 @@ describe('sanitizeRelationshipIDs', () => {
         },
       ],
       group: {
+        ...relsData,
+        array: [{ ...relsData }],
+      },
+      groupAndRow: {
         ...relsData,
         array: [{ ...relsData }],
       },

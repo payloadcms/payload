@@ -1,35 +1,36 @@
 import type { IndexOptions, Schema, SchemaOptions, SchemaTypeOptions } from 'mongoose'
-import type {
-  ArrayField,
-  Block,
-  BlocksField,
-  CheckboxField,
-  CodeField,
-  CollapsibleField,
-  DateField,
-  EmailField,
-  Field,
-  FieldAffectingData,
-  GroupField,
-  JSONField,
-  NonPresentationalField,
-  NumberField,
-  PointField,
-  RadioField,
-  RelationshipField,
-  RichTextField,
-  RowField,
-  SanitizedConfig,
-  SanitizedLocalizationConfig,
-  SelectField,
-  Tab,
-  TabsField,
-  TextareaField,
-  TextField,
-  UploadField,
-} from 'payload'
 
 import mongoose from 'mongoose'
+import {
+  type ArrayField,
+  type Block,
+  type BlocksField,
+  type CheckboxField,
+  type CodeField,
+  type CollapsibleField,
+  type DateField,
+  type EmailField,
+  type Field,
+  type FieldAffectingData,
+  flattenTopLevelFields,
+  type GroupField,
+  type JSONField,
+  type NonPresentationalField,
+  type NumberField,
+  type PointField,
+  type RadioField,
+  type RelationshipField,
+  type RichTextField,
+  type RowField,
+  type SanitizedConfig,
+  type SanitizedLocalizationConfig,
+  type SelectField,
+  type Tab,
+  type TabsField,
+  type TextareaField,
+  type TextField,
+  type UploadField,
+} from 'payload'
 import {
   fieldAffectsData,
   fieldIsLocalized,
@@ -416,6 +417,8 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     const hasManyRelations = Array.isArray(field.relationTo)
     let schemaToReturn: { [key: string]: any } = {}
 
+    const valueType = getRelationshipValueType(field, config)
+
     if (field.localized && config.localization) {
       schemaToReturn = {
         type: config.localization.localeCodes.reduce((locales, locale) => {
@@ -428,14 +431,14 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
               type: mongoose.Schema.Types.Mixed,
               relationTo: { type: String, enum: field.relationTo },
               value: {
-                type: mongoose.Schema.Types.Mixed,
+                type: valueType,
                 refPath: `${field.name}.${locale}.relationTo`,
               },
             }
           } else {
             localeSchema = {
               ...formatBaseSchema(field, buildSchemaOptions),
-              type: mongoose.Schema.Types.Mixed,
+              type: valueType,
               ref: field.relationTo,
             }
           }
@@ -456,7 +459,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
         type: mongoose.Schema.Types.Mixed,
         relationTo: { type: String, enum: field.relationTo },
         value: {
-          type: mongoose.Schema.Types.Mixed,
+          type: valueType,
           refPath: `${field.name}.relationTo`,
         },
       }
@@ -470,7 +473,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     } else {
       schemaToReturn = {
         ...formatBaseSchema(field, buildSchemaOptions),
-        type: mongoose.Schema.Types.Mixed,
+        type: valueType,
         ref: field.relationTo,
       }
 
@@ -624,6 +627,8 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     const hasManyRelations = Array.isArray(field.relationTo)
     let schemaToReturn: { [key: string]: any } = {}
 
+    const valueType = getRelationshipValueType(field, config)
+
     if (field.localized && config.localization) {
       schemaToReturn = {
         type: config.localization.localeCodes.reduce((locales, locale) => {
@@ -636,14 +641,14 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
               type: mongoose.Schema.Types.Mixed,
               relationTo: { type: String, enum: field.relationTo },
               value: {
-                type: mongoose.Schema.Types.Mixed,
+                type: valueType,
                 refPath: `${field.name}.${locale}.relationTo`,
               },
             }
           } else {
             localeSchema = {
               ...formatBaseSchema(field, buildSchemaOptions),
-              type: mongoose.Schema.Types.Mixed,
+              type: valueType,
               ref: field.relationTo,
             }
           }
@@ -664,7 +669,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
         type: mongoose.Schema.Types.Mixed,
         relationTo: { type: String, enum: field.relationTo },
         value: {
-          type: mongoose.Schema.Types.Mixed,
+          type: valueType,
           refPath: `${field.name}.relationTo`,
         },
       }
@@ -678,7 +683,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     } else {
       schemaToReturn = {
         ...formatBaseSchema(field, buildSchemaOptions),
-        type: mongoose.Schema.Types.Mixed,
+        type: valueType,
         ref: field.relationTo,
       }
 
@@ -694,4 +699,42 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       [field.name]: schemaToReturn,
     })
   },
+}
+
+const getRelationshipValueType = (
+  field: RelationshipField | UploadField,
+  config: SanitizedConfig,
+) => {
+  if (typeof field.relationTo === 'string') {
+    const relatedCollection = config.collections.find((each) => each.slug === field.relationTo)
+    const customIDField = flattenTopLevelFields(relatedCollection.fields).find(
+      (each) => each.name === 'id',
+    )
+
+    if (!customIDField) {
+      return mongoose.Schema.Types.ObjectId
+    }
+
+    if (customIDField.type === 'number') {
+      return mongoose.Schema.Types.Number
+    }
+
+    return mongoose.Schema.Types.String
+  }
+
+  // has custom id relationTo
+  if (
+    field.relationTo.some((relationTo) => {
+      const relatedCollection = config.collections.find((each) => each.slug === relationTo)
+      const customIDField = flattenTopLevelFields(relatedCollection.fields).find(
+        (each) => each.name === 'id',
+      )
+
+      return !!customIDField
+    })
+  ) {
+    return mongoose.Schema.Types.Mixed
+  }
+
+  return mongoose.Schema.Types.ObjectId
 }

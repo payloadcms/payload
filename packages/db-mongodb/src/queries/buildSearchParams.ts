@@ -83,13 +83,13 @@ export async function buildSearchParam({
   }
 
   const [{ field, path }] = paths
-
   if (path) {
     const sanitizedQueryValue = sanitizeQueryValue({
       field,
       hasCustomID,
       operator,
       path,
+      payload,
       val,
     })
 

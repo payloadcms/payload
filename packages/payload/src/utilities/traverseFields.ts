@@ -82,6 +82,7 @@ export const traverseFields = ({
 
     // avoid mutation of ref for all fields
     let currentRef = ref
+    let currentParentRef = parentRef
 
     if (field.type === 'tabs' && 'tabs' in field) {
       for (const tab of field.tabs) {
@@ -115,8 +116,8 @@ export const traverseFields = ({
       return
     }
     if (field.type !== 'tab' && (fieldHasSubFields(field) || field.type === 'blocks')) {
-      const parentRef = currentRef
       if ('name' in field && field.name) {
+        currentParentRef = currentRef
         if (typeof ref[field.name] === 'undefined') {
           if (field.type === 'array' || field.type === 'blocks') {
             if (field.localized) {
@@ -135,7 +136,12 @@ export const traverseFields = ({
       if (field.type === 'group' && field.localized) {
         for (const key in currentRef as Record<string, unknown>) {
           if (currentRef[key]) {
-            traverseFields({ callback, fields: field.fields, parentRef, ref: currentRef[key] })
+            traverseFields({
+              callback,
+              fields: field.fields,
+              parentRef: currentParentRef,
+              ref: currentRef[key],
+            })
           }
         }
         return
@@ -153,7 +159,7 @@ export const traverseFields = ({
               callback,
               data: localeData,
               field,
-              parentRef,
+              parentRef: currentParentRef,
             })
           }
         } else if (Array.isArray(currentRef)) {
@@ -161,11 +167,16 @@ export const traverseFields = ({
             callback,
             data: currentRef as Record<string, unknown>[],
             field,
-            parentRef,
+            parentRef: currentParentRef,
           })
         }
       } else {
-        traverseFields({ callback, fields: field.fields, parentRef, ref: currentRef })
+        traverseFields({
+          callback,
+          fields: field.fields,
+          parentRef: currentParentRef,
+          ref: currentRef,
+        })
       }
     }
   })

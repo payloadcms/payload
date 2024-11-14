@@ -1,24 +1,25 @@
-import type { Field, TabAsField } from 'payload'
+import type { Block, Field, Payload, RelationshipField, TabAsField } from 'payload'
 
 import { Types } from 'mongoose'
-import { createArrayFromCommaDelineated } from 'payload'
+import { createArrayFromCommaDelineated, flattenTopLevelFields } from 'payload'
 
 type SanitizeQueryValueArgs = {
   field: Field | TabAsField
   hasCustomID: boolean
   operator: string
   path: string
+  payload: Payload
   val: any
 }
 
-const buildExistsQuery = (formattedValue, path) => {
+const buildExistsQuery = (formattedValue, path, treatEmptyString = true) => {
   if (formattedValue) {
     return {
       rawQuery: {
         $and: [
           { [path]: { $exists: true } },
           { [path]: { $ne: null } },
-          { [path]: { $ne: '' } }, // Exclude null and empty string
+          ...(treatEmptyString ? [{ [path]: { $ne: '' } }] : []), // Treat empty string as null / undefined
         ],
       },
     }
@@ -28,9 +29,46 @@ const buildExistsQuery = (formattedValue, path) => {
         $or: [
           { [path]: { $exists: false } },
           { [path]: { $eq: null } },
-          { [path]: { $eq: '' } }, // Treat empty string as null / undefined
+          ...(treatEmptyString ? [{ [path]: { $eq: '' } }] : []), // Treat empty string as null / undefined
         ],
       },
+    }
+  }
+}
+
+// returns nestedField Field object from blocks.nestedField path because getLocalizedPaths splits them only for relationships
+const getFieldFromSegments = ({
+  field,
+  segments,
+}: {
+  field: Block | Field | TabAsField
+  segments: string[]
+}) => {
+  if ('blocks' in field) {
+    for (const block of field.blocks) {
+      const field = getFieldFromSegments({ field: block, segments })
+      if (field) {
+        return field
+      }
+    }
+  }
+
+  if ('fields' in field) {
+    for (let i = 0; i < segments.length; i++) {
+      const foundField = flattenTopLevelFields(field.fields).find(
+        (each) => each.name === segments[i],
+      )
+
+      if (!foundField) {
+        break
+      }
+
+      if (foundField && segments.length - 1 === i) {
+        return foundField
+      }
+
+      segments.shift()
+      return getFieldFromSegments({ field: foundField, segments })
     }
   }
 }
@@ -40,6 +78,7 @@ export const sanitizeQueryValue = ({
   hasCustomID,
   operator,
   path,
+  payload,
   val,
 }: SanitizeQueryValueArgs): {
   operator?: string
@@ -48,6 +87,16 @@ export const sanitizeQueryValue = ({
 } => {
   let formattedValue = val
   let formattedOperator = operator
+
+  if (['array', 'blocks', 'group', 'tab'].includes(field.type) && path.includes('.')) {
+    const segments = path.split('.')
+    segments.shift()
+    const foundField = getFieldFromSegments({ field, segments })
+
+    if (foundField) {
+      field = foundField
+    }
+  }
 
   // Disregard invalid _ids
   if (path === '_id') {
@@ -81,21 +130,22 @@ export const sanitizeQueryValue = ({
       }
 
       formattedValue = formattedValue.reduce((formattedValues, inVal) => {
-        const newValues = [inVal]
         if (!hasCustomID) {
           if (Types.ObjectId.isValid(inVal)) {
-            newValues.push(new Types.ObjectId(inVal))
+            formattedValues.push(new Types.ObjectId(inVal))
           }
         }
 
         if (field.type === 'number') {
           const parsedNumber = parseFloat(inVal)
           if (!Number.isNaN(parsedNumber)) {
-            newValues.push(parsedNumber)
+            formattedValues.push(parsedNumber)
           }
+        } else {
+          formattedValues.push(inVal)
         }
 
-        return [...formattedValues, ...newValues]
+        return formattedValues
       }, [])
     }
   }
@@ -169,17 +219,37 @@ export const sanitizeQueryValue = ({
 
     if (['in', 'not_in'].includes(operator) && Array.isArray(formattedValue)) {
       formattedValue = formattedValue.reduce((formattedValues, inVal) => {
-        const newValues = [inVal]
-        if (Types.ObjectId.isValid(inVal)) {
-          newValues.push(new Types.ObjectId(inVal))
+        const relationTo = (field as RelationshipField).relationTo
+        if (typeof relationTo === 'string' && payload.collections[relationTo].customIDType) {
+          if (payload.collections[relationTo].customIDType === 'number') {
+            const parsedNumber = parseFloat(inVal)
+            if (!Number.isNaN(parsedNumber)) {
+              formattedValues.push(parsedNumber)
+              return formattedValues
+            }
+          }
+
+          formattedValues.push(inVal)
+          return formattedValues
         }
 
-        const parsedNumber = parseFloat(inVal)
-        if (!Number.isNaN(parsedNumber)) {
-          newValues.push(parsedNumber)
+        if (
+          Array.isArray(relationTo) &&
+          relationTo.some((relationTo) => !!payload.collections[relationTo].customIDType)
+        ) {
+          if (Types.ObjectId.isValid(inVal.toString())) {
+            formattedValues.push(new Types.ObjectId(inVal))
+          } else {
+            formattedValues.push(inVal)
+          }
+          return formattedValues
         }
 
-        return [...formattedValues, ...newValues]
+        if (Types.ObjectId.isValid(inVal.toString())) {
+          formattedValues.push(new Types.ObjectId(inVal))
+        }
+
+        return formattedValues
       }, [])
     }
 
@@ -239,7 +309,12 @@ export const sanitizeQueryValue = ({
     if (operator === 'exists') {
       formattedValue = formattedValue === 'true' || formattedValue === true
 
-      return buildExistsQuery(formattedValue, path)
+      // _id can't be empty string, will error Cast to ObjectId failed for value ""
+      return buildExistsQuery(
+        formattedValue,
+        path,
+        !['relationship', 'upload'].includes(field.type),
+      )
     }
   }
 
