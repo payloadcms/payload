@@ -23,3 +23,31 @@ export function deepMergeSimple<T = object>(obj1: object, obj2: object): T {
 
   return output as T
 }
+
+/**
+ * Deep merge two objects. Arrays are concatenated, objects are merged recursively.
+ *
+ * @param obj1 base object
+ * @param obj2 object to merge "into" obj1
+ */
+
+export function deepMerge<T = object>(obj1: any, obj2: any): T {
+  const output = Array.isArray(obj1) ? [...obj1] : { ...obj1 }
+
+  for (const key in obj2) {
+    if (Object.prototype.hasOwnProperty.call(obj2, key)) {
+      const val1 = obj1[key]
+      const val2 = obj2[key]
+
+      if (Array.isArray(val1) && Array.isArray(val2)) {
+        output[key] = [...val1, ...val2]
+      } else if (typeof val1 === 'object' && typeof val2 === 'object' && val1 && val2) {
+        output[key] = deepMerge(val1, val2)
+      } else {
+        output[key] = val2
+      }
+    }
+  }
+
+  return output as T
+}

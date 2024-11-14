@@ -215,6 +215,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:only',
   'general:or',
   'general:order',
+  'general:overwriteExistingData',
   'general:pageNotFound',
   'general:password',
   'general:payloadSettings',
@@ -261,6 +262,13 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:uploading',
   'general:uploadingBulk',
   'general:welcome',
+
+  'localization:copyToLocale',
+  'localization:copyFromTo',
+  'localization:selectLocaleToCopy',
+  'localization:cannotCopySameLocale',
+  'localization:copyFrom',
+  'localization:copyTo',
 
   'operators:equals',
   'operators:exists',

@@ -5,17 +5,18 @@ import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
 import { CheckboxField } from '../../fields/Checkbox/index.js'
-import { SelectField } from '../../fields/Select/index.js'
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { deepMerge } from '../../utilities/deepMerge.js'
 import { DrawerHeader } from '../BulkUpload/Header/index.js'
 import { Button } from '../Button/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { PopupList } from '../Popup/index.js'
 import './index.scss'
+import { LocaleSelectField } from './LocaleSelect.js'
 
 const baseClass = 'copy-locale-data'
 
@@ -35,8 +36,9 @@ export const CopyLocaleData: React.FC = () => {
   const modified = useFormModified()
   const { toggleModal } = useModal()
   const localeOptions =
-    localization &&
-    localization.locales.map((locale) => ({ label: locale.label, value: locale.code }))
+    (localization &&
+      localization.locales.map((locale) => ({ label: locale.label, value: locale.code }))) ||
+    []
 
   const [copying, setCopying] = React.useState(false)
   const [toLocale, setToLocale] = React.useState<null | string>(null)
@@ -45,24 +47,23 @@ export const CopyLocaleData: React.FC = () => {
 
   const copyLocaleData = useCallback(
     async ({ from, to }) => {
-      let url
-      let redirect
-      let method = 'PATCH'
-
+      const isCollection = Boolean(collectionSlug)
+      const url = `${serverURL}${api}/${isCollection ? `${collectionSlug}/${id}` : `globals/${globalSlug}`}?depth=0&locale=${from}`
+      const redirect = `${serverURL}/admin/${isCollection ? `collections/${collectionSlug}/${id}` : `globals/${globalSlug}`}?locale=${to}`
+      const method = isCollection ? 'PATCH' : 'POST'
+      const action = url.replace(`locale=${from}`, `locale=${to}`)
+      let data = {}
       setCopying(true)
 
       try {
-        if (collectionSlug) {
-          url = `${serverURL}${api}/${collectionSlug}/${id}?depth=0&locale=${from}`
-          redirect = `${serverURL}/admin/collections/${collectionSlug}/${id}?locale=${to}`
-        } else if (globalSlug) {
-          url = `${serverURL}${api}/globals/${globalSlug}?depth=0&locale=${from}`
-          redirect = `${serverURL}/admin/globals/${globalSlug}?locale=${to}`
-          method = 'POST'
-        }
         const response = await fetch(url)
-        const data = await response.json()
-        const action = url.replace(`locale=${from}`, `locale=${to}`)
+        data = await response.json()
+
+        if (!overwriteExisting) {
+          const toLocaleReq = await fetch(action)
+          const toLocaleData = await toLocaleReq.json()
+          data = deepMerge(data, toLocaleData)
+        }
 
         await submit({
           action,
@@ -75,11 +76,9 @@ export const CopyLocaleData: React.FC = () => {
         })
 
         setCopying(false)
-        // toggleModal(drawerSlug)
-
-        // if (response.ok) {
-        //   window.open(redirect, '_self')
-        // }
+        if (response.ok) {
+          window.open(redirect, '_self')
+        }
       } catch (error) {
         toast.error(error.message)
       }
@@ -103,7 +102,7 @@ export const CopyLocaleData: React.FC = () => {
           }
         }}
       >
-        Copy to Locale
+        {t('localization:copyToLocale')}
       </PopupList.Button>
       <Drawer
         className={baseClass}
@@ -113,20 +112,17 @@ export const CopyLocaleData: React.FC = () => {
             onClose={() => {
               toggleModal(drawerSlug)
             }}
-            title="Copy to Locale"
+            title={t('localization:copyToLocale')}
           />
         }
         slug={drawerSlug}
       >
         <div className={`${baseClass}__sub-header`}>
-          {/* TODO: translate */}
           <span>
             {fromLocale && toLocale ? (
-              <div>
-                Copying from <strong>{fromLocale}</strong> to <strong>{toLocale}</strong>
-              </div>
+              <div>{t('localization:copyFromTo', { from: fromLocale, to: toLocale })}</div>
             ) : (
-              'Select locale to copy'
+              t('localization:selectLocaleToCopy')
             )}
           </span>
           <Button
@@ -135,7 +131,7 @@ export const CopyLocaleData: React.FC = () => {
             iconPosition="left"
             onClick={async () => {
               if (fromLocale === toLocale) {
-                toast.error('Cannot copy to the same locale')
+                toast.error(t('localization:cannotCopySameLocale'))
                 return
               }
               if (!copying) {
@@ -152,44 +148,29 @@ export const CopyLocaleData: React.FC = () => {
         </div>
 
         <div className={`${baseClass}__content`}>
-          <div>
-            Copy From
-            <SelectField
-              defaultValue={
-                fromLocale
-                  ? {
-                      label: localeOptions.find((option) => option.value === fromLocale)?.label,
-                      value: fromLocale,
-                    }
-                  : undefined
-              }
-              field={{
-                name: 'fromLocale',
-                options: localeOptions,
-              }}
-              onChange={(value: string) => setFromLocale(value)}
-            />
-          </div>
-          <div>
-            Copy To
-            <SelectField
-              field={{
-                name: 'toLocale',
-                options: localeOptions,
-              }}
-              onChange={(value: string) => setToLocale(value)}
-            />
-          </div>
-          <div>
-            <CheckboxField
-              checked={overwriteExisting}
-              field={{
-                name: 'overwriteExisting',
-                label: 'Overwrite existing field data',
-              }}
-              onChange={() => setOverwriteExisting(!overwriteExisting)}
-            />
-          </div>
+          <LocaleSelectField
+            label={t('localization:copyFrom')}
+            name="fromLocale"
+            onChange={setFromLocale}
+            options={localeOptions}
+            value={fromLocale}
+          />
+          <LocaleSelectField
+            label={t('localization:copyTo')}
+            name="toLocale"
+            onChange={setToLocale}
+            options={localeOptions}
+            value={toLocale}
+          />
+          <CheckboxField
+            checked={overwriteExisting}
+            field={{
+              name: 'overwriteExisting',
+              label: t('general:overwriteExistingData'),
+            }}
+            onChange={() => setOverwriteExisting(!overwriteExisting)}
+            path={'overwriteExisting'}
+          />
         </div>
       </Drawer>
     </React.Fragment>

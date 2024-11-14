@@ -276,6 +276,7 @@ export const enTranslations = {
     open: 'Open',
     or: 'Or',
     order: 'Order',
+    overwriteExistingData: 'Overwrite existing field data',
     pageNotFound: 'Page not found',
     password: 'Password',
     payloadSettings: 'Payload Settings',
@@ -323,6 +324,14 @@ export const enTranslations = {
     value: 'Value',
     viewReadOnly: 'View read-only',
     welcome: 'Welcome',
+  },
+  localization: {
+    cannotCopySameLocale: 'Cannot copy to the same locale',
+    copyFrom: 'Copy from',
+    copyFromTo: 'Copying from {{from}} to {{to}}',
+    copyTo: 'Copy to',
+    copyToLocale: 'Copy to locale',
+    selectLocaleToCopy: 'Select locale to copy',
   },
   operators: {
     contains: 'contains',
