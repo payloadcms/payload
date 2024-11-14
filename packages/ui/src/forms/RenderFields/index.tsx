@@ -1,6 +1,6 @@
 'use client'
 
-import type { FieldPermissions } from 'payload'
+import type { SanitizedFieldPermissions } from 'payload'
 
 import { getFieldPaths } from 'payload/shared'
 import React from 'react'
@@ -51,7 +51,7 @@ export const RenderFields: React.FC<Props> = (props) => {
             return null
           }
 
-          const fieldPermissions: FieldPermissions =
+          const fieldPermissions: SanitizedFieldPermissions =
             'name' in field ? permissions?.[field.name] : permissions
 
           // If the user cannot read the field, then filter it out

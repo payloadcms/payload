@@ -1,6 +1,5 @@
 import type {
   Data,
-  DocumentPermissions,
   DocumentPreferences,
   Field,
   FieldSchemaMap,
@@ -8,6 +7,7 @@ import type {
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
+  SanitizedDocumentPermissions,
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
@@ -61,7 +61,7 @@ export type AddFieldStatePromiseArgs = {
   parentPath: string
   parentSchemaPath: string
   passesCondition: boolean
-  permissions: DocumentPermissions['fields']
+  permissions: SanitizedDocumentPermissions['fields']
   preferences: DocumentPreferences
   previousFormState: FormState
   renderAllFields: boolean

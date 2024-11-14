@@ -764,6 +764,7 @@ export { registerFirstUserOperation } from './auth/operations/registerFirstUser.
 export { resetPasswordOperation } from './auth/operations/resetPassword.js'
 export { unlockOperation } from './auth/operations/unlock.js'
 export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
+
 export type {
   AuthStrategyFunction,
   AuthStrategyFunctionArgs,
@@ -774,9 +775,15 @@ export type {
   IncomingAuthType,
   Permission,
   Permissions,
+  SanitizedCollectionPermission,
+  SanitizedDocumentPermissions,
+  SanitizedFieldPermissions,
+  SanitizedGlobalPermission,
+  SanitizedPermissions,
   User,
   VerifyConfig,
 } from './auth/types.js'
+
 export { generateImportMap } from './bin/generateImportMap/index.js'
 export type { ImportMap } from './bin/generateImportMap/index.js'
 

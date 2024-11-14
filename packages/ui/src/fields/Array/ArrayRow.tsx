@@ -1,5 +1,5 @@
 'use client'
-import type { ArrayField, ClientField, FieldPermissions, Row } from 'payload'
+import type { ArrayField, ClientField, Row, SanitizedFieldPermissions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -30,7 +30,7 @@ type ArrayRowProps = {
   readonly moveRow: (fromIndex: number, toIndex: number) => void
   readonly parentPath: string
   readonly path: string
-  readonly permissions: FieldPermissions
+  readonly permissions: SanitizedFieldPermissions
   readonly readOnly?: boolean
   readonly removeRow: (rowIndex: number) => void
   readonly row: Row

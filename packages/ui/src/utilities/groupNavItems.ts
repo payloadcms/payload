@@ -1,8 +1,8 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
-  Permissions,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
+  SanitizedPermissions,
   StaticLabel,
 } from 'payload'
 
@@ -34,7 +34,7 @@ export type NavGroupType = {
 
 export function groupNavItems(
   entities: EntityToGroup[],
-  permissions: Permissions,
+  permissions: SanitizedPermissions,
   i18n: I18nClient,
 ): NavGroupType[] {
   const result = entities.reduce(

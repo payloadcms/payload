@@ -1,4 +1,4 @@
-import type { Data, DocumentPermissions, Permissions } from 'payload'
+import type { Data, SanitizedDocumentPermissions, SanitizedPermissions } from 'payload'
 
 import * as qs from 'qs-esm'
 import React from 'react'
@@ -25,9 +25,9 @@ export const useGetDocPermissions = ({
   i18n: any
   id: string
   locale: string
-  permissions: Permissions
+  permissions: SanitizedPermissions
   serverURL: string
-  setDocPermissions: React.Dispatch<React.SetStateAction<DocumentPermissions>>
+  setDocPermissions: React.Dispatch<React.SetStateAction<SanitizedDocumentPermissions>>
   setHasPublishPermission: React.Dispatch<React.SetStateAction<boolean>>
   setHasSavePermission: React.Dispatch<React.SetStateAction<boolean>>
 }) =>
@@ -61,7 +61,7 @@ export const useGetDocPermissions = ({
             method: 'post',
           })
 
-          const json: DocumentPermissions = await res.json()
+          const json: SanitizedDocumentPermissions = await res.json()
 
           const publishedAccessJSON = await fetch(
             `${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`,

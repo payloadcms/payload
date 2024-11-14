@@ -1,5 +1,5 @@
 import type { groupNavItems } from '@payloadcms/ui/shared'
-import type { ClientUser, Permissions, ServerProps, VisibleEntities } from 'payload'
+import type { ClientUser, SanitizedPermissions, ServerProps, VisibleEntities } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { Button, Card, Gutter, Locked } from '@payloadcms/ui'
@@ -19,7 +19,7 @@ export type DashboardProps = {
   }>
   Link: React.ComponentType<any>
   navGroups?: ReturnType<typeof groupNavItems>
-  permissions: Permissions
+  permissions: SanitizedPermissions
   visibleEntities: VisibleEntities
 } & ServerProps
 

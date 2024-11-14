@@ -1,6 +1,6 @@
 'use client'
 
-import type { Data, DocumentPermissions, DocumentSlots, FormState } from 'payload'
+import type { Data, DocumentSlots, FormState, SanitizedDocumentPermissions } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import * as qs from 'qs-esm'
@@ -26,7 +26,7 @@ type FormsManagerContext = {
   readonly activeIndex: State['activeIndex']
   readonly addFiles: (filelist: FileList) => Promise<void>
   readonly collectionSlug: string
-  readonly docPermissions?: DocumentPermissions
+  readonly docPermissions?: SanitizedDocumentPermissions
   readonly documentSlots: DocumentSlots
   readonly forms: State['forms']
   getFormDataRef: React.RefObject<() => Data>
@@ -91,7 +91,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
   const [documentSlots, setDocumentSlots] = React.useState<DocumentSlots>({})
   const [hasSubmitted, setHasSubmitted] = React.useState(false)
-  const [docPermissions, setDocPermissions] = React.useState<DocumentPermissions>()
+  const [docPermissions, setDocPermissions] = React.useState<SanitizedDocumentPermissions>()
   const [hasSavePermission, setHasSavePermission] = React.useState(false)
   const [hasPublishPermission, setHasPublishPermission] = React.useState(false)
   const [hasInitializedState, setHasInitializedState] = React.useState(false)
@@ -162,7 +162,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       method: 'post',
     })
 
-    const json: DocumentPermissions = await res.json()
+    const json: SanitizedDocumentPermissions = await res.json()
     const publishedAccessJSON = await fetch(
       `${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`,
       {

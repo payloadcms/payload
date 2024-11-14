@@ -1,14 +1,14 @@
 import type {
-  DocumentPermissions,
   Payload,
   SanitizedCollectionConfig,
+  SanitizedDocumentPermissions,
   SanitizedGlobalConfig,
   TypedUser,
 } from 'payload'
 
 type Args = {
   collectionConfig?: SanitizedCollectionConfig
-  docPermissions: DocumentPermissions
+  docPermissions: SanitizedDocumentPermissions
   globalConfig?: SanitizedGlobalConfig
   id?: number | string
   locale?: string

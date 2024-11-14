@@ -2,8 +2,8 @@ import type {
   ClientComponentProps,
   ClientField,
   FieldPaths,
-  FieldPermissions,
   PayloadComponent,
+  SanitizedFieldPermissions,
   ServerComponentProps,
 } from 'payload'
 
@@ -44,7 +44,7 @@ export const renderField: RenderFieldMethod = ({
 
   const permissions = fieldAffectsData(fieldConfig)
     ? incomingPermissions?.[fieldConfig.name]
-    : ({} as FieldPermissions)
+    : ({} as SanitizedFieldPermissions)
 
   const clientProps: ClientComponentProps & Partial<FieldPaths> = {
     customComponents: fieldState?.customComponents || {},

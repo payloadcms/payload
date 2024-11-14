@@ -62,6 +62,17 @@ export type CollectionPermission = {
   update: Permission
 }
 
+export type SanitizedCollectionPermission = {
+  create?: true
+  delete?: true
+  fields: {
+    [fieldName: string]: SanitizedFieldPermissions
+  }
+  read?: true
+  readVersions?: true
+  update?: true
+}
+
 export type GlobalPermission = {
   fields: {
     [fieldName: string]: FieldPermissions
@@ -71,7 +82,19 @@ export type GlobalPermission = {
   update: Permission
 }
 
+export type SanitizedGlobalPermission = {
+  fields: {
+    [fieldName: string]: SanitizedFieldPermissions
+  }
+  read?: true
+  readVersions?: true
+  update?: true
+}
+
 export type DocumentPermissions = CollectionPermission | GlobalPermission
+
+export type SanitizedDocumentPermissions = SanitizedCollectionPermission | SanitizedGlobalPermission
+
 export type Permissions = {
   canAccessAdmin: boolean
   collections: {
