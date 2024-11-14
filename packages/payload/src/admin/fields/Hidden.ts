@@ -1,3 +1,5 @@
+import type { ClientFieldBase } from '../types.js'
+
 type HiddenFieldBaseClientProps = {
   readonly disableModifyingForm?: false
   readonly field?: never
@@ -5,4 +7,5 @@ type HiddenFieldBaseClientProps = {
   readonly value?: unknown
 }
 
-export type HiddenFieldProps = HiddenFieldBaseClientProps
+export type HiddenFieldProps = HiddenFieldBaseClientProps &
+  Pick<ClientFieldBase, 'forceRender' | 'schemaPath'>
