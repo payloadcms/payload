@@ -12,7 +12,7 @@ export interface Config {
   };
   collections: {
     posts: Post;
-    simple: Simple;
+    media: Media;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -21,7 +21,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
-    simple: SimpleSelect<false> | SimpleSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -32,11 +32,9 @@ export interface Config {
   };
   globals: {
     menu: Menu;
-    'custom-ts': CustomT;
   };
   globalsSelect: {
     menu: MenuSelect<false> | MenuSelect<true>;
-    'custom-ts': CustomTsSelect<false> | CustomTsSelect<true>;
   };
   locale: null;
   user: User & {
@@ -71,34 +69,54 @@ export interface UserAuthOperations {
  */
 export interface Post {
   id: string;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  title?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "simple".
+ * via the `definition` "media".
  */
-export interface Simple {
+export interface Media {
   id: string;
-  text?: string | null;
   updatedAt: string;
   createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    medium?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    large?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -129,8 +147,8 @@ export interface PayloadLockedDocument {
         value: string | Post;
       } | null)
     | ({
-        relationTo: 'simple';
-        value: string | Simple;
+        relationTo: 'media';
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'users';
@@ -183,19 +201,61 @@ export interface PayloadMigration {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
-  richText?: T;
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "simple_select".
+ * via the `definition` "media_select".
  */
-export interface SimpleSelect<T extends boolean = true> {
-  text?: T;
+export interface MediaSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        medium?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        large?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -256,45 +316,10 @@ export interface Menu {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-ts".
- */
-export interface CustomT {
-  id: string;
-  custom?: 'hello' | 'world';
-  withDefinitionsUsage?: ObjectWithNumber[];
-  json: {
-    id: string;
-    name: string;
-    age?: number;
-  }[];
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "objectWithNumber".
- */
-export interface ObjectWithNumber {
-  id?: number;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "menu_select".
  */
 export interface MenuSelect<T extends boolean = true> {
   globalText?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-ts_select".
- */
-export interface CustomTsSelect<T extends boolean = true> {
-  custom?: T;
-  withDefinitionsUsage?: T;
-  json?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -309,6 +334,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

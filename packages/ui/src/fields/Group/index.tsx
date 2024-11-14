@@ -31,12 +31,11 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
       fields,
       label,
     },
-    path: pathFromProps,
+    path,
     permissions,
     readOnly,
     schemaPath: schemaPathFromProps,
   } = props
-  const path = pathFromProps ?? name
   const schemaPath = schemaPathFromProps ?? name
 
   const { i18n } = useTranslation()

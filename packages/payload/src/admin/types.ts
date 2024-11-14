@@ -16,7 +16,7 @@ import type {
   Row,
 } from './forms/Form.js'
 
-export type { DefaultCellComponentProps } from './elements/Cell.js'
+export type { DefaultCellComponentProps, DefaultServerCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
 export type { DayPickerProps, SharedProps, TimePickerProps } from './elements/DatePicker.js'
 export type { NavGroupPreferences, NavPreferences } from './elements/Nav.js'
@@ -301,7 +301,12 @@ export type {
   TextareaFieldServerProps,
 } from './fields/Textarea.js'
 
-export type { UIFieldClientComponent, UIFieldServerComponent } from './fields/UI.js'
+export type {
+  UIFieldClientComponent,
+  UIFieldClientProps,
+  UIFieldServerComponent,
+  UIFieldServerProps,
+} from './fields/UI.js'
 
 export type {
   UploadFieldClientComponent,
@@ -351,6 +356,7 @@ export type {
   ClientFieldBase,
   ClientFieldWithOptionalType,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerComponentProps,
   ServerFieldBase,

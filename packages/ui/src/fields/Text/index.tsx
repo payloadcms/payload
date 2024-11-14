@@ -11,8 +11,8 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { isFieldRTL } from '../shared/index.js'
-import './index.scss'
 import { TextInput } from './Input.js'
+import './index.scss'
 
 export { TextInput, TextInputProps }
 
@@ -31,11 +31,10 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
       required,
     },
     inputRef,
-    path: pathFromProps,
+    path,
     readOnly,
     validate,
   } = props
-  const path = pathFromProps ?? name
 
   const locale = useLocale()
 

@@ -46,11 +46,10 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       required,
     },
     onChange: onChangeFromProps,
-    path: pathFromProps,
+    path,
     readOnly,
     validate,
   } = props
-  const path = pathFromProps ?? name
 
   const options = React.useMemo(() => formatOptions(optionsFromProps), [optionsFromProps])
 

@@ -43,11 +43,10 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
     } = {} as CheckboxFieldClientProps['field'],
     onChange: onChangeFromProps,
     partialChecked,
-    path: pathFromProps,
+    path,
     readOnly,
     validate,
   } = props
-  const path = pathFromProps ?? name
 
   const { uuid } = useForm()
 

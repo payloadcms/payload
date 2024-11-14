@@ -5,951 +5,597 @@
 
 ## What has changed?
 
-The core logic and principles of Payload remain the same for 3.0. The brunt of the changes are at the HTTP layer and the Admin Panel. These aspects were moved to be based upon Next.js.
+The core logic and principles of Payload remain the same from 2.0 to 3.0, with the majority of changes affecting specifically the HTTP layer and the Admin Panel, which is now built upon Next.js. With this change, your entire application can be served within a single repo. Payload endpoints are now opened directly within your own Next.js application, right alongside your frontend. All Payload APIs remain exactly the same (with a few new features), and the Payload Config is generally the same, with the breaking changes detailed below.
+
+Payload is still headless, you will still be able to leverage it completely headlessly just as you do now with Sveltekit, etc. In fact, Payload itself is now _truly_ portable because it is fully Node.js compatible and completely separate from the HTTP layer. The entire Payload suite of packages has been modularized to make this possible.
 
 ## To migrate from Payload 2.0 to 3.0:
 
-1. Delete the `admin.bundler` property from your Payload Config:
+1. Delete the `admin.bundler` property from your Payload Config. Payload no longer bundles the Admin Panel. Instead, we rely directly on Next.js for bundling.
 
-Payload no longer bundles the Admin Panel. Instead, we rely directly on Next.js for bundling. This also means that the `@payloadcms/bundler-webpack` and `@payloadcms/bundler-vite` packages have been deprecated. You can completely uninstall those from your project by removing them from your `package.json` file and re-running your package manager’s installation process, i.e. `pnpm i`.
+    ```diff
+    // payload.config.ts
+    - import { webpackBundler } from '@payloadcms/bundler-webpack'
 
-2. Add the `secret` property to your Payload Config. This used to be set in the `payload.init()` function of your `server.ts` file. Move it to `payload.config.ts` instead:
-
-```tsx
-// payload.config.ts
-
-buildConfig({
-  // ...
-  secret: process.env.PAYLOAD_SECRET
-})
-```
-
-3. The `admin.css` and `admin.scss` properties in the Payload Config have been removed:
-
-Instead for any global styles you can:
-
-- use `(payload)/custom.scss` to import or add your own styles, eg. for tailwind
-- plugins that need to inject global styles should do so via the provider config at `admin.components.providers` :
-
-```tsx
-// payload.config.js
-import { MyProvider } from './providers/MyProvider'
-
-//...
-admin: {
-  components: {
-    providers: [
-      MyProvider
-    ]
-  }
-},
-//...
-
-// providers/MyProvider.tsx
-
-import React from 'react'
-import './globals.css'
-
-export const MyProvider: React.FC<{children?: any}= ({ children }) ={
-  return (
-    <React.fragment>
-      {children}
-    </React.fragment>
-  )
-}
-```
-
-4. The `admin.indexHTML` property has been removed.
-5. The `collection.admin.hooks` property has been removed.
-
-Instead, use the new `beforeDuplicate` field-level hook which take the usual field hook arguments.
-
-```tsx
-// ❌ Before
-// file: collections/Posts.ts
-import type { CollectionConfig } from 'payload'
-
-export const PostsCollection: CollectionConfig = {
-  slug: 'posts',
-  admin: {
-    hooks: {
-      beforeDuplicate: ({ data }) => {
-        return {
-          ...data,
-          title: `${data.title}-duplicate`
-        }
+    buildConfig({
+      // ...
+      admin: {
+        // ...
+    -   bundler: webpackBundler(),
       }
-    }
-  },
-  fields: [
-    {
-      name: 'title',
-      type: 'text',
-    },
-  ],
-}
-```
+    })
+    ```
 
-```tsx
-// ✅ After
-// file: collections/Posts.ts
-import type { CollectionConfig } from 'payload'
+    This also means that the `@payloadcms/bundler-webpack` and `@payloadcms/bundler-vite` packages have been deprecated. You can completely uninstall those from your project by removing them from your `package.json` file and re-running your package manager’s installation process, i.e. `pnpm i`.
 
-export const PostsCollection: CollectionConfig = {
-  slug: 'posts',
-  fields: [
-    {
-      name: 'title',
-      type: 'text',
-      hooks: {
-        beforeDuplicate: [
-          ({ data }) => `${data.title}-duplicate`
-        ],
-      },
-    },
-  ],
-}
-```
+1. Add the `secret` property to your Payload Config. This used to be set in the `payload.init()` function of your `server.ts` file. Instead, move it to `payload.config.ts`:
 
-6. Import all Payload React components via the `@payloadcms/ui` package instead of `payload`:
+    ```diff
+    // payload.config.ts
 
-If you were previously importing components into your app from the `payload` package, for example to create a custom component, you will need to:
+    buildConfig({
+      // ...
+    + secret: process.env.PAYLOAD_SECRET
+    })
+    ```
 
-- Change your import paths (see below)
-- Migrate your component (if necessary, see next bullet)
+1. The `admin.css` and `admin.scss` properties in the Payload Config have been removed.
 
-```tsx
-import {
-  // Form Fields
-  ArrayField,
-  BlocksField,
-  CheckboxField,
-  CodeField,
-  CollapsibleField,
-  ConfirmPasswordField,
-  DateTimeField,
-  EmailField,
-  GroupField,
-  HiddenField,
-  JSONField,
-  NumberField,
-  PasswordField,
-  PointField,
-  RadioGroupField,
-  RelationshipField,
-  RichTextField,
-  RowField,
-  SelectField,
-  TabsField,
-  TextField,
-  TextareaField,
-  UIField,
-  Upload,
-  UploadField,
+    ```diff
+    // payload.config.ts
 
-  // Input Elements
-  HiddenInput,
-  TextInput,
-  TextareaInput,
-  UploadInput,
+    buildConfig({
+      // ...
+      admin: {
+        // ...
+    -   css: '',
+    -   scss: ''
+      }
+    })
+    ```
 
-  // Hooks
-  useActions,
-  useAddClientFunction,
-  useAllFormFields,
-  useAuth,
-  useClientFunctions,
-  useConfig,
-  useDebounce,
-  useDebouncedCallback,
-  useDebouncedEffect,
-  useDelay,
-  useDelayedRender,
-  useDocumentDrawer,
-  useDocumentEvents,
-  useDocumentInfo,
-  useDrawerSlug,
-  useEditDepth,
-  useEntityVisibility,
-  useField,
-  useFieldComponents,
-  useForm,
-  useFormFields,
-  useFormInitializing,
-  useFormModified,
-  useFormProcessing,
-  useFormSubmitted,
-  useHotkey,
-  useIntersect,
-  useListDrawer,
-  useListInfo,
-  useListQuery,
-  useLocale,
-  useModal,
-  useNav,
-  useOperation,
-  useParams,
-  usePayloadAPI,
-  usePreferences,
-  useResize,
-  useRouteCache,
-  useRowLabel,
-  useScrollInfo,
-  useSearchParams,
-  useSelection,
-  useStepNav,
-  useTheme,
-  useThrottledEffect,
-  useTranslation,
-  useUseTitleField,
-  useWatchForm,
-  useWindowInfo,
+    To migrate, choose one of the following options:
 
-  // Providers
-  ActionsProvider,
-  AuthProvider,
-  ClientFunctionProvider,
-  ConfigProvider,
-  DocumentEventsProvider,
-  DocumentInfoProvider,
-  EditDepthProvider,
-  EntityVisibilityProvider,
-  FieldComponentsProvider,
-  FieldPropsProvider,
-  ListInfoProvider,
-  ListQueryProvider,
-  LocaleProvider,
-  OperationProvider,
-  ParamsProvider,
-  PreferencesProvider,
-  RelationshipProvider,
-  RootProvider,
-  RouteCacheProvider,
-  RowLabelProvider,
-  ScrollInfoProvider,
-  SearchParamsProvider,
-  SelectionProvider,
-  TableCellProvider,
-  TableColumnsProvider,
-  ThemeProvider,
-  TranslationProvider,
-  WindowInfoProvider,
+    1. For most use cases, you can simply customize the file located at `(payload)/custom.scss`. You can import or add your own styles here, such as for Tailwind.
+    1. For plugins author, you can use a Custom Provider at `admin.components.providers` to import your stylesheet:
 
-  // View Components
-  Account,
-  Logout,
+        ```tsx
+        // payload.config.js
 
-  // Elements
-  Button,
-  Card,
-  Collapsible,
-  CopyToClipboard,
-  DefaultPublishButton,
-  Drawer,
-  DrawerToggler,
-  ErrorPill,
-  Gutter,
-  Hamburger,
-  LoadingOverlay,
-  LoadingOverlayToggle,
-  Modal,
-  NavGroup,
-  NavToggler,
-  Pagination,
-  PerPage,
-  Pill,
-  Popup,
-  PopupList,
-  PublishButton,
-  RenderTitle,
-  RowLabel,
-  ShimmerEffect,
-  StaggeredShimmers,
-  Table,
-  Thumbnail,
-  Tooltip,
-  Translation,
-
-  // Icons
-  CalendarIcon,
-  CheckIcon,
-  ChevronIcon,
-  CloseMenuIcon,
-  CodeBlockIcon,
-  CopyIcon,
-  DragHandleIcon,
-  EditIcon,
-  LineIcon,
-  LinkIcon,
-  LogOutIcon,
-  MenuIcon,
-  MinimizeMaximizeIcon,
-  MoreIcon,
-  PlusIcon,
-  SearchIcon,
-  SwapIcon,
-  XIcon,
-
-  // Constant Variables
-  defaultTheme,
-  fieldBaseClass,
-
-  // TS Types
-  ColumnPreferences,
-  DocumentInfoContext,
-  DocumentInfoProps,
-  FieldType,
-  FormProps,
-  RowLabelProps,
-  SelectFieldProps,
-  TabsFieldProps,
-  TextAreaInputProps,
-  TextFieldProps,
-  TextInputProps,
-  TextareaFieldProps,
-  Theme,
-  UploadFieldProps,
-  UploadInputProps,
-
-  // Other Exports
-  AppHeader,
-  BlocksDrawer,
-  Column,
-  DefaultBlockImage,
-  DeleteMany,
-  DocumentControls,
-  DocumentFields,
-  EditMany,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-  FieldMap,
-  File,
-  Form,
-  FormLoadingOverlayToggle,
-  FormSubmit,
-  GenerateConfirmation,
-  HydrateClientUser,
-  ListControls,
-  ListSelection,
-  MappedField,
-  MappedTab,
-  NullifyLocaleField,
-  Options,
-  PublishMany,
-  ReactSelect,
-  ReactSelectOption,
-  ClientField,
-  ClientBlock,
-  RenderFields,
-  SectionTitle,
-  Select,
-  SetStepNav,
-  SetViewActions,
-  SortColumn,
-  StepNavItem,
-  UnpublishMany,
-  ViewDescription,
-  WatchChildErrors,
-  formatDrawerSlug,
-  toast,
-  withCondition,
-} from '@payloadcms/ui'
-```
-
-7. Migrate all Custom Components to Server Components.
-
-All Custom Components are now server-rendered, and therefore, cannot use state or hooks directly. If you’re using Custom Components in your app that requires state or hooks, define your component in a separate file with the `'use client'` directive at the top, then render *that* client component within your server component. Remember you can only pass serializable props to this component, so props cannot be blindly spread.
-
-```tsx
-// file: components/MyServerComponent.tsx
-import React from 'react'
-import type { ServerOnlyProps } from './types.ts'
-import { MyClientComponent } from './MyClientComponent.tsx'
-
-export const MyServerComponent: React.FC<ServerOnlyProps= (serverOnlyProps) ={
-  const clientOnlyProps = {
-    // ... sanitize server-only props here as needed
-  }
-
-  return (
-    <MyClientComponent {...clientOnlyProps} />
-  )
-}
-
-
-// file: components/MyClientComponent.tsx
-'use client'
-import React from 'react'
-
-export const MyClientComponent = {
-  const [count, setCount] = React.useState(0)
-
-  return (
-    <div>
-      <h1>This component uses state, it MUST be a client component</h1>
-      <button
-        type="button"
-        onClick(() => {
-          setCount(prevCount => prevCount + 1)
-        })
-      >
-        Increment
-      </button>
-      <span>Count: {count}</span>
-    </div>
-  )
-}
-```
-
-8. The `custom` property in the Payload Config, i.e. collections, globals, blocks, and fields are now ***server only***.
-
-Use `admin.custom` properties will be available in both server and client bundles.
-
-
-```tsx
-// file: payload.config.ts
-import { buildConfig } from 'payload'
-
-export default buildConfig({
-  // Server Only
-  custom: {
-    someProperty: 'value'
-  },
-  admin: {
-    custom: {
-      name: 'Customer portal' // Available in server and client
-    }
-  },
-})
-```
-
-9. The `admin.description` property on field configs no longer attaches `data` to its args:
-
-This is because we cannot pass your `description` function to the client for execution (functions are not serializable, and state is held on the client). To display dynamic descriptions that use current `data` or `path`, you must now pass a custom component and subscribe to the field’s state yourself using Payload’s React hooks:
-
-
-```tsx
-// file: payload.config.ts
-import { buildConfig } from 'payload'
-import  { ServerRenderedDescription } from './components/ServerRenderedDescription.tsx'
-
-export default buildConfig({
-  // ...
-  collections: [
-    {
-      slug: 'posts',
-      fields: [
-        {
-          name: 'text',
-          type: 'text',
-          admin: {
-            description: ServerRenderedDescription
+        //...
+        admin: {
+          components: {
+            providers: [
+              MyProvider: './providers/MyProvider.tsx'
+            ]
           }
         },
-      ]
-    }
-  ]
-  // ...
-})
+        //...
 
+        // providers/MyProvider.tsx
 
-// file: components/ServerRenderedDescription.tsx
-import React from 'react'
+        'use client'
+        import React from 'react'
+        import './globals.css'
 
-import { ClientRenderedDescription } from './ClientRenderedDescription.tsx'
-
-export const ServerRenderedDescription = () => <ClientRenderedDescription />
-
-
-// file: components/ClientRenderedDescription.tsx
-'use client'
-import React from 'react'
-import type { TextFieldDescriptionClientComponent } from 'payload'
-import { useFormFields } from '@payloadcms/ui'
-
-export const ClientRenderedDescription: TextFieldDescriptionClientComponent = ({ path }) => {
-  const { value } = useFormFields(([fields]) => fields[path])
-  const customDescription = `Component description: ${path} - ${value}`
-
-  return (
-    <div>
-      {customDescription}
-    </div>
-  )
-}
-```
-
-10. The `admin.label` property on the `collapsible` field no longer attaches `data` to its args.
-
-This is because we cannot pass your `label` function to the client for execution  (functions are not serializable, and state is held on the client). To display dynamic labels that use current `data` or `path`, you must now pass a custom component and subscribe to the field’s state yourself using Payload’s React hooks:
-
-
-```tsx
-// file: payload.config.ts
-import { buildConfig } from 'payload'
-import  { ServerRenderedCollapsibleLabel } from './components/ServerRenderedCollapsibleLabel.tsx'
-
-export default buildConfig({
-  // ...
-  collections: [
-    {
-      slug: 'posts',
-      fields: [
-        {
-          type: 'collapsible',
-          label: ServerRenderedCollapsibleLabel
-          fields: [
-            {
-              name: 'fieldInCollapsible',
-              type: 'text',
-            }
-          ]
-        },
-      ]
-    }
-  ]
-  // ...
-})
-
-
-// file: components/ServerRenderedCollapsibleLabel.tsx
-import React from 'react'
-import { ClientCollapsibleLabel } from './ClientCollapsibleLabel.tsx'
-
-export const ServerRenderedCollapsibleLabel = () => <ClientCollapsibleLabel />
-
-
-// file: components/ClientCollapsibleLabel.tsx
-'use client'
-import React from 'react'
-import { useFormFields } from '@payloadcms/ui'
-
-export const ClientCollapsibleLabel = ({ path }) => {
-  const { value } = useFormFields(([fields]) => fields[path])
-  const customLabel = `${value?.fieldInCollapsible || 'Untitled Collapsible'}`
-
-  return <div>{customLabel}</div>
-}
-```
-
-12. `admin.components.RowLabel` no longer accepts a function, instead use a custom component and make use of the `useRowLabel` hook:
-
-```tsx
-// file: payload.config.ts
-import { buildConfig } from 'payload'
-import  { ServerRenderedArrayRowLabel } from './components/ServerRenderedArrayRowLabel.tsx'
-
-export default buildConfig({
-  // ...
-  collections: [
-    {
-      slug: 'posts',
-      fields: [
-        {
-          name: 'people',
-          type: 'array',
-          admin: {
-            components: {
-              RowLabel: ServerRenderedArrayRowLabel
-            }
-          },
-          fields: [
-            {
-              name: 'name',
-              type: 'text',
-            }
-          ]
+        export const MyProvider: React.FC<{children?: any}= ({ children }) ={
+          return (
+            <React.fragment>
+              {children}
+            </React.fragment>
+          )
         }
+        ```
+
+1. The `admin.indexHTML` property has been removed. Delete this from your Payload Config.
+
+    ```diff
+    // payload.config.ts
+
+    buildConfig({
+      // ...
+      admin: {
+        // ...
+    -   indexHTML: ''
+      }
+    })
+    ```
+
+1. The `collection.admin.hooks` property has been removed. Instead, use the new `beforeDuplicate` field-level hook which take the usual field hook arguments.
+
+    ```diff
+    // collections/Posts.ts
+    import type { CollectionConfig } from 'payload'
+
+    export const PostsCollection: CollectionConfig = {
+      slug: 'posts',
+      admin: {
+        hooks: {
+    -     beforeDuplicate: ({ data }) => {
+    -       return {
+    -         ...data,
+    -         title: `${data.title}-duplicate`
+    -       }
+    -     }
+        }
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          hooks: {
+    +      beforeDuplicate: [
+    +        ({ data }) => `${data.title}-duplicate`
+    +      ],
+          },
+        },
+      ],
+    }
+    ```
+
+1. All Payload React components have been moved from the `payload` package to `@payloadcms/ui`. If you were previously importing components into your app from the `payload` package, for example to create Custom Components, you will need to change your import paths:
+
+    ```diff
+    - import { TextField, useField, etc. } from 'payload'
+    + import { TextField, useField, etc. } from '@payloadcms/ui'
+    ```
+    *Note: for brevity, not _all_ modules are listed here*
+
+1. The `BlockField` and related types have been renamed to `BlocksField` for semantic accuracy.
+
+    ```diff
+    - import type { BlockField, BlockFieldProps } from 'payload'
+    + import type { BlocksField, BlocksFieldProps } from 'payload'
+    ```
+
+1. All Custom Components are now defined as _file paths_ instead of direct imports. If you are using Custom Components in your Payload Config, remove the imported module and point to the file's path instead:
+
+    ```diff
+    import { buildConfig } from 'payload'
+    - import { MyComponent } from './src/components/Logout'
+
+    const config = buildConfig({
+      // ...
+      admin: {
+        components: {
+          logout: {
+    -       Button: MyComponent,
+    +       Button: '/src/components/Logout#MyComponent'
+          }
+        }
+      },
+    })
+    ```
+
+    For more details, see the [Documentation](https://payloadcms.com/docs/beta/admin/components#component-paths).
+
+1. All Custom Components are now server-rendered by default, and therefore, cannot use state or hooks directly. If you’re using Custom Components in your app that requires state or hooks, add the `'use client'` directive at the top of the file.
+
+    ```diff
+    // components/MyClientComponent.tsx
+    + 'use client'
+    import React, { useState } from 'react'
+
+    export const MyClientComponent = () => {
+      const [state, setState] = useState()
+
+      return (
+        <div>
+          {state}
+        </div>
+      )
+    }
+    ```
+
+    For more details, see the [Documentation](https://payloadcms.com/docs/beta/admin/components#client-components).
+
+1. The `custom` property in the Payload Config, i.e. Collections, Globals, and Fields is now **server only** and will **not** appear in the client-side bundle. To add custom properties to the client bundle, use the new `admin.custom` property, which will be available on _both_ the server and the client.
+
+    ```diff
+    // payload.config.ts
+    import { buildConfig } from 'payload'
+
+    export default buildConfig({
+      custom: {
+        someProperty: 'My Server Prop' // Now server only!
+      },
+      admin: {
+    +   custom: {
+    +     name: 'My Client Prop' // Available in server AND client
+    +   }
+      },
+    })
+    ```
+
+1. The `useTitle` hook has been consolidated into the `useDocumentInfo` hook. Instead, you can get title directly from document info context:
+
+    ```diff
+    'use client'
+    - import { useTitle } from 'payload'
+    + import { useDocumentInfo } from '@payloadcms/ui'
+
+    export const MyComponent = () => {
+    - const title = useTitle()
+    + const { title } = useDocumentInfo()
+
+      // ...
+    }
+    ```
+
+1. The `Fields` type was renamed to `FormState` for improved semantics. If you were previously importing this type in your own application, simply change the import name:
+
+    ```diff
+    - import type { Fields } from 'payload'
+    + import type { FormState } from 'payload'
+    ```
+
+1. The `useDocumentInfo` hook no longer returns `collection` or `global`. Instead, various properties of the config are passed, like `collectionSlug` and `globalSlug`. You can use these to access a client-side config, if needed, through the `useConfig` hook (see next bullet).
+
+    ```diff
+    'use client'
+    import { useDocumentInfo } from '@payloadcms/ui'
+
+    export const MyComponent = () => {
+      const {
+    -   collection,
+    -   global,
+    +   collectionSlug,
+    +   globalSlug
+      } = useDocumentInfo()
+
+      // ...
+    }
+    ```
+
+1. The `useConfig` hook now returns a `ClientConfig` and not a `SanitizedConfig`. This is because the config itself is not serializable and so it is not able to be thread through to the client. This means that all non-serializable props have been omitted from the Client Config, such as `db`, `bundler`, etc.
+
+    ```diff
+    'use client'
+    - import { useConfig } from 'payload'
+    + import { useConfig } from '@payloadcms/ui'
+
+    export const MyComponent = () => {
+    - const config = useConfig() // used to be a 'SanitizedConfig'
+    + const { config } = useConfig() // now is a 'ClientConfig'
+
+      // ...
+    }
+    ```
+
+    For more details, see the [Documentation](https://payloadcms.com/docs/beta/admin/components#accessing-the-payload-config).
+
+1. The args of the `admin.livePreview.url` function have changed. It no longer receives `documentInfo` as an arg, and instead, now has `collectionConfig` and `globalConfig`.
+
+    ```diff
+    // payload.config.ts
+    import { buildConfig } from 'payload'
+
+    export default buildConfig({
+      // ...
+      admin: {
+        // ...
+        livePreview: ({
+    -     documentInfo,
+    +     collectionConfig,
+    +     globalConfig
+        }) => ''
+      }
+    })
+    ```
+
+1. The `href` and `isActive` functions on View Tabs no longer includes the `match` or `location` arguments. This is is a property specific to React Router, not Next.js. If you need to do URL matching similar to this, use a custom tab that fires of some hooks, i.e. `usePathname()` and run it through your own utility functions:
+
+    ```diff
+    // collections/Posts.ts
+    import type { CollectionConfig } from 'payload'
+
+    export const PostsCollection: CollectionConfig = {
+      slug: 'posts',
+      admin: {
+        components: {
+          views: {
+    -        Edit: {
+    -          Tab: {
+    -            isActive: ({ href, location, match }) => true,
+    -            href: ({ href, location, match }) => ''
+    -          },
+    -       },
+    +       edit: {
+    +         tab: {
+    +           isActive: ({ href }) => true,
+    +           href: ({ href }) => ''
+    +           Component: './path/to/CustomComponent.tsx', // Or use a Custom Component
+    +         }
+    +       },
+          },
+        },
+      },
+    }
+    ```
+
+1. The `admin.components.views[key].Tab.pillLabel` has been replaced with `admin.components.views[key].tab.Pill`:
+
+    ```diff
+    // collections/Posts.ts
+    import type { CollectionConfig } from 'payload'
+
+    export const PostsCollection: CollectionConfig = {
+      slug: 'posts',
+      admin: {
+        components: {
+    -     views: {
+    -       edit: {
+    -         Tab: {
+    -           pillLabel: 'Hello, world!',
+    -         },
+    -       },
+    +       Edit: {
+    +         tab: {
+    +           Pill: './path/to/CustomPill.tsx',
+    +         }
+    +       },
+          },
+        },
+      },
+    }
+    ```
+
+1. Unique fields will now automatically be appended with “- Copy” through the new `admin.beforeDuplicate` field hooks (detailed aboved).
+
+1. The `useCollapsible` hook has had slight changes to its property names. `collapsed` is now `isCollapsed` and `withinCollapsible` is now `isWithinCollapsible`.
+
+    ```diff
+    'use client'
+    import { useCollapsible } from '@payloadcms/ui'
+
+    export const MyComponent = () => {
+    - const { collapsed, withinCollapsible } = useCollapsible()
+    + const { isCollapsed, isWithinCollapsible } = useCollapsible()
+    }
+    ```
+
+1. The `admin.favicon` property is now `admin.icons` and the types have changed:
+
+    ```diff
+    // payload.config.ts
+    import { buildConfig } from 'payload'
+
+    const config = buildConfig({
+      // ...
+      admin: {
+    -   favicon: 'path-to-favicon.svg',
+    +   icons: [{
+    +     path: 'path-to-favicon.svg',
+    +     sizes: '32x32'
+    +   }]
+      }
+    })
+    ```
+
+    For more details, see the [Documentation](https://payloadcms.com/docs/beta/admin/metadata#icons).
+
+1. The `admin.meta.ogImage` property has been replaced by `admin.meta.openGraph.images`:
+
+    ```diff
+    // payload.config.ts
+    import { buildConfig } from 'payload'
+
+    const config = buildConfig({
+      // ...
+      admin: {
+        meta: {
+    -     ogImage: '',
+    +     openGraph: {
+    +       images: []
+    +     }
+        }
+      }
+    })
+    ```
+
+    For more details, see the [Documentation](https://payloadcms.com/docs/beta/admin/metadata#open-graph).
+
+1. The `admin.logoutRoute` and `admin.inactivityRoute` properties have been consolidated into a single `admin.routes` property. To migrate, simply move those two keys as follows:
+
+    ```diff
+    // payload.config.ts
+    import { buildConfig } from 'payload'
+
+    const config = buildConfig({
+      // ...
+      admin: {
+    -   logoutRoute: '/custom-logout',
+    +   inactivityRoute: '/custom-inactivity'
+    +   routes: {
+    +     logout: '/custom-logout',
+    +     inactivity: '/custom-inactivity'
+    +   }
+      }
+    })
+    ```
+
+1. Environment variables prefixed with `PAYLOAD_PUBLIC` will no longer be available on the client. In order to access them on the client, those will now have to be prefixed with `NEXT_PUBLIC` instead.
+
+    ```diff
+    'use client'
+    - const var = process.env.PAYLOAD_PUBLIC_MY_ENV_VAR
+    + const var = process.env.NEXT_PUBLIC_MY_ENV_VAR
+    ```
+
+    For more details, see the [Documentation](https://payloadcms.com/docs/beta/configuration/environment-vars).
+
+1. The `useTranslation` hook no longer takes any options, any translations using shorthand accessors will need to use the entire `group:key`
+
+    ```diff
+    'use client'
+    - import { useTranslation } from 'payload'
+    + import { useTranslation } from '@payloadcms/ui'
+
+    export const MyComponent = () => {
+    - const { i18n, t } = useTranslation('general')
+    + const { i18n, t } = useTranslation()
+
+    - return <p>{t('cancel')}</p>
+    + return <p>{t('general:cancel')}</p>
+    }
+    ```
+
+1. `react-i18n` was removed, the `Trans` component from `react-i18n` has been replaced with a Payload-provided solution:
+
+    ```diff
+    'use client'
+    - import { Trans } from "react-i18n"
+    + import { Translation } from "@payloadcms/ui"
+
+    // Example string to translate:
+    // "loggedInChangePassword": "To change your password, go to your <0>account</0> and edit your password there."
+
+    export const MyComponent = () => {
+      return (
+    -     <Trans i18nKey="loggedInChangePassword" t={t}>
+    -       <Link to={`${admin}/account`}>account</Link>
+    -     </Trans>
+
+    +     <Translation
+    +       t={t}
+    +       i18nKey="authentication:loggedInChangePassword"
+    +       elements={{
+    +         '0': ({ children }) => <Link href={`${admin}/account`} children={children} />,
+    +       }}
+    +     />
+      )
+    }
+    ```
+
+1. `root` endpoints no longer exist on the config. Instead, you must add them to the `/api` folder within your own Payload application.
+
+    ```diff
+    // payload.config.ts
+    import { buildConfig } from 'payload'
+
+    const config = buildConfig({
+      // ...
+    - endpoints: [...]
+    })
+    ```
+
+    For more details, see the [Next.js Documentation](https://nextjs.org/docs/app/api-reference/file-conventions/route).
+
+1. All other endpoint handlers have changed. The args no longer include `res`, and `next`, and the return type now expects a valid HTTP [`Response`](https://developer.mozilla.org/en-US/docs/Web/API/Response) instead of `res.json`, `res.send`, etc.:
+
+    ```diff
+    // collections/Posts.ts
+    import type { CollectionConfig } from 'payload'
+
+    export const PostsCollection: CollectionConfig = {
+      slug: 'posts',
+      endpoints: [
+    -   {
+    -     path: '/whoami/:parameter',
+    -     method: 'post',
+    -     handler: (req, res) => {
+    -       res.json({
+    -         parameter: req.params.parameter,
+    -         name: req.body.name,
+    -         age: req.body.age,
+    -       })
+    -     }
+    -   },
+    +   {
+    +     path: '/whoami/:parameter',
+    +     method: 'post',
+    +     handler: (req) => {
+    +       return Response.json({
+    +         parameter: req.routeParams.parameter,
+    +         // ^^ `params` is now `routeParams`
+    +         name: req.data.name,
+    +         age: req.data.age,
+    +       })
+    +     }
+    +   }
       ]
     }
-  ]
-  // ...
-})
+    ```
 
+1. Endpoint handlers no longer resolves `data`, `locale`, or `fallbackLocale` for you on the request. Instead, you must resolve them yourself or use the Payload-provided utilities:
 
-// file: components/ServerRenderedArrayRowLabel.tsx
-import React from 'react'
-import { ClientRowLabel } from './ClientRowLabel.tsx'
+    ```diff
+    // collections/Posts.ts
+    import type { CollectionConfig } from 'payload'
+    + import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
+    + import { addLocalesToRequest } from '@payloadcms/next/utilities'
 
-export const ServerRenderedArrayRowLabel = () => <ClientArrayRowLabel />
+    export const PostsCollection: CollectionConfig = {
+      slug: 'posts',
+      endpoints: [
+    -   {
+    -     path: '/whoami/:parameter',
+    -     method: 'post',
+    -     handler: async (req) => {
+    -       return Response.json({
+    -         name: req.data.name, // data will be undefined
+    -       })
+    -     }
+    -   },
+    +   {
+    +     path: '/whoami/:parameter',
+    +     method: 'post',
+    +     handler: async (req) => {
+    +       // mutates req, must be awaited
+    +       await addDataAndFileToRequest(req)
+    +       await addLocalesToRequest(req)
+    +
+    +       return Response.json({
+    +         name: req.data.name, // data is now available
+    +    	    fallbackLocale: req.fallbackLocale,
+    +         locale: req.locale,
+    +       })
+    +     }
+    +   }
+      ]
+    }
+    ```
 
+1. The `req` object used to extend the [Express Request](https://expressjs.com/), but now extends the [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request). You may need to update your code accordingly to reflect this change. For example:
 
-// file: components/ClientArrayRowLabel.tsx
-'use client'
-import React from 'react'
-import { useRowLabel } from '@payloadcms/ui'
+    ```diff
+    - req.headers['content-type']
+    + req.headers.get('content-type')
+    ```
 
-export const ClientArrayRowLabel = () => {
-  const { data } = useRowLabel()
+1. `staticDir` must now be an absolute path. Before it would attempt to use the location of the Payload Config and merge the relative path set for staticDir.
 
-  return <div>{data?.name || 'No Name'}</div>
-}
-```
+    ```diff
+    // collections/Media.ts
+    import type { CollectionConfig } from 'payload'
+    import path from 'path'
+    + import { fileURLToPath } from 'url'
 
-13. The `admin.components.views[].Tab.pillLabel` has been replaced with `admin.components.views[].Tab.Pill`
+    + const filename = fileURLToPath(import.meta.url)
+    + const dirname = path.dirname(filename)
 
-```tsx
-// Collection.ts
-
-// ❌ Before
-
-{
-  admin: {
-    components: {
-      views: {
-        edit: {
-          tab: {
-            pillLabel: '',
-          },
-        },
+    export const MediaCollection: CollectionConfig = {
+      slug: 'media',
+      upload: {
+    -   staticDir: path.resolve(__dirname, './uploads'),
+    +   staticDir: path.resolve(dirname, '../uploads'),
       },
-    },
-  },
-}
+    }
+    ```
 
-// ✅ After
+1. `staticURL` has been removed. If you were using this format URLs when using an external provider, you can leverage the `generateFileURL` functions in order to do the same.
 
-{
-  admin: {
-    components: {
-      views: {
-        edit: {
-          tab: {
-            pill: {
-              Component: './path/to/CustomPill.js',
-            },
-          },
-        },
+    ```diff
+    // collections/Media.ts
+    import type { CollectionConfig } from 'payload'
+
+    export const MediaCollection: CollectionConfig = {
+      slug: 'media',
+      upload: {
+    -   staticURL: '',
       },
-    },
-  },
-}
-```
-
-14. The `useTitle` hook has been absorbed by the `useDocumentInfo` hook.
-
-Now, you can get title directly from document info context, i.e. `const { title } = useDocumentInfo()`.
-
-15. The `Fields` type was renamed to `FormState`:
-
-This was changed for improved semantics. If you were previously importing this type in your own application, simply change the import name:
-
-
-```tsx
-// ❌ Before
-
-import type { Fields } from 'payload'
-
-// ✅ After
-
-import type { FormState } from 'payload'
-```
-
-16. The `useDocumentInfo` hook no longer returns a `SanizitedCollectionConfig` or `SanitizedGlobalConfig`:
-
-This is because the configs themselves are not serializable and so they cannot be thread through to the client, i.e. the `DocumentInfoContext`. Instead, various properties of the config are passed instead, like `collectionSlug` and `globalSlug`.  You can use these to access a client-side config, if needed, through the `useConfig` hook (see next bullet).
-
-17. The `useConfig` hook now returns a `ClientConfig` and not a `SanitizedConfig`.
-
-This is because the config itself is not serializable and so it is not able to be thread through to the client, i.e. the `ConfigContext`.
-
-18. `DocumentTabProps` no longer contains `id` or `isEditing`.
-
-Instead you can use the `useDocumentInfo` hook to get this information (see above).
-
-19. The args of the `livePreview.url` function have changed.
-
-It no longer receives `documentInfo` as an arg, and instead, now has `collectionConfig` and `globalConfig`.
-
-20. The  `href` and `isActive` functions in the view tab config no longer sends the `match` or `location` arguments.
-
-This is is a property specific to React Router, not Next.js. If you need to do fancy matching similar to this, use a custom tab that fires of some hooks, i.e. `usePathname()` and run it through your own utility functions.
-
-21. The `views.Edit` or `views.Edit.Default` or `views.Edit.Default.Component` properties are no longer of type `AdminViewComponent` like the other views.
-
-Instead, their new type is `React.FC<EditViewProps>` where you now only receive the config slug. This is because of how custom edit views need to be rendered server-side, then returned by a client-component (i.e. the document drawer). There’s an example of this adapter pattern in the first sections of this page.
-
-22. `beforeDuplicate` field hooks have been added to `unique` fields to automatically add “- Copy” to the end.
-23. The `useCollapsible` hook has had slight changes to its property names:
-
-`collapsed` is now `isCollapsed` and `withinCollapsible` is now `isWithinCollapsible`.
-
-24. Components that return a function have webpack errors.
-
-Will need to document the following (if intended as a breaking change)
-
-
-![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/0fcec415-321b-48ca-a915-504d61c448b3/94156826-74ee-4708-aa73-1beb11ad0306/Untitled.png)
-
-25. The `admin.favicon` property is now `admin.icons` and the types have changed
-
-Reference: https://github.com/payloadcms/payload/pull/6347
-
-
-```tsx
-// payload.config.ts
-
-// ❌ Before
-
-{
-  // ...
-  admin: {
-    favicon: 'path-to-favicon.svg'
-  }
-}
-
-// ✅ After
-
-{
-  // ...
-  admin: {
-    icons: [{
-      path: 'path-to-favicon.svg',
-      sizes: '32x32'
-    }]
-  }
-}
-```
-
-See also: https://nextjs.org/docs/app/api-reference/functions/generate-metadata#icons
-
-26. The `admin.meta.ogImage` property has been replaced by `admin.meta.openGraph.images`
-
-Reference: https://github.com/payloadcms/payload/pull/6227
-
-```tsx
-// payload.config.ts
-
-// ❌ Before
-{
-  admin: {
-    meta: {
-      ogImage: ''
     }
-  }
-}
-```
-
-```tsx
-// ✅ After
-
-{
-  admin: {
-    meta: {
-      openGraph: {
-        images: []
-      }
-    }
-  }
-}
-```
-
-See also : https://nextjs.org/docs/app/api-reference/functions/generate-metadata#opengraph
-
-27. The `admin.logoutRoute` and `admin.inactivityRoute` properties have been consolidated into a single `admin.routes` property
-
-Reference: https://github.com/payloadcms/payload/pull/6354
-
-To migrate, simply move those two keys as follows:
-
-```tsx
-// payload.config.ts
-
-// ❌ Before
-
-{
-  // ...
-  admin: {
-    logoutRoute: '/custom-logout',
-    inactivityRoute: '/custom-inactivity'
-  }
-}
-
-// ✅ After
-
-{
-  // ...
-  admin: {
-    routes: {
-      logout: '/custom-logout',
-      inactivity: '/custom-inactivity'
-    }
-  }
-}
-```
-
-## Environment variables
-
-- Environment variables prefixed with `PAYLOAD_PUBLIC` will no longer be available on the client. In order to access them on the client, those will now have to be prefixed with `NEXT_PUBLIC` instead
-
-## i18n
-
-- `useTranslation()` hook no longer takes any options, any translations using shorthand accessors will need to use the entire `group:key`
-
-```tsx
-// ❌ Before
-
-const { i18n, t } = useTranslation('general')
-return <p>{t('cancel')}</p>
-
-// ✅ After
-
-const { i18n, t } = useTranslation()
-return <p>{t('general:cancel')}</p>
-```
-
-- `react-i18n` was removed, the `Trans` component from react-i18n has been replaced with a Payload provided solution. You can instead `import { Translation } from "@payloadcms/ui"`
-
-```tsx
-// Translation string example
-// "loggedInChangePassword": "To change your password, go to your <0>account</0> and edit your password there."
-
-// ❌ Before
-
-<Trans i18nKey="loggedInChangePassword" t={t}>
-  <Link to={`${admin}/account`}>account</Link>
-</Trans>
-
-// ✅ After
-
-<Translation
-  t={t}
-  i18nKey="authentication:loggedInChangePassword"
-  elements={{
-    '0': ({ children }) => <Link href={`${admin}/account`} children={children} />,
-  }}
-/>
-```
-
-## Description and Label handling
-
- https://github.com/payloadcms/payload/pull/6264
-
-- Globals config: `admin.description` no longer accepts a custom component. You will have to move it to `admin.components.elements.Description`
-- Collections config: `admin.description` no longer accepts a custom component. You will have to move it to `admin.components.edit.Description`
-- All Fields: `field.admin.description` no longer accepts a custom component. You will have to move it to `field.admin.components.Description`
-- Collapsible Field: `field.label` no longer accepts a custom component. You will have to move it to `field.admin.components.RowLabel`
-- Array Field: `field.admin.components.RowLabel` no longer accepts strings or records
-- If you are using our exported field components in your own app, their `labelProps` property has been stripped down and no longer contains the `label` and `required` prop. Those can now only be configured at the top-level.
-
-## Custom Endpoints
-
-- `root` endpoints no longer exist on the config. If you want to create a “root” endpoint, you can add them to the api folder within your Payload application. See Next docs: https://nextjs.org/docs/app/api-reference/file-conventions/route
-- Endpoint handlers
-  - arguments
-    - ❌ Before: `(req, res, next)`
-    - ✅ After: `(req)`
-  - return
-    - ❌ Before: `res.json`, `res.send`, etc.
-    - ✅ After: a valid HTTP [`Response`](https://developer.mozilla.org/en-US/docs/Web/API/Response)
-
-```tsx
-// ❌ Before
-
-{
-  path: '/whoami/:parameter',
-  method: 'post',
-  handler: (req, res) => {
-    res.json({
-      parameter: req.params.parameter,
-      name: req.body.name,
-      age: req.body.age,
-    })
-  }
-}
-
-// ✅ After
-
-{
-  path: '/whoami/:parameter',
-  method: 'post',
-  handler: (req) => {
-    return Response.json({
-      parameter: req.routeParams.parameter,
-      // ^^ `params` is now `routeParams`
-      name: req.data.name,
-      age: req.data.age,
-    })
-  }
-}
-```
-
-- Handlers no longer resolve `data` for you on the request, use `req.json()` or you can use our utilities
-
-```tsx
-// ❌ Before
-
-{
-  path: '/whoami/:parameter',
-  method: 'post',
-  handler: async (req) => {
-    return Response.json({
-      name: req.data.name, // data will be undefined
-    })
-  }
-}
-
-// ✅ After
-
-import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
-{
-  path: '/whoami/:parameter',
-  method: 'post',
-  handler: async (req) => {
-    // mutates req, must be awaited
-    await addDataAndFileToRequest(req)
-
-    return Response.json({
-      name: req.data.name, // data is now available
-    })
-  }
-}
-```
-
-- Handlers no longer resolve `locale` and `fallbackLocale` for you
-
-```tsx
-// ❌ Before
-
-{
-  path: '/whoami/:parameter',
-  method: 'post',
-  handler: async (req) => {
-    return Response.json({
-	    // will be undefined
-			fallbackLocale: req.fallbackLocale,
-      locale: req.locale,
-    })
-  }
-}
-
-// ✅ After
-
-import { addLocalesToRequest } from '@payloadcms/next/utilities'
-{
-  path: '/whoami/:parameter',
-  method: 'post',
-  handler: async (req) => {
-    // mutates req
-    addLocalesToRequest(req)
-
-    return Response.json({
-	    fallbackLocale: req.fallbackLocale,
-      locale: req.locale,
-    })
-  }
-}
-```
-
-## Req (Hooks, Access-control, etc)
-
-- The `req` used to extend the Express Request, now it extends the [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request). So you may need to change things in your code, for example if you are relying on `req.headers['content-type']` you will now need to to use `req.headers.get('content-type')`
-
-## Uploads
-
-- `staticDir` must now be an absolute path. Before it would attempt to use the location of the Payload Config and merge the relative path set for staticDir.
-- `staticURL` has been removed. If you were using this format URLs when using an external provider, you can leverage the `generateFileURL` functions in order to do the same.
+    ```
 
 ## Email Adapters
 
@@ -1017,21 +663,17 @@ export default buildConfig({
 
 # Plugins
 
-- *All* plugins have been standardized to use *named exports* (as opposed to default exports). Most also have a suffix of `Plugin` to make it clear what is being imported.
+1. *All* plugins have been standardized to use _named exports_ (as opposed to default exports). Most also have a suffix of `Plugin` to make it clear what is being imported.
 
-```tsx
-// ❌ Before
+    ```diff
+    - import seo from '@payloadcms/plugin-seo'
+    + import { seoPlugin } from '@payloadcms/plugin-seo'
 
-import seo from '@payloadcms/plugin-seo'
-import stripePlugin from '@payloadcms/plugin-stripe'
+    - import stripePlugin from '@payloadcms/plugin-stripe'
+    + import { stripePlugin } from '@payloadcms/plugin-stripe'
 
-// ✅ After
-
-import { seoPlugin } from '@payloadcms/plugin-seo'
-import { stripePlugin } from '@payloadcms/plugin-stripe'
-
-// etc.
-```
+    // and so on for every plugin
+    ```
 
 ## `@payloadcms/plugin-cloud-storage`
 
@@ -1095,60 +737,66 @@ plugins: [
 
 ## `@payloadcms/plugin-form-builder`
 
-- Field overrides for form and form submission collections now accept a function with a `defaultFields` inside the args instead of an array of config
+1. Field overrides for form and form submission collections now accept a function with a `defaultFields` inside the args instead of an array of config
 
-```tsx
-// ❌ Before
+    ```diff
+    // payload.config.ts
+    import { buildConfig } from 'payload'
+    import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 
-fields: [
-  {
-    name: 'custom',
-    type: 'text',
-  }
-]
-
-// ✅ After
-fields: ({ defaultFields }) => {
-  return [
-    ...defaultFields,
-    {
-      name: 'custom',
-      type: 'text',
-    },
-  ]
-}
-```
+    const config = buildConfig({
+      // ...
+      plugins: formBuilderPlugin({
+    -   fields: [
+    -     {
+    -       name: 'custom',
+    -       type: 'text',
+    -     }
+    -   ],
+    +   fields: ({ defaultFields }) => {
+    +     return [
+    +       ...defaultFields,
+    +       {
+    +         name: 'custom',
+    +         type: 'text',
+    +       },
+    +     ]
+    +   }
+      })
+    })
+    ```
 
 ## `@payloadcms/plugin-redirects`
 
-- Field overrides for the redirects collection now accepts a function with a `defaultFields` inside the args instead of an array of config
+1. Field overrides for the redirects collection now accepts a function with a `defaultFields` inside the args instead of an array of config
 
-```tsx
-// ❌ Before
+    ```diff
+    // payload.config.ts
+    import { buildConfig } from 'payload'
+    import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 
-fields: [
-  {
-    name: 'custom',
-    type: 'text',
-  }
-]
-
-// ✅ After
-fields: ({ defaultFields }) => {
-  return [
-    ...defaultFields,
-    {
-      name: 'custom',
-      type: 'text',
-    },
-  ]
-}
-```
+    const config = buildConfig({
+      // ...
+      plugins: redirectsPlugin({
+    -   fields: [
+    -     {
+    -       name: 'custom',
+    -       type: 'text',
+    -     }
+    -   ],
+    +   fields: ({ defaultFields }) => {
+    +     return [
+    +       ...defaultFields,
+    +       {
+    +         name: 'custom',
+    +         type: 'text',
+    +       },
+    +     ]
+    +   }
+      })
+    })
+    ```
 
 ## `@payloadcms/richtext-lexical`
 
-// TODO: Needs comprehensive breaking changes / migration steps
-
-### Custom Features
-
-- Previously, a Feature would contain both server code (e.g. population promises) and client code (e.g. toolbar items). Now, they have been split up into server features and client features
+// TODO: Add migration guide for `@payloadcms/richtext-lexical`
