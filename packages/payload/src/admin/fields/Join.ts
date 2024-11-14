@@ -5,6 +5,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -17,9 +18,7 @@ import type {
 
 type JoinFieldClientWithoutType = MarkOptional<JoinFieldClient, 'type'>
 
-type JoinFieldBaseClientProps = {
-  readonly path: string
-}
+type JoinFieldBaseClientProps = Omit<FieldPaths, 'indexPath'>
 
 export type JoinFieldClientProps = ClientFieldBase<JoinFieldClientWithoutType> &
   JoinFieldBaseClientProps

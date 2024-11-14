@@ -6,6 +6,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -20,10 +21,9 @@ type SelectFieldClientWithoutType = MarkOptional<SelectFieldClient, 'type'>
 
 type SelectFieldBaseClientProps = {
   readonly onChange?: (e: string | string[]) => void
-  readonly path: string
   readonly validate?: SelectFieldValidation
   readonly value?: string
-}
+} & Omit<FieldPaths, 'indexPath'>
 
 export type SelectFieldClientProps = ClientFieldBase<SelectFieldClientWithoutType> &
   SelectFieldBaseClientProps

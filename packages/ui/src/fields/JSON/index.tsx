@@ -18,7 +18,6 @@ const baseClass = 'json-field'
 const JSONFieldComponent: JSONFieldClientComponent = (props) => {
   const {
     field: {
-      name,
       admin: { className, description, editorOptions, maxHeight, style, width } = {},
       jsonSchema,
       label,

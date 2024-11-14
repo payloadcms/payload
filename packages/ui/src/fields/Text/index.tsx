@@ -19,7 +19,6 @@ export { TextInput, TextInputProps }
 const TextFieldComponent: TextFieldClientComponent = (props) => {
   const {
     field: {
-      name,
       admin: { className, description, placeholder, rtl, style, width } = {},
       hasMany,
       label,

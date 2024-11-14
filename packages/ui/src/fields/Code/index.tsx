@@ -23,7 +23,6 @@ const baseClass = 'code-field'
 const CodeFieldComponent: CodeFieldClientComponent = (props) => {
   const {
     field: {
-      name,
       admin: {
         className,
         description,

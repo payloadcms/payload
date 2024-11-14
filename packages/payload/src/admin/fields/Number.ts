@@ -6,6 +6,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -20,9 +21,8 @@ type NumberFieldClientWithoutType = MarkOptional<NumberFieldClient, 'type'>
 
 type NumberFieldBaseClientProps = {
   readonly onChange?: (e: number) => void
-  readonly path: string
   readonly validate?: NumberFieldValidation
-}
+} & Omit<FieldPaths, 'indexPath'>
 
 export type NumberFieldClientProps = ClientFieldBase<NumberFieldClientWithoutType> &
   NumberFieldBaseClientProps

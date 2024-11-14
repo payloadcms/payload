@@ -6,6 +6,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -24,10 +25,9 @@ type RadioFieldBaseClientProps = {
    */
   readonly disableModifyingForm?: boolean
   readonly onChange?: OnChange
-  readonly path: string
   readonly validate?: RadioFieldValidation
   readonly value?: string
-}
+} & Omit<FieldPaths, 'indexPath'>
 
 export type RadioFieldClientProps = ClientFieldBase<RadioFieldClientWithoutType> &
   RadioFieldBaseClientProps

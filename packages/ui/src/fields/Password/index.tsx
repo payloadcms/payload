@@ -19,7 +19,6 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
   const {
     autoComplete,
     field: {
-      name,
       admin: {
         className,
         disabled: disabledFromProps,

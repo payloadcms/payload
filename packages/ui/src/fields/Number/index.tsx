@@ -21,7 +21,6 @@ import './index.scss'
 const NumberFieldComponent: NumberFieldClientComponent = (props) => {
   const {
     field: {
-      name,
       admin: {
         className,
         description,

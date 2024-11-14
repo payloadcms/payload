@@ -6,6 +6,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -20,9 +21,8 @@ type CodeFieldClientWithoutType = MarkOptional<CodeFieldClient, 'type'>
 
 type CodeFieldBaseClientProps = {
   readonly autoComplete?: string
-  readonly path: string
   readonly validate?: CodeFieldValidation
-}
+} & Omit<FieldPaths, 'indexPath'>
 
 export type CodeFieldClientProps = ClientFieldBase<CodeFieldClientWithoutType> &
   CodeFieldBaseClientProps

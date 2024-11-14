@@ -7,8 +7,8 @@ import React from 'react'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import './index.scss'
 import { UploadInput } from './Input.js'
+import './index.scss'
 
 export { UploadInput } from './Input.js'
 export type { UploadInputProps } from './Input.js'
@@ -18,7 +18,6 @@ export const baseClass = 'upload'
 export function UploadComponent(props: UploadFieldClientProps) {
   const {
     field: {
-      name,
       admin: { allowCreate, className, description, isSortable, style, width } = {},
       hasMany,
       label,

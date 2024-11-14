@@ -39,7 +39,6 @@ const baseClass = 'relationship'
 const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => {
   const {
     field: {
-      name,
       admin: {
         allowCreate = true,
         allowEdit = true,

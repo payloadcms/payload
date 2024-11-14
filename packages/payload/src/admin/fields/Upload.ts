@@ -6,6 +6,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -19,9 +20,8 @@ import type {
 type UploadFieldClientWithoutType = MarkOptional<UploadFieldClient, 'type'>
 
 type UploadFieldBaseClientProps = {
-  readonly path: string
   readonly validate?: UploadFieldValidation
-}
+} & Omit<FieldPaths, 'indexPath'>
 
 export type UploadFieldClientProps = ClientFieldBase<UploadFieldClientWithoutType> &
   UploadFieldBaseClientProps

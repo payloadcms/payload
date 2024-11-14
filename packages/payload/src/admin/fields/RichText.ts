@@ -6,6 +6,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -27,9 +28,8 @@ type RichTextFieldBaseClientProps<
   TAdapterProps = any,
   TExtraProperties = object,
 > = {
-  readonly path: string
   readonly validate?: RichTextFieldValidation
-}
+} & Omit<FieldPaths, 'indexPath'>
 
 export type RichTextFieldClientProps<
   TValue extends object = any,

@@ -19,7 +19,6 @@ const baseClass = 'point'
 export const PointFieldComponent: PointFieldClientComponent = (props) => {
   const {
     field: {
-      name,
       admin: { className, description, placeholder, step, style, width } = {},
       label,
       localized,

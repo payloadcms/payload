@@ -4,15 +4,14 @@ import type { UIField, UIFieldClient } from '../../fields/config/types.js'
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../types.js'
 
 type UIFieldClientWithoutType = MarkOptional<UIFieldClient, 'type'>
 
-type UIFieldBaseClientProps = {
-  readonly path: string
-}
+type UIFieldBaseClientProps = Omit<FieldPaths, 'indexPath'>
 
 export type UIFieldClientProps = ClientFieldBase<UIFieldClientWithoutType> & UIFieldBaseClientProps
 

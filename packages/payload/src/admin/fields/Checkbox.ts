@@ -6,6 +6,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -24,9 +25,8 @@ type CheckboxFieldBaseClientProps = {
   readonly id?: string
   readonly onChange?: (value: boolean) => void
   readonly partialChecked?: boolean
-  readonly path: string
   readonly validate?: CheckboxFieldValidation
-}
+} & Omit<FieldPaths, 'indexPath'>
 
 export type CheckboxFieldClientProps = CheckboxFieldBaseClientProps &
   ClientFieldBase<CheckboxFieldClientWithoutType>

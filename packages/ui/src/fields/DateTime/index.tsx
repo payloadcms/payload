@@ -20,7 +20,6 @@ const baseClass = 'date-time-field'
 const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
   const {
     field: {
-      name,
       admin: { className, date: datePickerProps, description, placeholder, style, width } = {},
       label,
       localized,

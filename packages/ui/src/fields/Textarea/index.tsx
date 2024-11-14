@@ -20,7 +20,6 @@ export { TextareaInput, TextAreaInputProps }
 const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
   const {
     field: {
-      name,
       admin: { className, description, placeholder, rows, rtl, style, width } = {},
       label,
       localized,

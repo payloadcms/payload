@@ -31,7 +31,6 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
     checked: checkedFromProps,
     disableFormData,
     field: {
-      name,
       admin: {
         className,
         description,

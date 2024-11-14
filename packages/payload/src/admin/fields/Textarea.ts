@@ -7,6 +7,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -22,9 +23,8 @@ type TextareaFieldClientWithoutType = MarkOptional<TextareaFieldClient, 'type'>
 type TextareaFieldBaseClientProps = {
   readonly inputRef?: React.Ref<HTMLInputElement>
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
-  readonly path: string
   readonly validate?: TextareaFieldValidation
-}
+} & Omit<FieldPaths, 'indexPath'>
 
 export type TextareaFieldClientProps = ClientFieldBase<TextareaFieldClientWithoutType> &
   TextareaFieldBaseClientProps

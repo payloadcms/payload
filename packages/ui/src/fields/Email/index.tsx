@@ -21,7 +21,6 @@ import './index.scss'
 const EmailFieldComponent: EmailFieldClientComponent = (props) => {
   const {
     field: {
-      name,
       admin: {
         autoComplete,
         className,
