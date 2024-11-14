@@ -1227,7 +1227,11 @@ export type Block = {
 }
 
 export type ClientBlock = {
-  admin?: Pick<Block['admin'], 'custom'>
+  admin?: {
+    components?: {
+      Label?: React.ReactNode
+    }
+  } & Pick<Block['admin'], 'custom'>
   fields: ClientField[]
   labels?: LabelsClient
 } & Pick<Block, 'imageAltText' | 'imageURL' | 'slug'>
