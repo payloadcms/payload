@@ -11,7 +11,6 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 })
 
-// eslint-disable-next-line no-restricted-exports
 export default withBundleAnalyzer(
   withPayload({
     eslint: {
@@ -19,6 +18,11 @@ export default withBundleAnalyzer(
     },
     typescript: {
       ignoreBuildErrors: true,
+    },
+    experimental: {
+      serverActions: {
+        bodySizeLimit: '5mb',
+      },
     },
     env: {
       PAYLOAD_CORE_DEV: 'true',

@@ -1,5 +1,6 @@
 export { countDistinct } from '../postgres/countDistinct.js'
-export { convertPathToJSONTraversal } from '../postgres/createJSONQuery/convertPathToJSONTraversal.js'
+export { createDatabase } from '../postgres/createDatabase.js'
+export { createExtensions } from '../postgres/createExtensions.js'
 export { createJSONQuery } from '../postgres/createJSONQuery/index.js'
 export { createMigration } from '../postgres/createMigration.js'
 export { defaultDrizzleSnapshot } from '../postgres/defaultSnapshot.js'

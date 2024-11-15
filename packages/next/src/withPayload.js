@@ -13,6 +13,29 @@ export const withPayload = (nextConfig = {}) => {
     env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH = 'true'
   }
 
+  if (process.env.PAYLOAD_PATCH_TURBOPACK_WARNINGS !== 'false') {
+    const consoleWarn = console.warn
+
+    console.warn = (...args) => {
+      // Force to disable serverExternalPackages warnings: https://github.com/vercel/next.js/issues/68805
+      if (
+        typeof args[1] === 'string' &&
+        args[1].includes(
+          'Packages that should be external need to be installed in the project directory, so they can be resolved from the output files.\nTry to install it into the project directory by running',
+        )
+      ) {
+        return
+      }
+
+      consoleWarn(...args)
+    }
+  }
+
+  const poweredByHeader = {
+    key: 'X-Powered-By',
+    value: 'Next.js, Payload',
+  }
+
   /**
    * @type {import('next').NextConfig}
    */
@@ -41,6 +64,8 @@ export const withPayload = (nextConfig = {}) => {
         },
       },
     },
+    // We disable the poweredByHeader here because we add it manually in the headers function below
+    ...(nextConfig?.poweredByHeader !== false ? { poweredByHeader: false } : {}),
     headers: async () => {
       const headersFromConfig = 'headers' in nextConfig ? await nextConfig.headers() : []
 
@@ -61,6 +86,7 @@ export const withPayload = (nextConfig = {}) => {
               key: 'Critical-CH',
               value: 'Sec-CH-Prefers-Color-Scheme',
             },
+            ...(nextConfig?.poweredByHeader !== false ? [poweredByHeader] : []),
           ],
         },
       ]

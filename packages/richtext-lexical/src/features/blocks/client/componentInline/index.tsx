@@ -9,7 +9,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
 import { mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
-import { Button, RenderComponent, useTranslation } from '@payloadcms/ui'
+import { Button, useTranslation } from '@payloadcms/ui'
 import {
   $getNodeByKey,
   $getSelection,
@@ -36,17 +36,21 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   const { formData, nodeKey } = props
   const [editor] = useLexicalComposerContext()
   const { i18n, t } = useTranslation<object, string>()
-  const { field } = useEditorConfigContext()
+  const {
+    fieldProps: { featureClientSchemaMap, readOnly, schemaPath },
+  } = useEditorConfigContext()
   const inlineBlockElemElemRef = useRef<HTMLDivElement | null>(null)
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
 
-  const {
-    field: { richTextComponentMap },
-  } = useEditorConfigContext()
+  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${formData.blockType}`
 
-  const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
-  const blocksField: BlocksFieldClient = richTextComponentMap?.get(componentMapRenderedBlockPath)[0]
-  const clientBlock = blocksField.blocks.find((block) => block.slug === formData.blockType)
+  const clientSchemaMap = featureClientSchemaMap['blocks']
+
+  const blocksField: BlocksFieldClient = clientSchemaMap[
+    componentMapRenderedBlockPath
+  ][0] as BlocksFieldClient
+
+  const clientBlock = blocksField.blocks[0]
 
   const removeInlineBlock = useCallback(() => {
     editor.update(() => {
@@ -56,17 +60,20 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   const $onDelete = useCallback(
     (event: KeyboardEvent) => {
-      if (isSelected && $isNodeSelection($getSelection())) {
+      const deleteSelection = $getSelection()
+      if (isSelected && $isNodeSelection(deleteSelection)) {
         event.preventDefault()
-        const node = $getNodeByKey(nodeKey)
-        if ($isInlineBlockNode(node)) {
-          node.remove()
-          return true
-        }
+        editor.update(() => {
+          deleteSelection.getNodes().forEach((node) => {
+            if ($isInlineBlockNode(node)) {
+              node.remove()
+            }
+          })
+        })
       }
       return false
     },
-    [isSelected, nodeKey],
+    [editor, isSelected],
   )
   const onClick = useCallback(
     (payload: MouseEvent) => {
@@ -105,6 +112,8 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     ? getTranslation(clientBlock.labels.singular, i18n)
     : clientBlock?.slug
 
+  const Label = clientBlock?.admin?.components?.Label
+
   return (
     <div
       className={[
@@ -116,20 +125,13 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         .join(' ')}
       ref={inlineBlockElemElemRef}
     >
-      {clientBlock?.admin?.components?.Label ? (
-        <RenderComponent
-          clientProps={{ blockKind: 'lexicalInlineBlock', formData }}
-          mappedComponent={clientBlock.admin.components.Label}
-        />
-      ) : (
-        <div>{getTranslation(clientBlock!.labels!.singular, i18n)}</div>
-      )}
+      {Label ? Label : <div>{getTranslation(clientBlock.labels!.singular, i18n)}</div>}
       {editor.isEditable() && (
         <div className={`${baseClass}__actions`}>
           <Button
             buttonStyle="icon-label"
             className={`${baseClass}__editButton`}
-            disabled={field?.admin?.readOnly}
+            disabled={readOnly}
             el="div"
             icon="edit"
             onClick={() => {
@@ -145,7 +147,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           <Button
             buttonStyle="icon-label"
             className={`${baseClass}__removeButton`}
-            disabled={field?.admin?.readOnly}
+            disabled={readOnly}
             icon="x"
             onClick={(e) => {
               e.preventDefault()

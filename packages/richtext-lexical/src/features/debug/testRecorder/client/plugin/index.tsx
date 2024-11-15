@@ -45,17 +45,14 @@ const formatStep = (step: Step) => {
       case 'click': {
         return `      await page.mouse.click(${value.x}, ${value.y});`
       }
-      case 'press': {
-        return `      await page.keyboard.press('${value}');`
-      }
       case 'keydown': {
         return `      await page.keyboard.keydown('${value}');`
       }
       case 'keyup': {
         return `      await page.keyboard.keyup('${value}');`
       }
-      case 'type': {
-        return `      await page.keyboard.type('${value}');`
+      case 'press': {
+        return `      await page.keyboard.press('${value}');`
       }
       case 'selectAll': {
         return `      await selectAll(page);`
@@ -69,6 +66,9 @@ const formatStep = (step: Step) => {
         focusOffset: ${value.focusOffset},
       });
 `
+      }
+      case 'type': {
+        return `      await page.keyboard.type('${value}');`
       }
       default:
         return ``
@@ -119,14 +119,14 @@ function getPathFromNodeToEditor(node: Node, rootElement: HTMLElement | null) {
 }
 
 const keyPresses = new Set([
-  'Enter',
-  'Backspace',
-  'Delete',
-  'Escape',
+  'ArrowDown',
   'ArrowLeft',
   'ArrowRight',
   'ArrowUp',
-  'ArrowDown',
+  'Backspace',
+  'Delete',
+  'Enter',
+  'Escape',
 ])
 
 type Step = {

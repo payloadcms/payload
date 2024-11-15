@@ -5,15 +5,16 @@ import type { UploadFieldClientProps } from 'payload'
 
 import {
   FieldLabel,
+  RenderCustomComponent,
   UploadInput,
   useConfig,
   useDocumentInfo,
   useField,
-  useFieldProps,
   useForm,
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
+import { reduceToSerializableFields } from '@payloadcms/ui/shared'
 import React, { useCallback } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
@@ -27,20 +28,23 @@ type MetaImageProps = {
 
 export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
   const {
-    field: {
-      admin: {
-        components: { Label },
-      },
-      label,
-      relationTo,
-      required,
-    },
+    field: { label, localized, relationTo, required },
     hasGenerateImageFn,
-    labelProps,
+    path,
   } = props || {}
-  const { path: pathFromContext } = useFieldProps()
 
-  const field: FieldType<string> = useField({ ...props, path: pathFromContext } as Options)
+  const {
+    config: {
+      collections,
+      routes: { api },
+      serverURL,
+    },
+  } = useConfig()
+
+  const field: FieldType<string> = useField({ ...props, path } as Options)
+  const {
+    customComponents: { Error, Label },
+  } = field
 
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
@@ -48,14 +52,16 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
   const { getData } = useForm()
   const docInfo = useDocumentInfo()
 
-  const { errorMessage, setValue, showError, value } = field
+  const { setValue, showError, value } = field
 
   const regenerateImage = useCallback(async () => {
     if (!hasGenerateImageFn) {
       return
     }
 
-    const genImageResponse = await fetch('/api/plugin-seo/generate-image', {
+    const endpoint = `${serverURL}${api}/plugin-seo/generate-image`
+
+    const genImageResponse = await fetch(endpoint, {
       body: JSON.stringify({
         id: docInfo.id,
         collectionSlug: docInfo.collectionSlug,
@@ -65,10 +71,13 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         hasPublishPermission: docInfo.hasPublishPermission,
         hasSavePermission: docInfo.hasSavePermission,
         initialData: docInfo.initialData,
-        initialState: docInfo.initialState,
+        initialState: reduceToSerializableFields(docInfo.initialState),
         locale: typeof locale === 'object' ? locale?.code : locale,
         title: docInfo.title,
-      } satisfies Omit<Parameters<GenerateImage>[0], 'collectionConfig' | 'globalConfig' | 'req'>),
+      } satisfies Omit<
+        Parameters<GenerateImage>[0],
+        'collectionConfig' | 'globalConfig' | 'hasPublishedDoc' | 'req' | 'versionCount'
+      >),
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
@@ -79,13 +88,25 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
     const generatedImage = await genImageResponse.text()
 
     setValue(generatedImage || '')
-  }, [hasGenerateImageFn, docInfo, getData, locale, setValue])
+  }, [
+    hasGenerateImageFn,
+    serverURL,
+    api,
+    docInfo.id,
+    docInfo.collectionSlug,
+    docInfo.docPermissions,
+    docInfo.globalSlug,
+    docInfo.hasPublishPermission,
+    docInfo.hasSavePermission,
+    docInfo.initialData,
+    docInfo.initialState,
+    docInfo.title,
+    getData,
+    locale,
+    setValue,
+  ])
 
   const hasImage = Boolean(value)
-
-  const { config } = useConfig()
-
-  const { collections, routes: { api } = {}, serverURL } = config
 
   const collection = collections?.find((coll) => coll.slug === relationTo) || undefined
 
@@ -102,12 +123,11 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel
-            field={null}
-            Label={Label}
-            label={label}
-            required={required}
-            {...(labelProps || {})}
+          <RenderCustomComponent
+            CustomComponent={Label}
+            Fallback={
+              <FieldLabel label={label} localized={localized} path={path} required={required} />
+            }
           />
           {hasGenerateImageFn && (
             <React.Fragment>
@@ -151,11 +171,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         <UploadInput
           api={api}
           collection={collection}
-          Error={{
-            type: 'client',
-            Component: null,
-            RenderedComponent: errorMessage,
-          }}
+          Error={Error}
           filterOptions={field.filterOptions}
           onChange={(incomingImage) => {
             if (incomingImage !== null) {
@@ -169,7 +185,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
               setValue(null)
             }
           }}
-          path={field.path}
+          path={path}
           relationTo={relationTo}
           required={required}
           serverURL={serverURL}

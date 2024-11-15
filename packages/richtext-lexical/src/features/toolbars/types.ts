@@ -3,6 +3,7 @@ import type { BaseSelection, LexicalEditor } from 'lexical'
 import type React from 'react'
 
 import type { EditorConfigContextType } from '../../lexical/config/client/EditorConfigProvider.js'
+import type { FeatureClientSchemaMap } from '../../types.js'
 
 export type ToolbarGroup = ToolbarButtonsGroup | ToolbarDropdownGroup
 
@@ -96,8 +97,9 @@ export type ToolbarGroupItem = {
   /** The label will be displayed in your toolbar item, if it's within a dropdown group. In order to make use of i18n, this can be a function. */
   label?:
     | ((args: {
+        featureClientSchemaMap: FeatureClientSchemaMap
         i18n: I18nClient<{}, string>
-        richTextComponentMap?: Map<string, React.ReactNode>
+        schemaPath: string
       }) => string)
     | string
   /** Each toolbar item needs to have a unique key. */

@@ -212,10 +212,10 @@ export const sanitizeQueryValue = ({
     operator = 'equals'
   }
 
-  if (operator === 'near' || operator === 'within' || operator === 'intersects') {
-    throw new APIError(
-      `Querying with '${operator}' is not supported with the postgres database adapter.`,
-    )
+  if (operator === 'near' && field.type === 'point' && typeof formattedValue === 'string') {
+    const [lng, lat, maxDistance, minDistance] = formattedValue.split(',')
+
+    formattedValue = [Number(lng), Number(lat), Number(maxDistance), Number(minDistance)]
   }
 
   if (operator === 'contains') {
@@ -223,8 +223,11 @@ export const sanitizeQueryValue = ({
   }
 
   if (operator === 'exists') {
-    formattedValue = formattedValue === 'true' || formattedValue === true
-    if (formattedValue === false) {
+    formattedValue = val === 'true' || val === true
+
+    if (formattedValue) {
+      operator = 'exists'
+    } else {
       operator = 'isNull'
     }
   }

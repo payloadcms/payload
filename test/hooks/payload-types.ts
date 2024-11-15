@@ -20,8 +20,24 @@ export interface Config {
     relations: Relation;
     'hooks-users': HooksUser;
     'data-hooks': DataHook;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+  };
+  collectionsJoins: {};
+  collectionsSelect: {
+    afterOperation: AfterOperationSelect<false> | AfterOperationSelect<true>;
+    'context-hooks': ContextHooksSelect<false> | ContextHooksSelect<true>;
+    transforms: TransformsSelect<false> | TransformsSelect<true>;
+    hooks: HooksSelect<false> | HooksSelect<true>;
+    'nested-after-read-hooks': NestedAfterReadHooksSelect<false> | NestedAfterReadHooksSelect<true>;
+    'chaining-hooks': ChainingHooksSelect<false> | ChainingHooksSelect<true>;
+    relations: RelationsSelect<false> | RelationsSelect<true>;
+    'hooks-users': HooksUsersSelect<false> | HooksUsersSelect<true>;
+    'data-hooks': DataHooksSelect<false> | DataHooksSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
     defaultIDType: string;
@@ -29,9 +45,16 @@ export interface Config {
   globals: {
     'data-hooks-global': DataHooksGlobal;
   };
+  globalsSelect: {
+    'data-hooks-global': DataHooksGlobalSelect<false> | DataHooksGlobalSelect<true>;
+  };
   locale: null;
   user: HooksUser & {
     collection: 'hooks-users';
+  };
+  jobs?: {
+    tasks: unknown;
+    workflows?: unknown;
   };
 }
 export interface HooksUserAuthOperations {
@@ -190,6 +213,57 @@ export interface DataHook {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'afterOperation';
+        value: string | AfterOperation;
+      } | null)
+    | ({
+        relationTo: 'context-hooks';
+        value: string | ContextHook;
+      } | null)
+    | ({
+        relationTo: 'transforms';
+        value: string | Transform;
+      } | null)
+    | ({
+        relationTo: 'hooks';
+        value: string | Hook;
+      } | null)
+    | ({
+        relationTo: 'nested-after-read-hooks';
+        value: string | NestedAfterReadHook;
+      } | null)
+    | ({
+        relationTo: 'chaining-hooks';
+        value: string | ChainingHook;
+      } | null)
+    | ({
+        relationTo: 'relations';
+        value: string | Relation;
+      } | null)
+    | ({
+        relationTo: 'hooks-users';
+        value: string | HooksUser;
+      } | null)
+    | ({
+        relationTo: 'data-hooks';
+        value: string | DataHook;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
@@ -224,6 +298,160 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "afterOperation_select".
+ */
+export interface AfterOperationSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "context-hooks_select".
+ */
+export interface ContextHooksSelect<T extends boolean = true> {
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transforms_select".
+ */
+export interface TransformsSelect<T extends boolean = true> {
+  transform?: T;
+  localizedTransform?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hooks_select".
+ */
+export interface HooksSelect<T extends boolean = true> {
+  fieldBeforeValidate?: T;
+  fieldBeforeChange?: T;
+  fieldAfterChange?: T;
+  fieldAfterRead?: T;
+  collectionBeforeValidate?: T;
+  collectionBeforeChange?: T;
+  collectionAfterChange?: T;
+  collectionBeforeRead?: T;
+  collectionAfterRead?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested-after-read-hooks_select".
+ */
+export interface NestedAfterReadHooksSelect<T extends boolean = true> {
+  text?: T;
+  group?:
+    | T
+    | {
+        array?:
+          | T
+          | {
+              input?: T;
+              afterRead?: T;
+              shouldPopulate?: T;
+              id?: T;
+            };
+        subGroup?:
+          | T
+          | {
+              afterRead?: T;
+              shouldPopulate?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chaining-hooks_select".
+ */
+export interface ChainingHooksSelect<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relations_select".
+ */
+export interface RelationsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hooks-users_select".
+ */
+export interface HooksUsersSelect<T extends boolean = true> {
+  roles?: T;
+  afterLoginHook?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "data-hooks_select".
+ */
+export interface DataHooksSelect<T extends boolean = true> {
+  field_collectionAndField?: T;
+  collection_beforeOperation_collection?: T;
+  collection_beforeChange_collection?: T;
+  collection_afterChange_collection?: T;
+  collection_beforeRead_collection?: T;
+  collection_afterRead_collection?: T;
+  collection_afterOperation_collection?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_select".
+ */
+export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_select".
+ */
+export interface PayloadPreferencesSelect<T extends boolean = true> {
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select".
+ */
+export interface PayloadMigrationsSelect<T extends boolean = true> {
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "data-hooks-global".
  */
 export interface DataHooksGlobal {
@@ -235,6 +463,20 @@ export interface DataHooksGlobal {
   global_afterRead_global?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "data-hooks-global_select".
+ */
+export interface DataHooksGlobalSelect<T extends boolean = true> {
+  field_globalAndField?: T;
+  global_beforeChange_global?: T;
+  global_afterChange_global?: T;
+  global_beforeRead_global?: T;
+  global_afterRead_global?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

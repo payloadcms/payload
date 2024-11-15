@@ -11,7 +11,7 @@ type FieldWithID = {
 }
 
 export const DynamicPriceSelector: TextFieldClientComponent = (props) => {
-  const { field } = props
+  const { field, path } = props
 
   const { fields, getData, getDataByPath } = useWatchForm()
 
@@ -22,8 +22,8 @@ export const DynamicPriceSelector: TextFieldClientComponent = (props) => {
 
   // only number fields can use 'valueOfField`
   useEffect(() => {
-    if (field?._path) {
-      const parentPath = field._path.split('.').slice(0, -1).join('.')
+    if (path) {
+      const parentPath = path.split('.').slice(0, -1).join('.')
       const paymentFieldData: any = getDataByPath(parentPath)
 
       if (paymentFieldData) {
@@ -40,7 +40,7 @@ export const DynamicPriceSelector: TextFieldClientComponent = (props) => {
         }
       }
     }
-  }, [fields, field._path, getDataByPath, getData])
+  }, [fields, getDataByPath, getData, path])
 
   // TODO: make this a number field, block by Payload
   if (valueType === 'static') {

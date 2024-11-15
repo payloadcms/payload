@@ -37,7 +37,10 @@ export const getDocumentPermissions = async (args: {
         },
         req: {
           ...req,
-          data,
+          data: {
+            ...data,
+            _status: 'draft',
+          },
         },
       })
 
@@ -57,7 +60,7 @@ export const getDocumentPermissions = async (args: {
         }).then(({ update }) => update?.permission)
       }
     } catch (error) {
-      console.error(error) // eslint-disable-line no-console
+      req.payload.logger.error(error)
     }
   }
 
@@ -84,7 +87,7 @@ export const getDocumentPermissions = async (args: {
         }).then(({ update }) => update?.permission)
       }
     } catch (error) {
-      console.error(error) // eslint-disable-line no-console
+      req.payload.logger.error(error)
     }
   }
 

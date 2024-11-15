@@ -8,7 +8,7 @@ import type { Locale, MetaConfig, PayloadComponent } from '../../config/types.js
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { LanguageOptions } from '../LanguageOptions.js'
-import type { MappedComponent } from '../types.js'
+import type { Data, DocumentSlots, PayloadServerAction } from '../types.js'
 
 export type AdminViewConfig = {
   Component: AdminViewComponent
@@ -20,16 +20,16 @@ export type AdminViewConfig = {
   strict?: boolean
 }
 
-export type MappedView = {
-  actions?: MappedComponent[]
-  Component: MappedComponent
-}
-
 export type AdminViewProps = {
   readonly clientConfig: ClientConfig
+  readonly disableActions?: boolean
+  readonly drawerSlug?: string
   readonly importMap: ImportMap
+  readonly initialData?: Data
   readonly initPageResult: InitPageResult
   readonly params?: { [key: string]: string | string[] | undefined }
+  readonly redirectAfterDelete?: boolean
+  readonly redirectAfterDuplicate?: boolean
   readonly searchParams: { [key: string]: string | string[] | undefined }
 }
 
@@ -48,11 +48,12 @@ export type VisibleEntities = {
 export type InitPageResult = {
   collectionConfig?: SanitizedCollectionConfig
   cookies: Map<string, string>
-  docID?: string
+  docID?: number | string
   globalConfig?: SanitizedGlobalConfig
   languageOptions: LanguageOptions
   locale?: Locale
   permissions: Permissions
+  redirectTo?: string
   req: PayloadRequest
   translations: ClientTranslationsObject
   visibleEntities: VisibleEntities
@@ -61,6 +62,9 @@ export type InitPageResult = {
 export type ServerSideEditViewProps = {
   readonly initPageResult: InitPageResult
   readonly params: { [key: string]: string | string[] | undefined }
+  readonly payloadServerAction: PayloadServerAction
   readonly routeSegments: string[]
   readonly searchParams: { [key: string]: string | string[] | undefined }
-}
+} & ClientSideEditViewProps
+
+export type ClientSideEditViewProps = {} & DocumentSlots

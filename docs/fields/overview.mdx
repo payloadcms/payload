@@ -93,13 +93,14 @@ Presentational Fields do not store data in the database. Instead, they are used 
 Here are the available Presentational Fields:
 
 - [Collapsible](/docs/fields/collapsible) - nests fields within a collapsible component
+- [Join](/docs/fields/join) - achieves two-way data binding between fields
 - [Row](/docs/fields/row) - aligns fields horizontally
 - [Tabs (Unnamed)](/docs/fields/tabs) - nests fields within a tabbed layout
 - [UI](/docs/fields/ui) - blank field for custom UI components
 
 <Banner type="warning">
   <strong>Tip:</strong>
-  Don't see a Field Type that fits your needs? You can build your own using a [Custom Field Component](../admin/fields#the-field-component).
+  Don't see a Field Type that fits your needs? You can build your own using a [Custom Field Component](../admin/fields#field).
 </Banner>
 
 ## Field Options
@@ -123,7 +124,7 @@ export const MyField: Field = {
 
 ### Field Names
 
-All [Data Fields](#data-fields) require a `name` property. This is the key that will be used to store and retrieve the field's value in the database. This property must be unique within the Collection, Global, or nested group that it is defined in.
+All [Data Fields](#data-fields) require a `name` property. This is the key that will be used to store and retrieve the field's value in the database. This property must be unique amongst this field's siblings.
 
 To set a field's name, use the `name` property in your Field Config:
 
@@ -205,7 +206,7 @@ export const MyField: Field = {
 }
 ```
 
-Default values can be defined as a static value or a function that returns a value. When a `defaultValue` is defined statically, Payload's DB adapters will apply it to the database schema or models.
+Default values can be defined as a static value or a function that returns a value. When a `defaultValue` is defined statically, Payload's [Database Adapters](../database/overview) will apply it to the database schema or models.
 
 Functions can be written to make use of the following argument properties:
 
@@ -264,7 +265,7 @@ The following arguments are provided to the `validate` function:
 
 #### Validation Context
 
-The `ctx` argument contains full document data, sibling field data, the current operation, and other useful information such as currently authenticated in user:
+The `ctx` argument contains full document data, sibling field data, the current operation, and other useful information such as currently authenticated user:
 
 ```ts
 import type { Field } from 'payload'
@@ -356,9 +357,9 @@ For full details on Admin Options, see the [Field Admin Options](../admin/fields
 
 ## Custom ID Fields
 
-All [Collections](../configuration/collections) automatically generate their own ID field. If needed, you can override this behavior by providing an explicit ID field to your config. This will force users to provide a their own ID value when creating a record.
+All [Collections](../configuration/collections) automatically generate their own ID field. If needed, you can override this behavior by providing an explicit ID field to your config. This field should either be required or have a hook to generate the ID dynamically.
 
-To define a custom ID field, add a new field with the `name` property set to `id`:
+To define a custom ID field, add a top-level field with the `name` property set to `id`:
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -368,6 +369,7 @@ export const MyCollection: CollectionConfig = {
   fields: [
     {
       name: 'id', // highlight-line
+      required: true,
       type: 'number',
     },
   ],

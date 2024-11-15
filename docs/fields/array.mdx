@@ -6,7 +6,7 @@ desc: Array Fields are intended for sets of repeating fields, that you define. L
 keywords: array, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-The Array Field is used when you need to have a set of "repeating" [Fields](./overview). It stores an array of objects containing fields that you define. These fields can be of any type, including other arrays to achieve infinitely nested structures.
+The Array Field is used when you need to have a set of "repeating" [Fields](./overview). It stores an array of objects containing fields that you define. These fields can be of any type, including other arrays, to achieve infinitely nested data structures.
 
 Arrays are useful for many different types of content from simple to complex, such as:
 
@@ -24,7 +24,7 @@ Arrays are useful for many different types of content from simple to complex, su
 To create an Array Field, set the `type` to `array` in your [Field Config](./overview):
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyArrayField: Field = {
   // ...
@@ -66,10 +66,10 @@ _\* An asterisk denotes that a property is required._
 
 ## Admin Options
 
-The customize the appearance and behavior of the Array Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
+To customize the appearance and behavior of the Array Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyArrayField: Field = {
   // ...
@@ -81,18 +81,18 @@ export const MyArrayField: Field = {
 
 The Array Field inherits all of the default options from the base [Field Admin Config](../admin/fields#admin-options), plus the following additional options:
 
-| Option                    | Description                                                                                                          |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| **`initCollapsed`**       | Set the initial collapsed state                                                                                      |
-| **`components.RowLabel`** | Function or React component to be rendered as the label on the array row. Receives `({ data, index, path })` as args |
-| **`isSortable`**          | Disable order sorting by setting this value to `false`                                                               |
+| Option                    | Description                                                                                                                                     |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`initCollapsed`**       | Set the initial collapsed state                                                                                                                 |
+| **`components.RowLabel`** | React component to be rendered as the label on the array row. [Example](#example-of-a-custom-rowlabel-component) |
+| **`isSortable`**          | Disable order sorting by setting this value to `false`                                                                                          |
 
 ## Example
 
 In this example, we have an Array Field called `slider` that contains a set of fields for a simple image slider. Each row in the array has a `title`, `image`, and `caption`. We also customize the row label to display the title if it exists, or a default label if it doesn't.
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
@@ -127,12 +127,27 @@ export const ExampleCollection: CollectionConfig = {
       ],
       admin: {
         components: {
-          RowLabel: ({ data, index }) => {
-            return data?.title || `Slide ${String(index).padStart(2, '0')}`
-          },
+          RowLabel: '/path/to/ArrayRowLabel#ArrayRowLabel',
         },
       },
     },
   ],
+}
+```
+
+### Example of a custom RowLabel component
+
+
+```tsx
+'use client'
+
+import { useRowLabel } from '@payloadcms/ui'
+
+export const ArrayRowLabel = () => {
+  const { data, rowNumber } = useRowLabel<{ title?: string }>()
+
+  const customLabel = `${data.title || 'Slide'} ${String(rowNumber).padStart(2, '0')} `
+
+  return <div>Custom Label: {customLabel}</div>
 }
 ```

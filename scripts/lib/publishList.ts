@@ -36,17 +36,18 @@ export const packagePublishList = [
   'storage-uploadthing',
 
   // Plugins
+  'payload-cloud',
   'plugin-cloud',
   'plugin-cloud-storage',
   'plugin-form-builder',
   'plugin-nested-docs',
   'plugin-redirects',
   'plugin-search',
+  'plugin-sentry',
   'plugin-seo',
   'plugin-stripe',
 
   // Unpublished
-  // 'plugin-sentry'
   // 'storage-uploadthing',
   // 'eslint-config',
   // 'eslint-plugin',

@@ -1,6 +1,13 @@
 import type { PaginatedDocs } from '../../../database/types.js'
-import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
-import type { Document, PayloadRequest, RequestContext, Where } from '../../../types/index.js'
+import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type {
+  Document,
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  Sort,
+  Where,
+} from '../../../types/index.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromCollectionSlug } from '../../config/types.js'
 
@@ -16,14 +23,16 @@ export type Options<TSlug extends CollectionSlug> = {
   context?: RequestContext
   depth?: number
   draft?: boolean
-  fallbackLocale?: TypedLocale
+  fallbackLocale?: false | TypedLocale
   limit?: number
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   page?: number
+  populate?: PopulateType
   req?: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
-  sort?: string
+  sort?: Sort
   user?: Document
   where?: Where
 }
@@ -38,6 +47,8 @@ export default async function findVersionsLocal<TSlug extends CollectionSlug>(
     limit,
     overrideAccess = true,
     page,
+    populate,
+    select,
     showHiddenFields,
     sort,
     where,
@@ -57,7 +68,9 @@ export default async function findVersionsLocal<TSlug extends CollectionSlug>(
     limit,
     overrideAccess,
     page,
+    populate,
     req: await createLocalReq(options, payload),
+    select,
     showHiddenFields,
     sort,
     where,

@@ -29,13 +29,13 @@ The following options are available:
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | **`group`**       | Text used as a label for grouping Collection and Global links together in the navigation.                                         |
 | **`hidden`**      | Set to true or a function, called with the current user, returning true to exclude this Global from navigation and admin routing. |
-| **`components`**  | Swap in your own React components to be used within this Global. [More details](#components).                           |
+| **`components`**  | Swap in your own React components to be used within this Global. [More details](#custom-components).                           |
 | **`preview`**     | Function to generate a preview URL within the Admin Panel for this Global that can point to your app. [More details](#preview).           |
 | **`livePreview`** | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).          |
 | **`hideAPIURL`**  | Hides the "API URL" meta field while editing documents within this collection.                                                    |
 | **`meta`**        | Page metadata overrides to apply to this Global within the Admin Panel. [More details](./metadata).                                                                           |
 
-### Components
+### Custom Components
 
 Globals can set their own [Custom Components](./components) which only apply to [Global](../configuration/globals)-specific UI within the [Admin Panel](./overview). This includes elements such as the Save Button, or entire layouts such as the Edit View.
 

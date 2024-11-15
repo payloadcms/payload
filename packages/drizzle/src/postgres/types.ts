@@ -21,7 +21,7 @@ import type {
 } from 'drizzle-orm/pg-core'
 import type { PgTableFn } from 'drizzle-orm/pg-core/table'
 import type { Payload, PayloadRequest } from 'payload'
-import type { QueryResult } from 'pg'
+import type { ClientConfig, QueryResult } from 'pg'
 
 import type { extendDrizzleTable, Operators } from '../index.js'
 import type { BuildQueryJoinAliases, DrizzleAdapter, TransactionPg } from '../types.js'
@@ -92,10 +92,21 @@ export type Insert = (args: {
   values: Record<string, unknown> | Record<string, unknown>[]
 }) => Promise<Record<string, unknown>[]>
 
+export type CreateDatabase = (args?: {
+  /**
+   * Name of a database, defaults to the current one
+   */
+  name?: string
+  /**
+   * Schema to create in addition to 'public'. Defaults from adapter.schemaName if exists.
+   */
+  schemaName?: string
+}) => Promise<boolean>
+
 type Schema =
   | {
       enum: typeof pgEnum
-      table: PgTableFn
+      table: PgTableFn<string>
     }
   | PgSchema
 
@@ -119,12 +130,16 @@ export type BasePostgresAdapter = {
   afterSchemaInit: PostgresSchemaHook[]
   beforeSchemaInit: PostgresSchemaHook[]
   countDistinct: CountDistinct
+  createDatabase: CreateDatabase
+  createExtensions: () => Promise<void>
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
   deleteWhere: DeleteWhere
+  disableCreateDatabase: boolean
   drizzle: PostgresDB
   dropDatabase: DropDatabase
   enums: Record<string, GenericEnum>
   execute: Execute<unknown>
+  extensions: Record<string, boolean>
   /**
    * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
    * Used for returning properly formed errors from unique fields
@@ -136,7 +151,8 @@ export type BasePostgresAdapter = {
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   operators: Operators
-  pgSchema?: Schema
+  pgSchema: Schema
+  poolOptions?: ClientConfig
   prodMigrations?: {
     down: (args: MigrateDownArgs) => Promise<void>
     name: string
@@ -157,6 +173,7 @@ export type BasePostgresAdapter = {
   }
   tableNameMap: Map<string, string>
   tables: Record<string, GenericTable>
+  tablesFilter?: string[]
   versionsSuffix?: string
 } & PostgresDrizzleAdapter
 

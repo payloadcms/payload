@@ -4,6 +4,7 @@ import { ar } from '../languages/ar.js'
 import { az } from '../languages/az.js'
 import { bg } from '../languages/bg.js'
 import { cs } from '../languages/cs.js'
+import { da } from '../languages/da.js'
 import { de } from '../languages/de.js'
 import { en } from '../languages/en.js'
 import { es } from '../languages/es.js'
@@ -25,6 +26,7 @@ import { rs } from '../languages/rs.js'
 import { rsLatin } from '../languages/rsLatin.js'
 import { ru } from '../languages/ru.js'
 import { sk } from '../languages/sk.js'
+import { sl } from '../languages/sl.js'
 import { sv } from '../languages/sv.js'
 import { th } from '../languages/th.js'
 import { tr } from '../languages/tr.js'
@@ -38,6 +40,7 @@ export const translations = {
   az,
   bg,
   cs,
+  da,
   de,
   en,
   es,
@@ -59,6 +62,7 @@ export const translations = {
   'rs-latin': rsLatin,
   ru,
   sk,
+  sl,
   sv,
   th,
   tr,

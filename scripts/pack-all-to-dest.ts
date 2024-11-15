@@ -35,7 +35,7 @@ async function main() {
 
   const args = minimist(process.argv.slice(2))
   const { dest } = args
-  if (!dest) throw new Error('--dest is required')
+  if (!dest) {throw new Error('--dest is required')}
 
   const resolvedDest = path.resolve(dest)
 
@@ -49,6 +49,7 @@ async function main() {
         'drizzle',
         'db-sqlite',
         'db-postgres',
+        'plugin-seo',
         'db-vercel-postgres',
         'richtext-lexical',
         'translations',

@@ -4,7 +4,7 @@ import type {
   SerializedTableRowNode as _SerializedTableRowNode,
 } from '@lexical/table'
 import type { Spread } from 'lexical'
-import type { Config, Field } from 'payload'
+import type { Config, Field, FieldSchemaMap } from 'payload'
 
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table'
 import { sanitizeFields } from 'payload'
@@ -62,9 +62,11 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#TableFeatureClient',
       generateSchemaMap: () => {
-        const schemaMap = new Map<string, Field[]>()
+        const schemaMap: FieldSchemaMap = new Map()
 
-        schemaMap.set('fields', sanitizedFields)
+        schemaMap.set('fields', {
+          fields: sanitizedFields,
+        })
 
         return schemaMap
       },

@@ -3,7 +3,6 @@
 
 export { slashMenuBasicGroupWithItems } from '../../features/shared/slashMenu/basicGroup.js'
 
-export { RichTextCell } from '../../cell/index.js'
 export { AlignFeatureClient } from '../../features/align/client/index.js'
 export { BlockquoteFeatureClient } from '../../features/blockquote/client/index.js'
 export { BlocksFeatureClient } from '../../features/blocks/client/index.js'
@@ -121,5 +120,11 @@ export {
   $isBlockNode,
   BlockNode,
 } from '../../features/blocks/client/nodes/BlocksNode.js'
+
+export {
+  $createInlineBlockNode,
+  $isInlineBlockNode,
+  InlineBlockNode,
+} from '../../features/blocks/client/nodes/InlineBlocksNode.js'
 
 export { FieldsDrawer } from '../../utilities/fieldsDrawer/Drawer.js'

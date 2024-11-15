@@ -10,10 +10,8 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { ListDrawerContent } from './DrawerContent.js'
-import './index.scss'
 
 export const baseClass = 'list-drawer'
-
 export const formatListDrawerSlug = ({
   depth,
   uuid,
@@ -27,12 +25,14 @@ export const ListDrawerToggler: React.FC<ListTogglerProps> = ({
   className,
   disabled,
   drawerSlug,
+  onClick,
   ...rest
 }) => {
   return (
     <DrawerToggler
       className={[className, `${baseClass}__toggler`].filter(Boolean).join(' ')}
       disabled={disabled}
+      onClick={onClick}
       slug={drawerSlug}
       {...rest}
     >

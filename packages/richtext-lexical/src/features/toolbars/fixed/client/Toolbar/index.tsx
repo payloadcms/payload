@@ -40,7 +40,7 @@ function ButtonGroupItem({
 
   return (
     <ToolbarButton editor={editor} item={item} key={item.key}>
-      {<item.ChildComponent />}
+      <item.ChildComponent />
     </ToolbarButton>
   )
 }
@@ -60,7 +60,7 @@ function ToolbarGroupComponent({
 }): React.ReactNode {
   const { i18n } = useTranslation()
   const {
-    field: { richTextComponentMap },
+    fieldProps: { featureClientSchemaMap, schemaPath },
   } = useEditorConfigContext()
   const [dropdownLabel, setDropdownLabel] = React.useState<string | undefined>(undefined)
   const [DropdownIcon, setDropdownIcon] = React.useState<React.FC | undefined>(undefined)
@@ -90,7 +90,9 @@ function ToolbarGroupComponent({
       let label = item.key
       if (item.label) {
         label =
-          typeof item.label === 'function' ? item.label({ i18n, richTextComponentMap }) : item.label
+          typeof item.label === 'function'
+            ? item.label({ featureClientSchemaMap, i18n, schemaPath })
+            : item.label
       }
       // Crop title to max. 25 characters
       if (label.length > 25) {
@@ -99,7 +101,7 @@ function ToolbarGroupComponent({
       setDropdownLabel(label)
       setDropdownIcon(() => item.ChildComponent)
     },
-    [group, i18n, richTextComponentMap],
+    [group, i18n, featureClientSchemaMap, schemaPath],
   )
 
   return (
@@ -155,7 +157,7 @@ function FixedToolbar({
 }): React.ReactNode {
   const currentToolbarRef = React.useRef<HTMLDivElement>(null)
 
-  const { y } = useScrollInfo!()
+  const { y } = useScrollInfo()
 
   // Memoize the parent toolbar element
   const parentToolbarElem = useMemo(() => {

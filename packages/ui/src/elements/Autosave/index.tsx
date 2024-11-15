@@ -13,6 +13,7 @@ import {
   useFormSubmitted,
 } from '../../forms/Form/context.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
+import { useIgnoredEffect } from '../../hooks/useIgnoredEffect.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -33,19 +34,21 @@ export type Props = {
   publishedDocUpdatedAt: string
 }
 
-export const Autosave: React.FC<Props> = ({
-  id,
-  collection,
-  global: globalDoc,
-  publishedDocUpdatedAt,
-}) => {
+export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc }) => {
   const {
     config: {
       routes: { api },
       serverURL,
     },
   } = useConfig()
-  const { docConfig, getVersions, versions } = useDocumentInfo()
+  const {
+    docConfig,
+    incrementVersionCount,
+    lastUpdateTime,
+    mostRecentVersionIsAutosaved,
+    setLastUpdateTime,
+    setMostRecentVersionIsAutosaved,
+  } = useDocumentInfo()
   const { reportUpdate } = useDocumentEvents()
   const { dispatchFields, setSubmitted } = useForm()
   const submitted = useFormSubmitted()
@@ -62,7 +65,6 @@ export const Autosave: React.FC<Props> = ({
   }
 
   const [saving, setSaving] = useState(false)
-  const [lastSaved, setLastSaved] = useState<number>()
   const debouncedFields = useDebounce(fields, interval)
   const modified = useDebounce(formModified, interval)
   const fieldRef = useRef(fields)
@@ -87,186 +89,191 @@ export const Autosave: React.FC<Props> = ({
   localeRef.current = locale
 
   // When debounced fields change, autosave
-  useEffect(() => {
-    const abortController = new AbortController()
-    let autosaveTimeout = undefined
-    // We need to log the time in order to figure out if we need to trigger the state off later
-    let startTimestamp = undefined
-    let endTimestamp = undefined
+  useIgnoredEffect(
+    () => {
+      const abortController = new AbortController()
+      let autosaveTimeout = undefined
+      // We need to log the time in order to figure out if we need to trigger the state off later
+      let startTimestamp = undefined
+      let endTimestamp = undefined
 
-    const autosave = () => {
-      if (modified) {
-        startTimestamp = new Date().getTime()
+      const autosave = () => {
+        if (modified) {
+          startTimestamp = new Date().getTime()
 
-        setSaving(true)
+          setSaving(true)
 
-        let url: string
-        let method: string
-        let entitySlug: string
+          let url: string
+          let method: string
+          let entitySlug: string
 
-        if (collection && id) {
-          entitySlug = collection.slug
-          url = `${serverURL}${api}/${entitySlug}/${id}?draft=true&autosave=true&locale=${localeRef.current}`
-          method = 'PATCH'
-        }
+          if (collection && id) {
+            entitySlug = collection.slug
+            url = `${serverURL}${api}/${entitySlug}/${id}?draft=true&autosave=true&locale=${localeRef.current}`
+            method = 'PATCH'
+          }
 
-        if (globalDoc) {
-          entitySlug = globalDoc.slug
-          url = `${serverURL}${api}/globals/${entitySlug}?draft=true&autosave=true&locale=${localeRef.current}`
-          method = 'POST'
-        }
+          if (globalDoc) {
+            entitySlug = globalDoc.slug
+            url = `${serverURL}${api}/globals/${entitySlug}?draft=true&autosave=true&locale=${localeRef.current}`
+            method = 'POST'
+          }
 
-        if (url) {
-          if (modifiedRef.current) {
-            const { data, valid } = {
-              ...reduceFieldsToValuesWithValidation(fieldRef.current, true),
-            }
-            data._status = 'draft'
-            const skipSubmission =
-              submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
+          if (url) {
+            if (modifiedRef.current) {
+              const { data, valid } = {
+                ...reduceFieldsToValuesWithValidation(fieldRef.current, true),
+              }
+              data._status = 'draft'
+              const skipSubmission =
+                submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
 
-            if (!skipSubmission) {
-              void fetch(url, {
-                body: JSON.stringify(data),
-                credentials: 'include',
-                headers: {
-                  'Accept-Language': i18n.language,
-                  'Content-Type': 'application/json',
-                },
-                method,
-                signal: abortController.signal,
-              })
-                .then((res) => {
-                  const newDate = new Date()
-                  // We need to log the time in order to figure out if we need to trigger the state off later
-                  endTimestamp = newDate.getTime()
-
-                  if (res.status === 200) {
-                    setLastSaved(newDate.getTime())
-
-                    reportUpdate({
-                      id,
-                      entitySlug,
-                      updatedAt: newDate.toISOString(),
-                    })
-
-                    void getVersions()
-                  } else {
-                    return res.json()
-                  }
+              if (!skipSubmission) {
+                void fetch(url, {
+                  body: JSON.stringify(data),
+                  credentials: 'include',
+                  headers: {
+                    'Accept-Language': i18n.language,
+                    'Content-Type': 'application/json',
+                  },
+                  method,
+                  signal: abortController.signal,
                 })
-                .then((json) => {
-                  if (versionsConfig?.drafts && versionsConfig?.drafts?.validate && json?.errors) {
-                    if (Array.isArray(json.errors)) {
-                      const [fieldErrors, nonFieldErrors] = json.errors.reduce(
-                        ([fieldErrs, nonFieldErrs], err) => {
-                          const newFieldErrs = []
-                          const newNonFieldErrs = []
+                  .then((res) => {
+                    const newDate = new Date()
+                    // We need to log the time in order to figure out if we need to trigger the state off later
+                    endTimestamp = newDate.getTime()
 
-                          if (err?.message) {
-                            newNonFieldErrs.push(err)
-                          }
+                    if (res.status === 200) {
+                      setLastUpdateTime(newDate.getTime())
 
-                          if (Array.isArray(err?.data)) {
-                            err.data.forEach((dataError) => {
-                              if (dataError?.field) {
-                                newFieldErrs.push(dataError)
-                              } else {
-                                newNonFieldErrs.push(dataError)
-                              }
-                            })
-                          }
-
-                          return [
-                            [...fieldErrs, ...newFieldErrs],
-                            [...nonFieldErrs, ...newNonFieldErrs],
-                          ]
-                        },
-                        [[], []],
-                      )
-
-                      dispatchFields({
-                        type: 'ADD_SERVER_ERRORS',
-                        errors: fieldErrors,
+                      reportUpdate({
+                        id,
+                        entitySlug,
+                        updatedAt: newDate.toISOString(),
                       })
 
-                      nonFieldErrors.forEach((err) => {
-                        toast.error(err.message || i18n.t('error:unknown'))
-                      })
-
-                      setSubmitted(true)
-                      setSaving(false)
-                      return
+                      if (!mostRecentVersionIsAutosaved) {
+                        incrementVersionCount()
+                        setMostRecentVersionIsAutosaved(true)
+                      }
+                    } else {
+                      return res.json()
                     }
-                  }
-                })
-                .then(() => {
-                  // If request was faster than minimum animation time, animate the difference
-                  if (endTimestamp - startTimestamp < minimumAnimationTime) {
-                    autosaveTimeout = setTimeout(
-                      () => {
+                  })
+                  .then((json) => {
+                    if (
+                      versionsConfig?.drafts &&
+                      versionsConfig?.drafts?.validate &&
+                      json?.errors
+                    ) {
+                      if (Array.isArray(json.errors)) {
+                        const [fieldErrors, nonFieldErrors] = json.errors.reduce(
+                          ([fieldErrs, nonFieldErrs], err) => {
+                            const newFieldErrs = []
+                            const newNonFieldErrs = []
+
+                            if (err?.message) {
+                              newNonFieldErrs.push(err)
+                            }
+
+                            if (Array.isArray(err?.data)) {
+                              err.data.forEach((dataError) => {
+                                if (dataError?.field) {
+                                  newFieldErrs.push(dataError)
+                                } else {
+                                  newNonFieldErrs.push(dataError)
+                                }
+                              })
+                            }
+
+                            return [
+                              [...fieldErrs, ...newFieldErrs],
+                              [...nonFieldErrs, ...newNonFieldErrs],
+                            ]
+                          },
+                          [[], []],
+                        )
+
+                        dispatchFields({
+                          type: 'ADD_SERVER_ERRORS',
+                          errors: fieldErrors,
+                        })
+
+                        nonFieldErrors.forEach((err) => {
+                          toast.error(err.message || i18n.t('error:unknown'))
+                        })
+
+                        setSubmitted(true)
                         setSaving(false)
-                      },
-                      minimumAnimationTime - (endTimestamp - startTimestamp),
-                    )
-                  } else {
-                    setSaving(false)
-                  }
-                })
+                        return
+                      }
+                    }
+                  })
+                  .then(() => {
+                    // If request was faster than minimum animation time, animate the difference
+                    if (endTimestamp - startTimestamp < minimumAnimationTime) {
+                      autosaveTimeout = setTimeout(
+                        () => {
+                          setSaving(false)
+                        },
+                        minimumAnimationTime - (endTimestamp - startTimestamp),
+                      )
+                    } else {
+                      setSaving(false)
+                    }
+                  })
+              }
             }
           }
         }
       }
-    }
 
-    void autosave()
+      void autosave()
 
-    return () => {
-      if (autosaveTimeout) {
-        clearTimeout(autosaveTimeout)
-      }
-      if (abortController.signal) {
-        try {
-          abortController.abort('Autosave closed early.')
-        } catch (error) {
-          // swallow error
+      return () => {
+        if (autosaveTimeout) {
+          clearTimeout(autosaveTimeout)
         }
+        if (abortController.signal) {
+          try {
+            abortController.abort('Autosave closed early.')
+          } catch (error) {
+            // swallow error
+          }
+        }
+        setSaving(false)
       }
-      setSaving(false)
-    }
-  }, [
-    api,
-    collection,
-    dispatchFields,
-    getVersions,
-    globalDoc,
-    i18n,
-    id,
-    interval,
-    modified,
-    reportUpdate,
-    serverURL,
-    setSubmitted,
-    versionsConfig?.drafts,
-    debouncedFields,
-    submitted,
-  ])
-
-  useEffect(() => {
-    if (versions?.docs?.[0]) {
-      setLastSaved(new Date(versions.docs[0].updatedAt).getTime())
-    } else if (publishedDocUpdatedAt) {
-      setLastSaved(new Date(publishedDocUpdatedAt).getTime())
-    }
-  }, [publishedDocUpdatedAt, versions])
+    },
+    [debouncedFields],
+    [
+      api,
+      collection,
+      dispatchFields,
+      globalDoc,
+      i18n,
+      id,
+      interval,
+      modified,
+      reportUpdate,
+      serverURL,
+      setSubmitted,
+      versionsConfig?.drafts,
+      submitted,
+      setLastUpdateTime,
+      mostRecentVersionIsAutosaved,
+      incrementVersionCount,
+      setMostRecentVersionIsAutosaved,
+    ],
+  )
 
   return (
     <div className={baseClass}>
       {saving && t('general:saving')}
-      {!saving && Boolean(lastSaved) && (
+      {!saving && Boolean(lastUpdateTime) && (
         <React.Fragment>
           {t('version:lastSavedAgo', {
-            distance: formatTimeToNow({ date: lastSaved, i18n }),
+            distance: formatTimeToNow({ date: lastUpdateTime, i18n }),
           })}
         </React.Fragment>
       )}

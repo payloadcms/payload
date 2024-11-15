@@ -32,6 +32,7 @@ export const CustomFields: CollectionConfig = {
           afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
           beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
           Label: '/collections/CustomFields/fields/Text/LabelClient.js#CustomClientLabel',
+          Field: '/collections/CustomFields/fields/Text/FieldClient.js#CustomClientField',
           Description:
             '/collections/CustomFields/fields/Text/DescriptionClient.js#CustomClientDescription',
           Error: '/collections/CustomFields/CustomError.js#CustomError',

@@ -5,6 +5,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -15,9 +16,12 @@ import type {
   FieldLabelServerComponent,
 } from '../types.js'
 
+type CollapsibleFieldBaseClientProps = FieldPaths & Pick<ServerFieldBase, 'permissions'>
+
 type CollapsibleFieldClientWithoutType = MarkOptional<CollapsibleFieldClient, 'type'>
 
-export type CollapsibleFieldClientProps = ClientFieldBase<CollapsibleFieldClientWithoutType>
+export type CollapsibleFieldClientProps = ClientFieldBase<CollapsibleFieldClientWithoutType> &
+  CollapsibleFieldBaseClientProps
 
 export type CollapsibleFieldServerProps = ServerFieldBase<
   CollapsibleField,
@@ -29,8 +33,10 @@ export type CollapsibleFieldServerComponent = FieldServerComponent<
   CollapsibleFieldClientWithoutType
 >
 
-export type CollapsibleFieldClientComponent =
-  FieldClientComponent<CollapsibleFieldClientWithoutType>
+export type CollapsibleFieldClientComponent = FieldClientComponent<
+  CollapsibleFieldClientWithoutType,
+  CollapsibleFieldBaseClientProps
+>
 
 export type CollapsibleFieldLabelServerComponent = FieldLabelServerComponent<
   CollapsibleField,

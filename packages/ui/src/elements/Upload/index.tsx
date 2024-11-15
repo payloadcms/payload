@@ -10,6 +10,7 @@ import { fieldBaseClass } from '../../fields/shared/index.js'
 import { useForm } from '../../forms/Form/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { Button } from '../Button/index.js'
@@ -218,9 +219,11 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   const showFocalPoint = focalPoint && (hasImageSizes || hasResizeOptions || focalPointEnabled)
 
+  const acceptMimeTypes = uploadConfig.mimeTypes?.join(', ')
+
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
-      <FieldError field={null} message={errorMessage} showError={showError} />
+      <FieldError message={errorMessage} showError={showError} />
       {doc.filename && !replacingFile && (
         <FileDetails
           collectionSlug={collectionSlug}
@@ -251,6 +254,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
                     {t('upload:selectFile')}
                   </Button>
                   <input
+                    accept={acceptMimeTypes}
                     aria-hidden="true"
                     className={`${baseClass}__hidden-input`}
                     hidden
@@ -355,21 +359,23 @@ export const Upload: React.FC<UploadProps> = (props) => {
         </div>
       )}
       {(value || doc.filename) && (
-        <Drawer Header={null} slug={editDrawerSlug}>
-          <EditUpload
-            fileName={value?.name || doc?.filename}
-            fileSrc={doc?.url || fileSrc}
-            imageCacheTag={doc.updatedAt}
-            initialCrop={uploadEdits?.crop ?? undefined}
-            initialFocalPoint={{
-              x: uploadEdits?.focalPoint?.x || doc.focalX || 50,
-              y: uploadEdits?.focalPoint?.y || doc.focalY || 50,
-            }}
-            onSave={onEditsSave}
-            showCrop={showCrop}
-            showFocalPoint={showFocalPoint}
-          />
-        </Drawer>
+        <EditDepthProvider>
+          <Drawer Header={null} slug={editDrawerSlug}>
+            <EditUpload
+              fileName={value?.name || doc?.filename}
+              fileSrc={doc?.url || fileSrc}
+              imageCacheTag={doc.updatedAt}
+              initialCrop={uploadEdits?.crop ?? undefined}
+              initialFocalPoint={{
+                x: uploadEdits?.focalPoint?.x || doc.focalX || 50,
+                y: uploadEdits?.focalPoint?.y || doc.focalY || 50,
+              }}
+              onSave={onEditsSave}
+              showCrop={showCrop}
+              showFocalPoint={showFocalPoint}
+            />
+          </Drawer>
+        </EditDepthProvider>
       )}
       {doc && hasImageSizes && (
         <Drawer
