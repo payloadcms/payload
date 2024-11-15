@@ -165,11 +165,6 @@ export default buildConfigWithDefaults({
         {
           name: 'authDebug',
           type: 'ui',
-          admin: {
-            components: {
-              Field: '/AuthDebug.js#AuthDebug',
-            },
-          },
           label: 'Auth Debug',
         },
       ],

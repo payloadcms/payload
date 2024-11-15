@@ -133,11 +133,13 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     const mutablePolicies = policiesObj.fields
 
     // Fields don't have all operations of a collection
-    if (operation === 'delete' || operation === 'readVersions' || operation === 'unlock') return
+    if (operation === 'delete' || operation === 'readVersions' || operation === 'unlock') {
+      return
+    }
 
     await Promise.all(
       fields.map(async (field) => {
-        if (fieldAffectsData(field) && field.name) {
+        if ('name' in field && field.name) {
           if (!mutablePolicies[field.name]) {
             mutablePolicies[field.name] = {}
           }
