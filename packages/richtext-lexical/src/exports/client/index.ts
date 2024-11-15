@@ -135,4 +135,4 @@ export { InlineBlockLabel } from '../../features/blocks/client/componentInline/c
 export { InlineBlockContainer } from '../../features/blocks/client/componentInline/components/InlineBlockContainer.js'
 export { BlockCollapsible } from '../../features/blocks/client/component/components/BlockCollapsible.js'
 export { BlockEditButton } from '../../features/blocks/client/component/components/BlockEditButton.js'
-export { BlockLabel } from '../../features/blocks/client/component/components/BlockLabel.js'
+export { BlockRemoveButton } from '../../features/blocks/client/component/components/BlockRemoveButton.js'

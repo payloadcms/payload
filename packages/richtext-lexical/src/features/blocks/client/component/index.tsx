@@ -31,11 +31,11 @@ import { v4 as uuid } from 'uuid'
 
 import type { BlockFields } from '../../server/nodes/BlocksNode.js'
 
-import './index.scss'
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
 import { BlockContent } from './BlockContent.js'
+import './index.scss'
 
 type Props = {
   readonly children?: React.ReactNode
@@ -242,39 +242,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
     [getDocPreferences, parentLexicalRichTextField.name, setDocFieldPreferences, formData.id],
   )
 
-  const BlockCollapsible = useMemo(
-    () =>
-      ({
-        children,
-        fieldHasErrors,
-        Label,
-      }: {
-        children?: React.ReactNode
-        fieldHasErrors?: boolean
-        Label: React.ReactNode
-      }) => (
-        <div className={baseClass + ' ' + baseClass + '-' + formData.blockType}>
-          <Collapsible
-            className={[
-              `${baseClass}__row`,
-              fieldHasErrors ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
-            ].join(' ')}
-            collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
-            header={Label}
-            isCollapsed={isCollapsed}
-            key={0}
-            onToggle={(incomingCollapsedState) => {
-              onCollapsedChange(incomingCollapsedState)
-              setIsCollapsed(incomingCollapsedState)
-            }}
-          >
-            {children}
-          </Collapsible>
-        </div>
-      ),
-    [isCollapsed, onCollapsedChange],
-  )
-
   const EditButton = useMemo(
     () => () => (
       <Button
@@ -294,64 +261,106 @@ export const BlockComponent: React.FC<Props> = (props) => {
     [blockDisplayName, readOnly, t, toggleDrawer],
   )
 
-  const Label = useMemo(() => {
-    if (CustomLabel) {
-      return () => CustomLabel
-    } else {
-      return ({
+  const RemoveButton = useMemo(
+    () => () => (
+      <Button
+        buttonStyle="icon-label"
+        className={`${baseClass}__removeButton`}
+        disabled={parentLexicalRichTextField?.admin?.readOnly || false}
+        icon="x"
+        onClick={(e) => {
+          e.preventDefault()
+          removeBlock()
+        }}
+        round
+        tooltip="Remove Block"
+      />
+    ),
+    [parentLexicalRichTextField?.admin?.readOnly, removeBlock],
+  )
+
+  const BlockCollapsible = useMemo(
+    () =>
+      ({
+        children,
         editButton,
         errorCount,
         fieldHasErrors,
+        Label,
+        removeButton,
       }: {
+        children?: React.ReactNode
         editButton?: boolean
         errorCount?: number
         fieldHasErrors?: boolean
+        /**
+         * Override the default label with a custom label
+         */
+        Label?: React.ReactNode
+        removeButton?: boolean
       }) => (
-        <div className={`${baseClass}__block-header`}>
-          <div>
-            <Pill
-              className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
-              pillStyle="white"
-            >
-              {blockDisplayName}
-            </Pill>
-            <SectionTitle
-              path="blockName"
-              readOnly={parentLexicalRichTextField?.admin?.readOnly || false}
-            />
-            {fieldHasErrors && <ErrorPill count={errorCount ?? 0} i18n={i18n} withMessage />}
-          </div>
-          <div>
-            {editButton && <EditButton />}
-            {editor.isEditable() && (
-              <Button
-                buttonStyle="icon-label"
-                className={`${baseClass}__removeButton`}
-                disabled={parentLexicalRichTextField?.admin?.readOnly || false}
-                icon="x"
-                onClick={(e) => {
-                  e.preventDefault()
-                  removeBlock()
-                }}
-                round
-                tooltip="Remove Block"
-              />
-            )}
-          </div>
+        <div className={baseClass + ' ' + baseClass + '-' + formData.blockType}>
+          <Collapsible
+            className={[
+              `${baseClass}__row`,
+              fieldHasErrors ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
+            ].join(' ')}
+            collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
+            header={
+              <div className={`${baseClass}__block-header`}>
+                {(Label ?? CustomLabel) ? (
+                  (Label ?? CustomLabel)
+                ) : (
+                  <div>
+                    <Pill
+                      className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
+                      pillStyle="white"
+                    >
+                      {blockDisplayName}
+                    </Pill>
+                    <SectionTitle
+                      path="blockName"
+                      readOnly={parentLexicalRichTextField?.admin?.readOnly || false}
+                    />
+                    {fieldHasErrors && (
+                      <ErrorPill count={errorCount ?? 0} i18n={i18n} withMessage />
+                    )}
+                  </div>
+                )}
+
+                <div>
+                  {(CustomBlock && editButton !== false) || (!CustomBlock && editButton) ? (
+                    <EditButton />
+                  ) : null}
+                  {removeButton !== false && editor.isEditable() ? <RemoveButton /> : null}
+                </div>
+              </div>
+            }
+            isCollapsed={isCollapsed}
+            key={0}
+            onToggle={(incomingCollapsedState) => {
+              onCollapsedChange(incomingCollapsedState)
+              setIsCollapsed(incomingCollapsedState)
+            }}
+          >
+            {children}
+          </Collapsible>
         </div>
-      )
-    }
-  }, [
-    CustomLabel,
-    EditButton,
-    clientBlock,
-    editor,
-    blockDisplayName,
-    // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
-    i18n,
-    parentLexicalRichTextField?.admin?.readOnly,
-    removeBlock,
-  ])
+      ),
+    [
+      CustomBlock,
+      CustomLabel,
+      EditButton,
+      RemoveButton,
+      blockDisplayName,
+      editor,
+      formData.blockType,
+      i18n,
+      isCollapsed,
+      onCollapsedChange,
+      parentLexicalRichTextField?.admin?.readOnly,
+    ],
+  )
 
   const BlockDrawer = useMemo(
     () => () => (
@@ -427,8 +436,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
           formData={formData}
           formSchema={clientBlock.fields}
           initialState={initialState}
-          Label={Label}
           nodeKey={nodeKey}
+          RemoveButton={RemoveButton}
         />
       </Form>
     )
@@ -436,8 +445,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
     BlockCollapsible,
     BlockDrawer,
     CustomBlock,
+    RemoveButton,
     EditButton,
-    Label,
     editor,
     toggleDrawer,
     clientBlock.fields,

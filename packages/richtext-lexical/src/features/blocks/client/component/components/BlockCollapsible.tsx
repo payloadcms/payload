@@ -5,9 +5,19 @@ import { useBlockComponentContext } from '../BlockContent.js'
 
 export const BlockCollapsible: React.FC<{
   children?: React.ReactNode
+  editButton?: boolean
+
+  /**
+   * Override the default label with a custom label
+   */
   Label?: React.ReactNode
-}> = ({ children, Label }) => {
+  removeButton?: boolean
+}> = ({ children, editButton, Label, removeButton }) => {
   const { BlockCollapsible } = useBlockComponentContext()
 
-  return BlockCollapsible ? <BlockCollapsible Label={Label}>{children}</BlockCollapsible> : null
+  return BlockCollapsible ? (
+    <BlockCollapsible editButton={editButton} Label={Label} removeButton={removeButton}>
+      {children}
+    </BlockCollapsible>
+  ) : null
 }

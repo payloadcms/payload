@@ -6,7 +6,6 @@ import React, { createContext, useMemo } from 'react'
 
 import type { BlockFields } from '../../server/nodes/BlocksNode.js'
 
-import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { useFormSave } from './FormSavePlugin.js'
 
 type Props = {
@@ -14,33 +13,40 @@ type Props = {
   BlockDrawer: React.FC
   Collapsible: React.FC<{
     children?: React.ReactNode
+    editButton?: boolean
+    errorCount?: number
     fieldHasErrors?: boolean
-    Label: React.ReactNode
+    /**
+     * Override the default label with a custom label
+     */
+    Label?: React.ReactNode
+    removeButton?: boolean
   }>
   CustomBlock: React.ReactNode
   EditButton: React.FC
   formData: BlockFields
   formSchema: ClientField[]
   initialState: false | FormState | undefined
-  Label: React.FC<{
-    editButton?: boolean
-    errorCount?: number
-    fieldHasErrors?: boolean
-  }>
   nodeKey: string
+
+  RemoveButton: React.FC
 }
 
 type BlockComponentContextType = {
   BlockCollapsible?: React.FC<{
     children?: React.ReactNode
+    editButton?: boolean
+    /**
+     * Override the default label with a custom label
+     */
     Label?: React.ReactNode
+    removeButton?: boolean
   }>
   EditButton?: React.FC
   initialState: false | FormState | undefined
-  Label?: React.FC<{
-    editButton?: boolean
-  }>
+
   nodeKey?: string
+  RemoveButton?: React.FC
 }
 
 const BlockComponentContext = createContext<BlockComponentContextType>({
@@ -63,33 +69,35 @@ export const BlockContent: React.FC<Props> = (props) => {
     formData,
     formSchema,
     initialState,
-    Label,
     nodeKey,
+    RemoveButton,
   } = props
-  const {
-    fieldProps: { permissions },
-  } = useEditorConfigContext()
 
   const { errorCount, fieldHasErrors } = useFormSave({ disabled: !initialState, formData, nodeKey })
 
-  const LabelWithErrorProps = useMemo(
-    () => (props: { editButton?: boolean }) => (
-      <Label
-        editButton={props?.editButton}
-        errorCount={errorCount}
-        fieldHasErrors={fieldHasErrors}
-      />
-    ),
-    [Label, errorCount, fieldHasErrors],
-  )
-
   const CollapsibleWithErrorProps = useMemo(
-    () => (props: { children?: React.ReactNode; Label?: React.ReactNode }) => (
-      <Collapsible fieldHasErrors={fieldHasErrors} Label={props.Label}>
-        {props.children}
-      </Collapsible>
-    ),
-    [Collapsible, fieldHasErrors],
+    () =>
+      (props: {
+        children?: React.ReactNode
+        editButton?: boolean
+
+        /**
+         * Override the default label with a custom label
+         */
+        Label?: React.ReactNode
+        removeButton?: boolean
+      }) => (
+        <Collapsible
+          editButton={props.editButton}
+          errorCount={errorCount}
+          fieldHasErrors={fieldHasErrors}
+          Label={props.Label}
+          removeButton={props.removeButton}
+        >
+          {props.children}
+        </Collapsible>
+      ),
+    [Collapsible, fieldHasErrors, errorCount],
   )
 
   return CustomBlock ? (
@@ -98,15 +106,15 @@ export const BlockContent: React.FC<Props> = (props) => {
         BlockCollapsible: CollapsibleWithErrorProps,
         EditButton,
         initialState,
-        Label: LabelWithErrorProps,
         nodeKey,
+        RemoveButton,
       }}
     >
       {CustomBlock}
       <BlockDrawer />
     </BlockComponentContext.Provider>
   ) : (
-    <CollapsibleWithErrorProps Label={<LabelWithErrorProps />}>
+    <CollapsibleWithErrorProps>
       <RenderFields
         fields={formSchema}
         forceRender={true}
