@@ -49,7 +49,6 @@ jobs:
               - 'pnpm-lock.yaml'
               - 'package.json'
               - 'templates/**'
-              - 'examples/**'
             templates:
               - 'templates/**'
       - name: Log all filter results
