@@ -217,9 +217,12 @@ export const sanitizeQueryValue = ({
       }
     }
 
+    const relationTo = (field as RelationshipField).relationTo
+
     if (['in', 'not_in'].includes(operator) && Array.isArray(formattedValue)) {
       formattedValue = formattedValue.reduce((formattedValues, inVal) => {
-        const relationTo = (field as RelationshipField).relationTo
+        if (!inVal) {return formattedValues}
+
         if (typeof relationTo === 'string' && payload.collections[relationTo].customIDType) {
           if (payload.collections[relationTo].customIDType === 'number') {
             const parsedNumber = parseFloat(inVal)
@@ -253,9 +256,47 @@ export const sanitizeQueryValue = ({
       }, [])
     }
 
-    if (typeof formattedValue === 'string') {
-      if (Types.ObjectId.isValid(formattedValue)) {
-        formattedValue = new Types.ObjectId(formattedValue)
+    if (
+      ['contains', 'equals', 'not_equals'].includes(operator) &&
+      (!Array.isArray(relationTo) || !path.endsWith('.relationTo'))
+    ) {
+      if (typeof relationTo === 'string') {
+        const customIDType = payload.collections[relationTo].customIDType
+
+        if (customIDType) {
+          if (customIDType === 'number') {
+            formattedValue = parseFloat(val)
+
+            if (Number.isNaN(formattedValue)) {
+              return { operator: formattedOperator, val: undefined }
+            }
+          }
+        } else {
+          if (!Types.ObjectId.isValid(formattedValue)) {
+            return { operator: formattedOperator, val: undefined }
+          }
+          formattedValue = new Types.ObjectId(formattedValue)
+        }
+      } else {
+        const hasCustomIDType = relationTo.some(
+          (relationTo) => !!payload.collections[relationTo].customIDType,
+        )
+
+        if (hasCustomIDType) {
+          if (typeof val === 'string') {
+            const formattedNumber = Number(val)
+            formattedValue = [Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val]
+            formattedOperator = operator === 'not_equals' ? 'not_in' : 'in'
+            if (!Number.isNaN(formattedNumber)) {
+              formattedValue.push(formattedNumber)
+            }
+          }
+        } else {
+          if (!Types.ObjectId.isValid(formattedValue)) {
+            return { operator: formattedOperator, val: undefined }
+          }
+          formattedValue = new Types.ObjectId(formattedValue)
+        }
       }
     }
   }
