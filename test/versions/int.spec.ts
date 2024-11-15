@@ -355,7 +355,7 @@ describe('Versions', () => {
         // createdAt from non-versions should be the same as version_createdAt in versions
         expect(fromNonVersionsTable.createdAt).toBe(latestVersionData.version.createdAt)
         // When creating new version - updatedAt should match version.updatedAt
-        expect(fromNonVersionsTable.updatedAt).toBe(latestVersionData.version.updatedAt)
+        expect(upd.updatedAt).toBe(latestVersionData.version.updatedAt)
       })
     })
 
@@ -1367,7 +1367,7 @@ describe('Versions', () => {
         // createdAt from non-versions should be the same as version_createdAt in versions
         expect(fromNonVersionsTable.createdAt).toBe(latestVersionData.version.createdAt)
         // When creating a new version - updatedAt should match
-        expect(fromNonVersionsTable.updatedAt).toBe(latestVersionData.version.updatedAt)
+        expect(upd.updatedAt).toBe(latestVersionData.version.updatedAt)
       })
     })
 
