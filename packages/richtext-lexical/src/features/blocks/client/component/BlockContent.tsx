@@ -61,18 +61,15 @@ function removeUndefinedAndNullAndEmptyArraysRecursively(obj: object) {
  * not the whole document.
  */
 export const BlockContent: React.FC<Props> = (props) => {
-  const { baseClass, clientBlock, field, formSchema, Label, nodeKey, path, schemaPath } = props
+  const { baseClass, clientBlock, field, formSchema, Label, nodeKey } = props
   let { formData } = props
-  const {
-    fieldProps: { permissions },
-  } = useEditorConfigContext()
 
   const { i18n } = useTranslation()
   const [editor] = useLexicalComposerContext()
   // Used for saving collapsed to preferences (and gettin' it from there again)
   // Remember, these preferences are scoped to the whole document, not just this form. This
   // is important to consider for the data path used in setDocFieldPreferences
-  const { docPermissions, getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
+  const { getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
 
   const [isCollapsed, setIsCollapsed] = React.useState<boolean>()
 
@@ -232,7 +229,7 @@ export const BlockContent: React.FC<Props> = (props) => {
           parentIndexPath=""
           parentPath={''}
           parentSchemaPath=""
-          permissions={permissions} // TODO: Pass field permissions
+          permissions={true}
         />
       </Collapsible>
 

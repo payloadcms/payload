@@ -1,6 +1,5 @@
-import type { TypedUser } from '../../index.js'
+import type { SanitizedPermissions, TypedUser } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
-import type { Permissions } from '../types.js'
 
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { executeAuthStrategies } from '../executeAuthStrategies.js'
@@ -12,7 +11,7 @@ export type AuthArgs = {
 }
 
 export type AuthResult = {
-  permissions: Permissions
+  permissions: SanitizedPermissions
   responseHeaders?: Headers
   user: null | TypedUser
 }

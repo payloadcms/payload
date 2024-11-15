@@ -3,7 +3,7 @@ import type {
   ClientField,
   ClientTab,
   DocumentPreferences,
-  FieldPermissions,
+  SanitizedFieldPermissions,
   StaticDescription,
   TabsFieldClientComponent,
 } from 'payload'
@@ -222,7 +222,7 @@ type ActiveTabProps = {
   parentPath: string
   parentSchemaPath: string
   path: string
-  permissions: FieldPermissions
+  permissions: SanitizedFieldPermissions
   readOnly: boolean
 }
 function ActiveTabContent({

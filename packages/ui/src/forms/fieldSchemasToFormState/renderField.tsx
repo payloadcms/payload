@@ -2,8 +2,8 @@ import type {
   ClientComponentProps,
   ClientField,
   FieldPaths,
-  FieldPermissions,
   PayloadComponent,
+  SanitizedFieldPermissions,
   ServerComponentProps,
 } from 'payload'
 
@@ -42,15 +42,18 @@ export const renderField: RenderFieldMethod = ({
     i18n: req.i18n,
   })
 
-  const permissions = fieldAffectsData(fieldConfig)
-    ? incomingPermissions?.[fieldConfig.name]
-    : ({} as FieldPermissions)
+  const permissions =
+    incomingPermissions === true
+      ? true
+      : fieldAffectsData(fieldConfig)
+        ? incomingPermissions?.[fieldConfig.name]
+        : ({} as SanitizedFieldPermissions)
 
   const clientProps: ClientComponentProps & Partial<FieldPaths> = {
     customComponents: fieldState?.customComponents || {},
     field: clientField,
     path,
-    readOnly: permissions?.[operation]?.permission === false,
+    readOnly: permissions !== true && !permissions?.[operation],
     schemaPath,
   }
 

@@ -206,9 +206,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
   }, [showUrlInput])
 
   const canRemoveUpload =
-    docPermissions?.update?.permission &&
-    'delete' in docPermissions &&
-    docPermissions?.delete?.permission
+    docPermissions?.update && 'delete' in docPermissions && docPermissions?.delete
 
   const hasImageSizes = uploadConfig?.imageSizes?.length > 0
   const hasResizeOptions = Boolean(uploadConfig?.resizeOptions)

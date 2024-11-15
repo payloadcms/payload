@@ -1,5 +1,5 @@
 'use client'
-import type { ClientField, DocumentPermissions } from 'payload'
+import type { ClientField, SanitizedDocumentPermissions } from 'payload'
 
 import { fieldIsSidebar } from 'payload/shared'
 import React from 'react'
@@ -15,7 +15,7 @@ type Args = {
   readonly AfterFields?: React.ReactNode
   readonly BeforeFields?: React.ReactNode
   readonly Description?: React.ReactNode
-  readonly docPermissions: DocumentPermissions
+  readonly docPermissions: SanitizedDocumentPermissions
   readonly fields: ClientField[]
   readonly forceSidebarWrap?: boolean
   readonly readOnly?: boolean

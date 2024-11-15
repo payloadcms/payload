@@ -1,6 +1,6 @@
 import type { ClientTranslationsObject } from '@payloadcms/translations'
 
-import type { Permissions } from '../../auth/index.js'
+import type { SanitizedPermissions } from '../../auth/index.js'
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { ClientConfig } from '../../config/client.js'
@@ -52,7 +52,7 @@ export type InitPageResult = {
   globalConfig?: SanitizedGlobalConfig
   languageOptions: LanguageOptions
   locale?: Locale
-  permissions: Permissions
+  permissions: SanitizedPermissions
   redirectTo?: string
   req: PayloadRequest
   translations: ClientTranslationsObject

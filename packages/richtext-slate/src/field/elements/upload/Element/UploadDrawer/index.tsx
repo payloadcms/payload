@@ -150,7 +150,7 @@ export const UploadDrawer: React.FC<{
             parentIndexPath=""
             parentPath=""
             parentSchemaPath=""
-            permissions={{}}
+            permissions={docPermissions.fields}
             readOnly={false}
           />
           <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
