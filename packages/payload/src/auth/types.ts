@@ -1,6 +1,6 @@
 import type { DeepRequired } from 'ts-essentials'
 
-import type { Payload } from '../index.js'
+import type { CollectionSlug, GlobalSlug, Payload } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 
 export type Permission = {
@@ -54,10 +54,10 @@ export type DocumentPermissions = CollectionPermission | GlobalPermission
 export type Permissions = {
   canAccessAdmin: boolean
   collections: {
-    [collectionSlug: string]: CollectionPermission
+    [collectionSlug: CollectionSlug]: CollectionPermission
   }
   globals?: {
-    [globalSlug: string]: GlobalPermission
+    [globalSlug: GlobalSlug]: GlobalPermission
   }
 }
 

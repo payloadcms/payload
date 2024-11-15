@@ -27,6 +27,8 @@ import type {
 } from './collections/config/types.js'
 export type { FieldState } from './admin/forms/Form.js'
 export type * from './admin/types.js'
+import type { NonNever } from 'ts-essentials'
+
 import type { Options as CountOptions } from './collections/operations/local/count.js'
 import type { Options as CreateOptions } from './collections/operations/local/create.js'
 import type {
@@ -166,6 +168,16 @@ type ResolveGlobalSelectType<T> = 'globalsSelect' extends keyof T
 // Applying helper types to GeneratedTypes
 export type TypedCollection = ResolveCollectionType<GeneratedTypes>
 
+export type TypedUploadCollection = NonNever<{
+  [K in keyof TypedCollection]:
+    | 'filename'
+    | 'filesize'
+    | 'mimeType'
+    | 'url' extends keyof TypedCollection[K]
+    ? TypedCollection[K]
+    : never
+}>
+
 export type TypedCollectionSelect = ResolveCollectionSelectType<GeneratedTypes>
 
 export type TypedCollectionJoins = ResolveCollectionJoinsType<GeneratedTypes>
@@ -179,6 +191,8 @@ export type StringKeyOf<T> = Extract<keyof T, string>
 
 // Define the types for slugs using the appropriate collections and globals
 export type CollectionSlug = StringKeyOf<TypedCollection>
+
+export type UploadCollectionSlug = StringKeyOf<TypedUploadCollection>
 
 type ResolveDbType<T> = 'db' extends keyof T
   ? T['db']
@@ -228,7 +242,7 @@ export class BasePayload {
   authStrategies: AuthStrategy[]
 
   collections: {
-    [slug: string]: Collection
+    [slug: CollectionSlug]: Collection
   } = {}
 
   config: SanitizedConfig
