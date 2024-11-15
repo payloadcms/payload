@@ -52,8 +52,8 @@ The following operators are available for use in queries:
 | `all`                | The value must contain all values provided in the comma-delimited list.                                                                                                             |
 | `exists`             | Only return documents where the value either exists (`true`) or does not exist (`false`).                                                                                           |
 | `near`               | For distance related to a [Point Field](../fields/point) comma separated as `<longitude>, <latitude>, <maxDistance in meters (nullable)>, <minDistance in meters (nullable)>`.      |
-| `within`             | For [point fields][../fields/point] to filter documents based on whether points are inside of the given area defined in GeoJSON. [Example](../fields/point#querying---within)       |
-| `intersects`         | For [point fields][../fields/point] to filter documents based on whether points intersect with the given area  defined in GeoJSON. [Example](../fields/point#querying---intersects) |
+| `within`             | For [Point Fields](../fields/point) to filter documents based on whether points are inside of the given area defined in GeoJSON. [Example](../fields/point#querying-within)         |
+| `intersects`         | For [Point Fields](../fields/point) to filter documents based on whether points intersect with the given area  defined in GeoJSON. [Example](../fields/point#querying-intersects)   |
 
 <Banner type="success">
   <strong>Tip:</strong>
