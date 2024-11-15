@@ -70,7 +70,13 @@ export const Auth: React.FC<Props> = (props) => {
     return false
   }, [permissions, collectionSlug])
 
-  const apiKeyReadOnly = readOnly || !docPermissions?.fields?.apiKey?.update
+  const apiKeyReadOnly =
+    readOnly ||
+    docPermissions?.fields?.apiKey !== true ||
+    (docPermissions?.fields?.apiKey &&
+      typeof docPermissions?.fields?.apiKey === 'object' &&
+      !docPermissions?.fields?.apiKey?.update)
+
   const enableAPIKeyReadOnly = readOnly || !docPermissions?.fields?.enableAPIKey?.update
 
   const canReadApiKey = docPermissions?.fields?.apiKey?.read

@@ -144,7 +144,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
           parentIndexPath=""
           parentPath={path}
           parentSchemaPath={schemaPath}
-          permissions={permissions?.fields}
+          permissions={permissions === true ? permissions : permissions?.fields}
           readOnly={readOnly}
         />
       </Collapsible>

@@ -261,7 +261,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                       parentIndexPath=""
                       parentPath=""
                       parentSchemaPath={slug}
-                      permissions={permissions?.collections?.[slug]?.fields}
+                      permissions={collectionPermissions?.fields}
                       readOnly={false}
                     />
                   )}

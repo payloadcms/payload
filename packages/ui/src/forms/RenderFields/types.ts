@@ -21,5 +21,6 @@ export type Props = {
       }
     | null
     | SanitizedFieldPermissions
+    | true
   readonly readOnly?: boolean
 }

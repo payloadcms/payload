@@ -147,7 +147,9 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
           parentIndexPath=""
           parentPath={path}
           parentSchemaPath={schemaPath}
-          permissions={permissions?.blocks?.[block.slug]?.fields}
+          permissions={
+            permissions === true ? permissions : permissions?.blocks?.[block.slug]?.fields
+          }
           readOnly={readOnly}
         />
       </Collapsible>

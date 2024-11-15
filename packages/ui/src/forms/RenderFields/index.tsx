@@ -51,15 +51,17 @@ export const RenderFields: React.FC<Props> = (props) => {
             return null
           }
 
-          const fieldPermissions: SanitizedFieldPermissions =
-            'name' in field ? permissions?.[field.name] : permissions
-
           // If the user cannot read the field, then filter it out
           // This is different from `admin.readOnly` which is executed based on `operation`
-          const lacksReadPermission =
-            fieldPermissions && 'read' in fieldPermissions && !fieldPermissions?.read
+          const hasReadPermission =
+            permissions === true ||
+            ('name' in field &&
+              typeof permissions === 'object' &&
+              permissions?.[field.name] &&
+              (permissions[field.name] === true ||
+                ('read' in permissions[field.name] && permissions[field.name].read)))
 
-          if (lacksReadPermission) {
+          if ('name' in field && !hasReadPermission) {
             return null
           }
 
@@ -72,10 +74,15 @@ export const RenderFields: React.FC<Props> = (props) => {
           }
 
           // If the user does not have access control to begin with, force it to be read-only
-          const lacksOperationPermission =
-            fieldPermissions && operation in fieldPermissions && !fieldPermissions[operation]
+          const hasOperationPermission =
+            permissions === true ||
+            ('name' in field &&
+              typeof permissions === 'object' &&
+              permissions?.[field.name] &&
+              (permissions[field.name] === true ||
+                (operation in permissions[field.name] && permissions[field.name][operation])))
 
-          if (lacksOperationPermission) {
+          if ('name' in field && !hasOperationPermission) {
             isReadOnly = true
           }
 
@@ -96,7 +103,13 @@ export const RenderFields: React.FC<Props> = (props) => {
               parentPath={parentPath}
               parentSchemaPath={parentSchemaPath}
               path={path}
-              permissions={fieldPermissions}
+              permissions={
+                permissions === true
+                  ? true
+                  : 'name' in field
+                    ? permissions?.[field.name]
+                    : permissions
+              }
               readOnly={isReadOnly}
               schemaPath={schemaPath}
             />
