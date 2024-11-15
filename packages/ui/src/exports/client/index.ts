@@ -273,6 +273,7 @@ export type {
   ListComponentServerProps,
   ListPreferences,
 } from '../../views/List/types.js'
+export type { ListHeaderProps } from '../../views/List/ListHeader/index.js'
 
 export { DefaultEditView } from '../../views/Edit/index.js'
 export { SetDocumentStepNav } from '../../views/Edit/SetDocumentStepNav/index.js'
