@@ -7,7 +7,7 @@ import type {
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
-  SanitizedDocumentPermissions,
+  SanitizedFieldPermissions,
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
@@ -61,7 +61,12 @@ export type AddFieldStatePromiseArgs = {
   parentPath: string
   parentSchemaPath: string
   passesCondition: boolean
-  permissions: SanitizedDocumentPermissions['fields']
+  permissions:
+    | {
+        [fieldName: string]: SanitizedFieldPermissions
+      }
+    | null
+    | SanitizedFieldPermissions
   preferences: DocumentPreferences
   previousFormState: FormState
   renderAllFields: boolean
@@ -131,8 +136,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   const disabledFromAdmin = field?.admin && 'disabled' in field.admin && field.admin.disabled
 
   if (fieldAffectsData(field) && !(isHiddenField || disabledFromAdmin)) {
-    let hasPermission =
-      typeof permissions?.[field.name]?.read === 'boolean' ? permissions[field.name].read : true
+    const fieldPermissions = permissions[field.name]
+
+    let hasPermission: boolean = fieldPermissions === true || fieldPermissions?.read
 
     if (typeof field?.access?.read === 'function') {
       hasPermission = await field.access.read({ doc: fullData, req, siblingData: data })
@@ -243,7 +249,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 parentPassesCondition: passesCondition,
                 parentPath,
                 parentSchemaPath: schemaPath,
-                permissions: permissions?.[field.name]?.fields || {},
+                permissions:
+                  fieldPermissions === true ? fieldPermissions : fieldPermissions?.fields || {},
                 preferences,
                 previousFormState,
                 renderAllFields: requiresRender,

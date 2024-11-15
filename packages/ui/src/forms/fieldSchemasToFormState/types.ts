@@ -6,7 +6,7 @@ import type {
   FormState,
   Operation,
   PayloadRequest,
-  SanitizedDocumentPermissions,
+  SanitizedFieldPermissions,
 } from 'payload'
 
 export type RenderFieldArgs = {
@@ -20,7 +20,12 @@ export type RenderFieldArgs = {
   parentPath: string
   parentSchemaPath: string
   path: string
-  permissions: SanitizedDocumentPermissions['fields']
+  permissions:
+    | {
+        [fieldName: string]: SanitizedFieldPermissions
+      }
+    | null
+    | SanitizedFieldPermissions
   previousFieldState: FieldState
   req: PayloadRequest
   schemaPath: string

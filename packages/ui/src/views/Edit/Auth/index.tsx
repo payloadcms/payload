@@ -57,30 +57,24 @@ export const Auth: React.FC<Props> = (props) => {
     const collection = permissions?.collections?.[collectionSlug]
 
     if (collection) {
-      const unlock = 'unlock' in collection ? collection.unlock : undefined
-
-      if (unlock) {
-        // current types for permissions do not include auth permissions, this will be fixed in another branch soon, for now we need to ignore the types
-        // @todo: fix types
-        // @ts-expect-error
-        return unlock.permission
-      }
+      return Boolean('unlock' in collection ? collection.unlock : undefined)
     }
 
     return false
   }, [permissions, collectionSlug])
 
+  const apiKeyPermissions = docPermissions?.fields?.enableAPIKey
+
   const apiKeyReadOnly =
     readOnly ||
-    docPermissions?.fields?.apiKey !== true ||
-    (docPermissions?.fields?.apiKey &&
-      typeof docPermissions?.fields?.apiKey === 'object' &&
-      !docPermissions?.fields?.apiKey?.update)
+    apiKeyPermissions === true ||
+    (apiKeyPermissions && typeof apiKeyPermissions === 'object' && !apiKeyPermissions?.update)
 
-  const enableAPIKeyReadOnly = readOnly || !docPermissions?.fields?.enableAPIKey?.update
+  const enableAPIKeyReadOnly =
+    readOnly || (apiKeyPermissions !== true && !apiKeyPermissions?.update)
 
-  const canReadApiKey = docPermissions?.fields?.apiKey?.read
-  const canReadEnableAPIKey = docPermissions?.fields?.enableAPIKey?.read
+  const canReadApiKey = apiKeyPermissions === true || apiKeyPermissions?.read
+  const canReadEnableAPIKey = apiKeyPermissions === true || apiKeyPermissions?.read
 
   const handleChangePassword = useCallback(
     (showPasswordFields: boolean) => {

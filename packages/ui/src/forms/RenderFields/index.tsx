@@ -1,7 +1,5 @@
 'use client'
 
-import type { SanitizedFieldPermissions } from 'payload'
-
 import { getFieldPaths } from 'payload/shared'
 import React from 'react'
 
