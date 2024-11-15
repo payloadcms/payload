@@ -38,7 +38,7 @@ function removeUndefinedAndNullAndEmptyArraysRecursively(obj: object) {
 }
 
 export const useFormSave = (props: Props): { errorCount: number; fieldHasErrors: boolean } => {
-  let { disabled, formData, nodeKey } = props
+  const { disabled, formData, nodeKey } = props
 
   const [_fields] = useAllFormFields()
 
@@ -81,7 +81,6 @@ export const useFormSave = (props: Props): { errorCount: number; fieldHasErrors:
           editor.update(() => {
             const node = $getNodeByKey(nodeKey)
             if (node && $isBlockNode(node)) {
-              formData = newFormData
               node.setFields(newFormData)
             }
           })
@@ -99,7 +98,7 @@ export const useFormSave = (props: Props): { errorCount: number; fieldHasErrors:
         setErrorCount(rowErrorCount)
       }
     },
-    [editor, nodeKey],
+    [editor, nodeKey, hasSubmitted, formData],
   )
 
   useEffect(() => {

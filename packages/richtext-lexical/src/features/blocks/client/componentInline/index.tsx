@@ -66,7 +66,7 @@ const InlineBlockComponentContext = createContext<InlineBlockComponentContextTyp
 export const useInlineBlockComponentContext = () => React.useContext(InlineBlockComponentContext)
 
 export const InlineBlockComponent: React.FC<Props> = (props) => {
-  let { formData, nodeKey } = props
+  const { formData, nodeKey } = props
   const [editor] = useLexicalComposerContext()
   const { i18n, t } = useTranslation<object, string>()
   const {
@@ -255,7 +255,6 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       editor.update(() => {
         const node = $getNodeByKey(nodeKey)
         if (node && $isInlineBlockNode(node)) {
-          formData = newData
           node.setFields(newData)
         }
       })

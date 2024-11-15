@@ -60,12 +60,12 @@ export const BlockContent: React.FC<Props> = (props) => {
     Collapsible,
     CustomBlock,
     EditButton,
+    formData,
     formSchema,
     initialState,
     Label,
     nodeKey,
   } = props
-  const { formData } = props
   const {
     fieldProps: { permissions },
   } = useEditorConfigContext()
