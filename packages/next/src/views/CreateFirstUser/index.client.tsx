@@ -114,7 +114,7 @@ export const CreateFirstUserClient: React.FC<{
         parentIndexPath=""
         parentPath=""
         parentSchemaPath={userSlug}
-        permissions={null}
+        permissions={true}
         readOnly={false}
       />
       <FormSubmit size="large">{t('general:create')}</FormSubmit>

@@ -19,7 +19,6 @@ export type Props = {
     | {
         [fieldName: string]: SanitizedFieldPermissions
       }
-    | null
     | SanitizedFieldPermissions
   readonly readOnly?: boolean
 }

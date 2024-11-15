@@ -52,7 +52,6 @@ export const RenderFields: React.FC<Props> = (props) => {
           // If the user cannot read the field, then filter it out
           // This is different from `admin.readOnly` which is executed based on `operation`
           const hasReadPermission =
-            permissions === null ||
             permissions === true ||
             ('name' in field &&
               typeof permissions === 'object' &&
@@ -74,7 +73,6 @@ export const RenderFields: React.FC<Props> = (props) => {
 
           // If the user does not have access control to begin with, force it to be read-only
           const hasOperationPermission =
-            permissions === null ||
             permissions === true ||
             ('name' in field &&
               typeof permissions === 'object' &&
