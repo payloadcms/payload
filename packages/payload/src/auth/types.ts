@@ -65,9 +65,11 @@ export type CollectionPermission = {
 export type SanitizedCollectionPermission = {
   create?: true
   delete?: true
-  fields: {
-    [fieldName: string]: SanitizedFieldPermissions
-  }
+  fields:
+    | {
+        [fieldName: string]: SanitizedFieldPermissions
+      }
+    | true
   read?: true
   readVersions?: true
   update?: true
@@ -83,9 +85,11 @@ export type GlobalPermission = {
 }
 
 export type SanitizedGlobalPermission = {
-  fields: {
-    [fieldName: string]: SanitizedFieldPermissions
-  }
+  fields:
+    | {
+        [fieldName: string]: SanitizedFieldPermissions
+      }
+    | true
   read?: true
   readVersions?: true
   update?: true
