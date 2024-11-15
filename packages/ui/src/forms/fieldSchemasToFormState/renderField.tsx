@@ -42,9 +42,12 @@ export const renderField: RenderFieldMethod = ({
     i18n: req.i18n,
   })
 
-  const permissions = fieldAffectsData(fieldConfig)
-    ? incomingPermissions?.[fieldConfig.name]
-    : ({} as SanitizedFieldPermissions)
+  const permissions =
+    incomingPermissions === true
+      ? true
+      : fieldAffectsData(fieldConfig)
+        ? incomingPermissions?.[fieldConfig.name]
+        : ({} as SanitizedFieldPermissions)
 
   const clientProps: ClientComponentProps & Partial<FieldPaths> = {
     customComponents: fieldState?.customComponents || {},
