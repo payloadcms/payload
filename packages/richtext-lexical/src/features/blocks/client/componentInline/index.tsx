@@ -1,15 +1,29 @@
 'use client'
 
-import React, { useCallback, useEffect, useRef } from 'react'
+import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 const baseClass = 'inline-block'
 
-import type { BlocksFieldClient } from 'payload'
+import type { BlocksFieldClient, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
 import { mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
-import { Button, useTranslation } from '@payloadcms/ui'
+import {
+  Button,
+  Drawer,
+  EditDepthProvider,
+  Form,
+  formatDrawerSlug,
+  FormSubmit,
+  RenderFields,
+  ShimmerEffect,
+  useDocumentInfo,
+  useEditDepth,
+  useServerFunctions,
+  useTranslation,
+} from '@payloadcms/ui'
+import { abortAndIgnore } from '@payloadcms/ui/shared'
 import {
   $getNodeByKey,
   $getSelection,
@@ -19,28 +33,58 @@ import {
   KEY_BACKSPACE_COMMAND,
   KEY_DELETE_COMMAND,
 } from 'lexical'
+import { reduceFieldsToValues } from 'payload/shared'
+
+import './index.scss'
+
+import { v4 as uuid } from 'uuid'
 
 import type { InlineBlockFields } from '../nodes/InlineBlocksNode.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
+import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
-import { OPEN_INLINE_BLOCK_DRAWER_COMMAND } from '../plugin/commands.js'
-import './index.scss'
 
 type Props = {
   readonly formData: InlineBlockFields
   readonly nodeKey: string
 }
 
+type BlockComponentContextType = {
+  EditButton?: React.FC
+  initialState: false | FormState | undefined
+  InlineBlockContainer?: React.FC<{ children: React.ReactNode }>
+  Label?: React.FC
+  nodeKey?: string
+  RemoveButton?: React.FC
+}
+
+const BlockComponentContext = createContext<BlockComponentContextType>({
+  initialState: false,
+})
+
+export const useBlockComponentContext = () => React.useContext(BlockComponentContext)
+
 export const InlineBlockComponent: React.FC<Props> = (props) => {
-  const { formData, nodeKey } = props
+  let { formData, nodeKey } = props
   const [editor] = useLexicalComposerContext()
   const { i18n, t } = useTranslation<object, string>()
   const {
-    fieldProps: { featureClientSchemaMap, readOnly, schemaPath },
+    fieldProps: { featureClientSchemaMap, permissions, readOnly, schemaPath },
+    uuid: uuidFromContext,
   } = useEditorConfigContext()
+  const { getFormState } = useServerFunctions()
+  const editDepth = useEditDepth()
+
+  const drawerSlug = formatDrawerSlug({
+    slug: `lexical-inlineBlocks-create-` + uuidFromContext,
+    depth: editDepth,
+  })
+  const { toggleDrawer } = useLexicalDrawer(drawerSlug, true)
+
   const inlineBlockElemElemRef = useRef<HTMLDivElement | null>(null)
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
+  const { id, collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${formData.blockType}`
 
@@ -112,53 +156,242 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     ? getTranslation(clientBlock.labels.singular, i18n)
     : clientBlock?.slug
 
-  const Label = clientBlock?.admin?.components?.Label
+  const onChangeAbortControllerRef = useRef(new AbortController())
+  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${clientBlock?.slug}.fields`
+  const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
+
+  /**
+   * HANDLE INITIAL STATE
+   */
+  useEffect(() => {
+    const controller = new AbortController()
+
+    const awaitInitialState = async () => {
+      const { state } = await getFormState({
+        id,
+        collectionSlug,
+        data: formData,
+        docPermissions,
+        docPreferences: await getDocPreferences(),
+        globalSlug,
+        operation: 'update',
+        renderAllFields: true,
+        schemaPath: schemaFieldsPath,
+        signal: controller.signal,
+      })
+
+      setInitialState(state)
+    }
+
+    void awaitInitialState()
+
+    return () => {
+      abortAndIgnore(controller)
+    }
+  }, [
+    schemaFieldsPath,
+    id,
+    formData,
+    getFormState,
+    collectionSlug,
+    globalSlug,
+    docPermissions,
+    getDocPreferences,
+    clientBlock.slug,
+  ])
+
+  /**
+   * HANDLE ONCHANGE
+   */
+  const onChange = useCallback(
+    async ({ formState: prevFormState }) => {
+      abortAndIgnore(onChangeAbortControllerRef.current)
+
+      const controller = new AbortController()
+      onChangeAbortControllerRef.current = controller
+
+      const { state } = await getFormState({
+        id,
+        collectionSlug,
+        docPermissions,
+        docPreferences: await getDocPreferences(),
+        formState: prevFormState,
+        globalSlug,
+        operation: 'update',
+        schemaPath: schemaFieldsPath,
+        signal: controller.signal,
+      })
+
+      if (!state) {
+        return prevFormState
+      }
+
+      return state
+    },
+    [
+      getFormState,
+      id,
+      collectionSlug,
+      docPermissions,
+      getDocPreferences,
+      globalSlug,
+      schemaFieldsPath,
+    ],
+  )
+  // cleanup effect
+  useEffect(() => {
+    return () => {
+      abortAndIgnore(onChangeAbortControllerRef.current)
+    }
+  }, [])
+
+  /**
+   * HANDLE FORM SUBMIT
+   */
+  const onFormSubmit = useCallback(
+    (formState) => {
+      const newData: any = reduceFieldsToValues(formState)
+      newData.blockType = formData.blockType
+      editor.update(() => {
+        const node = $getNodeByKey(nodeKey)
+        if (node && $isInlineBlockNode(node)) {
+          formData = newData
+          node.setFields(newData)
+        }
+      })
+    },
+    [editor, nodeKey, formData],
+  )
+
+  const CustomLabel = initialState?.['_components']?.customComponents?.BlockLabel
+  const CustomBlock = initialState?.['_components']?.customComponents?.Block
+
+  const RemoveButton = useMemo(
+    () => () => (
+      <Button
+        buttonStyle="icon-label"
+        className={`${baseClass}__removeButton`}
+        disabled={readOnly}
+        icon="x"
+        onClick={(e) => {
+          e.preventDefault()
+          removeInlineBlock()
+        }}
+        round
+        size="small"
+        tooltip={t('lexical:blocks:inlineBlocks:remove', { label: blockDisplayName })}
+      />
+    ),
+    [blockDisplayName, readOnly, removeInlineBlock, t],
+  )
+
+  const EditButton = useMemo(
+    () => () => (
+      <Button
+        buttonStyle="icon-label"
+        className={`${baseClass}__editButton`}
+        disabled={readOnly}
+        el="div"
+        icon="edit"
+        onClick={() => {
+          toggleDrawer()
+        }}
+        round
+        size="small"
+        tooltip={t('lexical:blocks:inlineBlocks:edit', { label: blockDisplayName })}
+      />
+    ),
+    [blockDisplayName, readOnly, t, toggleDrawer],
+  )
+
+  const InlineBlockContainer = useMemo(
+    () =>
+      ({ children }) => (
+        <div
+          className={[
+            baseClass,
+            baseClass + '-' + formData.blockType,
+            isSelected && `${baseClass}--selected`,
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          ref={inlineBlockElemElemRef}
+        >
+          {children}
+        </div>
+      ),
+    [formData.blockType, isSelected],
+  )
+
+  const Label = useMemo(() => {
+    if (CustomLabel) {
+      return () => CustomLabel
+    } else {
+      return () => <div>{getTranslation(clientBlock.labels!.singular, i18n)}</div>
+    }
+  }, [CustomLabel, clientBlock.labels, i18n])
 
   return (
-    <div
-      className={[
-        baseClass,
-        baseClass + '-' + formData.blockType,
-        isSelected && `${baseClass}--selected`,
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      ref={inlineBlockElemElemRef}
+    <Form
+      beforeSubmit={[onChange]}
+      disableValidationOnSubmit
+      fields={clientBlock.fields}
+      initialState={initialState || {}}
+      onChange={[onChange]}
+      onSubmit={(formState) => {
+        onFormSubmit(formState)
+        toggleDrawer()
+      }}
+      uuid={uuid()}
     >
-      {Label ? Label : <div>{getTranslation(clientBlock.labels!.singular, i18n)}</div>}
-      {editor.isEditable() && (
-        <div className={`${baseClass}__actions`}>
-          <Button
-            buttonStyle="icon-label"
-            className={`${baseClass}__editButton`}
-            disabled={readOnly}
-            el="div"
-            icon="edit"
-            onClick={() => {
-              editor.dispatchCommand(OPEN_INLINE_BLOCK_DRAWER_COMMAND, {
-                fields: formData,
-                nodeKey,
-              })
-            }}
-            round
-            size="small"
-            tooltip={t('lexical:blocks:inlineBlocks:edit', { label: blockDisplayName })}
-          />
-          <Button
-            buttonStyle="icon-label"
-            className={`${baseClass}__removeButton`}
-            disabled={readOnly}
-            icon="x"
-            onClick={(e) => {
-              e.preventDefault()
-              removeInlineBlock()
-            }}
-            round
-            size="small"
-            tooltip={t('lexical:blocks:inlineBlocks:remove', { label: blockDisplayName })}
-          />
-        </div>
+      <EditDepthProvider>
+        <Drawer
+          className={''}
+          slug={drawerSlug}
+          title={t(`lexical:blocks:inlineBlocks:${formData?.id ? 'edit' : 'create'}`, {
+            label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
+          })}
+        >
+          {initialState ? (
+            <>
+              <RenderFields
+                fields={clientBlock.fields}
+                forceRender
+                parentIndexPath=""
+                parentPath="" // See Blocks feature path for details as for why this is empty
+                parentSchemaPath={schemaFieldsPath}
+                permissions={permissions}
+                readOnly={false}
+              />
+              <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
+            </>
+          ) : null}
+        </Drawer>
+      </EditDepthProvider>
+      {CustomBlock ? (
+        <BlockComponentContext.Provider
+          value={{
+            EditButton,
+            initialState,
+            InlineBlockContainer,
+            Label,
+            nodeKey,
+            RemoveButton,
+          }}
+        >
+          {CustomBlock}
+        </BlockComponentContext.Provider>
+      ) : (
+        <InlineBlockContainer>
+          {initialState ? <Label /> : <ShimmerEffect height="15px" width="40px" />}
+          {editor.isEditable() ? (
+            <div className={`${baseClass}__actions`}>
+              <EditButton />
+              <RemoveButton />
+            </div>
+          ) : null}
+        </InlineBlockContainer>
       )}
-    </div>
+    </Form>
   )
 }

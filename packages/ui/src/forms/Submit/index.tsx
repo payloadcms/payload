@@ -13,13 +13,22 @@ export const FormSubmit = forwardRef<HTMLButtonElement, Props>((props, ref) => {
   const { type = 'submit', buttonId: id, children, disabled: disabledFromProps } = props
   const processing = useFormProcessing()
   const initializing = useFormInitializing()
-  const { disabled } = useForm()
+  const { disabled, submit } = useForm()
 
   const canSave = !(disabledFromProps || initializing || processing || disabled)
 
   return (
     <div className={baseClass}>
-      <Button ref={ref} {...props} disabled={canSave ? undefined : true} id={id} type={type}>
+      <Button
+        ref={ref}
+        {...props}
+        disabled={canSave ? undefined : true}
+        id={id}
+        onClick={() => {
+          void submit()
+        }}
+        type={type}
+      >
         {children}
       </Button>
     </div>

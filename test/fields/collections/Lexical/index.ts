@@ -87,8 +87,61 @@ const editorConfig: ServerEditorConfig = {
         {
           slug: 'myInlineBlock',
           admin: {
+            components: {},
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
+          slug: 'myInlineBlockWithLabel',
+          admin: {
             components: {
-              Label: '/collections/Lexical/LabelComponent.js#LabelComponent',
+              Label: '/collections/Lexical/inlineBlockComponents/LabelComponent.js#LabelComponent',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
+          slug: 'myInlineBlockWithBlock',
+          admin: {
+            components: {
+              Block: '/collections/Lexical/inlineBlockComponents/BlockComponent.js#BlockComponent',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
+          slug: 'myInlineBlockWithBlockAndLabel',
+          admin: {
+            components: {
+              Block: '/collections/Lexical/inlineBlockComponents/BlockComponent.js#BlockComponent',
+              Label: '/collections/Lexical/inlineBlockComponents/LabelComponent.js#LabelComponent',
             },
           },
           fields: [
