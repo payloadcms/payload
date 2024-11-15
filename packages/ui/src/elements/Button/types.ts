@@ -20,6 +20,7 @@ export type Props = {
   Link?: React.ElementType
   newTab?: boolean
   onClick?: (event: MouseEvent) => void
+  onMouseDown?: (event: MouseEvent) => void
   round?: boolean
   secondaryActions?: secondaryAction | secondaryAction[]
   size?: 'large' | 'medium' | 'small'
