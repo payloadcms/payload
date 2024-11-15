@@ -1,6 +1,6 @@
 import type { CollectionConfig, Field, SanitizedConfig, TraverseFieldsCallback } from 'payload'
 
-import mongoose from 'mongoose'
+import { Types } from 'mongoose'
 import { APIError, traverseFields } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
 
@@ -25,14 +25,14 @@ const convertValue = ({
 }: {
   relatedCollection: CollectionConfig
   value: number | string
-}): mongoose.Types.ObjectId | number | string => {
+}): number | string | Types.ObjectId => {
   const customIDField = relatedCollection.fields.find(
     (field) => fieldAffectsData(field) && field.name === 'id',
   )
 
   if (!customIDField) {
     try {
-      return new mongoose.Types.ObjectId(value)
+      return new Types.ObjectId(value)
     } catch (error) {
       throw new APIError(
         `Failed to create ObjectId from value: ${value}. Error: ${error.message}`,
@@ -141,7 +141,7 @@ export const sanitizeRelationshipIDs = ({
     }
   }
 
-  traverseFields({ callback: sanitize, fields, ref: data })
+  traverseFields({ callback: sanitize, fields, fillEmpty: false, ref: data })
 
   return data
 }
