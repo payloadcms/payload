@@ -1,3 +1,4 @@
+import type { QueryOptions } from 'mongoose'
 import type { PayloadRequest, UpdateGlobal } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -9,12 +10,13 @@ import { withSession } from './withSession.js'
 
 export const updateGlobal: UpdateGlobal = async function updateGlobal(
   this: MongooseAdapter,
-  { slug, data, req = {} as PayloadRequest, select },
+  { slug, data, options: optionsArgs = {}, req = {} as PayloadRequest, select },
 ) {
   const Model = this.globals
   const fields = this.payload.config.globals.find((global) => global.slug === slug).fields
 
-  const options = {
+  const options: QueryOptions = {
+    ...optionsArgs,
     ...(await withSession(this, req)),
     lean: true,
     new: true,

@@ -49,7 +49,7 @@ export const createClientGlobalConfig = ({
   global: SanitizedConfig['globals'][0]
   i18n: I18nClient
 }): ClientGlobalConfig => {
-  const clientGlobal = deepCopyObjectSimple(global) as unknown as ClientGlobalConfig
+  const clientGlobal = deepCopyObjectSimple(global, true) as unknown as ClientGlobalConfig
 
   clientGlobal.fields = createClientFields({
     clientFields: clientGlobal?.fields || [],
