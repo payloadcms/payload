@@ -1443,8 +1443,8 @@ importers:
   packages/translations:
     dependencies:
       date-fns:
-        specifier: 3.3.1
-        version: 3.3.1
+        specifier: 4.1.0
+        version: 4.1.0
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -1498,8 +1498,8 @@ importers:
         specifier: 2.0.4
         version: 2.0.4
       date-fns:
-        specifier: 3.3.1
-        version: 3.3.1
+        specifier: 4.1.0
+        version: 4.1.0
       dequal:
         specifier: 2.0.3
         version: 2.0.3
@@ -5790,6 +5790,9 @@ packages:
 
   date-fns@3.3.1:
     resolution: {integrity: sha512-y8e109LYGgoQDveiEBD3DYXKba1jWf5BA8YU1FL5Tvm0BTdEfy54WLCwnuYWZNnzzvALy/QQ4Hov+Q9RVRv+Zw==}
+
+  date-fns@4.1.0:
+    resolution: {integrity: sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==}
 
   dateformat@4.6.3:
     resolution: {integrity: sha512-2P0p0pFGzHS5EMnhdxQi7aJN+iMheud0UhG4dlE1DLAlvL8JHjJJTX/CSm4JXwV0Ka5nGk3zC5mcb5bUQUxxMA==}
@@ -15099,6 +15102,8 @@ snapshots:
   dataloader@2.2.2: {}
 
   date-fns@3.3.1: {}
+
+  date-fns@4.1.0: {}
 
   dateformat@4.6.3: {}
 
