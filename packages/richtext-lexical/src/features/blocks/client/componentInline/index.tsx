@@ -50,7 +50,7 @@ type Props = {
   readonly nodeKey: string
 }
 
-type BlockComponentContextType = {
+type InlineBlockComponentContextType = {
   EditButton?: React.FC
   initialState: false | FormState | undefined
   InlineBlockContainer?: React.FC<{ children: React.ReactNode }>
@@ -59,11 +59,11 @@ type BlockComponentContextType = {
   RemoveButton?: React.FC
 }
 
-const BlockComponentContext = createContext<BlockComponentContextType>({
+const InlineBlockComponentContext = createContext<InlineBlockComponentContextType>({
   initialState: false,
 })
 
-export const useBlockComponentContext = () => React.useContext(BlockComponentContext)
+export const useInlineBlockComponentContext = () => React.useContext(InlineBlockComponentContext)
 
 export const InlineBlockComponent: React.FC<Props> = (props) => {
   let { formData, nodeKey } = props
@@ -369,7 +369,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         </Drawer>
       </EditDepthProvider>
       {CustomBlock ? (
-        <BlockComponentContext.Provider
+        <InlineBlockComponentContext.Provider
           value={{
             EditButton,
             initialState,
@@ -380,7 +380,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           }}
         >
           {CustomBlock}
-        </BlockComponentContext.Provider>
+        </InlineBlockComponentContext.Provider>
       ) : (
         <InlineBlockContainer>
           {initialState ? <Label /> : <ShimmerEffect height="15px" width="40px" />}

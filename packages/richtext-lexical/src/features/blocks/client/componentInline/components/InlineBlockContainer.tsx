@@ -1,10 +1,10 @@
 'use client'
 import React from 'react'
 
-import { useBlockComponentContext } from '../index.js'
+import { useInlineBlockComponentContext } from '../index.js'
 
 export const InlineBlockContainer = ({ children }) => {
-  const { InlineBlockContainer } = useBlockComponentContext()
+  const { InlineBlockContainer } = useInlineBlockComponentContext()
 
   return InlineBlockContainer ? <InlineBlockContainer>{children}</InlineBlockContainer> : null
 }

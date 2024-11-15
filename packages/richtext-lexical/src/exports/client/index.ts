@@ -133,3 +133,6 @@ export { InlineBlockEditButton } from '../../features/blocks/client/componentInl
 export { InlineBlockRemoveButton } from '../../features/blocks/client/componentInline/components/InlineBlockRemoveButton.js'
 export { InlineBlockLabel } from '../../features/blocks/client/componentInline/components/InlineBlockLabel.js'
 export { InlineBlockContainer } from '../../features/blocks/client/componentInline/components/InlineBlockContainer.js'
+export { BlockCollapsible } from '../../features/blocks/client/component/components/BlockCollapsible.js'
+export { BlockEditButton } from '../../features/blocks/client/component/components/BlockEditButton.js'
+export { BlockLabel } from '../../features/blocks/client/component/components/BlockLabel.js'

@@ -1,10 +1,10 @@
 'use client'
 import React from 'react'
 
-import { useBlockComponentContext } from '../index.js'
+import { useInlineBlockComponentContext } from '../index.js'
 
 export const InlineBlockRemoveButton = () => {
-  const { RemoveButton } = useBlockComponentContext()
+  const { RemoveButton } = useInlineBlockComponentContext()
 
   return RemoveButton ? <RemoveButton /> : null
 }

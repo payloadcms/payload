@@ -9,7 +9,7 @@ import type {
   SanitizedConfig,
 } from 'payload'
 
-import { dequal } from 'dequal'
+import { dequal } from 'dequal' // TODO: Can we change this to dequal/lite ? If not, please add comment explaining why
 import { createClientConfig, formatErrors } from 'payload'
 
 import type { Column } from '../elements/Table/index.js'

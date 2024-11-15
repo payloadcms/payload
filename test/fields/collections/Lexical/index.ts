@@ -82,6 +82,77 @@ const editorConfig: ServerEditorConfig = {
         ConditionalLayoutBlock,
         TabBlock,
         CodeBlock,
+        {
+          slug: 'myBlock',
+          admin: {
+            components: {},
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
+          slug: 'myBlockWithLabel',
+          admin: {
+            components: {
+              Label: '/collections/Lexical/blockComponents/LabelComponent.js#LabelComponent',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
+          slug: 'myBlockWithBlock',
+          admin: {
+            components: {
+              Block: '/collections/Lexical/blockComponents/BlockComponent.js#BlockComponent',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
+          slug: 'myBlockWithBlockAndLabel',
+          admin: {
+            components: {
+              Block: '/collections/Lexical/blockComponents/BlockComponent.js#BlockComponent',
+              Label: '/collections/Lexical/blockComponents/LabelComponent.js#LabelComponent',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
       ],
       inlineBlocks: [
         {
