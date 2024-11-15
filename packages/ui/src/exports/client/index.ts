@@ -191,6 +191,7 @@ export { Account } from '../../graphics/Account/index.js'
 export { PayloadIcon } from '../../graphics/Icon/index.js'
 
 export { DefaultBlockImage } from '../../graphics/DefaultBlockImage/index.js'
+export { ExternalLinkIcon } from '../../graphics/ExternalLink/index.js'
 export { File } from '../../graphics/File/index.js'
 
 // icons
@@ -274,6 +275,7 @@ export type {
   ListComponentServerProps,
   ListPreferences,
 } from '../../views/List/types.js'
+export type { ListHeaderProps } from '../../views/List/ListHeader/index.js'
 
 export { DefaultEditView } from '../../views/Edit/index.js'
 export { SetDocumentStepNav } from '../../views/Edit/SetDocumentStepNav/index.js'

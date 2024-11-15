@@ -1,5 +1,5 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { ClientField, FieldPermissions } from 'payload'
+import type { ClientField, SanitizedFieldPermissions } from 'payload'
 import type React from 'react'
 import type { DiffMethod } from 'react-diff-viewer-continued'
 
@@ -16,6 +16,10 @@ export type DiffComponentProps<TField extends ClientField = ClientField> = {
   readonly isRichText?: boolean
   readonly locale?: string
   readonly locales?: string[]
-  readonly permissions?: Record<string, FieldPermissions>
+  readonly permissions?:
+    | {
+        [key: string]: SanitizedFieldPermissions
+      }
+    | true
   readonly version: any
 }

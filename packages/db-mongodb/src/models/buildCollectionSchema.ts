@@ -1,5 +1,5 @@
 import type { PaginateOptions, Schema } from 'mongoose'
-import type { SanitizedCollectionConfig, SanitizedConfig } from 'payload'
+import type { Payload, SanitizedCollectionConfig } from 'payload'
 
 import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2'
 import paginate from 'mongoose-paginate-v2'
@@ -9,12 +9,12 @@ import { buildSchema } from './buildSchema.js'
 
 export const buildCollectionSchema = (
   collection: SanitizedCollectionConfig,
-  config: SanitizedConfig,
+  payload: Payload,
   schemaOptions = {},
 ): Schema => {
-  const schema = buildSchema(config, collection.fields, {
+  const schema = buildSchema(payload, collection.fields, {
     draftsEnabled: Boolean(typeof collection?.versions === 'object' && collection.versions.drafts),
-    indexSortableFields: config.indexSortableFields,
+    indexSortableFields: payload.config.indexSortableFields,
     options: {
       minimize: false,
       timestamps: collection.timestamps !== false,
@@ -34,7 +34,7 @@ export const buildCollectionSchema = (
     schema.index(indexDefinition, { unique: true })
   }
 
-  if (config.indexSortableFields && collection.timestamps !== false) {
+  if (payload.config.indexSortableFields && collection.timestamps !== false) {
     schema.index({ updatedAt: 1 })
     schema.index({ createdAt: 1 })
   }

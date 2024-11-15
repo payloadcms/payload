@@ -84,6 +84,22 @@ export default buildConfigWithDefaults({
           type: 'relationship',
           relationTo: relationSlug,
         },
+        {
+          name: 'blocks',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'block',
+              fields: [
+                {
+                  name: 'relationField',
+                  type: 'relationship',
+                  relationTo: relationSlug,
+                },
+              ],
+            },
+          ],
+        },
         // Relationship w/ default access
         {
           name: 'defaultAccessRelation',

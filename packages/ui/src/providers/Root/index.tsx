@@ -3,7 +3,7 @@ import type { I18nClient, Language } from '@payloadcms/translations'
 import type {
   ClientConfig,
   LanguageOptions,
-  Permissions,
+  SanitizedPermissions,
   ServerFunctionClient,
   User,
 } from 'payload'
@@ -41,7 +41,7 @@ type Props = {
   readonly isNavOpen?: boolean
   readonly languageCode: string
   readonly languageOptions: LanguageOptions
-  readonly permissions: Permissions
+  readonly permissions: SanitizedPermissions
   readonly serverFunction: ServerFunctionClient
   readonly switchLanguageServerAction?: (lang: string) => Promise<void>
   readonly theme: Theme

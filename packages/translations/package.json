@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/translations",
-  "version": "3.0.0-beta.130",
+  "version": "3.0.0-beta.131",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -54,7 +54,7 @@
     "translateNewKeys": "node --no-deprecation --import @swc-node/register/esm-register scripts/translateNewKeys/run.ts"
   },
   "dependencies": {
-    "date-fns": "3.3.1"
+    "date-fns": "4.1.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",

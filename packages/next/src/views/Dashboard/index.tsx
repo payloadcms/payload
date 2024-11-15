@@ -35,14 +35,13 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
 
   const collections = config.collections.filter(
     (collection) =>
-      permissions?.collections?.[collection.slug]?.read?.permission &&
+      permissions?.collections?.[collection.slug]?.read &&
       visibleEntities.collections.includes(collection.slug),
   )
 
   const globals = config.globals.filter(
     (global) =>
-      permissions?.globals?.[global.slug]?.read?.permission &&
-      visibleEntities.globals.includes(global.slug),
+      permissions?.globals?.[global.slug]?.read && visibleEntities.globals.includes(global.slug),
   )
 
   // Query locked global documents only if there are globals in the config

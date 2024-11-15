@@ -68,7 +68,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         id,
         collectionSlug,
         data: formData,
-        docPermissions,
+        docPermissions: { fields: true },
         docPreferences: await getDocPreferences(),
         globalSlug,
         operation: 'update',
@@ -103,7 +103,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
     collectionSlug,
     globalSlug,
     getDocPreferences,
-    docPermissions,
     // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
   ])
 

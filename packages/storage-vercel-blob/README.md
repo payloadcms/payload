@@ -28,8 +28,8 @@ export default buildConfig({
       enabled: true, // Optional, defaults to true
       // Specify which collections should use Vercel Blob
       collections: {
-        [Media.slug]: true,
-        [MediaWithPrefix.slug]: {
+        media: true,
+        'media-with-prefix': {
           prefix: 'my-prefix',
         },
       },

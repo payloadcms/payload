@@ -467,20 +467,6 @@ Payload is still headless, you will still be able to leverage it completely head
     }
     ```
 
-1. `root` endpoints no longer exist on the config. Instead, you must add them to the `/api` folder within your own Payload application.
-
-    ```diff
-    // payload.config.ts
-    import { buildConfig } from 'payload'
-
-    const config = buildConfig({
-      // ...
-    - endpoints: [...]
-    })
-    ```
-
-    For more details, see the [Next.js Documentation](https://nextjs.org/docs/app/api-reference/file-conventions/route).
-
 1. All other endpoint handlers have changed. The args no longer include `res`, and `next`, and the return type now expects a valid HTTP [`Response`](https://developer.mozilla.org/en-US/docs/Web/API/Response) instead of `res.json`, `res.send`, etc.:
 
     ```diff
@@ -698,7 +684,7 @@ import { s3Adapter } from '@payloadcms/plugin-cloud-storage/s3'
 plugins: [
     cloudStorage({
       collections: {
-        [mediaSlug]: {
+        media: {
           adapter: s3Adapter({
             bucket: process.env.S3_BUCKET,
             config: {
@@ -721,7 +707,7 @@ plugins: [
  plugins: [
     s3Storage({
       collections: {
-        [mediaSlug]: true,
+        media: true,
       },
       bucket: process.env.S3_BUCKET,
       config: {

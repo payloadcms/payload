@@ -386,6 +386,22 @@ export default buildConfigWithDefaults({
       ],
       versions: { drafts: true },
     },
+    {
+      slug: 'relationships-migration',
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'default-values',
+          name: 'relationship',
+        },
+        {
+          type: 'relationship',
+          relationTo: ['default-values'],
+          name: 'relationship_2',
+        },
+      ],
+      versions: true,
+    },
   ],
   globals: [
     {

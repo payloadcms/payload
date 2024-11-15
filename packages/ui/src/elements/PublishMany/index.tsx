@@ -44,7 +44,7 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
   const { stringifyParams } = useSearchParams()
 
   const collectionPermissions = permissions?.collections?.[slug]
-  const hasPermission = collectionPermissions?.update?.permission
+  const hasPermission = collectionPermissions?.update
 
   const modalSlug = `publish-${slug}`
 

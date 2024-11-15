@@ -1,4 +1,5 @@
 import type { TypeWithID } from '../collections/config/types.js'
+import type { CollectionSlug, GlobalSlug } from '../index.js'
 import type {
   Document,
   JoinQuery,
@@ -185,7 +186,7 @@ export type RollbackTransaction = (id: number | Promise<number | string> | strin
 export type CommitTransaction = (id: number | Promise<number | string> | string) => Promise<void>
 
 export type QueryDraftsArgs = {
-  collection: string
+  collection: CollectionSlug
   joins?: JoinQuery
   limit?: number
   locale?: string
@@ -200,7 +201,7 @@ export type QueryDraftsArgs = {
 export type QueryDrafts = <T = TypeWithID>(args: QueryDraftsArgs) => Promise<PaginatedDocs<T>>
 
 export type FindOneArgs = {
-  collection: string
+  collection: CollectionSlug
   joins?: JoinQuery
   locale?: string
   req: PayloadRequest
@@ -211,7 +212,7 @@ export type FindOneArgs = {
 export type FindOne = <T extends TypeWithID>(args: FindOneArgs) => Promise<null | T>
 
 export type FindArgs = {
-  collection: string
+  collection: CollectionSlug
   joins?: JoinQuery
   /** Setting limit to 1 is equal to the previous Model.findOne(). Setting limit to 0 disables the limit */
   limit?: number
@@ -230,7 +231,7 @@ export type FindArgs = {
 export type Find = <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>
 
 export type CountArgs = {
-  collection: string
+  collection: CollectionSlug
   locale?: string
   req: PayloadRequest
   where?: Where
@@ -263,7 +264,7 @@ type BaseVersionArgs = {
 }
 
 export type FindVersionsArgs = {
-  collection: string
+  collection: CollectionSlug
 } & BaseVersionArgs
 
 export type FindVersions = <T = TypeWithID>(
@@ -271,7 +272,7 @@ export type FindVersions = <T = TypeWithID>(
 ) => Promise<PaginatedDocs<TypeWithVersion<T>>>
 
 export type FindGlobalVersionsArgs = {
-  global: string
+  global: GlobalSlug
 } & BaseVersionArgs
 
 export type FindGlobalArgs = {
@@ -283,7 +284,7 @@ export type FindGlobalArgs = {
 }
 
 export type UpdateGlobalVersionArgs<T = TypeWithID> = {
-  global: string
+  global: GlobalSlug
   locale?: string
   /**
    * Additional database adapter specific options to pass to the query
@@ -340,7 +341,7 @@ export type FindGlobalVersions = <T = TypeWithID>(
 ) => Promise<PaginatedDocs<TypeWithVersion<T>>>
 
 export type DeleteVersionsArgs = {
-  collection: string
+  collection: CollectionSlug
   locale?: string
   req: PayloadRequest
   sort?: {
@@ -351,7 +352,7 @@ export type DeleteVersionsArgs = {
 
 export type CreateVersionArgs<T = TypeWithID> = {
   autosave: boolean
-  collectionSlug: string
+  collectionSlug: CollectionSlug
   createdAt: string
   /** ID of the parent document for which the version should be created for */
   parent: number | string
@@ -370,7 +371,7 @@ export type CreateVersion = <T extends TypeWithID = TypeWithID>(
 export type CreateGlobalVersionArgs<T = TypeWithID> = {
   autosave: boolean
   createdAt: string
-  globalSlug: string
+  globalSlug: GlobalSlug
   /** ID of the parent document for which the version should be created for */
   parent: number | string
   publishedLocale?: string
@@ -388,7 +389,7 @@ export type CreateGlobalVersion = <T extends TypeWithID = TypeWithID>(
 export type DeleteVersions = (args: DeleteVersionsArgs) => Promise<void>
 
 export type UpdateVersionArgs<T = TypeWithID> = {
-  collection: string
+  collection: CollectionSlug
   locale?: string
   /**
    * Additional database adapter specific options to pass to the query
@@ -413,7 +414,7 @@ export type UpdateVersion = <T extends TypeWithID = TypeWithID>(
 ) => Promise<TypeWithVersion<T>>
 
 export type CreateArgs = {
-  collection: string
+  collection: CollectionSlug
   data: Record<string, unknown>
   draft?: boolean
   locale?: string
@@ -424,7 +425,7 @@ export type CreateArgs = {
 export type Create = (args: CreateArgs) => Promise<Document>
 
 export type UpdateOneArgs = {
-  collection: string
+  collection: CollectionSlug
   data: Record<string, unknown>
   draft?: boolean
   joins?: JoinQuery
@@ -449,7 +450,7 @@ export type UpdateOneArgs = {
 export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
 export type UpsertArgs = {
-  collection: string
+  collection: CollectionSlug
   data: Record<string, unknown>
   joins?: JoinQuery
   locale?: string
@@ -461,7 +462,7 @@ export type UpsertArgs = {
 export type Upsert = (args: UpsertArgs) => Promise<Document>
 
 export type DeleteOneArgs = {
-  collection: string
+  collection: CollectionSlug
   joins?: JoinQuery
   req: PayloadRequest
   select?: SelectType
@@ -471,7 +472,7 @@ export type DeleteOneArgs = {
 export type DeleteOne = (args: DeleteOneArgs) => Promise<Document>
 
 export type DeleteManyArgs = {
-  collection: string
+  collection: CollectionSlug
   joins?: JoinQuery
   req: PayloadRequest
   where: Where

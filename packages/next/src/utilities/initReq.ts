@@ -1,5 +1,5 @@
 import type { I18n, I18nClient } from '@payloadcms/translations'
-import type { PayloadRequest, Permissions, SanitizedConfig, User } from 'payload'
+import type { PayloadRequest, SanitizedConfig, SanitizedPermissions, User } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
 import { headers as getHeaders } from 'next/headers.js'
@@ -11,7 +11,7 @@ import { getRequestLanguage } from './getRequestLanguage.js'
 
 type Result = {
   i18n: I18nClient
-  permissions: Permissions
+  permissions: SanitizedPermissions
   req: PayloadRequest
   user: User
 }
