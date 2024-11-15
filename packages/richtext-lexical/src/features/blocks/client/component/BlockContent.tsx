@@ -113,7 +113,7 @@ export const BlockContent: React.FC<Props> = (props) => {
         parentIndexPath=""
         parentPath={''}
         parentSchemaPath=""
-        permissions={permissions} // TODO: Pass field permissions
+        permissions={true}
       />
     </CollapsibleWithErrorProps>
   )

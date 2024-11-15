@@ -20,7 +20,7 @@ export default buildConfig({
   plugins: [
     uploadthingStorage({
       collections: {
-        [mediaSlug]: true,
+        media: true,
       },
       options: {
         token: process.env.UPLOADTHING_TOKEN,

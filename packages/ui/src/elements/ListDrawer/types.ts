@@ -6,7 +6,7 @@ import type { ListDrawerContextProps } from './Provider.js'
 
 export type ListDrawerProps = {
   readonly allowCreate?: boolean
-  readonly collectionSlugs: string[]
+  readonly collectionSlugs: SanitizedCollectionConfig['slug'][]
   readonly drawerSlug?: string
   readonly enableRowSelections?: boolean
   readonly filterOptions?: FilterOptionsResult
@@ -21,9 +21,9 @@ export type ListTogglerProps = {
 } & HTMLAttributes<HTMLButtonElement>
 
 export type UseListDrawer = (args: {
-  collectionSlugs?: string[]
+  collectionSlugs?: SanitizedCollectionConfig['slug'][]
   filterOptions?: FilterOptionsResult
-  selectedCollection?: string
+  selectedCollection?: SanitizedCollectionConfig['slug']
   uploads?: boolean // finds all collections with upload: true
 }) => [
   React.FC<

@@ -1,5 +1,5 @@
 'use client'
-import type { ClientBlock, ClientField, FieldPermissions, Labels, Row } from 'payload'
+import type { ClientBlock, ClientField, Labels, Row, SanitizedFieldPermissions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -31,7 +31,7 @@ type BlocksFieldProps = {
   moveRow: (fromIndex: number, toIndex: number) => void
   parentPath: string
   path: string
-  permissions: FieldPermissions
+  permissions: SanitizedFieldPermissions
   readOnly: boolean
   removeRow: (rowIndex: number) => void
   row: Row
@@ -147,7 +147,9 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
           parentIndexPath=""
           parentPath={path}
           parentSchemaPath={schemaPath}
-          permissions={permissions?.blocks?.[block.slug]?.fields}
+          permissions={
+            permissions === true ? permissions : permissions?.blocks?.[block.slug]?.fields
+          }
           readOnly={readOnly}
         />
       </Collapsible>
