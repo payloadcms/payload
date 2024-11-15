@@ -1,15 +1,19 @@
 'use client'
-import { Button, LoadingOverlay, toast, useAuth, useTranslation } from '@payloadcms/ui'
+import {
+  Button,
+  LinkTransition,
+  LoadingOverlay,
+  toast,
+  useAuth,
+  useTranslation,
+} from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
-import LinkImport from 'next/link.js'
 import { useRouter } from 'next/navigation.js'
 import React, { useEffect } from 'react'
 
 import './index.scss'
 
 const baseClass = 'logout'
-
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const LogoutClient: React.FC<{
   adminRoute: string
@@ -56,7 +60,13 @@ export const LogoutClient: React.FC<{
     return (
       <div className={`${baseClass}__wrap`}>
         <h2>{t('authentication:loggedOutInactivity')}</h2>
-        <Button buttonStyle="secondary" el="link" Link={Link} size="large" url={loginRoute}>
+        <Button
+          buttonStyle="secondary"
+          el="link"
+          Link={LinkTransition}
+          size="large"
+          url={loginRoute}
+        >
           {t('authentication:logBackIn')}
         </Button>
       </div>

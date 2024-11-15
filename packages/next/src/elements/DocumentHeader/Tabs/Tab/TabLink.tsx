@@ -1,13 +1,10 @@
 'use client'
 import type { SanitizedConfig } from 'payload'
 
-import { useSearchParams } from '@payloadcms/ui'
+import { LinkTransition, useSearchParams } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
-import LinkImport from 'next/link.js'
 import { useParams, usePathname } from 'next/navigation.js'
 import React from 'react'
-
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const DocumentTabLink: React.FC<{
   adminRoute: SanitizedConfig['routes']['admin']
@@ -64,7 +61,7 @@ export const DocumentTabLink: React.FC<{
       aria-label={ariaLabel}
       className={[baseClass, isActive && `${baseClass}--active`].filter(Boolean).join(' ')}
     >
-      <Link
+      <LinkTransition
         className={`${baseClass}__link`}
         href={!isActive || href !== pathname ? hrefWithLocale : ''}
         prefetch={false}
@@ -72,7 +69,7 @@ export const DocumentTabLink: React.FC<{
         tabIndex={isActive ? -1 : 0}
       >
         {children}
-      </Link>
+      </LinkTransition>
     </li>
   )
 }

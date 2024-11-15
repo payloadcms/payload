@@ -1,12 +1,10 @@
 'use client'
 import type { MouseEvent } from 'react'
 
-import LinkImport from 'next/link.js' // TODO: abstract this out to support all routers
 import React from 'react'
 
 import './index.scss'
-
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
+import { LinkTransition } from '../LinkTransition/index.js'
 
 const baseClass = 'banner'
 
@@ -56,7 +54,7 @@ export const Banner: React.FC<Props> = ({
     RenderedType = 'button'
   }
   if (to) {
-    RenderedType = Link
+    RenderedType = LinkTransition
   }
 
   return (

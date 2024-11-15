@@ -2,12 +2,10 @@
 // TODO: abstract the `next/link` dependency out from this component
 import type { LinkProps } from 'next/link.js'
 
-import LinkImport from 'next/link.js'
 import * as React from 'react' // TODO: abstract this out to support all routers
 
 import './index.scss'
-
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
+import { LinkTransition } from '../../LinkTransition/index.js'
 
 const baseClass = 'popup-button-list'
 
@@ -51,7 +49,7 @@ export const Button: React.FC<MenuButtonProps> = ({
 
   if (href) {
     return (
-      <Link
+      <LinkTransition
         className={classes}
         href={href}
         id={id}
@@ -63,7 +61,7 @@ export const Button: React.FC<MenuButtonProps> = ({
         prefetch={false}
       >
         {children}
-      </Link>
+      </LinkTransition>
     )
   }
 
