@@ -256,7 +256,7 @@ export const createOperation = async <
     // /////////////////////////////////////
 
     if (collectionConfig.versions) {
-      await saveVersion({
+      const version = await saveVersion({
         id: result.id,
         autosave,
         collection: collectionConfig,
@@ -264,6 +264,8 @@ export const createOperation = async <
         payload,
         req,
       })
+
+      result.updatedAt = (version as Record<string, unknown>).updatedAt
     }
 
     // /////////////////////////////////////
