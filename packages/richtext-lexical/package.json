@@ -147,6 +147,58 @@
         "import": "./dist/exports/server/migrate.js",
         "types": "./dist/exports/server/migrate.d.ts",
         "default": "./dist/exports/server/migrate.js"
+      },
+      "lexical": {
+        "import": "./dist/lexical-proxy/index.js",
+        "types": "./dist/lexical-proxy/index.d.ts",
+        "default": "./dist/lexical-proxy/index.js",
+        "./headless": {
+          "import": "./dist/lexical-proxy/@lexical-headless.js",
+          "types": "./dist/lexical-proxy/@lexical-headless.d.ts",
+          "default": "./dist/lexical-proxy/@lexical-headless.js"
+        },
+        "./link": {
+          "import": "./dist/lexical-proxy/@lexical-link.js",
+          "types": "./dist/lexical-proxy/@lexical-link.d.ts",
+          "default": "./dist/lexical-proxy/@lexical-link.js"
+        },
+        "./list": {
+          "import": "./dist/lexical-proxy/@lexical-list.js",
+          "types": "./dist/lexical-proxy/@lexical-list.d.ts",
+          "default": "./dist/lexical-proxy/@lexical-list.js"
+        },
+        "./mark": {
+          "import": "./dist/lexical-proxy/@lexical-mark.js",
+          "types": "./dist/lexical-proxy/@lexical-mark.d.ts",
+          "default": "./dist/lexical-proxy/@lexical-mark.js"
+        },
+        "./markdown": {
+          "import": "./dist/lexical-proxy/@lexical-markdown.js",
+          "types": "./dist/lexical-proxy/@lexical-markdown.d.ts",
+          "default": "./dist/lexical-proxy/@lexical-markdown.js"
+        },
+        "./rich-text": {
+          "import": "./dist/lexical-proxy/@lexical-rich-text.js",
+          "types": "./dist/lexical-proxy/@lexical-rich-text.d.ts",
+          "default": "./dist/lexical-proxy/@lexical-rich-text.js"
+        },
+        "./selection": {
+          "import": "./dist/lexical-proxy/@lexical-selection.js",
+          "types": "./dist/lexical-proxy/@lexical-selection.d.ts",
+          "default": "./dist/lexical-proxy/@lexical-selection.js"
+        },
+        "./utils": {
+          "import": "./dist/lexical-proxy/@lexical-utils.js",
+          "types": "./dist/lexical-proxy/@lexical-utils.d.ts",
+          "default": "./dist/lexical-proxy/@lexical-utils.js"
+        },
+        "./react": {
+          ".LexicalAutoFocusPlugin": {
+            "import": "./dist/lexical-proxy/@lexical-react/LexicalAutoFocusPlugin.js",
+            "types": "./dist/lexical-proxy/@lexical-react/LexicalAutoFocusPlugin.d.ts",
+            "default": "./dist/lexical-proxy/@lexical-react/LexicalAutoFocusPlugin.js"
+          }
+        }
       }
     },
     "main": "./dist/index.js",
