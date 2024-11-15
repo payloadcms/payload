@@ -221,7 +221,9 @@ export const sanitizeQueryValue = ({
 
     if (['in', 'not_in'].includes(operator) && Array.isArray(formattedValue)) {
       formattedValue = formattedValue.reduce((formattedValues, inVal) => {
-        if (!inVal) {return formattedValues}
+        if (!inVal) {
+          return formattedValues
+        }
 
         if (typeof relationTo === 'string' && payload.collections[relationTo].customIDType) {
           if (payload.collections[relationTo].customIDType === 'number') {
@@ -257,7 +259,7 @@ export const sanitizeQueryValue = ({
     }
 
     if (
-      ['contains', 'equals', 'not_equals'].includes(operator) &&
+      ['contains', 'equals', 'like', 'not_equals'].includes(operator) &&
       (!Array.isArray(relationTo) || !path.endsWith('.relationTo'))
     ) {
       if (typeof relationTo === 'string') {
