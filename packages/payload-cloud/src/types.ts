@@ -1,10 +1,10 @@
 import type {
   CollectionConfig,
-  CollectionSlug,
   Config,
   FileData,
   PayloadRequest,
   TypeWithID,
+  UploadCollectionSlug,
 } from 'payload'
 
 export interface File {
@@ -101,7 +101,7 @@ export interface PluginOptions {
         /**
          * Caching configuration per-collection
          */
-        collections?: Partial<Record<CollectionSlug, CollectionCachingConfig>>
+        collections?: Partial<Record<UploadCollectionSlug, CollectionCachingConfig>>
         /** Caching in seconds override for all collections
          * @default 86400 (24 hours)
          */
