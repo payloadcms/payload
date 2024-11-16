@@ -227,7 +227,9 @@ export const Form: React.FC<FormProps> = (props) => {
       // Execute server side validations
       if (Array.isArray(beforeSubmit)) {
         let revalidatedFormState: FormState
-        const serializableFields = deepCopyObjectSimpleWithoutReactComponents(fields)
+        const serializableFields = deepCopyObjectSimpleWithoutReactComponents(
+          contextRef.current.fields,
+        )
 
         await beforeSubmit.reduce(async (priorOnChange, beforeSubmitFn) => {
           await priorOnChange
@@ -263,7 +265,9 @@ export const Form: React.FC<FormProps> = (props) => {
 
       // If submit handler comes through via props, run that
       if (onSubmit) {
-        const serializableFields = deepCopyObjectSimpleWithoutReactComponents(fields)
+        const serializableFields = deepCopyObjectSimpleWithoutReactComponents(
+          contextRef.current.fields,
+        )
         const data = reduceFieldsToValues(serializableFields, true)
 
         if (overrides) {
@@ -399,7 +403,6 @@ export const Form: React.FC<FormProps> = (props) => {
       disableValidationOnSubmit,
       disabled,
       dispatchFields,
-      fields,
       handleResponse,
       method,
       onSubmit,

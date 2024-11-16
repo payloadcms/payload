@@ -84,6 +84,51 @@ The Blocks Field inherits all of the default options from the base [Field Admin 
 | **`initCollapsed`**    | Set the initial collapsed state |
 | **`isSortable`**       | Disable order sorting by setting this value to `false` |
 
+#### Customizing the way your block is rendered in Lexical
+
+If you're using this block within the [Lexical editor](/docs/lexical/overview), you can also customize how the block is rendered in the Lexical editor itself by specifying custom components.
+
+- `admin.components.Label` - pass a custom React component here to customize the way that the label is rendered for this block
+- `admin.components.Block` - pass a component here to completely override the way the block is rendered in Lexical with your own component
+
+This is super handy if you'd like to present your editors with a very deliberate and nicely designed block "preview" right in your rich text.
+
+For example, if you have a `gallery` block, you might want to actually render the gallery of images directly in your Lexical block. With the `admin.components.Block` property, you can do exactly that!
+
+<Banner type="success">
+  <strong>Tip:</strong><br/>
+  If you customize the way your block is rendered in Lexical, you can import utility components to easily edit / remove your block - so that you don't have to build all of this yourself.
+</Banner>
+
+To import these utility components for one of your custom blocks, you can import the following:
+
+```ts
+import { 
+  // Edit block buttons (choose the one that corresponds to your usage)
+  // When clicked, this will open a drawer with your block's fields
+  // so your editors can edit them
+  InlineBlockEditButton,
+  BlockEditButton,
+
+  // Buttons that will remove this block from Lexical 
+  // (choose the one that corresponds to your usage)
+  InlineBlockRemoveButton,
+  BlockRemoveButton,
+
+  // The label that should be rendered for an inline block
+  InlineBlockLabel,
+  
+  // The default "container" that is rendered for an inline block
+  // if you want to re-use it
+  InlineBlockContainer,
+
+  // The default "collapsible" UI that is rendered for a regular block
+  // if you want to re-use it
+  BlockCollapsible,
+  
+} from '@payloadcms/richtext-lexical/client'
+```
+
 ## Block Configs
 
 Blocks are defined as separate configs of their own.
