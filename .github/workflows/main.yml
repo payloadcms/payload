@@ -413,6 +413,8 @@ jobs:
             database: postgres
           - template: with-vercel-postgres
             database: postgres
+          - template: with-vercel-website
+            database: postgres
 
     name: ${{ matrix.template }}-${{ matrix.database }}
 
