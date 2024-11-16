@@ -40,7 +40,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
 
     const where = {
       [on]: {
-        in: [docID || ''],
+        equals: docID,
       },
     }
 
