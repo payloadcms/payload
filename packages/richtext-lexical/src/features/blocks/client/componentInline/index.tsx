@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'react'
 const baseClass = 'inline-block'
 
 import type { BlocksFieldClient, FormState } from 'payload'
@@ -70,11 +70,21 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   const [editor] = useLexicalComposerContext()
   const { i18n, t } = useTranslation<object, string>()
   const {
-    fieldProps: { featureClientSchemaMap, permissions, readOnly, schemaPath },
+    fieldProps: {
+      featureClientSchemaMap,
+      initialLexicalFormState,
+      permissions,
+      readOnly,
+      schemaPath,
+    },
     uuid: uuidFromContext,
   } = useEditorConfigContext()
   const { getFormState } = useServerFunctions()
   const editDepth = useEditDepth()
+
+  const [initialState, setInitialState] = React.useState<false | FormState | undefined>(
+    initialLexicalFormState?.[formData.id]?.formState,
+  )
 
   const drawerSlug = formatDrawerSlug({
     slug: `lexical-inlineBlocks-create-` + uuidFromContext,
@@ -84,7 +94,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   const inlineBlockElemElemRef = useRef<HTMLDivElement | null>(null)
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
-  const { id, collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${formData.blockType}`
 
@@ -158,46 +168,51 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   const onChangeAbortControllerRef = useRef(new AbortController())
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${clientBlock?.slug}.fields`
-  const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
 
-  /**
-   * HANDLE INITIAL STATE
-   */
+  // Initial state for newly created blocks
   useEffect(() => {
-    const controller = new AbortController()
+    const abortController = new AbortController()
 
     const awaitInitialState = async () => {
+      /*
+       * This will only run if a new block is created. For all existing blocks that are loaded when the document is loaded, or when the form is saved,
+       * this is not run, as the lexical field RSC will fetch the state server-side and pass it to the client. That way, we avoid unnecessary client-side
+       * requests. Though for newly created blocks, we need to fetch the state client-side, as the server doesn't know about the block yet.
+       */
       const { state } = await getFormState({
         id,
         collectionSlug,
         data: formData,
-        docPermissions,
+        docPermissions: { fields: true },
         docPreferences: await getDocPreferences(),
         globalSlug,
         operation: 'update',
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
-        signal: controller.signal,
+        signal: abortController.signal,
       })
 
-      setInitialState(state)
+      if (state) {
+        setInitialState(state)
+      }
     }
 
-    void awaitInitialState()
+    if (formData && !initialState) {
+      void awaitInitialState()
+    }
 
     return () => {
-      abortAndIgnore(controller)
+      abortAndIgnore(abortController)
     }
   }, [
+    getFormState,
     schemaFieldsPath,
     id,
     formData,
-    getFormState,
+    initialState,
     collectionSlug,
     globalSlug,
-    docPermissions,
     getDocPreferences,
-    clientBlock.slug,
   ])
 
   /**
@@ -213,7 +228,9 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       const { state } = await getFormState({
         id,
         collectionSlug,
-        docPermissions,
+        docPermissions: {
+          fields: true,
+        },
         docPreferences: await getDocPreferences(),
         formState: prevFormState,
         globalSlug,
@@ -228,15 +245,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
       return state
     },
-    [
-      getFormState,
-      id,
-      collectionSlug,
-      docPermissions,
-      getDocPreferences,
-      globalSlug,
-      schemaFieldsPath,
-    ],
+    [getFormState, id, collectionSlug, getDocPreferences, globalSlug, schemaFieldsPath],
   )
   // cleanup effect
   useEffect(() => {
