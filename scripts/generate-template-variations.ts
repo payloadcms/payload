@@ -78,7 +78,7 @@ async function main() {
       dirname: 'with-vercel-website',
       db: 'vercel-postgres',
       storage: 'vercelBlobStorage',
-      sharp: false,
+      sharp: true,
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
         encodeURI(
@@ -202,35 +202,27 @@ async function main() {
       packageJson.scripts.ci = 'payload migrate && pnpm build'
       await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2))
 
-      // Handle copying migrations
-      const migrationSrcDir = path.join(templatesDir, '_data/migrations')
       const migrationDestDir = path.join(destDir, 'src/migrations')
 
-      // Make directory if it doesn't exist
-      if ((await fs.stat(migrationDestDir).catch(() => null)) === null) {
-        await fs.mkdir(migrationDestDir, { recursive: true })
-      }
-      log(`Copying migrations from ${migrationSrcDir} to ${migrationDestDir}`)
-      copyRecursiveSync(migrationSrcDir, migrationDestDir)
+      // Delete and recreate migrations directory
+      await fs.rm(migrationDestDir, { recursive: true, force: true })
+      await fs.mkdir(migrationDestDir, { recursive: true })
 
-      // Change all '@payloadcms/db-postgres' import to be '@payloadcms/db-vercel-postgres'
-      if (db === 'vercel-postgres') {
-        const migrationFiles = await fs.readdir(migrationDestDir)
-        for (const migrationFile of migrationFiles) {
-          const migrationFilePath = path.join(migrationDestDir, migrationFile)
-          const migrationFileContents = await fs.readFile(migrationFilePath, 'utf8')
-          const updatedFileContents = migrationFileContents.replaceAll(
-            '@payloadcms/db-postgres',
-            '@payloadcms/db-vercel-postgres',
-          )
-          await fs.writeFile(migrationFilePath, updatedFileContents)
-        }
-      }
+      log(`Generating initial migrations in ${migrationDestDir}`)
+
+      execSyncSafe(`pnpm run payload migrate:create initial`, {
+        cwd: destDir,
+        env: {
+          ...process.env,
+          BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_TEST_asdf',
+          DATABASE_URI: 'postgres://localhost:5432/payloadtests',
+        },
+      })
     }
 
     if (generateLockfile) {
       log('Generating pnpm-lock.yaml')
-      execSync(`pnpm install --ignore-workspace`, { cwd: destDir })
+      execSyncSafe(`pnpm install --ignore-workspace`, { cwd: destDir })
     }
 
     // TODO: Email?
@@ -241,7 +233,7 @@ async function main() {
   }
   // TODO: Run prettier manually on the generated files, husky blows up
   log('Running prettier on generated files...')
-  execSync(`pnpm prettier --write templates "*.{js,jsx,ts,tsx}"`)
+  execSyncSafe(`pnpm prettier --write templates "*.{js,jsx,ts,tsx}"`)
 
   log('Template generation complete!')
 }
@@ -306,4 +298,24 @@ function header(message: string) {
 
 function log(message: string) {
   console.log(chalk.dim(message))
+}
+function execSyncSafe(command: string, options?: Parameters<typeof execSync>[1]) {
+  try {
+    execSync(command, options)
+  } catch (error) {
+    if (error instanceof Error) {
+      const stderr = (error as any).stderr?.toString()
+      const stdout = (error as any).stdout?.toString()
+
+      if (stderr && stderr.trim()) {
+        console.error('Standard Error:', stderr)
+      } else if (stdout && stdout.trim()) {
+        console.error('Standard Output (likely contains error details):', stdout)
+      } else {
+        console.error('An unknown error occurred with no output.')
+      }
+    } else {
+      console.error('An unexpected error occurred:', error)
+    }
+  }
 }
