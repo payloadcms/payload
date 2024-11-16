@@ -113,7 +113,7 @@ export function serializeLexical({ nodes }: Props): JSX.Element {
                   imgClassName="m-0"
                   key={index}
                   {...block}
-                  captionClassName="mx-auto max-w-[48rem]"
+                  captionClassName="mx-auto max-w-3xl"
                   enableGutter={false}
                   disableInnerContainer={true}
                 />
