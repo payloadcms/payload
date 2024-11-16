@@ -94,7 +94,7 @@ jobs:
           echo "Ref: ${{ github.ref }}"
 
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v7
         if: steps.commit.outputs.committed == 'true'
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
