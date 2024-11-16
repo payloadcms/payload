@@ -39,6 +39,7 @@ const baseClass = 'relationship-table'
 
 type RelationshipTableComponentProps = {
   readonly allowCreate?: boolean
+  readonly disableTable?: boolean
   readonly field: JoinFieldClient
   readonly filterOptions?: Where
   readonly initialData?: PaginatedDocs
@@ -50,6 +51,7 @@ type RelationshipTableComponentProps = {
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
   const {
     allowCreate = true,
+    disableTable = false,
     filterOptions,
     initialData: initialDataFromProps,
     initialDrawerData,
@@ -100,6 +102,10 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const renderTable = useCallback(
     async (docs?: PaginatedDocs['docs']) => {
+      if (disableTable) {
+        return
+      }
+
       const newQuery: ListQuery = {
         ...(query || {}),
         where: { ...(query?.where || {}) },
