@@ -18,24 +18,9 @@ env:
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
 
 jobs:
-  determine_tag:
-    runs-on: ubuntu-latest
-    outputs:
-      release_tag: ${{ steps.determine.outputs.release_tag }}
-    steps:
-      - name: Determine Release Tag
-        id: determine
-        run: |
-          if [ "${{ github.event.inputs.tag }}" != "" ]; then
-            echo "Using tag from input: ${{ github.event.inputs.tag }}"
-            echo "release_tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
-          else
-            echo "Using tag from release event: ${{ github.event.release.tag_name }}"
-            echo "release_tag=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
-          fi
-
   post_release:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_dispatch' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -55,9 +40,7 @@ jobs:
             🚀 This is included in version {release_link}
 
   update_templates:
-    needs: determine_tag
     runs-on: ubuntu-latest
-    if: startsWith(needs.determine_tag.outputs.release_tag, 'v3')
     permissions:
       contents: write
       pull-requests: write
@@ -73,6 +56,17 @@ jobs:
       - name: Update template lockfiles and migrations
         run: pnpm script:gen-templates
 
+      - name: Determine Release Tag
+        id: determine_tag
+        run: |
+          if [ "${{ github.event.inputs.tag }}" != "" ]; then
+            echo "Using tag from input: ${{ github.event.inputs.tag }}"
+            echo "release_tag=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "Using tag from release event: ${{ github.event.release.tag_name }}"
+            echo "release_tag=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Commit and push changes
         id: commit
         env:
@@ -81,16 +75,23 @@ jobs:
           set -ex
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          export BRANCH_NAME=chore/templates-${{ needs.determine_tag.outputs.release_tag }}
+          export BRANCH_NAME=chore/templates-${{ steps.determine_tag.outputs.release_tag }}
           git checkout -b $BRANCH_NAME
           git add -A
 
           # If no files have changed, exit early with success
           git diff --cached --quiet --exit-code && exit 0
 
-          git commit -m "chore(templates): bump lockfiles after ${{ needs.determine_tag.outputs.release_tag }}"
+          git commit -m "chore(templates): bump lockfiles after ${{ steps.determine_tag.outputs.release_tag }}"
           git push origin $BRANCH_NAME
           echo "committed=true" >> "$GITHUB_OUTPUT"
+          echo "branch=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Debug Branches
+        run: |
+          echo "Target Commitish: ${{ github.event.release.target_commitish }}"
+          echo "Branch: ${{ steps.commit.outputs.branch }}"
+          echo "Ref: ${{ github.ref }}"
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v5
@@ -100,7 +101,7 @@ jobs:
           labels: 'area: templates'
           author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
           commit-message: 'Automated update after release'
-          branch: chore/templates-${{ needs.determine_tag.outputs.release_tag }}
-          base: ${{ github.event.release.target_commitish }}
-          title: 'chore(templates): bump lockfiles after ${{ needs.determine_tag.outputs.release_tag }}'
-          body: 'Automated bump of template lockfiles after release ${{ needs.determine_tag.outputs.release_tag }}'
+          branch: ${{ steps.commit.outputs.branch }}
+          base: ${{ github.event_name != 'workflow_dispatch' && github.event.release.target_commitish || github.ref }}
+          title: 'chore(templates): bump lockfiles after ${{ steps.determine_tag.outputs.release_tag }}'
+          body: 'Automated bump of template lockfiles after release ${{ steps.determine_tag.outputs.release_tag }}'
