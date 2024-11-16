@@ -284,7 +284,7 @@ jobs:
   tests-e2e:
     runs-on: ubuntu-latest
     needs: build
-    name: ${{ matrix.suite }}
+    name: e2e-${{ matrix.suite }}
     strategy:
       fail-fast: false
       matrix:
@@ -477,6 +477,7 @@ jobs:
           pnpm runts scripts/build-template-with-local-pkgs.ts ${{ matrix.template }} $POSTGRES_URL
         env:
           BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_TEST_asdf'
+          POSTGRES_URL: ${{ env.POSTGRES_URL }}
 
   tests-type-generation:
     runs-on: ubuntu-latest
