@@ -10,7 +10,7 @@ import './index.scss'
 const baseClass = 'form-submit'
 
 export const FormSubmit = forwardRef<HTMLButtonElement, Props>((props, ref) => {
-  const { type = 'submit', buttonId: id, children, disabled: disabledFromProps } = props
+  const { type = 'submit', buttonId: id, children, disabled: disabledFromProps, onClick } = props
   const processing = useFormProcessing()
   const initializing = useFormInitializing()
   const { disabled, submit } = useForm()
@@ -24,9 +24,12 @@ export const FormSubmit = forwardRef<HTMLButtonElement, Props>((props, ref) => {
         {...props}
         disabled={canSave ? undefined : true}
         id={id}
-        onClick={() => {
-          void submit()
-        }}
+        onClick={
+          onClick ??
+          (() => {
+            void submit()
+          })
+        }
         type={type}
       >
         {children}
