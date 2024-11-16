@@ -10,8 +10,10 @@ export const PayloadLogo: React.FC = () => (
   <svg
     className="graphic-logo"
     fill="none"
+    height="43.5"
     id="b"
     viewBox="0 0 193.38 43.5"
+    width="193.38"
     xmlns="http://www.w3.org/2000/svg"
   >
     <style>{css}</style>
