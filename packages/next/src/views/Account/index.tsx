@@ -139,6 +139,7 @@ export const Account: React.FC<AdminViewProps> = async ({
           <HydrateAuthProvider permissions={permissions} />
           <RenderServerComponent
             Component={config.admin?.components?.views?.Account?.Component}
+            Fallback={EditView}
             importMap={payload.importMap}
             serverProps={{
               i18n,
@@ -152,7 +153,6 @@ export const Account: React.FC<AdminViewProps> = async ({
               user,
             }}
           />
-          <EditView />
           <AccountClient />
         </EditDepthProvider>
       </DocumentInfoProvider>
