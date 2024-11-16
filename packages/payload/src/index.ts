@@ -581,10 +581,13 @@ export class BasePayload {
     this.config.collections.forEach((collection) => {
       let customIDType = undefined
       const findCustomID: TraverseFieldsCallback = ({ field, next }) => {
-        if (['array', 'blocks'].includes(field.type)) {
-          next()
-          return
+        if (
+          ['array', 'blocks', 'group'].includes(field.type) ||
+          (field.type === 'tab' && 'name' in field)
+        ) {
+          return true
         }
+
         if (!fieldAffectsData(field)) {
           return
         }
