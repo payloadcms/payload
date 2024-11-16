@@ -7,6 +7,7 @@ export function parsePayloadComponent(PayloadComponent: PayloadComponent): {
   if (!PayloadComponent) {
     return null
   }
+
   const pathAndMaybeExport =
     typeof PayloadComponent === 'string' ? PayloadComponent : PayloadComponent.path
 
