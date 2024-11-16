@@ -6,6 +6,12 @@ on:
       - published
   workflow_dispatch:
 
+env:
+  NODE_VERSION: 22.6.0
+  PNPM_VERSION: 9.7.1
+  DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+  NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
+
 jobs:
   post_release:
     runs-on: ubuntu-latest
@@ -28,3 +34,57 @@ jobs:
 
           comment-template: |
             🚀 This is included in version {release_link}
+
+  # Some templates have lockfiles that must point to the new release
+  # This runs the necessary script and creates a PR with the changes
+  update_templates:
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.release.tag_name, 'v3')
+    permissions:
+      pull-request: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+
+      - name: Update template lockfiles and migrations
+        run: pnpm script:gen-templates
+
+      - name: Commit and push changes
+        id: commit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -ex
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          export RELEASE_TAG=$(echo ${{ github.event.release.tag_name }})
+          export BRANCH_NAME=chore/templates-$RELEASE_TAG
+          git checkout -b $BRANCH_NAME
+          git add -A
+
+          # If no files have changed, exit early with success
+          git diff --cached --quiet --exit-code && exit 0
+
+          git commit -m "chore(templates): bump lockfiles after $RELEASE_TAG"
+          git push origin $BRANCH_NAME
+          # export the tag for use in the next job
+          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
+          echo "committed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v5
+        if: steps.commit.outputs.committed == 'true'
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          labels: 'area: templates'
+          author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+          commit-message: 'Automated update after release'
+          branch: chore/templates-$RELEASE_TAG
+          base: ${{ github.event.release.target_commitish }}
+          title: 'chore(templates): bump lockfiles after $RELEASE_TAG'
+          body: 'Automated bump of template lockfiles after release $RELEASE_TAG'
