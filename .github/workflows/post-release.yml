@@ -87,6 +87,12 @@ jobs:
           echo "committed=true" >> "$GITHUB_OUTPUT"
           echo "branch=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
 
+      - name: Debug Branches
+        run: |
+          echo "Target Commitish: ${{ github.event.release.target_commitish }}"
+          echo "Branch: ${{ steps.commit.outputs.branch }}"
+          echo "Ref: ${{ github.ref }}"
+
       - name: Create pull request
         uses: peter-evans/create-pull-request@v5
         if: steps.commit.outputs.committed == 'true'
@@ -96,6 +102,6 @@ jobs:
           author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
           commit-message: 'Automated update after release'
           branch: ${{ steps.commit.outputs.branch }}
-          base: ${{ github.event.release.target_commitish }}
+          base: ${{ github.event_name != 'workflow_dispatch' && github.event.release.target_commitish || github.ref }}
           title: 'chore(templates): bump lockfiles after ${{ steps.determine_tag.outputs.release_tag }}'
           body: 'Automated bump of template lockfiles after release ${{ steps.determine_tag.outputs.release_tag }}'
