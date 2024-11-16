@@ -334,6 +334,35 @@ describe('Relationships', () => {
         expect(query.docs).toHaveLength(1) // Due to limit: 1
       })
 
+      it('should allow querying within blocks', async () => {
+        const rel = await payload.create({
+          collection: relationSlug,
+          data: {
+            name: 'test',
+            disableRelation: false,
+          },
+        })
+
+        const doc = await payload.create({
+          collection: slug,
+          data: {
+            blocks: [
+              {
+                blockType: 'block',
+                relationField: rel.id,
+              },
+            ],
+          },
+        })
+
+        const { docs } = await payload.find({
+          collection: slug,
+          where: { 'blocks.relationField': { equals: rel.id } },
+        })
+
+        expect(docs[0].id).toBe(doc.id)
+      })
+
       describe('Custom ID', () => {
         it('should query a custom id relation', async () => {
           const { customIdRelation } = await restClient

@@ -9,7 +9,7 @@
     "test": "pnpm -C \"../\" run test",
     "test:e2e": "pnpm -C \"../\" run test:e2e",
     "test:int": "pnpm -C \"../\" run test:int",
-    "typecheck": "pnpm turbo build --filter test && tsc --project tsconfig.typecheck.json"
+    "typecheck": "pnpm turbo build --filter payload-test-suite && tsc --project tsconfig.typecheck.json"
   },
   "lint-staged": {
     "**/package.json": "sort-package-json",
@@ -23,8 +23,8 @@
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.614.0",
-    "@lexical/headless": "0.18.0",
-    "@lexical/markdown": "0.18.0",
+    "@lexical/headless": "0.20.0",
+    "@lexical/markdown": "0.20.0",
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/db-sqlite": "workspace:*",
@@ -64,13 +64,14 @@
     "comment-json": "^4.2.3",
     "create-payload-app": "workspace:*",
     "dotenv": "16.4.5",
-    "drizzle-kit": "0.26.2",
+    "drizzle-kit": "0.28.0",
     "eslint-plugin-playwright": "1.7.0",
     "execa": "5.1.1",
     "file-type": "19.3.0",
     "http-status": "1.6.2",
     "jwt-decode": "4.0.0",
-    "lexical": "0.18.0",
+    "lexical": "0.20.0",
+    "mongoose": "8.8.1",
     "next": "15.0.0",
     "payload": "workspace:*",
     "qs-esm": "7.0.2",
@@ -81,7 +82,6 @@
     "tempy": "^1.0.1",
     "ts-essentials": "10.0.3",
     "typescript": "5.6.3",
-    "uploadthing": "^6.10.1",
     "uuid": "10.0.0"
   },
   "overrides": {

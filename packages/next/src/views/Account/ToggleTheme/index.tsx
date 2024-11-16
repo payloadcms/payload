@@ -36,6 +36,7 @@ export const ToggleTheme: React.FC = () => {
         ],
       }}
       onChange={onChange}
+      path="theme"
       value={autoMode ? 'auto' : theme}
     />
   )

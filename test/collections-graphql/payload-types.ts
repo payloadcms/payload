@@ -23,16 +23,40 @@ export interface Config {
     'content-type': ContentType;
     'cyclical-relationship': CyclicalRelationship;
     media: Media;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+  };
+  collectionsJoins: {};
+  collectionsSelect: {
+    users: UsersSelect<false> | UsersSelect<true>;
+    point: PointSelect<false> | PointSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
+    relation: RelationSelect<false> | RelationSelect<true>;
+    dummy: DummySelect<false> | DummySelect<true>;
+    'error-on-hooks': ErrorOnHooksSelect<false> | ErrorOnHooksSelect<true>;
+    'payload-api-test-ones': PayloadApiTestOnesSelect<false> | PayloadApiTestOnesSelect<true>;
+    'payload-api-test-twos': PayloadApiTestTwosSelect<false> | PayloadApiTestTwosSelect<true>;
+    'content-type': ContentTypeSelect<false> | ContentTypeSelect<true>;
+    'cyclical-relationship': CyclicalRelationshipSelect<false> | CyclicalRelationshipSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
     defaultIDType: string;
   };
   globals: {};
+  globalsSelect: {};
   locale: 'en' | 'es';
   user: User & {
     collection: 'users';
+  };
+  jobs?: {
+    tasks: unknown;
+    workflows?: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -246,6 +270,69 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'point';
+        value: string | Point;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'custom-ids';
+        value: number | CustomId;
+      } | null)
+    | ({
+        relationTo: 'relation';
+        value: string | Relation;
+      } | null)
+    | ({
+        relationTo: 'dummy';
+        value: string | Dummy;
+      } | null)
+    | ({
+        relationTo: 'error-on-hooks';
+        value: string | ErrorOnHook;
+      } | null)
+    | ({
+        relationTo: 'payload-api-test-ones';
+        value: string | PayloadApiTestOne;
+      } | null)
+    | ({
+        relationTo: 'payload-api-test-twos';
+        value: string | PayloadApiTestTwo;
+      } | null)
+    | ({
+        relationTo: 'content-type';
+        value: string | ContentType;
+      } | null)
+    | ({
+        relationTo: 'cyclical-relationship';
+        value: string | CyclicalRelationship;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: string | Media;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
@@ -277,6 +364,208 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "point_select".
+ */
+export interface PointSelect<T extends boolean = true> {
+  point?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  number?: T;
+  min?: T;
+  relationField?: T;
+  relationToCustomID?: T;
+  relationHasManyField?: T;
+  relationMultiRelationTo?: T;
+  relationMultiRelationToHasMany?: T;
+  A1?:
+    | T
+    | {
+        A2?: T;
+      };
+  B1?:
+    | T
+    | {
+        B2?: T;
+      };
+  C1?:
+    | T
+    | {
+        C2Text?: T;
+        C2?:
+          | T
+          | {
+              C3?: T;
+            };
+      };
+  D1?:
+    | T
+    | {
+        D2?:
+          | T
+          | {
+              D3?:
+                | T
+                | {
+                    D4?: T;
+                  };
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-ids_select".
+ */
+export interface CustomIdsSelect<T extends boolean = true> {
+  id?: T;
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation_select".
+ */
+export interface RelationSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "dummy_select".
+ */
+export interface DummySelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "error-on-hooks_select".
+ */
+export interface ErrorOnHooksSelect<T extends boolean = true> {
+  title?: T;
+  errorBeforeChange?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-api-test-ones_select".
+ */
+export interface PayloadApiTestOnesSelect<T extends boolean = true> {
+  payloadAPI?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-api-test-twos_select".
+ */
+export interface PayloadApiTestTwosSelect<T extends boolean = true> {
+  payloadAPI?: T;
+  relation?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "content-type_select".
+ */
+export interface ContentTypeSelect<T extends boolean = true> {
+  contentType?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cyclical-relationship_select".
+ */
+export interface CyclicalRelationshipSelect<T extends boolean = true> {
+  title?: T;
+  relationToSelf?: T;
+  media?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_select".
+ */
+export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_select".
+ */
+export interface PayloadPreferencesSelect<T extends boolean = true> {
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select".
+ */
+export interface PayloadMigrationsSelect<T extends boolean = true> {
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -98,12 +98,12 @@ Benchmark: https://github.com/AlessioGr/fastest-deep-clone-json/blob/main/test/b
  *              `Set`, `Buffer`, ... are not allowed.
  * @returns The cloned JSON value.
  */
-export function deepCopyObjectSimple<T extends JsonValue>(value: T): T {
+export function deepCopyObjectSimple<T extends JsonValue>(value: T, filterUndefined = false): T {
   if (typeof value !== 'object' || value === null) {
     return value
   } else if (Array.isArray(value)) {
     return value.map((e) =>
-      typeof e !== 'object' || e === null ? e : deepCopyObjectSimple(e),
+      typeof e !== 'object' || e === null ? e : deepCopyObjectSimple(e, filterUndefined),
     ) as T
   } else {
     if (value instanceof Date) {
@@ -112,7 +112,43 @@ export function deepCopyObjectSimple<T extends JsonValue>(value: T): T {
     const ret: { [key: string]: T } = {}
     for (const k in value) {
       const v = value[k]
-      ret[k] = typeof v !== 'object' || v === null ? v : (deepCopyObjectSimple(v as T) as any)
+      if (filterUndefined && v === undefined) {
+        continue
+      }
+      ret[k] =
+        typeof v !== 'object' || v === null
+          ? v
+          : (deepCopyObjectSimple(v as T, filterUndefined) as any)
+    }
+    return ret as unknown as T
+  }
+}
+
+export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(value: T): T {
+  if (
+    typeof value === 'object' &&
+    value !== null &&
+    '$$typeof' in value &&
+    typeof value.$$typeof === 'symbol'
+  ) {
+    return undefined
+  } else if (typeof value !== 'object' || value === null) {
+    return value
+  } else if (Array.isArray(value)) {
+    return value.map((e) =>
+      typeof e !== 'object' || e === null ? e : deepCopyObjectSimpleWithoutReactComponents(e),
+    ) as T
+  } else {
+    if (value instanceof Date) {
+      return new Date(value) as unknown as T
+    }
+    const ret: { [key: string]: T } = {}
+    for (const k in value) {
+      const v = value[k]
+      ret[k] =
+        typeof v !== 'object' || v === null
+          ? v
+          : (deepCopyObjectSimpleWithoutReactComponents(v as T) as any)
     }
     return ret as unknown as T
   }
@@ -129,6 +165,11 @@ export function deepCopyObjectComplex<T>(object: T, cache: WeakMap<any, any> = n
 
   if (cache.has(object)) {
     return cache.get(object)
+  }
+
+  // Handle File
+  if (object instanceof File) {
+    return object as unknown as T
   }
 
   // Handle Date

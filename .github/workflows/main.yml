@@ -208,6 +208,19 @@ jobs:
       AWS_SECRET_ACCESS_KEY: localstack
       AWS_REGION: us-east-1
 
+    services:
+      postgres:
+        image: ${{ (startsWith(matrix.database, 'postgres') ) && 'postgis/postgis:16-3.4' || '' }}
+        env:
+          # must specify password for PG Docker container image, see: https://registry.hub.docker.com/_/postgres?tab=description&page=1&name=10
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -232,15 +245,6 @@ jobs:
       - name: Start LocalStack
         run: pnpm docker:start
 
-      - name: Start PostgreSQL
-        uses: CasperWA/postgresql-action@v1.2
-        with:
-          postgresql version: '14' # See https://hub.docker.com/_/postgres for available versions
-          postgresql db: ${{ env.POSTGRES_DB }}
-          postgresql user: ${{ env.POSTGRES_USER }}
-          postgresql password: ${{ env.POSTGRES_PASSWORD }}
-        if: startsWith(matrix.database, 'postgres')
-
       - name: Install Supabase CLI
         uses: supabase/setup-cli@v1
         with:
@@ -252,10 +256,6 @@ jobs:
           supabase init
           supabase start
         if: matrix.database == 'supabase'
-
-      - name: Wait for PostgreSQL
-        run: sleep 30
-        if: startsWith(matrix.database, 'postgres')
 
       - name: Configure PostgreSQL
         run: |
@@ -525,6 +525,7 @@ jobs:
   publish-canary:
     name: Publish Canary
     runs-on: ubuntu-latest
+    if: ${{ needs.all-green.result == 'success' && github.ref_name == 'beta' }}
     needs:
       - all-green
 
@@ -533,4 +534,3 @@ jobs:
       - run: |
           echo github.ref: ${{ github.ref }}
           echo isBeta: ${{ github.ref == 'refs/heads/beta' }}
-          echo isMain: ${{ github.ref == 'refs/heads/main' }}

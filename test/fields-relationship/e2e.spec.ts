@@ -79,6 +79,8 @@ describe('fields - relationship', () => {
   })
 
   beforeEach(async () => {
+    await ensureCompilationIsDone({ page, serverURL })
+
     await clearAllDocs()
 
     // Create docs to relate to
@@ -152,8 +154,6 @@ describe('fields - relationship', () => {
         relationshipWithTitle: relationWithTitle.id,
       },
     })) as any
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   const tableRowLocator = 'table > tbody > tr'

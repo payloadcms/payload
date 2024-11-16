@@ -19,7 +19,7 @@ import type {
 type EmailFieldClientWithoutType = MarkOptional<EmailFieldClient, 'type'>
 
 type EmailFieldBaseClientProps = {
-  readonly autoComplete?: string
+  readonly path: string
   readonly validate?: EmailFieldValidation
 }
 

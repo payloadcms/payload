@@ -39,6 +39,7 @@ body:
         - 'db-postgres'
         - 'db-sqlite'
         - 'db-vercel-postgres'
+        - 'email-nodemailer'
         - 'plugin: cloud'
         - 'plugin: cloud-storage'
         - 'plugin: form-builder'

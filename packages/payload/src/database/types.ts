@@ -29,6 +29,8 @@ export interface BaseDatabaseAdapter {
   connect?: Connect
 
   count: Count
+  countGlobalVersions: CountGlobalVersions
+  countVersions: CountVersions
 
   create: Create
 
@@ -158,6 +160,8 @@ export type Connect = (args?: ConnectArgs) => Promise<void>
 export type Destroy = () => Promise<void>
 
 export type CreateMigration = (args: {
+  /** dirname of the package, required in drizzle */
+  dirname?: string
   file?: string
   /**
    * Skips the prompt asking to create empty migrations
@@ -234,6 +238,17 @@ export type CountArgs = {
 
 export type Count = (args: CountArgs) => Promise<{ totalDocs: number }>
 
+export type CountVersions = (args: CountArgs) => Promise<{ totalDocs: number }>
+
+export type CountGlobalVersionArgs = {
+  global: string
+  locale?: string
+  req: PayloadRequest
+  where?: Where
+}
+
+export type CountGlobalVersions = (args: CountGlobalVersionArgs) => Promise<{ totalDocs: number }>
+
 type BaseVersionArgs = {
   limit?: number
   locale?: string
@@ -270,6 +285,10 @@ export type FindGlobalArgs = {
 export type UpdateGlobalVersionArgs<T = TypeWithID> = {
   global: string
   locale?: string
+  /**
+   * Additional database adapter specific options to pass to the query
+   */
+  options?: Record<string, unknown>
   req: PayloadRequest
   select?: SelectType
   versionData: T
@@ -303,6 +322,10 @@ export type CreateGlobal = <T extends Record<string, unknown> = any>(
 
 export type UpdateGlobalArgs<T extends Record<string, unknown> = any> = {
   data: T
+  /**
+   * Additional database adapter specific options to pass to the query
+   */
+  options?: Record<string, unknown>
   req: PayloadRequest
   select?: SelectType
   slug: string
@@ -367,6 +390,10 @@ export type DeleteVersions = (args: DeleteVersionsArgs) => Promise<void>
 export type UpdateVersionArgs<T = TypeWithID> = {
   collection: string
   locale?: string
+  /**
+   * Additional database adapter specific options to pass to the query
+   */
+  options?: Record<string, unknown>
   req: PayloadRequest
   select?: SelectType
   versionData: T

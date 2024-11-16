@@ -153,16 +153,10 @@ export const reduceClientFields = ({
         : field.name
 
       const formattedField: FieldCondition = {
-        Filter: field.admin?.components?.Filter,
         label: formattedLabel,
         value: formattedValue,
         ...fieldTypes[field.type],
-        field: {
-          ...field,
-          ...(field?.admin?.components?.Cell || {}),
-          // Override the type with the field type, it can come back from the Cell component with type 'client' or 'server' which is an unintended assignment
-          type: field.type,
-        },
+        field,
         operators,
       }
 

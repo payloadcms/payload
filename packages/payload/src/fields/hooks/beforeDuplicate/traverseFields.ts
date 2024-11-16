@@ -31,7 +31,7 @@ export const traverseFields = async <T>({
   siblingDoc,
 }: Args<T>): Promise<void> => {
   const promises = []
-  fields.forEach((field) => {
+  fields.forEach((field, fieldIndex) => {
     promises.push(
       promise({
         id,
@@ -39,6 +39,7 @@ export const traverseFields = async <T>({
         context,
         doc,
         field,
+        fieldIndex,
         overrideAccess,
         parentPath: path,
         parentSchemaPath: schemaPath,

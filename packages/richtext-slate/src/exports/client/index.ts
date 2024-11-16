@@ -1,6 +1,5 @@
 'use client'
 
-export { RichTextCell } from '../../cell/index.js'
 export { BlockquoteElementButton } from '../../field/elements/blockquote/Button.js'
 export { BlockquoteElement } from '../../field/elements/blockquote/Element.js'
 export { ElementButton } from '../../field/elements/Button.js'
@@ -55,11 +54,11 @@ export { CodeLeafButton } from '../../field/leaves/code/LeafButton.js'
 
 export { ItalicLeaf } from '../../field/leaves/italic/Italic/index.js'
 export { ItalicLeafButton } from '../../field/leaves/italic/LeafButton.js'
+
 export { StrikethroughLeafButton } from '../../field/leaves/strikethrough/LeafButton.js'
-
 export { StrikethroughLeaf } from '../../field/leaves/strikethrough/Strikethrough/index.js'
-export { UnderlineLeafButton } from '../../field/leaves/underline/LeafButton.js'
 
+export { UnderlineLeafButton } from '../../field/leaves/underline/LeafButton.js'
 export { UnderlineLeaf } from '../../field/leaves/underline/Underline/index.js'
 
 export { useElement } from '../../field/providers/ElementProvider.js'
