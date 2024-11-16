@@ -1,12 +1,17 @@
 import type { CustomPayloadRequestProperties, PayloadRequest, SanitizedConfig } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
-import { executeAuthStrategies, getDataLoader, parseCookies, sanitizeFallbackLocale } from 'payload'
+import {
+  executeAuthStrategies,
+  getDataLoader,
+  getPayload,
+  parseCookies,
+  sanitizeFallbackLocale,
+} from 'payload'
 import * as qs from 'qs-esm'
 import { URL } from 'url'
 
 import { sanitizeLocales } from './addLocalesToRequest.js'
-import { getPayloadHMR } from './getPayloadHMR.js'
 import { getRequestLanguage } from './getRequestLanguage.js'
 
 type Args = {
@@ -23,7 +28,7 @@ export const createPayloadRequest = async ({
   request,
 }: Args): Promise<PayloadRequest> => {
   const cookies = parseCookies(request.headers)
-  const payload = await getPayloadHMR({ config: configPromise })
+  const payload = await getPayload({ config: configPromise })
 
   const { config } = payload
   const localization = config.localization
