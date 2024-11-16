@@ -41,7 +41,8 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.event.release.tag_name, 'v3')
     permissions:
-      pull-request: write
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
