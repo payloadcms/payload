@@ -1,7 +1,7 @@
 'use client'
-import LinkWithDefault from 'next/link.js'
 import React, { useEffect, useRef, useState } from 'react'
 
+import { LinkTransition } from '../../elements/LinkTransition/index.js'
 import { Account } from '../../graphics/Account/index.js'
 import { useActions } from '../../providers/Actions/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -13,8 +13,8 @@ import { LocalizerLabel } from '../Localizer/LocalizerLabel/index.js'
 import { useNav } from '../Nav/context.js'
 import { NavToggler } from '../Nav/NavToggler/index.js'
 import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
-import { StepNav } from '../StepNav/index.js'
 import './index.scss'
+import { StepNav } from '../StepNav/index.js'
 
 const baseClass = 'app-header'
 
@@ -59,9 +59,7 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
     }
   }, [Actions])
 
-  const Link = LinkWithDefault.default
-
-  const LinkElement = Link || 'a'
+  const LinkElement = LinkTransition || 'a'
 
   const ActionComponents = Actions ? Object.values(Actions) : []
 
@@ -75,7 +73,11 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
           </NavToggler>
           <div className={`${baseClass}__controls-wrapper`}>
             <div className={`${baseClass}__step-nav-wrapper`}>
-              <StepNav className={`${baseClass}__step-nav`} CustomIcon={CustomIcon} Link={Link} />
+              <StepNav
+                className={`${baseClass}__step-nav`}
+                CustomIcon={CustomIcon}
+                Link={LinkTransition}
+              />
             </div>
             <div className={`${baseClass}__actions-wrapper`}>
               <div className={`${baseClass}__actions`} ref={customControlsRef}>
@@ -101,7 +103,7 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
               aria-label={t('authentication:account')}
               className={`${baseClass}__account`}
               href={formatAdminURL({ adminRoute, path: accountRoute })}
-              prefetch={Link ? false : undefined}
+              prefetch={LinkTransition ? false : undefined}
               tabIndex={0}
             >
               <RenderCustomComponent CustomComponent={CustomAvatar} Fallback={<Account />} />
