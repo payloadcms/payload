@@ -739,6 +739,12 @@ if (!cached) {
   cached = global._payload = { payload: null, promise: null, reload: false, ws: null }
 }
 
+// Properties of payload.db that shouldn't be re-initalized even on HMR reload
+const cachedDbProperties: Record<string, string[]> = {
+  postgres: ['pool'],
+  sqlite: ['client'],
+}
+
 export const reload = async (
   config: SanitizedConfig,
   payload: Payload,
@@ -763,6 +769,22 @@ export const reload = async (
   }
 
   // TODO: support HMR for other props in the future (see payload/src/index init()) that may change on Payload singleton
+
+  const dbCache: Record<string, unknown> = cachedDbProperties[payload.db.name]?.reduce(
+    (acc, property) => {
+      acc[property] = payload.db[property]
+      return acc
+    },
+    {},
+  )
+
+  payload.db = payload.config.db.init({ payload })
+
+  if (dbCache) {
+    for (const property in dbCache) {
+      payload.db[property] = dbCache[property]
+    }
+  }
 
   // Generate types
   if (config.typescript.autoGenerate !== false) {
