@@ -1,16 +1,16 @@
-import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { headers as getHeaders } from 'next/headers.js'
 import Link from 'next/link'
+import { getPayload } from 'payload'
 import React from 'react'
 
 import config from '../../../payload.config'
 import { Gutter } from '../_components/Gutter'
-import { LogoutPage } from './LogoutPage'
 import classes from './index.module.scss'
+import { LogoutPage } from './LogoutPage'
 
 export default async function Logout() {
   const headers = getHeaders()
-  const payload = await getPayloadHMR({ config })
+  const payload = await getPayload({ config })
   const { user } = await payload.auth({ headers })
 
   if (!user) {
