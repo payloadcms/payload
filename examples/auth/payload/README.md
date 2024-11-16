@@ -48,12 +48,12 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
   ```ts
     import { headers as getHeaders } from 'next/headers.js'
-    import { getPayloadHMR } from '@payloadcms/next/utilities'
+    import { getPayload } from 'payload'
     import config from '../../payload.config'
 
     export default async function AccountPage({ searchParams }) {
       const headers = getHeaders()
-      const payload = await getPayloadHMR({ config: configPromise })
+      const payload = await getPayload({ config: configPromise })
       const { permissions, user } = await payload.auth({ headers })
 
       if (!user) {

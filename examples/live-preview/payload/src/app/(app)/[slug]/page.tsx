@@ -1,23 +1,22 @@
-/* eslint-disable no-restricted-exports */
-import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { notFound } from 'next/navigation'
-import React from 'react'
-import { Fragment } from 'react'
+/* eslint-disable no-restricted-exports */
+import { getPayload } from 'payload'
+import React, { Fragment } from 'react'
 
 import type { Page as PageType } from '../../../payload-types'
 
 import config from '../../../payload.config'
 import { Gutter } from '../_components/Gutter'
 import RichText from '../_components/RichText'
-import { RefreshRouteOnSave } from './RefreshRouteOnSave'
 import classes from './index.module.scss'
+import { RefreshRouteOnSave } from './RefreshRouteOnSave'
 
 interface PageParams {
   params: { slug: string }
 }
 
 export default async function Page({ params: { slug = 'home' } }: PageParams) {
-  const payload = await getPayloadHMR({ config })
+  const payload = await getPayload({ config })
 
   const pageRes = await payload.find({
     collection: 'pages',
@@ -30,7 +29,7 @@ export default async function Page({ params: { slug = 'home' } }: PageParams) {
     },
   })
 
-  const data = pageRes?.docs?.[0] as PageType | null
+  const data = pageRes?.docs?.[0] as null | PageType
 
   if (data === null) {
     return notFound()
@@ -49,7 +48,7 @@ export default async function Page({ params: { slug = 'home' } }: PageParams) {
 }
 
 export async function generateStaticParams() {
-  const payload = await getPayloadHMR({ config })
+  const payload = await getPayload({ config })
 
   const pagesRes = await payload.find({
     collection: 'pages',
@@ -66,5 +65,5 @@ export async function generateStaticParams() {
           slug,
         }
       : {},
-  ) // eslint-disable-line function-paren-newline
+  )
 }

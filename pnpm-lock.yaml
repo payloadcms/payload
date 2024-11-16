@@ -739,9 +739,6 @@ importers:
       uuid:
         specifier: 10.0.0
         version: 10.0.0
-      ws:
-        specifier: ^8.16.0
-        version: 8.18.0(bufferutil@4.0.8)(utf-8-validate@6.0.5)
     devDependencies:
       '@babel/cli':
         specifier: ^7.24.5
@@ -776,9 +773,6 @@ importers:
       '@types/uuid':
         specifier: 10.0.0
         version: 10.0.0
-      '@types/ws':
-        specifier: ^8.5.10
-        version: 8.5.13
       babel-plugin-react-compiler:
         specifier: 0.0.0-experimental-24ec0eb-20240918
         version: 0.0.0-experimental-24ec0eb-20240918
@@ -881,6 +875,9 @@ importers:
       uuid:
         specifier: 10.0.0
         version: 10.0.0
+      ws:
+        specifier: ^8.16.0
+        version: 8.18.0(bufferutil@4.0.8)(utf-8-validate@6.0.5)
     devDependencies:
       '@hyrious/esbuild-plugin-commonjs':
         specifier: ^0.2.4
@@ -906,6 +903,9 @@ importers:
       '@types/uuid':
         specifier: 10.0.0
         version: 10.0.0
+      '@types/ws':
+        specifier: ^8.5.10
+        version: 8.5.13
       copyfiles:
         specifier: 2.4.1
         version: 2.4.1

@@ -1,9 +1,8 @@
 import type { Collection, ErrorResult, PayloadRequest, SanitizedConfig } from 'payload'
 
 import httpStatus from 'http-status'
-import { APIError, formatErrors } from 'payload'
+import { APIError, formatErrors, getPayload } from 'payload'
 
-import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { mergeHeaders } from '../../utilities/mergeHeaders.js'
 
@@ -22,7 +21,7 @@ export const routeError = async ({
 
   if (!payload) {
     try {
-      payload = await getPayloadHMR({ config: configArg })
+      payload = await getPayload({ config: configArg })
     } catch (e) {
       return Response.json(
         {
