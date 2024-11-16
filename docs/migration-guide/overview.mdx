@@ -189,6 +189,48 @@ Payload is still headless, you will still be able to leverage it completely head
 
     For more details, see the [Documentation](https://payloadcms.com/docs/beta/admin/components#client-components).
 
+1. Collections and Globals `description` no longer accepts a React Component. Instead, you must define it as a Custom Component.
+
+    1. For Collections, use the `admin.components.edit.Description` key:
+
+    ```diff
+    // collections/Posts.ts
+    import type { CollectionConfig } from 'payload'
+    - import { MyCustomDescription } from '../components/MyCustomDescription'
+
+    export const PostsCollection: CollectionConfig = {
+      slug: 'posts',
+      admin: {
+    -    description: MyCustomDescription
+    +    components: {
+    +      edit: {
+    +        Description: 'path/to/MyCustomDescription'
+    +      }
+    +    }
+      }
+    }
+    ```
+
+    2. For Globals, use the `admin.components.elements.Description` key:
+
+    ```diff
+    // globals/Site.ts
+    import type { GlobalConfig } from 'payload'
+    - import { MyCustomDescription } from '../components/MyCustomDescription'
+
+    export const SiteGlobal: GlobalConfig = {
+      slug: 'site',
+      admin: {
+    -    description: MyCustomDescription
+    +    components: {
+    +      elements: {
+    +        Description: 'path/to/MyCustomDescription'
+    +      }
+    +    }
+      }
+    }
+    ```
+
 1. The `custom` property in the Payload Config, i.e. Collections, Globals, and Fields is now **server only** and will **not** appear in the client-side bundle. To add custom properties to the client bundle, use the new `admin.custom` property, which will be available on _both_ the server and the client.
 
     ```diff
