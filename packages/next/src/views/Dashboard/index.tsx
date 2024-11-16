@@ -113,7 +113,7 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
           Link,
           locale,
         }}
-        Component={config.admin?.components?.views?.Dashboard?.Component}
+        Component={config.admin?.components?.views?.dashboard?.Component}
         Fallback={DefaultDashboard}
         importMap={payload.importMap}
         serverProps={{
