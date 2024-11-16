@@ -37,11 +37,7 @@ export const Account: React.FC<AdminViewProps> = async ({
   } = initPageResult
 
   const {
-    admin: {
-      components: { views: { Account: CustomAccountComponent } = {} } = {},
-      theme,
-      user: userSlug,
-    },
+    admin: { theme, user: userSlug },
     routes: { api },
     serverURL,
   } = config
@@ -142,7 +138,7 @@ export const Account: React.FC<AdminViewProps> = async ({
           />
           <HydrateAuthProvider permissions={permissions} />
           <RenderServerComponent
-            Component={CustomAccountComponent}
+            Component={config.admin?.components?.views?.Account?.Component}
             importMap={payload.importMap}
             serverProps={{
               i18n,
