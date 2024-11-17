@@ -54,10 +54,10 @@
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "is-hotkey": "0.2.0",
-    "slate": "0.91.4",
-    "slate-history": "0.86.0",
-    "slate-hyperscript": "0.81.3",
-    "slate-react": "0.92.0"
+    "slate": "0.110.2",
+    "slate-history": "0.110.3",
+    "slate-hyperscript": "0.100.0",
+    "slate-react": "0.111.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
