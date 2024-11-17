@@ -133,7 +133,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       setColumnState(newColumnState)
       setIsLoadingTable(false)
     },
-    [getTableState, relationTo, filterOptions, query],
+    [getTableState, relationTo, disableTable, filterOptions, query],
   )
 
   useIgnoredEffect(
