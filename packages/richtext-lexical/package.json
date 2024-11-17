@@ -79,7 +79,7 @@
     "dequal": "2.0.3",
     "escape-html": "1.0.3",
     "lexical": "0.20.0",
-    "react-error-boundary": "4.0.13",
+    "react-error-boundary": "4.1.2",
     "ts-essentials": "10.0.3",
     "uuid": "10.0.0"
   },
