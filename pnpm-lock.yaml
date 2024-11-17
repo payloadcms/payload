@@ -472,12 +472,12 @@ importers:
   packages/email-nodemailer:
     dependencies:
       nodemailer:
-        specifier: 6.9.10
-        version: 6.9.10
+        specifier: 6.9.16
+        version: 6.9.16
     devDependencies:
       '@types/nodemailer':
-        specifier: 6.4.14
-        version: 6.4.14
+        specifier: 6.4.16
+        version: 6.4.16
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -892,8 +892,8 @@ importers:
         specifier: 1.2.2
         version: 1.2.2
       '@types/nodemailer':
-        specifier: 6.4.14
-        version: 6.4.14
+        specifier: 6.4.16
+        version: 6.4.16
       '@types/pluralize':
         specifier: 0.0.33
         version: 0.0.33
@@ -946,8 +946,8 @@ importers:
         specifier: ^6.1.2
         version: 6.3.12
       nodemailer:
-        specifier: 6.9.10
-        version: 6.9.10
+        specifier: 6.9.16
+        version: 6.9.16
       resend:
         specifier: ^0.17.2
         version: 0.17.2
@@ -956,8 +956,8 @@ importers:
         specifier: 29.5.12
         version: 29.5.12
       '@types/nodemailer':
-        specifier: 6.4.14
-        version: 6.4.14
+        specifier: 6.4.16
+        version: 6.4.16
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -1528,8 +1528,8 @@ importers:
         specifier: 10.1.8
         version: 10.1.8(react@19.0.0-rc-65a56d0e-20241020)
       react-select:
-        specifier: 5.8.0
-        version: 5.8.0(react-dom@19.0.0-rc-65a56d0e-20241020(react@19.0.0-rc-65a56d0e-20241020))(react@19.0.0-rc-65a56d0e-20241020)(types-react@19.0.0-rc.1)
+        specifier: 5.8.3
+        version: 5.8.3(react-dom@19.0.0-rc-65a56d0e-20241020(react@19.0.0-rc-65a56d0e-20241020))(react@19.0.0-rc-65a56d0e-20241020)(types-react@19.0.0-rc.1)
       scheduler:
         specifier: 0.0.0-experimental-3edc000d-20240926
         version: 0.0.0-experimental-3edc000d-20240926
@@ -4843,8 +4843,8 @@ packages:
   '@types/node@22.5.4':
     resolution: {integrity: sha512-FDuKUJQm/ju9fT/SeX/6+gBzoPzlVCzfzmGkwKvRHQVxi4BntVbyIwf6a4Xn62mrvndLiml6z/UBXIdEVjQLXg==}
 
-  '@types/nodemailer@6.4.14':
-    resolution: {integrity: sha512-fUWthHO9k9DSdPCSPRqcu6TWhYyxTBg382vlNIttSe9M7XfsT06y0f24KHXtbnijPGGRIcVvdKHTNikOI6qiHA==}
+  '@types/nodemailer@6.4.16':
+    resolution: {integrity: sha512-uz6hN6Pp0upXMcilM61CoKyjT7sskBoOWpptkjjJp8jIMlTdc3xG01U7proKkXzruMS4hS0zqtHNkNPFB20rKQ==}
 
   '@types/parse-json@4.0.2':
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
@@ -7543,6 +7543,7 @@ packages:
 
   libsql@0.4.7:
     resolution: {integrity: sha512-T9eIRCs6b0J1SHKYIvD8+KCJMcWZ900iZyxdnSCdqxN12Z1ijzT+jY5nrk72Jw4B0HGzms2NgpryArlJqvc3Lw==}
+    cpu: [x64, arm64, wasm32]
     os: [darwin, linux, win32]
 
   lie@3.1.1:
@@ -7950,8 +7951,8 @@ packages:
   node-releases@2.0.18:
     resolution: {integrity: sha512-d9VeXT4SJ7ZeOqGX6R5EM022wpL+eWPooLI+5UpWn2jCT1aosUQEhQP214x33Wkwx3JQMvIm+tIoVOdodFS40g==}
 
-  nodemailer@6.9.10:
-    resolution: {integrity: sha512-qtoKfGFhvIFW5kLfrkw2R6Nm6Ur4LNUMykyqu6n9BRKJuyQrqEGwdXXUAbwWEKt33dlWUGXb7rzmJP/p4+O+CA==}
+  nodemailer@6.9.16:
+    resolution: {integrity: sha512-psAuZdTIRN08HKVd/E8ObdV6NO7NTBY3KsC30F7M4H1OnmLCUNaS56FpYxyb26zWLSyYF9Ozch9KYHhHegsiOQ==}
     engines: {node: '>=6.0.0'}
 
   noms@0.0.0:
@@ -8495,8 +8496,8 @@ packages:
       react: 19.0.0-rc-65a56d0e-20241020
       react-dom: 19.0.0-rc-65a56d0e-20241020
 
-  react-select@5.8.0:
-    resolution: {integrity: sha512-TfjLDo58XrhP6VG5M/Mi56Us0Yt8X7xD6cDybC7yoRMUNm7BGO7qk8J0TLQOua/prb8vUOtsfnXZwfm30HGsAA==}
+  react-select@5.8.3:
+    resolution: {integrity: sha512-lVswnIq8/iTj1db7XCG74M/3fbGB6ZaluCzvwPGT5ZOjCdL/k0CLWhEK0vCBLuU5bHTEf6Gj8jtSvi+3v+tO1w==}
     peerDependencies:
       react: 19.0.0-rc-65a56d0e-20241020
       react-dom: 19.0.0-rc-65a56d0e-20241020
@@ -13992,7 +13993,7 @@ snapshots:
     dependencies:
       undici-types: 6.19.8
 
-  '@types/nodemailer@6.4.14':
+  '@types/nodemailer@6.4.16':
     dependencies:
       '@types/node': 22.5.4
 
@@ -17675,7 +17676,7 @@ snapshots:
 
   node-releases@2.0.18: {}
 
-  nodemailer@6.9.10: {}
+  nodemailer@6.9.16: {}
 
   noms@0.0.0:
     dependencies:
@@ -18224,7 +18225,7 @@ snapshots:
       react: 19.0.0-rc-65a56d0e-20241020
       react-dom: 19.0.0-rc-65a56d0e-20241020(react@19.0.0-rc-65a56d0e-20241020)
 
-  react-select@5.8.0(react-dom@19.0.0-rc-65a56d0e-20241020(react@19.0.0-rc-65a56d0e-20241020))(react@19.0.0-rc-65a56d0e-20241020)(types-react@19.0.0-rc.1):
+  react-select@5.8.3(react-dom@19.0.0-rc-65a56d0e-20241020(react@19.0.0-rc-65a56d0e-20241020))(react@19.0.0-rc-65a56d0e-20241020)(types-react@19.0.0-rc.1):
     dependencies:
       '@babel/runtime': 7.26.0
       '@emotion/cache': 11.13.1

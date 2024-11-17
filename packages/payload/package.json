@@ -117,7 +117,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/json-schema": "7.0.15",
     "@types/minimist": "1.2.2",
-    "@types/nodemailer": "6.4.14",
+    "@types/nodemailer": "6.4.16",
     "@types/pluralize": "0.0.33",
     "@types/react-datepicker": "6.2.0",
     "@types/uuid": "10.0.0",

@@ -113,7 +113,7 @@
     "react-animate-height": "2.1.2",
     "react-datepicker": "6.9.0",
     "react-image-crop": "10.1.8",
-    "react-select": "5.8.0",
+    "react-select": "5.8.3",
     "scheduler": "0.0.0-experimental-3edc000d-20240926",
     "sonner": "^1.5.0",
     "ts-essentials": "10.0.3",
