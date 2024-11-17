@@ -1,5 +1,5 @@
 import type { RichTextAdapter } from '../../../admin/RichText.js'
-import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, JsonValue, PayloadRequest } from '../../../types/index.js'
@@ -91,7 +91,6 @@ export const promise = async <T>({
     // Sanitize incoming data
     switch (field.type) {
       case 'array':
-
       case 'blocks': {
         // Handle cases of arrays being intentionally set to 0
         if (siblingData[field.name] === '0' || siblingData[field.name] === 0) {
@@ -140,7 +139,6 @@ export const promise = async <T>({
         break
       }
       case 'relationship':
-
       case 'upload': {
         if (
           siblingData[field.name] === '' ||
@@ -163,6 +161,15 @@ export const promise = async <T>({
               const relatedCollection = req.payload.config.collections.find(
                 (collection) => collection.slug === relatedDoc.relationTo,
               )
+
+              if (
+                typeof relatedDoc.value === 'object' &&
+                relatedDoc.value &&
+                'id' in relatedDoc.value
+              ) {
+                relatedDoc.value = relatedDoc.value.id
+              }
+
               if (relatedCollection?.fields) {
                 const relationshipIDField = relatedCollection.fields.find(
                   (collectionField) =>
@@ -181,6 +188,11 @@ export const promise = async <T>({
             const relatedCollection = req.payload.config.collections.find(
               (collection) => collection.slug === value.relationTo,
             )
+
+            if (typeof value.value === 'object' && value.value && 'id' in value.value) {
+              value.value = (value.value as TypeWithID).id
+            }
+
             if (relatedCollection?.fields) {
               const relationshipIDField = relatedCollection.fields.find(
                 (collectionField) =>
@@ -198,6 +210,10 @@ export const promise = async <T>({
                 (collection) => collection.slug === field.relationTo,
               )
 
+              if (typeof relatedDoc === 'object' && relatedDoc && 'id' in relatedDoc) {
+                value[i] = relatedDoc.id
+              }
+
               if (relatedCollection?.fields) {
                 const relationshipIDField = relatedCollection.fields.find(
                   (collectionField) =>
@@ -213,6 +229,10 @@ export const promise = async <T>({
             const relatedCollection = req.payload.config.collections.find(
               (collection) => collection.slug === field.relationTo,
             )
+
+            if (typeof value === 'object' && value && 'id' in value) {
+              siblingData[field.name] = value.id
+            }
 
             if (relatedCollection?.fields) {
               const relationshipIDField = relatedCollection.fields.find(
@@ -375,7 +395,6 @@ export const promise = async <T>({
     }
 
     case 'collapsible':
-
     case 'row': {
       await traverseFields({
         id,
