@@ -359,6 +359,43 @@ describe('Queues', () => {
     expect(allSimples.docs[0].title).toBe('hello!')
   })
 
+  it('respects deleteJobOnComplete true default configuration with workflows', async () => {
+    const { id } = await payload.jobs.queue({
+      workflow: 'inlineTaskTest',
+      input: {
+        message: 'hello!',
+      },
+    })
+
+    const before = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    expect(before.id).toBe(id)
+
+    await payload.jobs.run()
+
+    const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    expect(after).toBeNull()
+  })
+
+  it('respects deleteJobOnComplete false configuration with workflows', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+    const { id } = await payload.jobs.queue({
+      workflow: 'inlineTaskTest',
+      input: {
+        message: 'hello!',
+      },
+    })
+
+    const before = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    expect(before.id).toBe(id)
+
+    await payload.jobs.run()
+
+    const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    expect(after.id).toBe(id)
+
+    payload.config.jobs.deleteJobOnComplete = true
+  })
+
   it('can queue single tasks', async () => {
     await payload.jobs.queue({
       task: 'CreateSimple',
@@ -376,6 +413,43 @@ describe('Queues', () => {
 
     expect(allSimples.totalDocs).toBe(1)
     expect(allSimples.docs[0].title).toBe('from single task')
+  })
+
+  it('respects deleteJobOnComplete true default configuration with tasks', async () => {
+    const { id } = await payload.jobs.queue({
+      task: 'CreateSimple',
+      input: {
+        message: 'from single task',
+      },
+    })
+
+    const before = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    expect(before.id).toBe(id)
+
+    await payload.jobs.run()
+
+    const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    expect(after).toBeNull()
+  })
+
+  it('respects deleteJobOnComplete false configuration with tasks', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+    const { id } = await payload.jobs.queue({
+      task: 'CreateSimple',
+      input: {
+        message: 'from single task',
+      },
+    })
+
+    const before = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    expect(before.id).toBe(id)
+
+    await payload.jobs.run()
+
+    const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    expect(after.id).toBe(id)
+
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   /*
