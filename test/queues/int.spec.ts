@@ -151,6 +151,7 @@ describe('Queues', () => {
   })
 
   it('ensure job retrying works', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
     const job = await payload.jobs.queue({
       workflow: 'retriesTest',
       queue: 'default',
@@ -183,9 +184,11 @@ describe('Queues', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(3)
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure workflow-level retries are respected', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
     const job = await payload.jobs.queue({
       workflow: 'retriesWorkflowLevelTest',
       input: {
@@ -217,6 +220,8 @@ describe('Queues', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(2)
+
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   /*
@@ -256,6 +261,7 @@ describe('Queues', () => {
   })*/
 
   it('ensure backoff strategy of task is respected', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
     const job = await payload.jobs.queue({
       workflow: 'retriesBackoffTest',
       input: {
@@ -338,6 +344,8 @@ describe('Queues', () => {
     expect(durations[1]).toBeGreaterThan(600)
     expect(durations[2]).toBeGreaterThan(1200)
     expect(durations[3]).toBeGreaterThan(2400)
+
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('can create new inline jobs', async () => {
