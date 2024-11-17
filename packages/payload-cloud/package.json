@@ -51,7 +51,7 @@
     "resend": "^0.17.2"
   },
   "devDependencies": {
-    "@types/jest": "29.5.12",
+    "@types/jest": "29.5.14",
     "@types/nodemailer": "6.4.14",
     "payload": "workspace:*",
     "ts-jest": "^29.1.0"
