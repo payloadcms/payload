@@ -406,7 +406,7 @@ Payload is still headless, you will still be able to leverage it completely head
     }
     ```
 
-1. Custom Row Labels on Array and Collapsible fields now _only_ accepts a React Component, and no longer accepts a plain string or record:
+1. Array Field row labels and Collapsible Field label now _only_ accepts a React Component, and no longer accepts a plain string or record:
 
     ```diff
     // file: Collection.tsx
@@ -432,13 +432,53 @@ Payload is still headless, you will still be able to leverage it completely head
           type: 'collapsible',
           admin: {
             components: {
-    -         RowLabel: 'My Collapsible Label',
-    +         RowLabel: './components/RowLabel.ts'
+    -         Label: 'My Collapsible Label',
+    +         Label: './components/RowLabel.ts'
             }
           },
           fields: [...]
         }
       ]
+    }
+    ```
+
+1. All default view keys are now camelcase:
+
+    For example, for Root Views:
+
+    ```diff
+    // file: payload.config.ts
+
+    import { buildConfig } from 'payload'
+
+    export default buildConfig({
+    admin: {
+      views: {
+    -    Account: ...
+    +    account: ...
+      }
+    })
+    ```
+
+    Or Document Views:
+
+    ```diff
+    // file: Collection.tsx
+
+    import type { CollectionConfig } from 'payload'
+
+    export const MyCollection: CollectionConfig = {
+      slug: 'my-collection',
+      admin: {
+        views: {
+    -     Edit: {
+    -       Default: ...
+    -     }
+    +     edit: {
+    +       default: ...
+    +     }
+        }
+      }
     }
     ```
 
@@ -454,7 +494,7 @@ Payload is still headless, you will still be able to leverage it completely head
       admin: {
         views: {
     -     Edit: MyCustomView  
-    +     Edit: {
+    +     edit: {
     +       Component: './components/MyCustomView.tsx'
     +     }
         }
@@ -473,7 +513,7 @@ Payload is still headless, you will still be able to leverage it completely head
       slug: 'my-collection',
       admin: {
         views: {
-    -     edit: MyCustomRootView
+    -     Edit: MyCustomRootView
           edit: {
     +       root: {
     +         Component: './components/MyCustomRootView.tsx'
@@ -525,12 +565,12 @@ Payload is still headless, you will still be able to leverage it completely head
       admin: {
         components: {
     -     views: {
-    -       edit: {
+    -       Edit: {
     -         Tab: {
     -           pillLabel: 'Hello, world!',
     -         },
     -       },
-    +       Edit: {
+    +       edit: {
     +         tab: {
     +           Pill: './path/to/CustomPill.tsx',
     +         }
