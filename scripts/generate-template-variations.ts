@@ -126,9 +126,6 @@ async function main() {
       db: 'mongodb',
       storage: 'localDisk',
       sharp: true,
-      // The blank template is used as a base for create-payload-app functionality,
-      // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
-      configureConfig: false,
     },
     {
       name: 'payload-cloud-mongodb-template',
