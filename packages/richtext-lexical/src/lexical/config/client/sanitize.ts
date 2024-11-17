@@ -14,10 +14,6 @@ export const sanitizeClientFeatures = (
 ): SanitizedClientFeatures => {
   const sanitized: SanitizedClientFeatures = {
     enabledFeatures: [],
-    hooks: {
-      load: [],
-      save: [],
-    },
     markdownTransformers: [],
     nodes: [],
     plugins: [],
@@ -39,15 +35,6 @@ export const sanitizeClientFeatures = (
   }
 
   features.forEach((feature) => {
-    if (feature.hooks) {
-      if (feature.hooks?.load?.length) {
-        sanitized.hooks.load = sanitized.hooks.load.concat(feature.hooks.load)
-      }
-      if (feature.hooks?.save?.length) {
-        sanitized.hooks.save = sanitized.hooks.save.concat(feature.hooks.save)
-      }
-    }
-
     if (feature.providers?.length) {
       sanitized.providers = sanitized.providers.concat(feature.providers)
     }

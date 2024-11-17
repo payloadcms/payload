@@ -1,12 +1,8 @@
 'use client'
 import type { ClientField, FormState } from 'payload'
 
-import { RenderFields } from '@payloadcms/ui'
+import { RenderFields, useFormSubmitted } from '@payloadcms/ui'
 import React, { createContext, useMemo } from 'react'
-
-import type { BlockFields } from '../../server/nodes/BlocksNode.js'
-
-import { useFormSave } from './FormSavePlugin.js'
 
 type Props = {
   baseClass: string
@@ -24,11 +20,11 @@ type Props = {
   }>
   CustomBlock: React.ReactNode
   EditButton: React.FC
-  formData: BlockFields
+  errorCount: number
   formSchema: ClientField[]
   initialState: false | FormState | undefined
-  nodeKey: string
 
+  nodeKey: string
   RemoveButton: React.FC
 }
 
@@ -66,14 +62,16 @@ export const BlockContent: React.FC<Props> = (props) => {
     Collapsible,
     CustomBlock,
     EditButton,
-    formData,
+    errorCount,
     formSchema,
     initialState,
     nodeKey,
     RemoveButton,
   } = props
 
-  const { errorCount, fieldHasErrors } = useFormSave({ disabled: !initialState, formData, nodeKey })
+  const hasSubmitted = useFormSubmitted()
+
+  const fieldHasErrors = hasSubmitted && errorCount > 0
 
   const CollapsibleWithErrorProps = useMemo(
     () =>

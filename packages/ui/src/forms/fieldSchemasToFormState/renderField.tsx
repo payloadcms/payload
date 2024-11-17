@@ -14,7 +14,8 @@ import { fieldAffectsData } from 'payload/shared'
 import type { RenderFieldMethod } from './types.js'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
-import { FieldDescription } from '../../fields/FieldDescription/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- need this to reference already existing bundle. Otherwise, bundle size increases., payload/no-imports-from-exports-dir
+import { FieldDescription } from '../../exports/client/index.js'
 
 const defaultUIFieldComponentKeys: Array<'Cell' | 'Description' | 'Field' | 'Filter'> = [
   'Cell',
@@ -24,6 +25,8 @@ const defaultUIFieldComponentKeys: Array<'Cell' | 'Description' | 'Field' | 'Fil
 ]
 
 export const renderField: RenderFieldMethod = ({
+  id,
+  collectionSlug,
   data,
   fieldConfig,
   fieldSchemaMap,
@@ -35,6 +38,7 @@ export const renderField: RenderFieldMethod = ({
   parentSchemaPath,
   path,
   permissions: incomingPermissions,
+  preferences,
   req,
   schemaPath,
   siblingData,
@@ -72,6 +76,7 @@ export const renderField: RenderFieldMethod = ({
   }
 
   const serverProps: ServerComponentProps = {
+    id,
     clientField,
     data,
     field: fieldConfig,
@@ -79,9 +84,13 @@ export const renderField: RenderFieldMethod = ({
     permissions,
     // TODO: Should we pass explicit values? initialValue, value, valid
     // value and initialValue should be typed
+    collectionSlug,
     formState,
     i18n: req.i18n,
+    operation,
     payload: req.payload,
+    preferences,
+    req,
     siblingData,
     user: req.user,
   }

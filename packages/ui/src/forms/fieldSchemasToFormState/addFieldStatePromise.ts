@@ -715,6 +715,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     }
 
     renderFieldFn({
+      id,
+      collectionSlug,
       data: fullData,
       fieldConfig: fieldConfig as Field,
       fieldSchemaMap,
@@ -726,6 +728,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       parentSchemaPath,
       path,
       permissions,
+      preferences,
       previousFieldState: previousFormState?.[path],
       req,
       schemaPath,
