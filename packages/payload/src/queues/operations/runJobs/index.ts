@@ -195,7 +195,7 @@ export const runJobs = async ({
         workflowHandler,
       })
 
-      if (jobsToDelete) {
+      if (result.status !== 'error' && jobsToDelete) {
         jobsToDelete.push(job.id)
       }
 
@@ -209,7 +209,7 @@ export const runJobs = async ({
         workflowHandler,
       })
 
-      if (jobsToDelete) {
+      if (result.status !== 'error' && jobsToDelete) {
         jobsToDelete.push(job.id)
       }
 
