@@ -102,10 +102,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const renderTable = useCallback(
     async (docs?: PaginatedDocs['docs']) => {
-      if (disableTable) {
-        return
-      }
-
       const newQuery: ListQuery = {
         ...(query || {}),
         where: { ...(query?.where || {}) },
@@ -133,16 +129,16 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       setColumnState(newColumnState)
       setIsLoadingTable(false)
     },
-    [getTableState, relationTo, disableTable, filterOptions, query],
+    [getTableState, relationTo, filterOptions, query],
   )
 
   useIgnoredEffect(
     () => {
-      if (!Table || query) {
+      if (!disableTable && (!Table || query)) {
         void renderTable()
       }
     },
-    [query],
+    [query, disableTable],
     [Table, renderTable],
   )
 
