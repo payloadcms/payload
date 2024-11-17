@@ -558,6 +558,7 @@ describe('Queues', () => {
   })
 
   it('can queue single tasks 500 times', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
     for (let i = 0; i < 500; i++) {
       await payload.jobs.queue({
         task: 'CreateSimple',
@@ -579,6 +580,7 @@ describe('Queues', () => {
     expect(allSimples.totalDocs).toBe(500) // Default limit: 10
     expect(allSimples.docs[0].title).toBe('from single task')
     expect(allSimples.docs[490].title).toBe('from single task')
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure default jobs run limit of 10 works', async () => {
