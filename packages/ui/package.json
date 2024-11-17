@@ -133,7 +133,7 @@
     "@types/react-datepicker": "6.2.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "@types/uuid": "10.0.0",
-    "babel-plugin-react-compiler": "0.0.0-experimental-24ec0eb-20240918",
+    "babel-plugin-react-compiler": "0.0.0-experimental-7449567-20240905",
     "esbuild": "0.23.1",
     "esbuild-sass-plugin": "3.3.1",
     "eslint-plugin-react-compiler": "19.0.0-beta-a7bf2bd-20241110",
