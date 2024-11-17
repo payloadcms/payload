@@ -125,12 +125,10 @@
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
     "esbuild": "0.23.1",
+    "graphql": "^16.8.1",
     "graphql-http": "^1.22.0",
     "rimraf": "3.0.2",
     "sharp": "0.32.6"
-  },
-  "peerDependencies": {
-    "graphql": "^16.8.1"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"

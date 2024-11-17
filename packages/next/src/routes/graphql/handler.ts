@@ -1,15 +1,28 @@
 import type { GraphQLError, GraphQLFormattedError } from 'graphql'
 import type { APIError, Payload, PayloadRequest, SanitizedConfig } from 'payload'
 
-import { configToSchema } from '@payloadcms/graphql'
-import { createHandler } from 'graphql-http/lib/use/fetch'
 import httpStatus from 'http-status'
+import { createRequire } from 'module'
 
 import { addDataAndFileToRequest } from '../../utilities/addDataAndFileToRequest.js'
 import { addLocalesToRequestFromData } from '../../utilities/addLocalesToRequest.js'
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { mergeHeaders } from '../../utilities/mergeHeaders.js'
+
+const require = createRequire(import.meta.url)
+
+let createHandler
+let configToSchema
+const getDynamicImports = () => {
+  if (createHandler) {
+    return createHandler
+  } else {
+    createHandler = require('graphql-http/lib/use/fetch').createHandler
+    configToSchema = require('@payloadcms/graphql').configToSchema
+    return { configToSchema, createHandler }
+  }
+}
 
 const handleError = async ({
   err,
@@ -78,6 +91,11 @@ export const getGraphql = async (config: Promise<SanitizedConfig> | SanitizedCon
   if (!cached.promise) {
     const resolvedConfig = await config
     cached.promise = new Promise((resolve) => {
+      if (resolvedConfig.graphQL.disable) {
+        resolve(null)
+        return
+      }
+      const { configToSchema } = getDynamicImports()
       const schema = configToSchema(resolvedConfig)
       resolve(cached.graphql || schema)
     })
@@ -95,6 +113,13 @@ export const getGraphql = async (config: Promise<SanitizedConfig> | SanitizedCon
 
 export const POST =
   (config: Promise<SanitizedConfig> | SanitizedConfig) => async (request: Request) => {
+    if ((await config).graphQL.disable) {
+      return new Response('GraphQL is disabled', {
+        status: httpStatus.NOT_FOUND,
+      })
+    }
+
+    const { createHandler } = getDynamicImports()
     const originalRequest = request.clone()
     const req = await createPayloadRequest({
       config,

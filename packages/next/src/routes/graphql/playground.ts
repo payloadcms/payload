@@ -1,14 +1,27 @@
 import type { SanitizedConfig } from 'payload'
 
-import { renderPlaygroundPage } from 'graphql-playground-html'
+import { createRequire } from 'module'
 
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 
+const require = createRequire(import.meta.url)
+
+let renderPlaygroundPage
+const getRenderPlaygroundPage = () => {
+  if (renderPlaygroundPage) {
+    return renderPlaygroundPage
+  } else {
+    renderPlaygroundPage = require('graphql-playground-html').renderPlaygroundPage
+    return renderPlaygroundPage
+  }
+}
 export const GET = (config: Promise<SanitizedConfig>) => async (request: Request) => {
   const req = await createPayloadRequest({
     config,
     request,
   })
+
+  const renderPlaygroundPage = getRenderPlaygroundPage()
 
   if (
     (!req.payload.config.graphQL.disable &&

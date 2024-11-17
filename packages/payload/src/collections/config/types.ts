@@ -525,11 +525,11 @@ export interface SanitizedCollectionConfig
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
-  slug: CollectionSlug
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
   joins: SanitizedJoins
+  slug: CollectionSlug
   upload: SanitizedUploadConfig
   versions: SanitizedCollectionVersions
 }

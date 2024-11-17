@@ -97,6 +97,12 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     },
   }
 
+  if (configWithDefaults.graphQL.disable) {
+    configWithDefaults.graphQL = { disable: true }
+    delete configWithDefaults.routes.graphQL
+    delete configWithDefaults.routes.graphQLPlayground
+  }
+
   if (!configWithDefaults?.serverURL) {
     configWithDefaults.serverURL = ''
   }

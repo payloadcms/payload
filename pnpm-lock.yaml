@@ -706,15 +706,6 @@ importers:
       file-type:
         specifier: 19.3.0
         version: 19.3.0
-      graphql:
-        specifier: ^16.8.1
-        version: 16.9.0
-      graphql-http:
-        specifier: ^1.22.0
-        version: 1.22.2(graphql@16.9.0)
-      graphql-playground-html:
-        specifier: 1.6.30
-        version: 1.6.30
       http-status:
         specifier: 1.6.2
         version: 1.6.2
@@ -785,6 +776,12 @@ importers:
       eslint-plugin-react-compiler:
         specifier: 19.0.0-beta-a7bf2bd-20241110
         version: 19.0.0-beta-a7bf2bd-20241110(eslint@9.14.0(jiti@1.21.6))
+      graphql:
+        specifier: ^16.8.1
+        version: 16.9.0
+      graphql-http:
+        specifier: ^1.22.0
+        version: 1.22.2(graphql@16.9.0)
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -833,9 +830,6 @@ importers:
       get-tsconfig:
         specifier: 4.8.1
         version: 4.8.1
-      graphql:
-        specifier: ^16.8.1
-        version: 16.9.0
       http-status:
         specifier: 1.6.2
         version: 1.6.2
@@ -915,6 +909,9 @@ importers:
       esbuild:
         specifier: 0.23.1
         version: 0.23.1
+      graphql:
+        specifier: ^16.8.1
+        version: 16.9.0
       graphql-http:
         specifier: ^1.22.0
         version: 1.22.2(graphql@16.9.0)
@@ -5749,9 +5746,6 @@ packages:
     resolution: {integrity: sha512-v1plID3y9r/lPhviJ1wrXpLeyUIGAZ2SHNYTEapm7/8A9nLPoyvVp3RK/EPFqn5kEznyWgYZNsRtYYIWbuG8KA==}
     engines: {node: '>=8'}
 
-  cssfilter@0.0.10:
-    resolution: {integrity: sha512-FAaLDaplstoRsDR8XGYH51znUN0UY7nMc6Z9/fvE8EXGwvJE9hu7W2vHwx1+bd6gCYnln9nLbzxFTrcO9YQDZw==}
-
   cssom@0.3.8:
     resolution: {integrity: sha512-b0tGHbfegbhPJpxpiBPU2sCkigAqtM9O121le6bbOlgyV+NyGyCmVfJ6QW9eRjz8CpNfWEOYBIMIGRYkLwsIYg==}
 
@@ -6819,9 +6813,6 @@ packages:
     engines: {node: '>=12'}
     peerDependencies:
       graphql: ^16.8.1
-
-  graphql-playground-html@1.6.30:
-    resolution: {integrity: sha512-tpCujhsJMva4aqE8ULnF7/l3xw4sNRZcSHu+R00VV+W0mfp+Q20Plvcrp+5UXD+2yS6oyCXncA+zoQJQqhGCEw==}
 
   graphql-scalars@1.22.2:
     resolution: {integrity: sha512-my9FB4GtghqXqi/lWSVAOPiTzTnnEzdOXCsAC2bb5V7EFNQjVjwy3cSSbUvgYOtDuDibd+ZsCDhz+4eykYOlhQ==}
@@ -9830,11 +9821,6 @@ packages:
 
   xmlchars@2.2.0:
     resolution: {integrity: sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==}
-
-  xss@1.0.15:
-    resolution: {integrity: sha512-FVdlVVC67WOIPvfOwhoMETV72f6GbW7aOabBC3WxN/oUdoEMDyLz4OgRv5/gck2ZeNqEQu+Tb0kloovXOfpYVg==}
-    engines: {node: '>= 0.10.0'}
-    hasBin: true
 
   xtend@4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
@@ -15103,8 +15089,6 @@ snapshots:
 
   crypto-random-string@2.0.0: {}
 
-  cssfilter@0.0.10: {}
-
   cssom@0.3.8: {}
 
   cssom@0.5.0: {}
@@ -16349,10 +16333,6 @@ snapshots:
   graphql-http@1.22.2(graphql@16.9.0):
     dependencies:
       graphql: 16.9.0
-
-  graphql-playground-html@1.6.30:
-    dependencies:
-      xss: 1.0.15
 
   graphql-scalars@1.22.2(graphql@16.9.0):
     dependencies:
@@ -19592,11 +19572,6 @@ snapshots:
   xml-name-validator@4.0.0: {}
 
   xmlchars@2.2.0: {}
-
-  xss@1.0.15:
-    dependencies:
-      commander: 2.20.3
-      cssfilter: 0.0.10
 
   xtend@4.0.2: {}
 

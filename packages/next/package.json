@@ -88,8 +88,6 @@
     "@payloadcms/ui": "workspace:*",
     "busboy": "^1.6.0",
     "file-type": "19.3.0",
-    "graphql-http": "^1.22.0",
-    "graphql-playground-html": "1.6.30",
     "http-status": "1.6.2",
     "path-to-regexp": "^6.2.1",
     "qs-esm": "7.0.2",
@@ -114,11 +112,12 @@
     "esbuild": "0.23.1",
     "esbuild-sass-plugin": "3.3.1",
     "eslint-plugin-react-compiler": "19.0.0-beta-a7bf2bd-20241110",
+    "graphql": "^16.8.1",
+    "graphql-http": "^1.22.0",
     "payload": "workspace:*",
     "swc-plugin-transform-remove-imports": "1.15.0"
   },
   "peerDependencies": {
-    "graphql": "^16.8.1",
     "next": "^15.0.0",
     "payload": "workspace:*"
   },
