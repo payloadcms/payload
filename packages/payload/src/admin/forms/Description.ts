@@ -10,6 +10,7 @@ export type DescriptionFunction = <T = unknown>({
 }: {
   data: Data
   path: string
+  siblingData?: Data
   t: TFunction
   value?: T
 }) => string

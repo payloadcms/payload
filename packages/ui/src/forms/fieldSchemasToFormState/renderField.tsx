@@ -208,6 +208,7 @@ export const renderField: RenderFieldMethod = ({
             description={fieldConfig.admin?.description({
               data,
               path,
+              siblingData,
               t: req.i18n.t,
               value: 'name' in fieldConfig ? formState[fieldConfig.name] : undefined,
             })}
