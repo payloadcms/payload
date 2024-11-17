@@ -1,19 +1,17 @@
-# 🚧 **DRAFT:** 3.0 Migration Guide / Breaking Changes
+# Payload 2.0 to 3.0 Migration Guide
 
-> [!IMPORTANT]
-> This document will continue to be updated and cleaned up until the 3.0 release.
+Payload 3.0 completely replatforms the Admin Panel from a React Router single-page application onto the Next.js App Router with full support for React Server Components. This change completely separates Payload "core" from its rendering and HTTP layers, making it truly Node-safe and portable.
 
 ## What has changed?
 
-The core logic and principles of Payload remain the same from 2.0 to 3.0, with the majority of changes affecting specifically the HTTP layer and the Admin Panel, which is now built upon Next.js. With this change, your entire application can be served within a single repo. Payload endpoints are now opened directly within your own Next.js application, right alongside your frontend. All Payload APIs remain exactly the same (with a few new features), and the Payload Config is generally the same, with the breaking changes detailed below.
+The core logic and principles of Payload remain the same from 2.0 to 3.0, with the majority of changes affecting specifically the HTTP layer and the Admin Panel, which is now built upon Next.js. With this change, your entire application can be served within a single repo, with Payload endpoints are now opened within your own Next.js application, directly alongside your frontend. Payload is still headless, you will still be able to leverage it completely headlessly just as you do now with Sveltekit, etc. All Payload APIs remain exactly the same (with a few new features), and the Payload Config is generally the same, with the breaking changes detailed below.
 
-Payload is still headless, you will still be able to leverage it completely headlessly just as you do now with Sveltekit, etc. In fact, Payload itself is now _truly_ portable because it is fully Node.js compatible and completely separate from the HTTP layer. The entire Payload suite of packages has been modularized to make this possible.
+### Table of Contents
 
-## Migration Guide
+All breaking changes are listed below. If you encounter changes that are not expicitly listed here, please consider contributing to this documentation by submitting a PR.
 
-#### Table of Contents
-
-- [General](#general)
+- [Installation](#installation)
+- [Breaking Changes](#breaking-changes)
 - [Custom Components](#custom-components)
 - [Endpoints](#endpoints)
 - [React Hooks](#react-hooks)
@@ -21,7 +19,17 @@ Payload is still headless, you will still be able to leverage it completely head
 - [Email Adapters](#email-adapters)
 - [Plugins](#plugins)
 
-## General
+## Installation
+
+Payload 3.0 requires a set of auto-generated files that you will need to bring into your existing project. The easiest way of aquiring these is by initializing a new project via `create-payload-app`, then replace the provided Payload Config with your own.
+
+```bash
+  npx create-payload-app@beta
+```
+
+For more details, see the [Documentation](https://payloadcms.com/docs/getting-started/installation).
+
+## Breaking Changes
 
 1. Delete the `admin.bundler` property from your Payload Config. Payload no longer bundles the Admin Panel. Instead, we rely directly on Next.js for bundling.
 
@@ -391,7 +399,7 @@ Payload is still headless, you will still be able to leverage it completely head
     3. For Fields, use the `admin.components.Description` key:
     
     ```diff
-    // globals/Site.ts
+    // fields/MyField.ts
     import type { FieldConfig } from 'payload'
     - import { MyCustomDescription } from '../components/MyCustomDescription'
 
