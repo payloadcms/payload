@@ -189,7 +189,7 @@ Payload is still headless, you will still be able to leverage it completely head
 
     For more details, see the [Documentation](https://payloadcms.com/docs/beta/admin/components#client-components).
 
-1. Collections and Globals `description` no longer accepts a React Component. Instead, you must define it as a Custom Component.
+1. The `admin.description` property within Collection, Globals, and Fields no longer accepts a React Component. Instead, you must define it as a Custom Component.
 
     1. For Collections, use the `admin.components.edit.Description` key:
 
@@ -201,7 +201,7 @@ Payload is still headless, you will still be able to leverage it completely head
     export const PostsCollection: CollectionConfig = {
       slug: 'posts',
       admin: {
-    -    description: MyCustomDescription
+    -    description: MyCustomDescription,
     +    components: {
     +      edit: {
     +        Description: 'path/to/MyCustomDescription'
@@ -221,13 +221,67 @@ Payload is still headless, you will still be able to leverage it completely head
     export const SiteGlobal: GlobalConfig = {
       slug: 'site',
       admin: {
-    -    description: MyCustomDescription
+    -    description: MyCustomDescription,
     +    components: {
     +      elements: {
     +        Description: 'path/to/MyCustomDescription'
     +      }
     +    }
       }
+    }
+    ```
+
+    3. For Fields, use the `admin.components.Description` key:
+    
+```diff
+    // globals/Site.ts
+    import type { FieldConfig } from 'payload'
+    - import { MyCustomDescription } from '../components/MyCustomDescription'
+
+    export const MyField: FieldConfig = {
+      type: 'text',
+      admin: {
+    -    description: MyCustomDescription,
+    +    components: {
+    +      Description: 'path/to/MyCustomDescription'
+    +    }
+      }
+    }
+    ```
+
+1. Custom row labels on Array and Collapsible fields now _only_ accepts a React Component, and no longer accepts a plain string or record:
+
+    ```diff
+    // file: Collection.tsx
+    import type { CollectionConfig } from 'payload'
+    - import { MyCustomRowLabel } from './components/MyCustomRowLabel.tsx'
+
+    export const MyCollection: CollectionConfig = {
+      slug: 'my-collection',
+      fields: [
+        {
+          name: 'my-array',
+          type: 'array',
+          admin: {
+            components: {
+    -         RowLabel: 'My Array Row Label,
+    +         RowLabel: './components/RowLabel.ts'
+            }
+          },
+          fields: [...]
+        },
+        {
+          name: 'my-collapsible',
+          type: 'collapsible',
+          admin: {
+            components: {
+    -         label: 'My Collapsible Label',
+    +         RowLabel: './components/RowLabel.ts'
+            }
+          },
+          fields: [...]
+        }
+      ]
     }
     ```
 
