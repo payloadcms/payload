@@ -15,7 +15,7 @@ import { InlineBlocksIcon } from '../../../lexical/ui/icons/InlineBlocks/index.j
 import { createClientFeature } from '../../../utilities/createClientFeature.js'
 import { BlockNode } from './nodes/BlocksNode.js'
 import { InlineBlockNode } from './nodes/InlineBlocksNode.js'
-import { INSERT_BLOCK_COMMAND, OPEN_INLINE_BLOCK_DRAWER_COMMAND } from './plugin/commands.js'
+import { INSERT_BLOCK_COMMAND, INSERT_INLINE_BLOCK_COMMAND } from './plugin/commands.js'
 import { BlocksPlugin } from './plugin/index.js'
 
 export const BlocksFeatureClient = createClientFeature(
@@ -102,11 +102,9 @@ export const BlocksFeatureClient = createClientFeature(
                       return blockDisplayName
                     },
                     onSelect: ({ editor }) => {
-                      editor.dispatchCommand(OPEN_INLINE_BLOCK_DRAWER_COMMAND, {
-                        fields: {
-                          blockName: '',
-                          blockType: inlineBlock.slug,
-                        },
+                      editor.dispatchCommand(INSERT_INLINE_BLOCK_COMMAND, {
+                        blockName: '',
+                        blockType: inlineBlock.slug,
                       })
                     },
                   } as SlashMenuItem
@@ -167,10 +165,9 @@ export const BlocksFeatureClient = createClientFeature(
                       return blockDisplayName
                     },
                     onSelect: ({ editor }) => {
-                      editor.dispatchCommand(OPEN_INLINE_BLOCK_DRAWER_COMMAND, {
-                        fields: {
-                          blockType: inlineBlock.slug,
-                        },
+                      editor.dispatchCommand(INSERT_INLINE_BLOCK_COMMAND, {
+                        blockName: '',
+                        blockType: inlineBlock.slug,
                       })
                     },
                     order: index,

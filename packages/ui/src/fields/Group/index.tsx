@@ -31,12 +31,11 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
       fields,
       label,
     },
-    path: pathFromProps,
+    path,
     permissions,
     readOnly,
     schemaPath: schemaPathFromProps,
   } = props
-  const path = pathFromProps ?? name
   const schemaPath = schemaPathFromProps ?? name
 
   const { i18n } = useTranslation()
@@ -105,7 +104,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
             parentIndexPath=""
             parentPath={path}
             parentSchemaPath={schemaPath}
-            permissions={permissions?.fields}
+            permissions={permissions === true ? permissions : permissions?.fields}
             readOnly={readOnly}
           />
         </div>

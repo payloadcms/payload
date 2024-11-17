@@ -52,7 +52,7 @@ export const createClientGlobalConfig = ({
   i18n: I18nClient
   importMap: ImportMap
 }): ClientGlobalConfig => {
-  const clientGlobal = deepCopyObjectSimple(global) as unknown as ClientGlobalConfig
+  const clientGlobal = deepCopyObjectSimple(global, true) as unknown as ClientGlobalConfig
 
   clientGlobal.fields = createClientFields({
     clientFields: clientGlobal?.fields || [],

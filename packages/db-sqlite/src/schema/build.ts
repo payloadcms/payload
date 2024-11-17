@@ -8,7 +8,7 @@ import type {
   SQLiteTableWithColumns,
   UniqueConstraintBuilder,
 } from 'drizzle-orm/sqlite-core'
-import type { Field, SanitizedJoins } from 'payload'
+import type { Field } from 'payload'
 
 import { buildIndexName, createTableName } from '@payloadcms/drizzle'
 import { relations, sql } from 'drizzle-orm'

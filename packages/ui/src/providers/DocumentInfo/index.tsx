@@ -3,8 +3,8 @@ import type {
   ClientCollectionConfig,
   ClientGlobalConfig,
   ClientUser,
-  DocumentPermissions,
   DocumentPreferences,
+  SanitizedDocumentPermissions,
 } from 'payload'
 
 import * as qs from 'qs-esm'
@@ -51,7 +51,8 @@ const DocumentInfo: React.FC<
     versionCount: versionCountFromProps,
   } = props
 
-  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(docPermissionsFromProps)
+  const [docPermissions, setDocPermissions] =
+    useState<SanitizedDocumentPermissions>(docPermissionsFromProps)
 
   const [hasSavePermission, setHasSavePermission] = useState<boolean>(hasSavePermissionFromProps)
 

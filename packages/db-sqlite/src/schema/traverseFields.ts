@@ -1,7 +1,7 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { Relation } from 'drizzle-orm'
 import type { IndexBuilder, SQLiteColumnBuilder } from 'drizzle-orm/sqlite-core'
-import type { Field, SanitizedJoins, TabAsField } from 'payload'
+import type { Field, TabAsField } from 'payload'
 
 import {
   buildIndexName,
@@ -472,16 +472,15 @@ export const traverseFields = ({
         targetTable[fieldName] = withDefault(integer(columnName, { mode: 'boolean' }), field)
         break
       }
+
       case 'code':
-
       case 'email':
-
       case 'textarea': {
         targetTable[fieldName] = withDefault(text(columnName), field)
         break
       }
-      case 'collapsible':
 
+      case 'collapsible':
       case 'row': {
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
         const {
@@ -654,7 +653,6 @@ export const traverseFields = ({
       }
 
       case 'json':
-
       case 'richText': {
         targetTable[fieldName] = withDefault(text(columnName, { mode: 'json' }), field)
         break
@@ -691,8 +689,8 @@ export const traverseFields = ({
       case 'point': {
         break
       }
-      case 'radio':
 
+      case 'radio':
       case 'select': {
         const options = field.options.map((option) => {
           if (optionIsObject(option)) {

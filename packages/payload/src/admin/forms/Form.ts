@@ -1,7 +1,8 @@
 import { type SupportedLanguages } from '@payloadcms/translations'
 
-import type { DocumentPermissions } from '../../auth/types.js'
+import type { SanitizedDocumentPermissions } from '../../auth/types.js'
 import type { Field, Validate } from '../../fields/config/types.js'
+import type { TypedLocale } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 
@@ -21,6 +22,11 @@ export type FilterOptionsResult = {
 
 export type FieldState = {
   customComponents?: {
+    /**
+     * This is used by UI fields, as they can have arbitrary components defined if used
+     * as a vessel to bring in custom components.
+     */
+    [key: string]: React.ReactNode | React.ReactNode[] | undefined
     AfterInput?: React.ReactNode
     BeforeInput?: React.ReactNode
     Description?: React.ReactNode
@@ -60,8 +66,9 @@ export type FormStateWithoutComponents = {
 
 export type BuildFormStateArgs = {
   data?: Data
-  docPermissions: DocumentPermissions | undefined
+  docPermissions: SanitizedDocumentPermissions | undefined
   docPreferences: DocumentPreferences
+  fallbackLocale?: false | TypedLocale
   formState?: FormState
   id?: number | string
   /*

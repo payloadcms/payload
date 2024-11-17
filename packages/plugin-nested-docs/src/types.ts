@@ -1,3 +1,5 @@
+import type { CollectionSlug } from 'payload'
+
 export type Breadcrumb = {
   doc: string
   label: string
@@ -22,7 +24,7 @@ export type NestedDocsPluginConfig = {
   /**
    * The slugs of the collections this plugin should extend. If you need different configs for different collections, this plugin can be added to your config more than once having different collections.
    */
-  collections: string[]
+  collections: CollectionSlug[]
   generateLabel?: GenerateLabel
   generateURL?: GenerateURL
   /**

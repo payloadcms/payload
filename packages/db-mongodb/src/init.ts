@@ -17,14 +17,14 @@ import { getDBName } from './utilities/getDBName.js'
 
 export const init: Init = function init(this: MongooseAdapter) {
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
-    const schema = buildCollectionSchema(collection, this.payload.config)
+    const schema = buildCollectionSchema(collection, this.payload)
 
     if (collection.versions) {
       const versionModelName = getDBName({ config: collection, versions: true })
 
       const versionCollectionFields = buildVersionCollectionFields(this.payload.config, collection)
 
-      const versionSchema = buildSchema(this.payload.config, versionCollectionFields, {
+      const versionSchema = buildSchema(this.payload, versionCollectionFields, {
         disableUnique: true,
         draftsEnabled: true,
         indexSortableFields: this.payload.config.indexSortableFields,
@@ -66,7 +66,7 @@ export const init: Init = function init(this: MongooseAdapter) {
     ) as CollectionModel
   })
 
-  this.globals = buildGlobalModel(this.payload.config)
+  this.globals = buildGlobalModel(this.payload)
 
   this.payload.config.globals.forEach((global) => {
     if (global.versions) {
@@ -74,7 +74,7 @@ export const init: Init = function init(this: MongooseAdapter) {
 
       const versionGlobalFields = buildVersionGlobalFields(this.payload.config, global)
 
-      const versionSchema = buildSchema(this.payload.config, versionGlobalFields, {
+      const versionSchema = buildSchema(this.payload, versionGlobalFields, {
         disableUnique: true,
         draftsEnabled: true,
         indexSortableFields: this.payload.config.indexSortableFields,

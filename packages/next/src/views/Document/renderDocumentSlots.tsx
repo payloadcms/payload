@@ -1,9 +1,9 @@
 import type {
   DefaultServerFunctionArgs,
-  DocumentPermissions,
   DocumentSlots,
   PayloadRequest,
   SanitizedCollectionConfig,
+  SanitizedDocumentPermissions,
   SanitizedGlobalConfig,
   StaticDescription,
 } from 'payload'
@@ -18,7 +18,7 @@ export const renderDocumentSlots: (args: {
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
   hasSavePermission: boolean
-  permissions: DocumentPermissions
+  permissions: SanitizedDocumentPermissions
   req: PayloadRequest
 }) => DocumentSlots = (args) => {
   const { collectionConfig, globalConfig, hasSavePermission, req } = args

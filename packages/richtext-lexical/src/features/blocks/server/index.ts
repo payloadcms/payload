@@ -91,8 +91,22 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
 
         if (props?.blocks?.length) {
           for (const block of props.blocks) {
+            const blockFields = [...block.fields]
+
+            if (block?.admin?.components) {
+              blockFields.unshift({
+                name: `_components`,
+                type: 'ui',
+                admin: {
+                  components: {
+                    Block: block.admin?.components?.Block,
+                    BlockLabel: block.admin?.components?.Label,
+                  },
+                },
+              })
+            }
             schemaMap.set(`lexical_blocks.${block.slug}.fields`, {
-              fields: block.fields,
+              fields: blockFields,
             })
             schemaMap.set(`lexical_blocks.${block.slug}`, {
               name: `lexical_blocks_${block.slug}`,
@@ -105,8 +119,23 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
         if (props?.inlineBlocks?.length) {
           // To generate block schemaMap which generates things like the componentMap for admin.Label
           for (const block of props.inlineBlocks) {
+            const blockFields = [...block.fields]
+
+            if (block?.admin?.components) {
+              blockFields.unshift({
+                name: `_components`,
+                type: 'ui',
+                admin: {
+                  components: {
+                    Block: block.admin?.components?.Block,
+                    BlockLabel: block.admin?.components?.Label,
+                  },
+                },
+              })
+            }
+
             schemaMap.set(`lexical_inline_blocks.${block.slug}.fields`, {
-              fields: block.fields,
+              fields: blockFields,
             })
 
             schemaMap.set(`lexical_inline_blocks.${block.slug}`, {

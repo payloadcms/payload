@@ -172,8 +172,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const preferenceKey = `${relationTo}-list`
 
-  const canCreate =
-    allowCreate !== false && permissions?.collections?.[relationTo]?.create?.permission
+  const canCreate = allowCreate !== false && permissions?.collections?.[relationTo]?.create
 
   return (
     <div className={baseClass}>

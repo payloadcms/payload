@@ -98,6 +98,7 @@ export const LoginForm: React.FC<{
             label: t('general:password'),
             required: true,
           }}
+          path="password"
         />
       </div>
       <Link

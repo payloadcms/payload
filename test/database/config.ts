@@ -383,8 +383,61 @@ export default buildConfigWithDefaults({
             ],
           },
         },
+        {
+          name: 'title',
+          type: 'text',
+        },
       ],
       versions: { drafts: true },
+    },
+    {
+      slug: 'fake-custom-ids',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'id',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'myTab',
+              fields: [
+                {
+                  name: 'id',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      slug: 'relationships-migration',
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'default-values',
+          name: 'relationship',
+        },
+        {
+          type: 'relationship',
+          relationTo: ['default-values'],
+          name: 'relationship_2',
+        },
+      ],
+      versions: true,
     },
   ],
   globals: [

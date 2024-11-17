@@ -47,13 +47,12 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       minRows: minRowsProp,
       required,
     },
-    path: pathFromProps,
+    path,
     permissions,
     readOnly,
     schemaPath: schemaPathFromProps,
     validate,
   } = props
-  const path = pathFromProps ?? name
   const schemaPath = schemaPathFromProps ?? name
 
   const minRows = (minRowsProp ?? required) ? 1 : 0
@@ -326,11 +325,12 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!readOnly && !hasMaxRows && (
+      {!hasMaxRows && (
         <Fragment>
           <DrawerToggler className={`${baseClass}__drawer-toggler`} slug={drawerSlug}>
             <Button
               buttonStyle="icon-label"
+              disabled={readOnly}
               el="span"
               icon="plus"
               iconPosition="left"

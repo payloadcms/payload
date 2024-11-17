@@ -1,27 +1,39 @@
 'use client'
 
 import {
+  Button,
   Collapsible,
+  Drawer,
+  EditDepthProvider,
+  ErrorPill,
   Form,
+  formatDrawerSlug,
+  FormSubmit,
   Pill,
+  RenderFields,
   SectionTitle,
-  ShimmerEffect,
   useDocumentInfo,
+  useEditDepth,
   useFormSubmitted,
   useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
+import { reduceFieldsToValues } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 const baseClass = 'lexical-block'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { getTranslation } from '@payloadcms/translations'
-import { type BlocksFieldClient, type FormState } from 'payload'
+import { $getNodeByKey } from 'lexical'
+import { type BlocksFieldClient, type CollapsedPreferences, type FormState } from 'payload'
 import { v4 as uuid } from 'uuid'
 
 import type { BlockFields } from '../../server/nodes/BlocksNode.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
+import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
+import { $isBlockNode } from '../nodes/BlocksNode.js'
 import { BlockContent } from './BlockContent.js'
 import './index.scss'
 
@@ -36,10 +48,29 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const submitted = useFormSubmitted()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const {
-    fieldProps: { featureClientSchemaMap, field: parentLexicalRichTextField, path, schemaPath },
+    fieldProps: {
+      featureClientSchemaMap,
+      field: parentLexicalRichTextField,
+      permissions,
+      readOnly,
+      schemaPath,
+    },
+    uuid: uuidFromContext,
   } = useEditorConfigContext()
   const onChangeAbortControllerRef = useRef(new AbortController())
-  const { docPermissions, getDocPreferences } = useDocumentInfo()
+  const editDepth = useEditDepth()
+
+  const drawerSlug = formatDrawerSlug({
+    slug: `lexical-blocks-create-${uuidFromContext}-${formData.id}`,
+    depth: editDepth,
+  })
+  const { toggleDrawer } = useLexicalDrawer(drawerSlug, true)
+
+  // Used for saving collapsed to preferences (and gettin' it from there again)
+  // Remember, these preferences are scoped to the whole document, not just this form. This
+  // is important to consider for the data path used in setDocFieldPreferences
+  const { docPermissions, getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
+  const [editor] = useLexicalComposerContext()
 
   const { getFormState } = useServerFunctions()
 
@@ -57,7 +88,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const clientBlock = blocksField.blocks[0]
 
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation<object, string>()
 
   // Field Schema
   useEffect(() => {
@@ -68,7 +99,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         id,
         collectionSlug,
         data: formData,
-        docPermissions,
+        docPermissions: { fields: true },
         docPreferences: await getDocPreferences(),
         globalSlug,
         operation: 'update',
@@ -103,7 +134,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
     collectionSlug,
     globalSlug,
     getDocPreferences,
-    docPermissions,
     // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
   ])
 
@@ -158,76 +188,274 @@ export const BlockComponent: React.FC<Props> = (props) => {
     }
   }, [])
 
-  const classNames = [`${baseClass}__row`, `${baseClass}__row--no-errors`].filter(Boolean).join(' ')
+  const removeBlock = useCallback(() => {
+    editor.update(() => {
+      $getNodeByKey(nodeKey)?.remove()
+    })
+  }, [editor, nodeKey])
 
-  const Label = clientBlock?.admin?.components?.Label
+  const CustomLabel = initialState?.['_components']?.customComponents?.BlockLabel
+  const CustomBlock = initialState?.['_components']?.customComponents?.Block
+
+  const blockDisplayName = clientBlock?.labels?.singular
+    ? getTranslation(clientBlock.labels.singular, i18n)
+    : clientBlock?.slug
+
+  const [isCollapsed, setIsCollapsed] = React.useState<boolean>()
+
+  // TODO: Load collapsed preferences in RSC Field component
+  useEffect(() => {
+    void getDocPreferences().then((currentDocPreferences) => {
+      const currentFieldPreferences = currentDocPreferences?.fields[parentLexicalRichTextField.name]
+      const collapsedArray = currentFieldPreferences?.collapsed
+      setIsCollapsed(collapsedArray ? collapsedArray.includes(formData.id) : false)
+    })
+  }, [parentLexicalRichTextField.name, formData.id, getDocPreferences])
+
+  const onCollapsedChange = useCallback(
+    (changedCollapsed: boolean) => {
+      void getDocPreferences().then((currentDocPreferences) => {
+        const currentFieldPreferences =
+          currentDocPreferences?.fields[parentLexicalRichTextField.name]
+
+        const collapsedArray = currentFieldPreferences?.collapsed
+
+        const newCollapsed: CollapsedPreferences =
+          collapsedArray && collapsedArray?.length ? collapsedArray : []
+
+        if (changedCollapsed) {
+          if (!newCollapsed.includes(formData.id)) {
+            newCollapsed.push(formData.id)
+          }
+        } else {
+          if (newCollapsed.includes(formData.id)) {
+            newCollapsed.splice(newCollapsed.indexOf(formData.id), 1)
+          }
+        }
+
+        setDocFieldPreferences(parentLexicalRichTextField.name, {
+          collapsed: newCollapsed,
+          hello: 'hi',
+        })
+      })
+    },
+    [getDocPreferences, parentLexicalRichTextField.name, setDocFieldPreferences, formData.id],
+  )
+
+  const EditButton = useMemo(
+    () => () => (
+      <Button
+        buttonStyle="icon-label"
+        className={`${baseClass}__editButton`}
+        disabled={readOnly}
+        el="div"
+        icon="edit"
+        onClick={() => {
+          toggleDrawer()
+        }}
+        round
+        size="small"
+        tooltip={t('lexical:blocks:inlineBlocks:edit', { label: blockDisplayName })}
+      />
+    ),
+    [blockDisplayName, readOnly, t, toggleDrawer],
+  )
+
+  const RemoveButton = useMemo(
+    () => () => (
+      <Button
+        buttonStyle="icon-label"
+        className={`${baseClass}__removeButton`}
+        disabled={parentLexicalRichTextField?.admin?.readOnly || false}
+        icon="x"
+        onClick={(e) => {
+          e.preventDefault()
+          removeBlock()
+        }}
+        round
+        tooltip="Remove Block"
+      />
+    ),
+    [parentLexicalRichTextField?.admin?.readOnly, removeBlock],
+  )
+
+  const BlockCollapsible = useMemo(
+    () =>
+      ({
+        children,
+        editButton,
+        errorCount,
+        fieldHasErrors,
+        Label,
+        removeButton,
+      }: {
+        children?: React.ReactNode
+        editButton?: boolean
+        errorCount?: number
+        fieldHasErrors?: boolean
+        /**
+         * Override the default label with a custom label
+         */
+        Label?: React.ReactNode
+        removeButton?: boolean
+      }) => (
+        <div className={baseClass + ' ' + baseClass + '-' + formData.blockType}>
+          <Collapsible
+            className={[
+              `${baseClass}__row`,
+              fieldHasErrors ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
+            ].join(' ')}
+            collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
+            header={
+              <div className={`${baseClass}__block-header`}>
+                {(Label ?? CustomLabel) ? (
+                  (Label ?? CustomLabel)
+                ) : (
+                  <div>
+                    <Pill
+                      className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
+                      pillStyle="white"
+                    >
+                      {blockDisplayName}
+                    </Pill>
+                    <SectionTitle
+                      path="blockName"
+                      readOnly={parentLexicalRichTextField?.admin?.readOnly || false}
+                    />
+                    {fieldHasErrors && (
+                      <ErrorPill count={errorCount ?? 0} i18n={i18n} withMessage />
+                    )}
+                  </div>
+                )}
+
+                <div>
+                  {(CustomBlock && editButton !== false) || (!CustomBlock && editButton) ? (
+                    <EditButton />
+                  ) : null}
+                  {removeButton !== false && editor.isEditable() ? <RemoveButton /> : null}
+                </div>
+              </div>
+            }
+            isCollapsed={isCollapsed}
+            key={0}
+            onToggle={(incomingCollapsedState) => {
+              onCollapsedChange(incomingCollapsedState)
+              setIsCollapsed(incomingCollapsedState)
+            }}
+          >
+            {children}
+          </Collapsible>
+        </div>
+      ),
+    [
+      CustomBlock,
+      CustomLabel,
+      EditButton,
+      RemoveButton,
+      blockDisplayName,
+      editor,
+      formData.blockType,
+      i18n,
+      isCollapsed,
+      onCollapsedChange,
+      parentLexicalRichTextField?.admin?.readOnly,
+    ],
+  )
+
+  const BlockDrawer = useMemo(
+    () => () => (
+      <EditDepthProvider>
+        <Drawer
+          className={''}
+          slug={drawerSlug}
+          title={t(`lexical:blocks:inlineBlocks:${formData?.id ? 'edit' : 'create'}`, {
+            label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
+          })}
+        >
+          {initialState ? (
+            <>
+              <RenderFields
+                fields={clientBlock.fields}
+                forceRender
+                parentIndexPath=""
+                parentPath="" // See Blocks feature path for details as for why this is empty
+                parentSchemaPath={schemaFieldsPath}
+                permissions={permissions}
+                readOnly={false}
+              />
+              <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
+            </>
+          ) : null}
+        </Drawer>
+      </EditDepthProvider>
+    ),
+    [
+      initialState,
+      drawerSlug,
+      blockDisplayName,
+      t,
+      clientBlock.fields,
+      schemaFieldsPath,
+      permissions,
+      // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
+    ],
+  )
 
   // Memoized Form JSX
-  const formContent = useMemo(() => {
-    return clientBlock && initialState !== false ? (
+  const Block = useMemo(() => {
+    if (!initialState) {
+      return null
+    }
+    return (
       <Form
         beforeSubmit={[onChange]}
         fields={clientBlock.fields}
         initialState={initialState}
         onChange={[onChange]}
+        onSubmit={(formState) => {
+          // THis is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
+          const newData: any = reduceFieldsToValues(formState)
+          newData.blockType = formData.blockType
+          editor.update(() => {
+            const node = $getNodeByKey(nodeKey)
+            if (node && $isBlockNode(node)) {
+              node.setFields(newData)
+            }
+          })
+          toggleDrawer()
+        }}
         submitted={submitted}
         uuid={uuid()}
       >
         <BlockContent
           baseClass={baseClass}
-          clientBlock={clientBlock}
-          field={parentLexicalRichTextField}
+          BlockDrawer={BlockDrawer}
+          Collapsible={BlockCollapsible}
+          CustomBlock={CustomBlock}
+          EditButton={EditButton}
           formData={formData}
           formSchema={clientBlock.fields}
+          initialState={initialState}
           nodeKey={nodeKey}
-          path={`${path}.lexical_internal_feature.blocks.${formData.blockType}`}
-          schemaPath={schemaFieldsPath}
+          RemoveButton={RemoveButton}
         />
       </Form>
-    ) : (
-      <Collapsible
-        className={classNames}
-        collapsibleStyle="default"
-        header={
-          clientBlock?.admin?.components?.Label ? (
-            Label
-          ) : (
-            <div className={`${baseClass}__block-header`}>
-              <div>
-                <Pill
-                  className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
-                  pillStyle="white"
-                >
-                  {clientBlock && typeof clientBlock.labels?.singular === 'string'
-                    ? getTranslation(clientBlock.labels.singular, i18n)
-                    : clientBlock?.slug}
-                </Pill>
-                <SectionTitle
-                  path="blockName"
-                  readOnly={parentLexicalRichTextField?.admin?.readOnly || false}
-                />
-              </div>
-            </div>
-          )
-        }
-        key={0}
-      >
-        <ShimmerEffect height="35vh" />
-      </Collapsible>
     )
   }, [
-    clientBlock,
+    BlockCollapsible,
+    BlockDrawer,
+    CustomBlock,
+    RemoveButton,
+    EditButton,
+    editor,
+    toggleDrawer,
+    clientBlock.fields,
+    // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
     initialState,
+    nodeKey,
     onChange,
     submitted,
-    parentLexicalRichTextField,
-    nodeKey,
-    path,
-    schemaFieldsPath,
-    classNames,
-    i18n,
-    // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
   ])
 
-  return <div className={baseClass + ' ' + baseClass + '-' + formData.blockType}>{formContent}</div>
+  return Block
 }

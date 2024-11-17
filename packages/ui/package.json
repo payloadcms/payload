@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.0.0-beta.129",
+  "version": "3.0.0-beta.133",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -100,7 +100,7 @@
     "@payloadcms/translations": "workspace:*",
     "body-scroll-lock": "4.0.0-beta.0",
     "bson-objectid": "2.0.4",
-    "date-fns": "3.3.1",
+    "date-fns": "4.1.0",
     "dequal": "2.0.3",
     "md5": "2.3.0",
     "object-to-formdata": "4.5.1",

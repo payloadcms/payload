@@ -40,7 +40,7 @@ function ButtonGroupItem({
 
   return (
     <ToolbarButton editor={editor} item={item} key={item.key}>
-      {<item.ChildComponent />}
+      <item.ChildComponent />
     </ToolbarButton>
   )
 }

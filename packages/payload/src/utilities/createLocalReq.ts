@@ -1,9 +1,10 @@
 import type { User } from '../auth/types.js'
-import type { Payload, RequestContext } from '../index.js'
+import type { Payload, RequestContext, TypedLocale } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { getDataLoader } from '../collections/dataloader.js'
 import { getLocalI18n } from '../translations/getLocalI18n.js'
+import { sanitizeFallbackLocale } from '../utilities/sanitizeFallbackLocale.js'
 
 function getRequestContext(
   req: Partial<PayloadRequest> = { context: null } as PayloadRequest,
@@ -71,7 +72,7 @@ const attachFakeURLProperties = (req: Partial<PayloadRequest>) => {
 type CreateLocalReq = (
   options: {
     context?: RequestContext
-    fallbackLocale?: string
+    fallbackLocale?: false | TypedLocale
     locale?: string
     req?: Partial<PayloadRequest>
     user?: User
@@ -83,23 +84,22 @@ export const createLocalReq: CreateLocalReq = async (
   { context, fallbackLocale, locale: localeArg, req = {} as PayloadRequest, user },
   payload,
 ) => {
-  if (payload.config?.localization) {
+  const localization = payload.config?.localization
+  if (localization) {
     const locale = localeArg === '*' ? 'all' : localeArg
-    const defaultLocale = payload.config.localization.defaultLocale
+    const defaultLocale = localization.defaultLocale
     const localeCandidate = locale || req?.locale || req?.query?.locale
 
     req.locale =
       localeCandidate && typeof localeCandidate === 'string' ? localeCandidate : defaultLocale
 
-    const fallbackLocaleFromConfig = payload.config.localization.locales.find(
-      ({ code }) => req.locale === code,
-    )?.fallbackLocale
+    const sanitizedFallback = sanitizeFallbackLocale({
+      fallbackLocale,
+      locale: req.locale,
+      localization,
+    })
 
-    if (typeof fallbackLocale !== 'undefined') {
-      req.fallbackLocale = fallbackLocale
-    } else if (typeof req?.fallbackLocale === 'undefined') {
-      req.fallbackLocale = fallbackLocaleFromConfig || defaultLocale
-    }
+    req.fallbackLocale = sanitizedFallback
   }
 
   const i18n =

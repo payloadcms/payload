@@ -1,8 +1,9 @@
 import type {
   ClientComponentProps,
   ClientField,
-  FieldPermissions,
+  FieldPaths,
   PayloadComponent,
+  SanitizedFieldPermissions,
   ServerComponentProps,
 } from 'payload'
 
@@ -14,6 +15,13 @@ import type { RenderFieldMethod } from './types.js'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
+
+const defaultUIFieldComponentKeys: Array<'Cell' | 'Description' | 'Field' | 'Filter'> = [
+  'Cell',
+  'Description',
+  'Field',
+  'Filter',
+]
 
 export const renderField: RenderFieldMethod = ({
   data,
@@ -42,19 +50,26 @@ export const renderField: RenderFieldMethod = ({
     importMap: req.payload.importMap,
   })
 
-  const permissions = fieldAffectsData(fieldConfig)
-    ? incomingPermissions?.[fieldConfig.name]
-    : ({} as FieldPermissions)
+  const permissions =
+    incomingPermissions === true
+      ? true
+      : fieldAffectsData(fieldConfig)
+        ? incomingPermissions?.[fieldConfig.name]
+        : ({} as SanitizedFieldPermissions)
 
-  const clientProps: ClientComponentProps = {
+  const clientProps: ClientComponentProps & Partial<FieldPaths> = {
     customComponents: fieldState?.customComponents || {},
     field: clientField,
-    indexPath,
-    parentPath,
-    parentSchemaPath,
     path,
-    readOnly: permissions?.[operation]?.permission === false,
+    readOnly: permissions !== true && !permissions?.[operation],
     schemaPath,
+  }
+
+  // fields with subfields
+  if (['array', 'blocks', 'collapsible', 'group', 'row', 'tabs'].includes(fieldConfig.type)) {
+    clientProps.indexPath = indexPath
+    clientProps.parentPath = parentPath
+    clientProps.parentSchemaPath = parentSchemaPath
   }
 
   const serverProps: ServerComponentProps = {
@@ -147,6 +162,28 @@ export const renderField: RenderFieldMethod = ({
         />
       )
 
+      break
+    }
+
+    case 'ui': {
+      if (fieldConfig?.admin?.components) {
+        // Render any extra, untyped components
+        for (const key in fieldConfig.admin.components) {
+          if (key in defaultUIFieldComponentKeys) {
+            continue
+          }
+          const Component = fieldConfig.admin.components[key]
+          fieldState.customComponents[key] = (
+            <RenderServerComponent
+              clientProps={clientProps}
+              Component={Component}
+              importMap={req.payload.importMap}
+              key={`field.admin.components.${key}`}
+              serverProps={serverProps}
+            />
+          )
+        }
+      }
       break
     }
 

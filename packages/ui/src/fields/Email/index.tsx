@@ -34,11 +34,10 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
       localized,
       required,
     } = {} as EmailFieldClientProps['field'],
-    path: pathFromProps,
+    path,
     readOnly,
     validate,
   } = props
-  const path = pathFromProps ?? name
 
   const { i18n } = useTranslation()
 

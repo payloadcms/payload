@@ -3,8 +3,8 @@ import type {
   AdminViewProps,
   Locale,
   Payload,
-  Permissions,
   SanitizedCollectionConfig,
+  SanitizedPermissions,
   User,
 } from 'payload'
 
@@ -38,7 +38,7 @@ export type ListComponentServerProps = {
   locale: Locale
   params: AdminViewProps['params']
   payload: Payload
-  permissions: Permissions
+  permissions: SanitizedPermissions
   searchParams: AdminViewProps['searchParams']
   user: User
 }

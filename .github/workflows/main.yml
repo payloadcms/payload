@@ -284,7 +284,7 @@ jobs:
   tests-e2e:
     runs-on: ubuntu-latest
     needs: build
-    name: ${{ matrix.suite }}
+    name: e2e-${{ matrix.suite }}
     strategy:
       fail-fast: false
       matrix:
@@ -294,6 +294,7 @@ jobs:
           - access-control
           - admin__e2e__1
           - admin__e2e__2
+          - admin__e2e__3
           - admin-root
           - auth
           - field-error-states
@@ -413,6 +414,10 @@ jobs:
             database: postgres
           - template: with-vercel-postgres
             database: postgres
+
+          # Re-enable once PG conncection is figured out
+          # - template: with-vercel-website
+          #   database: postgres
 
     name: ${{ matrix.template }}-${{ matrix.database }}
 

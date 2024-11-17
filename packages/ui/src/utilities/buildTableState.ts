@@ -10,7 +10,7 @@ import type {
   SanitizedConfig,
 } from 'payload'
 
-import { dequal } from 'dequal'
+import { dequal } from 'dequal' // TODO: Can we change this to dequal/lite ? If not, please add comment explaining why
 import { createClientConfig, formatErrors } from 'payload'
 
 import type { Column } from '../elements/Table/index.js'
@@ -170,6 +170,7 @@ export const buildTableState = async (
       collection: 'payload-preferences',
       depth: 0,
       limit: 1,
+      pagination: false,
       where: {
         and: [
           {
@@ -190,34 +191,42 @@ export const buildTableState = async (
         ],
       },
     })
-    .then((res) => res.docs[0]?.value as ListPreferences)
+    .then((res) => res.docs[0] ?? { id: null, value: {} })
 
-  let newPrefs = preferencesResult
+  let newPrefs = preferencesResult.value
 
-  if (!preferencesResult || !dequal(columns, preferencesResult?.columns)) {
+  if (!preferencesResult.id || !dequal(columns, preferencesResult?.columns)) {
     const mergedPrefs = {
       ...(preferencesResult || {}),
       columns,
     }
-
-    newPrefs = await payload
-      .create({
-        collection: 'payload-preferences',
-        data: {
-          key: preferencesKey,
-          user: {
-            collection: user.collection,
-            value: user.id,
-          },
-          value: mergedPrefs,
+    const preferencesArgs = {
+      collection: 'payload-preferences',
+      data: {
+        key: preferencesKey,
+        user: {
+          collection: user.collection,
+          value: user.id,
         },
-        req,
-      })
-      ?.then((res) => res.value as ListPreferences)
+        value: mergedPrefs,
+      },
+      depth: 0,
+      req,
+    }
+
+    if (preferencesResult.id) {
+      newPrefs = await payload
+        .update({
+          ...preferencesArgs,
+          id: preferencesResult.id,
+        })
+        ?.then((res) => res.value as ListPreferences)
+    } else {
+      newPrefs = await payload.create(preferencesArgs)?.then((res) => res.value as ListPreferences)
+    }
   }
 
   const fields = collectionConfig.fields
-  const clientFields = clientCollectionConfig?.fields || []
 
   let docs = docsFromArgs
   let data: PaginatedDocs

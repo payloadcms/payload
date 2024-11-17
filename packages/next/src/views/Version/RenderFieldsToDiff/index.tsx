@@ -50,11 +50,13 @@ const RenderFieldsToDiff: React.FC<Props> = ({
               ? JSON.stringify(comparison?.[fieldName])
               : comparison?.[fieldName]
 
-            const hasPermission = fieldPermissions?.[fieldName]?.read?.permission
+            const hasPermission =
+              fieldPermissions?.[fieldName] === true || fieldPermissions?.[fieldName]?.read
 
-            const subFieldPermissions = fieldPermissions?.[fieldName]?.fields
+            const subFieldPermissions =
+              fieldPermissions?.[fieldName] === true || fieldPermissions?.[fieldName]?.fields
 
-            if (hasPermission === false) {
+            if (!hasPermission) {
               return null
             }
 
