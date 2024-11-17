@@ -19,7 +19,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
-import { reduceFieldsToValues } from 'payload/shared'
+import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 
 const baseClass = 'lexical-block'
@@ -36,6 +36,7 @@ import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalD
 import { $isBlockNode } from '../nodes/BlocksNode.js'
 import { BlockContent } from './BlockContent.js'
 import './index.scss'
+import { removeEmptyArrayValues } from './removeEmptyArrayValues.js'
 
 type Props = {
   readonly children?: React.ReactNode
@@ -60,6 +61,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   } = useEditorConfigContext()
   const onChangeAbortControllerRef = useRef(new AbortController())
   const editDepth = useEditDepth()
+  const [errorCount, setErrorCount] = React.useState(0)
 
   const drawerSlug = formatDrawerSlug({
     slug: `lexical-blocks-create-${uuidFromContext}-${formData.id}`,
@@ -77,8 +79,19 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${formData.blockType}.fields`
 
   const [initialState, setInitialState] = React.useState<false | FormState | undefined>(
-    initialLexicalFormState?.[formData.id]?.formState,
+    initialLexicalFormState?.[formData.id]?.formState
+      ? {
+          ...initialLexicalFormState?.[formData.id]?.formState,
+          blockName: {
+            initialValue: formData.blockName,
+            passesCondition: true,
+            valid: true,
+            value: formData.blockName,
+          },
+        }
+      : false,
   )
+
   // Initial state for newly created blocks
   useEffect(() => {
     const abortController = new AbortController()
@@ -103,6 +116,13 @@ export const BlockComponent: React.FC<Props> = (props) => {
       })
 
       if (state) {
+        state.blockName = {
+          initialValue: formData.blockName,
+          passesCondition: true,
+          valid: true,
+          value: formData.blockName,
+        }
+
         setInitialState(state)
       }
     }
@@ -142,7 +162,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const { i18n, t } = useTranslation<object, string>()
 
   const onChange = useCallback(
-    async ({ formState: prevFormState }) => {
+    async ({ formState: prevFormState, submit }) => {
       abortAndIgnore(onChangeAbortControllerRef.current)
 
       const controller = new AbortController()
@@ -166,11 +186,36 @@ export const BlockComponent: React.FC<Props> = (props) => {
         return prevFormState
       }
 
-      newFormState.blockName = {
-        initialValue: '',
-        passesCondition: true,
-        valid: true,
-        value: formData.blockName,
+      newFormState.blockName = prevFormState.blockName
+
+      const newFormStateData: BlockFields = reduceFieldsToValues(
+        removeEmptyArrayValues({
+          fields: deepCopyObjectSimpleWithoutReactComponents(newFormState),
+        }),
+        true,
+      ) as BlockFields
+
+      setTimeout(() => {
+        editor.update(() => {
+          const node = $getNodeByKey(nodeKey)
+          if (node && $isBlockNode(node)) {
+            const newData = {
+              ...newFormStateData,
+              blockType: formData.blockType,
+            }
+            node.setFields(newData)
+          }
+        })
+      }, 0)
+
+      if (submit) {
+        let rowErrorCount = 0
+        for (const formField of Object.values(newFormState)) {
+          if (formField?.valid === false) {
+            rowErrorCount++
+          }
+        }
+        setErrorCount(rowErrorCount)
       }
 
       return newFormState
@@ -183,7 +228,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
       getDocPreferences,
       globalSlug,
       schemaFieldsPath,
-      formData.blockName,
+      formData.blockType,
+      editor,
+      nodeKey,
     ],
   )
 
@@ -402,7 +449,11 @@ export const BlockComponent: React.FC<Props> = (props) => {
     }
     return (
       <Form
-        beforeSubmit={[onChange]}
+        beforeSubmit={[
+          async ({ formState }) => {
+            return await onChange({ formState, submit: true })
+          },
+        ]}
         fields={clientBlock.fields}
         initialState={initialState}
         onChange={[onChange]}
@@ -427,7 +478,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
           Collapsible={BlockCollapsible}
           CustomBlock={CustomBlock}
           EditButton={EditButton}
-          formData={formData}
+          errorCount={errorCount}
           formSchema={clientBlock.fields}
           initialState={initialState}
           nodeKey={nodeKey}
@@ -442,6 +493,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     RemoveButton,
     EditButton,
     editor,
+    errorCount,
     toggleDrawer,
     clientBlock.fields,
     // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
